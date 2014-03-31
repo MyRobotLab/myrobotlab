@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!--
+	References :
+	  http://msdn.microsoft.com/en-us/library/ie/hh673567(v=vs.85).aspx - excellent examples - sendBinaryMessage
+	  http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
+	  http://stackoverflow.com/questions/5112793/how-do-i-dynamically-call-a-javascript-objects-method
+	  http://stackoverflow.com/questions/2141520/javascript-variable-number-of-arguments-to-function
+	  http://stackoverflow.com/questions/5723289/jquery-ui-accordion-in-accordion (nested accordion)
+	  http://stackoverflow.com/questions/1098040/checking-if-an-associative-array-key-exists-in-javascript
+	  http://stackoverflow.com/questions/912711/jquery-to-load-javascript-file-dynamically
+	  http://stackoverflow.com/questions/8277462/jquery-append-external-html-file-into-my-page
+	  http://stackoverflow.com/questions/500431/javascript-variable-scope (scope !)
+
+	  TODO :
+
+	  ????? DO I NEED A REGISTRY?  OR DO I CALL RUNTIME FOR IT EACH TIME???
+	  test for not using null in subscribe
+ -->
+<meta charset="utf-8" />
+<title>myrobotlab - One Software To Rule Them All !</title>
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/vader/jquery-ui.css" />
+<link rel="stylesheet" href="common/style.css">
+<link rel="stylesheet" href="common/ace-editor-style.css">
+
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="common/js/jquery.websocket-0.0.1.js"></script>
+<script src="common/js/jquery.json-2.2.min.js"></script>
+<script>
+	// global registry and vars
+	var guiMap = new Array();
+	var registry = [];
+	var loadedClasses = [];
+	var connection; // the one and only connection (at the moment - 1 per environment/host)
+	var mrl;
+	var debug = true;
+	
+	var host = "<%=getHostAddress%>";
+	var httpPort = "<%=httpPort%>";
+	var wsPort = "<%=wsPort%>";
+
+	var wsURI = "ws://" + host + ":" + wsPort; // TODO - this gets passed up from server
+
+	var runtimeName = "<%=runtimeName%>";
+	var webguiName = "<%=webguiName%>";
+
+	function Message(name, method, params) {
+		this.msgID = new Date().getTime();
+		this.timeStamp = this.msgID;
+		this.name = name;
+		this.sender = webguiName; // FIXME - named passed in
+		this.sendingMethod = method;
+		this.historyList = new Array(); // necessary?
+		this.method = method;
+		this.data = params;
+	}
+	
+	function Status(name, level, detail){
+		this.name = name;
+		this.level = level;
+		this.code;
+		this.detail = detail;
+	}
+
+	function getRegistry(data) {
+		// refresh global registry
+		registry = data[0];
+		loadServiceGUIClass(registry, Object.keys(registry), 0);
+	}
+
+	function loadServiceGUIClass(registry, nameArray, index) {
+
+		// check  to see if we are done
+		if (index == Object.keys(registry).length){
+			return;
+		}
+
+		var serviceName = nameArray[index];
+		var service = registry[serviceName];
+		var className = service.simpleName;
+
+
+		// if this is a new class - we will load it
+		if (!(className in loadedClasses)){
+
+
+		// get runs on a different thread - or at least the callback does
+		// so this can't be in a for loop indexed by serviceName - it has to be
+		// in a recursive driven method
+
+		// --- dynamic class loader begin ---
+//		$.getScript("/WebGUI/"+className+".js",
+//				function(data, result, scopedName) {
+//				});
+					// --- dynamic class loader end ---
+
+		}
+
+		if (!(serviceName in guiMap) && service.allowDisplay) {
+			// class is loaded - but need a new instance
+			// load the accordian reference
+			try {
+				//$("<h3><img src='/" + className + ".png' /> " + serviceName + " <span class='error' id='"+serviceName+"-status'></span></h3>" ).appendTo( "#accordion1" );
+				$("<h3><img src='/" + className + ".png' width='24' height='24'/> " + serviceName + " <span id='"+serviceName+"-status'></span></h3>" ).appendTo( "#accordion1" );
+				$("<div id='" + serviceName + "-gui'><button id='"+serviceName+"-releaseService' name='"+serviceName+"'>release</button></div>" ).appendTo( "#accordion1" );
+				$("#accordion1").accordion("refresh");
+
+				newClass = " new " + className + "GUI('"+serviceName+"');";
+				guiMap[serviceName] = eval(newClass);
+
+				// add html
+				$("#"+ serviceName + "-gui").append(guiMap[serviceName].getPanel());
+				//guiMap[serviceName].serviceGUIInit();
+				guiMap[serviceName].init();
+				guiMap[serviceName].attachGUI();
+				//guiMap[serviceName].broadcastState();
+				$("#accordion1").accordion("refresh");
+			} catch (err) {
+				mrl.error(err);
+			}
+		}
+
+		loadServiceGUIClass(registry, nameArray, index + 1);
+
+	}
+
+	/* TODO - complete - don't do massive update on registry
+	function register(data)
+	{
+
+	}
+	*/
+
+	// --- ServiceGUI begin ----
+	function ServiceGUI(name) {
+		this.name = name;
+	}
+
+	// to be overriden by all
+	ServiceGUI.prototype.attachGUI = function() {
+	};
+
+	ServiceGUI.prototype.detachGUI = function() {
+	};
+
+	// send to bound service name
+	ServiceGUI.prototype.send = function(method, data) {
+		var msg = new Message(this.name, method, data);
+		var json = JSON.stringify(msg);
+		connection.ws.send(json);
+	};
+
+	ServiceGUI.prototype.sendTo = function(name, method, data) {
+		var msg = new Message(name, method, data);
+		var json = JSON.stringify(msg);
+		connection.ws.send(json);
+	};
+
+	ServiceGUI.prototype.subscribe = function(inMethod, outMethod)
+	{
+		this.sendTo(webguiName, "subscribe", [ this.name, inMethod,
+				outMethod ]);
+	}
+
+	ServiceGUI.prototype.subscribeTo = function(publisherName, outMethod, inMethod)
+	{
+		// FIXME - need a "subscribe to a runtimes' getRegistry"
+		this.sendTo(webguiName, "subscribe",
+				[ publisherName, inMethod, outMethod ]);
+	}
+
+	ServiceGUI.prototype.key = function(inStr)
+	{
+		return("#"+this.name+"-"+inStr);
+	}
+
+	ServiceGUI.prototype.releaseService = function()
+	{
+		this.send("releaseService");
+	}
+
+	/*
+	ServiceGUI.prototype.serviceGUIInit = function()
+	{
+		$("#"+this.name+"-releaseService").button().click(function(event) {
+			guiMap[this.name].releaseService();
+		});
+	}
+
+
+	ServiceGUI.prototype.broadcastState = function()
+	{
+		this.send("broadcastState");
+	}
+	*/
+
+	// --- ServiceGUI end ----
+	// FIXME -  embedded all methods in ServiceGUI
+	function Connection(uri) {
+		this.ws = new WebSocket(uri);
+
+		this.ws.onopen = function(openEvent) {
+			var text = "connected to " + wsURI;
+			$("#topMessage").text(text);
+			mrl.sendTo(runtimeName, "getRegistry");
+		};
+
+		this.ws.onerror = function(errorMsg) {
+			var text = "websocket error " + errorMsg;
+			$("#topMessage").text(text);
+		};
+
+		this.ws.onclose = function(errorMsg) {
+			var text = "disconnected from " + wsURI + " " + errorMsg;
+			mrl.info(text);
+			$("#topMessage").text(text); // TODO mrl.info OR #topMessage ????
+		};
+
+		// the message router
+		this.ws.onmessage = function(e) {
+			//info("Server: " + e.data);
+			// TODO - debug level			//console.log(e.data);
+			var msg = null;
+			try {
+				msg = jQuery.parseJSON(e.data);
+//				console.log("invoke " + msg.sender + "." + msg.method);
+				// TODO - debug level				mrl.info("invoke " + msg.sender + "." + msg.method);
+				if (msg.method == "getRegistry") {
+					getRegistry(msg.data)
+				} else {
+					if (msg.data != null){
+						guiMap[msg.sender][msg.method](msg.data);
+					} else {
+						guiMap[msg.sender][msg.method]();
+					}
+				}
+			} catch (err) {
+				//alert("json parse error " + err + " data " + e.data);
+				//error("json parse error " + err + " data " + e.data);
+				//this.error(err); // make not all exceptions will be trapped
+				//mrl.error(err);
+				console.log(err + "-" + msg.sender + "." + msg.method + e.data);
+				$("#topMessage").text(err.message + "-" + msg.sender + "." + msg.method + e.data);;
+			}
+		};
+	}
+
+	// -- webgui framework display begin ---
+	$(function() {
+		$("#accordion1").accordion({
+			//collapsible: true,
+			header : "h3",
+			autoHeight : true,
+			heightStyle : "content",
+			collapsible : true,
+			active : false
+		});
+
+		$("#accordion2").accordion({
+			header : "h3",
+			active : false,
+			collapsible : true,
+			heightStyle : "content"
+		});
+	});
+	// -- webgui framework display begin ---
+
+	// -- websocket global connectivity and message processing begin --
+	// TODO - jquery best practices - anonymous functions are to be avoided
+
+	$(function() {
+		$("#restMethods").button().click(function(event) {
+			window.open("http://" + host + ":" + httpPort + "/services");
+		});
+	});
+
+	// --- logging begin ----
+	ServiceGUI.prototype.debug = function(text) {
+		this.log(text, "debug");
+		this.displayStatus([new Status(this.name, "DEBUG", text)]); // FIXME - lame
+	}
+
+	ServiceGUI.prototype.info = function(text) {
+		this.log(text, "info");
+		this.displayStatus([new Status(this.name, "INFO", text)]); // FIXME - lame
+	}
+
+	ServiceGUI.prototype.warn = function(text) {
+		this.log(text, "warn");
+		this.displayStatus([new Status(this.name, "WARN", text)]); // FIXME - lame
+	}
+
+	ServiceGUI.prototype.error = function(text) {
+		this.log(text, "error");
+		this.displayStatus([new Status(this.name, "ERROR", text)]); // FIXME - lame
+	}
+
+	// call back from the service debug info warn error
+	// TODO attachGUI - calls parent sets the framework message routes
+	// this is the point of where two "inbound" msgs meet - one from other
+	// pages - which do this.info() and one from the Services info warn error
+	// the Service category of message is split in the message - so is the peer pages
+	// it should remain split - no parsing should be necessary
+	ServiceGUI.prototype.displayStatus = function(data) {
+
+		var guiStatus = $("#"+this.name+"-status");
+		var status = data[0];
+		
+		if (status.level == "INFO"){
+			guiStatus.addClass("info");
+			guiStatus.removeClass("warn");
+			guiStatus.removeClass("error");
+		} else if (status.level == "WARN") {
+			guiStatus.removeClass("info");
+			guiStatus.addClass("warn");
+			guiStatus.removeClass("error");
+		} else if (status.level == "ERROR") {
+			guiStatus.removeClass("info");
+			guiStatus.removeClass("warn");
+			guiStatus.addClass("error");
+		} 
+
+		guiStatus.text(status.detail);
+	}
+
+
+	// http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
+	ServiceGUI.prototype.log = function(text, level) {
+		//$("#log").val((text !== null ? text : "null") + "\n" + $("#log").val());
+		$("#log").html("<span class='"+level+"'>" + this.name + " " + level + " " + text + "</span><br />" + $("#log").html());
+		/*
+		$("#log").val(
+				(new Date).getTime() + ": " + (text !== null ? text : "null")
+						+ "\n" + $("#log").val());
+		 */
+	}
+	// --- logging end ----
+
+	// DOM loaded
+	$(document).ready(function() {
+
+		$("#topMessage").html("connecting to " + wsURI);
+
+		mrl = new ServiceGUI(runtimeName);
+		connection = new Connection(wsURI);
+
+	});
+
+	// FIXME - need a strategy to easily debug dynamically loaded scripts
+	// one hack would just to be append them ?
+</script>
+<!--  http://myrobotlab.googlecode.com/svn/trunk/myrobotlab/src/WebGUI/Arduino.js -->
+<!-- static scripts for easy debugging begin -->
+<!-- FIXME LOCAL VERSUS NETWORKED RESOURCES -->
+<script src="<%=mrl.script.location%>Arduino.js"></script>
+<script src="<%=mrl.script.location%>Clock.js"></script>
+<script src="<%=mrl.script.location%>PickToLight.js"></script>
+<script src="<%=mrl.script.location%>Python.js"></script>
+<script src="<%=mrl.script.location%>Runtime.js"></script>
+<script src="<%=mrl.script.location%>Servo.js"></script>
+<script src="<%=mrl.script.location%>WebGUI.js"></script>
+<script src="<%=mrl.script.location%>Serial.js"></script>
+<script src="<%=mrl.script.location%>Plantoid.js"></script>
+<!-- static scripts for easy debugging end -->
+</head>
+<body>
+	<div id="accordion1">
+		<h3>
+			<img src="../myrobotlab.png" height="24" width="24"/>myrobotlab <span id="topMessage"></span>
+		</h3>
+		<div>
+			<button id="restMethods">rest methods</button>
+			<br/>
+			web socket clients
+			<div id="clients">
+			</div>
+		</div>
+	</div>
+
+	<div id="accordion2">
+		<h3>messages</h3>
+		<h3>logs</h3>
+		<!-- <textarea id="log" rows="30" cols="120"></textarea> -->
+		<!-- TODO - switch between html & text fromat (higher up - no span on text)
+		   -->
+		<div id="log"></div>
+	</div>
+
+</body>
+</html>

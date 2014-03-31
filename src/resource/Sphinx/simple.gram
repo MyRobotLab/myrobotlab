@@ -1,0 +1,36 @@
+#JSGF V1.0;
+
+/**
+ * JSGF Grammar for Hello World example
+ * http://cmusphinx.sourceforge.net/sphinx4/javadoc/edu/cmu/sphinx/jsgf/JSGFGrammar.html
+ * The grammar name must correspond to the name specified in simple.xml - <property name="grammarName" value="simple"/> 
+ * The <xxxx> needs to be sync'd in the xml too.. bleh..
+ * 
+ */
+
+grammar simple;
+
+public <greet> = (hello | ball | hand | box | beer | yes | no | danish | english | dutch | japanese | correct | stop | save | context | look | what is this | what do you see | and this | what about this | do you know what this is );
+
+ 
+
+/*
+public <greet> = (what is this | what do you see );
+
+public <greet> = (audrey | tell me what you see | stop | spin left | spin right | show me your toy);
+public <greet> = (rose | go | stop | halt | left | right | board | center | relax | clear | test | camera on | camera off | report | find | look for shapes);
+public <greet> = (roby | camera | tilt | pan)  ( sweep| left | right | center | up | down | thingy |go | sweep | start | stop | run | forward);
+
+*/
+
+
+/*
+
+  public <basicCmd> = <startPolite> <command> <endPolite>;
+  <command> = <action> <object>;
+  <action> = /10/ open |/2/ close |/1/ delete |/1/ move;
+  <object> = [the | a] (window | file | menu);
+  <startPolite> = (please | kindly | could you | oh mighty computer) *;
+  <endPolite> = [ please | thanks | thank you ];
+
+*/

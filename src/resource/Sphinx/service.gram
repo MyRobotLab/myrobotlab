@@ -1,0 +1,12 @@
+#JSGF V1.0;
+
+grammar service;
+
+public <command> = 
+		audio		{ goto_audio } |
+		tilt		{ goto_tilt } |
+		recognition		{ goto_recognition } |
+		camera		{ goto_camera } |
+		gooey		{ goto_gooey } |
+		board		{ goto_board } |
+		pan		{ goto_pan } ;

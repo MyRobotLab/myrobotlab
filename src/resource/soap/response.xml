@@ -1,0 +1,8 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.soap.org">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ser:%methodName%Response>
+         <ser:%methodName%Return>%responseObject%</ser:%methodName%Return>
+      </ser:%methodName%Response>
+   </soapenv:Body>
+</soapenv:Envelope>

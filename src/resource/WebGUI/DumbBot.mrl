@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>myrobotlab - One Software To Rule Them All !</title>
+<link rel="stylesheet"
+	href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/vader/jquery-ui.css" />
+<link rel="stylesheet" href="common/style.css">
+
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="common/js/jquery.websocket-0.0.1.js"></script>
+<script src="common/js/jquery.json-2.2.min.js"></script>
+<script>
+	// global registry and vars
+	var guiMap = new Array();
+	var registry = [];
+	var loadedClasses = [];
+	var connection; // the one and only connection (at the moment - 1 per environment/host)
+	var mrl;
+
+	var msgCount = 0;
+
+	var host = "<%=getHostAddress%>";
+	var httpPort = "<%=httpPort%>";
+	var wsPort = "<%=wsPort%>";
+
+	var wsURI = "ws://" + host + ":" + wsPort; // TODO - this gets passed up from server
+
+	var runtimeName = "<%=runtimeName%>";
+	var webguiName = "<%=webguiName%>";
+
+	var topMessage = null;
+
+	function Message(name, method, params) {
+		this.msgID = new Date().getTime();
+		this.timeStamp = this.msgID;
+		this.name = name;
+		this.sender = webguiName; // FIXME - named passed in
+		this.sendingMethod = method; // Python blew up without a sender (cache key)
+		this.historyList = new Array(); // necessary?
+		this.method = method;
+		this.data = params;
+	}
+
+	function Status(name, level, detail) {
+		this.name = name;
+		this.level = level;
+		this.code;
+		this.detail = detail;
+	}
+
+	function getRegistry(data) {
+		// refresh global registry
+		registry = data[0];
+		//loadServiceGUIClass(registry, Object.keys(registry), 0);
+	}
+
+	// --- ServiceGUI begin ----
+	function ServiceGUI(name) {
+		this.name = name;
+		this.soildMoisture = null;
+		this.tempHumidity = null;
+		this.leftLight = null;
+		this.rightLight = null;
+		this.airQuality = null;
+	}
+
+	// to be overriden by all
+	ServiceGUI.prototype.attachGUI = function() {
+	};
+
+	ServiceGUI.prototype.detachGUI = function() {
+	};
+
+	// send to bound service name
+	ServiceGUI.prototype.send = function(method, data) {
+		var msg = new Message(this.name, method, data);
+		var json = JSON.stringify(msg);
+		connection.ws.send(json);
+	};
+
+	ServiceGUI.prototype.sendTo = function(name, method, data) {
+		var msg = new Message(name, method, data);
+		var json = JSON.stringify(msg);
+		connection.ws.send(json);
+	};
+
+	ServiceGUI.prototype.subscribe = function(inMethod, outMethod) {
+		this
+				.sendTo(webguiName, "subscribe", [ this.name, inMethod,
+						outMethod ]);
+	}
+
+	ServiceGUI.prototype.subscribeTo = function(publisherName, outMethod,
+			inMethod) {
+		// FIXME - need a "subscribe to a runtimes' getRegistry"
+		this.sendTo(webguiName, "subscribe", [ publisherName, inMethod,
+				outMethod ]);
+	}
+
+	ServiceGUI.prototype.key = function(inStr) {
+		return ("#" + this.name + "-" + inStr);
+	}
+
+	ServiceGUI.prototype.releaseService = function() {
+		this.send("releaseService");
+	}
+
+	// --- ServiceGUI end ----
+	// FIXME -  embedded all methods in ServiceGUI
+	function Connection(uri) {
+		this.ws = new WebSocket(uri);
+
+		this.ws.onopen = function(openEvent) {
+			var text = "connected to " + wsURI;
+			$("#connected").attr("src", "/WebGUI/common/button-green.png");
+			topMessage.text(text);
+			mrl.sendTo(runtimeName, "getRegistry");
+		};
+
+		this.ws.onerror = function(errorMsg) {
+			var text = "websocket error " + errorMsg;
+			topMessage.text(text);
+		};
+
+		this.ws.onclose = function(errorMsg) {
+			var text = "disconnected from " + wsURI + " " + errorMsg;
+			mrl.info(text);
+			$("#connected").attr("src", "/WebGUI/common/button-red.png");
+			topMessage.text(text); // TODO mrl.info OR #topMessage ????
+		};
+
+		// the message router
+		this.ws.onmessage = function(e) {
+			++msgCount;
+
+			if (msgCount % 100 == 0) {
+				topMessage.text(msgCount + " rx");
+			}
+
+			var msg = null;
+			try {
+				msg = jQuery.parseJSON(e.data);
+
+				if (msg.method == "getRegistry") {
+					getRegistry(msg.data)
+				} else {
+					if (msg.data != null) {
+						//guiMap[msg.sender][msg.method](msg.data);
+						if (msg.method == "publishPin") {
+							// no longer applicable
+						}
+					} else {
+						guiMap[msg.sender][msg.method]();
+					}
+				}
+			} catch (err) {
+				topMessage.text(err.message + "-" + msg.sender + "."
+						+ msg.method + e.data);
+			}
+		};
+	}
+
+	// -- webgui framework display begin ---
+
+	// -- webgui framework display begin ---
+
+	// --- logging begin ----
+	ServiceGUI.prototype.debug = function(text) {
+		this.log(text, "debug");
+		this.displayStatus([ new Status(this.name, "DEBUG", text) ]); // FIXME - lame
+	}
+
+	ServiceGUI.prototype.info = function(text) {
+		this.log(text, "info");
+		this.displayStatus([ new Status(this.name, "INFO", text) ]); // FIXME - lame
+	}
+
+	ServiceGUI.prototype.warn = function(text) {
+		this.log(text, "warn");
+		this.displayStatus([ new Status(this.name, "WARN", text) ]); // FIXME - lame
+	}
+
+	ServiceGUI.prototype.error = function(text) {
+		this.log(text, "error");
+		this.displayStatus([ new Status(this.name, "ERROR", text) ]); // FIXME - lame
+	}
+
+	// call back from the service debug info warn error
+	// TODO attachGUI - calls parent sets the framework message routes
+	// this is the point of where two "inbound" msgs meet - one from other
+	// pages - which do this.info() and one from the Services info warn error
+	// the Service category of message is split in the message - so is the peer pages
+	// it should remain split - no parsing should be necessary
+	ServiceGUI.prototype.displayStatus = function(data) {
+
+		var guiStatus = $("#" + this.name + "-status");
+		var status = data[0];
+
+		if (status.level == "INFO") {
+			guiStatus.addClass("info");
+			guiStatus.removeClass("warn");
+			guiStatus.removeClass("error");
+		} else if (status.level == "WARN") {
+			guiStatus.removeClass("info");
+			guiStatus.addClass("warn");
+			guiStatus.removeClass("error");
+		} else if (status.level == "ERROR") {
+			guiStatus.removeClass("info");
+			guiStatus.removeClass("warn");
+			guiStatus.addClass("error");
+		}
+
+		guiStatus.text(status.detail);
+	}
+
+	// http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
+	ServiceGUI.prototype.log = function(text, level) {
+		$("#log").html(
+				"<span class='"+level+"'>" + this.name + " " + level + " "
+						+ text + "</span><br />" + $("#log").html());
+
+	}
+	// --- logging end ----
+
+	// DOM loaded
+	$(document).ready(function() {
+
+		topMessage = $("#topMessage");
+		topMessage.html("connecting to " + wsURI);
+
+		mrl = new ServiceGUI(runtimeName);
+		connection = new Connection(wsURI);
+
+		$("#forward")
+	      .button()
+	      .click(function( event ) {
+	        mrl.sendTo("python", "forward");
+	      });
+		$("#back")
+	      .button()
+	      .click(function( event ) {
+	        mrl.sendTo("python", "back");
+	      });
+		$("#stop")
+	      .button()
+	      .click(function( event ) {
+	        mrl.sendTo("python", "stop");
+	      });
+
+	});
+
+	// FIXME - need a strategy to easily debug dynamically loaded scripts
+	// one hack would just to be append them ?
+</script>
+</head>
+<body>
+	<table border="1">
+	<tr>
+	  <td><img id="connected" src="/WebGUI/common/button-red.png" /><span id="topMessage"></span></td>
+	</tr>
+	<tr>
+		<td><button id="forward">forward</button>
+	</tr>
+	<tr>
+		<td><button id="back">back</button>
+	</tr>
+	<tr>
+		<td><button id="stop">stop</button>
+	</tr>
+	</table>
+
+</body>
+</html>

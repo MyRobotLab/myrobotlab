@@ -1,0 +1,15 @@
+      <wsdl:operation name="%methodName%">
+          
+         <wsdlsoap:operation soapAction="%methodName%"/>
+         
+         <wsdl:input name="%methodName%Request">
+             
+            <wsdlsoap:body use="literal"/>
+            
+         </wsdl:input>
+         
+         <wsdl:output name="%methodName%Response">
+             
+            <wsdlsoap:body use="literal"/>
+         </wsdl:output>
+      </wsdl:operation>

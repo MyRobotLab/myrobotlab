@@ -1,0 +1,8 @@
+#JSGF V1.0;grammar recognition;
+
+public <command> = 
+		isRecording|
+		startRecording|
+		run|
+		stopRecording|
+		loadDefaultConfiguration;

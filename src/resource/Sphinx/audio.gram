@@ -1,0 +1,4 @@
+#JSGF V1.0;grammar audio;
+
+public <command> = 
+		loadDefaultConfiguration;

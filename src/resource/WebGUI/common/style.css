@@ -1,0 +1,26 @@
+.small-button {
+   font-size: .6em !important;
+}
+
+.ui-button-text {
+	text-align: left;
+   font-size: inherit !important;
+} 
+
+.error {
+	color:#CC0000;
+}
+
+.console {
+	font-size:x-small;
+}
+
+#log {
+	font-size:x-small;
+}
+
+// --- Arduino begin ---
+.pwm-value {
+	width:50px;
+}
+// --- Arduino end ---

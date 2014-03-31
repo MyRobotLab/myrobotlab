@@ -1,0 +1,443 @@
+<!--
+	Dependencies:
+		Windows:
+			svnversion.exe from Collabnet
+		Linux:
+			svnversion	
+			
+	FIXME - thirdParty/lib/sloppy **/*.jar classpath - needs to be export of eclipse's .classpath
+	TODO - use more Ivy to actually manage dependencies
+	TODO use Ivy to place "integration" libraries into build directory for GUIService & Service
+	TODO task - publishRelease & publishBleedingEdge
+	TODO test on multiple platforms Linux etc
+	TODO build native code with virtual vms - put in CI system
+		
+	tasks
+		
+	init
+	compile
+	dist
+	scp.maahr - deprecate
+	clean
+	junit
+	report
+	mail
+	javadoc
+	publishBleedingEdge
+	publishRelease
+	
+	References:
+	http://imwill.com/svntask-examples-for-apache-ant/#.URQiPKXAfzw
+	http://onjava.com/pub/a/onjava/2003/12/17/ant_bestpractices.html
+	http://stackoverflow.com/questions/4257869/java-project-layout-best-practices-for-ant-based-builds
+	http://www.qasimrasheed.com/post.cfm/eclipse-configure-ant-home
+	http://java.dzone.com/articles/how-use-svn-tasks-with-ant
+	http://stackoverflow.com/questions/1727616/custom-junit-report
+	http://ant.1045680.n5.nabble.com/Mail-task-with-mail-jar-amp-activation-jar-out-of-lib-folder-td3347501.html 
+	http://enitsys.sourceforge.net/ant-classloadertask/
+	http://www.shinylight.com/2009/10/03/ant-script-to-deploy/
+	
+	publishBleedingEdge
+	publishRelease
+	
+	definitions
+	${version} 	= ${rev}.${DSTAMP}.${TSTAMP}
+	${label} 	= "myrobotlab.${version}
+	
+	FIXME - make "update" work in IDE
+	publishBleedingEdge
+	publishRelease
+	
+-->
+
+<project name="myrobotlab" default="dist" basedir=".">
+	<description>http://myrobotlab.org myrobotlab build file</description>
+	
+	<!-- 
+		${build.properties} external build properties - you can override the location of the build properties file
+		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
+	-->
+	<property name="build.properties" location="build.properties" />
+	
+	<!-- TODO - junit tests multiple virtualbox os-->
+	<!-- set global properties for this build -->
+	<property name="src" 				location="src" />
+	<property name="build.root.dir" 	location="build" />
+	<property name="dist.root.dir" 		location="${build.root.dir}/dist" />
+
+	<property name="scp.userid" 	value="pi" />
+	<property name="scp.password" 		value="raspberry" />
+	
+	<property name="resource.root" 		location="./thirdParty/build/resource/root" />
+	<property name="junit.jar" 			location="../myrobotlab-tests/thirdParty/lib" />
+	<property name="junit.src" 			location="../myrobotlab-tests/src" />
+	<property name="thirdParty.build" 	location="./thirdParty/build" />
+	<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
+	
+	<property name="svn.base.url" 				value="https://myrobotlab.googlecode.com/svn/" />
+	<property name="svn.username" 				value="" />
+	<property name="svn.password" 				value="" />
+				
+    <!-- mail task properties -->
+	<property name="mail.host" 				value="smtp.gmail.com" />
+	<property name="mail.port" 				value="464" />
+	<property name="mail.subjectalert" 		value="Test build" />
+	<property name="mail.ssl" 				value="yes" />
+	<property name="mail.username" 			value="" /><!-- get from local properties file -->
+	<property name="mail.password" 			value="" /><!-- get from local properties file -->
+	<property name="mail.from" 				value="build@myrobotlab.org" />
+	<property name="mail.tolist" 			value="" /><!-- get from local properties file -->
+	<property environment="env" />
+	
+	<!-- publish release properties -->
+	<property name="gc.upload.userid" 		value="${env.gc.upload.userid}"/>  
+	<property name="gc.upload.password" 	value="${env.gc.upload.password}"/>  
+	
+	<exec executable="svn" dir="." outputproperty="svn.comment" description="get changeset/version number">
+     <arg line="propget --revprop svn:log -r HEAD"/>
+	</exec>
+	
+	<echo>The svn comment is: ${svn.comment}</echo>
+		
+	<!-- FIXME use .classpath -->
+	<path id="myrobotlab.classpath">
+	    <!-- taken -->
+		
+        <pathelement location="bin"/>
+        <pathelement location="thirdParty/repo/com.centralnexus.joystick/joystick/0.7/Joystick.jar"/>
+        <pathelement location="thirdParty/repo/com.google.gson/gson/1.7.1/gson-1.7.1.jar"/>
+        <pathelement location="thirdParty/repo/com.mxgraph.jgraph/jgraph/1.6.1.2/jgraphx.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.java3d/java3d/1.5.1/j3dcore.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.java3d/java3d/1.5.1/j3dutils.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.java3d/java3d/1.5.1/vecmath.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.jna/jna/3.2.2/jna.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.speech.freetts/freetts/1.2/freetts.jar"/>
+        <pathelement location="thirdParty/repo/edu.cmu.sphinx/sphinx/4-1.0beta6/batch.jar"/>
+        <pathelement location="thirdParty/repo/edu.cmu.sphinx/sphinx/4-1.0beta6/jsapi-1.0-base.jar"/>
+        <pathelement location="thirdParty/repo/edu.cmu.sphinx/sphinx/4-1.0beta6/sphinx4.jar"/>
+        <pathelement location="thirdParty/repo/edu.cmu.sphinx/sphinx/4-1.0beta6/tags.jar"/>
+        <pathelement location="thirdParty/repo/edu.cmu.sphinx/sphinx/4-1.0beta6/TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
+        <pathelement location="thirdParty/repo/edu.cmu.sphinx/sphinx/4-1.0beta6/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
+        <pathelement location="thirdParty/repo/edu.cmu.sphinx/sphinx/4-1.0beta6/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.jar"/>
+        <pathelement location="thirdParty/repo/gnu.io.rxtx/rxtx/2.1-7r2/RXTXcomm.jar"/>
+        <pathelement location="thirdParty/repo/javaclient3.playerstage/playerstage/3/javaclient3.jar"/>
+        <pathelement location="thirdParty/repo/javaFlacEncoder.FLAC_FileEncoder/FLAC_FileEncoder/0.1/javaFlacEncoder-0.1.jar"/>
+        <pathelement location="thirdParty/repo/javax.speech.recognition/recognition/1.0/jsapi.jar"/>
+        <pathelement location="thirdParty/repo/javax.vecmath/vecmath/1.5.1/vecmath.jar"/>
+        <pathelement location="thirdParty/repo/javazoom.jl.player/player/1.0.1/jl1.0.1.jar"/>
+        <pathelement location="thirdParty/repo/net.sourceforge.simbad/simbad/1.4/simbad-1.4.jar"/>
+        <pathelement location="thirdParty/repo/org.apache.ivy/ivy/2.0.0/ivy.jar"/>
+        <pathelement location="thirdParty/repo/org.apache.log4j/log4j/1.2.14/log4j-1.2.14.jar"/>
+        <pathelement location="thirdParty/repo/org.jfugue.music/music/4.0.3/jfugue-4.0.3.jar"/>
+        <pathelement location="thirdParty/repo/org.jibble.simplewebserver/simplewebserver/1.0/SimpleWebServer.jar"/>
+        <pathelement location="thirdParty/repo/org.op.chess/chess/1.0.0/ChessBoard.jar"/>
+        <pathelement location="thirdParty/repo/org.python.core/core/2.5.2/jython.jar"/>
+        <pathelement location="thirdParty/repo/org.tritonus.share.sampled.floatsamplebuffer/floatsamplebuffer/0.3.6/tritonus_share-0.3.6.jar"/>
+        <pathelement location="thirdParty/repo/simbad.gui/gui/1.4/simbad-1.4.jar"/>
+        <pathelement location="thirdParty/repo/wiiuse.wiimote/wiimote/0.12b/wiiusej.jar"/>
+        <pathelement location="thirdParty/repo/org.quartz/quartz/2.1.5/quartz-2.1.5.jar"/>
+        <pathelement location="thirdParty/repo/org.slf4j/slf4j/1.6.1/slf4j-log4j12-1.6.1.jar"/>
+        <pathelement location="thirdParty/repo/org.slf4j/slf4j/1.6.1/slf4j-api-1.6.1.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.mail/mail/1.4.5/dsn.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.mail/mail/1.4.5/imap.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.mail/mail/1.4.5/mail.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.mail/mail/1.4.5/mailapi.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.mail/mail/1.4.5/pop3.jar"/>
+        <pathelement location="thirdParty/repo/com.sun.mail/mail/1.4.5/smtp.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.javacv/javacv/0.3/javacpp.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.javacv/javacv/0.3/javacv.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.javacv/javacv/0.3/javacv-android-arm.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.javacv/javacv/0.3/javacv-linux-x86.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.javacv/javacv/0.3/javacv-linux-x86_64.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.javacv/javacv/0.3/javacv-macosx-x86_64.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.javacv/javacv/0.3/javacv-windows-x86.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.javacv/javacv/0.3/javacv-windows-x86_64.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.colorutils/r9/colorutils.jar"/>
+        <pathelement location="thirdParty/repo/net.java.games.jinput/jinput/20120914/jinput.jar"/>
+        <pathelement location="thirdParty/repo/org.fife.rsyntaxtextarea/rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar"/>
+        <pathelement location="thirdParty/repo/org.fife.autocomplete/autocomplete/2.0.4/autocomplete.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.jssc/jssc/0.9.0/jssc.jar"/>
+        <pathelement location="thirdParty/repo/org.openni/openni/1.5.4.0/x86.64.windows/org.OpenNI.jar"/>
+        <pathelement location="thirdParty/repo/com.googlecode.chatterbot/1.2.1/chatter-bot-api.jar"/>
+        <pathelement location="thirdParty/repo/com.googlcode.jsonsimple/1.1/json_simple-1.1.jar"/>
+        <pathelement location="thirdParty/repo/com.pi4j.pi4j/pi4j/0.0.5/pi4j-core.jar"/>
+        <pathelement location="thirdParty/repo/com.pi4j.pi4j/pi4j/0.0.5/pi4j-gpio-extension.jar"/>
+        <pathelement location="thirdParty/repo/it.sauronsoftware.cron4j/cron4j/2.2.5/cron4j-2.2.5.jar"/>
+        <pathelement location="thirdParty/repo/org.drjava.java/java/20120818/asm-3.1.jar"/>
+        <pathelement location="thirdParty/repo/org.drjava.java/java/20120818/dynamicjava-base.jar"/>
+        <pathelement location="thirdParty/repo/org.drjava.java/java/20120818/plt.jar"/>
+        <pathelement location="thirdParty/repo/net.sourceforge.tess4j/tess4j/1.1/tess4j.jar"/>
+        <pathelement location="thirdParty/repo/org.apache.commons.httpclient/httpclient/4.2.5/commons-codec-1.6.jar"/>
+        <pathelement location="thirdParty/repo/org.apache.commons.httpclient/httpclient/4.2.5/commons-logging-1.1.1.jar"/>
+        <pathelement location="thirdParty/repo/org.apache.commons.httpclient/httpclient/4.2.5/fluent-hc-4.2.5.jar"/>
+        <pathelement location="thirdParty/repo/org.apache.commons.httpclient/httpclient/4.2.5/httpclient-4.2.5.jar"/>
+        <pathelement location="thirdParty/repo/org.apache.commons.httpclient/httpclient/4.2.5/httpclient-cache-4.2.5.jar"/>
+        <pathelement location="thirdParty/repo/org.apache.commons.httpclient/httpclient/4.2.5/httpcore-4.2.4.jar"/>
+        <pathelement location="thirdParty/repo/org.apache.commons.httpclient/httpclient/4.2.5/httpmime-4.2.5.jar"/>
+        <pathelement location="thirdParty/repo/com.wolfram.alpha/alpha/1.1/WolframAlpha-1.1.jar"/>
+        <pathelement location="thirdParty/repo/org.twitter4j.twitter/twitter/3.0.3/twitter4j-async-3.0.3.jar"/>
+        <pathelement location="thirdParty/repo/org.twitter4j.twitter/twitter/3.0.3/twitter4j-core-3.0.3.jar"/>
+        <pathelement location="thirdParty/repo/org.twitter4j.twitter/twitter/3.0.3/twitter4j-examples-3.0.3.jar"/>
+        <pathelement location="thirdParty/repo/org.twitter4j.twitter/twitter/3.0.3/twitter4j-media-support-3.0.3.jar"/>
+        <pathelement location="thirdParty/repo/org.twitter4j.twitter/twitter/3.0.3/twitter4j-stream-3.0.3.jar"/>
+        <pathelement location="thirdParty/repo/com.strobel.decompiler/decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
+        <pathelement location="thirdParty/repo/edu.northwestern.topcodes/topcodes/1.0/topcodes.jar"/>
+        <pathelement location="thirdParty/repo/org.java_websocket.websocket/websocket/1.1/java_websocket.jar"/>
+        <pathelement location="thirdParty/repo/org.simpleframework.xml/xml/2.7/simple-xml-2.7.jar"/>
+  		<pathelement location="thirdParty/repo/org.jivesoftware.smack/smack/3.3.0/smack.jar"/>
+  		<pathelement location="thirdParty/repo/com.google.simpleopenni/simpleopenni/1.96/library/SimpleOpenNI.jar"/>
+  		
+	</path>
+
+	<!-- class path for testing -->	
+	<path id="ant_ext.classpath" description="for ant extentions">
+ 		<fileset dir="./thirdParty/build/ant_ext">     
+  		<include name="**/*.jar" />
+ 		</fileset>
+	</path>
+	
+	<!-- ant subversion extention -->
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="ant_ext.classpath" />
+	
+	<taskdef name="classloadertask" classname="org.apache.tools.ant.taskdefs.ClassloaderTask" classpathref="ant_ext.classpath"/> 
+	<classloadertask classpathref="ant_ext.classpath" loader="thread"/> 
+	
+	
+	<!-- build the appropriate label -->
+	<target name="init">
+	    <!-- load file properties -->
+	     <loadproperties srcFile="${build.properties}"/>
+	    <!-- default values set if not set in already in build.properties or "release" -->
+	    <condition property="build.type" value="dev">
+    		<not>  
+        		<isset property="build.type"/>
+    		</not>
+		</condition>
+	    <condition property="targetVersion" value="myrobotlab">
+    		<not>  
+        		<isset property="targetVersion"/>
+    		</not>
+		</condition>
+	    	
+    	<echo message="build.type=${build.type}"/>			
+    	<echo message="targetVersion=${targetVersion}"/>			
+    		    
+		<tstamp />
+		<!-- Create the time stamp -->
+		<!-- a lot of work just to remove a possible semi-colon - which is an illegal
+		character for a windows file system -->
+		
+		<!-- non temp version begin -->
+		<!-- 
+		<exec executable="svnversion" outputproperty="repository.revision" />
+		<echo message="repository revision is ${repository.revision}" />
+		<tempfile property="temp.file"/>
+		<echo message="${repository.revision}" file="${temp.file}" />
+		<loadfile srcfile="${temp.file}" property="rev">
+			<filterchain>
+				<replaceregex pattern=":" replace="." />
+			</filterchain>
+		</loadfile>
+		<delete file="${temp.file}" />
+		<echo message="rev ${rev}" />
+		<property name="version" value="${rev}.${DSTAMP}.${TSTAMP}" />
+		 -->
+		<!-- non temp version end -->
+				
+		 <!-- temp version -->
+		<property name="version" value="temp" />
+		
+		<property name="label" value="myrobotlab.${version}" />
+		<echo message="version ${version}" />
+		<echo message="label ${label}" />
+		
+		<!-- Create the build directory structure used by compile -->
+		<!-- TODO set all subsequent directories or resources with appended label -->
+		<!-- TODO branch on the label in release -->
+		
+		<property name="build"			location="${build.root.dir}/${label}"/>
+		<property name="dist"			location="${dist.root.dir}/${label}"/>
+		<property name="report.dir" 	location="${dist.root.dir}/report" />
+				
+		<mkdir dir="${build.root.dir}" />
+		<mkdir dir="${build}" />
+		<mkdir dir="${dist.root.dir}" />
+		<mkdir dir="${dist}" />
+		
+		<!-- remember env vars are passed to ant with prefix env.  !!!! jenkins wants gc.upload.userid etc -->
+		<echo message="uid ${env.gc.upload.userid}"/>
+		<!-- <echo message="pwd ${env.gc.upload.password}"/> -->
+		
+	</target>
+
+	
+	<target name="compile" depends="init" description="compile the source ">
+	    <echo>compile start</echo>
+		<!-- compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src}" destdir="${build}" debug="true" includeantruntime="false">
+			<exclude name="org/myrobotlab/service/Android.java" />
+			<exclude name="org/myrobotlab/service/SEAR.java" />
+			<exclude name="org/myrobotlab/control/SEARGUI.java" />
+			<exclude name="org/myrobotlab/service/ArduinoBT.java" />
+			<classpath refid="myrobotlab.classpath" />
+		</javac>
+
+		<!-- copy resource.root -->
+		<copy todir="${build}/resource">
+			<fileset dir="${src}/resource" />
+		</copy>
+
+		<echo file="${build}/resource/version.txt">${version}</echo>
+
+		<copy todir="${dist}">
+			<fileset dir="${resource.root}" />
+		</copy>
+
+		<copy file="./thirdParty/repo/serviceData.xml" todir="${dist}/.myrobotlab" />
+
+		<!-- FIXME - use Ivy to get the files there ! filebase or url resolver -->
+	    <echo>compile end</echo>
+	</target>
+
+	<target name="dist" depends="compile" description="generate the distribution">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}" />
+
+		<jar jarfile="${dist}/libraries/jar/myrobotlab.jar" basedir="${build}">
+			<!-- excludes="org/myrobotlab/boot/" -->
+			<manifest>
+			    <attribute name="Main-Class" value="org.myrobotlab.service.Runtime"/>
+				<attribute name="Built-By" value="${user.name}" />
+				<!-- section name="myrobotlab" -->
+				<section name="compile">
+					<attribute name="Specification-Title" value="myrobotlab" />
+					<attribute name="Specification-Version" value="${targetVersion}" />
+					<attribute name="Specification-Vendor" value="myrobotlab" />
+					<attribute name="Implementation-Title" value="myrobotlab" />
+					<attribute name="Implementation-Version" value="${version}" />
+					<attribute name="Implementation-Vendor" value="myrobotlab.org" />
+				</section>
+			</manifest>
+		</jar>
+		<chmod file="${dist}/*.sh" perm="ugo+rx"/>
+		<zip destfile="${dist.root.dir}/${label}.zip"
+   			basedir="${dist.root.dir}"
+   			includes="${label}/**" />
+	</target>
+
+	<!-- scp updates begin -->
+	<target name="scp" depends="dist" description="ssh updates to test systems - should be removed - and running system should be scheduled to check for updates">
+	    <!--  
+		<input message="Please enter maahr userid:" addproperty="scp.userid" />
+		<input message="Please enter maahr password:" addproperty="scp.password" />
+		-->
+		<scp port="10022" file="${dist}/libraries/jar/myrobotlab.jar" todir="${maahr.scp.userid}:${maahr.scp.password}@orbous.zipto.org:/opt/mrl/libraries/jar" />
+	</target>
+	
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+	</target>
+
+	<target name="junit" depends="dist">
+		<!-- FIXME - copy over serviceData.xml & ivy repo - root?  -->
+
+		<copy todir="${build}/resource">
+			<fileset dir="${src}/resource" />
+		</copy>
+		
+		<!-- compile tests -->
+		<javac srcdir="${junit.src}" destdir="${build}" includeantruntime="false">
+			<classpath>
+				<fileset dir="${dist}/libraries/jar">
+					<include name="myrobotlab.jar" />
+				</fileset>
+				<path refid="myrobotlab.classpath" />
+			</classpath>
+		</javac>
+
+		<!-- run tests - Services will need to be loaded if they don't come 
+			 with the default mrl load ie. if they have dependencies on the repo -->
+		<mkdir dir="${report.dir}" />
+		<junit printsummary="yes" haltonfailure="yes" > <!-- haltonfailure to bubble up the failure info to ant & jenkins -->
+			<sysproperty key="java.awt.headless" value="true"/><!-- any junit tests would fail running on jenkins with gui components -->		    
+		    <classpath>
+				<fileset dir="${dist}/libraries/jar">
+					<include name="**/*.jar" />
+				</fileset>
+				<pathelement path="${junit.jar}/junit-4.4.jar" />
+				<!-- pathelement path="${dist}/${label}/libraries/jar/myrobotlab.jar"/ -->
+				<pathelement location="${build}" /> <!-- FIXME - I should be able to pick everything up from the libraries include ?!?  -->
+			</classpath>
+			<formatter type="xml" />
+
+			<batchtest fork="yes" todir="${report.dir}">
+				<fileset dir="${junit.src}" includes="**/test/**/*.java" />
+			</batchtest>
+		</junit>
+			<!--  <classloaderreport/> -->
+		</target>
+
+	<target name="report" depends="junit">
+		<junitreport todir="${report.dir}">
+			<fileset dir="${report.dir}" includes="TEST-*.xml" />
+			<report todir="${report.dir}" format="noframes">
+			</report>
+		</junitreport>
+	</target>
+	
+	<target name="mail" depends="report">	    
+		<mail mailhost="${mail.host}" mailport="${mail.port}" subject="${mail.subjectalert}" ssl="${mail.ssl}" 
+		    user="${mail.username}" password="${mail.password}" tolist="${mail.tolist}">
+			<from address="${mail.from}"/>      
+			<!--  <to address="${mail.to}"/> -->
+			<message>The nightly build has completed</message>
+  			<attachments>
+    			<fileset dir="${report.dir}">
+      				<include name="**/*.html"/>
+    			</fileset>
+  			</attachments>
+		</mail>
+ 	</target>
+	
+	<!-- thankfully created in Eclipse -->
+	<target name="javadoc">
+		<javadoc access="public" packagenames="org.myrobotlab.*" author="true" destdir="javadoc" 
+			doctitle="myrobotlab" nodeprecated="false" nodeprecatedlist="false" noindex="false" 
+			nonavbar="false" notree="false" source="1.7" sourcepath="src" splitindex="true" use="true" version="true">
+  			<arg value="-notimestamp" />
+  			<classpath refid="myrobotlab.classpath"/>
+		</javadoc>
+	</target>
+	
+	<target name="publishBleedingEdge" depends="report" description="publish bleeding edge to google code" >
+	    <!-- 
+		<input message="Please enter upload userid:" addproperty="gc.upload.userid" />
+		<input message="Please enter upload password:" addproperty="gc.upload.password" />
+		 -->
+		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" name="gcupload" classpathref="ant_ext.classpath"/>
+		<gcupload username="${env.gc.upload.userid}" password="${env.gc.upload.password}" projectname="myrobotlab" verbose="true" filename="${dist.root.dir}/${label}/libraries/jar/myrobotlab.jar" targetfilename="myrobotlab.bleeding.edge.${version}.jar" summary="bleeding edge - ${svn.comment}" labels="OpSys-All" />
+	</target>
+	
+
+	<target name="publishRelease" depends="publishBleedingEdge" description="publish release to google code" >
+	    <!-- 
+		<input message="Please enter upload userid:" addproperty="gc.upload.userid" />
+		<input message="Please enter upload password:" addproperty="gc.upload.password" />
+		 -->
+		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" name="gcupload" classpathref="ant_ext.classpath"/>
+		<gcupload username="${env.gc.upload.userid}" password="${env.gc.upload.password}" projectname="myrobotlab" verbose="true" filename="${dist.root.dir}/${label}.zip" targetfilename="myrobotlab.${version}.zip" summary="complete package - ${svn.comment}" labels="OpSys-All,Featured" />
+	</target>
+
+		<!-- TODO - upload javadoc, check in javadoc? -->
+
+	<!-- how to call a class directly	
+	<target name="run" depends="compile">
+	  <java fork="true" failonerror="yes" classname="Addition" classpath="build">  
+	  <arg line=""/>
+	  </java>
+	  </target>
+	-->
+
+</project>
