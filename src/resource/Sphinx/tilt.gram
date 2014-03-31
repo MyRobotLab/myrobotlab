@@ -1,0 +1,10 @@
+#JSGF V1.0;grammar tilt;
+
+public <command> = 
+		detach|
+		get Controller Name|
+		get Position|
+		sweep|
+		stop Sweep|
+		get Pin|
+		load Default Configuration;

@@ -1,0 +1,8 @@
+#JSGF V1.0;grammar camera;
+
+public <command> = 
+		stop|
+		getLastFrame|
+		start|
+		capture|
+		loadDefaultConfiguration;

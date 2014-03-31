@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head> 
+<!--
+
+A0 = soil moisture
+A2 = temp humidity
+A4 = left light
+A6 = right light
+A10 = air quality
+
+-->
+<meta charset="utf-8" />
+<title>myrobotlab - One Software To Rule Them All !</title>
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/vader/jquery-ui.css" />
+<link rel="stylesheet" href="common/style.css">
+
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="common/js/jquery.websocket-0.0.1.js"></script>
+<script src="common/js/jquery.json-2.2.min.js"></script>
+<script src='/root/RGraph.common.core.js' ></script>
+<script src='/root/RGraph.common.dynamic.js' ></script>
+<script src='/root/RGraph.common.effects.js' ></script>
+<script src='/root/RGraph.gauge.js' ></script>
+<script src='/root/RGraph.odo.js' ></script>
+<script>
+	// global registry and vars
+	var guiMap = new Array();
+	var registry = [];
+	var loadedClasses = [];
+	var connection; // the one and only connection (at the moment - 1 per environment/host)
+	var mrl;
+	
+	var msgCount = 0;
+
+	var host = "<%=getHostAddress%>";
+	var httpPort = "<%=httpPort%>";
+	var wsPort = "<%=wsPort%>";
+
+	var wsURI = "ws://" + host + ":" + wsPort; // TODO - this gets passed up from server 
+
+	var runtimeName = "<%=runtimeName%>";
+	var webguiName = "<%=webguiName%>";
+	
+	var soildMoistureMin = 1024; 
+	var soildMoistureMax = 0;
+	var leftLightMin = 1024;
+	var leftLightMax = 0;
+	var rightLightMin = 1024;
+	var rightLightMax = 0;
+	var airQualityMin = 1024;
+	var airQualityMax = 0;
+	
+	var topMessage = null;
+
+	function Message(name, method, params) {
+		this.msgID = new Date().getTime();
+		this.timeStamp = this.msgID;
+		this.name = name;
+		this.sender = webguiName; // FIXME - named passed in
+		this.sendingMethod = method;
+		this.historyList = new Array(); // necessary?
+		this.method = method;
+		this.data = params;
+	}
+
+	function Status(name, level, detail) {
+		this.name = name;
+		this.level = level;
+		this.code;
+		this.detail = detail;
+	}
+
+	function getRegistry(data) {
+		// refresh global registry
+		registry = data[0];
+		//loadServiceGUIClass(registry, Object.keys(registry), 0);
+	}
+
+	// --- ServiceGUI begin ----
+	function ServiceGUI(name) {
+		this.name = name;
+		this.soildMoisture = null;
+		this.tempHumidity = null;
+		this.leftLight = null;
+		this.rightLight = null;
+		this.airQuality = null;
+	}
+
+	// to be overriden by all
+	ServiceGUI.prototype.attachGUI = function() {
+	};
+
+	ServiceGUI.prototype.detachGUI = function() {
+	};
+
+	// send to bound service name
+	ServiceGUI.prototype.send = function(method, data) {
+		var msg = new Message(this.name, method, data);
+		var json = JSON.stringify(msg);
+		connection.ws.send(json);
+	};
+
+	ServiceGUI.prototype.sendTo = function(name, method, data) {
+		var msg = new Message(name, method, data);
+		var json = JSON.stringify(msg);
+		connection.ws.send(json);
+	};
+
+	ServiceGUI.prototype.subscribe = function(inMethod, outMethod) {
+		this
+				.sendTo(webguiName, "subscribe", [ this.name, inMethod,
+						outMethod ]);
+	}
+
+	ServiceGUI.prototype.subscribeTo = function(publisherName, outMethod,
+			inMethod) {
+		// FIXME - need a "subscribe to a runtimes' getRegistry"
+		this.sendTo(webguiName, "subscribe", [ publisherName, inMethod,
+				outMethod ]);
+	}
+
+	ServiceGUI.prototype.key = function(inStr) {
+		return ("#" + this.name + "-" + inStr);
+	}
+
+	ServiceGUI.prototype.releaseService = function() {
+		this.send("releaseService");
+	}
+
+	// --- ServiceGUI end ----
+	// FIXME -  embedded all methods in ServiceGUI
+	function Connection(uri) {
+		this.ws = new WebSocket(uri);
+
+		this.ws.onopen = function(openEvent) {
+			var text = "connected to " + wsURI;
+			$("#connected").attr("src","/root/connected.png");
+			topMessage.text(text);
+			mrl.sendTo(runtimeName, "getRegistry");
+		};
+		
+		this.ws.onerror = function(errorMsg) { 
+			var text = "websocket error " + errorMsg;
+			topMessage.text(text);
+		};  
+
+		this.ws.onclose = function(errorMsg) {
+			var text = "disconnected from " + wsURI + " " + errorMsg;
+			mrl.info(text);
+			$("#connected").attr("src","/root/disconnected.png");
+			topMessage.text(text); // TODO mrl.info OR #topMessage ????
+		};
+
+		// the message router
+		this.ws.onmessage = function(e) {
+			++msgCount;
+			
+			if (msgCount%100 == 0){
+				topMessage.text(msgCount + " rx");
+			}
+
+			var msg = null;
+			try {
+				msg = jQuery.parseJSON(e.data);
+
+				if (msg.method == "getRegistry") {
+					getRegistry(msg.data) 
+				} else {
+					if (msg.data != null) { 
+						//guiMap[msg.sender][msg.method](msg.data);						
+						if (msg.method == "publishPin"){
+
+							var pinValue = msg.data[0].value;
+							var pin = msg.data[0].pin;
+							if (pin == 4) {
+								mrl.leftLight.value = pinValue;
+								$("#leftLight-label").text(pinValue);
+								leftLightMin = (pinValue < leftLightMin)?pinValue:leftLightMin;
+								leftLightMax = (pinValue > leftLightMax)?pinValue:leftLightMax;
+								$("#leftLight-label-min").text(leftLightMin);
+								$("#leftLight-label-max").text(leftLightMax);
+								mrl.leftLight.Draw();
+							} else if (pin == 0) {
+								mrl.soildMoisture.value = pinValue;
+								$("#soildMoisture-label").text(pinValue);
+								soildMoistureMin = (pinValue < soildMoistureMin)?pinValue:soildMoistureMin;
+								soildMoistureMax = (pinValue > soildMoistureMax)?pinValue:soildMoistureMax;
+								$("#soildMoisture-label-min").text(soildMoistureMin);
+								$("#soildMoisture-label-max").text(soildMoistureMax);
+								mrl.soildMoisture.Draw();
+							} else if (pin == 2) {
+								mrl.tempHumidity.value = pinValue;
+								mrl.tempHumidity.Draw();
+							} else if (pin == 6) {
+								mrl.rightLight.value = pinValue;
+								$("#rightLight-label").text(pinValue);
+								rightLightMin = (pinValue < rightLightMin)?pinValue:rightLightMin;
+								rightLightMax = (pinValue > rightLightMax)?pinValue:rightLightMax;
+								$("#rightLight-label-min").text(rightLightMin);
+								$("#rightLight-label-max").text(rightLightMax);
+								mrl.rightLight.Draw();
+							} else if (pin == 10) {
+								mrl.airQuality.value = pinValue;
+								$("#airQuality-label").text(pinValue);
+								airQualityMin = (pinValue < airQualityMin)?pinValue:airQualityMin;
+								airQualityMax = (pinValue > airQualityMax)?pinValue:airQualityMax;
+								$("#airQuality-label-min").text(airQualityMin);
+								$("#airQuality-label-max").text(airQualityMax);
+								mrl.airQuality.Draw();
+							} else {
+								topMessage.text("unknown pin " + pin + " " + pinValue);
+							}
+							
+						}
+					} else {
+						guiMap[msg.sender][msg.method]();
+					}
+				}
+			} catch (err) {
+				topMessage.text(
+						err.message + "-" + msg.sender + "." + msg.method
+								+ e.data);
+			}
+		};
+	}
+
+	// -- webgui framework display begin ---
+	
+	// -- webgui framework display begin ---
+
+	// --- logging begin ----
+	ServiceGUI.prototype.debug = function(text) {
+		this.log(text, "debug");
+		this.displayStatus([ new Status(this.name, "DEBUG", text) ]); // FIXME - lame
+	}
+
+	ServiceGUI.prototype.info = function(text) {
+		this.log(text, "info");
+		this.displayStatus([ new Status(this.name, "INFO", text) ]); // FIXME - lame
+	}
+
+	ServiceGUI.prototype.warn = function(text) {
+		this.log(text, "warn");
+		this.displayStatus([ new Status(this.name, "WARN", text) ]); // FIXME - lame
+	}
+
+	ServiceGUI.prototype.error = function(text) {
+		this.log(text, "error");
+		this.displayStatus([ new Status(this.name, "ERROR", text) ]); // FIXME - lame
+	}
+
+	// call back from the service debug info warn error
+	// TODO attachGUI - calls parent sets the framework message routes
+	// this is the point of where two "inbound" msgs meet - one from other
+	// pages - which do this.info() and one from the Services info warn error
+	// the Service category of message is split in the message - so is the peer pages
+	// it should remain split - no parsing should be necessary
+	ServiceGUI.prototype.displayStatus = function(data) {
+
+		var guiStatus = $("#" + this.name + "-status");
+		var status = data[0];
+
+		if (status.level == "INFO") {
+			guiStatus.addClass("info");
+			guiStatus.removeClass("warn");
+			guiStatus.removeClass("error");
+		} else if (status.level == "WARN") {
+			guiStatus.removeClass("info");
+			guiStatus.addClass("warn");
+			guiStatus.removeClass("error");
+		} else if (status.level == "ERROR") {
+			guiStatus.removeClass("info");
+			guiStatus.removeClass("warn");
+			guiStatus.addClass("error");
+		}
+
+		guiStatus.text(status.detail);
+	}
+
+	// http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
+	ServiceGUI.prototype.log = function(text, level) {
+		//$("#log").val((text !== null ? text : "null") + "\n" + $("#log").val());
+		$("#log").html(
+				"<span class='"+level+"'>" + this.name + " " + level + " "
+						+ text + "</span><br />" + $("#log").html());
+		/*
+		$("#log").val(
+				(new Date).getTime() + ": " + (text !== null ? text : "null")
+						+ "\n" + $("#log").val());
+		 */
+	}
+	// --- logging end ----
+
+	// DOM loaded
+	$(document).ready(function() {
+
+		topMessage = $("#topMessage");
+		topMessage.html("connecting to " + wsURI);
+		
+		mrl = new ServiceGUI(runtimeName);
+		connection = new Connection(wsURI);
+		
+		mrl.soildMoisture = new RGraph.Odometer('soildMoisture', 0, 1024, 0).Draw();
+		mrl.tempHumidity = new RGraph.Odometer('tempHumidity', 0, 1024, 0).Draw();
+		mrl.leftLight = new RGraph.Odometer('leftLight', 0, 1024, 0).Draw();
+		//mrl.leftLight.background.color = "green";
+		mrl.rightLight = new RGraph.Odometer('rightLight', 0, 1024, 0).Draw();
+		mrl.airQuality = new RGraph.Odometer('airQuality', 0, 1024, 0).Draw();
+				
+		/**
+     * This draws a simple gray circle over the centerpin
+     */
+     function myCenterpin (obj)
+     {
+         // This circle becomes the border of the centerpin
+         obj.context.beginPath();
+             obj.context.fillStyle = '#aaa';
+             obj.context.arc(obj.centerx, obj.centery, 10, 0, TWOPI, false); 
+         obj.context.fill();
+     }
+     
+     RGraph.AddCustomEventListener(this.leftLight, 'ondraw', myCenterpin);
+		
+
+	});
+
+	// FIXME - need a strategy to easily debug dynamically loaded scripts
+	// one hack would just to be append them ?
+</script>
+</head>
+<body>
+<table border="0">
+<tr>
+	<td colspan="3">
+		<img src="/root/plantoid-server.png" />
+	</td>
+</tr> 
+<tr>
+  <td colspan="3"><img id="connected" src="/WebGUI/common/button-red.png" /><span id="topMessage"></span></td>
+</tr>
+<tr>
+	<td colspan="2"><img src="http://orbous.zapto.org:9090/?action=stream" /></td><td><img src="http://orbous.zapto.org:9092/?action=stream" /></td>
+</tr> 
+<tr>
+    <td>
+	<table border="0" cellpadding="5" cellspacing="0">
+	  <tr><td><img src="/root/soil-moisture.png" /><br/>
+	  	<canvas id='soildMoisture' width='250' height='250'>[No canvas support]</canvas></td>
+	      <td>
+	      <table border="0" cellpadding="5" cellspacing="0">
+		<tr><td><img src="/root/value.png"/><br/> <span id="soildMoisture-label">0</span></td></tr>
+		<tr><td><img src="/root/max.png"/><br/> <span id="soildMoisture-label-max">0</span></td></tr>
+		<tr><td><img src="/root/min.png"/><br/> <span id="soildMoisture-label-min">0</span></td></tr>	
+	      </table>
+	      </td>
+	  </tr>			
+	</table>
+    </td>
+    <td>
+	<table border="0" cellpadding="5" cellspacing="0">
+	  <tr><td><img src="/root/temp-humidity.png" /><br/>
+	  <canvas id='tempHumidity' width='250' height='250'>[No canvas support]</canvas></td>
+	      <td>
+	      <table border="0" cellpadding="5" cellspacing="0">
+		<tr><td><img src="/root/value.png"/><br/> <span id="tempHumidity-label">0</span></td></tr>
+		<tr><td><img src="/root/max.png"/><br/> <span id="tempHumidity-label-max">0</span></td></tr>
+		<tr><td><img src="/root/min.png"/><br/> <span id="tempHumidity-label-min">0</span></td></tr>	
+	      </table>
+	      </td>
+	  </tr>			
+	</table>
+    </td>
+    <td>
+	<table border="0" cellpadding="5" cellspacing="0">
+	  <tr><td><img src="/root/ambient-light.png" /><br/>
+	  <canvas id='leftLight' width='250' height='250'>[No canvas support]</canvas></td>
+	      <td>
+	      <table border="0" cellpadding="5" cellspacing="0">
+		<tr><td><img src="/root/value.png"/><br/> <span id="leftLight-label">0</span></td></tr>
+		<tr><td><img src="/root/max.png"/><br/> <span id="leftLight-label-max">0</span></td></tr>
+		<tr><td><img src="/root/min.png"/><br/> <span id="leftLight-label-min">0</span></td></tr>	
+	      </table>
+	      </td>
+	  </tr>			
+	</table>
+    </td>
+   </tr>
+   
+   <tr>
+     <td>
+	<table border="0" cellpadding="5" cellspacing="0">
+	  <tr><td><img src="/root/ambient-light.png" /><br/>
+	  <canvas id='rightLight' width='250' height='250'>[No canvas support]</canvas></td>
+	      <td>
+	      <table border="0" cellpadding="5" cellspacing="0">
+		<tr><td><img src="/root/value.png"/><br/> <span id="rightLight-label">0</span></td></tr>
+		<tr><td><img src="/root/max.png"/><br/> <span id="rightLight-label-max">0</span></td></tr>
+		<tr><td><img src="/root/min.png"/><br/> <span id="rightLight-label-min">0</span></td></tr>	
+	      </table>
+	      </td>
+	  </tr>			
+	</table>
+     </td>
+     <td>
+	<table border="0" cellpadding="5" cellspacing="0">
+	  <tr><td><img src="/root/air-quality.png" /><br/>
+	  <canvas id='airQuality' width='250' height='250'>[No canvas support]</canvas></td>
+	      <td>
+	      <table border="0" cellpadding="5" cellspacing="0">
+		<tr><td><img src="/root/value.png"/><br/> <span id="airQuality-label">0</span></td></tr>
+		<tr><td><img src="/root/max.png"/><br/> <span id="airQuality-label-max">0</span></td></tr>
+		<tr><td><img src="/root/min.png"/><br/> <span id="airQuality-label-min">0</span></td></tr>	
+	      </table>
+	      </td> 
+	  </tr>			
+	</table>
+     </td>
+     <td>
+	<table border="0" cellpadding="5" cellspacing="0">
+	  <tr><td><canvas id='battery' width='250' height='250'>[No canvas support]</canvas></td>
+	      <td>
+	      <table border="0" cellpadding="5" cellspacing="0">
+		<tr><td><img src="/root/value.png"/><br/> <span id="battery-label">0</span></td></tr>
+		<tr><td><img src="/root/max.png"/><br/> <span id="battery-label-max">0</span></td></tr>
+		<tr><td><img src="/root/min.png"/><br/> <span id="battery-label-min">0</span></td></tr>	
+	      </table>
+	      </td>
+	  </tr>			
+	</table>
+     </td>
+   </tr>
+   
+ </table>			
+	
+</body>
+</html>

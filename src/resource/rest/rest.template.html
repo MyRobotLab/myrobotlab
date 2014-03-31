@@ -1,0 +1,53 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>myrobotlab - resistance is futile</title>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+  <link rel="stylesheet" href="demos/style.css" />
+  <script>
+  $(function() {
+    $( "#accordion" ).accordion({
+    collapsible: true,
+    autoHeight: false,
+    active: false});
+  });
+
+  $(function() {
+		$("a").button().click(function(event) {
+			//event.preventDefault();
+		});
+	});
+
+  
+function buildRestURI(aForm)
+{
+	var url="/services";
+ 	for(i=0; i<aForm.elements.length; ++i)
+ 	{
+ 		url += "/" + aForm.elements[i].value;
+	}
+
+	//alert(url);
+
+	//window.location.replace(url);
+	//window.location.href = url;
+	// TODO - make opening new tab optional - 
+	// FIXME - close of jquery object on backbutton
+	window.open(url, "_blank");
+	return false;
+}
+  </script>
+</head>
+<body>
+<div id="accordion">
+%content%
+</div>
+
+
+</body>
+</html>
+

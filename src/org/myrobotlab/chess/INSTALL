@@ -1,0 +1,20 @@
+To build the applet, unpack the .jar file (You've presumably done that
+if you're reading this message) and do
+
+javac *.java
+
+To pack the applet into a jar file you need to specify a manifest file
+containing the line:
+
+Class-Path: ChessBoard.jar
+
+Place the ChessApp.jar and ChessBoard.jar files in the same directory
+as your web page.
+
+See the ChessApp webpage
+http://english.op.org/~peter/ChessApp/index.html for the kind of
+<APPLET> tag you need to include this on a webpage.
+---------
+
+This version makes use of the ChessBoard JavaBean for its display. The
+source is therefore simply for the engine and applet.
