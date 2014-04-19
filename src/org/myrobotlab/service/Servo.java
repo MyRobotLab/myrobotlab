@@ -62,7 +62,6 @@ public class Servo extends Service implements ServoControl {
 
 	ServoController controller;
 
-	@Element
 	private Float inputX;
 	
 	// clipping
@@ -81,6 +80,7 @@ public class Servo extends Service implements ServoControl {
 	@Element
 	private float maxY = 180;
 
+	@Element
 	private int rest = 90;
 	
 	private long lastActivityTime = 0;
@@ -212,29 +212,19 @@ public class Servo extends Service implements ServoControl {
 		return inverted;
 	}
 	
-	public boolean map(float minX, float maxX, float minY, float maxY) {
+	public void map(float minX, float maxX, float minY, float maxY) {
 		this.minX = minX;
 		this.maxX = maxX;
 		this.minY = minY;
 		this.maxY = maxY;
-
-		return true;
 	}
 
-	public boolean map(int minX, int maxX, int minY, int maxY) {
+	public void map(int minX, int maxX, int minY, int maxY) {
 		this.minX = minX;
 		this.maxX = maxX;
 		this.minY = minY;
 		this.maxY = maxY;
-
-		return true;
 	}
-	
-	/*
-	public static double mapRange(double minX, double maxX, double minY, double maxY, double s){
-		return minY + ((s - minX)*(maxY - minY))/(maxX - minX);
-	}
-	*/
 	
 	public float calc(float s){
 		return  minY + ((s - minX)*(maxY - minY))/(maxX - minX);

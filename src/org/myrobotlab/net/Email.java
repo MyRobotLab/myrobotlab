@@ -26,10 +26,8 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- * General email
- * dependencies are
- * 	mailapi.jar and smtp.jar
- *
+ *         General email dependencies are mailapi.jar and smtp.jar
+ * 
  */
 public class Email {
 
@@ -47,16 +45,16 @@ public class Email {
 		emailProperties = System.getProperties();
 		emailProperties.put("mail.smtp.host", host);
 		emailProperties.put("mail.smtp.port", 25);
-		//emailProperties.put("mail.smtp.auth", "false");
-		//emailProperties.put("mail.smtp.starttls.enable", "true");
+		// emailProperties.put("mail.smtp.auth", "false");
+		// emailProperties.put("mail.smtp.starttls.enable", "true");
 	}
 
 	public void setEmailServer(String host, Integer port) {
 		emailProperties = System.getProperties();
 		emailProperties.put("mail.smtp.host", host);
 		emailProperties.put("mail.smtp.port", port);
-		//emailProperties.put("mail.smtp.auth", "true");
-		//emailProperties.put("mail.smtp.starttls.enable", "true");
+		// emailProperties.put("mail.smtp.auth", "true");
+		// emailProperties.put("mail.smtp.starttls.enable", "true");
 	}
 
 	public void setGmailServer(String user, String password) {
@@ -108,29 +106,30 @@ public class Email {
 		transport.close();
 		log.info("Email sent successfully.");
 	}
-	
-	// TODO String[] of attachments - Derive mimeType from File - inline with img if is image
-	public MimeMessage createEmailMessageWithImage(String to, String subject, String body, String imgFileName) throws AddressException, MessagingException{
-		
+
+	// TODO String[] of attachments - Derive mimeType from File - inline with
+	// img if is image
+	public MimeMessage createEmailMessageWithImage(String to, String subject, String body, String imgFileName) throws AddressException, MessagingException {
+
 		MimeMessage msg = createEmailMessage(to, subject, String.format("%s <br/>\n <img src=\"%s\"/>", body, imgFileName));
-		
+
 		MimeBodyPart messageBodyPart = new MimeBodyPart();
 
-	    messageBodyPart.setContent(String.format("%s <br/>\n <img src=\"%s\"/>", body, imgFileName), "text/html");
+		messageBodyPart.setContent(String.format("%s <br/>\n <img src=\"%s\"/>", body, imgFileName), "text/html");
 
-	    Multipart multipart = new MimeMultipart();
-	    multipart.addBodyPart(messageBodyPart);
+		Multipart multipart = new MimeMultipart();
+		multipart.addBodyPart(messageBodyPart);
 
-	    messageBodyPart = new MimeBodyPart();
-	    File img = new File(imgFileName);
-	    DataSource source = new FileDataSource(img);
-	    messageBodyPart.setDataHandler(new DataHandler(source));
-	    messageBodyPart.setFileName(imgFileName);
-	    messageBodyPart.setDisposition(MimeBodyPart.INLINE);
-	    multipart.addBodyPart(messageBodyPart);
+		messageBodyPart = new MimeBodyPart();
+		File img = new File(imgFileName);
+		DataSource source = new FileDataSource(img);
+		messageBodyPart.setDataHandler(new DataHandler(source));
+		messageBodyPart.setFileName(imgFileName);
+		messageBodyPart.setDisposition(MimeBodyPart.INLINE);
+		multipart.addBodyPart(messageBodyPart);
 
-	    msg.setContent(multipart);
-	    return msg;
+		msg.setContent(multipart);
+		return msg;
 	}
 
 	public void sendEmail(String to, String subject, String body) throws AddressException, MessagingException {
@@ -144,7 +143,7 @@ public class Email {
 		transport.close();
 		log.info("Email sent successfully.");
 	}
-	
+
 	// FIXME - needs work generalize to take a File[] and extract mime info
 	public void sendEmailWithImage(String to, String subject, String body, String imgFileName) throws AddressException, MessagingException {
 
@@ -158,10 +157,9 @@ public class Email {
 		log.info("Email sent successfully.");
 	}
 
-
 	public static void main(String args[]) throws AddressException, MessagingException {
 		try {
-			
+
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.ERROR);
 
@@ -170,9 +168,10 @@ public class Email {
 			email.setEmailServer("mail.freightliner.com");
 			// email.createEmailMessage("greg.perry@daimler.com", "test",
 			// "test body");
-			//email.sendEmail("greg.perry@daimler.com", "test", "test body");
-			email.sendEmailWithImage("greg.perry@daimler.com", "test", "test body", "opencv.input.4.jpg");
-			
+			email.sendEmail("greg.perry@daimler.com", "test", "test body");
+			// email.sendEmailWithImage("greg.perry@daimler.com", "test",
+			// "test body", "opencv.input.4.jpg");
+
 			log.info("done");
 		} catch (Exception e) {
 			Logging.logException(e);

@@ -59,20 +59,24 @@ public class _TemplateServiceGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-		subscribe("publishState", "getState", _TemplateService.class);
-		send("publishState");
+		// commented out subscription due to this class being used for
+		// un-defined gui's 
+		
+		// subscribe("publishState", "getState", _TemplateService.class);
+		// send("publishState");
 	}
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishState", "getState", _TemplateService.class);
+		// commented out subscription due to this class being used for
+		// un-defined gui's 
+				
+		// unsubscribe("publishState", "getState", _TemplateService.class);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
 	
+	}
 
 }

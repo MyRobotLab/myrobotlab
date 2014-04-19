@@ -145,7 +145,7 @@ public class Module {
 		if (translation.containsKey(s)) {
 			b = translation.get(s);
 		} else {
-			log.error(String.format("character %s not translated", c));
+			log.info(String.format("character %s not translated", c));
 		}
 		return b;
 	}
@@ -191,6 +191,7 @@ public class Module {
 															// ! for LED
 
 		} catch (Exception e) {
+			log.error(String.format("writeDisplay device %d error in writing", address.controller));
 			Logging.logException(e);
 		}
 
@@ -314,6 +315,7 @@ public class Module {
 			log.info("ledOn {}", Integer.toHexString(selector));
 			device.write((byte) selector);
 		} catch (Exception e) {
+			log.error(String.format("ledOn device %d error in writing", address.controller));
 			Logging.logException(e);
 		}
 		return selector;
@@ -325,6 +327,7 @@ public class Module {
 			log.info("ledOff {}", Integer.toHexString(selector));
 			device.write((byte) selector);
 		} catch (Exception e) {
+			log.error(String.format("ledOff device %d error in writing", address.controller));
 			Logging.logException(e);
 		}
 

@@ -86,7 +86,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 		buttonPane.add(ok);
 		ok.addActionListener(this);
 
-		noWorky = new JButton("GroG, it \"no-worky\"!");
+		noWorky = new JButton("Help, it \"no-worky\"!");
 		buttonPane.add(noWorky);
 		noWorky.addActionListener(this);
 
@@ -134,7 +134,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 
 			}
 		} else if (source == noWorky) {
-			String logon = JOptionPane.showInputDialog(parent, "<html>This will send GroG your myrobotlab.log file<br> please type your myrobotlab.org user</html>");
+			String logon = JOptionPane.showInputDialog(parent, "<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of monkeys,</p><br> please type your myrobotlab.org user</html>");
 			if (logon == null || logon.length() == 0) {
 				return;
 			}

@@ -218,6 +218,10 @@ public final class PMatrix3D /*implements PMatrix3D , PConstants*/ {
     apply(c, -s, 0, 0,  s, c, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1);
   }
 
+	static public final float sqrt(float a) {
+		return (float) Math.sqrt(a);
+	}
+	
 
   public void rotate(float angle, float v0, float v1, float v2) {
     float norm2 = v0 * v0 + v1 * v1 + v2 * v2;
@@ -228,7 +232,7 @@ public final class PMatrix3D /*implements PMatrix3D , PConstants*/ {
 
     if (Math.abs(norm2 - 1) > PConstants.EPSILON) {
       // The rotation vector is not normalized.
-      float norm = PApplet.sqrt(norm2);
+      float norm = sqrt(norm2);
       v0 /= norm;
       v1 /= norm;
       v2 /= norm;

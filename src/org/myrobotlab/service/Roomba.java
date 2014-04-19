@@ -48,6 +48,8 @@ public class Roomba extends Service implements SerialDeviceService {
 	public final static Logger log = LoggerFactory.getLogger(Roomba.class.getCanonicalName());
 
 	transient RoombaCommSerialDevice roombacomm = null;
+	
+	private boolean isConnected = false;
 
 	@Element
 	String portName = "";
@@ -97,6 +99,7 @@ public class Roomba extends Service implements SerialDeviceService {
 	public boolean connect(String portName) {
 		if (roombacomm.connect(portName)) {
 			this.portName = portName;
+			isConnected = true;
 			save();
 			return true;
 		}
@@ -111,6 +114,7 @@ public class Roomba extends Service implements SerialDeviceService {
 
 	public boolean disconnect() {
 		roombacomm.disconnect();
+		isConnected = false;
 		return true;
 	}
 
@@ -806,6 +810,11 @@ public class Roomba extends Service implements SerialDeviceService {
 	public void write(int data) throws IOException {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public boolean isConnected() {
+		return isConnected;
 	}
 
 }

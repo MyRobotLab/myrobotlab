@@ -27,14 +27,14 @@ import org.myrobotlab.net.http.ResponseException;
 import org.myrobotlab.service.WebGUI;
 import org.myrobotlab.service.interfaces.HTTPProcessor;
 import org.slf4j.Logger;
+
 /**
- * WSServer - to be used as a general purpose HTTP server 
- * extends WebSocketServer for web socket support
- * clients which do not implement websockets are processed with
- * registered processors HTTP 1.1 support
+ * WSServer - to be used as a general purpose HTTP server extends
+ * WebSocketServer for web socket support clients which do not implement
+ * websockets are processed with registered processors HTTP 1.1 support
  * 
  * @author GroG
- *
+ * 
  */
 public class WSServer extends WebSocketServer {
 
@@ -68,14 +68,14 @@ public class WSServer extends WebSocketServer {
 	public WSServer(WebGUI webgui, int port) throws UnknownHostException {
 		super(new InetSocketAddress(port));
 		this.webgui = webgui;
-		
+
 		// FIXME !! - shorthand - /api/method ...
 		// FIXME !! - longhand /api/returnType/paramType/method ....
 		// FIXME !!
-		//processors.put("/api/soap", new SOAPProcessor());
-		//processors.put("/api/html/html/rest", new RESTProcessor());
-		//processors.put("/api", new RESTProcessor());
-		// default uri map 
+		// processors.put("/api/soap", new SOAPProcessor());
+		// processors.put("/api/html/html/rest", new RESTProcessor());
+		// processors.put("/api", new RESTProcessor());
+		// default uri map
 
 		processors.put("/services", new RESTProcessor());
 		processors.put("/api/soap", new SOAPProcessor());
@@ -155,17 +155,16 @@ public class WSServer extends WebSocketServer {
 			}
 		}
 	}
-	
+
 	/*
-
-	@Override
-	public void onRawMessage(WebSocket conn, ByteBuffer d) {
-		
-		log.error("onRawMessage ??? Not supposed to be here right ???");
-
-
-	}
-	*/
+	 * 
+	 * @Override public void onRawMessage(WebSocket conn, ByteBuffer d) {
+	 * 
+	 * log.error("onRawMessage ??? Not supposed to be here right ???");
+	 * 
+	 * 
+	 * }
+	 */
 
 	// ///////////////////// FROM NANOHTTPD ///////////////////////
 
@@ -174,7 +173,17 @@ public class WSServer extends WebSocketServer {
 	 */
 	public void decodeHeader(String in, Map<String, String> pre, Map<String, String> parms, Map<String, String> headers) throws ResponseException {
 
+		if (in == null) {
+			log.error("decode header in is null");
+			return;
+		}
 		int pos0 = in.indexOf("\r");
+
+		if (pos0 == -1) {
+			log.error(String.format("bad header %s no \\r", in));
+			return;
+		}
+
 		String inLine = in.substring(0, pos0);
 
 		StringTokenizer st = new StringTokenizer(inLine);
@@ -196,7 +205,7 @@ public class WSServer extends WebSocketServer {
 			decodeParms(uri.substring(qmi + 1), parms);
 			uri = decodePercent(uri.substring(0, qmi));
 		} else {
-			//uri = decodePercent(uri);
+			// uri = decodePercent(uri);
 		}
 
 		// If there's another token, it's protocol version,
@@ -312,32 +321,34 @@ public class WSServer extends WebSocketServer {
 
 	@Override
 	public void onRawOpen(WebSocket conn, ByteBuffer d) {
-		// TODO Auto-generated method stub
 
-		log.info("onRawOpen");
-		
 		try {
+			if (conn == null){
+				log.error("conn is null");
+				return;
+			}
+
+			log.info(String.format("onRawOpen %s", conn.getRemoteSocketAddress()));
 
 			// this is the whole buffer i think
 			String s = new String(d.array());
-			//log.info(s);
-			
+			// log.info(s);
+
 			String sub = s.substring(0, d.limit());
 			log.info(sub);
-			
+
 			int pos0 = sub.indexOf("\r\n\r\n");
-			
-			if (pos0 == -1){
+
+			if (pos0 == -1) {
 				log.error("invalid http header");
 				return;
 			}
-			
+
 			String headerStr = sub.substring(0, pos0);
 			String postBody = null;
-						
-			if (pos0 > 0)
-			{
-				postBody = sub.substring(pos0+4);
+
+			if (pos0 > 0) {
+				postBody = sub.substring(pos0 + 4);
 			}
 
 			HashMap<String, String> parms = new HashMap<String, String>();
@@ -362,16 +373,16 @@ public class WSServer extends WebSocketServer {
 			// FIXME use different response encoders Encoder.base64 etc
 			Response r = null;
 
-			// FIXME - parameter encoding & return encoding needs to be resolved in framework - before processing
+			// FIXME - parameter encoding & return encoding needs to be resolved
+			// in framework - before processing
 			// FIXME hacked up
 			// begin new api interface
-			if (uri.startsWith("/api/soap"))
-			{
+			if (uri.startsWith("/api/soap")) {
 				HTTPProcessor processor = processors.get("/api/soap");
-				//String paramEncoding = keys[2];
-				
+				// String paramEncoding = keys[2];
+
 				r = processor.serve(uri.substring("/api/soap".length()), method, headers, parms, postBody);
-				
+
 			} else if (processors.containsKey(key)) {
 
 				HTTPProcessor processor = processors.get(key);
@@ -383,11 +394,9 @@ public class WSServer extends WebSocketServer {
 				r = defaultProcessor.serve(uri, method, headers, parms, postBody);
 				log.info("post -defaultProcessor");
 			}
-			
-			if (r == null)
-			{
+
+			if (r == null) {
 				log.info("---------------CLOSE-------------------------");
-				conn.close();
 				return;
 			}
 
@@ -399,13 +408,15 @@ public class WSServer extends WebSocketServer {
 			byte[] ba = out.toByteArray();
 			log.info(String.format("sending %d bytes", ba.length));
 			conn.send(ba);
-			conn.close();
-			
+			//conn.close();
+
 		} catch (Exception e) {
 			// attempt a 500
 			Logging.logException(e);
+		} finally {
+			conn.close();
 		}
-		
+
 	}
 
 }

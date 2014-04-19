@@ -53,6 +53,12 @@ public class MouthControl extends Service {
 		//jaw.setMinMax(closed, opened);
 		moutClosedPos = closed;
 		mouthOpenedPos = opened;
+		
+		if (closed < opened){
+			jaw.setMinMax(closed, opened);
+		} else {
+			jaw.setMinMax(opened, closed);
+		}
 	}
 
 	public void startService() {
