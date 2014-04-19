@@ -265,6 +265,8 @@ public class InMoovArm extends Service {
 			shoulder.moveTo(shoulder.getPosition() + 2);
 			omoplate.moveTo(omoplate.getPosition() + 2);
 			
+			sleep(300);
+			
 		} catch (Exception e) {
 			error(e);
 			return;
@@ -300,5 +302,23 @@ public class InMoovArm extends Service {
 		attached |= omoplate.isAttached();
 		
 		return attached;
+	}
+	
+	public boolean save(){
+		super.save();
+		bicep.save();
+		rotate.save();
+		shoulder.save();
+		omoplate.save();
+		return true;
+	}
+	
+	public boolean load(){
+		super.load();
+		bicep.load();
+		rotate.load();
+		shoulder.load();
+		omoplate.load();
+		return true;
 	}
 }

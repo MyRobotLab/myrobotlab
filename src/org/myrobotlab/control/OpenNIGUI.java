@@ -36,9 +36,9 @@ import javax.swing.JTabbedPane;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.GestureRecognition;
+import org.myrobotlab.service.OpenNI;
 
-public class GestureRecognitionGUI extends ServiceGUI implements ActionListener {
+public class OpenNIGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
 
@@ -53,7 +53,7 @@ public class GestureRecognitionGUI extends ServiceGUI implements ActionListener 
 
 	JPanel eastPanel = new JPanel();
 
-	public GestureRecognitionGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public OpenNIGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		video = new VideoWidget(boundServiceName, myService, tabs);
 	}
@@ -80,7 +80,7 @@ public class GestureRecognitionGUI extends ServiceGUI implements ActionListener 
 
 	}
 
-	public void getState(GestureRecognition openni) {
+	public void getState(OpenNI openni) {
 		// TODO - update state
 	}
 
@@ -91,7 +91,7 @@ public class GestureRecognitionGUI extends ServiceGUI implements ActionListener 
 	@Override
 	public void attachGUI() {
 		// subscribe & ask for the initial state of the service
-		subscribe("publishState", "getState", GestureRecognition.class);
+		subscribe("publishState", "getState", OpenNI.class);
 		// subscribe("publishDisplay", "publishDisplay", ShortBuffer.class);
 		subscribe("publishFrame", "publishFrame", SerializableImage.class);
 		myService.send(boundServiceName, "publishState");
@@ -100,7 +100,7 @@ public class GestureRecognitionGUI extends ServiceGUI implements ActionListener 
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishState", "getState", GestureRecognition.class);
+		unsubscribe("publishState", "getState", OpenNI.class);
 	}
 
 	@Override

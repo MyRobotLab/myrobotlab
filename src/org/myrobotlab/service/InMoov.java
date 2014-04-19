@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.util.Calendar;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Peers;
@@ -8,6 +9,7 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.simpleframework.xml.Element;
@@ -72,6 +74,10 @@ public class InMoov extends Service {
 	transient public final static String LEFT = "left";
 	transient public final static String RIGHT = "right";
 
+	transient public OpenNI openni;
+
+	transient public PID pid;
+
 	// reflective or non-interactive peers
 	// transient public WebGUI webgui;
 	// transient public XMPP xmpp;
@@ -125,6 +131,8 @@ public class InMoov extends Service {
 		peers.put("mouth", "Speech", "InMoov speech service");
 		peers.put("mouthControl", "MouthControl", "MouthControl");
 		peers.put("opencv", "OpenCV", "InMoov OpenCV service");
+		peers.put("openni", "OpenNI", "Kinect service");
+		peers.put("pid", "PID", "PID service");
 
 		return peers;
 	}
@@ -181,6 +189,9 @@ public class InMoov extends Service {
 		startMouth();
 		startHead(leftPort);
 		startEar();
+
+		startMouthControl(leftPort);
+
 		startLeftHand(leftPort);
 		startRightHand(rightPort);
 		startLeftArm(leftPort);
@@ -192,36 +203,75 @@ public class InMoov extends Service {
 		speakBlocking("startup sequence completed");
 	}
 
-	public Integer pirPin = null;
-	Long startSleep = null;
+	public OpenNI startOpenNI() {
+		if (openni == null) {
+			speakBlocking("starting kinect");
+			openni = (OpenNI) startPeer("openni");
+			pid = (PID) startPeer("pid");
 
-	public void startPIR(String port, int pin) {
-		speakBlocking("starting pee eye are sensor on port %s pin %d", port, pin);
-		if (arduinos.containsKey(port)) {
-			Arduino arduino = arduinos.get(port);
-			arduino.connect(port);
-			arduino.setSampleRate(8000);
-			arduino.digitalReadPollStart(pin);
-			pirPin = pin;
-			arduino.addListener("publishPin", this.getName(), "publishPin");
+			pid.setMode(PID.MODE_AUTOMATIC);
+			pid.setOutputRange(-1, 1);
+			pid.setPID(10.0, 0.0, 1.0);
+			pid.setControllerDirection(0);
 
-		} else {
-			// FIXME - SHOULD ALLOW STARTUP AND LATER ACCESS VIA PORT ONCE OTHER
-			// STARTS CHECK MAP FIRST
-			log.error(String.format("%s arduino not found - start some other system first (head, arm, hand)", port));
+			// re-mapping of skeleton !
+			openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
+			openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
+			
+			openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
+			openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+			
+			//openni.skeleton.leftShoulder
+
+			openni.addListener("publish", this.getName(), "getSkeleton");
 		}
-
+		return openni;
 	}
 
-	public void publishPin(Pin pin) {
-		if (pirPin == pin.pin) {
-			if (startSleep != null) {
-				attach(); // good morning / evening / night... asleep for % hours
-				powerUp();
-				speakBlocking("hello. i was sleeping but now i am awake");
-				// TODO - add saying time asleep
+	boolean copyGesture = false;
+	boolean firstSkeleton = true;
+
+	public Skeleton getSkeleton(Skeleton skeleton) {
+
+		if (firstSkeleton) {
+			speakBlocking("i see you");
+			firstSkeleton = false;
+		}
+
+		if (copyGesture) {
+			if (leftArm != null) {
+				leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
+				leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
+				leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ());
+			}
+			if (rightArm != null) {
+				rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
+				rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
+				rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ());
 			}
 		}
+
+		return skeleton;
+	}
+
+	public boolean copyGesture(boolean b) {
+		if (b) {
+			if (openni == null) {
+				openni = startOpenNI();
+			}
+			speakBlocking("copying gestures");
+			openni.initContext();
+			openni.startUserTracking();
+		} else {
+			speakBlocking("stop copying gestures");
+			if (openni != null) {
+				openni.stopCapture();
+				firstSkeleton = true;
+			}
+		}
+
+		copyGesture = b;
+		return b;
 	}
 
 	// TODO TODO TODO - context & status report -
@@ -509,6 +559,28 @@ public class InMoov extends Service {
 		}
 	}
 
+	public void atEase() {
+		if (head != null) {
+			head.rest();
+		}
+		if (rightHand != null) {
+			rightHand.rest();
+			rightHand.detach();
+		}
+		if (leftHand != null) {
+			leftHand.rest();
+			leftHand.detach();
+		}
+		if (rightArm != null) {
+			rightArm.rest();
+			rightArm.detach();
+		}
+		if (leftArm != null) {
+			leftArm.rest();
+			leftArm.detach();
+		}
+	}
+
 	public void detach() {
 		if (head != null) {
 			head.detach();
@@ -583,6 +655,8 @@ public class InMoov extends Service {
 			head.test();
 		}
 
+		sleep(500);
+		rest();
 		broadcastState();
 		speakBlocking("system check completed");
 	}
@@ -627,50 +701,25 @@ public class InMoov extends Service {
 		moveHand("right", 0, 0, 0, 0, 0, 0);
 	}
 
-	public void powerDown() {
-		sleep(2);
-		if (ear != null){
-			ear.pauseListening();
-		}
-		rest();
-		speakBlocking("I'm powering down");
-		purgeAllTasks();
-		sleep(2);
-		moveHead(40, 85);
-		sleep(4);
-		detach();
-		speakBlocking("for more interaction please request me to power up");
-		speakBlocking("or activate the p eye are sensor. thank you. good bye.");
-		
-		// right
-		// rightSerialPort.digitalWrite(53, Arduino.LOW);
-		// leftSerialPort.digitalWrite(53, Arduino.LOW);
-		if (ear != null){
-			ear.lockOutAllGrammarExcept("power up");
-			sleep(2);
-			ear.resumeListening();
-		}
-		
-		startSleep = System.currentTimeMillis();
-	}
-
 	public void powerUp() {
+		attach();
+
 		startSleep = null;
-		sleep(2);
-		if (ear != null){
+		if (ear != null) {
 			ear.pauseListening();
 		}
 		// rightSerialPort.digitalWrite(53, Arduino.HIGH);
 		// leftSerialPort.digitalWrite(53, Arduino.HIGH);
 		speakBlocking("Im powered up");
 		rest();
-		if (ear != null){
+		if (ear != null) {
 			ear.clearLock();
 			sleep(2);
 			ear.resumeListening();
 		}
 		speakBlocking("ready");
-		
+
+		autoPowerDownOnInactivity();
 	}
 
 	// ---------- canned gestures end ---------
@@ -822,10 +871,6 @@ public class InMoov extends Service {
 		return script.toString();
 	}
 
-	public void startAutoDetach(int intervalSeconds) {
-		addLocalTask(intervalSeconds * 1000, "checkForInactivity");
-	}
-
 	/**
 	 * finds most recent activity
 	 * 
@@ -876,7 +921,7 @@ public class InMoov extends Service {
 	}
 
 	public long powerDownOnInactivity() {
-		speakBlocking("checking");
+		// speakBlocking("checking");
 		long lastActivityTime = getLastActivityTime();
 		long now = System.currentTimeMillis();
 		long inactivitySeconds = (now - lastActivityTime) / 1000;
@@ -884,9 +929,91 @@ public class InMoov extends Service {
 			speakBlocking("%d seconds have passed without activity", inactivitySeconds);
 			powerDown();
 		} else {
-			speakBlocking("%d seconds have passed without activity", inactivitySeconds);
+			// speakBlocking("%d seconds have passed without activity",
+			// inactivitySeconds);
+			info("checking powerDownOnInactivity - %d seconds have passed without activity", inactivitySeconds);
 		}
 		return lastActivityTime;
+	}
+
+	public void powerDown() {
+		sleep(2);
+		if (ear != null) {
+			ear.pauseListening();
+		}
+		rest();
+		speakBlocking("I'm powering down");
+		purgeAllTasks();
+		sleep(2);
+		moveHead(40, 85);
+		sleep(4);
+		speakBlocking("for more interaction please request me to power up");
+		speakBlocking("or activate the p eye are sensor. thank you. good bye.");
+
+		detach();
+
+		// right
+		// rightSerialPort.digitalWrite(53, Arduino.LOW);
+		// leftSerialPort.digitalWrite(53, Arduino.LOW);
+		if (ear != null) {
+			ear.lockOutAllGrammarExcept("power up");
+			sleep(2);
+			ear.resumeListening();
+		}
+
+		startSleep = System.currentTimeMillis();
+	}
+
+	public Integer pirPin = null;
+	Long startSleep = null;
+
+	public void startPIR(String port, int pin) {
+		speakBlocking("starting pee. eye. are. sensor on port %s pin %d", port, pin);
+		if (arduinos.containsKey(port)) {
+			Arduino arduino = arduinos.get(port);
+			arduino.connect(port);
+			arduino.setSampleRate(8000);
+			arduino.digitalReadPollStart(pin);
+			pirPin = pin;
+			arduino.addListener("publishPin", this.getName(), "publishPin");
+
+		} else {
+			// FIXME - SHOULD ALLOW STARTUP AND LATER ACCESS VIA PORT ONCE OTHER
+			// STARTS CHECK MAP FIRST
+			log.error(String.format("%s arduino not found - start some other system first (head, arm, hand)", port));
+		}
+
+	}
+
+	public void stopPIR() {
+		/*
+		 * if (arduinos.containsKey(port)) { Arduino arduino =
+		 * arduinos.get(port); arduino.connect(port);
+		 * arduino.setSampleRate(8000); arduino.digitalReadPollStart(pin);
+		 * pirPin = pin; arduino.addListener("publishPin", this.getName(),
+		 * "publishPin"); }
+		 */
+
+	}
+
+	public void publishPin(Pin pin) {
+		// if its PIR & PIR is active & was sleeping - then wake up !
+		if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
+			// attach(); // good morning / evening / night... asleep for % hours
+			powerUp();
+			Calendar now = Calendar.getInstance();
+
+			String salutation = "hello ";
+			if (now.get(Calendar.HOUR_OF_DAY) < 12) {
+				salutation = "good morning ";
+			} else if (now.get(Calendar.HOUR_OF_DAY) < 16) {
+				salutation = "good afternoon ";
+			} else {
+				salutation = "good evening ";
+			}
+
+			speakBlocking(String.format("%s. i was sleeping but now i am awake", salutation));
+		}
 	}
 
 	public boolean isAttached() {
@@ -1010,61 +1137,123 @@ public class InMoov extends Service {
 			headTracking.clearTrackingPoints();
 		}
 	}
-	
-	public void purgeAllTasks()
-	{
+
+	public void purgeAllTasks() {
 		speakBlocking("purging all tasks");
 		super.purgeAllTasks();
+	}
+	
+	public boolean save(){
+		super.save();
+		if (leftHand != null){
+			leftHand.save();
+		}
+		
+		if (rightHand != null){
+			rightHand.save();
+		}
+		
+		if (rightArm != null){
+			rightArm.save();
+		}
+
+		if (leftArm != null){
+			leftArm.save();
+		}
+
+		if (head != null){
+			head.save();
+		}
+		
+		if (openni != null){
+			openni.save();
+		}
+		
+		return true;
+	}
+	
+	public boolean load(){
+		super.load();
+		if (leftHand != null){
+			leftHand.load();
+		}
+		
+		if (rightHand != null){
+			rightHand.load();
+		}
+		
+		if (rightArm != null){
+			rightArm.load();
+		}
+
+		if (leftArm != null){
+			leftArm.load();
+		}
+		
+		if (head != null){
+			head.load();
+		}
+		
+		if (openni != null){
+			openni.load();
+		}
+
+		return true;
 	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
+		Runtime.createAndStart("gui", "GUIService");
+
+		InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
+		i01.startMouth();
+		i01.startLeftArm("COM15");
+		i01.copyGesture(true);
+
 		// Create two virtual ports for UART and user and null them together:
 		// create 2 virtual ports
-/*
-		VirtualSerialPort vp0 = new VirtualSerialPort("UART15");
-		VirtualSerialPort vp1 = new VirtualSerialPort("COM15");
-
-		// make null modem cable ;)
-		VirtualSerialPort.makeNullModem(vp0, vp1);
-		
-
-		// add virtual ports to the serial device factory
-		SerialDeviceFactory.add(vp0);
-		SerialDeviceFactory.add(vp1);
-*/		
+		/*
+		 * VirtualSerialPort vp0 = new VirtualSerialPort("UART15");
+		 * VirtualSerialPort vp1 = new VirtualSerialPort("COM15");
+		 * 
+		 * // make null modem cable ;) VirtualSerialPort.makeNullModem(vp0,
+		 * vp1);
+		 * 
+		 * 
+		 * // add virtual ports to the serial device factory
+		 * SerialDeviceFactory.add(vp0); SerialDeviceFactory.add(vp1);
+		 */
 
 		// create the UART serial service
 		// log.info("Creating a LIDAR UART Serial service named: " + getName() +
 		// "SerialService");
 		// String serialName = getName() + "SerialService";
-		Serial serial0 = new Serial("UART15");
-		serial0.startService();
-		serial0.connect("UART15");
-
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
-
-		InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
-		i01.startMouth();
-		//i01.power(120);
-		InMoovHand lefthand = i01.startLeftHand("COM15");
-		i01.leftHand.setRest(10, 10, 10, 10, 10);
-		i01.autoPowerDownOnInactivity(10);
+		/*
+		 * Serial serial0 = new Serial("UART15"); serial0.startService();
+		 * serial0.connect("UART15");
+		 * 
+		 * Runtime.createAndStart("gui", "GUIService");
+		 * Runtime.createAndStart("python", "Python");
+		 * 
+		 * InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
+		 * i01.startMouth(); // i01.power(120); InMoovHand lefthand =
+		 * i01.startLeftHand("COM15"); i01.leftHand.setRest(10, 10, 10, 10, 10);
+		 * i01.autoPowerDownOnInactivity(10);
+		 */
 
 		/*
-		log.info("inactivity {}", i01.powerDownOnInactivity());
-
-		lefthand.moveTo(5, 10, 30, 40, 50);
-
-		log.info("inactivity {}", i01.powerDownOnInactivity());
-
-		lefthand.rest();
-
-		log.info("inactivity {}", i01.powerDownOnInactivity());
-		*/
+		 * log.info("inactivity {}", i01.powerDownOnInactivity());
+		 * 
+		 * lefthand.moveTo(5, 10, 30, 40, 50);
+		 * 
+		 * log.info("inactivity {}", i01.powerDownOnInactivity());
+		 * 
+		 * lefthand.rest();
+		 * 
+		 * log.info("inactivity {}", i01.powerDownOnInactivity());
+		 */
 
 		/*
 		 * 

@@ -138,7 +138,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	private transient ObjectInputStream playback;
 	private transient OutputStream recordingXML;
 	private transient OutputStream recordingPython;
-	
+
 	// FIXME upgrade to ScheduledExecutorService
 	protected class Task extends TimerTask {
 
@@ -168,24 +168,29 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			}
 		}
 	}
-	
-	public void addLocalTask(int interval, String method,  Object[]...params) {
+
+	public void addLocalTask(int interval, String method, Object[]... params) {
 		if (timer == null) {
 			timer = new Timer(String.format("%s.timer", getName()));
 		}
 
-		Task task = new Task(interval, getName(), method, (Object[])params);
+		Task task = new Task(interval, getName(), method, (Object[]) params);
 		timer.schedule(task, 0);
 	}
-	
+
 	public void purgeAllTasks() {
+		info("purgeAllTasks");
 		if (timer != null) {
-			timer.cancel();
-			timer.purge();
+			try {
+				timer.cancel();
+				timer.purge();
+				timer = null;
+			} catch (Exception e) {
+				log.info(e.getMessage());
+			}
 		}
 	}
 
-	
 	/**
 	 * Short description of the service
 	 */
@@ -2057,12 +2062,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	public void info(String msg) {
 		log.info(msg);
-		
+
 		// can only read "so" fast
-		//if (System.currentTimeMillis() - lastInfo > 300) {
-			invoke("publishStatus", "info", msg);
-			lastInfo = System.currentTimeMillis();
-		//}
+		// if (System.currentTimeMillis() - lastInfo > 300) {
+		invoke("publishStatus", "info", msg);
+		lastInfo = System.currentTimeMillis();
+		// }
 	}
 
 	public void info(String format, Object... args) {
@@ -2081,15 +2086,25 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		Logging.logException(e);
 		return error(e.getMessage());
 	}
+	
+	/*
+	static public setErrorEmail(String to, String host, String user, String password){
+		
+	}
+	*/
 
 	public String error(String msg) {
 		lastErrorMsg = msg;
 		log.error(msg);
-		//if (System.currentTimeMillis() - lastError > 300) {
-			invoke("publishStatus", "error", msg);
-			invoke("publishError", msg);
-			lastError = System.currentTimeMillis();
-		//}
+		
+		// handle error
+		//email.sendEmail("greg.perry@daimler.com", "test", "test body");
+		
+		// if (System.currentTimeMillis() - lastError > 300) {
+		invoke("publishStatus", "error", msg);
+		invoke("publishError", msg);
+		lastError = System.currentTimeMillis();
+		// }
 
 		return lastErrorMsg;
 	}

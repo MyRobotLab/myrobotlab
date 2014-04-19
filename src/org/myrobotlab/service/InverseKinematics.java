@@ -53,6 +53,14 @@ public class InverseKinematics extends Service {
 		    ikEngine.setGoal(x,y,z);
 	 }
 
+	 public void setPoint(int x,int y, int z){
+		    ikEngine.setGoal(x,y,z);
+	 }
+	 
+	 public void setPoint(float x, float y, float z){
+		    ikEngine.setGoal(x,y,z);
+	 }
+	 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.WARN);

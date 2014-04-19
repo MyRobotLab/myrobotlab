@@ -291,6 +291,27 @@ public class InMoovHead extends Service {
 		
 		return attached;
 	}
+	
+	public boolean save(){
+		super.save();
+		rothead.save();
+		neck.save();
+		eyeX.save();
+		eyeY.save();
+		jaw.save();
+		return true;
+	}
+
+
+	public boolean load(){
+		super.load();
+		rothead.load();
+		neck.load();
+		eyeX.load();
+		eyeY.load();
+		jaw.load();
+		return true;
+	}
 
 
 }

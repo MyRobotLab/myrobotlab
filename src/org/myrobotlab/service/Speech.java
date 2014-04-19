@@ -302,7 +302,8 @@ public class Speech extends Service {
 			myVoice = voiceManager.getVoice(voiceName);
 
 			if (myVoice == null) {
-				log.error("Cannot find a voice named " + voiceName + ".  Please specify a different voice.");
+				error("Cannot find a voice named " + voiceName + ".  Please specify a different voice.");
+				return;
 			} else {
 				initialized = true;
 			}
@@ -512,15 +513,20 @@ public class Speech extends Service {
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		
 	
 		Speech speech = new Speech("speech");
 		speech.startService();
-		//speech.setGoogleURI("http://tts-api.com/tts.mp3?q=");
-		speech.speak("system check completed sir");
+		
+		speech.speakFreeTTS("hello");
+		
+		speech.setBackendType(BACKEND_TYPE_FREETTS);
+		
+		speech.speak("blah blah system check completed sir");
 		speech.speak("dood this is awesome");
 		
 		speech.setGenderMale();
-		speech.setBackendType(BACKEND_TYPE_FREETTS);
+		
 		// speech.setBackendType(BACKEND_TYPE_GOOGLE);
 		// speech.setLanguage("fr");
 		speech.speakBlocking("this should work");
@@ -539,6 +545,8 @@ public class Speech extends Service {
 		speech.speak("I believe I have bumped into something");
 		speech.speak("Ah, I have found a way out of this situation");
 		speech.speak("aaaaaaaaah, long vowels sound");
+		
+		speech.setGoogleURI("http://tts-api.com/tts.mp3?q=");
 
 	}
 

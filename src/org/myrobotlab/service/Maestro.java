@@ -13,6 +13,12 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 
+/**
+ * @author GroG
+ * http://www.pololu.com/product/1352
+ * http://www.pololu.com/product/1350
+ *
+ */
 public class Maestro extends Service implements ArduinoShield, ServoController {
 
 	private static final long serialVersionUID = 1L;

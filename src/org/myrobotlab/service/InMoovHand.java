@@ -413,5 +413,16 @@ public class InMoovHand extends Service {
 		ringFinger.map(minX, maxX, minY, maxY);
 		pinky.map(minX, maxX, minY, maxY);
 	}
+	
+	public boolean save(){
+		super.save();
+		thumb.save();
+		index.save();
+		majeure.save();
+		ringFinger.save();
+		pinky.save();
+		wrist.save();
+		return true;
+	}
 
 }

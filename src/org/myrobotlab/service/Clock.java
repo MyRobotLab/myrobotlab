@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -163,6 +162,8 @@ public class Clock extends Service {
 				// cuz you have not started it yet
 				Clock clock = (Clock) Runtime.createAndStart(String.format("clock%d", i), "Clock");
 				Runtime.createAndStart(String.format("gui%d", i), "GUIService");
+				
+				//myservice.subscribe("clock", "pulse", "pulseMe");
 /*
 				Message msg = remote.createMessage("", "register", clock);
 				URI uri = new URI("tcp://127.0.0.1:6767");
