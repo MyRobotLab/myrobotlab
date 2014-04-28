@@ -286,7 +286,7 @@ public class FileIO {
 		final Path path = Paths.get(zipFilename);
 		final URI uri = URI.create("jar:file:" + path.toUri().getPath());
 
-		final Map<String, String> env = new HashMap<>();
+		final Map<String, String> env = new HashMap<String,String>();
 		if (create) {
 			env.put("create", "true");
 		}

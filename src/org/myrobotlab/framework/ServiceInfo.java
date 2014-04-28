@@ -4,9 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +43,8 @@ public class ServiceInfo implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(ServiceInfo.class.toString());
 
+	public HashSet<String> nativeFileExt = new HashSet<String>(Arrays.asList("dll", "so", "dylib", "jnilib"));
+	
 	private ServiceData serviceData = new ServiceData();
 	private ServiceData serviceDataFromRepo = new ServiceData();
 	private final List<String> errors;
@@ -675,11 +681,6 @@ public class ServiceInfo implements Serializable {
 				report = Ivy2.getReport();
 				artifacts = report.getAllArtifactsReports();
 
-				/*
-				 * if (report.hasChanged()) { log.info(String.format(
-				 * "local system has changed with %d download",
-				 * report.getDownloadSize())); }
-				 */
 				if (report.hasError()) {
 					ret = false;
 					log.error("Ivy resolve error");
@@ -703,8 +704,18 @@ public class ServiceInfo implements Serializable {
 				for (int j = 0; j < artifacts.length; ++j) {
 					artifact = artifacts[j];
 					if (artifact.getExt().equals("zip")) {
-						filename = String.format("libraries%1$szip%1$s%2$s.zip", File.separator, artifact.getName());
+						filename = String.format("libraries/zip/%s.zip", artifact.getName());
 						Zip.unzip(filename, "./");
+					}
+					
+					if (nativeFileExt.contains(artifact.getExt().toLowerCase())) {
+						File f = artifact.getLocalFile();
+						String abpath = String.format("%s", f.getAbsolutePath());
+						String source = String.format("%s",artifact.getName());
+						String target = String.format("%s",artifact.getName());
+						
+						//log.info("cp %")
+						//Files.move(source, "libraries/native", StandardCopyOption.REPLACE_EXISTING);
 					}
 					log.info("artifacts {}",artifacts[j]);
 				}

@@ -950,7 +950,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		convertRealWorldToProjective(joint1Pos, joint1Pos2d);
 		convertRealWorldToProjective(joint2Pos, joint2Pos2d);
 
-		_parent.line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y);
+		_parent.line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y, userId, joint1, joint2);
 	}
 
 	/**
@@ -967,6 +967,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	public float getJointPositionSkeleton(int userId, int joint, PVector jointPos) {
 		float ret = getJointPositionSkeleton(userId, joint, _tempVec);
 		jointPos.set(_tempVec);
+		jointPos.quality = ret;
 		return ret;
 	}
 

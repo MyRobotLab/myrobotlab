@@ -28,6 +28,7 @@ package org.myrobotlab.image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +84,7 @@ public class SerializableImage implements Serializable {
 		this.image = image;
 		this.timestamp = System.currentTimeMillis();
 	}
-	
+
 	public SerializableImage(BufferedImage image, String source, int frameIndex) {
 		this.source = source;
 		this.image = image;
@@ -175,8 +176,31 @@ public class SerializableImage implements Serializable {
 	public long getTimestamp() {
 		return timestamp;
 	}
+	
+	public void writeToFile(String filename){
+		writeToFile(image, filename);
+	}
+	
+
+	public static void writeToFile(BufferedImage img, String filename) {
+		try {
+			FileOutputStream out = new FileOutputStream(new File(filename));
+			String extension = null;
+			int i = filename.lastIndexOf('.');
+			if (i > 0) {
+				extension = filename.substring(i + 1);
+			}
+
+			if (extension != null) {
+				ImageIO.write(img, extension, new MemoryCacheImageOutputStream(out));
+			}
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+	}
 
 	// FIXME ??? use OpenCV cvEncode ???
+	// FIXME !! PNG default ???
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		ImageIO.write(image, "jpg", new MemoryCacheImageOutputStream(out));
 		Logging.logTime("writeObject");

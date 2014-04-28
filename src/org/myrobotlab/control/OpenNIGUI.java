@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.openni.OpenNIData;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.OpenNI;
 
@@ -84,23 +85,35 @@ public class OpenNIGUI extends ServiceGUI implements ActionListener {
 		// TODO - update state
 	}
 
+	
 	public void publishFrame(SerializableImage si) {
 		video.displayFrame(si);
 	}
 
+	SerializableImage source = new SerializableImage(null, "kinect");
+	
+	public void publishOpenNIData(OpenNIData data) {
+		if (data.rbgPImage != null) {
+			source.setImage(data.rbgPImage.getImage());
+		} else {
+			source.setImage(data.depth);
+		}
+		video.displayFrame(source);
+	}
+
+	
 	@Override
 	public void attachGUI() {
 		// subscribe & ask for the initial state of the service
 		subscribe("publishState", "getState", OpenNI.class);
-		// subscribe("publishDisplay", "publishDisplay", ShortBuffer.class);
-		subscribe("publishFrame", "publishFrame", SerializableImage.class);
+		subscribe("publishOpenNIData", "publishOpenNIData");
 		myService.send(boundServiceName, "publishState");
-
 	}
 
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", OpenNI.class);
+		unsubscribe("publishOpenNIData", "publishOpenNIData");
 	}
 
 	@Override
