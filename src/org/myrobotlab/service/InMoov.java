@@ -9,6 +9,7 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.openni.OpenNIData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -230,8 +231,11 @@ public class InMoov extends Service {
 
 	boolean copyGesture = false;
 	boolean firstSkeleton = true;
+	boolean saveSkeletonFrame = false;
 
-	public Skeleton getSkeleton(Skeleton skeleton) {
+	public void getSkeleton(OpenNIData data) {
+		
+		Skeleton skeleton = data.skeleton;
 
 		if (firstSkeleton) {
 			speakBlocking("i see you");
@@ -250,8 +254,11 @@ public class InMoov extends Service {
 				rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ());
 			}
 		}
-
-		return skeleton;
+		
+		// TODO - route data appropriately
+		// rgb & depth image to OpenCV 
+		// servos & depth image to gui (entire InMoov + references to servos)
+		
 	}
 
 	public boolean copyGesture(boolean b) {
@@ -260,7 +267,6 @@ public class InMoov extends Service {
 				openni = startOpenNI();
 			}
 			speakBlocking("copying gestures");
-			openni.initContext();
 			openni.startUserTracking();
 		} else {
 			speakBlocking("stop copying gestures");
@@ -1200,6 +1206,7 @@ public class InMoov extends Service {
 
 		return true;
 	}
+	
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();

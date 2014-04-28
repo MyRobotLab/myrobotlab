@@ -4,6 +4,12 @@ import org.simpleframework.xml.Element;
 
 public class Skeleton {
 	
+	public int frameNumber;
+	public int userId;
+	
+	@Element
+	public PVector centerOfMass = new PVector();
+	
 	@Element
 	public PVector head = new PVector();
 	

@@ -10,7 +10,8 @@ import java.awt.*;
  */
 public class IKEngine extends Canvas{
 
-  /**
+	private static final long serialVersionUID = 1L;
+/**
    * Used to synchronize the methods w/ the animating thread
    */
   boolean stopped, safeToChangeInternalState;

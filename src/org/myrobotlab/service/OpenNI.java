@@ -15,6 +15,7 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.openni.OpenNIData;
 import org.myrobotlab.openni.PImage;
 import org.myrobotlab.openni.PVector;
 import org.myrobotlab.openni.Skeleton;
@@ -52,6 +53,18 @@ public class OpenNI extends Service // implements
 	public static final float PI = (float) Math.PI;
 	public static final float RAD_TO_DEG = 180.0f / PI;
 
+	// min max vars
+	/*
+	float leftShoulderAngleYZmin = 361;
+	float leftShoulderAngleYZmax = -361;
+
+	float leftShoulderAngleXYmin = 361;
+	float leftShoulderAngleXYmax = -361;
+
+	float leftElbowAngleXYmin = 361;
+	float leftElbowAngleXYmax = -361;
+	*/
+
 	public final static Logger log = LoggerFactory.getLogger(OpenNI.class);
 	SimpleOpenNI context;
 
@@ -59,7 +72,7 @@ public class OpenNI extends Service // implements
 
 	Graphics2D g2d;
 
-	int cnt = 0;
+	int frameNumber = 0;
 
 	int handVecListSize = 20;
 	HashMap<Integer, ArrayList<PVector>> handPathList = new HashMap<Integer, ArrayList<PVector>>();
@@ -70,13 +83,19 @@ public class OpenNI extends Service // implements
 	PVector com2d = new PVector();
 
 	BufferedImage frame;
-	
+
+	FileOutputStream csvFile = null;
+	FileOutputStream rubySketchUpFile = null;
+
+	// IMPORTANT - this single skeleton contains mapping information !
 	@Element
 	public Skeleton skeleton = new Skeleton();
 
-	private boolean recordRubySketchUp = false;
 	private boolean initialized = false;
 	transient Worker worker = null;
+
+	private boolean recordSingleFrame = false;
+	private boolean createHeader = true;
 
 	public OpenNI(String n) {
 		super(n);
@@ -84,13 +103,13 @@ public class OpenNI extends Service // implements
 
 	@Override
 	public String getDescription() {
-		return "used as a general template";
+		return "OpenNI Service";
 	}
 
 	@Override
 	public void startService() {
 		super.startService();
-		initContext(); // FIXME - manual or auto call to initContext ?
+		initContext();
 	}
 
 	@Override
@@ -105,7 +124,6 @@ public class OpenNI extends Service // implements
 	public void initContext() {
 
 		if (!initialized) {
-			// String s = SimpleOpenNI.getLibraryPathWin();
 			SimpleOpenNI.start();
 
 			SimpleOpenNI.initContext();
@@ -121,21 +139,6 @@ public class OpenNI extends Service // implements
 			initialized = true;
 		}
 
-	}
-
-	/**
-	 * FIXME - input needs to be OpenCVData THIS IS NOT USED ! VideoProcessor
-	 * NOW DOES OpenCVData - this will return NULL REMOVE !!
-	 */
-	public final SerializableImage publishDisplay(SerializableImage img) {
-		// lastDisplay = new SerializableImage(img, source);
-		// return lastDisplay;
-		return img;
-	}
-
-	public SerializableImage publishFrame(SerializableImage frame) {
-		log.debug("publishing frame");
-		return frame;
 	}
 
 	public void add(VideoSink vs) {
@@ -161,8 +164,9 @@ public class OpenNI extends Service // implements
 		}
 
 		// enable depthMap generation
-		context.enableDepth();
-		// context.en
+		enableDepth(true);
+		// enableRGB(true);
+		// enableIR(true);
 
 		// enable skeleton generation for all joints
 		context.enableUser();
@@ -173,6 +177,30 @@ public class OpenNI extends Service // implements
 		}
 		worker = new Worker("user");
 		worker.start();
+	}
+
+	public boolean enableDepth(boolean b) {
+		enableDepth = b;
+		if (enableDepth) {
+			context.enableDepth();
+		}
+		return b;
+	}
+
+	public boolean enableRGB(boolean b) {
+		enableRGB = b;
+		if (enableRGB) {
+			context.enableRGB();
+		}
+		return b;
+	}
+
+	public boolean enableIR(boolean b) {
+		enableIR = b;
+		if (enableIR) {
+			context.enableIR();
+		}
+		return b;
 	}
 
 	public void startHandTracking() {
@@ -223,7 +251,7 @@ public class OpenNI extends Service // implements
 				isRunning = true;
 				while (isRunning) {
 					if ("user".equals(type)) {
-						drawUser();
+						getData();
 					} else if ("hands".equals(type)) {
 						drawHand();
 					} else {
@@ -239,18 +267,36 @@ public class OpenNI extends Service // implements
 		}
 	}
 
-	void drawUser() {
-		// update the cam
+	boolean enableDepth = true;
+	boolean enableRGB = true;
+	boolean enableIR = true;
+
+	void getData() {
+
+		// a new container is used to preserved references in
+		// a multi-threaded environment
+		OpenNIData data = new OpenNIData();
+
+		// update the camera
 		context.update();
+		// FIXME - is PImage a faster data mech to get into OpenCV?
+		data.depthPImage = context.depthImage();
+		if (enableRGB) {
+			data.rbgPImage = context.rgbImage();
+		}
 
-		// draw depthImageMap
-		// image(context.depthImage(),0,0);
+		// FIXME REMOVE - and just like OpenCV - convert and cache only on a
+		// getBufferedImage !!!
+		data.depth = data.depthPImage.getImage();
+		frame = data.depth;
 
-		// FIXME - THIS IS INCORRECT - DATA CAN BE BROADCAST BUT NO GRAPHICS !
-		PImage p = context.depthImage();
-		frame = p.getImage();
-		++cnt;
+		// can not be new skeleton - as it contains mapping data
+		data.skeleton = skeleton;
 
+		++frameNumber;
+		skeleton.frameNumber = frameNumber;
+
+		// FIXME REMOVE
 		g2d = frame.createGraphics();
 		g2d.setColor(Color.RED);
 
@@ -260,152 +306,103 @@ public class OpenNI extends Service // implements
 			if (context.isTrackingSkeleton(userList[i])) {
 				// stroke(userClr[(userList[i] - 1) % userClr.length]);
 				int userID = userList[i];
-				if (userID == 1){
-					drawSkeleton(userID);
+				if (userID == 1) {
+					extractSkeleton(userID);
 				}
 			}
 
 			// draw the center of mass
 			if (context.getCoM(userList[i], com)) {
 				context.convertRealWorldToProjective(com, com2d);
-				/*
-				 * stroke(100, 255, 0); strokeWeight(1); beginShape(LINES);
-				 * vertex(com2d.x, com2d.y - 5); vertex(com2d.x, com2d.y + 5);
-				 * 
-				 * vertex(com2d.x - 5, com2d.y); vertex(com2d.x + 5, com2d.y);
-				 * endShape();
-				 * 
-				 * 
-				 * fill(0, 255, 100); text(Integer.toString(userList[i]),
-				 * com2d.x, com2d.y);
-				 */
-
+				data.skeleton.centerOfMass = com;
 				Integer.toString(userList[i]);
 			}
 		}
 
-		invoke("publishFrame", new SerializableImage(frame, getName()));
+		invoke("publishOpenNIData", data);
 
 	}
 
-	public boolean recordRubySketchUp(boolean b) {
-		recordRubySketchUp = b;
-		return recordRubySketchUp;
+	// publishing the big kahuna <output>
+	public final OpenNIData publishOpenNIData(OpenNIData data) {
+		return data;
 	}
 
 	public Skeleton publish(Skeleton skeleton) {
 		return skeleton;
 	}
 
-	// draw the skeleton with the selected joints
-	void drawSkeleton(int userId) {
-		
-		// to get the 3d joint data
-		/*
-		 * PVector jointPos = new PVector();
-		 * context.getJointPositionSkeleton(userId
-		 * ,SimpleOpenNI.SKEL_NECK,jointPos); println(jointPos);
-		 */
+	int x1, y1, x2, y2;
 
-		// FIXME - shouldn't have to new it up each frame - is a waste
-		// skeleton = new Skeleton();
+	PVector joint1Pos2d = new PVector();
+	PVector joint2Pos2d = new PVector();
+
+	boolean drawSkeleton = true;
+
+	// FIXME - divide into parts - computer skeleton
+	// FIXME - "draw"/graphics should be in OpenNIGUI !!!
+	// FIXME - remove drawSkeleton
+	// draw the skeleton with the selected joints
+	void extractSkeleton(int userId) {
+
+		skeleton.userId = userId;
 
 		PVector jointPos = new PVector();
 		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_NECK, jointPos);
-		// println(jointPos);
-		// log.info("jointPos skeleton neck {} ", jointPos);
 
 		// 3D matrix 4x4
 		// context.getJointOrientationSkeleton(userId, joint, jointOrientation);
 
 		// ------- skeleton data build begin-------
-		float quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_HEAD, skeleton.head);
-		skeleton.head.quality = quality;
-
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_NECK, skeleton.neck);
-		skeleton.neck.quality = quality;
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_HEAD, skeleton.head);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_NECK, skeleton.neck);
 
 		// left & right arms
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, skeleton.leftShoulder);
-		skeleton.leftShoulder.quality = quality;
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, skeleton.leftElbow);
-		skeleton.leftElbow.quality = quality;
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_HAND, skeleton.leftHand);
-		skeleton.leftHand.quality = quality;
-
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, skeleton.rightShoulder);
-		skeleton.rightShoulder.quality = quality;
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, skeleton.rightElbow);
-		skeleton.rightElbow.quality = quality;
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_HAND, skeleton.rightHand);
-		skeleton.rightHand.quality = quality;
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, skeleton.leftShoulder);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, skeleton.leftElbow);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_HAND, skeleton.leftHand);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, skeleton.rightShoulder);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, skeleton.rightElbow);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_HAND, skeleton.rightHand);
 
 		// torso
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_TORSO, skeleton.torso);
-		skeleton.torso.quality = quality;
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_TORSO, skeleton.torso);
 
 		// right and left leg
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_HIP, skeleton.leftHip);
-		skeleton.leftHip.quality = quality;
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_KNEE, skeleton.leftKnee);
-		skeleton.leftKnee.quality = quality;
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_FOOT, skeleton.leftFoot);
-		skeleton.leftFoot.quality = quality;
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_HIP, skeleton.leftHip);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_KNEE, skeleton.leftKnee);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_LEFT_FOOT, skeleton.leftFoot);
 
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_HIP, skeleton.rightHip);
-		skeleton.rightHip.quality = quality;
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, skeleton.rightKnee);
-		skeleton.rightKnee.quality = quality;
-		quality = context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_FOOT, skeleton.rightFoot);
-		skeleton.rightFoot.quality = quality;
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_HIP, skeleton.rightHip);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, skeleton.rightKnee);
+		context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_RIGHT_FOOT, skeleton.rightFoot);
 		// ------- skeleton data build end -------
 
-		// log.info(sb.toString());
-
-		// float quality = getJointPositionSkeleton(userId,
-		// SimpleOpenNI.SKEL_HEAD, joint2Pos);
-
-		context.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
-
-		context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
-		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
-		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
-
-		context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
-		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
-		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
-
-		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
-		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
-
-		context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
-		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
-		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
-
-		context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
-		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
-		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);
-
-		// begin angular decomposition
+		// begin angular decomposition & projections
 
 		/**
-		 * Taken from "Making Things See" a excellent book and I recommend
-		 * buying it http://shop.oreilly.com/product/0636920020684.do
+		 * initially started from "Making Things See" a excellent book and I
+		 * recommend buying it http://shop.oreilly.com/product/0636920020684.do
 		 */
 
 		// reduce our joint vectors to two dimensions
 		PVector rightHandXY = new PVector(skeleton.rightHand.x, skeleton.rightHand.y);
 		PVector rightElbowXY = new PVector(skeleton.rightElbow.x, skeleton.rightElbow.y);
-		PVector rightElbowYZ = new PVector(skeleton.rightElbow.y, skeleton.rightElbow.z);
 		PVector rightShoulderXY = new PVector(skeleton.rightShoulder.x, skeleton.rightShoulder.y);
+
+		PVector rightElbowYZ = new PVector(skeleton.rightElbow.y, skeleton.rightElbow.z);
 		PVector rightShoulderYZ = new PVector(skeleton.rightShoulder.y, skeleton.rightShoulder.z);
+
 		PVector rightHipXY = new PVector(skeleton.rightHip.x, skeleton.rightHip.y);
 
+		
 		PVector leftHandXY = new PVector(skeleton.leftHand.x, skeleton.leftHand.y);
 		PVector leftElbowXY = new PVector(skeleton.leftElbow.x, skeleton.leftElbow.y);
-		PVector leftElbowYZ = new PVector(skeleton.leftElbow.y, skeleton.leftElbow.z);
 		PVector leftShoulderXY = new PVector(skeleton.leftShoulder.x, skeleton.leftShoulder.y);
+
+		PVector leftElbowYZ = new PVector(skeleton.leftElbow.y, skeleton.leftElbow.z);
 		PVector leftShoulderYZ = new PVector(skeleton.leftShoulder.y, skeleton.leftShoulder.z);
+
 		PVector leftHipXY = new PVector(skeleton.leftHip.x, skeleton.leftHip.y);
 
 		// calculate the axis against which we want to measure our angles
@@ -419,106 +416,271 @@ public class OpenNI extends Service // implements
 
 		// FIXME !! - IS THIS CORRECT - CAN XY JUST BE RE-USED - SINCE THE
 		// NORMAL OF THE BODY IS IN THE Z ?
-		PVector leftTorsoOrientationYZ = PVector.sub(leftShoulderXY, leftHipXY);
-		PVector rightTorsoOrientationYZ = PVector.sub(rightShoulderXY, rightHipXY);
-		
+		//PVector leftTorsoOrientationYZ = PVector.sub(leftShoulderXY, leftHipXY);
+		//PVector rightTorsoOrientationYZ = PVector.sub(rightShoulderXY, rightHipXY);
+
 		// calculate the angles between our joints
 		float rightShoulderAngleXY = angleOf(rightElbowXY, rightShoulderXY, rightTorsoOrientationXY);
-		float rightShoulderAngleYZ = angleOf(rightElbowYZ, rightShoulderYZ, rightTorsoOrientationYZ);
 		float rightElbowAngleXY = angleOf(rightHandXY, rightElbowXY, rightUpperArmOrientationXY);
 
 		float leftShoulderAngleXY = angleOf(leftElbowXY, leftShoulderXY, leftTorsoOrientationXY);
-		float leftShoulderAngleYZ = angleOf(leftElbowYZ, leftShoulderYZ, leftTorsoOrientationYZ);
 		float leftElbowAngleXY = angleOf(leftHandXY, leftElbowXY, leftUpperArmOrientationXY);
 
+		float rightShoulderAngleYZ = angleOf(rightElbowYZ, rightShoulderYZ, rightTorsoOrientationXY);
+		float leftShoulderAngleYZ = angleOf(leftElbowYZ, leftShoulderYZ, leftTorsoOrientationXY);
+		
 		skeleton.rightShoulder.setAngleXY(rightShoulderAngleXY);
 		skeleton.rightElbow.setAngleXY(rightElbowAngleXY);
 		skeleton.rightShoulder.setAngleYZ(rightShoulderAngleYZ);
-		
+
 		skeleton.leftShoulder.setAngleXY(leftShoulderAngleXY);
 		skeleton.leftElbow.setAngleXY(leftElbowAngleXY);
 		skeleton.leftShoulder.setAngleYZ(leftShoulderAngleYZ);
 
-		g2d.drawString(String.format("shoulder %d %d", Math.round(leftShoulderAngleYZ), Math.round(rightShoulderAngleYZ)), 20, 30);
-		g2d.drawString(String.format("omoplate %d %d", Math.round(rightShoulderAngleXY), Math.round(leftShoulderAngleXY)), 20, 40);
-		g2d.drawString(String.format("bicep %d %d", Math.round(rightElbowAngleXY), Math.round(leftElbowAngleXY)), 20, 50);
 		
-		invoke("publish", skeleton);
+		/*
+		leftShoulderAngleYZmin = (leftShoulderAngleYZ < leftShoulderAngleYZmin) ? leftShoulderAngleYZ : leftShoulderAngleYZmin;
+		leftShoulderAngleYZmax = (leftShoulderAngleYZ > leftShoulderAngleYZmax) ? leftShoulderAngleYZ : leftShoulderAngleYZmax;
 
-		if (recordRubySketchUp) {
-			addRubySketchUpFrame(skeleton);
+		leftShoulderAngleXYmin = (leftShoulderAngleXY < leftShoulderAngleXYmin) ? leftShoulderAngleXY : leftShoulderAngleXYmin;
+		leftShoulderAngleXYmax = (leftShoulderAngleXY > leftShoulderAngleXYmax) ? leftShoulderAngleXY : leftShoulderAngleXYmax;
+
+		leftElbowAngleXYmin = (leftElbowAngleXY < leftElbowAngleXYmin) ? leftElbowAngleXY : leftElbowAngleXYmin;
+		leftElbowAngleXYmax = (leftElbowAngleXY > leftElbowAngleXYmax) ? leftElbowAngleXY : leftElbowAngleXYmax;
+		*/
+
+		/*
+		 * g2d.drawString(String.format("shoulder min %d max %d %d %d",
+		 * Math.round(rightShoulderAngleYZ), Math.round(leftShoulderAngleYZ)),
+		 * 20, 30); g2d.drawString(String.format("omoplate min %d max %d %d %d",
+		 * Math.round(rightShoulderAngleXY), Math.round(leftShoulderAngleXY)),
+		 * 20, 40); g2d.drawString(String.format("bicep min %d max %d %d %d",
+		 * Math.round(rightElbowAngleXY), Math.round(leftElbowAngleXY)), 20,
+		 * 50);
+		 */
+		/*
+		 * g2d.drawString(String.format("shoulder min %d max %d cur %d",
+		 * Math.round(leftShoulderAngleYZmin),
+		 * Math.round(leftShoulderAngleYZmax), Math.round(leftShoulderAngleYZ)),
+		 * 20, 30);
+		 * g2d.drawString(String.format("omoplate min %d max %d cur %d",
+		 * Math.round(leftShoulderAngleXYmin),
+		 * Math.round(leftShoulderAngleXYmax), Math.round(leftShoulderAngleXY)),
+		 * 20, 40); g2d.drawString(String.format("bicep min %d max %d cur %d",
+		 * Math.round(leftElbowAngleXYmin), Math.round(leftElbowAngleXYmax),
+		 * Math.round(leftElbowAngleXY)), 20, 50);
+		 */
+
+		// invoke("publish", skeleton);
+		
+
+		//context.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
+
+		//context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
+		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
+		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
+
+		//context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
+		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
+		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
+
+		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
+		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
+
+		context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
+		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
+		context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
+
+		context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
+		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
+		context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);
+		
+		if (drawSkeleton) {
+
+			//--------------------------------------------------------------
+			context.convertRealWorldToProjective(skeleton.head, joint1Pos2d);
+			context.convertRealWorldToProjective(skeleton.neck, joint2Pos2d);
+			x1 = Math.round(joint1Pos2d.x); y1 = Math.round(joint1Pos2d.y);
+			x2 = Math.round(joint2Pos2d.x); y2 = Math.round(joint2Pos2d.y);
+
+			g2d.drawString("head", x1, y1);
+			g2d.drawString("neck", x2, y2);
+			g2d.drawLine(x1, y1, x2, y2);
+
+			line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y);
+			//--------------------------------------------------------------
+			context.convertRealWorldToProjective(skeleton.neck, joint1Pos2d);
+			context.convertRealWorldToProjective(skeleton.leftShoulder, joint2Pos2d);
+			x1 = Math.round(joint1Pos2d.x); y1 = Math.round(joint1Pos2d.y);
+			x2 = Math.round(joint2Pos2d.x); y2 = Math.round(joint2Pos2d.y);
+
+			g2d.drawString(String.format("lsh xy %d yz %d", Math.round(skeleton.leftShoulder.getAngleXY()), Math.round(skeleton.leftShoulder.getAngleYZ())), x2, y2);
+			g2d.drawLine(x1, y1, x2, y2);
+
+			line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y);
+			//--------------------------------------------------------------
+			context.convertRealWorldToProjective(skeleton.neck, joint1Pos2d);
+			context.convertRealWorldToProjective(skeleton.rightShoulder, joint2Pos2d);
+			x1 = Math.round(joint1Pos2d.x); y1 = Math.round(joint1Pos2d.y);
+			x2 = Math.round(joint2Pos2d.x); y2 = Math.round(joint2Pos2d.y);
+
+			g2d.drawString(String.format("rsh xy %d yz %d", Math.round(skeleton.rightShoulder.getAngleXY()), Math.round(skeleton.rightShoulder.getAngleYZ())), x2, y2);
+			g2d.drawLine(x1, y1, x2, y2);
+
+			line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y);
+			
+			//--------------------------------------------------------------
+			context.convertRealWorldToProjective(skeleton.rightShoulder, joint1Pos2d);
+			context.convertRealWorldToProjective(skeleton.rightElbow, joint2Pos2d);
+			x1 = Math.round(joint1Pos2d.x); y1 = Math.round(joint1Pos2d.y);
+			x2 = Math.round(joint2Pos2d.x); y2 = Math.round(joint2Pos2d.y);
+
+			g2d.drawString(String.format("re xy %d", Math.round(skeleton.rightElbow.getAngleXY())), x2, y2);
+			g2d.drawLine(x1, y1, x2, y2);
+
+			line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y);
+			
+			//--------------------------------------------------------------
+			context.convertRealWorldToProjective(skeleton.leftShoulder, joint1Pos2d);
+			context.convertRealWorldToProjective(skeleton.leftElbow, joint2Pos2d);
+			x1 = Math.round(joint1Pos2d.x); y1 = Math.round(joint1Pos2d.y);
+			x2 = Math.round(joint2Pos2d.x); y2 = Math.round(joint2Pos2d.y);
+
+			g2d.drawString(String.format("le xy %d", Math.round(skeleton.leftElbow.getAngleXY())), x2, y2);
+			g2d.drawLine(x1, y1, x2, y2);
+
+			line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y);
+			
+			
+		}
+
+
+
+		if (recordSingleFrame) {
+			addCSVDataFrame(skeleton, recordSingleFrame);
+			addRubySketchUpFrame(skeleton, recordSingleFrame);
+			SerializableImage.writeToFile(frame, String.format("skeleton.%d.png", frameNumber));
+			recordSingleFrame = false;
 		}
 
 	}
 
-	FileOutputStream rubySketchUpFile = null;
+	// FIXME - too many methods !!!
+	public String format(PVector v) {
+		return String.format("%d %d %d", Math.round(v.x), Math.round(v.y), Math.round(v.z));
+	}
 
-	public void openRubySketchUpFile() {
+	public void addCSVDataFrame(Skeleton skeleton, boolean singleFrame) {
 		try {
-			if (rubySketchUpFile != null) {
-				rubySketchUpFile.close();
+
+			if (csvFile == null) {
+				csvFile = new FileOutputStream(new File(String.format("skeleton.%d.csv", frameNumber)));
 			}
-			String filename = String.format("skeleton_%d.rb", System.currentTimeMillis());
-			rubySketchUpFile = new FileOutputStream(new File(filename));
+
+			StringBuffer sb = new StringBuffer();
+			if (createHeader) {
+				sb.append("frame,user,head,neck,ls,lsxy,lsyz,rs,rsxy,rsyz,le,lexy,leyz,re,rexy,reyz\n");
+			}
+
+			sb.append(frameNumber).append(",");
+			sb.append(skeleton.userId).append(",");
+			sb.append(format(skeleton.head)).append(",");
+			sb.append(format(skeleton.neck)).append(",");
+
+			sb.append(format(skeleton.leftShoulder)).append(",");
+			sb.append(Math.round(skeleton.leftShoulder.getAngleXY())).append(",");
+			sb.append(Math.round(skeleton.leftShoulder.getAngleYZ())).append(",");
+
+			sb.append(format(skeleton.rightShoulder)).append(",");
+			sb.append(Math.round(skeleton.rightShoulder.getAngleXY())).append(",");
+			sb.append(Math.round(skeleton.rightShoulder.getAngleYZ())).append(",");
+
+			sb.append(format(skeleton.leftElbow)).append(",");
+			sb.append(Math.round(skeleton.leftElbow.getAngleXY())).append(",");
+			sb.append(Math.round(skeleton.leftElbow.getAngleYZ())).append(",");
+
+			sb.append(format(skeleton.rightElbow)).append(",");
+			sb.append(Math.round(skeleton.rightElbow.getAngleXY())).append(",");
+			sb.append(Math.round(skeleton.rightElbow.getAngleYZ())).append("\n");
+
+			csvFile.write(sb.toString().getBytes());
+
+			if (singleFrame) {
+				csvFile.close();
+				csvFile = null;
+				// recordCSVData = false;
+				createHeader = true;
+			} else {
+				createHeader = false;
+			}
+
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+
 	}
 
-	public void addRubySketchUpFrame(Skeleton skeleton) {
-		StringBuffer sb = new StringBuffer();
-		sb.append(String.format(String.format("\n#-----------------------frame %d begin----------------------\n", cnt)));
-		sb.append(String.format("head = [%f,%f,%f]\n", skeleton.head.x, skeleton.head.z, skeleton.head.y));
-		sb.append(String.format("neck = [%f,%f,%f]\n", skeleton.neck.x, skeleton.neck.z, skeleton.neck.y));
-
-		sb.append(String.format("leftShoulder = [%f,%f,%f]\n", skeleton.leftShoulder.x, skeleton.leftShoulder.z, skeleton.leftShoulder.y));
-		sb.append(String.format("leftElbow = [%f,%f,%f]\n", skeleton.leftElbow.x, skeleton.leftElbow.z, skeleton.leftElbow.y));
-		sb.append(String.format("leftHand = [%f,%f,%f]\n", skeleton.leftHand.x, skeleton.head.z, skeleton.head.y));
-
-		sb.append(String.format("rightShoulder = [%f,%f,%f]\n", skeleton.rightShoulder.x, skeleton.rightShoulder.z, skeleton.rightShoulder.y));
-		sb.append(String.format("rightElbow = [%f,%f,%f]\n", skeleton.rightElbow.x, skeleton.rightElbow.z, skeleton.rightElbow.y));
-		sb.append(String.format("rightHand = [%f,%f,%f]\n", skeleton.rightHand.x, skeleton.head.z, skeleton.head.y));
-
-		sb.append(String.format("torso = [%f,%f,%f]\n", skeleton.torso.x, skeleton.torso.z, skeleton.torso.y));
-
-		sb.append(String.format("leftHip = [%f,%f,%f]\n", skeleton.leftHip.x, skeleton.leftHip.z, skeleton.leftHip.y));
-		sb.append(String.format("leftKnee = [%f,%f,%f]\n", skeleton.leftKnee.x, skeleton.leftKnee.z, skeleton.leftKnee.y));
-		sb.append(String.format("leftFoot = [%f,%f,%f]\n", skeleton.leftFoot.x, skeleton.leftFoot.z, skeleton.leftFoot.y));
-
-		sb.append(String.format("rightHip = [%f,%f,%f]\n", skeleton.rightHip.x, skeleton.rightHip.z, skeleton.rightHip.y));
-		sb.append(String.format("rightKnee = [%f,%f,%f]\n", skeleton.rightKnee.x, skeleton.rightKnee.z, skeleton.rightKnee.y));
-		sb.append(String.format("rightFoot = [%f,%f,%f]\n", skeleton.rightFoot.x, skeleton.rightFoot.z, skeleton.rightFoot.y));
-
-		sb.append("model = Sketchup.active_model\n");
-		sb.append("model.entities.add_line(head, neck)\n");
-
-		sb.append("model.entities.add_line(neck, leftShoulder)\n");
-		sb.append("model.entities.add_line(leftShoulder, leftElbow)\n");
-		sb.append("model.entities.add_line(leftElbow, leftHand)\n");
-
-		sb.append("model.entities.add_line(neck, rightShoulder)\n");
-		sb.append("model.entities.add_line(rightShoulder, rightElbow)\n");
-		sb.append("model.entities.add_line(rightElbow, rightHand)\n");
-
-		sb.append("model.entities.add_line(torso, leftShoulder)\n");
-		sb.append("model.entities.add_line(torso, rightShoulder)\n");
-
-		sb.append("model.entities.add_line(torso, leftHip)\n");
-		sb.append("model.entities.add_line(leftHip, leftKnee)\n");
-		sb.append("model.entities.add_line(leftKnee, leftFoot)\n");
-
-		sb.append("model.entities.add_line(torso, rightHip)\n");
-		sb.append("model.entities.add_line(rightHip, rightKnee)\n");
-		sb.append("model.entities.add_line(rightKnee, rightFoot)\n");
-
-		sb.append(String.format(String.format("\n#-----------------------frame %d begin----------------------\n", cnt)));
-
-		if (rubySketchUpFile == null) {
-			openRubySketchUpFile();
-		}
-
+	public void addRubySketchUpFrame(Skeleton skeleton, boolean singleFrame) {
 		try {
+			StringBuffer sb = new StringBuffer();
+			sb.append(String.format(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber)));
+			sb.append(String.format("head = [%f,%f,%f]\n", skeleton.head.x, skeleton.head.z, skeleton.head.y));
+			sb.append(String.format("neck = [%f,%f,%f]\n", skeleton.neck.x, skeleton.neck.z, skeleton.neck.y));
+
+			sb.append(String.format("leftShoulder = [%f,%f,%f]\n", skeleton.leftShoulder.x, skeleton.leftShoulder.z, skeleton.leftShoulder.y));
+			sb.append(String.format("leftElbow = [%f,%f,%f]\n", skeleton.leftElbow.x, skeleton.leftElbow.z, skeleton.leftElbow.y));
+			sb.append(String.format("leftHand = [%f,%f,%f]\n", skeleton.leftHand.x, skeleton.leftHand.z, skeleton.leftHand.y));
+
+			sb.append(String.format("rightShoulder = [%f,%f,%f]\n", skeleton.rightShoulder.x, skeleton.rightShoulder.z, skeleton.rightShoulder.y));
+			sb.append(String.format("rightElbow = [%f,%f,%f]\n", skeleton.rightElbow.x, skeleton.rightElbow.z, skeleton.rightElbow.y));
+			sb.append(String.format("rightHand = [%f,%f,%f]\n", skeleton.rightHand.x, skeleton.rightHand.z, skeleton.rightHand.y));
+
+			sb.append(String.format("torso = [%f,%f,%f]\n", skeleton.torso.x, skeleton.torso.z, skeleton.torso.y));
+
+			sb.append(String.format("leftHip = [%f,%f,%f]\n", skeleton.leftHip.x, skeleton.leftHip.z, skeleton.leftHip.y));
+			sb.append(String.format("leftKnee = [%f,%f,%f]\n", skeleton.leftKnee.x, skeleton.leftKnee.z, skeleton.leftKnee.y));
+			sb.append(String.format("leftFoot = [%f,%f,%f]\n", skeleton.leftFoot.x, skeleton.leftFoot.z, skeleton.leftFoot.y));
+
+			sb.append(String.format("rightHip = [%f,%f,%f]\n", skeleton.rightHip.x, skeleton.rightHip.z, skeleton.rightHip.y));
+			sb.append(String.format("rightKnee = [%f,%f,%f]\n", skeleton.rightKnee.x, skeleton.rightKnee.z, skeleton.rightKnee.y));
+			sb.append(String.format("rightFoot = [%f,%f,%f]\n", skeleton.rightFoot.x, skeleton.rightFoot.z, skeleton.rightFoot.y));
+
+			sb.append("model = Sketchup.active_model\n");
+			sb.append("model.entities.add_line(head, neck)\n");
+
+			sb.append("model.entities.add_line(neck, leftShoulder)\n");
+			sb.append("model.entities.add_line(leftShoulder, leftElbow)\n");
+			sb.append("model.entities.add_line(leftElbow, leftHand)\n");
+
+			sb.append("model.entities.add_line(neck, rightShoulder)\n");
+			sb.append("model.entities.add_line(rightShoulder, rightElbow)\n");
+			sb.append("model.entities.add_line(rightElbow, rightHand)\n");
+
+			sb.append("model.entities.add_line(torso, leftShoulder)\n");
+			sb.append("model.entities.add_line(torso, rightShoulder)\n");
+
+			sb.append("model.entities.add_line(torso, leftHip)\n");
+			sb.append("model.entities.add_line(leftHip, leftKnee)\n");
+			sb.append("model.entities.add_line(leftKnee, leftFoot)\n");
+
+			sb.append("model.entities.add_line(torso, rightHip)\n");
+			sb.append("model.entities.add_line(rightHip, rightKnee)\n");
+			sb.append("model.entities.add_line(rightKnee, rightFoot)\n");
+
+			sb.append(String.format(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber)));
+
+			if (rubySketchUpFile == null) {
+				String filename = String.format("skeleton.%d.rb", skeleton.frameNumber);
+				rubySketchUpFile = new FileOutputStream(new File(filename));
+			}
+
 			rubySketchUpFile.write(sb.toString().getBytes());
+
+			if (singleFrame) {
+				rubySketchUpFile.close();
+				rubySketchUpFile = null;
+				// recordRubySketchUp = false;
+			}
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
@@ -549,6 +711,7 @@ public class OpenNI extends Service // implements
 	float angleOf(PVector one, PVector two, PVector axis) {
 		PVector limb = PVector.sub(two, one);
 		return degrees(PVector.angleBetween(limb, axis));
+		//return degrees(PVector.aSinangleBetween(limb, axis));
 	}
 
 	static public final float degrees(float radians) {
@@ -605,8 +768,6 @@ public class OpenNI extends Service // implements
 
 			}
 		}
-
-		invoke("publishFrame", new SerializableImage(frame, getName()));
 	}
 
 	// -----------------------------------------------------------------
@@ -673,14 +834,17 @@ public class OpenNI extends Service // implements
 
 	}
 
-	// PApplet
-	public void line(Float x, Float y, Float x2, Float y2) {
-		// TODO Auto-generated method stub
+	public void line(Float x, Float y, Float x2, Float y2, int user, int joint1, int joint2) {
+		if (joint1 == SimpleOpenNI.SKEL_HEAD) {
+			g2d.drawString("head", x, y);
+		}
 		g2d.drawLine(Math.round(x), Math.round(y), Math.round(x2), Math.round(y2));
-		g2d.drawString(String.format("head %d %d %d", Math.round(skeleton.head.x), Math.round(skeleton.head.y), Math.round(skeleton.head.z)), 20, 20);
-		// g2d.drawString(str, Math.round(x), Math.round(y));
 	}
-	
+
+	public void line(Float x, Float y, Float x2, Float y2) {
+		g2d.drawLine(Math.round(x), Math.round(y), Math.round(x2), Math.round(y2));
+	}
+
 	// USER END ---------------------------------------------
 
 	public void registerDispose(SimpleOpenNI simpleOpenNI) {
@@ -703,10 +867,14 @@ public class OpenNI extends Service // implements
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 
-		OpenNI openni = (OpenNI)Runtime.createAndStart("openni", "OpenNI");
+		OpenNI openni = (OpenNI) Runtime.createAndStart("openni", "OpenNI");
 		openni.startUserTracking();
-		openni.recordRubySketchUp(true);
+		openni.recordSingleFrame();
 
 		// openni.startHandTracking();
+	}
+
+	public void recordSingleFrame() {
+		recordSingleFrame = true;
 	}
 }

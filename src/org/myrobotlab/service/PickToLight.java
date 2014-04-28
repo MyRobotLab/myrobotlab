@@ -86,6 +86,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 	int cycleDelayMs = 300;
 	int pollingDelayMs = 150;
 	int blinkDelayMs = 150;
+	
+	String plant;
 
 	// static HashMap<String, Module> modules = new HashMap<String, Module>();
 	ConcurrentHashMap<String, Module> modules = new ConcurrentHashMap<String, Module>();
@@ -100,7 +102,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 	String mode = "kitting";
 	String messageGoodPick = "GOOD";
 
-	final public static String soapRegisterTemplate = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:a=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\" xmlns:tem=\"http://tempuri.org/\"><soapenv:Header/><soapenv:Body><tem:RegisterController><tem:Name>%s</tem:Name><tem:MACAddress>%s</tem:MACAddress><tem:IPAddress>%s</tem:IPAddress><tem:I2CAddresses>%s</tem:I2CAddresses></tem:RegisterController></soapenv:Body></soapenv:Envelope>";
+	final public static String soapRegisterTemplate = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:a=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\" xmlns:tem=\"http://tempuri.org/\"><soapenv:Header/><soapenv:Body><tem:RegisterControllerWithPlant><tem:plant>%s</tem:plant><tem:Name>%s</tem:Name><tem:MACAddress>%s</tem:MACAddress><tem:IPAddress>%s</tem:IPAddress><tem:I2CAddresses>%s</tem:I2CAddresses></tem:RegisterControllerWithPlant></soapenv:Body></soapenv:Envelope>";
 	final public static String soapEventTemplate = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:tem=\"http://tempuri.org/\"><soapenv:Header/><soapenv:Body><tem:PickToLightEvent><tem:MACAddress>%s</tem:MACAddress><tem:IPAddress>%s</tem:IPAddress><tem:EventType>%s</tem:EventType><tem:Data>%s</tem:Data></tem:PickToLightEvent></soapenv:Body></soapenv:Envelope>";
 
 	public final static String ERROR_CONNECTION_REFUSED = "E001";
@@ -292,7 +294,13 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 			log.info("loading mes properties");
 			input = new FileInputStream("/boot/pickToLight.properties");
 			properties.load(input);
-
+			
+			if ("true".equalsIgnoreCase(properties.getProperty("xmpp.enabled"))){
+				XMPP xmpp = (XMPP)Runtime.createAndStart("xmpp", "XMPP");
+				xmpp.connect(properties.getProperty("xmpp.user"), properties.getProperty("xmpp.password"));
+				xmpp.addAuditor("Greg Perry");
+			}
+			
 		} catch (Exception ex) {
 			Logging.logException(ex);
 		} finally {
@@ -305,6 +313,11 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 			}
 		}
 
+		plant = properties.getProperty("mes.plant");
+		log.info(String.format("operating in plant [%s]", plant));
+		if (plant == null){
+			log.error("invalid plant");
+		}
 		return properties;
 	}
 
@@ -514,6 +527,11 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 	public void systemCheck() {
 		// TODO put into state mode - system check
 		// check current mode see if its possible
+		
+		if (properties.getProperty("splashscreen") != null){
+			cycleAll(properties.getProperty("splashscreen"));
+			sleep(100000);
+		}
 
 		blinkAllOn("test");
 		Controller c = getController();
@@ -804,8 +822,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 			sb.append(String.format("<a:string>%s</a:string>", m.getI2CAddress()));
 		}
 
-		String body = String.format(soapRegisterTemplate, "name", controller.getMacAddress(), controller.getIpAddress(), sb.toString());
-		String soapResponse = sendSoap("http://tempuri.org/SoapService/RegisterController", body);
+		String body = String.format(soapRegisterTemplate, plant,"name", controller.getMacAddress(), controller.getIpAddress(), sb.toString());
+		String soapResponse = sendSoap("http://tempuri.org/SoapService/RegisterControllerWithPlant", body);
 
 		SOAPResponse ret = new SOAPResponse();
 
@@ -834,6 +852,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 		String mesUser = properties.getProperty("mes.user");
 		String mesDomain = properties.getProperty("mes.domain");
 		String mesPassword = properties.getProperty("mes.password");
+		
 
 		String ret = "";
 

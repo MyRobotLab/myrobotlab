@@ -63,8 +63,7 @@ public class InverseKinematics extends Service {
 	 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
+		LoggingFactory.getInstance().setLevel(Level.INFO);
 		InverseKinematics inversekinematics = new InverseKinematics("inversekinematics");
 		inversekinematics.setDOF(3);
 		inversekinematics.setStructure(0,100);
