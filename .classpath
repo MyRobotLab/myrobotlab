@@ -81,6 +81,6 @@
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/twitter/3.0.5/twitter4j-examples-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/twitter/3.0.5/twitter4j-media-support-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/twitter/3.0.5/twitter4j-stream-3.0.5.jar"/>
-	<classpathentry kind="lib" path="/repo/com.googlcode.simpleopenni/simpleopenni/1.96/SimpleOpenNI.jar"/>
+	<classpathentry kind="lib" path="/repo/com.googlecode.simpleopenni/simpleopenni/1.96/SimpleOpenNI.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
