@@ -248,14 +248,14 @@
 	<target name="repoExists" depends="repoCheck" if="repo.present">
 		<echo message="git pull" level="info" />
 		<git:git directory="../repo" verbose="true" settingsRef="git.testing">
-			<!-- git:pull uri="https://github.com/MyRobotLab/repo.git" /-->
+			<git:pull uri="https://github.com/MyRobotLab/repo.git" />
 			<!-- <git:checkout branchName="dummyBranch" createBranch="true"/> -->
 		</git:git>
 	</target>
 	<target name="repoDoesNotExists" depends="repoCheck" unless="repo.present">
 		<echo message="git clone" level="info" />
 		<git:git directory="../repo" verbose="true" settingsRef="git.testing">
-			<!--git:clone uri="https://github.com/MyRobotLab/repo.git" /-->
+			<git:clone uri="https://github.com/MyRobotLab/repo.git" />
 			<!-- <git:checkout branchName="dummyBranch" createBranch="true"/> -->
 		</git:git>
 	</target>
