@@ -8,6 +8,11 @@
 	TODO task - publishRelease & publishBleedingEdge
 	TODO test on multiple platforms Linux etc
 	TODO build native code with virtual vms - put in CI system
+	
+	Jenkins Notes - 
+	Jenkins->Manage Jenkins->Manage Plugins->Advanced tab to set proxy - git client 
+	The git client will not follow global .gitconfig directives
+	Jenkins->Node->(master)->configure - configure ANT_HOME JAVA_HOME and PATH
 		
 	tasks
 		
@@ -39,7 +44,7 @@
 	
 	definitions
 	${version} 	= ${rev}.${DSTAMP}.${TSTAMP}
-	${label} 	= "myrobotlab.${version}
+	${tag} 	= "myrobotlab.${version}
 	
 	publishBleedingEdge
 	publishRelease
@@ -47,50 +52,90 @@
 -->
 
 <project name="myrobotlab" default="dist" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
-
-
 	<description>http://myrobotlab.org myrobotlab build file</description>
-
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
-	<property name="build.properties" location="build.properties" />
 
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
 	<property name="src" location="src" />
-	<property name="build.root.dir" location="build" />
-	<property name="dist.root.dir" location="${build.root.dir}/dist" />
+	<property name="build" location="build" />
+	<property name="dist" location="dist" />
+	<property name="report" location="report" />
+	<property name="resource.root" location="${build}/resource/root" />
+	<property name="build.properties" location="build.properties" />
+	<tstamp />
 
-	<property name="scp.userid" value="pi" />
-	<property name="scp.password" value="raspberry" />
+	<!-- ================ init begin ================= -->
+	<target name="init" depends="repoDoesNotExists, repoExists">
 
-	<property name="resource.root" location="../repo/build/resource/root" />
-	<property name="junit.jar" location="../myrobotlab-tests/../lib" />
-	<property name="junit.src" location="../myrobotlab-tests/src" />
-	<property name="thirdParty.build" location="./../build" />
-	<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
+		<!-- FIXME add unit tests if 
+		<property name="junit.jar" location="../myrobotlab-tests/../lib" />
+		<property name="junit.src" location="../myrobotlab-tests/src" />
+		-->
 
-	<!-- mail task properties -->
-	<property name="mail.host" value="smtp.gmail.com" />
-	<property name="mail.port" value="464" />
-	<property name="mail.subjectalert" value="Test build" />
-	<property name="mail.ssl" value="yes" />
-	<property name="mail.username" value="" />
-	<!-- get from local properties file -->
-	<property name="mail.password" value="" />
-	<!-- get from local properties file -->
-	<property name="mail.from" value="build@myrobotlab.org" />
-	<property name="mail.tolist" value="" />
-	<!-- get from local properties file -->
-	<property environment="env" />
+		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
-	<!-- publish release properties -->
+		<!-- mail task properties -->
+		<property name="mail.host" value="smtp.gmail.com" />
+		<property name="mail.port" value="464" />
+		<property name="mail.subjectalert" value="Test build" />
+		<property name="mail.ssl" value="yes" />
+		<property name="mail.username" value="" />
+		<!-- get from local properties file -->
+		<property name="mail.password" value="" />
+		<!-- get from local properties file -->
+		<property name="mail.from" value="build@myrobotlab.org" />
+		<property name="mail.tolist" value="" />
 
+		<property environment="env" />
+
+		<!-- TODO - create a local descriptor for non-build server (dev) builds -->
+		<!-- or will tag's be sufficient -->
+		<!-- TODO - get repo's comment -->
+		<!-- build.number = from main CI
+			tag = build number ? for incremental builds - unless overridden by dev build directive... -->
+
+		<property environment="env" />
+		<echo message="env.BUILD_NUMBER env.BUILD_NUMBER=${env.BUILD_NUMBER}" />
+		<echo message="travis job id - $TRAVIS_JOB_ID" />
+		<!-- <property name="build.number" value="${TRAVIS_JOB_ID}" /> -->
+		<property name="build.number" value="${DSTAMP}.${TSTAMP}" />
+		<property name="tag" value="${DSTAMP}.${TSTAMP}" />
+		<property name="comment" value="${DSTAMP}.${TSTAMP}" />
+
+		<!-- after_success:
+  		- git commit -a -m "Committed by Travis-CI build number: $TRAVIS_JOB_ID" -->
+
+		<property name="tag" value="${build.number}" />
+		<echo message="tag ${tag}" />
+
+
+		<!-- Create the build directory structure used by compile -->
+		<!-- TODO set all subsequent directories or resources with appended tag -->
+		<!-- TODO branch on the tag in release -->
+
+		<property name="temp" location="${dist}/temp/${tag}" />
+		<property name="bin" location="${temp}/bin" />
+		<property name="toZip" location="${temp}/toZip" />
+
+		<!-- create all necessary directories -->
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/archive" />
+		<mkdir dir="${dist}/temp" />
+		<mkdir dir="${dist}/temp/${tag}" />
+		<mkdir dir="${bin}" />
+		<mkdir dir="${toZip}" />
+
+		<!-- load local overrides from build.properties -->
+		<loadproperties srcFile="${build.properties}" />
+	</target>
+	<!-- ================ init end ================= -->
+
+	<!-- FIXME - fixme with ivy -->
 	<path id="myrobotlab.classpath">
-		<!-- taken -->
-
 		<pathelement location="bin" />
 		<pathelement location="../repo/com.centralnexus.joystick/joystick/0.7/Joystick.jar" />
 		<pathelement location="../repo/com.google.gson/gson/1.7.1/gson-1.7.1.jar" />
@@ -174,12 +219,11 @@
 		<pathelement location="../repo/org.simpleframework.xml/xml/2.7/simple-xml-2.7.jar" />
 		<pathelement location="../repo/org.jivesoftware.smack/smack/3.3.0/smack.jar" />
 		<pathelement location="../repo/com.googlecode.simpleopenni/simpleopenni/1.96/SimpleOpenNI.jar" />
-
 	</path>
 
-	<!-- class path for testing -->
+	<!-- class path for testing FIXME - add junit normalize git -->
 	<path id="ant_ext.classpath" description="for ant extentions">
-		<fileset dir="../repo/build/lib">
+		<fileset dir="${build}/lib">
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
@@ -187,13 +231,15 @@
 	<!-- git for ant -->
 	<taskdef uri="antlib:com.rimerosolutions.ant.git" resource="com/rimerosolutions/ant/git/jgit-ant-lib.xml">
 		<classpath>
-			<pathelement location="../repo/build/lib/ant-git-tasks.jar" />
-			<pathelement location="../repo/build/lib/org.eclipse.jgit.ant.jar" />
-			<pathelement location="../repo/build/lib/org.eclipse.jgit.jar" />
-			<pathelement location="../repo/build/lib/jsch.jar" />
+			<pathelement location="${build}/lib/ant-git-tasks.jar" />
+			<pathelement location="${build}/lib/org.eclipse.jgit.ant.jar" />
+			<pathelement location="${build}/lib/org.eclipse.jgit.jar" />
+			<pathelement location="${build}/lib/jsch.jar" />
 		</classpath>
 	</taskdef>
 
+	<!-- FIXME - use ivy correctly ! -->
+	<!-- FIXME - manage proxy for ivy -->
 	<!-- =============== repo begin  =============== -->
 	<!-- repo added if not already cloned - does update to head -->
 	<target name="repoCheck">
@@ -202,91 +248,23 @@
 	<target name="repoExists" depends="repoCheck" if="repo.present">
 		<echo message="git pull" level="info" />
 		<git:git directory="../repo" verbose="true" settingsRef="git.testing">
-			<git:pull uri="https://github.com/MyRobotLab/repo.git"/>
+			<!-- git:pull uri="https://github.com/MyRobotLab/repo.git" /-->
 			<!-- <git:checkout branchName="dummyBranch" createBranch="true"/> -->
 		</git:git>
 	</target>
 	<target name="repoDoesNotExists" depends="repoCheck" unless="repo.present">
 		<echo message="git clone" level="info" />
 		<git:git directory="../repo" verbose="true" settingsRef="git.testing">
-			<git:clone uri="https://github.com/MyRobotLab/repo.git"/>
+			<!--git:clone uri="https://github.com/MyRobotLab/repo.git" /-->
 			<!-- <git:checkout branchName="dummyBranch" createBranch="true"/> -->
 		</git:git>
 	</target>
 	<!-- =============== repo end  =============== -->
 
-
-	<!-- build the appropriate label -->
-	<target name="init" depends="repoDoesNotExists, repoExists">
-		<!-- load file properties -->
-		<loadproperties srcFile="${build.properties}" />
-		<!-- default values set if not set in already in build.properties or "release" -->
-		<condition property="build.type" value="dev">
-			<not>
-				<isset property="build.type" />
-			</not>
-		</condition>
-		<condition property="targetVersion" value="myrobotlab">
-			<not>
-				<isset property="targetVersion" />
-			</not>
-		</condition>
-
-		<echo message="build.type=${build.type}" />
-		<echo message="targetVersion=${targetVersion}" />
-		<property environment="env" />
-		<echo message="env.BUILD_NUMBER=${env.BUILD_NUMBER}" />
-
-		<tstamp />
-
-		<!-- FIXME - push tag into repo - use that tag name -->
-		<!-- windows -->
-		<exec executable="cmd" outputproperty="repository.revision">
-			<arg value="/c" />
-			<!--arg value="git log oneline | wc -l" / -->
-			<arg value="git log -1 --pretty=format:%h -n1 HEAD" />
-		</exec>
-
-		<!-- Linux
-		<exec executable="git" outputproperty="repository.revision">
-		    <arg value="log -1 pretty=format:%H" />
-		</exec>
-		-->
-
-		<property name="version" value="${repository.revision}.${DSTAMP}.${TSTAMP}" />
-
-		<!-- non temp version end -->
-		<!-- temp version -->
-		<!-- property name="version" value="temp" / -->
-
-		<property name="label" value="myrobotlab.${version}" />
-		<echo message="version ${version}" />
-		<echo message="label ${label}" />
-
-		<!-- Create the build directory structure used by compile -->
-		<!-- TODO set all subsequent directories or resources with appended label -->
-		<!-- TODO branch on the label in release -->
-
-		<property name="build" location="${build.root.dir}/${label}" />
-		<property name="dist" location="${dist.root.dir}/${label}" />
-		<property name="report.dir" location="${dist.root.dir}/report" />
-
-		<mkdir dir="${build.root.dir}" />
-		<mkdir dir="${build}" />
-		<mkdir dir="${dist.root.dir}" />
-		<mkdir dir="${dist}" />
-
-		<!-- remember env vars are passed to ant with prefix env.  !!!! jenkins wants gc.upload.userid etc -->
-		<echo message="uid ${env.gc.upload.userid}" />
-		<!-- <echo message="pwd ${env.gc.upload.password}"/> -->
-
-	</target>
-
-
 	<target name="compile" depends="init" description="compile the source ">
 		<echo>compile start</echo>
 		<!-- compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}" debug="true" includeantruntime="false">
+		<javac srcdir="${src}" destdir="${bin}" debug="true" includeantruntime="false">
 			<exclude name="org/myrobotlab/service/Android.java" />
 			<exclude name="org/myrobotlab/service/SEAR.java" />
 			<exclude name="org/myrobotlab/control/SEARGUI.java" />
@@ -295,27 +273,13 @@
 		</javac>
 
 		<!-- copy resource.root -->
-		<copy todir="${build}/resource">
+		<copy todir="${bin}/resource">
 			<fileset dir="${src}/resource" />
 		</copy>
 
-		<echo file="${build}/resource/version.txt">${version}</echo>
+		<echo file="${bin}/resource/version.txt">${tag}</echo>
 
-		<copy todir="${dist}">
-			<fileset dir="${resource.root}" />
-		</copy>
-
-		<copy file="./../repo/serviceData.xml" todir="${dist}/.myrobotlab" />
-
-		<!-- FIXME - use Ivy to get the files there ! filebase or url resolver -->
-		<echo>compile end</echo>
-	</target>
-
-	<target name="dist" depends="compile" description="generate the distribution">
-		<!-- Create the distribution directory -->
-		<mkdir dir="${dist}" />
-
-		<jar jarfile="${dist}/libraries/jar/myrobotlab.jar" basedir="${build}">
+		<jar jarfile="${toZip}/libraries/jar/myrobotlab.jar" basedir="${bin}">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
 				<attribute name="Main-Class" value="org.myrobotlab.service.Runtime" />
@@ -323,31 +287,34 @@
 				<!-- section name="myrobotlab" -->
 				<section name="compile">
 					<attribute name="Specification-Title" value="myrobotlab" />
-					<attribute name="Specification-Version" value="${targetVersion}" />
+					<attribute name="Specification-Version" value="${tag}" />
 					<attribute name="Specification-Vendor" value="myrobotlab" />
 					<attribute name="Implementation-Title" value="myrobotlab" />
-					<attribute name="Implementation-Version" value="${version}" />
+					<attribute name="Implementation-Version" value="${tag}" />
 					<attribute name="Implementation-Vendor" value="myrobotlab.org" />
 				</section>
 			</manifest>
 		</jar>
-		<chmod file="${dist}/*.sh" perm="ugo+rx" />
-		<zip destfile="${dist.root.dir}/${label}.zip" basedir="${dist.root.dir}" includes="${label}/**" />
+
+		<copy todir="${toZip}">
+			<fileset dir="${resource.root}" />
+		</copy>
+
+		<copy file="./../repo/serviceData.xml" todir="${toZip}/.myrobotlab" />
+
+		<!-- FIXME - use Ivy to get the files there ! filebase or url resolver -->
+		<echo>compile end</echo>
 	</target>
 
-	<!-- scp updates begin -->
-	<target name="scp" depends="dist" description="ssh updates to test systems - should be removed - and running system should be scheduled to check for updates">
-		<!--  
-		<input message="Please enter maahr userid:" addproperty="scp.userid" />
-		<input message="Please enter maahr password:" addproperty="scp.password" />
-		-->
-		<scp port="10022" file="${dist}/libraries/jar/myrobotlab.jar" todir="${maahr.scp.userid}:${maahr.scp.password}@orbous.zipto.org:/opt/mrl/libraries/jar" />
+	<target name="dist" depends="compile" description="generate the distribution">
+		<chmod file="${temp}/*.sh" perm="ugo+rx" />
+		<zip destfile="${temp}/myrobotlab.${tag}.zip" basedir="${toZip}" />
 	</target>
 
 	<target name="clean" description="clean up">
-		<!-- Delete the ${build} and ${dist} directory trees -->
+		<!-- Delete the ${build} and ${temp} directory trees -->
 		<delete dir="${build}" />
-		<delete dir="${dist}" />
+		<delete dir="${temp}" />
 	</target>
 
 	<target name="junit" depends="dist">
@@ -360,7 +327,7 @@
 		<!-- compile tests -->
 		<javac srcdir="${junit.src}" destdir="${build}" includeantruntime="false">
 			<classpath>
-				<fileset dir="${dist}/libraries/jar">
+				<fileset dir="${temp}/libraries/jar">
 					<include name="myrobotlab.jar" />
 				</fileset>
 				<path refid="myrobotlab.classpath" />
@@ -369,23 +336,23 @@
 
 		<!-- run tests - Services will need to be loaded if they don't come 
 			 with the default mrl load ie. if they have dependencies on the repo -->
-		<mkdir dir="${report.dir}" />
+		<mkdir dir="${report}" />
 		<junit printsummary="yes" haltonfailure="yes">
 			<!-- haltonfailure to bubble up the failure info to ant & jenkins -->
 			<sysproperty key="java.awt.headless" value="true" />
 			<!-- any junit tests would fail running on jenkins with gui components -->
 			<classpath>
-				<fileset dir="${dist}/libraries/jar">
+				<fileset dir="${temp}/libraries/jar">
 					<include name="**/*.jar" />
 				</fileset>
 				<pathelement path="${junit.jar}/junit-4.4.jar" />
-				<!-- pathelement path="${dist}/${label}/libraries/jar/myrobotlab.jar"/ -->
+				<!-- pathelement path="${temp}/${tag}/libraries/jar/myrobotlab.jar"/ -->
 				<pathelement location="${build}" />
 				<!-- FIXME - I should be able to pick everything up from the libraries include ?!?  -->
 			</classpath>
 			<formatter type="xml" />
 
-			<batchtest fork="yes" todir="${report.dir}">
+			<batchtest fork="yes" todir="${report}">
 				<fileset dir="${junit.src}" includes="**/test/**/*.java" />
 			</batchtest>
 		</junit>
@@ -393,9 +360,9 @@
 	</target>
 
 	<target name="report" depends="junit">
-		<junitreport todir="${report.dir}">
-			<fileset dir="${report.dir}" includes="TEST-*.xml" />
-			<report todir="${report.dir}" format="noframes">
+		<junitreport todir="${report}">
+			<fileset dir="${report}" includes="TEST-*.xml" />
+			<report todir="${report}" format="noframes">
 			</report>
 		</junitreport>
 	</target>
@@ -406,7 +373,7 @@
 			<!--  <to address="${mail.to}"/> -->
 			<message>The nightly build has completed</message>
 			<attachments>
-				<fileset dir="${report.dir}">
+				<fileset dir="${report}">
 					<include name="**/*.html" />
 				</fileset>
 			</attachments>
@@ -426,7 +393,7 @@
 		<input message="Please enter upload userid:" addproperty="gc.upload.userid" />
 		<input message="Please enter upload password:" addproperty="gc.upload.password" />
 		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" name="gcupload" classpathref="ant_ext.classpath" />
-		<gcupload username="${env.gc.upload.userid}" password="${env.gc.upload.password}" projectname="myrobotlab" verbose="true" filename="${dist.root.dir}/${label}/libraries/jar/myrobotlab.jar" targetfilename="myrobotlab.bleeding.edge.${version}.jar" summary="bleeding edge - ${svn.comment}" labels="OpSys-All" />
+		<gcupload username="${env.gc.upload.userid}" password="${env.gc.upload.password}" projectname="myrobotlab" verbose="true" filename="${temp}/${tag}/libraries/jar/myrobotlab.jar" targetfilename="myrobotlab.bleeding.edge.${version}.jar" summary="bleeding edge - ${svn.comment}" labels="OpSys-All" />
 		 -->
 	</target>
 
@@ -436,7 +403,7 @@
 		<input message="Please enter upload userid:" addproperty="gc.upload.userid" />
 		<input message="Please enter upload password:" addproperty="gc.upload.password" />
 		<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" name="gcupload" classpathref="ant_ext.classpath" />
-		<gcupload username="${env.gc.upload.userid}" password="${env.gc.upload.password}" projectname="myrobotlab" verbose="true" filename="${dist.root.dir}/${label}.zip" targetfilename="myrobotlab.${version}.zip" summary="complete package - ${svn.comment}" labels="OpSys-All,Featured" />
+		<gcupload username="${env.gc.upload.userid}" password="${env.gc.upload.password}" projectname="myrobotlab" verbose="true" filename="${temp}/${tag}.zip" targetfilename="myrobotlab.${version}.zip" summary="complete package - ${svn.comment}" labels="OpSys-All,Featured" />
 		 -->
 	</target>
 
