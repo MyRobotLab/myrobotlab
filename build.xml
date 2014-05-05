@@ -1,7 +1,10 @@
 <!--
 	Dependencies:
 	
-	The goal is always to make the build more simple
+	The goal is always to make the build more simple :)
+	Currently the only dependencies come with the git clone in the build directory.
+	Additionaly ant tasks are all Java.
+	TODO - git is assumed - so you probably can get rid of ant git tasks :P
 	
 	TODO - add tests & junit jars to build/lib
 	TODO - use more Ivy to actually manage dependencies
@@ -10,9 +13,9 @@
 	TODO build native code with virtual vms - put in CI system
 	
 	TODO - list use cases - all need tags - v1.0.bn
-			build types [clean | simple | incremental]
+			build types - [clean | simple | incremental]
 			uploads - [ none | release myrobotlab.tag.jar | myrobotlab.tag.zip | both?]
-			build location  [local | jenkins | travis]
+			build location - [local | jenkins | travis]
 			tests [multi platform]
 	
 	TODO - dependencies
@@ -111,7 +114,7 @@
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
 		<property name="build.number" value="${env.BUILD_NUMBER}" />
 		<property name="tag" value="1.0.${build.number}" />
-		<echo messag="tag ${tag}" />
+		<echo message="tag ${tag}" />
 		<property name="comment" value="${DSTAMP}.${TSTAMP}" />
 
 		<!-- http://larrycai.wordpress.com/2013/02/22/publish-the-artifacts-inside-travis-ci-to-github/ -->
