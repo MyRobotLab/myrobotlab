@@ -178,4 +178,11 @@ public class Email {
 		}
 	}
 
+	public void sendEmail(String[] to, String subject, String body) throws AddressException, MessagingException {
+		for (int i = 0; i < to.length; ++i){
+			sendEmail(to[i], subject, body);
+		}
+		
+	}
+
 }
