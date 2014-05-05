@@ -3,13 +3,22 @@
 	
 	The goal is always to make the build more simple
 	
-	TODO - incremental
-	TODO - jenkins - travis - local
+	TODO - add tests & junit jars to build/lib
 	TODO - use more Ivy to actually manage dependencies
 	TODO use Ivy to place "integration" libraries into build directory for GUIService & Service
-	TODO task - publishRelease & publishBleedingEdge
 	TODO test on multiple platforms Linux etc
 	TODO build native code with virtual vms - put in CI system
+	
+	TODO - list use cases - all need tags - v1.0.bn
+			build types [clean | simple | incremental]
+			uploads - [ none | release myrobotlab.tag.jar | myrobotlab.tag.zip | both?]
+			build location  [local | jenkins | travis]
+			tests [multi platform]
+	
+	TODO - dependencies
+			build - java 1.7
+			dist - git token environment variable
+	
 	
 	Jenkins Notes - 
 	Jenkins->Manage Jenkins->Manage Plugins->Advanced tab to set proxy - git client 
@@ -21,26 +30,11 @@
 	init
 	compile
 	dist
-	scp.maahr - deprecate
 	clean
 	junit
 	report
 	mail
 	javadoc
-	publishBleedingEdge
-	publishRelease
-	
-	References:
-	http://imwill.com/svntask-examples-for-apache-ant/#.URQiPKXAfzw
-	http://onjava.com/pub/a/onjava/2003/12/17/ant_bestpractices.html
-	http://stackoverflow.com/questions/4257869/java-project-layout-best-practices-for-ant-based-builds
-	http://www.qasimrasheed.com/post.cfm/eclipse-configure-ant-home
-	http://java.dzone.com/articles/how-use-svn-tasks-with-ant
-	http://stackoverflow.com/questions/1727616/custom-junit-report
-	http://ant.1045680.n5.nabble.com/Mail-task-with-mail-jar-amp-activation-jar-out-of-lib-folder-td3347501.html 
-	http://enitsys.sourceforge.net/ant-classloadertask/
-	http://www.shinylight.com/2009/10/03/ant-script-to-deploy/
-	
 	publishBleedingEdge
 	publishRelease
 	
@@ -52,6 +46,8 @@
 	publishRelease
 	
 	public release JSON data - https://api.github.com/repos/MyRobotLab/myrobotlab/releases
+	
+	References:
 	
 -->
 
@@ -82,6 +78,11 @@
 
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
+		<!-- bummer - a lot of work to get jgit working - but comments may not be enabled
+		<git:git directory="." verbose="true" settingsRef="git.testing">
+			<git:log uri="https://github.com/MyRobotLab/repo.git" />
+		</git:git -->
+
 		<!-- mail task properties -->
 		<property name="mail.host" value="smtp.gmail.com" />
 		<property name="mail.port" value="464" />
@@ -103,16 +104,19 @@
 			tag = build number ? for incremental builds - unless overridden by dev build directive... -->
 
 		<property environment="env" />
+		<!-- TODO .. resolve Travis vs Jenkins by getting build number from http://myrobotlab.org/getBuildNumber.php db identity -->
 		<echo message="env.BUILD_NUMBER env.BUILD_NUMBER=${env.BUILD_NUMBER}" />
 		<echo message="travis job id - $TRAVIS_JOB_ID" />
 		<!-- <property name="build.number" value="${TRAVIS_JOB_ID}" /> -->
-		<property name="build.number" value="${DSTAMP}.${TSTAMP}" />
-		<property name="tag" value="${DSTAMP}.${TSTAMP}" />
+		<echo message="date time ${DSTAMP}.${TSTAMP}" />
+		<property name="build.number" value="${env.BUILD_NUMBER}" />
+		<property name="tag" value="1.0.${build.number}" />
+		<echo messag="tag ${tag}" />
 		<property name="comment" value="${DSTAMP}.${TSTAMP}" />
-		
+
 		<!-- http://larrycai.wordpress.com/2013/02/22/publish-the-artifacts-inside-travis-ci-to-github/ -->
 		<property name="github.token" value="${env.GITHUB_TOKEN}" />
-		<echo message="github.token ${env.GITHUB_TOKEN}" />
+		<!-- echo message="github.token ${env.GITHUB_TOKEN}" / -->
 
 		<!-- after_success:
   		- git commit -a -m "Committed by Travis-CI build number: $TRAVIS_JOB_ID" 
@@ -339,11 +343,11 @@
 		</http>
 		<echo message="${release.response}" />
 	</target>
-	
+
 	<taskdef resource="net/sf/antcontrib/antlib.xml">
-	     <classpath>
-	     	<pathelement location="${build}/lib/ant-contrib-1.0b3.jar" />
-	     </classpath>
+		<classpath>
+			<pathelement location="${build}/lib/ant-contrib-1.0b3.jar" />
+		</classpath>
 	</taskdef>
 
 	<target name="getAssetsURL" depends="createGitHubRelease">
