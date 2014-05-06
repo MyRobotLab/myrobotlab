@@ -71,33 +71,47 @@
 
 <project name="myrobotlab" default="uploadAssets" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
 	<description>http://myrobotlab.org myrobotlab build file</description>
-	
-	<macrodef name = "git">
-	    <attribute name = "command" />
-	    <attribute name = "dir" default = "" />
-	    <element name = "args" optional = "true" />
-	    <sequential>
-	        <echo message = "git @{command}" />
-	        <exec executable = "git" dir = "@{dir}">
-	            <arg value = "@{command}" />
-	            <args/>
-	        </exec>
-	    </sequential>
+
+	<macrodef name="git">
+		<attribute name="command" />
+		<attribute name="dir" default="" />
+		<element name="args" optional="true" />
+		<sequential>
+			<echo message="git @{command}" />
+			<exec executable="git" dir="@{dir}">
+				<arg value="@{command}" />
+				<args />
+			</exec>
+		</sequential>
 	</macrodef>
-	<macrodef name = "git-clone-pull">
-	    <attribute name = "repository" />
-	    <attribute name = "dest" />
-	    <sequential>
-	        <git command = "clone">
-	            <args>
-	                <arg value = "@{repository}" />
-	                <arg value = "@{dest}" />
-	            </args>
-	        </git>
-	        <git command = "pull" dir = "@{dest}" />
-	    </sequential>
+	<macrodef name="git-clone-pull">
+		<attribute name="repository" />
+		<attribute name="dest" />
+		<sequential>
+			<git command="clone">
+				<args>
+					<arg value="@{repository}" />
+					<arg value="@{dest}" />
+				</args>
+			</git>
+			<git command="pull" dir="@{dest}" />
+		</sequential>
 	</macrodef>
-	
+
+	<exec executable="git" outputproperty="BUILD_NUMBER">
+		<arg value="describe" />
+		<arg value="--match" />
+		<arg value="build" />
+		<redirector>
+			<outputfilterchain>
+				<tokenfilter>
+					<replaceregex pattern="^[^-]+-" replace="" />
+					<replaceregex pattern="-.+$" replace="" />
+				</tokenfilter>
+			</outputfilterchain>
+		</redirector>
+	</exec>
+
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
@@ -155,7 +169,8 @@
 		<!-- <property name="build.number" value="${TRAVIS_JOB_ID}" /> -->
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
 		<property name="build.number" value="${env.BUILD_NUMBER}" />
-		<property name="tag" value="1.0.${build.number}" />
+		<!-- <property name="tag" value="1.0.${build.number}" /> -->
+		<property name="tag" value="1.0.${BUILD_NUMBER}" />
 		<echo message="tag ${tag}" />
 		<property name="comment" value="${DSTAMP}.${TSTAMP}" />
 
@@ -177,7 +192,7 @@
 		<property name="temp" location="${dist}/temp/${tag}" />
 		<property name="bin" location="${temp}/bin" />
 		<property name="toZip" location="${temp}/toZip" />
-		
+
 
 		<!-- create all necessary directories -->
 		<mkdir dir="${dist}" />
@@ -304,14 +319,14 @@
 		<available file="../repo" property="repo.present" />
 	</target>
 	<target name="repoExists" depends="repoCheck" if="repo.present">
-		<git command = "pull" dir = "../repo" />	
+		<git command="pull" dir="../repo" />
 	</target>
 	<target name="repoDoesNotExists" depends="repoCheck" unless="repo.present">
-		<git command = "clone">
-		    <args>
-		        <arg value = "https://github.com/MyRobotLab/repo.git" />
-		        <arg value = "../repo" />
-		    </args>
+		<git command="clone">
+			<args>
+				<arg value="https://github.com/MyRobotLab/repo.git" />
+				<arg value="../repo" />
+			</args>
 		</git>
 	</target>
 	<!-- =============== repo end  =============== -->
