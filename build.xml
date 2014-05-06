@@ -13,8 +13,10 @@
 	TODO build native code with virtual vms - put in CI system
 	
 	TODO - list use cases - all need tags - v1.0.bn
+			use cases - (local only - no connectivity | post bleeding edge jar | post release.zip)
+			connectivity - dependencies (none all local | myrobotlab.org/buildnumber.php | github | proxy)
 			build types - [clean | simple | incremental]
-			uploads - [ none | release myrobotlab.tag.jar | myrobotlab.tag.zip | both?]
+			uploads - push release - [ none | release myrobotlab.tag.jar | myrobotlab.tag.zip | both? | (local only)]
 			build location - [local | jenkins | travis]
 			tests [multi platform]
 	
@@ -48,7 +50,16 @@
 	publishBleedingEdge
 	publishRelease
 	
-	public release JSON data - https://api.github.com/repos/MyRobotLab/myrobotlab/releases
+	JSON Urls
+	https://api.github.com/repos/MyRobotLab/myrobotlab
+	https://api.github.com/repos/MyRobotLab/myrobotlab/releases
+	https://api.github.com/repos/MyRobotLab/myrobotlab/contents/
+	https://api.github.com/repos/MyRobotLab/myrobotlab/git/trees/:sha
+	
+	repo
+	https://api.github.com/repos/MyRobotLab/repo
+	https://api.github.com/repos/MyRobotLab/repo/contents/:org/:module/:version
+	https://api.github.com/repos/MyRobotLab/repo/contents/com.google.gson/gson
 	
 	References:
 	
@@ -56,6 +67,33 @@
 
 <project name="myrobotlab" default="uploadAssets" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
 	<description>http://myrobotlab.org myrobotlab build file</description>
+	
+	<macrodef name = "git">
+	    <attribute name = "command" />
+	    <attribute name = "dir" default = "" />
+	    <element name = "args" optional = "true" />
+	    <sequential>
+	        <echo message = "git @{command}" />
+	        <exec executable = "git" dir = "@{dir}">
+	            <arg value = "@{command}" />
+	            <args/>
+	        </exec>
+	    </sequential>
+	</macrodef>
+	<macrodef name = "git-clone-pull">
+	    <attribute name = "repository" />
+	    <attribute name = "dest" />
+	    <sequential>
+	        <git command = "clone">
+	            <args>
+	                <arg value = "@{repository}" />
+	                <arg value = "@{dest}" />
+	            </args>
+	        </git>
+	        <git command = "pull" dir = "@{dest}" />
+	    </sequential>
+	</macrodef>
+	
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
@@ -262,17 +300,25 @@
 	</target>
 	<target name="repoExists" depends="repoCheck" if="repo.present">
 		<echo message="git pull" level="info" />
-		<git:git directory="../repo" verbose="true" settingsRef="git.testing">
-			<git:pull uri="https://github.com/MyRobotLab/repo.git" />
-			<!-- <git:checkout branchName="dummyBranch" createBranch="true"/> -->
-		</git:git>
+		<git command = "pull" dir = "../repo" />	
 	</target>
 	<target name="repoDoesNotExists" depends="repoCheck" unless="repo.present">
 		<echo message="git clone" level="info" />
+		
+		<git command = "clone">
+		    <args>
+		        <arg value = "https://github.com/MyRobotLab/repo.git" />
+		        <arg value = "../repo" />
+		    </args>
+		</git>
+		
+		<!--
 		<git:git directory="../repo" verbose="true" settingsRef="git.testing">
 			<git:clone uri="https://github.com/MyRobotLab/repo.git" />
+			</git:git>
+		-->
 			<!-- <git:checkout branchName="dummyBranch" createBranch="true"/> -->
-		</git:git>
+		
 	</target>
 	<!-- =============== repo end  =============== -->
 

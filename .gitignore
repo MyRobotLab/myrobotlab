@@ -1,2 +1,12 @@
 /bin
 /dist
+/.ivy
+/.myrobotlab
+/update
+/libraries
+/arduino
+/backup
+/haarcascades
+/hogcascades
+/lbpcascades
+/tessdata
