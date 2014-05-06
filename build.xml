@@ -10,6 +10,12 @@
 	FIXME !!!- manage proxy for ivy
 	
 	
+	FIXME !!! - not so straightforward
+	https://wiki.jenkins-ci.org/display/JENKINS/Git+Plugin#GitPlugin-AdvancedFeatures
+	Push notification from repository
+	curl http://yourserver/jenkins/git/notifyCommit?url=<URL of the Git repository>[&branches=branch1[,branch2]*][&sha1=<commit ID>]
+	
+	
 	TODO - add tests & junit jars to build/lib
 	TODO - use more Ivy to actually manage dependencies
 	TODO use Ivy to place "integration" libraries into build directory for GUIService & Service
@@ -169,8 +175,8 @@
 		<!-- <property name="build.number" value="${TRAVIS_JOB_ID}" /> -->
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
 		<property name="build.number" value="${env.BUILD_NUMBER}" />
-		<!-- <property name="tag" value="1.0.${build.number}" /> -->
-		<property name="tag" value="1.0.${BUILD_NUMBER}" />
+		<property name="tag" value="1.0.${build.number}" />
+		<!-- local tag git commit index <property name="tag" value="1.0.${BUILD_NUMBER}" /> -->
 		<echo message="tag ${tag}" />
 		<property name="comment" value="${DSTAMP}.${TSTAMP}" />
 
