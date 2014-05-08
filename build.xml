@@ -74,7 +74,7 @@
 	
 -->
 
-<project name="myrobotlab" default="uploadMyrobotlab.jar" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
+<project name="myrobotlab" default="uploadZip" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
 	<macrodef name="git">
