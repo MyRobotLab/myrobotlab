@@ -436,7 +436,7 @@
 		</http>
 	</target>
 	
-	<target name="uploadZip" depends="dist">
+	<target name="uploadZip" depends="dist, uploadMyrobotlab.jar">
 		<echo message="${myrobotlab.jar}" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
