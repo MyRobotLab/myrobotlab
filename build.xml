@@ -103,6 +103,8 @@
 		</sequential>
 	</macrodef>
 
+	<!-- for local repo only - counts the number of commits against local archive up to the the point of 
+	a tag named "build" -->
 	<exec executable="git" outputproperty="BUILD_NUMBER">
 		<arg value="describe" />
 		<arg value="--match" />
@@ -434,7 +436,7 @@
 		</http>
 	</target>
 	
-	<target name="uploadZip" depends="uploadMyrobotlab.jar">
+	<target name="uploadZip" depends="dist">
 		<echo message="${myrobotlab.jar}" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
