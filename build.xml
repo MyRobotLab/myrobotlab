@@ -74,7 +74,7 @@
 	
 -->
 
-<project name="myrobotlab" default="uploadAssets" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
+<project name="myrobotlab" default="uploadMyrobotlab.jar" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
 	<macrodef name="git">
@@ -418,7 +418,7 @@
 		<echo message="${upload_url}" />
 	</target>
 
-	<target name="uploadAssets" depends="getAssetsURL, compile">
+	<target name="uploadMyrobotlab.jar" depends="getAssetsURL, compile">
 		<echo message="${myrobotlab.jar}" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
@@ -431,6 +431,22 @@
 				<parameter name="name" value="myrobotlab.jar" />
 			</query>
 			<entity file="${myrobotlab.jar}" binary="true" />
+		</http>
+	</target>
+	
+	<target name="uploadZip" depends="uploadMyrobotlab.jar">
+		<echo message="${myrobotlab.jar}" />
+		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
+			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
+			<headers>
+				<header name="Authorization" value="token ${github.token}" />
+				<header name="Accept" value="application/vnd.github.manifold-preview" />
+				<header name="Content-Type" value="application/java-archive" />
+			</headers>
+			<query>
+				<parameter name="name" value="myrobotlab.${tag}.zip" />
+			</query>
+			<entity file="${temp}/myrobotlab.${tag}.zip" binary="true" />
 		</http>
 	</target>
 
