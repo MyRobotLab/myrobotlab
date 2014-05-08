@@ -291,25 +291,31 @@ public class ServiceInfo implements Serializable {
 
 		String module = org.substring(org.lastIndexOf(".") + 1);
 		try {
-			HTTPRequest http = new HTTPRequest(String.format("http://myrobotlab.googlecode.com/" + "svn/trunk/myrobotlab/thirdParty/repo/%1$s/%2$s/", org, module));
+			HTTPRequest http = new HTTPRequest(String.format("https://api.github.com/repos/MyRobotLab/repo/contents/%s/%s/", org, module));
 			String s = http.getString();
+			
+			GitHubContent[] releases = Encoder.gson.fromJson(s, GitHubContent[].class);
+			
 			if (s == null) {
 				return null;
 			}
-			// ---- begin fragile & ugly parsing -----
-			// reverse pos from bottom to find the end of the list of
-			// directories
-			// to start the pos
-			String latestVersion = s.substring(s.lastIndexOf("<li><a href=\"") + 13);
-			latestVersion = latestVersion.substring(0, latestVersion.indexOf("/\">"));
-			if (!"..".equals(latestVersion)) {
-				return new Dependency(org, module, latestVersion, true);
+			
+			String[] releaseNumbers = new String[releases.length];
+			
+			for (int i = 0; i < releases.length; ++i){
+				releaseNumbers[i] = releases[i].name;
 			}
-			// ---- end fragile & ugly parsing -----
+			
+			Arrays.sort(releaseNumbers);
+			
+			String latestVersion = releaseNumbers[releaseNumbers.length - 1];
+			return new Dependency(org, module, latestVersion, true);
+			
 		} catch (Exception e) {
 			Logging.logException(e);
-			errors.add(e.getMessage());
 		}
+		
+		log.error(String.format("could not getRepoLatestDependencies for org %s", org));
 		return null;
 	}
 
@@ -522,13 +528,13 @@ public class ServiceInfo implements Serializable {
 	// TODO - interface to Ivy2 needs to be put into ServiceInfo
 	// resolve here "means" retrieve
 	public boolean resolve(String fullTypeName) {
-		log.debug(String.format("getDependencies %1$s", fullTypeName));
+		log.debug(String.format("getDependencies %s", fullTypeName));
 
 		org.myrobotlab.service.Runtime runtime = org.myrobotlab.service.Runtime.getInstance();
 
 		File ivysettings = new File(ivyFileName);
 		if (!ivysettings.exists()) {
-			log.warn(String.format("%1$s does not exits - will not try to resolve dependencies", ivyFileName));
+			log.warn(String.format("%s does not exits - will not try to resolve dependencies", ivyFileName));
 			return false;
 		}
 		List<String> d = getRequiredDependencies(fullTypeName);

@@ -37,6 +37,7 @@ import java.util.Vector;
 import org.myrobotlab.cmdline.CMDLine;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.framework.GitHubRelease;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodEntry;
@@ -1312,7 +1313,7 @@ public class Runtime extends Service {
 		cmdline.splitLine(args);
 
 		Logging logging = LoggingFactory.getInstance();
-
+		
 		try {
 
 			if (cmdline.containsKey("-h") || cmdline.containsKey("--help")) {
@@ -1347,7 +1348,6 @@ public class Runtime extends Service {
 			}
 
 			logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
-
 			log.info(cmdline.toString());
 
 			// LINUX LD_LIBRARY_PATH MUST BE EXPORTED - NO OTHER SOLUTION FOUND
@@ -1703,30 +1703,35 @@ public class Runtime extends Service {
 
 	public static String getBleedingEdgeVersionString() {
 		try {
-			//
-			// String listURL =
-			// "http://code.google.com/p/myrobotlab/downloads/list?can=2&q=&sort=uploaded&colspec=Filename%20Summary%20Uploaded%20ReleaseDate%20Size%20DownloadCount";
-			String listURL = "http://code.google.com/p/myrobotlab/downloads/list?can=1&q=&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount";
+	
+			String listURL = "https://api.github.com/repos/MyRobotLab/myrobotlab/releases";
+			
 			log.info(String.format("getting list of dist %s", listURL));
 			HTTPRequest http;
 			http = new HTTPRequest(listURL);
 			String s = http.getString();
 			log.info(String.format("recieved [%s]", s));
 			log.info("parsing");
-			String myrobotlabBleedingEdge = "myrobotlab.bleeding.edge.";
-			int p0 = s.indexOf(myrobotlabBleedingEdge);
-			if (p0 > 0) {
-				p0 += myrobotlabBleedingEdge.length();
-				int p1 = s.indexOf(".jar", p0);
-				String intermediate = s.substring(p0, p1);
-				log.info(intermediate);
-				return intermediate.trim();
-			} else {
-				log.error(String.format("could not parse results for %s in getBleedingEdgeVersionString", listURL));
+			
+			GitHubRelease[] releases = Encoder.gson.fromJson(s, GitHubRelease[].class);
+			getInstance().info("found %d releases", releases.length);
+			
+			String[] r = new String[releases.length];
+			for (int i = 0; i < releases.length; ++i){
+				r[i] = releases[i].tag_name;
 			}
+			
+			Arrays.sort(r);
+			
+			if (r.length > 0){
+				return r[r.length-1];
+			}
+			
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+		
+		getInstance().error("could not get latest version information");
 
 		return null;
 	}
@@ -1736,7 +1741,11 @@ public class Runtime extends Service {
 		try {
 			log.info("getBleedingEdgeMyRobotLabJar");
 			String version = getBleedingEdgeVersionString();
-			String latestMRLJar = "http://myrobotlab.googlecode.com/files/myrobotlab.bleeding.edge." + version + ".jar";
+			if (version == null){
+				log.error("could not get latest version from github");
+				return;
+			}
+			String latestMRLJar = "https://github.com/MyRobotLab/myrobotlab/releases/download/"+version+"/myrobotlab.jar";
 			log.info(String.format("getting latest build from %s", latestMRLJar));
 			HTTPRequest zip = new HTTPRequest(latestMRLJar);
 			byte[] jarfile = zip.getBinary();
@@ -2212,37 +2221,5 @@ public class Runtime extends Service {
 		
 	}
 
-	/*
-	 * public static String getLocalMacAddress2() { try {
-	 * log.info("getLocalMacAddress2");
-	 * 
-	 * Enumeration<NetworkInterface> interfaces =
-	 * NetworkInterface.getNetworkInterfaces(); while
-	 * (interfaces.hasMoreElements()) { NetworkInterface current =
-	 * interfaces.nextElement(); // log.info(current); if (!current.isUp() ||
-	 * current.isLoopback() || current.isVirtual()) {
-	 * log.info("skipping interface is down, a loopback or virtual"); continue;
-	 * } Enumeration<InetAddress> addresses = current.getInetAddresses(); while
-	 * (addresses.hasMoreElements()) { InetAddress currentAddress =
-	 * addresses.nextElement(); if (currentAddress.isLoopbackAddress()) {
-	 * log.info("skipping loopback address"); continue; }
-	 * log.info(currentAddress.getHostAddress());
-	 * 
-	 * NetworkInterface network =
-	 * NetworkInterface.getByInetAddress(currentAddress);
-	 * 
-	 * byte[] mac = network.getHardwareAddress();
-	 * 
-	 * System.out.print("Current MAC address : ");
-	 * 
-	 * StringBuilder sb = new StringBuilder(); for (int i = 0; i < mac.length;
-	 * i++) { sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ?
-	 * "-" : "")); }
-	 * 
-	 * return sb.toString();
-	 * 
-	 * } } } catch (Exception e) { Logging.logException(e); }
-	 * 
-	 * log.info("not found"); return null; }
-	 */
+	
 }
