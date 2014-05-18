@@ -50,8 +50,9 @@ public class RasPi extends Service {
 	public RasPi(String n) {
 		super(n);
 
-		log.info(String.format("platform is %s", Platform.getLocalInstance()));
-		if ("arm".equals(Platform.getArch())) {
+		Platform platform = Platform.getLocalInstance();
+		log.info(String.format("platform is %s", platform));
+		if ("arm".equals(platform.getArch())) {
 			// init I2C
 			gpio = GpioFactory.getInstance();
 			gpio01 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01);

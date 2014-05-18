@@ -21,8 +21,10 @@ import javax.swing.JPanel;
 
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
+
 import javax.swing.JTabbedPane;
 
 import org.myrobotlab.logging.LoggingFactory;
@@ -37,7 +39,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(AboutDialog.class.getCanonicalName());
 
-	JButton bleedingEdge = null;
+	JButton latestVersion = null;
 	JButton noWorky = null;
 	JButton ok = null;
 	JFrame parent = null;
@@ -90,9 +92,9 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 		buttonPane.add(noWorky);
 		noWorky.addActionListener(this);
 
-		bleedingEdge = new JButton("I feel lucky, give me the bleeding edge !");
-		buttonPane.add(bleedingEdge);
-		bleedingEdge.addActionListener(this);
+		latestVersion = new JButton("get latest version");
+		buttonPane.add(latestVersion);
+		latestVersion.addActionListener(this);
 
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -107,8 +109,10 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 		if (source == ok) {
 			setVisible(false);
 			dispose();
-		} else if (source == bleedingEdge) {
-			String newVersion = Runtime.getBleedingEdgeVersionString();
+		} else if (source == latestVersion) {
+			//Runtime runtime = Runtime.getInstance();
+			Repo repo = Repo.getLocalInstance();
+			String newVersion = repo.getRepoVersion();
 			String currentVersion = FileIO.resourceToString("version.txt");
 			log.info(String.format("comparing new version %s with current version %s", newVersion, currentVersion));
 			if (newVersion == null)
@@ -122,10 +126,11 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 				log.info("not equals - offer update");
 				// Custom button text
 				Object[] options = { "Yes, hit me daddy-O!", "No way, I'm scared" };
-				int n = JOptionPane.showOptionDialog(parent, String.format("A fresh new version is ready, do you want this one? %s", newVersion), "Bleeding Edge Check",
+				int n = JOptionPane.showOptionDialog(parent, String.format("a newer version exists, do you want this one? %s", newVersion), "Latest Version Check",
 						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 				if (n == JOptionPane.YES_OPTION) {
-					Runtime.getBleedingEdgeMyRobotLabJar();
+					// FIXME - should process all 
+					repo.getLatestVersionJar();
 					versionLabel.setText(String.format("updating with %s", newVersion));
 					GUIService.restart("moveUpdate");
 				} else {

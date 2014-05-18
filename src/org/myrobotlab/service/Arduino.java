@@ -904,7 +904,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	// supporting methods for Compiler & UPloader may be necessary
 
 	static public String getAvrBasePath() {
-		if (Platform.isLinux()) {
+		Platform platform = Platform.getLocalInstance();
+		if (platform.isLinux()) {
 			return ""; // avr tools are installed system-wide and in the path
 		} else {
 			return getHardwarePath() + File.separator + "tools" + File.separator + "avr" + File.separator + "bin" + File.separator;
@@ -927,7 +928,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		String path = System.getProperty("user.dir");
 
 		// Get a path to somewhere inside the .app folder
-		if (Platform.isMac()) {
+		Platform platform = Platform.getLocalInstance();
+		if (platform.isMac()) {
 			String javaroot = System.getProperty("javaroot");
 			if (javaroot != null) {
 				path = javaroot;

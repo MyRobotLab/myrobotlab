@@ -93,8 +93,10 @@ public class AvrdudeUploader extends Uploader {
 		// avrdude wants "stk500v1" to distinguish it from stk500v2
 		if (protocol.equals("stk500"))
 			protocol = "stk500v1";
+		Platform platform = Platform.getLocalInstance();
+
 		commandDownloader.add("-c" + protocol);
-		commandDownloader.add("-P" + (Platform.isWindows() ? "\\\\.\\" : "") + myArduino.preferences.get("serial.port"));// myArduino.preferences.get("serial.port"));
+		commandDownloader.add("-P" + (platform.isWindows() ? "\\\\.\\" : "") + myArduino.preferences.get("serial.port"));// myArduino.preferences.get("serial.port"));
 		commandDownloader.add("-b" + Integer.parseInt(boardPreferences.get("upload.speed")));
 		commandDownloader.add("-D"); // don't erase
 		commandDownloader.add("-Uflash:w:" + buildPath + File.separator + className + ".hex:i");
@@ -121,10 +123,12 @@ public class AvrdudeUploader extends Uploader {
 		List params = new ArrayList();
 		params.add("-c" + programmerPreferences.get("protocol"));
 
+		Platform platform = Platform.getLocalInstance();
+
 		if ("usb".equals(programmerPreferences.get("communication"))) {
 			params.add("-Pusb");
 		} else if ("serial".equals(programmerPreferences.get("communication"))) {
-			params.add("-P" + (Platform.isWindows() ? "\\\\.\\" : "") + myArduino.preferences.get("serial.port"));
+			params.add("-P" + (platform.isWindows() ? "\\\\.\\" : "") + myArduino.preferences.get("serial.port"));
 			if (programmerPreferences.get("speed") != null) {
 				params.add("-b" + Integer.parseInt(programmerPreferences.get("speed")));
 			}
@@ -199,7 +203,8 @@ public class AvrdudeUploader extends Uploader {
 	public boolean avrdude(Collection params) throws RunnerException {
 		List commandDownloader = new ArrayList();
 
-		if (Platform.isLinux()) {
+		Platform platform = Platform.getLocalInstance();
+		if (platform.isLinux()) {
 			if ((new File(Arduino.getHardwarePath() + "/tools/" + "avrdude")).exists()) {
 				commandDownloader.add(Arduino.getHardwarePath() + "/tools/" + "avrdude");
 				commandDownloader.add("-C" + Arduino.getHardwarePath() + "/tools/avrdude.conf");

@@ -128,7 +128,7 @@ public class SaberTooth extends Service implements MotorController {
 			serial.write(address);
 			serial.write(command);
 			serial.write(data);
-			serial.write((address + 0 + data) & 0b01111111);
+			serial.write((address + 0 + data) & 0x7F);
 		} catch (Exception e) {
 			Logging.logException(e);
 		}

@@ -14,6 +14,7 @@ import org.myrobotlab.framework.Index;
 import org.myrobotlab.framework.IndexNode;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -100,7 +101,7 @@ public class Incubator extends Service {
 
 	static public final ArrayList<Error> serializeTest() {
 
-		String[] serviceTypeNames = Runtime.getInstance().getServiceSimpleNames();
+		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 		ArrayList<Error> badServices = new ArrayList<Error>();
 
 		Runtime runtime = Runtime.getInstance();
@@ -118,7 +119,8 @@ public class Incubator extends Service {
 				}
 				log.warn("starting " + simpleType);
 
-				if (!runtime.isInstalled(String.format("org.myrobotlab.service.%s", simpleType))) {
+				Repo repo = Repo.getLocalInstance();
+				if (!repo.isServiceTypeInstalled(String.format("org.myrobotlab.service.%s", simpleType))) {
 					badServices.add(new Error(simpleType, "notInstalled"));
 					continue;
 				}

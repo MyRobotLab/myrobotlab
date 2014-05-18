@@ -51,8 +51,9 @@ public class I2CFactory {
 		// which would not be my first choice - but since it does
 		// I will do the same here... otherwise I'll need to invoke
 		// without an interface
+		Platform platform = Platform.getLocalInstance();
 		
-		if (Platform.isArm()) {
+		if (platform.isArm()) {
 			// raspi
 			return I2CBusImpl.getBus(busNumber);
 		} else {

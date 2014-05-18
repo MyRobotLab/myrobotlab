@@ -52,6 +52,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolTip;
 import javax.swing.ListCellRenderer;
@@ -64,13 +65,13 @@ import javax.swing.table.TableColumn;
 
 import org.myrobotlab.control.widget.ProgressDialog;
 import org.myrobotlab.control.widget.Style;
-import org.myrobotlab.framework.Dependency;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceInfo;
+import org.myrobotlab.framework.repo.Dependency;
+import org.myrobotlab.framework.repo.Repo;
+import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.framework.repo.Updates;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
@@ -132,6 +133,8 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	public RuntimeGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 
+		// well done - this can be any runtime - which is good if there is
+		// multiple instances
 		myRuntime = (Runtime) Runtime.getService(boundServiceName);
 	}
 
@@ -177,7 +180,12 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				popupRow = source.rowAtPoint(e.getPoint());
 				ServiceEntry c = (ServiceEntry) possibleServicesModel.getValueAt(popupRow, 0);
 				releaseMenuItem.setVisible(false);
-				if (myRuntime.getServiceInfo().hasUnfulfilledDependencies("org.myrobotlab.service." + c.type)) {
+				
+				// "if" - the data already exists - (non transient) - then it should be correct
+				// for remote systems - but if it's "refreshed" it won't be correct
+				Repo repo = myRuntime.getRepo();
+				ServiceData serviceData = repo.getServiceDataFile();
+				if (serviceData.hasUnfulfilledDependencies("org.myrobotlab.service." + c.type)) {
 					// need to install it
 					installMenuItem.setVisible(true);
 					startMenuItem.setVisible(false);
@@ -186,6 +194,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 					// have it
 					installMenuItem.setVisible(false);
 					startMenuItem.setVisible(true);
+					/* FIXME - need to process checkForUpdates()
 					if (myRuntime.getServiceInfo().checkForUpgrade("org.myrobotlab.service." + c.type).size() > 0) {
 						// has dependencies which can be upgraded
 						upgradeMenuItem.setVisible(true);
@@ -193,6 +202,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 						// no upgrade available
 						upgradeMenuItem.setVisible(false);
 					}
+					*/
 				}
 
 				int column = source.columnAtPoint(e.getPoint());
@@ -285,6 +295,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		filters.add(nofilter, fgc);
 		++fgc.gridy;
 
+		/* FIXME - need categories
 		String[] cats = myRuntime.getServiceInfo().getUniqueCategoryNames();
 		for (int j = 0; j < cats.length; ++j) {
 			JButton b = new JButton(cats[j]);
@@ -292,6 +303,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			filters.add(b, fgc);
 			++fgc.gridy;
 		}
+		*/
 
 		JPanel input = new JPanel();
 		input.setLayout(new GridBagLayout());
@@ -374,16 +386,20 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
+		/* FIXME - refactor to general updateProcessStatus
 		subscribe("resolveSuccess", "resolveSuccess", String.class);
 		subscribe("resolveError", "resolveError", String.class);
 		subscribe("resolveBegin", "resolveBegin", String.class);
 		subscribe("resolveEnd", "resolveEnd");
 		subscribe("newArtifactsDownloaded", "newArtifactsDownloaded", String.class);
 		subscribe("failedDependency", "failedDependency", String.class);
-		subscribe("proposedUpdates", "proposedUpdates", ServiceInfo.class);
+		subscribe("proposedUpdates", "proposedUpdates", ServiceDataManager.class);
+		*/
+		
+		unsubscribe("checkForUpdates", "proposedUpdates", Updates.class);
 
 		// get the service info for the bound runtime (not necessarily local)
-		subscribe("getServiceSimpleNames", "onPossibleServicesRefresh", String[].class);
+		subscribe("getServiceTypeNames", "onPossibleServicesRefresh", String[].class);
 
 		// myService.send(boundServiceName, "broadcastState");
 
@@ -394,6 +410,8 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void detachGUI() {
+		
+		/* FIXME - refactored into general updateProcessStatus
 		unsubscribe("resolveSuccess", "resolveSuccess", String.class);
 		unsubscribe("resolveError", "resolveError", String.class);
 		unsubscribe("resolveBegin", "resolveBegin", String.class);
@@ -403,9 +421,9 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("registered", "registered", ServiceInterface.class);
 		unsubscribe("released", "released", ServiceInterface.class);
 		unsubscribe("failedDependency", "failedDependency", String.class);
-		unsubscribe("proposedUpdates", "proposedUpdates", ServiceInfo.class);
-
-		unsubscribe("getServiceSimpleNames", "onPossibleServicesRefresh", String[].class);
+		*/
+		unsubscribe("checkForUpdates", "proposedUpdates", Updates.class);
+		unsubscribe("getServiceTypeNames", "onPossibleServicesRefresh", String[].class);
 	}
 
 	public void failedDependency(String dep) {
@@ -469,7 +487,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	 */
 	public void getPossibleServices(final String filter) {
 		possibleServiceFilter = filter;
-		myService.send(boundServiceName, "getServiceSimpleNames", filter);
+		myService.send(boundServiceName, "getServiceTypeNames", filter);
 	}
 
 	public void onPossibleServicesRefresh(final String[] sscn) {
@@ -484,7 +502,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				possibleServicesModel.getRowCount();
 
 				// FIXME
-				// String[] sscn = Runtime.getServiceSimpleNames(filter);
+				// String[] sscn = Runtime.getServiceTypeNames(filter);
 				ServiceEntry[] ses = new ServiceEntry[sscn.length];
 				ServiceEntry se = null;
 
@@ -507,20 +525,21 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focused, int row, int column) {
 
+			Repo repo = myRuntime.getRepo();
 			setEnabled(table == null || table.isEnabled());
-			ServiceInfo info = myRuntime.getServiceInfo();
 			ServiceEntry entry = (ServiceEntry) table.getValueAt(row, 0);
 			// FIXME - "org.myrobotlab.service." + is not allowed "anywhere" -
 			// cept in overloaded methods
-			boolean available = !(info.hasUnfulfilledDependencies("org.myrobotlab.service." + entry.type));
+			boolean available = !(repo.getServiceDataFile().hasUnfulfilledDependencies("org.myrobotlab.service." + entry.type));
 			boolean upgradeAvailable = false;
 
 			String upgradeString = "<html><h6>upgrade<br>";
+			/* FIXME - process checkForUpdates
 			List<Dependency> deps = info.checkForUpgrade("org.myrobotlab.service." + entry.type);
 			if (deps.size() > 0) {
 				upgradeAvailable = true;
 				for (int i = 0; i < deps.size(); ++i) {
-					upgradeString += deps.get(i).module + " " + deps.get(i).version;
+					upgradeString += deps.get(i).getModule() + " " + deps.get(i).getRevision();
 
 					if (i < deps.size() - 1) {
 						upgradeString += "<br>";
@@ -529,6 +548,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				}
 				upgradeString += "</h6></html>";
 			}
+			*/
 
 			if (value.getClass().equals(ServiceEntry.class)) {
 				setHorizontalAlignment(JLabel.LEFT);
@@ -601,9 +621,9 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	 * @param si
 	 * @return
 	 */
-	public ServiceInfo proposedUpdates(ServiceInfo si) {
+	public Updates proposedUpdates(Updates updates) {
 		getPossibleServices("all");
-		return si;
+		return updates;
 	}
 
 	@Override
@@ -624,7 +644,9 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 			String newService = ((ServiceEntry) possibleServices.getValueAt(selectedRow, 0)).toString();
 			String fullTypeName = "org.myrobotlab.service." + newService;
-			if (myRuntime.getServiceInfo().hasUnfulfilledDependencies(fullTypeName)) {
+			Repo repo = myRuntime.getRepo();
+
+			if (repo.getServiceDataFile().hasUnfulfilledDependencies(fullTypeName)) {
 				// dependencies needed !!!
 				String msg = "<html>This Service has dependencies which are not yet loaded,<br>" + "do you wish to download them now?";
 				JOptionPane.setRootFrame(myService.getFrame());

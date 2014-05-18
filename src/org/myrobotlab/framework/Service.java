@@ -120,7 +120,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	transient protected CommunicationInterface cm = null;
 
-	protected final static String cfgDir = String.format("%s%s.myrobotlab", System.getProperty("user.dir"), File.separator);
+	public final static String cfgDir = FileIO.getCfgDir();
 
 	protected Set<String> methodSet;
 

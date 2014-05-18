@@ -60,6 +60,10 @@ public class InMoov extends Service {
 	transient public InMoovHand leftHand;
 	transient public InMoovArm rightArm;
 	transient public InMoovHand rightHand;
+	
+	transient public Servo topStom;
+	transient public Servo midStom;
+	transient public Servo lowStom;
 
 	transient private HashMap<String, InMoovArm> arms = new HashMap<String, InMoovArm>();
 	transient private HashMap<String, InMoovHand> hands = new HashMap<String, InMoovHand>();
@@ -989,6 +993,12 @@ public class InMoov extends Service {
 			log.error(String.format("%s arduino not found - start some other system first (head, arm, hand)", port));
 		}
 
+	}
+	
+	// - http://myrobotlab.org/content/mrl-kinect-inmoov-quest-accuracy#comment-2846
+	// default - arduino mega, pin 30,31,32, (left)
+	public void startStomache(String port){
+		
 	}
 
 	public void stopPIR() {

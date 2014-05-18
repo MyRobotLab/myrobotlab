@@ -31,7 +31,8 @@ public class SerialDeviceFactory {
 	static HashMap<String, VirtualSerialPort> virtualPorts = new HashMap<String, VirtualSerialPort>();
 
 	static public ArrayList<String> getSerialDeviceNames() {
-		if (Platform.isDavlik()) {
+		Platform platform = Platform.getLocalInstance();
+		if (platform.isDavlik()) {
 			return getSerialDeviceNames(TYPE_ANDROID_BLUETOOTH);
 		} else {
 			return getSerialDeviceNames(TYPE_GNU);
@@ -76,9 +77,10 @@ public class SerialDeviceFactory {
 	 * @throws SerialDeviceException
 	 */
 	static public SerialDevice getSerialDevice(String name, int rate, int databits, int stopbits, int parity) throws SerialDeviceException {
+		Platform platform = Platform.getLocalInstance();
 		if (virtualPorts.containsKey(name)){
 			return virtualPorts.get(name);
-		} else if (Platform.isDavlik()) {
+		} else if (platform.isDavlik()) {
 			// FIXME Bluetooth rate databits stopbits & parity are all
 			// meaningless
 			return getSerialDevice(TYPE_ANDROID_BLUETOOTH, name, rate, databits, stopbits, parity);
