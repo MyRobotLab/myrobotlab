@@ -39,6 +39,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -65,6 +66,10 @@ import org.slf4j.Logger;
 public class FileIO {
 
 	public final static Logger log = LoggerFactory.getLogger(FileIO.class.getCanonicalName());
+	
+	static public String getCfgDir () {
+		return String.format("%s%s.myrobotlab", System.getProperty("user.dir"), File.separator);
+	}
 
 	// --- string interface begin ---
 	public final static String fileToString(File file) {
@@ -95,8 +100,16 @@ public class FileIO {
 
 	// --- byte[] interface begin ------------------
 	// rename getBytes getResourceBytes / String File InputStream
-	
-	
+
+	static public byte[] getURL(URL url) {
+		try {
+			URLConnection conn = url.openConnection();
+			return toByteArray(conn.getInputStream());
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+		return null;
+	}
 
 	static public boolean byteArrayToFile(String filename, byte[] data) {
 		try {
@@ -231,8 +244,8 @@ public class FileIO {
 		String jarPath = full.substring(full.indexOf("jar:file:/") + 10, full.lastIndexOf("!"));
 		return jarPath;
 	}
-	
-	static public String getBinaryPath(){
+
+	static public String getBinaryPath() {
 		return ClassLoader.getSystemClassLoader().getResource(".").getPath();
 	}
 
@@ -286,7 +299,7 @@ public class FileIO {
 		final Path path = Paths.get(zipFilename);
 		final URI uri = URI.create("jar:file:" + path.toUri().getPath());
 
-		final Map<String, String> env = new HashMap<String,String>();
+		final Map<String, String> env = new HashMap<String, String>();
 		if (create) {
 			env.put("create", "true");
 		}
@@ -297,8 +310,10 @@ public class FileIO {
 
 		System.out.printf("Listing Archive:  %s\n", zipFilename);
 
-		// create the file system
-		try (FileSystem zipFileSystem = createZipFileSystem(zipFilename, false)) {
+		FileSystem zipFileSystem = null;
+		try {
+			// create the file system
+			zipFileSystem = createZipFileSystem(zipFilename, false);
 
 			final Path root = zipFileSystem.getPath("/");
 
@@ -329,6 +344,8 @@ public class FileIO {
 					System.out.printf("%d  %s  %s\n", Files.size(file), modTime, file);
 				}
 			});
+		} catch (Exception e) {
+			Logging.logException(e);
 		}
 	}
 
@@ -342,10 +359,10 @@ public class FileIO {
 			File f = new File(toFilename);
 			String path = f.getParent();
 			File dir = new File(path);
-			if (!dir.exists()){
+			if (!dir.exists()) {
 				dir.mkdirs();
 			}
-			
+
 			byteArrayToFile(toFilename, b);
 			return true;
 		} catch (Exception e) {
@@ -375,11 +392,11 @@ public class FileIO {
 		copyResource("mrl_logo.jpg", "mrl_logo.jpg");
 
 		byte[] b = resourceToByteArray("mrl_logo.jpg");
-		
+
 		File[] files = getPackageContent("");
-		
+
 		log.info(getBinaryPath());
-		
+
 		log.info("{}", b);
 
 		log.info("done");

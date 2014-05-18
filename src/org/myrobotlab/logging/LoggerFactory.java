@@ -12,7 +12,8 @@ public class LoggerFactory {
 	
 	public static Logger getLogger(String name)
 	{
-		if (Platform.isDavlik()) {
+		Platform platform = Platform.getLocalInstance();
+		if (platform.isDavlik()) {
 			String android = name.substring(name.lastIndexOf(".") + 1);
 			if (android.length()>23) android = android.substring(0, 23);
 			// http://slf4j.42922.n3.nabble.com/

@@ -15,7 +15,7 @@
  *  limitations under the License.
  *
  */
-package org.myrobotlab.framework;
+package org.myrobotlab.framework.repo;
 
 import java.io.File;
 import java.io.FileOutputStream;

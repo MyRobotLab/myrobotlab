@@ -357,8 +357,10 @@ public class Module {
 
 			address.setI2CBus(bus);
 			address.setI2CAddress(i2cAddress);
+			
+			Platform platform = Platform.getLocalInstance();
 
-			if (Platform.isArm()) {
+			if (platform.isArm()) {
 				// create I2C communications bus instance
 				i2cbus = I2CFactory.getInstance(bus);
 

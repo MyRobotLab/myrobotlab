@@ -65,7 +65,7 @@ public class LIDARGUI extends ServiceGUI implements ListSelectionListener, Video
     public Random rand = new Random();
     int vheight = height / xyScale;
     int vwidth = width / xyScale;
-    ArrayList<Integer> hist = new ArrayList<>();
+    ArrayList<Integer> hist = new ArrayList<Integer>();
     boolean staticInfo = false;
 
     public LIDARGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {

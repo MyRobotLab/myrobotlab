@@ -82,7 +82,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.string.Util;
+import org.myrobotlab.string.StringUtil;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
@@ -671,7 +671,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		} else if ("hide all".equals(cmd)) {
 			hideAll();
 		} else if ("install latest".equals(cmd)) {
-			runtime.updateAll();
+			//runtime.updateAll();
 		} else if (cmd.equals(Level.DEBUG) || cmd.equals(Level.INFO) || cmd.equals(Level.WARN) || cmd.equals(Level.ERROR) || cmd.equals(Level.FATAL)) {
 			// TODO this needs to be changed into something like tryValueOf(cmd)
 			Logging logging = LoggingFactory.getInstance();
@@ -728,7 +728,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 
 			}
 		} else {
-			invoke(Util.StringToMethodName(cmd));
+			invoke(StringUtil.StringToMethodName(cmd));
 		}
 	}
 

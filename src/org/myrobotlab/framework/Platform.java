@@ -109,29 +109,24 @@ public class Platform implements Serializable {
 		return localInstance;
 	}
 
-	static public String getMRLVersion() {
-		Platform p = getLocalInstance();
-		return p.mrlVersion;
+	public String getMRLVersion() {
+		return mrlVersion;
 	}
 
-	static public String getOS() {
-		Platform p = getLocalInstance();
-		return p.os;
+	public String getOS() {
+		return os;
 	}
 
-	static public String getVMName() {
-		Platform p = getLocalInstance();
-		return p.vmName;
+	public String getVMName() {
+		return vmName;
 	}
 
-	static public boolean isDavlik() {
-		Platform p = getLocalInstance();
-		return VM_DALVIK.equals(p.vmName);
+	public boolean isDavlik() {
+		return VM_DALVIK.equals(vmName);
 	}
 
-	static public int getBitness() {
-		Platform p = getLocalInstance();
-		return p.bitness;
+	public int getBitness() {
+		return bitness;
 	}
 
 	/**
@@ -140,23 +135,24 @@ public class Platform implements Serializable {
 	 * 
 	 * @return hardware architecture
 	 */
-	static public String getArch() {
-		return localInstance.arch;
+	// FIXME ! non-static !!!!
+	public String getArch() {
+		return arch;
 	}
 
-	static public boolean isMac() {
-		return OS_MAC.equals(localInstance.arch);
+	public boolean isMac() {
+		return OS_MAC.equals(arch);
 	}
 
-	static public boolean isLinux() {
-		return OS_LINUX.equals(localInstance.arch);
+	public boolean isLinux() {
+		return OS_LINUX.equals(arch);
 	}
 
-	static public boolean isWindows() {
-		return OS_WINDOWS.equals(localInstance.arch);
+	public boolean isWindows() {
+		return OS_WINDOWS.equals(arch);
 	}
 
-	static public String getClassPathSeperator() {
+	public String getClassPathSeperator() {
 		if (isWindows()) {
 			return ";";
 		} else {
@@ -164,11 +160,11 @@ public class Platform implements Serializable {
 		}
 	}
 
-	static public boolean isArm() {
+	public boolean isArm() {
 		return getArch().startsWith(ARCH_ARM);
 	}
 
-	static public boolean isX86() {
+	public boolean isX86() {
 		return getArch().equals(ARCH_X86);
 	}
 

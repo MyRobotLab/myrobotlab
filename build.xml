@@ -74,7 +74,7 @@
 	
 -->
 
-<project name="myrobotlab" default="uploadZip" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
+<project name="myrobotlab" default="dist" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
 	<macrodef name="git">
@@ -137,6 +137,7 @@
 	<!-- ================ init begin ================= -->
 	<target name="init" depends="repoDoesNotExists, repoExists">
 
+		<echo message="compiling with ${ant.java.version}" />
 		<!-- FIXME add unit tests if 
 		<property name="junit.jar" location="../myrobotlab-tests/../lib" />
 		<property name="junit.src" location="../myrobotlab-tests/src" />
@@ -170,16 +171,23 @@
 			tag = build number ? for incremental builds - unless overridden by dev build directive... -->
 
 		<property environment="env" />
+		
+		<!-- ============ tag begin ================= -->
 		<!-- TODO .. resolve Travis vs Jenkins by getting build number from http://myrobotlab.org/getBuildNumber.php db identity -->
 		<echo message="env.BUILD_NUMBER env.BUILD_NUMBER=${env.BUILD_NUMBER}" />
 		<echo message="travis job id - $TRAVIS_JOB_ID" />
 		<!-- <property name="build.number" value="${TRAVIS_JOB_ID}" /> -->
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
 		<property name="build.number" value="${env.BUILD_NUMBER}" />
-		<property name="tag" value="1.0.${build.number}" />
+		<!-- property name="tag" value="1.0.${build.number}" / -->
+		<property name="tag" value="${DSTAMP}.${TSTAMP}" />
+		<!-- TODO add missing link global method http://myrobotlab.org/buildnumber.php !!! -->
 		<!-- local tag git commit index <property name="tag" value="1.0.${BUILD_NUMBER}" /> -->
+		<property name="tag" value="1.0.${BUILD_NUMBER}" />
 		<echo message="tag ${tag}" />
+	
 		<property name="comment" value="${DSTAMP}.${TSTAMP}" />
+		<!-- ============ tag end ================= -->
 
 		<!-- http://larrycai.wordpress.com/2013/02/22/publish-the-artifacts-inside-travis-ci-to-github/ -->
 		<property name="github.token" value="${env.GITHUB_TOKEN}" />
@@ -198,8 +206,7 @@
 
 		<property name="temp" location="${dist}/temp/${tag}" />
 		<property name="bin" location="${temp}/bin" />
-		<property name="toZip" location="${temp}/toZip" />
-
+		<property name="toZip" location="${temp}/toZip/${tag}" />
 
 		<!-- create all necessary directories -->
 		<mkdir dir="${dist}" />
@@ -207,6 +214,7 @@
 		<mkdir dir="${dist}/temp" />
 		<mkdir dir="${dist}/temp/${tag}" />
 		<mkdir dir="${bin}" />
+		<mkdir dir="${temp}/toZip" />
 		<mkdir dir="${toZip}" />
 
 		<!-- load local overrides from build.properties -->
@@ -453,7 +461,7 @@
 	</target>
 
 	<target name="dist" depends="compile" description="generate the distribution">
-		<chmod file="${temp}/*.sh" perm="ugo+rx" />
+		<chmod file="${toZip}/*.sh" perm="ugo+rx" />
 		<zip destfile="${temp}/myrobotlab.${tag}.zip" basedir="${toZip}" />
 	</target>
 
@@ -470,7 +478,7 @@
 			<fileset dir="${src}/resource" />
 		</copy>
 
-		<!-- compile tests -->
+		<!-- FIXME !!! compile tests -->
 		<javac srcdir="${junit.src}" destdir="${build}" includeantruntime="false">
 			<classpath>
 				<fileset dir="${temp}/libraries/jar">

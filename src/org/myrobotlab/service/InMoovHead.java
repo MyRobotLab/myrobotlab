@@ -230,14 +230,13 @@ public class InMoovHead extends Service {
 	}
 	
 	public void test() {
-		Errors errors = new Errors();
 		try {
 			if (arduino == null) {
-				errors.add("arduino is null");
+				log.error("arduino is null");
 			}
 			
 			if (!arduino.isConnected()){
-				errors.add("arduino not connected");
+				log.error("arduino not connected");
 			}
 
 			rothead.moveTo(rothead.getPosition() + 2);
