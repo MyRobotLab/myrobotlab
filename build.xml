@@ -180,10 +180,10 @@
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
 		<property name="build.number" value="${env.BUILD_NUMBER}" />
 		<!-- property name="tag" value="1.0.${build.number}" / -->
-		<property name="tag" value="${DSTAMP}.${TSTAMP}" />
+		<!-- property name="tag" value="${DSTAMP}.${TSTAMP}" / -->
 		<!-- TODO add missing link global method http://myrobotlab.org/buildnumber.php !!! -->
 		<!-- local tag git commit index <property name="tag" value="1.0.${BUILD_NUMBER}" /> -->
-		<property name="tag" value="1.0.${BUILD_NUMBER}" />
+		<property name="tag" value="1.0.${build.number}" />
 		<echo message="tag ${tag}" />
 	
 		<property name="comment" value="${DSTAMP}.${TSTAMP}" />
