@@ -23,6 +23,7 @@ i01.startMouth()
 #i01.startLeftHand(leftPort)
 #i01.startLeftArm(leftPort)
 i01.startHead(leftPort)
+i01.startMouthControl(leftPort)
 # starting part with a reference, with a reference
 # you can interact further
 #opencv = i01.startOpenCV()
@@ -34,6 +35,11 @@ i01.startHead(leftPort)
 # currently attached servos
 #i01.detach()
 #i01.attach()
+
+# verbal commands
+ear = i01.startEar()
+
+i01.startHeadTracking(leftPort)
 
 i01.systemCheck()
 
@@ -63,8 +69,7 @@ i01.systemCheck()
 
 # i01.systemCheck()
  
-# verbal commands
-ear = i01.startEar()
+
 
 # commands with i01.getName() use the InMoov service methods
 ear.addCommand("attach", i01.getName(), "attach")
