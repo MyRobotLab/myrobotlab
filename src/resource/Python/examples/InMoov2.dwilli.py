@@ -39,7 +39,8 @@ i01.startMouthControl(leftPort)
 # verbal commands
 ear = i01.startEar()
 
-i01.startHeadTracking(leftPort)
+tracking = i01.startHeadTracking(leftPort)
+tracking.faceDetect()
 
 i01.systemCheck()
 
