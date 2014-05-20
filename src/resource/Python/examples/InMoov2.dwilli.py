@@ -3,12 +3,12 @@
 # InMoov now can be started in modular pieces
 
 leftPort = "COM15"
-rightPort = "COM12"
+rightPort = "COM16"
 
 i01 = Runtime.createAndStart("i01", "InMoov")
 
 # starts everything
-i01.startAll(leftPort, rightPort)
+#i01.startAll(leftPort, rightPort)
 
 # how to invert the left hand fingers begin
 # i01.leftHand.thumb.setInverted(True)
@@ -19,10 +19,10 @@ i01.startAll(leftPort, rightPort)
 # how to invert the left hand fingers end
 
 # starting parts
-#i01.startMouth()
+i01.startMouth()
 #i01.startLeftHand(leftPort)
 #i01.startLeftArm(leftPort)
-#i01.startHead(leftPort)
+i01.startHead(leftPort)
 # starting part with a reference, with a reference
 # you can interact further
 #opencv = i01.startOpenCV()
@@ -64,7 +64,7 @@ i01.systemCheck()
 # i01.systemCheck()
  
 # verbal commands
-ear = i01.ear
+ear = i01.startEar()
 
 # commands with i01.getName() use the InMoov service methods
 ear.addCommand("attach", i01.getName(), "attach")
