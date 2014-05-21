@@ -36,13 +36,15 @@ i01.startMouthControl(leftPort)
 #i01.detach()
 #i01.attach()
 
-# verbal commands
-ear = i01.startEar()
+i01.head.rothead.setInverted(True)
+
+i01.systemCheck()
 
 tracking = i01.startHeadTracking(leftPort)
 tracking.faceDetect()
 
-i01.systemCheck()
+# verbal commands
+ear = i01.startEar()
 
 # auto detaches any attached servos after 120 seconds of inactivity
 # i01.autoPowerDownOnInactivity()
@@ -69,8 +71,6 @@ i01.systemCheck()
 # After ear.startListening(), the ear will listen for commands
 
 # i01.systemCheck()
- 
-
 
 # commands with i01.getName() use the InMoov service methods
 ear.addCommand("attach", i01.getName(), "attach")
