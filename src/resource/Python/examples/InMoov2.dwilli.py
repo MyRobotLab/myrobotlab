@@ -20,7 +20,8 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 
 # starting parts
 i01.startMouth()
-#i01.startLeftHand(leftPort)
+i01.startLeftHand(leftPort)
+i01.startRightHand(rightPort)
 #i01.startLeftArm(leftPort)
 i01.startHead(leftPort)
 i01.startMouthControl(leftPort)
@@ -40,8 +41,8 @@ i01.head.rothead.setInverted(True)
 
 i01.systemCheck()
 
-tracking = i01.startHeadTracking(leftPort)
-tracking.faceDetect()
+# tracking = i01.startHeadTracking(leftPort)
+# tracking.faceDetect()
 
 # verbal commands
 ear = i01.startEar()
@@ -873,3 +874,4 @@ def howmanyfingersdoihave():
  
      ear.resumeListening()
 
+howmanyfingersdoihave()
