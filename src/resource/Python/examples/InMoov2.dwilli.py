@@ -20,11 +20,13 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 
 # starting parts
 i01.startMouth()
-i01.startLeftHand(leftPort)
-i01.startRightHand(rightPort)
+#i01.startLeftHand(leftPort)
 #i01.startLeftArm(leftPort)
-i01.startHead(leftPort)
-i01.startMouthControl(leftPort)
+head = i01.startHead(leftPort)
+mouthControl = i01.startMouthControl(leftPort)
+
+webgui = Runtime.createAndStart("webgui","WebGUI")
+
 # starting part with a reference, with a reference
 # you can interact further
 #opencv = i01.startOpenCV()
@@ -37,15 +39,13 @@ i01.startMouthControl(leftPort)
 #i01.detach()
 #i01.attach()
 
-i01.head.rothead.setInverted(True)
-
-i01.systemCheck()
+# verbal commands
+ear = i01.startEar()
 
 # tracking = i01.startHeadTracking(leftPort)
 # tracking.faceDetect()
 
-# verbal commands
-ear = i01.startEar()
+# i01.systemCheck()
 
 # auto detaches any attached servos after 120 seconds of inactivity
 # i01.autoPowerDownOnInactivity()
@@ -72,78 +72,10 @@ ear = i01.startEar()
 # After ear.startListening(), the ear will listen for commands
 
 # i01.systemCheck()
+ 
+
 
 # commands with i01.getName() use the InMoov service methods
-ear.addCommand("attach", i01.getName(), "attach")
-ear.addCommand("detach", i01.getName(), "detach")
-ear.addCommand("rest", i01.getName(), "rest")
-
-ear.addCommand("power down", i01.getName(), "powerDown")
-ear.addCommand("power up", i01.getName(), "powerUp")
-
-ear.addCommand("open hand", i01.getName(), "handOpen", "both")
-ear.addCommand("close hand", i01.getName(), "handClose", "both")
-ear.addCommand("camera on", i01.getName(), "cameraOn")
-ear.addCommand("off camera", i01.getName(), "cameraOff")
-ear.addCommand("capture gesture", i01.getName(), "captureGesture")
-
-# FIXME - lk tracking setpoint
-ear.addCommand("track", i01.getName(), "track")
-ear.addCommand("freeze track", i01.getName(), "clearTrackingPoints")
-ear.addCommand("hello", "python", "hello")
-ear.addCommand("giving", i01.getName(), "giving")
-ear.addCommand("fighter", i01.getName(), "fighter")
-ear.addCommand("fist hips", i01.getName(), "fistHips")
-ear.addCommand("look at this", i01.getName(), "lookAtThis")
-ear.addCommand("victory", i01.getName(), "victory")
-ear.addCommand("arms up", i01.getName(), "armsUp")
-ear.addCommand("arms front", i01.getName(), "armsFront")
-ear.addCommand("da vinci", i01.getName(), "daVinci")
-
-ear.addCommand("manual", ear.getName(), "lockOutAllGrammarExcept", "voice control")
-ear.addCommand("voice control", ear.getName(), "clearLock")
-ear.addCommand("stop listening", ear.getName(), "stopListening")
-
-##sets the servos back to full speed, anywhere in sequence or gestures
-ear.addCommand("full speed", "python", "fullspeed")
-##sequence1
-ear.addCommand("grab the bottle", "python", "grabthebottle")
-ear.addCommand("take the glass", "python", "grabtheglass")
-ear.addCommand("poor bottle", "python", "poorbottle")
-ear.addCommand("give the glass", "python", "givetheglass")
-##sequence2
-ear.addCommand("take the ball", "python", "takeball")
-ear.addCommand("keep the ball", "python", "keepball")
-ear.addCommand("approach the left hand", "python", "approachlefthand")
-ear.addCommand("use the left hand", "python", "uselefthand")
-ear.addCommand("more", "python", "more")
-ear.addCommand("hand down", "python", "handdown")
-ear.addCommand("is it a ball", "python", "isitaball")
-ear.addCommand("put it down", "python", "putitdown")
-ear.addCommand("drop it", "python", "dropit")
-ear.addCommand("remove your left arm", "python", "removeleftarm")
-ear.addCommand("further", "python", "further")
-##extras
-ear.addCommand("perfect", "python", "perfect")
-ear.addCommand("delicate grab", "python", "delicategrab")
-ear.addCommand("release delicate", "python", "releasedelicate")
-ear.addCommand("open your right hand", "python", "openrighthand")
-ear.addCommand("open your left hand", "python", "openlefthand")
-ear.addCommand("surrender", "python", "surrender")
-ear.addCommand("picture on the right side", "python", "picturerightside")
-ear.addCommand("picture on the left side", "python", "pictureleftside")
-ear.addCommand("picture on both sides", "python", "picturebothside")
-ear.addCommand("before happy", "python", "beforehappy")
-ear.addCommand("happy birthday", "python", "happy")
-#ear.addCommand("photo", "python", "photo")
-ear.addCommand("about", "python", "about")
-ear.addCommand("servo", "python", "servos")
-ear.addCommand("how many fingers do you have", "python", "howmanyfingersdoihave")
-
-ear.addComfirmations("yes","correct","ya") 
-ear.addNegations("no","wrong","nope","nah")
- 
-ear.startListening()
 
 def fullspeed():
   i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
@@ -873,5 +805,3 @@ def howmanyfingersdoihave():
      sleep(0.5)
  
      ear.resumeListening()
-
-howmanyfingersdoihave()
