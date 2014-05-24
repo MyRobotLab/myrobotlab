@@ -19,11 +19,13 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 # how to invert the left hand fingers end
 
 # starting parts
-i01.startMouth()
+mouth = i01.startMouth()
+mouth.setGoogleURI("http://thehackettfamily.org/Voice_api/api2.php?voice=Ryan&txt=")
+mouth.speakBlocking("Hello. I am big manly rob now")
 #i01.startLeftHand(leftPort)
 #i01.startLeftArm(leftPort)
 head = i01.startHead(leftPort)
-mouthControl = i01.startMouthControl(leftPort)
+# mouthControl = i01.startMouthControl(leftPort)
 
 webgui = Runtime.createAndStart("webgui","WebGUI")
 
