@@ -48,8 +48,6 @@ webgui = Runtime.createAndStart("webgui","WebGUI")
 #i01.detach()
 #i01.attach()
 
-# verbal commands
-ear = i01.startEar()
 
 # tracking = i01.startHeadTracking(leftPort)
 # tracking.faceDetect()
@@ -76,9 +74,7 @@ ear = i01.startEar()
 # and create a new method named "newGesture"
 #i01.captureGesture("newGesture")
 
-# all ear associations are done python startEar() only starts
 # the peer service
-# After ear.startListening(), the ear will listen for commands
 
 # i01.systemCheck()
  
@@ -367,34 +363,6 @@ def picturebothside():
   i01.moveHand("left",50,86,97,74,106,119)
   i01.moveHand("right",10,112,95,91,125,45)
 
-# power up and power down are implemented in the
-# InMoov service now
-#
-#def powerdown():
-#	sleep(2)	
-#	ear.pauseListening()
-#	i01.rest()
-#	i01.mouth.speakBlocking("I'm powering down")
-#	sleep(2)
-#	i01.moveHead(40, 85);
-#	sleep(4)
-#	rightSerialPort.digitalWrite(53, Arduino.LOW)
-#	leftSerialPort.digitalWrite(53, Arduino.LOW)
-#	ear.lockOutAllGrammarExcept("power up")
-#	sleep(2)
-#	ear.resumeListening()
-#
-#def powerup():
-#	sleep(2)	
-#	ear.pauseListening()
-#	#rightSerialPort.digitalWrite(53, Arduino.HIGH)
-#	#leftSerialPort.digitalWrite(53, Arduino.HIGH)
-#	i01.mouth.speakBlocking("Im powered up")
-#	i01.rest()
-#	ear.clearLock()
-#	sleep(2)
-#	ear.resumeListening()
-#	attach()
 
 def hello():
      i01.setHandSpeed("left", 0.60, 0.60, 1.0, 1.0, 1.0, 1.0)
@@ -407,7 +375,6 @@ def hello():
      i01.moveArm("right",90,144,60,75)
      i01.moveHand("left",112,111,105,102,81,10)
      i01.moveHand("right",0,0,0,50,82,180)
-     ear.pauseListening()
      sleep(1)
 	
      for w in range(0,3):
@@ -441,7 +408,6 @@ def hello():
 		     i01.moveArm("right",90,157,47,75)
 		     i01.moveHand("left",112,111,105,102,81,10)
 		     i01.moveHand("right",3,0,62,41,117,94)
-		     ear.resumeListening()
 
 def photo():	
 	i01.moveHead(87,60)
@@ -489,11 +455,9 @@ def happy():
 		     i01.moveHand("left",0,0,0,0,0,90)
 		     i01.moveHand("right",81,79,118,47,0,90)
 		     sleep(5)
-		     ear.resumeListening()
 
 def about():
 	sleep(2)	
-	ear.pauseListening()
 	sleep(2)
 	i01.setArmSpeed("right", 0.1, 0.1, 0.2, 0.2);
 	i01.setArmSpeed("left", 0.1, 0.1, 0.2, 0.2);
@@ -541,10 +505,8 @@ def about():
 	i01.setArmSpeed("left", 1, 1, 1, 1);
 	i01.setHeadSpeed(1,1)
 	sleep(2)
-	ear.resumeListening()
 
 def servos():	
-	ear.pauseListening()
 	sleep(2)
 	i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
 	i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
@@ -691,10 +653,8 @@ def servos():
 	i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0);
 	further()
 	sleep(2)
-	ear.resumeListening()
 
 def howmanyfingersdoihave():
-     ear.pauseListening()
      sleep(1)
      i01.moveHead(49,74)
      i01.moveArm("left",75,83,79,24)
@@ -813,4 +773,3 @@ def howmanyfingersdoihave():
      further()
      sleep(0.5)
  
-     ear.resumeListening()
