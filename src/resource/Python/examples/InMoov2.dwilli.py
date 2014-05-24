@@ -22,8 +22,15 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 mouth = i01.startMouth()
 mouth.setGoogleURI("http://thehackettfamily.org/Voice_api/api2.php?voice=Ryan&txt=")
 mouth.speakBlocking("Hello. I am big manly rob now")
-i01.startLeftHand(leftPort)
-i01.startRightHand(rightPort)
+leftHand = i01.startLeftHand(leftPort)
+rightHand = i01.startRightHand(rightPort)
+
+rightHand.thumb.invert()
+rightHand.index.invert()
+rightHand.majeure.invert()
+rightHand.ringFinger.invert()
+rightHand.pinky.invert()
+
 # head = i01.startHead(leftPort)
 # mouthControl = i01.startMouthControl(leftPort)
 
