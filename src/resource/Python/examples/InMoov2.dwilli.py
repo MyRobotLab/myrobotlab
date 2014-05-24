@@ -25,12 +25,12 @@ mouth.speakBlocking("Hello. I am big manly rob now")
 leftHand = i01.startLeftHand(leftPort)
 rightHand = i01.startRightHand(rightPort)
 
-rightHand.thumb.invert()
-rightHand.index.invert()
-rightHand.majeure.invert()
-rightHand.ringFinger.invert()
-rightHand.pinky.invert()
-
+rightHand.thumb.setInverted(True)
+rightHand.index.setInverted(True)
+rightHand.majeure.setInverted(True)
+rightHand.ringFinger.setInverted(True)
+rightHand.pinky.setInverted(True)
+i01.speakErrors(False)
 # head = i01.startHead(leftPort)
 # mouthControl = i01.startMouthControl(leftPort)
 
