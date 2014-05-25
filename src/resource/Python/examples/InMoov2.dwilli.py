@@ -10,19 +10,19 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 # starts everything
 #i01.startAll(leftPort, rightPort)
 
-# how to invert the left hand fingers begin
-# i01.leftHand.thumb.setInverted(True)
-# i01.leftHand.index.setInverted(True)
-# i01.leftHand.majeure.setInverted(True)
-# i01.leftHand.ringFinger.setInverted(True)
-# i01.leftHand.pinky.setInverted(True)
-# how to invert the left hand fingers end
-
 # starting parts
 mouth = i01.startMouth()
 mouth.setGoogleURI("http://thehackettfamily.org/Voice_api/api2.php?voice=Ryan&txt=")
 mouth.speakBlocking("Hello. I am big manly rob now")
 leftHand = i01.startLeftHand(leftPort)
+rightHand = i01.startLeftHand(rightPort)
+
+# invert right hand
+i01.rightHand.thumb.setInverted(True)
+i01.rightHand.index.setInverted(True)
+i01.rightHand.majeure.setInverted(True)
+i01.rightHand.ringFinger.setInverted(True)
+i01.rightHand.pinky.setInverted(True)
 
 i01.speakErrors(False)
 # head = i01.startHead(leftPort)
