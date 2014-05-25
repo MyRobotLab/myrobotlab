@@ -2,6 +2,9 @@
 # most parts can be run by uncommenting them
 # InMoov now can be started in modular pieces
 
+# limits for the eyes x axis Min 93   Max 110
+# Limits for Jaw    Min 70   Max 125
+
 leftPort = "COM15"
 rightPort = "COM3"
 
