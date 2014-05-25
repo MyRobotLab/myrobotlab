@@ -27,7 +27,7 @@ rightHand.pinky.setInverted(True)
 i01.speakErrors(False)
 # head = i01.startHead(leftPort)
 # mouthControl = i01.startMouthControl(leftPort)
-
+mouth.speak("starting web gui. i await your command master dw")
 webgui = Runtime.createAndStart("webgui","WebGUI")
 
 # starting part with a reference, with a reference
