@@ -3,7 +3,7 @@
 # InMoov now can be started in modular pieces
 
 leftPort = "COM15"
-rightPort = "COM16"
+rightPort = "COM3"
 
 i01 = Runtime.createAndStart("i01", "InMoov")
 
