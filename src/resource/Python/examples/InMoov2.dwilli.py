@@ -18,11 +18,11 @@ leftHand = i01.startLeftHand(leftPort)
 rightHand = i01.startLeftHand(rightPort)
 
 # invert right hand
-i01.rightHand.thumb.setInverted(True)
-i01.rightHand.index.setInverted(True)
-i01.rightHand.majeure.setInverted(True)
-i01.rightHand.ringFinger.setInverted(True)
-i01.rightHand.pinky.setInverted(True)
+rightHand.thumb.setInverted(True)
+rightHand.index.setInverted(True)
+rightHand.majeure.setInverted(True)
+rightHand.ringFinger.setInverted(True)
+rightHand.pinky.setInverted(True)
 
 i01.speakErrors(False)
 # head = i01.startHead(leftPort)
