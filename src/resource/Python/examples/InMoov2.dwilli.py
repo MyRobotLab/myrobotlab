@@ -19,6 +19,7 @@ mouth.setGoogleURI("http://thehackettfamily.org/Voice_api/api2.php?voice=Ryan&tx
 mouth.speakBlocking("Hello. I am big manly rob now")
 leftHand = i01.startLeftHand(leftPort)
 rightHand = i01.startRightHand(rightPort)
+leftArm = i01.startLeftHand(leftPort)
 
 # invert right hand
 rightHand.thumb.setInverted(True)
