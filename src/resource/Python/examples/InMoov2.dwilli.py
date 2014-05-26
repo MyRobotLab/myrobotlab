@@ -20,6 +20,7 @@ mouth.speakBlocking("Hello. I am big manly rob now")
 leftHand = i01.startLeftHand(leftPort)
 rightHand = i01.startRightHand(rightPort)
 leftArm = i01.startLeftArm(leftPort)
+rightArm = i01.startRightArm(rightPort)
 
 # invert right hand
 rightHand.thumb.setInverted(True)
