@@ -21,6 +21,7 @@ leftHand = i01.startLeftHand(leftPort)
 rightHand = i01.startRightHand(rightPort)
 leftArm = i01.startLeftArm(leftPort)
 rightArm = i01.startRightArm(rightPort)
+head = i01.startHead(leftPort)
 
 # invert right hand
 rightHand.thumb.setInverted(True)
@@ -30,7 +31,7 @@ rightHand.ringFinger.setInverted(True)
 rightHand.pinky.setInverted(True)
 
 i01.speakErrors(False)
-# head = i01.startHead(leftPort)
+
 # mouthControl = i01.startMouthControl(leftPort)
 mouth.speak("starting web gui. i await your command master dw")
 webgui = Runtime.createAndStart("webgui","WebGUI")
