@@ -13,29 +13,25 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 # starts everything
 #i01.startAll(leftPort, rightPort)
 
+
 # starting parts
 mouth = i01.startMouth()
 mouth.setGoogleURI("http://thehackettfamily.org/Voice_api/api2.php?voice=Ryan&txt=")
-mouth.speakBlocking("Hello. I am big manly rob now")
+mouth.speakBlocking("Hello. I'm Mac Daddy G-Man Rob Otto!")
 leftHand = i01.startLeftHand(leftPort)
 rightHand = i01.startRightHand(rightPort)
 leftArm = i01.startLeftArm(leftPort)
 rightArm = i01.startRightArm(rightPort)
 head = i01.startHead(leftPort)
-
-# invert right hand
-rightHand.thumb.setInverted(True)
-rightHand.index.setInverted(True)
-rightHand.majeure.setInverted(True)
-rightHand.ringFinger.setInverted(True)
-rightHand.pinky.setInverted(True)
+mouthControl = i01.startMouthControl(leftPort)
+mouthControl.setmouth(130, 73)
+#mouthControl.jaw.setInverted(True)
 
 i01.speakErrors(False)
 
-# mouthControl = i01.startMouthControl(leftPort)
-mouth.speak("starting web gui. i await your command master dw")
+mouthControl = i01.startMouthControl(leftPort)
+mouth.speak("Give me a second while I start the Inner Webs. I'm wainting on you D-Dub")
 webgui = Runtime.createAndStart("webgui","WebGUI")
-
 # starting part with a reference, with a reference
 # you can interact further
 #opencv = i01.startOpenCV()
@@ -77,7 +73,7 @@ webgui = Runtime.createAndStart("webgui","WebGUI")
 # the peer service
 
 # i01.systemCheck()
- 
+
 
 
 # commands with i01.getName() use the InMoov service methods
@@ -465,11 +461,11 @@ def about():
 	i01.moveArm("right", 64, 94, 10, 10);
 
 
-	i01.mouth.speakBlocking("I am the first life size humanoid robot you can 3D print and animate")
+	i01.mouth.speakBlocking("I am the first life size humanoid robot you can 3D print and animate.")
 	i01.moveHead(65,66)
 	i01.moveArm("left", 64, 104, 10, 10);
 	i01.moveArm("right", 44, 84, 10, 10);
-	i01.mouth.speakBlocking("my designer creator is Gael Langevin a French sculptor, model maker")
+	i01.mouth.speakBlocking("My designer creator is Gael Langevin a French sculptor, model maker")
 	i01.moveHead(75,86)
 	i01.moveArm("left", 54, 104, 10, 10);
 	i01.moveArm("right", 64, 84, 10, 20);
@@ -477,16 +473,16 @@ def about():
 	i01.moveHead(65,96)
 	i01.moveArm("left", 44, 94, 10, 20);
 	i01.moveArm("right", 54, 94, 20, 10);
-	i01.mouth.speakBlocking("this is where Joel, my builder downloaded my files.")
+	i01.mouth.speakBlocking("this is where Dwayne, my builder down loaded all of my files.")
 
 	i01.moveHead(75,76)
 	i01.moveArm("left", 64, 94, 20, 10);
 	i01.moveArm("right", 34, 94, 10, 10);
-	i01.mouth.speakBlocking("after five hundred hours of printing, four kilos of plastic, twenty five hobby servos, blood and sweat.I was brought to life") # should be " i was borght to life."
+	i01.mouth.speakBlocking("after five hundred hours of printing, four kilos of plastic, twenty five hobby servos, blood sweat and gears. I was brought to life") # should be " i was borght to life."
 	i01.moveHead(65,86)
 	i01.moveArm("left", 24, 94, 10, 10);
 	i01.moveArm("right", 24, 94, 10, 10);	
-	i01.mouth.speakBlocking("so if You have a 3D printer, some building skills, then you can build your own version of me") # mabe add in " alot of money"
+	i01.mouth.speakBlocking("So if You have a 3D printer,  and some building skills, then you can build your own version of me") # mabe add in " alot of money"
 	i01.moveHead(85,86)
 	i01.moveArm("left", 4, 94, 20, 30);
 	i01.moveArm("right", 24, 124, 10, 20);
@@ -494,7 +490,7 @@ def about():
 	i01.moveHead(75,96)
 	i01.moveArm("left", 24, 104, 10, 10);
 	i01.moveArm("right", 4, 94, 20, 30);
-	i01.mouth.speakBlocking("I'm just kidding. i need some legs to get around, and i have to over come my  pyro-phobia, a fear of fire") # mabe add in " alot of money"
+	i01.mouth.speakBlocking("BWA HA HA HA HA,  I'm just kidding. i need some legs to get around first, and i have to over come my  pyro-phobia, which is a fear of fire") # mabe add in " alot of money"
 	i01.moveHead(75,96)
 	i01.moveArm("left", 4, 94, 10, 10)
 	i01.moveArm("right", 4, 94, 10, 10);
@@ -773,3 +769,4 @@ def howmanyfingersdoihave():
      further()
      sleep(0.5)
  
+howmanyfingersdoihave()
