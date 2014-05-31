@@ -13,6 +13,7 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 # starts everything
 #i01.startAll(leftPort, rightPort)
 
+
 # starting parts
 mouth = i01.startMouth()
 mouth.setGoogleURI("http://thehackettfamily.org/Voice_api/api2.php?voice=Ryan&txt=")
