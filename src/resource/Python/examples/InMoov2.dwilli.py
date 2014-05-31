@@ -12,7 +12,6 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 
 # starts everything
 #i01.startAll(leftPort, rightPort)
-# test 2
 
 
 # starting parts
