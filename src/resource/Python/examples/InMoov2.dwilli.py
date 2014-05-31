@@ -12,6 +12,7 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 
 # starts everything
 #i01.startAll(leftPort, rightPort)
+# test
 
 
 # starting parts
@@ -769,6 +770,4 @@ def howmanyfingersdoihave():
      further()
      sleep(0.5)
  
-     ear.resumeListening()
-
 howmanyfingersdoihave()
