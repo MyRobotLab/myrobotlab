@@ -12,7 +12,7 @@ i01 = Runtime.createAndStart("i01", "InMoov")
 
 # starts everything
 #i01.startAll(leftPort, rightPort)
-
+#test 3
 
 # starting parts
 mouth = i01.startMouth()
