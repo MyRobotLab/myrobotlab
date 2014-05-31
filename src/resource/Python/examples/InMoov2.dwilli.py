@@ -2,29 +2,35 @@
 # most parts can be run by uncommenting them
 # InMoov now can be started in modular pieces
 
+# limits for the eyes x axis Min 93   Max 110
+# Limits for Jaw    Min 70   Max 125
+
 leftPort = "COM15"
-rightPort = "COM16"
+rightPort = "COM3"
 
 i01 = Runtime.createAndStart("i01", "InMoov")
 
 # starts everything
 #i01.startAll(leftPort, rightPort)
 
-# how to invert the left hand fingers begin
-# i01.leftHand.thumb.setInverted(True)
-# i01.leftHand.index.setInverted(True)
-# i01.leftHand.majeure.setInverted(True)
-# i01.leftHand.ringFinger.setInverted(True)
-# i01.leftHand.pinky.setInverted(True)
-# how to invert the left hand fingers end
-
 # starting parts
-i01.startMouth()
-i01.startLeftHand(leftPort)
-i01.startRightHand(rightPort)
-#i01.startLeftArm(leftPort)
-i01.startHead(leftPort)
-i01.startMouthControl(leftPort)
+mouth = i01.startMouth()
+mouth.setGoogleURI("http://thehackettfamily.org/Voice_api/api2.php?voice=Ryan&txt=")
+mouth.speakBlocking("Hello. I'm Mac Daddy G-Man Rob Otto!")
+leftHand = i01.startLeftHand(leftPort)
+rightHand = i01.startRightHand(rightPort)
+leftArm = i01.startLeftArm(leftPort)
+rightArm = i01.startRightArm(rightPort)
+head = i01.startHead(leftPort)
+mouthControl = i01.startMouthControl(leftPort)
+mouthControl.setmouth(130, 73)
+#mouthControl.jaw.setInverted(True)
+
+i01.speakErrors(False)
+
+mouthControl = i01.startMouthControl(leftPort)
+mouth.speak("Give me a second while I start the Inner Webs. I'm wainting on you D-Dub")
+webgui = Runtime.createAndStart("webgui","WebGUI")
 # starting part with a reference, with a reference
 # you can interact further
 #opencv = i01.startOpenCV()
@@ -37,15 +43,11 @@ i01.startMouthControl(leftPort)
 #i01.detach()
 #i01.attach()
 
-i01.head.rothead.setInverted(True)
-
-i01.systemCheck()
 
 # tracking = i01.startHeadTracking(leftPort)
 # tracking.faceDetect()
 
-# verbal commands
-ear = i01.startEar()
+# i01.systemCheck()
 
 # auto detaches any attached servos after 120 seconds of inactivity
 # i01.autoPowerDownOnInactivity()
@@ -67,83 +69,13 @@ ear = i01.startEar()
 # and create a new method named "newGesture"
 #i01.captureGesture("newGesture")
 
-# all ear associations are done python startEar() only starts
 # the peer service
-# After ear.startListening(), the ear will listen for commands
 
 # i01.systemCheck()
 
+
+
 # commands with i01.getName() use the InMoov service methods
-ear.addCommand("attach", i01.getName(), "attach")
-ear.addCommand("detach", i01.getName(), "detach")
-ear.addCommand("rest", i01.getName(), "rest")
-
-ear.addCommand("power down", i01.getName(), "powerDown")
-ear.addCommand("power up", i01.getName(), "powerUp")
-
-ear.addCommand("open hand", i01.getName(), "handOpen", "both")
-ear.addCommand("close hand", i01.getName(), "handClose", "both")
-ear.addCommand("camera on", i01.getName(), "cameraOn")
-ear.addCommand("off camera", i01.getName(), "cameraOff")
-ear.addCommand("capture gesture", i01.getName(), "captureGesture")
-
-# FIXME - lk tracking setpoint
-ear.addCommand("track", i01.getName(), "track")
-ear.addCommand("freeze track", i01.getName(), "clearTrackingPoints")
-ear.addCommand("hello", "python", "hello")
-ear.addCommand("giving", i01.getName(), "giving")
-ear.addCommand("fighter", i01.getName(), "fighter")
-ear.addCommand("fist hips", i01.getName(), "fistHips")
-ear.addCommand("look at this", i01.getName(), "lookAtThis")
-ear.addCommand("victory", i01.getName(), "victory")
-ear.addCommand("arms up", i01.getName(), "armsUp")
-ear.addCommand("arms front", i01.getName(), "armsFront")
-ear.addCommand("da vinci", i01.getName(), "daVinci")
-
-ear.addCommand("manual", ear.getName(), "lockOutAllGrammarExcept", "voice control")
-ear.addCommand("voice control", ear.getName(), "clearLock")
-ear.addCommand("stop listening", ear.getName(), "stopListening")
-
-##sets the servos back to full speed, anywhere in sequence or gestures
-ear.addCommand("full speed", "python", "fullspeed")
-##sequence1
-ear.addCommand("grab the bottle", "python", "grabthebottle")
-ear.addCommand("take the glass", "python", "grabtheglass")
-ear.addCommand("poor bottle", "python", "poorbottle")
-ear.addCommand("give the glass", "python", "givetheglass")
-##sequence2
-ear.addCommand("take the ball", "python", "takeball")
-ear.addCommand("keep the ball", "python", "keepball")
-ear.addCommand("approach the left hand", "python", "approachlefthand")
-ear.addCommand("use the left hand", "python", "uselefthand")
-ear.addCommand("more", "python", "more")
-ear.addCommand("hand down", "python", "handdown")
-ear.addCommand("is it a ball", "python", "isitaball")
-ear.addCommand("put it down", "python", "putitdown")
-ear.addCommand("drop it", "python", "dropit")
-ear.addCommand("remove your left arm", "python", "removeleftarm")
-ear.addCommand("further", "python", "further")
-##extras
-ear.addCommand("perfect", "python", "perfect")
-ear.addCommand("delicate grab", "python", "delicategrab")
-ear.addCommand("release delicate", "python", "releasedelicate")
-ear.addCommand("open your right hand", "python", "openrighthand")
-ear.addCommand("open your left hand", "python", "openlefthand")
-ear.addCommand("surrender", "python", "surrender")
-ear.addCommand("picture on the right side", "python", "picturerightside")
-ear.addCommand("picture on the left side", "python", "pictureleftside")
-ear.addCommand("picture on both sides", "python", "picturebothside")
-ear.addCommand("before happy", "python", "beforehappy")
-ear.addCommand("happy birthday", "python", "happy")
-#ear.addCommand("photo", "python", "photo")
-ear.addCommand("about", "python", "about")
-ear.addCommand("servo", "python", "servos")
-ear.addCommand("how many fingers do you have", "python", "howmanyfingersdoihave")
-
-ear.addComfirmations("yes","correct","ya") 
-ear.addNegations("no","wrong","nope","nah")
- 
-ear.startListening()
 
 def fullspeed():
   i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
@@ -426,34 +358,6 @@ def picturebothside():
   i01.moveHand("left",50,86,97,74,106,119)
   i01.moveHand("right",10,112,95,91,125,45)
 
-# power up and power down are implemented in the
-# InMoov service now
-#
-#def powerdown():
-#	sleep(2)	
-#	ear.pauseListening()
-#	i01.rest()
-#	i01.mouth.speakBlocking("I'm powering down")
-#	sleep(2)
-#	i01.moveHead(40, 85);
-#	sleep(4)
-#	rightSerialPort.digitalWrite(53, Arduino.LOW)
-#	leftSerialPort.digitalWrite(53, Arduino.LOW)
-#	ear.lockOutAllGrammarExcept("power up")
-#	sleep(2)
-#	ear.resumeListening()
-#
-#def powerup():
-#	sleep(2)	
-#	ear.pauseListening()
-#	#rightSerialPort.digitalWrite(53, Arduino.HIGH)
-#	#leftSerialPort.digitalWrite(53, Arduino.HIGH)
-#	i01.mouth.speakBlocking("Im powered up")
-#	i01.rest()
-#	ear.clearLock()
-#	sleep(2)
-#	ear.resumeListening()
-#	attach()
 
 def hello():
      i01.setHandSpeed("left", 0.60, 0.60, 1.0, 1.0, 1.0, 1.0)
@@ -466,7 +370,6 @@ def hello():
      i01.moveArm("right",90,144,60,75)
      i01.moveHand("left",112,111,105,102,81,10)
      i01.moveHand("right",0,0,0,50,82,180)
-     ear.pauseListening()
      sleep(1)
 	
      for w in range(0,3):
@@ -500,7 +403,6 @@ def hello():
 		     i01.moveArm("right",90,157,47,75)
 		     i01.moveHand("left",112,111,105,102,81,10)
 		     i01.moveHand("right",3,0,62,41,117,94)
-		     ear.resumeListening()
 
 def photo():	
 	i01.moveHead(87,60)
@@ -548,11 +450,9 @@ def happy():
 		     i01.moveHand("left",0,0,0,0,0,90)
 		     i01.moveHand("right",81,79,118,47,0,90)
 		     sleep(5)
-		     ear.resumeListening()
 
 def about():
 	sleep(2)	
-	ear.pauseListening()
 	sleep(2)
 	i01.setArmSpeed("right", 0.1, 0.1, 0.2, 0.2);
 	i01.setArmSpeed("left", 0.1, 0.1, 0.2, 0.2);
@@ -560,11 +460,11 @@ def about():
 	i01.moveArm("right", 64, 94, 10, 10);
 
 
-	i01.mouth.speakBlocking("I am the first life size humanoid robot you can 3D print and animate")
+	i01.mouth.speakBlocking("I am the first life size humanoid robot you can 3D print and animate.")
 	i01.moveHead(65,66)
 	i01.moveArm("left", 64, 104, 10, 10);
 	i01.moveArm("right", 44, 84, 10, 10);
-	i01.mouth.speakBlocking("my designer creator is Gael Langevin a French sculptor, model maker")
+	i01.mouth.speakBlocking("My designer creator is Gael Langevin a French sculptor, model maker")
 	i01.moveHead(75,86)
 	i01.moveArm("left", 54, 104, 10, 10);
 	i01.moveArm("right", 64, 84, 10, 20);
@@ -572,16 +472,16 @@ def about():
 	i01.moveHead(65,96)
 	i01.moveArm("left", 44, 94, 10, 20);
 	i01.moveArm("right", 54, 94, 20, 10);
-	i01.mouth.speakBlocking("this is where Joel, my builder downloaded my files.")
+	i01.mouth.speakBlocking("this is where Dwayne, my builder down loaded all of my files.")
 
 	i01.moveHead(75,76)
 	i01.moveArm("left", 64, 94, 20, 10);
 	i01.moveArm("right", 34, 94, 10, 10);
-	i01.mouth.speakBlocking("after five hundred hours of printing, four kilos of plastic, twenty five hobby servos, blood and sweat.I was brought to life") # should be " i was borght to life."
+	i01.mouth.speakBlocking("after five hundred hours of printing, four kilos of plastic, twenty five hobby servos, blood sweat and gears. I was brought to life") # should be " i was borght to life."
 	i01.moveHead(65,86)
 	i01.moveArm("left", 24, 94, 10, 10);
 	i01.moveArm("right", 24, 94, 10, 10);	
-	i01.mouth.speakBlocking("so if You have a 3D printer, some building skills, then you can build your own version of me") # mabe add in " alot of money"
+	i01.mouth.speakBlocking("So if You have a 3D printer,  and some building skills, then you can build your own version of me") # mabe add in " alot of money"
 	i01.moveHead(85,86)
 	i01.moveArm("left", 4, 94, 20, 30);
 	i01.moveArm("right", 24, 124, 10, 20);
@@ -589,7 +489,7 @@ def about():
 	i01.moveHead(75,96)
 	i01.moveArm("left", 24, 104, 10, 10);
 	i01.moveArm("right", 4, 94, 20, 30);
-	i01.mouth.speakBlocking("I'm just kidding. i need some legs to get around, and i have to over come my  pyro-phobia, a fear of fire") # mabe add in " alot of money"
+	i01.mouth.speakBlocking("BWA HA HA HA HA,  I'm just kidding. i need some legs to get around first, and i have to over come my  pyro-phobia, which is a fear of fire") # mabe add in " alot of money"
 	i01.moveHead(75,96)
 	i01.moveArm("left", 4, 94, 10, 10)
 	i01.moveArm("right", 4, 94, 10, 10);
@@ -600,10 +500,8 @@ def about():
 	i01.setArmSpeed("left", 1, 1, 1, 1);
 	i01.setHeadSpeed(1,1)
 	sleep(2)
-	ear.resumeListening()
 
 def servos():	
-	ear.pauseListening()
 	sleep(2)
 	i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
 	i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
@@ -750,10 +648,8 @@ def servos():
 	i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0);
 	further()
 	sleep(2)
-	ear.resumeListening()
 
 def howmanyfingersdoihave():
-     ear.pauseListening()
      sleep(1)
      i01.moveHead(49,74)
      i01.moveArm("left",75,83,79,24)
