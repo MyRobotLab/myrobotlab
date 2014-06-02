@@ -25,6 +25,9 @@ rightArm = i01.startRightArm(rightPort)
 head = i01.startHead(leftPort)
 mouthControl = i01.startMouthControl(leftPort)
 mouthControl.setmouth(130, 73)
+
+leftArm.omoplate.setRest(11)
+rightArm.omoplate.setRest(11)
 #mouthControl.jaw.setInverted(True)
 
 i01.speakErrors(False)
