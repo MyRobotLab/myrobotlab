@@ -1,10 +1,21 @@
 <!--
-	Dependencies:
+	Dependencies: git 
 	
 	The goal is always to make the build more simple :)
-	Currently the only dependencies come with the git clone in the build directory.
-	Additionaly ant tasks are all Java.
-	TODO - git is assumed - so you probably can get rid of ant git tasks :P
+	Currently the only dependencies come with the git clone are in the build directory.
+	
+	Build Types - Network
+	noNetwork - no network at all - build number will need to be date time stamp
+	minNetwork - a quick local build - no remote git pull - only a http://myrobotlab.org/buildnumber.php?increment 
+				this would be appropriate for very fast deployment - more detail should be flushed out for minimal distribution
+				myrobotlab without root/jars ???  classes only ???
+	fullNetwork - increment + remote git pull - post release etc
+	
+	Build Type - Goals
+	min - local build - min distribution
+	test - junit and Incubator
+	
+	TODO - ivy maven build
 	
 	FIXME !!!- use ivy correctly !
 	FIXME !!!- manage proxy for ivy
@@ -15,7 +26,6 @@
 	curl http://yourserver/jenkins/git/notifyCommit?url=<URL of the Git repository>[&branches=branch1[,branch2]*][&sha1=<commit ID>]
 	
 	
-	TODO - add tests & junit jars to build/lib
 	TODO - use more Ivy to actually manage dependencies
 	TODO use Ivy to place "integration" libraries into build directory for GUIService & Service
 	TODO test on multiple platforms Linux etc
@@ -40,6 +50,10 @@
 	Jenkins->Node->(master)->configure - configure ANT_HOME JAVA_HOME and PATH
 		
 	tasks
+	
+	FIXME - incremental build (no temp)
+	FIXME - need proxy support
+	FIXME - git hub release SHOULD NOT be created before compilation/distribution
 		
 	init
 	compile
@@ -73,51 +87,9 @@
 	References:
 	
 -->
-
-<project name="myrobotlab" default="uploadZip" basedir="." xmlns:git="antlib:com.rimerosolutions.ant.git">
+<!-- FIXME - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
+<project name="myrobotlab" default="uploadMyrobotlab.jar">
 	<description>http://myrobotlab.org myrobotlab build file</description>
-
-	<macrodef name="git">
-		<attribute name="command" />
-		<attribute name="dir" default="" />
-		<element name="args" optional="true" />
-		<sequential>
-			<echo message="git @{command}" />
-			<exec executable="git" dir="@{dir}">
-				<arg value="@{command}" />
-				<args />
-			</exec>
-		</sequential>
-	</macrodef>
-	<macrodef name="git-clone-pull">
-		<attribute name="repository" />
-		<attribute name="dest" />
-		<sequential>
-			<git command="clone">
-				<args>
-					<arg value="@{repository}" />
-					<arg value="@{dest}" />
-				</args>
-			</git>
-			<git command="pull" dir="@{dest}" />
-		</sequential>
-	</macrodef>
-
-	<!-- for local repo only - counts the number of commits against local archive up to the the point of 
-	a tag named "build" -->
-	<exec executable="git" outputproperty="BUILD_NUMBER">
-		<arg value="describe" />
-		<arg value="--match" />
-		<arg value="build" />
-		<redirector>
-			<outputfilterchain>
-				<tokenfilter>
-					<replaceregex pattern="^[^-]+-" replace="" />
-					<replaceregex pattern="-.+$" replace="" />
-				</tokenfilter>
-			</outputfilterchain>
-		</redirector>
-	</exec>
 
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
@@ -134,6 +106,13 @@
 	<property name="build.properties" location="build.properties" />
 	<tstamp />
 
+	<taskdef name="http" classname="org.missinglink.ant.task.http.HttpClientTask">
+		<classpath>
+			<!-- had to modify the original to not dump header auth token to std out -->
+			<pathelement location="${build}/lib/ml-ant-http-1.1.3.1.jar" />
+		</classpath>
+	</taskdef>
+		
 	<!-- ================ init begin ================= -->
 	<target name="init" depends="repoDoesNotExists, repoExists">
 
@@ -145,17 +124,13 @@
 
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
-		<!-- bummer - a lot of work to get jgit working - but comments may not be enabled
-		<git:git directory="." verbose="true" settingsRef="git.testing">
-			<git:log uri="https://github.com/MyRobotLab/repo.git" />
-		</git:git -->
-
 		<!-- mail task properties -->
 		<property name="mail.host" value="smtp.gmail.com" />
 		<property name="mail.port" value="464" />
 		<property name="mail.subjectalert" value="Test build" />
 		<property name="mail.ssl" value="yes" />
 		<property name="mail.username" value="" />
+		
 		<!-- get from local properties file -->
 		<property name="mail.password" value="" />
 		<!-- get from local properties file -->
@@ -173,17 +148,20 @@
 		<property environment="env" />
 		
 		<!-- ============ tag begin ================= -->
-		<!-- TODO .. resolve Travis vs Jenkins by getting build number from http://myrobotlab.org/getBuildNumber.php db identity -->
+		<!-- FIXME - internet build number if available - if fail use date or local file increment? -->
+		
+		<!-- Travis and Jenkin build numbers
 		<echo message="env.BUILD_NUMBER env.BUILD_NUMBER=${env.BUILD_NUMBER}" />
 		<echo message="travis job id - $TRAVIS_JOB_ID" />
-		<!-- <property name="build.number" value="${TRAVIS_JOB_ID}" /> -->
+		 -->
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
 		<property name="build.number" value="${env.BUILD_NUMBER}" />
 		<!-- property name="tag" value="1.0.${build.number}" / -->
 		<!-- property name="tag" value="${DSTAMP}.${TSTAMP}" / -->
 		<!-- TODO add missing link global method http://myrobotlab.org/buildnumber.php !!! -->
 		<!-- local tag git commit index <property name="tag" value="1.0.${BUILD_NUMBER}" /> -->
-		<property name="tag" value="1.0.${build.number}" />
+		
+		<!-- property name="tag" value="${DSTAMP}.${TSTAMP}" /-->
 		<echo message="tag ${tag}" />
 	
 		<property name="comment" value="${DSTAMP}.${TSTAMP}" />
@@ -197,7 +175,13 @@
   		- git commit -a -m "Committed by Travis-CI build number: $TRAVIS_JOB_ID" 
 		-->
 
-		<property name="tag" value="${build.number}" />
+		<!-- property name="tag" value="${build.number}" / -->
+		<!-- property name="tag" value="1.0.${build.number}" /-->
+		
+		<http method="GET" url="http://myrobotlab.org/buildnumber.php?action=increment" expected="200" printresponseheaders="false" printrequestheaders="false" printresponse="true" entityProperty="buildnumber.response">
+			<headers/>
+		</http>
+		<property name="tag" value="1.${buildnumber.response}" />
 		<echo message="tag ${tag}" />
 
 		<!-- Create the build directory structure used by compile -->
@@ -246,7 +230,6 @@
 		<pathelement location="../repo/javax.vecmath/1.5.1/vecmath.jar"/>
 		<pathelement location="../repo/javazoom.jl.player/1.0.1/jl1.0.1.jar"/>
 		<pathelement location="../repo/net.sourceforge.simbad/1.4/simbad-1.4.jar"/>
-		<!-- pathelement location="../repo/org.apache.ivy/2.0.0/ivy.jar"/ -->
 		<pathelement location="../repo/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar"/>
 		<pathelement location="../repo/org.apache.log4j/1.2.14/log4j-1.2.14.jar"/>
 		<pathelement location="../repo/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
@@ -305,6 +288,8 @@
 		<pathelement location="../repo/org.twitter4j.twitter/3.0.5/twitter4j-media-support-3.0.5.jar"/>
 		<pathelement location="../repo/org.twitter4j.twitter/3.0.5/twitter4j-stream-3.0.5.jar"/>
 		<pathelement location="../repo/com.googlecode.simpleopenni/1.96/SimpleOpenNI.jar"/>
+		<pathelement location="../repo/io.netty/4.0.19/netty-all-4.0.19.Final.jar"/>
+		<pathelement location="../repo/org.junit/4.11/junit-4.11.jar"/>
 	</path>
 
 	<!-- class path for testing FIXME - add junit normalize git -->
@@ -314,16 +299,6 @@
 		</fileset>
 	</path>
 
-	<!-- git for ant -->
-	<taskdef uri="antlib:com.rimerosolutions.ant.git" resource="com/rimerosolutions/ant/git/jgit-ant-lib.xml">
-		<classpath>
-			<pathelement location="${build}/lib/ant-git-tasks.jar" />
-			<pathelement location="${build}/lib/org.eclipse.jgit.ant.jar" />
-			<pathelement location="${build}/lib/org.eclipse.jgit.jar" />
-			<pathelement location="${build}/lib/jsch.jar" />
-		</classpath>
-	</taskdef>
-
 	<!-- FIXME !!!- use ivy correctly ! -->
 	<!-- FIXME !!!- manage proxy for ivy -->
 	<!-- =============== repo begin  =============== -->
@@ -332,23 +307,28 @@
 		<available file="../repo" property="repo.present" />
 	</target>
 	<target name="repoExists" depends="repoCheck" if="repo.present">
-		<git command="pull" dir="../repo" />
+		<echo message="git pull ../repo" />
+		<exec executable="git" dir="../repo">
+		    <!-- <arg value="fetch"/> -->
+			<arg value="pull"/>
+		 </exec>
 	</target>
 	<target name="repoDoesNotExists" depends="repoCheck" unless="repo.present">
-		<git command="clone">
-			<args>
-				<arg value="https://github.com/MyRobotLab/repo.git" />
-				<arg value="../repo" />
-			</args>
-		</git>
+		<echo message="git clone https://github.com/MyRobotLab/repo.git ../repo" />
+		<exec executable="git">
+		    <arg value="clone"/>
+		    <arg value="https://github.com/MyRobotLab/repo.git"/>
+		    <arg value="../repo"/>
+		</exec>
 	</target>
 	<!-- =============== repo end  =============== -->
-
+	<!--
 	<taskdef name="upload" classname="no.kinsey.ant.GitHubUploadTask">
 		<classpath>
 			<pathelement location="${build}/lib/githubUpdate.jar" />
 		</classpath>
 	</taskdef>
+	-->
 
 	<target name="compile" depends="init" description="compile the source ">
 		<echo>compile start</echo>
@@ -371,7 +351,7 @@
 		<jar jarfile="${toZip}/libraries/jar/myrobotlab.jar" basedir="${bin}">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
-				<attribute name="Main-Class" value="org.myrobotlab.service.Runtime" />
+				<attribute name="Main-Class" value="org.myrobotlab.Bootstrap" />
 				<attribute name="Built-By" value="${user.name}" />
 				<!-- section name="myrobotlab" -->
 				<section name="compile">
@@ -381,7 +361,7 @@
 					<attribute name="Implementation-Title" value="myrobotlab" />
 					<attribute name="Implementation-Version" value="${tag}" />
 					<attribute name="Implementation-Vendor" value="myrobotlab.org" />
-				</section>
+				</section>				
 			</manifest>
 		</jar>
 
@@ -397,14 +377,9 @@
 		<echo>compile end</echo>
 	</target>
 
-	<taskdef name="http" classname="org.missinglink.ant.task.http.HttpClientTask">
-		<classpath>
-			<!-- had to modify the original to not dump header auth token to std out -->
-			<pathelement location="${build}/lib/ml-ant-http-1.1.3.1.jar" />
-		</classpath>
-	</taskdef>
-
+	<!-- FYI - HTTP STATUS 422 - MEANS YOU ALREADY HAVE THAT RELEASE MADE !!! -->
 	<target name="createGitHubRelease" depends="init">
+		<echo message="token = ${github.token}" />
 		<http method="POST" url="https://api.github.com/repos/MyRobotLab/myrobotlab/releases" expected="201" printresponseheaders="false" printrequestheaders="false" printresponse="false" entityProperty="release.response">
 			<headers>
 				<header name="Authorization" value="token ${github.token}" />
@@ -426,7 +401,7 @@
 		<echo message="${upload_url}" />
 	</target>
 
-	<target name="uploadMyrobotlab.jar" depends="getAssetsURL, compile">
+	<target name="uploadMyrobotlab.jar" depends="compile, getAssetsURL">
 		<echo message="${myrobotlab.jar}" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
@@ -532,7 +507,6 @@
 		</mail>
 	</target>
 
-	<!-- thankfully created in Eclipse -->
 	<target name="javadoc">
 		<javadoc access="public" packagenames="org.myrobotlab.*" author="true" destdir="javadoc" doctitle="myrobotlab" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.7" sourcepath="src" splitindex="true" use="true" version="true">
 			<arg value="-notimestamp" />
