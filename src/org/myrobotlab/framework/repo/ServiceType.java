@@ -85,5 +85,9 @@ public class ServiceType implements Serializable, Comparator<ServiceType>  {
 		}
 		return name.substring(name.lastIndexOf('.') + 1);
 	}
+	
+	public String toString(){
+		return name;
+	}
 
 }

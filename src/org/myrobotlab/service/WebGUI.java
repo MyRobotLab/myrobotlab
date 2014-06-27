@@ -204,7 +204,7 @@ public class WebGUI extends Service {
 	 */
 	public void customize() {
 		try {
-			Zip.extractFromFile("./libraries/jar/myrobotlab.jar", "./", "resource");
+			Zip.extractFromFile("./myrobotlab.jar", "./resource", "resource");
 		} catch (Exception e) {
 			Logging.logException(e);
 		}

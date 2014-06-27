@@ -673,10 +673,15 @@ public class HTTPRequest {
 		// URL u = new URL("http://www.java2s.com/binary.dat");
 		// URLConnection uc = url.openConnection();
 
-		String contentType = connection.getContentType();
-		int contentLength = connection.getContentLength();
+		String contentType = null;
+		int contentLength = -1;
 
-		log.info("contentType " + contentType + " contentLength " + contentLength);
+		// a little weird - this will throw NoSuchElementException 
+		// if nothing was recieved
+		contentType = connection.getContentType();
+		contentLength = connection.getContentLength();
+
+		log.info(String.format("contentType %s contentLength %d", contentType, contentLength));
 
 		InputStream raw;
 		byte[] data = null;
@@ -690,7 +695,7 @@ public class HTTPRequest {
 			byte[] tmp = new byte[initSize];
 			int ret;
 			while ((ret = in.read(tmp)) > 0) {
-				log.info(String.format("read %d bytes", ret));
+				log.debug(String.format("read %d bytes", ret));
 				bos.write(tmp, 0, ret);
 			}
 		} catch (IOException e) {
@@ -874,6 +879,10 @@ public class HTTPRequest {
 		Logging logging = LoggingFactory.getInstance();
 		logging.configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		HTTPRequest http;
+		http = new HTTPRequest("http://www.google.com");
+		String s = http.getString();
 
 		HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File("myrobotlab.log"));
 

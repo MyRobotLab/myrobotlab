@@ -27,10 +27,12 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -140,7 +142,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	private boolean connected = false;
 	private String boardType;
 
-	BlockingQueue<String> blockingData = new LinkedBlockingQueue<String>();
+	BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
 
 	public static final String MRLCOMM_VERSION = "9";
 
@@ -670,7 +672,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			if (serialDevice != null) {
 				blockingData.clear();
 				sendMsg(GET_MRLCOMM_VERSION, 0, 0);
-				String version = blockingData.poll(1000, TimeUnit.MILLISECONDS);
+				String version = (String) blockingData.poll(1000, TimeUnit.MILLISECONDS);
 				return version;
 			} else {
 				return null;
@@ -855,6 +857,14 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							String version = String.format("%d", msg[1]);
 							blockingData.add(version);
 							invoke("publishVersion", String.format("%d", msg[1]));
+							break;
+						}
+						case PULSE_IN: {
+							ByteBuffer buf = ByteBuffer.wrap(msg, 0, 4);
+							long pulse = buf.getLong();
+							// shift
+							blockingData.add(pulse);
+							invoke("publishPulseIn", String.format("%d", msg[1]));
 							break;
 						}
 						case ANALOG_VALUE: {
@@ -1562,13 +1572,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return sketch;
 	}
 
-	public String loadSketchFromFile(String filename) {
-		String newSketch = FileIO.fileToString(filename);
-		if (newSketch != null) {
-			sketch = newSketch;
-			return sketch;
-		}
-		return null;
+	public String loadSketchFromFile(String filename) throws FileNotFoundException {
+		sketch = FileIO.fileToString(filename);
+		return sketch;
 	}
 
 	@Override
@@ -1716,7 +1722,29 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	// FIXME - COMPLETE IMPLEMENTATION END --
 
 	// -- StepperController begin ----
+	
+	public long pulseIn(int pin){
+		return pulseIn(pin, HIGH);
+	}
 
+	// FIXME - implement timeout
+	public long pulseIn(int pin, int value) {
+		try {
+			if (serialDevice != null) {
+				blockingData.clear();
+				sendMsg(PULSE_IN, pin, value);
+				Long pulse = (Long)blockingData.poll(1000, TimeUnit.MILLISECONDS);
+				return pulse;
+			} else {
+				return 0;
+			}
+
+		} catch (Exception e) {
+			Logging.logException(e);
+			return 0;
+		}
+	}
+	
 	public static void main(String[] args) throws RunnerException, SerialDeviceException, IOException {
 
 		LoggingFactory.getInstance().configure();
@@ -1727,5 +1755,15 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		Runtime.createAndStart("python", "Python");
 		Runtime.createAndStart("gui01", "GUIService");
 
+	}
+
+	@Override
+	public int read() throws IOException {
+		return serialDevice.read();
+	}
+
+	@Override
+	public int read(byte[] data) throws IOException {
+		return serialDevice.read(data);
 	}
 }

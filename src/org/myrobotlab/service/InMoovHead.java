@@ -1,9 +1,7 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.Errors;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -231,12 +229,13 @@ public class InMoovHead extends Service {
 	
 	public void test() {
 		try {
+			
 			if (arduino == null) {
-				log.error("arduino is null");
+				error("arduino is null");
 			}
 			
 			if (!arduino.isConnected()){
-				log.error("arduino not connected");
+				error("arduino not connected");
 			}
 
 			rothead.moveTo(rothead.getPosition() + 2);

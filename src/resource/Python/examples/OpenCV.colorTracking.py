@@ -15,17 +15,17 @@ global newy
 opencv = Runtime.createAndStart("opencv","OpenCV")
 opencv.publishState()
 opencv.addFilter("pd","PyramidDown")
-opencv.addFilter("InRange","InRange")
 InRange = OpenCVFilterInRange("InRange")
 InRange.useHue= True
-InRange.hueMinValue = 32
-InRange.hueMaxValue= 51
+InRange.hueMinValue = 22
+InRange.hueMaxValue= 47
 InRange.useSaturation= True
-InRange.saturationMinValue = 21
-InRange.saturationMaxValue = 72
+InRange.saturationMinValue = 88
+InRange.saturationMaxValue = 246
 InRange.useValue= True
-InRange.valueMinValue = 161
-InRange.valueMinValue = 258
+InRange.valueMinValue = 178
+InRange.valueMinValue = 255
+opencv.addFilter(InRange)
 opencv.setDisplayFilter("InRange")
 opencv.addFilter("findcontours","FindContours")
 

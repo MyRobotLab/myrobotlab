@@ -48,7 +48,12 @@ public class Dependency implements Serializable, Comparator<Dependency>  {
 		if (org == null){
 			return null;
 		}
-		return org.substring(org.lastIndexOf("."));
+		int p = org.lastIndexOf(".");
+		if (p == -1){
+			return org;
+		} else {
+			return org.substring(p + 1);
+		}
 	}
 	public boolean isReleased()
 	{
@@ -62,7 +67,7 @@ public class Dependency implements Serializable, Comparator<Dependency>  {
 
 	@Override
 	public String toString() {
-		return String.format("%s %s %s", org, getModule(), revision);
+		return String.format("%s %s %b", org, revision, resolved);
 	}
 
 	public void setResolved(boolean b) {
@@ -76,4 +81,9 @@ public class Dependency implements Serializable, Comparator<Dependency>  {
 	public String getRevision() {
 		return revision;
 	}
+
+	public void setRevision(String revision2) {
+		revision = revision2;
+	}
+
 }

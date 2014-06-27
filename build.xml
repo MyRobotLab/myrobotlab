@@ -124,7 +124,7 @@
 
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
-		<property name="network.available" value="true" />
+		<property name="network.available" value="false" />
 
 		<!-- mail task properties -->
 		<property name="mail.host" value="smtp.gmail.com" />
@@ -187,10 +187,13 @@
 
 		<!-- property name="tag" value="${build.number}" / -->
 		<!-- property name="tag" value="1.0.${build.number}" /-->
+		
+		<!-- need to depends on getTag()
 
 		<http method="GET" url="http://myrobotlab.org/buildnumber.php?action=increment" expected="200" printresponseheaders="false" printrequestheaders="false" printresponse="true" entityProperty="buildnumber.response">
 			<headers />
 		</http>
+		-->
 		<property name="tag" value="1.0.23" />
 		<!-- GOOD <property name="tag" value="1.0.${buildnumber.response}" /> -->
 		<echo message="tag ${tag}" />
@@ -376,6 +379,9 @@
 
 		<echo file="${bin}/resource/version.txt">${tag}</echo>
 
+		<!-- copy the latest serviceData.xml into package -->
+		<copy file="./../repo/serviceData.xml" todir="${bin}/resource/framework" />
+		
 		<jar jarfile="${toZip}/libraries/jar/myrobotlab.jar" basedir="${bin}">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
@@ -398,8 +404,6 @@
 		<copy todir="${toZip}">
 			<fileset dir="${resource.root}" />
 		</copy>
-
-		<copy file="./../repo/serviceData.xml" todir="${toZip}/.myrobotlab" />
 
 		<!-- FIXME - use Ivy to get the files there ! filebase or url resolver -->
 		<echo>compile end</echo>
@@ -473,8 +477,6 @@
 	</target>
 
 	<target name="junit" depends="dist">
-		<!-- FIXME - copy over serviceData.xml & ivy repo - root?  -->
-
 		<copy todir="${build}/resource">
 			<fileset dir="${src}/resource" />
 		</copy>

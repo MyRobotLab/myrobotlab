@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -17,6 +16,8 @@ import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,19 +31,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
-import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.cmdline.CMDLine;
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.framework.Bootstrap;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MessageListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.PreLogger;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.UpdateReport;
@@ -55,6 +60,7 @@ import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.interfaces.Communicator;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
@@ -81,7 +87,7 @@ import org.slf4j.Logger;
  * 
  */
 @Root
-public class Runtime extends Service {
+public class Runtime extends Service implements MessageListener {
 	final static private long serialVersionUID = 1L;
 
 	// ---- rte members begin ----------------------------
@@ -91,19 +97,25 @@ public class Runtime extends Service {
 	/**
 	 * map to hide methods we are not interested in
 	 */
+	// FIXME - REMOVE ALL STATICS !!!
 	static private HashSet<String> hideMethods = new HashSet<String>();
 
 	static private boolean needsRestart = false;
-
-	static boolean checkForUpdates = false;
 
 	static private String runtimeName;
 
 	static private Date startDate = new Date();
 
+	@Element
+	private boolean checkForUpdatesOnStart = true;
+
+	@Element
+	private boolean autoRestartAfterUpdate = false;
+
 	// FYI - can't be transient - "should" be preserved in
 	// network transport - it's the "instances" repo
-	private Repo repo = Repo.getLocalInstance();
+	// FIXME - non static member variables should be initialized in constructor
+	private Repo repo = null;
 
 	private Platform platform = Platform.getLocalInstance();
 
@@ -124,18 +136,14 @@ public class Runtime extends Service {
 	 */
 	private static Runtime runtime = null;
 
-	private static int autoUpdateCheckIntervalSeconds = 300;
-
-	private static String[] startingArgs;
-
-	public static void startAutoUpdate(int seconds) {
-		// isAutoUpdateEnabled = true;
-		autoUpdateCheckIntervalSeconds = seconds;
-		// only runtime can auto-update
-		// FIXME - re-implement but only start if there is a Task -
-		// runtime.timer.schedule(new AutoUpdate(),
-		// autoUpdateCheckIntervalSeconds * 1000);
-	}
+	private List<String> jvmArgs;
+	private List<String> args;
+	
+	/**
+	 * global startingArgs - whatever came into main
+	 * each runtime will have its individual copy
+	 */
+	private static String[] globalArgs;
 
 	public static String getVersion() {
 		return FileIO.resourceToString("version.txt");
@@ -155,44 +163,13 @@ public class Runtime extends Service {
 		return sb.toString();
 	}
 
-	public static void stopAutoUpdate() {
-		// Runtime runtime = Runtime.getInstance();
-		/*
-		 * FIXME - re-implement but only start if there is a task
-		 * runtime.timer.cancel(); runtime.timer.purge();
-		 */
-	}
-
-	// TODO deprecate - this can be handled more generally in a
-	// AutoTask
-	static class AutoUpdate extends TimerTask {
-
-		@Override
-		public void run() {
-			runtime.info("starting auto-update check");
-
-			Updates updates = runtime.repo.checkForUpdates();
-
-			applyUpdates(updates);
-
-			log.info("re-setting timer begin");
-			// FIXME - re-implement but only start if there is a task
-			// runtime.timer.schedule(new AutoUpdate(),
-			// autoUpdateCheckIntervalSeconds * 1000);
-			log.info("re-setting timer end");
-		}
-	}
-
-	/**
-	 * Constructor.
-	 * 
-	 * @param n
-	 */
 	public Runtime(String n) {
 		super(n);
 
 		synchronized (instanceLockObject) {
-			runtime = this;
+			if (runtime == null) {
+				runtime = this;
+			}
 		}
 
 		String libararyPath = System.getProperty("java.library.path");
@@ -203,13 +180,51 @@ public class Runtime extends Service {
 		// TODO this should be a single log statement
 		// http://developer.android.com/reference/java/lang/System.html
 
-		log.info("---------------normalized-------------------");
 		Date now = new Date();
 		String format = "yyyy/MM/dd HH:mm:ss";
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
 		SimpleDateFormat gmtf = new SimpleDateFormat(format);
 		gmtf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		log.info("============== args begin ==============");
+		StringBuffer sb = new StringBuffer();
+		jvmArgs = Bootstrap.getJVMArgs();
+		args = new ArrayList<String>();
+		for (int i = 0; i < globalArgs.length; ++i){
+			sb.append(globalArgs[i]);
+			args.add(globalArgs[i]);
+		}
+		log.info(String.format("jvmArgs %s", Arrays.toString(jvmArgs.toArray())));
+		log.info(String.format("args %s", Arrays.toString(args.toArray())));
+		log.info("============== args end ==============");
+		log.info("============== prelog begin ==============");
+		try {
+			// when having issues next time just close the prelogger... duh
+			Path prelog = Paths.get(PreLogger.PRELOG_FILENAME);
+
+			if (Files.exists(prelog)) {
+				log.info(FileIO.fileToString(PreLogger.PRELOG_FILENAME));
+				log.info(String.format("deleting %s", PreLogger.PRELOG_FILENAME));
+				Files.delete(prelog);
+				log.info(String.format("deleted %s", PreLogger.PRELOG_FILENAME));
+			} else {
+				log.info("prelog does not exist");
+			}
+			
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+		log.info("============== prelog end ==============");
+		log.info("============== env begin ==============");
+		Map<String, String> env = System.getenv();
+		for (Map.Entry<String, String> entry : env.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+			log.info(String.format("%s=%s", key, value));
+		}
+		log.info("============== env end ==============");
+
 		// Platform platform = Platform.getLocalInstance();
+		log.info("============== normalized ==============");
 		log.info("{} - GMT - {}", sdf.format(now), gmtf.format(now));
 		log.info(String.format("ivy [runtime,%s.%d.%s]", platform.getArch(), platform.getBitness(), platform.getOS()));
 		log.info(String.format("os.name [%s] getOS [%s]", System.getProperty("os.name"), platform.getOS()));
@@ -221,7 +236,7 @@ public class Runtime extends Service {
 		log.info(String.format("jar path [%s]", FileIO.getResourceJarPath()));
 		log.info(String.format("sun.arch.data.model [%s]", System.getProperty("sun.arch.data.model")));
 
-		log.info("---------------non-normalized---------------");
+		log.info("============== non-normalized ==============");
 		log.info(String.format("java.vm.name [%s]", vmName));
 		log.info(String.format("java.vm.version [%s]", System.getProperty("java.vm.version")));
 		log.info(String.format("java.vm.vendor [%s]", System.getProperty("java.vm.vendor")));
@@ -236,12 +251,13 @@ public class Runtime extends Service {
 		log.info(String.format("java.class.path [%s]", System.getProperty("java.class.path")));
 		log.info(String.format("java.library.path [%s]", libararyPath));
 		log.info(String.format("user.dir [%s]", userDir));
+
 		log.info(String.format("user.home [%s]", userHome));
 		log.info(String.format("total mem [%d] Mb", Runtime.getTotalMemory() / 1048576));
 		log.info(String.format("total free [%d] Mb", Runtime.getFreeMemory() / 1048576));
 
-		// create local configuration directory
-		new File(cfgDir).mkdir();
+		log.info("getting local repo");
+		repo = new Repo(n);
 
 		hideMethods.add("main");
 		hideMethods.add("loadDefaultConfiguration");
@@ -250,7 +266,7 @@ public class Runtime extends Service {
 		hideMethods.add("access$0");
 
 		// TODO - check for updates on startup ???
-		repo = new Repo();
+		// repo = new Repo();
 
 		// starting this
 		startService();
@@ -303,19 +319,51 @@ public class Runtime extends Service {
 	}
 
 	/**
-	 * publishing event which allows the user to modify the derived updates from
-	 * the repo - this is returned from "checkForUpdates" - depending on
-	 * configuration plus user input (if necessary) determines the final state
-	 * of the Updates pojo
+	 * check repo for updates - this will collect "all" update information both
+	 * service dependency resolution & jar version information
 	 * 
-	 * The "finalized" state then can be processed with applyUpdates
+	 * @return
+	 */
+	static public Updates checkForUpdates() {
+		runtime.invoke("checkingForUpdates");
+		Updates updates = runtime.repo.checkForUpdates();
+		runtime.invoke("publishUpdates", updates);
+		return updates;
+	}
+	
+	/**
+	 * publishing event - since checkForUpdates may take a while
+	 */
+	public void checkingForUpdates(){
+		log.info("checking for updates");
+	}
+
+	/**
+	 * publish the results of a query of updates - to be presented to the user
+	 * for selections
 	 * 
 	 * @param updates
 	 * @return
 	 */
-	/*
-	 * public Updates proposedUpdates(Updates updates){ return updates; }
+	public Updates publishUpdates(Updates updates) {
+		return updates;
+	}
+
+	/**
+	 * this method is called by the user (or system) when a specific service
+	 * needs to be installed (or updated) - it should resolve all the
+	 * dependencies for that service
+	 * 
+	 * @param fullServiceTypeName
+	 *            - full service type for dependency resolution
+	 * @return
 	 */
+	public UpdateReport update(String fullServiceTypeName) {
+		Updates updates = new Updates(runtimeName);
+		updates.isValid = true; // forcing since this is direct request
+		updates.serviceTypesToUpdate.add(fullServiceTypeName);
+		return applyUpdates(updates);
+	}
 
 	/**
 	 * all the data contained in updates is used to apply against the running
@@ -324,14 +372,136 @@ public class Runtime extends Service {
 	 * 
 	 * @param updates
 	 */
-	// TODO - return update report - can handle 1 to many updates
-	synchronized static public UpdateReport applyUpdates(Updates updates) {
-		runtime.repo.getRemoteServiceData();
-		runtime.info("updating myrobotlab.jar");
-		runtime.repo.getLatestVersionJar();
-		// runtime.info("moving jar");
-		// Runtime.restart("moveUpdate");
+	synchronized public UpdateReport applyUpdates(Updates updates) {
+		if (!updates.isValid) {
+			error("can not apply updates - updates are not valid");
+			return null;
+		}
+
+		invoke("updatesBegin", updates);
+
+		ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();		
+		String intertoobTest = null;	
+		try {
+			intertoobTest = repo.getVersionFromRepo();
+			log.info("remote version %s", intertoobTest);
+		} catch (Exception e) {
+		}
+
+		// FIXME support ServiceTypes with dependencies of ServiceTypes !!!
+		// FIXME compress dependencies of all ServiceTypes into 1 unique
+		// list/Hash
+
+		for (int i = 0; i < updates.serviceTypesToUpdate.size(); ++i) {
+			try {
+				ArrayList<ResolveReport> report = repo.retrieveServiceType(updates.serviceTypesToUpdate.get(i));
+				for (int j = 0; j < report.size(); ++j) {
+					reports.add(report.get(j));
+				}
+			} catch (Exception e) {
+				Logging.logException(e);
+			}
+		}
+
+		// FIXME - selectively choose which parts to update !!!
+		// NOT JUST update because there "is" an update - many
+		// potential parts to an update
+
+		if (updates.hasJarUpdate()) {
+			info("updating myrobotlab.jar");
+			if (runtime.repo.getLatestJar()) {
+
+				if (autoRestartAfterUpdate) {
+					// asynch call to get user or config data to determine if a
+					// restart
+					// is desired
+					restart();
+				} else {
+					// async call to request permission to restart
+					// publish requestSpawnBootStrap
+					needsRestart = true;
+					invoke("confirmRestart");
+				}
+
+			}
+		}
+
+		invoke("updatesFinished", reports);
 		return null;
+	}
+
+	/**
+	 * publishing event for the start of updates being applied
+	 */
+	public Updates updatesBegin(Updates updates) {
+		return updates;
+	}
+
+	/**
+	 * publishing event for the end of updates being applied
+	 */
+	public ArrayList<ResolveReport> updatesFinished(ArrayList<ResolveReport> report) {
+		return report;
+	}
+
+	/**
+	 * publishing the updates progress with a series of status messages.
+	 * 
+	 * @return
+	 */
+	final public Status updateProgress(final Status status) {
+		if (status.isError()) {
+			log.error(status.toString());
+		} else {
+			log.info(status.toString());
+		}
+		return status;
+	}
+
+	/**
+	 * invoked to confirm with the user it is appropriate to restart now
+	 * 
+	 * @return - the current autoRestartAfterUpdate to put in dialog to (never
+	 *         ask again)
+	 */
+	public boolean confirmRestart() {
+		needsRestart = true;
+		return autoRestartAfterUpdate;
+	}
+
+	/**
+	 * restart occurs after applying updates - user or config data needs to be
+	 * examined and see if its an appropriate time to restart - if it is the
+	 * spawnBootstrap method will be called and bootstrap.jar will go through
+	 * its sequence to update myrobotlab.jar
+	 */
+	public void restart() {
+		try {
+
+			// final java.lang.Runtime r = java.lang.Runtime.getRuntime();
+			info("restarting");
+			// TODO - timeout release .releaseAll nice ? - check or re-implement
+			Runtime.releaseAll();
+
+			// create bootstrap.jar
+			Bootstrap bootstrap = new Bootstrap();
+			bootstrap.createBootstrapJar();
+
+			// FIXME - get jvm arguments and other original args
+			ArrayList<String> restartArgs = new ArrayList<String>();	
+			for(int i = 0; i < jvmArgs.size(); ++i){
+				restartArgs.add(jvmArgs.get(i));
+			}
+			for(int i = 0; i < args.size(); ++i){
+				restartArgs.add(args.get(i));
+			}
+			bootstrap.spawn(restartArgs);
+			System.exit(0);
+
+			// shutdown / exit
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
 	}
 
 	/**
@@ -941,42 +1111,6 @@ public class Runtime extends Service {
 		return ret;
 	}
 
-	/**
-	 * DEPRICATE saves binary definition of MRL
-	 * 
-	 * @param filename
-	 * @return
-	 */
-	public static boolean save(String filename) {
-		FileOutputStream fos = null;
-		ObjectOutputStream out = null;
-		try {
-
-			// ServiceEnvironment se = getLocalServices();
-
-			fos = new FileOutputStream(filename);
-			out = new ObjectOutputStream(fos);
-
-			out.writeObject(hosts);
-
-			out.writeObject(registry);
-			out.writeObject(hideMethods);
-			out.flush();
-		} catch (Exception e) {
-			Logging.logException(e);
-			return false;
-		} finally {
-			if (out != null) {
-				try {
-					// todo - should we flush first?
-					out.close();
-				} catch (Exception e) {
-				}
-			}
-		}
-
-		return true;
-	}
 
 	public static void dumpToFile() {
 		FileIO.stringToFile(String.format("serviceRegistry.%s.txt", runtime.getName()), Runtime.dump());
@@ -1061,26 +1195,11 @@ public class Runtime extends Service {
 		return ret;
 	}
 
-	/*
-	 * 
-	 * Implementation - now back in Service
-	 * 
-	 * // new transfer state fns public static Service copyState (Service local,
-	 * Service remote) { if (local == remote) return local;
-	 * 
-	 * return local; } // the assumption is remote has been serialized and the
-	 * // top level fields need to be merged over public static Object deepCopy
-	 * (Object local, Object remote) { if (local == remote) return local;
-	 * 
-	 * return local; }
-	 */
-	public static void requestRestart() {
-		needsRestart = true;
-	}
-
 	/**
+	 * needsRestart is set by the update process - or some othe method when a
+	 * restart is needed. Used by other Services to prepare for restart
 	 * 
-	 * @return
+	 * @return needsRestart
 	 */
 	public static boolean needsRestart() {
 		return needsRestart;
@@ -1243,126 +1362,6 @@ public class Runtime extends Service {
 		Runtime.release(name);
 	}
 
-	static String createRestartScript(String[] args) {
-		// String
-		return null;
-	}
-
-	/**
-	 * hack from http://blog.cedarsoft.com/2010/11/setting-java-library-path-
-	 * programmatically/
-	 * 
-	 * @param newPath
-	 */
-	static void setJavaLibraryPath(String newPath) {
-		try {
-			System.setProperty("java.library.path", "/path/to/libs");
-
-			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
-			fieldSysPath.setAccessible(true);
-			fieldSysPath.set(null, null);
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
-	/**
-	 * Main starting method of MyRobotLab Parses command line options
-	 * 
-	 * -h help -v version -list
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-
-		startingArgs = args;
-
-		CMDLine cmdline = new CMDLine();
-		cmdline.splitLine(args);
-
-		Logging logging = LoggingFactory.getInstance();
-
-		try {
-
-			if (cmdline.containsKey("-h") || cmdline.containsKey("--help")) {
-				mainHelp();
-				return;
-			}
-
-			if (cmdline.containsKey("-v") || cmdline.containsKey("--version")) {
-				System.out.print(FileIO.resourceToString("version.txt"));
-				return;
-			}
-			if (cmdline.containsKey("-runtimeName")) {
-				runtimeName = cmdline.getSafeArgument("-runtimeName", 0, "MRL");
-			}
-
-			if (cmdline.containsKey("-logToConsole")) {
-				logging.addAppender(Appender.CONSOLE);
-			} else if (cmdline.containsKey("-logToRemote")) {
-				String host = cmdline.getSafeArgument("-logToRemote", 0, "localhost");
-				String port = cmdline.getSafeArgument("-logToRemote", 1, "4445");
-				logging.addAppender(Appender.REMOTE, host, port);
-			} else {
-				if (cmdline.containsKey("-multiLog")) {
-					logging.addAppender(Appender.FILE, "multiLog", null);
-				} else {
-					logging.addAppender(Appender.FILE);
-				}
-			}
-
-			if (cmdline.containsKey("-autoUpdate")) {
-				startAutoUpdate(autoUpdateCheckIntervalSeconds);
-			}
-
-			logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
-			log.info(cmdline.toString());
-
-			// LINUX LD_LIBRARY_PATH MUST BE EXPORTED - NO OTHER SOLUTION FOUND
-			// hack to reconcile the different ways os handle and expect
-			// "PATH & LD_LIBRARY_PATH" to be handled
-			// found here -
-			// http://blog.cedarsoft.com/2010/11/setting-java-library-path-programmatically/
-			// but does not work
-
-			if (cmdline.containsKey("-update")) {
-				// force all updates
-				ArrayList<String> services = cmdline.getArgumentList("-update");
-
-				if (services.size() == 0) {
-					if (runtime != null) {
-						// runtime.updateAll();
-						runtime.repo.checkForUpdates(); // TODO - call back to
-														// apply updates
-					} else {
-						log.error("runtime is null");
-					}
-					return;
-				} else {
-					// TODO - do specific service install
-					log.error("not implemented yet");
-				}
-			} else {
-				createAndStartServices(cmdline);
-			}
-
-			invokeCommands(cmdline);
-
-			// outbound - auto-connect
-			if (cmdline.containsKey("-connect")) {
-				String host = cmdline.getSafeArgument("-connect", 0, "localhost");
-				String portStr = cmdline.getSafeArgument("-connect", 1, "6767");
-				int port = Integer.parseInt(portStr);
-				runtime.connect(null, null, host, port);
-			}
-
-		} catch (Exception e) {
-			Logging.logException(e);
-			System.out.print(Logging.stackToString(e));
-			Service.sleep(2000);
-		}
-	}
-
 	static public void invokeCommands(CMDLine cmdline) {
 		int argCount = cmdline.getArgumentCount("-invoke");
 		if (argCount > 1) {
@@ -1399,7 +1398,13 @@ public class Runtime extends Service {
 	 * @return
 	 */
 	static public synchronized ServiceInterface create(String name, String type) {
-		return create(name, "org.myrobotlab.service.", type);
+		String fullTypeName;
+		if (type.indexOf(".") == -1) {
+			fullTypeName = String.format("org.myrobotlab.service.%s", type);
+		} else {
+			fullTypeName = type;
+		}
+		return createService(name, fullTypeName);
 	}
 
 	/**
@@ -1412,20 +1417,16 @@ public class Runtime extends Service {
 	 *            - type of Service
 	 * @return
 	 */
-	static public synchronized ServiceInterface create(String name, String pkgName, String type) {
-		try {
-			log.debug("Runtime.create - Class.forName");
-			// get String Class
-			String typeName = pkgName + type;
-			// Class<?> cl = Class.forName(typeName);
-			// Class<?> cl = Class.forName(typeName, false,
-			// ClassLoader.getSystemClassLoader());
-			return createService(name, typeName);
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		return null;
-	}
+	/*
+	 * static public synchronized ServiceInterface create(String name, String
+	 * pkgName, String type) { try {
+	 * log.debug("Runtime.create - Class.forName"); // get String Class String
+	 * typeName = pkgName + type; // Class<?> cl = Class.forName(typeName); //
+	 * Class<?> cl = Class.forName(typeName, false, //
+	 * ClassLoader.getSystemClassLoader()); return createService(name,
+	 * typeName); } catch (Exception e) { Logging.logException(e); } return
+	 * null; }
+	 */
 
 	/**
 	 * @param name
@@ -1441,7 +1442,7 @@ public class Runtime extends Service {
 
 		ServiceInterface sw = Runtime.getService(name);
 		if (sw != null) {
-			log.debug(String.format("service %1$s already exists", name));
+			log.debug(String.format("service %s already exists", name));
 			return sw;
 		}
 
@@ -1459,10 +1460,17 @@ public class Runtime extends Service {
 				log.debug("thread context parent " + Thread.currentThread().getContextClassLoader().getParent().getClass().getCanonicalName());
 			}
 
-			Repo repo = Repo.getLocalInstance();
-			if (!repo.isServiceTypeInstalled(fullTypeName)) {
-				log.error("%s is not installed - please install it", fullTypeName);
-				// return null;
+			// want to use only local instance runtime - but cant check to see
+			// if local runtime exists
+			if (!fullTypeName.equals("org.myrobotlab.service.Runtime")) {
+
+				Repo repo = Runtime.getInstance().getRepo();
+
+				if (!repo.isServiceTypeInstalled(fullTypeName)) {
+					log.error(String.format("%s is not installed - please install it", fullTypeName));
+					// return null;
+				}
+
 			}
 
 			// create an instance
@@ -1605,34 +1613,82 @@ public class Runtime extends Service {
 	// References :
 	// http://java.dzone.com/articles/programmatically-restart-java
 	// better - http://java.dzone.com/articles/programmatically-restart-java
-	static public void restart(String restartScript) {
-		log.info("restart - restart?");
-		Runtime.releaseAll();
-		try {
-			Platform platform = Platform.getLocalInstance();
-			if (restartScript == null) {
-				if (platform.isWindows()) {
-					java.lang.Runtime.getRuntime().exec("cmd /c start myrobotlab.bat");
-				} else {
-					java.lang.Runtime.getRuntime().exec("./myrobotlab.sh");
-				}
-			} else {
-				if (platform.isWindows()) {
-					java.lang.Runtime.getRuntime().exec(String.format("cmd /c start scripts\\%s.cmd", restartScript));
-				} else {
-					String command = String.format("./scripts/%s.sh", restartScript);
-					File exe = new File(command); // FIXME - NORMALIZE !!!!!
-					if (!exe.setExecutable(true)) {
-						log.error(String.format("could not set %s to executable permissions", command));
-					}
-					java.lang.Runtime.getRuntime().exec(command);
-				}
-			}
-		} catch (Exception ex) {
-			Logging.logException(ex);
-		}
-		System.exit(0);
+	/*
+	 * static public void restart(String restartScript) {
+	 * log.info("restart - restart?"); Runtime.releaseAll(); try { Platform
+	 * platform = Platform.getLocalInstance(); if (restartScript == null) { if
+	 * (platform.isWindows()) {
+	 * java.lang.Runtime.getRuntime().exec("cmd /c start myrobotlab.bat"); }
+	 * else { java.lang.Runtime.getRuntime().exec("./myrobotlab.sh"); } } else {
+	 * if (platform.isWindows()) {
+	 * java.lang.Runtime.getRuntime().exec(String.format
+	 * ("cmd /c start scripts\\%s.cmd", restartScript)); } else { String command
+	 * = String.format("./scripts/%s.sh", restartScript); File exe = new
+	 * File(command); // FIXME - NORMALIZE !!!!! if (!exe.setExecutable(true)) {
+	 * log.error(String.format("could not set %s to executable permissions",
+	 * command)); } java.lang.Runtime.getRuntime().exec(command); } } } catch
+	 * (Exception ex) { Logging.logException(ex); } System.exit(0);
+	 * 
+	 * }
+	 */
 
+	// http://javafrustratzone.blogspot.com/2012/01/bash-shell-in-java-cannot-run-program.html
+	// http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html
+	// http://stackoverflow.com/questions/14165517/processbuilder-forwarding-stdout-and-stderr-of-started-processes-without-blocki
+	// http://stackoverflow.com/questions/10954194/start-cmd-by-using-processbuilder
+	// startShell(new String[]{"dir"});
+	public static int startShell(String[] args) throws IOException {
+		Platform platform = Platform.getLocalInstance();
+		String[] shellArgs;
+		if (platform.isWindows()) {
+			shellArgs = new String[args.length + 2];
+			shellArgs[0] = "cmd.exe";
+			shellArgs[1] = "/c"; // "start" ???
+			for (int i = 0; i < args.length; ++i) {
+				shellArgs[i + 2] = args[i];
+			}
+		} else {
+			shellArgs = new String[args.length + 2];
+			shellArgs[0] = "/bin/bash";
+			for (int i = 0; i < args.length; ++i) {
+				shellArgs[i + 1] = args[i];
+			}
+		}
+		// based on platform
+		return startProcess(shellArgs);
+	}
+
+	public static int startProcess(String[] args) throws IOException {
+		/*
+		 * 
+		 * ProcessBuilder testProcess = new ProcessBuilder(); Map environmentMap
+		 * = testProcess.environment(); System.out.println(environmentMap);
+		 * 
+		 * // usual way System.out.println(System.getenv());
+		 * 
+		 * ProcessBuilder dirProcess = new ProcessBuilder("cmd"); File commands
+		 * = new File("C:/process/commands.bat"); File dirOut = new
+		 * File("C:/process/out.txt"); File dirErr = new
+		 * File("C:/process/err.txt");
+		 * 
+		 * dirProcess.redirectInput(commands);
+		 * dirProcess.redirectOutput(dirOut); dirProcess.redirectError(dirErr);
+		 * 
+		 * ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
+		 * pb.redirectErrorStream(true); // use this to capture messages sent to
+		 * stderr Process shell = pb.start(); InputStream shellIn =
+		 * shell.getInputStream(); // this captures the output from the command
+		 * int shellExitStatus = shell.waitFor(); // wait for the shell to
+		 * finish and get the return code InputStreamReader reader = new
+		 * InputStreamReader(shellIn); BufferedReader buf = new
+		 * BufferedReader(reader); // Read lines using buf
+		 */
+
+		// SHOULD BE THREADED? PROLLY
+		Process p = new ProcessBuilder().inheritIO().command(args).start();
+		// p.waitFor();
+		// int rc = p.exitValue();
+		return 0;
 	}
 
 	static class Move implements Runnable {
@@ -1662,6 +1718,14 @@ public class Runtime extends Service {
 
 	}
 
+	/**
+	 * 
+	 * should probably be deprecated - currently not used
+	 * 
+	 * @param runBeforeRestart
+	 * 
+	 *            will this work on a file lock update?
+	 */
 	static public void restart(Runnable runBeforeRestart) {
 		final java.lang.Runtime r = java.lang.Runtime.getRuntime();
 		log.info("restart - restart?");
@@ -1683,7 +1747,7 @@ public class Runtime extends Service {
 			final StringBuffer cmd = new StringBuffer("\"" + java + "\" ");
 
 			// program main and program arguments
-			String[] mainCommand = startingArgs;
+			String[] mainCommand = globalArgs;
 			// program main is a jar
 			if (mainCommand[0].endsWith(".jar")) {
 				// if it's a jar, add -jar mainJar
@@ -1823,46 +1887,6 @@ public class Runtime extends Service {
 		return ret;
 	}
 
-	// TODO - load it up in gui & send it out
-	public static void spawnRemoteMRL(String runtimeName) {
-		HashMap<String, String> services = new HashMap<String, String>();
-		services.put("remote", "RemoteAdapter");
-		newMRLInstance(buildMLRCommandLine(services, runtimeName));
-	}
-
-	public static void newMRLInstance(ArrayList<String> args) {
-		try {
-
-			String separator = System.getProperty("file.separator");
-			// String classpath = System.getProperty("java.class.path");
-			String path = System.getProperty("java.home") + separator + "bin" + separator + "java";
-			// ProcessBuilder processBuilder = new ProcessBuilder(path, "-cp",
-			// classpath, clazz.getCanonicalName());
-			args.add(0, path);
-
-			log.info(Arrays.toString(args.toArray()));
-			ProcessBuilder processBuilder = new ProcessBuilder(args);
-			processBuilder.directory(new File(System.getProperty("user.dir")));
-			processBuilder.redirectErrorStream(true);
-			Process process = processBuilder.start();
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
-	public static void startSecondJVM(Class<? extends Object> clazz, boolean redirectStream) throws Exception {
-		System.out.println(clazz.getCanonicalName());
-		String separator = System.getProperty("file.separator");
-		String classpath = System.getProperty("java.class.path");
-		String path = System.getProperty("java.home") + separator + "bin" + separator + "java";
-		ProcessBuilder processBuilder = new ProcessBuilder(path, "-cp", classpath, clazz.getCanonicalName());
-		processBuilder.redirectErrorStream(redirectStream);
-		Process process = processBuilder.start();
-		process.waitFor();
-		System.out.println("Fin");
-	}
-
 	/**
 	 * unique id's are need for sendBlocking - to uniquely identify the message
 	 * this is a method to support that - it is unique within a process, but not
@@ -1870,16 +1894,10 @@ public class Runtime extends Service {
 	 * 
 	 * @return a unique id
 	 */
-	public static synchronized long getUniqueID() {
+	public static final synchronized long getUniqueID() {
 		++uniqueID;
 		return uniqueID;
 	}
-
-	/*
-	 * public boolean isServiceTypeInstalled(String fullTypeName) { return
-	 * runtime
-	 * .repo.getServiceDataFile().hasUnfulfilledDependencies(fullTypeName); }
-	 */
 
 	public boolean noWorky() {
 		try {
@@ -2054,6 +2072,95 @@ public class Runtime extends Service {
 
 	public Platform getPlatform() {
 		return repo.getPlatform();
+	}
+
+	// FIXME - this is important in the future
+	@Override
+	public void receive(Message msg) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * Main starting method of MyRobotLab Parses command line options
+	 * 
+	 * -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
+	 * -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+
+		// global for this process
+		globalArgs = args;
+
+		CMDLine cmdline = new CMDLine();
+		cmdline.splitLine(args);
+
+		Logging logging = LoggingFactory.getInstance();
+
+		try {
+
+			if (cmdline.containsKey("-h") || cmdline.containsKey("--help")) {
+				mainHelp();
+				return;
+			}
+
+			if (cmdline.containsKey("-v") || cmdline.containsKey("--version")) {
+				System.out.print(FileIO.resourceToString("version.txt"));
+				return;
+			}
+			if (cmdline.containsKey("-runtimeName")) {
+				runtimeName = cmdline.getSafeArgument("-runtimeName", 0, "MRL");
+			}
+
+			if (cmdline.containsKey("-logToConsole")) {
+				logging.addAppender(Appender.CONSOLE);
+			} else if (cmdline.containsKey("-logToRemote")) {
+				String host = cmdline.getSafeArgument("-logToRemote", 0, "localhost");
+				String port = cmdline.getSafeArgument("-logToRemote", 1, "4445");
+				logging.addAppender(Appender.REMOTE, host, port);
+			} else {
+				if (cmdline.containsKey("-multiLog")) {
+					logging.addAppender(Appender.FILE, "multiLog", null);
+				} else {
+					logging.addAppender(Appender.FILE);
+				}
+			}
+
+			logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
+			log.info(cmdline.toString());
+
+			// LINUX LD_LIBRARY_PATH MUST BE EXPORTED - NO OTHER SOLUTION FOUND
+			// hack to reconcile the different ways os handle and expect
+			// "PATH & LD_LIBRARY_PATH" to be handled
+			// found here -
+			// http://blog.cedarsoft.com/2010/11/setting-java-library-path-programmatically/
+			// but does not work
+
+			if (cmdline.containsKey("-update")) {
+				// force all updates
+				ArrayList<String> services = cmdline.getArgumentList("-update");
+				Repo repo = new Repo("update");
+				if (services.size() == 0) {
+					repo.retrieveAll();
+					return;
+				} else {
+					for (int i = 0; i < services.size(); ++i) {
+						repo.retrieveServiceType(services.get(i));
+					}
+				}
+			} else {
+				createAndStartServices(cmdline);
+			}
+
+			invokeCommands(cmdline);
+
+		} catch (Exception e) {
+			Logging.logException(e);
+			System.out.print(Logging.stackToString(e));
+			Service.sleep(2000);
+		}
 	}
 
 }

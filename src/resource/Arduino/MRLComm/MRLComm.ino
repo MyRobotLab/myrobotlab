@@ -40,7 +40,7 @@
 
 #include <Servo.h>
 
-#define MRLCOMM_VERSION      9
+#define MRLCOMM_VERSION      10
 
 #define DIGITAL_WRITE        0
 #define DIGITAL_VALUE        1
@@ -407,6 +407,18 @@ void loop () {
 			Serial.write(MAGIC_NUMBER);
 			Serial.write(2); // size
 			Serial.write(GET_MRLCOMM_VERSION);
+			Serial.write((byte)MRLCOMM_VERSION);
+			break;
+		case PULSE_IN:
+		    //unsigned long timeout = FIXME - implement
+		    unsigned long duration = pulseIn(ioCommand[1], ioCommand[2]);
+		    
+			Serial.write(MAGIC_NUMBER);
+			Serial.write(5); // size
+			Serial.write(PULSE_IN);
+			Serial.write((byte)MRLCOMM_VERSION);
+			Serial.write((byte)MRLCOMM_VERSION);
+			Serial.write((byte)MRLCOMM_VERSION);
 			Serial.write((byte)MRLCOMM_VERSION);
 			break;
 		case SET_SAMPLE_RATE:

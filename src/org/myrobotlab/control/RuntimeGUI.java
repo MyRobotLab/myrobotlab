@@ -25,6 +25,7 @@
 
 package org.myrobotlab.control;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -33,24 +34,30 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -63,15 +70,26 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+import org.apache.ivy.core.report.ResolveReport;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.net.SocketAppender;
+import org.myrobotlab.control.widget.AboutDialog;
+import org.myrobotlab.control.widget.ConnectDialog;
 import org.myrobotlab.control.widget.ProgressDialog;
 import org.myrobotlab.control.widget.Style;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.Dependency;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.Updates;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.logging.Appender;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
@@ -80,10 +98,13 @@ import org.slf4j.Logger;
 
 public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
-	public final static Logger log = LoggerFactory.getLogger(RuntimeGUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(RuntimeGUI.class);
 	static final long serialVersionUID = 1L;
 
 	HashMap<String, ServiceEntry> nameToServiceEntry = new HashMap<String, ServiceEntry>();
+	JDialog updateDialog = null;
+	ArrayList<String> resolveErrors = null;
+	boolean localRepoChange = false;
 
 	int popupRow = 0;
 
@@ -93,9 +114,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	JMenuItem releaseMenuItem = null;
 
 	String possibleServiceFilter = null;
-
-	// FIXME - don't assume local runtime
-	// ServiceInfo serviceInfo = null;//Runtime.getInstance().getServiceInfo();
+	ProgressDialog progressDialog = null;
 
 	Runtime myRuntime = null;
 
@@ -123,7 +142,8 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			return getValueAt(0, column).getClass();
 		}
 	};
-	JList currentServices = new JList(currentServicesModel);
+
+	JList runningServices = new JList(currentServicesModel);
 	CurrentServicesRenderer currentServicesRenderer = new CurrentServicesRenderer();
 	FilterListener filterListener = new FilterListener();
 	JPopupMenu popup = new JPopupMenu();
@@ -139,14 +159,16 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	}
 
 	public void init() {
-		gc.gridx = 0;
-		gc.gridy = 0;
+		display.setLayout(new BorderLayout());
+
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setVisible(false);
 
 		getCurrentServices();
 
-		currentServices.setCellRenderer(currentServicesRenderer);
+		runningServices.setCellRenderer(currentServicesRenderer);
+		runningServices.setFixedCellWidth(200);
 
-		currentServices.setFixedCellWidth(200);
 		possibleServicesModel.addColumn("");
 		possibleServicesModel.addColumn("");
 		possibleServices.setRowHeight(24);
@@ -155,8 +177,8 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 		possibleServices.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		TableColumn col = possibleServices.getColumnModel().getColumn(0);
-		col.setPreferredWidth(150);
+		TableColumn col = possibleServices.getColumnModel().getColumn(1);
+		col.setPreferredWidth(10);
 		possibleServices.setPreferredScrollableViewportSize(new Dimension(300, 480));
 		// set map to determine what types get rendered
 		possibleServices.setDefaultRenderer(ImageIcon.class, cellRenderer);
@@ -180,12 +202,14 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				popupRow = source.rowAtPoint(e.getPoint());
 				ServiceEntry c = (ServiceEntry) possibleServicesModel.getValueAt(popupRow, 0);
 				releaseMenuItem.setVisible(false);
-				
-				// "if" - the data already exists - (non transient) - then it should be correct
-				// for remote systems - but if it's "refreshed" it won't be correct
+
+				// "if" - the data already exists - (non transient) - then it
+				// should be correct
+				// for remote systems - but if it's "refreshed" it won't be
+				// correct
 				Repo repo = myRuntime.getRepo();
 				ServiceData serviceData = repo.getServiceDataFile();
-				if (serviceData.hasUnfulfilledDependencies("org.myrobotlab.service." + c.type)) {
+				if (serviceData.hasUnfulfilledDependencies(c.type)) {
 					// need to install it
 					installMenuItem.setVisible(true);
 					startMenuItem.setVisible(false);
@@ -194,15 +218,6 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 					// have it
 					installMenuItem.setVisible(false);
 					startMenuItem.setVisible(true);
-					/* FIXME - need to process checkForUpdates()
-					if (myRuntime.getServiceInfo().checkForUpgrade("org.myrobotlab.service." + c.type).size() > 0) {
-						// has dependencies which can be upgraded
-						upgradeMenuItem.setVisible(true);
-					} else {
-						// no upgrade available
-						upgradeMenuItem.setVisible(false);
-					}
-					*/
 				}
 
 				int column = source.columnAtPoint(e.getPoint());
@@ -216,7 +231,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 		});
 
-		currentServices.addMouseListener(new MouseAdapter() {
+		runningServices.addMouseListener(new MouseAdapter() {
 			// isPopupTrigger over OSs - use masks
 			public void mouseReleased(MouseEvent e) {
 				log.debug("mouseReleased");
@@ -276,12 +291,10 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 		// getPossibleServices("all");
 
-		GridBagConstraints inputgc = new GridBagConstraints();
-
-		JScrollPane currentServicesScrollPane = new JScrollPane(currentServices);
+		JScrollPane runningServicesScrollPane = new JScrollPane(runningServices);
 		JScrollPane possibleServicesScrollPane = new JScrollPane(possibleServices);
 
-		currentServices.setVisibleRowCount(20);
+		runningServices.setVisibleRowCount(20);
 
 		// make category filter buttons
 		JPanel filters = new JPanel(new GridBagLayout());
@@ -295,46 +308,70 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		filters.add(nofilter, fgc);
 		++fgc.gridy;
 
-		/* FIXME - need categories
-		String[] cats = myRuntime.getServiceInfo().getUniqueCategoryNames();
+		Repo repo = myRuntime.getRepo();
+
+		ServiceData sd = repo.getServiceDataFile();
+		String[] cats = sd.getCategoryNames();
+
 		for (int j = 0; j < cats.length; ++j) {
 			JButton b = new JButton(cats[j]);
 			b.addActionListener(filterListener);
 			filters.add(b, fgc);
 			++fgc.gridy;
 		}
-		*/
 
-		JPanel input = new JPanel();
-		input.setLayout(new GridBagLayout());
-		inputgc.anchor = GridBagConstraints.NORTH;
-		inputgc.gridx = 0;
-		inputgc.gridy = 1;
-		input.add(filters, inputgc);
-		++inputgc.gridx;
-		inputgc.gridy = 0;
-		input.add(new JLabel("possible services"), inputgc);
-		inputgc.gridy = 1;
-		// possibleServicesScrollPane.setBorder(BorderFactory.createEmptyBorder());
-		input.add(possibleServicesScrollPane, inputgc);
-		++inputgc.gridx;
-		// input.add(getReleaseServiceButton(), inputgc);
-		++inputgc.gridx;
-		// input.add(getAddServiceButton(), inputgc);
-		++inputgc.gridx;
-		inputgc.gridy = 0;
-		input.add(new JLabel("running services"), inputgc);
-		inputgc.gridy = 1;
-		input.add(currentServicesScrollPane, inputgc);
+		JPanel possibleServicesPanel = new JPanel(new GridBagLayout());
+		fgc.gridy = 0;
+		fgc.gridx = 0;
+		fgc.fill = GridBagConstraints.HORIZONTAL;
+		possibleServicesPanel.add(new JLabel("possible services"), fgc);
+		++fgc.gridy;
+		possibleServicesPanel.add(possibleServicesScrollPane, fgc);
+
+		JPanel runningServicesPanel = new JPanel(new GridBagLayout());
+		fgc.gridy = 0;
+		fgc.gridx = 0;
+		fgc.fill = GridBagConstraints.HORIZONTAL;
+		runningServicesPanel.add(new JLabel("running services"), fgc);
+		++fgc.gridy;
+		runningServicesPanel.add(runningServicesScrollPane, fgc);
+
+		JPanel center = new JPanel();
+		center.add(filters);
+		center.add(possibleServicesPanel);
+		center.add(runningServicesPanel);
 
 		TitledBorder title;
 		title = BorderFactory.createTitledBorder("services");
-		input.setBorder(title);
+		center.setBorder(title);
 
-		display.add(input, gc);
+		JMenuBar menuBar = new JMenuBar();
+		JMenu system = new JMenu("system");
+		menuBar.add(system);
+		JMenu logging = new JMenu("logging");
+		menuBar.add(logging);
 
-		++gc.gridy;
-		gc.gridx = 0;
+		JMenuItem item = new JMenuItem("about");
+		item.addActionListener(this);
+		system.add(item);
+		item = new JMenuItem("check for updates");
+		item.addActionListener(this);
+		system.add(item);
+		item = new JMenuItem("record");
+		item.addActionListener(this);
+		system.add(item);
+
+		JMenu m1 = new JMenu("level");
+		logging.add(m1);
+		buildLogLevelMenu(m1);
+
+		m1 = new JMenu("type");
+		logging.add(m1);
+		buildLogAppenderMenu(m1);
+
+		display.add(menuBar, BorderLayout.NORTH);
+		display.add(center, BorderLayout.CENTER);
+
 	}
 
 	public void getCurrentServices() {
@@ -347,13 +384,12 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		while (it.hasNext()) {
 			String serviceName = it.next();
 			ServiceInterface sw = services.get(serviceName);
-			String shortClassName = sw.getSimpleName();
 			if (sw.getHost() != null) {
-				ServiceEntry se = new ServiceEntry(serviceName, shortClassName, true);
+				ServiceEntry se = new ServiceEntry(serviceName, sw.getType(), true);
 				currentServicesModel.addElement(se);
 				nameToServiceEntry.put(serviceName, se);
 			} else {
-				ServiceEntry se = new ServiceEntry(serviceName, shortClassName, false);
+				ServiceEntry se = new ServiceEntry(serviceName, sw.getType(), false);
 				currentServicesModel.addElement(se);
 				nameToServiceEntry.put(serviceName, se);
 			}
@@ -363,7 +399,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	// Called from GUIService - after making msg route from Runtime.registered
 	public ServiceInterface registered(Service sw) {
 		if (!nameToServiceEntry.containsKey(sw.getName())) {
-			String typeName = (sw == null) ? "unknown" : sw.getSimpleName();
+			String typeName = (sw == null) ? "unknown" : sw.getType();
 			ServiceEntry newServiceEntry = new ServiceEntry(sw.getName(), typeName, (sw.getHost() != null));
 			currentServicesModel.addElement(newServiceEntry);
 			nameToServiceEntry.put(sw.getName(), newServiceEntry);
@@ -386,43 +422,41 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-		/* FIXME - refactor to general updateProcessStatus
-		subscribe("resolveSuccess", "resolveSuccess", String.class);
-		subscribe("resolveError", "resolveError", String.class);
-		subscribe("resolveBegin", "resolveBegin", String.class);
-		subscribe("resolveEnd", "resolveEnd");
-		subscribe("newArtifactsDownloaded", "newArtifactsDownloaded", String.class);
-		subscribe("failedDependency", "failedDependency", String.class);
-		subscribe("proposedUpdates", "proposedUpdates", ServiceDataManager.class);
-		*/
-		
-		unsubscribe("checkForUpdates", "proposedUpdates", Updates.class);
+
+		// check to see if there are updates
+		subscribe("checkingForUpdates", "checkingForUpdates");
+
+		// results of checkForUpdates
+		subscribe("publishUpdates", "publishUpdates", Updates.class);
+
+		subscribe("updatesBegin", "updatesBegin", Updates.class);
+		subscribe("updateProgress", "updateProgress", Status.class);
+		subscribe("updatesFinished", "updatesFinished", ArrayList.class);
+
+		// FIXME - remove
+		subscribe("confirmRestart", "confirmRestart", Boolean.class);
 
 		// get the service info for the bound runtime (not necessarily local)
 		subscribe("getServiceTypeNames", "onPossibleServicesRefresh", String[].class);
 
-		// myService.send(boundServiceName, "broadcastState");
-
-		// FIXME !!! - flakey - do to subscribe not processing before this
-		// meathod? Dunno???
 		getPossibleServices("all");
 	}
 
 	@Override
 	public void detachGUI() {
-		
-		/* FIXME - refactored into general updateProcessStatus
-		unsubscribe("resolveSuccess", "resolveSuccess", String.class);
-		unsubscribe("resolveError", "resolveError", String.class);
-		unsubscribe("resolveBegin", "resolveBegin", String.class);
-		unsubscribe("resolveEnd", "resolveEnd");
-		unsubscribe("newArtifactsDownloaded", "newArtifactsDownloaded", String.class);
 
-		unsubscribe("registered", "registered", ServiceInterface.class);
-		unsubscribe("released", "released", ServiceInterface.class);
-		unsubscribe("failedDependency", "failedDependency", String.class);
-		*/
-		unsubscribe("checkForUpdates", "proposedUpdates", Updates.class);
+		unsubscribe("checkingForUpdates", "checkingForUpdates");
+
+		unsubscribe("publishUpdates", "publishUpdates", Updates.class);
+
+		unsubscribe("updatesBegin", "updatesBegin", Updates.class);
+		unsubscribe("updateProgress", "updateProgress", Status.class);
+		unsubscribe("updatesFinished", "updatesFinished", ArrayList.class);
+
+		// FIXME - remove
+		unsubscribe("confirmRestart", "confirmRestart", Boolean.class);
+
+		// get the service info for the bound runtime (not necessarily local)
 		unsubscribe("getServiceTypeNames", "onPossibleServicesRefresh", String[].class);
 	}
 
@@ -432,7 +466,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 	class ServiceEntry {
 		public String name;
-		public String type;
+		private String type;
 		public boolean loaded = false;
 		public boolean isRemote = false;
 
@@ -442,8 +476,28 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			this.isRemote = isRemote;
 		}
 
-		public String toString() {
+		public String getType() {
 			return type;
+		}
+
+		public void setType(String type) {
+			// if (type.indexOf(".") == -1) {
+			// this.type = String.format("org.myrobotlab.service.%s", type);
+			// } else {
+			this.type = type;
+			// }
+		}
+
+		public String getSimpleName() {
+			if (type.indexOf(".") != -1) {
+				return type.substring(type.lastIndexOf(".") + 1);
+			} else {
+				return type;
+			}
+		}
+
+		public String toString() {
+			return getSimpleName();
 		}
 	}
 
@@ -464,7 +518,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 			// ImageIcon icon = Util.getScaledIcon(Util.getImage((entry.type +
 			// ".png").toLowerCase(), "unknown.png"), 0.50);
-			ImageIcon icon = Util.getScaledIcon(Util.getImage((entry.type + ".png"), "unknown.png"), 0.50);
+			ImageIcon icon = Util.getScaledIcon(Util.getImage((entry.getSimpleName() + ".png"), "unknown.png"), 0.50);
 			setIcon(icon);
 
 			if (isSelected) {
@@ -490,7 +544,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		myService.send(boundServiceName, "getServiceTypeNames", filter);
 	}
 
-	public void onPossibleServicesRefresh(final String[] sscn) {
+	public void onPossibleServicesRefresh(final String[] serviceTypeNames) {
 		log.info("here");
 		// FIXED - a new AWT Thread is spawned off to do the rendering
 		SwingUtilities.invokeLater(new Runnable() {
@@ -503,12 +557,12 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 				// FIXME
 				// String[] sscn = Runtime.getServiceTypeNames(filter);
-				ServiceEntry[] ses = new ServiceEntry[sscn.length];
+				ServiceEntry[] ses = new ServiceEntry[serviceTypeNames.length];
 				ServiceEntry se = null;
 
 				for (int i = 0; i < ses.length; ++i) {
 					// log.info("possible service {}", i);
-					se = new ServiceEntry(null, sscn[i], false);
+					se = new ServiceEntry(null, serviceTypeNames[i], false);
 
 					possibleServicesModel.addRow(new Object[] { se, "" });
 				}
@@ -519,6 +573,8 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		});
 	}
 
+	// FIXME - checkingForUpdates needs to process ? versus display current
+	// ServiceTypes
 	class CellRenderer extends DefaultTableCellRenderer {
 		private static final long serialVersionUID = 1L;
 
@@ -528,32 +584,29 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			Repo repo = myRuntime.getRepo();
 			setEnabled(table == null || table.isEnabled());
 			ServiceEntry entry = (ServiceEntry) table.getValueAt(row, 0);
-			// FIXME - "org.myrobotlab.service." + is not allowed "anywhere" -
-			// cept in overloaded methods
-			boolean available = !(repo.getServiceDataFile().hasUnfulfilledDependencies("org.myrobotlab.service." + entry.type));
+
+			ServiceData serviceData = repo.getServiceDataFile();
+			boolean availableToInstall = !serviceData.hasUnfulfilledDependencies(entry.type);
 			boolean upgradeAvailable = false;
 
 			String upgradeString = "<html><h6>upgrade<br>";
-			/* FIXME - process checkForUpdates
-			List<Dependency> deps = info.checkForUpgrade("org.myrobotlab.service." + entry.type);
-			if (deps.size() > 0) {
-				upgradeAvailable = true;
-				for (int i = 0; i < deps.size(); ++i) {
-					upgradeString += deps.get(i).getModule() + " " + deps.get(i).getRevision();
+			/*
+			 * FIXME - process checkingForUpdates List<Dependency> deps =
+			 * info.checkForUpgrade("org.myrobotlab.service." + entry.type); if
+			 * (deps.size() > 0) { upgradeAvailable = true; for (int i = 0; i <
+			 * deps.size(); ++i) { upgradeString += deps.get(i).getModule() +
+			 * " " + deps.get(i).getRevision();
+			 * 
+			 * if (i < deps.size() - 1) { upgradeString += "<br>"; }
+			 * 
+			 * } upgradeString += "</h6></html>"; }
+			 */
 
-					if (i < deps.size() - 1) {
-						upgradeString += "<br>";
-					}
-
-				}
-				upgradeString += "</h6></html>";
-			}
-			*/
-
+			// select by class being published by JTable on how to display
 			if (value.getClass().equals(ServiceEntry.class)) {
 				setHorizontalAlignment(JLabel.LEFT);
-				setIcon(Util.getScaledIcon(Util.getImage((entry.type + ".png"), "unknown.png"), 0.50));
-				setText(entry.type);
+				setIcon(Util.getScaledIcon(Util.getImage((entry.getSimpleName() + ".png"), "unknown.png"), 0.50));
+				setText(entry.getSimpleName());
 				// setToolTipText("<html><body bgcolor=\"#E6E6FA\">" +
 				// entry.type+
 				// " <a href=\"http://myrobotlab.org\">blah</a></body></html>");
@@ -562,7 +615,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				setIcon(null);
 				setHorizontalAlignment(JLabel.LEFT);
 
-				if (!available) {
+				if (!availableToInstall) {
 					setText("<html><h6>not<br>installed&nbsp;</h6></html>");
 				} else {
 					if (upgradeAvailable) {
@@ -581,7 +634,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				setForeground(Style.listForeground);
 			} else {
 
-				if (!available) {
+				if (!availableToInstall) {
 					setForeground(Style.listForeground);
 					setBackground(Style.possibleServicesNotInstalled);
 				} else {
@@ -611,7 +664,17 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				getPossibleServices(cmd.getActionCommand());
 			}
 		}
+	}
 
+	public void checkingForUpdates() {
+		// FIXME - if auto update or check on startup - we don't want a silly
+		// dialog
+		// we just want to be notified if there "is" an update - and whether or
+		// not we
+		// should apply it
+
+		// FIXME - bypass is auto
+		progressDialog.checkingForUpdates();
 	}
 
 	/**
@@ -621,52 +684,79 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	 * @param si
 	 * @return
 	 */
-	public Updates proposedUpdates(Updates updates) {
-		getPossibleServices("all");
-		return updates;
-	}
+	public void publishUpdates(Updates updates) {
+		// depending on update changes options - no updates available
 
+		progressDialog.publishUpdates(updates);
+		// getPossibleServices("all");
+	}
+//zod
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		ServiceEntry c = (ServiceEntry) possibleServicesModel.getValueAt(popupRow, 0);
 		String cmd = event.getActionCommand();
 		Object o = event.getSource();
+		
 		if (releaseMenuItem == o) {
 			myService.send(boundServiceName, "releaseService", releasedTarget.name);
 			return;
 		}
 
 		if ("info".equals(cmd)) {
-			BareBonesBrowserLaunch.openURL("http://myrobotlab.org/service/" + c.type);
-
+			BareBonesBrowserLaunch.openURL("http://myrobotlab.org/service/" + c.getSimpleName());
 		} else if ("install".equals(cmd)) {
 			int selectedRow = possibleServices.getSelectedRow();
 
-			String newService = ((ServiceEntry) possibleServices.getValueAt(selectedRow, 0)).toString();
-			String fullTypeName = "org.myrobotlab.service." + newService;
+			ServiceEntry entry = ((ServiceEntry) possibleServices.getValueAt(selectedRow, 0));
 			Repo repo = myRuntime.getRepo();
 
-			if (repo.getServiceDataFile().hasUnfulfilledDependencies(fullTypeName)) {
+			if (repo.getServiceDataFile().hasUnfulfilledDependencies(entry.getType())) {
 				// dependencies needed !!!
 				String msg = "<html>This Service has dependencies which are not yet loaded,<br>" + "do you wish to download them now?";
 				JOptionPane.setRootFrame(myService.getFrame());
-				int result = JOptionPane.showConfirmDialog((Component) null, msg, "alert", JOptionPane.OK_CANCEL_OPTION);
+				int result = JOptionPane.showConfirmDialog(myService.getFrame(), msg, "alert", JOptionPane.OK_CANCEL_OPTION);
 				if (result == JOptionPane.CANCEL_OPTION) {
 					return;
 				}
-
-				myService.send(boundServiceName, "update", "org.myrobotlab.service." + c.type);
+				// you say "install", i say "update", repo says "resolve"
+				myService.send(boundServiceName, "update", c.type);
 			} else {
 				// no unfulfilled dependencies - good to go
-				addNewService(newService);
+				addNewService(entry.getType());
 			}
 
 		} else if ("start".equals(cmd)) {
 			int selectedRow = possibleServices.getSelectedRow();
-			String newService = ((ServiceEntry) possibleServices.getValueAt(selectedRow, 0)).toString();
-			addNewService(newService);
+			ServiceEntry entry = ((ServiceEntry) possibleServices.getValueAt(selectedRow, 0));
+			addNewService(entry.getType());
 		} else if ("upgrade".equals(cmd)) {
-			myService.send(Runtime.getInstance().getName(), "update", "org.myrobotlab.service." + c.type);
+			/* IMPORTANT - INSTALL OF A SERVICE */
+			// send to "my" runtime - may be remote
+			myService.send(myRuntime.getName(), "update", c.type);
+		} else if ("about".equals(cmd)) {
+			new AboutDialog(myService);
+		} else if ("check for updates".equals(cmd)) {
+			myService.send(myRuntime.getName(), "checkForUpdates");
+		} else if (cmd.equals(Level.DEBUG) || cmd.equals(Level.INFO) || cmd.equals(Level.WARN) || cmd.equals(Level.ERROR) || cmd.equals(Level.FATAL)) {
+			// TODO this needs to be changed into something like tryValueOf(cmd)
+			Logging logging = LoggingFactory.getInstance();
+			logging.setLevel(cmd);
+		} else if (cmd.equals(Appender.NONE)) {
+			Logging logging = LoggingFactory.getInstance();
+			logging.removeAllAppenders();
+			
+		/*} else if (cmd.equals(Appender.REMOTE)) {
+			JCheckBoxMenuItem m = (JCheckBoxMenuItem) ae.getSource();
+			if (m.isSelected()) {
+				ConnectDialog dlg = new ConnectDialog(new JFrame(), "connect to remote logging", "message", this, "127.0.0.1", "6767");
+				Logging logging = LoggingFactory.getInstance();
+				logging.addAppender(Appender.REMOTE, dlg.host.getText(), dlg.port.getText());
+			} else {
+				Logging logging = LoggingFactory.getInstance();
+				logging.removeAppender(Appender.REMOTE);
+			}
+			*/
+			
 		} else {
 			log.error("unknown command " + cmd);
 		}
@@ -674,8 +764,6 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		// end actionCmd
 
 	}
-
-	ProgressDialog progressDialog = null;
 
 	public void addNewService(String newService) {
 		JFrame frame = new JFrame();
@@ -688,64 +776,48 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		}
 	}
 
-	JDialog updateDialog = null;
-	List<String> resolveErrors = null;
+	/**
+	 * this is the beginning of the applyUpdates process
+	 * 
+	 * @param updates
+	 * @return
+	 */
+	public Updates updatesBegin(Updates updates) {
+		progressDialog.beginUpdates();
+		return updates;
+	}
 
-	public String resolveBegin(String className) // per dependency module
-	{
-		// FIXME - start dialog - warn previously internet connection necessary
+	/**
+	 * progress messages relating to an update
+	 * 
+	 * @param status
+	 * @return
+	 */
+	public Status updateProgress(Status status) {
+		// FIXME - start dialog - warn previously Internet connection necessary
 		// no proxy
-		if (progressDialog == null) {
-			progressDialog = new ProgressDialog(myService.getFrame());
-			progressDialog.setVisible(true);
-		}
 
-		resolveErrors = null;
-		progressDialog.addInfo("checking for latest version of " + className);
-		progressDialog.addInfo("attempting to retrieve " + className + " info");
-
-		return className;
-	}
-
-	public List<String> resolveError(List<String> errors) {
-		if (progressDialog == null) {
-			progressDialog = new ProgressDialog(myService.getFrame());
-		}
-		// FIXME - dialog - there are errors which - cancel? or terminate
-		resolveErrors = errors;
-		progressDialog.addErrorInfo("ERROR - " + errors);
-		// JOptionPane.showMessageDialog(myService.getFrame(),
-		// "could not resolve", "error " + errors, JOptionPane.ERROR_MESSAGE);
-		return resolveErrors;
-	}
-
-	public String resolveSuccess(String className) {
-		progressDialog.addInfo(String.format("%s is installed", className));
-		return className;
-	}
-
-	boolean localRepoChange = false;
-
-	public String newArtifactsDownloaded(String className) {
-		localRepoChange = true;
-		progressDialog.addInfo(String.format("%s - new artifacts downloaded", className));
-		return className;
-	}
-
-	public void resolveEnd() {
-		progressDialog.addInfo("finished processing updates ");
-		// progressDialog.setVisible(false);
-		// progressDialog.dispose(); FIXME - needs an "OK" to terminate
-
-		if (resolveErrors != null) {
-			log.info("there were errors");
-			progressDialog.addErrorInfo("there were errors " + resolveErrors);
-		} else {
-			progressDialog.finished();
-			if (localRepoChange) {
-				GUIService.restart(null);
+		if (status.isError()) {
+			progressDialog.addErrorInfo(status.toString());
+			if (resolveErrors == null) {
+				resolveErrors = new ArrayList<String>();
 			}
+			resolveErrors.add(status.toString());
+		} else {
+			progressDialog.addInfo(status.toString());
 		}
+		return status;
+	}
+
+	/**
+	 * updatesFinished - finished processing updates. Looking for confirmation
+	 * of a restart or a no worky in case of errors
+	 * 
+	 * @param report
+	 */
+	public void updatesFinished(ArrayList<ResolveReport> report) {
+		progressDialog.addInfo("finished processing updates ");
+		progressDialog.finished();
 	}
 
 	public void getState(final Runtime runtime) {
@@ -758,6 +830,102 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 
 			}
 		});
+	}
+
+	/**
+	 * a restart command will be sent to the appropriate runtime
+	 */
+	public void restart() {
+		send("restart");
+	}
+
+	/**
+	 * Add all options to the Log Appender menu.
+	 * 
+	 * @param parentMenu
+	 */
+	private void buildLogAppenderMenu(JMenu parentMenu) {
+		Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+		boolean console = false;
+		boolean file = false;
+		boolean remote = false;
+
+		while (appenders.hasMoreElements()) {
+			Object o = appenders.nextElement();
+			if (o.getClass() == ConsoleAppender.class) {
+				console = true;
+			} else if (o.getClass() == FileAppender.class) {
+				file = true;
+			} else if (o.getClass() == SocketAppender.class) {
+				remote = true;
+			}
+
+			log.info(o.getClass().toString());
+		}
+
+		JCheckBoxMenuItem mi = new JCheckBoxMenuItem(Appender.NONE);
+		mi.setSelected(!console && !file && !remote);
+		mi.addActionListener(this);
+		parentMenu.add(mi);
+
+		mi = new JCheckBoxMenuItem(Appender.CONSOLE);
+		mi.setSelected(console);
+		mi.addActionListener(this);
+		parentMenu.add(mi);
+
+		mi = new JCheckBoxMenuItem(Appender.FILE);
+		mi.setSelected(file);
+		mi.addActionListener(this);
+		parentMenu.add(mi);
+
+		/*
+		mi = new JCheckBoxMenuItem(Appender.REMOTE);
+		mi.setSelected(remote);
+		mi.addActionListener(this);
+		parentMenu.add(mi);
+		*/
+	}
+
+	/**
+	 * Add all options to the Log Level menu.
+	 * 
+	 * @param parentMenu
+	 */
+	private void buildLogLevelMenu(JMenu parentMenu) {
+		ButtonGroup logLevelGroup = new ButtonGroup();
+
+		String level = LoggingFactory.getInstance().getLevel();
+
+		JRadioButtonMenuItem mi = new JRadioButtonMenuItem(Level.DEBUG);
+		mi.setSelected(("DEBUG".equals(level)));
+		mi.addActionListener(this);
+		logLevelGroup.add(mi);
+		parentMenu.add(mi);
+
+		mi = new JRadioButtonMenuItem(Level.INFO);
+		mi.setSelected(("INFO".equals(level)));
+		mi.addActionListener(this);
+		logLevelGroup.add(mi);
+		parentMenu.add(mi);
+
+		mi = new JRadioButtonMenuItem(Level.WARN);
+		mi.setSelected(("WARN".equals(level)));
+		mi.addActionListener(this);
+		logLevelGroup.add(mi);
+		parentMenu.add(mi);
+
+		mi = new JRadioButtonMenuItem(Level.ERROR);
+		mi.setSelected(("ERROR".equals(level)));
+		mi.addActionListener(this);
+		logLevelGroup.add(mi);
+		parentMenu.add(mi);
+
+		mi = new JRadioButtonMenuItem(Level.FATAL); // TODO - deprecate to WTF
+													// :)
+		mi.setSelected(("FATAL".equals(level)));
+		mi.addActionListener(this);
+		logLevelGroup.add(mi);
+		parentMenu.add(mi);
 	}
 
 }

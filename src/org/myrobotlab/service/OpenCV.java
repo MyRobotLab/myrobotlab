@@ -76,6 +76,7 @@ import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
+import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Instantiator;
 import org.myrobotlab.service.data.Point2Df;
@@ -131,7 +132,7 @@ public class OpenCV extends VideoSource {
 	public static String VALID_FILTERS[] = { "And", "AverageColor", "Canny", "CreateHistogram", "ColorTrack", "Detector", "Dilate", "Erode", "FGBG", "FaceDetect", "Fauvist",
 			"FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2", "HSV", "InRange", "KinectDepth", "KinectDepthMask",
 			"KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr",
-			"ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "Smooth", "Split", "Threshold" };
+			"ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "Smooth", "Split", "Threshold", "Transpose" };
 
 	// yep its public - cause a whole lotta data
 	// will get set on it before a setState
@@ -816,9 +817,11 @@ public class OpenCV extends VideoSource {
 		Runtime.createAndStart("gui", "GUIService");
 		
 		opencv.capture();
+		OpenCVFilterTranspose transpose = new OpenCVFilterTranspose("transpose");
+		transpose.flipCode = 1;
 		
-		OpenCVFilterLKOpticalTrack jj = new OpenCVFilterLKOpticalTrack("lk");
-		opencv.addFilter(jj);
+		//OpenCVFilterLKOpticalTrack jj = new OpenCVFilterLKOpticalTrack("lk");
+		opencv.addFilter(transpose);
 		
 		//opencv.test();
 		

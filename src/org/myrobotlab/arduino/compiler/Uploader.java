@@ -94,7 +94,7 @@ public abstract class Uploader {
 		secondErrorFound = false;
 		notFoundError = false;
 		int result = 0; // pre-initialized to quiet a bogus warning from jikes
-
+		
 		String userdir = System.getProperty("user.dir") + File.separator;
 
 		try {

@@ -31,6 +31,10 @@ public interface SerialDeviceService {
 
 	public void write(int data) throws IOException;
 	
+	public int read() throws IOException;
+
+	public int read(byte[] data) throws IOException;
+	
 	public boolean disconnect();
 	
 	public boolean isConnected();

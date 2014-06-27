@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -403,7 +404,7 @@ public class Java extends Service {
 		stop();// release the interpeter
 	}
 
-	public boolean loadAndExec(String filename) {
+	public boolean loadAndExec(String filename) throws FileNotFoundException {
 		boolean ret = loadScript(filename);
 		exec();
 		return ret;
@@ -421,8 +422,9 @@ public class Java extends Service {
 	 * @param filename
 	 *            - name of file to load
 	 * @return - success if loaded
+	 * @throws FileNotFoundException 
 	 */
-	public boolean loadScript(String filename) {
+	public boolean loadScript(String filename) throws FileNotFoundException {
 		String newCode = FileIO.fileToString(filename);
 		if (newCode != null && !newCode.isEmpty()) {
 			log.info(String.format("replacing current script with %1s",

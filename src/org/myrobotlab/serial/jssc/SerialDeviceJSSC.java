@@ -292,4 +292,9 @@ public class SerialDeviceJSSC implements SerialDevice, SerialPortEventListener {
 		return null;
 	}
 
+	@Override
+	public int read(byte[] data) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

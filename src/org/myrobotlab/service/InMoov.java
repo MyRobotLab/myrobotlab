@@ -56,14 +56,11 @@ public class InMoov extends Service {
 
 	// hands and arms
 	transient public InMoovHead head;
+	transient public InMoovTorso torso;
 	transient public InMoovArm leftArm;
 	transient public InMoovHand leftHand;
 	transient public InMoovArm rightArm;
 	transient public InMoovHand rightHand;
-	
-	transient public Servo topStom;
-	transient public Servo midStom;
-	transient public Servo lowStom;
 
 	transient private HashMap<String, InMoovArm> arms = new HashMap<String, InMoovArm>();
 	transient private HashMap<String, InMoovHand> hands = new HashMap<String, InMoovHand>();
@@ -102,6 +99,7 @@ public class InMoov extends Service {
 
 		// SHARING !!!
 		peers.suggestAs("head.arduino", "left", "Arduino", "shared left arduino");
+		peers.suggestAs("torso.arduino", "left", "Arduino", "shared left arduino");
 
 		peers.suggestAs("leftArm.arduino", "left", "Arduino", "shared left arduino");
 		peers.suggestAs("leftHand.arduino", "left", "Arduino", "shared left arduino");
@@ -124,6 +122,7 @@ public class InMoov extends Service {
 		peers.suggestAs("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
 
 		// put peer definitions in
+		peers.put("torso", "InMoovTorso", "torso");
 		peers.put("leftArm", "InMoovArm", "left arm");
 		peers.put("leftHand", "InMoovHand", "left hand");
 		peers.put("rightArm", "InMoovArm", "right arm");
@@ -365,12 +364,6 @@ public class InMoov extends Service {
 		return mouthControl;
 	}
 
-	/*
-	 * 
-	 * public void startPIR(String port, int pin){ Arduino
-	 * arduino.setSampleRate(8000) arduino.digitalReadPollStart(12) }
-	 */
-
 	public InMoovHand startRightHand(String port) {
 		return startRightHand(port, null);
 	}
@@ -465,6 +458,27 @@ public class InMoov extends Service {
 
 		return head;
 	}
+	
+	public InMoovTorso startTorso(String port) {
+		return startTorso(port, null);
+	}
+	
+	public InMoovTorso startTorso(String port, String type) {
+		// log.warn(InMoov.buildDNA(myKey, serviceClass))
+		speakBlocking("starting torso on %s", port);
+
+		torso = (InMoovTorso) startPeer("torso");
+
+		if (type == null) {
+			type = Arduino.BOARD_TYPE_ATMEGA2560;
+		}
+
+		torso.arduino.setBoard(type);
+		torso.connect(port);
+		arduinos.put(port, torso.arduino);
+
+		return torso;
+	}
 
 	// ------ starts end ---------
 	// ------ composites begin ---------
@@ -549,6 +563,9 @@ public class InMoov extends Service {
 		if (leftArm != null) {
 			leftArm.setSpeed(1.0f, 1.0f, 1.0f, 1.0f);
 		}
+		if (torso != null) {
+			torso.setSpeed(1.0f, 1.0f, 1.0f);
+		}
 	}
 
 	public void rest() {
@@ -566,6 +583,9 @@ public class InMoov extends Service {
 		}
 		if (leftArm != null) {
 			leftArm.rest();
+		}
+		if (torso != null) {
+			torso.rest();
 		}
 	}
 
@@ -589,6 +609,10 @@ public class InMoov extends Service {
 			leftArm.rest();
 			leftArm.detach();
 		}
+		if (torso != null) {
+			torso.rest();
+			torso.detach();
+		}
 	}
 
 	public void detach() {
@@ -606,6 +630,9 @@ public class InMoov extends Service {
 		}
 		if (leftArm != null) {
 			leftArm.detach();
+		}
+		if (torso != null) {
+			torso.detach();
 		}
 	}
 
@@ -629,6 +656,9 @@ public class InMoov extends Service {
 		if (leftArm != null) {
 			sleep(100);
 			leftArm.attach();
+		}
+		if (torso != null) {
+			torso.attach();
 		}
 	}
 
@@ -665,6 +695,11 @@ public class InMoov extends Service {
 			head.test();
 		}
 
+		if (torso != null) {
+			speakBlocking("testing torso");
+			torso.test();
+		}
+		
 		sleep(500);
 		rest();
 		broadcastState();
@@ -692,6 +727,10 @@ public class InMoov extends Service {
 			head.broadcastState();
 		}
 
+		if (torso != null) {
+			torso.broadcastState();
+		}
+
 		if (headTracking != null) {
 			headTracking.broadcastState();
 		}
@@ -709,27 +748,6 @@ public class InMoov extends Service {
 
 	public void openrighthand() {
 		moveHand("right", 0, 0, 0, 0, 0, 0);
-	}
-
-	public void powerUp() {
-		attach();
-
-		startSleep = null;
-		if (ear != null) {
-			ear.pauseListening();
-		}
-		// rightSerialPort.digitalWrite(53, Arduino.HIGH);
-		// leftSerialPort.digitalWrite(53, Arduino.HIGH);
-		speakBlocking("Im powered up");
-		rest();
-		if (ear != null) {
-			ear.clearLock();
-			sleep(2);
-			ear.resumeListening();
-		}
-		speakBlocking("ready");
-
-		autoPowerDownOnInactivity();
 	}
 
 	// ---------- canned gestures end ---------
@@ -815,6 +833,14 @@ public class InMoov extends Service {
 		}
 	}
 
+	public void moveTorso(Integer topStom, Integer midStom, Integer lowStom) {
+		if (torso != null) {
+			torso.moveTo(topStom, midStom, lowStom);
+		} else {
+			log.error("moveTorso - I have a null torso");
+		}
+	}
+
 	public void moveHead(Integer neck, Integer rothead, Integer eyeX, Integer eyeY, Integer jaw) {
 		if (head != null) {
 			head.moveTo(neck, rothead, eyeX, eyeY, jaw);
@@ -823,11 +849,23 @@ public class InMoov extends Service {
 		}
 	}
 
-	public void setHeadSpeed(Float rothead, Float neck) {
+	public void setHeadSpeed(Float rothead, Float neck, Float eyeXSpeed, Float eyeYSpeed, Float jawSpeed) {
 		if (head != null) {
-			head.setSpeed(rothead, neck, null, null, null);
+			head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
 		} else {
 			log.warn("setHeadSpeed - I have no head");
+		}
+	}
+	
+	public void setHeadSpeed(Float rothead, Float neck) {
+		setHeadSpeed(rothead, neck, null, null, null);
+	}
+	
+	public void setTorsoSpeed(Float topStom, Float midStom, Float lowStom) {
+		if (torso != null) {
+			torso.setSpeed(topStom, midStom, lowStom);
+		} else {
+			log.warn("setTorsoSpeed - I have no torso");
 		}
 	}
 
@@ -875,6 +913,11 @@ public class InMoov extends Service {
 			script.append(indentSpace);
 			script.append(rightHand.getScript(getName()));
 		}
+		
+		if (torso != null) {
+			script.append(indentSpace);
+			script.append(torso.getScript(getName()));
+		}
 
 		send("python", "appendScript", script.toString());
 
@@ -915,6 +958,11 @@ public class InMoov extends Service {
 			myLastActivity = head.getLastActivityTime();
 			lastActivityTime = (lastActivityTime > myLastActivity) ? myLastActivity : lastActivityTime;
 		}
+		
+		if (torso != null) {
+			myLastActivity = torso.getLastActivityTime();
+			lastActivityTime = (lastActivityTime > myLastActivity) ? myLastActivity : lastActivityTime;
+		}
 
 		return lastActivityTime;
 
@@ -945,6 +993,26 @@ public class InMoov extends Service {
 		}
 		return lastActivityTime;
 	}
+	
+	public void powerUp() {
+		attach();
+
+		startSleep = null;
+		// rightSerialPort.digitalWrite(53, Arduino.HIGH);
+		// leftSerialPort.digitalWrite(53, Arduino.HIGH);
+		speakBlocking("Im powered up");
+		rest();
+		if (ear != null) {
+			ear.clearLock();
+			sleep(2);
+			ear.resumeListening();
+		}
+		speakBlocking("ready");
+		// nod would be cute
+
+		autoPowerDownOnInactivity();
+	}
+
 
 	public void powerDown() {
 		sleep(2);
@@ -952,14 +1020,10 @@ public class InMoov extends Service {
 			ear.pauseListening();
 		}
 		rest();
-		speakBlocking("I'm powering down");
+		speakBlocking("powering down");
 		purgeAllTasks();
-		sleep(2);
 		moveHead(40, 85);
-		sleep(4);
-		speakBlocking("for more interaction please request me to power up");
-		speakBlocking("or activate the p eye are sensor. thank you. good bye.");
-
+		sleep(2);
 		detach();
 
 		// right
@@ -993,12 +1057,6 @@ public class InMoov extends Service {
 			log.error(String.format("%s arduino not found - start some other system first (head, arm, hand)", port));
 		}
 
-	}
-	
-	// - http://myrobotlab.org/content/mrl-kinect-inmoov-quest-accuracy#comment-2846
-	// default - arduino mega, pin 30,31,32, (left)
-	public void startStomache(String port){
-		
 	}
 
 	public void stopPIR() {
@@ -1052,6 +1110,10 @@ public class InMoov extends Service {
 
 		if (head != null) {
 			attached |= head.isAttached();
+		}
+		
+		if (torso != null) {
+			attached |= torso.isAttached();
 		}
 		return attached;
 	}
@@ -1223,8 +1285,12 @@ public class InMoov extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Runtime.createAndStart("gui", "GUIService");
+		
+		InMoov i01 = (InMoov)Runtime.createAndStart("i01","InMoov");
+		InMoovTorso torso = (InMoovTorso)i01.startTorso("COM4");
 
-		InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
+
+		
 		i01.startMouth();
 		i01.startLeftArm("COM15");
 		i01.copyGesture(true);

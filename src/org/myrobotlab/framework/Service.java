@@ -698,9 +698,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			methodSet = getMessageSet();
 		}
 
-		// if I'm not a Runtime and not explicitly requesting a Runtime - then
-		// start a Runtime
-		if (!Runtime.isRuntime(this) && !serviceClass.equals("org.myrobotlab.service.Runtime")) {
+		// a "safety" if Service was created by new Service(name)
+		// we still want the local Runtime running
+		if (!Runtime.isRuntime(this)) {
 			Runtime.getInstance();
 		}
 
@@ -936,9 +936,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 					outbox.add(msg);
 				}
 			}
+		} catch (InterruptedException edown) {
+			info("shutting down");
 		} catch (Exception e) {
-			Logging.logException(e);
-			error(e.getMessage());
+			error(e);
 		}
 	}
 
@@ -1017,7 +1018,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			return getThrowableNewInstance(cast, classname, params);
 		} catch (ClassNotFoundException e) {
 			// quiet no class
-			log.info("class %s not found", classname);
+			log.info(String.format("class %s not found", classname));
 		} catch (Exception e) {
 			// noisy otherwise
 			Logging.logException(e);
@@ -1112,7 +1113,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	/**
-	 * adds a MRL message listener
+	 * adds a MRL message listener to this service
+	 * this is the result of a "subscribe" from a different service
 	 * 
 	 * @param listener
 	 */
@@ -1134,10 +1136,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				nes.add(listener);
 			}
 		} else {
-			ArrayList<MRLListener> nel = new ArrayList<MRLListener>();
-			nel.add(listener);
+			ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
+			notifyList.add(listener);
 			log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.outMethod, listener.name, listener.inMethod));
-			outbox.notifyList.put(listener.outMethod.toString(), nel);
+			outbox.notifyList.put(listener.outMethod.toString(), notifyList);
 		}
 
 	}
@@ -2182,6 +2184,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 		sb.append("\n");
 		return sb.toString();
+	}
+	
+	public String getType(){
+		return getClass().getCanonicalName();
 	}
 
 	public String setLogLevel(String level) {

@@ -35,19 +35,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBoxMenuItem;
+import javax.swing.Box;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -56,22 +55,16 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.net.SocketAppender;
 import org.myrobotlab.control.GUIServiceGUI;
 import org.myrobotlab.control.RuntimeGUI;
 import org.myrobotlab.control.ServiceGUI;
 import org.myrobotlab.control.TabControl2;
 import org.myrobotlab.control.Welcome;
 import org.myrobotlab.control.widget.AboutDialog;
-import org.myrobotlab.control.widget.ConnectDialog;
 import org.myrobotlab.control.widget.Console;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
@@ -81,8 +74,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.string.StringUtil;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
@@ -135,7 +128,8 @@ public class GUIService extends Service implements WindowListener, ActionListene
 
 	public transient GUIServiceGUI guiServiceGUI = null;
 
-	// FIXME - supply Welcome type - create WelcomeGUI type - with boundServiceName this GUIService
+	// FIXME - supply Welcome type - create WelcomeGUI type - with
+	// boundServiceName this GUIService
 	transient Welcome welcome = null;
 	transient HashMap<String, ServiceGUI> serviceGUIMap = new HashMap<String, ServiceGUI>();
 
@@ -211,8 +205,9 @@ public class GUIService extends Service implements WindowListener, ActionListene
 	}
 
 	/**
-	 * builds all the service tabs for the first time
-	 * called when GUIService starts
+	 * builds all the service tabs for the first time called when GUIService
+	 * starts
+	 * 
 	 * @return
 	 */
 	synchronized public JTabbedPane buildTabPanels() {
@@ -239,13 +234,14 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		return tabs;
 	}
 
-	
 	/**
 	 * add a service tab to the GUIService
-	 * @param serviceName - name of service to add
 	 * 
-	 * FIXME - full parameter of addTab(final String serviceName, final String serviceType, final String lable)
-	 * then overload
+	 * @param serviceName
+	 *            - name of service to add
+	 * 
+	 *            FIXME - full parameter of addTab(final String serviceName,
+	 *            final String serviceType, final String lable) then overload
 	 */
 	synchronized public void addTab(final String serviceName) {
 
@@ -287,14 +283,6 @@ public class GUIService extends Service implements WindowListener, ActionListene
 						Color hsv = GUIService.getColorFromURI(sw.getHost());
 						tabs.setBackgroundAt(index, hsv);
 					}
-
-					// String serviceName = tc.getText();
-					/*
-					 * REMOVED RECENTLY - implement in ServiceGUI if necessary
-					 * if (undockedPanels.containsKey(serviceName)) {
-					 * UndockedPanel up = undockedPanels.get(serviceName); if
-					 * (!up.isDocked()) { tc.undockPanel(); } }
-					 */
 				}
 
 				frame.pack();
@@ -326,7 +314,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 			}
 		});
 	}
-	
+
 	/**
 	 * attempts to create a new ServiceGUI and add it to the map
 	 * 
@@ -406,7 +394,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 			frame.setJMenuBar(buildMenu());
 			frame.setVisible(true);
 			frame.pack();
-			
+
 			isDisplaying = true;
 		}
 
@@ -469,18 +457,34 @@ public class GUIService extends Service implements WindowListener, ActionListene
 	}
 
 	public void about() {
-		new AboutDialog(frame);
+		new AboutDialog(this);
 	}
 
 	public void stopService() {
-		dispose();
-		super.stopService();
-	}
-
-	public void dispose() {
 		if (frame != null) {
 			frame.dispose();
 		}
+		super.stopService();
+	}
+
+	public void noWorky() {
+		String logon = JOptionPane.showInputDialog(getFrame(),
+				"<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of monkeys,</p><br> please type your myrobotlab.org user</html>");
+		if (logon == null || logon.length() == 0) {
+			return;
+		}
+
+		try {
+			String ret = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", logon, "file", new File("myrobotlab.log"));
+			if (ret.contains("Upload:")) {
+				JOptionPane.showMessageDialog(getFrame(), "log file sent, Thank you", "Sent !", JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				JOptionPane.showMessageDialog(getFrame(), ret, "DOH !", JOptionPane.ERROR_MESSAGE);
+			}
+		} catch (Exception e1) {
+			JOptionPane.showMessageDialog(getFrame(), Service.stackToString(e1), "DOH !", JOptionPane.ERROR_MESSAGE);
+		}
+
 	}
 
 	@Override
@@ -565,13 +569,6 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		buildTabPanels();
 	}
 
-	// FIXME - now I think its only "register" - Deprecate if possible
-	/*
-	public void registerServicesEvent() {
-		buildTabPanels();
-	}
-	*/
-
 	static public void console() {
 		attachJavaConsole();
 	}
@@ -593,53 +590,11 @@ public class GUIService extends Service implements WindowListener, ActionListene
 	public JMenuBar buildMenu() {
 		JMenuBar menuBar = new JMenuBar();
 
-		// --- system ----
-		JMenu systemMenu = new JMenu("system");
-
-		JMenuItem save = new JMenuItem("save");
-		save.setActionCommand("save");
-		systemMenu.add(save);
-		save.addActionListener(this);
-
-		JMenuItem load = new JMenuItem("load");
-		load.setActionCommand("load");
-		systemMenu.add(load);
-		load.addActionListener(this);
-
-		JMenuItem unhideAll = new JMenuItem("unhide all");
-		unhideAll.setActionCommand("unhide all");
-		systemMenu.add(unhideAll);
-		unhideAll.addActionListener(this);
-
-		JMenuItem hideAll = new JMenuItem("hide all");
-		hideAll.setActionCommand("hide all");
-		systemMenu.add(hideAll);
-		hideAll.addActionListener(this);
-
-		JMenu m = new JMenu("logging");
-		systemMenu.add(m);
-
-		JMenu m2 = new JMenu("level");
-		m.add(m2);
-		buildLogLevelMenu(m2);
-
-		m2 = new JMenu("type");
-		m.add(m2);
-		buildLogAppenderMenu(m2);
-
-		m = new JMenu("update");
-		buildUpdatesMenu(m);
-
-		systemMenu.add(m);
-
-		systemMenu.add(buildRecordingMenu(new JMenu("recording")));
-
-		menuBar.add(systemMenu);
-
 		JMenu help = new JMenu("help");
 		JMenuItem about = new JMenuItem("about");
 		about.addActionListener(this);
 		help.add(about);
+		menuBar.add(Box.createHorizontalGlue());
 		menuBar.add(help);
 
 		return menuBar;
@@ -660,42 +615,12 @@ public class GUIService extends Service implements WindowListener, ActionListene
 	public void actionPerformed(ActionEvent ae) {
 		String cmd = ae.getActionCommand();
 		Object source = ae.getSource();
-		// get local runtime instance
-		Runtime runtime = Runtime.getInstance();
-		if ("save".equals(cmd)) {
-			Runtime.saveAll();
-		} else if ("load".equals(cmd)) {
-			Runtime.loadAll();
-		} else if ("unhide all".equals(cmd)) {
+		
+		if ("unhide all".equals(cmd)) {
 			unhideAll();
 		} else if ("hide all".equals(cmd)) {
 			hideAll();
-		} else if ("install latest".equals(cmd)) {
-			//runtime.updateAll();
-		} else if (cmd.equals(Level.DEBUG) || cmd.equals(Level.INFO) || cmd.equals(Level.WARN) || cmd.equals(Level.ERROR) || cmd.equals(Level.FATAL)) {
-			// TODO this needs to be changed into something like tryValueOf(cmd)
-			Logging logging = LoggingFactory.getInstance();
-			logging.setLevel(cmd);
-		} else /*
-				 * if ("connect".equals(cmd)) { ConnectDialog dlg = new
-				 * ConnectDialog(new JFrame(), "connect", "message", this,
-				 * lastHost, lastPort); lastHost = dlg.host.getText(); lastPort
-				 * = dlg.port.getText(); } else
-				 */if (cmd.equals(Appender.NONE)) {
-			Logging logging = LoggingFactory.getInstance();
-			logging.removeAllAppenders();
-		} else if (cmd.equals(Appender.REMOTE)) {
-			JCheckBoxMenuItem m = (JCheckBoxMenuItem) ae.getSource();
-			if (m.isSelected()) {
-				ConnectDialog dlg = new ConnectDialog(new JFrame(), "connect to remote logging", "message", this, "127.0.0.1", "6767");
-				Logging logging = LoggingFactory.getInstance();
-				logging.addAppender(Appender.REMOTE, dlg.host.getText(), dlg.port.getText());
-			} else {
-				Logging logging = LoggingFactory.getInstance();
-				logging.removeAppender(Appender.REMOTE);
-			}
-		} else if (cmd.equals(Appender.FILE)) { // FIXME - refactor it all out
-												// (it recovered from enums !
+		} else if (cmd.equals(Appender.FILE)) {
 			Logging logging = LoggingFactory.getInstance();
 			logging.addAppender(Appender.FILE);
 		} else if (cmd.equals(Appender.NONE)) {
@@ -728,118 +653,19 @@ public class GUIService extends Service implements WindowListener, ActionListene
 
 			}
 		} else {
-			invoke(StringUtil.StringToMethodName(cmd));
+			log.info(String.format("unknown command %s", cmd));
 		}
 	}
 
-	/**
-	 * Add all options to the Software Update menu.
-	 * 
-	 * @param parentMenu
-	 */
-	private void buildUpdatesMenu(JMenu parentMenu) {
-		JMenuItem mi = new JMenuItem("install latest");
-		mi = new JMenuItem("install latest");
-		mi.addActionListener(this);
-
-		parentMenu.add(mi);
-
-	}
-
-	/**
-	 * Add all options to the Log Appender menu.
-	 * 
-	 * @param parentMenu
-	 */
-	private void buildLogAppenderMenu(JMenu parentMenu) {
-		Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
-		boolean console = false;
-		boolean file = false;
-		boolean remote = false;
-
-		while (appenders.hasMoreElements()) {
-			Object o = appenders.nextElement();
-			if (o.getClass() == ConsoleAppender.class) {
-				console = true;
-			} else if (o.getClass() == FileAppender.class) {
-				file = true;
-			} else if (o.getClass() == SocketAppender.class) {
-				remote = true;
-			}
-
-			log.info(o.getClass().toString());
-		}
-
-		JCheckBoxMenuItem mi = new JCheckBoxMenuItem(Appender.NONE);
-		mi.setSelected(!console && !file && !remote);
-		mi.addActionListener(this);
-		parentMenu.add(mi);
-
-		mi = new JCheckBoxMenuItem(Appender.CONSOLE);
-		mi.setSelected(console);
-		mi.addActionListener(this);
-		parentMenu.add(mi);
-
-		mi = new JCheckBoxMenuItem(Appender.FILE);
-		mi.setSelected(file);
-		mi.addActionListener(this);
-		parentMenu.add(mi);
-
-		mi = new JCheckBoxMenuItem(Appender.REMOTE);
-		mi.setSelected(remote);
-		mi.addActionListener(this);
-		parentMenu.add(mi);
-	}
-
-	/**
-	 * Add all options to the Log Level menu.
-	 * 
-	 * @param parentMenu
-	 */
-	private void buildLogLevelMenu(JMenu parentMenu) {
-		ButtonGroup logLevelGroup = new ButtonGroup();
-
-		String level = LoggingFactory.getInstance().getLevel();
-
-		JRadioButtonMenuItem mi = new JRadioButtonMenuItem(Level.DEBUG);
-		mi.setSelected(("DEBUG".equals(level)));
-		mi.addActionListener(this);
-		logLevelGroup.add(mi);
-		parentMenu.add(mi);
-
-		mi = new JRadioButtonMenuItem(Level.INFO);
-		mi.setSelected(("INFO".equals(level)));
-		mi.addActionListener(this);
-		logLevelGroup.add(mi);
-		parentMenu.add(mi);
-
-		mi = new JRadioButtonMenuItem(Level.WARN);
-		mi.setSelected(("WARN".equals(level)));
-		mi.addActionListener(this);
-		logLevelGroup.add(mi);
-		parentMenu.add(mi);
-
-		mi = new JRadioButtonMenuItem(Level.ERROR);
-		mi.setSelected(("ERROR".equals(level)));
-		mi.addActionListener(this);
-		logLevelGroup.add(mi);
-		parentMenu.add(mi);
-
-		mi = new JRadioButtonMenuItem(Level.FATAL); // TODO - deprecate to WTF
-													// :)
-		mi.setSelected(("FATAL".equals(level)));
-		mi.addActionListener(this);
-		logLevelGroup.add(mi);
-		parentMenu.add(mi);
-	}
-
-	static public void restart(String restartScript) {
+	static public void restart() {
 		JFrame frame = new JFrame();
 		int ret = JOptionPane.showConfirmDialog(frame, "<html>New components have been added,<br>" + " it is necessary to restart in order to use them.</html>", "restart",
 				JOptionPane.YES_NO_OPTION);
 		if (ret == JOptionPane.OK_OPTION) {
 			log.info("restarting");
-			Runtime.restart(restartScript);
+			// Runtime.restart(restartScript);
+			Runtime.getInstance().restart(); // <-- FIXME WRONG need to send
+												// message - may be remote !!
 		} else {
 			log.info("chose not to restart");
 			return;
@@ -931,37 +757,11 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		LoggingFactory.getInstance().configure();
 		Logging logging = LoggingFactory.getInstance();
 		logging.setLevel(Level.INFO);
-		/*
-		 * //float x = 539248398 >> 10; float x = 10f % 539248398; log.info(x);
-		 * float y = 5383823987f % 10f; log.info(y);
-		 * 
-		 * URI a = new URI("tcp://127.0.0.1:6767"); URI b = new
-		 * URI("tcp://192.168.0.2:6767");
-		 * 
-		 * String c = a.toString(); String d = b.toString();
-		 * 
-		 * log.info(c); log.info(String.format("0.%d",Math.abs(c.hashCode())));
-		 * 
-		 * log.info(d); log.info(String.format("0.%d",Math.abs(d.hashCode())));
-		 */
-		// Runtime.createAndStart("clock", "Clock");
 
 		Runtime.createAndStart("i01", "InMoov");
 
 		GUIService gui2 = (GUIService) Runtime.createAndStart("gui1", "GUIService");
 		gui2.startService();
-
-		/*
-		 * Clock clock = new Clock("clock"); clock.startService();
-		 */
-
-		// Runtime.createAndStart("opencv", "OpenCV");
-		// gui2.display();
-
-		// gui2.startRecording();
-		// gui2.stopRecording();
-
-		// gui2.loadRecording(".myrobotlab/gui1_20120918052147517.msg");
 
 	}
 
