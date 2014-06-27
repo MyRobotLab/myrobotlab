@@ -16,22 +16,15 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class AboutDialog extends JDialog implements ActionListener, MouseListener {
@@ -39,15 +32,15 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(AboutDialog.class.getCanonicalName());
 
-	JButton latestVersion = null;
 	JButton noWorky = null;
 	JButton ok = null;
 	JFrame parent = null;
 	JLabel versionLabel = new JLabel(FileIO.resourceToString("version.txt"));
+	GUIService gui;
 
-	public AboutDialog(JFrame parent) {
-		super(parent, "about", true);
-		this.parent = parent;
+	public AboutDialog(GUIService gui) {
+		super(gui.getFrame(), "about", true);
+		this.parent = gui.getFrame();
 		if (parent != null) {
 			Dimension parentSize = parent.getSize();
 			Point p = parent.getLocation();
@@ -55,6 +48,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 		}
 
 		JPanel content = new JPanel(new BorderLayout());
+		content.setPreferredSize(new Dimension(350, 150));
 		getContentPane().add(content);
 
 		// picture
@@ -92,10 +86,6 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 		buttonPane.add(noWorky);
 		noWorky.addActionListener(this);
 
-		latestVersion = new JButton("get latest version");
-		buttonPane.add(latestVersion);
-		latestVersion.addActionListener(this);
-
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		pack();
@@ -109,52 +99,8 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 		if (source == ok) {
 			setVisible(false);
 			dispose();
-		} else if (source == latestVersion) {
-			//Runtime runtime = Runtime.getInstance();
-			Repo repo = Repo.getLocalInstance();
-			String newVersion = repo.getRepoVersion();
-			String currentVersion = FileIO.resourceToString("version.txt");
-			log.info(String.format("comparing new version %s with current version %s", newVersion, currentVersion));
-			if (newVersion == null)
-			{
-				log.info("newVersion == null - nothing available");
-				JOptionPane.showMessageDialog(parent, "There are no updates available at this time");
-			} else if (currentVersion.compareTo(newVersion) >= 0) {
-				log.info("equals or old bleeding - no updates - currentVersion.compareTo(newVersion) = {}", currentVersion.compareTo(newVersion));
-				JOptionPane.showMessageDialog(parent, "There are no new updates available at this time");
-			} else {
-				log.info("not equals - offer update");
-				// Custom button text
-				Object[] options = { "Yes, hit me daddy-O!", "No way, I'm scared" };
-				int n = JOptionPane.showOptionDialog(parent, String.format("a newer version exists, do you want this one? %s", newVersion), "Latest Version Check",
-						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-				if (n == JOptionPane.YES_OPTION) {
-					// FIXME - should process all 
-					repo.getLatestVersionJar();
-					versionLabel.setText(String.format("updating with %s", newVersion));
-					GUIService.restart("moveUpdate");
-				} else {
-					versionLabel.setText("bwak bwak bwak... chicken!");
-				}
-
-			}
 		} else if (source == noWorky) {
-			String logon = JOptionPane.showInputDialog(parent, "<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of monkeys,</p><br> please type your myrobotlab.org user</html>");
-			if (logon == null || logon.length() == 0) {
-				return;
-			}
-
-			try {
-				String ret = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", logon, "file", new File("myrobotlab.log"));
-				if (ret.contains("Upload:")) {
-					JOptionPane.showMessageDialog(parent, "log file sent, Thank you", "Sent !", JOptionPane.INFORMATION_MESSAGE);
-				} else {
-					JOptionPane.showMessageDialog(parent, ret, "DOH !", JOptionPane.ERROR_MESSAGE);
-				}
-			} catch (Exception e1) {
-				JOptionPane.showMessageDialog(parent, Service.stackToString(e1), "DOH !", JOptionPane.ERROR_MESSAGE);
-			}
-
+			gui.noWorky();
 		}
 	}
 

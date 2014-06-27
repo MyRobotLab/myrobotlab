@@ -90,4 +90,6 @@ public interface SerialDevice {
 	
 	public InputStream getInputStream();
 	public OutputStream getOutputStream();
+
+       public int read(byte[] data) throws IOException;
 }

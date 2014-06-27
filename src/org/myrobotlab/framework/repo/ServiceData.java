@@ -1,20 +1,22 @@
 package org.myrobotlab.framework.repo;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -28,55 +30,44 @@ public class ServiceData implements Serializable {
 
 	transient static private Serializer serializer = new Persister();
 
-	/**
-	 * list of relationships from Service to dependency key. Dependency
-	 * information is stored in a normalized (TreeMap) list of Service types
-	 * Each Service type can have a list of serviceInfo (many to many). The
-	 * relationships can be many to many but the actual serviceInfo have to be
-	 * normalized
-	 */
-	
-	// FIXME - hashmaps should be used always ! - array lists are only used because the desired xml format dictates it
+	@ElementMap(key = "name", entry = "serviceType", inline = false, required = false)
+	private transient TreeMap<String, ServiceType> serviceTypesNameIndex = new TreeMap<String, ServiceType>();
 
-	private transient HashMap<String, ServiceType> serviceTypesNameIndex = new HashMap<String, ServiceType>();
-	@ElementList(entry = "serviceType", inline = false, required = false)
-	private ArrayList<ServiceType> serviceTypes = new ArrayList<ServiceType>();
+	@ElementMap(key = "name", entry = "categories", inline = true, required = false)
+	private transient TreeMap<String, Category> categoriesNameIndex = new TreeMap<String, Category>();
 
-	private transient HashMap<String, Category> categoriesNameIndex = new HashMap<String, Category>();
-	@ElementList(entry = "categories", inline = true, required = false)
-	public ArrayList<Category> categories = new ArrayList<Category>();
-
-	private transient HashMap<String, Dependency> dependenciesOrgIndex = new HashMap<String, Dependency>();
-	@ElementList(name = "thirdPartyLibs", entry = "lib", inline = false, required = false)
-	public ArrayList<Dependency> dependencies = new ArrayList<Dependency>();
+	@ElementMap(key = "name", name = "thirdPartyLibs", entry = "lib", inline = false, required = false)
+	private transient TreeMap<String, Dependency> dependenciesOrgIndex = new TreeMap<String, Dependency>();
 
 	public ServiceData() {
 	}
+	
 
 	public void add(ServiceType serviceType) {
-		// serviceTypeMap.put(serviceType.getName(), serviceType);
-		serviceTypes.add(serviceType);
+		serviceTypesNameIndex.put(serviceType.name, serviceType);
 		for (int i = 0; i < serviceType.dependencyList.size(); ++i) {
 			String org = serviceType.dependencyList.get(i);
 			if (!containsDependency(org)) {
-				log.warn(String.format("can not find %s in dependencies", org));
+				log.error(String.format("can %s not find %s in dependencies", org));
 			}
 		}
 	}
 
 	boolean containsDependency(String org) {
-		for (int i = 0; i < dependencies.size(); ++i) {
-			Dependency d = dependencies.get(i);
-			if (d.getOrg().equals(org)) {
-				return true;
-			}
-		}
-		return false;
+		return dependenciesOrgIndex.containsKey(org);
 	}
 
+	public Dependency getDependency(String org) {
+		if (dependenciesOrgIndex.containsKey(org)) {
+			return dependenciesOrgIndex.get(org);
+		}
+
+		return null;
+	}
+
+	// FIXME - change to addDependency
 	public void addThirdPartyLib(String org, String revision) {
 		Dependency dep = new Dependency(org, revision);
-		dependencies.add(dep);
 		dependenciesOrgIndex.put(org, dep);
 	}
 
@@ -89,18 +80,16 @@ public class ServiceData implements Serializable {
 
 	}
 
+	public boolean containsServiceType(String fullServiceName) {
+		return serviceTypesNameIndex.containsKey(fullServiceName);
+	}
+
 	public ServiceType getServiceType(String fullServiceName) {
 		if (serviceTypesNameIndex.containsKey(fullServiceName)) {
 			return serviceTypesNameIndex.get(fullServiceName);
 		}
 
 		return null;
-	}
-
-	public void sort() {
-		Collections.sort(serviceTypes, new ServiceType("dummy"));
-		Collections.sort(dependencies, new Dependency());
-		Collections.sort(categories, new Category());
 	}
 
 	public boolean hasUnfulfilledDependencies(String fullServiceName) {
@@ -112,20 +101,21 @@ public class ServiceData implements Serializable {
 		}
 
 		ServiceType d = serviceTypesNameIndex.get(fullServiceName);
-		if (d.dependencyList.size() == 0) {
-			log.info(String.format("no dependencies needed for %s", fullServiceName));
+		if (d.dependencyList == null || d.dependencyList.size() == 0) {
+			log.debug(String.format("no dependencies needed for %s", fullServiceName));
 			return false;
 		}
 
 		for (int i = 0; i < d.dependencyList.size(); ++i) {
 			String org = d.dependencyList.get(i);
 			if (!dependenciesOrgIndex.containsKey(org)) {
-				log.error(String.format("%s has dependency of %s but it is does not have a defined version", fullServiceName, org));
+				log.error(String.format("%s has dependency of %s, but it is does not have a defined version", fullServiceName, org));
 				return true;
 			} else {
 				Dependency dep = dependenciesOrgIndex.get(org);
 				if (!dep.isResolved()) {
-					log.warn("%s had a dependency of %s %s - but it is currently not resolved", fullServiceName, org);
+					log.debug(String.format("%s had a dependency of %s, but it is currently not resolved", fullServiceName, org));
+					return true;
 				}
 			}
 		}
@@ -135,13 +125,11 @@ public class ServiceData implements Serializable {
 
 	public String[] getUnusedDependencies() {
 		HashSet<String> unique = new HashSet<String>();
-		for (int i = 0; i < dependencies.size(); ++i) {
-			Dependency dep = dependencies.get(i);
-			String org = dep.getOrg();
+		for (Map.Entry<String, Dependency> o : dependenciesOrgIndex.entrySet()) {
+			String org = o.getValue().getOrg();
 			if (isUnused(org)) {
 				unique.add(org);
 			}
-
 		}
 
 		String[] ret = new String[unique.size()];
@@ -156,9 +144,9 @@ public class ServiceData implements Serializable {
 		return ret;
 	}
 
-	private boolean isUnused(String org) {
-		for (int i = 0; i < serviceTypes.size(); ++i) {
-			ServiceType st = serviceTypes.get(i);
+	public boolean isUnused(String org) {
+		for (Map.Entry<String, ServiceType> o : serviceTypesNameIndex.entrySet()) {
+			ServiceType st = o.getValue();
 			if (st.dependencyList != null) {
 				for (int j = 0; j < st.dependencyList.size(); ++j) {
 					String d = st.dependencyList.get(j);
@@ -178,8 +166,8 @@ public class ServiceData implements Serializable {
 
 	public String[] getInvalidDependencies() {
 		HashSet<String> unique = new HashSet<String>();
-		for (int i = 0; i < serviceTypes.size(); ++i) {
-			ServiceType st = serviceTypes.get(i);
+		for (Map.Entry<String, ServiceType> o : serviceTypesNameIndex.entrySet()) {
+			ServiceType st = o.getValue();
 			if (st.dependencyList != null) {
 				for (int j = 0; j < st.dependencyList.size(); ++j) {
 					String org = st.dependencyList.get(j);
@@ -204,8 +192,8 @@ public class ServiceData implements Serializable {
 
 	public String[] getServiceTypeDependencies() {
 		HashSet<String> unique = new HashSet<String>();
-		for (int i = 0; i < serviceTypes.size(); ++i) {
-			ServiceType st = serviceTypes.get(i);
+		for (Map.Entry<String, ServiceType> o : serviceTypesNameIndex.entrySet()) {
+			ServiceType st = o.getValue();
 			if (st.dependencyList != null) {
 				for (int j = 0; j < st.dependencyList.size(); ++j) {
 					unique.add(st.dependencyList.get(j));
@@ -236,7 +224,6 @@ public class ServiceData implements Serializable {
 		}
 		ServiceType st = new ServiceType(className);
 		st.description = description;
-		serviceTypes.add(st);
 		serviceTypesNameIndex.put(st.getName(), st);
 		if (dependencies != null) {
 			for (int i = 0; i < dependencies.length; ++i) {
@@ -246,51 +233,24 @@ public class ServiceData implements Serializable {
 
 	}
 
-	static public ServiceData getLocalServiceData(String filename) {
-		try {
-			if (filename == null){
-				filename = String.format("%s%sserviceData.xml", FileIO.getCfgDir(), File.separator);
-			}
-			return getServiceData(new File(filename).toURI().toURL());
-		} catch (Exception e) {
-			Logging.logException(e);
+	static public ServiceData getLocal() throws FileNotFoundException {
+		return getLocal(null);
+	}
+	static public ServiceData getLocal(String filename) throws FileNotFoundException {
+
+		if (filename == null) {
+			filename = String.format("%s%sserviceData.xml", FileIO.getCfgDir(), File.separator);
 		}
-		return null;
+		String data = FileIO.fileToString(filename);
+		return load(data);
 	}
 
-	public void syncIndexes() {
-		serviceTypesNameIndex.clear();
-		for (int i = 0; i < serviceTypes.size(); ++i) {
-			ServiceType st = serviceTypes.get(i);
-			if (serviceTypesNameIndex.containsKey(st.getName())) {
-				log.error(String.format("duplicate service type entry %s", st.getName()));
-			}
-			serviceTypesNameIndex.put(st.getName(), st);
-		}
-
-		categoriesNameIndex.clear();
-		for (int i = 0; i < categories.size(); ++i) {
-			Category c = categories.get(i);
-			if (categoriesNameIndex.containsKey(c.name)) {
-				log.error(String.format("duplicate category entry %s", c.name));
-			}
-			categoriesNameIndex.put(c.name, c);
-		}
-
-		dependenciesOrgIndex.clear();
-		for (int i = 0; i < dependencies.size(); ++i) {
-			Dependency dep = dependencies.get(i);
-			if (dependenciesOrgIndex.containsKey(dep.getOrg())) {
-				log.error(String.format("duplicate dependency entry %s", dep.getOrg()));
-			}
-			dependenciesOrgIndex.put(dep.getOrg(), dep);
-		}
-	}
-
-	public static ServiceData getServiceData(String url) {
+	public static ServiceData getRemote(String url) {
 		try {
-			return getServiceData(new URL(url));
-		} catch (Exception e) {
+			log.info("getting {}", url);
+			String data = new String(FileIO.getURL(new URL(url)));
+			return load(data);
+		} catch(Exception e){
 			Logging.logException(e);
 		}
 		return null;
@@ -313,36 +273,36 @@ public class ServiceData implements Serializable {
 			}
 		}
 
-		for (int i = 0; i < categories.size(); ++i){
-			Category category = categories.get(i);
-			for (int j = 0; j < category.serviceTypes.size(); ++j){
+		for (Map.Entry<String, Category> o : categoriesNameIndex.entrySet()) {
+			Category category = o.getValue();
+
+			for (int j = 0; j < category.serviceTypes.size(); ++j) {
 				String serviceType = category.serviceTypes.get(j);
-				if (!serviceTypesNameIndex.containsKey(serviceType)){
+				if (!serviceTypesNameIndex.containsKey(serviceType)) {
 					log.warn(String.format("category %s contains reference to service type %s which does not exist", category.name, serviceType));
 				}
 			}
 		}
-		
+
 		HashSet<String> categorizedServiceTypes = new HashSet<String>();
 
-		for (int i = 0; i < categories.size(); ++i){
-			Category category = categories.get(i);
-			if (category.serviceTypes.size() == 0){
+		for (Map.Entry<String, Category> o : categoriesNameIndex.entrySet()) {
+			Category category = o.getValue();
+			if (category.serviceTypes.size() == 0) {
 				log.warn(String.format("empty category %s", category.name));
 			}
-			for (int j = 0; j < category.serviceTypes.size(); ++j){
+			for (int j = 0; j < category.serviceTypes.size(); ++j) {
 				categorizedServiceTypes.add(category.serviceTypes.get(j));
 			}
 		}
-		
-		for (int i = 0; i < serviceTypes.size(); ++i){
-			ServiceType st = serviceTypes.get(i);
-			if (!categorizedServiceTypes.contains(st.getName())){
+
+		for (Map.Entry<String, ServiceType> o : serviceTypesNameIndex.entrySet()) {
+			ServiceType st = o.getValue();
+			if (!categorizedServiceTypes.contains(st.getName())) {
 				log.warn(String.format("uncategorized service %s", st.getName()));
 			}
 		}
-		
-		
+
 		if (invalid.length > 0) {
 			return false;
 		}
@@ -350,17 +310,36 @@ public class ServiceData implements Serializable {
 		return true;
 	}
 
-	public static ServiceData getServiceData(URL url) {
+	public static ServiceData load(String data) {
 		try {
-			String serviceData = new String(FileIO.getURL(url));
-			ServiceData sd = serializer.read(ServiceData.class, serviceData);
-			// sync - indexes
-			sd.syncIndexes();
+			if (data == null){
+				log.warn("can not load serviceData - data is null");
+			}
+			log.info("loading serviceData");
+			ServiceDataLoader sdl = serializer.read(ServiceDataLoader.class, data);
+			ServiceData sd = new ServiceData();
+
+			for (int i = 0; i < sdl.serviceTypes.size(); ++i) {
+				ServiceType st = sdl.serviceTypes.get(i);
+				sd.serviceTypesNameIndex.put(st.getName(), st);
+			}
+
+			for (int i = 0; i < sdl.categories.size(); ++i) {
+				Category st = sdl.categories.get(i);
+				sd.categoriesNameIndex.put(st.name, st);
+			}
+
+			for (int i = 0; i < sdl.dependencies.size(); ++i) {
+				Dependency st = sdl.dependencies.get(i);
+				//log.info(st.toString());
+				sd.dependenciesOrgIndex.put(st.getOrg(), st);
+			}
 
 			sd.isValid();
 
 			return sd;
-
+		} catch (FileNotFoundException e) {
+			log.info(e.getMessage());
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
@@ -368,14 +347,116 @@ public class ServiceData implements Serializable {
 	}
 
 	public String[] getServiceTypeNames(String filter) {
-		ArrayList<String> ret = new ArrayList<String>();
-
-		for (int i = 0; i < serviceTypes.size(); ++i) {
-			// if (filter == null || filter)
-			ServiceType st = serviceTypes.get(i);
-			ret.add(st.getSimpleName());
+		
+		if (filter == null || filter.length() == 0 || filter.equals("all")){
+			return serviceTypesNameIndex.keySet().toArray(new String[0]);
 		}
-		return null;
+		
+		if (!categoriesNameIndex.containsKey(filter)){
+			return new String[]{};
+		}
+		
+		Category cat = categoriesNameIndex.get(filter);
+		return cat.serviceTypes.toArray(new String[cat.serviceTypes.size()]);
+
+	}
+
+	public ArrayList<ServiceType> getServiceTypes() {
+		ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
+		for (Map.Entry<String, ServiceType> o : serviceTypesNameIndex.entrySet()) {
+			ret.add(o.getValue());
+		}
+		return ret;
+	}
+
+	public void addCategory(String name, String[] serviceTypes) {
+		addCategory(name, null, serviceTypes);
+	}
+
+	public void addCategory(String name, String description, String[] serviceTypes) {
+		Category category = null;
+		if (categoriesNameIndex.containsKey(name)) {
+			category = categoriesNameIndex.get(name);
+		} else {
+			category = new Category();
+		}
+
+		category.name = name;
+		category.description = description;
+		for (int i = 0; i < serviceTypes.length; ++i) {
+			boolean alreadyHasReference = false;
+			for (int j = 0; j < category.serviceTypes.size(); ++j) {
+				if (serviceTypes[i].equals(category.serviceTypes.get(j))) {
+					alreadyHasReference = true;
+					break;
+				}
+			}
+
+			if (!alreadyHasReference) {
+				category.serviceTypes.add(serviceTypes[i]);
+			}
+		}
+
+		categoriesNameIndex.put(category.name, category);
+	}
+
+	public ServiceData loadLocal() throws FileNotFoundException {
+		return getLocal(String.format("%s%sserviceData.xml", FileIO.getCfgDir(), File.separator));
+	}
+
+	public boolean save() {
+		return save(String.format("%s%sserviceData.xml", FileIO.getCfgDir(), File.separator));
+	}
+
+	public boolean save(String filename) {
+		try {
+
+			isValid();
+
+			Serializer serializer = new Persister();
+
+			ServiceDataLoader sdl = new ServiceDataLoader();
+
+			for (Map.Entry<String, ServiceType> o : serviceTypesNameIndex.entrySet()) {
+				ServiceType st = o.getValue();
+				sdl.serviceTypes.add(st);
+			}
+
+			for (Map.Entry<String, Category> o : categoriesNameIndex.entrySet()) {
+				Category st = o.getValue();
+				sdl.categories.add(st);
+			}
+
+			for (Map.Entry<String, Dependency> o : dependenciesOrgIndex.entrySet()) {
+				Dependency st = o.getValue();
+				sdl.dependencies.add(st);
+			}
+
+			FileOutputStream fos = new FileOutputStream(filename);
+			serializer.write(sdl, fos);
+			fos.close();
+
+			// File f = new File(filename);
+			// serializer.write(this, f);
+
+			return true;
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+
+		return false;
+	}
+
+	public String[] getCategoryNames() {
+
+		String[] cat = new String[categoriesNameIndex.size()];
+
+		int i = 0;
+		for (Map.Entry<String, Category> o : categoriesNameIndex.entrySet()) {
+			cat[i] = o.getKey();
+			++i;
+		}
+		return cat;
 	}
 
 	public static void main(String[] args) {
@@ -391,7 +472,7 @@ public class ServiceData implements Serializable {
 
 			// working level - 0 non implementation 1 implemented dev not tested
 			// 2 implemented basic unit testing 3 implemented
-
+			/*
 			ServiceData serviceData = new ServiceData();
 
 			serviceData.addServiceType("org.myrobotlab.service.ACEduinoMotorShield", "ACEduino Motor Shield for Arduino", new String[] { "gnu.io.rxtx", "cc.arduino",
@@ -450,7 +531,8 @@ public class ServiceData implements Serializable {
 			serviceData.addServiceType("org.myrobotlab.service.MouthControl", "allows control of a mouth based on text said");
 			serviceData.addServiceType("org.myrobotlab.service.OpenCV", "The OpenCV Service is a library of vision functions", new String[] { "com.googlecode.javacv",
 					"net.sourceforge.opencv" });
-			serviceData.addServiceType("org.myrobotlab.service.OpenNI", "service to provide OpenNI methods such as depth cloud and skeleton tracking", new String[] { "com.googlecode.simpleopenni"});
+			serviceData.addServiceType("org.myrobotlab.service.OpenNI", "service to provide OpenNI methods such as depth cloud and skeleton tracking",
+					new String[] { "com.googlecode.simpleopenni" });
 			serviceData.addServiceType("org.myrobotlab.service.PickToLight", "pick to light controller", new String[] { "org.apache.commons.httpclient", "com.pi4j.pi4j" });
 
 			serviceData.addServiceType("org.myrobotlab.service.Plantoid", "Plantoid robotics", new String[] { "com.sun.speech.freetts", "org.apache.commons.httpclient",
@@ -495,19 +577,22 @@ public class ServiceData implements Serializable {
 					"org.apache.commons.httpclient", "com.wolfram.alpha" });
 			serviceData.addServiceType("org.myrobotlab.service.XMPP", "client xmpp service - will allow a duplex communication without the need of port-forwarding",
 					new String[] { "org.jivesoftware.smack" });
-			
-			serviceData.addCategory("audio",new String[]{"org.myrobotlab.service.AudioCapture", "org.myrobotlab.service.AudioFile","org.myrobotlab.service.JFugue"});
-			serviceData.addCategory("microcontroller",new String[]{"org.myrobotlab.service.Arduino","org.myrobotlab.service.Propeller"});
-			serviceData.addCategory("programming",new String[]{"org.myrobotlab.service.Python","org.myrobotlab.service.Java","org.myrobotlab.service.GUIService"});
-			serviceData.addCategory("robots",new String[]{"org.myrobotlab.service.Houston","org.myrobotlab.service.InMoov","org.myrobotlab.service.Plantoid", "org.myrobotlab.service.Roomba"});
-			serviceData.addCategory("network",new String[]{"org.myrobotlab.service.RemoteAdapter","org.myrobotlab.service.InMoov"});
-			serviceData.addCategory("actuators",new String[]{"org.myrobotlab.service.Motor","org.myrobotlab.service.Servo"});
-			serviceData.addCategory("vision",new String[]{"org.myrobotlab.service.OpenCV","org.myrobotlab.service.OpenNI","org.myrobotlab.service.IPCamera","org.myrobotlab.service.Tracking","org.myrobotlab.service.TopCodes"});
-			serviceData.addCategory("simulators",new String[]{"org.myrobotlab.service.SLAMBad"});
-			serviceData.addCategory("display",new String[]{"org.myrobotlab.service.GUIService","org.myrobotlab.service.WebGUI","org.myrobotlab.service.VideoStreamer","org.myrobotlab.service.ThingSpeak"});
-			serviceData.addCategory("speech synthesis",new String[]{"org.myrobotlab.service.Speech"});
-			serviceData.addCategory("speech recognition",new String[]{"org.myrobotlab.service.Sphinx"});
-			serviceData.addCategory("intelligence",new String[]{"org.myrobotlab.service.CleverBot"});
+
+			serviceData.addCategory("audio", new String[] { "org.myrobotlab.service.AudioCapture", "org.myrobotlab.service.AudioFile", "org.myrobotlab.service.JFugue" });
+			serviceData.addCategory("microcontroller", new String[] { "org.myrobotlab.service.Arduino", "org.myrobotlab.service.Propeller" });
+			serviceData.addCategory("programming", new String[] { "org.myrobotlab.service.Python", "org.myrobotlab.service.Java", "org.myrobotlab.service.GUIService" });
+			serviceData.addCategory("robots", new String[] { "org.myrobotlab.service.Houston", "org.myrobotlab.service.InMoov", "org.myrobotlab.service.InMoovArm",
+					"org.myrobotlab.service.InMoovHand", "org.myrobotlab.service.InMoov", "org.myrobotlab.service.Plantoid", "org.myrobotlab.service.Roomba" });
+			serviceData.addCategory("network", new String[] { "org.myrobotlab.service.RemoteAdapter", "org.myrobotlab.service.InMoov" });
+			serviceData.addCategory("actuators", new String[] { "org.myrobotlab.service.Motor", "org.myrobotlab.service.Servo" });
+			serviceData.addCategory("vision", new String[] { "org.myrobotlab.service.OpenCV", "org.myrobotlab.service.OpenNI", "org.myrobotlab.service.IPCamera",
+					"org.myrobotlab.service.Tracking", "org.myrobotlab.service.TopCodes" });
+			serviceData.addCategory("simulators", new String[] { "org.myrobotlab.service.SLAMBad" });
+			serviceData.addCategory("display", new String[] { "org.myrobotlab.service.GUIService", "org.myrobotlab.service.WebGUI", "org.myrobotlab.service.VideoStreamer",
+					"org.myrobotlab.service.ThingSpeak" });
+			serviceData.addCategory("speech synthesis", new String[] { "org.myrobotlab.service.Speech" });
+			serviceData.addCategory("speech recognition", new String[] { "org.myrobotlab.service.Sphinx" });
+			serviceData.addCategory("intelligence", new String[] { "org.myrobotlab.service.CleverBot" });
 
 			// TODO -
 			// http://stackoverflow.com/questions/13685042/how-to-set-a-unix-dynamic-library-path-ld-library-path-in-java
@@ -550,79 +635,23 @@ public class ServiceData implements Serializable {
 			serviceData.addThirdPartyLib("wiiuse.wiimote", "0.12b");
 
 			serviceData.save();
-			serviceData.load();
+			*/
+			
+			ServiceData sd = ServiceData.getLocal();//.loadLocal();
+			sd.save();
 
-			Serializer serializer = new Persister();
-
-			File cfg = new File("serviceData.test.xml");
-			serializer.write(serviceData, cfg);
+			/*
+			 * Serializer serializer = new Persister();
+			 * 
+			 * File cfg = new File("serviceData.test.xml");
+			 * serializer.write(serviceData, cfg);
+			 */
 
 			log.info("here");
 
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
-	}
-
-	public void addCategory(String name, String[] serviceTypes) {
-		addCategory(name, null, serviceTypes);
-	}
-
-	public void addCategory(String name, String description, String[] serviceTypes) {
-		Category category = null;
-		if (categoriesNameIndex.containsKey(name)){
-			category = categoriesNameIndex.get(name);
-		} else {
-			category = new Category();
-		}
-		
-		category.name = name;
-		category.description = description;
-		for(int i = 0; i < serviceTypes.length; ++i){
-			boolean alreadyHasReference = false;
-			for(int j = 0; j < category.serviceTypes.size(); ++j){
-				if (serviceTypes[i].equals(category.serviceTypes.get(j))){
-					alreadyHasReference = true;
-					break;
-				}
-			}
-			
-			if (!alreadyHasReference){
-				category.serviceTypes.add(serviceTypes[i]);
-			}
-		}
-		
-		categoriesNameIndex.put(category.name, category);
-		categories.add(category);
-		
-	}
-
-	public void load() {
-		getLocalServiceData(String.format("%s%sserviceData.xml", FileIO.getCfgDir(), File.separator));
-	}
-
-	public boolean save() {
-		return save(String.format("%s%sserviceData.xml", FileIO.getCfgDir(), File.separator));
-	}
-
-	public boolean save(String filename) {
-		try {
-
-			sort();
-			
-			isValid();
-
-			Serializer serializer = new Persister();
-
-			File f = new File(filename);
-			serializer.write(this, f);
-
-			return true;
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return false;
 	}
 
 }

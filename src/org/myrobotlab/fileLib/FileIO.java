@@ -29,6 +29,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,13 +67,48 @@ import org.slf4j.Logger;
 public class FileIO {
 
 	public final static Logger log = LoggerFactory.getLogger(FileIO.class.getCanonicalName());
-	
-	static public String getCfgDir () {
-		return String.format("%s%s.myrobotlab", System.getProperty("user.dir"), File.separator);
+
+	/**
+	 * Single place to get configuration data directory - currently in
+	 * cwd/.myrobotlab
+	 * 
+	 * @return
+	 */
+
+	/*
+	 * MIN JAVA 7 :) import java.nio.file.Files; import java.nio.file.Paths;
+	 * import java.nio.file.Path;
+	 * 
+	 * Path path = Paths.get("path/to/file"); byte[] data =
+	 * Files.readAllBytes(path);
+	 */
+	static public String getCfgDir() {
+		try {
+			String dirName = String.format("%s%s.myrobotlab", System.getProperty("user.dir"), File.separator);
+
+			File dir = new File(dirName);
+
+			if (!dir.exists()) {
+				boolean ret = dir.mkdirs();
+				if (!ret) {
+					log.error("could not create {}", dirName);
+				}
+			}
+
+			if (!dir.isDirectory()) {
+				log.error("{} is not a file", dirName);
+			}
+
+			return dirName;
+
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+		return null;
 	}
 
 	// --- string interface begin ---
-	public final static String fileToString(File file) {
+	public final static String fileToString(File file) throws FileNotFoundException {
 		byte[] bytes = fileToByteArray(file);
 		if (bytes == null) {
 			return null;
@@ -80,7 +116,7 @@ public class FileIO {
 		return new String(bytes);
 	}
 
-	public final static String fileToString(String filename) {
+	public final static String fileToString(String filename) throws FileNotFoundException {
 		return fileToString(new File(filename));
 	}
 
@@ -112,35 +148,61 @@ public class FileIO {
 	}
 
 	static public boolean byteArrayToFile(String filename, byte[] data) {
+		FileOutputStream fos = null;
 		try {
-			FileOutputStream fos = new FileOutputStream(filename);
+			fos = new FileOutputStream(filename);
 			fos.write(data);
-			fos.close();
 			return true;
 		} catch (Exception e) {
 			Logging.logException(e);
+		} finally {
+			try {
+				fos.close();
+			} catch (Exception e) {
+			}
 		}
 		return false;
 	}
 
-	public final static byte[] fileToByteArray(File file) {
+	public final static byte[] fileToByteArray(File file) throws FileNotFoundException {
+
+		FileInputStream fis = null;
+		byte[] data = null;
 		try {
-			FileInputStream fis = new FileInputStream(file);
-			return toByteArray(fis);
-		} catch (Exception e) {
-			Logging.logException(e);
+			fis = new FileInputStream(file);
+			data = toByteArray(fis);
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (Exception e) {
+				}
+			}
 		}
-		return null;
+		return data;
 	}
 
 	public static final byte[] resourceToByteArray(String resourceName) {
 		String filename = String.format("/resource/%s", resourceName);
+		log.info(String.format("looking for %s", filename));
 		InputStream isr = FileIO.class.getResourceAsStream(filename);
-		if (isr == null) {
-			log.error(String.format("can not find resource [%s]", filename));
-			return null;
+		byte[] data = null;
+		try {
+			if (isr == null) {
+				log.error(String.format("can not find resource [%s]", filename));
+				return null;
+			}
+			data = toByteArray(isr);
+		} finally {
+			try {
+				if (isr != null) {
+					isr.close();
+				}
+			} catch (Exception e) {
+
+			}
 		}
-		return toByteArray(isr);
+		return data;
 	}
 
 	public static byte[] toByteArray(InputStream is) {
@@ -249,7 +311,16 @@ public class FileIO {
 		return ClassLoader.getSystemClassLoader().getResource(".").getPath();
 	}
 
-	static public ArrayList<String> listInternalContents(String path) {
+	/**
+	 * similar to ls - when running in jar form will return contents of path in
+	 * an array list of files when running in the ide will return the contents
+	 * of /bin + path
+	 * 
+	 * @param path
+	 * @return
+	 */
+	static public ArrayList<File> listInternalContents(String path) {
+		ArrayList<File> ret = new ArrayList<File>();
 		if (!inJar()) {
 			// get listing if in debug mode or classes are unzipped
 			String rp = getRootLocation();
@@ -258,26 +329,39 @@ public class FileIO {
 			File dir = new File(fullPath);
 			if (!dir.exists()) {
 				log.error(String.format("%s does not exist", fullPath));
+				return ret;
 			}
-			ArrayList<String> ret = new ArrayList<String>();
+
+			if (!dir.isDirectory()) {
+				ret.add(dir);
+			}
+
 			String[] tmp = dir.list();
 			for (int i = 0; i < tmp.length; ++i) {
-				File dirCheck = new File(targetDir + path + "/" + tmp[i]);
-				if (dirCheck.isDirectory()) {
-					ret.add(tmp[i] + "/");
-				} else {
-					ret.add(tmp[i]);
-				}
+				File file = new File(targetDir + path + "/" + tmp[i]);
+				ret.add(file);
+				/*
+				 * if (dirCheck.isDirectory()) { ret.add(tmp[i] + "/"); } else {
+				 * ret.add(tmp[i]); }
+				 */
 			}
 			dir.list();
 			return ret;
 		} else {
-			// unzip
+			// gets compiled to the "bin" directory in eclipse
+			File bin = new File(String.format("./bin%s", path));
+			if (!bin.exists()) {
+				log.error("{} does not exist", bin);
+				return ret;
+			}
+
+			log.error("implement");
+			// if ()
 			return null;
 		}
 	}
 
-	static public ArrayList<String> listResourceContents(String path) {
+	static public ArrayList<File> listResourceContents(String path) {
 		return listInternalContents("/resource" + path);
 	}
 
@@ -386,6 +470,14 @@ public class FileIO {
 
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		String data = resourceToString("version.txt");
+		data = resourceToString("framework/ivychain.xml");
+		data = resourceToString("framework/serviceData.xml");
+
+		byte[] ba = resourceToByteArray("version.txt");
+		ba = resourceToByteArray("framework/version.txt");
+		ba = resourceToByteArray("framework/serviceData.xml");
 
 		String hello = resourceToString("blah.txt");
 

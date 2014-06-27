@@ -3,7 +3,13 @@ package org.myrobotlab.framework;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class Status extends Exception {
+import org.myrobotlab.logging.Logging;
+
+/**
+ *  WARNING - this class used to extend Exception - but the gson serializer would stack overflow
+ *  with self reference issue
+ */
+public class Status {// extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
@@ -36,16 +42,19 @@ public class Status extends Exception {
 		this.detail = detail;
 	}
 
-	public Status(Exception e) {
-		super(e);
-	}
 
-	public final String stackToString() {
+	public Status(Exception e) {
+
 		StringWriter sw;
+		try {
 		sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
-		this.printStackTrace(pw);
-		return "------\r\n" + sw.toString() + "------\r\n";
+			e.printStackTrace(pw);
+			detail = sw.toString();
+		} catch (Exception e2) {
+		}
+		this.key = e.getMessage();
+		
 	}
 
 	public boolean isDebug() {
@@ -64,16 +73,18 @@ public class Status extends Exception {
 		return ERROR.equals(level);
 	}
 
+	/*
 	public static void throwError(String msg) throws Status {
 		throw new Status(msg);
 	}
+	*/
 
 	public static Status error(Exception e) {
 		Status s = new Status(e);
 		s.level = ERROR;
 		return s;
 	}
-
+	
 	public static Status info(String msg) {
 		Status s = new Status(msg);
 		s.level = INFO;
@@ -99,5 +110,17 @@ public class Status extends Exception {
 		}
 		
 		return sb.toString();
+	}
+
+	public static Status info(String format, Object... args) {
+		Status status = new Status(String.format(format, args));
+		status.level = INFO;
+		return status;
+	}
+
+	public static Object error(String format, Object[] args) {
+		Status status = new Status(String.format(format, args));
+		status.level = ERROR;
+		return status;
 	}
 }

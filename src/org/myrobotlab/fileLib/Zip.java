@@ -27,7 +27,7 @@ public class Zip {
 	final public static String RESOURCE = "RESOURCE";
 	final public static String FILE = "FILE";
 	static int BUFFER_SIZE = 2048;
-	public final static Logger log = LoggerFactory.getLogger(Zip.class.toString());
+	public final static Logger log = LoggerFactory.getLogger(Zip.class);
 
 	static public void extractFromSelf() throws IOException {
 		extractFromSelf(".");
@@ -49,6 +49,7 @@ public class Zip {
 		extractFromFile(filePath, targetDirectory, null);
 	}
 
+	// e.g. Zip.extractFromFile("./myrobotlab.jar", "./", "resource");
 	static public void extractFromFile(String resourcePath, String targetDirectory, String filter) throws IOException {
 		extract(resourcePath, targetDirectory, filter, FILE, false);
 	}
@@ -85,9 +86,14 @@ public class Zip {
 			byte[] buffer = new byte[BUFFER_SIZE];
 
 			for (ZipEntry entry = in.getNextEntry(); entry != null; entry = in.getNextEntry()) {
-				File file = new File(target, entry.getName());
-
+				log.info(entry.getName());
+				
 				if (filter == null || entry.getName().startsWith(filter)) {
+					
+					String filename = entry.getName().substring(filter.length());
+					//File file = new File(target, entry.getName());
+					File file = new File(target, filename);
+					
 					log.debug("Extracted Resource = " + entry.getName());
 					if (entry.isDirectory()) {
 						file.mkdirs();

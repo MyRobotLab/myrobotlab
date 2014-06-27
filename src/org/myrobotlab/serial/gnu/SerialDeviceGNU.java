@@ -321,10 +321,15 @@ public class SerialDeviceGNU implements SerialDevice, SerialPortEventListener  {
 
 	@Override
 	public int read() throws IOException {
-		// return (byte)input.read();
 		return input.read();
 	}
 
+	@Override
+	public int read(byte[] data) throws IOException {
+		return input.read(data);
+	}
+
+	
 	@Override
 	public int available() {
 		if (input != null) {

@@ -53,7 +53,7 @@ public class Incubator extends Service {
 		peers.put("webgui", "WebGUI", "WebGUI service");
 		peers.put("python", "Python", "Python service");
 
-		return peers;
+		return peers;	
 	}
 
 	public Incubator(String n) {
@@ -119,7 +119,7 @@ public class Incubator extends Service {
 				}
 				log.warn("starting " + simpleType);
 
-				Repo repo = Repo.getLocalInstance();
+				Repo repo = new Repo("test");
 				if (!repo.isServiceTypeInstalled(String.format("org.myrobotlab.service.%s", simpleType))) {
 					badServices.add(new Error(simpleType, "notInstalled"));
 					continue;
@@ -182,7 +182,7 @@ public class Incubator extends Service {
 	public void testPythonScripts() {
 		try {
 			// String script;
-			ArrayList<String> list = FileIO.listInternalContents("/resource/Python/examples");
+			ArrayList<File> list = FileIO.listInternalContents("/resource/Python/examples");
 
 			Runtime.createAndStart("gui", "GUIService");
 			python = (Python) startPeer("python");
@@ -191,7 +191,7 @@ public class Incubator extends Service {
 			HashSet<String> keepMeRunning = new HashSet<String>(Arrays.asList("i01", "gui", "runtime", "python", getName()));
 
 			for (int i = 0; i < list.size(); ++i) {
-				String r = list.get(i);
+				String r = list.get(i).getName();
 				if (r.startsWith("InMoov2")) {
 					warn("testing script %s", r);
 					String script = FileIO.resourceToString(String.format("Python/examples/%s", r));
@@ -230,6 +230,8 @@ public class Incubator extends Service {
 		log.error(msg);
 		// TODO email
 	}
+	
+	
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();

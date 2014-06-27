@@ -817,4 +817,17 @@ public class Roomba extends Service implements SerialDeviceService {
 		return isConnected;
 	}
 
+
+	@Override
+	public int read() throws IOException {
+		//return serialDevice.read();
+		return 0;
+	}
+
+	@Override
+	public int read(byte[] data) throws IOException {
+		//return serialDevice.read(data);
+		return 0;
+	}
+
 }

@@ -5,11 +5,9 @@ import java.util.ArrayList;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Status;
 public interface ServiceInterface {
 	
-	// FIXME !!!!
-	// need public Test() - unimplemented by Service !!!! :D
+	// FIXME !!!! - refactor - split into 2 interfaces ServiceInterface - service related methods & Messaging
 	
 	// getTestEnvironment() - hasServo hasArduino ???
 	
@@ -17,6 +15,7 @@ public interface ServiceInterface {
 	
 	// hasError() - publish subscribe - getError().getSourceName()
 	
+	// TODO throw exceptions
 	public void test(Object... data);
 	public void test();
 	
@@ -40,6 +39,10 @@ public interface ServiceInterface {
 
 	public void releaseService();
 	
+	public void info(String format, Object... args);
+	public String error(String format, Object... args);
+	public void warn(String format, Object... args);
+	
 	/**
 	 * recursive release - releases all peers and their peers etc.
 	 * then releases this service
@@ -51,12 +54,17 @@ public interface ServiceInterface {
 	public ArrayList<MRLListener> getNotifyList(String key);
 
 	public String getSimpleName();
+	
+	public String getType();
 
 	public String getDescription();
 	
 	public boolean save();
 	
 	public boolean load();
+	
+	// FIXME - split 2 interfaces ServiceInterface & Messaging
+	// public void send(String name, String method, )
 	
 	public void subscribe(String outMethod, String publisherName, String inMethod, Class<?>... parameterType);
 	
@@ -76,7 +84,7 @@ public interface ServiceInterface {
 	
 	
 	/**
-	 * asked by the framework - to determin if the service needs to be secure
+	 * asked by the framework - to determine if the service needs to be secure
 	 * @return
 	 */
 	public boolean requiresSecurity();

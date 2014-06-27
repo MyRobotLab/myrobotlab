@@ -226,8 +226,8 @@ public class Servo extends Service implements ServoControl {
 		this.maxY = maxY;
 	}
 	
-	public float calc(float s){
-		return  minY + ((s - minX)*(maxY - minY))/(maxX - minX);
+	public int calc(float s){
+		return Math.round( minY + ((s - minX)*(maxY - minY))/(maxX - minX));
 	}
 
 	/**
@@ -246,21 +246,17 @@ public class Servo extends Service implements ServoControl {
 		}
 		
 		// the magic mapping
-		float outputY = calc(inputX);
+		int outputY = calc(inputX);
 		
 		if (outputY > outputYMax || outputY < outputYMin){
-			if ((int)outputY == outputY){
 				warn(String.format("%s.moveTo(%d) out of range", getName(), (int)outputY));
-			} else {
-				warn(String.format("%s.moveTo(%f) out of range", getName(), outputY));
-			}
 			return;
 		}
 		
 		// FIXME - currently their is no timerPosition
 		// this could be gotten with 100 * outputY for some valid range
 		log.info("servoWrite({})", outputY);
-		controller.servoWrite(getName(), (int)outputY);
+		controller.servoWrite(getName(), outputY);
 		lastActivityTime = System.currentTimeMillis();
 		this.inputX = inputX;
 	}

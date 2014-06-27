@@ -1,1 +1,1 @@
-development trunk
+1.0.12

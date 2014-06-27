@@ -314,11 +314,12 @@ public class InMoovHand extends Service {
 	public void test() {
 		try {
 			if (arduino == null) {
-				Status.throwError("arduino is null");
+				// gson encoding prevents this
+				throw new Exception("arduino is null");
 			}
 
 			if (!arduino.isConnected()) {
-				Status.throwError("arduino not connected");
+				throw new Exception("arduino not connected");
 			}
 
 			thumb.moveTo(thumb.getPosition() + 2);

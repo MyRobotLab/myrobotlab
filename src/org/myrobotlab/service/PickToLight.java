@@ -107,7 +107,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 	String messageGoodPick = "GOOD";
 
 	final public static String soapRegisterTemplate = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:a=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\" xmlns:tem=\"http://tempuri.org/\"><soapenv:Header/><soapenv:Body><tem:RegisterController><tem:plant>%s</tem:plant><tem:Name>%s</tem:Name><tem:MACAddress>%s</tem:MACAddress><tem:IPAddress>%s</tem:IPAddress><tem:I2CAddresses>%s</tem:I2CAddresses></tem:RegisterController></soapenv:Body></soapenv:Envelope>";
-	final public static String soapEventTemplate = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:tem=\"http://tempuri.org/\"><soapenv:Header/><soapenv:Body><tem:plant>%s</tem:plant><tem:Event><tem:Type>%s</tem:Type><tem:Data>%s</tem:Data></tem:Event></soapenv:Body></soapenv:Envelope>";
+	//final public static String soapEventTemplate = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:tem=\"http://tempuri.org/\"><soapenv:Header/><soapenv:Body><tem:plant>%s</tem:plant><tem:Event><tem:Type>%s</tem:Type><tem:Data>%s</tem:Data></tem:Event></soapenv:Body></soapenv:Envelope>";
+	final public static String soapNotifyTemplate = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:a=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\" xmlns:tem=\"http://tempuri.org/\"><soapenv:Header/><soapenv:Body><tem:NotifyMES><tem:plant>%s</tem:plant><tem:type>%s</tem:type><tem:eventData>%s</tem:eventData></tem:NotifyMES></soapenv:Body></soapenv:Envelope>";
 
 	public final static String ERROR_CONNECTION_REFUSED = "E001";
 	public final static String ERROR_CONNECTION_RESET = "E002";
@@ -235,6 +236,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 							if (m.readSensor() == 1) { // FIXME !!!! BITMASK
 														// READ !!!
 														// (m.readSensor() == 3
+								sendEvent(new PickEvent(getController(), new Module(1, m.getI2CAddress())));
 								blinkOff(m.getI2CAddress());
 								iter.remove();
 							}
@@ -866,8 +868,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 	}
 
 	public String sendEvent(String eventType, Object data) {
-		String body = String.format(soapEventTemplate, plant, eventType, Encoder.gson.toJson(data));
-		return sendSoap("http://tempuri.org/SoapService/Event", body);
+		String body = String.format(soapNotifyTemplate, plant, eventType, Encoder.gson.toJson(data));
+		return sendSoap("http://tempuri.org/SoapService/NotifyMES", body);
 	}
 
 	public String sendSoap(String soapAction, String soapEnv) {
@@ -918,6 +920,59 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 		return ret;
 
 	}
+
+	
+	public String getServerTime() {
+		String soapAction = "http://tempuri.org/SoapService/GetServerTime";
+		String soapEnv = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:tem=\"http://tempuri.org/\">   <soapenv:Header/>   <soapenv:Body>      <tem:GetServerTime/>   </soapenv:Body></soapenv:Envelope>";
+		log.info(String.format("sendSoap - action %s [%s]", soapAction, soapEnv));
+		String mesEndpoint = properties.getProperty("mes.endpoint");
+		String mesUser = properties.getProperty("mes.user");
+		String mesDomain = properties.getProperty("mes.domain");
+		String mesPassword = properties.getProperty("mes.password");
+
+		log.info(String.format("mesEndpoint %s", mesEndpoint));
+		log.info(String.format("mesUser %s", mesUser));
+		log.info(String.format("mesDomain %s", mesDomain));
+		log.info(String.format("mesPassword %s", mesPassword));
+		
+		String ret = "";
+
+		try {
+			DefaultHttpClient httpclient = new DefaultHttpClient();
+			List<String> authpref = new ArrayList<String>();
+			authpref.add(AuthPolicy.NTLM);
+			httpclient.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
+			NTCredentials creds = new NTCredentials(mesUser, mesPassword, "", mesDomain);
+			httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
+
+			HttpContext localContext = new BasicHttpContext();
+			HttpPost post = new HttpPost(mesEndpoint);
+
+			// ,"utf-8"
+			StringEntity stringentity = new StringEntity(soapEnv);
+			stringentity.setChunked(true);
+			post.setEntity(stringentity);
+			post.addHeader("Accept", "text/xml");
+			post.addHeader("SOAPAction", soapAction);
+			post.addHeader("Content-Type", "text/xml; charset=utf-8");
+
+			HttpResponse response = httpclient.execute(post, localContext);
+			HttpEntity entity = response.getEntity();
+			ret = EntityUtils.toString(entity);
+
+			// parse the response - check
+		} catch (Exception e) {
+			error("endpoint %s user %s domain %s password %s", mesEndpoint, mesUser, mesDomain, mesPassword);
+			Logging.logException(e);
+			ret = e.getMessage();
+		}
+
+		log.info(String.format("soap response [%s]", ret));
+		return ret;
+
+	}
+
 
 	public void pollAll() {
 		log.info("pollAll");
@@ -1027,6 +1082,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 		// Runtime.getStartInfo();
 
 		PickToLight pick = new PickToLight("pick.1");
+		String response = pick.getServerTime();
+		//pick.sendSoap(soapAction, soapEnv);
 
 		pick.sendEvent(new PickEvent(pick.getController(), new Module(1, 13)));
 

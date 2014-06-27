@@ -377,33 +377,7 @@ public class GUIDynamicGUI extends GUIServiceGUI {
 
 	}
 
-	// DEPRECATE - binary save not supported
-	public JButton getSaveButton() {
-		JButton button = new JButton("save");
-		button.setEnabled(true);
-		button.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// Execute when button is pressed // TODO send - message
-				// serialize graph
-				mxCodecRegistry.addPackage("org.myrobotlab.control");
-				mxCodecRegistry.register(new mxCellCodec(new org.myrobotlab.control.GUIServiceGraphVertex()));
-				mxCodecRegistry.register(new mxCellCodec(Type.INPORT));
-				mxCodec codec = new mxCodec();
-				String xml = mxUtils.getXml(codec.encode(graph.getModel()));
-
-				myService.setGraphXML(xml);
-
-				// save runtime
-				Runtime.save("runtime.bin");
-			}
-
-		});
-
-		return button;
-	}
-
+	
 	public void buildLocalServiceGraph() {
 
 		log.info("buildLocalServiceGraph-begin");

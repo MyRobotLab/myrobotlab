@@ -23,7 +23,6 @@
 	<classpathentry kind="lib" path="/repo/javax.vecmath/1.5.1/vecmath.jar"/>
 	<classpathentry kind="lib" path="/repo/javazoom.jl.player/1.0.1/jl1.0.1.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.simbad/1.4/simbad-1.4.jar"/>
-	<!-- classpathentry kind="lib" path="/repo/org.apache.ivy/2.0.0/ivy.jar"/ -->
 	<classpathentry kind="lib" path="/repo/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.log4j/1.2.14/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
@@ -37,10 +36,9 @@
 	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/dsn.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/imap.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/mail.jar"/>
-	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/mailapi.jar"/>	
+	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/mailapi.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/pop3.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/smtp.jar"/>
-	<!-- classpathentry kind="lib" path="/repo/com.googlecode.colorutils/r9/colorutils.jar"/ -->
 	<classpathentry kind="lib" path="/repo/net.java.games.jinput/20120914/jinput.jar"/>
 	<classpathentry kind="lib" path="/repo/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar"/>
 	<classpathentry kind="lib" path="/repo/org.fife.autocomplete/2.0.4/autocomplete.jar"/>
@@ -82,5 +80,7 @@
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-media-support-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-stream-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.simpleopenni/1.96/SimpleOpenNI.jar"/>
+	<classpathentry kind="lib" path="/repo/io.netty/4.0.19/netty-all-4.0.19.Final.jar"/>
+	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
@@ -42,7 +44,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	public static final int PUBLISH_BYTE = 0;
 	public static final int PUBLISH_LONG = 1;
 	public static final int PUBLISH_INT = 2;
-	public static final int PUBLISH_CHAR = 3;
 	public static final int PUBLISH_BYTE_ARRAY = 3;
 	public static final int PUBLISH_STRING = 4;
 	public static final int PUBLISH_MESSAGE = 5;
@@ -58,6 +59,13 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	public int BYTE_SIZE_LONG = 4;
 	public int BYTE_SIZE_INT = 2;
 
+	// ====== file io begin ======
+	private int fileCnt = 0;
+	private boolean useRXFile = false;
+	private FileWriter fileWriterRX = null;
+	private BufferedWriter bufferedWriterRX = null;
+	// ====== file io end ======
+
 	public Serial(String n) {
 		super(n);
 	}
@@ -66,9 +74,34 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		buffer = new byte[size];
 	}
 
+	public boolean useRXFile(boolean b) {
+		try {
+			useRXFile = b;
+			if (useRXFile) {
+				if (fileWriterRX == null) {
+					++fileCnt;
+					fileWriterRX = new FileWriter(String.format("rx.%d.data", fileCnt));
+					bufferedWriterRX = new BufferedWriter(fileWriterRX);
+				}
+			} else {
+				if (fileWriterRX != null) {
+					fileWriterRX.flush();
+					bufferedWriterRX.flush();
+					fileWriterRX.close();
+					bufferedWriterRX.close();
+				}
+			}
+
+			return b;
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+		return false;
+	}
+
 	// @Override
 	public String getDescription() {
-		return "used as a general template";
+		return "reads and writes serial data";
 	}
 
 	public String getPortName() {
@@ -86,6 +119,12 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	public void publishInt() {
 		publishType = PUBLISH_INT;
 	}
+	
+	
+	/**
+	 * If serialEvents are used - thread management is simplified for the consumer as it uses the 
+	 * underlying serial event management thread.
+	 */
 
 	@Override
 	public void serialEvent(SerialDeviceEvent event) {
@@ -106,11 +145,15 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				byte newByte;
 				recievedByteCount = 0;
 				log.info("--------begin---------------");
-				// FIXME available you should stay in the wile loop and read
+				// FIXME available you should stay in the while loop and read
 				// that many !!!!
 				while (serialDevice.isOpen() && serialDevice.available() > 0) {
 					newByte = (byte) serialDevice.read();
 					++recievedByteCount;
+
+					if (useRXFile) {
+						fileWriterRX.write(newByte & 0xff);
+					}
 
 					if (blocking) {
 						if (blockingData.size() < BUFFER_SIZE) {
@@ -160,7 +203,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 							log.warn(String.format("%s published byte %d", getName(), newByte));
 							break;
 						}
-						
+
 						case PUBLISH_STRING: {
 							// here be dragons...
 							buffer[recievedByteCount - 1] = newByte;
@@ -192,6 +235,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return SerialDeviceFactory.getSerialDeviceNames();
 	}
 
+	// access to "lowest" level object
 	@Override
 	public SerialDevice getSerialDevice() {
 		return serialDevice;
@@ -244,10 +288,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 	public byte publishByte(Byte data) {
 		log.info(String.format("%s published byte %02x", getName(), (int) data.byteValue()));
-		return data;
-	}
-
-	public char publishChar(Character data) {
 		return data;
 	}
 
@@ -421,6 +461,18 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		vp1.rx = vp0.tx;
 	}
 
+
+	@Override
+	public int read() throws IOException {
+		return serialDevice.read();
+	}
+
+	@Override
+	public int read(byte[] data) throws IOException {
+		return serialDevice.read(data);
+	}
+
+	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.WARN);

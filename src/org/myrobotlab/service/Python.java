@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -460,8 +461,9 @@ public class Python extends Service {
 	 * 
 	 * @param filename
 	 *            the full path name of the python file to execute
+	 * @throws FileNotFoundException 
 	 */
-	public void execFile(String filename) {
+	public void execFile(String filename) throws FileNotFoundException {
 		String script = FileIO.fileToString(filename);
 		exec(script);
 	}
@@ -525,7 +527,7 @@ public class Python extends Service {
 		stop();// release the interpeter
 	}
 
-	public boolean loadAndExec(String filename) {
+	public boolean loadAndExec(String filename) throws FileNotFoundException {
 		boolean ret = loadScript(filename);
 		exec();
 		return ret;
@@ -560,8 +562,9 @@ public class Python extends Service {
 	 * @param filename
 	 *            - name of file to load
 	 * @return - success if loaded
+	 * @throws FileNotFoundException 
 	 */
-	public boolean loadScript(String filename) {
+	public boolean loadScript(String filename) throws FileNotFoundException {
 		String newCode = FileIO.fileToString(filename);
 		if (newCode != null && !newCode.isEmpty()) {
 			log.info(String.format("replacing current script with %1s", filename));
@@ -584,8 +587,9 @@ public class Python extends Service {
 	 * 
 	 * @param filename
 	 * @return true if successfully loaded
+	 * @throws FileNotFoundException 
 	 */
-	public boolean loadUserScript(String filename) {
+	public boolean loadUserScript(String filename) throws FileNotFoundException {
 		String newCode = FileIO.fileToString(getCFGDir() + File.separator + filename);
 		if (newCode != null && !newCode.isEmpty()) {
 			log.info(String.format("replacing current script with %1s", filename));
@@ -608,8 +612,8 @@ public class Python extends Service {
 	 * 
 	 * @return list of python examples
 	 */
-	public ArrayList<String> getExampleListing() {
-		ArrayList<String> r = FileIO.listResourceContents("/Python/examples");
+	public ArrayList<File> getExampleListing() {
+		ArrayList<File> r = FileIO.listResourceContents("/Python/examples");
 		return r;
 	}
 

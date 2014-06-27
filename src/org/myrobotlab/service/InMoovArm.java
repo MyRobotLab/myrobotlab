@@ -253,11 +253,11 @@ public class InMoovArm extends Service {
 	public void test() {
 		try {
 			if (arduino == null) {
-				Status.throwError("arduino is null");
+				throw new Exception("arduino is null");
 			}
 			
 			if (!arduino.isConnected()){
-				Status.throwError("arduino not connected");
+				throw new Exception("arduino not connected");
 			}
 
 			bicep.moveTo(bicep.getPosition() + 2);

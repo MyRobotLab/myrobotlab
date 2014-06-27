@@ -1,10 +1,14 @@
 package org.myrobotlab.framework;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 
 import org.myrobotlab.logging.Logging;
+
+//import org.myrobotlab.logging.Logging;
 
 public class Platform implements Serializable {
 
@@ -93,10 +97,14 @@ public class Platform implements Serializable {
 
 			try {
 				BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/version.txt"), "UTF-8"));
-				for (int c = br.read(); c != -1; c = br.read())
+				for (int c = br.read(); c != -1; c = br.read()){
 					sb.append((char) c);
+					}
+				if (sb.length() > 0){
+					platform.mrlVersion = sb.toString();
+				}
 			} catch (Exception e) {
-				Logging.logException(e);
+				// no logging silently die
 			}
 			
 			// TODO - ProcParser
@@ -109,7 +117,7 @@ public class Platform implements Serializable {
 		return localInstance;
 	}
 
-	public String getMRLVersion() {
+	public String getVersion() {
 		return mrlVersion;
 	}
 
@@ -141,15 +149,15 @@ public class Platform implements Serializable {
 	}
 
 	public boolean isMac() {
-		return OS_MAC.equals(arch);
+		return OS_MAC.equals(os);
 	}
 
 	public boolean isLinux() {
-		return OS_LINUX.equals(arch);
+		return OS_LINUX.equals(os);
 	}
 
 	public boolean isWindows() {
-		return OS_WINDOWS.equals(arch);
+		return OS_WINDOWS.equals(os);
 	}
 
 	public String getClassPathSeperator() {
@@ -170,6 +178,10 @@ public class Platform implements Serializable {
 
 	public String toString() {
 		return String.format("%s.%d.%s", arch, bitness, os);
+	}
+
+	public String getPlatformId() {
+		return String.format("%s.%s.%s", getArch(), getBitness(), getOS());
 	}
 
 }
