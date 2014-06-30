@@ -46,6 +46,7 @@ public class MagaBot extends Service {
 	 * 
 	 * 'i' if the ir sensors are activated
 	 */
+	/*
 	public void sendOrder(String o) {
 		try {
 			serialDevice.write(o);
@@ -53,6 +54,7 @@ public class MagaBot extends Service {
 			logException(e);
 		}
 	}
+	*/
 
 	@Override
 	public String getDescription() {

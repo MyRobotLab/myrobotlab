@@ -19,6 +19,8 @@ import javax.swing.text.DefaultCaret;
 import org.myrobotlab.control.RuntimeGUI;
 import org.myrobotlab.framework.repo.Updates;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * @author GroG class to handle the complex interaction for processing updates
@@ -26,6 +28,8 @@ import org.myrobotlab.image.Util;
  */
 public class ProgressDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 1L;
+	
+	public final static Logger log = LoggerFactory.getLogger(ProgressDialog.class);
 
 	// north
 	JLabel actionText = null;
@@ -37,13 +41,16 @@ public class ProgressDialog extends JDialog implements ActionListener {
 
 	// south
 	JLabel buttonText = new JLabel("");
-	JButton ok = new JButton("ok");
+	JButton okToUpdates = new JButton("ok");
+	//JButton ok_update = new JButton("ok");
 	JButton cancel = new JButton("cancel");
 	JButton restart = new JButton("restart");
 	JButton noWorky = new JButton("noWorky!");
 
 	boolean hasError = false;
 	RuntimeGUI parent;
+
+	private Updates lastUpdates;
 
 	public ProgressDialog(RuntimeGUI parent) {
 		super(parent.myService.getFrame(), "new components");
@@ -75,12 +82,12 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		// south
 		JPanel south = new JPanel();
 		display.add(south, BorderLayout.SOUTH);
-		ok.addActionListener(this);
+		okToUpdates.addActionListener(this);
 		cancel.addActionListener(this);
 		restart.addActionListener(this);
 		noWorky.addActionListener(this);
 		hideButtons();
-		south.add(ok);
+		south.add(okToUpdates);
 		south.add(cancel);
 		south.add(restart);
 		south.add(noWorky);
@@ -90,7 +97,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 	}
 
 	public void hideButtons() {
-		ok.setVisible(false);
+		okToUpdates.setVisible(false);
 		cancel.setVisible(false);
 		restart.setVisible(false);
 		noWorky.setVisible(false);
@@ -124,15 +131,6 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		});
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		Object source = event.getSource();
-		if (source == noWorky) {
-			parent.myService.noWorky();
-		} else if (source == restart) {
-			parent.restart();
-		}
-	}
 
 	public void beginUpdates() {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -163,6 +161,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 	}
 
 	public void publishUpdates(final Updates updates) {
+		lastUpdates = updates;
 		hideButtons();
 
 		SwingUtilities.invokeLater(new Runnable() {
@@ -177,10 +176,10 @@ public class ProgressDialog extends JDialog implements ActionListener {
 
 				if (updates.hasJarUpdate()) {
 					buttonText.setText(String.format("<html>Version %s is available<br/>Would you like to update?</html>", updates.repoVersion));
-					ok.setVisible(true);
+					okToUpdates.setVisible(true);
 					cancel.setVisible(true);
 				} else {
-					ok.setVisible(true);
+					okToUpdates.setVisible(true);
 					buttonText.setText("No new updates are available.");
 				}
 				// FIXME - enable cancel & ok button -> okUpdate button ?
@@ -192,5 +191,22 @@ public class ProgressDialog extends JDialog implements ActionListener {
 			}
 		});
 	}
+	
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object source = event.getSource();
+		if (source == noWorky) {
+			parent.myService.noWorky();
+		} else if (source == restart) {
+			parent.restart();
+		} else if (source == cancel) {
+			setVisible(false);
+		} else if (source == okToUpdates) {
+			parent.myService.send(parent.myRuntime.getName(), "applyUpdates", lastUpdates);
+		} else {
+			log.error("unknown source");
+		}
+	}
+
 
 }

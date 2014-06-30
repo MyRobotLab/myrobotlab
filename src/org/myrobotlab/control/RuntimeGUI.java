@@ -75,10 +75,9 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.net.SocketAppender;
-import org.myrobotlab.control.widget.AboutDialog;
-import org.myrobotlab.control.widget.ConnectDialog;
 import org.myrobotlab.control.widget.ProgressDialog;
 import org.myrobotlab.control.widget.Style;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
@@ -116,7 +115,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	String possibleServiceFilter = null;
 	ProgressDialog progressDialog = null;
 
-	Runtime myRuntime = null;
+	public Runtime myRuntime = null;
 
 	DefaultListModel<ServiceEntry> currentServicesModel = new DefaultListModel<ServiceEntry>();
 	DefaultTableModel possibleServicesModel = new DefaultTableModel() {
@@ -342,7 +341,10 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		center.add(runningServicesPanel);
 
 		TitledBorder title;
-		title = BorderFactory.createTitledBorder("services");
+		Platform platform = myRuntime.getPlatform();
+		
+		// TODO - get memory total & free - put in Platform? getMemory has to be implemented as a callback 
+		title = BorderFactory.createTitledBorder(String.format("<html>%s %s</html>", platform.getPlatformId(), platform.getVersion()));
 		center.setBorder(title);
 
 		JMenuBar menuBar = new JMenuBar();
@@ -351,12 +353,20 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		JMenu logging = new JMenu("logging");
 		menuBar.add(logging);
 
+		/*
 		JMenuItem item = new JMenuItem("about");
 		item.addActionListener(this);
 		system.add(item);
-		item = new JMenuItem("check for updates");
+		
+		*/
+		JMenuItem item = new JMenuItem("check for updates");
 		item.addActionListener(this);
 		system.add(item);
+
+		item = new JMenuItem("install all");
+		item.addActionListener(this);
+		system.add(item);
+		
 		item = new JMenuItem("record");
 		item.addActionListener(this);
 		system.add(item);
@@ -365,9 +375,11 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		logging.add(m1);
 		buildLogLevelMenu(m1);
 
+		/*
 		m1 = new JMenu("type");
 		logging.add(m1);
 		buildLogAppenderMenu(m1);
+		*/
 
 		display.add(menuBar, BorderLayout.NORTH);
 		display.add(center, BorderLayout.CENTER);
@@ -433,9 +445,6 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		subscribe("updateProgress", "updateProgress", Status.class);
 		subscribe("updatesFinished", "updatesFinished", ArrayList.class);
 
-		// FIXME - remove
-		subscribe("confirmRestart", "confirmRestart", Boolean.class);
-
 		// get the service info for the bound runtime (not necessarily local)
 		subscribe("getServiceTypeNames", "onPossibleServicesRefresh", String[].class);
 
@@ -452,9 +461,6 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("updatesBegin", "updatesBegin", Updates.class);
 		unsubscribe("updateProgress", "updateProgress", Status.class);
 		unsubscribe("updatesFinished", "updatesFinished", ArrayList.class);
-
-		// FIXME - remove
-		unsubscribe("confirmRestart", "confirmRestart", Boolean.class);
 
 		// get the service info for the bound runtime (not necessarily local)
 		unsubscribe("getServiceTypeNames", "onPossibleServicesRefresh", String[].class);
@@ -729,18 +735,24 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			int selectedRow = possibleServices.getSelectedRow();
 			ServiceEntry entry = ((ServiceEntry) possibleServices.getValueAt(selectedRow, 0));
 			addNewService(entry.getType());
+			
+		} else if ("install all".equals(cmd)) {
+			myService.send(boundServiceName, "updateAll");
 		} else if ("upgrade".equals(cmd)) {
 			/* IMPORTANT - INSTALL OF A SERVICE */
 			// send to "my" runtime - may be remote
 			myService.send(myRuntime.getName(), "update", c.type);
-		} else if ("about".equals(cmd)) {
-			new AboutDialog(myService);
 		} else if ("check for updates".equals(cmd)) {
 			myService.send(myRuntime.getName(), "checkForUpdates");
 		} else if (cmd.equals(Level.DEBUG) || cmd.equals(Level.INFO) || cmd.equals(Level.WARN) || cmd.equals(Level.ERROR) || cmd.equals(Level.FATAL)) {
-			// TODO this needs to be changed into something like tryValueOf(cmd)
 			Logging logging = LoggingFactory.getInstance();
 			logging.setLevel(cmd);
+		} else if (cmd.equals(Appender.FILE)) {
+			Logging logging = LoggingFactory.getInstance();
+			logging.addAppender(Appender.FILE);
+		} else if (cmd.equals(Appender.CONSOLE)) {
+			Logging logging = LoggingFactory.getInstance();
+			logging.addAppender(Appender.CONSOLE);
 		} else if (cmd.equals(Appender.NONE)) {
 			Logging logging = LoggingFactory.getInstance();
 			logging.removeAllAppenders();

@@ -148,11 +148,11 @@ public class SerialDeviceFactory {
 			sd.open();
 			log.info("{}", sd.isOpen());
 			log.info("{}", sd.isOpen());
-			sd.write(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+			sd.write(new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
 			sd.close();
 			log.info("{}", sd.isOpen());
 			sd.open();
-			sd.write(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+			sd.write(new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
 			log.info("{}", sd.isOpen());
 		} catch (SerialDeviceException e) {
 			// TODO Auto-generated catch block

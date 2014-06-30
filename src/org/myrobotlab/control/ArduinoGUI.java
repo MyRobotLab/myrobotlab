@@ -192,6 +192,7 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 
 		if (myArduino != null && boardName != null && boardName.contains("Mega")) {
 			getMegaPanel();
+			return;
 		}
 		getDuemilanovePanel();
 	}

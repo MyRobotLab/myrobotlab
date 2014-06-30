@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 public class AboutDialog extends JDialog implements ActionListener, MouseListener {
 
 	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(AboutDialog.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(AboutDialog.class);
 
 	JButton noWorky = null;
 	JButton ok = null;
@@ -40,6 +40,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 
 	public AboutDialog(GUIService gui) {
 		super(gui.getFrame(), "about", true);
+		this.gui = gui;	
 		this.parent = gui.getFrame();
 		if (parent != null) {
 			Dimension parentSize = parent.getSize();

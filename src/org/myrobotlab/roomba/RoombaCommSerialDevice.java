@@ -189,10 +189,18 @@ public class RoombaCommSerialDevice extends RoombaComm implements SerialDeviceEv
 	 * 
 	 * @see org.myrobotlab.roomba.Z#send(byte[])
 	 */
+	// FIXME - IS THIS RIGHT ?!?!? - why would you send real Java bytes - you'd have to 
+	// "load" them incorrectly send them
+	// 
 	@Override
 	public boolean send(byte[] bytes) {
 		try {
-			port.write(bytes);
+			// BLECH - conversion to support silly send(byte[] bytes)
+			int[] ints = new int[bytes.length];
+			for (int i = 0; i < ints.length; ++i){
+				ints[i] = bytes[i];
+			}
+			port.write(ints);
 			// if( flushOutput ) port.flush(); // hmm, not sure if a good idea
 		} catch (Exception e) { // null pointer or serial port dead
 			e.printStackTrace();

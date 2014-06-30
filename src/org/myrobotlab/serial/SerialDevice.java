@@ -32,7 +32,7 @@ public interface SerialDevice {
 	// public String getCurrentOwner();
 	// public int getPortType();
 	// public boolean isCurrentlyOwned();
-	public int available();
+	public int available() throws IOException;
 
 	// open / close
 	public void open() throws SerialDeviceException;
@@ -72,24 +72,23 @@ public interface SerialDevice {
 	// write methods
 	public void write(int data) throws IOException;
 
-	public void write(byte data) throws IOException;
-
-	public void write(char data) throws IOException;
-
 	public void write(int[] data) throws IOException;
 
-	public void write(byte[] data) throws IOException;
-
-	public void write(String data) throws IOException;
-
-	/*because this overrides inputstream - it must return "int" instead of 
-	 * what it "actually returns which is a byte - this is an artifact of the 
-	 * native code implementation
+	/*
+	 * public void write(byte data) throws IOException;
+	 * 
+	 * public void write(char data) throws IOException;
+	 * 
+	 * public void write(byte[] data) throws IOException;
+	 * 
+	 * public void write(String data) throws IOException;
 	 */
-	public int read() throws IOException;
-	
-	public InputStream getInputStream();
-	public OutputStream getOutputStream();
 
-       public int read(byte[] data) throws IOException;
+
+	public int read() throws IOException;
+
+	// LAME - but Java goes both way with InputStream
+	// it returns a single "int" / byte form 0/255
+	// in addition it returns your byte array - as java bytes - which no one uses :P
+	public int read(byte[] data) throws IOException;
 }

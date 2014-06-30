@@ -6,8 +6,6 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Index;
@@ -15,6 +13,7 @@ import org.myrobotlab.framework.IndexNode;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.Repo;
+import org.myrobotlab.framework.repo.UpdateReport;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -99,6 +98,7 @@ public class Incubator extends Service {
 		}
 	}
 
+	// FIXME - do all types of serialization
 	static public final ArrayList<Error> serializeTest() {
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
@@ -232,21 +232,29 @@ public class Incubator extends Service {
 	}
 	
 	
+	/**
+	 * install all service
+	 */
+	public void installAll(){
+
+		Runtime runtime = Runtime.getInstance();		
+		UpdateReport report = runtime.updateAll();
+		log.info(report.toString());
+	}
+	
+	// remove all - install single 1 - check for errors on start 
+	
+	// install all 3rd party libraries ???
+	
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.WARN);
 
-		String blah = "13232343";
-
-		// log.info("{}", blah, blah, blah);
-
-		log.info(String.format("%s", (Object[]) blah.split("\\-")));
-
-		Boolean b = Runtime.isHeadless();
-
 		Incubator incubator = new Incubator("incubator");
 		incubator.startService();
+		
+		incubator.installAll();
 		// incubator.startTest();
 
 		incubator.testPythonScripts();

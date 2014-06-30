@@ -42,6 +42,11 @@
 
 #define MRLCOMM_VERSION      10
 
+// MAX definitions
+// MAX_SERVOS defined by boardtype/library
+#define PINGDARS_MAX		6
+#define SENSORS_MAX			12
+
 #define DIGITAL_WRITE        0
 #define DIGITAL_VALUE        1
 #define ANALOG_WRITE         2
@@ -52,28 +57,44 @@
 #define SERVO_WRITE          7
 #define SERVO_SET_MAX_PULSE  8
 #define SERVO_DETACH         9
-#define SERVO_STOP_AND_REPORT 10
-#define SET_PWM_FREQUENCY    11
-#define SET_SERVO_SPEED           12
-#define ANALOG_READ_POLLING_START	 13
-#define ANALOG_READ_POLLING_STOP	 14
-#define DIGITAL_READ_POLLING_START	 15
-#define DIGITAL_READ_POLLING_STOP	 16
-#define SET_ANALOG_TRIGGER               17
-#define REMOVE_ANALOG_TRIGGER            18
-#define SET_DIGITAL_TRIGGER              19
-#define REMOVE_DIGITAL_TRIGGER           20
-#define DIGITAL_DEBOUNCE_ON              21
-#define DIGITAL_DEBOUNCE_OFF             22
-#define DIGITAL_TRIGGER_ONLY_ON          23
-#define DIGITAL_TRIGGER_ONLY_OFF         24
-#define SET_SERIAL_RATE			         25
-#define GET_MRLCOMM_VERSION				 26
-#define SET_SAMPLE_RATE				 	 27
-#define SERVO_WRITE_MICROSECONDS		 28
+#define SERVO_STOP_AND_REPORT 			10
+#define SET_PWM_FREQUENCY    			11
+#define SET_SERVO_SPEED           		12
+#define ANALOG_READ_POLLING_START	 	13
+#define ANALOG_READ_POLLING_STOP	 	14
+#define DIGITAL_READ_POLLING_START	 	15
+#define DIGITAL_READ_POLLING_STOP	 	16
+#define SET_ANALOG_TRIGGER				17
+#define REMOVE_ANALOG_TRIGGER			18
+#define SET_DIGITAL_TRIGGER				19
+#define REMOVE_DIGITAL_TRIGGER			20
+#define DIGITAL_DEBOUNCE_ON				21
+#define DIGITAL_DEBOUNCE_OFF			22
+#define DIGITAL_TRIGGER_ONLY_ON			23
+#define DIGITAL_TRIGGER_ONLY_OFF		24
+#define SET_SERIAL_RATE					25
+#define GET_MRLCOMM_VERSION				26
+#define SET_SAMPLE_RATE					27
+#define SERVO_WRITE_MICROSECONDS		28
+// TODO - make single ERROR type - with error code to be sent back
+// function error(errorCode)
+// error unknown command
+// error bad magic number
+// error serial rx error
+// error ???
 #define MRLCOMM_RX_ERROR				29
 
+#define PINGDAR_ATTACH              	30
+#define PINGDAR_START             		31
+#define PINGDAR_STOP              		32
+#define PINGDAR_DATA 					33
 
+#define SENSOR_ATTACH 					34
+#define SENSOR_POLLING_START			35
+#define SENSOR_POLLING_STOP				36
+#define SENSOR_DATA 					37
+
+#define SENSOR_ULTRASONIC				1
 
 /*
 // FIXME - finish implementation Stepper* steppers[MAX_STEPPERS];
@@ -133,24 +154,55 @@ int movingServosCount = 0;            // number of servo's currently moving at f
 unsigned long loopCount     = 0;
 int byteCount               = 0;
 unsigned char newByte 		= 0;
-unsigned char ioCommand[64];  // most io fns can cleanly be done with a 4 byte code
+unsigned char ioCmd[64];  // message buffer for all inbound messages
 int readValue;
 unsigned int sampleRate = 1; // 1 - 65,535 modulus of the loopcount - allowing you to sample less
+
 
 int digitalReadPin[DIGITAL_PIN_COUNT];        // array of pins to read from
 int digitalReadPollingPinCount = 0;           // number of pins currently reading
 int lastDigitalInputValue[DIGITAL_PIN_COUNT]; // array of last input values
-int digitalPinService[DIGITAL_PIN_COUNT];     // the services this pin is involved in
 bool digitalTriggerOnly	= false;      // send data back only if its different
 
 int analogReadPin[ANALOG_PIN_COUNT];          // array of pins to read from
 int analogReadPollingPinCount = 0;            // number of pins currently reading
 int lastAnalogInputValue[ANALOG_PIN_COUNT];   // array of last input values
-int analogPinService[ANALOG_PIN_COUNT];       // the services this pin is involved in
 bool analogTriggerOnly = false;         // send data back only if its different
 
-unsigned long retULValue;
 unsigned int errorCount = 0;
+
+// TODO - all well and good .. but you dont control Servo's data (yet)
+// should have a struct for it too - contains all the data info you'd want to have
+// in a servo - same with stepper
+
+typedef struct
+  {
+      int servoIndex; // id of servo in servos array
+      int servoPos;
+      int sensorIndex;
+      int sweepMin;
+      int sweepMax;
+      int step;
+      bool isRunning;
+  }  pingdar_type;
+
+pingdar_type pingdars[PINGDARS_MAX];
+
+/* could optimize - but makes for ugly code - just to save a couple clock cycles - counting to 6 :P
+not worth it
+int pingdarsRunningCount = 0;
+int pingdarsRunning[6]; // map array of running pingdars
+*/
+
+typedef struct
+  {
+ 	  int type;
+ 	  int trigPin;
+      int echoPin;
+      bool isRunning;
+  }  sensor_type;
+
+sensor_type sensors[SENSORS_MAX];
 
 void setup() {
 	Serial.begin(57600);        // connect to the serial port
@@ -270,7 +322,7 @@ boolean getCommand ()
 		
 		if (byteCount > 2) {
 		  // fill in msg data - (2) headbytes -1 (offset)
-		  ioCommand[byteCount - 3] = newByte;
+		  ioCmd[byteCount - 3] = newByte;
 		}
 		
 		// if received header + msg
@@ -285,24 +337,24 @@ boolean getCommand ()
 
 void moveServo(bool isWriteMicroSecond){
 
-	if (servoSpeed[ioCommand[1]] == 100) // move at regular/full 100% speed
+	if (servoSpeed[ioCmd[1]] == 100) // move at regular/full 100% speed
 	{
 		// move at regular/full 100% speed
 		// although not completely accurate
 		// target position & current position are
 		// updated immediately
 		if (isWriteMicroSecond) {
-			int ms = (ioCommand[2]<<8) + ioCommand[3];
-			servos[ioCommand[1]].writeMicroseconds(ms);
+			int ms = (ioCmd[2]<<8) + ioCmd[3];
+			servos[ioCmd[1]].writeMicroseconds(ms);
 		} else {
-			servos[ioCommand[1]].write(ioCommand[2]);
+			servos[ioCmd[1]].write(ioCmd[2]);
 		}
-		servoTargetPosition[ioCommand[1]] = ioCommand[2];
-		servoCurrentPosition[ioCommand[1]] = ioCommand[2];
-	} else if (servoSpeed[ioCommand[1]] < 100 && servoSpeed[ioCommand[1]] > 0) {
+		servoTargetPosition[ioCmd[1]] = ioCmd[2];
+		servoCurrentPosition[ioCmd[1]] = ioCmd[2];
+	} else if (servoSpeed[ioCmd[1]] < 100 && servoSpeed[ioCmd[1]] > 0) {
 		// start moving a servo at fractional speed
-		servoTargetPosition[ioCommand[1]] = ioCommand[2];
-		movingServos[movingServosCount]=ioCommand[1];
+		servoTargetPosition[ioCmd[1]] = ioCmd[2];
+		movingServos[movingServosCount]=ioCmd[1];
 		++movingServosCount;
 	} else {
 		// NOP - 0 speed - don't move
@@ -315,22 +367,19 @@ void loop () {
 
 	if (getCommand())
 	{
-		switch (ioCommand[0])
+		switch (ioCmd[0])
 		{
 		case DIGITAL_WRITE:
-			digitalWrite(ioCommand[1], ioCommand[2]);
+			digitalWrite(ioCmd[1], ioCmd[2]);
 			break;
 		case ANALOG_WRITE:
-			analogWrite(ioCommand[1], ioCommand[2]);
+			analogWrite(ioCmd[1], ioCmd[2]);
 			break;
 		case PINMODE:
-			pinMode(ioCommand[1], ioCommand[2]);
-			break;
-		case PULSE_IN:
-			retULValue = pulseIn(ioCommand[1], ioCommand[2]);
+			pinMode(ioCmd[1], ioCmd[2]);
 			break;
 		case SERVO_ATTACH:
-			servos[ioCommand[1]].attach(ioCommand[2]);
+			servos[ioCmd[1]].attach(ioCmd[2]);
 			break;
 		case SERVO_WRITE:
 			moveServo(false);
@@ -340,54 +389,50 @@ void loop () {
 			break;
 		case SERVO_STOP_AND_REPORT:
 			// a stop can only be issued to a moving servo under speed control
-			if (servoSpeed[ioCommand[1]] < 100 && servoSpeed[ioCommand[1]] > 0) {
-				servoTargetPosition[ioCommand[1]] = servoCurrentPosition[ioCommand[1]];
-				removeAndShift(movingServos, movingServosCount, ioCommand[1]);
+			if (servoSpeed[ioCmd[1]] < 100 && servoSpeed[ioCmd[1]] > 0) {
+				servoTargetPosition[ioCmd[1]] = servoCurrentPosition[ioCmd[1]];
+				removeAndShift(movingServos, movingServosCount, ioCmd[1]);
 			} 
 			break;
 		case SET_SERVO_SPEED:
 			// setting the speed of a servo
-			servoSpeed[ioCommand[1]]=ioCommand[2];
+			servoSpeed[ioCmd[1]]=ioCmd[2];
 			break;
 		case SERVO_SET_MAX_PULSE:
-			//servos[ioCommand[1]].setMaximumPulse(ioCommand[2]);    TODO - lame fix hardware
+			//servos[ioCmd[1]].setMaximumPulse(ioCmd[2]);    TODO - lame fix hardware
 			break;
 		case SERVO_DETACH:
-			servos[ioCommand[1]].detach();
+			servos[ioCmd[1]].detach();
 			break;
 		case SET_PWM_FREQUENCY:
-			setPWMFrequency (ioCommand[1], ioCommand[2]);
+			setPWMFrequency (ioCmd[1], ioCmd[2]);
 			break;
 		case ANALOG_READ_POLLING_START:
-			analogReadPin[analogReadPollingPinCount] = ioCommand[1]; // put on polling read list
-			analogPinService[ioCommand[1]] |= POLLING_MASK;
+			analogReadPin[analogReadPollingPinCount] = ioCmd[1]; // put on polling read list
 			// TODO - if POLLING ALREADY DON'T RE-ADD - MAKE RE-ENTRANT - if already set don't increment
 			++analogReadPollingPinCount;
 			break;
 		case ANALOG_READ_POLLING_STOP:
 			// TODO - MAKE RE-ENRANT
-			removeAndShift(analogReadPin, analogReadPollingPinCount, ioCommand[1]);
-			analogPinService[ioCommand[1]] &= ~POLLING_MASK;
+			removeAndShift(analogReadPin, analogReadPollingPinCount, ioCmd[1]);
 			break;
 		case DIGITAL_READ_POLLING_START:
 			// TODO - MAKE RE-ENRANT
-			digitalReadPin[digitalReadPollingPinCount] = ioCommand[1]; // put on polling read list
+			digitalReadPin[digitalReadPollingPinCount] = ioCmd[1]; // put on polling read list
 			++digitalReadPollingPinCount;
 			break;
 		case DIGITAL_READ_POLLING_STOP:
 			// TODO - MAKE RE-ENRANT
-			removeAndShift(digitalReadPin, digitalReadPollingPinCount, ioCommand[1]);
-			digitalPinService[ioCommand[1]] &= ~POLLING_MASK;
+			removeAndShift(digitalReadPin, digitalReadPollingPinCount, ioCmd[1]);
 			break;
 		case SET_ANALOG_TRIGGER:
 			// TODO - if POLLING ALREADY DON'T RE-ADD - MAKE RE-ENTRANT
-			analogReadPin[analogReadPollingPinCount] = ioCommand[1]; // put on polling read list
-			analogPinService[ioCommand[1]] |= TRIGGER_MASK;
+			analogReadPin[analogReadPollingPinCount] = ioCmd[1]; // put on polling read list
 			++analogReadPollingPinCount;
 			break;
 		case DIGITAL_DEBOUNCE_ON:
 			// debounceDelay = 50;
-			debounceDelay = ((ioCommand[1]<<8) + ioCommand[2]);
+			debounceDelay = ((ioCmd[1]<<8) + ioCmd[2]);
 			break;
 		case DIGITAL_DEBOUNCE_OFF:
 			debounceDelay = 0;
@@ -401,7 +446,7 @@ void loop () {
 		case SET_SERIAL_RATE:
 			Serial.end();
 			delay(500);
-			Serial.begin(ioCommand[1]);
+			Serial.begin(ioCmd[1]);
 			break;
 		case GET_MRLCOMM_VERSION:
 			Serial.write(MAGIC_NUMBER);
@@ -409,21 +454,41 @@ void loop () {
 			Serial.write(GET_MRLCOMM_VERSION);
 			Serial.write((byte)MRLCOMM_VERSION);
 			break;
-		case PULSE_IN:
-		    //unsigned long timeout = FIXME - implement
-		    unsigned long duration = pulseIn(ioCommand[1], ioCommand[2]);
-		    
-			Serial.write(MAGIC_NUMBER);
-			Serial.write(5); // size
+		
+		case PULSE_IN: {
+			int trigPin = ioCmd[1];
+			int echoPin = ioCmd[2];
+			// TODO - implement HI/LOW value & timeout & variable delay for trigger
+			
+			pinMode(trigPin, OUTPUT);
+			pinMode(echoPin, INPUT);
+			
+			digitalWrite(trigPin, LOW); 
+			delayMicroseconds(2); 
+			
+			digitalWrite(trigPin, HIGH);
+			delayMicroseconds(10); 
+			 
+			digitalWrite(trigPin, LOW);
+			unsigned long duration = pulseIn(echoPin, HIGH);
+			
+			//Calculate the distance (in cm) based on the speed of sound.
+			// distance = duration/58.2;
+ 
+            Serial.write(MAGIC_NUMBER);
+			Serial.write(5); // size 1 FN + 4 bytes of unsigned long
 			Serial.write(PULSE_IN);
-			Serial.write((byte)MRLCOMM_VERSION);
-			Serial.write((byte)MRLCOMM_VERSION);
-			Serial.write((byte)MRLCOMM_VERSION);
-			Serial.write((byte)MRLCOMM_VERSION);
+            // write the long value out
+			Serial.write((byte)(duration >> 24));
+			Serial.write((byte)(duration >> 16));
+			Serial.write((byte)(duration >> 8));
+			Serial.write((byte)duration & 0xFF);
+                    
 			break;
+		}
 		case SET_SAMPLE_RATE:
 			// 2 byte int - valid range 1-65,535
-			sampleRate = (ioCommand[1]<<8) + ioCommand[2];
+			sampleRate = (ioCmd[1]<<8) + ioCmd[2];
 			if (sampleRate == 0)
 				{ sampleRate = 1; } // avoid /0 error - FIXME - time estimate param
 			break;
@@ -432,23 +497,56 @@ void loop () {
 			break;
 /* FIXME - finish Arduino's version of implementation		
 		case STEPPER_ATTACH:
-			steppers[ioCommand[1]] = &(Stepper(ioCommand[2], ioCommand[3], ioCommand[4], ioCommand[5], ioCommand[6]));
+			steppers[ioCmd[1]] = &(Stepper(ioCmd[2], ioCmd[3], ioCmd[4], ioCmd[5], ioCmd[6]));
 			break;		
 */				
 
 			// --VENDOR CODE BEGIN--
 			// --VENDOR CODE END--
 
+		case PINGDAR_ATTACH:{
+			int pingdarIndex = ioCmd[1];
+			pingdar_type pingdar = pingdars[pingdarIndex];
+			pingdar.servoIndex = ioCmd[2];
+			pingdar.sensorIndex = ioCmd[3];
+			break;
+		}
+		
+		case SENSOR_ATTACH:{
+			int sensorIndex = ioCmd[1];
+			sensor_type& sensor = sensors[sensorIndex];
+			sensor.type = ioCmd[2];
+			sensor.trigPin = ioCmd[3];
+			sensor.echoPin = ioCmd[4];	
+			break;
+		}
+		
+		case SENSOR_POLLING_START:{
+			int sensorIndex = ioCmd[1];
+			sensor_type& sensor = sensors[sensorIndex];
+			sensors[sensorIndex].isRunning = true;
+			break;
+		}
+		
+		case SENSOR_POLLING_STOP:{
+			int sensorIndex = ioCmd[1];
+			sensor_type& sensor = sensors[sensorIndex];
+			sensor.isRunning = false;
+			break;
+		}
+	
 		case NOP:
 			// No Operation
 			break;
+			
 		default:
-			//             Serial.print("unknown command!\n"); 
+		    // TODO - send back an error msg
+		    // error (unknown command)
 			break;
 		}
 
 		// reset buffer
-		memset(ioCommand,0,sizeof(ioCommand));
+		memset(ioCmd,0,sizeof(ioCmd));
 		byteCount = 0;
 
 	} // if getCommand()
@@ -528,7 +626,45 @@ void loop () {
 			removeAndShift(movingServos, movingServosCount, servoIndex);
 		}
 	}
+	
+	for (int i = 0; i < PINGDARS_MAX; ++i) {
+		pingdar_type p = pingdars[i];
+		if (p.isRunning == true){
+			// step
+			// pulsein - if sensor is "running" set to false
+			// no need to send 2 sets of data - let controller (arduino) break a pingdar set apart and distribute
+			// get data
+			// make msg
+			// send back
+		}
+	}
 
+	for (int i = 0; i < SENSORS_MAX; ++i) {
+		sensor_type& sensor = sensors[i];
+		if (sensor.isRunning == true){
+			if (sensor.type == SENSOR_ULTRASONIC){
+			
+				digitalWrite(sensor.trigPin, LOW); 
+				delayMicroseconds(2); 
+			
+				digitalWrite(sensor.trigPin, HIGH);
+				delayMicroseconds(10); 
+			 
+				digitalWrite(sensor.trigPin, LOW);
+				unsigned long duration = pulseIn(sensor.echoPin, HIGH);
+				
+				Serial.write(MAGIC_NUMBER);
+				Serial.write(6); // size = 1 FN + 1 INDEX + 4 bytes of unsigned long
+				Serial.write(SENSOR_DATA);
+				Serial.write(i); // send my index
+				// write the long value out
+				Serial.write((byte)(duration >> 24));
+				Serial.write((byte)(duration >> 16));
+				Serial.write((byte)(duration >> 8));
+				Serial.write((byte)duration & 0xFF);
+			}
+		}
+	}
 
 
 } // loop

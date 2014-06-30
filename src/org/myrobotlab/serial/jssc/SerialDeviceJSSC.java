@@ -193,29 +193,13 @@ public class SerialDeviceJSSC implements SerialDevice, SerialPortEventListener {
 
 	@Override
 	public void write(int[] data) throws IOException {
-		for (int i = 0; i < data.length; ++i) {
-			try {
-				port.writeInt(data[i]);
-			} catch (SerialPortException e) {
-				log.error(e.getMessage());
-				e.printStackTrace();
-			}
-		}
-	}
 
-	@Override
-	public void write(byte[] data) throws IOException {
 		try {
-			port.writeBytes(data);
+			port.writeIntArray(data);
 		} catch (SerialPortException e) {
-			log.error(e.getMessage());// TODO - re-throw
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
-	}
 
-	@Override
-	public void write(String data) throws IOException {
-		write(data.getBytes());
 	}
 
 	@Override
@@ -223,24 +207,8 @@ public class SerialDeviceJSSC implements SerialDevice, SerialPortEventListener {
 		try {
 			port.writeInt(data);
 		} catch (SerialPortException e) {
-			log.error(e.getMessage());
-			e.printStackTrace();
+			throw new IOException(e);
 		}
-	}
-
-	@Override
-	public void write(byte data) throws IOException {
-		try {
-			port.writeByte(data);
-		} catch (SerialPortException e) {
-			log.error(e.getMessage());
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void write(char data) throws IOException {
-		write((byte) data);
 	}
 
 	@Override
@@ -278,18 +246,6 @@ public class SerialDeviceJSSC implements SerialDevice, SerialPortEventListener {
 	public int available() {
 		// don't know how to implement this
 		return -1;
-	}
-
-	@Override
-	public InputStream getInputStream() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public OutputStream getOutputStream() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

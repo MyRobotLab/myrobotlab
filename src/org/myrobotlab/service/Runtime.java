@@ -3,10 +3,8 @@ package org.myrobotlab.service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -138,10 +136,10 @@ public class Runtime extends Service implements MessageListener {
 
 	private List<String> jvmArgs;
 	private List<String> args;
-	
+
 	/**
-	 * global startingArgs - whatever came into main
-	 * each runtime will have its individual copy
+	 * global startingArgs - whatever came into main each runtime will have its
+	 * individual copy
 	 */
 	private static String[] globalArgs;
 
@@ -189,9 +187,11 @@ public class Runtime extends Service implements MessageListener {
 		StringBuffer sb = new StringBuffer();
 		jvmArgs = Bootstrap.getJVMArgs();
 		args = new ArrayList<String>();
-		for (int i = 0; i < globalArgs.length; ++i){
-			sb.append(globalArgs[i]);
-			args.add(globalArgs[i]);
+		if (globalArgs != null) {
+			for (int i = 0; i < globalArgs.length; ++i) {
+				sb.append(globalArgs[i]);
+				args.add(globalArgs[i]);
+			}
 		}
 		log.info(String.format("jvmArgs %s", Arrays.toString(jvmArgs.toArray())));
 		log.info(String.format("args %s", Arrays.toString(args.toArray())));
@@ -209,7 +209,7 @@ public class Runtime extends Service implements MessageListener {
 			} else {
 				log.info("prelog does not exist");
 			}
-			
+
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
@@ -330,11 +330,11 @@ public class Runtime extends Service implements MessageListener {
 		runtime.invoke("publishUpdates", updates);
 		return updates;
 	}
-	
+
 	/**
 	 * publishing event - since checkForUpdates may take a while
 	 */
-	public void checkingForUpdates(){
+	public void checkingForUpdates() {
 		log.info("checking for updates");
 	}
 
@@ -347,6 +347,21 @@ public class Runtime extends Service implements MessageListener {
 	 */
 	public Updates publishUpdates(Updates updates) {
 		return updates;
+	}
+
+	// GAH !!! retrieveAll / updateAll / UpdateReport / ResolveReport :P
+	public UpdateReport updateAll() {
+		
+		UpdateReport report = new UpdateReport();
+		report.updates = new Updates(runtimeName);
+		report.updates.isValid = true; // forcing since this is direct request
+		report.updates.serviceTypesToUpdate = Arrays.asList(getServiceTypeNames());
+		
+		invoke("updatesBegin", report.updates);
+		// :D optimized ! 
+		report.reports = repo.retrieveAll();
+		invoke("updatesFinished", report.reports);
+		return report;
 	}
 
 	/**
@@ -373,6 +388,9 @@ public class Runtime extends Service implements MessageListener {
 	 * @param updates
 	 */
 	synchronized public UpdateReport applyUpdates(Updates updates) {
+		UpdateReport ret = new UpdateReport();
+		ret.updates = updates;
+		
 		if (!updates.isValid) {
 			error("can not apply updates - updates are not valid");
 			return null;
@@ -380,12 +398,13 @@ public class Runtime extends Service implements MessageListener {
 
 		invoke("updatesBegin", updates);
 
-		ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();		
-		String intertoobTest = null;	
+		ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();
+		String intertoobTest = null;
 		try {
 			intertoobTest = repo.getVersionFromRepo();
 			log.info("remote version %s", intertoobTest);
 		} catch (Exception e) {
+			log.error(String.format("if connection error - just bail and save us some time !", e.getMessage()));
 		}
 
 		// FIXME support ServiceTypes with dependencies of ServiceTypes !!!
@@ -398,10 +417,13 @@ public class Runtime extends Service implements MessageListener {
 				for (int j = 0; j < report.size(); ++j) {
 					reports.add(report.get(j));
 				}
+				// FIXME - distinguish all good versus bad reports ... DUH
 			} catch (Exception e) {
 				Logging.logException(e);
 			}
 		}
+		
+		ret.reports = reports;
 
 		// FIXME - selectively choose which parts to update !!!
 		// NOT JUST update because there "is" an update - many
@@ -420,14 +442,15 @@ public class Runtime extends Service implements MessageListener {
 					// async call to request permission to restart
 					// publish requestSpawnBootStrap
 					needsRestart = true;
-					invoke("confirmRestart");
+					// invoke("confirmRestart");
+					// progressDialog confirms after download
 				}
 
 			}
 		}
 
 		invoke("updatesFinished", reports);
-		return null;
+		return ret;
 	}
 
 	/**
@@ -464,10 +487,10 @@ public class Runtime extends Service implements MessageListener {
 	 * @return - the current autoRestartAfterUpdate to put in dialog to (never
 	 *         ask again)
 	 */
-	public boolean confirmRestart() {
-		needsRestart = true;
-		return autoRestartAfterUpdate;
-	}
+	/*
+	 * public boolean confirmRestart() { needsRestart = true; return
+	 * autoRestartAfterUpdate; }
+	 */
 
 	/**
 	 * restart occurs after applying updates - user or config data needs to be
@@ -488,11 +511,11 @@ public class Runtime extends Service implements MessageListener {
 			bootstrap.createBootstrapJar();
 
 			// FIXME - get jvm arguments and other original args
-			ArrayList<String> restartArgs = new ArrayList<String>();	
-			for(int i = 0; i < jvmArgs.size(); ++i){
+			ArrayList<String> restartArgs = new ArrayList<String>();
+			for (int i = 0; i < jvmArgs.size(); ++i) {
 				restartArgs.add(jvmArgs.get(i));
 			}
-			for(int i = 0; i < args.size(); ++i){
+			for (int i = 0; i < args.size(); ++i) {
 				restartArgs.add(args.get(i));
 			}
 			bootstrap.spawn(restartArgs);
@@ -1110,7 +1133,6 @@ public class Runtime extends Service implements MessageListener {
 
 		return ret;
 	}
-
 
 	public static void dumpToFile() {
 		FileIO.stringToFile(String.format("serviceRegistry.%s.txt", runtime.getName()), Runtime.dump());

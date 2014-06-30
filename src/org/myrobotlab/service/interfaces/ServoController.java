@@ -54,7 +54,7 @@ public interface ServoController {
 	 *            - pin number
 	 * @return boolean boolean
 	 */
-	public boolean servoAttach(String servoName, Integer pin);
+	public int servoAttach(String servoName, Integer pin);
 
 	/**
 	 * servoWrite - move the servo at an angle between 0 - 180
@@ -82,7 +82,7 @@ public interface ServoController {
 	 * @param servoName
 	 * @return
 	 */
-	public Integer getServoPin(String servoName);
+	//public Integer getServoPin(String servoName);
 
 	public void setServoSpeed(String servoName, Float speed);
 	

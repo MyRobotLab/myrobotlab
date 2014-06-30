@@ -245,9 +245,18 @@ public class ServiceData implements Serializable {
 		return load(data);
 	}
 
+	/**
+	 * long ass process to "not" be doing in a seperate thread ... :P
+	 * should be asynchronous - but it would be a challenge to sync
+	 * with the graphics 
+	 * 
+	 * @param url
+	 * @return
+	 */
 	public static ServiceData getRemote(String url) {
 		try {
 			log.info("getting {}", url);
+			System.out.println(String.format("getting remote file from %s", url));
 			String data = new String(FileIO.getURL(new URL(url)));
 			return load(data);
 		} catch(Exception e){

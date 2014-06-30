@@ -147,6 +147,7 @@ public class Repo {
 		// all else fails - no local file - no remote - we will get
 		// the serviceData packaged with the jar
 		String sd = FileIO.resourceToString("framework/serviceData.xml");
+		log.info(sd);
 		if (sd == null){
 			error("resource serviceData not found!");
 			return null;
@@ -308,6 +309,10 @@ public class Repo {
 	public boolean isServiceTypeInstalled(String fullTypeName) {
 		if (localServiceData != null) {
 			ServiceType st = localServiceData.getServiceType(fullTypeName);
+			if (st == null){
+				error("unknown service %s", fullTypeName);
+				return false;
+			}
 			if (st.dependencyList != null) {
 				for (int i = 0; i < st.dependencyList.size(); ++i) {
 					String d = st.dependencyList.get(i);
@@ -506,6 +511,7 @@ public class Repo {
 		
 	ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();
 		ArrayList<Dependency> deps = getDependencies(fullTypeName);
+		if (deps != null){
 		for (int i = 0; i < deps.size(); ++i) {
 			Dependency dep = deps.get(i);
 			if (!dep.isResolved()) {
@@ -524,6 +530,11 @@ public class Repo {
 				}
 
 			}
+		}
+		
+		} else {
+			// FIXME - fill reports with HAPPY ENTRY :D
+			log.info("%s is free of dependencies ", fullTypeName);
 		}
 
 		return reports;
@@ -544,7 +555,7 @@ public class Repo {
 			String org = orgs[i];
 			Dependency dep = localServiceData.getDependency(org);
 			try {
-				ResolveReport report = resolveArtifacts(dep.getOrg(), dep.getRevision(), true);
+				ResolveReport report = retrieveArtifacts(dep.getOrg(), dep.getRevision());
 				reports.add(report);
 			} catch (Exception e) {
 				Logging.logException(e);
