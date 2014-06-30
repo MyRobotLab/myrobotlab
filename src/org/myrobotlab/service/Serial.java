@@ -64,6 +64,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	private boolean useRXFile = false;
 	private FileWriter fileWriterRX = null;
 	private BufferedWriter bufferedWriterRX = null;
+
 	// ====== file io end ======
 
 	public Serial(String n) {
@@ -72,6 +73,32 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 	public void capacity(int size) {
 		buffer = new byte[size];
+	}
+
+	/**
+	 * No ByteBuffer do to referrence - AND the fact
+	 * http://royontechnology.blogspot
+	 * .com/2012/04/converting-byte-array-to-long.html
+	 * 
+	 * TODO - add Endianess switch TODO - add "padding" for length < 8 e.g.
+	 * Arduino length is 4
+	 * 
+	 * @param bytes
+	 * @param offset
+	 * @return
+	 */
+	public static long byteToLong(byte[] bytes, int offset, int length) {
+
+		long retVal = 0;
+
+		for (int i = 0; i < length; ++i) {
+			retVal |= ((long) bytes[offset + i] & 0xFF);
+			if (i != length - 1) {
+				retVal <<= 8;
+			}
+		}
+
+		return retVal;
 	}
 
 	public boolean useRXFile(boolean b) {
@@ -119,11 +146,10 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	public void publishInt() {
 		publishType = PUBLISH_INT;
 	}
-	
-	
+
 	/**
-	 * If serialEvents are used - thread management is simplified for the consumer as it uses the 
-	 * underlying serial event management thread.
+	 * If serialEvents are used - thread management is simplified for the
+	 * consumer as it uses the underlying serial event management thread.
 	 */
 
 	@Override
@@ -461,7 +487,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		vp1.rx = vp0.tx;
 	}
 
-
 	@Override
 	public int read() throws IOException {
 		return serialDevice.read();
@@ -472,7 +497,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return serialDevice.read(data);
 	}
 
-	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.WARN);

@@ -69,6 +69,7 @@ import org.myrobotlab.control.widget.Console;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -468,8 +469,11 @@ public class GUIService extends Service implements WindowListener, ActionListene
 	}
 
 	public void noWorky() {
-		String logon = JOptionPane.showInputDialog(getFrame(),
-				"<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of monkeys,</p><br> please type your myrobotlab.org user</html>");
+		String img = 
+	           GUIService.class.getResource("/resource/expert.jpg").toString();
+		String logon = (String) JOptionPane.showInputDialog(getFrame(),
+				"<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of experts,<br> please type your myrobotlab.org user</p></html>", "No Worky!",JOptionPane.WARNING_MESSAGE, 
+				Util.getResourceIcon("expert.jpg"),null,null);
 		if (logon == null || logon.length() == 0) {
 			return;
 		}
@@ -627,6 +631,8 @@ public class GUIService extends Service implements WindowListener, ActionListene
 			Logging logging = LoggingFactory.getInstance();
 			logging.addAppender(Appender.NONE);
 		} else if ("explode".equals(cmd)) {
+		} else if ("about".equals(cmd)) {
+			new AboutDialog(this);
 			// display();
 		} else if (source == recording) {
 			if ("start recording".equals(recording.getText())) {

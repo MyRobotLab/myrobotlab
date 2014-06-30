@@ -133,37 +133,12 @@ public class VirtualSerialPort implements SerialDevice {
 		write((byte) data);
 	}
 
-	@Override
-	public void write(byte data) throws IOException {
-		tx.add(data);
-		if (listener != null && notifyOnDataAvailable) {
-			SerialDeviceEvent sde = new SerialDeviceEvent(srcport, SerialDeviceEvent.DATA_AVAILABLE, false, true);
-			listener.serialEvent(sde);
-		}
-	}
-
-	@Override
-	public void write(char data) throws IOException {
-		write((byte) data);
-	}
 
 	@Override
 	public void write(int[] data) throws IOException {
 		for (int i = 0; i < data.length; ++i) {
 			write((byte) data[i]);
 		}
-	}
-
-	@Override
-	public void write(byte[] data) throws IOException {
-		for (int i = 0; i < data.length; ++i) {
-			write(data[i]);
-		}
-	}
-
-	@Override
-	public void write(String data) throws IOException {
-		write(data.getBytes());
 	}
 
 	@Override
@@ -174,18 +149,6 @@ public class VirtualSerialPort implements SerialDevice {
 			return -1;
 		}
 
-	}
-
-	@Override
-	public InputStream getInputStream() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public OutputStream getOutputStream() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

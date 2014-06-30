@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -669,7 +670,7 @@ public class HTTPRequest {
 		return new HTTPRequest(url).post(name1, value1, name2, value2, name3, value3, name4, value4);
 	}
 
-	public byte[] getBinary() {
+	public byte[] getBinary() throws IOException {
 		// URL u = new URL("http://www.java2s.com/binary.dat");
 		// URLConnection uc = url.openConnection();
 
@@ -688,7 +689,7 @@ public class HTTPRequest {
 		int initSize = (contentLength == -1) ? 65536 : contentLength;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(initSize);
 		InputStream in = null;
-		try {
+//		try {
 			raw = connection.getInputStream();
 			in = new BufferedInputStream(raw);
 
@@ -698,9 +699,11 @@ public class HTTPRequest {
 				log.debug(String.format("read %d bytes", ret));
 				bos.write(tmp, 0, ret);
 			}
+/*			
 		} catch (IOException e) {
 			Logging.logException(e);
 		}
+*/
 
 		data = bos.toByteArray();
 		log.info(String.format("read %d bytes", data.length));
@@ -740,10 +743,11 @@ public class HTTPRequest {
 		return data;
 	}
 
-	public String getString() {
+	public String getString() throws IOException {
 		byte[] b = getBinary();
-		if (b != null)
+		if (b != null){
 			return new String(b);
+		}
 
 		return null;
 	}

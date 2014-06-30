@@ -88,7 +88,7 @@
 	
 -->
 <!-- FIXME - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="compile">
+<project name="myrobotlab" default="uploadMyrobotlab.jar">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
 	<!-- 
@@ -124,7 +124,7 @@
 
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
-		<property name="network.available" value="false" />
+		<property name="network.available" value="true" />
 
 		<!-- mail task properties -->
 		<property name="mail.host" value="smtp.gmail.com" />
@@ -188,13 +188,14 @@
 		<!-- property name="tag" value="${build.number}" / -->
 		<!-- property name="tag" value="1.0.${build.number}" /-->
 		
-		<!-- need to depends on getTag()
+		<!-- need to depends on getTag() -->
 
 		<http method="GET" url="http://myrobotlab.org/buildnumber.php?action=increment" expected="200" printresponseheaders="false" printrequestheaders="false" printresponse="true" entityProperty="buildnumber.response">
 			<headers />
 		</http>
-		-->
-		<property name="tag" value="1.0.23" />
+		
+		<!-- <property name="tag" value="1.0.14" /> -->
+		<property name="tag" value="1.0.${buildnumber.response}" />
 		<!-- GOOD <property name="tag" value="1.0.${buildnumber.response}" /> -->
 		<echo message="tag ${tag}" />
 

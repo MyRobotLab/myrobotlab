@@ -251,7 +251,9 @@ public class Bootstrap {
 		// will be discarded and terminate - hence no std/io
 		// Process process = builder.start();
 		// TODO hold on to process - check for zombies - agent control
+		// http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id
 		builder.start();
+
 
 		// TODO make new filew or pre-pend to myrobotlab.log
 		// THESE WILL HANG THE PROCESS !!!!!

@@ -63,9 +63,10 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 	}
 
 	@Override
-	public boolean servoAttach(String servoName, Integer pin) {
+	public int servoAttach(String servoName, Integer pin) {
 		// TODO Auto-generated method stub
-		return false;
+
+		return pin;
 	}
 
 	@Override
@@ -80,11 +81,6 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 		return false;
 	}
 
-	@Override
-	public Integer getServoPin(String servoName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public void setServoSpeed(String servoName, Float speed) {

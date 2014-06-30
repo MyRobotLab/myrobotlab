@@ -187,7 +187,7 @@ public class Servo extends Service implements ServoControl {
 			return false;
 		}
 
-		isAttached  = controller.servoAttach(getName(), pin);
+		isAttached  = controller.servoAttach(getName(), pin) != -1;
 		
 		if (isAttached){
 			// changed state

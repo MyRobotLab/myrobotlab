@@ -33,7 +33,7 @@ import org.slf4j.Logger;
  *         driver dynamically loaded is loaded with a hardcoded string :P
  * 
  */
-public class SerialDeviceGNU implements SerialDevice, SerialPortEventListener  {
+public class SerialDeviceGNU implements SerialDevice, SerialPortEventListener {
 
 	public final static Logger log = LoggerFactory.getLogger(SerialDeviceGNU.class.getCanonicalName());
 
@@ -250,31 +250,7 @@ public class SerialDeviceGNU implements SerialDevice, SerialPortEventListener  {
 	}
 
 	@Override
-	public void write(byte[] data) throws IOException {
-		for (int i = 0; i < data.length; ++i) {
-			output.write(data[i]);
-		}
-	}
-
-	@Override
-	public void write(String data) throws IOException {
-		for (int i = 0; i < data.length(); ++i) {
-			output.write(data.charAt(i));
-		}
-	}
-
-	@Override
 	public void write(int data) throws IOException {
-		output.write(data);
-	}
-
-	@Override
-	public void write(byte data) throws IOException {
-		output.write(data);
-	}
-
-	@Override
-	public void write(char data) throws IOException {
 		output.write(data);
 	}
 
@@ -313,10 +289,10 @@ public class SerialDeviceGNU implements SerialDevice, SerialPortEventListener  {
 		} catch (UnsupportedCommOperationException e) {
 			Logging.logException(e);
 			throw new SerialDeviceException("UnsupportedCommOperationException " + e.getMessage());
-		} /*catch (IOException e) {
-			Logging.logException(e);
-			throw new SerialDeviceException("IOException " + e.getMessage());
-		}*/
+		} /*
+		 * catch (IOException e) { Logging.logException(e); throw new
+		 * SerialDeviceException("IOException " + e.getMessage()); }
+		 */
 	}
 
 	@Override
@@ -329,16 +305,10 @@ public class SerialDeviceGNU implements SerialDevice, SerialPortEventListener  {
 		return input.read(data);
 	}
 
-	
 	@Override
-	public int available() {
+	public int available() throws IOException {
 		if (input != null) {
-			try {
-				return input.available();
-			} catch (IOException e) {
-				log.error(e.getMessage());
-				e.printStackTrace();
-			}
+			return input.available();
 		}
 		return 0;
 	}

@@ -424,6 +424,15 @@ public class Python extends Service {
 	public String publishStdOut(String data) {
 		return data;
 	}
+	
+	/**
+	 * execute a "already" defined python method directly
+	 * @param methodName
+	 */
+	public void execMethod(String method){
+		Message msg = createMessage(getName(), method, null);
+		inputQueue.add(msg);
+	}
 
 	/**
 	 * preProcessHook is used to intercept messages and process or route them
