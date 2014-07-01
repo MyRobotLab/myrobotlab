@@ -1978,11 +1978,13 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			
 			sr04.attach(arduino, 7, 8);
 			// blocking examples
+			
+/*			
 			long duration = sr04.ping();
 			log.info("duration {}", duration);
 			long range = sr04.range();
 			log.info("range {}", range);
-			
+*/			
 			// non blocking - event example
 			// sr04.publishRange(long duration);
 			sr04.startRanging();
@@ -2000,7 +2002,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 			for (int i = 0; i < 1000; ++i) {
 
-				duration = arduino.pulseIn(7,8);
+				long duration = arduino.pulseIn(7,8);
 				log.info("duration {}", duration);
 				// sleep(100);
 			}

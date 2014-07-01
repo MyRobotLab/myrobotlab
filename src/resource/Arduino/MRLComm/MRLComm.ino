@@ -516,8 +516,15 @@ void loop () {
 			int sensorIndex = ioCmd[1];
 			sensor_type& sensor = sensors[sensorIndex];
 			sensor.type = ioCmd[2];
-			sensor.trigPin = ioCmd[3];
-			sensor.echoPin = ioCmd[4];	
+			
+			// initialize based on sensor type
+			if (sensor.type == SENSOR_ULTRASONIC){
+				sensor.trigPin = ioCmd[3];
+				sensor.echoPin = ioCmd[4];
+				pinMode(sensor.trigPin, OUTPUT);
+				pinMode(sensor.echoPin, INPUT);				
+			}	
+			
 			break;
 		}
 		
