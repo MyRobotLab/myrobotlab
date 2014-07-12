@@ -68,7 +68,7 @@ public interface ServoControl {
 	 * 
 	 * @return
 	 */
-	public Float getPosition();
+	public Float getPosFloat();
 
 	/**
 	 * limits input of servo - to prevent damage or problems
@@ -96,7 +96,7 @@ public interface ServoControl {
 	 * servo must be moving at incremental speed for
 	 * a stop to work (setSpeed < 1.0)
 	 */
-	public void stopServo();
+	public void stop();
 	
 	/**
 	 * re-attaches servo to controller it was last

@@ -175,7 +175,7 @@ public class InMoovTorso extends Service {
 	}
 
 	public String getScript(String inMoovServiceName) {
-		return String.format("%s.moveTorso(%d,%d,%d)\n", inMoovServiceName, topStom.getPositionInt(), midStom.getPositionInt(), lowStom.getPositionInt());
+		return String.format("%s.moveTorso(%d,%d,%d)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
 	}
 
 	public void moveTo(Integer topStom, Integer midStom, Integer lowStom) {
@@ -198,9 +198,9 @@ public class InMoovTorso extends Service {
 				throw new Exception("arduino not connected");
 			}
 
-			topStom.moveTo(topStom.getPosition() + 2);
-			midStom.moveTo(midStom.getPosition() + 2);
-			lowStom.moveTo(lowStom.getPosition() + 2);
+			topStom.moveTo(topStom.getPos() + 2);
+			midStom.moveTo(midStom.getPos() + 2);
+			lowStom.moveTo(lowStom.getPos() + 2);
 			
 			moveTo(35, 45, 55);
 			String move = getScript("i01");
@@ -215,12 +215,8 @@ public class InMoovTorso extends Service {
 	}
 
 	public long getLastActivityTime() {
-		long minLastActivity = 0;
-
-		minLastActivity = (minLastActivity < topStom.getLastActivityTime()) ? topStom.getLastActivityTime() : minLastActivity;
-		minLastActivity = (minLastActivity < midStom.getLastActivityTime()) ? midStom.getLastActivityTime() : minLastActivity;
-		minLastActivity = (minLastActivity < lowStom.getLastActivityTime()) ? lowStom.getLastActivityTime() : minLastActivity;
-
+		long minLastActivity = Math.max(topStom.getLastActivityTime(), midStom.getLastActivityTime());
+		minLastActivity = Math.max(minLastActivity, lowStom.getLastActivityTime());
 		return minLastActivity;
 	}
 

@@ -44,7 +44,7 @@ public class Cron extends Service {
 	
 	public Cron(String n) {
 		super(n);
-		scheduler.start();
+		//scheduler.start();
 	}
 
 	@Override
@@ -70,17 +70,25 @@ public class Cron extends Service {
 		});
 	}
 	
+	public void startService(){
+		super.startService();
+		if (!scheduler.isStarted()){
+		scheduler.start();
+		}
+	}
+	
 	public ArrayList<Task> getTasks()
 	{
 		return tasks;
 	}
 	
-	
 	@Override 
 	public void stopService()
 	{
 		super.stopService();
-		scheduler.stop();
+		if (scheduler.isStarted()){
+			scheduler.stop();
+		}
 	}
 	
 
@@ -88,7 +96,7 @@ public class Cron extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
-		Cron cron = new Cron("cron");
+		Cron cron = (Cron)Runtime.start("cron", "Cron");//new Cron("cron");
 		cron.startService();	
 				
 		cron.addScheduledEvent("0 6 * * 1,3,5","arduino","digitalWrite", 13, 1);

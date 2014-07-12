@@ -237,7 +237,7 @@ public class InMoovArm extends Service {
 	}
 
 	public String getScript(String inMoovServiceName) {
-		return String.format("%s.moveArm(\"%s\",%d,%d,%d,%d)\n", inMoovServiceName, side, bicep.getPositionInt(), rotate.getPositionInt(), shoulder.getPositionInt(), omoplate.getPositionInt());
+		return String.format("%s.moveArm(\"%s\",%d,%d,%d,%d)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(), omoplate.getPos());
 	}
 
 	public void moveTo(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
@@ -260,10 +260,10 @@ public class InMoovArm extends Service {
 				throw new Exception("arduino not connected");
 			}
 
-			bicep.moveTo(bicep.getPosition() + 2);
-			rotate.moveTo(rotate.getPosition() + 2);
-			shoulder.moveTo(shoulder.getPosition() + 2);
-			omoplate.moveTo(omoplate.getPosition() + 2);
+			bicep.moveTo(bicep.getPos() + 2);
+			rotate.moveTo(rotate.getPos() + 2);
+			shoulder.moveTo(shoulder.getPos() + 2);
+			omoplate.moveTo(omoplate.getPos() + 2);
 			
 			sleep(300);
 			
@@ -284,13 +284,10 @@ public class InMoovArm extends Service {
 	}
 	
 	public long getLastActivityTime() {
-		long minLastActivity = 0;
-		
-		minLastActivity = (minLastActivity < bicep.getLastActivityTime())?bicep.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < rotate.getLastActivityTime())?rotate.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < shoulder.getLastActivityTime())?shoulder.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < omoplate.getLastActivityTime())?omoplate.getLastActivityTime():minLastActivity;
-		return minLastActivity;
+		long lastActivityTime = Math.max(bicep.getLastActivityTime(), rotate.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime, shoulder.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime, omoplate.getLastActivityTime());
+		return lastActivityTime;
 	}
 
 	public boolean isAttached() {

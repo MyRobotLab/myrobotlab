@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -24,14 +25,14 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Serial.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Serial.class);
 
 	private transient SerialDevice serialDevice;
 	public ArrayList<String> portNames = new ArrayList<String>();
 
 	int BUFFER_SIZE = 8192;
 	byte[] buffer = new byte[BUFFER_SIZE];
-	BlockingQueue<Byte> blockingData = new LinkedBlockingQueue<Byte>();
+	transient BlockingQueue<Byte> blockingData = new LinkedBlockingQueue<Byte>();
 
 	private int recievedByteCount = 0;
 
@@ -49,10 +50,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	public static final int PUBLISH_MESSAGE = 5;
 	public static final int PUBLISH_MRL_MESSAGE = 6;
 
-	public boolean useFixedWidth = false;
-	public int msgWidth = 10;
-	public char delimeter = '\n';
-
 	public int publishType = PUBLISH_BYTE;
 
 	// Arduino micro-controller specific at the moment
@@ -62,10 +59,18 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	// ====== file io begin ======
 	private int fileCnt = 0;
 	private boolean useRXFile = false;
-	private FileWriter fileWriterRX = null;
-	private BufferedWriter bufferedWriterRX = null;
+	transient private FileWriter fileWriterRX = null;
+	transient private BufferedWriter bufferedWriterRX = null;
 
 	// ====== file io end ======
+
+	// display buffer for all RX data
+	StringBuffer display = new StringBuffer();
+	// pretty print = 3 chars e.g 'FF '
+	// * number of bytes 8
+
+	// decimal format will be 4 chars e.g. '127 '
+	int displayWidth = 4 * 8;
 
 	public Serial(String n) {
 		super(n);
@@ -151,7 +156,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 * If serialEvents are used - thread management is simplified for the
 	 * consumer as it uses the underlying serial event management thread.
 	 */
-
 	@Override
 	public void serialEvent(SerialDeviceEvent event) {
 		switch (event.getEventType()) {
@@ -168,17 +172,43 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		case SerialDeviceEvent.DATA_AVAILABLE:
 			try {
 
+				// stupid Java signed byte :(
 				byte newByte;
+				// necessary Java unsigned byte in a signed int :(
+				int newInt;
 				recievedByteCount = 0;
-				log.info("--------begin---------------");
-				// FIXME available you should stay in the while loop and read
-				// that many !!!!
-				while (serialDevice.isOpen() && serialDevice.available() > 0) {
-					newByte = (byte) serialDevice.read();
+
+				// log.info("--------begin---------------");
+				// jump into loop and process as much as there is
+				// good implementation :) - the ---begin-- was useful to see
+				// "messages"
+				// come in groups of bytes
+
+				// previously ->
+				// while (serialDevice.isOpen() && serialDevice.available() > 0)
+				// { << DOES NOT WORK
+				// OUT OF SYNC ??
+
+				while (serialDevice.isOpen() && (newInt = serialDevice.read()) > -1) {
+					newByte = (byte) newInt;
+
 					++recievedByteCount;
 
+					// display / debug option ? - mrl message format ?
+					// display.append(String.format("%02x ", newInt));
+					display.append(String.format("%03d ", newInt));
+					if (display.length() % displayWidth == 0) {
+						// display.append("\n");
+						log.info(display.toString());
+						display.setLength(0);
+					}
+					// display.append(String.format(" %d ", (int) (newByte &
+					// 0xFF)));
+
 					if (useRXFile) {
-						fileWriterRX.write(newByte & 0xff);
+						// TODO - why use this encoding stream thing?
+						// what about just a buffered FileOutputStream ??
+						fileWriterRX.write(newInt);
 					}
 
 					if (blocking) {
@@ -192,33 +222,15 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 					if (publish) {
 						switch (publishType) {
+						
+						// PUBLISH_BYTE_ARRAY - wouldnt be bad at all
+						// but would require a fixed width OR NOT !!! 
+						// JUST PUBLISH WHEN YOU BREAK OUT OF LOOP ???
 
-						case PUBLISH_LONG: {
-							buffer[recievedByteCount - 1] = newByte;
-							if (recievedByteCount % BYTE_SIZE_LONG == 0) {
-								long value = 0;
-								for (int i = 0; i < BYTE_SIZE_LONG; i++) {
-									value = (value << 8) + (buffer[i] & 0xff);
-								}
-
-								invoke("publishLong", value);
-								recievedByteCount = 0;
-							}
-							break;
-						}
+						// FIXME - remove / deprecate -
+						// "publishInt should be in PUBLISH_BYTE"
 						case PUBLISH_INT: {
 							buffer[recievedByteCount - 1] = newByte;
-							/*
-							 * if (recievedByteCount % BYTE_SIZE_LONG == 0) {
-							 * long value = 0; for (int i = 0; i <
-							 * BYTE_SIZE_LONG; i++) { value = (value << 8) +
-							 * (buffer[i] & 0xff); }
-							 * 
-							 * invoke("publishInt", value); recievedByteCount =
-							 * 0; }
-							 */
-
-							int newInt = (newByte & 0xFF);
 							invoke("publishInt", newInt);
 
 							break;
@@ -226,18 +238,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 						case PUBLISH_BYTE: {
 							invoke("publishByte", newByte);
-							log.warn(String.format("%s published byte %d", getName(), newByte));
-							break;
-						}
-
-						case PUBLISH_STRING: {
-							// here be dragons...
-							buffer[recievedByteCount - 1] = newByte;
-							if (recievedByteCount % BYTE_SIZE_LONG == 0) {
-								String value = "";
-								invoke("publishString", value);
-								recievedByteCount = 0;
-							}
+							// log.info(String.format(" %d ", newInt));
 							break;
 						}
 
@@ -245,8 +246,10 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 					} // if publish
 				}
 
-				log.info("---out of loop----");
-				log.info("cnt {}", recievedByteCount);
+				// Very useful debugging here
+				// log.info("---out of loop----");
+				// log.info("cnt {}", recievedByteCount);
+
 			} catch (IOException e) {
 				Logging.logException(e);
 			}
@@ -313,7 +316,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	// FIXME - block read(until block size)
 
 	public byte publishByte(Byte data) {
-		log.info(String.format("%s published byte %02x", getName(), (int) data.byteValue()));
+		// log.info(String.format(" %02x ", (int) (data.intValue() & 0xFF)));
 		return data;
 	}
 
@@ -321,15 +324,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return data;
 	}
 
-	public long publishLong(Long data) {
-		return data;
-	}
-
 	public byte[] publishByteArray(byte[] data) {
-		return data;
-	}
-
-	public String publishString(String data) {
 		return data;
 	}
 
@@ -419,7 +414,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	@Override
 	public void write(byte[] data) throws IOException {
 		for (int i = 0; i < data.length; ++i) {
-			serialDevice.write(data[i]);
+			serialDevice.write(data[i] & 0xff);
 		}
 	}
 
@@ -485,6 +480,10 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		VirtualSerialPort vp1 = new VirtualSerialPort(port1);
 		vp1.tx = vp0.rx;
 		vp1.rx = vp0.tx;
+
+		// add virtual ports to the serial device factory
+		SerialDeviceFactory.add(vp0);
+		SerialDeviceFactory.add(vp1);
 	}
 
 	@Override
@@ -497,131 +496,97 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return serialDevice.read(data);
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
+	@Override
+	public void test() throws IOException {
 
-		// Create two virtual ports for UART and user and null them together:
-		// create 2 virtual ports
-		VirtualSerialPort vp0 = new VirtualSerialPort("/dev/vp0");
-		VirtualSerialPort vp1 = new VirtualSerialPort("/dev/vp1");
+		// non destructive tests
+		// TODO - if I am connected to a different serial port
+		// get that name - disconnect - and then reconnect when done
 
-		// make null modem cable ;)
-		VirtualSerialPort.makeNullModem(vp0, vp1);
-		/*
-		 * vp1.tx = vp0.rx; vp1.rx = vp0.tx; vp1.listener
-		 */
+		info("testing null modem with %s", getName());
 
-		// add virtual ports to the serial device factory
-		SerialDeviceFactory.add(vp0);
-		SerialDeviceFactory.add(vp1);
+		info("creating virtual null modem cable");
+		String UART = "UART";
+		String COM = "COM";
 
-		// create the UART serial service
-		// log.info("Creating a LIDAR UART Serial service named: " + getName() +
-		// "SerialService");
-		// String serialName = getName() + "SerialService";
-		Serial serial0 = new Serial("serial0");
-		serial0.startService();
-		serial0.connect("/dev/vp0");
+		createNullModemCable(UART, COM);
 
-		Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
-		arduino.connect("/dev/vp1");
+		info("creating uart");
+		Serial uart = (Serial) Runtime.start(UART, "Serial");
 
-		arduino.sendMsg(2, 2, 2);
+		Runtime.start("gui", "GUIService");
 
-		Runtime.createAndStart("webgui", "WebGUI");
+		ArrayList<String> portNames = getPortNames();
+		info("reading portnames back %s", Arrays.toString(portNames.toArray()));
 
-		// user serial
-		// Serial serial1 = new Serial("lidar_serial");
-		Serial serial1 = new Serial("serial1");
-		serial1.startService();
-
-		// Runtime.createAndStart("gui", "GUIService");
-
-		serial1.connect("/dev/vp1");
-
-		for (int i = 0; i < 1000; ++i) {
-			byte x = (byte) i;
-			serial0.write((byte) x);
+		boolean found1 = false;
+		boolean found2 = false;
+		for (int i = 0; i < portNames.size(); ++i) {
+			if (portNames.get(i).equals(UART)) {
+				found1 = true;
+			}
+			if (portNames.get(i).equals(COM)) {
+				found2 = true;
+			}
 		}
 
-		serial0.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 });
-		serial0.write(new byte[] { 5, 5, 5, 5, 5 });
-		serial0.write(new byte[] { 6, 6, 6, 6, 6 });
-		serial0.write(new byte[] { 7, 7, 7, 7, 7 });
-		serial0.write(new byte[] { 8, 8, 8, 8, 8 });
-		serial0.write(new byte[] { 9, 9, 9, 9, 9 });
-		serial0.write(new byte[] { 5, 5, 5, 5, 5 });
-		serial0.write(new byte[] { 6, 6, 6, 6, 6 });
-		serial0.write(new byte[] { 7, 7, 7, 7, 7 });
-		serial0.write(new byte[] { 8, 8, 8, 8, 8 });
-		serial0.write(new byte[] { 9, 9, 9, 9, 9 });
+		if (found1 && found2) {
+			info("found both ports");
+		} else {
+			throw new IOException("ports not found");
+		}
 
-		serial1.write(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 });
-		serial1.write(new byte[] { 6, 6, 6, 6, 6, 6 });
+		info("connecting");
+		if (!connect(COM) || !uart.connect(UART)) {
+			throw new IOException("cant connect");
+		}
 
-		serial0.write(new byte[] { 16 });
-		log.info("here");
+		info("test blocking");
+		info("test publish/subscribe nonblocking");
 
-		/*
-		 * 
-		 * Serial serial = new Serial("serial"); serial.startService();
-		 * 
-		 * serial.connect("COM16", 9600, 8, 1, 0); /* // create 2 virtual ports
-		 * VirtualSerialPort vp0 = new VirtualSerialPort("/dev/virtualPort0");
-		 * VirtualSerialPort vp1 = new VirtualSerialPort("/dev/virtualPort1");
-		 * 
-		 * // make null modem cable ;) vp1.tx = vp0.rx; vp1.rx = vp0.tx;
-		 * 
-		 * // add virtual ports to the serial device factory
-		 * SerialDeviceFactory.add(vp0); SerialDeviceFactory.add(vp1);
-		 * 
-		 * // create two serial services Serial searSerial = new
-		 * Serial("searSerial"); Serial serial1 = new Serial("serial1");
-		 * 
-		 * searSerial.startService(); serial1.startService();
-		 * 
-		 * ArrayList<String> portNames = searSerial.getPortNames();
-		 * 
-		 * log.info("listing port names:"); for (int i = 0; i <
-		 * portNames.size(); ++i) { log.info(portNames.get(i)); }
-		 * 
-		 * searSerial.connect("/dev/virtualPort0");
-		 * serial1.connect("/dev/virtualPort1");
-		 * 
-		 * WebGUI web = new WebGUI("web"); web.startService();
-		 * 
-		 * // user starts initialization sequence
-		 * log.info("user sends first set of bytes"); serial1.write(new byte[] {
-		 * 13, 117, 100, 58 });
-		 * 
-		 * // second initialization sequence
-		 * log.info("user sends second set of bytes"); serial1.write(new byte[]
-		 * { 5, 5, 5, 5 });
-		 * 
-		 * // now the lidar is initialized sear virtual lidar will send // a
-		 * long sequence of bytes log.info("lidar sending back data");
-		 * searSerial.write(new byte[] { 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-		 * 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-		 * 15 }); /*
-		 * 
-		 * Arduino arduino = new Arduino("arduino"); arduino.startService();
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 */
-		/*
-		 * Serial serial = new Serial("serial"); serial.startService();
-		 * 
-		 * serial.connect("COM9", 57600, 8, 1, 0);
-		 * 
-		 * for (int i = 0; i < 10; ++i) { log.info("here {}",
-		 * serial.readByte()); } for (int i = 0; i < 10; ++i) {
-		 * log.info("here {}", serial.readInt()); } for (int i = 0; i < 10; ++i)
-		 * { log.info("here {}", serial.readByteArray(10)); }
-		 */
+		info("writing from %s -----> uart", getName());
 
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 */
+		// how a byte should be
+		write(new byte[] { (byte) ((int) 128 & 0xff), (byte) ((int) 243 & 0xff), (byte) ((int) 127 & 0xff), -128, -128 });
+
+		for (int i = 255; i > 0; --i) {
+			write(i);
+
+			write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 });
+			write(new byte[] { 5, 5, 5, 5, 5 });
+			write(new byte[] { 6, 6, 6, 6, 6 });
+			write(new byte[] { 7, 7, 7, 7, 7 });
+			write(new byte[] { 8, 8, 8, 8, 8 });
+			write(new byte[] { 9, 9, 9, 9, 9 });
+			write(new byte[] { 5, 5, 5, 5, 5 });
+			write(new byte[] { 6, 6, 6, 6, 6 });
+			write(new byte[] { 7, 7, 7, 7, 7 });
+			write(new byte[] { 8, 8, 8, 8, 8 });
+			write(new byte[] { 9, 9, 9, 9, 9 });
+			write(new byte[] { (byte) (128 & 0xff), 9, 9, 9, 9 });
+
+			write(new byte[] { (byte) (128 & 0xff), (byte) (127 & 0xff) });
+		}
+
+		info("writing from %s <----- uart", getName());
+		uart.write(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 });
+		uart.write(new byte[] { 6, 6, 6, 6, 6, 6 });
+
+		write(new byte[] { 16 });
+
+	}
+
+	public static void main(String[] args) throws IOException, InterruptedException {
+		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
+			Runtime.start("gui", "GUIService");
+			Serial serial = (Serial) Runtime.start("serial", "Serial");
+			// serial.connect("COM15");
+			serial.test();
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
 	}
 
 }

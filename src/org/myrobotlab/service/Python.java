@@ -87,7 +87,7 @@ public class Python extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static transient Logger log = LoggerFactory.getLogger(Python.class.getCanonicalName());
+	public final static transient Logger log = LoggerFactory.getLogger(Python.class);
 
 	transient PythonInterpreter interp = null;
 	transient PIThread interpThread = null;
@@ -219,8 +219,12 @@ public class Python extends Service {
 						// sending method, but must call the appropriate method
 						// in Sphinx
 						StringBuffer msgHandle = new StringBuffer().append("msg_").append(getSafeReferenceName(msg.sender)).append("_").append(msg.sendingMethod);
-
 						PyObject compiledObject = getCompiledMethod(msg.method, String.format("%s()", msg.method), interp);
+						/*
+						if (compiledObject == null){ // NEVER NULL - object cache - builds cache if not there
+							log.error(String.format("%s() NOT FOUND", msg.method));
+						}
+						*/
 						log.info(String.format("setting data %s", msgHandle));
 						interp.set(msgHandle.toString(), msg);
 						interp.exec(compiledObject);
@@ -230,8 +234,12 @@ public class Python extends Service {
 					}
 
 				}
-			} catch (InterruptedException e) {
-				Logging.logException(e);
+			} catch (Exception e) {
+				if (e instanceof InterruptedException) {
+					info("shutting down %s", getName());
+				} else {
+					Logging.logException(e);
+				}
 			}
 		}
 	}
@@ -285,8 +293,7 @@ public class Python extends Service {
 
 		// load the import
 		// RIXME - RuntimeGlobals & static values for unknown
-		if (!"unknown".equals(s.getSimpleName())) 
-		{
+		if (!"unknown".equals(s.getSimpleName())) {
 			registerScript = String.format("from org.myrobotlab.service import %s\n", s.getSimpleName());
 		}
 
@@ -361,9 +368,9 @@ public class Python extends Service {
 	 */
 	public void exec(String code, boolean replace) {
 		log.info(String.format("exec %s", code));
-		
-	//	code = code.replaceAll("\r\n", "\n"); // DOS2UNIX
-		
+
+		// code = code.replaceAll("\r\n", "\n"); // DOS2UNIX
+
 		if (interp == null) {
 			createPythonInterpreter();
 		}
@@ -424,12 +431,13 @@ public class Python extends Service {
 	public String publishStdOut(String data) {
 		return data;
 	}
-	
+
 	/**
-	 * execute a "already" defined python method directly
+	 * execute an "already" defined python method directly
+	 * 
 	 * @param methodName
 	 */
-	public void execMethod(String method){
+	public void execMethod(String method) {
 		Message msg = createMessage(getName(), method, null);
 		inputQueue.add(msg);
 	}
@@ -470,7 +478,7 @@ public class Python extends Service {
 	 * 
 	 * @param filename
 	 *            the full path name of the python file to execute
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
 	 */
 	public void execFile(String filename) throws FileNotFoundException {
 		String script = FileIO.fileToString(filename);
@@ -496,6 +504,7 @@ public class Python extends Service {
 		if (objectCache.containsKey(name)) {
 			return objectCache.get(name);
 		}
+		
 		PyObject compiled = interp.compile(code);
 		if (objectCache.size() > 5) {
 			// keep the size to 6
@@ -571,7 +580,7 @@ public class Python extends Service {
 	 * @param filename
 	 *            - name of file to load
 	 * @return - success if loaded
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
 	 */
 	public boolean loadScript(String filename) throws FileNotFoundException {
 		String newCode = FileIO.fileToString(filename);
@@ -596,7 +605,7 @@ public class Python extends Service {
 	 * 
 	 * @param filename
 	 * @return true if successfully loaded
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
 	 */
 	public boolean loadUserScript(String filename) throws FileNotFoundException {
 		String newCode = FileIO.fileToString(getCFGDir() + File.separator + filename);

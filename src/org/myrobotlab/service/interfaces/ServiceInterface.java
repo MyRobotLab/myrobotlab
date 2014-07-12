@@ -15,9 +15,11 @@ public interface ServiceInterface {
 	
 	// hasError() - publish subscribe - getError().getSourceName()
 	
-	// TODO throw exceptions
-	public void test(Object... data);
-	public void test();
+	// can't be statics :( 
+	// but is good enough - probably a good idea to keep in mind
+	// is the ability to do "non destructive" tests on a "live" Service at any time
+	public void test(Object... data) throws Exception;
+	public void test() throws Exception;
 	
 	public URI getHost();
 		

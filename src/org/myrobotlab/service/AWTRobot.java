@@ -33,19 +33,19 @@ public class AWTRobot extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(AWTRobot.class
 			.getCanonicalName());
-	private Robot robot;
-	private Point mousePos;
-	private Point oldMousePos;
-	private Rectangle maxBounds;
-	private Rectangle bounds;
-	private Dimension resizedBounds;
-	private VideoSources videoSources;
-	public final static int BUTTON1_MASK = InputEvent.BUTTON1_MASK;
-	public final static int BUTTON2_MASK = InputEvent.BUTTON2_MASK;
-	public final static int BUTTON3_MASK = InputEvent.BUTTON3_MASK;
-	public final static int SHIFT_DOWN_MASK = KeyEvent.SHIFT_DOWN_MASK;
-	public final static int CTRL_DOWN_MASK = KeyEvent.CTRL_DOWN_MASK;
-	public final static int ALT_DOWN_MASK = KeyEvent.ALT_DOWN_MASK;
+	transient private Robot robot;
+	transient private Point mousePos;
+	transient private Point oldMousePos;
+	transient private Rectangle maxBounds;
+	transient private Rectangle bounds;
+	transient private Dimension resizedBounds;
+	transient private VideoSources videoSources;
+	transient public final static int BUTTON1_MASK = InputEvent.BUTTON1_MASK;
+	transient public final static int BUTTON2_MASK = InputEvent.BUTTON2_MASK;
+	transient public final static int BUTTON3_MASK = InputEvent.BUTTON3_MASK;
+	transient public final static int SHIFT_DOWN_MASK = KeyEvent.SHIFT_DOWN_MASK;
+	transient public final static int CTRL_DOWN_MASK = KeyEvent.CTRL_DOWN_MASK;
+	transient public final static int ALT_DOWN_MASK = KeyEvent.ALT_DOWN_MASK;
 
 	public class MouseData implements Serializable {
 		private static final long serialVersionUID = 1L;

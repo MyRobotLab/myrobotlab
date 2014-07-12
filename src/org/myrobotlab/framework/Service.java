@@ -212,11 +212,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return host == null;
 	}
 
-	public void test() {
+	public void test() throws Exception {
 		test((Object[]) null);
 	}
 
-	public void test(Object... data) {
+	public void test(Object... data) throws Exception {
 		info("test completed - no valid tests");
 	}
 
@@ -241,7 +241,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public void releasePeers() {
 		log.info(String.format("dna - %s", dna.toString()));
 		String myKey = getName();
-		log.info(String.format("createReserves (%s, %s)", myKey, serviceClass));
+		log.info(String.format("releasePeers (%s, %s)", myKey, serviceClass));
 		try {
 			Class<?> theClass = Class.forName(serviceClass);
 			Method method = theClass.getMethod("getPeers", String.class);
@@ -869,8 +869,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		// note - if stopService is overwritten with extra
 		// threads - releaseService will need to be overwritten too
 		stopService();
-		// Runtime.unregister(null, name);
-		// recently changed
+		
+		// recently added
+		releasePeers();
+		
 		Runtime.release(getName());
 	}
 
@@ -2024,30 +2026,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	public void allowDisplay(Boolean b) {
 		allowDisplay = b;
-	}
-
-	/**
-	 * pure string interface for control facets which only support strings -
-	 * like javascript, web, etc...
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public boolean attach(String name) {
-		return attach(name, (Object[]) null);
-	}
-
-	/**
-	 * this framework attach supports string interface it will invoke an attach
-	 * on the actual service with a "real" type
-	 * 
-	 * @param name
-	 * @param data
-	 * @return
-	 */
-	public Boolean attach(String name, Object... data) {
-		ServiceInterface si = Runtime.getService(name);
-		return (Boolean) invoke("attach", si);
 	}
 
 	/**

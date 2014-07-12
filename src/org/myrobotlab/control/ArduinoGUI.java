@@ -260,6 +260,7 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 						SerialDevice sd = myArduino.getSerialDevice();
 						if (sd != null && sd.getName().equals(portName)) {
 							if (sd.isOpen()) {
+								// FIXME - editor is often == null - race condition :(
 								editor.connectButton.activate();
 								serialDevice.setSelected(true);
 							} else {

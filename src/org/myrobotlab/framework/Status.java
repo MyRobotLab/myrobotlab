@@ -85,6 +85,13 @@ public class Status {// extends Exception {
 		return s;
 	}
 	
+	
+	public static Status error(String msg) {
+		Status s = new Status(msg);
+		s.level = ERROR;
+		return s;
+	}
+	
 	public static Status info(String msg) {
 		Status s = new Status(msg);
 		s.level = INFO;
@@ -118,7 +125,7 @@ public class Status {// extends Exception {
 		return status;
 	}
 
-	public static Object error(String format, Object[] args) {
+	public static Status error(String format, Object... args) {
 		Status status = new Status(String.format(format, args));
 		status.level = ERROR;
 		return status;
