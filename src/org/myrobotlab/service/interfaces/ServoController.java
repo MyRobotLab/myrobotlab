@@ -66,6 +66,9 @@ public interface ServoController {
 	 * @return void
 	 */
 	void servoWrite(String servoName, Integer newPos);
+	
+	void servoSweep(String servoName, int min, int max, int step);
+
 
 	/**
 	 * servoDetach - detach the servo from a specific pin on the controller
@@ -87,5 +90,7 @@ public interface ServoController {
 	public void setServoSpeed(String servoName, Float speed);
 	
 	public void servoStop(String servoName);
+
+	public boolean setServoEventsEnabled(String servoName, boolean b);
 
 }

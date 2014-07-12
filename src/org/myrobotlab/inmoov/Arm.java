@@ -118,7 +118,7 @@ public class Arm {
 
 	public String getScript(String inMoovServiceName) {
 		return String
-				.format("%s.moveArm(\"%s\",%d,%d,%d,%d)\n", inMoovServiceName, side, bicep.getPosition(), rotate.getPosition(), shoulder.getPosition(), omoplate.getPosition());
+				.format("%s.moveArm(\"%s\",%d,%d,%d,%d)\n", inMoovServiceName, side, bicep.getPosFloat(), rotate.getPosFloat(), shoulder.getPosFloat(), omoplate.getPosFloat());
 	}
 
 	public void moveTo(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {

@@ -62,7 +62,7 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Error;
+import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
@@ -655,7 +655,7 @@ public class OpenCV extends VideoSource {
 			log.info("boundingBox size {}", d.getBoundingBoxArray().size());
 			
 			SerializableImage img = getDisplay();
-			if (img == null){throw new Error("getDisplay is null");}
+			if (img == null){throw new MRLError("getDisplay is null");}
 
 			output = recordSingleFrame();
 			log.info(String.format("record single frame - %s", output));
@@ -704,19 +704,19 @@ public class OpenCV extends VideoSource {
 			// and equal
 			IplImage image = data.getImage();
 			if (image == null) {
-				throw new Error("image null");
+				throw new MRLError("image null");
 			}
 			IplImage display = data.getDisplay();
 			if (display == null) {
-				throw new Error("display null");
+				throw new MRLError("display null");
 			}
 			IplImage input = data.getInputImage();
 			if (input == null) {
-				throw new Error("input null");
+				throw new MRLError("input null");
 			}
 
 			if (image != display || display != input) {
-				throw new Error("not equal");
+				throw new MRLError("not equal");
 			}
 
 			// specific filter tests
@@ -751,19 +751,19 @@ public class OpenCV extends VideoSource {
 
 				image = data.getImage(filter);
 				if (image == null) {
-					throw new Error("image null");
+					throw new MRLError("image null");
 				}
 				if (display == null) {
-					throw new Error("display null");
+					throw new MRLError("display null");
 				}
 
 				if (!data.getSelectedFilterName().equals(filter)) {
-					throw new Error("filter name != selected name");
+					throw new MRLError("filter name != selected name");
 				}
 
 				image = data.getImage();
 				if (image == null) {
-					throw new Error("image null");
+					throw new MRLError("image null");
 				}
 
 				display = data.getDisplay();

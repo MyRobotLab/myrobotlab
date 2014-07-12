@@ -72,6 +72,7 @@ public class InMoov extends Service {
 	transient public Tracking headTracking;
 	transient public OpenCV opencv;
 	transient public MouthControl mouthControl;
+	transient public Python python;
 
 	transient public final static String LEFT = "left";
 	transient public final static String RIGHT = "right";
@@ -88,7 +89,7 @@ public class InMoov extends Service {
 	boolean speakErrors = true;
 	String lastError = "";
 
-	long lastActivityTime;
+	//long lastActivityTime;
 
 	int maxInactivityTimeSeconds = 120;
 
@@ -121,6 +122,8 @@ public class InMoov extends Service {
 		peers.suggestAs("mouthControl.mouth", "mouth", "Speech", "shared Speech");
 		peers.suggestAs("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
 
+		peers.suggestRootAs("python", "python", "Python", "shared Python service");
+
 		// put peer definitions in
 		peers.put("torso", "InMoovTorso", "torso");
 		peers.put("leftArm", "InMoovArm", "left arm");
@@ -147,6 +150,18 @@ public class InMoov extends Service {
 		// FIXME - mebbe starts with same error - don't say it again unless a
 		// certain time has passed
 	}
+	
+	// ---------- new getter interface begin ---------------------------
+
+	public Python getPython() {
+		if (python == null) {
+			python = (Python) startPeer("python");
+		}
+
+		return python;
+	}
+	
+	// ---------- new getter interface begin ---------------------------
 
 	public boolean speakErrors(boolean b) {
 		speakErrors = b;
@@ -247,14 +262,14 @@ public class InMoov extends Service {
 
 		if (copyGesture) {
 			if (leftArm != null) {
-				leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
-				leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
-				leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ());
+				leftArm.bicep.moveTo(Math.round(skeleton.leftElbow.getAngleXY()));
+				leftArm.omoplate.moveTo(Math.round(skeleton.leftShoulder.getAngleXY()));
+				leftArm.shoulder.moveTo(Math.round(skeleton.leftShoulder.getAngleYZ()));
 			}
 			if (rightArm != null) {
-				rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
-				rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
-				rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ());
+				rightArm.bicep.moveTo(Math.round(skeleton.rightElbow.getAngleXY()));
+				rightArm.omoplate.moveTo(Math.round(skeleton.rightShoulder.getAngleXY()));
+				rightArm.shoulder.moveTo(Math.round(skeleton.rightShoulder.getAngleYZ()));
 			}
 		}
 		
@@ -931,41 +946,43 @@ public class InMoov extends Service {
 	 */
 	public long getLastActivityTime() {
 
-		long lastActivityTime = System.currentTimeMillis();
-		long myLastActivity = 0;
+		long lastActivityTime = 0;
 
 		if (leftHand != null) {
-			myLastActivity = leftHand.getLastActivityTime();
-			lastActivityTime = (lastActivityTime > myLastActivity) ? myLastActivity : lastActivityTime;
+			lastActivityTime = Math.max(lastActivityTime, leftHand.getLastActivityTime());
 		}
 
 		if (leftArm != null) {
-			myLastActivity = leftArm.getLastActivityTime();
-			lastActivityTime = (lastActivityTime > myLastActivity) ? myLastActivity : lastActivityTime;
+			lastActivityTime = Math.max(lastActivityTime, leftArm.getLastActivityTime());
 		}
 
 		if (rightHand != null) {
-			myLastActivity = rightHand.getLastActivityTime();
-			lastActivityTime = (lastActivityTime > myLastActivity) ? myLastActivity : lastActivityTime;
+			lastActivityTime = Math.max(lastActivityTime, rightHand.getLastActivityTime());
 		}
 
 		if (rightArm != null) {
-			myLastActivity = rightArm.getLastActivityTime();
-			lastActivityTime = (lastActivityTime > myLastActivity) ? myLastActivity : lastActivityTime;
+			lastActivityTime = Math.max(lastActivityTime, rightArm.getLastActivityTime());
 		}
 
 		if (head != null) {
-			myLastActivity = head.getLastActivityTime();
-			lastActivityTime = (lastActivityTime > myLastActivity) ? myLastActivity : lastActivityTime;
+			lastActivityTime = Math.max(lastActivityTime, head.getLastActivityTime());
 		}
 		
 		if (torso != null) {
-			myLastActivity = torso.getLastActivityTime();
-			lastActivityTime = (lastActivityTime > myLastActivity) ? myLastActivity : lastActivityTime;
+			lastActivityTime = Math.max(lastActivityTime, torso.getLastActivityTime());
 		}
-
+		
+		if(lastPIRActivityTime != null)
+		{
+			lastActivityTime = Math.max(lastActivityTime, lastPIRActivityTime);
+		}
+		
+		if (lastActivityTime == 0){
+			error("invalid activity time - anything connected?");
+			lastActivityTime = System.currentTimeMillis();
+		}
+		
 		return lastActivityTime;
-
 	}
 
 	public void autoPowerDownOnInactivity() {
@@ -974,7 +991,8 @@ public class InMoov extends Service {
 
 	public void autoPowerDownOnInactivity(int maxInactivityTimeSeconds) {
 		this.maxInactivityTimeSeconds = maxInactivityTimeSeconds;
-		speakBlocking("power down after %s seconds inactivity is on", this.maxInactivityTimeSeconds);
+		//speakBlocking("power down after %s seconds inactivity is on", this.maxInactivityTimeSeconds);
+		log.info("power down after %s seconds inactivity is on", this.maxInactivityTimeSeconds);
 		addLocalTask(5 * 1000, "powerDownOnInactivity");
 	}
 
@@ -984,7 +1002,7 @@ public class InMoov extends Service {
 		long now = System.currentTimeMillis();
 		long inactivitySeconds = (now - lastActivityTime) / 1000;
 		if (inactivitySeconds > maxInactivityTimeSeconds && isAttached()) {
-			speakBlocking("%d seconds have passed without activity", inactivitySeconds);
+			//speakBlocking("%d seconds have passed without activity", inactivitySeconds);
 			powerDown();
 		} else {
 			// speakBlocking("%d seconds have passed without activity",
@@ -994,25 +1012,43 @@ public class InMoov extends Service {
 		return lastActivityTime;
 	}
 	
+	String powerUpText = "hello. i am powering up";
+	
+	public String setPowerUpText(String text){
+		powerUpText = text;
+		return text;
+	}
+	
 	public void powerUp() {
+		
+		getPython();
+		
+		python.execMethod("powerUp");
+		
 		attach();
 
 		startSleep = null;
 		// rightSerialPort.digitalWrite(53, Arduino.HIGH);
 		// leftSerialPort.digitalWrite(53, Arduino.HIGH);
-		speakBlocking("Im powered up");
+		speakBlocking(powerUpText);
 		rest();
 		if (ear != null) {
 			ear.clearLock();
 			sleep(2);
 			ear.resumeListening();
 		}
-		speakBlocking("ready");
+		// speakBlocking("ready");
 		// nod would be cute
 
 		autoPowerDownOnInactivity();
 	}
 
+	String powerDownText = "powering down";
+	
+	public String setPowerDownText(String text){
+		powerDownText = text;
+		return text;
+	}
 
 	public void powerDown() {
 		sleep(2);
@@ -1020,7 +1056,7 @@ public class InMoov extends Service {
 			ear.pauseListening();
 		}
 		rest();
-		speakBlocking("powering down");
+		speakBlocking(powerDownText);
 		purgeAllTasks();
 		moveHead(40, 85);
 		sleep(2);
@@ -1070,13 +1106,19 @@ public class InMoov extends Service {
 
 	}
 
+	Long lastPIRActivityTime = null;
+	
 	public void publishPin(Pin pin) {
+		if (pin.value == 1){
+			lastPIRActivityTime = System.currentTimeMillis();
+		}
 		// if its PIR & PIR is active & was sleeping - then wake up !
 		if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
 			// attach(); // good morning / evening / night... asleep for % hours
 			powerUp();
 			Calendar now = Calendar.getInstance();
 
+			/* FIXME - make a getSalutation
 			String salutation = "hello ";
 			if (now.get(Calendar.HOUR_OF_DAY) < 12) {
 				salutation = "good morning ";
@@ -1085,8 +1127,10 @@ public class InMoov extends Service {
 			} else {
 				salutation = "good evening ";
 			}
+			
 
 			speakBlocking(String.format("%s. i was sleeping but now i am awake", salutation));
+			*/
 		}
 	}
 
@@ -1285,15 +1329,17 @@ public class InMoov extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
 		
 		InMoov i01 = (InMoov)Runtime.createAndStart("i01","InMoov");
+		
 		InMoovTorso torso = (InMoovTorso)i01.startTorso("COM4");
 
 
 		
 		i01.startMouth();
-		i01.startLeftArm("COM15");
-		i01.copyGesture(true);
+		i01.startLeftArm("COM4");
+		//i01.copyGesture(true);
 
 		// Create two virtual ports for UART and user and null them together:
 		// create 2 virtual ports

@@ -187,6 +187,17 @@ public class Tracking extends Service {
 		arduino.startService();
 		opencv.startService();
 	}
+	
+	/*
+	public void releaseService() {
+		x.releaseService();
+		y.releaseService();
+		xpid.releaseService();
+		ypid.releaseService();
+		arduino.releaseService();
+		opencv.releaseService();
+	}
+	*/
 
 	// -------------- System Specific Initialization Begin --------------
 	// FIXME make interface
@@ -223,8 +234,8 @@ public class Tracking extends Service {
 		x.rest();
 		y.rest();
 
-		lastXServoPos = x.getPosition();
-		lastYServoPos = y.getPosition();
+		lastXServoPos = x.getPosFloat();
+		lastYServoPos = y.getPosFloat();
 	}
 
 	// ------------------- tracking & detecting methods begin
@@ -450,8 +461,8 @@ public class Tracking extends Service {
 
 		xpid.setInput(targetPoint.x);
 		ypid.setInput(targetPoint.y);
-		float currentXServoPos = x.getPosition();
-		float currentYServoPos = y.getPosition();
+		int currentXServoPos = x.getPos();
+		int currentYServoPos = y.getPos();
 
 		// TODO - work on removing currentX/YServoPos - and use the servo's
 		// directly ???
@@ -469,7 +480,7 @@ public class Tracking extends Service {
 				currentXServoPos += (int) xpid.getOutput();
 				if (currentXServoPos != lastXServoPos) {
 					x.moveTo(currentXServoPos);
-					currentXServoPos = x.getPosition();
+					currentXServoPos = x.getPos();
 					lastXServoPos = currentXServoPos;
 				}
 				// TODO - canidate for "move(int)" ?
@@ -490,7 +501,7 @@ public class Tracking extends Service {
 				currentYServoPos += (int) ypid.getOutput();
 				if (currentYServoPos != lastYServoPos) {
 					y.moveTo(currentYServoPos);
-					currentYServoPos = y.getPosition();
+					currentYServoPos = y.getPos();
 					lastYServoPos = currentYServoPos;
 				}
 			} else {
@@ -617,7 +628,7 @@ public class Tracking extends Service {
 				faceFoundFrameCount = 0;
 
 				if (scan) {
-					float xpos = x.getPosition();
+					int xpos = x.getPos();
 
 					if (xpos + scanXStep >= x.getMax() && scanXStep > 0 || xpos + scanXStep <= x.getMin() && scanXStep < 0) {
 						scanXStep = scanXStep * -1;
@@ -639,7 +650,7 @@ public class Tracking extends Service {
 
 		// FIXME - remove not used
 		case STATE_FACE_DETECT_LOST_TRACK:
-			float xpos = x.getPosition();
+			int xpos = x.getPos();
 
 			if (xpos >= x.getMax() && scanXStep > 0) {
 				scanXStep = scanXStep * -1;

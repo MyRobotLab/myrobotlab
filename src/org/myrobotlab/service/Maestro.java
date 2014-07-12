@@ -106,5 +106,17 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 		return false;
 	}
 
+	@Override
+	public void servoSweep(String servoName, int min, int max, int step) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean setServoEventsEnabled(String servoName, boolean b) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 
 }

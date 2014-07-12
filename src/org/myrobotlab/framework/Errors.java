@@ -9,7 +9,7 @@ public class Errors extends Exception {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Errors.class);
 
-	private ArrayList<Error> errors = new ArrayList<Error>();
+	private ArrayList<MRLError> errors = new ArrayList<MRLError>();
 	
 	public Errors(){}
 	
@@ -18,10 +18,10 @@ public class Errors extends Exception {
 	}
 	
 	public void add(String msg){
-		add(new Error(msg));
+		add(new MRLError(msg));
 	}
 	
-	public void add(Error err){
+	public void add(MRLError err){
 		errors.add(err);
 	}
 	
@@ -38,7 +38,7 @@ public class Errors extends Exception {
 	}
 
 	public void add(Exception e) {
-		add(new Error(e));
+		add(new MRLError(e));
 	}
 
 	public void log() {
@@ -58,7 +58,7 @@ public class Errors extends Exception {
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < errors.size(); ++i){
-			Error e = errors.get(i);
+			MRLError e = errors.get(i);
 			sb.append(e.toString());
 			if (i < errors.size() - 1){
 				sb.append(" ");

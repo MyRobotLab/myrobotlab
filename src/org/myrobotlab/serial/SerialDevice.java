@@ -1,8 +1,6 @@
 package org.myrobotlab.serial;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.TooManyListenersException;
 
 public interface SerialDevice {
@@ -87,7 +85,7 @@ public interface SerialDevice {
 
 	public int read() throws IOException;
 
-	// LAME - but Java goes both way with InputStream
+	// LAME - but Java goes both ways with InputStream
 	// it returns a single "int" / byte form 0/255
 	// in addition it returns your byte array - as java bytes - which no one uses :P
 	public int read(byte[] data) throws IOException;

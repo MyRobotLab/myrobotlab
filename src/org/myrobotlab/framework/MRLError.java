@@ -1,6 +1,6 @@
 package org.myrobotlab.framework;
 
-public class Error extends Exception {
+public class MRLError extends Exception {
 	private static final long serialVersionUID = 1L;
 	
 	final public static String LEVEL_ERROR = "error";
@@ -9,20 +9,20 @@ public class Error extends Exception {
 	
 	String level = LEVEL_ERROR;
 	
-	public Error(){
+	public MRLError(){
 		super();
 	}
 	
-	public Error(String msg){		
+	public MRLError(String msg){		
 		super(msg);
 	}
 	
-	public Error(Throwable throwable){
+	public MRLError(Throwable throwable){
 		super(throwable);
 	}
 
-	public Error(String msg, Throwable throwable){
-		super(msg, throwable);
+	public MRLError(String format, Object... params){
+		super(String.format(format, params));
 	}
 	
 	public String toString(){

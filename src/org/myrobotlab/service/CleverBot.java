@@ -15,10 +15,10 @@ public class CleverBot extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(CleverBot.class.getCanonicalName());
 
-	ChatterBotFactory factory = null;
-	ChatterBotSession session = null;
-	ChatterBot chatterbot = null;
-	ChatterBotType type = ChatterBotType.CLEVERBOT;
+	transient ChatterBotFactory factory = null;
+	transient ChatterBotSession session = null;
+	transient ChatterBot chatterbot = null;
+	transient ChatterBotType type = ChatterBotType.CLEVERBOT;
 	boolean initialized = false;
 	boolean continueToTalkToSelf = true;
 

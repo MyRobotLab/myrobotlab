@@ -322,4 +322,16 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	public void servoStop(String servoName) {
 		arduino.servoStop(servoName);
 	}
+
+	@Override
+	public void servoSweep(String servoName, int min, int max, int step) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean setServoEventsEnabled(String servoName, boolean b) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

@@ -25,12 +25,13 @@
 
 package org.myrobotlab.service;
 
-import java.util.ArrayList;
 import java.util.Vector;
 
+import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -41,34 +42,38 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- * Servos have both input and output.  Input is usually of the range of integers between 0 - 180, and
- * output can relay those values directly to the servo's firmware (Arduino ServoLib, I2C controller, etc)
+ *         Servos have both input and output. Input is usually of the range of
+ *         integers between 0 - 180, and output can relay those values directly
+ *         to the servo's firmware (Arduino ServoLib, I2C controller, etc)
  * 
- * However there can be the occasion that the input comes from a system which does not have the same range.
- * Such that input can vary from 0.0 to 1.0.  For example, OpenCV coordinates are often returned in this range.
- * When a mapping is needed Servo.map can be used.  For this mapping Servo.map(0.0, 1.0, 0, 180) might be
- * desired.  Reversing input would be done with Servo.map(180, 0, 0, 180)
+ *         However there can be the occasion that the input comes from a system
+ *         which does not have the same range. Such that input can vary from 0.0
+ *         to 1.0. For example, OpenCV coordinates are often returned in this
+ *         range. When a mapping is needed Servo.map can be used. For this
+ *         mapping Servo.map(0.0, 1.0, 0, 180) might be desired. Reversing input
+ *         would be done with Servo.map(180, 0, 0, 180)
  * 
- * outputY - is the values sent to the firmware, and should not necessarily be confused with the inputX
- * which is the input values sent to the servo
- *
+ *         outputY - is the values sent to the firmware, and should not
+ *         necessarily be confused with the inputX which is the input values
+ *         sent to the servo
+ * 
  */
 @Root
 public class Servo extends Service implements ServoControl {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Servo.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
 	ServoController controller;
 
 	private Float inputX;
-	
+
 	// clipping
 	@Element
 	private float outputYMin = 0;
 	@Element
-	private float outputYMax = 180; 
+	private float outputYMax = 180;
 
 	// range mapping
 	@Element
@@ -80,34 +85,34 @@ public class Servo extends Service implements ServoControl {
 	@Element
 	private float maxY = 180;
 
+	boolean isBlocking = false;
+
 	@Element
 	private int rest = 90;
-	
+
 	private long lastActivityTime = 0;
 
 	/**
 	 * the pin is a necessary part of servo - even though this is really
 	 * controller's information a pin is a integral part of a "servo" - so it is
 	 * beneficial to store it allowing a re-attach during runtime
+	 * 
+	 * FIXME - not true - attach on the controller puts in the data - it should
+	 * leave it even on a detach - a attach with pin should only replace it -
+	 * that way pin does not need to be stored on the Servo
 	 */
 	private Integer pin;
 	Vector<String> controllers;
+	// computer thread based sweeping
+	boolean isSweeping = false;
 
-	// FIXME - should be implemented inside the Arduino / ServoController - but
-	// has to be tied to position
-	int sweepStart = 0;
-	int sweepEnd = 180;
-	int sweepDelayMS = 1000;
-	int sweepIncrement = 1;
-	boolean sweeperRunning = false;
+	// sweep types
+	// TODO - computer implemented speed control (non-sweep)
+	boolean speedControlOnUC = true;
+
 	transient Thread sweeper = null;
 
 	private boolean isAttached = false;
-
-
-	/**
-	 * not needed but kept to allow setInverted 
-	 */
 	private boolean inverted = false;
 
 	public Servo(String n) {
@@ -120,20 +125,21 @@ public class Servo extends Service implements ServoControl {
 		detach();
 		super.releaseService();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.myrobotlab.service.interfaces.ServoControl#setController(org.myrobotlab.service.interfaces.ServoController)
-	 */
+
+	public boolean setBlocking(boolean b) {
+		isBlocking = b;
+		return b;
+	}
+
 	@Override
 	public boolean setController(ServoController controller) {
 		log.info(String.format("%s setController %s", getName(), controller));
-		
-		if (isAttached())
-		{
+
+		if (isAttached()) {
 			warn("can not set controller %s when servo %s is attached", controller, getName());
 			return false;
 		}
-		
+
 		if (controller == null) {
 			error("setting null as controller");
 			return false;
@@ -142,15 +148,16 @@ public class Servo extends Service implements ServoControl {
 		broadcastState();
 		return true;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.myrobotlab.service.interfaces.ServoControl#setPin(int)
 	 */
 	@Override
 	public boolean setPin(int pin) {
 		log.info(String.format("setting %s pin to %d", getName(), pin));
-		if (isAttached())
-		{
+		if (isAttached()) {
 			warn("%s can not set pin %d when servo is attached", getName(), pin);
 			return false;
 		}
@@ -158,60 +165,69 @@ public class Servo extends Service implements ServoControl {
 		broadcastState();
 		return true;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.myrobotlab.service.interfaces.ServoControl#attach(java.lang.String, int)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.myrobotlab.service.interfaces.ServoControl#attach(java.lang.String,
+	 * int)
 	 */
 	public boolean attach(String controller, int pin) {
+		return attach((Arduino) Runtime.getService(controller), pin);
+	}
+
+	public boolean attach(Arduino controller, int pin) {
 		setPin(pin);
-		
-		if (setController(controller)){
+
+		if (setController(controller)) {
 			return attach();
 		}
-		
+
 		return false;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.myrobotlab.service.interfaces.ServoControl#attach()
 	 */
 	public boolean attach() {
 		lastActivityTime = System.currentTimeMillis();
-		if (isAttached){
+		if (isAttached) {
 			log.info(String.format("%s.attach() - already attached - detach first", getName()));
 			return false;
 		}
-		
+
 		if (controller == null) {
 			error("no valid controller can not attach %s", getName());
 			return false;
 		}
 
-		isAttached  = controller.servoAttach(getName(), pin) != -1;
-		
-		if (isAttached){
+		isAttached = controller.servoAttach(getName(), pin) != -1;
+
+		if (isAttached) {
 			// changed state
 			broadcastState();
 		}
-		
+
 		return isAttached;
 	}
-	
-	
+
 	public void setInverted(boolean isInverted) {
-		if (!inverted  && isInverted){
+		if (!inverted && isInverted) {
 			map(maxX, minX, minY, maxY);
 			inverted = true;
 		} else {
 			inverted = false;
 		}
-		
+
 	}
 
 	public boolean isInverted() {
 		return inverted;
 	}
-	
+
 	public void map(float minX, float maxX, float minY, float maxY) {
 		this.minX = minX;
 		this.maxX = maxX;
@@ -225,74 +241,48 @@ public class Servo extends Service implements ServoControl {
 		this.minY = minY;
 		this.maxY = maxY;
 	}
-	
-	public int calc(float s){
-		return Math.round( minY + ((s - minX)*(maxY - minY))/(maxX - minX));
+
+	public int calc(float s) {
+		return Math.round(minY + ((s - minX) * (maxY - minY)) / (maxX - minX));
 	}
 
 	/**
-	 * simple move servo to the location desired TODO Float Version - is range 0
-	 * - 1.0 ???
+	 * basic move command of the servo - usually is 0 - 180 valid range but can
+	 * be adjusted and / or re-mapped with min / max and map commands
+	 * 
+	 * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
+	 * response
 	 */
 	@Override
 	public void moveTo(Integer pos) {
-		moveTo((float)pos);
-	}
-	
-	public void moveTo(float inputX) {
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
-		
+
+		inputX = pos.floatValue();
+
 		// the magic mapping
 		int outputY = calc(inputX);
-		
-		if (outputY > outputYMax || outputY < outputYMin){
-				warn(String.format("%s.moveTo(%d) out of range", getName(), (int)outputY));
+
+		if (outputY > outputYMax || outputY < outputYMin) {
+			warn(String.format("%s.moveTo(%d) out of range", getName(), (int) outputY));
 			return;
 		}
-		
+
 		// FIXME - currently their is no timerPosition
 		// this could be gotten with 100 * outputY for some valid range
 		log.info("servoWrite({})", outputY);
 		controller.servoWrite(getName(), outputY);
 		lastActivityTime = System.currentTimeMillis();
-		this.inputX = inputX;
-	}
-
-	/**
-	 * moves the servo in the range -1.0 to 1.0 where in a typical servo -1.0 =
-	 * 0 0.0 = 90 1.0 = 180 setting the min and max will affect the range where
-	 * -1.0 will always be the minPos and 1.0 will be maxPos
-	 *//*
-	@Override
-	public void move(Float pos) {
-		Float amount = pos;
-
-		if (amount > 1 || amount < -1) {
-			error("%s.move %d out of range", getName(), amount);
-			return;
-		}
-
-		int range = limitMax - limitMin;
-		int newPos = Math.abs((int) (range / 2 * amount - range / 2));
-
-		controller.servoWrite(getName(), newPos);
-		position = newPos;
 
 	}
-*/
-	
+
 	public boolean isAttached() {
 		return isAttached;
 	}
 
 	public void setMinMax(int min, int max) {
-		setMinMax((float)min, (float)max);
-	}
-	
-	public void setMinMax(float min, float max){
 		outputYMin = min;
 		outputYMax = max;
 		broadcastState();
@@ -306,21 +296,21 @@ public class Servo extends Service implements ServoControl {
 		return (int) outputYMax;
 	}
 
-	public Float getPosition() {
+	public Float getPosFloat() {
 		return inputX;
 	}
-	
-	public int getPositionInt() {
+
+	public int getPos() {
 		return Math.round(inputX);
 	}
 
-	public long getLastActivityTime(){
+	public long getLastActivityTime() {
 		return lastActivityTime;
 	}
 
 	@Override
 	public String getDescription() {
-		return "<html>service for a servo</html>";
+		return "basic servo service";
 	}
 
 	/**
@@ -328,25 +318,51 @@ public class Servo extends Service implements ServoControl {
 	 * function
 	 * 
 	 */
-	private class Sweeper implements Runnable {
+	public class Sweeper extends Thread {
+
+		int min;
+		int max;
+		int delay; // depending on type - this is 2 different things COMPUTER
+					// its ms delay - CONTROLLER its modulus loop count
+		int step;
+
+		public Sweeper(String name, int min, int max, int delay, int step) {
+			super(String.format("%s.sweeper", name));
+			this.min = min;
+			this.max = max;
+			this.delay = delay;
+			this.step = step;
+		}
+
 		@Override
 		public void run() {
 
-			while (sweeperRunning) {
-				// controller.servoMoveTo(name, position);
-				inputX += sweepIncrement;
+			if (inputX == null) {
+				inputX = (float) min;
+			}
 
-				// switch directions
-				if ((inputX <= sweepStart && sweepIncrement < 0) || (inputX >= sweepEnd && sweepIncrement > 0)) {
-					sweepIncrement = sweepIncrement * -1;
+			isSweeping = true;
+
+			try {
+				while (isSweeping) {
+
+					inputX += step;
+
+					// switch directions
+					if ((inputX <= min && step < 0) || (inputX >= max && step > 0)) {
+						step = step * -1;
+					}
+
+					moveTo(inputX.intValue());
+					Thread.sleep(delay);
+
 				}
 
-				moveTo(inputX);
-
-				try {
-					Thread.sleep(sweepDelayMS);
-				} catch (InterruptedException e) {
-					sweeperRunning = false;
+			} catch (Exception e) {
+				isSweeping = false;
+				if (e instanceof InterruptedException) {
+					info("shutting down sweeper");
+				} else {
 					logException(e);
 				}
 			}
@@ -354,28 +370,29 @@ public class Servo extends Service implements ServoControl {
 
 	}
 
-	public void sweep(int sweepStart, int sweepEnd, int sweepDelayMS, int sweepIncrement) {
-		if (sweeperRunning) {
-			stopSweep();
-		}
-		this.sweepStart = sweepStart;
-		this.sweepEnd = sweepEnd;
-		this.sweepDelayMS = sweepDelayMS;
-		this.sweepIncrement = sweepIncrement;
-
-		sweeperRunning = true;
-
-		sweeper = new Thread(new Sweeper());
-		sweeper.start();
+	public void sweep(int min, int max) {
+		sweep(min, max, 1, 1);
 	}
 
-	public void stopSweep() {
-		sweeperRunning = false;
-		sweeper = null;
+	// FIXME - is it really speed control - you don't currently thread for
+	// factional speed values
+	public void sweep(int min, int max, int delay, int step) {
+		// CONTROLLER TYPE SWITCH
+		if (speedControlOnUC) {
+			controller.servoSweep(getName(), min, max, step); // delay & step
+																// implemented
+		} else {
+			if (isSweeping) {
+				stop();
+			}
+
+			sweeper = new Sweeper(getName(), min, max, delay, step);
+			sweeper.start();
+		}
 	}
 
 	public void sweep() {
-		sweep(sweepStart, sweepEnd, sweepDelayMS, sweepIncrement);
+		sweep(Math.round(minX), Math.round(maxX), 1, 1);
 	}
 
 	@Override
@@ -387,10 +404,16 @@ public class Servo extends Service implements ServoControl {
 		return controller.getName();
 	}
 
+	// FIXME - really this could be normalized...
+	// attach / detach - the detach would not remove the ServoData from
+	// the controller only another attach with a different pin would
+	// change it
 	@Override
 	public Integer getPin() {
 		/*
 		 * valiant attempt of normalizing - but Servo needs to know its own pin
+		 * to support attach()
+		 * 
 		 * if (controller == null) { return null; }
 		 * 
 		 * return controller.getServoPin(getName());
@@ -410,84 +433,22 @@ public class Servo extends Service implements ServoControl {
 		controller.setServoSpeed(getName(), speed);
 	}
 
-	
 	public boolean detach() {
-		if (!isAttached){
+		if (!isAttached) {
 			log.info(String.format("%s.detach() - already detach - attach first", getName()));
 			return false;
 		}
-		
+
 		if (controller != null) {
-			if (controller.servoDetach(getName())){
+			if (controller.servoDetach(getName())) {
 				isAttached = false;
 				// changed state
 				broadcastState();
 				return true;
 			}
 		}
-		
+
 		return false;
-	}
-	
-	
-	public void test() {
-		
-		try {
-		ArrayList<String> errors = new ArrayList<String>();
-		
-		// test standard Python service page script
-		log.info("service python script begin---");
-		Python python = (Python)Runtime.createAndStart("python","Python");
-		String resourceName = "Python/examples/bork.py";
-		python.execResource(resourceName);
-		if (python.getLastError() != null){
-			errors.add(String.format("service python script error [%s]", python.getLastError()));
-			python.clearLastError();
-		}
-		
-		log.info("service python script end---");
-		
-		// start peers ?
-		Arduino arduino = (Arduino)Runtime.createAndStart("arduino","Arduino");
-		
-		// TEST RE-ENTRANT attach !!
-	 
-		// test limits
-		
-		// test refreshControllers 
-		
-		// if it gets in a limit - must be able to move out.. no?
-		// TODO - testing invalid states
-		setController("arduino");
-		attach();
-		
-		
-		//put in testMode - collect controller data
-		
-	 	moveTo(0);
-	 	moveTo(180);
-	 
-	 
-		for (int i = 0; i < 10000; ++i) {
-			setSpeed(0.6f);
-			moveTo(90);
-			moveTo(180);
-			setSpeed(0.6f);
-			moveTo(90);
-			moveTo(180);
-			setSpeed(0.5f);
-			moveTo(90);
-			moveTo(180);
-			setSpeed(0.5f);
-			moveTo(90);
-			moveTo(180);
-		}
-		
-		} catch (Exception e){
-			error(e);
-		}
-		
-		info("test completed");
 	}
 
 	public Vector<String> refreshControllers() {
@@ -495,14 +456,19 @@ public class Servo extends Service implements ServoControl {
 		return controllers;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.myrobotlab.service.interfaces.ServoControl#stopServo()
 	 */
 	@Override
-	public void stopServo() {
+	public void stop() {
+		// stop sweeper thread if running
+		isSweeping = false;
+		sweeper = null;
+		// send a stop to the uC
 		controller.servoStop(getName());
 	}
-	
 
 	public int setRest(int i) {
 		rest = i;
@@ -519,70 +485,190 @@ public class Servo extends Service implements ServoControl {
 
 	@Override
 	public boolean setController(String controller) {
-		
+
 		ServoController sc = (ServoController) Runtime.getService(controller);
-		if (sc == null){
+		if (sc == null) {
 			return false;
 		}
-		
+
 		return setController(sc);
 	}
-	
+
+	public void test() throws MRLError {
+		test("COM15", 4);
+	}
+
+	public void test(String port, int pin) throws MRLError {
+		test(new Object[] { port, pin });
+	}
+
+	public void test(Object... params) throws MRLError {
+
+		// FIXME GSON or PYTHON MESSAGES
+
+		boolean useGUI = false;
+		boolean useVirtualPorts = false;
+		boolean testBasicMoves = false;
+		boolean testSweep = true;
+		boolean testDetachReAttach = false;
+		boolean testBlocking = false;
+
+		if (useVirtualPorts) {
+			// virtual testing
+			Serial.createNullModemCable("COM15", "UART");
+			Serial uart = (Serial) Runtime.start("uart", "Serial");
+			uart.connect("UART");
+		}
+
+		// dependencies - hardware - servocontroll & servo & port
+		// challenges - no "real" feedback - even with hardware (visual?
+		// contact?)
+		// without hardware - possible serial binary MRLFile comparison !
+
+		// TODO - check if !headless
+		if (useGUI) {
+			Runtime.start("gui", "GUIService");
+		}
+
+		// step 1 - test for success
+		// step 2 - test for failures & recovery
+		String arduinoName = "arduino";
+		int min = 10;
+		int max = 170;
+
+		int pause = 2000;
+
+		// weird notation - but its nice when copying out
+		// into some script or other code
+		// also good to guarantee being started
+
+		Servo servo = (Servo) Runtime.start(getName(), "Arduino");
+
+		String port = (String) params[0];
+		int pin = (int) params[1];
+
+		// TODO test errros on servo move before attach
+
+		Arduino arduino = (Arduino) Runtime.start(arduinoName, "Arduino");
+		arduino.connect(port);
+		info("attaching to pin %d", pin);
+
+		if (!servo.attach(arduino, pin)) {
+			throw new MRLError("could not attach to arduino");
+		}
+
+		if (servo.getPin() != pin) {
+			throw new MRLError("bad pin value");
+		}
+
+		Vector<String> controllers = servo.refreshControllers();
+		if (controllers.size() != 1) {
+			throw new MRLError("should be on controller");
+		}
+
+		servo.setMinMax(min, max);
+
+		info("should not move");
+		sleep(pause);
+		servo.moveTo(min - 1);
+		servo.moveTo(max + 1);
+
+		if (testBasicMoves) {
+
+			info("testing 10 speeds on uC");
+			sleep(pause);
+			// TODO - moveToBlocking or callback when
+			// servo reaches position would be nice here !
+			for (int i = 0; i < 10; ++i) {
+				float newSpeed = 1.0f - ((float) i * 0.1f);
+				info("moveTo(pos=%d) %03f speed ", min, newSpeed);
+				servo.setSpeed(newSpeed);
+				servo.moveTo(min);
+				sleep(pause);
+				info("moveTo(pos=%d) %03f speed ", max, newSpeed);
+				servo.moveTo(max);
+				sleep(pause);
+			}
+		}
+
+		info("back to rest");
+		servo.setSpeed(1.0f);
+		servo.rest();
+		
+		servo.setEventsEnabled(true);
+
+		if (testSweep) {
+
+			servo.setSpeed(0.9f);
+			servo.sweep(min, max, 30, 1);
+			
+			servo.setEventsEnabled(false);
+
+			/*
+			 * 
+			 * info("computer controlled sweep speed"); int newDelay; for (int i
+			 * = 0; i < 10; ++i) { newDelay = i * 100 + 1; // FIXME - make GSON
+			 * or PYTHON message output
+			 * info("sweep (min=%d max=%d delay=%d step=%d )", min, max,
+			 * newDelay, 1); servo.setSpeed(0.3f); servo.sweep(min, max,
+			 * newDelay, 1); sleep(3 * pause); servo.stop(); servo.rest(); }
+			 */
+
+			info("uc controlled sweep speed");
+			servo.stop();
+		}
+
+		// TODO - detach - re-attach - detach (move) - re-attach - check for no
+		// move !
+
+		if (testDetachReAttach) {
+			info("testing detach re-attach");
+			servo.detach();
+			sleep(pause);
+			servo.attach();
+
+			info("make sure we can move after a re-attach");
+			// put in testMode - collect controller data
+
+			servo.moveTo(min);
+			sleep(pause);
+			servo.moveTo(max);
+		}
+
+		if (testBlocking) {
+			info("test blocking");
+			servo.setBlocking(true);
+		}
+
+		info("test completed");
+	}
+
+	public boolean setEventsEnabled(boolean b) {
+		controller.setServoEventsEnabled(getName(), b);
+		return b;
+	}
+
+	public void setSpeedControlOnUC(boolean b) {
+		speedControlOnUC = b;
+	}
+
 	public static void main(String[] args) throws InterruptedException {
 
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		
-		Servo right = new Servo("servo01");
-		
-		right.map(5, 180, 5, 180);
-		log.info("{}",right.calc(1));
-		log.info("{}",right.calc(3));
-		right.map(180, 0, 0, 180);
-		log.info("{}",right.calc(3));
-		right.map(0, 180, 5, 178);
-		log.info("{}",right.calc(0));
-		
-		right.startService();
-		right.test();
+		try {
 
-		// FIXME - routing of servo.attach("arduino", 3);
-
-		Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
-
-		arduino.connect("COM4");
-
-		
-		arduino.servoAttach(right.getName(), 13);
-
-		right.test();
-
-		Runtime.createAndStart("gui", "GUIService");
-
-		// right.attach(serviceName)
-		/*
-		 * Servo left = new Servo("left"); left.startService();
-		 * 
-		 * //Servo neck = new Servo("neck"); //neck.startService();
-		 * 
-		 * for (int i = 0; i < 30; ++i) {
-		 * 
-		 * right.attach("arduino", 2); left.attach("arduino", 3);
-		 * 
-		 * right.moveTo(120); // 70 back left.moveTo(70); // 118 back
-		 * 
-		 * Thread.sleep(10000);
-		 * 
-		 * right.moveTo(90); left.moveTo(90);
-		 * 
-		 * //right.detach(); //left.detach(); }
-		 */
+			Servo servo = (Servo) Runtime.start("servo", "Servo");
+			/*
+			 * Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			 * servo.setSpeedControlOnUC(true);
+			 * Serial.createNullModemCable("COM15", "UART");
+			 */
+			servo.test();
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
 
 	}
 
-	
-
-
-	
-	
 }

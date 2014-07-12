@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +45,9 @@ import org.slf4j.Logger;
 
 // FIXME - remove all references of Runtime - you must messages to an interface !
 
-public class Repo {
+public class Repo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(Repo.class);
 
@@ -476,6 +479,8 @@ public class Repo {
 				Artifact artifact = ar.getArtifact();
 				File file = ar.getLocalFile();
 				log.info("{}", file.getAbsoluteFile());
+				// FIXME - native move up one directory !!! - from denormalized back to normalized Yay!
+				// maybe look for PlatformId in path ? 
 				if (ret == 1 && "zip".equalsIgnoreCase(artifact.getType())) {
 					String filename = String.format("libraries/zip/%s.zip", artifact.getName());
 					info("unzipping %s", filename);

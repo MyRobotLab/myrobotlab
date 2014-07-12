@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
@@ -34,19 +35,28 @@ public class Cortex extends Service implements MemoryChangeListener {
 
 
 	// ------- begin names --------------
-	// FIXME - get composite names of sub peers - FIXME NEED INTERFACE
-	public String trackingName = "tracking";
-	public String faceDetectorName = "faceDetector";
-	// ------- end names --------------
 
 	// peer services
 	transient Tracking tracking;
 	transient OpenCV faceDetector;
 	
+	Node currentFace;
+	
 	public OpenCVFilterFaceDetect faceFilter = new OpenCVFilterFaceDetect();
 
 	// TODO - store all config in memory too?
-	private Memory memory = new Memory();
+	transient private Memory memory = new Memory();
+	
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		
+		// put peer definitions in
+		peers.put("tracking", "Tracking", "tracking");
+		peers.put("faceDetector", "OpenCV", "face detector");
+
+		return peers;
+	}
+
 
 	public Cortex(String n) {
 		super(n);
@@ -80,13 +90,13 @@ public class Cortex extends Service implements MemoryChangeListener {
 		
 		// FIXME - check if exists ! - IF EXISTS THEN COMES THE RESPONSIBLITY OF BEING TOTALLY CONFIGURED 
 		// EXTERNALLY
-		tracking = (Tracking) Runtime.createAndStart(trackingName, "Tracking"); // FIXME - needs to pass in reference? dunno
+		tracking = (Tracking) startPeer("tracking"); 
 //		tracking.opencvName = "cameraTracking";
 		tracking.connect("COM12");
 		tracking.startService();
 		tracking.trackPoint(); 
 		
-		faceDetector = (OpenCV) Runtime.create(faceDetectorName, "OpenCV");
+		faceDetector = (OpenCV) startPeer("faceDetector");;
 		faceDetector.setPipeline(String.format("%s.PyramidDown", tracking.opencv.getName()));// set key
 		faceDetector.addFilter(faceFilter);
 		faceDetector.setDisplayFilter(faceFilter.name);
@@ -103,7 +113,13 @@ public class Cortex extends Service implements MemoryChangeListener {
 		
 	}
 	
-	Node currentFace;
+	/*
+	public void releasePeers(){
+		super.releasePeers();
+		tracking.releaseService();
+		faceDetector.releaseService();
+	}
+	*/
 	
 	// FIXME - only publish when faces are actually found
 	public void foundFace(OpenCVData faces)

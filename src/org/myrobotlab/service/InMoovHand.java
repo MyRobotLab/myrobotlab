@@ -278,8 +278,8 @@ public class InMoovHand extends Service {
 	}
 
 	public String getScript(String inMoovServiceName) {
-		return String.format("%s.moveHand(\"%s\",%d,%d,%d,%d,%d,%d)\n", inMoovServiceName, side, thumb.getPositionInt(), index.getPositionInt(), majeure.getPositionInt(),
-				ringFinger.getPositionInt(), pinky.getPositionInt(), wrist.getPositionInt());
+		return String.format("%s.moveHand(\"%s\",%d,%d,%d,%d,%d,%d)\n", inMoovServiceName, side, thumb.getPos(), index.getPos(), majeure.getPos(),
+				ringFinger.getPos(), pinky.getPos(), wrist.getPos());
 	}
 
 	public void setPins(int thumb, int index, int majeure, int ringFinger, int pinky, int wrist) {
@@ -322,12 +322,12 @@ public class InMoovHand extends Service {
 				throw new Exception("arduino not connected");
 			}
 
-			thumb.moveTo(thumb.getPosition() + 2);
-			index.moveTo(index.getPosition() + 2);
-			majeure.moveTo(majeure.getPosition() + 2);
-			ringFinger.moveTo(ringFinger.getPosition() + 2);
-			pinky.moveTo(pinky.getPosition() + 2);
-			wrist.moveTo(wrist.getPosition() + 2);
+			thumb.moveTo(thumb.getPos() + 2);
+			index.moveTo(index.getPos() + 2);
+			majeure.moveTo(majeure.getPos() + 2);
+			ringFinger.moveTo(ringFinger.getPos() + 2);
+			pinky.moveTo(pinky.getPos() + 2);
+			wrist.moveTo(wrist.getPos() + 2);
 
 		} catch (Exception e) {
 			error(e);
@@ -367,16 +367,15 @@ public class InMoovHand extends Service {
 	}
 
 	public long getLastActivityTime() {
-		long minLastActivity = 0;
 		
-		minLastActivity = (minLastActivity < thumb.getLastActivityTime())?thumb.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < index.getLastActivityTime())?index.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < majeure.getLastActivityTime())?majeure.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < ringFinger.getLastActivityTime())?ringFinger.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < pinky.getLastActivityTime())?pinky.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < wrist.getLastActivityTime())?wrist.getLastActivityTime():minLastActivity;
+		long lastActivityTime =  Math.max(index.getLastActivityTime(), thumb.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime, index.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime, majeure.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime, ringFinger.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime, pinky.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime, wrist.getLastActivityTime());
 		
-		return minLastActivity;
+		return lastActivityTime;
 
 	}
 

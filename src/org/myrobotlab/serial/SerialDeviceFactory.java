@@ -122,6 +122,14 @@ public class SerialDeviceFactory {
 		return port;
 	}
 
+	public static void add(VirtualSerialPort virtualSerialPort) {
+		if (virtualPorts.containsKey(virtualSerialPort.name)){
+			log.warn("already contains serial port {} remove first", virtualSerialPort.name);
+			return;
+		}
+		virtualPorts.put(virtualSerialPort.name, virtualSerialPort);
+	}
+
 	public static void main(String[] args) throws IOException {
 		Logging logging = LoggingFactory.getInstance();
 		logging.configure();
@@ -136,15 +144,7 @@ public class SerialDeviceFactory {
 
 		String portName = "COM9";
 		try {
-			SerialDevice sd = SerialDeviceFactory.getSerialDevice(TYPE_GNU, portName, 57600, 8, 1, 0); // TODO/FIXME
-																										// -
-																										// serialdevice
-																										// identifier
-																										// -
-																										// opened
-																										// by
-																										// someone
-																										// else
+			SerialDevice sd = SerialDeviceFactory.getSerialDevice(TYPE_GNU, portName, 57600, 8, 1, 0); 
 			sd.open();
 			log.info("{}", sd.isOpen());
 			log.info("{}", sd.isOpen());
@@ -159,10 +159,6 @@ public class SerialDeviceFactory {
 			e.printStackTrace();
 		}
 
-	}
-
-	public static void add(VirtualSerialPort virtualSerialPort) {
-		virtualPorts.put(virtualSerialPort.name, virtualSerialPort);
 	}
 
 }

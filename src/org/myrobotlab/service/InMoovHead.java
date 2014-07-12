@@ -205,8 +205,8 @@ public class InMoovHead extends Service {
 	}
 
 	public String getScript(String inMoovServiceName) {
-		return String.format("%s.moveHead(%d,%d,%d,%d,%d)\n", inMoovServiceName, neck.getPositionInt(), rothead.getPositionInt(), eyeX.getPositionInt(), eyeY.getPositionInt(),
-				jaw.getPositionInt());
+		return String.format("%s.moveHead(%d,%d,%d,%d,%d)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(),
+				jaw.getPos());
 	}
 
 	public void setpins(int headXPin, int headYPin, int eyeXPin, int eyeYPin, int jawPin) {
@@ -238,11 +238,11 @@ public class InMoovHead extends Service {
 				error("arduino not connected");
 			}
 
-			rothead.moveTo(rothead.getPosition() + 2);
-			neck.moveTo(neck.getPosition() + 2);
-			eyeX.moveTo(eyeX.getPosition() + 2);
-			eyeY.moveTo(eyeY.getPosition() + 2);
-			jaw.moveTo(jaw.getPosition() + 2);
+			rothead.moveTo(rothead.getPos() + 2);
+			neck.moveTo(neck.getPos() + 2);
+			eyeX.moveTo(eyeX.getPos() + 2);
+			eyeY.moveTo(eyeY.getPos() + 2);
+			jaw.moveTo(jaw.getPos() + 2);
 			
 		} catch (Exception e) {
 			error(e);
@@ -260,14 +260,12 @@ public class InMoovHead extends Service {
 	}
 	
 	public long getLastActivityTime() {
-		long minLastActivity = 0;
-		
-		minLastActivity = (minLastActivity < rothead.getLastActivityTime())?rothead.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < neck.getLastActivityTime())?neck.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < eyeX.getLastActivityTime())?eyeX.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < eyeY.getLastActivityTime())?eyeY.getLastActivityTime():minLastActivity;
-		minLastActivity = (minLastActivity < jaw.getLastActivityTime())?jaw.getLastActivityTime():minLastActivity;
-		return minLastActivity;
+
+		long lastActivityTime = Math.max(rothead.getLastActivityTime() , neck.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime , eyeX.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime , eyeY.getLastActivityTime());
+		lastActivityTime = Math.max(lastActivityTime , jaw.getLastActivityTime());
+		return lastActivityTime;
 	}
 
 	// ----- initialization end --------

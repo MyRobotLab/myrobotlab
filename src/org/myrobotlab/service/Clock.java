@@ -25,6 +25,7 @@
 
 package org.myrobotlab.service;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -164,11 +165,11 @@ public class Clock extends Service {
 				Runtime.createAndStart(String.format("gui%d", i), "GUIService");
 				
 				//myservice.subscribe("clock", "pulse", "pulseMe");
-/*
+
 				Message msg = remote.createMessage("", "register", clock);
 				URI uri = new URI("tcp://127.0.0.1:6767");
 				remote.sendRemote(uri, msg);
-*/
+
 				// FIXME - sholdn't this be sendRemote ??? or at least
 				// in an interface
 				// remote.sendRemote(uri, msg);

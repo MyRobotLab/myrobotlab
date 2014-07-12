@@ -83,6 +83,9 @@ public class Speech extends Service {
 	 * http://www.codeproject.com/Articles/435434/Text-to-Speech-tts-for-the-Web
 	 * http://www.text2speech.org/ - another possible back-end
 	 */
+	
+	// FIXME - Speech doesn't need HTTPClient - could just use org.myrobotlab.net.HTTPRequest - and benefit from
+	// 1 less dependency & proxy info
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Speech.class.getCanonicalName());
@@ -126,6 +129,10 @@ public class Speech extends Service {
 	private String isSaying ;
 
 	final public static HashMap<String, String> googleLanguageMap = new HashMap<String, String>();
+	
+	public String googleProxyHost = null;
+	public int googleProxyPort = 8080;
+	public int afterSpeechPause = 600;
 	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -342,9 +349,6 @@ public class Speech extends Service {
 		googleURI = uri;
 	}
 
-	public String googleProxyHost = null;
-	public int googleProxyPort = 8080;
-	
 	public void setGenderFemale() {
 		voiceName = "audrey";
 		googleProxyHost = null;
@@ -443,7 +447,7 @@ public class Speech extends Service {
 		invoke("isSpeaking", true);
 		invoke("saying", toSpeak);
 		audioFile.playFile(audioFileName, true);
-		sleep(600);// important pause after speech
+		sleep(afterSpeechPause);// important pause after speech
 		invoke("isSpeaking", false);
 	}
 

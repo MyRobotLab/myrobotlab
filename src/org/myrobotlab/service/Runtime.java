@@ -1187,6 +1187,7 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	/**
+	 * WTF did you use a vector ?!?!?
 	 * 
 	 * @param interfaceName
 	 * @return
@@ -1405,6 +1406,10 @@ public class Runtime extends Service implements MessageListener {
 
 		}
 
+	}
+	
+	static public ServiceInterface start(String name, String type){
+		return createAndStart(name, type);
 	}
 
 	static public ServiceInterface createAndStart(String name, String type) {
