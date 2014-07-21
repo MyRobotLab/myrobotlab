@@ -99,6 +99,8 @@ public class Speech extends Service {
 	
 	String language = "en_gb";
 	private String googleURI = "http://translate.google.com/translate_tts?tl=%s&q=";
+	
+	static String filter = "[\\\\/:\\*\\?\"'<>\\|]";
 
 	// TODO - seperate all of the var into appropriate parts - ie Global ATT
 	// Google FreeTTS
@@ -241,6 +243,7 @@ public class Speech extends Service {
 
 	// front-end functions
 	public boolean speak(String toSpeak) {
+		toSpeak = toSpeak.replaceAll(filter, " ");
 		if (toSpeak == null || toSpeak.length() == 0){
 			return false;
 		}
@@ -276,11 +279,20 @@ public class Speech extends Service {
 	public boolean speakBlocking(String toSpeak) {
 		return speakBlocking(toSpeak, (Object[])null);
 	}
+	
+	/**
+	 * main speak blocking function
+	 * @param speak
+	 * @param fdata
+	 * @return
+	 */
 	public boolean speakBlocking(String speak, Object... fdata) {
-		if (speak == null || speak.length() == 0)
+		if (speak == null || speak.length() == 0){
 			return false;
+		}
 		
-		String toSpeak = String.format(speak, fdata);
+		
+		String toSpeak = String.format(speak, fdata).replaceAll(filter, " ");
 		
 		if (backendType == BackendType.FREETTS) { // festival tts
 			speakFreeTTS(toSpeak);
@@ -518,7 +530,9 @@ public class Speech extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		
+		String test = " hello this is a test \\dev\\blah / blah : * ? \" blah \" blah > < <> bla | zod | zod2 ".replaceAll(filter, " ");
 	
+		log.info(test);
 		Speech speech = new Speech("speech");
 		speech.startService();
 		

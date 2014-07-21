@@ -547,7 +547,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			return peers;
 
 		} catch (Exception e) {
-			log.info(String.format("%s does not have a getPeers", fullClassName));
+			log.debug(String.format("%s does not have a getPeers", fullClassName));
 		}
 
 		return null;
@@ -585,7 +585,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			Index<ServiceReservation> peerDNA = peers.getDNA();
 			ArrayList<ServiceReservation> flattenedPeerDNA = peerDNA.flatten();
 
-			log.info(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey, flattenedPeerDNA.size()));
+			log.debug(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey, flattenedPeerDNA.size()));
 
 			// Two loops are necessary - because recursion should not start
 			// until the entire level
@@ -605,13 +605,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				String fullKey = String.format("%s.%s", myKey, peerKey);
 				ServiceReservation reservation = myDNA.get(fullKey);
 
-				log.info(String.format("%d (%s) - [%s]", x, fullKey, peersr.actualName));
+				log.debug(String.format("%d (%s) - [%s]", x, fullKey, peersr.actualName));
 
 				if (reservation == null) {
-					log.info(String.format("dna adding new key %s %s %s %s", fullKey, peersr.actualName, peersr.fullTypeName, comment));
+					log.debug(String.format("dna adding new key %s %s %s %s", fullKey, peersr.actualName, peersr.fullTypeName, comment));
 					myDNA.put(fullKey, peersr);
 				} else {
-					log.info(String.format("dna collision - replacing null values !!! %s", fullKey));
+					log.debug(String.format("dna collision - replacing null values !!! %s", fullKey));
 					StringBuffer sb = new StringBuffer();
 					if (reservation.actualName == null) {
 						sb.append(String.format(" updating actualName to %s ", peersr.actualName));
@@ -639,7 +639,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				buildDNA(myDNA, Peers.getPeerKey(myKey, peersr.key), peersr.fullTypeName, peersr.comment);
 			}
 		} catch (Exception e) {
-			log.info(String.format("%s does not have a getPeers", fullClassName));
+			log.debug(String.format("%s does not have a getPeers", fullClassName));
 		}
 	}
 

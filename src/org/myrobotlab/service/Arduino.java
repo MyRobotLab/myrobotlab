@@ -111,7 +111,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
 
-	public static final int MRLCOMM_VERSION = 13;
+	public static final int MRLCOMM_VERSION = 14;
 
 	// serial protocol functions
 	public static final int MAGIC_NUMBER = 170; // 10101010
@@ -166,6 +166,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	// MSG MAGIC | SZ | SERVO-INDEX | POSITION
 	public static final int SERVO_EVENTS_ENABLE = 40;
 	public static final int SERVO_EVENT = 41;
+	
+	public static final int LOAD_TIMING_ENABLE = 42;
+	public static final int LOAD_TIMING_EVENT = 43;
 
 	public static final int SERVO_EVENT_STOPPED = 1;
 	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
@@ -952,6 +955,16 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							break;
 						}
 
+						case LOAD_TIMING_EVENT: {
+
+							long microsPerLoop = Serial.byteToLong(msg, 1, 4);
+							info("load %d us", microsPerLoop);
+							// log.info(String.format(" index %d type %d cur %d target %d", servoIndex, eventType, currentPos & 0xff, targetPos & 0xff));
+							// invoke("publishPin", pin);
+							break;
+						}
+						
+						
 						case SERVO_EVENT: {
 
 							int servoIndex = msg[1];
@@ -963,6 +976,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							// invoke("publishPin", pin);
 							break;
 						}
+						
 
 						case SENSOR_DATA: {
 							int index = (int) msg[1];
@@ -2087,6 +2101,19 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return false;
 	}
 
+	public boolean setLoadTimingEnabled(boolean enable){
+		log.info(String.format("setLoadTimingEnabled %b", enable));
+		
+			if (enable){
+				sendMsg(LOAD_TIMING_ENABLE, TRUE);
+			} else {
+				sendMsg(LOAD_TIMING_ENABLE, FALSE);				
+			}
+			
+		return enable;
+	}
+
+	
 	public static void main(String[] args) {
 		try {
 
