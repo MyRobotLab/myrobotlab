@@ -149,6 +149,7 @@ public class InMoov extends Service {
 		// addRoutes();
 		// FIXME - mebbe starts with same error - don't say it again unless a
 		// certain time has passed
+		python = getPython();
 	}
 	
 	// ---------- new getter interface begin ---------------------------
@@ -985,18 +986,18 @@ public class InMoov extends Service {
 		return lastActivityTime;
 	}
 
-	public void autoPowerDownOnInactivity() {
-		autoPowerDownOnInactivity(maxInactivityTimeSeconds);
+	public void beginCheckingOnInactivity() {
+		beginCheckingOnInactivity(maxInactivityTimeSeconds);
 	}
 
-	public void autoPowerDownOnInactivity(int maxInactivityTimeSeconds) {
+	public void beginCheckingOnInactivity(int maxInactivityTimeSeconds) {
 		this.maxInactivityTimeSeconds = maxInactivityTimeSeconds;
 		//speakBlocking("power down after %s seconds inactivity is on", this.maxInactivityTimeSeconds);
 		log.info("power down after %s seconds inactivity is on", this.maxInactivityTimeSeconds);
-		addLocalTask(5 * 1000, "powerDownOnInactivity");
+		addLocalTask(5 * 1000, "checkInactivity");
 	}
 
-	public long powerDownOnInactivity() {
+	public long checkInactivity() {
 		// speakBlocking("checking");
 		long lastActivityTime = getLastActivityTime();
 		long now = System.currentTimeMillis();
@@ -1007,71 +1008,40 @@ public class InMoov extends Service {
 		} else {
 			// speakBlocking("%d seconds have passed without activity",
 			// inactivitySeconds);
-			info("checking powerDownOnInactivity - %d seconds have passed without activity", inactivitySeconds);
+			info("checking checkInactivity - %d seconds have passed without activity", inactivitySeconds);
 		}
 		return lastActivityTime;
 	}
-	
-	String powerUpText = "hello. i am powering up";
-	
-	public String setPowerUpText(String text){
-		powerUpText = text;
-		return text;
-	}
-	
-	public void powerUp() {
 		
-		getPython();
-		
-		python.execMethod("powerUp");
-		
-		attach();
-
+	public void powerUp() {				
 		startSleep = null;
-		// rightSerialPort.digitalWrite(53, Arduino.HIGH);
-		// leftSerialPort.digitalWrite(53, Arduino.HIGH);
-		speakBlocking(powerUpText);
+		attach();
 		rest();
 		if (ear != null) {
 			ear.clearLock();
-			sleep(2);
-			ear.resumeListening();
 		}
-		// speakBlocking("ready");
-		// nod would be cute
 
-		autoPowerDownOnInactivity();
-	}
-
-	String powerDownText = "powering down";
-	
-	public String setPowerDownText(String text){
-		powerDownText = text;
-		return text;
+		beginCheckingOnInactivity();
+		
+		python.execMethod("power_up");
 	}
 
 	public void powerDown() {
-		sleep(2);
-		if (ear != null) {
-			ear.pauseListening();
-		}
+		
 		rest();
-		speakBlocking(powerDownText);
 		purgeAllTasks();
-		moveHead(40, 85);
-		sleep(2);
 		detach();
 
+		// TODO standard relay line ?
 		// right
 		// rightSerialPort.digitalWrite(53, Arduino.LOW);
 		// leftSerialPort.digitalWrite(53, Arduino.LOW);
 		if (ear != null) {
 			ear.lockOutAllGrammarExcept("power up");
-			sleep(2);
-			ear.resumeListening();
 		}
 
 		startSleep = System.currentTimeMillis();
+		python.execMethod("power_down");
 	}
 
 	public Integer pirPin = null;
@@ -1369,19 +1339,19 @@ public class InMoov extends Service {
 		 * InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 		 * i01.startMouth(); // i01.power(120); InMoovHand lefthand =
 		 * i01.startLeftHand("COM15"); i01.leftHand.setRest(10, 10, 10, 10, 10);
-		 * i01.autoPowerDownOnInactivity(10);
+		 * i01.beginCheckingOnInactivity(10);
 		 */
 
 		/*
-		 * log.info("inactivity {}", i01.powerDownOnInactivity());
+		 * log.info("inactivity {}", i01.checkInactivity());
 		 * 
 		 * lefthand.moveTo(5, 10, 30, 40, 50);
 		 * 
-		 * log.info("inactivity {}", i01.powerDownOnInactivity());
+		 * log.info("inactivity {}", i01.checkInactivity());
 		 * 
 		 * lefthand.rest();
 		 * 
-		 * log.info("inactivity {}", i01.powerDownOnInactivity());
+		 * log.info("inactivity {}", i01.checkInactivity());
 		 */
 
 		/*

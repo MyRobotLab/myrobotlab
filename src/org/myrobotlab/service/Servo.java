@@ -616,6 +616,12 @@ public class Servo extends Service implements ServoControl {
 
 			info("uc controlled sweep speed");
 			servo.stop();
+			
+			// TODO - test blocking ..
+			servo.setSpeed(1.0f);
+			
+			servo.setSpeedControlOnUC(false);
+			servo.sweep(min, max, 10, 1);
 		}
 
 		// TODO - detach - re-attach - detach (move) - re-attach - check for no
@@ -655,7 +661,7 @@ public class Servo extends Service implements ServoControl {
 	public static void main(String[] args) throws InterruptedException {
 
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
 
 			Servo servo = (Servo) Runtime.start("servo", "Servo");

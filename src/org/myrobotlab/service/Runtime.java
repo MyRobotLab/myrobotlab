@@ -606,6 +606,7 @@ public class Runtime extends Service implements MessageListener {
 	 * @return
 	 */
 	public static final long getTotalMemory() {
+		
 		return java.lang.Runtime.getRuntime().totalMemory();
 	}
 

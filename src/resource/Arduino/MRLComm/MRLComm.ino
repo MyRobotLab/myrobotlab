@@ -41,7 +41,7 @@
 #include <Servo.h>
 
 // ----------  MRLCOMM FUNCTION INTERFACE BEGIN -----------
-#define MRLCOMM_VERSION				13
+#define MRLCOMM_VERSION				14
 	
 // serial protocol functions
 #define MAGIC_NUMBER  					170 // 10101010
@@ -95,9 +95,12 @@
 #define SERVO_EVENTS_ENABLE				40 
 #define SERVO_EVENT						41 
 
+#define LOAD_TIMING_ENABLE				42 
+#define LOAD_TIMING_EVENT				43 
+
+// servo event types
 #define  SERVO_EVENT_STOPPED			1
 #define  SERVO_EVENT_POSITION_UPDATE 	2
-
 
 // error types
 #define ERROR_SERIAL					1
@@ -116,12 +119,17 @@
 
 // ----------  MRLCOMM FUNCTION INTERFACE END -----------
 
-
 // MAX definitions
 // MAX_SERVOS defined by boardtype/library
 #define PINGDARS_MAX		6
 #define SENSORS_MAX			12
 
+#define ECHO_STATE_START 1
+#define ECHO_STATE_TRIG_PULSE_BEGIN 2
+#define ECHO_STATE_TRIG_PULSE_END 3
+#define ECHO_STATE_WAITING 4
+#define ECHO_STATE_GOOD_RANGE	5
+#define ECHO_STATE_TIMEOUT	6
 
 /*
 // FIXME - finish implementation Stepper* steppers[MAX_STEPPERS];
@@ -165,13 +173,7 @@ unsigned int debounceDelay = 50; // in ms
 long lastDebounceTime[DIGITAL_PIN_COUNT];
 byte msgBuf[64];
 
-// Servo servos[MAX_SERVOS];
-//int servoSpeed[MAX_SERVOS];    // 0 - 100 corresponding to the 0.0 - 1.0 Servo.setSpeed - not a float at this point
-//int servoTargetPosition[MAX_SERVOS];  // when using a fractional speed - servo's must remember their end destination
-//int servoCurrentPosition[MAX_SERVOS]; // when using a fractional speed - servo's must remember their end destination
-//int movingServos[MAX_SERVOS];		  // array of servos currently moving at some fractional speed
-//int movingServosCount = 0;            // number of servo's currently moving at fractional speed
-
+// Servos 
 typedef struct
 {
     Servo* servo;
@@ -198,10 +200,19 @@ servo_type servos[MAX_SERVOS];
 
 
 unsigned long loopCount     = 0;
+unsigned long lastMicros 	= 0;
 int byteCount               = 0;
 unsigned char newByte 		= 0;
 unsigned char ioCmd[64];  // message buffer for all inbound messages
 int readValue;
+
+// FIXME - normalize with sampleRate ..
+int loadTimingModulus = 1000;
+
+boolean loadTimingEnabled = false;
+unsigned long loadTime = 0;
+// TODO - avg load time
+
 unsigned int sampleRate = 1; // 1 - 65,535 modulus of the loopcount - allowing you to sample less
 
 int digitalReadPin[DIGITAL_PIN_COUNT];        // array of pins to read from
@@ -248,8 +259,11 @@ typedef struct
       int trigPin;
       int echoPin;
       bool isRunning;
-      int timeoutMS;
+      int timeoutUS;
+      unsigned long ts;
       unsigned long lastValue;
+      int state;
+      //NewPing* ping;
   }  sensor_type;
 
 sensor_type sensors[SENSORS_MAX];
@@ -257,7 +271,7 @@ sensor_type sensors[SENSORS_MAX];
 
 void sendServoEvent(servo_type& s, int eventType);
 unsigned long getUltrasonicRange(sensor_type& sensor);
-void sendMsg ( int num, ... );
+// void sendMsg ( int num, ... );
 
 //---- data record definitions end -----
 
@@ -466,6 +480,13 @@ void loop () {
 			break;
 		}
 		
+		case LOAD_TIMING_ENABLE:{
+			loadTimingEnabled = ioCmd[1];
+			//loadTimingModulus = ioCmd[2];
+			loadTimingModulus = 1000;
+			break;
+		}
+		
 		case SERVO_WRITE_MICROSECONDS:{
 			// TODO - incorporate into speed control etc
 			// normalize - currently by itself doesn't effect events
@@ -591,6 +612,11 @@ void loop () {
 			//Calculate the distance (in cm) based on the speed of sound.
 			// distance = duration/58.2;
  
+			//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xFF);
+ 			//sendMsg(5, PULSE_IN, duration >> 24, duration >> 16, duration >> 8, duration & 0xFF);
+ 			//sendMsg(6, SENSOR_DATA, 47, duration >> 24, duration >> 16, duration >> 8, duration & 0xFF);
+ 			
+ 			
 			Serial.write(MAGIC_NUMBER);
 			Serial.write(5); // size 1 FN + 4 bytes of unsigned long
 			Serial.write(PULSE_IN);
@@ -599,6 +625,7 @@ void loop () {
 			Serial.write((byte)(duration >> 16));
 			Serial.write((byte)(duration >> 8));
 			Serial.write((byte)duration & 0xFF);
+			
                     
 			break;
 		}
@@ -640,12 +667,15 @@ void loop () {
 			sensor_type& sensor = sensors[sensorIndex];
 			sensor.type = ioCmd[2];
 			
+			
+			
 			// initialize based on sensor type
 			if (sensor.type == SENSOR_ULTRASONIC){
 				sensor.trigPin = ioCmd[3];
 				sensor.echoPin = ioCmd[4];
 				pinMode(sensor.trigPin, OUTPUT);
-				pinMode(sensor.echoPin, INPUT);				
+				pinMode(sensor.echoPin, INPUT);		
+				//sensor.ping = new NewPing(sensor.trigPin, sensor.echoPin, 100);	
 			}	
 			
 			break;
@@ -655,12 +685,16 @@ void loop () {
 			int sensorIndex = ioCmd[1];
 			sensor_type& sensor = sensors[sensorIndex];
 			sensor.isRunning = true;
+			
 			// I'm used to ms - and would need to change some
 			// interfaces if i was to support inbound longs
-			sensor.timeoutMS = ioCmd[2] * 1000;
+			//sensor.timeoutUS = ioCmd[2] * 1000;
+			sensor.timeoutUS = 20000; // 20 ms
+			sensor.state = ECHO_STATE_START;
+			
 			break;
 		}
-		
+				
 		case SENSOR_POLLING_STOP:{
 			int sensorIndex = ioCmd[1];
 			sensor_type& sensor = sensors[sensorIndex];
@@ -685,7 +719,7 @@ void loop () {
 
 	} // if getCommand()
 	
-	
+	// all reads are affected by sample rate
 	if (loopCount%sampleRate == 0) {
 		// digital polling read - send data for pins which are currently in INPUT mode only AND whose state has changed
 		for (int i  = 0; i < digitalReadPollingPinCount; ++i)
@@ -727,13 +761,16 @@ void loop () {
 			// if my value is different from last time - send it
 			if (lastAnalogInputValue[analogReadPin[i]] != readValue   || !analogTriggerOnly) //TODO - SEND_DELTA_MIN_DIFF
 			{
+				//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xFF);
+			
 				Serial.write(MAGIC_NUMBER);
 				Serial.write(4); //size
 				Serial.write(ANALOG_VALUE);
 				Serial.write(analogReadPin[i]);
 				Serial.write(readValue >> 8);   // MSB
-				Serial.write(readValue & 0xFF);	// LSB		
-	         }
+				Serial.write(readValue & 0xFF);	// LSB	
+							
+	        }
 			// set the last input value of this pin
 			lastAnalogInputValue[analogReadPin[i]] = readValue;
 		}
@@ -773,53 +810,111 @@ void loop () {
 		}
 	}
 
+	unsigned long ts;
+
 	for (int i = 0; i < SENSORS_MAX; ++i) {
 		sensor_type& sensor = sensors[i];
 		if (sensor.isRunning == true){
 			if (sensor.type == SENSOR_ULTRASONIC){
+				
+				// we are running & have an ultrasonic (ping) sensor
+				
+				// old way --- unsigned long duration = pulseIn(echoPin, HIGH);
+				//sensor.lastValue = getUltrasonicRange(sensor);
+				//sensor.lastValue = sensor.ping->ping();
+				// check to see what state we  are in
+				
+				if (sensor.state == ECHO_STATE_START){		
+					// trigPin prepare - start low for an 
+					// upcoming high pulse		
+					pinMode(sensor.trigPin, OUTPUT);
+					digitalWrite(sensor.trigPin, LOW);
+					
+					// put the echopin into a high state
+					// is this necessary ???
+					pinMode(sensor.echoPin, OUTPUT);
+					digitalWrite(sensor.echoPin, HIGH);
+					
+					ts = micros();
+					if (ts - sensor.ts > 2){
+						sensor.ts = ts;
+						sensor.state = ECHO_STATE_TRIG_PULSE_BEGIN;
+					}
+				} else if (sensor.state == ECHO_STATE_TRIG_PULSE_BEGIN){
+					
+					// begin high pulse for at least 10 us
+					pinMode(sensor.trigPin, OUTPUT);
+					digitalWrite(sensor.trigPin, HIGH);
+					
+					ts = micros();
+					if (ts - sensor.ts > 10){
+						sensor.ts = ts;
+						sensor.state = ECHO_STATE_TRIG_PULSE_END;
+					}
+				} else if (sensor.state == ECHO_STATE_TRIG_PULSE_END){
+					// end of pulse 
+					pinMode(sensor.trigPin, OUTPUT);
+					digitalWrite(sensor.trigPin, LOW);
+					
+					// putting echo pin into listen mode
+					pinMode(sensor.echoPin, OUTPUT);
+					digitalWrite(sensor.echoPin, HIGH);
+					pinMode(sensor.echoPin, INPUT);
+					
+					sensor.state = ECHO_STATE_WAITING;
+					sensor.ts = micros();
+				} else if (sensor.state == ECHO_STATE_WAITING) {
+					// timeout or change states..
+					int value = digitalRead(sensor.echoPin);
+					ts = micros();
+					
+					if (value == LOW) {
+						sensor.lastValue = ts - sensor.ts;
+						sensor.ts = ts;		
+						sensor.state = ECHO_STATE_GOOD_RANGE;			
+					} else if (ts - sensor.ts > sensor.timeoutUS) {
+						sensor.state = ECHO_STATE_TIMEOUT;
+						sensor.ts = ts; 
+						sensor.lastValue = 0;
+					}
+					
+				} else if (sensor.state == ECHO_STATE_GOOD_RANGE || sensor.state == ECHO_STATE_TIMEOUT) {
+					Serial.write(MAGIC_NUMBER);
+					Serial.write(6); // size 1 FN + 4 bytes of unsigned long
+					Serial.write(SENSOR_DATA);
+					Serial.write(i);
+		            // write the long value out
+					Serial.write((byte)(sensor.lastValue >> 24));
+					Serial.write((byte)(sensor.lastValue >> 16));
+					Serial.write((byte)(sensor.lastValue >> 8));
+					Serial.write((byte) sensor.lastValue & 0xFF);	
+					sensor.state = ECHO_STATE_START;	
+				}
 			
-				sensor.lastValue = getUltrasonicRange(sensor);
-				
-				//pulseIn(sensor.echoPin, HIGH, 10);
-				// -- INLINE getUltrasonicRange() BEGIN ---
-				
-				// -- INLINE getUltrasonicRange()  END ---
-				sendMsg(8, MAGIC_NUMBER, 6, SENSOR_DATA, i, sensor.lastValue >> 24, sensor.lastValue >> 16, sensor.lastValue >> 8, sensor.lastValue & 0xFF);
-				
-/*
-				Serial.write(MAGIC_NUMBER);
-				Serial.write(6); // size = 1 FN + 1 INDEX + 4 bytes of unsigned long
-				Serial.write(SENSOR_DATA);
-				Serial.write(i); // send my index
-				// write the long value out
-				Serial.write((byte)(sensor.lastValue >> 24));
-				Serial.write((byte)(sensor.lastValue >> 16));
-				Serial.write((byte)(sensor.lastValue >> 8));
-				Serial.write((byte)sensor.lastValue & 0xFF);
-*/
-				
 			}
 		}
 	}
-
-} // loop
-
-void sendMsg ( int num, ... )
-{
-    va_list arguments;                     
-    /* Initializing arguments to store all values after num */
-    va_start ( arguments, num );           
-   
-    // copies to msg buffer
-    for ( int x = 0; x < num; x++ )        
-    {
-        msgBuf[x] = (byte) va_arg ( arguments, int ); 
-    }
-    va_end ( arguments );                  // Cleans up the list
-    Serial.write(msgBuf, num);
-    return;                      
-}
-
+	
+	unsigned long now = micros();
+	loadTime = now - lastMicros; // avg outside
+ 	lastMicros = now;
+	
+	// report load time
+	if (loadTimingEnabled && (loopCount%loadTimingModulus == 0)) {
+ 		
+ 		// send it
+		Serial.write(MAGIC_NUMBER);
+		Serial.write(5); // size 1 FN + 4 bytes of unsigned long
+		Serial.write(LOAD_TIMING_EVENT);
+        // write the long value out
+		Serial.write((byte)(loadTime >> 24));
+		Serial.write((byte)(loadTime >> 16));
+		Serial.write((byte)(loadTime >> 8));
+		Serial.write((byte) loadTime & 0xFF);
+	}
+				
+				
+} // end of big loop
 
 unsigned long getUltrasonicRange(sensor_type& sensor){
 		
@@ -835,11 +930,11 @@ unsigned long getUltrasonicRange(sensor_type& sensor){
 
 		// added for sensors which have single pin !
 		pinMode(sensor.echoPin, INPUT);
-		// CHECKING return pulseIn(sensor.echoPin, HIGH, sensor.timeoutMS);
-		return pulseIn(sensor.echoPin, HIGH, 10);
+		// CHECKING return pulseIn(sensor.echoPin, HIGH, sensor.timeoutUS);
+		// TODO - adaptive timeout ? - start big - pull in until valid value - push out if range is coming close
+		return pulseIn(sensor.echoPin, HIGH);
 }
 
-// MSG 
 void sendServoEvent(servo_type& s, int eventType){
   	// check type of event - STOP vs CURRENT POS
   
@@ -851,7 +946,6 @@ void sendServoEvent(servo_type& s, int eventType){
 	Serial.write(eventType); 
 	Serial.write(s.currentPos); 
 	Serial.write(s.targetPos); 
-	
 }
 
 void sendError(int type){
@@ -861,3 +955,24 @@ void sendError(int type){
 	Serial.write(type);
 }
 
+/* SEEMED LIKE A GOOD IDEA NOT !!!!
+void sendMsg ( int num, ... )
+{
+	va_list arguments;                     
+	// Initializing arguments to store all values after num 
+	va_start ( arguments, num );           
+   
+	// write header
+	msgBuf[0] = MAGIC_NUMBER;
+	msgBuf[1] = num;
+   
+	// copies msg payload to buffer after header
+	for ( int x = 2; x < num+2; x++ )        
+	{
+		msgBuf[x] = (byte) va_arg ( arguments, int ); 
+	}
+	va_end ( arguments );                  // Cleans up the list
+	Serial.write(msgBuf, num + 2);
+	return;                      
+}
+*/

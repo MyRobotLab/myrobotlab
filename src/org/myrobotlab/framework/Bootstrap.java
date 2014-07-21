@@ -130,6 +130,12 @@ public class Bootstrap {
 		String javaPath = System.getProperty("java.home") + fs + "bin" + fs + "java";
 		String javaLibraryPath = String.format("-Djava.library.path=\"libraries/native%slibraries/native/%s\"", ps, platformId);
 		// String jvmMemory = "-Xmx2048m -Xms256m";
+		Integer totalMemory = getTotalPhysicalMemory();
+		if (totalMemory == null){
+			log.info("could not get total physical memory");
+		} else {
+			log.info("total physical memory returned is %d", totalMemory);
+		}
 
 		outArgs.add(javaPath);
 		// transferring original jvm args
@@ -439,6 +445,19 @@ public class Bootstrap {
 
 	public void spawn(List<String> args) throws IOException, URISyntaxException  {
 		spawn(args.toArray(new String[args.size()]));
+	}
+	
+	public Integer getTotalPhysicalMemory(){
+		try {
+		com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
+			     java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+			Integer physicalMemorySize = (int)os.getTotalPhysicalMemorySize()/1048576;
+			
+			return physicalMemorySize;
+		} catch(Exception e){
+			log.error("getTotalPhysicalMemory - threw");
+		}
+		return null;
 	}
 	
 	public static void main(String[] args) {
