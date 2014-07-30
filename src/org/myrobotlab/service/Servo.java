@@ -657,7 +657,17 @@ public class Servo extends Service implements ServoControl {
 	public void setSpeedControlOnUC(boolean b) {
 		speedControlOnUC = b;
 	}
+	
+	// uber good
+	public Integer publishServoEvent(Integer position){
+		return position;
+	}
 
+	// uber good
+	public void addServoEventListener(Service service) {
+		addListener("publishServoEvent", service.getName(), "publishServoEvent", Integer.class);
+	}
+	
 	public static void main(String[] args) throws InterruptedException {
 
 		LoggingFactory.getInstance().configure();
@@ -676,5 +686,6 @@ public class Servo extends Service implements ServoControl {
 		}
 
 	}
+
 
 }

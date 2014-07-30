@@ -37,6 +37,8 @@ public interface ServoControl {
 	 * The servo controller uses this method to pass a reference of itself to
 	 * the servo, to be used directly.
 	 */
+	
+	// FIXME - deprecate - part of attach !
 	public boolean setController(ServoController controller);
 	
 	

@@ -57,7 +57,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	public int BYTE_SIZE_INT = 2;
 
 	// ====== file io begin ======
-	private int fileCnt = 0;
 	private boolean useRXFile = false;
 	transient private FileWriter fileWriterRX = null;
 	transient private BufferedWriter bufferedWriterRX = null;
@@ -111,8 +110,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 			useRXFile = b;
 			if (useRXFile) {
 				if (fileWriterRX == null) {
-					++fileCnt;
-					fileWriterRX = new FileWriter(String.format("rx.%d.data", fileCnt));
+					fileWriterRX = new FileWriter(String.format("rx.%d.data", System.currentTimeMillis()));
 					bufferedWriterRX = new BufferedWriter(fileWriterRX);
 				}
 			} else {
@@ -184,10 +182,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				// "messages"
 				// come in groups of bytes
 
-				// previously ->
-				// while (serialDevice.isOpen() && serialDevice.available() > 0)
-				// { << DOES NOT WORK
-				// OUT OF SYNC ??
 
 				while (serialDevice.isOpen() && (newInt = serialDevice.read()) > -1) {
 					newByte = (byte) newInt;

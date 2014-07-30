@@ -36,7 +36,7 @@ import org.slf4j.Logger;
  *         http://www.python.org/javadoc/org/python/util/PythonInterpreter.html
  *         http
  *         ://etutorials.org/Programming/Python+tutorial/Part+V+Extending+and
- *         +Embedding
+ *         +EmbeddinggetCompiledMethod
  *         /Chapter+25.+Extending+and+Embedding+Python/25.2+Embedding+Python
  *         +in+Java/ http://wiki.python.org/moin/PythonEditors - list of editors
  *         http://java-source.net/open-source/scripting-languages
@@ -219,12 +219,36 @@ public class Python extends Service {
 						// sending method, but must call the appropriate method
 						// in Sphinx
 						StringBuffer msgHandle = new StringBuffer().append("msg_").append(getSafeReferenceName(msg.sender)).append("_").append(msg.sendingMethod);
-						PyObject compiledObject = getCompiledMethod(msg.method, String.format("%s()", msg.method), interp);
+						
+						// StringBuffer methodSignature ???
+						
+						PyObject compiledObject = null;
+						
+						// TODO - getCompiledMethod(msg.method  SHOULD BE getCompiledMethod(methodSignature
+						// without it - no overloading is possible
+						
+						if (msg.data == null || msg.data.length == 0){
+							compiledObject = getCompiledMethod(msg.method, String.format("%s()", msg.method), interp);
+						} else {
+							StringBuffer methodWithParams = new StringBuffer();
+							methodWithParams.append(String.format("%s(", msg.method));
+							for (int i = 0; i < msg.data.length; ++i){
+								String paramHandle = String.format("%s_p%d", msgHandle, i);
+								interp.set(paramHandle.toString(), msg.data[i]);
+								methodWithParams.append(paramHandle);
+								if (i < msg.data.length - 1){
+									methodWithParams.append(",");
+								}
+							}
+							methodWithParams.append(")");
+							compiledObject = getCompiledMethod(msg.method, methodWithParams.toString(), interp);
+						}
 						/*
 						if (compiledObject == null){ // NEVER NULL - object cache - builds cache if not there
 							log.error(String.format("%s() NOT FOUND", msg.method));
 						}
 						*/
+						
 						log.info(String.format("setting data %s", msgHandle));
 						interp.set(msgHandle.toString(), msg);
 						interp.exec(compiledObject);
@@ -506,7 +530,7 @@ public class Python extends Service {
 		}
 		
 		PyObject compiled = interp.compile(code);
-		if (objectCache.size() > 5) {
+		if (objectCache.size() > 25) {
 			// keep the size to 6
 			objectCache.remove(objectCache.keySet().iterator().next());
 		}

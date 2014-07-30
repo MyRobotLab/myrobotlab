@@ -1,6 +1,6 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -111,7 +111,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
 
-	public static final int MRLCOMM_VERSION = 14;
+	public static final int MRLCOMM_VERSION = 15;
 
 	// serial protocol functions
 	public static final int MAGIC_NUMBER = 170; // 10101010
@@ -170,6 +170,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public static final int LOAD_TIMING_ENABLE = 42;
 	public static final int LOAD_TIMING_EVENT = 43;
 
+	public static final int STEPPER_ATTACH	= 44;
+	public static final int STEPPER_MOVE_TO = 45; 
+	
 	public static final int SERVO_EVENT_STOPPED = 1;
 	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
@@ -213,6 +216,12 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	 * pin description of board
 	 */
 	ArrayList<Pin> pinList = null;
+	
+	
+	// data and mapping for data going from MRL ---to---> Arduino
+	HashMap<String, Stepper> steppers = new HashMap<String, Stepper>();
+	// index for data mapping going from Arduino ---to---> MRL
+	HashMap<Integer, Stepper> stepperIndex = new HashMap<Integer, Stepper>();
 
 	// data and mapping for data going from MRL ---to---> Arduino
 	HashMap<String, SensorData> sensors = new HashMap<String, SensorData>();
@@ -274,16 +283,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	HashMap<String, MotorData> motors = new HashMap<String, MotorData>();
 
-	class PingdarData implements Serializable {
-		private static final long serialVersionUID = 1L;
-		transient Servo servo = null;
-		transient UltrasonicSensor sensor = null;
-		int pingdarIndex = -1;
-		public Pingdar pingdar;
-	}
-
-	HashMap<String, PingdarData> pingdars = new HashMap<String, PingdarData>();
-
 	class SensorData implements Serializable {
 		private static final long serialVersionUID = 1L;
 		// -- FIXME - make Sensor(controller?) interface - when we get a new
@@ -309,11 +308,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	 * the local name to servo info
 	 */
 	HashMap<String, ServoData> servos = new HashMap<String, ServoData>();
-
-	/**
-	 * represents the Arduino pde array of servos and their state
-	 */
-	boolean[] servosInUse = new boolean[MAX_SERVOS];
+	HashMap<Integer, ServoData> servoIndex = new HashMap<Integer, ServoData>();
 
 	// from the Arduino IDE :P
 	public Preferences preferences;
@@ -619,19 +614,21 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		// because the Servo's don't fully "detach" using the standard library
 		// it proved very "bad"
 		// simplistic mapping where Java is in control seems best
-		int servoIndex = pin - 2;
+		int index = pin - 2;
 
 		// attach index pin
-		sendMsg(SERVO_ATTACH, servoIndex, pin);
+		sendMsg(SERVO_ATTACH, index, pin);
 
 		ServoData sd = new ServoData();
 		sd.pin = pin;
-		sd.servoIndex = servoIndex;
+		sd.servoIndex = index;
+		ServoControl sc = (ServoControl)Runtime.getService(servoName);
+		sd.servo = sc;
 		servos.put(servoName, sd);
-		servosInUse[servoIndex] = true;
+		servoIndex.put(index, sd);
 
-		log.info("servo index {} pin {} attached ", servoIndex, pin);
-		return servoIndex;
+		log.info("servo index {} pin {} attached ", index, pin);
+		return index;
 	}
 
 	@Override
@@ -642,10 +639,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			ServoData sd = servos.get(servoName);
 			sendMsg(SERVO_DETACH, sd.servoIndex, 0);
 			// FIXME - simplify remove
-			servosInUse[sd.servoIndex] = false;
 			// sd.servo.setController((ServoController)null);
 			// FIXME !!! - DON'T REMOVE !!!
 			servos.remove(servoName);
+			servoIndex.remove(sd.servoIndex);
 			return true;
 		}
 
@@ -829,7 +826,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	int byteCount = 0;
 	int msgSize = 0;
 
-	StringBuffer dump = new StringBuffer();
+	//StringBuffer dump = new StringBuffer();
 
 	@Element
 	private String portName = "";
@@ -886,7 +883,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							byteCount = 0;
 							msgSize = 0;
 							warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++error_arduino_to_mrl_rx_cnt));
-							dump.setLength(0);
+							//dump.setLength(0);
 						}
 						continue;
 					} else if (byteCount == 2) {
@@ -967,13 +964,16 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 						
 						case SERVO_EVENT: {
 
-							int servoIndex = msg[1];
+							int index = msg[1];
 							int eventType = msg[2];
 							int currentPos = msg[3];
 							int targetPos = msg[4];
 
-							log.info(String.format(" index %d type %d cur %d target %d", servoIndex, eventType, currentPos & 0xff, targetPos & 0xff));
-							// invoke("publishPin", pin);
+							log.info(String.format(" index %d type %d cur %d target %d", index, eventType, currentPos & 0xff, targetPos & 0xff));
+							// uber good - 
+							// TODO - deprecate ServoControl interface - not needed Servo is abstraction enough
+							Servo servo = (Servo) servoIndex.get(index).servo;
+							servo.invoke("publishServoEvent", currentPos  & 0xff);
 							break;
 						}
 						
@@ -988,7 +988,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							// invoke("publishSensorData", sd);
 							// NICE !! - force sensor to have publishSensorData
 							// or publishRange in interface !!!
-							sd.sensor.invoke("publishRange", sd);
+							// sd.sensor.invoke("publishRange", sd);
+							sd.sensor.invoke("publishRange", sd.duration);
 							break;
 						}
 						} // end switch
@@ -1011,6 +1012,11 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 					// serialDevice.read()) > -1
 
 			} catch (Exception e) {
+				++error_mrl_to_arduino_rx_cnt;
+				error("msg structure violation %d", error_mrl_to_arduino_rx_cnt);
+				// try again ?
+				msgSize = 0;
+				byteCount = 0;
 				Logging.logException(e);
 			}
 
@@ -1982,67 +1988,61 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return true;
 	}
 
-	// struct array - http://forum.arduino.cc/index.php/topic,43587.0.html
-	// public boolean pingdarAttach(String pingdarName, String servoName, int
-	// servoPin, String sensorName, int trigPin, int echoPin) {
-	public boolean pingdarAttach(String pingdarName) {
-
-		Pingdar pingdar = (Pingdar) Runtime.getService(pingdarName);
-		if (pingdar == null) {
-			error(String.format("pingdar attach not valid service %s", pingdarName));
-			return false;
+	// --- stepper begin ---
+	public synchronized int stepperAttach(String stepperName) {
+		Stepper stepper = (Stepper) Runtime.getService(stepperName);
+		if (stepper == null) {
+			log.error("Sensor {} not valid", stepperName);
+			return -1;
 		}
-		return pingdarAttach(pingdar);
+		return stepperAttach(stepper);
 	}
 
-	public boolean pingdarStart(String name) {
-		return pingdarStart(name, 0, 180, 1);
-	}
+	public synchronized int stepperAttach(Stepper stepper) {
+		String stepperName = stepper.getName();
+		log.info(String.format("stepperAttach %s", stepperName));
+		Integer index = 0;
 
-	public boolean pingdarStart(String pingdarName, int sweepMin, int sweepMax, int step) {
-		try {
-			PingdarData pd = pingdars.get(pingdarName);
-			sendMsg(PINGDAR_START, servos.get(pd.servo.getName()).servoIndex, sensors.get(pd.sensor.getName()).sensorIndex);
-			return true;
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		return false;
-	}
-
-	// deprecate !!!!
-	public boolean pingdarAttach(Pingdar pingdar) {
-		// FIXME - have the servo & sensor attach "normally" all the way to the
-		// MRLComm.ino script
-		// THEN ! - have the PIDAR get references to the actual services & send
-		// the indexes to the MRLComm.ino
-
-		// complicated mapping
-		PingdarData pd = new PingdarData();
-		pd.pingdarIndex = pingdars.size();
-		pd.pingdar = pingdar;
-
-		pingdars.put(pingdar.getName(), pd);
-
-		// attach servo
-		Servo servo = pingdar.getServo();
-		if (!servos.containsKey(servo.getName())) {
-			servoAttach(servo);// <-- FIXME !!! uh the fact that that
-			// doesnt compile is f'd up !
-		}
-		ServoData sd = servos.get(servo.getName());
-
-		// attach sensor
-		UltrasonicSensor sensor = pingdar.getSensor();
-		if (!sensors.containsKey(sensor.getName())) {
-			sensorAttach(sensor);
+		if (serialDevice == null) {
+			error("could not attach stepper - no serial device!");
+			return -1;
 		}
 
-		SensorData send = sensors.get(sensor.getName());
-		// attach pingdar
-		sendMsg(PINGDAR_ATTACH, sd.servoIndex, send.sensorIndex);
-		return true;
+		if (steppers.containsKey(stepperName)) {
+			log.warn("stepper already attach - detach first");
+			return -1;
+		}
+
+		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getType())) {
+			// int type = Stepper.STEPPER_TYPE_POLOLU.hashCode(); heh, cool idea - but byte collision don't want to risk ;)
+			int type = 1;
+			
+			// simple count = index mapping
+			index = steppers.size();
+			
+			Integer [] pins = stepper.getPins();
+			if (pins.length != 2){
+				error("Pololu stepper needs 2 pins defined - direction pin & step pin");
+				return -1;
+			}
+
+			// attach index pin
+			sendMsg(STEPPER_ATTACH, index, type, pins[0], pins[1]);
+			
+			stepper.setIndex(index);
+
+			steppers.put(stepperName, stepper);
+			stepperIndex.put(index, stepper);
+
+			log.info(String.format("stepper STEPPER_TYPE_POLOLU index %d pin direction %d step %d attached ", stepperIndex,  pins[0], pins[1]));
+		} else {
+			error("unkown type of stepper");
+		}
+
+		return index;
 	}
+	
+	// --- stepper end ---
 
 	public void test(String port) throws Exception {
 
@@ -2112,7 +2112,21 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			
 		return enable;
 	}
-
+	
+	public void stepperMoveTo(String name, Integer newPos) {
+		if (!steppers.containsKey(name)){
+			error("%s stepper not found");
+			return;
+		}
+		
+		Stepper stepper = steppers.get(name);
+		sendMsg(stepper.getIndex(), newPos);
+		
+		// TODO - call back event - to say arrived ?
+		
+		// TODO - blocking method
+		
+	}
 	
 	public static void main(String[] args) {
 		try {

@@ -21,6 +21,8 @@ public class Pingdar extends Service {
 	transient private UltrasonicSensor sensor;
 
 	private boolean isAttached = false;
+	private Long lastRange;
+	private Integer lastPos;
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -51,10 +53,17 @@ public class Pingdar extends Service {
 			return false;
 		}
 		// TODO - configurable speed
-		servo.setSpeed(0.9f);
-		servo.setEventsEnabled(true);
-		servo.sweep(sweepMin, sweepMax, 1, 1);
+		sensor = getSensor();
+		servo = getServo();
 		
+		sensor.addPublishRangeListener(this);
+		servo.addServoEventListener(this);
+		
+		servo.setSpeed(0.20f);
+		servo.setEventsEnabled(true);
+		servo.sweep(sweepMin, sweepMax, 1, step);
+		
+		sensor.startRanging();
 		return true;
 	}
 	
@@ -109,15 +118,33 @@ public class Pingdar extends Service {
 			return false;
 		}
 
-		sensor.attach(arduino, port, trigPin, echoPin);
-		servo.attach(arduino, servoPin);
-
-		if (!arduino.pingdarAttach(this)) {
-			error("could not attach pingdar %s", getName());
+		if (!sensor.attach(arduino, port, trigPin, echoPin)){
+			error("could not attach sensor");
 			return false;
 		}
+		
+		sensor.addPublishRangeListener(this);
+		servo.addServoEventListener(this);
+		
+		if (!servo.attach(arduino, servoPin)){
+			error("could not attach servo");
+			return false;
+		}
+		
 		isAttached = true;
 		return true;
+	}
+	
+	// sensor data has come in
+	// grab the latest position
+	public void publishRange(Long range){
+		info("range %d", range);
+		lastRange = range;
+	}
+	
+	public void publishServoEvent(Integer pos){
+		info("pos %d", pos);
+		lastPos = pos;
 	}
 
 	@Override
@@ -128,20 +155,22 @@ public class Pingdar extends Service {
 	public void test(){
 		Pingdar pingdar = (Pingdar)Runtime.start(getName(), "Pingdar");
 		pingdar.attach("COM15", 7, 8, 4);
-		pingdar.servo.setSpeedControlOnUC(false);
+		//pingdar.servo.setSpeedControlOnUC(false);
 		pingdar.sweep(10, 170, 1);
-		pingdar.sensor.startRanging();
-		pingdar.sensor.stopRanging();
+		//pingdar.sensor.startRanging();
+		//pingdar.sensor.stopRanging();
 		pingdar.stop();
 	}
 
 	public void stop() {
+		super.stopService();
 		sensor.stopRanging();
 		servo.setEventsEnabled(false);
 		servo.stop();
 	}
 	
 	public void startService(){
+		super.startService();
 		servo = (Servo)startPeer("servo");
 		sensor = (UltrasonicSensor)startPeer("sensor");
 	}

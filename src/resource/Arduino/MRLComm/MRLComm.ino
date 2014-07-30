@@ -41,7 +41,7 @@
 #include <Servo.h>
 
 // ----------  MRLCOMM FUNCTION INTERFACE BEGIN -----------
-#define MRLCOMM_VERSION				14
+#define MRLCOMM_VERSION				15
 	
 // serial protocol functions
 #define MAGIC_NUMBER  					170 // 10101010
@@ -98,6 +98,12 @@
 #define LOAD_TIMING_ENABLE				42 
 #define LOAD_TIMING_EVENT				43 
 
+#define STEPPER_ATTACH					44
+#define STEPPER_MOVE_TO					45 
+
+#define STEPPER_TYPE_POLOLU  1
+
+
 // servo event types
 #define  SERVO_EVENT_STOPPED			1
 #define  SERVO_EVENT_POSITION_UPDATE 	2
@@ -123,24 +129,15 @@
 // MAX_SERVOS defined by boardtype/library
 #define PINGDARS_MAX		6
 #define SENSORS_MAX			12
+#define STEPPERS_MAX		6
 
 #define ECHO_STATE_START 1
 #define ECHO_STATE_TRIG_PULSE_BEGIN 2
 #define ECHO_STATE_TRIG_PULSE_END 3
-#define ECHO_STATE_WAITING 4
-#define ECHO_STATE_GOOD_RANGE	5
-#define ECHO_STATE_TIMEOUT	6
-
-/*
-// FIXME - finish implementation Stepper* steppers[MAX_STEPPERS];
-// http://arduino.cc/en/Reference/StepperStep
-#define STEPPER_ATTACH				 	xx
-#define STEPPER_DETACH				 	xx
-#define STEPPER_STEP				 	xx
-// lame - shuold determine max stepper based on board pins / pins required
-#define MAX_STEPPERS 2 
-*/
-
+#define ECHO_STATE_MIN_PAUSE_PRE_LISTENING 4
+#define ECHO_STATE_LISTENING 5
+#define ECHO_STATE_GOOD_RANGE	6
+#define ECHO_STATE_TIMEOUT	7
 
 // --VENDOR DEFINE SECTION BEGIN--
 // --VENDOR DEFINE SECTION END--
@@ -172,6 +169,39 @@ int msgSize = 0; // the NUM_BYTES of current message
 unsigned int debounceDelay = 50; // in ms
 long lastDebounceTime[DIGITAL_PIN_COUNT];
 byte msgBuf[64];
+
+typedef struct
+  {
+      int type;
+      int trigPin;
+      int echoPin;
+      bool isRunning;
+      int timeoutUS;
+      unsigned long ts;
+      unsigned long lastValue;
+      int state;
+      //NewPing* ping;
+  }  sensor_type;
+
+sensor_type sensors[SENSORS_MAX];
+
+typedef struct
+  {
+      int type;
+      int currentPos;
+      int targetPos;
+      int speed;
+      int dir;
+      bool isRunning;
+      int state;
+      int dirPin;
+      int step0;
+      int step1;
+      int step2;
+      int step3;
+  }  stepper_type;
+
+stepper_type steppers[STEPPERS_MAX];
 
 // Servos 
 typedef struct
@@ -253,20 +283,7 @@ int pingdarsRunningCount = 0;
 int pingdarsRunning[6]; // map array of running pingdars
 */
 
-typedef struct
-  {
-      int type;
-      int trigPin;
-      int echoPin;
-      bool isRunning;
-      int timeoutUS;
-      unsigned long ts;
-      unsigned long lastValue;
-      int state;
-      //NewPing* ping;
-  }  sensor_type;
 
-sensor_type sensors[SENSORS_MAX];
 
 
 void sendServoEvent(servo_type& s, int eventType);
@@ -643,12 +660,30 @@ void loop () {
 			break;
 		}
 		
-/* FIXME - finish Arduino's version of implementation		
 		case STEPPER_ATTACH:{
-			steppers[ioCmd[1]] = &(Stepper(ioCmd[2], ioCmd[3], ioCmd[4], ioCmd[5], ioCmd[6]));
-			break;		
+			stepper_type& stepper = steppers[ioCmd[1]];
+			stepper.isRunning = false;
+			stepper.type = ioCmd[2];
+			
+			if (stepper.type == STEPPER_TYPE_POLOLU) {
+				stepper.dirPin = ioCmd[3];
+				stepper.step0 = ioCmd[4];
+			} else {
+				sendError(ERROR_UNKOWN_CMD);
 			}
-*/				
+			break;		
+		}	
+		
+		case STEPPER_MOVE_TO:{
+			stepper_type& stepper = steppers[ioCmd[1]];
+			if (stepper.type == STEPPER_TYPE_POLOLU) {
+				stepper.isRunning = true;
+				stepper.targetPos = ioCmd[2];
+			} else {
+				sendError(ERROR_UNKOWN_CMD);
+			}
+			break;
+		}
 			
 			// --VENDOR CODE BEGIN--
 			// --VENDOR CODE END--
@@ -818,10 +853,6 @@ void loop () {
 			if (sensor.type == SENSOR_ULTRASONIC){
 				
 				// we are running & have an ultrasonic (ping) sensor
-				
-				// old way --- unsigned long duration = pulseIn(echoPin, HIGH);
-				//sensor.lastValue = getUltrasonicRange(sensor);
-				//sensor.lastValue = sensor.ping->ping();
 				// check to see what state we  are in
 				
 				if (sensor.state == ECHO_STATE_START){		
@@ -856,14 +887,23 @@ void loop () {
 					pinMode(sensor.trigPin, OUTPUT);
 					digitalWrite(sensor.trigPin, LOW);
 					
-					// putting echo pin into listen mode
-					pinMode(sensor.echoPin, OUTPUT);
-					digitalWrite(sensor.echoPin, HIGH);
-					pinMode(sensor.echoPin, INPUT);
-					
-					sensor.state = ECHO_STATE_WAITING;
+					sensor.state = ECHO_STATE_MIN_PAUSE_PRE_LISTENING;
 					sensor.ts = micros();
-				} else if (sensor.state == ECHO_STATE_WAITING) {
+				} else if (sensor.state == ECHO_STATE_MIN_PAUSE_PRE_LISTENING){
+					
+					ts = micros();
+					if (ts - sensor.ts > 1500){
+						sensor.ts = ts;
+						
+						// putting echo pin into listen mode
+						pinMode(sensor.echoPin, OUTPUT);
+						digitalWrite(sensor.echoPin, HIGH);
+						pinMode(sensor.echoPin, INPUT);
+						
+						sensor.state = ECHO_STATE_LISTENING;
+					}
+					
+				} else if (sensor.state == ECHO_STATE_LISTENING) {
 					// timeout or change states..
 					int value = digitalRead(sensor.echoPin);
 					ts = micros();
@@ -889,8 +929,26 @@ void loop () {
 					Serial.write((byte)(sensor.lastValue >> 8));
 					Serial.write((byte) sensor.lastValue & 0xFF);	
 					sensor.state = ECHO_STATE_START;	
-				}
+				} // end else if
 			
+			} // if (sensor.type == SENSOR_ULTRASONIC)
+		
+		} // end isRunning
+	
+	} // end for each sensor
+
+	for (int i = 0; i < STEPPERS_MAX; ++i) {
+		stepper_type& stepper = steppers[i];
+		if (stepper.isRunning == true){
+			if (stepper.type == SENSOR_ULTRASONIC){
+			  if (stepper.targetPos != stepper.currentPos){
+			    // state change
+			    
+			    // start pulse
+			    
+			    // end pulse
+			    
+			    // increment step
 			}
 		}
 	}

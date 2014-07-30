@@ -32,14 +32,15 @@ public class UltrasonicSensor extends Service {
 	private Integer trigPin = null;
 	private Integer echoPin = null;
 	private String type = "SR04";
+	private Long lastRange;
 
-	private transient Arduino controller;
+	private transient Arduino arduino;
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 
 		// put peer definitions in
-		peers.put("controller", "Arduino", "controller");
+		peers.put("arduino", "Arduino", "arduino");
 		return peers;
 	}
 
@@ -53,6 +54,10 @@ public class UltrasonicSensor extends Service {
 	}
 
 	// ---- part of interfaces begin -----
+	
+	public long getLastRange(){
+		return lastRange;
+	}
 
 	public boolean setType(String type) {
 		if (types.contains(type)) {
@@ -74,20 +79,20 @@ public class UltrasonicSensor extends Service {
 		return attach((String) null, port, trigPin, echoPin);
 	}
 
-	public boolean attach(String controller, String port, int trigPin, int echoPin) {
-		if (controller == null && this.controller == null) {
-			this.controller = (Arduino) startPeer("controller");
+	public boolean attach(String arduino, String port, int trigPin, int echoPin) {
+		if (arduino == null && this.arduino == null) {
+			this.arduino = (Arduino) startPeer("arduino");
 		}
-		return attach(this.controller, port, trigPin, echoPin);
+		return attach(this.arduino, port, trigPin, echoPin);
 	}
 
-	public boolean attach(Arduino controller, String port, int trigPin, int echoPin) {
-		this.controller = controller;
+	public boolean attach(Arduino arduino, String port, int trigPin, int echoPin) {
+		this.arduino = arduino;
 		this.trigPin = trigPin;
 		this.echoPin = echoPin;
-		this.controller.connect(port);
+		this.arduino.connect(port);
 
-		return controller.sensorAttach(this) != -1;
+		return arduino.sensorAttach(this) != -1;
 	}
 
 	public long ping() {
@@ -95,11 +100,11 @@ public class UltrasonicSensor extends Service {
 	}
 
 	public long ping(int timeout) {
-		return controller.pulseIn(trigPin, echoPin, timeout);
+		return arduino.pulseIn(trigPin, echoPin, timeout);
 	}
 
 	public long range() {
-		return controller.pulseIn(trigPin, echoPin) / 58;
+		return arduino.pulseIn(trigPin, echoPin) / 58;
 	}
 
 	public void startRanging() {
@@ -107,51 +112,75 @@ public class UltrasonicSensor extends Service {
 	}
 
 	public void startRanging(int timeoutMS) {
-		controller.sensorPollingStart(getName(), timeoutMS);
+		arduino.sensorPollingStart(getName(), timeoutMS);
 	}
 
 	public void stopRanging() {
-		controller.sensorPollingStop(getName());
+		arduino.sensorPollingStop(getName());
 	}
-
+	
 	/* FIXME !!! IMPORTANT PUT IN INTERFACE & REMOVE SELF FROM ARDUINO !!! */
-	public long publishRange(SensorData sd) {
+	public Long publishRange(Long duration) {
 		++pings;
 		// if (log.isDebugEnabled()){
 		// TODO - add TimeUnits - cm
-		long range = sd.duration / 58;
-		log.info(String.format("publishRange name %s index %d duration %d range %d cm", sd.sensor.getName(), sd.sensorIndex, sd.duration, range));
+		//long range = sd.duration / 58;
+		lastRange = duration / 58;
+		log.info(String.format("publishRange name %s duration %d range %d cm", getName(), duration, lastRange));
 		// }
-		return range;
+		return lastRange;
 	}
 
+	// TODO - Virtual Serial test - do a record of tx & rx on a real sensor
+	// then send the data - IT MUST BE INTERLEAVED
 	public void test() {
 		// FIXME - there has to be a properties method to configure localized
 		// testing
 		boolean useGUI = true;
 
 		UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start(getName(), "UltrasonicSensor");
+		Python python = (Python) Runtime.start("python", "Python");
 
+		// TODO - remove servo - after test
 		Servo servo = (Servo) Runtime.start("servo", "Servo");
 
+		// && depending on headless
 		if (useGUI) {
-			Runtime.createAndStart("gui", "GUIService");
+			Runtime.start("gui", "GUIService");
 		}
 
 		// nice simple interface
-		sr04.attach("COM15", 7, 8);
 		
-		servo.attach("sr04.controller", 4);
+		sr04.attach("COM15", 7, 8);
+		// TODO - VIRTUAL NULL MODEM WITH TEST DATA !!!!
+		// RECORD FROM ACTUAL SENSOR !!!
+		
+		//sr04.arduino.setLoadTimingEnabled(true);
+		
+		sr04.addPublishRangeListener(python);
+		
+		sr04.startRanging();
+		log.info("here");
+		sr04.stopRanging();
+		
+		sr04.arduino.setLoadTimingEnabled(true);
+		sr04.arduino.setLoadTimingEnabled(false);
+		
+		servo.attach("sr04.arduino", 4);
 		servo.setSpeed(0.99f);
 		servo.setEventsEnabled(true);
+		servo.setEventsEnabled(false);
 		servo.moveTo(30);
+		
+		/*
 
 		for (int i = 0; i < 100; ++i) {
 			log.info("ping 1");
 			long duration = sr04.ping();
 			log.info("duration {}", duration);
 		}
-
+		*/
+		servo.setEventsEnabled(true);
 		sr04.startRanging();
 		log.info("here");
 		servo.moveTo(130);
@@ -160,13 +189,12 @@ public class UltrasonicSensor extends Service {
 		// sensor.attach(arduino, "COM15", 7, 8);
 		for (int i = 1; i < 200; i += 10) {
 			sr04.startRanging(i);
+			
+			servo.setSpeed(0.8f);
+			servo.moveTo(30);
+			servo.moveTo(175);
 			sr04.stopRanging();
-			//servo.setSpeed(0.8f);
-			//servo.moveTo(30);
-			//servo.moveTo(175);
 		}
-
-		
 
 		sr04.startRanging(5);
 		sr04.startRanging(10);
@@ -175,6 +203,15 @@ public class UltrasonicSensor extends Service {
 
 		sr04.stopRanging();
 
+	}
+
+	// Uber good - .. although this is "chained" versus star routing
+	// Star routing would be routing from the Arduino directly to the Listener
+	// The "chained" version takes 2 thread contexts :( .. but it has the benefit
+	// of the "publishRange" method being affected by the Sensor service e.g.
+	// change units, sample rate, etc
+	public void addPublishRangeListener(Service service) {
+		addListener("publishRange", service.getName(), "publishRange", long.class);
 	}
 
 	// ---- part of interfaces end -----
