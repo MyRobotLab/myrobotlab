@@ -941,14 +941,6 @@ void loop () {
 		stepper_type& stepper = steppers[i];
 		if (stepper.isRunning == true){
 			if (stepper.type == SENSOR_ULTRASONIC){
-			  if (stepper.targetPos != stepper.currentPos){
-			    // state change
-			    
-			    // start pulse
-			    
-			    // end pulse
-			    
-			    // increment step
 			}
 		}
 	}
