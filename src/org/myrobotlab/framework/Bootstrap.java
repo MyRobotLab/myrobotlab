@@ -46,6 +46,23 @@ import java.util.zip.ZipInputStream;
  *         http://java.dzone.com/articles/programmatically-restart-java
  *         http://stackoverflow.com/questions/3468987/executing-another-application-from-java
  *         
+ *         
+ *         TODO - ARMV 6 7 8 ??? - http://www.binarytides.com/linux-cpu-information/ - lscpu
+ *         
+ *         	Architecture:          armv7l
+			Byte Order:            Little Endian
+			CPU(s):                4
+			On-line CPU(s) list:   0-3
+			Thread(s) per core:    1
+			Core(s) per socket:    1
+			Socket(s):             4
+
+
+		TODO - soft floating point vs hard floating point
+		 readelf -A /proc/self/exe | grep Tag_ABI_VFP_args
+		 soft = nothing
+		 hard = Tag_ABI_VFP_args: VFP registers
+ *         
  * 
  */
 public class Bootstrap {
@@ -127,7 +144,10 @@ public class Bootstrap {
 		String classpath = String.format("\"./myrobotlab.jar%s./libraries/jar/*\"", ps);
 		// the java which is executing me will be the java executing runtime
 		// java vs javaw ?
-		String javaPath = System.getProperty("java.home") + fs + "bin" + fs + "java";
+		
+		String javaExe = platform.isWindows()?"javaw":"java";
+		
+		String javaPath = System.getProperty("java.home") + fs + "bin" + fs + javaExe;
 		String javaLibraryPath = String.format("-Djava.library.path=\"libraries/native%slibraries/native/%s\"", ps, platformId);
 		// String jvmMemory = "-Xmx2048m -Xms256m";
 		Integer totalMemory = getTotalPhysicalMemory();
@@ -137,7 +157,7 @@ public class Bootstrap {
 			log.info("total physical memory returned is %d", totalMemory);
 		}
 
-		outArgs.add(javaPath);
+		outArgs.add(String.format("\"%s\"",javaPath));
 		// transferring original jvm args
 		for (int i = 0; i < jvmArgs.size(); ++i){
 			outArgs.add(jvmArgs.get(i));

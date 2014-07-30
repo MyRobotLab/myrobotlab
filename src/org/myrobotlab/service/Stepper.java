@@ -25,6 +25,7 @@
 
 package org.myrobotlab.service;
 
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -53,6 +54,11 @@ public class Stepper extends Service implements StepperControl {
 	private int rpm = 0;
 	private boolean locked = false; // for locking the motor in a stopped position
 	
+	/**
+	 * controller index for events & controllers to dumb to have dynamic string based containers
+	 */
+	private Integer index; 
+	
 	// Constants that the user passes in to the motor calls
 	public static final Integer FORWARD = 1;
 	public static final Integer BACKWARD = 2;
@@ -67,7 +73,39 @@ public class Stepper extends Service implements StepperControl {
 	
 	private Integer stepperingStyle = SINGLE;
 	
+	/**
+	 *  number of steps for this stepper - common is 200
+	 */
+	private Integer steps;
+	
+	private String type;
+	
 	private StepperController controller = null; // board name
+	
+	static final public String STEPPER_TYPE_POLOLU = "STEPPER_TYPE_POLOLU";
+	
+	/**
+	 * step pins this can vary in size 2 for Pololu (dir & step) , 3, 4, 5, ...
+	 * if more than one - they must be in the correct stepping order
+	 */
+	private Integer[] pins; // this data is "shared" with the controller
+	
+	/**
+	 *  direction pin is used for Pololu stype stepper drivers with a
+	 *  direction input
+	 */
+	
+	// TODO - generalize
+	private transient Arduino arduino;
+	
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+
+		// put peer definitions in
+		// TODO - generalize
+		peers.put("arduino", "Arduino", "arduino");
+		return peers;
+	}
 	
 	public Stepper(String n) {
 		super(n);
@@ -153,6 +191,43 @@ public class Stepper extends Service implements StepperControl {
 		
 	}
 	
+	public boolean attach(String port, int steps, Integer...pins) {
+		return attach((String) null, port, steps, pins);
+	}
+
+	public boolean attach(String arduino, String port, int steps, Integer...pins) {
+		if (arduino == null && this.arduino == null) {
+			this.arduino = (Arduino) startPeer("arduino");
+		}
+		return attach(this.arduino, port, steps, STEPPER_TYPE_POLOLU, pins);
+	}
+
+	public boolean attach(Arduino arduino, String port, int steps, String type, Integer...pins) {
+		this.arduino = arduino;
+		this.steps = steps;
+		this.type = type;
+		this.pins = pins;
+		
+		if (!this.arduino.connect(port)){
+			error("could not connect port %s", port);
+			return false;
+		}
+
+		return arduino.stepperAttach(this) != -1;
+	}
+	
+	public Integer getIndex() {
+		return index;
+	}
+
+	public void setIndex(Integer index) {
+		this.index = index;
+	}
+	
+	public void moveTo(Integer newPos){
+		this.arduino.stepperMoveTo(getName(), newPos);
+	}
+	
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
@@ -166,6 +241,12 @@ public class Stepper extends Service implements StepperControl {
 		Runtime.createAndStart("gui", "GUIService");
 
 	}
+
+	public Integer[] getPins() {
+		return pins;
+	}
+
+	
 
 
 }
