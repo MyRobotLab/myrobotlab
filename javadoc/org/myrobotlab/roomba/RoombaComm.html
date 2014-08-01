@@ -1,0 +1,3596 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>RoombaComm</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="RoombaComm";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/RoombaComm.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/roomba/Note.html" title="class in org.myrobotlab.roomba"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/roomba/RoombaCommSerialDevice.html" title="class in org.myrobotlab.roomba"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/roomba/RoombaComm.html" target="_top">Frames</a></li>
+<li><a href="RoombaComm.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.roomba</div>
+<h2 title="Class RoombaComm" class="title">Class RoombaComm</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.roomba.RoombaComm</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>Direct Known Subclasses:</dt>
+<dd><a href="../../../org/myrobotlab/roomba/RoombaCommSerialDevice.html" title="class in org.myrobotlab.roomba">RoombaCommSerialDevice</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public abstract class <span class="strong">RoombaComm</span>
+extends java.lang.Object</pre>
+<div class="block">The abstract base for all Roomba communications.
+ 
+ <h2>Overview</h2> This class contains the communications layer-independent
+ parts of how to communicate with a Roomba. It does assume a very serial
+ port-like interaction, as the only working subclass is for serial ports.
+ Thus, this objects form may change in the future.
+ 
+ Standard lifecyle of this object (and its subclasses)
+ 
+ <pre>
+   RoombaComm roomba = new RoombaCommSubClass();  // (e.g. RoombaCommSerial)
+   roomba.listports();               // if implemented
+   roomba.connect("someportid");
+   roomba.startup();
+   roomba.updateSensors();
+   while( ... ) {
+      roomba.sensors();
+      roomba.playNote( 53, 12 );
+      roomba.goForward( 400 );
+      roomba.spinRight( 45 );
+      if( roomba.bump() ) roomba.goBackward( 100 );
+   }    
+   roomba.disconnect();
+ </pre>
+ 
+ <h2>API levels</h2> Describe different API levels
+ 
+ <h2>Sensor Functions</h2> Describe sensor functions
+ 
+ <h2>Sublass behavior</h2> Describe subclassing strategries</div>
+<dl><dt><span class="strong">Author:</span></dt>
+  <dd>Tod E. Kurt</dd></dl>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#ANGLE_HI">ANGLE_HI</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#ANGLE_LO">ANGLE_LO</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#BAUD">BAUD</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#BUMP_MASK">BUMP_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#BUMPLEFT_MASK">BUMPLEFT_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#BUMPRIGHT_MASK">BUMPRIGHT_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#BUMPSWHEELDROPS">BUMPSWHEELDROPS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#BUTTONS">BUTTONS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#BUTTONSCMD">BUTTONSCMD</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CAPACITY_HI">CAPACITY_HI</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CAPACITY_LO">CAPACITY_LO</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CHARGE_HI">CHARGE_HI</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CHARGE_LO">CHARGE_LO</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CHARGINGSTATE">CHARGINGSTATE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CLEAN">CLEAN</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CLEANBUTTON_MASK">CLEANBUTTON_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CLIFFFRONTLEFT">CLIFFFRONTLEFT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CLIFFFRONTRIGHT">CLIFFFRONTRIGHT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CLIFFLEFT">CLIFFLEFT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CLIFFRIGHT">CLIFFRIGHT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CONTROL">CONTROL</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CURRENT_HI">CURRENT_HI</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#CURRENT_LO">CURRENT_LO</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#debug">debug</a></strong></code>
+<div class="block">turns on/off various debugging messages</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#defaultSensorsUpdateTime">defaultSensorsUpdateTime</a></strong></code>
+<div class="block">default update time in ms for auto sensors update</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#defaultSpeed">defaultSpeed</a></strong></code>
+<div class="block">default speed for movement operations if speed isn't specified</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DIGITLEDSASCII">DIGITLEDSASCII</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DIGITLEDSRAW">DIGITLEDSRAW</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DIRTLEFT">DIRTLEFT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DIRTRIGHT">DIRTRIGHT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DISTANCE_HI">DISTANCE_HI</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DISTANCE_LO">DISTANCE_LO</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DOCK">DOCK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DRIVE">DRIVE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DRIVEPWM">DRIVEPWM</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#DRIVEWHEELS">DRIVEWHEELS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#FULL">FULL</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#LEDS">LEDS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static org.slf4j.Logger</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#log">log</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MAX">MAX</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MAXBUTTON_MASK">MAXBUTTON_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#millimetersPerDegree">millimetersPerDegree</a></strong></code>
+<div class="block">mm/deg is circumference distance divided by 360 degrees</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#millimetersPerRadian">millimetersPerRadian</a></strong></code>
+<div class="block">mm/rad is a circumference distance divied by two pi</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MODE_FULL">MODE_FULL</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MODE_PASSIVE">MODE_PASSIVE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MODE_SAFE">MODE_SAFE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MODE_UNKNOWN">MODE_UNKNOWN</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MOTOROVERCURRENTS">MOTOROVERCURRENTS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MOTORS">MOTORS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MOVERDRIVELEFT_MASK">MOVERDRIVELEFT_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MOVERDRIVERIGHT_MASK">MOVERDRIVERIGHT_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MOVERMAINBRUSH_MASK">MOVERMAINBRUSH_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MOVERSIDEBRUSH_MASK">MOVERSIDEBRUSH_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#MOVERVACUUM_MASK">MOVERVACUUM_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#PLAY">PLAY</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#POWER">POWER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#POWERBUTTON_MASK">POWERBUTTON_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#PWMMOTORS">PWMMOTORS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#QUERYLIST">QUERYLIST</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTE_CLEAN">REMOTE_CLEAN</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTE_FORWARD">REMOTE_FORWARD</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTE_MAX">REMOTE_MAX</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTE_NONE">REMOTE_NONE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTE_PAUSE">REMOTE_PAUSE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTE_POWER">REMOTE_POWER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTE_SPINLEFT">REMOTE_SPINLEFT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTE_SPINRIGHT">REMOTE_SPINRIGHT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTE_SPOT">REMOTE_SPOT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#REMOTEOPCODE">REMOTEOPCODE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SAFE">SAFE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SCHEDULE">SCHEDULE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SCHEDULINGLEDS">SCHEDULINGLEDS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SENSORS">SENSORS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SENSORS_ALL">SENSORS_ALL</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SENSORS_INTERNAL">SENSORS_INTERNAL</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SENSORS_PHYSICAL">SENSORS_PHYSICAL</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SENSORS_POWER">SENSORS_POWER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#sensorsValid">sensorsValid</a></strong></code>
+<div class="block">if sensor variables have been updated successfully</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SETDAYTIME">SETDAYTIME</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SONG">SONG</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#speed">speed</a></strong></code>
+<div class="block">current speed for movement operations that don't take a speed</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SPOT">SPOT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#SPOTBUTTON_MASK">SPOTBUTTON_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#START">START</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#STOPSTARTSTREAM">STOPSTARTSTREAM</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#STREAM">STREAM</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#TEMPERATURE">TEMPERATURE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#VERSION">VERSION</a></strong></code>
+<div class="block">version of the library</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#VIRTUALWALL">VIRTUALWALL</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#VOLTAGE_HI">VOLTAGE_HI</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#VOLTAGE_LO">VOLTAGE_LO</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#WALL">WALL</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#wheelbase">wheelbase</a></strong></code>
+<div class="block">distance between wheels on the roomba, in millimeters</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#WHEELDROP_MASK">WHEELDROP_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#WHEELDROPCENT_MASK">WHEELDROPCENT_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#WHEELDROPLEFT_MASK">WHEELDROPLEFT_MASK</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#WHEELDROPRIGHT_MASK">WHEELDROPRIGHT_MASK</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#RoombaComm()">RoombaComm</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#RoombaComm(boolean)">RoombaComm</a></strong>(boolean&nbsp;autoUpdate)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#RoombaComm(boolean, int)">RoombaComm</a></strong>(boolean&nbsp;autoUpdate,
+          int&nbsp;updateTime)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>short</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#angle()">angle</a></strong>()</code>
+<div class="block">Angle traveled since last requested units: mm, diff in distance traveled
+ by two drive wheels range: -32768 - 32767</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#angleInDegrees()">angleInDegrees</a></strong>()</code>
+<div class="block">angle since last read, but in degrees</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#angleInRadians()">angleInRadians</a></strong>()</code>
+<div class="block">angle since last read, but in radians</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#binary(int)">binary</a></strong>(int&nbsp;i)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#bump()">bump</a></strong>()</code>
+<div class="block">Did we bump into anything</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#bumpLeft()">bumpLeft</a></strong>()</code>
+<div class="block">Left bump sensor</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#bumpRight()">bumpRight</a></strong>()</code>
+<div class="block">Right bump sensor</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#bumps_wheeldrops()">bumps_wheeldrops</a></strong>()</code>
+<div class="block">lower-level func, returns raw byte</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#buttons()">buttons</a></strong>()</code>
+<div class="block">lower-level func, returns raw byte</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#capacity()">capacity</a></strong>()</code>
+<div class="block">Estimated charge capacity of battery units: mAh range: 0-65535</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#charge()">charge</a></strong>()</code>
+<div class="block">Current charge of battery units: mAh range: 0-65535</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#charging_state()">charging_state</a></strong>()</code>
+<div class="block">Charging state units: enumeration range:</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#clean()">clean</a></strong>()</code>
+<div class="block">Send the CLEAN command</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#cleanButton()">cleanButton</a></strong>()</code>
+<div class="block">'Clean' button pressed state</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#cliff_frontleft()">cliff_frontleft</a></strong>()</code>
+<div class="block">lower-level func, returns raw byte</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#cliff_frontright()">cliff_frontright</a></strong>()</code>
+<div class="block">lower-level func, returns raw byte</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#cliff_left()">cliff_left</a></strong>()</code>
+<div class="block">lower-level func, returns raw byte</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#cliff_right()">cliff_right</a></strong>()</code>
+<div class="block">lower-level func, returns raw byte</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#cliffFrontLeft()">cliffFrontLeft</a></strong>()</code>
+<div class="block">front left cliff sensor</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#cliffFrontRight()">cliffFrontRight</a></strong>()</code>
+<div class="block">front right cliff sensor</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#cliffLeft()">cliffLeft</a></strong>()</code>
+<div class="block">left cliff sensor</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#cliffRight()">cliffRight</a></strong>()</code>
+<div class="block">right cliff sensor</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#computeSafetyFault()">computeSafetyFault</a></strong>()</code>
+<div class="block">Compute possible safety fault.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>abstract boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#connect(java.lang.String)">connect</a></strong>(java.lang.String&nbsp;portid)</code>
+<div class="block">Connect to a port (for serial, portid is serial port name, for net,
+ portid is url?)</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#connected()">connected</a></strong>()</code>
+<div class="block">Returns current connected state.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#control()">control</a></strong>()</code>
+<div class="block">Send CONTROL command</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#createSong(int, int[])">createSong</a></strong>(int&nbsp;songnum,
+          int[]&nbsp;song)</code>
+<div class="block">Make a song</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#createSong(int, org.myrobotlab.roomba.Note[])">createSong</a></strong>(int&nbsp;songnum,
+          <a href="../../../org/myrobotlab/roomba/Note.html" title="class in org.myrobotlab.roomba">Note</a>[]&nbsp;song)</code>
+<div class="block">Make a song</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>short</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#current()">current</a></strong>()</code>
+<div class="block">Current flowing in or out of battery units: mA range: -332768 - 32767</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#delay(int)">delay</a></strong>(int&nbsp;millis)</code>
+<div class="block">Alias to pause</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#dirt_left()">dirt_left</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#dirt_right()">dirt_right</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#dirt()">dirt</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#dirtLeft()">dirtLeft</a></strong>()</code>
+<div class="block">amount of dirt seen by left dirt sensor</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#dirtRight()">dirtRight</a></strong>()</code>
+<div class="block">amount of dirt seen by right dirt sensor</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>abstract void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#disconnect()">disconnect</a></strong>()</code>
+<div class="block">Disconnect from a port, clean up any memory in use</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>short</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#distance()">distance</a></strong>()</code>
+<div class="block">Distance traveled since last requested units: mm range: -32768 - 32767</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#drive(int, int)">drive</a></strong>(int&nbsp;velocity,
+     int&nbsp;radius)</code>
+<div class="block">Move the Roomba via the low-level velocity + radius method.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#errorMessage(java.lang.String, java.lang.Throwable)">errorMessage</a></strong>(java.lang.String&nbsp;where,
+            java.lang.Throwable&nbsp;e)</code>
+<div class="block">General error reporting, all corraled here just in case I think of
+ something slightly more intelligent to do.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#full()">full</a></strong>()</code>
+<div class="block">Send FULL command</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#getSpeed()">getSpeed</a></strong>()</code>
+<div class="block">Get speed for movement commands</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#goBackward()">goBackward</a></strong>()</code>
+<div class="block">Go backward at the current (negative) speed</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#goBackward(int)">goBackward</a></strong>(int&nbsp;distance)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#goBackwardAt(int)">goBackwardAt</a></strong>(int&nbsp;aspeed)</code>
+<div class="block">Go backward at a specified speed</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#goForward()">goForward</a></strong>()</code>
+<div class="block">Go forward the current (positive) speed</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#goForward(int)">goForward</a></strong>(int&nbsp;distance)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#goForwardAt(int)">goForwardAt</a></strong>(int&nbsp;aspeed)</code>
+<div class="block">Go forward at a specified speed</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#goStraight(int)">goStraight</a></strong>(int&nbsp;distance)</code>
+<div class="block">Go straight at the current speed for a specified distance.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#goStraightAt(int)">goStraightAt</a></strong>(int&nbsp;velocity)</code>
+<div class="block">Go straight at a specified speed.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#hex(byte)">hex</a></strong>(byte&nbsp;b)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#hex(int)">hex</a></strong>(int&nbsp;i)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>abstract java.lang.String[]</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#listPorts()">listPorts</a></strong>()</code>
+<div class="block">List available ports</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#logmsg(java.lang.String)">logmsg</a></strong>(java.lang.String&nbsp;msg)</code>
+<div class="block">just a little debug</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#max()">max</a></strong>()</code>
+<div class="block">Send the max command</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#maxButton()">maxButton</a></strong>()</code>
+<div class="block">'Max' button pressed state</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#mode()">mode</a></strong>()</code>
+<div class="block">current ROI mode RoombaComm thinks the Roomba is in</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#modeAsString()">modeAsString</a></strong>()</code>
+<div class="block">mode as String</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#motor_overcurrents()">motor_overcurrents</a></strong>()</code>
+<div class="block">lower-level func, returns raw byte</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#motorOvercurrentDriveLeft()">motorOvercurrentDriveLeft</a></strong>()</code>
+<div class="block">overcurrent on left drive wheel</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#motorOvercurrentDriveRight()">motorOvercurrentDriveRight</a></strong>()</code>
+<div class="block">overcurrent on right drive wheel</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#motorOvercurrentMainBrush()">motorOvercurrentMainBrush</a></strong>()</code>
+<div class="block">overcurrent on main brush</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#motorOvercurrentSideBrush()">motorOvercurrentSideBrush</a></strong>()</code>
+<div class="block">overcurrent on side brush</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#motorOvercurrentVacuum()">motorOvercurrentVacuum</a></strong>()</code>
+<div class="block">overcurrent on vacuum</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#pause(int)">pause</a></strong>(int&nbsp;millis)</code>
+<div class="block">Just a simple pause function.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#playNote(int, int)">playNote</a></strong>(int&nbsp;note,
+        int&nbsp;duration)</code>
+<div class="block">Play a musical note Does it via the hacky method of defining a one-note
+ song & playing it Uses up song slot 15.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#playSong(int)">playSong</a></strong>(int&nbsp;songnum)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#powerButton()">powerButton</a></strong>()</code>
+<div class="block">'Power' button pressed state</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#powerOff()">powerOff</a></strong>()</code>
+<div class="block">Power off the Roomba.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#println(java.lang.String)">println</a></strong>(java.lang.String&nbsp;s)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#queryList(byte[], int)">queryList</a></strong>(byte[]&nbsp;sensorList,
+         int&nbsp;returnLen)</code>
+<div class="block">Query a list of sensors.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#remote_opcode()">remote_opcode</a></strong>()</code>
+<div class="block">lower-level func, returns raw byte</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#reset()">reset</a></strong>()</code>
+<div class="block">Reset Roomba after a fault.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#safe()">safe</a></strong>()</code>
+<div class="block">Send SAFE command</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#safetyFault()">safetyFault</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>abstract boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#send(byte[])">send</a></strong>(byte[]&nbsp;bytes)</code>
+<div class="block">Send given byte array to Roomba.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>abstract boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#send(int)">send</a></strong>(int&nbsp;b)</code>
+<div class="block">Send a single byte to the Roomba (defined as int because of stupid java
+ signed bytes)</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#sensors()">sensors</a></strong>()</code>
+<div class="block">get all sensor data</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#sensors(int)">sensors</a></strong>(int&nbsp;packetcode)</code>
+<div class="block">Send the SENSORS command with one of the SENSORS_ arguments Typically,
+ one does "sensors(SENSORS_ALL)" to get all sensor data</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#sensorsAsString()">sensorsAsString</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#sensorsAutoUpdate()">sensorsAutoUpdate</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#sensorsUpdateTime()">sensorsUpdateTime</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#sensorsValid()">sensorsValid</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#setLEDs(boolean, boolean, boolean, boolean, boolean, boolean, int, int)">setLEDs</a></strong>(boolean&nbsp;status_green,
+       boolean&nbsp;status_red,
+       boolean&nbsp;spot,
+       boolean&nbsp;clean,
+       boolean&nbsp;max,
+       boolean&nbsp;dirt,
+       int&nbsp;power_color,
+       int&nbsp;power_intensity)</code>
+<div class="block">Turns on/off the various LEDs.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#setMotors(boolean, boolean, boolean)">setMotors</a></strong>(boolean&nbsp;mainbrush,
+         boolean&nbsp;vacuum,
+         boolean&nbsp;sidebrush)</code>
+<div class="block">Turns on/off the non-drive motors (main brush, vacuum, sidebrush).</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#setSensorsAutoUpdate(boolean)">setSensorsAutoUpdate</a></strong>(boolean&nbsp;b)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#setSensorsUpdateTime(int)">setSensorsUpdateTime</a></strong>(int&nbsp;i)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#setSpeed(int)">setSpeed</a></strong>(int&nbsp;s)</code>
+<div class="block">Set speed for movement commands</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#spin(int)">spin</a></strong>(int&nbsp;angle)</code>
+<div class="block">Spin right or spin left a particular number of degrees</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#spinLeft()">spinLeft</a></strong>()</code>
+<div class="block">Spin in place anti-clockwise, at the current speed</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#spinLeft(int)">spinLeft</a></strong>(int&nbsp;angle)</code>
+<div class="block">Spin left a specified angle at a specified speed</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#spinLeftAt(int)">spinLeftAt</a></strong>(int&nbsp;aspeed)</code>
+<div class="block">Spin in place anti-clockwise, at the current speed.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#spinRight()">spinRight</a></strong>()</code>
+<div class="block">Spin in place clockwise, at the current speed</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#spinRight(int)">spinRight</a></strong>(int&nbsp;angle)</code>
+<div class="block">Spin right the current speed for a specified angle</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#spinRightAt(int)">spinRightAt</a></strong>(int&nbsp;aspeed)</code>
+<div class="block">Spin in place clockwise, at the current speed.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#spot()">spot</a></strong>()</code>
+<div class="block">Send the SPOT command</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#spotButton()">spotButton</a></strong>()</code>
+<div class="block">'Spot' button pressed state</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#start()">start</a></strong>()</code>
+<div class="block">Send START command</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#startAutoUpdate()">startAutoUpdate</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#startup()">startup</a></strong>()</code>
+<div class="block">Put Roomba in safe mode.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#stop()">stop</a></strong>()</code>
+<div class="block">Stop Rooomba's motion.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>byte</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#temperature()">temperature</a></strong>()</code>
+<div class="block">temperature of battery units: degrees Celcius range: -128 - 127</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static short</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#toShort(byte, byte)">toShort</a></strong>(byte&nbsp;hi,
+       byte&nbsp;lo)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#toUnsignedShort(byte, byte)">toUnsignedShort</a></strong>(byte&nbsp;hi,
+               byte&nbsp;lo)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#turn(int)">turn</a></strong>(int&nbsp;radius)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#turnLeft()">turnLeft</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#turnRight()">turnRight</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>abstract boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#updateSensors()">updateSensors</a></strong>()</code>
+<div class="block">Query Roomba for sensor status and sync its state with this object's
+ Subclasses should query Roomba and fill up 'sensor_bytes' with the full
+ sensor data set If a RooombaComm object is constructed with 'autoUpdate'
+ true, calling this method is not required because a separate thread is
+ created to do sensor updating.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#vacuum(boolean)">vacuum</a></strong>(boolean&nbsp;state)</code>
+<div class="block">Turn all vacuum motors on or off according to state</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#virtual_wall()">virtual_wall</a></strong>()</code>
+<div class="block">lower-level func, returns raw byte</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#voltage()">voltage</a></strong>()</code>
+<div class="block">Voltage of battery units: mV range: 0 - 65535</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#wakeup()">wakeup</a></strong>()</code>
+<div class="block">Wake's Roomba up, if possible, thus optional To wake up the Roomba
+ requires twiddling its DD line, often hooked up to the RS-232 DTR line,
+ which may not be available in some implementations</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#wall()">wall</a></strong>()</code>
+<div class="block">Can we see a wall?</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#wheelDropCenter()">wheelDropCenter</a></strong>()</code>
+<div class="block">Center wheeldrop sensor</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#wheelDropLeft()">wheelDropLeft</a></strong>()</code>
+<div class="block">Left wheeldrop sensor</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/roomba/RoombaComm.html#wheelDropRight()">wheelDropRight</a></strong>()</code>
+<div class="block">Right wheeldrop sensor</div>
+</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a name="log">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>log</h4>
+<pre>public static final&nbsp;org.slf4j.Logger log</pre>
+</li>
+</ul>
+<a name="VERSION">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>VERSION</h4>
+<pre>public static final&nbsp;java.lang.String VERSION</pre>
+<div class="block">version of the library</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.VERSION">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="debug">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>debug</h4>
+<pre>public&nbsp;boolean debug</pre>
+<div class="block">turns on/off various debugging messages</div>
+</li>
+</ul>
+<a name="wheelbase">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>wheelbase</h4>
+<pre>public static final&nbsp;int wheelbase</pre>
+<div class="block">distance between wheels on the roomba, in millimeters</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.wheelbase">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="millimetersPerDegree">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>millimetersPerDegree</h4>
+<pre>public static final&nbsp;float millimetersPerDegree</pre>
+<div class="block">mm/deg is circumference distance divided by 360 degrees</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.millimetersPerDegree">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="millimetersPerRadian">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>millimetersPerRadian</h4>
+<pre>public static final&nbsp;float millimetersPerRadian</pre>
+<div class="block">mm/rad is a circumference distance divied by two pi</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.millimetersPerRadian">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="defaultSpeed">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>defaultSpeed</h4>
+<pre>public static final&nbsp;int defaultSpeed</pre>
+<div class="block">default speed for movement operations if speed isn't specified</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.defaultSpeed">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="defaultSensorsUpdateTime">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>defaultSensorsUpdateTime</h4>
+<pre>public static final&nbsp;int defaultSensorsUpdateTime</pre>
+<div class="block">default update time in ms for auto sensors update</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.defaultSensorsUpdateTime">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="speed">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>speed</h4>
+<pre>public&nbsp;int speed</pre>
+<div class="block">current speed for movement operations that don't take a speed</div>
+</li>
+</ul>
+<a name="sensorsValid">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensorsValid</h4>
+<pre>public&nbsp;boolean sensorsValid</pre>
+<div class="block">if sensor variables have been updated successfully</div>
+</li>
+</ul>
+<a name="MODE_UNKNOWN">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MODE_UNKNOWN</h4>
+<pre>public static final&nbsp;int MODE_UNKNOWN</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MODE_UNKNOWN">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MODE_PASSIVE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MODE_PASSIVE</h4>
+<pre>public static final&nbsp;int MODE_PASSIVE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MODE_PASSIVE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MODE_SAFE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MODE_SAFE</h4>
+<pre>public static final&nbsp;int MODE_SAFE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MODE_SAFE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MODE_FULL">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MODE_FULL</h4>
+<pre>public static final&nbsp;int MODE_FULL</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MODE_FULL">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="START">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>START</h4>
+<pre>public static final&nbsp;int START</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.START">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BAUD">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BAUD</h4>
+<pre>public static final&nbsp;int BAUD</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.BAUD">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CONTROL">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CONTROL</h4>
+<pre>public static final&nbsp;int CONTROL</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CONTROL">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SAFE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SAFE</h4>
+<pre>public static final&nbsp;int SAFE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SAFE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="FULL">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>FULL</h4>
+<pre>public static final&nbsp;int FULL</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.FULL">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="POWER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>POWER</h4>
+<pre>public static final&nbsp;int POWER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.POWER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SPOT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SPOT</h4>
+<pre>public static final&nbsp;int SPOT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SPOT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CLEAN">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CLEAN</h4>
+<pre>public static final&nbsp;int CLEAN</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CLEAN">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MAX">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MAX</h4>
+<pre>public static final&nbsp;int MAX</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MAX">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DRIVE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DRIVE</h4>
+<pre>public static final&nbsp;int DRIVE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DRIVE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MOTORS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MOTORS</h4>
+<pre>public static final&nbsp;int MOTORS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MOTORS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="LEDS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>LEDS</h4>
+<pre>public static final&nbsp;int LEDS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.LEDS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SONG">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SONG</h4>
+<pre>public static final&nbsp;int SONG</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SONG">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="PLAY">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>PLAY</h4>
+<pre>public static final&nbsp;int PLAY</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.PLAY">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSORS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSORS</h4>
+<pre>public static final&nbsp;int SENSORS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SENSORS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DOCK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DOCK</h4>
+<pre>public static final&nbsp;int DOCK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DOCK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="PWMMOTORS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>PWMMOTORS</h4>
+<pre>public static final&nbsp;int PWMMOTORS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.PWMMOTORS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DRIVEWHEELS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DRIVEWHEELS</h4>
+<pre>public static final&nbsp;int DRIVEWHEELS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DRIVEWHEELS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DRIVEPWM">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DRIVEPWM</h4>
+<pre>public static final&nbsp;int DRIVEPWM</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DRIVEPWM">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="STREAM">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>STREAM</h4>
+<pre>public static final&nbsp;int STREAM</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.STREAM">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="QUERYLIST">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>QUERYLIST</h4>
+<pre>public static final&nbsp;int QUERYLIST</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.QUERYLIST">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="STOPSTARTSTREAM">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>STOPSTARTSTREAM</h4>
+<pre>public static final&nbsp;int STOPSTARTSTREAM</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.STOPSTARTSTREAM">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SCHEDULINGLEDS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SCHEDULINGLEDS</h4>
+<pre>public static final&nbsp;int SCHEDULINGLEDS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SCHEDULINGLEDS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITLEDSRAW">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITLEDSRAW</h4>
+<pre>public static final&nbsp;int DIGITLEDSRAW</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DIGITLEDSRAW">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITLEDSASCII">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITLEDSASCII</h4>
+<pre>public static final&nbsp;int DIGITLEDSASCII</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DIGITLEDSASCII">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BUTTONSCMD">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BUTTONSCMD</h4>
+<pre>public static final&nbsp;int BUTTONSCMD</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.BUTTONSCMD">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SCHEDULE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SCHEDULE</h4>
+<pre>public static final&nbsp;int SCHEDULE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SCHEDULE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SETDAYTIME">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SETDAYTIME</h4>
+<pre>public static final&nbsp;int SETDAYTIME</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SETDAYTIME">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BUMPSWHEELDROPS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BUMPSWHEELDROPS</h4>
+<pre>public static final&nbsp;int BUMPSWHEELDROPS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.BUMPSWHEELDROPS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="WALL">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>WALL</h4>
+<pre>public static final&nbsp;int WALL</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.WALL">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CLIFFLEFT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CLIFFLEFT</h4>
+<pre>public static final&nbsp;int CLIFFLEFT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CLIFFLEFT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CLIFFFRONTLEFT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CLIFFFRONTLEFT</h4>
+<pre>public static final&nbsp;int CLIFFFRONTLEFT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CLIFFFRONTLEFT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CLIFFFRONTRIGHT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CLIFFFRONTRIGHT</h4>
+<pre>public static final&nbsp;int CLIFFFRONTRIGHT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CLIFFFRONTRIGHT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CLIFFRIGHT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CLIFFRIGHT</h4>
+<pre>public static final&nbsp;int CLIFFRIGHT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CLIFFRIGHT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="VIRTUALWALL">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>VIRTUALWALL</h4>
+<pre>public static final&nbsp;int VIRTUALWALL</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.VIRTUALWALL">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MOTOROVERCURRENTS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MOTOROVERCURRENTS</h4>
+<pre>public static final&nbsp;int MOTOROVERCURRENTS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MOTOROVERCURRENTS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIRTLEFT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIRTLEFT</h4>
+<pre>public static final&nbsp;int DIRTLEFT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DIRTLEFT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIRTRIGHT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIRTRIGHT</h4>
+<pre>public static final&nbsp;int DIRTRIGHT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DIRTRIGHT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTEOPCODE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOTEOPCODE</h4>
+<pre>public static final&nbsp;int REMOTEOPCODE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTEOPCODE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BUTTONS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BUTTONS</h4>
+<pre>public static final&nbsp;int BUTTONS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.BUTTONS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DISTANCE_HI">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DISTANCE_HI</h4>
+<pre>public static final&nbsp;int DISTANCE_HI</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DISTANCE_HI">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DISTANCE_LO">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DISTANCE_LO</h4>
+<pre>public static final&nbsp;int DISTANCE_LO</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.DISTANCE_LO">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ANGLE_HI">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ANGLE_HI</h4>
+<pre>public static final&nbsp;int ANGLE_HI</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.ANGLE_HI">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ANGLE_LO">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ANGLE_LO</h4>
+<pre>public static final&nbsp;int ANGLE_LO</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.ANGLE_LO">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CHARGINGSTATE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CHARGINGSTATE</h4>
+<pre>public static final&nbsp;int CHARGINGSTATE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CHARGINGSTATE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="VOLTAGE_HI">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>VOLTAGE_HI</h4>
+<pre>public static final&nbsp;int VOLTAGE_HI</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.VOLTAGE_HI">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="VOLTAGE_LO">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>VOLTAGE_LO</h4>
+<pre>public static final&nbsp;int VOLTAGE_LO</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.VOLTAGE_LO">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CURRENT_HI">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CURRENT_HI</h4>
+<pre>public static final&nbsp;int CURRENT_HI</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CURRENT_HI">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CURRENT_LO">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CURRENT_LO</h4>
+<pre>public static final&nbsp;int CURRENT_LO</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CURRENT_LO">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="TEMPERATURE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TEMPERATURE</h4>
+<pre>public static final&nbsp;int TEMPERATURE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.TEMPERATURE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CHARGE_HI">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CHARGE_HI</h4>
+<pre>public static final&nbsp;int CHARGE_HI</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CHARGE_HI">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CHARGE_LO">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CHARGE_LO</h4>
+<pre>public static final&nbsp;int CHARGE_LO</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CHARGE_LO">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CAPACITY_HI">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CAPACITY_HI</h4>
+<pre>public static final&nbsp;int CAPACITY_HI</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CAPACITY_HI">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CAPACITY_LO">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CAPACITY_LO</h4>
+<pre>public static final&nbsp;int CAPACITY_LO</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CAPACITY_LO">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="WHEELDROP_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>WHEELDROP_MASK</h4>
+<pre>public static final&nbsp;int WHEELDROP_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.WHEELDROP_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BUMP_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BUMP_MASK</h4>
+<pre>public static final&nbsp;int BUMP_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.BUMP_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BUMPRIGHT_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BUMPRIGHT_MASK</h4>
+<pre>public static final&nbsp;int BUMPRIGHT_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.BUMPRIGHT_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BUMPLEFT_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BUMPLEFT_MASK</h4>
+<pre>public static final&nbsp;int BUMPLEFT_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.BUMPLEFT_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="WHEELDROPRIGHT_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>WHEELDROPRIGHT_MASK</h4>
+<pre>public static final&nbsp;int WHEELDROPRIGHT_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.WHEELDROPRIGHT_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="WHEELDROPLEFT_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>WHEELDROPLEFT_MASK</h4>
+<pre>public static final&nbsp;int WHEELDROPLEFT_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.WHEELDROPLEFT_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="WHEELDROPCENT_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>WHEELDROPCENT_MASK</h4>
+<pre>public static final&nbsp;int WHEELDROPCENT_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.WHEELDROPCENT_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MOVERDRIVELEFT_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MOVERDRIVELEFT_MASK</h4>
+<pre>public static final&nbsp;int MOVERDRIVELEFT_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MOVERDRIVELEFT_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MOVERDRIVERIGHT_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MOVERDRIVERIGHT_MASK</h4>
+<pre>public static final&nbsp;int MOVERDRIVERIGHT_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MOVERDRIVERIGHT_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MOVERMAINBRUSH_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MOVERMAINBRUSH_MASK</h4>
+<pre>public static final&nbsp;int MOVERMAINBRUSH_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MOVERMAINBRUSH_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MOVERVACUUM_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MOVERVACUUM_MASK</h4>
+<pre>public static final&nbsp;int MOVERVACUUM_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MOVERVACUUM_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MOVERSIDEBRUSH_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MOVERSIDEBRUSH_MASK</h4>
+<pre>public static final&nbsp;int MOVERSIDEBRUSH_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MOVERSIDEBRUSH_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="POWERBUTTON_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>POWERBUTTON_MASK</h4>
+<pre>public static final&nbsp;int POWERBUTTON_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.POWERBUTTON_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SPOTBUTTON_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SPOTBUTTON_MASK</h4>
+<pre>public static final&nbsp;int SPOTBUTTON_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SPOTBUTTON_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CLEANBUTTON_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CLEANBUTTON_MASK</h4>
+<pre>public static final&nbsp;int CLEANBUTTON_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.CLEANBUTTON_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MAXBUTTON_MASK">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MAXBUTTON_MASK</h4>
+<pre>public static final&nbsp;int MAXBUTTON_MASK</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.MAXBUTTON_MASK">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSORS_ALL">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSORS_ALL</h4>
+<pre>public static final&nbsp;int SENSORS_ALL</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SENSORS_ALL">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSORS_PHYSICAL">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSORS_PHYSICAL</h4>
+<pre>public static final&nbsp;int SENSORS_PHYSICAL</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SENSORS_PHYSICAL">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSORS_INTERNAL">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSORS_INTERNAL</h4>
+<pre>public static final&nbsp;int SENSORS_INTERNAL</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SENSORS_INTERNAL">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSORS_POWER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSORS_POWER</h4>
+<pre>public static final&nbsp;int SENSORS_POWER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.SENSORS_POWER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTE_NONE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOTE_NONE</h4>
+<pre>public static final&nbsp;int REMOTE_NONE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTE_NONE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTE_POWER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOTE_POWER</h4>
+<pre>public static final&nbsp;int REMOTE_POWER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTE_POWER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTE_PAUSE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOTE_PAUSE</h4>
+<pre>public static final&nbsp;int REMOTE_PAUSE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTE_PAUSE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTE_CLEAN">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOTE_CLEAN</h4>
+<pre>public static final&nbsp;int REMOTE_CLEAN</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTE_CLEAN">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTE_MAX">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOTE_MAX</h4>
+<pre>public static final&nbsp;int REMOTE_MAX</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTE_MAX">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTE_SPOT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOTE_SPOT</h4>
+<pre>public static final&nbsp;int REMOTE_SPOT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTE_SPOT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTE_SPINLEFT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOTE_SPINLEFT</h4>
+<pre>public static final&nbsp;int REMOTE_SPINLEFT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTE_SPINLEFT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTE_FORWARD">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOTE_FORWARD</h4>
+<pre>public static final&nbsp;int REMOTE_FORWARD</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTE_FORWARD">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOTE_SPINRIGHT">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>REMOTE_SPINRIGHT</h4>
+<pre>public static final&nbsp;int REMOTE_SPINRIGHT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.roomba.RoombaComm.REMOTE_SPINRIGHT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="RoombaComm()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>RoombaComm</h4>
+<pre>public&nbsp;RoombaComm()</pre>
+</li>
+</ul>
+<a name="RoombaComm(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>RoombaComm</h4>
+<pre>public&nbsp;RoombaComm(boolean&nbsp;autoUpdate)</pre>
+</li>
+</ul>
+<a name="RoombaComm(boolean, int)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>RoombaComm</h4>
+<pre>public&nbsp;RoombaComm(boolean&nbsp;autoUpdate,
+          int&nbsp;updateTime)</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="startAutoUpdate()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startAutoUpdate</h4>
+<pre>public&nbsp;void&nbsp;startAutoUpdate()</pre>
+</li>
+</ul>
+<a name="listPorts()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>listPorts</h4>
+<pre>public abstract&nbsp;java.lang.String[]&nbsp;listPorts()</pre>
+<div class="block">List available ports</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>a list available portids, if applicable or empty set if no ports,
+         or return null if list is not enumerable</dd></dl>
+</li>
+</ul>
+<a name="connect(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>connect</h4>
+<pre>public abstract&nbsp;boolean&nbsp;connect(java.lang.String&nbsp;portid)</pre>
+<div class="block">Connect to a port (for serial, portid is serial port name, for net,
+ portid is url?)</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>true on successful connect, false otherwise</dd></dl>
+</li>
+</ul>
+<a name="disconnect()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>disconnect</h4>
+<pre>public abstract&nbsp;void&nbsp;disconnect()</pre>
+<div class="block">Disconnect from a port, clean up any memory in use</div>
+</li>
+</ul>
+<a name="send(byte[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>send</h4>
+<pre>public abstract&nbsp;boolean&nbsp;send(byte[]&nbsp;bytes)</pre>
+<div class="block">Send given byte array to Roomba.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>bytes</code> - byte array of ROI commands to send</dd>
+<dt><span class="strong">Returns:</span></dt><dd>true on successful send</dd></dl>
+</li>
+</ul>
+<a name="send(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>send</h4>
+<pre>public abstract&nbsp;boolean&nbsp;send(int&nbsp;b)</pre>
+<div class="block">Send a single byte to the Roomba (defined as int because of stupid java
+ signed bytes)</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>b</code> - byte of an ROI command to send</dd>
+<dt><span class="strong">Returns:</span></dt><dd>true on successful send</dd></dl>
+</li>
+</ul>
+<a name="updateSensors()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>updateSensors</h4>
+<pre>public abstract&nbsp;boolean&nbsp;updateSensors()</pre>
+<div class="block">Query Roomba for sensor status and sync its state with this object's
+ Subclasses should query Roomba and fill up 'sensor_bytes' with the full
+ sensor data set If a RooombaComm object is constructed with 'autoUpdate'
+ true, calling this method is not required because a separate thread is
+ created to do sensor updating.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>true on successful sensor update, false otherwise</dd></dl>
+</li>
+</ul>
+<a name="wakeup()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>wakeup</h4>
+<pre>public&nbsp;void&nbsp;wakeup()</pre>
+<div class="block">Wake's Roomba up, if possible, thus optional To wake up the Roomba
+ requires twiddling its DD line, often hooked up to the RS-232 DTR line,
+ which may not be available in some implementations</div>
+</li>
+</ul>
+<a name="startup()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startup</h4>
+<pre>public&nbsp;void&nbsp;startup()</pre>
+<div class="block">Put Roomba in safe mode. As opposed to full mode. Safe mode is the
+ preferred working state when playing with the Roomba as it provides some
+ measure of autonomous self-preservation if it encounters a cliff or is
+ picked up If that happens it goes into passive mode and must be
+ 'reset()'.</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/roomba/RoombaComm.html#reset()"><code>reset()</code></a></dd></dl>
+</li>
+</ul>
+<a name="reset()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>reset</h4>
+<pre>public&nbsp;void&nbsp;reset()</pre>
+<div class="block">Reset Roomba after a fault. This takes it out of whatever mode it was in
+ and puts it into safe mode. This command also syncs the object's sensor
+ state with the Roomba's by calling updateSensors()</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/roomba/RoombaComm.html#startup()"><code>startup()</code></a>, 
+<a href="../../../org/myrobotlab/roomba/RoombaComm.html#updateSensors()"><code>updateSensors()</code></a></dd></dl>
+</li>
+</ul>
+<a name="start()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>start</h4>
+<pre>public&nbsp;void&nbsp;start()</pre>
+<div class="block">Send START command</div>
+</li>
+</ul>
+<a name="control()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>control</h4>
+<pre>public&nbsp;void&nbsp;control()</pre>
+<div class="block">Send CONTROL command</div>
+</li>
+</ul>
+<a name="safe()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>safe</h4>
+<pre>public&nbsp;void&nbsp;safe()</pre>
+<div class="block">Send SAFE command</div>
+</li>
+</ul>
+<a name="full()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>full</h4>
+<pre>public&nbsp;void&nbsp;full()</pre>
+<div class="block">Send FULL command</div>
+</li>
+</ul>
+<a name="powerOff()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>powerOff</h4>
+<pre>public&nbsp;void&nbsp;powerOff()</pre>
+<div class="block">Power off the Roomba. Once powered off, the only way to wake it is via
+ wakeup() (if implemented) or via a physically pressing the Power button</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/roomba/RoombaComm.html#wakeup()"><code>wakeup()</code></a></dd></dl>
+</li>
+</ul>
+<a name="spot()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>spot</h4>
+<pre>public&nbsp;void&nbsp;spot()</pre>
+<div class="block">Send the SPOT command</div>
+</li>
+</ul>
+<a name="clean()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>clean</h4>
+<pre>public&nbsp;void&nbsp;clean()</pre>
+<div class="block">Send the CLEAN command</div>
+</li>
+</ul>
+<a name="max()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>max</h4>
+<pre>public&nbsp;void&nbsp;max()</pre>
+<div class="block">Send the max command</div>
+</li>
+</ul>
+<a name="sensors(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensors</h4>
+<pre>public&nbsp;void&nbsp;sensors(int&nbsp;packetcode)</pre>
+<div class="block">Send the SENSORS command with one of the SENSORS_ arguments Typically,
+ one does "sensors(SENSORS_ALL)" to get all sensor data</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>packetcode</code> - one of SENSORS_ALL, SENSORS_PHYSICAL, SENSORS_INTERNAL, or
+            SENSORS_POWER, or for roomba 5xx, it is the sensor packet
+            number (from the spec)</dd></dl>
+</li>
+</ul>
+<a name="sensors()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensors</h4>
+<pre>public&nbsp;void&nbsp;sensors()</pre>
+<div class="block">get all sensor data</div>
+</li>
+</ul>
+<a name="queryList(byte[], int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>queryList</h4>
+<pre>public&nbsp;void&nbsp;queryList(byte[]&nbsp;sensorList,
+             int&nbsp;returnLen)</pre>
+<div class="block">Query a list of sensors. This is a roomba 5xx only command.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>sensorList</code> - A byte array containing the sensor groups requested to be read</dd><dd><code>returnLen</code> - The number of bytes of data expected to be returned from
+            roomba</dd></dl>
+</li>
+</ul>
+<a name="delay(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>delay</h4>
+<pre>public&nbsp;void&nbsp;delay(int&nbsp;millis)</pre>
+<div class="block">Alias to pause</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/roomba/RoombaComm.html#pause(int)"><code>pause(int)</code></a></dd></dl>
+</li>
+</ul>
+<a name="pause(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>pause</h4>
+<pre>public&nbsp;void&nbsp;pause(int&nbsp;millis)</pre>
+<div class="block">Just a simple pause function. Makes the thread block with Thread.sleep()</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>millis</code> - number of milliseconds to wait</dd></dl>
+</li>
+</ul>
+<a name="stop()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stop</h4>
+<pre>public&nbsp;void&nbsp;stop()</pre>
+<div class="block">Stop Rooomba's motion. Sends drive(0,0)</div>
+</li>
+</ul>
+<a name="setSpeed(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSpeed</h4>
+<pre>public&nbsp;void&nbsp;setSpeed(int&nbsp;s)</pre>
+<div class="block">Set speed for movement commands</div>
+</li>
+</ul>
+<a name="getSpeed()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSpeed</h4>
+<pre>public&nbsp;int&nbsp;getSpeed()</pre>
+<div class="block">Get speed for movement commands</div>
+</li>
+</ul>
+<a name="goStraight(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>goStraight</h4>
+<pre>public&nbsp;void&nbsp;goStraight(int&nbsp;distance)</pre>
+<div class="block">Go straight at the current speed for a specified distance. Positive
+ distance moves forward, negative distance moves backward. This method
+ blocks until the action is finished.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>distance</code> - distance in millimeters, positive or negative</dd></dl>
+</li>
+</ul>
+<a name="goForward(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>goForward</h4>
+<pre>public&nbsp;void&nbsp;goForward(int&nbsp;distance)</pre>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>distance</code> - distance in millimeters, positive</dd></dl>
+</li>
+</ul>
+<a name="goBackward(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>goBackward</h4>
+<pre>public&nbsp;void&nbsp;goBackward(int&nbsp;distance)</pre>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>distance</code> - distance in millimeters, positive</dd></dl>
+</li>
+</ul>
+<a name="turnLeft()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>turnLeft</h4>
+<pre>public&nbsp;void&nbsp;turnLeft()</pre>
+</li>
+</ul>
+<a name="turnRight()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>turnRight</h4>
+<pre>public&nbsp;void&nbsp;turnRight()</pre>
+</li>
+</ul>
+<a name="turn(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>turn</h4>
+<pre>public&nbsp;void&nbsp;turn(int&nbsp;radius)</pre>
+</li>
+</ul>
+<a name="spin(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>spin</h4>
+<pre>public&nbsp;void&nbsp;spin(int&nbsp;angle)</pre>
+<div class="block">Spin right or spin left a particular number of degrees</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>angle</code> - angle in degrees, positive to spin left, negative to spin
+            right</dd></dl>
+</li>
+</ul>
+<a name="spinRight(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>spinRight</h4>
+<pre>public&nbsp;void&nbsp;spinRight(int&nbsp;angle)</pre>
+<div class="block">Spin right the current speed for a specified angle</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>angle</code> - angle in degrees, positive</dd></dl>
+</li>
+</ul>
+<a name="spinLeft(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>spinLeft</h4>
+<pre>public&nbsp;void&nbsp;spinLeft(int&nbsp;angle)</pre>
+<div class="block">Spin left a specified angle at a specified speed</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>angle</code> - angle in degrees, positive</dd></dl>
+</li>
+</ul>
+<a name="spinLeft()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>spinLeft</h4>
+<pre>public&nbsp;void&nbsp;spinLeft()</pre>
+<div class="block">Spin in place anti-clockwise, at the current speed</div>
+</li>
+</ul>
+<a name="spinRight()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>spinRight</h4>
+<pre>public&nbsp;void&nbsp;spinRight()</pre>
+<div class="block">Spin in place clockwise, at the current speed</div>
+</li>
+</ul>
+<a name="spinLeftAt(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>spinLeftAt</h4>
+<pre>public&nbsp;void&nbsp;spinLeftAt(int&nbsp;aspeed)</pre>
+<div class="block">Spin in place anti-clockwise, at the current speed.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>aspeed</code> - speed to spin at</dd></dl>
+</li>
+</ul>
+<a name="spinRightAt(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>spinRightAt</h4>
+<pre>public&nbsp;void&nbsp;spinRightAt(int&nbsp;aspeed)</pre>
+<div class="block">Spin in place clockwise, at the current speed.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>aspeed</code> - speed to spin at, positive</dd></dl>
+</li>
+</ul>
+<a name="goStraightAt(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>goStraightAt</h4>
+<pre>public&nbsp;void&nbsp;goStraightAt(int&nbsp;velocity)</pre>
+<div class="block">Go straight at a specified speed. Positive is forward, negative is
+ backward</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>velocity</code> - velocity of motion in mm/sec</dd></dl>
+</li>
+</ul>
+<a name="goForward()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>goForward</h4>
+<pre>public&nbsp;void&nbsp;goForward()</pre>
+<div class="block">Go forward the current (positive) speed</div>
+</li>
+</ul>
+<a name="goBackward()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>goBackward</h4>
+<pre>public&nbsp;void&nbsp;goBackward()</pre>
+<div class="block">Go backward at the current (negative) speed</div>
+</li>
+</ul>
+<a name="goForwardAt(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>goForwardAt</h4>
+<pre>public&nbsp;void&nbsp;goForwardAt(int&nbsp;aspeed)</pre>
+<div class="block">Go forward at a specified speed</div>
+</li>
+</ul>
+<a name="goBackwardAt(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>goBackwardAt</h4>
+<pre>public&nbsp;void&nbsp;goBackwardAt(int&nbsp;aspeed)</pre>
+<div class="block">Go backward at a specified speed</div>
+</li>
+</ul>
+<a name="drive(int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>drive</h4>
+<pre>public&nbsp;void&nbsp;drive(int&nbsp;velocity,
+         int&nbsp;radius)</pre>
+<div class="block">Move the Roomba via the low-level velocity + radius method. See the
+ 'Drive' section of the Roomba ROI spec for more details. Low-level
+ command.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>velocity</code> - speed in millimeters/second, positive forward, negative
+            backward</dd><dd><code>radius</code> - radius of turn in millimeters</dd></dl>
+</li>
+</ul>
+<a name="playNote(int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>playNote</h4>
+<pre>public&nbsp;void&nbsp;playNote(int&nbsp;note,
+            int&nbsp;duration)</pre>
+<div class="block">Play a musical note Does it via the hacky method of defining a one-note
+ song & playing it Uses up song slot 15. If another note is played before
+ one is finished, the new note cuts off the old one.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>note</code> - a note number from 31 (G0) to 127 (G8)</dd><dd><code>duration</code> - duration of note in 1/64ths of a second</dd></dl>
+</li>
+</ul>
+<a name="playSong(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>playSong</h4>
+<pre>public&nbsp;void&nbsp;playSong(int&nbsp;songnum)</pre>
+</li>
+</ul>
+<a name="createSong(int, int[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>createSong</h4>
+<pre>public&nbsp;void&nbsp;createSong(int&nbsp;songnum,
+              int[]&nbsp;song)</pre>
+<div class="block">Make a song</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>songnum</code> - number of song to define</dd><dd><code>song</code> - array of songnotes, even entries are notenums, odd are
+            duration of 1/6ths</dd></dl>
+</li>
+</ul>
+<a name="createSong(int, org.myrobotlab.roomba.Note[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>createSong</h4>
+<pre>public&nbsp;void&nbsp;createSong(int&nbsp;songnum,
+              <a href="../../../org/myrobotlab/roomba/Note.html" title="class in org.myrobotlab.roomba">Note</a>[]&nbsp;song)</pre>
+<div class="block">Make a song</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>songnum</code> - number of song to define</dd><dd><code>song</code> - array of Notes</dd></dl>
+</li>
+</ul>
+<a name="setMotors(boolean, boolean, boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setMotors</h4>
+<pre>public&nbsp;void&nbsp;setMotors(boolean&nbsp;mainbrush,
+             boolean&nbsp;vacuum,
+             boolean&nbsp;sidebrush)</pre>
+<div class="block">Turns on/off the non-drive motors (main brush, vacuum, sidebrush). Sort
+ of low-level.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>mainbrush</code> - mainbrush motor on/off state</dd><dd><code>vacuum</code> - vacuum motor on/off state</dd><dd><code>sidebrush</code> - sidebrush motor on/off state</dd></dl>
+</li>
+</ul>
+<a name="setLEDs(boolean, boolean, boolean, boolean, boolean, boolean, int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setLEDs</h4>
+<pre>public&nbsp;void&nbsp;setLEDs(boolean&nbsp;status_green,
+           boolean&nbsp;status_red,
+           boolean&nbsp;spot,
+           boolean&nbsp;clean,
+           boolean&nbsp;max,
+           boolean&nbsp;dirt,
+           int&nbsp;power_color,
+           int&nbsp;power_intensity)</pre>
+<div class="block">Turns on/off the various LEDs. Low-level command. FIXME: this is too
+ complex</div>
+</li>
+</ul>
+<a name="vacuum(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>vacuum</h4>
+<pre>public&nbsp;void&nbsp;vacuum(boolean&nbsp;state)</pre>
+<div class="block">Turn all vacuum motors on or off according to state</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>state</code> - true to turn on vacuum function, false to turn it off</dd></dl>
+</li>
+</ul>
+<a name="computeSafetyFault()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>computeSafetyFault</h4>
+<pre>public&nbsp;boolean&nbsp;computeSafetyFault()</pre>
+<div class="block">Compute possible safety fault. Called on every successful
+ updateSensors(). In normal use, call updateSensors() then check
+ safetyFault().</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>true if indicates we had an event that took the Roomba out of
+         safe mode</dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/roomba/RoombaComm.html#updateSensors()"><code>updateSensors()</code></a></dd></dl>
+</li>
+</ul>
+<a name="connected()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>connected</h4>
+<pre>public&nbsp;boolean&nbsp;connected()</pre>
+<div class="block">Returns current connected state. It's up to subclasses to ensure this
+ variable is correct.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>current connected state</dd></dl>
+</li>
+</ul>
+<a name="mode()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>mode</h4>
+<pre>public&nbsp;int&nbsp;mode()</pre>
+<div class="block">current ROI mode RoombaComm thinks the Roomba is in</div>
+</li>
+</ul>
+<a name="modeAsString()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>modeAsString</h4>
+<pre>public&nbsp;java.lang.String&nbsp;modeAsString()</pre>
+<div class="block">mode as String</div>
+</li>
+</ul>
+<a name="sensorsAutoUpdate()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensorsAutoUpdate</h4>
+<pre>public&nbsp;boolean&nbsp;sensorsAutoUpdate()</pre>
+</li>
+</ul>
+<a name="setSensorsAutoUpdate(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSensorsAutoUpdate</h4>
+<pre>public&nbsp;void&nbsp;setSensorsAutoUpdate(boolean&nbsp;b)</pre>
+</li>
+</ul>
+<a name="sensorsUpdateTime()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensorsUpdateTime</h4>
+<pre>public&nbsp;int&nbsp;sensorsUpdateTime()</pre>
+</li>
+</ul>
+<a name="setSensorsUpdateTime(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSensorsUpdateTime</h4>
+<pre>public&nbsp;void&nbsp;setSensorsUpdateTime(int&nbsp;i)</pre>
+</li>
+</ul>
+<a name="safetyFault()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>safetyFault</h4>
+<pre>public&nbsp;boolean&nbsp;safetyFault()</pre>
+</li>
+</ul>
+<a name="sensorsValid()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensorsValid</h4>
+<pre>public&nbsp;boolean&nbsp;sensorsValid()</pre>
+</li>
+</ul>
+<a name="sensorsAsString()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensorsAsString</h4>
+<pre>public&nbsp;java.lang.String&nbsp;sensorsAsString()</pre>
+<dl><dt><span class="strong">Returns:</span></dt><dd>all sensor data as a string</dd></dl>
+</li>
+</ul>
+<a name="bump()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bump</h4>
+<pre>public&nbsp;boolean&nbsp;bump()</pre>
+<div class="block">Did we bump into anything</div>
+</li>
+</ul>
+<a name="bumpLeft()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bumpLeft</h4>
+<pre>public&nbsp;boolean&nbsp;bumpLeft()</pre>
+<div class="block">Left bump sensor</div>
+</li>
+</ul>
+<a name="bumpRight()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bumpRight</h4>
+<pre>public&nbsp;boolean&nbsp;bumpRight()</pre>
+<div class="block">Right bump sensor</div>
+</li>
+</ul>
+<a name="wheelDropLeft()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>wheelDropLeft</h4>
+<pre>public&nbsp;boolean&nbsp;wheelDropLeft()</pre>
+<div class="block">Left wheeldrop sensor</div>
+</li>
+</ul>
+<a name="wheelDropRight()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>wheelDropRight</h4>
+<pre>public&nbsp;boolean&nbsp;wheelDropRight()</pre>
+<div class="block">Right wheeldrop sensor</div>
+</li>
+</ul>
+<a name="wheelDropCenter()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>wheelDropCenter</h4>
+<pre>public&nbsp;boolean&nbsp;wheelDropCenter()</pre>
+<div class="block">Center wheeldrop sensor</div>
+</li>
+</ul>
+<a name="wall()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>wall</h4>
+<pre>public&nbsp;boolean&nbsp;wall()</pre>
+<div class="block">Can we see a wall?</div>
+</li>
+</ul>
+<a name="dirt()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>dirt</h4>
+<pre>public&nbsp;boolean&nbsp;dirt()</pre>
+<dl><dt><span class="strong">Returns:</span></dt><dd>true if dirt present</dd></dl>
+</li>
+</ul>
+<a name="dirtLeft()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>dirtLeft</h4>
+<pre>public&nbsp;int&nbsp;dirtLeft()</pre>
+<div class="block">amount of dirt seen by left dirt sensor</div>
+</li>
+</ul>
+<a name="dirtRight()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>dirtRight</h4>
+<pre>public&nbsp;int&nbsp;dirtRight()</pre>
+<div class="block">amount of dirt seen by right dirt sensor</div>
+</li>
+</ul>
+<a name="cliffLeft()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cliffLeft</h4>
+<pre>public&nbsp;boolean&nbsp;cliffLeft()</pre>
+<div class="block">left cliff sensor</div>
+</li>
+</ul>
+<a name="cliffFrontLeft()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cliffFrontLeft</h4>
+<pre>public&nbsp;boolean&nbsp;cliffFrontLeft()</pre>
+<div class="block">front left cliff sensor</div>
+</li>
+</ul>
+<a name="cliffFrontRight()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cliffFrontRight</h4>
+<pre>public&nbsp;boolean&nbsp;cliffFrontRight()</pre>
+<div class="block">front right cliff sensor</div>
+</li>
+</ul>
+<a name="cliffRight()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cliffRight</h4>
+<pre>public&nbsp;boolean&nbsp;cliffRight()</pre>
+<div class="block">right cliff sensor</div>
+</li>
+</ul>
+<a name="motorOvercurrentDriveLeft()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorOvercurrentDriveLeft</h4>
+<pre>public&nbsp;boolean&nbsp;motorOvercurrentDriveLeft()</pre>
+<div class="block">overcurrent on left drive wheel</div>
+</li>
+</ul>
+<a name="motorOvercurrentDriveRight()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorOvercurrentDriveRight</h4>
+<pre>public&nbsp;boolean&nbsp;motorOvercurrentDriveRight()</pre>
+<div class="block">overcurrent on right drive wheel</div>
+</li>
+</ul>
+<a name="motorOvercurrentMainBrush()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorOvercurrentMainBrush</h4>
+<pre>public&nbsp;boolean&nbsp;motorOvercurrentMainBrush()</pre>
+<div class="block">overcurrent on main brush</div>
+</li>
+</ul>
+<a name="motorOvercurrentVacuum()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorOvercurrentVacuum</h4>
+<pre>public&nbsp;boolean&nbsp;motorOvercurrentVacuum()</pre>
+<div class="block">overcurrent on vacuum</div>
+</li>
+</ul>
+<a name="motorOvercurrentSideBrush()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorOvercurrentSideBrush</h4>
+<pre>public&nbsp;boolean&nbsp;motorOvercurrentSideBrush()</pre>
+<div class="block">overcurrent on side brush</div>
+</li>
+</ul>
+<a name="powerButton()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>powerButton</h4>
+<pre>public&nbsp;boolean&nbsp;powerButton()</pre>
+<div class="block">'Power' button pressed state</div>
+</li>
+</ul>
+<a name="spotButton()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>spotButton</h4>
+<pre>public&nbsp;boolean&nbsp;spotButton()</pre>
+<div class="block">'Spot' button pressed state</div>
+</li>
+</ul>
+<a name="cleanButton()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cleanButton</h4>
+<pre>public&nbsp;boolean&nbsp;cleanButton()</pre>
+<div class="block">'Clean' button pressed state</div>
+</li>
+</ul>
+<a name="maxButton()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>maxButton</h4>
+<pre>public&nbsp;boolean&nbsp;maxButton()</pre>
+<div class="block">'Max' button pressed state</div>
+</li>
+</ul>
+<a name="bumps_wheeldrops()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bumps_wheeldrops</h4>
+<pre>public&nbsp;int&nbsp;bumps_wheeldrops()</pre>
+<div class="block">lower-level func, returns raw byte</div>
+</li>
+</ul>
+<a name="cliff_left()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cliff_left</h4>
+<pre>public&nbsp;int&nbsp;cliff_left()</pre>
+<div class="block">lower-level func, returns raw byte</div>
+</li>
+</ul>
+<a name="cliff_frontleft()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cliff_frontleft</h4>
+<pre>public&nbsp;int&nbsp;cliff_frontleft()</pre>
+<div class="block">lower-level func, returns raw byte</div>
+</li>
+</ul>
+<a name="cliff_frontright()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cliff_frontright</h4>
+<pre>public&nbsp;int&nbsp;cliff_frontright()</pre>
+<div class="block">lower-level func, returns raw byte</div>
+</li>
+</ul>
+<a name="cliff_right()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cliff_right</h4>
+<pre>public&nbsp;int&nbsp;cliff_right()</pre>
+<div class="block">lower-level func, returns raw byte</div>
+</li>
+</ul>
+<a name="virtual_wall()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>virtual_wall</h4>
+<pre>public&nbsp;int&nbsp;virtual_wall()</pre>
+<div class="block">lower-level func, returns raw byte</div>
+</li>
+</ul>
+<a name="motor_overcurrents()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motor_overcurrents</h4>
+<pre>public&nbsp;int&nbsp;motor_overcurrents()</pre>
+<div class="block">lower-level func, returns raw byte</div>
+</li>
+</ul>
+<a name="dirt_left()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>dirt_left</h4>
+<pre>public&nbsp;int&nbsp;dirt_left()</pre>
+</li>
+</ul>
+<a name="dirt_right()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>dirt_right</h4>
+<pre>public&nbsp;int&nbsp;dirt_right()</pre>
+</li>
+</ul>
+<a name="remote_opcode()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>remote_opcode</h4>
+<pre>public&nbsp;int&nbsp;remote_opcode()</pre>
+<div class="block">lower-level func, returns raw byte</div>
+</li>
+</ul>
+<a name="buttons()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>buttons</h4>
+<pre>public&nbsp;int&nbsp;buttons()</pre>
+<div class="block">lower-level func, returns raw byte</div>
+</li>
+</ul>
+<a name="distance()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>distance</h4>
+<pre>public&nbsp;short&nbsp;distance()</pre>
+<div class="block">Distance traveled since last requested units: mm range: -32768 - 32767</div>
+</li>
+</ul>
+<a name="angle()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>angle</h4>
+<pre>public&nbsp;short&nbsp;angle()</pre>
+<div class="block">Angle traveled since last requested units: mm, diff in distance traveled
+ by two drive wheels range: -32768 - 32767</div>
+</li>
+</ul>
+<a name="angleInDegrees()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>angleInDegrees</h4>
+<pre>public&nbsp;float&nbsp;angleInDegrees()</pre>
+<div class="block">angle since last read, but in degrees</div>
+</li>
+</ul>
+<a name="angleInRadians()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>angleInRadians</h4>
+<pre>public&nbsp;float&nbsp;angleInRadians()</pre>
+<div class="block">angle since last read, but in radians</div>
+</li>
+</ul>
+<a name="charging_state()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>charging_state</h4>
+<pre>public&nbsp;int&nbsp;charging_state()</pre>
+<div class="block">Charging state units: enumeration range:</div>
+</li>
+</ul>
+<a name="voltage()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>voltage</h4>
+<pre>public&nbsp;int&nbsp;voltage()</pre>
+<div class="block">Voltage of battery units: mV range: 0 - 65535</div>
+</li>
+</ul>
+<a name="current()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>current</h4>
+<pre>public&nbsp;short&nbsp;current()</pre>
+<div class="block">Current flowing in or out of battery units: mA range: -332768 - 32767</div>
+</li>
+</ul>
+<a name="temperature()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>temperature</h4>
+<pre>public&nbsp;byte&nbsp;temperature()</pre>
+<div class="block">temperature of battery units: degrees Celcius range: -128 - 127</div>
+</li>
+</ul>
+<a name="charge()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>charge</h4>
+<pre>public&nbsp;int&nbsp;charge()</pre>
+<div class="block">Current charge of battery units: mAh range: 0-65535</div>
+</li>
+</ul>
+<a name="capacity()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>capacity</h4>
+<pre>public&nbsp;int&nbsp;capacity()</pre>
+<div class="block">Estimated charge capacity of battery units: mAh range: 0-65535</div>
+</li>
+</ul>
+<a name="toShort(byte, byte)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>toShort</h4>
+<pre>public static final&nbsp;short&nbsp;toShort(byte&nbsp;hi,
+            byte&nbsp;lo)</pre>
+</li>
+</ul>
+<a name="toUnsignedShort(byte, byte)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>toUnsignedShort</h4>
+<pre>public static final&nbsp;int&nbsp;toUnsignedShort(byte&nbsp;hi,
+                  byte&nbsp;lo)</pre>
+</li>
+</ul>
+<a name="println(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>println</h4>
+<pre>public&nbsp;void&nbsp;println(java.lang.String&nbsp;s)</pre>
+</li>
+</ul>
+<a name="hex(byte)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hex</h4>
+<pre>public&nbsp;java.lang.String&nbsp;hex(byte&nbsp;b)</pre>
+</li>
+</ul>
+<a name="hex(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hex</h4>
+<pre>public&nbsp;java.lang.String&nbsp;hex(int&nbsp;i)</pre>
+</li>
+</ul>
+<a name="binary(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>binary</h4>
+<pre>public&nbsp;java.lang.String&nbsp;binary(int&nbsp;i)</pre>
+</li>
+</ul>
+<a name="logmsg(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>logmsg</h4>
+<pre>public&nbsp;void&nbsp;logmsg(java.lang.String&nbsp;msg)</pre>
+<div class="block">just a little debug</div>
+</li>
+</ul>
+<a name="errorMessage(java.lang.String, java.lang.Throwable)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>errorMessage</h4>
+<pre>public&nbsp;void&nbsp;errorMessage(java.lang.String&nbsp;where,
+                java.lang.Throwable&nbsp;e)</pre>
+<div class="block">General error reporting, all corraled here just in case I think of
+ something slightly more intelligent to do.</div>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/RoombaComm.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/roomba/Note.html" title="class in org.myrobotlab.roomba"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/roomba/RoombaCommSerialDevice.html" title="class in org.myrobotlab.roomba"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/roomba/RoombaComm.html" target="_top">Frames</a></li>
+<li><a href="RoombaComm.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

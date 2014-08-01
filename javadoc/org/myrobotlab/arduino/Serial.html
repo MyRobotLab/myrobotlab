@@ -1,0 +1,628 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>Serial</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="Serial";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/Serial.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/arduino/PApplet.html" title="class in org.myrobotlab.arduino"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/arduino/Sketch.html" title="class in org.myrobotlab.arduino"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/arduino/Serial.html" target="_top">Frames</a></li>
+<li><a href="Serial.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.arduino</div>
+<h2 title="Class Serial" class="title">Class Serial</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.arduino.Serial</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>java.util.EventListener, <a href="../../../org/myrobotlab/serial/SerialDeviceEventListener.html" title="interface in org.myrobotlab.serial">SerialDeviceEventListener</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public class <span class="strong">Serial</span>
+extends java.lang.Object
+implements <a href="../../../org/myrobotlab/serial/SerialDeviceEventListener.html" title="interface in org.myrobotlab.serial">SerialDeviceEventListener</a></pre>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#Serial(org.myrobotlab.service.Arduino)">Serial</a></strong>(<a href="../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a>&nbsp;myArduino)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#addListener(org.myrobotlab.arduino.compiler.MessageConsumer)">addListener</a></strong>(<a href="../../../org/myrobotlab/arduino/compiler/MessageConsumer.html" title="interface in org.myrobotlab.arduino.compiler">MessageConsumer</a>&nbsp;consumer)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#available()">available</a></strong>()</code>
+<div class="block">Returns the number of bytes that have been read from serial and are
+ waiting to be dealt with by the user.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#clear()">clear</a></strong>()</code>
+<div class="block">Ignore all the bytes read so far and empty the buffer.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#dispose()">dispose</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#errorMessage(java.lang.String, java.lang.Throwable)">errorMessage</a></strong>(java.lang.String&nbsp;where,
+            java.lang.Throwable&nbsp;e)</code>
+<div class="block">General error reporting, all corraled here just in case I think of
+ something slightly more intelligent to do.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String[]</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#list()">list</a></strong>()</code>
+<div class="block">If this just hangs and never completes on Windows, it may be because the
+ DLL doesn't have its exec bit set.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#open()">open</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#read()">read</a></strong>()</code>
+<div class="block">Returns a number between 0 and 255 for the next byte that's waiting in
+ the buffer.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>byte[]</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#readBytes()">readBytes</a></strong>()</code>
+<div class="block">Return a byte array of anything that's in the serial buffer.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#readBytes(byte[])">readBytes</a></strong>(byte[]&nbsp;outgoing)</code>
+<div class="block">Grab whatever is in the serial buffer, and stuff it into a byte buffer
+ passed in by the user.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>byte[]</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#readBytesUntil(int)">readBytesUntil</a></strong>(int&nbsp;interesting)</code>
+<div class="block">Reads from the serial port into a buffer of bytes up to and including a
+ particular character.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#readBytesUntil(int, byte[])">readBytesUntil</a></strong>(int&nbsp;interesting,
+              byte[]&nbsp;outgoing)</code>
+<div class="block">Reads from the serial port into a buffer of bytes until a particular
+ character.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>char</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#readChar()">readChar</a></strong>()</code>
+<div class="block">Returns the next byte in the buffer as a char.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#readString()">readString</a></strong>()</code>
+<div class="block">Return whatever has been read from the serial port so far as a String.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#readStringUntil(int)">readStringUntil</a></strong>(int&nbsp;interesting)</code>
+<div class="block">Combination of readBytesUntil and readString.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#serialEvent(org.myrobotlab.serial.SerialDeviceEvent)">serialEvent</a></strong>(<a href="../../../org/myrobotlab/serial/SerialDeviceEvent.html" title="class in org.myrobotlab.serial">SerialDeviceEvent</a>&nbsp;serialEvent)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#setDTR(boolean)">setDTR</a></strong>(boolean&nbsp;state)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#setRTS(boolean)">setRTS</a></strong>(boolean&nbsp;state)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#write(byte[])">write</a></strong>(byte[]&nbsp;bytes)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#write(int)">write</a></strong>(int&nbsp;what)</code>
+<div class="block">This will handle both ints, bytes and chars transparently.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/arduino/Serial.html#write(java.lang.String)">write</a></strong>(java.lang.String&nbsp;what)</code>
+<div class="block">Write a String to the output.</div>
+</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="Serial(org.myrobotlab.service.Arduino)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>Serial</h4>
+<pre>public&nbsp;Serial(<a href="../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a>&nbsp;myArduino)
+       throws <a href="../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code><a href="../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></code></dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="dispose()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>dispose</h4>
+<pre>public&nbsp;void&nbsp;dispose()</pre>
+</li>
+</ul>
+<a name="addListener(org.myrobotlab.arduino.compiler.MessageConsumer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addListener</h4>
+<pre>public&nbsp;void&nbsp;addListener(<a href="../../../org/myrobotlab/arduino/compiler/MessageConsumer.html" title="interface in org.myrobotlab.arduino.compiler">MessageConsumer</a>&nbsp;consumer)</pre>
+</li>
+</ul>
+<a name="serialEvent(org.myrobotlab.serial.SerialDeviceEvent)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>serialEvent</h4>
+<pre>public&nbsp;void&nbsp;serialEvent(<a href="../../../org/myrobotlab/serial/SerialDeviceEvent.html" title="class in org.myrobotlab.serial">SerialDeviceEvent</a>&nbsp;serialEvent)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/serial/SerialDeviceEventListener.html#serialEvent(org.myrobotlab.serial.SerialDeviceEvent)">serialEvent</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/serial/SerialDeviceEventListener.html" title="interface in org.myrobotlab.serial">SerialDeviceEventListener</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="available()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>available</h4>
+<pre>public&nbsp;int&nbsp;available()</pre>
+<div class="block">Returns the number of bytes that have been read from serial and are
+ waiting to be dealt with by the user.</div>
+</li>
+</ul>
+<a name="clear()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>clear</h4>
+<pre>public&nbsp;void&nbsp;clear()</pre>
+<div class="block">Ignore all the bytes read so far and empty the buffer.</div>
+</li>
+</ul>
+<a name="read()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>read</h4>
+<pre>public&nbsp;int&nbsp;read()</pre>
+<div class="block">Returns a number between 0 and 255 for the next byte that's waiting in
+ the buffer. Returns -1 if there was no byte (although the user should
+ first check available() to see if things are ready to avoid this)</div>
+</li>
+</ul>
+<a name="readChar()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readChar</h4>
+<pre>public&nbsp;char&nbsp;readChar()</pre>
+<div class="block">Returns the next byte in the buffer as a char. Returns -1, or 0xffff, if
+ nothing is there.</div>
+</li>
+</ul>
+<a name="readBytes()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readBytes</h4>
+<pre>public&nbsp;byte[]&nbsp;readBytes()</pre>
+<div class="block">Return a byte array of anything that's in the serial buffer. Not
+ particularly memory/speed efficient, because it creates a byte array on
+ each read, but it's easier to use than readBytes(byte b[]) (see below).</div>
+</li>
+</ul>
+<a name="readBytes(byte[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readBytes</h4>
+<pre>public&nbsp;int&nbsp;readBytes(byte[]&nbsp;outgoing)</pre>
+<div class="block">Grab whatever is in the serial buffer, and stuff it into a byte buffer
+ passed in by the user. This is more memory/time efficient than
+ readBytes() returning a byte[] array.
+ 
+ Returns an int for how many bytes were read. If more bytes are available
+ than can fit into the byte array, only those that will fit are read.</div>
+</li>
+</ul>
+<a name="readBytesUntil(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readBytesUntil</h4>
+<pre>public&nbsp;byte[]&nbsp;readBytesUntil(int&nbsp;interesting)</pre>
+<div class="block">Reads from the serial port into a buffer of bytes up to and including a
+ particular character. If the character isn't in the serial buffer, then
+ 'null' is returned.</div>
+</li>
+</ul>
+<a name="readBytesUntil(int, byte[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readBytesUntil</h4>
+<pre>public&nbsp;int&nbsp;readBytesUntil(int&nbsp;interesting,
+                 byte[]&nbsp;outgoing)</pre>
+<div class="block">Reads from the serial port into a buffer of bytes until a particular
+ character. If the character isn't in the serial buffer, then 'null' is
+ returned.
+ 
+ If outgoing[] is not big enough, then -1 is returned, and an error
+ message is printed on the console. If nothing is in the buffer, zero is
+ returned. If 'interesting' byte is not in the buffer, then 0 is returned.</div>
+</li>
+</ul>
+<a name="readString()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readString</h4>
+<pre>public&nbsp;java.lang.String&nbsp;readString()</pre>
+<div class="block">Return whatever has been read from the serial port so far as a String. It
+ assumes that the incoming characters are ASCII.
+ 
+ If you want to move Unicode data, you can first convert the String to a
+ byte stream in the representation of your choice (i.e. UTF8 or two-byte
+ Unicode data), and send it as a byte array.</div>
+</li>
+</ul>
+<a name="readStringUntil(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readStringUntil</h4>
+<pre>public&nbsp;java.lang.String&nbsp;readStringUntil(int&nbsp;interesting)</pre>
+<div class="block">Combination of readBytesUntil and readString. See caveats in each
+ function. Returns null if it still hasn't found what you're looking for.
+ 
+ If you want to move Unicode data, you can first convert the String to a
+ byte stream in the representation of your choice (i.e. UTF8 or two-byte
+ Unicode data), and send it as a byte array.</div>
+</li>
+</ul>
+<a name="write(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>write</h4>
+<pre>public&nbsp;void&nbsp;write(int&nbsp;what)</pre>
+<div class="block">This will handle both ints, bytes and chars transparently.</div>
+</li>
+</ul>
+<a name="write(byte[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>write</h4>
+<pre>public&nbsp;void&nbsp;write(byte[]&nbsp;bytes)</pre>
+</li>
+</ul>
+<a name="write(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>write</h4>
+<pre>public&nbsp;void&nbsp;write(java.lang.String&nbsp;what)</pre>
+<div class="block">Write a String to the output. Note that this doesn't account for Unicode
+ (two bytes per char), nor will it send UTF8 characters.. It assumes that
+ you mean to send a byte buffer (most often the case for networking and
+ serial i/o) and will only use the bottom 8 bits of each char in the
+ string. (Meaning that internally it uses String.getBytes)
+ 
+ If you want to move Unicode data, you can first convert the String to a
+ byte stream in the representation of your choice (i.e. UTF8 or two-byte
+ Unicode data), and send it as a byte array.</div>
+</li>
+</ul>
+<a name="setDTR(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setDTR</h4>
+<pre>public&nbsp;void&nbsp;setDTR(boolean&nbsp;state)
+            throws java.lang.Throwable</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.lang.Throwable</code></dd></dl>
+</li>
+</ul>
+<a name="setRTS(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setRTS</h4>
+<pre>public&nbsp;void&nbsp;setRTS(boolean&nbsp;state)
+            throws <a href="../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code><a href="../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></code></dd></dl>
+</li>
+</ul>
+<a name="list()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>list</h4>
+<pre>public static&nbsp;java.lang.String[]&nbsp;list()</pre>
+<div class="block">If this just hangs and never completes on Windows, it may be because the
+ DLL doesn't have its exec bit set. Why the hell that'd be the case, who
+ knows.</div>
+</li>
+</ul>
+<a name="errorMessage(java.lang.String, java.lang.Throwable)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>errorMessage</h4>
+<pre>public static&nbsp;void&nbsp;errorMessage(java.lang.String&nbsp;where,
+                java.lang.Throwable&nbsp;e)</pre>
+<div class="block">General error reporting, all corraled here just in case I think of
+ something slightly more intelligent to do.</div>
+</li>
+</ul>
+<a name="open()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>open</h4>
+<pre>public&nbsp;void&nbsp;open()
+          throws <a href="../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code><a href="../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></code></dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/Serial.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/arduino/PApplet.html" title="class in org.myrobotlab.arduino"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/arduino/Sketch.html" title="class in org.myrobotlab.arduino"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/arduino/Serial.html" target="_top">Frames</a></li>
+<li><a href="Serial.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

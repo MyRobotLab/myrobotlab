@@ -167,6 +167,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				timer.schedule(t, interval);
 			}
 		}
+		
 	}
 
 	public void addLocalTask(int interval, String method, Object[]... params) {

@@ -1741,7 +1741,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	// -- StepperController begin ----
-
+	// FIXME DEPRECATE ALL - the Service Stepper is the interface
+	// A STEPPERCONTROLLER INTERFACE IS VERY BARE MINIMUM
+	// PINS DIGITALWRITES !! and SENDMSG !!! (FOR MRLCOMM.INO)
+	
 	@Override
 	public boolean stepperAttach(String stepperName, Integer steps, Object... data) {
 		Stepper stepper = (Stepper) Runtime.createAndStart(stepperName, "Stepper");
@@ -1833,11 +1836,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
 	}
 
-	// FIXME - COMPLETE IMPLEMENTATION BEGIN --
-
-	// FIXME - COMPLETE IMPLEMENTATION END --
-
-	// -- StepperController begin ----
 
 	// often used as a ping echo pulse - timing is critical
 	// so it has to be done on the uC .. therefore
@@ -1989,6 +1987,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	// --- stepper begin ---
+	// FIXME - relatively clean interface BUT - ALL THIS LOGIC SHOULD BE IN STEPPER NOT ARDUINO !!!
+	// SO STEPPER MUST NEED TO KNOW ABOUT CONTROLLER TYPE
+	
 	public synchronized int stepperAttach(String stepperName) {
 		Stepper stepper = (Stepper) Runtime.getService(stepperName);
 		if (stepper == null) {
@@ -2013,7 +2014,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			return -1;
 		}
 
-		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getType())) {
+		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())) {
 			// int type = Stepper.STEPPER_TYPE_POLOLU.hashCode(); heh, cool idea - but byte collision don't want to risk ;)
 			int type = 1;
 			
@@ -2034,12 +2035,28 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			steppers.put(stepperName, stepper);
 			stepperIndex.put(index, stepper);
 
-			log.info(String.format("stepper STEPPER_TYPE_POLOLU index %d pin direction %d step %d attached ", stepperIndex,  pins[0], pins[1]));
+			log.info(String.format("stepper STEPPER_TYPE_POLOLU index %d pin direction %d step %d attached ", index,  pins[0], pins[1]));
 		} else {
 			error("unkown type of stepper");
 		}
 
 		return index;
+	}
+	
+
+	public void stepperMoveTo(String name, Integer newPos) {
+		if (!steppers.containsKey(name)){
+			error("%s stepper not found");
+			return;
+		}
+		
+		Stepper stepper = steppers.get(name);
+		sendMsg(stepper.getIndex(), newPos);
+		
+		// TODO - call back event - to say arrived ?
+		
+		// TODO - blocking method
+		
 	}
 	
 	// --- stepper end ---
@@ -2113,20 +2130,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return enable;
 	}
 	
-	public void stepperMoveTo(String name, Integer newPos) {
-		if (!steppers.containsKey(name)){
-			error("%s stepper not found");
-			return;
-		}
-		
-		Stepper stepper = steppers.get(name);
-		sendMsg(stepper.getIndex(), newPos);
-		
-		// TODO - call back event - to say arrived ?
-		
-		// TODO - blocking method
-		
-	}
 	
 	public static void main(String[] args) {
 		try {

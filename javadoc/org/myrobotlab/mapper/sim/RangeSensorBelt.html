@@ -1,0 +1,886 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>RangeSensorBelt</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="RangeSensorBelt";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/RangeSensorBelt.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../org/myrobotlab/mapper/sim/Plan.html" title="class in org.myrobotlab.mapper.sim"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../org/myrobotlab/mapper/sim/Robot.html" title="class in org.myrobotlab.mapper.sim"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?org/myrobotlab/mapper/sim/RangeSensorBelt.html" target="_top">Frames</a></li>
+<li><a href="RangeSensorBelt.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.mapper.sim</div>
+<h2 title="Class RangeSensorBelt" class="title">Class RangeSensorBelt</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html" title="class in org.myrobotlab.mapper.sim">org.myrobotlab.mapper.sim.BaseObject</a></li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../../org/myrobotlab/mapper/sim/Device.html" title="class in org.myrobotlab.mapper.sim">org.myrobotlab.mapper.sim.Device</a></li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../../org/myrobotlab/mapper/sim/SensorDevice.html" title="class in org.myrobotlab.mapper.sim">org.myrobotlab.mapper.sim.SensorDevice</a></li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../../org/myrobotlab/mapper/sim/PickSensor.html" title="class in org.myrobotlab.mapper.sim">org.myrobotlab.mapper.sim.PickSensor</a></li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.mapper.sim.RangeSensorBelt</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<hr>
+<br>
+<pre>public class <span class="strong">RangeSensorBelt</span>
+extends <a href="../../../../org/myrobotlab/mapper/sim/PickSensor.html" title="class in org.myrobotlab.mapper.sim">PickSensor</a></pre>
+<div class="block">This class models a circular belt of range sensors : Sonar , Bumpers (future
+ : Laser, Ir). Sensors are arranged circularly around the robot. User can
+ access to the measurement and hits state of each sensor individualy or obtain
+ an average measurement in a quadrant. <br>
+ <br>
+ Note that the sensors are not affected by noise. however you can easily add
+ some gaussian noise with the java.util.Random class. <br>
+ <code> Random generator = new Random(seed); </code> <br>
+ and<br>
+ <code> value = sonars.getMeasurement(0)+generator.nextGaussian()*stddev;</code>
+ <br>
+ <br>
+ <br>
+ Implementation notes : We use java 3D picking feature to emulate sensing. A
+ PickCylinderRay is used on each update to test whether there is an potential
+ obstacle. Each ray is then checked with a PickSegement.</div>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#FLAG_SHOW_FULL_SENSOR_RAY">FLAG_SHOW_FULL_SENSOR_RAY</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#TYPE_BUMPER">TYPE_BUMPER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#TYPE_IR">TYPE_IR</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#TYPE_LASER">TYPE_LASER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#TYPE_SONAR">TYPE_SONAR</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#RangeSensorBelt(float, float, float, int, int, int)">RangeSensorBelt</a></strong>(float&nbsp;radius,
+               float&nbsp;minRange,
+               float&nbsp;maxRange,
+               int&nbsp;nbsensors,
+               int&nbsp;type,
+               int&nbsp;flags)</code>
+<div class="block">Constructs a RangeSensorBelt.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#RangeSensorBelt(javax.vecmath.Vector3d[], javax.vecmath.Vector3d[], int, int)">RangeSensorBelt</a></strong>(javax.vecmath.Vector3d[]&nbsp;positions,
+               javax.vecmath.Vector3d[]&nbsp;directions,
+               int&nbsp;type,
+               int&nbsp;flags)</code>
+<div class="block">Constructs a RangeSensorBelt.</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>javax.swing.JPanel</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#createInspectorPanel()">createInspectorPanel</a></strong>()</code>
+<div class="block">Creates the panel associated to the device.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getBackLeftQuadrantHits()">getBackLeftQuadrantHits</a></strong>()</code>
+<div class="block">Returns number of sensor hits in the back left quadrant: [PI/2,PI].</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getBackLeftQuadrantMeasurement()">getBackLeftQuadrantMeasurement</a></strong>()</code>
+<div class="block">Returns the averaged measure of the sensors situated in the bacck left
+ quadrant: [PI/2,PI].</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getBackQuadrantHits()">getBackQuadrantHits</a></strong>()</code>
+<div class="block">Returns number of sensor hits in the back quadrant: [3PI/4,5PI/4].</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getBackQuadrantMeasurement()">getBackQuadrantMeasurement</a></strong>()</code>
+<div class="block">Returns the averaged measure of the sensors situated in the back
+ quadrant: [3PI/4,4*PI/4].</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getBackRightQuadrantHits()">getBackRightQuadrantHits</a></strong>()</code>
+<div class="block">Returns number of sensor hits in the back right quadrant: [PI,3PI/2].</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getBackRightQuadrantMeasurement()">getBackRightQuadrantMeasurement</a></strong>()</code>
+<div class="block">Returns the averaged measure of the sensors situated in the back right
+ quadrant: [PI,3*PI/2].</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getFrontLeftQuadrantHits()">getFrontLeftQuadrantHits</a></strong>()</code>
+<div class="block">Returns number of sensor hits in the front left quadrant: [0,PI/4].</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getFrontLeftQuadrantMeasurement()">getFrontLeftQuadrantMeasurement</a></strong>()</code>
+<div class="block">Returns the averaged measure of the sensors situated in the front left
+ quadrant: [0,PI/4].</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getFrontQuadrantHits()">getFrontQuadrantHits</a></strong>()</code>
+<div class="block">Returns number of sensor hits in the front quadrant: [-PI/4,PI/4].</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getFrontQuadrantMeasurement()">getFrontQuadrantMeasurement</a></strong>()</code>
+<div class="block">Returns the averaged measure of the sensors situated in the front
+ quadrant: [-PI/4,PI/4].</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getFrontRightQuadrantHits()">getFrontRightQuadrantHits</a></strong>()</code>
+<div class="block">Returns number of sensor hits in the front right quadrant: [3PI/2,2*PI].</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getFrontRightQuadrantMeasurement()">getFrontRightQuadrantMeasurement</a></strong>()</code>
+<div class="block">Returns the averaged measure of the sensors situated in the front right
+ quadrant: [3PI/2,2*PI].</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getLeftQuadrantHits()">getLeftQuadrantHits</a></strong>()</code>
+<div class="block">Returns number of sensor hits in the left quadrant: [PI/4,PI*3/4].</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getLeftQuadrantMeasurement()">getLeftQuadrantMeasurement</a></strong>()</code>
+<div class="block">Returns the averaged measure of the sensors situated in the left
+ quadrant: [PI/4,PI*3/4].</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>float</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getMaxRange()">getMaxRange</a></strong>()</code>
+<div class="block">Returns the maximum sensing range in meters.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getMeasurement(int)">getMeasurement</a></strong>(int&nbsp;sensorNum)</code>
+<div class="block">Returns the last measure collected for the individual sensor.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getNumSensors()">getNumSensors</a></strong>()</code>
+<div class="block">Return the number of individual sensor in the belt.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getQuadrantHits(double, double)">getQuadrantHits</a></strong>(double&nbsp;minAngle,
+               double&nbsp;maxAngle)</code>
+<div class="block">Returns number of hits in quadrant [minAngle,maxAngle].</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getQuadrantMeasurement(double, double)">getQuadrantMeasurement</a></strong>(double&nbsp;minAngle,
+                      double&nbsp;maxAngle)</code>
+<div class="block">Returns the averaged measure of the sensors situated in quadrant
+ [minAngle,maxAngle].</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getRightQuadrantHits()">getRightQuadrantHits</a></strong>()</code>
+<div class="block">Returns number of sensor hits in the right quadrant: [5PI/4,7PI/4].</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getRightQuadrantMeasurement()">getRightQuadrantMeasurement</a></strong>()</code>
+<div class="block">Returns the averaged measure of the sensors situated in the right
+ quadrant: [5*PI/4,7*PI/4].</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#getSensorAngle(int)">getSensorAngle</a></strong>(int&nbsp;sensorNum)</code>
+<div class="block">Returns the angle of this sensor.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#hasHit(int)">hasHit</a></strong>(int&nbsp;sensorNum)</code>
+<div class="block">Returns the hit state of the sensor.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/RangeSensorBelt.html#oneHasHit()">oneHasHit</a></strong>()</code>
+<div class="block">Returns true if one of the sensors has hit.</div>
+</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.mapper.sim.Device">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;org.myrobotlab.mapper.sim.<a href="../../../../org/myrobotlab/mapper/sim/Device.html" title="class in org.myrobotlab.mapper.sim">Device</a></h3>
+<code><a href="../../../../org/myrobotlab/mapper/sim/Device.html#getName()">getName</a>, <a href="../../../../org/myrobotlab/mapper/sim/Device.html#getUpdatePerSecond()">getUpdatePerSecond</a>, <a href="../../../../org/myrobotlab/mapper/sim/Device.html#setUpdateOnEachFrame(boolean)">setUpdateOnEachFrame</a>, <a href="../../../../org/myrobotlab/mapper/sim/Device.html#setUpdatePerSecond(double)">setUpdatePerSecond</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.mapper.sim.BaseObject">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;org.myrobotlab.mapper.sim.<a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html" title="class in org.myrobotlab.mapper.sim">BaseObject</a></h3>
+<code><a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html#attach()">attach</a>, <a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html#detach()">detach</a>, <a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html#getCanBeTraversed()">getCanBeTraversed</a>, <a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html#getRotationTransform(javax.media.j3d.Transform3D)">getRotationTransform</a>, <a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html#getTranslationTransform(javax.media.j3d.Transform3D)">getTranslationTransform</a>, <a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html#rotateY(double)">rotateY</a>, <a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html#setCanBeTraversed(boolean)">setCanBeTraversed</a>, <a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html#setColor(javax.vecmath.Color3f)">setColor</a>, <a href="../../../../org/myrobotlab/mapper/sim/BaseObject.html#translateTo(javax.vecmath.Vector3d)">translateTo</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a name="TYPE_SONAR">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TYPE_SONAR</h4>
+<pre>public static final&nbsp;int TYPE_SONAR</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../../constant-values.html#org.myrobotlab.mapper.sim.RangeSensorBelt.TYPE_SONAR">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="TYPE_IR">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TYPE_IR</h4>
+<pre>public static final&nbsp;int TYPE_IR</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../../constant-values.html#org.myrobotlab.mapper.sim.RangeSensorBelt.TYPE_IR">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="TYPE_LASER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TYPE_LASER</h4>
+<pre>public static final&nbsp;int TYPE_LASER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../../constant-values.html#org.myrobotlab.mapper.sim.RangeSensorBelt.TYPE_LASER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="TYPE_BUMPER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TYPE_BUMPER</h4>
+<pre>public static final&nbsp;int TYPE_BUMPER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../../constant-values.html#org.myrobotlab.mapper.sim.RangeSensorBelt.TYPE_BUMPER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="FLAG_SHOW_FULL_SENSOR_RAY">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>FLAG_SHOW_FULL_SENSOR_RAY</h4>
+<pre>public static final&nbsp;int FLAG_SHOW_FULL_SENSOR_RAY</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../../constant-values.html#org.myrobotlab.mapper.sim.RangeSensorBelt.FLAG_SHOW_FULL_SENSOR_RAY">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="RangeSensorBelt(float, float, float, int, int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>RangeSensorBelt</h4>
+<pre>public&nbsp;RangeSensorBelt(float&nbsp;radius,
+               float&nbsp;minRange,
+               float&nbsp;maxRange,
+               int&nbsp;nbsensors,
+               int&nbsp;type,
+               int&nbsp;flags)</pre>
+<div class="block">Constructs a RangeSensorBelt. The sensor type can be either
+ TYPE_BUMPER,TYPE_SONAR,TYPE_IR or TYPE_LASER. Ranges are measured from
+ the belt perimeter (not from the belt center).</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>radius</code> - - the radius of the belt.</dd><dd><code>minRange</code> - - the minimal range of each sensor ray. Not used for
+            TYPE_BUMPER.</dd><dd><code>maxRange</code> - - the maximal range of each sensor ray. Not used for
+            TYPE_BUMPER.</dd><dd><code>nbsensors</code> - - the number of sensors in the belt (typically 4,6,12,24 or
+            36).</dd><dd><code>type</code> - - to specify the sensor behavior</dd></dl>
+</li>
+</ul>
+<a name="RangeSensorBelt(javax.vecmath.Vector3d[], javax.vecmath.Vector3d[], int, int)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>RangeSensorBelt</h4>
+<pre>public&nbsp;RangeSensorBelt(javax.vecmath.Vector3d[]&nbsp;positions,
+               javax.vecmath.Vector3d[]&nbsp;directions,
+               int&nbsp;type,
+               int&nbsp;flags)</pre>
+<div class="block">Constructs a RangeSensorBelt. The sensor type can be either
+ TYPE_BUMPER,TYPE_SONAR,TYPE_IR or TYPE_LASER.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>positions</code> - : the position of each sensor relative to belt center.</dd><dd><code>directions</code> - : the sensing ray direction of each sensor relative to sensor
+            positions. the magnitude of the vector corresponds to the max
+            range.</dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="getMeasurement(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getMeasurement(int&nbsp;sensorNum)</pre>
+<div class="block">Returns the last measure collected for the individual sensor. Measurement
+ is made from the circle perimeter.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>sensorNum</code> - num of the sensor.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>the range measurment.</dd></dl>
+</li>
+</ul>
+<a name="getFrontQuadrantMeasurement()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getFrontQuadrantMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getFrontQuadrantMeasurement()</pre>
+<div class="block">Returns the averaged measure of the sensors situated in the front
+ quadrant: [-PI/4,PI/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the averaged measurment.</dd></dl>
+</li>
+</ul>
+<a name="getFrontLeftQuadrantMeasurement()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getFrontLeftQuadrantMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getFrontLeftQuadrantMeasurement()</pre>
+<div class="block">Returns the averaged measure of the sensors situated in the front left
+ quadrant: [0,PI/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the averaged measurment.</dd></dl>
+</li>
+</ul>
+<a name="getFrontRightQuadrantMeasurement()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getFrontRightQuadrantMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getFrontRightQuadrantMeasurement()</pre>
+<div class="block">Returns the averaged measure of the sensors situated in the front right
+ quadrant: [3PI/2,2*PI].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the averaged measurment.</dd></dl>
+</li>
+</ul>
+<a name="getLeftQuadrantMeasurement()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getLeftQuadrantMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getLeftQuadrantMeasurement()</pre>
+<div class="block">Returns the averaged measure of the sensors situated in the left
+ quadrant: [PI/4,PI*3/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the averaged measurment.</dd></dl>
+</li>
+</ul>
+<a name="getBackLeftQuadrantMeasurement()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getBackLeftQuadrantMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getBackLeftQuadrantMeasurement()</pre>
+<div class="block">Returns the averaged measure of the sensors situated in the bacck left
+ quadrant: [PI/2,PI].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the averaged measurment.</dd></dl>
+</li>
+</ul>
+<a name="getBackQuadrantMeasurement()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getBackQuadrantMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getBackQuadrantMeasurement()</pre>
+<div class="block">Returns the averaged measure of the sensors situated in the back
+ quadrant: [3PI/4,4*PI/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the averaged measurment.</dd></dl>
+</li>
+</ul>
+<a name="getBackRightQuadrantMeasurement()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getBackRightQuadrantMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getBackRightQuadrantMeasurement()</pre>
+<div class="block">Returns the averaged measure of the sensors situated in the back right
+ quadrant: [PI,3*PI/2].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the averaged measurment.</dd></dl>
+</li>
+</ul>
+<a name="getRightQuadrantMeasurement()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getRightQuadrantMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getRightQuadrantMeasurement()</pre>
+<div class="block">Returns the averaged measure of the sensors situated in the right
+ quadrant: [5*PI/4,7*PI/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the averaged measurment.</dd></dl>
+</li>
+</ul>
+<a name="getQuadrantMeasurement(double, double)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getQuadrantMeasurement</h4>
+<pre>public&nbsp;double&nbsp;getQuadrantMeasurement(double&nbsp;minAngle,
+                            double&nbsp;maxAngle)</pre>
+<div class="block">Returns the averaged measure of the sensors situated in quadrant
+ [minAngle,maxAngle].</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>minAngle</code> - in radians the right limit of the quadrant.</dd><dd><code>maxAngle</code> - in radians the left limit of the quadrant.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>the averaged measurment.</dd></dl>
+</li>
+</ul>
+<a name="getFrontQuadrantHits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getFrontQuadrantHits</h4>
+<pre>public&nbsp;int&nbsp;getFrontQuadrantHits()</pre>
+<div class="block">Returns number of sensor hits in the front quadrant: [-PI/4,PI/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the number of hits.</dd></dl>
+</li>
+</ul>
+<a name="getFrontLeftQuadrantHits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getFrontLeftQuadrantHits</h4>
+<pre>public&nbsp;int&nbsp;getFrontLeftQuadrantHits()</pre>
+<div class="block">Returns number of sensor hits in the front left quadrant: [0,PI/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the number of hits.</dd></dl>
+</li>
+</ul>
+<a name="getFrontRightQuadrantHits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getFrontRightQuadrantHits</h4>
+<pre>public&nbsp;int&nbsp;getFrontRightQuadrantHits()</pre>
+<div class="block">Returns number of sensor hits in the front right quadrant: [3PI/2,2*PI].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the number of hits.</dd></dl>
+</li>
+</ul>
+<a name="getLeftQuadrantHits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getLeftQuadrantHits</h4>
+<pre>public&nbsp;int&nbsp;getLeftQuadrantHits()</pre>
+<div class="block">Returns number of sensor hits in the left quadrant: [PI/4,PI*3/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the number of hits.</dd></dl>
+</li>
+</ul>
+<a name="getBackLeftQuadrantHits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getBackLeftQuadrantHits</h4>
+<pre>public&nbsp;int&nbsp;getBackLeftQuadrantHits()</pre>
+<div class="block">Returns number of sensor hits in the back left quadrant: [PI/2,PI].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the number of hits.</dd></dl>
+</li>
+</ul>
+<a name="getBackQuadrantHits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getBackQuadrantHits</h4>
+<pre>public&nbsp;int&nbsp;getBackQuadrantHits()</pre>
+<div class="block">Returns number of sensor hits in the back quadrant: [3PI/4,5PI/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the number of hits.</dd></dl>
+</li>
+</ul>
+<a name="getBackRightQuadrantHits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getBackRightQuadrantHits</h4>
+<pre>public&nbsp;int&nbsp;getBackRightQuadrantHits()</pre>
+<div class="block">Returns number of sensor hits in the back right quadrant: [PI,3PI/2].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the number of hits.</dd></dl>
+</li>
+</ul>
+<a name="getRightQuadrantHits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getRightQuadrantHits</h4>
+<pre>public&nbsp;int&nbsp;getRightQuadrantHits()</pre>
+<div class="block">Returns number of sensor hits in the right quadrant: [5PI/4,7PI/4].</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the number of hits.</dd></dl>
+</li>
+</ul>
+<a name="getQuadrantHits(double, double)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getQuadrantHits</h4>
+<pre>public&nbsp;int&nbsp;getQuadrantHits(double&nbsp;minAngle,
+                  double&nbsp;maxAngle)</pre>
+<div class="block">Returns number of hits in quadrant [minAngle,maxAngle].</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>minAngle</code> - in radians the right limit of the quadrant.</dd><dd><code>maxAngle</code> - in radians the left limit of the quadrant.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>the number of hits.</dd></dl>
+</li>
+</ul>
+<a name="hasHit(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasHit</h4>
+<pre>public&nbsp;boolean&nbsp;hasHit(int&nbsp;sensorNum)</pre>
+<div class="block">Returns the hit state of the sensor.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>sensorNum</code> - num of the sensor.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>true if the sensor ray has hit an obstacle</dd></dl>
+</li>
+</ul>
+<a name="oneHasHit()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>oneHasHit</h4>
+<pre>public&nbsp;boolean&nbsp;oneHasHit()</pre>
+<div class="block">Returns true if one of the sensors has hit.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>true if one ray has hit an obstacle</dd></dl>
+</li>
+</ul>
+<a name="getNumSensors()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getNumSensors</h4>
+<pre>public&nbsp;int&nbsp;getNumSensors()</pre>
+<div class="block">Return the number of individual sensor in the belt.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the number of sensors.</dd></dl>
+</li>
+</ul>
+<a name="getSensorAngle(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSensorAngle</h4>
+<pre>public&nbsp;double&nbsp;getSensorAngle(int&nbsp;sensorNum)</pre>
+<div class="block">Returns the angle of this sensor.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>sensorNum</code> - - num of the sensor.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>the angle in radians.</dd></dl>
+</li>
+</ul>
+<a name="getMaxRange()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMaxRange</h4>
+<pre>public&nbsp;float&nbsp;getMaxRange()</pre>
+<div class="block">Returns the maximum sensing range in meters.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the maximum range.</dd></dl>
+</li>
+</ul>
+<a name="createInspectorPanel()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>createInspectorPanel</h4>
+<pre>public&nbsp;javax.swing.JPanel&nbsp;createInspectorPanel()</pre>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../../org/myrobotlab/mapper/sim/Device.html#createInspectorPanel()">Device</a></code></strong></div>
+<div class="block">Creates the panel associated to the device. This panel can be inserted in
+ the inspector window for monitoring.</div>
+<dl>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/mapper/sim/Device.html#createInspectorPanel()">createInspectorPanel</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/myrobotlab/mapper/sim/Device.html" title="class in org.myrobotlab.mapper.sim">Device</a></code></dd>
+<dt><span class="strong">Returns:</span></dt><dd>the JPanel. null if no panel can be associated</dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/RangeSensorBelt.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../org/myrobotlab/mapper/sim/Plan.html" title="class in org.myrobotlab.mapper.sim"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../org/myrobotlab/mapper/sim/Robot.html" title="class in org.myrobotlab.mapper.sim"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?org/myrobotlab/mapper/sim/RangeSensorBelt.html" target="_top">Frames</a></li>
+<li><a href="RangeSensorBelt.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>
