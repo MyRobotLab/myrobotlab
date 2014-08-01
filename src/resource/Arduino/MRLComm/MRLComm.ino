@@ -100,6 +100,11 @@
 
 #define STEPPER_ATTACH					44
 #define STEPPER_MOVE_TO					45 
+#define STEPPER_STOP					46 
+
+#define STEPPER_EVENT					47
+#define STEPPER_EVENT_STOP				1 
+
 
 #define STEPPER_TYPE_POLOLU  1
 
@@ -187,15 +192,17 @@ sensor_type sensors[SENSORS_MAX];
 
 typedef struct
   {
+  	  int ts;
       int type;
+      int index;
       int currentPos;
       int targetPos;
       int speed;
       int dir;
       bool isRunning;
       int state;
-      int dirPin;
-      int step0;
+      // int dirPin;
+      int step0; // step0 is dirPin is POLOLU TYPE
       int step1;
       int step2;
       int step3;
@@ -663,11 +670,12 @@ void loop () {
 		case STEPPER_ATTACH:{
 			stepper_type& stepper = steppers[ioCmd[1]];
 			stepper.isRunning = false;
+			stepper.index = ioCmd[1];
 			stepper.type = ioCmd[2];
 			
 			if (stepper.type == STEPPER_TYPE_POLOLU) {
-				stepper.dirPin = ioCmd[3];
-				stepper.step0 = ioCmd[4];
+				stepper.step0 = ioCmd[3]; // dir pin
+				stepper.step1 = ioCmd[4]; // step pin
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}
@@ -679,6 +687,19 @@ void loop () {
 			if (stepper.type == STEPPER_TYPE_POLOLU) {
 				stepper.isRunning = true;
 				stepper.targetPos = ioCmd[2];
+				stepper.dir = ioCmd[3];
+				digitalWrite(stepper.step0, stepper.dir);
+			} else {
+				sendError(ERROR_UNKOWN_CMD);
+			}
+			break;
+		}
+		
+		case STEPPER_STOP:{
+			stepper_type& stepper = steppers[ioCmd[1]];
+			if (stepper.type == STEPPER_TYPE_POLOLU) {
+				stepper.isRunning = false;
+				stepper.targetPos = stepper.currentPos;
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}
@@ -937,10 +958,33 @@ void loop () {
 	
 	} // end for each sensor
 
+	// TODO - brake - speed - fractional stepping - other stepper types
 	for (int i = 0; i < STEPPERS_MAX; ++i) {
 		stepper_type& stepper = steppers[i];
 		if (stepper.isRunning == true){
-			if (stepper.type == SENSOR_ULTRASONIC){
+			if (stepper.type == STEPPER_TYPE_POLOLU){
+				// stepper states
+				
+				// direction is already taken processed in initial STEPPER_MOVE
+				
+				// start state
+				if (stepper.currentPos < stepper.targetPos) {
+					digitalWrite(stepper.step0, 1);
+					delayMicroseconds(1); // :P
+					digitalWrite(stepper.step0, 0);
+					
+					++stepper.currentPos;
+				} else {
+					stepper.isRunning = false;
+					stepper.currentPos = stepper.targetPos; // forcing ? :P
+					Serial.write(MAGIC_NUMBER);
+					Serial.write(4); // size = 1 FN + 1 eventType + 1 index + 1 curPos
+					Serial.write(STEPPER_EVENT);
+					Serial.write(STEPPER_EVENT_STOP); 
+					Serial.write(stepper.index); // send my index
+					Serial.write(stepper.currentPos); 
+				}
+				
 			}
 		}
 	}

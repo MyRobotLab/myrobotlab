@@ -1,0 +1,1152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>HTTPRequest</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="HTTPRequest";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/HTTPRequest.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/net/Heartbeat.html" title="class in org.myrobotlab.net"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/net/InstallCert.html" title="class in org.myrobotlab.net"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/net/HTTPRequest.html" target="_top">Frames</a></li>
+<li><a href="HTTPRequest.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.net</div>
+<h2 title="Class HTTPRequest" class="title">Class HTTPRequest</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.net.HTTPRequest</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<hr>
+<br>
+<pre>public class <span class="strong">HTTPRequest</span>
+extends java.lang.Object</pre>
+<div class="block">Client HTTP Request class This class helps to send POST HTTP requests with
+ various form data, including files. Cookies can be added to be included in
+ the request.</div>
+<dl><dt><span class="strong">Version:</span></dt>
+  <dd>1.0
+ 
+          Modified by grog - added buffered output to increase performance in
+          larger POSTs. In file operations buffered output is 10x faster.
+          Currently, a POST of a large file takes ~6 seconds TODO - fill in
+          details and result
+ 
+          References:
+          http://www.javabeat.net/tips/36-file-upload-and-download-
+          using-java.html http://www.java2s.com/Code/Java/File-Input-Output/
+          ComparingBufferedandUnbufferedWritingPerformance.htm
+ 
+          The big beautiful kahuna from stack overflow
+          http://stackoverflow.com
+          /questions/2793150/how-to-use-java-net-urlconnection
+          -to-fire-and-handle-http-requests Proxy info -
+          http://edn.embarcadero.com/article/29783 Proxy info -
+          http://docs.oracle
+          .com/javase/6/docs/technotes/guides/net/proxies.html Proxy info -
+          http
+          ://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be
+          -used-by-the-jvm</dd>
+<dt><span class="strong">Author:</span></dt>
+  <dd>Vlad Patryshev</dd></dl>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static org.slf4j.Logger</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#log">log</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#HTTPRequest(java.lang.String)">HTTPRequest</a></strong>(java.lang.String&nbsp;urlString)</code>
+<div class="block">Creates a new multipart POST HTTP request for a specified URL string</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#HTTPRequest(java.net.URL)">HTTPRequest</a></strong>(java.net.URL&nbsp;url)</code>
+<div class="block">Creates a new multipart POST HTTP request for a specified URL</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#HTTPRequest(java.net.URLConnection)">HTTPRequest</a></strong>(java.net.URLConnection&nbsp;connection)</code>
+<div class="block">Creates a new multipart POST HTTP request on a freshly opened
+ URLConnection</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>byte[]</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#getBinary()">getBinary</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#getError()">getError</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#getString()">getString</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#hasError()">hasError</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post()">post</a></strong>()</code>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.util.Map)">post</a></strong>(java.util.Map&nbsp;parameters)</code>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added before (if any), and with parameters that are passed in
+ the argument</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.util.Map, java.util.Map)">post</a></strong>(java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;cookies,
+    java.util.Map&nbsp;parameters)</code>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added before (if any), and with cookies and parameters that are
+ passed in the arguments</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.lang.Object[])">post</a></strong>(java.lang.Object[]&nbsp;parameters)</code>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added before (if any), and with parameters that are passed in
+ the argument</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.lang.String[], java.lang.Object[])">post</a></strong>(java.lang.String[]&nbsp;cookies,
+    java.lang.Object[]&nbsp;parameters)</code>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added before (if any), and with cookies and parameters that are
+ passed in the arguments</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.lang.String, java.lang.Object)">post</a></strong>(java.lang.String&nbsp;name,
+    java.lang.Object&nbsp;value)</code>
+<div class="block">post the POST request to the server, with the specified parameter</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">post</a></strong>(java.lang.String&nbsp;name1,
+    java.lang.Object&nbsp;value1,
+    java.lang.String&nbsp;name2,
+    java.lang.Object&nbsp;value2)</code>
+<div class="block">post the POST request to the server, with the specified parameters</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">post</a></strong>(java.lang.String&nbsp;name1,
+    java.lang.Object&nbsp;value1,
+    java.lang.String&nbsp;name2,
+    java.lang.Object&nbsp;value2,
+    java.lang.String&nbsp;name3,
+    java.lang.Object&nbsp;value3)</code>
+<div class="block">post the POST request to the server, with the specified parameters</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">post</a></strong>(java.lang.String&nbsp;name1,
+    java.lang.Object&nbsp;value1,
+    java.lang.String&nbsp;name2,
+    java.lang.Object&nbsp;value2,
+    java.lang.String&nbsp;name3,
+    java.lang.Object&nbsp;value3,
+    java.lang.String&nbsp;name4,
+    java.lang.Object&nbsp;value4)</code>
+<div class="block">post the POST request to the server, with the specified parameters</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.net.URL, java.util.Map)">post</a></strong>(java.net.URL&nbsp;url,
+    java.util.Map&nbsp;parameters)</code>
+<div class="block">posts a new request to specified URL, with parameters that are passed in
+ the argument</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.net.URL, java.util.Map, java.util.Map)">post</a></strong>(java.net.URL&nbsp;url,
+    java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;cookies,
+    java.util.Map&nbsp;parameters)</code>
+<div class="block">posts a new request to specified URL, with cookies and parameters that
+ are passed in the argument</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.net.URL, java.lang.Object[])">post</a></strong>(java.net.URL&nbsp;url,
+    java.lang.Object[]&nbsp;parameters)</code>
+<div class="block">posts a new request to specified URL, with parameters that are passed in
+ the argument</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.net.URL, java.lang.String[], java.lang.Object[])">post</a></strong>(java.net.URL&nbsp;url,
+    java.lang.String[]&nbsp;cookies,
+    java.lang.Object[]&nbsp;parameters)</code>
+<div class="block">posts a new request to specified URL, with cookies and parameters that
+ are passed in the argument</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.net.URL, java.lang.String, java.lang.Object)">post</a></strong>(java.net.URL&nbsp;url,
+    java.lang.String&nbsp;name1,
+    java.lang.Object&nbsp;value1)</code>
+<div class="block">post the POST request specified URL, with the specified parameter</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.net.URL, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">post</a></strong>(java.net.URL&nbsp;url,
+    java.lang.String&nbsp;name1,
+    java.lang.Object&nbsp;value1,
+    java.lang.String&nbsp;name2,
+    java.lang.Object&nbsp;value2)</code>
+<div class="block">post the POST request to specified URL, with the specified parameters</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.net.URL, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">post</a></strong>(java.net.URL&nbsp;url,
+    java.lang.String&nbsp;name1,
+    java.lang.Object&nbsp;value1,
+    java.lang.String&nbsp;name2,
+    java.lang.Object&nbsp;value2,
+    java.lang.String&nbsp;name3,
+    java.lang.Object&nbsp;value3)</code>
+<div class="block">post the POST request to specified URL, with the specified parameters</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#post(java.net.URL, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">post</a></strong>(java.net.URL&nbsp;url,
+    java.lang.String&nbsp;name1,
+    java.lang.Object&nbsp;value1,
+    java.lang.String&nbsp;name2,
+    java.lang.Object&nbsp;value2,
+    java.lang.String&nbsp;name3,
+    java.lang.Object&nbsp;value3,
+    java.lang.String&nbsp;name4,
+    java.lang.Object&nbsp;value4)</code>
+<div class="block">post the POST request to specified URL, with the specified parameters</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#postCookies()">postCookies</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#postFile(java.lang.String, java.lang.String, java.lang.String, java.io.File)">postFile</a></strong>(java.lang.String&nbsp;url,
+        java.lang.String&nbsp;userid,
+        java.lang.String&nbsp;fieldName,
+        java.io.File&nbsp;textFile)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setCookie(java.lang.String, java.lang.String)">setCookie</a></strong>(java.lang.String&nbsp;name,
+         java.lang.String&nbsp;value)</code>
+<div class="block">adds a cookie to the requst</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setCookies(java.util.Map)">setCookies</a></strong>(java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;cookies)</code>
+<div class="block">adds cookies to the request</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setCookies(java.lang.String[])">setCookies</a></strong>(java.lang.String[]&nbsp;cookies)</code>
+<div class="block">adds cookies to the request</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.io.File)">setParameter</a></strong>(java.lang.String&nbsp;name,
+            java.io.File&nbsp;file)</code>
+<div class="block">adds a file parameter to the request</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.Object)">setParameter</a></strong>(java.lang.String&nbsp;name,
+            java.lang.Object&nbsp;object)</code>
+<div class="block">adds a parameter to the request; if the parameter is a File, the file is
+ uploaded, otherwise the string value of the parameter is passed in the
+ request</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String)">setParameter</a></strong>(java.lang.String&nbsp;name,
+            java.lang.String&nbsp;value)</code>
+<div class="block">adds a string parameter to the request</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String, java.io.InputStream)">setParameter</a></strong>(java.lang.String&nbsp;name,
+            java.lang.String&nbsp;filename,
+            java.io.InputStream&nbsp;is)</code>
+<div class="block">adds a file parameter to the request</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.util.Map)">setParameters</a></strong>(java.util.Map&nbsp;parameters)</code>
+<div class="block">adds parameters to the request</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.lang.Object[])">setParameters</a></strong>(java.lang.Object[]&nbsp;parameters)</code>
+<div class="block">adds parameters to the request</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/HTTPRequest.html#setRequestProperty(java.lang.String, java.lang.String)">setRequestProperty</a></strong>(java.lang.String&nbsp;key,
+                  java.lang.String&nbsp;value)</code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a name="log">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>log</h4>
+<pre>public static final&nbsp;org.slf4j.Logger log</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="HTTPRequest(java.net.URLConnection)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>HTTPRequest</h4>
+<pre>public&nbsp;HTTPRequest(java.net.URLConnection&nbsp;connection)
+            throws java.io.IOException</pre>
+<div class="block">Creates a new multipart POST HTTP request on a freshly opened
+ URLConnection</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>connection</code> - an already open URL connection</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="HTTPRequest(java.net.URL)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>HTTPRequest</h4>
+<pre>public&nbsp;HTTPRequest(java.net.URL&nbsp;url)
+            throws java.io.IOException</pre>
+<div class="block">Creates a new multipart POST HTTP request for a specified URL</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>url</code> - the URL to send request to</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="HTTPRequest(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>HTTPRequest</h4>
+<pre>public&nbsp;HTTPRequest(java.lang.String&nbsp;urlString)
+            throws java.io.IOException</pre>
+<div class="block">Creates a new multipart POST HTTP request for a specified URL string</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>urlString</code> - the string representation of the URL to send request to</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="setRequestProperty(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setRequestProperty</h4>
+<pre>public&nbsp;void&nbsp;setRequestProperty(java.lang.String&nbsp;key,
+                      java.lang.String&nbsp;value)</pre>
+</li>
+</ul>
+<a name="postCookies()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>postCookies</h4>
+<pre>public&nbsp;void&nbsp;postCookies()</pre>
+</li>
+</ul>
+<a name="setCookie(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setCookie</h4>
+<pre>public&nbsp;void&nbsp;setCookie(java.lang.String&nbsp;name,
+             java.lang.String&nbsp;value)
+               throws java.io.IOException</pre>
+<div class="block">adds a cookie to the requst</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - cookie name</dd><dd><code>value</code> - cookie value</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="setCookies(java.util.Map)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setCookies</h4>
+<pre>public&nbsp;void&nbsp;setCookies(java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;cookies)
+                throws java.io.IOException</pre>
+<div class="block">adds cookies to the request</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cookies</code> - the cookie "name-to-value" map</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="setCookies(java.lang.String[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setCookies</h4>
+<pre>public&nbsp;void&nbsp;setCookies(java.lang.String[]&nbsp;cookies)
+                throws java.io.IOException</pre>
+<div class="block">adds cookies to the request</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cookies</code> - array of cookie names and values (cookies[2*i] is a name,
+            cookies[2*i + 1] is a value)</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="setParameter(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setParameter</h4>
+<pre>public&nbsp;void&nbsp;setParameter(java.lang.String&nbsp;name,
+                java.lang.String&nbsp;value)
+                  throws java.io.IOException</pre>
+<div class="block">adds a string parameter to the request</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - parameter name</dd><dd><code>value</code> - parameter value</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="setParameter(java.lang.String, java.lang.String, java.io.InputStream)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setParameter</h4>
+<pre>public&nbsp;void&nbsp;setParameter(java.lang.String&nbsp;name,
+                java.lang.String&nbsp;filename,
+                java.io.InputStream&nbsp;is)
+                  throws java.io.IOException</pre>
+<div class="block">adds a file parameter to the request</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - parameter name</dd><dd><code>filename</code> - the name of the file</dd><dd><code>is</code> - input stream to read the contents of the file from</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="setParameter(java.lang.String, java.io.File)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setParameter</h4>
+<pre>public&nbsp;void&nbsp;setParameter(java.lang.String&nbsp;name,
+                java.io.File&nbsp;file)
+                  throws java.io.IOException</pre>
+<div class="block">adds a file parameter to the request</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - parameter name</dd><dd><code>file</code> - the file to upload</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="setParameter(java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setParameter</h4>
+<pre>public&nbsp;void&nbsp;setParameter(java.lang.String&nbsp;name,
+                java.lang.Object&nbsp;object)
+                  throws java.io.IOException</pre>
+<div class="block">adds a parameter to the request; if the parameter is a File, the file is
+ uploaded, otherwise the string value of the parameter is passed in the
+ request</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - parameter name</dd><dd><code>object</code> - parameter value, a File or anything else that can be
+            stringified</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="setParameters(java.util.Map)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setParameters</h4>
+<pre>public&nbsp;void&nbsp;setParameters(java.util.Map&nbsp;parameters)
+                   throws java.io.IOException</pre>
+<div class="block">adds parameters to the request</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>parameters</code> - "name-to-value" map of parameters; if a value is a file, the
+            file is uploaded, otherwise it is stringified and sent in the
+            request</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="setParameters(java.lang.Object[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setParameters</h4>
+<pre>public&nbsp;void&nbsp;setParameters(java.lang.Object[]&nbsp;parameters)
+                   throws java.io.IOException</pre>
+<div class="block">adds parameters to the request</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>parameters</code> - array of parameter names and values (parameters[2*i] is a
+            name, parameters[2*i + 1] is a value); if a value is a file,
+            the file is uploaded, otherwise it is stringified and sent in
+            the request</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="post()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post()</pre>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="post(java.util.Map)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.util.Map&nbsp;parameters)
+                         throws java.io.IOException</pre>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added before (if any), and with parameters that are passed in
+ the argument</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>parameters</code> - request parameters</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.util.Map)"><code>setParameters(java.util.Map)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.lang.Object[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.lang.Object[]&nbsp;parameters)
+                         throws java.io.IOException</pre>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added before (if any), and with parameters that are passed in
+ the argument</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>parameters</code> - request parameters</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.util.Map)"><code>setParameters(java.util.Map)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.util.Map, java.util.Map)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;cookies,
+                       java.util.Map&nbsp;parameters)
+                         throws java.io.IOException</pre>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added before (if any), and with cookies and parameters that are
+ passed in the arguments</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cookies</code> - request cookies</dd><dd><code>parameters</code> - request parameters</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.util.Map)"><code>setParameters(java.util.Map)</code></a>, 
+<code>setCookies</code></dd></dl>
+</li>
+</ul>
+<a name="post(java.lang.String[], java.lang.Object[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.lang.String[]&nbsp;cookies,
+                       java.lang.Object[]&nbsp;parameters)
+                         throws java.io.IOException</pre>
+<div class="block">posts the requests to the server, with all the cookies and parameters
+ that were added before (if any), and with cookies and parameters that are
+ passed in the arguments</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cookies</code> - request cookies</dd><dd><code>parameters</code> - request parameters</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.util.Map)"><code>setParameters(java.util.Map)</code></a>, 
+<code>setCookies</code></dd></dl>
+</li>
+</ul>
+<a name="post(java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.lang.String&nbsp;name,
+                       java.lang.Object&nbsp;value)
+                         throws java.io.IOException</pre>
+<div class="block">post the POST request to the server, with the specified parameter</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - parameter name</dd><dd><code>value</code> - parameter value</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String)"><code>setParameter(java.lang.String, java.lang.String)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.lang.String&nbsp;name1,
+                       java.lang.Object&nbsp;value1,
+                       java.lang.String&nbsp;name2,
+                       java.lang.Object&nbsp;value2)
+                         throws java.io.IOException</pre>
+<div class="block">post the POST request to the server, with the specified parameters</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name1</code> - first parameter name</dd><dd><code>value1</code> - first parameter value</dd><dd><code>name2</code> - second parameter name</dd><dd><code>value2</code> - second parameter value</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String)"><code>setParameter(java.lang.String, java.lang.String)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.lang.String&nbsp;name1,
+                       java.lang.Object&nbsp;value1,
+                       java.lang.String&nbsp;name2,
+                       java.lang.Object&nbsp;value2,
+                       java.lang.String&nbsp;name3,
+                       java.lang.Object&nbsp;value3)
+                         throws java.io.IOException</pre>
+<div class="block">post the POST request to the server, with the specified parameters</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name1</code> - first parameter name</dd><dd><code>value1</code> - first parameter value</dd><dd><code>name2</code> - second parameter name</dd><dd><code>value2</code> - second parameter value</dd><dd><code>name3</code> - third parameter name</dd><dd><code>value3</code> - third parameter value</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String)"><code>setParameter(java.lang.String, java.lang.String)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.lang.String&nbsp;name1,
+                       java.lang.Object&nbsp;value1,
+                       java.lang.String&nbsp;name2,
+                       java.lang.Object&nbsp;value2,
+                       java.lang.String&nbsp;name3,
+                       java.lang.Object&nbsp;value3,
+                       java.lang.String&nbsp;name4,
+                       java.lang.Object&nbsp;value4)
+                         throws java.io.IOException</pre>
+<div class="block">post the POST request to the server, with the specified parameters</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name1</code> - first parameter name</dd><dd><code>value1</code> - first parameter value</dd><dd><code>name2</code> - second parameter name</dd><dd><code>value2</code> - second parameter value</dd><dd><code>name3</code> - third parameter name</dd><dd><code>value3</code> - third parameter value</dd><dd><code>name4</code> - fourth parameter name</dd><dd><code>value4</code> - fourth parameter value</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String)"><code>setParameter(java.lang.String, java.lang.String)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.net.URL, java.util.Map)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.net.URL&nbsp;url,
+                       java.util.Map&nbsp;parameters)
+                         throws java.io.IOException</pre>
+<div class="block">posts a new request to specified URL, with parameters that are passed in
+ the argument</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>parameters</code> - request parameters</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.util.Map)"><code>setParameters(java.util.Map)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.net.URL, java.lang.Object[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.net.URL&nbsp;url,
+                       java.lang.Object[]&nbsp;parameters)
+                         throws java.io.IOException</pre>
+<div class="block">posts a new request to specified URL, with parameters that are passed in
+ the argument</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>parameters</code> - request parameters</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.util.Map)"><code>setParameters(java.util.Map)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.net.URL, java.util.Map, java.util.Map)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.net.URL&nbsp;url,
+                       java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;cookies,
+                       java.util.Map&nbsp;parameters)
+                         throws java.io.IOException</pre>
+<div class="block">posts a new request to specified URL, with cookies and parameters that
+ are passed in the argument</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cookies</code> - request cookies</dd><dd><code>parameters</code> - request parameters</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setCookies(java.util.Map)"><code>setCookies(java.util.Map&lt;java.lang.String, java.lang.String&gt;)</code></a>, 
+<a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.util.Map)"><code>setParameters(java.util.Map)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.net.URL, java.lang.String[], java.lang.Object[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.net.URL&nbsp;url,
+                       java.lang.String[]&nbsp;cookies,
+                       java.lang.Object[]&nbsp;parameters)
+                         throws java.io.IOException</pre>
+<div class="block">posts a new request to specified URL, with cookies and parameters that
+ are passed in the argument</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cookies</code> - request cookies</dd><dd><code>parameters</code> - request parameters</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setCookies(java.util.Map)"><code>setCookies(java.util.Map&lt;java.lang.String, java.lang.String&gt;)</code></a>, 
+<a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameters(java.util.Map)"><code>setParameters(java.util.Map)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.net.URL, java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.net.URL&nbsp;url,
+                       java.lang.String&nbsp;name1,
+                       java.lang.Object&nbsp;value1)
+                         throws java.io.IOException</pre>
+<div class="block">post the POST request specified URL, with the specified parameter</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>filename</code> - parameter name</dd><dd><code>value</code> - parameter value</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String)"><code>setParameter(java.lang.String, java.lang.String)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.net.URL, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.net.URL&nbsp;url,
+                       java.lang.String&nbsp;name1,
+                       java.lang.Object&nbsp;value1,
+                       java.lang.String&nbsp;name2,
+                       java.lang.Object&nbsp;value2)
+                         throws java.io.IOException</pre>
+<div class="block">post the POST request to specified URL, with the specified parameters</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name1</code> - first parameter name</dd><dd><code>value1</code> - first parameter value</dd><dd><code>name2</code> - second parameter name</dd><dd><code>value2</code> - second parameter value</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String)"><code>setParameter(java.lang.String, java.lang.String)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.net.URL, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.net.URL&nbsp;url,
+                       java.lang.String&nbsp;name1,
+                       java.lang.Object&nbsp;value1,
+                       java.lang.String&nbsp;name2,
+                       java.lang.Object&nbsp;value2,
+                       java.lang.String&nbsp;name3,
+                       java.lang.Object&nbsp;value3)
+                         throws java.io.IOException</pre>
+<div class="block">post the POST request to specified URL, with the specified parameters</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name1</code> - first parameter name</dd><dd><code>value1</code> - first parameter value</dd><dd><code>name2</code> - second parameter name</dd><dd><code>value2</code> - second parameter value</dd><dd><code>name3</code> - third parameter name</dd><dd><code>value3</code> - third parameter value</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String)"><code>setParameter(java.lang.String, java.lang.String)</code></a></dd></dl>
+</li>
+</ul>
+<a name="post(java.net.URL, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object, java.lang.String, java.lang.Object)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>post</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;post(java.net.URL&nbsp;url,
+                       java.lang.String&nbsp;name1,
+                       java.lang.Object&nbsp;value1,
+                       java.lang.String&nbsp;name2,
+                       java.lang.Object&nbsp;value2,
+                       java.lang.String&nbsp;name3,
+                       java.lang.Object&nbsp;value3,
+                       java.lang.String&nbsp;name4,
+                       java.lang.Object&nbsp;value4)
+                         throws java.io.IOException</pre>
+<div class="block">post the POST request to specified URL, with the specified parameters</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>name1</code> - first parameter name</dd><dd><code>value1</code> - first parameter value</dd><dd><code>name2</code> - second parameter name</dd><dd><code>value2</code> - second parameter value</dd><dd><code>name3</code> - third parameter name</dd><dd><code>value3</code> - third parameter value</dd><dd><code>name4</code> - fourth parameter name</dd><dd><code>value4</code> - fourth parameter value</dd>
+<dt><span class="strong">Returns:</span></dt><dd>input stream with the server response</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd><dt><span class="strong">See Also:</span></dt><dd><a href="../../../org/myrobotlab/net/HTTPRequest.html#setParameter(java.lang.String, java.lang.String)"><code>setParameter(java.lang.String, java.lang.String)</code></a></dd></dl>
+</li>
+</ul>
+<a name="getBinary()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getBinary</h4>
+<pre>public&nbsp;byte[]&nbsp;getBinary()
+                 throws java.io.IOException</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="getString()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getString</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getString()
+                           throws java.io.IOException</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="hasError()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasError</h4>
+<pre>public&nbsp;boolean&nbsp;hasError()</pre>
+</li>
+</ul>
+<a name="getError()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getError</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getError()</pre>
+</li>
+</ul>
+<a name="postFile(java.lang.String, java.lang.String, java.lang.String, java.io.File)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>postFile</h4>
+<pre>public static&nbsp;java.lang.String&nbsp;postFile(java.lang.String&nbsp;url,
+                        java.lang.String&nbsp;userid,
+                        java.lang.String&nbsp;fieldName,
+                        java.io.File&nbsp;textFile)
+                                 throws java.lang.Exception</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.lang.Exception</code></dd></dl>
+</li>
+</ul>
+<a name="main(java.lang.String[])">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>main</h4>
+<pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;args)
+                 throws java.lang.Exception</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.lang.Exception</code></dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/HTTPRequest.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/net/Heartbeat.html" title="class in org.myrobotlab.net"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/net/InstallCert.html" title="class in org.myrobotlab.net"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/net/HTTPRequest.html" target="_top">Frames</a></li>
+<li><a href="HTTPRequest.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

@@ -88,7 +88,7 @@
 	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
 -->
 <!-- FIXME - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="dist">
+<project name="myrobotlab" default="javadoc">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
 	<!-- 
@@ -417,7 +417,7 @@
 			<headers>
 				<header name="Authorization" value="token ${github.token}" />
 			</headers>
-			<entity value="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${tag}&quot;,&quot;body&quot;: &quot;Description of the release&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}">
+			<entity value="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${tag}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}">
 			</entity>
 		</http>
 		<echo message="${release.response}" />

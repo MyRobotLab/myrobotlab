@@ -1,0 +1,816 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>SerialDeviceGNU</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="SerialDeviceGNU";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/SerialDeviceGNU.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceFactoryGNU.html" title="class in org.myrobotlab.serial.gnu"><span class="strong">Prev Class</span></a></li>
+<li>Next Class</li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?org/myrobotlab/serial/gnu/SerialDeviceGNU.html" target="_top">Frames</a></li>
+<li><a href="SerialDeviceGNU.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.serial.gnu</div>
+<h2 title="Class SerialDeviceGNU" class="title">Class SerialDeviceGNU</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.serial.gnu.SerialDeviceGNU</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>gnu.io.SerialPortEventListener, java.util.EventListener, <a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public class <span class="strong">SerialDeviceGNU</span>
+extends java.lang.Object
+implements <a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a>, gnu.io.SerialPortEventListener</pre>
+<dl><dt><span class="strong">Author:</span></dt>
+  <dd>GroG
+ 
+         A silly but necessary wrapper class for gnu.io.SerialPort, since
+         RXTXComm driver initializes loadlibrary in a static block and the
+         driver dynamically loaded is loaded with a hardcoded string :P</dd></dl>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static org.slf4j.Logger</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#log">log</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="fields_inherited_from_class_org.myrobotlab.serial.SerialDevice">
+<!--   -->
+</a>
+<h3>Fields inherited from interface&nbsp;org.myrobotlab.serial.<a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></h3>
+<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#DATABITS_5">DATABITS_5</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#DATABITS_6">DATABITS_6</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#DATABITS_7">DATABITS_7</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#DATABITS_8">DATABITS_8</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#FLOWCONTROL_NONE">FLOWCONTROL_NONE</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#FLOWCONTROL_RTSCTS_IN">FLOWCONTROL_RTSCTS_IN</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#FLOWCONTROL_RTSCTS_OUT">FLOWCONTROL_RTSCTS_OUT</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#FLOWCONTROL_XONXOFF_IN">FLOWCONTROL_XONXOFF_IN</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#FLOWCONTROL_XONXOFF_OUT">FLOWCONTROL_XONXOFF_OUT</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#PARITY_EVEN">PARITY_EVEN</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#PARITY_MARK">PARITY_MARK</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#PARITY_NONE">PARITY_NONE</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#PARITY_ODD">PARITY_ODD</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#PARITY_SPACE">PARITY_SPACE</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#PORTTYPE_SERIAL">PORTTYPE_SERIAL</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#STOPBITS_1">STOPBITS_1</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#STOPBITS_1_5">STOPBITS_1_5</a>, <a href="../../../../org/myrobotlab/serial/SerialDevice.html#STOPBITS_2">STOPBITS_2</a></code></li>
+</ul>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#SerialDeviceGNU(gnu.io.CommPortIdentifier)">SerialDeviceGNU</a></strong>(gnu.io.CommPortIdentifier&nbsp;portId)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#SerialDeviceGNU(gnu.io.CommPortIdentifier, int, int, int, int)">SerialDeviceGNU</a></strong>(gnu.io.CommPortIdentifier&nbsp;portId,
+               int&nbsp;rate,
+               int&nbsp;databits,
+               int&nbsp;stopbits,
+               int&nbsp;parity)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#addEventListener(org.myrobotlab.serial.SerialDeviceEventListener)">addEventListener</a></strong>(<a href="../../../../org/myrobotlab/serial/SerialDeviceEventListener.html" title="interface in org.myrobotlab.serial">SerialDeviceEventListener</a>&nbsp;lsnr)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#available()">available</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#close()">close</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getBaudRate()">getBaudRate</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getCurrentOwner()">getCurrentOwner</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getDataBits()">getDataBits</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.InputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getInputStream()">getInputStream</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getName()">getName</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.io.OutputStream</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getOutputStream()">getOutputStream</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getParity()">getParity</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getPortString()">getPortString</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getPortType()">getPortType</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#getStopBits()">getStopBits</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#isCD()">isCD</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#isCTS()">isCTS</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#isCurrentlyOwned()">isCurrentlyOwned</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#isDSR()">isDSR</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#isDTR()">isDTR</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#isOpen()">isOpen</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#isRI()">isRI</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#isRTS()">isRTS</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#notifyOnDataAvailable(boolean)">notifyOnDataAvailable</a></strong>(boolean&nbsp;enable)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#open()">open</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#read()">read</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#read(byte[])">read</a></strong>(byte[]&nbsp;data)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#removeSerialDeviceEventListener(org.myrobotlab.serial.SerialDeviceEventListener)">removeSerialDeviceEventListener</a></strong>(<a href="../../../../org/myrobotlab/serial/SerialDeviceEventListener.html" title="interface in org.myrobotlab.serial">SerialDeviceEventListener</a>&nbsp;listener)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#serialEvent(gnu.io.SerialPortEvent)">serialEvent</a></strong>(gnu.io.SerialPortEvent&nbsp;spe)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#setDTR(boolean)">setDTR</a></strong>(boolean&nbsp;state)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#setParams(int, int, int, int)">setParams</a></strong>(int&nbsp;rate,
+         int&nbsp;databits,
+         int&nbsp;stopbits,
+         int&nbsp;parity)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#setRTS(boolean)">setRTS</a></strong>(boolean&nbsp;state)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#write(int)">write</a></strong>(int&nbsp;data)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceGNU.html#write(int[])">write</a></strong>(int[]&nbsp;data)</code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a name="log">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>log</h4>
+<pre>public static final&nbsp;org.slf4j.Logger log</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="SerialDeviceGNU(gnu.io.CommPortIdentifier)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SerialDeviceGNU</h4>
+<pre>public&nbsp;SerialDeviceGNU(gnu.io.CommPortIdentifier&nbsp;portId)
+                throws <a href="../../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></code></dd></dl>
+</li>
+</ul>
+<a name="SerialDeviceGNU(gnu.io.CommPortIdentifier, int, int, int, int)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>SerialDeviceGNU</h4>
+<pre>public&nbsp;SerialDeviceGNU(gnu.io.CommPortIdentifier&nbsp;portId,
+               int&nbsp;rate,
+               int&nbsp;databits,
+               int&nbsp;stopbits,
+               int&nbsp;parity)</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="getPortString()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPortString</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getPortString()</pre>
+</li>
+</ul>
+<a name="isOpen()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isOpen</h4>
+<pre>public&nbsp;boolean&nbsp;isOpen()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#isOpen()">isOpen</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="close()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>close</h4>
+<pre>public&nbsp;void&nbsp;close()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#close()">close</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="getInputStream()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getInputStream</h4>
+<pre>public&nbsp;java.io.InputStream&nbsp;getInputStream()</pre>
+</li>
+</ul>
+<a name="getOutputStream()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getOutputStream</h4>
+<pre>public&nbsp;java.io.OutputStream&nbsp;getOutputStream()</pre>
+</li>
+</ul>
+<a name="getName()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getName</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getName()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#getName()">getName</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="setParams(int, int, int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setParams</h4>
+<pre>public&nbsp;void&nbsp;setParams(int&nbsp;rate,
+             int&nbsp;databits,
+             int&nbsp;stopbits,
+             int&nbsp;parity)
+               throws <a href="../../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#setParams(int, int, int, int)">setParams</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></code></dd></dl>
+</li>
+</ul>
+<a name="getBaudRate()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getBaudRate</h4>
+<pre>public&nbsp;int&nbsp;getBaudRate()</pre>
+</li>
+</ul>
+<a name="getDataBits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getDataBits</h4>
+<pre>public&nbsp;int&nbsp;getDataBits()</pre>
+</li>
+</ul>
+<a name="getStopBits()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getStopBits</h4>
+<pre>public&nbsp;int&nbsp;getStopBits()</pre>
+</li>
+</ul>
+<a name="getParity()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getParity</h4>
+<pre>public&nbsp;int&nbsp;getParity()</pre>
+</li>
+</ul>
+<a name="isDTR()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isDTR</h4>
+<pre>public&nbsp;boolean&nbsp;isDTR()</pre>
+</li>
+</ul>
+<a name="setDTR(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setDTR</h4>
+<pre>public&nbsp;void&nbsp;setDTR(boolean&nbsp;state)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#setDTR(boolean)">setDTR</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="setRTS(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setRTS</h4>
+<pre>public&nbsp;void&nbsp;setRTS(boolean&nbsp;state)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#setRTS(boolean)">setRTS</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="isCTS()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isCTS</h4>
+<pre>public&nbsp;boolean&nbsp;isCTS()</pre>
+</li>
+</ul>
+<a name="isDSR()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isDSR</h4>
+<pre>public&nbsp;boolean&nbsp;isDSR()</pre>
+</li>
+</ul>
+<a name="isCD()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isCD</h4>
+<pre>public&nbsp;boolean&nbsp;isCD()</pre>
+</li>
+</ul>
+<a name="isRI()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isRI</h4>
+<pre>public&nbsp;boolean&nbsp;isRI()</pre>
+</li>
+</ul>
+<a name="isRTS()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isRTS</h4>
+<pre>public&nbsp;boolean&nbsp;isRTS()</pre>
+</li>
+</ul>
+<a name="notifyOnDataAvailable(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>notifyOnDataAvailable</h4>
+<pre>public&nbsp;void&nbsp;notifyOnDataAvailable(boolean&nbsp;enable)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#notifyOnDataAvailable(boolean)">notifyOnDataAvailable</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="addEventListener(org.myrobotlab.serial.SerialDeviceEventListener)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addEventListener</h4>
+<pre>public&nbsp;void&nbsp;addEventListener(<a href="../../../../org/myrobotlab/serial/SerialDeviceEventListener.html" title="interface in org.myrobotlab.serial">SerialDeviceEventListener</a>&nbsp;lsnr)
+                      throws java.util.TooManyListenersException</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#addEventListener(org.myrobotlab.serial.SerialDeviceEventListener)">addEventListener</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.util.TooManyListenersException</code></dd></dl>
+</li>
+</ul>
+<a name="serialEvent(gnu.io.SerialPortEvent)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>serialEvent</h4>
+<pre>public&nbsp;void&nbsp;serialEvent(gnu.io.SerialPortEvent&nbsp;spe)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code>serialEvent</code>&nbsp;in interface&nbsp;<code>gnu.io.SerialPortEventListener</code></dd>
+</dl>
+</li>
+</ul>
+<a name="removeSerialDeviceEventListener(org.myrobotlab.serial.SerialDeviceEventListener)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>removeSerialDeviceEventListener</h4>
+<pre>public&nbsp;void&nbsp;removeSerialDeviceEventListener(<a href="../../../../org/myrobotlab/serial/SerialDeviceEventListener.html" title="interface in org.myrobotlab.serial">SerialDeviceEventListener</a>&nbsp;listener)</pre>
+</li>
+</ul>
+<a name="write(int[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>write</h4>
+<pre>public&nbsp;void&nbsp;write(int[]&nbsp;data)
+           throws java.io.IOException</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#write(int[])">write</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="write(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>write</h4>
+<pre>public&nbsp;void&nbsp;write(int&nbsp;data)
+           throws java.io.IOException</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#write(int)">write</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="getCurrentOwner()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getCurrentOwner</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getCurrentOwner()</pre>
+</li>
+</ul>
+<a name="getPortType()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPortType</h4>
+<pre>public&nbsp;int&nbsp;getPortType()</pre>
+</li>
+</ul>
+<a name="isCurrentlyOwned()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isCurrentlyOwned</h4>
+<pre>public&nbsp;boolean&nbsp;isCurrentlyOwned()</pre>
+</li>
+</ul>
+<a name="open()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>open</h4>
+<pre>public&nbsp;void&nbsp;open()
+          throws <a href="../../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#open()">open</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDeviceException.html" title="class in org.myrobotlab.serial">SerialDeviceException</a></code></dd></dl>
+</li>
+</ul>
+<a name="read()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>read</h4>
+<pre>public&nbsp;int&nbsp;read()
+         throws java.io.IOException</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#read()">read</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="read(byte[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>read</h4>
+<pre>public&nbsp;int&nbsp;read(byte[]&nbsp;data)
+         throws java.io.IOException</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#read(byte[])">read</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="available()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>available</h4>
+<pre>public&nbsp;int&nbsp;available()
+              throws java.io.IOException</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/myrobotlab/serial/SerialDevice.html#available()">available</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/SerialDeviceGNU.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../org/myrobotlab/serial/gnu/SerialDeviceFactoryGNU.html" title="class in org.myrobotlab.serial.gnu"><span class="strong">Prev Class</span></a></li>
+<li>Next Class</li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?org/myrobotlab/serial/gnu/SerialDeviceGNU.html" target="_top">Frames</a></li>
+<li><a href="SerialDeviceGNU.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>KinectImageNode</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="KinectImageNode";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/KinectImageNode.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/image/Convert.html" title="class in org.myrobotlab.image"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/image/KinectImageNode.html" target="_top">Frames</a></li>
+<li><a href="KinectImageNode.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.image</div>
+<h2 title="Class KinectImageNode" class="title">Class KinectImageNode</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.image.KinectImageNode</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>java.io.Serializable</dd>
+</dl>
+<hr>
+<br>
+<pre>public class <span class="strong">KinectImageNode</span>
+extends java.lang.Object
+implements java.io.Serializable</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../serialized-form.html#org.myrobotlab.image.KinectImageNode">Serialized Form</a></dd></dl>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.awt.Rectangle</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#boundingBox">boundingBox</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#cameraFrame">cameraFrame</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#cropped">cropped</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>com.googlecode.javacv.cpp.opencv_core.CvRect</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#cvBoundingBox">cvBoundingBox</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>com.googlecode.javacv.cpp.opencv_core.IplImage</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#cvCameraFrame">cvCameraFrame</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>com.googlecode.javacv.cpp.opencv_core.IplImage</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#cvCropped">cvCropped</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>com.googlecode.javacv.cpp.opencv_core.IplImage</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#cvMask">cvMask</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#ID">ID</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#imageFilePath">imageFilePath</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#lastGoodFitIndex">lastGoodFitIndex</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#mask">mask</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#template">template</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Date</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#timestamp">timestamp</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#KinectImageNode()">KinectImageNode</a></strong>()</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#convertToSerializableTypes()">convertToSerializableTypes</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>com.googlecode.javacv.cpp.opencv_core.IplImage</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/image/KinectImageNode.html#getTemplate()">getTemplate</a></strong>()</code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a name="ID">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ID</h4>
+<pre>public&nbsp;int ID</pre>
+</li>
+</ul>
+<a name="timestamp">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>timestamp</h4>
+<pre>public&nbsp;java.util.Date timestamp</pre>
+</li>
+</ul>
+<a name="cvCameraFrame">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cvCameraFrame</h4>
+<pre>public transient&nbsp;com.googlecode.javacv.cpp.opencv_core.IplImage cvCameraFrame</pre>
+</li>
+</ul>
+<a name="cvMask">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cvMask</h4>
+<pre>public transient&nbsp;com.googlecode.javacv.cpp.opencv_core.IplImage cvMask</pre>
+</li>
+</ul>
+<a name="cvCropped">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cvCropped</h4>
+<pre>public transient&nbsp;com.googlecode.javacv.cpp.opencv_core.IplImage cvCropped</pre>
+</li>
+</ul>
+<a name="cvBoundingBox">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cvBoundingBox</h4>
+<pre>public&nbsp;com.googlecode.javacv.cpp.opencv_core.CvRect cvBoundingBox</pre>
+</li>
+</ul>
+<a name="cameraFrame">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cameraFrame</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a> cameraFrame</pre>
+</li>
+</ul>
+<a name="mask">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>mask</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a> mask</pre>
+</li>
+</ul>
+<a name="cropped">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>cropped</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a> cropped</pre>
+</li>
+</ul>
+<a name="boundingBox">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>boundingBox</h4>
+<pre>public&nbsp;java.awt.Rectangle boundingBox</pre>
+</li>
+</ul>
+<a name="template">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>template</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a> template</pre>
+</li>
+</ul>
+<a name="imageFilePath">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>imageFilePath</h4>
+<pre>public&nbsp;java.lang.String imageFilePath</pre>
+</li>
+</ul>
+<a name="lastGoodFitIndex">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>lastGoodFitIndex</h4>
+<pre>public&nbsp;int lastGoodFitIndex</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="KinectImageNode()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>KinectImageNode</h4>
+<pre>public&nbsp;KinectImageNode()</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="getTemplate()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getTemplate</h4>
+<pre>public&nbsp;com.googlecode.javacv.cpp.opencv_core.IplImage&nbsp;getTemplate()</pre>
+</li>
+</ul>
+<a name="convertToSerializableTypes()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>convertToSerializableTypes</h4>
+<pre>public&nbsp;void&nbsp;convertToSerializableTypes()</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/KinectImageNode.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/image/Convert.html" title="class in org.myrobotlab.image"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/image/KinectImageNode.html" target="_top">Frames</a></li>
+<li><a href="KinectImageNode.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

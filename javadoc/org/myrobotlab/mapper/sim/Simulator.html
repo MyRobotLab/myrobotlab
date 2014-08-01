@@ -1,0 +1,507 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>Simulator</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="Simulator";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/Simulator.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../org/myrobotlab/mapper/sim/SimpleAgent.html" title="class in org.myrobotlab.mapper.sim"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../org/myrobotlab/mapper/sim/StaticObject.html" title="class in org.myrobotlab.mapper.sim"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?org/myrobotlab/mapper/sim/Simulator.html" target="_top">Frames</a></li>
+<li><a href="Simulator.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.mapper.sim</div>
+<h2 title="Class Simulator" class="title">Class Simulator</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.mapper.sim.Simulator</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<hr>
+<br>
+<pre>public class <span class="strong">Simulator</span>
+extends java.lang.Object</pre>
+<div class="block">The Simulator class. It manages the list of agents and performs the
+ simulation steps. For each agent a simulation step is is as follow: <li>
+ update sensors</li> <li>call agent performBehavior</li> <li>update position</li>
+ In normal operation the steps are triggered by a timer event. <br>
+ The Simulator class also provides a Background Mode with limited rendering.
+ This mode is mainly useful for batch simulation ( ie genetic algorithms). See
+ Also Simbatch class.
+ 
+ Cooperates with: World, PhysicalEngine</div>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#Simulator(javax.swing.JComponent, org.myrobotlab.mapper.sim.World, org.myrobotlab.mapper.sim.EnvironmentDescription)">Simulator</a></strong>(javax.swing.JComponent&nbsp;applicationComponent,
+         <a href="../../../../org/myrobotlab/mapper/sim/World.html" title="class in org.myrobotlab.mapper.sim">World</a>&nbsp;world,
+         <a href="../../../../org/myrobotlab/mapper/sim/EnvironmentDescription.html" title="class in org.myrobotlab.mapper.sim">EnvironmentDescription</a>&nbsp;ed)</code>
+<div class="block">Constructs the simulator object</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#dispose()">dispose</a></strong>()</code>
+<div class="block">Dispose all ressources.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.ArrayList</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#getAgentList()">getAgentList</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>float</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#getVirtualTimeFactor()">getVirtualTimeFactor</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#initBehaviors()">initBehaviors</a></strong>()</code>
+<div class="block">initialize the behavior of all agents.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#lock()">lock</a></strong>()</code>
+<div class="block">Obtain simulator critical resources.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#performSimulationStep()">performSimulationStep</a></strong>()</code>
+<div class="block">Perform a single step of simulation</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#resetSimulation()">resetSimulation</a></strong>()</code>
+<div class="block">Reset the simulation.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#restartSimulation()">restartSimulation</a></strong>()</code>
+<div class="block">Simulator control.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#setApplicationComponent(javax.swing.JComponent)">setApplicationComponent</a></strong>(javax.swing.JComponent&nbsp;component)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#setVirtualTimeFactor(float)">setVirtualTimeFactor</a></strong>(float&nbsp;fact)</code>
+<div class="block">Set the time factor.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#simulateOneStep()">simulateOneStep</a></strong>()</code>
+<div class="block">The main simulator method.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#startBackgroundMode()">startBackgroundMode</a></strong>()</code>
+<div class="block">Starts special background mode</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#startSimulation()">startSimulation</a></strong>()</code>
+<div class="block">Starts the simulator loop.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#stopBackgroundMode()">stopBackgroundMode</a></strong>()</code>
+<div class="block">Stops special background mode</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#stopSimulation()">stopSimulation</a></strong>()</code>
+<div class="block">Stop (or pause) the simulator loop.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/mapper/sim/Simulator.html#unlock()">unlock</a></strong>()</code>
+<div class="block">Release simulator critical resources.</div>
+</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="Simulator(javax.swing.JComponent, org.myrobotlab.mapper.sim.World, org.myrobotlab.mapper.sim.EnvironmentDescription)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>Simulator</h4>
+<pre>public&nbsp;Simulator(javax.swing.JComponent&nbsp;applicationComponent,
+         <a href="../../../../org/myrobotlab/mapper/sim/World.html" title="class in org.myrobotlab.mapper.sim">World</a>&nbsp;world,
+         <a href="../../../../org/myrobotlab/mapper/sim/EnvironmentDescription.html" title="class in org.myrobotlab.mapper.sim">EnvironmentDescription</a>&nbsp;ed)</pre>
+<div class="block">Constructs the simulator object</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>applicationComponent</code> - - A reference to the main Application container.</dd><dd><code>world</code> - - The 3d world object.</dd><dd><code>ed</code> - - the Environment description.</dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="dispose()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>dispose</h4>
+<pre>public&nbsp;void&nbsp;dispose()</pre>
+<div class="block">Dispose all ressources. only called once.</div>
+</li>
+</ul>
+<a name="simulateOneStep()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>simulateOneStep</h4>
+<pre>public&nbsp;void&nbsp;simulateOneStep()</pre>
+<div class="block">The main simulator method. It is called cyclicaly or step by step. (see
+ startSimulation).</div>
+</li>
+</ul>
+<a name="initBehaviors()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>initBehaviors</h4>
+<pre>public&nbsp;void&nbsp;initBehaviors()</pre>
+<div class="block">initialize the behavior of all agents.</div>
+</li>
+</ul>
+<a name="startSimulation()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startSimulation</h4>
+<pre>public&nbsp;void&nbsp;startSimulation()</pre>
+<div class="block">Starts the simulator loop.</div>
+</li>
+</ul>
+<a name="stopSimulation()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stopSimulation</h4>
+<pre>public&nbsp;void&nbsp;stopSimulation()</pre>
+<div class="block">Stop (or pause) the simulator loop.</div>
+</li>
+</ul>
+<a name="restartSimulation()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>restartSimulation</h4>
+<pre>public&nbsp;void&nbsp;restartSimulation()</pre>
+<div class="block">Simulator control.</div>
+</li>
+</ul>
+<a name="resetSimulation()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>resetSimulation</h4>
+<pre>public&nbsp;void&nbsp;resetSimulation()</pre>
+<div class="block">Reset the simulation. Resets any living agents.</div>
+</li>
+</ul>
+<a name="performSimulationStep()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>performSimulationStep</h4>
+<pre>public&nbsp;void&nbsp;performSimulationStep()</pre>
+<div class="block">Perform a single step of simulation</div>
+</li>
+</ul>
+<a name="getAgentList()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAgentList</h4>
+<pre>public&nbsp;java.util.ArrayList&nbsp;getAgentList()</pre>
+</li>
+</ul>
+<a name="setVirtualTimeFactor(float)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setVirtualTimeFactor</h4>
+<pre>public&nbsp;void&nbsp;setVirtualTimeFactor(float&nbsp;fact)</pre>
+<div class="block">Set the time factor. Used to increase or decrease the simulation rate.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>factor</code> - : typical value 1.0 (default) , 2.0 or 0.5</dd></dl>
+</li>
+</ul>
+<a name="getVirtualTimeFactor()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getVirtualTimeFactor</h4>
+<pre>public&nbsp;float&nbsp;getVirtualTimeFactor()</pre>
+</li>
+</ul>
+<a name="setApplicationComponent(javax.swing.JComponent)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setApplicationComponent</h4>
+<pre>public&nbsp;void&nbsp;setApplicationComponent(javax.swing.JComponent&nbsp;component)</pre>
+</li>
+</ul>
+<a name="lock()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>lock</h4>
+<pre>public&nbsp;void&nbsp;lock()</pre>
+<div class="block">Obtain simulator critical resources.</div>
+</li>
+</ul>
+<a name="unlock()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>unlock</h4>
+<pre>public&nbsp;void&nbsp;unlock()</pre>
+<div class="block">Release simulator critical resources.</div>
+</li>
+</ul>
+<a name="startBackgroundMode()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startBackgroundMode</h4>
+<pre>public&nbsp;void&nbsp;startBackgroundMode()</pre>
+<div class="block">Starts special background mode</div>
+</li>
+</ul>
+<a name="stopBackgroundMode()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>stopBackgroundMode</h4>
+<pre>public&nbsp;void&nbsp;stopBackgroundMode()</pre>
+<div class="block">Stops special background mode</div>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/Simulator.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../org/myrobotlab/mapper/sim/SimpleAgent.html" title="class in org.myrobotlab.mapper.sim"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../org/myrobotlab/mapper/sim/StaticObject.html" title="class in org.myrobotlab.mapper.sim"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?org/myrobotlab/mapper/sim/Simulator.html" target="_top">Frames</a></li>
+<li><a href="Simulator.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

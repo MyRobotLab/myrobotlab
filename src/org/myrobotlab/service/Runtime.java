@@ -1464,7 +1464,7 @@ public class Runtime extends Service implements MessageListener {
 	static public synchronized ServiceInterface createService(String name, String fullTypeName) {
 		log.info(String.format("Runtime.createService %s", name));
 		if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
-			log.error(String.format("%1$s not a type or %2$s not defined ", fullTypeName, name));
+			log.error(String.format("%s not a type or %s not defined ", fullTypeName, name));
 			return null;
 		}
 

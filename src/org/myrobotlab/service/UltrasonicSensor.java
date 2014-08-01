@@ -162,7 +162,7 @@ public class UltrasonicSensor extends Service {
 		sr04.startRanging();
 		log.info("here");
 		sr04.stopRanging();
-		
+
 		sr04.arduino.setLoadTimingEnabled(true);
 		sr04.arduino.setLoadTimingEnabled(false);
 		

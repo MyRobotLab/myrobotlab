@@ -191,18 +191,18 @@ public class Stepper extends Service implements StepperControl {
 		
 	}
 	
-	public boolean attach(String port, int steps, Integer...pins) {
+	public boolean attach(String port, Integer steps, Integer...pins) {
 		return attach((String) null, port, steps, pins);
 	}
 
-	public boolean attach(String arduino, String port, int steps, Integer...pins) {
+	public boolean attach(String arduino, String port, Integer steps, Integer...pins) {
 		if (arduino == null && this.arduino == null) {
 			this.arduino = (Arduino) startPeer("arduino");
 		}
 		return attach(this.arduino, port, steps, STEPPER_TYPE_POLOLU, pins);
 	}
 
-	public boolean attach(Arduino arduino, String port, int steps, String type, Integer...pins) {
+	public boolean attach(Arduino arduino, String port, Integer steps, String type, Integer...pins) {
 		this.arduino = arduino;
 		this.steps = steps;
 		this.type = type;
@@ -224,29 +224,58 @@ public class Stepper extends Service implements StepperControl {
 		this.index = index;
 	}
 	
-	public void moveTo(Integer newPos){
+	public void moveTo(int newPos){
 		this.arduino.stepperMoveTo(getName(), newPos);
 	}
 	
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
-		Runtime.createAndStart("python", "Python");
-		// Runtime.createAndStart("adafruit", "AdafruitMotorShield");
-		Stepper stepper = (Stepper)Runtime.createAndStart("stepper", "Stepper");
-		//stepper.attach(arduino, 5, 6, 7, 8);
-		Runtime.createAndStart("gui", "GUIService");
-
+	public void startService(){
+		super.startService();
+		arduino = (Arduino)startPeer("arduino");
 	}
+	
+	boolean connect(String port){
+		return arduino.connect(port);
+	}
+	
+	public void test() {
+		// FIXME - there has to be a properties method to configure localized
+		// testing
+		boolean useGUI = true;
 
+		Stepper stepper = (Stepper) Runtime.start(getName(), "Stepper");
+		//Python python = (Python) Runtime.start("python", "Python");
+
+		// && depending on headless
+		if (useGUI) {
+			Runtime.start("gui", "GUIService");
+		}
+
+		int dirPin = 34;
+		int stepPin = 38;
+		// nice simple interface
+		// stepper.connect("COM15");
+		stepper.attach("COM15", steps, dirPin, stepPin);
+		
+		stepper.moveTo(100);
+	}
+	
 	public Integer[] getPins() {
 		return pins;
 	}
 
-	
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		
+		Stepper stepper = (Stepper)Runtime.start("stepper", "Stepper");
+		stepper.test();
+
+	}
+
+	public String getStepperType() {
+		return type;
+	}
 
 
 }

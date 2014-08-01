@@ -1,0 +1,514 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>LIDARGUI</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="LIDARGUI";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/LIDARGUI.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/control/KeyboardGUI.Keyboard.html" title="class in org.myrobotlab.control"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/control/LogGUI.html" title="class in org.myrobotlab.control"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/control/LIDARGUI.html" target="_top">Frames</a></li>
+<li><a href="LIDARGUI.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.control</div>
+<h2 title="Class LIDARGUI" class="title">Class LIDARGUI</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>java.awt.event.WindowAdapter</li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">org.myrobotlab.control.ServiceGUI</a></li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.control.LIDARGUI</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>java.awt.event.WindowFocusListener, java.awt.event.WindowListener, java.awt.event.WindowStateListener, java.util.EventListener, javax.swing.event.ListSelectionListener, <a href="../../../org/myrobotlab/control/TabControlEventHandler.html" title="interface in org.myrobotlab.control">TabControlEventHandler</a>, <a href="../../../org/myrobotlab/service/interfaces/VideoGUISource.html" title="interface in org.myrobotlab.service.interfaces">VideoGUISource</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public class <span class="strong">LIDARGUI</span>
+extends <a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a>
+implements javax.swing.event.ListSelectionListener, <a href="../../../org/myrobotlab/service/interfaces/VideoGUISource.html" title="interface in org.myrobotlab.service.interfaces">VideoGUISource</a></pre>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static org.slf4j.Logger</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#log">log</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Random</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#rand">rand</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="fields_inherited_from_class_org.myrobotlab.control.ServiceGUI">
+<!--   -->
+</a>
+<h3>Fields inherited from class&nbsp;org.myrobotlab.control.<a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></h3>
+<code><a href="../../../org/myrobotlab/control/ServiceGUI.html#boundServiceName">boundServiceName</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#display">display</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#gc">gc</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#myService">myService</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#x">x</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#y">y</a></code></li>
+</ul>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#LIDARGUI(java.lang.String, org.myrobotlab.service.GUIService, javax.swing.JTabbedPane)">LIDARGUI</a></strong>(java.lang.String&nbsp;boundServiceName,
+        <a href="../../../org/myrobotlab/service/GUIService.html" title="class in org.myrobotlab.service">GUIService</a>&nbsp;myService,
+        javax.swing.JTabbedPane&nbsp;tabs)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#attachGUI()">attachGUI</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#detachGUI()">detachGUI</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#displayFrame(org.myrobotlab.image.SerializableImage)">displayFrame</a></strong>(<a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a>&nbsp;camImage)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#displaySweepData(int[])">displaySweepData</a></strong>(int[]&nbsp;points)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#drawStaticInfo()">drawStaticInfo</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/control/VideoWidget.html" title="class in org.myrobotlab.control">VideoWidget</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#getLocalDisplay()">getLocalDisplay</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#getMax(int[])">getMax</a></strong>(int[]&nbsp;points)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int[]</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#getMinMax(int[])">getMinMax</a></strong>(int[]&nbsp;points)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#init()">init</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#map(int, int, int, int, int)">map</a></strong>(int&nbsp;x,
+   int&nbsp;in_min,
+   int&nbsp;in_max,
+   int&nbsp;out_min,
+   int&nbsp;out_max)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#setCurrentFilterMouseListener()">setCurrentFilterMouseListener</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/LIDARGUI.html#valueChanged(javax.swing.event.ListSelectionEvent)">valueChanged</a></strong>(javax.swing.event.ListSelectionEvent&nbsp;arg0)</code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.control.ServiceGUI">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;org.myrobotlab.control.<a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></h3>
+<code><a href="../../../org/myrobotlab/control/ServiceGUI.html#actionPerformed(java.awt.event.ActionEvent, java.lang.String)">actionPerformed</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#dockPanel()">dockPanel</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#getDisplay()">getDisplay</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#getTabControl()">getTabControl</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#hidePanel()">hidePanel</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#isDocked()">isDocked</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#isHidden()">isHidden</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#isReadyForRelease()">isReadyForRelease</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#makeReadyForRelease()">makeReadyForRelease</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#mouseClicked(java.awt.event.MouseEvent, java.lang.String)">mouseClicked</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#remove()">remove</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#savePosition()">savePosition</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#send(java.lang.String)">send</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#send(java.lang.String, java.lang.Object...)">send</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#subscribe(java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#subscribe(java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#subscribe(java.lang.String, java.lang.String, java.lang.Class...)">subscribe</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#test(int, double)">test</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#undockPanel()">undockPanel</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#unhidePanel()">unhidePanel</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#unsubscribe(java.lang.String)">unsubscribe</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#unsubscribe(java.lang.String, java.lang.String)">unsubscribe</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#unsubscribe(java.lang.String, java.lang.String, java.lang.Class...)">unsubscribe</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#windowClosing(java.awt.event.WindowEvent)">windowClosing</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.awt.event.WindowAdapter">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.awt.event.WindowAdapter</h3>
+<code>windowActivated, windowClosed, windowDeactivated, windowDeiconified, windowGainedFocus, windowIconified, windowLostFocus, windowOpened, windowStateChanged</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a name="log">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>log</h4>
+<pre>public static final&nbsp;org.slf4j.Logger log</pre>
+</li>
+</ul>
+<a name="rand">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>rand</h4>
+<pre>public&nbsp;java.util.Random rand</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="LIDARGUI(java.lang.String, org.myrobotlab.service.GUIService, javax.swing.JTabbedPane)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>LIDARGUI</h4>
+<pre>public&nbsp;LIDARGUI(java.lang.String&nbsp;boundServiceName,
+        <a href="../../../org/myrobotlab/service/GUIService.html" title="class in org.myrobotlab.service">GUIService</a>&nbsp;myService,
+        javax.swing.JTabbedPane&nbsp;tabs)</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="init()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>init</h4>
+<pre>public&nbsp;void&nbsp;init()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/control/ServiceGUI.html#init()">init</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="displayFrame(org.myrobotlab.image.SerializableImage)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>displayFrame</h4>
+<pre>public&nbsp;void&nbsp;displayFrame(<a href="../../../org/myrobotlab/image/SerializableImage.html" title="class in org.myrobotlab.image">SerializableImage</a>&nbsp;camImage)</pre>
+</li>
+</ul>
+<a name="attachGUI()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>attachGUI</h4>
+<pre>public&nbsp;void&nbsp;attachGUI()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/control/ServiceGUI.html#attachGUI()">attachGUI</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="detachGUI()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>detachGUI</h4>
+<pre>public&nbsp;void&nbsp;detachGUI()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/control/ServiceGUI.html#detachGUI()">detachGUI</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="displaySweepData(int[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>displaySweepData</h4>
+<pre>public&nbsp;void&nbsp;displaySweepData(int[]&nbsp;points)</pre>
+</li>
+</ul>
+<a name="setCurrentFilterMouseListener()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setCurrentFilterMouseListener</h4>
+<pre>public&nbsp;void&nbsp;setCurrentFilterMouseListener()</pre>
+</li>
+</ul>
+<a name="getMinMax(int[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMinMax</h4>
+<pre>public&nbsp;int[]&nbsp;getMinMax(int[]&nbsp;points)</pre>
+</li>
+</ul>
+<a name="getMax(int[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMax</h4>
+<pre>public&nbsp;int&nbsp;getMax(int[]&nbsp;points)</pre>
+</li>
+</ul>
+<a name="map(int, int, int, int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>map</h4>
+<pre>public&nbsp;int&nbsp;map(int&nbsp;x,
+      int&nbsp;in_min,
+      int&nbsp;in_max,
+      int&nbsp;out_min,
+      int&nbsp;out_max)</pre>
+</li>
+</ul>
+<a name="drawStaticInfo()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>drawStaticInfo</h4>
+<pre>public&nbsp;void&nbsp;drawStaticInfo()</pre>
+</li>
+</ul>
+<a name="getLocalDisplay()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getLocalDisplay</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/control/VideoWidget.html" title="class in org.myrobotlab.control">VideoWidget</a>&nbsp;getLocalDisplay()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/VideoGUISource.html#getLocalDisplay()">getLocalDisplay</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/VideoGUISource.html" title="interface in org.myrobotlab.service.interfaces">VideoGUISource</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="valueChanged(javax.swing.event.ListSelectionEvent)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>valueChanged</h4>
+<pre>public&nbsp;void&nbsp;valueChanged(javax.swing.event.ListSelectionEvent&nbsp;arg0)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code>valueChanged</code>&nbsp;in interface&nbsp;<code>javax.swing.event.ListSelectionListener</code></dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/LIDARGUI.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/control/KeyboardGUI.Keyboard.html" title="class in org.myrobotlab.control"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/control/LogGUI.html" title="class in org.myrobotlab.control"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/control/LIDARGUI.html" target="_top">Frames</a></li>
+<li><a href="LIDARGUI.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>
