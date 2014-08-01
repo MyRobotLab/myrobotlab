@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="org/myrobotlab/service/Android.java|org/myrobotlab/service/ArduinoBT.java|processing/app/tools/format/src/|org/myrobotlab/service/LeapMotion.java|resource/Java/examples/LeapMotion.java|resource/Java/examples/|org/myrobotlab/leapmotion/LeapListener.java|org/myrobotlab/service/SEAR.java|org/myrobotlab/control/SEARGUI.java|org/myrobotlab/service/Tracking2.java" kind="src" path="src"/>
@@ -83,5 +84,7 @@
 	<classpathentry kind="lib" path="/repo/io.netty/4.0.19/netty-all-4.0.19.Final.jar"/>
 	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.3.2.4/jovr-0.3.2.4.jar"/>
+	<classpathentry kind="lib" path="/repo/org.aitools.programd/4.6/programd-main.jar"/>
+	<classpathentry kind="lib" path="/repo/org.aitools.programd/4.6/programd-rhino.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
