@@ -7,12 +7,7 @@ public interface StepperControl {
 	*/
 
 	/**
-	 * Attach a stepper controller to the stepper. The stepper and stepper controller
-	 * "should be in the same instance of MRL and this reference to another
-	 * service should be ok.
-	 * 
-	 * The stepper controller uses this method to pass a reference of itself to
-	 * the stepper, to be used directly
+	 * setting controller is needed in the "attach" process
 	 */
 	public boolean setController(StepperController controller);
 
@@ -47,6 +42,18 @@ public interface StepperControl {
 	 * unlocks the stepper, so other commands can affect it
 	 */
 	public void unlock();
+
+	public String getName();
+
+	public String getStepperType();
+
+	public Integer[] getPins();
+
+	public void setIndex(Integer index);
+
+	public Integer getIndex();
+
+	public int getSteps();
 
 
 }

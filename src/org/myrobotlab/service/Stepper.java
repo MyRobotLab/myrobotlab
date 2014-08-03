@@ -191,6 +191,10 @@ public class Stepper extends Service implements StepperControl {
 		
 	}
 	
+	public void reset(){
+		controller.stepperReset(getName());
+	}
+	
 	public boolean attach(String port, Integer steps, Integer...pins) {
 		return attach((String) null, port, steps, pins);
 	}
@@ -213,7 +217,7 @@ public class Stepper extends Service implements StepperControl {
 			return false;
 		}
 
-		return arduino.stepperAttach(this) != -1;
+		return arduino.stepperAttach(this);
 	}
 	
 	public Integer getIndex() {
@@ -257,6 +261,21 @@ public class Stepper extends Service implements StepperControl {
 		stepper.attach("COM15", steps, dirPin, stepPin);
 		
 		stepper.moveTo(100);
+		
+		stepper.reset();
+		
+		// TODO - blocking call
+		
+		log.info("here");
+		log.info("here");
+		
+		stepper.moveTo(50);
+		stepper.reset();
+		log.info("here");
+		stepper.moveTo(-150);
+		log.info("here");
+		stepper.moveTo(-150);
+		log.info("here");
 	}
 	
 	public Integer[] getPins() {
@@ -266,7 +285,7 @@ public class Stepper extends Service implements StepperControl {
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		
 		Stepper stepper = (Stepper)Runtime.start("stepper", "Stepper");
 		stepper.test();
@@ -277,5 +296,15 @@ public class Stepper extends Service implements StepperControl {
 		return type;
 	}
 
+	// excellent pattern - put in interface
+	public int publishStepperEvent(int currentPos){
+		log.info(String.format("publishStepperEvent %s %d", getName(), currentPos));
+		return currentPos;
+	}
+
+	@Override
+	public int getSteps() {
+		return steps;
+	}
 
 }

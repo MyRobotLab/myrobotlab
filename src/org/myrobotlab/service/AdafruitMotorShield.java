@@ -180,7 +180,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		}
 
 		Stepper s = (Stepper)Runtime.createAndStart(stepperName, "Stepper");
-		if (!stepperAttach(s, steps, stepperPort))
+		if (!stepperAttach(s))
 		{
 			return null;
 		}
@@ -439,9 +439,9 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	// StepperController begin ----
 
 	@Override
-	public boolean stepperAttach(String stepperName, Integer steps, Object...data) {
+	public boolean stepperAttach(String stepperName) {
 		Stepper stepper = (Stepper)Runtime.createAndStart(stepperName, "Stepper");
-		return stepperAttach(stepper, steps, data);
+		return stepperAttach(stepper);
 	}
 
 	@Override // FIXME DEPRECATE !!!! - use method with style 
@@ -482,7 +482,8 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	}
 
 	@Override
-	public boolean stepperAttach(StepperControl stepperControl, Integer steps, Object...data) {
+	public boolean stepperAttach(StepperControl stepperControl) {
+		Integer[] data = stepperControl.getPins();
 		if (data.length != 1 || data[0].getClass() != Integer.class)
 		{
 			error("Adafruit stepper needs 1 Integers to specify port");
@@ -500,7 +501,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		stepper.broadcastState();
 		
 		steppers.put(stepper.getName(), stepper);
-		arduino.sendMsg(AF_STEPPER_ATTACH, steps, stepperPort);
+		arduino.sendMsg(AF_STEPPER_ATTACH, stepperControl.getSteps(), stepperPort);
 		deviceNameToNumber.put(stepper.getName(), stepperPort);
 		arduino.sendMsg(AF_STEPPER_SET_SPEED, stepperPort, 10); // default to 10 rpm 
 		
@@ -543,6 +544,12 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		fruity.releaseStepper(stepper1.getName());
 
 		//Runtime.createAndStart("python", "Python");
+	}
+
+	@Override
+	public void stepperReset(String stepper) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

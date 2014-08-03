@@ -18,7 +18,7 @@ public class CleverBot extends Service {
 	transient ChatterBotFactory factory = null;
 	transient ChatterBotSession session = null;
 	transient ChatterBot chatterbot = null;
-	transient ChatterBotType type = ChatterBotType.CLEVERBOT;
+	transient ChatterBotType type = ChatterBotType.PANDORABOTS;
 	boolean initialized = false;
 	boolean continueToTalkToSelf = true;
 
@@ -47,8 +47,8 @@ public class CleverBot extends Service {
 		try {
 			factory = new ChatterBotFactory();
 			//chatterbot = factory.create(type);
-			//chatterbot = factory.create(ChatterBotType.PANDORABOTS, "b0dafd24ee35a477");
-			chatterbot = factory.create(ChatterBotType.CLEVERBOT);
+			chatterbot = factory.create(ChatterBotType.PANDORABOTS, "b0dafd24ee35a477");
+			//chatterbot = factory.create(ChatterBotType.CLEVERBOT);
 			session = chatterbot.createSession();
 		} catch (Exception e) {
 			Logging.logException(e);

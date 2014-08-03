@@ -95,10 +95,12 @@ public class ProgramD extends Service {
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 		ProgramD alice = (ProgramD) Runtime.createAndStart("alice", "ProgramD");
-		String progDPath = "C:/dev/workspace.kmw/ProgramD/";
-		String corePropertiesPath = "c:\\dev\\workspace.kmw\\ProgramD\\conf\\core.xml";
+		String progDPath = "C:/tools/ProgramD/";
+		String corePropertiesPath = "C:\\tools\\ProgramD\\conf\\core.xml";
 		alice.loadCore(progDPath,corePropertiesPath);
-		String response = alice.getResponse("Hello.", "1", "SampleBot");
+		String response = alice.getResponse("TESTATOMIC", "1", "SampleBot");
+		System.out.println("Alice" + response);
+		response = alice.getResponse("How are you?", "1", "SampleBot");
 		System.out.println("Alice" + response);
 	}
 

@@ -27,6 +27,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.ArrayList;
 
+import org.myrobotlab.service.Stepper;
 import org.myrobotlab.service.data.Pin;
 
 public interface StepperController {
@@ -37,30 +38,9 @@ public interface StepperController {
 	public final Integer STYLE_MICROSTEP = 4;
 	
 	
-	/**
-	 * attach a stepper named to this controller
-	 * @param stepperName
-	 * @param steps
-	 * @param pin1
-	 * @param pin2
-	 * @param pin3
-	 * @param pin4
-	 * @return
-	 */
-	public boolean stepperAttach(String stepperName, Integer steps, Object...data); 
+	public boolean stepperAttach(String stepperName); 
 	
-	
-	/**
-	 * typed attachment 
-	 * @param stepper
-	 * @param steps
-	 * @param pin1
-	 * @param pin2
-	 * @param pin3
-	 * @param pin4
-	 * @return
-	 */
-	public boolean stepperAttach(StepperControl stepper, Integer steps, Object...data);
+	public boolean stepperAttach(StepperControl stepper);
 
 	/**
 	 * This is basic information to request from a Controller. A list of pins on
@@ -112,5 +92,7 @@ public interface StepperController {
 	 * @return
 	 */
 	public Object[] getStepperData(String stepperName);
+
+	public void stepperReset(String stepper);
 
 }
