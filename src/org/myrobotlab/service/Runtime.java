@@ -1885,7 +1885,7 @@ public class Runtime extends Service implements MessageListener {
 		// class path
 		String systemClassPath = System.getProperty("java.class.path");
 		ret.add("-classpath");
-		String classPath = String.format("./libraries/jar/*%1$s./libraries/jar/%2$s/*%1$s%3$s", platform.getClassPathSeperator(), classpath, systemClassPath);
+		String classPath = String.format("./libraries/jar/*%1$s./libraries/jar/%2$s/*%1$s%3$s", platform.getClassPathSeparator(), classpath, systemClassPath);
 		ret.add(classPath);
 
 		ret.add("org.myrobotlab.service.Runtime");
