@@ -111,7 +111,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
 
-	public static final int MRLCOMM_VERSION = 15;
+	public static final int MRLCOMM_VERSION = 16;
 
 	// serial protocol functions
 	public static final int MAGIC_NUMBER = 170; // 10101010
@@ -158,10 +158,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public static final int SENSOR_DATA = 37;
 
 	public static final int SERVO_SWEEP_START = 38;
-	public static final int SERVO_SWEEP_STOP = 39; // normalize with SERVO_STOP
-													// -
-	public static final int SERVO_STOP_AND_REPORT = 39;
-
+	public static final int SERVO_SWEEP_STOP = 39;
+				
 	// callback event - e.g. position arrived
 	// MSG MAGIC | SZ | SERVO-INDEX | POSITION
 	public static final int SERVO_EVENTS_ENABLE = 40;
@@ -172,7 +170,15 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	public static final int STEPPER_ATTACH	= 44;
 	public static final int STEPPER_MOVE_TO = 45; 
+	public static final int STEPPER_STOP = 46; 
+	public static final int STEPPER_RESET = 47; 
+
+	public static final int STEPPER_EVENT = 48; 
+	public static final int STEPPER_EVENT_STOP = 1; 
+
+	public static final int STEPPER_TYPE_POLOLU = 1; 
 	
+// servo event types
 	public static final int SERVO_EVENT_STOPPED = 1;
 	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
@@ -191,6 +197,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public static final int NOP = 255;
 
 	// ---------- MRLCOMM FUNCTION INTERFACE END -----------
+	
 	
 	public static final int TRUE = 1;
 	public static final int FALSE = 0;
@@ -219,9 +226,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	
 	
 	// data and mapping for data going from MRL ---to---> Arduino
-	HashMap<String, Stepper> steppers = new HashMap<String, Stepper>();
+	HashMap<String, StepperControl> steppers = new HashMap<String, StepperControl>();
 	// index for data mapping going from Arduino ---to---> MRL
-	HashMap<Integer, Stepper> stepperIndex = new HashMap<Integer, Stepper>();
+	HashMap<Integer, StepperControl> stepperIndex = new HashMap<Integer, StepperControl>();
 
 	// data and mapping for data going from MRL ---to---> Arduino
 	HashMap<String, SensorData> sensors = new HashMap<String, SensorData>();
@@ -266,6 +273,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	private String boardType;
 
 	BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
+	
+	StringBuilder debugTX = new StringBuilder();
+	StringBuilder debugRX = new StringBuilder();
 
 	/**
 	 * MotorData is the combination of a Motor and any controller data needed to
@@ -458,8 +468,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	 *            TODO - take the cheese out of this method .. it shold be
 	 *            sendMsg(byte[]...data)
 	 */
-	StringBuffer debugBuffer = new StringBuffer();
-
 	public synchronized void sendMsg(int function, int... params) {
 		// log.debug("sendMsg magic | fn " + function + " p1 " + param1 + " p2 "
 		// + param2);
@@ -488,16 +496,16 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			}
 
 			if (log.isDebugEnabled()) {
-				debugBuffer.append("sendMsg -> MAGIC_NUMBER|");
-				debugBuffer.append("SZ ").append(1 + params.length);
-				debugBuffer.append(String.format("|FN %d", function));
+				debugTX.append("sendMsg -> MAGIC_NUMBER|");
+				debugTX.append("SZ ").append(1 + params.length);
+				debugTX.append(String.format("|FN %d", function));
 				for (int i = 0; i < params.length; ++i) {
 					if (log.isDebugEnabled()) {
-						debugBuffer.append(String.format("|P%d %d", i, params[i]));
+						debugTX.append(String.format("|P%d %d", i, params[i]));
 					}
 				}
-				log.debug(debugBuffer.toString());
-				debugBuffer.setLength(0);
+				log.debug(debugTX.toString());
+				debugTX.setLength(0);
 			}
 
 		} catch (Exception e) {
@@ -563,7 +571,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	// ----------ServoController begin-------------
 	// FIXME - is this re-entrant ???
 
-	public synchronized boolean servoAttach(String servoName) {
+	public boolean servoAttach(String servoName) {
 		Servo servo = (Servo) Runtime.getService(servoName);
 		if (servo == null) {
 			error("servoAttach can not attach %s no service exists", servoName);
@@ -818,7 +826,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	static final public int MAX_MSG_LEN = 64;
-	StringBuffer rxDebug = new StringBuffer();
+	//StringBuilder rxDebug = new StringBuilder ();
 
 	// TODO - define as int[] because Java bytes suck !
 	byte[] msg = new byte[64]; // TODO define outside
@@ -992,15 +1000,31 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							sd.sensor.invoke("publishRange", sd.duration);
 							break;
 						}
+
+						case STEPPER_EVENT: {
+
+							int eventType = msg[1];
+							int index = msg[2];
+							int currentPos = msg[3];
+
+							log.info(String.format(" index %d type %d cur %d", index, eventType, currentPos & 0xff));
+							// uber good - 
+							// TODO - stepper ServoControl interface - not needed Servo is abstraction enough
+							Stepper stepper = (Stepper) stepperIndex.get(index);
+							stepper.invoke("publishStepperEvent", currentPos  & 0xff);
+							break;
+						}
+						
+						default: {
+							error(formatMRLCommMsg("unknown serial event <- ", msg, msgSize));
+							break;
+						}
+						
+						
 						} // end switch
 
 						if (log.isDebugEnabled()) {
-							rxDebug.append(String.format(" serialEvent ->  MAGIC_NUMBER|SZ %d|FN %d", msgSize, msg[0]));
-							for (int i = 1; i < msgSize; ++i) {
-								rxDebug.append(String.format("|P%d %d", i, msg[i]));
-							}
-							log.debug(rxDebug.toString());
-							rxDebug.setLength(0);
+							log.debug(formatMRLCommMsg("serialEvent <- ", msg, msgSize));
 						}
 
 						// processed msg
@@ -1022,6 +1046,18 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 		}
 
+	}
+		
+	public String formatMRLCommMsg(String prefix, byte[] message, int size){
+		debugRX.setLength(0);
+		if (prefix != null){
+			debugRX.append(prefix);
+		}
+		debugRX.append(String.format("MAGIC_NUMBER|SZ %d|FN %d", size, message[0]));
+		for (int i = 1; i < size; ++i) {
+			debugRX.append(String.format("|P%d %d", i, message[i]));
+		}
+		return debugRX.toString();
 	}
 
 	// FIXME !!! - REMOVE ALL BELOW - except compile(File) compile(String)
@@ -1741,15 +1777,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	// -- StepperController begin ----
-	// FIXME DEPRECATE ALL - the Service Stepper is the interface
-	// A STEPPERCONTROLLER INTERFACE IS VERY BARE MINIMUM
-	// PINS DIGITALWRITES !! and SENDMSG !!! (FOR MRLCOMM.INO)
-	
-	@Override
-	public boolean stepperAttach(String stepperName, Integer steps, Object... data) {
-		Stepper stepper = (Stepper) Runtime.createAndStart(stepperName, "Stepper");
-		return stepperAttach(stepper, steps, data);
-	}
 
 	@Override
 	public void stepperStep(String name, Integer steps) {
@@ -1779,28 +1806,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public Object[] getStepperData(String stepperName) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public boolean stepperAttach(StepperControl stepperControl, Integer steps, Object... data) {
-		if (data.length != 4 || data[0].getClass() != Integer.class || data[1].getClass() != Integer.class || data[2].getClass() != Integer.class
-				|| data[3].getClass() != Integer.class) {
-			error("Arduino stepper needs 4 Integers to specify pins");
-			return false;
-		}
-
-		Stepper stepper = (Stepper) stepperControl; // FIXME - only support
-													// stepper at the moment ..
-													// so not a big deal ... yet
-													// :P
-
-		if (!isConnected()) {
-			error(String.format("can not attach servo %s before Arduino %s is connected", stepper.getName(), getName()));
-			return false;
-		}
-
-		error("FIXME - IMPLEMENT !");
-		return false;
 	}
 
 	/**
@@ -1833,7 +1838,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	@Override
 	public void servoStop(String servoName) {
-		sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
+		// FIXME DEPRECATE OR IMPLEMENT
+		//sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
 	}
 
 
@@ -1990,30 +1996,32 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	// FIXME - relatively clean interface BUT - ALL THIS LOGIC SHOULD BE IN STEPPER NOT ARDUINO !!!
 	// SO STEPPER MUST NEED TO KNOW ABOUT CONTROLLER TYPE
 	
-	public synchronized int stepperAttach(String stepperName) {
+	public boolean stepperAttach(String stepperName) {
 		Stepper stepper = (Stepper) Runtime.getService(stepperName);
 		if (stepper == null) {
-			log.error("Sensor {} not valid", stepperName);
-			return -1;
+			log.error("Stepper {} not valid", stepperName);
+			return false;
 		}
 		return stepperAttach(stepper);
 	}
 
-	public synchronized int stepperAttach(Stepper stepper) {
+	public boolean stepperAttach(StepperControl stepper) {
 		String stepperName = stepper.getName();
 		log.info(String.format("stepperAttach %s", stepperName));
 		Integer index = 0;
 
 		if (serialDevice == null) {
 			error("could not attach stepper - no serial device!");
-			return -1;
+			return false;
 		}
 
 		if (steppers.containsKey(stepperName)) {
 			log.warn("stepper already attach - detach first");
-			return -1;
+			return false;
 		}
 
+		stepper.setController(this);
+		
 		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())) {
 			// int type = Stepper.STEPPER_TYPE_POLOLU.hashCode(); heh, cool idea - but byte collision don't want to risk ;)
 			int type = 1;
@@ -2024,7 +2032,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			Integer [] pins = stepper.getPins();
 			if (pins.length != 2){
 				error("Pololu stepper needs 2 pins defined - direction pin & step pin");
-				return -1;
+				return false;
 			}
 
 			// attach index pin
@@ -2038,9 +2046,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			log.info(String.format("stepper STEPPER_TYPE_POLOLU index %d pin direction %d step %d attached ", index,  pins[0], pins[1]));
 		} else {
 			error("unkown type of stepper");
+			return false;
 		}
 
-		return index;
+		return true;
 	}
 	
 
@@ -2050,8 +2059,18 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			return;
 		}
 		
-		Stepper stepper = steppers.get(name);
-		sendMsg(stepper.getIndex(), newPos);
+		int dir = 0;
+		
+		StepperControl stepper = steppers.get(name);
+		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())){
+			if (newPos > 0){
+				dir = 1;
+			}
+		} else {
+			error("unknown stepper type");
+			return;
+		}
+		sendMsg(STEPPER_MOVE_TO, stepper.getIndex(), newPos, dir);
 		
 		// TODO - call back event - to say arrived ?
 		
@@ -2131,6 +2150,17 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 	
 	
+	// String functions to interface are important
+	// Interfaces should support both - "real" references and "String" references
+	// the String reference just "gets" the real reference - but this is important
+	// to support all protocols
+	
+	@Override
+	public void stepperReset(String stepperName) {
+		StepperControl stepper = steppers.get(stepperName);
+		sendMsg(STEPPER_RESET, stepper.getIndex());
+	}
+
 	public static void main(String[] args) {
 		try {
 
@@ -2169,5 +2199,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			Logging.logException(e);
 		}
 	}
+
 
 }

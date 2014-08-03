@@ -41,7 +41,7 @@
 #include <Servo.h>
 
 // ----------  MRLCOMM FUNCTION INTERFACE BEGIN -----------
-#define MRLCOMM_VERSION				15
+#define MRLCOMM_VERSION				16
 	
 // serial protocol functions
 #define MAGIC_NUMBER  					170 // 10101010
@@ -93,7 +93,7 @@
 // callback event - e.g. position arrived 
 // MSG MAGIC | SZ | SERVO-INDEX | POSITION
 #define SERVO_EVENTS_ENABLE				40 
-#define SERVO_EVENT						41 
+#define SERVO_EVENT					41 
 
 #define LOAD_TIMING_ENABLE				42 
 #define LOAD_TIMING_EVENT				43 
@@ -101,13 +101,12 @@
 #define STEPPER_ATTACH					44
 #define STEPPER_MOVE_TO					45 
 #define STEPPER_STOP					46 
+#define STEPPER_RESET					47
 
-#define STEPPER_EVENT					47
+#define STEPPER_EVENT					48
 #define STEPPER_EVENT_STOP				1 
 
-
-#define STEPPER_TYPE_POLOLU  1
-
+#define STEPPER_TYPE_POLOLU  			1
 
 // servo event types
 #define  SERVO_EVENT_STOPPED			1
@@ -289,9 +288,6 @@ not worth it
 int pingdarsRunningCount = 0;
 int pingdarsRunning[6]; // map array of running pingdars
 */
-
-
-
 
 void sendServoEvent(servo_type& s, int eventType);
 unsigned long getUltrasonicRange(sensor_type& sensor);
@@ -669,9 +665,13 @@ void loop () {
 		
 		case STEPPER_ATTACH:{
 			stepper_type& stepper = steppers[ioCmd[1]];
-			stepper.isRunning = false;
 			stepper.index = ioCmd[1];
 			stepper.type = ioCmd[2];
+			stepper.isRunning = false;
+			stepper.currentPos = 0;
+			stepper.targetPos = 0;
+			stepper.dir = 0;
+			stepper.speed = 100;
 			
 			if (stepper.type == STEPPER_TYPE_POLOLU) {
 				stepper.step0 = ioCmd[3]; // dir pin
@@ -682,12 +682,22 @@ void loop () {
 			break;		
 		}	
 		
+		case STEPPER_RESET:{
+			stepper_type& stepper = steppers[ioCmd[1]];
+			stepper.isRunning = false;
+			stepper.currentPos = 0;
+			stepper.targetPos = 0;
+			stepper.dir = 0;
+			stepper.speed = 100;
+			break;
+		}
+		
 		case STEPPER_MOVE_TO:{
 			stepper_type& stepper = steppers[ioCmd[1]];
 			if (stepper.type == STEPPER_TYPE_POLOLU) {
 				stepper.isRunning = true;
-				stepper.targetPos = ioCmd[2];
-				stepper.dir = ioCmd[3];
+				stepper.targetPos = stepper.currentPos + ioCmd[2];
+				stepper.dir = ioCmd[3]; // <- logic handled in MRL layer
 				digitalWrite(stepper.step0, stepper.dir);
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
@@ -969,11 +979,22 @@ void loop () {
 				
 				// start state
 				if (stepper.currentPos < stepper.targetPos) {
-					digitalWrite(stepper.step0, 1);
-					delayMicroseconds(1); // :P
-					digitalWrite(stepper.step0, 0);
+				    
+				    // step - POLOLU has single step pin (dir is on step0)
+					digitalWrite(stepper.step1, 1);
+					delayMicroseconds(1); // :P should require another state? loop is ~106us min ?
+					digitalWrite(stepper.step1, 0);
 					
-					++stepper.currentPos;
+					stepper.currentPos++;
+				} else if (stepper.currentPos > stepper.targetPos) { 
+
+				    // step - POLOLU has single step pin (dir is on step0)
+					digitalWrite(stepper.step1, 1);
+					delayMicroseconds(1); // :P should require another state? loop is ~106us min ?
+					digitalWrite(stepper.step1, 0);
+					
+					stepper.currentPos--;
+				
 				} else {
 					stepper.isRunning = false;
 					stepper.currentPos = stepper.targetPos; // forcing ? :P

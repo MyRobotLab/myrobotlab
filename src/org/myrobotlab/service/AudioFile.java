@@ -48,6 +48,8 @@ import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import javazoom.jl.player.advanced.AdvancedPlayer;
+import javazoom.jl.player.advanced.PlaybackEvent;
+import javazoom.jl.player.advanced.PlaybackListener;
 
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
@@ -62,6 +64,14 @@ public class AudioFile extends Service {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(AudioFile.class.getCanonicalName());
 	transient AePlayWave wavPlayer = new AePlayWave();
+	int pausedOnFrame = 0;
+	
+	transient PlaybackListener playbackListener = new  PlaybackListener() {
+		 @Override
+		    public void playbackFinished(PlaybackEvent event) {
+		        pausedOnFrame = event.getFrame();
+		    }
+	};
 	// FIXME -
 	// http://alvinalexander.com/java/java-audio-example-java-au-play-sound - so
 	// much more simple
@@ -108,6 +118,7 @@ public class AudioFile extends Service {
 			super(filename);
 			try {
 				this.player = new AdvancedPlayer(bis);
+				player.setPlayBackListener(playbackListener);
 			} catch (Exception e) {
 				Logging.logException(e);
 			}
@@ -140,9 +151,11 @@ public class AudioFile extends Service {
 				// players.put(filename, player);
 				players.add(player);
 				player.start();
+				
 			} else {
 				invoke("started");
 				AdvancedPlayer player = new AdvancedPlayer(is);
+				player.setPlayBackListener(playbackListener);
 				player.play();
 				invoke("stopped");
 			}
@@ -406,11 +419,15 @@ public class AudioFile extends Service {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		AudioFile af = (AudioFile) Runtime.createAndStart("audio", "AudioFile");
+		af.playFile("C:\\mrl3\\myrobotlab\\audioFile\\google\\en\\audrey\\test.mp3", false, false);
+		af.silence();
+		
 		af.convert("C:\\tools\\Tarsos-master\\test.wav");
 
 		Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
 		Python python = (Python) Runtime.createAndStart("python", "Python");
 		AudioFile player = new AudioFile("player");
+		//player.playFile(filename, true);
 		player.startService();
 		GUIService gui = (GUIService) Runtime.createAndStart("gui", "GUIService");
 

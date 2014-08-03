@@ -40,6 +40,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -197,19 +198,25 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 	// FIXME put in sub gui
 	ArrayList<Pin> pinList = null;
 
-	public void getState(Stepper stepper) {
+	public void getState(final Stepper stepper) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+			
 		setEnabled(stepper.isAttached());
 		// FIXED - can't use a reference - because it changes mid-stream through
 		// this method
 		// StepperControllerPanel subpanel =
 		// ((StepperControllerPanel)controllerTypePanel);
-		if (stepper.isAttached()) {
+		if (stepper.isAttached() && stepper.getControllerName() != null) {
 			// !!!!! - This actually fires the (makes a new
 			// StepperControllerPanel) !!!!!
 			controllerSelect.setSelectedItem(stepper.getControllerName());
 			controllerTypePanel.setData(controller.getStepperData(boundServiceName));
 		}
 		controllerTypePanel.setAttached(stepper.isAttached());
+		
+			}
+		});
 	}
 
 	@Override
