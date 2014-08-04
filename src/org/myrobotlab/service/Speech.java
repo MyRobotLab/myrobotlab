@@ -100,7 +100,7 @@ public class Speech extends Service {
 	String language = "en_gb";
 	private String googleURI = "http://translate.google.com/translate_tts?tl=%s&q=";
 	
-	static String filter = "[\\\\/:\\*\\?\"'<>\\|]";
+	static String filter = "[\\\\/:\\*\\?\"<>\\|]";
 
 	// TODO - seperate all of the var into appropriate parts - ie Global ATT
 	// Google FreeTTS
@@ -524,11 +524,23 @@ public class Speech extends Service {
 	public void requestConfirmation(String text) {
 		speak(String.format("did you say. %s", text));
 	}
+	
+	public void test(){
+		Speech mouth = (Speech)Runtime.start(getName(),"Speech");
+		mouth.speak("I don't use appostrophes, or other punctuation, do you?");
+		mouth.speak("I'm done with this test");
+		
+		// TODO non-blocking - blocking google freetts
+		log.info("done with test");
+	}
 
 	// codes - http://code.google.com/apis/language/translate/v2/using_rest.html
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		
+		Speech mouth = (Speech)Runtime.start("mouth", "Speech");
+		mouth.test();
 		
 		String test = " hello this is a test \\dev\\blah / blah : * ? \" blah \" blah > < <> bla | zod | zod2 ".replaceAll(filter, " ");
 	
