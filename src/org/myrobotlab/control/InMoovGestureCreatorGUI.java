@@ -1,28 +1,3 @@
-/**
- *                    
- * @author greg (at) myrobotlab.org
- *  
- * This file is part of MyRobotLab (http://myrobotlab.org).
- *
- * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version (subject to the "Classpath" exception
- * as provided in the LICENSE.txt file that accompanied this code).
- *
- * MyRobotLab is distributed in the hope that it will be useful or fun,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * All libraries in thirdParty bundle are subject to their own license
- * requirements - please refer to http://myrobotlab.org/libraries for 
- * details.
- * 
- * Enjoy !
- * 
- * */
-
 package org.myrobotlab.control;
 
 import java.awt.BorderLayout;
@@ -81,7 +56,8 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 	JButton frame_add;
 	JButton frame_addsleep;
 	JButton frame_addspeech;
-	
+
+	JButton frame_importminmax;
 	JButton frame_remove;
 	JButton frame_load;
 	JButton frame_update;
@@ -117,17 +93,18 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		// bottom1:
 		// |----------|
-		// |bottom1top| <- JButton: exportcode, testgesture
+		// |bottom1top| <- JButton's: exportcode, testgesture
 		// |----------|
-		// |##########| <- JTextArea generatedcode
+		// |##########| <- JTextArea: generatedcode
 		// |##########|
 		// |----------|
 
 		// bottom2:
 		// |----------|
-		// |bottom2top| <- JButton's & JTextField's: [frame_] connect, add, addsleep
-		// |##########| <- JButton's: [frame_] remove, load, update, copy, up,
-		// down
+		// |bottom2top| <- JButton's & JTextField's: [frame_] connect, add,
+		// addsleep, addspeech
+		// |##########| <- JButton's: [frame_] importminmax, remove, load,
+		// update, copy, up, down, test
 		// |----------|
 		// |##########|
 		// |##########| <- JList: framelist
@@ -347,7 +324,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		exportcode = new JButton("Export Code");
 		bottom1top.add(exportcode);
 		exportcode.addActionListener(this);
-		
+
 		testgesture = new JButton("Test Gesture");
 		bottom1top.add(testgesture);
 		testgesture.addActionListener(this);
@@ -378,7 +355,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		frame_connect = new JButton("Connect");
 		bottom2top1.add(frame_connect);
 		frame_connect.addActionListener(this);
-		
+
 		frame_add_textfield = new JTextField("Frame-Name");
 		bottom2top1.add(frame_add_textfield);
 
@@ -392,10 +369,10 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		frame_addsleep = new JButton("Add Sleep");
 		bottom2top1.add(frame_addsleep);
 		frame_addsleep.addActionListener(this);
-		
+
 		frame_addspeech_textfield = new JTextField("Speech");
 		bottom2top1.add(frame_addspeech_textfield);
-		
+
 		frame_addspeech = new JButton("Add Speech");
 		bottom2top1.add(frame_addspeech);
 		frame_addspeech.addActionListener(this);
@@ -404,6 +381,10 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		JPanel bottom2top2 = new JPanel();
 		bottom2top2.setLayout(new BoxLayout(bottom2top2, BoxLayout.X_AXIS));
+
+		frame_importminmax = new JButton("Import Min Max");
+		bottom2top2.add(frame_importminmax);
+		frame_importminmax.addActionListener(this);
 
 		frame_remove = new JButton("Remove");
 		bottom2top2.add(frame_remove);
@@ -428,7 +409,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		frame_down = new JButton("Down");
 		bottom2top2.add(frame_down);
 		frame_down.addActionListener(this);
-		
+
 		frame_test = new JButton("Test");
 		bottom2top2.add(frame_test);
 		frame_test.addActionListener(this);
@@ -513,14 +494,18 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		} else if (o == frame_addspeech) {
 			myService.send(boundServiceName, "frame_addspeech", framelist,
 					frame_addspeech_textfield);
+		} else if (o == frame_importminmax) {
+			myService.send(boundServiceName, "frame_importminmax");
 		} else if (o == frame_remove) {
 			myService.send(boundServiceName, "frame_remove", framelist);
 		} else if (o == frame_load) {
 			myService.send(boundServiceName, "frame_load", framelist,
-					frame_add_textfield, frame_addsleep_textfield, frame_addspeech_textfield);
+					frame_add_textfield, frame_addsleep_textfield,
+					frame_addspeech_textfield);
 		} else if (o == frame_update) {
 			myService.send(boundServiceName, "frame_update", framelist,
-					frame_add_textfield, frame_addsleep_textfield, frame_addspeech_textfield);
+					frame_add_textfield, frame_addsleep_textfield,
+					frame_addspeech_textfield);
 		} else if (o == frame_copy) {
 			myService.send(boundServiceName, "frame_copy", framelist);
 		} else if (o == frame_up) {
