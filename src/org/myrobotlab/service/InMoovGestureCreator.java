@@ -217,7 +217,7 @@ public class InMoovGestureCreator extends Service {
 
 		fih.sleep = Integer.parseInt(frame_addsleep_textfield.getText());
 		fih.speech = null;
-		
+
 		frameitemholder.add(fih);
 
 		framelistact(framelist);
@@ -236,6 +236,88 @@ public class InMoovGestureCreator extends Service {
 		framelistact(framelist);
 	}
 
+	public void frame_importminmax() {
+		// Import the Min- / Max- settings of your InMoov
+		for (int i1 = 0; i1 < servoitemholder.length; i1++) {
+			for (int i2 = 0; i2 < servoitemholder[i1].length; i2++) {
+				InMoovHand inmhand = null;
+				InMoovArm inmarm = null;
+				InMoovHead inmhead = null;
+				InMoovTorso inmtorso = null;
+
+				if (i1 == 0) {
+					inmhand = i01.rightHand;
+				} else if (i1 == 1) {
+					inmarm = i01.rightArm;
+				} else if (i1 == 2) {
+					inmhand = i01.leftHand;
+				} else if (i1 == 3) {
+					inmarm = i01.rightArm;
+				} else if (i1 == 4) {
+					inmhead = i01.head;
+				} else if (i1 == 5) {
+					inmtorso = i01.torso;
+				}
+
+				Servo servo = null;
+
+				if (i1 == 0 || i1 == 2) {
+					if (i2 == 0) {
+						servo = inmhand.thumb;
+					} else if (i2 == 1) {
+						servo = inmhand.index;
+					} else if (i2 == 2) {
+						servo = inmhand.majeure;
+					} else if (i2 == 3) {
+						servo = inmhand.ringFinger;
+					} else if (i2 == 4) {
+						servo = inmhand.pinky;
+					} else if (i2 == 5) {
+						servo = inmhand.wrist;
+					}
+				} else if (i1 == 1 || i1 == 3) {
+					if (i2 == 0) {
+						servo = inmarm.bicep;
+					} else if (i2 == 1) {
+						servo = inmarm.rotate;
+					} else if (i2 == 2) {
+						servo = inmarm.shoulder;
+					} else if (i2 == 3) {
+						servo = inmarm.omoplate;
+					}
+				} else if (i1 == 4) {
+					if (i2 == 0) {
+						servo = inmhead.jaw;
+					} else if (i2 == 1) {
+						servo = inmhead.eyeX;
+					} else if (i2 == 2) {
+						servo = inmhead.eyeY;
+					} else if (i2 == 3) {
+						servo = inmhead.rothead;
+					} else if (i2 == 4) {
+						servo = inmhead.neck;
+					}
+				} else if (i1 == 5) {
+					if (i2 == 0) {
+						servo = inmtorso.topStom;
+					} else if (i2 == 1) {
+						servo = inmtorso.midStom;
+					} else if (i2 == 2) {
+						servo = inmtorso.lowStom;
+					}
+				}
+
+				int min = servo.getMin();
+				int max = servo.getMax();
+
+				servoitemholder[i1][i2].min.setText(min + "");
+				servoitemholder[i1][i2].max.setText(max + "");
+				servoitemholder[i1][i2].sli.setMinimum(min);
+				servoitemholder[i1][i2].sli.setMaximum(max);
+			}
+		}
+	}
+
 	public void frame_remove(JList framelist) {
 		// Remove this frame from the framelist (button bottom-right)
 		int pos = framelist.getSelectedIndex();
@@ -247,7 +329,8 @@ public class InMoovGestureCreator extends Service {
 	}
 
 	public void frame_load(JList framelist, JTextField frame_add_textfield,
-			JTextField frame_addsleep_textfield, JTextField frame_addspeech_textfield) {
+			JTextField frame_addsleep_textfield,
+			JTextField frame_addspeech_textfield) {
 		// Load this frame from the framelist (button bottom-right)
 		int pos = framelist.getSelectedIndex();
 
@@ -258,7 +341,8 @@ public class InMoovGestureCreator extends Service {
 				frame_addsleep_textfield.setText(frameitemholder.get(pos).sleep
 						+ "");
 			} else if (frameitemholder.get(pos).speech != null) {
-				frame_addspeech_textfield.setText(frameitemholder.get(pos).speech);
+				frame_addspeech_textfield
+						.setText(frameitemholder.get(pos).speech);
 			} else {
 				servoitemholder[0][0].sli
 						.setValue(frameitemholder.get(pos).rthumb);
@@ -327,7 +411,8 @@ public class InMoovGestureCreator extends Service {
 	}
 
 	public void frame_update(JList framelist, JTextField frame_add_textfield,
-			JTextField frame_addsleep_textfield, JTextField frame_addspeech_textfield) {
+			JTextField frame_addsleep_textfield,
+			JTextField frame_addspeech_textfield) {
 		// Update this frame on the framelist (button bottom-right)
 
 		int pos = framelist.getSelectedIndex();
@@ -423,9 +508,9 @@ public class InMoovGestureCreator extends Service {
 			framelistact(framelist);
 		}
 	}
-	
+
 	public void frame_test(JList framelist) {
-		//Test this frame (execute)
+		// Test this frame (execute)
 		int pos = framelist.getSelectedIndex();
 		if (i01 != null && pos != -1) {
 			FrameItemHolder fih = frameitemholder.get(pos);
@@ -439,22 +524,20 @@ public class InMoovGestureCreator extends Service {
 							fih.neck);
 				}
 				if (tabs_main_checkbox_states[1]) {
-					i01.moveArm("left", fih.lbicep, fih.lrotate,
-							fih.lshoulder, fih.lomoplate);
+					i01.moveArm("left", fih.lbicep, fih.lrotate, fih.lshoulder,
+							fih.lomoplate);
 				}
 				if (tabs_main_checkbox_states[2]) {
 					i01.moveArm("right", fih.rbicep, fih.rrotate,
 							fih.rshoulder, fih.romoplate);
 				}
 				if (tabs_main_checkbox_states[3]) {
-					i01.moveHand("left", fih.lthumb, fih.lindex,
-							fih.lmajeure, fih.lringfinger, fih.lpinky,
-							fih.lwrist);
+					i01.moveHand("left", fih.lthumb, fih.lindex, fih.lmajeure,
+							fih.lringfinger, fih.lpinky, fih.lwrist);
 				}
 				if (tabs_main_checkbox_states[4]) {
-					i01.moveHand("right", fih.rthumb, fih.rindex,
-							fih.rmajeure, fih.rringfinger, fih.rpinky,
-							fih.rwrist);
+					i01.moveHand("right", fih.rthumb, fih.rindex, fih.rmajeure,
+							fih.rringfinger, fih.rpinky, fih.rwrist);
 				}
 				if (tabs_main_checkbox_states[5]) {
 					i01.moveTorso(fih.topStom, fih.midStom, fih.lowStom);
@@ -561,7 +644,7 @@ public class InMoovGestureCreator extends Service {
 		try {
 
 			Runtime.start("gui", "GUIService");
-			Runtime.start("inmoovgestures", "InMoovGestureCreator");
+			Runtime.start("inmoovgesturecreator", "InMoovGestureCreator");
 
 		} catch (Exception e) {
 			Logging.logException(e);
