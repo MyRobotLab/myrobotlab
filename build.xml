@@ -1,6 +1,9 @@
 <!--
 	Dependencies: git 
 	
+	proxy
+	-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+	
 	The goal is always to make the build more simple :)
 	Currently the only dependencies come with the git clone are in the build directory.
 	
@@ -88,7 +91,7 @@
 	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
 -->
 <!-- FIXME - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="javadoc">
+<project name="myrobotlab" default="uploadMyrobotlab.jar">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
 	<!-- 
