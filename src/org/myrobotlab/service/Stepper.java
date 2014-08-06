@@ -80,6 +80,8 @@ public class Stepper extends Service implements StepperControl {
 	
 	private String type;
 	
+	private Integer currentPos = 0;
+	
 	private StepperController controller = null; // board name
 	
 	static final public String STEPPER_TYPE_POLOLU = "STEPPER_TYPE_POLOLU";
