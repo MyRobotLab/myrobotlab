@@ -99,8 +99,6 @@ public class Stepper extends Service implements StepperControl {
 	
 	// TODO - generalize
 	private transient Arduino arduino;
-
-	private int currentPos;
 	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
