@@ -157,7 +157,12 @@ public class Bootstrap {
 			log.info("total physical memory returned is %d", totalMemory);
 		}
 
-		outArgs.add(String.format("\"%s\"",javaPath));
+		if (platform.isWindows()){
+			outArgs.add(String.format("\"%s\"",javaPath));
+		} else {
+			outArgs.add(javaPath);
+		}
+		
 		// transferring original jvm args
 		for (int i = 0; i < jvmArgs.size(); ++i){
 			outArgs.add(jvmArgs.get(i));
