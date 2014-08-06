@@ -97,6 +97,8 @@ public class Stepper extends Service implements StepperControl {
 	
 	// TODO - generalize
 	private transient Arduino arduino;
+
+	private int currentPos;
 	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -258,7 +260,7 @@ public class Stepper extends Service implements StepperControl {
 		int stepPin = 38;
 		// nice simple interface
 		// stepper.connect("COM15");
-		stepper.attach("COM15", steps, dirPin, stepPin);
+		stepper.attach("COM12", steps, dirPin, stepPin);
 		
 		stepper.moveTo(100);
 		
@@ -282,15 +284,6 @@ public class Stepper extends Service implements StepperControl {
 		return pins;
 	}
 
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		
-		Stepper stepper = (Stepper)Runtime.start("stepper", "Stepper");
-		stepper.test();
-
-	}
 
 	public String getStepperType() {
 		return type;
@@ -299,12 +292,24 @@ public class Stepper extends Service implements StepperControl {
 	// excellent pattern - put in interface
 	public int publishStepperEvent(int currentPos){
 		log.info(String.format("publishStepperEvent %s %d", getName(), currentPos));
+		this.currentPos = currentPos;
 		return currentPos;
 	}
 
 	@Override
 	public int getSteps() {
 		return steps;
+	}
+	
+
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		
+		Stepper stepper = (Stepper)Runtime.start("stepper", "Stepper");
+		stepper.test();
+
 	}
 
 }
