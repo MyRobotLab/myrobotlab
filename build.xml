@@ -311,7 +311,7 @@
 		<pathelement location="../repo/org.saintandreas.jovr/0.3.2.4/jovr-0.3.2.4.jar" />
 		<pathelement location="../repo/org.aitools.programd/4.6/programd-main.jar" />
 		<pathelement location="../repo/org.aitools.programd/4.6/programd-rhino.jar" />
-		<pathelement location="../repo/" />
+		<pathelement location="../repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar" />
 	</path>
 
 	<!-- class path for testing FIXME - add junit normalize git -->

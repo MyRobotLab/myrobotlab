@@ -67,7 +67,6 @@ public class AudioCapture extends Service {
 		super(n);
 	}
 
-
 	// This method creates and returns an
 	// AudioFormat object for a given set
 	// of format parameters. If these
@@ -77,7 +76,7 @@ public class AudioCapture extends Service {
 	// are shown in comments following
 	// the declarations.
 	private AudioFormat getAudioFormat() {
-		float sampleRate = 8000.0F;
+		float sampleRate = 16000.0F;
 		// 8000,11025,16000,22050,44100
 		int sampleSizeInBits = 16;
 		// 8,16
@@ -117,13 +116,12 @@ public class AudioCapture extends Service {
 		stopCapture = true;
 	}
 
-	public void save(String filename) throws IOException
-	{
-		
+	public void save(String filename) throws IOException {
+
 		File file = new File(filename);
 		AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, file);
 	}
-	
+
 	public ByteArrayOutputStream publishCapture() {
 		return byteArrayOutputStream;
 	}
@@ -225,19 +223,28 @@ public class AudioCapture extends Service {
 	public static void main(String[] args) throws InterruptedException {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		
-		AudioCapture audioIn = new AudioCapture("audioIn");
-		audioIn.startService();
-		GUIService gui = new GUIService("gui");
-		gui.startService();
-		
-		
-		audioIn.captureAudio();
-		Thread.sleep(3000);
-		audioIn.stopAudioCapture();
-		audioIn.playAudio();
 
-	
+		try {
+
+			AudioCapture audioIn = (AudioCapture) Runtime.start("audioIn", "AudioCapture");
+			Runtime.start("gui", "GUIService");
+
+			audioIn.captureAudio();
+			Thread.sleep(3000);
+			audioIn.stopAudioCapture();
+			audioIn.playAudio();
+			audioIn.save("me5.wav");
+			
+			audioIn.captureAudio();
+			Thread.sleep(3000);
+			audioIn.stopAudioCapture();
+			audioIn.playAudio();
+			audioIn.save("me1.wav");
+
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+
 		/*
 		 * AudioInputStream stream = AudioSystem.getAudioInputStream(new File(
 		 * "bump.wav")); // stream = AudioSystem.getAudioInputStream(new URL( //

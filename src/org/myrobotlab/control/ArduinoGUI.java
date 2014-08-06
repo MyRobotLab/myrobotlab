@@ -258,7 +258,7 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 
 						JRadioButtonMenuItem serialDevice = new JRadioButtonMenuItem(myArduino.portNames.get(i));
 						SerialDevice sd = myArduino.getSerialDevice();
-						if (sd != null && sd.getName().equals(portName)) {
+						if (sd != null && sd.getName().equals(portName)  && editor.connectButton != null) {
 							if (sd.isOpen()) {
 								// FIXME - editor is often == null - race condition :(
 								editor.connectButton.activate();

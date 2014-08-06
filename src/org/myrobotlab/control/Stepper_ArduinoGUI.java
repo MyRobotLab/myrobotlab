@@ -80,8 +80,10 @@ public class Stepper_ArduinoGUI extends StepperControllerPanel implements Action
 
 	@Override
 	public void setData(Object[] data) {
+		if (data != null && data[0] != null && data[1] != null){
 		powerPin.setSelectedItem(data[0]);
 		directionPin.setSelectedItem(data[1]);
+		}
 	}
 
 	@Override

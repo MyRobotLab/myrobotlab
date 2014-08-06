@@ -2055,7 +2055,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	public void stepperMoveTo(String name, Integer newPos) {
 		if (!steppers.containsKey(name)){
-			error("%s stepper not found");
+			error("%s stepper not found", name);
 			return;
 		}
 		
