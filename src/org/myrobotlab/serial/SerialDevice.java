@@ -27,7 +27,6 @@ public interface SerialDevice {
 	// identification
 	public String getName();
 
-	// public String getCurrentOwner();
 	// public int getPortType();
 	// public boolean isCurrentlyOwned();
 	public int available() throws IOException;
