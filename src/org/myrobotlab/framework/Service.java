@@ -1439,7 +1439,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		invoke("startRecording", new Object[] { null });
 	}
 
-	public String startRecording(String filename) {
+	public String startMsgRecording(String filename) {
 		String filenameXML = String.format("%s/%s_%s.xml", cfgDir, getName(), TSFormatter.format(new Date()));
 		String filenamePython = String.format("%s/%s_%s.py", cfgDir, getName(), TSFormatter.format(new Date()));
 		if (filename == null) {
@@ -1463,7 +1463,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return filenamePython;
 	}
 
-	public void stopRecording() {
+	public void stopMsgRecording() {
 		log.info("stopped recording");
 		isRecording = false;
 		if (recording == null) {
