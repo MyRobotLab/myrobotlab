@@ -66,10 +66,9 @@ public class Repo implements Serializable {
 	transient Ivy ivy = null;
 
 	/**
-	 * the Runtime's name which this Repo is operating in behalf of.
-	 * There is a possiblity that this will be not a real name or null,
-	 * in which case their will be no Runtime running - but Repo requests are
-	 * still desired.
+	 * the Runtime's name which this Repo is operating in behalf of. There is a
+	 * possiblity that this will be not a real name or null, in which case their
+	 * will be no Runtime running - but Repo requests are still desired.
 	 */
 	public final String runtimeName;
 
@@ -89,28 +88,28 @@ public class Repo implements Serializable {
 		// load local file
 		localServiceData = getServiceDataFile();
 	}
-	
+
 	// pulled in dependencies .. not sure if that is good
 	public void info(String format, Object... args) {
 		ServiceInterface si = org.myrobotlab.service.Runtime.getService(runtimeName);
-		
-		if (si != null){
+
+		if (si != null) {
 			si.invoke("updateProgress", Status.info(format, args));
 		} else {
 			log.info(String.format(format, args));
 		}
 	}
-	
+
 	// pulled in dependencies .. not sure if that is good
 	public void error(String format, Object... args) {
 		ServiceInterface si = org.myrobotlab.service.Runtime.getService(runtimeName);
-		if (si != null){
+		if (si != null) {
 			si.invoke("updateProgress", Status.error(format, args));
 		} else {
 			log.error(String.format(format, args));
 		}
 	}
-	
+
 	public void error(Exception e) {
 		Logging.logException(e);
 		error(e.getMessage());
@@ -138,20 +137,25 @@ public class Repo implements Serializable {
 			info("local service data file not found");
 		}
 
+		// FIXME FIXME FIXME - DO NOT AUTO GRAB THE LATEST !!!
 		// failed getting local - try remote
 		// return from remote - last attempt
-		remoteServiceData = getServiceDataFromRepo();
+		boolean checkRepoOnStartup = false;
 
-		if (remoteServiceData != null) {
-			localServiceData = remoteServiceData;
-			return localServiceData;
+		if (checkRepoOnStartup) {
+			remoteServiceData = getServiceDataFromRepo();
+
+			if (remoteServiceData != null) {
+				localServiceData = remoteServiceData;
+				return localServiceData;
+			}
 		}
 
 		// all else fails - no local file - no remote - we will get
 		// the serviceData packaged with the jar
 		String sd = FileIO.resourceToString("framework/serviceData.xml");
 		log.info(sd);
-		if (sd == null){
+		if (sd == null) {
 			error("resource serviceData not found!");
 			return null;
 		}
@@ -189,16 +193,16 @@ public class Repo implements Serializable {
 		String listURL = "https://api.github.com/repos/MyRobotLab/myrobotlab/releases";
 
 		info("trying %s", listURL);
-		
+
 		log.info(String.format("getting list of dist %s", listURL));
 		HTTPRequest http = new HTTPRequest(listURL);
 		String s = http.getString();
-		//info(String.format("recieved [%s]", s));
+		// info(String.format("recieved [%s]", s));
 
 		info("parsing");
 
 		GitHubRelease[] releases = Encoder.gson.fromJson(s, GitHubRelease[].class);
-		if (releases == null){
+		if (releases == null) {
 			error("Are you connected to intertoobs?");
 			throw new IOException("Are you connected to intertoobs?");
 		}
@@ -210,7 +214,7 @@ public class Repo implements Serializable {
 		}
 
 		Arrays.sort(r);
-		
+
 		info("finished parsing and sorting");
 
 		if (r.length > 0) {
@@ -262,7 +266,7 @@ public class Repo implements Serializable {
 			error(e.getMessage());
 			Logging.logException(e);
 		}
-		
+
 		return false;
 	}
 
@@ -295,7 +299,7 @@ public class Repo implements Serializable {
 		} catch (NoSuchElementException e) {
 			Logging.logException(e);
 			updates.lastError = "I think it was evil gnomes !";
-		} catch (Exception ex){
+		} catch (Exception ex) {
 			Logging.logException(ex);
 			updates.lastError = ex.getMessage();
 		}
@@ -312,7 +316,7 @@ public class Repo implements Serializable {
 	public boolean isServiceTypeInstalled(String fullTypeName) {
 		if (localServiceData != null) {
 			ServiceType st = localServiceData.getServiceType(fullTypeName);
-			if (st == null){
+			if (st == null) {
 				error("unknown service %s", fullTypeName);
 				return false;
 			}
@@ -358,7 +362,7 @@ public class Repo implements Serializable {
 	 */
 	// FIXME - should have a better return than just Files
 	synchronized public ResolveReport resolveArtifacts(String org, String revision, boolean retrieve) throws ParseException, IOException {
-		info("%s %s.%s", (retrieve)?"retrieve":"resolve", org, revision);
+		info("%s %s.%s", (retrieve) ? "retrieve" : "resolve", org, revision);
 		// creates clear ivy settings
 		// IvySettings ivySettings = new IvySettings();
 		String module;
@@ -438,11 +442,11 @@ public class Repo implements Serializable {
 		List<?> errors = report.getAllProblemMessages();
 
 		if (errors.size() > 0) {
-			for (int i = 0; i < errors.size(); ++i){
+			for (int i = 0; i < errors.size(); ++i) {
 				error(errors.get(i).toString());
 			}
 		} else {
-			info("%s %s.%s for %s", (retrieve)?"retrieved":"resolved", org, revision, platform.getPlatformId());
+			info("%s %s.%s for %s", (retrieve) ? "retrieved" : "resolved", org, revision, platform.getPlatformId());
 		}
 		// TODO - no error
 		if (retrieve && errors.size() == 0) {
@@ -479,8 +483,9 @@ public class Repo implements Serializable {
 				Artifact artifact = ar.getArtifact();
 				File file = ar.getLocalFile();
 				log.info("{}", file.getAbsoluteFile());
-				// FIXME - native move up one directory !!! - from denormalized back to normalized Yay!
-				// maybe look for PlatformId in path ? 
+				// FIXME - native move up one directory !!! - from denormalized
+				// back to normalized Yay!
+				// maybe look for PlatformId in path ?
 				if (ret == 1 && "zip".equalsIgnoreCase(artifact.getType())) {
 					String filename = String.format("libraries/zip/%s.zip", artifact.getName());
 					info("unzipping %s", filename);
@@ -513,30 +518,31 @@ public class Repo implements Serializable {
 	}
 
 	public ArrayList<ResolveReport> retrieveServiceType(String fullTypeName) throws ParseException, IOException {
-		
-	ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();
+
+		ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();
 		ArrayList<Dependency> deps = getDependencies(fullTypeName);
-		if (deps != null){
-		for (int i = 0; i < deps.size(); ++i) {
-			Dependency dep = deps.get(i);
-			if (!dep.isResolved()) {
-				ResolveReport report = resolveArtifacts(dep.getOrg(), dep.getRevision(), true);
-				reports.add(report);
+		if (deps != null) {
+			for (int i = 0; i < deps.size(); ++i) {
+				Dependency dep = deps.get(i);
+				if (!dep.isResolved()) {
+					ResolveReport report = resolveArtifacts(dep.getOrg(), dep.getRevision(), true);
+					reports.add(report);
 
-				if (report.hasError()) {
-					// TODO - invoke through "myRuntime"
-					// INTERFACE - through message sink / message source
-					// interface
-					List<?> problems = report.getAllProblemMessages();
-					for (int j = 0; j < problems.size(); ++j) {
-						Object problem = problems.get(j);
-						// error(problem.toString()); - already prints out when retrieved
+					if (report.hasError()) {
+						// TODO - invoke through "myRuntime"
+						// INTERFACE - through message sink / message source
+						// interface
+						List<?> problems = report.getAllProblemMessages();
+						for (int j = 0; j < problems.size(); ++j) {
+							Object problem = problems.get(j);
+							// error(problem.toString()); - already prints out
+							// when retrieved
+						}
 					}
-				}
 
+				}
 			}
-		}
-		
+
 		} else {
 			// FIXME - fill reports with HAPPY ENTRY :D
 			log.info("%s is free of dependencies ", fullTypeName);

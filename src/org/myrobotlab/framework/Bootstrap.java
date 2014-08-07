@@ -2,12 +2,14 @@ package org.myrobotlab.framework;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -62,6 +64,11 @@ import java.util.zip.ZipInputStream;
 		 readelf -A /proc/self/exe | grep Tag_ABI_VFP_args
 		 soft = nothing
 		 hard = Tag_ABI_VFP_args: VFP registers
+		 
+		 PACKAGING
+		 jsmooth - windows only
+		 javafx - 1.76u - more dependencies ?
+		 http://stackoverflow.com/questions/1967549/java-packaging-tools-alternatives-for-jsmooth-launch4j-onejar
  *         
  * 
  */
@@ -93,6 +100,32 @@ public class Bootstrap {
 	// http://stackoverflow.com/questions/9911686/getresource-some-jar-returns-null-although-some-jar-exists-in-geturls
 	// RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 	// List<String> arguments = runtimeMxBean.getInputArguments();
+	
+	private class StreamGobbler extends Thread {
+	    InputStream is;
+	    String type;
+
+	    private StreamGobbler(InputStream is, String type) {
+	        this.is = is;
+	        this.type = type;
+	    }
+
+	    @Override
+	    public void run() {
+	        try {
+	            InputStreamReader isr = new InputStreamReader(is);
+	            BufferedReader br = new BufferedReader(isr);
+	            String line = null;
+	            while ((line = br.readLine()) != null){
+	                //System.out.println(type + "> " + line);
+	            	log.info(type + "> " + line);
+	            }
+	        }
+	        catch (IOException ioe) {
+	            ioe.printStackTrace();
+	        }
+	    }
+	}
 	
 	public static List<String> getJVMArgs (){
 		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
@@ -165,7 +198,10 @@ public class Bootstrap {
 		
 		// transferring original jvm args
 		for (int i = 0; i < jvmArgs.size(); ++i){
+			String jvmArg = jvmArgs.get(i);
+			if (!jvmArg.startsWith("-agentlib")){
 			outArgs.add(jvmArgs.get(i));
+		}
 		}
 		outArgs.add(javaLibraryPath);
 		outArgs.add("-cp");
@@ -225,8 +261,21 @@ public class Bootstrap {
 					}
 					log.info(String.format("bootstrap.jar spawning -> %s", formatList(bootArgs)));
 					ProcessBuilder builder = new ProcessBuilder(bootArgs);
-					builder.start();
-					log.info("done - good luck new bootstrap");
+					Process process = builder.start();
+					
+					StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
+
+					// any output?
+					//StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
+					StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
+
+					// start gobblers
+					outputGobbler.start();
+					errorGobbler.start();
+					
+					Thread.sleep(10);
+					
+					log.info(String.format("done - good luck new bootstrap - exitValue %d", process.exitValue()));
 					PreLogger.close();
 					return;
 				} catch (Exception ex) {
