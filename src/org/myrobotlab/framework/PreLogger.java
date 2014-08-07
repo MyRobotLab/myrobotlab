@@ -66,7 +66,10 @@ public class PreLogger {
 				msgToWrite = String.format(msg, params);
 			}
 
-			bufferedWriter.write(String.format("%d %s %s\n", System.currentTimeMillis() - startTS, level, msgToWrite));
+			String data = String.format("%d %s %s\n", System.currentTimeMillis() - startTS, level, msgToWrite);
+			System.out.println(data);
+
+			bufferedWriter.write(data);
 			bufferedWriter.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
