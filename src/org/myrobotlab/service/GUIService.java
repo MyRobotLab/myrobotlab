@@ -639,7 +639,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 				startRecording();
 				recording.setText("stop recording");
 			} else {
-				stopRecording();
+				stopMsgRecording();
 				recording.setText("start recording");
 			}
 		} else if (source == loadRecording) {

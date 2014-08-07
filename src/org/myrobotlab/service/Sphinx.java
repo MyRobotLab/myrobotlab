@@ -165,7 +165,7 @@ public class Sphinx extends Service implements SpeechRecognizer {
 	 * seems to degrade when startRecording is called. I have worked around this
 	 * by not stopping the recording, but by not processing what was recognized
 	 */
-	public void stopRecording() {
+	public void stopMsgRecording() {
 		microphone.stopRecording();
 		microphone.clear();
 	}
