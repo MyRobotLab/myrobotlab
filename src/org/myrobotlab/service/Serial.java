@@ -104,6 +104,14 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 		return retVal;
 	}
+	
+	public boolean record(){
+		return useRXFile(true);
+	}
+	
+	public boolean stopRxRecording(){
+		return useRXFile(false);
+	}
 
 	public boolean useRXFile(boolean b) {
 		try {
