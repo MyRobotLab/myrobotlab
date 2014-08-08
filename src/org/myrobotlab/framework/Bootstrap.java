@@ -540,6 +540,11 @@ public class Bootstrap {
 			Bootstrap bootstrap = new Bootstrap();
 			bootstrap.spawn(args);
 			System.out.println("leaving bootstrap");
+			
+			// Create Starter files
+			CreateStarter cs = new CreateStarter("gui", "GUIService");
+			cs.createEmptyRuntimeStarter();
+			cs.createServiceStarter();
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {
