@@ -91,7 +91,7 @@
 	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
 -->
 <!-- FIXME - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="uploadMyrobotlab.jar">
+<project name="myrobotlab" default="dist">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
 	<!-- 
@@ -197,7 +197,7 @@
 			<headers />
 		</http>
 		
-		<!-- <property name="tag" value="1.0.14" /> -->
+		 <property name="tag" value="1.0.47" /> 
 		<property name="tag" value="1.0.${buildnumber.response}" />
 		<!-- GOOD <property name="tag" value="1.0.${buildnumber.response}" /> -->
 		<echo message="tag ${tag}" />
