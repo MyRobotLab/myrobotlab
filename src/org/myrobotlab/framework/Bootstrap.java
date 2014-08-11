@@ -180,9 +180,7 @@ public class Bootstrap {
 
 		String javaPath = System.getProperty("java.home") + fs + "bin" + fs
 				+ javaExe;
-		String javaLibraryPath = String
-				.format("-Djava.library.path=\"libraries/native%s%s\"",
-						ps, platformId);
+		String javaLibraryPath = String.format("-Djava.library.path=\"libraries/native/%s\"", platformId);
 		// String jvmMemory = "-Xmx2048m -Xms256m";
 		Integer totalMemory = getTotalPhysicalMemory();
 		if (totalMemory == null) {
@@ -190,7 +188,7 @@ public class Bootstrap {
 		} else {
 			log.info("total physical memory returned is %d", totalMemory);
 		}
-		
+
 		if (platform.isWindows()) {
 			outArgs.add(String.format("\"%s\"", javaPath));
 		} else {
@@ -198,14 +196,14 @@ public class Bootstrap {
 		}
 
 		// transferring original jvm args
-		
+
 		for (int i = 0; i < jvmArgs.size(); ++i) {
 			String jvmArg = jvmArgs.get(i);
 			if (!jvmArg.startsWith("-agentlib")) {
 				outArgs.add(jvmArgs.get(i));
 			}
 		}
-		
+
 		outArgs.add(javaLibraryPath);
 		outArgs.add("-cp");
 		outArgs.add(classpath);
@@ -266,7 +264,7 @@ public class Bootstrap {
 						bootArgs.add(in[i]);
 					}
 					String cmd = formatList(outArgs);
-					log.info(String.format("bootstrap.jar spawning -> %s",cmd));
+					log.info(String.format("bootstrap.jar spawning -> %s", cmd));
 					ProcessBuilder builder = new ProcessBuilder(cmd);
 					Process process = builder.start();
 
@@ -300,12 +298,11 @@ public class Bootstrap {
 		String cmd = formatList(outArgs);
 		log.info(String.format("spawning -> [%s]", cmd));
 		/*
-		ArrayList<String> test = new ArrayList<String>();
-		test.add(String.format("%s", javaPath));
-		test.add("-cp");
-		test.add("./myrobotlab.jar:./libraries/jar/*:./");
-		test.add("org.myrobotlab.service.Runtime");
-		*/
+		 * ArrayList<String> test = new ArrayList<String>();
+		 * test.add(String.format("%s", javaPath)); test.add("-cp");
+		 * test.add("./myrobotlab.jar:./libraries/jar/*:./");
+		 * test.add("org.myrobotlab.service.Runtime");
+		 */
 		ProcessBuilder builder = new ProcessBuilder(outArgs);// .inheritIO();
 
 		// environment variables setup
@@ -374,8 +371,8 @@ public class Bootstrap {
 		outputGobbler.start();
 		errorGobbler.start();
 
-		//int ret = process.waitFor();
-		//log.info(String.format("process returned %d", ret));
+		// int ret = process.waitFor();
+		// log.info(String.format("process returned %d", ret));
 
 		// Runtime.getRuntime().exec(outArgs.toArray(new
 		// String[outArgs.size()]));
@@ -400,7 +397,7 @@ public class Bootstrap {
 
 		return sb.toString();
 	}
-	
+
 	public String getVersion() {
 		log = PreLogger.getInstance();
 		InputStream isr = Bootstrap.class

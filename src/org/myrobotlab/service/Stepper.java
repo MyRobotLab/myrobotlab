@@ -262,21 +262,24 @@ public class Stepper extends Service implements StepperControl {
 		// stepper.connect("COM15");
 		stepper.attach("COM12", steps, dirPin, stepPin);
 		
-		stepper.moveTo(100);
+		stepper.moveTo(11100);
 		
-		stepper.reset();
+		//stepper.reset();
+		
+		stepper.moveTo(100);
 		
 		// TODO - blocking call
 		
 		log.info("here");
-		log.info("here");
 		
-		stepper.moveTo(50);
+		stepper.moveTo(1);
 		stepper.reset();
+		stepper.moveTo(2);
+		
 		log.info("here");
-		stepper.moveTo(-150);
+		stepper.moveTo(-1);
 		log.info("here");
-		stepper.moveTo(-150);
+		stepper.moveTo(-300);
 		log.info("here");
 	}
 	
@@ -290,7 +293,7 @@ public class Stepper extends Service implements StepperControl {
 	}
 
 	// excellent pattern - put in interface
-	public int publishStepperEvent(int currentPos){
+	public Integer publishStepperEvent(Integer currentPos){
 		log.info(String.format("publishStepperEvent %s %d", getName(), currentPos));
 		this.currentPos = currentPos;
 		return currentPos;

@@ -111,7 +111,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
 
-	public static final int MRLCOMM_VERSION = 16;
+	public static final int MRLCOMM_VERSION = 17;
 
 	// serial protocol functions
 	public static final int MAGIC_NUMBER = 170; // 10101010
@@ -1005,13 +1005,13 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 							int eventType = msg[1];
 							int index = msg[2];
-							int currentPos = msg[3];
+							int currentPos = (msg[3] << 8) + (msg[4] & 0xff);
 
-							log.info(String.format(" index %d type %d cur %d", index, eventType, currentPos & 0xff));
+							log.info(String.format(" index %d type %d cur %d", index, eventType, currentPos));
 							// uber good - 
 							// TODO - stepper ServoControl interface - not needed Servo is abstraction enough
 							Stepper stepper = (Stepper) stepperIndex.get(index);
-							stepper.invoke("publishStepperEvent", currentPos  & 0xff);
+							stepper.invoke("publishStepperEvent", currentPos);
 							break;
 						}
 						
@@ -2059,18 +2059,17 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			return;
 		}
 		
-		int dir = 0;
-		
 		StepperControl stepper = steppers.get(name);
 		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())){
-			if (newPos > 0){
-				dir = 1;
-			}
 		} else {
 			error("unknown stepper type");
 			return;
 		}
-		sendMsg(STEPPER_MOVE_TO, stepper.getIndex(), newPos, dir);
+		
+		int lsb = newPos & 0xff;
+		int msb = (newPos >> 8) & 0xff;
+		
+		sendMsg(STEPPER_MOVE_TO, stepper.getIndex(), msb, lsb);
 		
 		// TODO - call back event - to say arrived ?
 		

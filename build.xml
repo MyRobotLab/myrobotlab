@@ -91,9 +91,8 @@
 	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
 -->
 <!-- FIXME - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="dist">
+<project name="myrobotlab" default="uploadMyrobotlab.jar">
 	<description>http://myrobotlab.org myrobotlab build file</description>
-
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
@@ -197,7 +196,7 @@
 			<headers />
 		</http>
 		
-		 <property name="tag" value="1.0.47" /> 
+		 <!-- property name="tag" value="1.0.47" /--> 
 		<property name="tag" value="1.0.${buildnumber.response}" />
 		<!-- GOOD <property name="tag" value="1.0.${buildnumber.response}" /> -->
 		<echo message="tag ${tag}" />
