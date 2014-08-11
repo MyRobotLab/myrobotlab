@@ -41,7 +41,7 @@
 #include <Servo.h>
 
 // ----------  MRLCOMM FUNCTION INTERFACE BEGIN -----------
-#define MRLCOMM_VERSION				16
+#define MRLCOMM_VERSION				17
 	
 // serial protocol functions
 #define MAGIC_NUMBER  					170 // 10101010
@@ -696,9 +696,15 @@ void loop () {
 			stepper_type& stepper = steppers[ioCmd[1]];
 			if (stepper.type == STEPPER_TYPE_POLOLU) {
 				stepper.isRunning = true;
-				stepper.targetPos = stepper.currentPos + ioCmd[2];
-				stepper.dir = ioCmd[3]; // <- logic handled in MRL layer
-				digitalWrite(stepper.step0, stepper.dir);
+				
+				stepper.targetPos = stepper.currentPos + (ioCmd[2]<<8) + ioCmd[3];
+				// relative position & direction
+				if (stepper.targetPos < 0) {
+					// direction
+					digitalWrite(stepper.step0, 1);
+				} else {
+					digitalWrite(stepper.step0, 0);
+				}
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}
@@ -973,11 +979,9 @@ void loop () {
 		stepper_type& stepper = steppers[i];
 		if (stepper.isRunning == true){
 			if (stepper.type == STEPPER_TYPE_POLOLU){
-				// stepper states
 				
-				// direction is already taken processed in initial STEPPER_MOVE
-				
-				// start state
+				// direction is already set in initial STEPPER_MOVE
+
 				if (stepper.currentPos < stepper.targetPos) {
 				    
 				    // step - POLOLU has single step pin (dir is on step0)
@@ -999,11 +1003,12 @@ void loop () {
 					stepper.isRunning = false;
 					stepper.currentPos = stepper.targetPos; // forcing ? :P
 					Serial.write(MAGIC_NUMBER);
-					Serial.write(4); // size = 1 FN + 1 eventType + 1 index + 1 curPos
+					Serial.write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
 					Serial.write(STEPPER_EVENT);
 					Serial.write(STEPPER_EVENT_STOP); 
 					Serial.write(stepper.index); // send my index
-					Serial.write(stepper.currentPos); 
+					Serial.write(stepper.currentPos >> 8);   // MSB
+					Serial.write(stepper.currentPos & 0xFF);	// LSB	
 				}
 				
 			}

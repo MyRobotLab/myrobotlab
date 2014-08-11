@@ -41,6 +41,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -58,6 +59,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipException;
 
+import org.myrobotlab.framework.Bootstrap;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -182,10 +184,41 @@ public class FileIO {
 		return data;
 	}
 
+	public static final String getSource() {
+		try {
+			//return URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8");
+			return FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+		} catch (Exception e) {
+			Logging.logException(e);
+			return null;
+		}
+	}
+
+	public static final boolean isJar() {
+		String source = getSource();
+		if (source != null) {
+			return source.endsWith(".jar");
+		}
+		return false;
+	}
+
 	public static final byte[] resourceToByteArray(String resourceName) {
 		String filename = String.format("/resource/%s", resourceName);
+
+		URL resource = FileIO.class.getResource(filename);
+
 		log.info(String.format("looking for %s", filename));
-		InputStream isr = FileIO.class.getResourceAsStream(filename);
+		InputStream isr = null;
+		if (isJar()) {
+			isr = FileIO.class.getResourceAsStream(filename);
+		} else {
+			try {
+				isr = new FileInputStream(String.format("%sresource/%s", getSource(), resourceName));
+			} catch (Exception e) {
+				Logging.logException(e);
+				return null;
+			}
+		}
 		byte[] data = null;
 		try {
 			if (isr == null) {

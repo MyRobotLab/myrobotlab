@@ -41,7 +41,7 @@ public class SpeakerRecognition extends Service {
 		// Create a new Recognito instance defining the audio sample rate to be
 		// used
 		//Recognito<String> recognito = new Recognito<>(16000.0f);
-		Recognito<String> recognito = new Recognito<>(16000.0f);
+		Recognito<String> recognito = new Recognito<String>(16000.0f);
 
 		VoicePrint print = recognito.createVoicePrint("me4", new File("me4.wav"));
 		recognito.createVoicePrint("me3", new File("me3.wav"));
