@@ -99,7 +99,7 @@
 #define LOAD_TIMING_EVENT				43 
 
 #define STEPPER_ATTACH					44
-#define STEPPER_MOVE_TO					45 
+#define STEPPER_MOVE					45 
 #define STEPPER_STOP					46 
 #define STEPPER_RESET					47
 
@@ -692,7 +692,7 @@ void loop () {
 			break;
 		}
 		
-		case STEPPER_MOVE_TO:{
+		case STEPPER_MOVE:{
 			stepper_type& stepper = steppers[ioCmd[1]];
 			if (stepper.type == STEPPER_TYPE_POLOLU) {
 				stepper.isRunning = true;
