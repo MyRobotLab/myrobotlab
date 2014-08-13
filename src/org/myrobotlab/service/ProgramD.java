@@ -24,7 +24,7 @@ public class ProgramD extends Service {
 	private URL baseURL;
 	private String corePropertiesPath;
 	private Core core = null;
-	
+
 	public ProgramD(String reservedKey) {
 		super(reservedKey);
 	}
@@ -60,48 +60,50 @@ public class ProgramD extends Service {
 	 * @param corePropertiesPath - should be the full path to the core.xml file for programD
 	 */
 	public void loadCore(String programDPath, String corePropertiesPath) {
-		
+
 		try {
 			baseURL = new URL("file:/" + programDPath);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		 try {
+		try {
 			core = new Core(baseURL, URLTools.createValidURL(corePropertiesPath));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
+		}		 
 	}
-	
+
 	/**
 	 * 
-	 * @param text
-	 * @param userId
-	 * @param robotName
+	 * @param text - the query string to the bot brain
+	 * @param userId - the user that is sending the query
+	 * @param robotName - the name of the bot you which to get the response from
 	 * @return
 	 */
 	public String getResponse(String text, String userId, String chatbotName) {
-		 String res = core.getResponse(text, userId, chatbotName);
-		 System.out.println(res);
-		 return res;
+		if (core == null) {
+			return "ERROR: Core not loaded, please load core before chatting.";
+		}
+		String res = core.getResponse(text, userId, chatbotName);
+		System.out.println(res);
+		return res;
 	}
-	
+
 	public static void main(String s[]) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel("INFO");
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 		ProgramD alice = (ProgramD) Runtime.createAndStart("alice", "ProgramD");
-		String progDPath = "C:/tools/ProgramD/";
+		String progDPath = "C:\\tools\\ProgramD\\";
 		String corePropertiesPath = "C:\\tools\\ProgramD\\conf\\core.xml";
 		alice.loadCore(progDPath,corePropertiesPath);
 		String response = alice.getResponse("TESTATOMIC", "1", "SampleBot");
-		System.out.println("Alice" + response);
+		System.out.println("Alice: " + response);
 		response = alice.getResponse("How are you?", "1", "SampleBot");
-		System.out.println("Alice" + response);
+		System.out.println("Alice" + response);		
 	}
 
 }
