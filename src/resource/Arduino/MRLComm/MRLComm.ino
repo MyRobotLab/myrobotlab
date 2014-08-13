@@ -716,6 +716,14 @@ void loop () {
 			if (stepper.type == STEPPER_TYPE_POLOLU) {
 				stepper.isRunning = false;
 				stepper.targetPos = stepper.currentPos;
+				
+				Serial.write(MAGIC_NUMBER);
+				Serial.write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
+				Serial.write(STEPPER_EVENT);
+				Serial.write(STEPPER_EVENT_STOP); 
+				Serial.write(stepper.index); // send my index
+				Serial.write(stepper.currentPos >> 8);   // MSB
+				Serial.write(stepper.currentPos & 0xFF);	// LSB	
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}

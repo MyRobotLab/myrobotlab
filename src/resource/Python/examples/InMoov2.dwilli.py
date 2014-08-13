@@ -25,7 +25,6 @@ rightArm = i01.startRightArm(rightPort)
 head = i01.startHead(leftPort)
 mouthControl = i01.startMouthControl(leftPort)
 mouthControl.setmouth(130, 73)
-
 #mouthControl.jaw.setInverted(True)
 
 i01.speakErrors(False)
@@ -770,3 +769,4 @@ def howmanyfingersdoihave():
      further()
      sleep(0.5)
  
+howmanyfingersdoihave()
