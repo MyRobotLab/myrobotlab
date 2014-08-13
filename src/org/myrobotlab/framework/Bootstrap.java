@@ -126,12 +126,10 @@ public class Bootstrap {
 		return runtimeMxBean.getInputArguments();
 	}
 
-	public synchronized void spawn(String[] in) throws IOException,
-			URISyntaxException, InterruptedException {
+	public synchronized void spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
 		log = PreLogger.getInstance();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-		log.info(String.format("\n\nBootstrap starting spawn %s",
-				formatter.format(new Date())));
+		log.info(String.format("\n\nBootstrap starting spawn %s", formatter.format(new Date())));
 
 		log.info("============== args begin ==============");
 		StringBuffer sb = new StringBuffer();
@@ -148,9 +146,7 @@ public class Bootstrap {
 
 		// FIXME - details on space / %20 decoding in URI
 		// http://stackoverflow.com/questions/320542/how-to-get-the-path-of-a-running-jar-file
-		String protectedDomain = URLDecoder.decode(Bootstrap.class
-				.getProtectionDomain().getCodeSource().getLocation().toURI()
-				.getPath(), "UTF-8");
+		String protectedDomain = URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8");
 
 		// this is null in jar :P
 		// String location = File.class.getResource(".").getPath();
@@ -171,16 +167,17 @@ public class Bootstrap {
 		// String class path = System.getProperty("java.class.path"); // wtf -
 		// do
 		// we have to do this?
-		String classpath = String.format(
-				"./%s./myrobotlab.jar%s./libraries/jar/*", ps, ps);
+		String classpath = String.format("./%s./myrobotlab.jar%s./libraries/jar/*", ps, ps);
 		// the java which is executing me will be the java executing runtime
 		// java vs javaw ?
 
 		String javaExe = platform.isWindows() ? "javaw" : "java";
 
-		String javaPath = System.getProperty("java.home") + fs + "bin" + fs
-				+ javaExe;
-		String javaLibraryPath = String.format("-Djava.library.path=\"libraries/native/%s\"", platformId);
+		String javaPath = System.getProperty("java.home") + fs + "bin" + fs + javaExe;
+		// JNI
+		String jniLibraryPath = String.format("-Djava.library.path=\"libraries/native/%s\"", platformId);
+		// FIXME - JNA path
+		
 		// String jvmMemory = "-Xmx2048m -Xms256m";
 		Integer totalMemory = getTotalPhysicalMemory();
 		if (totalMemory == null) {
@@ -204,7 +201,7 @@ public class Bootstrap {
 			}
 		}
 
-		outArgs.add(javaLibraryPath);
+		outArgs.add(jniLibraryPath);
 		outArgs.add("-cp");
 		outArgs.add(classpath);
 
@@ -239,8 +236,7 @@ public class Bootstrap {
 				Path source = Paths.get("./myrobotlab.jar");
 				File archiveDir = new File("./archive");
 				archiveDir.mkdirs();
-				Path target = Paths.get(String.format(
-						"./archive/myrobotlab.%s.jar", getVersion()));
+				Path target = Paths.get(String.format("./archive/myrobotlab.%s.jar", getVersion()));
 				Files.move(source, target, REPLACE_EXISTING);
 
 				// copy update
@@ -268,22 +264,18 @@ public class Bootstrap {
 					ProcessBuilder builder = new ProcessBuilder(cmd);
 					Process process = builder.start();
 
-					StreamGobbler errorGobbler = new StreamGobbler(
-							process.getErrorStream(), "ERROR");
+					StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
 
 					// any output?
 					// StreamGobbler outputGobbler = new
 					// StreamGobbler(process.getInputStream(), "OUTPUT");
-					StreamGobbler outputGobbler = new StreamGobbler(
-							process.getInputStream(), "OUTPUT");
+					StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
 
 					// start gobblers
 					outputGobbler.start();
 					errorGobbler.start();
 
-					log.info(String.format(
-							"done - good luck new bootstrap - exitValue %d",
-							process.exitValue()));
+					log.info(String.format("done - good luck new bootstrap - exitValue %d", process.exitValue()));
 					PreLogger.close();
 					return;
 				} catch (Exception ex) {
@@ -308,19 +300,13 @@ public class Bootstrap {
 		// environment variables setup
 		Map<String, String> env = builder.environment();
 		if (platform.isLinux()) {
-			String ldPath = String
-					.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}",
-							platformId);
+			String ldPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}", platformId);
 			env.put("LD_LIBRARY_PATH", ldPath);
 		} else if (platform.isMac()) {
-			String dyPath = String
-					.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}",
-							platformId);
+			String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
 			env.put("DYLD_LIBRARY_PATH", dyPath);
 		} else if (platform.isWindows()) {
-			String path = String
-					.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%",
-							platformId);
+			String path = String.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%", platformId);
 			env.put("PATH", path);
 		} else {
 			log.error("unkown operating system");
@@ -358,14 +344,12 @@ public class Bootstrap {
 		// http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id
 		Process process = builder.start();
 
-		StreamGobbler errorGobbler = new StreamGobbler(
-				process.getErrorStream(), "ERROR");
+		StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
 
 		// any output?
 		// StreamGobbler outputGobbler = new
 		// StreamGobbler(process.getInputStream(), "OUTPUT");
-		StreamGobbler outputGobbler = new StreamGobbler(
-				process.getInputStream(), "OUTPUT");
+		StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
 
 		// start gobblers
 		outputGobbler.start();
@@ -383,8 +367,7 @@ public class Bootstrap {
 		// inheritIO(process.getErrorStream(), System.err);
 		// process.waitFor();
 
-		log.info(String.format("Bootstrap finished spawn %s",
-				formatter.format(new Date())));
+		log.info(String.format("Bootstrap finished spawn %s", formatter.format(new Date())));
 		PreLogger.close();
 
 	}
@@ -400,8 +383,7 @@ public class Bootstrap {
 
 	public String getVersion() {
 		log = PreLogger.getInstance();
-		InputStream isr = Bootstrap.class
-				.getResourceAsStream("/resource/version.txt");
+		InputStream isr = Bootstrap.class.getResourceAsStream("/resource/version.txt");
 		if (isr == null) {
 			log.error("can not find resource [/resource/version.txt]");
 			return null;
@@ -431,8 +413,7 @@ public class Bootstrap {
 		return null;
 	}
 
-	static public void extract(String resourcePath, String targetDirectory,
-			String filter, boolean overwrite) throws IOException {
+	static public void extract(String resourcePath, String targetDirectory, String filter, boolean overwrite) throws IOException {
 		// log.debug(String.format("extractFromResource (%s,%s)", resourcePath,
 		// targetDirectory));
 		InputStream source = new FileInputStream(resourcePath);
@@ -441,8 +422,7 @@ public class Bootstrap {
 
 		if (!target.exists() && !target.mkdirs()) {
 			source.close();
-			throw new IOException("Unable to create directory "
-					+ target.getAbsolutePath());
+			throw new IOException("Unable to create directory " + target.getAbsolutePath());
 		}
 
 		ZipInputStream in = new ZipInputStream(source);
@@ -450,14 +430,12 @@ public class Bootstrap {
 
 			byte[] buffer = new byte[BUFFER_SIZE];
 
-			for (ZipEntry entry = in.getNextEntry(); entry != null; entry = in
-					.getNextEntry()) {
+			for (ZipEntry entry = in.getNextEntry(); entry != null; entry = in.getNextEntry()) {
 				// log.info(entry.getName());
 
 				if (filter == null || entry.getName().startsWith(filter)) {
 
-					String filename = entry.getName()
-							.substring(filter.length());
+					String filename = entry.getName().substring(filter.length());
 					// File file = new File(target, entry.getName());
 					File file = new File(target, filename);
 
@@ -505,8 +483,7 @@ public class Bootstrap {
 	 * @param tobeJared
 	 * @throws IOException
 	 */
-	public void createJarArchive(String archiveFileName,
-			ArrayList<String> tobeJared) throws IOException {
+	public void createJarArchive(String archiveFileName, ArrayList<String> tobeJared) throws IOException {
 
 		File archiveFile = new File(archiveFileName);
 		byte buffer[] = new byte[BUFFER_SIZE];
@@ -517,16 +494,14 @@ public class Bootstrap {
 		// http://www.concretepage.com/java/add-manifest-into-jar-file-using-java
 		Attributes global = manifest.getMainAttributes();
 		global.put(Attributes.Name.MANIFEST_VERSION, "1.0.0");
-		global.put(new Attributes.Name("Built-By"),
-				String.format("Bootstrap %s", getVersion()));
+		global.put(new Attributes.Name("Built-By"), String.format("Bootstrap %s", getVersion()));
 		// global.put(new Attributes.Name("CLASS_PATH"), "dummy classpath");
 		// global.put(new Attributes.Name("CONTENT_TYPE"), "txt/plain");
 		// global.put(new Attributes.Name("SIGNATURE_VERSION"), "2.0");
 		// global.put(new Attributes.Name("SPECIFICATION_TITLE"),
 		// "dummy title");
 		// global.put(new Attributes.Name("CLASS_PATH"), "dummy classpath");
-		global.put(Attributes.Name.MAIN_CLASS,
-				Bootstrap.class.getCanonicalName());
+		global.put(Attributes.Name.MAIN_CLASS, Bootstrap.class.getCanonicalName());
 
 		JarOutputStream out = new JarOutputStream(stream, manifest);
 
@@ -568,15 +543,13 @@ public class Bootstrap {
 
 	}
 
-	public void spawn(List<String> args) throws IOException,
-			URISyntaxException, InterruptedException {
+	public void spawn(List<String> args) throws IOException, URISyntaxException, InterruptedException {
 		spawn(args.toArray(new String[args.size()]));
 	}
 
 	public Integer getTotalPhysicalMemory() {
 		try {
-			com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory
-					.getOperatingSystemMXBean();
+			com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
 			Integer physicalMemorySize = (int) os.getTotalPhysicalMemorySize() / 1048576;
 
 			return physicalMemorySize;

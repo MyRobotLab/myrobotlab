@@ -3,7 +3,7 @@
 # this script is provided as a basic guide
 # most parts can be run by uncommenting them
 # InMoov now can be started in modular pieces
- 
+import random
 leftPort = "COM7"
 rightPort = "COM8"
  
@@ -32,8 +32,9 @@ i01.head.rothead.setRest(86)
 ##############
 i01.startMouthControl(leftPort)
 # tweaking default settings of jaw
-i01.head.jaw.setMinMax(8,55)
-i01.mouthControl.setmouth(8,38)
+i01.head.jaw.setMinMax(76,103)
+i01.mouthControl.setmouth(76,100)
+helvar = 1
 ##############
 i01.startEar()
 ##############
@@ -190,10 +191,6 @@ ear.addCommand("camera on", i01.getName(), "cameraOn")
 ear.addCommand("off camera", i01.getName(), "cameraOff")
 ear.addCommand("capture gesture", i01.getName(), "captureGesture")
 # FIXME - lk tracking setpoint
-#ear.addCommand("track", i01.getName(), "track")
-#ear.addCommand("freeze track", i01.getName(), "clearTrackingPoints")
-#ear.addCommand("hello", i01.getName(), "hello")
-ear.addCommand("hello", "python", "hello")
 ear.addCommand("giving", i01.getName(), "giving")
 ear.addCommand("fighter", i01.getName(), "fighter")
 ear.addCommand("fist hips", "python", "fistHips")
@@ -258,11 +255,107 @@ ear.addCommand("cycle gesture one", "python", "cyclegesture1")
 ear.addCommand("cycle gesture two", "python", "cyclegesture2")
 ear.addCommand("show your muscles", "python", "muscle")
 ear.addCommand("shake hand", "python", "shakehand")
+ear.addCommand("unhappy", "python", "unhappy")
  
 ear.addComfirmations("yes","correct","ya","yeah")
 ear.addNegations("no","wrong","nope","nah")
+
+ear.startListening("sorry | how do you do | hello | byebye | i love you | thanks | thank you | nice")
  
-ear.startListening()
+# set up a message route from the ear --to--> python method "heard"
+ear.addListener("recognized", "python", "heard")
+ 
+def heard():
+    data = msg_i01_ear_recognized.data[0]
+ 
+ 
+ 
+    if (data == "sorry"):
+        x = (random.randint(1, 3))
+        if x == 1:
+            i01.mouth.speak("no problems")
+        if x == 2:
+            i01.mouth.speak("it doesn't matter")
+        if x == 3:
+            i01.mouth.speak("it's okay")
+
+    if (data == "nice"):
+        x = (random.randint(1, 2))
+        if x == 1:
+            i01.mouth.speak("I know")
+        if x == 2:
+            i01.mouth.speak("yeah isn't it")
+
+    if (data == "hello"):
+        hello()
+        relax()    
+ 
+    if (data == "byebye"):
+        i01.mouth.speak("see you soon")
+        global helvar
+        helvar = 1
+        x = (random.randint(1, 4))
+        if x == 1:
+            i01.mouth.speak("i'm looking forward to see you again")
+        if x == 2:
+            i01.mouth.speak("goodbye")
+
+    if (data == "thank you"):
+        x = (random.randint(1, 3))
+        if x == 1:
+            i01.mouth.speak("you are welcome")
+        if x == 2:
+            i01.mouth.speak("my pleasure")
+        if x == 3:
+            i01.mouth.speak("it's okay")
+
+    if (data == "thanks"):
+        x = (random.randint(1, 2))
+        if x == 1:
+            i01.mouth.speak("it's okay")
+        if x == 2:
+            i01.mouth.speak("sure")    
+ 
+ 
+    if (data == "how do you do"):
+        if helvar <= 2:    
+            i01.mouth.speak("I'm fine thank you")
+            global helvar
+            helvar += 1
+        elif helvar == 3:
+            i01.mouth.speak("you have already said that at least twice")
+            i01.moveArm("left",43,88,22,10)
+            i01.moveArm("right",20,90,30,10)
+            i01.moveHand("left",0,0,0,0,0,119)
+            i01.moveHand("right",0,0,0,0,0,119)
+            sleep(2)
+            relax()
+            global helvar
+            helvar += 1
+        elif helvar == 4:
+            i01.mouth.speak("what is your problem stop saying how do you do all the time")
+            i01.moveArm("left",30,83,22,10)
+            i01.moveArm("right",40,85,30,10)
+            i01.moveHand("left",130,180,180,180,180,119)
+            i01.moveHand("right",130,180,180,180,180,119)
+            sleep(2)
+            relax()
+            global helvar
+            helvar += 1
+        elif helvar == 5:
+            i01.mouth.speak("i will ignore you if you say how do you do one more time")
+            unhappy()
+            sleep(4)
+            relax()
+            global helvar
+            helvar += 1
+ 
+    if (data == "i love you"):
+        i01.mouth.speak("i love you too")
+        giving()
+        relax()
+
+        
 def startkinect():
      i01.copyGesture(True)
 
@@ -295,6 +388,20 @@ def fistHips():
   i01.moveHand("right",99,130,152,154,145,180)
   i01.moveTorso(90,90,90)
 
+def unhappy():
+  i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+  i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+  i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0)
+  i01.setArmSpeed("right", 1.0, 1.0, 1.0, 1.0)
+  i01.setHeadSpeed(1.0, 1.0)
+  i01.setTorsoSpeed(1.0, 1.0, 1.0)
+  i01.moveHead(85,40,80,90,78)
+  i01.moveArm("left",79,42,23,41)
+  i01.moveArm("right",71,40,14,39)
+  i01.moveHand("left",180,180,180,180,180,47)
+  i01.moveHand("right",99,130,152,154,145,180)
+  i01.moveTorso(90,90,90)
+
 def rest():
   i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
   i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
@@ -302,7 +409,7 @@ def rest():
   i01.setArmSpeed("right", 1.0, 1.0, 1.0, 1.0)
   i01.setHeadSpeed(1.0, 1.0)
   i01.setTorsoSpeed(1.0, 1.0, 1.0)
-  i01.moveHead(80,86,82,78,8)
+  i01.moveHead(80,86,82,78,76)
   i01.moveArm("left",5,90,30,10)
   i01.moveArm("right",5,90,30,10)
   i01.moveHand("left",2,2,2,2,2,90)
@@ -340,6 +447,19 @@ def perfect():
   i01.moveArm("right",0,91,28,17)
   i01.moveHand("left",130,160,83,40,0,34)
   i01.moveHand("right",86,51,133,162,153,180)
+
+def fisthips():
+  i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+  i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+  i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0)
+  i01.setArmSpeed("right", 1.0, 1.0, 1.0, 1.0)
+  i01.setHeadSpeed(0.65, 0.75)
+  i01.moveHead(138,80,82,78,78)
+  i01.moveArm("left",79,45,23,41)
+  i01.moveArm("right",71,40,14,39)
+  i01.moveHand("left",180,180,180,180,180,47)
+  i01.moveHand("right",99,130,152,154,145,180)
+  i01.moveTorso(90,90,90)
  
 def releasedelicate():
   i01.setHandSpeed("left", 0.60, 0.60, 1.0, 1.0, 1.0, 1.0)
@@ -390,12 +510,10 @@ def poorbottle():
   i01.moveHand("right",145,112,127,105,143,133)
  
 def givetheglass():
-  i01.headTracking.faceDetect()
-  i01.eyesTracking.faceDetect()
   sleep(2)
   i01.setHandSpeed("left", 0.60, 0.60, 0.60, 0.60, 0.60, 0.60)
   i01.setHandSpeed("right", 0.60, 0.80, 0.60, 0.60, 0.60, 0.60)
-  i01.setArmSpeed("left", 0.60, 0.60, 0.60, 0.60)
+  i01.setArmSpeed("left", 0.60, 1.0, 0.60, 0.60)
   i01.setArmSpeed("right", 0.60, 0.60, 0.60, 0.60)
   i01.setHeadSpeed(0.65, 0.65)
   i01.moveHead(84,79)
@@ -538,7 +656,7 @@ def relax():
   i01.setArmSpeed("left", 0.95, 0.65, 0.75, 0.75)
   i01.setHeadSpeed(0.75, 0.75)
   i01.setTorsoSpeed(0.75, 0.55, 1.0)
-  i01.moveHead(79,100,80,90,13)
+  i01.moveHead(79,100,80,90,76)
   i01.moveArm("left",5,84,28,15)
   i01.moveArm("right",5,82,28,15)
   i01.moveHand("left",92,33,37,71,66,25)
@@ -721,7 +839,7 @@ def shakehand():
   i01.moveTorso(101,100,90)
   sleep(1)
 ##shake hand down
-  i01.mouth.speakBlocking("please to meet you")
+  i01.mouth.speak("please to meet you")
   i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
   i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
   i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0)
@@ -730,7 +848,7 @@ def shakehand():
   i01.setTorsoSpeed(1.0, 1.0, 1.0)
   i01.moveHead(85,90,78,80,8)
   i01.moveArm("left",5,84,16,15)
-  i01.moveArm("right",6,73,65,16)
+  i01.moveArm("right",6,73,60,16)
   i01.moveHand("left",50,50,40,20,20,90)
   i01.moveHand("right",180,126,120,145,168,77)
   i01.moveTorso(101,100,90)
@@ -765,7 +883,7 @@ def shakehand():
   sleep(2)
 ## release hand  
   i01.setHandSpeed("left", 0.65, 0.65, 0.65, 0.65, 0.65, 1.0)
-  i01.setHandSpeed("right", 0.85, 0.85, 0.85, 0.85, 0.85, 1.0)
+  i01.setHandSpeed("right", 0.95, 0.95, 0.95, 0.95, 0.95, 1.0)
   i01.setArmSpeed("right", 0.75, 0.75, 0.95, 0.85)
   i01.setArmSpeed("left", 0.75, 0.85, 0.95, 0.85)
   i01.setHeadSpeed(0.45, 0.45)
@@ -844,7 +962,7 @@ def hello():
           i01.moveArm("right",90,157,47,75)
           i01.moveHand("left",112,111,105,102,81,10)
           i01.moveHand("right",3,0,62,41,117,94)
-          sleep(1)
+          
  
           if w==1:
                      i01.setHandSpeed("left", 0.60, 0.60, 1.0, 1.0, 1.0, 1.0)
@@ -1348,49 +1466,19 @@ def cyclegesture2():
     relax()
     sleep(2)
     removeleftarm()
-    i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("right", 1.0, 1.0, 1.0, 1.0)
-    i01.setHeadSpeed(1.0, 1.0)
-    i01.setTorsoSpeed(1.0, 1.0, 1.0)
-    sleep(8)
-    handdown()
-    i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("right", 1.0, 1.0, 1.0, 1.0)
-    i01.setHeadSpeed(1.0, 1.0)
-    i01.setTorsoSpeed(1.0, 1.0, 1.0)
-    sleep(8)
-    giving()
-    sleep(5)
-    handclose()
-    i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("right", 1.0, 1.0, 1.0, 1.0)
-    i01.setHeadSpeed(1.0, 1.0)
-    i01.setTorsoSpeed(1.0, 1.0, 1.0)
     sleep(2)
-    giving()
-    i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("right", 1.0, 1.0, 1.0, 1.0)
-    i01.setHeadSpeed(1.0, 1.0)
-    i01.setTorsoSpeed(1.0, 1.0, 1.0)
+    handdown()
+    sleep(1)
+    #i01.giving()
+    sleep(5)
+    ##giving()
     sleep(5)
     removeleftarm()
     sleep(2)
     isitaball()
-    i01.setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("left", 1.0, 1.0, 1.0, 1.0)
-    i01.setArmSpeed("right", 1.0, 1.0, 1.0, 1.0)
-    i01.setHeadSpeed(1.0, 1.0)
-    i01.setTorsoSpeed(1.0, 1.0, 1.0)
     sleep(4)
+    dropit()
+    sleep(2)
     relax()
     sleep(5)
     powerdown()

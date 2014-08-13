@@ -25,10 +25,15 @@
 
 package org.myrobotlab.service;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.StepperControl;
 import org.myrobotlab.service.interfaces.StepperController;
@@ -52,13 +57,15 @@ public class Stepper extends Service implements StepperControl {
 
 	private boolean isAttached = false;
 	private int rpm = 0;
-	private boolean locked = false; // for locking the motor in a stopped position
-	
+	private boolean locked = false; // for locking the motor in a stopped
+									// position
+
 	/**
-	 * controller index for events & controllers to dumb to have dynamic string based containers
+	 * controller index for events & controllers to dumb to have dynamic string
+	 * based containers
 	 */
-	private Integer index; 
-	
+	private Integer index;
+
 	// Constants that the user passes in to the motor calls
 	public static final Integer FORWARD = 1;
 	public static final Integer BACKWARD = 2;
@@ -70,36 +77,38 @@ public class Stepper extends Service implements StepperControl {
 	public static final Integer DOUBLE = 2;
 	public static final Integer INTERLEAVE = 3;
 	public static final Integer MICROSTEP = 4;
-	
+
 	private Integer stepperingStyle = SINGLE;
-	
+
+	BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
+
 	/**
-	 *  number of steps for this stepper - common is 200
+	 * number of steps for this stepper - common is 200
 	 */
 	private Integer steps;
-	
+
 	private String type;
-	
+
 	private Integer currentPos = 0;
-	
+
 	private StepperController controller = null; // board name
-	
+
 	static final public String STEPPER_TYPE_POLOLU = "STEPPER_TYPE_POLOLU";
-	
+
 	/**
 	 * step pins this can vary in size 2 for Pololu (dir & step) , 3, 4, 5, ...
 	 * if more than one - they must be in the correct stepping order
 	 */
 	private Integer[] pins; // this data is "shared" with the controller
-	
+
 	/**
-	 *  direction pin is used for Pololu stype stepper drivers with a
-	 *  direction input
+	 * direction pin is used for Pololu stype stepper drivers with a direction
+	 * input
 	 */
-	
+
 	// TODO - generalize
 	private transient Arduino arduino;
-	
+
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 
@@ -108,7 +117,7 @@ public class Stepper extends Service implements StepperControl {
 		peers.put("arduino", "Arduino", "arduino");
 		return peers;
 	}
-	
+
 	public Stepper(String n) {
 		super(n);
 	}
@@ -163,8 +172,7 @@ public class Stepper extends Service implements StepperControl {
 
 	@Override
 	public boolean detach() {
-		if (controller == null)
-		{
+		if (controller == null) {
 			return false;
 		}
 		controller.stepperDetach(getName());
@@ -175,7 +183,7 @@ public class Stepper extends Service implements StepperControl {
 	public void setSpeed(Integer rpm) {
 		controller.setSpeed(rpm);
 	}
-	
+
 	@Override
 	public void step(Integer steps) {
 		step(steps, stepperingStyle);
@@ -187,41 +195,47 @@ public class Stepper extends Service implements StepperControl {
 		controller.stepperStep(getName(), steps, style);
 	}
 
-	@Override
-	public void stop() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public void reset(){
-		controller.stepperReset(getName());
-	}
-	
-	public boolean attach(String port, Integer steps, Integer...pins) {
-		return attach((String) null, port, steps, pins);
+	public void moveTo(int newPos) {
+		this.arduino.stepperMoveTo(getName(), newPos);
 	}
 
-	public boolean attach(String arduino, String port, Integer steps, Integer...pins) {
+	@Override
+	public void stop() {
+		this.arduino.stepperStop(getName());
+	}
+
+	public void setNumSteps(Integer steps) {
+		this.steps = steps;
+	}
+
+	public void reset() {
+		controller.stepperReset(getName());
+	}
+
+	public boolean attach(String port, Integer... pins) {
+		return attach((String) null, port, pins);
+	}
+
+	public boolean attach(String arduino, String port, Integer... pins) {
 		if (arduino == null && this.arduino == null) {
 			this.arduino = (Arduino) startPeer("arduino");
 		}
-		return attach(this.arduino, port, steps, STEPPER_TYPE_POLOLU, pins);
+		return attach(this.arduino, port, STEPPER_TYPE_POLOLU, pins);
 	}
 
-	public boolean attach(Arduino arduino, String port, Integer steps, String type, Integer...pins) {
+	public boolean attach(Arduino arduino, String port, String type, Integer... pins) {
 		this.arduino = arduino;
-		this.steps = steps;
 		this.type = type;
 		this.pins = pins;
-		
-		if (!this.arduino.connect(port)){
+
+		if (!this.arduino.connect(port)) {
 			error("could not connect port %s", port);
 			return false;
 		}
 
 		return arduino.stepperAttach(this);
 	}
-	
+
 	public Integer getIndex() {
 		return index;
 	}
@@ -229,27 +243,63 @@ public class Stepper extends Service implements StepperControl {
 	public void setIndex(Integer index) {
 		this.index = index;
 	}
-	
-	public void moveTo(int newPos){
-		this.arduino.stepperMoveTo(getName(), newPos);
-	}
-	
-	public void startService(){
+
+	public void startService() {
 		super.startService();
-		arduino = (Arduino)startPeer("arduino");
+		arduino = (Arduino) startPeer("arduino");
 	}
-	
-	boolean connect(String port){
+
+	boolean connect(String port) {
 		return arduino.connect(port);
 	}
-	
+
+	public Integer[] getPins() {
+		return pins;
+	}
+
+	public String getStepperType() {
+		return type;
+	}
+
+	// excellent pattern - put in interface
+	public Integer publishStepperEvent(Integer currentPos) {
+		log.info(String.format("publishStepperEvent %s %d", getName(), currentPos));
+		this.currentPos = currentPos;
+		if (isBlockingOnStop) {
+			blockingData.add(currentPos);
+		}
+		return currentPos;
+	}
+
+	@Override
+	public int getSteps() {
+		return steps;
+	}
+
+	private boolean isBlockingOnStop = false;
+
+	public Integer moveToBlocking(Integer newPos) {
+		try {
+
+			isBlockingOnStop = true;
+			blockingData.clear();
+
+			moveTo(newPos);
+			Integer gotTo = (Integer) blockingData.poll(10000, TimeUnit.MILLISECONDS);
+			return gotTo;
+		} catch (Exception e) {
+			Logging.logException(e);
+			return null;
+		}
+	}
+
 	public void test() {
 		// FIXME - there has to be a properties method to configure localized
 		// testing
 		boolean useGUI = true;
 
 		Stepper stepper = (Stepper) Runtime.start(getName(), "Stepper");
-		//Python python = (Python) Runtime.start("python", "Python");
+		// Python python = (Python) Runtime.start("python", "Python");
 
 		// && depending on headless
 		if (useGUI) {
@@ -260,57 +310,38 @@ public class Stepper extends Service implements StepperControl {
 		int stepPin = 38;
 		// nice simple interface
 		// stepper.connect("COM15");
-		stepper.attach("COM12", steps, dirPin, stepPin);
-		
-		stepper.moveTo(11100);
-		
-		//stepper.reset();
-		
+		stepper.attach("COM12", dirPin, stepPin);
+
+		//stepper.moveToBlocking(77777);
+
+		stepper.moveTo(81100);
+
+		stepper.stop();
+		// stepper.reset();
+
 		stepper.moveTo(100);
-		
+
 		// TODO - blocking call
-		
+
 		log.info("here");
-		
+
 		stepper.moveTo(1);
 		stepper.reset();
 		stepper.moveTo(2);
-		
+
 		log.info("here");
 		stepper.moveTo(-1);
 		log.info("here");
 		stepper.moveTo(-300);
 		log.info("here");
 	}
-	
-	public Integer[] getPins() {
-		return pins;
-	}
-
-
-	public String getStepperType() {
-		return type;
-	}
-
-	// excellent pattern - put in interface
-	public Integer publishStepperEvent(Integer currentPos){
-		log.info(String.format("publishStepperEvent %s %d", getName(), currentPos));
-		this.currentPos = currentPos;
-		return currentPos;
-	}
-
-	@Override
-	public int getSteps() {
-		return steps;
-	}
-	
 
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-		
-		Stepper stepper = (Stepper)Runtime.start("stepper", "Stepper");
+
+		Stepper stepper = (Stepper) Runtime.start("stepper", "Stepper");
 		stepper.test();
 
 	}

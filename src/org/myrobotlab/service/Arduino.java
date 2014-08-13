@@ -2159,6 +2159,11 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		StepperControl stepper = steppers.get(stepperName);
 		sendMsg(STEPPER_RESET, stepper.getIndex());
 	}
+	
+	public void stepperStop(String name) {
+		StepperControl stepper = steppers.get(name);
+		sendMsg(STEPPER_STOP, stepper.getIndex());
+	}
 
 	public static void main(String[] args) {
 		try {
