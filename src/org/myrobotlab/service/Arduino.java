@@ -169,7 +169,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public static final int LOAD_TIMING_EVENT = 43;
 
 	public static final int STEPPER_ATTACH	= 44;
-	public static final int STEPPER_MOVE_TO = 45; 
+	public static final int STEPPER_MOVE = 45; 
 	public static final int STEPPER_STOP = 46; 
 	public static final int STEPPER_RESET = 47; 
 
@@ -2053,7 +2053,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 	
 
-	public void stepperMoveTo(String name, Integer newPos) {
+	public void stepperMove(String name, Integer newPos) {
 		if (!steppers.containsKey(name)){
 			error("%s stepper not found", name);
 			return;
@@ -2069,7 +2069,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		int lsb = newPos & 0xff;
 		int msb = (newPos >> 8) & 0xff;
 		
-		sendMsg(STEPPER_MOVE_TO, stepper.getIndex(), msb, lsb);
+		sendMsg(STEPPER_MOVE, stepper.getIndex(), msb, lsb);
 		
 		// TODO - call back event - to say arrived ?
 		

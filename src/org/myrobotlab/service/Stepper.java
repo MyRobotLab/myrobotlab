@@ -195,8 +195,8 @@ public class Stepper extends Service implements StepperControl {
 		controller.stepperStep(getName(), steps, style);
 	}
 
-	public void moveTo(int newPos) {
-		this.arduino.stepperMoveTo(getName(), newPos);
+	public void move(int newPos) {
+		this.arduino.stepperMove(getName(), newPos);
 	}
 
 	@Override
@@ -284,7 +284,7 @@ public class Stepper extends Service implements StepperControl {
 			isBlockingOnStop = true;
 			blockingData.clear();
 
-			moveTo(newPos);
+			move(newPos);
 			Integer gotTo = (Integer) blockingData.poll(10000, TimeUnit.MILLISECONDS);
 			return gotTo;
 		} catch (Exception e) {
@@ -314,27 +314,37 @@ public class Stepper extends Service implements StepperControl {
 
 		//stepper.moveToBlocking(77777);
 
-		stepper.moveTo(81100);
+		stepper.move(81100);
 
 		stepper.stop();
 		// stepper.reset();
 
-		stepper.moveTo(100);
+		stepper.move(100);
 
 		// TODO - blocking call
 
 		log.info("here");
 
-		stepper.moveTo(1);
+		stepper.move(1);
 		stepper.reset();
-		stepper.moveTo(2);
+		stepper.move(2);
 
 		log.info("here");
-		stepper.moveTo(-1);
+		stepper.move(-1);
 		log.info("here");
-		stepper.moveTo(-300);
+		stepper.move(-300);
 		log.info("here");
 	}
+	
+	// Uber good - .. although this is "chained" versus star routing
+	// Star routing would be routing from the Arduino directly to the Listener
+	// The "chained" version takes 2 thread contexts :( .. but it has the benefit
+	// of the "publishRange" method being affected by the Sensor service e.g.
+	// change units, sample rate, etc
+	public void addPublishStepperEventListener(Service service) {
+		addListener("publishStepperEvent", service.getName(), "publishStepperEvent", Integer.class);
+	}
+
 
 	public static void main(String[] args) {
 
