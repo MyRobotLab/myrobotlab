@@ -86,5 +86,6 @@
 	<classpathentry kind="lib" path="/repo/org.aitools.programd/4.6/programd-main.jar"/>
 	<classpathentry kind="lib" path="/repo/org.aitools.programd/4.6/programd-rhino.jar"/>
 	<classpathentry kind="lib" path="/repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/repo/org.alicebot.ab/0.0.6.26/Ab.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
