@@ -1,5 +1,3 @@
-from org.myrobotlab.service import Stepper
-
 stepper = Runtime.start("stepper","Stepper")
 
 comPort = "COM12" # com port of the arduino
