@@ -381,6 +381,15 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	/**
+	 * headless call - no user intervention needed / no "publishUpdates"
+	 * @return
+	 */
+	public UpdateReport applyUpdate(){
+		Updates updates = checkForUpdates();
+		return applyUpdates(updates);
+	}
+	
+	/**
 	 * all the data contained in updates is used to apply against the running
 	 * system. this is where are the business logic of the merge between the
 	 * current system, the repo and the users objectives are all resolved
@@ -402,7 +411,7 @@ public class Runtime extends Service implements MessageListener {
 		String intertoobTest = null;
 		try {
 			intertoobTest = repo.getVersionFromRepo();
-			log.info("remote version %s", intertoobTest);
+			info("remote version %s", intertoobTest);
 		} catch (Exception e) {
 			log.error(String.format("if connection error - just bail and save us some time !", e.getMessage()));
 		}
