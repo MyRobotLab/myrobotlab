@@ -1,103 +1,146 @@
 package org.myrobotlab.service;
 
-import com.google.gson.Gson;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.Pin;
+import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.*;
-
+import com.google.gson.Gson;
 
 public class CloudConnector extends Service {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public final static Logger log = LoggerFactory.getLogger(CloudConnector.class);
+	public final static Logger log = LoggerFactory.getLogger(CloudConnector.class);
+	
+	@Element
+	public String robotId;
+	@Element
+	public String propertyId;
+	
+	class CloudMessage {
+		 
+	    public String robotId;
+	    public String propertyId;
+	    public Message message;
+	    
+	    public CloudMessage(String robotId, String propertyId, Message message){
+	    	this.robotId = robotId;
+	    	this.propertyId = propertyId;
+	    	this.message = message;
+	    }
+	    
+	}
 
-    public CloudConnector(String n) {
-        super(n);
-    }
+	public CloudConnector(String n) {
+		super(n);
+		load();
+	}
 
-    @Override
-    public String getDescription() {
+	@Override
+	public String getDescription() {
+		return "Cloud Connector";
+	}
 
-        return "used as a general template";
-    }
+	public void sendMessage(Message message) {
+		try {
+			String USER_AGENT = "MRL-/5.0";
 
+			String urlParameters = "";
+			String url = "http://svns.mobi:9392/robot/property/collection/update";
 
-    public void sendMessage(Message message) {
-        String urlParameters = "";
-        String request = "http://svns.mobi/robot/property/collection/update";
-        try {
-            Gson gson = new Gson();
+			Gson gson = new Gson();
 
-            urlParameters = URLEncoder.encode(gson.toJson(message), "UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
-            System.out.print(e.getMessage());
-        }
-        try {
-            URL url = new URL(request);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.setInstanceFollowRedirects(false);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestProperty("charset", "utf-8");
-            connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
-            connection.setUseCaches (false);
+			urlParameters = URLEncoder.encode(gson.toJson(new CloudMessage(robotId, propertyId, message)), "UTF-8");
 
-            DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
-            connection.disconnect();
-        }
-        catch (ProtocolException e) {
-            System.out.print(e.getMessage());
-        }
-        catch (MalformedURLException e) {
-            System.out.println(e.getMessage());
-        }
-        catch (IOException e) {
-            System.out.print(e.getMessage());
-        }
-    }
+			//String url = "https://selfsolve.apple.com/wcResults.do";
+			URL obj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
+			// add reuqest header
+			con.setRequestMethod("POST");
+			con.setRequestProperty("User-Agent", USER_AGENT);
+			con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
 
-    public boolean preProcessHook(Message m) {
-        if (m.method.equals("log")) {
-            invoke("log", m);
-            sendMessage(m);
-            return false;
-        }
-        return true;
-    }
+			//urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
 
-    public static void main(String[] args) {
+			// Send post request
+			con.setDoOutput(true);
+			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+			wr.writeBytes(urlParameters);
+			wr.flush();
+			wr.close();
 
-        LoggingFactory.getInstance().configure();
-        LoggingFactory.getInstance().setLevel(Level.WARN);
+			int responseCode = con.getResponseCode();
+			log.info("\nSending 'POST' request to URL : " + url);
+			log.info("Post parameters : " + urlParameters);
+			log.info("Response Code : " + responseCode);
 
-        CloudConnector template = new CloudConnector("template");
-        template.startService();
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
 
-        Runtime.createAndStart("gui", "GUIService");
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
 
+			// print result
+			log.info(response.toString());
+			
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+	}
+
+	public boolean preProcessHook(Message m) {
+		sendMessage(m);
+		return false;
+	}
+
+	public void test() {
+
+	}
+
+	public String setRobotId(String robotId) {
+		this.robotId = robotId;
+		save();
+		return robotId;
+	}
+	
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		CloudConnector cloud = new CloudConnector("cloud");
+		cloud.startService();
+		cloud.setRobotId("george");
+
+		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+		arduino.connect("COM12");
+		arduino.analogReadPollingStart(3);
+		arduino.addListener("publishPin", cloud.getName(), "publishPin", Pin.class);
+
+		// Runtime.createAndStart("gui", "GUIService");
 
 		/*
 		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
 		 */
 
-    }
+	}
 
 
 }
