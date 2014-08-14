@@ -304,8 +304,12 @@ public class WebGUI extends Service {
 		// clock.startClock();
 		// Runtime.createAndStart("security", "Security");
 		WebGUI webgui = new WebGUI("webgui");
+		Runtime.start("python", "Python");
+		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+		arduino.connect("COM12");
+		arduino.analogReadPollingStart(3);
 		webgui.useLocalResources(true);
-		webgui.autoStartBrowser(false);
+		//webgui.autoStartBrowser(false);
 		webgui.startService();
 		// Runtime.createAndStart("webgui", "WebGUI");
 		// webgui.useLocalResources(true);
