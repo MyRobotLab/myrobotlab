@@ -16,6 +16,13 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * based on _TemplateService
+ */
+/**
+ *
+ * @author LunDev (github), Ma. Vo. (MyRobotlab)
+ */
 public class InMoovGestureCreator extends Service {
 
 	private static final long serialVersionUID = 1L;
