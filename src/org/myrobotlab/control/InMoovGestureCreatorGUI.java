@@ -34,6 +34,13 @@ import org.myrobotlab.service.InMoovGestureCreator.ServoItemHolder;
 import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
+/**
+ * based on _TemplateServiceGUI
+ */
+/**
+ *
+ * @author LunDev (github), Ma. Vo. (MyRobotlab)
+ */
 public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		ActionListener {
 
