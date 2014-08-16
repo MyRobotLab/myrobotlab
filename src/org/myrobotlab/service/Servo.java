@@ -665,7 +665,7 @@ public class Servo extends Service implements ServoControl {
 
 	// uber good
 	public void addServoEventListener(Service service) {
-		addListener("publishServoEvent", service.getName(), "publishServoEvent", Integer.class);
+		addListener("publishServoEvent", service.getName(), "onServoEvent", Integer.class);
 	}
 	
 	public static void main(String[] args) throws InterruptedException {

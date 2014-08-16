@@ -211,7 +211,7 @@ public class UltrasonicSensor extends Service {
 	// of the "publishRange" method being affected by the Sensor service e.g.
 	// change units, sample rate, etc
 	public void addPublishRangeListener(Service service) {
-		addListener("publishRange", service.getName(), "publishRange", long.class);
+		addListener("publishRange", service.getName(), "onRange", long.class);
 	}
 
 	// ---- part of interfaces end -----

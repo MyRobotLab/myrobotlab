@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
-import org.alicebot.ab.*;
+import org.alicebot.ab.Bot;
+import org.alicebot.ab.Chat;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
 
@@ -16,7 +17,6 @@ import org.myrobotlab.logging.LoggingFactory;
  */
 public class ProgramAB extends Service {
 
-	
 	private Bot bot=null;
 	private Chat chatSession=null;
 	
@@ -24,29 +24,13 @@ public class ProgramAB extends Service {
 		super(reservedKey);
 	}
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public String getDescription() {
-		// TODO Auto-generated method stub
 		return "AIML 2.0 Reference interpreter based on Program AB";
 	}
 
-	@Override
-	public void stopService() {
-		// TODO Auto-generated method stub
-		super.stopService();
-	}
-
-	@Override
-	public void startService() {
-		// TODO Auto-generated method stub
-		super.startService();
-
-	}
 
 	/**
 	 * Load the AIML 2.0 Bot config and start a chat session.  This must be called after the service is created.
@@ -74,6 +58,8 @@ public class ProgramAB extends Service {
 		System.out.println(res);
 		return res;
 	}
+	
+	
 
 	public static void main(String s[]) {
 		LoggingFactory.getInstance().configure();

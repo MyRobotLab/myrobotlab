@@ -127,6 +127,8 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 	public void attachGUI() {
 		// subscribe("publishIR", "publishIR",
 		// IRData.class.getCanonicalName());
+		
+		subscribe("publishSinglePoint", "onSinglePoint", Point.class);
 		subscribe("publishSweepData", "publishSweepData", ArrayList.class);
 		subscribe("setServoLeftMax", "setServoLeftMax", Integer.class);
 		subscribe("setServoRightMax", "setServoRightMax", Integer.class);
@@ -139,6 +141,7 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 	public void detachGUI() {
 		// unsubscribe("publishIR", "publishIR",
 		// IRData.class);
+		unsubscribe("publishSinglePoint", "onSinglePoint", Point.class);
 		unsubscribe("publishSweepData", "publishSweepData", ArrayList.class);
 		unsubscribe("setServoLeftMax", "setServoLeftMax", Integer.class);
 		unsubscribe("setServoRightMax", "setServoRightMax", Integer.class);
@@ -327,7 +330,7 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 	DecimalFormat df = new DecimalFormat("#.##");
 	int cnt = 0;
 
-	public Point publishSinglePoint(Point p) {
+	public Point onSinglePoint(Point p) {
 		int x;
 		int y;
 		int x0;
@@ -349,6 +352,7 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 		// calculate xy for p
 		x = ((int) (p.z * Math.cos(Math.toRadians(p.servoPos)) * zScale) + xOffset);
 		y = vheight - ((int) (p.z * Math.sin(Math.toRadians(p.servoPos)) * zScale));
+		log.info(String.format(" x y %d %d", x, y));
 
 		// take care of history
 		if (hist.size() > 0) {
@@ -368,9 +372,9 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 			// graph.drawLine(x0, y0, x0, y0);
 			graph.setColor(Color.green);
 			// draw line if under min distance from previous point
-			if (distance < 40) {
+			//if (distance < 40) {
 				graph.drawLine(x, y, x0, y0);
-			}
+			//}
 
 			// black historical lidar vector
 			graph.setColor(Color.black);

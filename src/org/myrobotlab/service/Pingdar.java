@@ -5,6 +5,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.WiiDAR.Point;
 import org.slf4j.Logger;
 
 public class Pingdar extends Service {
@@ -23,6 +24,8 @@ public class Pingdar extends Service {
 	private boolean isAttached = false;
 	private Long lastRange;
 	private Integer lastPos;
+	
+	private int rngCount = 0;
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -137,12 +140,16 @@ public class Pingdar extends Service {
 	
 	// sensor data has come in
 	// grab the latest position
-	public void publishRange(Long range){
+	public void onRange(Long range){
 		info("range %d", range);
 		lastRange = range;
+		++rngCount;
+		Point p = new Point(rngCount, lastPos, 1, System.currentTimeMillis());
+		p.z = range;
+		invoke("publishVector", new Point(p));
 	}
 	
-	public void publishServoEvent(Integer pos){
+	public void onServoEvent(Integer pos){
 		info("pos %d", pos);
 		lastPos = pos;
 	}
@@ -154,12 +161,20 @@ public class Pingdar extends Service {
 	
 	public void test(){
 		Pingdar pingdar = (Pingdar)Runtime.start(getName(), "Pingdar");
-		pingdar.attach("COM15", 7, 8, 4);
-		//pingdar.servo.setSpeedControlOnUC(false);
+		pingdar.attach("COM12", 7, 8, 4);
+		for (int i = 0; i < 180; ++i){
+			Point p = new Point(i, i, i, System.currentTimeMillis());
+			p.z = 20;
+			invoke("publishVector", new Point(p));
+		}
 		pingdar.sweep(10, 170, 1);
 		//pingdar.sensor.startRanging();
 		//pingdar.sensor.stopRanging();
 		pingdar.stop();
+	}
+	
+	public Point publishVector(Point point){
+		return point;
 	}
 
 	public void stop() {
