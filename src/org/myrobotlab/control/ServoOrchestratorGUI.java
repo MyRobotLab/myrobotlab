@@ -29,6 +29,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service._TemplateService;
@@ -50,7 +51,7 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 
 	public int sizex;
 	public int sizey;
-	
+
 	public ServoOrchestratorGUI_middlemiddle_main middlemiddle_ref;
 
 	public JTextField middleright_name_textfield;
@@ -67,7 +68,7 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 	public JTextField bottommiddlerighttop_textfield_1;
 	public JTextField bottommiddlerighttop_textfield_2;
 	public JTextField bottommiddlerighttop_textfield_3;
-	
+
 	public JButton bottommiddlerightbottom_button_1;
 	public JButton bottommiddlerightbottom_button_2;
 	public JButton bottommiddlerightbottom_button_3;
@@ -124,7 +125,7 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 
 		// TODO - add type list (change(-r))
 		JPanel middleright_min_panel = new JPanel();
-		
+
 		JLabel middleright_min_label = new JLabel("MIN:");
 		middleright_min_panel.add(middleright_min_label);
 
@@ -133,9 +134,9 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		middleright_min_panel.add(middleright_min_textfield);
 
 		middleright.add(middleright_min_panel);
-		
+
 		JPanel middleright_max_panel = new JPanel();
-		
+
 		JLabel middleright_max_label = new JLabel("MAX:");
 		middleright_max_panel.add(middleright_max_label);
 
@@ -144,9 +145,9 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		middleright_max_panel.add(middleright_max_textfield);
 
 		middleright.add(middleright_max_panel);
-		
+
 		JPanel middleright_startvalue_panel = new JPanel();
-		
+
 		JLabel middleright_startvalue_label = new JLabel("START-VALUE:");
 		middleright_startvalue_panel.add(middleright_startvalue_label);
 
@@ -155,42 +156,50 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		middleright_startvalue_panel.add(middleright_startvalue_textfield);
 
 		middleright.add(middleright_startvalue_panel);
-		
+
 		middleright_update_button = new JButton("UPDATE");
 		middleright.add(middleright_update_button);
 		middleright_update_button.addActionListener(this);
-		
+
 		middleright_arduino_list = new JList();
 		myService.send(boundServiceName, "set_middleright_arduino_list_items");
 		middleright_arduino_list.setVisibleRowCount(3);
-		middleright_arduino_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		middleright_arduino_list
+				.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		middleright_arduino_list.addListSelectionListener(this);
-		JScrollPane middleright_arduino_list_scrollpane = new JScrollPane(middleright_arduino_list);
-		middleright_arduino_list_scrollpane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		middleright_arduino_list_scrollpane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane middleright_arduino_list_scrollpane = new JScrollPane(
+				middleright_arduino_list);
+		middleright_arduino_list_scrollpane
+				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		middleright_arduino_list_scrollpane
+				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		middleright.add(middleright_arduino_list_scrollpane);
-		
+
 		middleright_pin_list = new JList();
 		String[] middleright_pin_list_items = new String[53];
 		for (int i = 0; i < 53; i++) {
 			if (i == 0) {
 				middleright_pin_list_items[i] = "          ";
 			}
-			middleright_pin_list_items[i] = (i+1)+"";
+			middleright_pin_list_items[i] = (i + 1) + "";
 		}
 		middleright_pin_list.setListData(middleright_pin_list_items);
 		middleright_pin_list.setVisibleRowCount(3);
-		middleright_pin_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		middleright_pin_list
+				.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		middleright_pin_list.addListSelectionListener(this);
-		JScrollPane middleright_pin_list_scrollpane = new JScrollPane(middleright_pin_list);
-		middleright_pin_list_scrollpane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		middleright_pin_list_scrollpane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane middleright_pin_list_scrollpane = new JScrollPane(
+				middleright_pin_list);
+		middleright_pin_list_scrollpane
+				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		middleright_pin_list_scrollpane
+				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		middleright.add(middleright_pin_list_scrollpane);
 
 		middleright_attach_button = new JButton("Attach");
 		middleright.add(middleright_attach_button);
 		middleright_attach_button.addActionListener(this);
-		
+
 		JPanel middlemiddlemiddleleft = new JPanel();
 
 		JPanel middlemiddle = middlemiddle_ref.externalcall_getmiddlemiddle();
@@ -322,78 +331,48 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 				bottommiddlerightbottom, BoxLayout.X_AXIS));
 
 		bottommiddlerightbottom_button_1 = new JButton();
-		try {
-			bottommiddlerightbottom_button_1
-					.setIcon(new ImageIcon(
-							ImageIO.read(new File(
-									"C:\\Users\\Marvin\\Desktop\\temp\\ServoOrchestrator_1.png"))));
-		} catch (IOException ex) {
-		}
+		bottommiddlerightbottom_button_1.setIcon(Util
+				.getImageIcon("ServoOrchestrator/1.png"));
 		bottommiddlerightbottom_button_1.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_1.setBorder(null);
 		bottommiddlerightbottom_button_1.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_1);
 
 		bottommiddlerightbottom_button_2 = new JButton();
-		try {
-			bottommiddlerightbottom_button_2
-					.setIcon(new ImageIcon(
-							ImageIO.read(new File(
-									"C:\\Users\\Marvin\\Desktop\\temp\\ServoOrchestrator_2.png"))));
-		} catch (IOException ex) {
-		}
+		bottommiddlerightbottom_button_2.setIcon(Util
+				.getImageIcon("ServoOrchestrator/2.png"));
 		bottommiddlerightbottom_button_2.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_2.setBorder(null);
 		bottommiddlerightbottom_button_2.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_2);
 
 		bottommiddlerightbottom_button_3 = new JButton();
-		try {
-			bottommiddlerightbottom_button_3
-					.setIcon(new ImageIcon(
-							ImageIO.read(new File(
-									"C:\\Users\\Marvin\\Desktop\\temp\\ServoOrchestrator_3.png"))));
-		} catch (IOException ex) {
-		}
+		bottommiddlerightbottom_button_3.setIcon(Util
+				.getImageIcon("ServoOrchestrator/3.png"));
 		bottommiddlerightbottom_button_3.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_3.setBorder(null);
 		bottommiddlerightbottom_button_3.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_3);
 
 		bottommiddlerightbottom_button_4 = new JButton();
-		try {
-			bottommiddlerightbottom_button_4
-					.setIcon(new ImageIcon(
-							ImageIO.read(new File(
-									"C:\\Users\\Marvin\\Desktop\\temp\\ServoOrchestrator_4.png"))));
-		} catch (IOException ex) {
-		}
+		bottommiddlerightbottom_button_4.setIcon(Util
+				.getImageIcon("ServoOrchestrator/4.png"));
 		bottommiddlerightbottom_button_4.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_4.setBorder(null);
 		bottommiddlerightbottom_button_4.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_4);
 
 		bottommiddlerightbottom_button_5 = new JButton();
-		try {
-			bottommiddlerightbottom_button_5
-					.setIcon(new ImageIcon(
-							ImageIO.read(new File(
-									"C:\\Users\\Marvin\\Desktop\\temp\\ServoOrchestrator_5.png"))));
-		} catch (IOException ex) {
-		}
+		bottommiddlerightbottom_button_5.setIcon(Util
+				.getImageIcon("ServoOrchestrator/5.png"));
 		bottommiddlerightbottom_button_5.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_5.setBorder(null);
 		bottommiddlerightbottom_button_5.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_5);
 
 		bottommiddlerightbottom_button_6 = new JButton();
-		try {
-			bottommiddlerightbottom_button_6
-					.setIcon(new ImageIcon(
-							ImageIO.read(new File(
-									"C:\\Users\\Marvin\\Desktop\\temp\\ServoOrchestrator_6.png"))));
-		} catch (IOException ex) {
-		}
+		bottommiddlerightbottom_button_6.setIcon(Util
+				.getImageIcon("ServoOrchestrator/6.png"));
 		bottommiddlerightbottom_button_6.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_6.setBorder(null);
 		bottommiddlerightbottom_button_6.addActionListener(this);
@@ -401,26 +380,16 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_6);
 
 		bottommiddlerightbottom_button_7 = new JButton();
-		try {
-			bottommiddlerightbottom_button_7
-					.setIcon(new ImageIcon(
-							ImageIO.read(new File(
-									"C:\\Users\\Marvin\\Desktop\\temp\\ServoOrchestrator_7.png"))));
-		} catch (IOException ex) {
-		}
+		bottommiddlerightbottom_button_7.setIcon(Util
+				.getImageIcon("ServoOrchestrator/7.png"));
 		bottommiddlerightbottom_button_7.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_7.setBorder(null);
 		bottommiddlerightbottom_button_7.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_7);
 
 		bottommiddlerightbottom_button_8 = new JButton();
-		try {
-			bottommiddlerightbottom_button_8
-					.setIcon(new ImageIcon(
-							ImageIO.read(new File(
-									"C:\\Users\\Marvin\\Desktop\\temp\\ServoOrchestrator_8.png"))));
-		} catch (IOException ex) {
-		}
+		bottommiddlerightbottom_button_8.setIcon(Util
+				.getImageIcon("ServoOrchestrator/8.png"));
 		bottommiddlerightbottom_button_8.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_8.setBorder(null);
 		bottommiddlerightbottom_button_8.addActionListener(this);
@@ -511,21 +480,29 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		} else if (o == bottommiddleleft_update_button) {
 			// TODO - add functionality
 		} else if (o == bottommiddlerightbottom_button_1) {
-			myService.send(boundServiceName, "bottommiddlerightbottom_button_1");
+			myService
+					.send(boundServiceName, "bottommiddlerightbottom_button_1");
 		} else if (o == bottommiddlerightbottom_button_2) {
-			myService.send(boundServiceName, "bottommiddlerightbottom_button_2");
+			myService
+					.send(boundServiceName, "bottommiddlerightbottom_button_2");
 		} else if (o == bottommiddlerightbottom_button_3) {
-			myService.send(boundServiceName, "bottommiddlerightbottom_button_3");
+			myService
+					.send(boundServiceName, "bottommiddlerightbottom_button_3");
 		} else if (o == bottommiddlerightbottom_button_4) {
-			myService.send(boundServiceName, "bottommiddlerightbottom_button_4");
+			myService
+					.send(boundServiceName, "bottommiddlerightbottom_button_4");
 		} else if (o == bottommiddlerightbottom_button_5) {
-			myService.send(boundServiceName, "bottommiddlerightbottom_button_5");
+			myService
+					.send(boundServiceName, "bottommiddlerightbottom_button_5");
 		} else if (o == bottommiddlerightbottom_button_6) {
-			myService.send(boundServiceName, "bottommiddlerightbottom_button_6");
+			myService
+					.send(boundServiceName, "bottommiddlerightbottom_button_6");
 		} else if (o == bottommiddlerightbottom_button_7) {
-			myService.send(boundServiceName, "bottommiddlerightbottom_button_7");
+			myService
+					.send(boundServiceName, "bottommiddlerightbottom_button_7");
 		} else if (o == bottommiddlerightbottom_button_8) {
-			myService.send(boundServiceName, "bottommiddlerightbottom_button_8");
+			myService
+					.send(boundServiceName, "bottommiddlerightbottom_button_8");
 		}
 
 		myService.send(boundServiceName, "publishState");
@@ -540,16 +517,16 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 			// TODO - add functionality
 		}
 	}
-	
+
 	@Override
 	public void valueChanged(ListSelectionEvent lse) {
 		Object o = lse.getSource();
-		
-		//List - Events
+
+		// List - Events
 		if (o == middleright_arduino_list) {
 			myService.send(boundServiceName, "middleright_arduino_list");
 		} else if (o == middleright_pin_list) {
-			//TODO - add functionality
+			// TODO - add functionality
 		}
 	}
 
