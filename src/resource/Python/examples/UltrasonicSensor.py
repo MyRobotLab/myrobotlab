@@ -3,7 +3,7 @@ sr04 = Runtime.start("sr04", "UltrasonicSensor")
 sr04.attach("COM15", 7, 8)
 sr04.addPublishRangeListener(python)
 
-def publishRange(distance):
+def onRange(distance):
   print "distance ", distance, " cm"
 
 # event driven ranging
