@@ -116,7 +116,7 @@ public class InMoovGestureCreator extends Service {
 			if (fih.sleep != -1) {
 				code1 = "sleep(" + fih.sleep + ")\n";
 			} else if (fih.speech != null) {
-				code1 = "i01.mouth.speakBlocking(" + fih.speech + ")\n";
+				code1 = "i01.mouth.speakBlocking(\"" + fih.speech + "\")\n";
 			} else {
 				String code11 = "";
 				String code12 = "";
