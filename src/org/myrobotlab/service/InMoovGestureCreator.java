@@ -125,8 +125,8 @@ public class InMoovGestureCreator extends Service {
 				String code15 = "";
 				String code16 = "";
 				if (tabs_main_checkbox_states[0]) {
-					code11 = "i01.moveHead(" + fih.rothead + "," + fih.neck + ","
-							+ fih.eyeX + "," + fih.eyeY + "," + fih.jaw
+					code11 = "i01.moveHead(" + fih.rothead + "," + fih.neck
+							+ "," + fih.eyeX + "," + fih.eyeY + "," + fih.jaw
 							+ ")\n";
 				}
 				if (tabs_main_checkbox_states[1]) {
@@ -246,8 +246,8 @@ public class InMoovGestureCreator extends Service {
 		framelistact(framelist);
 	}
 
-	public void frame_importminmax() {
-		// Import the Min- / Max- settings of your InMoov
+	public void frame_importminresmax() {
+		// Import the Min- / Res- / Max- settings of your InMoov
 		for (int i1 = 0; i1 < servoitemholder.length; i1++) {
 			for (int i2 = 0; i2 < servoitemholder[i1].length; i2++) {
 				InMoovHand inmhand = null;
@@ -318,12 +318,15 @@ public class InMoovGestureCreator extends Service {
 				}
 
 				int min = servo.getMin();
+				int res = servo.getRest();
 				int max = servo.getMax();
 
 				servoitemholder[i1][i2].min.setText(min + "");
+				servoitemholder[i1][i2].res.setText(res + "");
 				servoitemholder[i1][i2].max.setText(max + "");
 				servoitemholder[i1][i2].sli.setMinimum(min);
 				servoitemholder[i1][i2].sli.setMaximum(max);
+				servoitemholder[i1][i2].sli.setValue(res);
 			}
 		}
 	}
@@ -596,8 +599,8 @@ public class InMoovGestureCreator extends Service {
 							+ fih.lshoulder + " " + fih.lomoplate;
 				}
 				if (tabs_main_checkbox_states[4]) {
-					displaytext5 = fih.rothead + " " + fih.neck + " " + fih.eyeX
-							+ " " + fih.eyeY + " " + fih.jaw;
+					displaytext5 = fih.rothead + " " + fih.neck + " "
+							+ fih.eyeX + " " + fih.eyeY + " " + fih.jaw;
 				}
 				if (tabs_main_checkbox_states[5]) {
 					displaytext6 = fih.topStom + " " + fih.midStom + " "
@@ -694,6 +697,7 @@ public class InMoovGestureCreator extends Service {
 
 		public JLabel fin;
 		public JLabel min;
+		public JLabel res;
 		public JLabel max;
 		public JLabel akt;
 		public JSlider sli;

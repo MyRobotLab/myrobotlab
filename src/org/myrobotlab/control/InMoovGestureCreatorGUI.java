@@ -64,7 +64,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 	JButton frame_addsleep;
 	JButton frame_addspeech;
 
-	JButton frame_importminmax;
+	JButton frame_importminresmax;
 	JButton frame_remove;
 	JButton frame_load;
 	JButton frame_update;
@@ -111,7 +111,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		// |----------|
 		// |bottom2top| <- JButton's & JTextField's: [frame_] connect, add,
 		// addsleep, addspeech
-		// |##########| <- JButton's: [frame_] importminmax, remove, load,
+		// |##########| <- JButton's: [frame_] importminresmax, remove, load,
 		// update, copy, up, down, test
 		// |----------|
 		// |##########|
@@ -119,16 +119,19 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		// |##########|
 		// |----------|
 
-		// predefined min- / max- positions
-		int[][][] minmaxpos = {
-				{ { 0, 180 }, { 0, 180 }, { 0, 180 }, { 0, 180 }, { 0, 180 },
-						{ 0, 180 } },
-				{ { 0, 180 }, { 0, 180 }, { 0, 180 }, { 0, 180 } },
-				{ { 0, 180 }, { 0, 180 }, { 0, 180 }, { 0, 180 }, { 0, 180 },
-						{ 0, 180 } },
-				{ { 0, 180 }, { 0, 180 }, { 0, 180 }, { 0, 180 } },
-				{ { 0, 180 }, { 0, 180 }, { 0, 180 }, { 0, 180 }, { 0, 180 } },
-				{ { 0, 180 }, { 0, 180 }, { 0, 180 } } };
+		// predefined min- / res- / max- positions
+		int[][][] minresmaxpos = {
+				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
+						{ 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } },
+				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
+						{ 0, 90, 180 } },
+				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
+						{ 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } },
+				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
+						{ 0, 90, 180 } },
+				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
+						{ 0, 90, 180 }, { 0, 90, 180 } },
+				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } } };
 
 		JPanel top = new JPanel();
 
@@ -287,10 +290,11 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 				}
 
 				sih11.fin = new JLabel(servoname);
-				sih11.min = new JLabel(minmaxpos[i1][i2][0] + "");
-				sih11.max = new JLabel(minmaxpos[i1][i2][1] + "");
+				sih11.min = new JLabel(minresmaxpos[i1][i2][0] + "");
+				sih11.res = new JLabel(minresmaxpos[i1][i2][1] + "");
+				sih11.max = new JLabel(minresmaxpos[i1][i2][2] + "");
 				sih11.sli = new JSlider();
-				customizeslider(sih11.sli, i1, i2, minmaxpos[i1][i2]);
+				customizeslider(sih11.sli, i1, i2, minresmaxpos[i1][i2]);
 				sih11.akt = new JLabel(sih11.sli.getValue() + "");
 
 				// x y w h wx wy
@@ -298,11 +302,13 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 						1.0, 1.0);
 				gridbaglayout_addComponent(con, gbl, sih11.min, 1, i2, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.max, 2, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.res, 2, i2, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.sli, 3, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.max, 3, i2, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.akt, 4, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.sli, 4, i2, 1, 1,
+						1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.akt, 7, i2, 1, 1,
 						1.0, 1.0);
 
 				sih1[i2] = sih11;
@@ -390,9 +396,9 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		JPanel bottom2top2 = new JPanel();
 		bottom2top2.setLayout(new BoxLayout(bottom2top2, BoxLayout.X_AXIS));
 
-		frame_importminmax = new JButton("Import Min Max");
-		bottom2top2.add(frame_importminmax);
-		frame_importminmax.addActionListener(this);
+		frame_importminresmax = new JButton("Import Min Rest Max");
+		bottom2top2.add(frame_importminresmax);
+		frame_importminresmax.addActionListener(this);
 
 		frame_remove = new JButton("Remove");
 		bottom2top2.add(frame_remove);
@@ -507,8 +513,8 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		} else if (o == frame_addspeech) {
 			myService.send(boundServiceName, "frame_addspeech", framelist,
 					frame_addspeech_textfield);
-		} else if (o == frame_importminmax) {
-			myService.send(boundServiceName, "frame_importminmax");
+		} else if (o == frame_importminresmax) {
+			myService.send(boundServiceName, "frame_importminresmax");
 		} else if (o == frame_remove) {
 			myService.send(boundServiceName, "frame_remove", framelist);
 		} else if (o == frame_load) {
@@ -559,16 +565,16 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 	}
 
 	public void customizeslider(JSlider slider, final int t1, final int t2,
-			int[] minmaxpos11) {
+			int[] minresmaxpos11) {
 		// preset the slider
-		slider.setMinimum(minmaxpos11[0]);
-		slider.setMaximum(minmaxpos11[1]);
+		slider.setMinimum(minresmaxpos11[0]);
+		slider.setMaximum(minresmaxpos11[2]);
 		slider.setMajorTickSpacing(20);
 		slider.setMinorTickSpacing(1);
 		slider.createStandardLabels(1);
 		slider.setPaintTicks(true);
 		slider.setPaintLabels(true);
-		slider.setValue((minmaxpos11[1] / 2));
+		slider.setValue((minresmaxpos11[0] + minresmaxpos11[2]) / 2);
 
 		slider.addChangeListener(new ChangeListener() {
 
