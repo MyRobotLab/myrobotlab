@@ -61,6 +61,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 	JButton frame_connect;
 	JButton frame_add;
+	JButton frame_addspeed;
 	JButton frame_addsleep;
 	JButton frame_addspeech;
 
@@ -296,6 +297,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 				sih11.sli = new JSlider();
 				customizeslider(sih11.sli, i1, i2, minresmaxpos[i1][i2]);
 				sih11.akt = new JLabel(sih11.sli.getValue() + "");
+				sih11.spe = new JTextField("1.00");
 
 				// x y w h wx wy
 				gridbaglayout_addComponent(con, gbl, sih11.fin, 0, i2, 1, 1,
@@ -308,7 +310,9 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 						1.0, 1.0);
 				gridbaglayout_addComponent(con, gbl, sih11.sli, 4, i2, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.akt, 7, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.akt, 5, i2, 1, 1,
+						1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.spe, 6, i2, 1, 1,
 						1.0, 1.0);
 
 				sih1[i2] = sih11;
@@ -376,6 +380,10 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		frame_add = new JButton("Add");
 		bottom2top1.add(frame_add);
 		frame_add.addActionListener(this);
+
+		frame_addspeed = new JButton("Add Speed");
+		bottom2top1.add(frame_addspeed);
+		frame_addspeed.addActionListener(this);
 
 		frame_addsleep_textfield = new JTextField("Seconds of Sleep");
 		bottom2top1.add(frame_addsleep_textfield);
@@ -507,6 +515,8 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		} else if (o == frame_add) {
 			myService.send(boundServiceName, "frame_add", framelist,
 					frame_add_textfield);
+		} else if (o == frame_addspeed) {
+			myService.send(boundServiceName, "frame_addspeed", framelist);
 		} else if (o == frame_addsleep) {
 			myService.send(boundServiceName, "frame_addsleep", framelist,
 					frame_addsleep_textfield);
