@@ -266,15 +266,15 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 					}
 				} else if (i1 == 4) {
 					if (i2 == 0) {
-						servoname = "jaw";
-					} else if (i2 == 1) {
-						servoname = "eyeX";
-					} else if (i2 == 2) {
-						servoname = "eyeY";
-					} else if (i2 == 3) {
 						servoname = "rothead";
-					} else if (i2 == 4) {
+					} else if (i2 == 1) {
 						servoname = "neck";
+					} else if (i2 == 2) {
+						servoname = "eyeX";
+					} else if (i2 == 3) {
+						servoname = "eyeY";
+					} else if (i2 == 4) {
+						servoname = "jaw";
 					}
 				} else if (i1 == 5) {
 					if (i2 == 0) {

@@ -79,8 +79,8 @@ public class InMoovGestureCreator extends Service {
 					i01.mouth.speakBlocking(fih.speech);
 				} else {
 					if (tabs_main_checkbox_states[0]) {
-						i01.moveHead(fih.jaw, fih.eyeX, fih.eyeY, fih.rothead,
-								fih.neck);
+						i01.moveHead(fih.rothead, fih.neck, fih.eyeX, fih.eyeY,
+								fih.jaw);
 					}
 					if (tabs_main_checkbox_states[1]) {
 						i01.moveArm("left", fih.lbicep, fih.lrotate,
@@ -125,8 +125,8 @@ public class InMoovGestureCreator extends Service {
 				String code15 = "";
 				String code16 = "";
 				if (tabs_main_checkbox_states[0]) {
-					code11 = "i01.moveHead(" + fih.jaw + "," + fih.eyeX + ","
-							+ fih.eyeY + "," + fih.rothead + "," + fih.neck
+					code11 = "i01.moveHead(" + fih.rothead + "," + fih.neck + ","
+							+ fih.eyeX + "," + fih.eyeY + "," + fih.jaw
 							+ ")\n";
 				}
 				if (tabs_main_checkbox_states[1]) {
@@ -201,11 +201,11 @@ public class InMoovGestureCreator extends Service {
 		fih.lshoulder = servoitemholder[3][2].sli.getValue();
 		fih.lomoplate = servoitemholder[3][3].sli.getValue();
 
-		fih.jaw = servoitemholder[4][0].sli.getValue();
-		fih.eyeX = servoitemholder[4][1].sli.getValue();
-		fih.eyeY = servoitemholder[4][2].sli.getValue();
-		fih.rothead = servoitemholder[4][3].sli.getValue();
-		fih.neck = servoitemholder[4][4].sli.getValue();
+		fih.rothead = servoitemholder[4][0].sli.getValue();
+		fih.neck = servoitemholder[4][1].sli.getValue();
+		fih.eyeX = servoitemholder[4][2].sli.getValue();
+		fih.eyeY = servoitemholder[4][3].sli.getValue();
+		fih.jaw = servoitemholder[4][4].sli.getValue();
 
 		fih.topStom = servoitemholder[5][0].sli.getValue();
 		fih.midStom = servoitemholder[5][1].sli.getValue();
@@ -297,15 +297,15 @@ public class InMoovGestureCreator extends Service {
 					}
 				} else if (i1 == 4) {
 					if (i2 == 0) {
-						servo = inmhead.jaw;
-					} else if (i2 == 1) {
-						servo = inmhead.eyeX;
-					} else if (i2 == 2) {
-						servo = inmhead.eyeY;
-					} else if (i2 == 3) {
 						servo = inmhead.rothead;
-					} else if (i2 == 4) {
+					} else if (i2 == 1) {
 						servo = inmhead.neck;
+					} else if (i2 == 2) {
+						servo = inmhead.eyeX;
+					} else if (i2 == 3) {
+						servo = inmhead.eyeY;
+					} else if (i2 == 4) {
+						servo = inmhead.jaw;
 					}
 				} else if (i1 == 5) {
 					if (i2 == 0) {
@@ -399,15 +399,15 @@ public class InMoovGestureCreator extends Service {
 						.setValue(frameitemholder.get(pos).lomoplate);
 
 				servoitemholder[4][0].sli
-						.setValue(frameitemholder.get(pos).jaw);
-				servoitemholder[4][1].sli
-						.setValue(frameitemholder.get(pos).eyeX);
-				servoitemholder[4][2].sli
-						.setValue(frameitemholder.get(pos).eyeY);
-				servoitemholder[4][3].sli
 						.setValue(frameitemholder.get(pos).rothead);
-				servoitemholder[4][4].sli
+				servoitemholder[4][1].sli
 						.setValue(frameitemholder.get(pos).neck);
+				servoitemholder[4][2].sli
+						.setValue(frameitemholder.get(pos).eyeX);
+				servoitemholder[4][3].sli
+						.setValue(frameitemholder.get(pos).eyeY);
+				servoitemholder[4][4].sli
+						.setValue(frameitemholder.get(pos).jaw);
 
 				servoitemholder[5][0].sli
 						.setValue(frameitemholder.get(pos).topStom);
@@ -463,11 +463,11 @@ public class InMoovGestureCreator extends Service {
 				fih.lshoulder = servoitemholder[3][2].sli.getValue();
 				fih.lomoplate = servoitemholder[3][3].sli.getValue();
 
-				fih.jaw = servoitemholder[4][0].sli.getValue();
-				fih.eyeX = servoitemholder[4][1].sli.getValue();
-				fih.eyeY = servoitemholder[4][2].sli.getValue();
-				fih.rothead = servoitemholder[4][3].sli.getValue();
-				fih.neck = servoitemholder[4][4].sli.getValue();
+				fih.rothead = servoitemholder[4][0].sli.getValue();
+				fih.neck = servoitemholder[4][1].sli.getValue();
+				fih.eyeX = servoitemholder[4][2].sli.getValue();
+				fih.eyeY = servoitemholder[4][3].sli.getValue();
+				fih.jaw = servoitemholder[4][4].sli.getValue();
 
 				fih.topStom = servoitemholder[5][0].sli.getValue();
 				fih.midStom = servoitemholder[5][1].sli.getValue();
@@ -530,8 +530,8 @@ public class InMoovGestureCreator extends Service {
 				i01.mouth.speakBlocking(fih.speech);
 			} else {
 				if (tabs_main_checkbox_states[0]) {
-					i01.moveHead(fih.jaw, fih.eyeX, fih.eyeY, fih.rothead,
-							fih.neck);
+					i01.moveHead(fih.rothead, fih.neck, fih.eyeX, fih.eyeY,
+							fih.jaw);
 				}
 				if (tabs_main_checkbox_states[1]) {
 					i01.moveArm("left", fih.lbicep, fih.lrotate, fih.lshoulder,
@@ -596,8 +596,8 @@ public class InMoovGestureCreator extends Service {
 							+ fih.lshoulder + " " + fih.lomoplate;
 				}
 				if (tabs_main_checkbox_states[4]) {
-					displaytext5 = fih.jaw + " " + fih.eyeX + " " + fih.eyeY
-							+ " " + fih.rothead + " " + fih.neck;
+					displaytext5 = fih.rothead + " " + fih.neck + " " + fih.eyeX
+							+ " " + fih.eyeY + " " + fih.jaw;
 				}
 				if (tabs_main_checkbox_states[5]) {
 					displaytext6 = fih.topStom + " " + fih.midStom + " "
@@ -650,18 +650,18 @@ public class InMoovGestureCreator extends Service {
 			fih.lshoulder = servoitemholder[3][2].sli.getValue();
 			fih.lomoplate = servoitemholder[3][3].sli.getValue();
 
-			fih.jaw = servoitemholder[4][0].sli.getValue();
-			fih.eyeX = servoitemholder[4][1].sli.getValue();
-			fih.eyeY = servoitemholder[4][2].sli.getValue();
-			fih.rothead = servoitemholder[4][3].sli.getValue();
-			fih.neck = servoitemholder[4][4].sli.getValue();
+			fih.rothead = servoitemholder[4][0].sli.getValue();
+			fih.neck = servoitemholder[4][1].sli.getValue();
+			fih.eyeX = servoitemholder[4][2].sli.getValue();
+			fih.eyeY = servoitemholder[4][3].sli.getValue();
+			fih.jaw = servoitemholder[4][4].sli.getValue();
 
 			fih.topStom = servoitemholder[5][0].sli.getValue();
 			fih.midStom = servoitemholder[5][1].sli.getValue();
 			fih.lowStom = servoitemholder[5][2].sli.getValue();
 
 			if (tabs_main_checkbox_states[0]) {
-				i01.moveHead(fih.jaw, fih.eyeX, fih.eyeY, fih.rothead, fih.neck);
+				i01.moveHead(fih.rothead, fih.neck, fih.eyeX, fih.eyeY, fih.jaw);
 			}
 			if (tabs_main_checkbox_states[1]) {
 				i01.moveArm("left", fih.lbicep, fih.lrotate, fih.lshoulder,
@@ -705,7 +705,7 @@ public class InMoovGestureCreator extends Service {
 		int rbicep, rrotate, rshoulder, romoplate;
 		int lthumb, lindex, lmajeure, lringfinger, lpinky, lwrist;
 		int lbicep, lrotate, lshoulder, lomoplate;
-		int jaw, eyeX, eyeY, rothead, neck;
+		int rothead, neck, eyeX, eyeY, jaw;
 		int topStom, midStom, lowStom;
 		int sleep;
 		String speech;
