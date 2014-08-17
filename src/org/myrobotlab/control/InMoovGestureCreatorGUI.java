@@ -431,7 +431,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		frame_moverealtime = new JCheckBox("Move Real Time");
 		frame_moverealtime.setSelected(false);
 		bottom2top2.add(frame_moverealtime);
-		frame_moverealtime.addActionListener(this);
+		frame_moverealtime.addItemListener(this);
 
 		bottom2top.add(bottom2top2);
 
