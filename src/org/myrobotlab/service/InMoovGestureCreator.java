@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JSlider;
@@ -33,6 +34,8 @@ public class InMoovGestureCreator extends Service {
 	ArrayList<FrameItemHolder> frameitemholder;
 
 	boolean[] tabs_main_checkbox_states;
+
+	boolean moverealtime = false;
 
 	InMoov i01;
 
@@ -611,10 +614,75 @@ public class InMoovGestureCreator extends Service {
 		framelist.setListData(listdata);
 	}
 
+	public void frame_moverealtime(JCheckBox frame_moverealtime) {
+		moverealtime = frame_moverealtime.isSelected();
+	}
+
 	public void servoitemholder_slider_changed(int t1, int t2) {
 		// One slider were adjusted
 		servoitemholder[t1][t2].akt.setText(servoitemholder[t1][t2].sli
 				.getValue() + "");
+		// Move the Servos in "Real-Time"
+		if (moverealtime && i01 != null) {
+			FrameItemHolder fih = new FrameItemHolder();
+
+			fih.rthumb = servoitemholder[0][0].sli.getValue();
+			fih.rindex = servoitemholder[0][1].sli.getValue();
+			fih.rmajeure = servoitemholder[0][2].sli.getValue();
+			fih.rringfinger = servoitemholder[0][3].sli.getValue();
+			fih.rpinky = servoitemholder[0][4].sli.getValue();
+			fih.rwrist = servoitemholder[0][5].sli.getValue();
+
+			fih.rbicep = servoitemholder[1][0].sli.getValue();
+			fih.rrotate = servoitemholder[1][1].sli.getValue();
+			fih.rshoulder = servoitemholder[1][2].sli.getValue();
+			fih.romoplate = servoitemholder[1][3].sli.getValue();
+
+			fih.lthumb = servoitemholder[2][0].sli.getValue();
+			fih.lindex = servoitemholder[2][1].sli.getValue();
+			fih.lmajeure = servoitemholder[2][2].sli.getValue();
+			fih.lringfinger = servoitemholder[2][3].sli.getValue();
+			fih.lpinky = servoitemholder[2][4].sli.getValue();
+			fih.lwrist = servoitemholder[2][5].sli.getValue();
+
+			fih.lbicep = servoitemholder[3][0].sli.getValue();
+			fih.lrotate = servoitemholder[3][1].sli.getValue();
+			fih.lshoulder = servoitemholder[3][2].sli.getValue();
+			fih.lomoplate = servoitemholder[3][3].sli.getValue();
+
+			fih.jaw = servoitemholder[4][0].sli.getValue();
+			fih.eyeX = servoitemholder[4][1].sli.getValue();
+			fih.eyeY = servoitemholder[4][2].sli.getValue();
+			fih.rothead = servoitemholder[4][3].sli.getValue();
+			fih.neck = servoitemholder[4][4].sli.getValue();
+
+			fih.topStom = servoitemholder[5][0].sli.getValue();
+			fih.midStom = servoitemholder[5][1].sli.getValue();
+			fih.lowStom = servoitemholder[5][2].sli.getValue();
+
+			if (tabs_main_checkbox_states[0]) {
+				i01.moveHead(fih.jaw, fih.eyeX, fih.eyeY, fih.rothead, fih.neck);
+			}
+			if (tabs_main_checkbox_states[1]) {
+				i01.moveArm("left", fih.lbicep, fih.lrotate, fih.lshoulder,
+						fih.lomoplate);
+			}
+			if (tabs_main_checkbox_states[2]) {
+				i01.moveArm("right", fih.rbicep, fih.rrotate, fih.rshoulder,
+						fih.romoplate);
+			}
+			if (tabs_main_checkbox_states[3]) {
+				i01.moveHand("left", fih.lthumb, fih.lindex, fih.lmajeure,
+						fih.lringfinger, fih.lpinky, fih.lwrist);
+			}
+			if (tabs_main_checkbox_states[4]) {
+				i01.moveHand("right", fih.rthumb, fih.rindex, fih.rmajeure,
+						fih.rringfinger, fih.rpinky, fih.rwrist);
+			}
+			if (tabs_main_checkbox_states[5]) {
+				i01.moveTorso(fih.topStom, fih.midStom, fih.lowStom);
+			}
+		}
 	}
 
 	public void servoitemholder_set_sih1(int i1, ServoItemHolder[] sih1) {

@@ -42,7 +42,7 @@ import org.slf4j.Logger;
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
 public class InMoovGestureCreatorGUI extends ServiceGUI implements
-		ActionListener {
+		ActionListener, ItemListener {
 
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory
@@ -72,6 +72,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 	JButton frame_up;
 	JButton frame_down;
 	JButton frame_test;
+	JCheckBox frame_moverealtime;
 
 	public InMoovGestureCreatorGUI(final String boundServiceName,
 			final GUIService myService, final JTabbedPane tabs) {
@@ -421,6 +422,11 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		bottom2top2.add(frame_test);
 		frame_test.addActionListener(this);
 
+		frame_moverealtime = new JCheckBox("Move Real Time");
+		frame_moverealtime.setSelected(false);
+		bottom2top2.add(frame_moverealtime);
+		frame_moverealtime.addActionListener(this);
+
 		bottom2top.add(bottom2top2);
 
 		bottom2.add(BorderLayout.NORTH, bottom2top);
@@ -523,6 +529,17 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 			myService.send(boundServiceName, "frame_test", framelist);
 		}
 		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent ie) {
+		Object o = ie.getSource();
+
+		// CheckBox - Events
+		if (o == frame_moverealtime) {
+			myService.send(boundServiceName, "frame_moverealtime",
+					frame_moverealtime);
+		}
 	}
 
 	public void gridbaglayout_addComponent(Container cont, GridBagLayout gbl,
