@@ -68,6 +68,7 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 	public JTextField bottommiddlerighttop_textfield_1;
 	public JTextField bottommiddlerighttop_textfield_2;
 	public JTextField bottommiddlerighttop_textfield_3;
+	JButton bottommiddlerighttop_update_button;
 
 	public JButton bottommiddlerightbottom_button_1;
 	public JButton bottommiddlerightbottom_button_2;
@@ -321,9 +322,13 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		JLabel bottommiddlerighttop_label_3 = new JLabel(".");
 		bottommiddlerighttop.add(bottommiddlerighttop_label_3);
 
-		bottommiddlerighttop_textfield_3 = new JTextField("00");
+		bottommiddlerighttop_textfield_3 = new JTextField("000");
 		bottommiddlerighttop.add(bottommiddlerighttop_textfield_3);
 
+		bottommiddlerighttop_update_button = new JButton("UPDATE");
+		bottommiddlerighttop.add(bottommiddlerighttop_update_button);
+		bottommiddlerighttop_update_button.addActionListener(this);
+		
 		bottommiddleright.add(bottommiddlerighttop);
 
 		JPanel bottommiddlerightbottom = new JPanel();
@@ -479,6 +484,8 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 			myService.send(boundServiceName, "middleright_attach_button");
 		} else if (o == bottommiddleleft_update_button) {
 			// TODO - add functionality
+		} else if (o == bottommiddlerighttop_update_button) {
+			myService.send(boundServiceName, "bottommiddlerighttop_update_button");
 		} else if (o == bottommiddlerightbottom_button_1) {
 			myService
 					.send(boundServiceName, "bottommiddlerightbottom_button_1");
@@ -526,7 +533,7 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		if (o == middleright_arduino_list) {
 			myService.send(boundServiceName, "middleright_arduino_list");
 		} else if (o == middleright_pin_list) {
-			// TODO - add functionality
+			// TODO - add functionality - Do I have to do this?
 		}
 	}
 
