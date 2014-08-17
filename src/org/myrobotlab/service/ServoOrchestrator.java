@@ -1,9 +1,16 @@
 package org.myrobotlab.service;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.event.ListSelectionEvent;
 
 import org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_panel;
@@ -46,6 +53,8 @@ public class ServoOrchestrator extends Service {
 	public transient ClockThread myClock = null;
 
 	int middleright_shownitem;
+	
+	boolean click_play = true;
 	
 	int pos1;
 	int pos2;
@@ -150,21 +159,29 @@ public class ServoOrchestrator extends Service {
 			}
 		}
 	}
+	
+	public void bottommiddlerighttop_update_button() {
+		pos1 = Integer.parseInt(sogui_ref.bottommiddlerighttop_textfield_1.getText());
+		pos2 = Integer.parseInt(sogui_ref.bottommiddlerighttop_textfield_2.getText());
+		pos3 = Integer.parseInt(sogui_ref.bottommiddlerighttop_textfield_3.getText());
+		play_updatetime(true, true, true);
+		play_updatepanels(pos1);
+	}
 
 	public void bottommiddlerightbottom_button_1() {
-		//TODO - add functionality
+		play_go_ba();
 	}
 	
 	public void bottommiddlerightbottom_button_2() {
-		//TODO - add functionality
+		play_go_fa();
 	}
 	
 	public void bottommiddlerightbottom_button_3() {
-		//TODO - add functionality
+		play_go_b1();
 	}
 	
 	public void bottommiddlerightbottom_button_4() {
-		//TODO - add functionality
+		play_go_f1();
 	}
 	
 	public void bottommiddlerightbottom_button_5() {
@@ -181,6 +198,10 @@ public class ServoOrchestrator extends Service {
 	
 	public void bottommiddlerightbottom_button_8() {
 		//TODO - add functionality
+	}
+	
+	public void bottomright_click_checkbox() {
+		
 	}
 	
 	public void middleright_arduino_list() {
@@ -226,27 +247,39 @@ public class ServoOrchestrator extends Service {
 	}
 
 	public void play_go_f1() {
-		//TODO - add functionality
+		pos1++;
+		play_updatetime(true, false, false);
+		play_updatepanels(pos1);
 	}
 
 	public void play_go_b1() {
-		//TODO - add functionality
+		pos1--;
+		play_updatetime(true, false, false);
+		play_updatepanels(pos1);
 	}
 
 	public void play_go_fa() {
-		//TODO - add functionality
+		pos1 = sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length;
+		pos2 = 4;
+		pos3 = 999;
+		play_updatetime(true, true, true);
+		play_updatepanels(pos1);
 	}
 
 	public void play_go_ba() {
-		//TODO - add functionality
+		pos1 = 1;
+		pos2 = 1;
+		pos3 = 0;
+		play_updatetime(true, true, true);
+		play_updatepanels(pos1);
 	}
 
 	public void play_play_1_1() {
 		pos1++;
-		sogui_ref.bottommiddlerighttop_textfield_1.setText(pos1 + "");
 		if (pos1 > sizex) {
 			play_go_stop();
 		}
+		play_updatetime(true, false, false);
 		play_playreally(pos1);
 	}
 	
@@ -256,7 +289,7 @@ public class ServoOrchestrator extends Service {
 			play_play_1_1();
 			pos2 -= 4;
 		}
-		sogui_ref.bottommiddlerighttop_textfield_2.setText(pos2 + "");
+		play_updatetime(false, true, false);
 	}
 	
 	public void play_play_3_1() {
@@ -265,15 +298,66 @@ public class ServoOrchestrator extends Service {
 			play_play_2_1();
 			pos3 -= 999;
 		}
-		sogui_ref.bottommiddlerighttop_textfield_3.setText(pos3 + "");
+		play_updatetime(false, false, true);
+	}
+	
+	public void play_checktime() {
+		if (pos1 > sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length) {
+			pos1 = sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length;
+		} else if (pos1 < 1) {
+			pos1 = 1;
+		}
+		if (pos2 > 4) {
+			pos2 = 4;
+		} else if (pos2 < 1) {
+			pos2 = 1;
+		}
+		if (pos3 > 999) {
+			pos3 = 999;
+		} else if (pos3 < 0) {
+			pos3 = 0;
+		}
+	}
+	
+	public void play_updatetime(boolean t1, boolean t2, boolean t3) {
+		play_checktime();
+		if (t1) {
+			sogui_ref.bottommiddlerighttop_textfield_1.setText(pos1 + "");
+		}
+		if (t2) {
+			sogui_ref.bottommiddlerighttop_textfield_2.setText(pos2 + "");
+		}
+		if (t3) {
+			sogui_ref.bottommiddlerighttop_textfield_3.setText(pos3 + "");
+		}
+	}
+	
+	public void play_updatepanels(int pos) {
+		for (int i = 0; i < sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length; i++) {
+			sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length+i].setBackground(Color.green);
+		}
+		sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length+pos-1].setBackground(Color.red);
+		sogui_ref.middlemiddle_ref.relayout();
 	}
 	
 	public void play_playreally(int pos) {
-		sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length+pos-2].setBackground(Color.green);
-		sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length+pos-1].setBackground(Color.red);
-		sogui_ref.middlemiddle_ref.relayout();
+		play_updatepanels(pos);
+		if (click_play) {
+			play_playclick();
+		}
 		if (pos >= sizex) {
 			play_searchblocks(pos);
+		}
+	}
+	
+	public void play_playclick() {
+		try {
+			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("C:\\Users\\Marvin\\Desktop\\temp\\click.wav").getAbsoluteFile());
+			Clip clip = AudioSystem.getClip();
+			clip.open(audioInputStream);
+			clip.start();
+		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+			e.printStackTrace();
 		}
 	}
 	
