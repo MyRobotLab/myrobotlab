@@ -2,6 +2,7 @@ package org.myrobotlab.control;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
