@@ -103,10 +103,10 @@ i01.startEyesTracking(leftPort)
 #i01.headTracking.pyramidDown()
 ############################################################
 #to tweak the default PID values
-i01.headTracking.xpid.setPID(5.0,5.0,0.1)
-i01.headTracking.ypid.setPID(5.0,5.0,0.1)
-i01.eyesTracking.xpid.setPID(5.0,5.0,0.1)
-i01.eyesTracking.ypid.setPID(5.0,5.0,0.1)
+i01.headTracking.xpid.setPID(10.0,5.0,0.1)
+i01.headTracking.ypid.setPID(10.0,5.0,0.1)
+i01.eyesTracking.xpid.setPID(15.0,5.0,0.1)
+i01.eyesTracking.ypid.setPID(15.0,5.0,0.1)
 ############################################################
 
 i01.startPIR("COM8",12)
