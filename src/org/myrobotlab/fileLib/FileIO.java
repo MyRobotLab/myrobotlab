@@ -528,4 +528,15 @@ public class FileIO {
 
 	}
 
+	// FIXME - implement
+	static public byte[] getResource(String resoucePath) {
+		String path = String.format("resource/%s", resoucePath);
+		if (isJar()){
+			
+		} else {
+			
+		}
+		return null;
+	}
+
 }

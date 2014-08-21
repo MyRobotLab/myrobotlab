@@ -20,13 +20,15 @@ public class Pingdar extends Service {
 	transient private Arduino arduino;
 	transient private Servo servo;
 	transient private UltrasonicSensor sensor;
+	// TODO - changed to XDar - make RangeSensor interface -> publishRange
+	// TODO - set default sample rate
 
 	private boolean isAttached = false;
 	private Long lastRange;
 	private Integer lastPos;
 	
 	private int rngCount = 0;
-
+	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 
@@ -43,13 +45,13 @@ public class Pingdar extends Service {
 	}
 
 	public boolean sweep() {
-		return sweep(sweepMin, sweepMax, step);
+		return sweep(sweepMin, sweepMax);
 	}
-
-	public boolean sweep(int sweepMin, int sweepMax, int step) {
+	
+	public boolean sweep(int sweepMin, int sweepMax) {
 		this.sweepMin = sweepMin;
 		this.sweepMax = sweepMax;
-		this.step = step;
+		this.step = step; // FIXME STEP
 
 		if (!isAttached) {
 			error("not attached");
@@ -64,6 +66,7 @@ public class Pingdar extends Service {
 		
 		servo.setSpeed(0.20f);
 		servo.setEventsEnabled(true);
+		// STEP ???
 		servo.sweep(sweepMin, sweepMax, 1, step);
 		
 		sensor.startRanging();
@@ -140,18 +143,20 @@ public class Pingdar extends Service {
 	
 	// sensor data has come in
 	// grab the latest position
-	public void onRange(Long range){
+	public Long onRange(Long range){
 		info("range %d", range);
 		lastRange = range;
 		++rngCount;
 		Point p = new Point(rngCount, lastPos, 1, System.currentTimeMillis());
 		p.z = range;
-		invoke("publishVector", new Point(p));
+		invoke("publishPingdar", new Point(p));
+		return lastRange;
 	}
 	
-	public void onServoEvent(Integer pos){
+	public Integer onServoEvent(Integer pos){
 		info("pos %d", pos);
 		lastPos = pos;
+		return lastPos;
 	}
 
 	@Override
@@ -161,19 +166,21 @@ public class Pingdar extends Service {
 	
 	public void test(){
 		Pingdar pingdar = (Pingdar)Runtime.start(getName(), "Pingdar");
-		pingdar.attach("COM12", 7, 8, 4);
+		pingdar.attach("COM15", 7, 8, 4);
+		
 		for (int i = 0; i < 180; ++i){
 			Point p = new Point(i, i, i, System.currentTimeMillis());
 			p.z = 20;
-			invoke("publishVector", new Point(p));
+			invoke("publishPingdar", new Point(p));
 		}
-		pingdar.sweep(10, 170, 1);
+		
+		pingdar.sweep(40, 160);
 		//pingdar.sensor.startRanging();
 		//pingdar.sensor.stopRanging();
 		pingdar.stop();
 	}
 	
-	public Point publishVector(Point point){
+	public Point publishPingdar(Point point){
 		return point;
 	}
 

@@ -365,6 +365,7 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	/**
+	 * FIXME - if true - service data xml needs to be pulled from repo
 	 * this method is called by the user (or system) when a specific service
 	 * needs to be installed (or updated) - it should resolve all the
 	 * dependencies for that service
@@ -413,7 +414,8 @@ public class Runtime extends Service implements MessageListener {
 			intertoobTest = repo.getVersionFromRepo();
 			info("remote version %s", intertoobTest);
 		} catch (Exception e) {
-			log.error(String.format("if connection error - just bail and save us some time !", e.getMessage()));
+			error(String.format("if connection error - just bail and save us some time !", e.getMessage()));
+			return null;
 		}
 
 		// FIXME support ServiceTypes with dependencies of ServiceTypes !!!
@@ -519,15 +521,20 @@ public class Runtime extends Service implements MessageListener {
 			Bootstrap bootstrap = new Bootstrap();
 			bootstrap.createBootstrapJar();
 
+			// WRONG - jvm args should be created and maintained in bootstrap
 			// FIXME - get jvm arguments and other original args
+			/*
 			ArrayList<String> restartArgs = new ArrayList<String>();
 			for (int i = 0; i < jvmArgs.size(); ++i) {
 				restartArgs.add(jvmArgs.get(i));
 			}
+			*/
+			/*
 			for (int i = 0; i < args.size(); ++i) {
 				restartArgs.add(args.get(i));
 			}
-			bootstrap.spawn(restartArgs);
+			*/
+			bootstrap.spawn(args);
 			System.exit(0);
 
 			// shutdown / exit

@@ -15,12 +15,15 @@ public class Sprinkler extends Service {
 
 	WebGUI wegui;
 	Arduino arduino;
-	XMPP xmpp;
+	Cron cron;
+	
+	String defaultPort = "/dev/ttyACM0";
 	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		peers.put("webgui", "WebGUI", "WebGUI service");
 		peers.put("arduino", "Arduino", "Arduino service");
+		peers.put("cron", "Cron", "Cron service");
 		return peers;
 	}
 
@@ -29,7 +32,12 @@ public class Sprinkler extends Service {
 	}
 	
 	public boolean connect(){
-		return arduino.connect("/dev/ttyACM0");
+		return arduino.connect(defaultPort);
+	}
+	
+	public boolean connect(String port){
+		defaultPort = port;
+		return arduino.connect(defaultPort);
 	}
 	
 	public void startService() {
@@ -39,6 +47,9 @@ public class Sprinkler extends Service {
 			// send mail error !!!
 			// send xmpp error !!
 		}
+		
+		// FIXME - custom MRLComm.ino build to start with all digital pins = 1 HIGH
+		// for the funky stinky nature of the relay board
 		
 		// FIXME - start schedule
 	}

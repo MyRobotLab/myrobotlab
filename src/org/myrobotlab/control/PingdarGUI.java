@@ -27,16 +27,10 @@ package org.myrobotlab.control;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Random;
 
-import javax.swing.ImageIcon;
-import javax.swing.JList;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -44,7 +38,6 @@ import javax.swing.event.ListSelectionListener;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.Wii.IRData;
 import org.myrobotlab.service.WiiDAR;
 import org.myrobotlab.service.WiiDAR.Point;
 import org.myrobotlab.service.interfaces.VideoGUISource;
@@ -56,23 +49,20 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 	public final static Logger log = LoggerFactory.getLogger(PingdarGUI.class.toString());
 
 	VideoWidget screen = null;
-
-	Graphics cam = null;
 	Graphics graph = null;
 
 	BufferedImage camImage = null;
 	BufferedImage graphImage = null;
 
-	int width = 1024;
-	int height = 768;
-	int xyScale = 2;
+	int scale = 1;
+	int vheight = height / scale;
+	int vwidth = width / scale;
 
 	ArrayList<ArrayList<Point>> left = new ArrayList<ArrayList<Point>>();
 	ArrayList<ArrayList<Point>> right = new ArrayList<ArrayList<Point>>();
 	ArrayList<ArrayList<Point>> history = new ArrayList<ArrayList<Point>>();
 
-	public Random rand = new Random();
-	public IRData lastIRData = null;
+	ArrayList<Point> hist = new ArrayList<Point>();
 
 	public PingdarGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
@@ -82,10 +72,9 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 		screen = new VideoWidget(boundServiceName, myService, tabs);
 		screen.init();
 
-		camImage = new BufferedImage(width / xyScale, height / xyScale, BufferedImage.TYPE_INT_RGB);
-		graphImage = new BufferedImage(width / xyScale, height / xyScale, BufferedImage.TYPE_INT_RGB);
+		camImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);
+		graphImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);
 
-		cam = camImage.getGraphics();
 		graph = graphImage.getGraphics();
 
 		graph.setColor(Color.green);
@@ -104,19 +93,6 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 		gc.gridheight = 1;
 		gc.gridwidth = 1;
 		gc.gridy = 5;
-
-		setCurrentFilterMouseListener();
-
-	}
-
-	protected ImageIcon createImageIcon(String path, String description) {
-		java.net.URL imgURL = getClass().getResource(path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL, description);
-		} else {
-			System.err.println("Couldn't find file: " + path);
-			return null;
-		}
 	}
 
 	public void displayFrame(SerializableImage camImage) {
@@ -125,64 +101,14 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 
 	@Override
 	public void attachGUI() {
-		// subscribe("publishIR", "publishIR",
-		// IRData.class.getCanonicalName());
-		
-		subscribe("publishSinglePoint", "onSinglePoint", Point.class);
+		subscribe("publishPingdar", "onSinglePoint", Point.class);
 		subscribe("publishSweepData", "publishSweepData", ArrayList.class);
-		subscribe("setServoLeftMax", "setServoLeftMax", Integer.class);
-		subscribe("setServoRightMax", "setServoRightMax", Integer.class);
-		subscribe("setIRLeftMax", "setIRLeftMax", Integer.class);
-		subscribe("setIRRightMax", "setIRRightMax", Integer.class);
-		subscribe("setCalibrating", "setCalibrating", Boolean.class);
 	}
 
 	@Override
 	public void detachGUI() {
-		// unsubscribe("publishIR", "publishIR",
-		// IRData.class);
-		unsubscribe("publishSinglePoint", "onSinglePoint", Point.class);
+		unsubscribe("publishPingdar", "onSinglePoint", Point.class);
 		unsubscribe("publishSweepData", "publishSweepData", ArrayList.class);
-		unsubscribe("setServoLeftMax", "setServoLeftMax", Integer.class);
-		unsubscribe("setServoRightMax", "setServoRightMax", Integer.class);
-		unsubscribe("setIRLeftMax", "setIRLeftMax", Integer.class);
-		unsubscribe("setIRRightMax", "setIRRightMax", Integer.class);
-		unsubscribe("setCalibrating", "setCalibrating", Boolean.class);
-	}
-
-	final String leftstr = "left";
-	final String rightstr = "right";
-	boolean calibrating = true;
-
-	int servoRightMax = 0;
-	IRData irRightMax = null;
-	int servoLeftMax = 0;
-	IRData irLeftMax = null;
-
-	// inbound from publish points
-	public Integer setServoLeftMax(Integer max) {
-		servoLeftMax = max;
-		return max;
-	}
-
-	public Integer setServoRightMax(Integer max) {
-		servoRightMax = max;
-		return max;
-	}
-
-	public IRData setIRLeftMax(IRData max) {
-		irLeftMax = max;
-		return max;
-	}
-
-	public IRData setIRRightMax(IRData max) {
-		irRightMax = max;
-		return max;
-	}
-
-	public Boolean setCalibrating(Boolean t) {
-		calibrating = t;
-		return t;
 	}
 
 	public ArrayList<Point> publishSweepData(ArrayList<Point> d) {
@@ -190,12 +116,6 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 		return d;
 	}
 
-	int vheight = height / xyScale;
-	int vwidth = width / xyScale;
-
-	// TODO - check for copy/ref of parameter moved locally
-	// TODO remove IREven
-	// find angle
 	public void displaySweepData(ArrayList<Point> points) {
 		int x;
 		int y;
@@ -219,23 +139,10 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 				graph.drawLine(0, vheight - i, vwidth, vheight - i);
 			}
 
-			// get the first and last point
-			Point first = points.get(0);
-			String dir = (first.direction == WiiDAR.LEFT) ? "left" : "right";
-
 			// set appropriate color
-			Color color = (dir.compareTo(leftstr) == 0) ? Color.green : Color.red;
+			Color color = Color.green;
 			graph.setColor(color);
 
-			// draw first last info
-			/*
-			 * int vpos =10; graph.drawString("smin " + servoRightMax + " smax "
-			 * + servoLeftMax, 10, vpos); graph.drawString("pts " +
-			 * points.size() + " midloc " + points.get(20).getX() + "," +
-			 * points.get(20).getY(), 10, vpos+=10); graph.drawString("fs " +
-			 * first.servoPos + " ls " + last.servoPos , 10, vpos+=10);
-			 * graph.drawString("dir " + dir, 10, vpos+=10);
-			 */
 			Point p = null;
 
 			graph.setColor(Color.green);
@@ -283,27 +190,6 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 
 	}
 
-	// TODO - encapsulate this
-	// MouseListener mouseListener = new MouseAdapter() {
-	public void setCurrentFilterMouseListener() {
-		MouseListener mouseListener = new MouseAdapter() {
-			public void mouseClicked(MouseEvent mouseEvent) {
-				JList theList = (JList) mouseEvent.getSource();
-				if (mouseEvent.getClickCount() == 2) {
-					int index = theList.locationToIndex(mouseEvent.getPoint());
-					if (index >= 0) {
-						Object o = theList.getModel().getElementAt(index);
-						System.out.println("Double-clicked on: " + o.toString());
-					}
-				}
-			}
-		};
-
-	}
-
-	ArrayList<Point> hist = new ArrayList<Point>();
-	boolean staticInfo = false;
-
 	public void drawStaticInfo() {
 		graph.setColor(Color.gray);
 
@@ -316,15 +202,9 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 		for (r = 160; r < vheight * 2; r += 160) {
 			inches += 10;
 			graph.drawArc(vwidth / 2 - r / 2, vheight - r / 2, r, r, 0, 180);
-			// graph.drawLine(0, vheight - i, vwidth, vheight - i);
-			// graph.drawArc(vwidth - 40, vheight, vheight - i - 5, vheight - i
-			// - 5, 0, 360);
-			// graph.drawArc(vwidth - 40, vheight, 30, 30, 0, 360);
-			// graph.drawArc(vwidth/2 - 100, vheight - 100, 200, 200, 0, 180);
 			graph.drawString("" + inches, vwidth / 2 + r / 2, vheight - 10);
 		}
 
-		staticInfo = true;
 	}
 
 	DecimalFormat df = new DecimalFormat("#.##");
@@ -368,13 +248,11 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 			graph.drawLine(x0, y0, x0, y0 - 40);
 
 			// gray out previous point
-			// graph.setColor(new Color(0,128,0));
-			// graph.drawLine(x0, y0, x0, y0);
 			graph.setColor(Color.green);
 			// draw line if under min distance from previous point
-			//if (distance < 40) {
-				graph.drawLine(x, y, x0, y0);
-			//}
+			// if (distance < 40) {
+			graph.drawLine(x, y, x0, y0);
+			// }
 
 			// black historical lidar vector
 			graph.setColor(Color.black);
@@ -427,10 +305,6 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 
 		// screen image
 		screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
-		/*
-		 * // send it to OpenCV if (cnt%20 == 0) {
-		 * myService.invoke("processImage", Utils.copyImage(graphImage)); }
-		 */
 		return p;
 	}
 

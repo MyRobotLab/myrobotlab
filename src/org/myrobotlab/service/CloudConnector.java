@@ -25,9 +25,9 @@ public class CloudConnector extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(CloudConnector.class);
 	
-	@Element
+	//@Element
 	public String robotId;
-	@Element
+	//@Element
 	public String propertyId;
 	
 	class CloudMessage {
@@ -46,7 +46,7 @@ public class CloudConnector extends Service {
 
 	public CloudConnector(String n) {
 		super(n);
-		load();
+		//load();
 	}
 
 	@Override
@@ -125,9 +125,10 @@ public class CloudConnector extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.WARN);
 
+		Runtime.start("gui", "GUIService");
 		CloudConnector cloud = new CloudConnector("cloud");
 		cloud.startService();
-		cloud.setRobotId("george");
+		cloud.setRobotId("incubator");
 
 		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 		arduino.connect("COM12");
