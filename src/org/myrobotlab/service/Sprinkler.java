@@ -52,6 +52,31 @@ public class Sprinkler extends Service {
 		// for the funky stinky nature of the relay board
 		
 		// FIXME - start schedule
+		cron.addScheduledEvent("0 7 */3 * *", this.getName(), "onTimeToWater");
+		cron.addScheduledEvent("30 7 */3 * *", this.getName(), "stop");
+	}
+	
+	public void stop(){
+		arduino.digitalWrite(5, 1);
+		arduino.digitalWrite(6, 1);
+		arduino.digitalWrite(7, 1);
+		arduino.digitalWrite(8, 1);
+		arduino.digitalWrite(9, 1);
+		arduino.digitalWrite(10, 1);
+		arduino.digitalWrite(11, 1);
+		arduino.digitalWrite(12, 1);
+	}
+	
+	// TODO - fix add length of watering
+	public void onTimeToWater(){
+		arduino.digitalWrite(5, 1);
+		arduino.digitalWrite(6, 1);
+		arduino.digitalWrite(7, 0);
+		arduino.digitalWrite(8, 0);
+		arduino.digitalWrite(9, 0);
+		arduino.digitalWrite(10, 0);
+		arduino.digitalWrite(11, 1);
+		arduino.digitalWrite(12, 1);		
 	}
 
 	public void stopService() {
