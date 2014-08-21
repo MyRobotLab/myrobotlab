@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
@@ -18,6 +20,10 @@ public class Sprinkler extends Service {
 	Cron cron;
 	
 	String defaultPort = "/dev/ttyACM0";
+	
+	// TODO - memory appender
+	ArrayList<String> history = new ArrayList<String>();
+	
 	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -50,13 +56,15 @@ public class Sprinkler extends Service {
 		
 		// FIXME - custom MRLComm.ino build to start with all digital pins = 1 HIGH
 		// for the funky stinky nature of the relay board
-		
+		cron = (Cron)startPeer("cron");
 		// FIXME - start schedule
 		cron.addScheduledEvent("0 7 */3 * *", this.getName(), "onTimeToWater");
 		cron.addScheduledEvent("30 7 */3 * *", this.getName(), "stop");
 	}
 	
 	public void stop(){
+		log.info("stop");
+		history.add(String.format("stop %s", new Date().toString()));
 		arduino.digitalWrite(5, 1);
 		arduino.digitalWrite(6, 1);
 		arduino.digitalWrite(7, 1);
@@ -69,6 +77,8 @@ public class Sprinkler extends Service {
 	
 	// TODO - fix add length of watering
 	public void onTimeToWater(){
+		log.info("onTimeToWater");
+		history.add(String.format("onTimeToWater %s", new Date().toString()));
 		arduino.digitalWrite(5, 1);
 		arduino.digitalWrite(6, 1);
 		arduino.digitalWrite(7, 0);
@@ -76,7 +86,15 @@ public class Sprinkler extends Service {
 		arduino.digitalWrite(9, 0);
 		arduino.digitalWrite(10, 0);
 		arduino.digitalWrite(11, 1);
-		arduino.digitalWrite(12, 1);		
+		arduino.digitalWrite(12, 1);	
+	}
+	
+	public ArrayList<String> getHistory(){
+		return history;
+	}
+	
+	public ArrayList<org.myrobotlab.service.Cron.Task> getTasks(){
+		return cron.getTasks();
 	}
 
 	public void stopService() {
