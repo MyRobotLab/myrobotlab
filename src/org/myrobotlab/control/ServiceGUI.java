@@ -75,9 +75,9 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 	@Element
 	public int y;
 	@Element
-	public int width;
+	public int width = 600;
 	@Element
-	public int height;
+	public int height = 600;
 
 	transient private JFrame undocked;
 

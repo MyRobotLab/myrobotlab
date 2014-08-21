@@ -214,8 +214,8 @@ public class Servo extends Service implements ServoControl {
 		return isAttached;
 	}
 
-	public void setInverted(boolean isInverted) {
-		if (!inverted && isInverted) {
+	public void setInverted(boolean invert) {
+		if (!inverted && invert) {
 			map(maxX, minX, minY, maxY);
 			inverted = true;
 		} else {
@@ -494,15 +494,29 @@ public class Servo extends Service implements ServoControl {
 		return setController(sc);
 	}
 
-	public void test() throws MRLError {
-		test("COM15", 4);
+
+
+	public boolean setEventsEnabled(boolean b) {
+		controller.setServoEventsEnabled(getName(), b);
+		return b;
 	}
+
+	public void setSpeedControlOnUC(boolean b) {
+		speedControlOnUC = b;
+	}
+	
+	// uber good
+	public Integer publishServoEvent(Integer position){
+		return position;
+	}
+
+	// uber good
+	public void addServoEventListener(Service service) {
+		addListener("publishServoEvent", service.getName(), "onServoEvent", Integer.class);
+	}
+	
 
 	public void test(String port, int pin) throws MRLError {
-		test(new Object[] { port, pin });
-	}
-
-	public void test(Object... params) throws MRLError {
 
 		// FIXME GSON or PYTHON MESSAGES
 
@@ -543,9 +557,6 @@ public class Servo extends Service implements ServoControl {
 		// also good to guarantee being started
 
 		Servo servo = (Servo) Runtime.start(getName(), "Arduino");
-
-		String port = (String) params[0];
-		int pin = (int) params[1];
 
 		// TODO test errros on servo move before attach
 
@@ -647,25 +658,6 @@ public class Servo extends Service implements ServoControl {
 		}
 
 		info("test completed");
-	}
-
-	public boolean setEventsEnabled(boolean b) {
-		controller.setServoEventsEnabled(getName(), b);
-		return b;
-	}
-
-	public void setSpeedControlOnUC(boolean b) {
-		speedControlOnUC = b;
-	}
-	
-	// uber good
-	public Integer publishServoEvent(Integer position){
-		return position;
-	}
-
-	// uber good
-	public void addServoEventListener(Service service) {
-		addListener("publishServoEvent", service.getName(), "onServoEvent", Integer.class);
 	}
 	
 	public static void main(String[] args) throws InterruptedException {

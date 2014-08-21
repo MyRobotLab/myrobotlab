@@ -281,7 +281,17 @@ public class WebGUI extends Service {
 			log.error(String.format("toJson %s.%s is null", msg.name, msg.method));
 		}
 	}
+	
+	public boolean addUser(String username, String password) {
+		return BasicSecurity.addUser(username, password);
+	}
 
+
+	public void addMsgListener(Service listener) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
@@ -298,58 +308,16 @@ public class WebGUI extends Service {
 			Logging.logException(e);
 		}
 
-		// REST rest = new REST();
-		// Runtime.createAndStart("arduino", "Arduino");
-		// Clock clock = (Clock)Runtime.createAndStart("clock", "Clock");
-		// clock.startClock();
-		// Runtime.createAndStart("security", "Security");
 		WebGUI webgui = new WebGUI("webgui");
-		Runtime.start("python", "Python");
-		Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-		arduino.connect("COM12");
-		arduino.analogReadPollingStart(3);
-		webgui.useLocalResources(true);
+		//webgui.useLocalResources(true);
 		//webgui.autoStartBrowser(false);
-		webgui.startService();
 		// Runtime.createAndStart("webgui", "WebGUI");
 		// webgui.useLocalResources(true);
+		webgui.startService();
 
-		// Runtime.createAndStart("servoX", "Servo");
-		// Runtime.createAndStart("rack-1-arduino-1", "Arduino");
-
-		// Serial arduino = (Serial)Runtime.createAndStart("serial", "Serial");
-		/*
-		 * Arduino ardurino = (Arduino)Runtime.createAndStart("arduino",
-		 * "Arduino"); Servo servo = (Servo)Runtime.createAndStart("servo",
-		 * "Servo"); arduino.connect("COM9");
-		 * arduino.servoAttach(servo.getName(), 7);
-		 */
-		// Runtime.createAndStart("python", "Python");
-		// webgui.addUser("gperry", "password");
-		// Runtime.createAndStart("arduino", "Arduino");
-
-		// webgui.subscribe("clock", "pulse");
-
-		// webgui.subscribe("pulse", "clock", "pulse", String.class);
-
-		/*
-		 * Message msg = webgui.createMessage("webgui", "publishPin", new
-		 * Object[] { new Pin(12, Pin.DIGITAL_VALUE, 1, "arduino") });
-		 * webgui.sendToAll(msg);
-		 */
-
-		// FileIO.stringToFile("services.html", rest.getServices());
-
-		// Runtime.releaseAll();
-		// Runtime.createAndStart("gui", "GUIService");
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
-		 */
 	}
 
-	public boolean addUser(String username, String password) {
-		return BasicSecurity.addUser(username, password);
-	}
+
+	
 
 }

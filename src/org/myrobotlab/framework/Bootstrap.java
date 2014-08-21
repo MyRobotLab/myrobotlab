@@ -132,16 +132,10 @@ public class Bootstrap {
 		log.info(String.format("\n\nBootstrap starting spawn %s", formatter.format(new Date())));
 
 		log.info("============== args begin ==============");
-		StringBuffer sb = new StringBuffer();
 		List<String> jvmArgs = getJVMArgs();
-		List<String> inArgs = new ArrayList<String>();
-
-		for (int i = 0; i < in.length; ++i) {
-			sb.append(in[i]);
-			inArgs.add(in[i]);
-		}
+		
 		log.info(String.format("jvmArgs %s", Arrays.toString(jvmArgs.toArray())));
-		log.info(String.format("inArgs %s", Arrays.toString(inArgs.toArray())));
+		log.info(String.format("in %s", Arrays.toString(in)));
 		log.info("============== args end ==============");
 
 		// FIXME - details on space / %20 decoding in URI
@@ -163,6 +157,7 @@ public class Bootstrap {
 
 		ArrayList<String> outArgs = new ArrayList<String>();
 
+		// FIXME FIXME FIXME - it SHOULD NOT be variable path name !!!
 		// java setup
 		// String class path = System.getProperty("java.class.path"); // wtf -
 		// do
@@ -175,7 +170,7 @@ public class Bootstrap {
 
 		String javaPath = System.getProperty("java.home") + fs + "bin" + fs + javaExe;
 		// JNI
-		String jniLibraryPath = String.format("-Djava.library.path=\"libraries/native/%s\"", platformId);
+		String jniLibraryPath = String.format("-Djava.library.path=libraries/native/%s", platformId);
 		// FIXME - JNA path
 		
 		// String jvmMemory = "-Xmx2048m -Xms256m";
@@ -183,30 +178,49 @@ public class Bootstrap {
 		if (totalMemory == null) {
 			log.info("could not get total physical memory");
 		} else {
-			log.info("total physical memory returned is %d", totalMemory);
+			log.info("total physical memory returned is %d Mb", totalMemory);
 		}
 
+		/* mebbe windows does not like quotes anymore ?
 		if (platform.isWindows()) {
 			outArgs.add(String.format("\"%s\"", javaPath));
 		} else {
 			outArgs.add(javaPath);
 		}
+		*/
+		outArgs.add(javaPath);
 
 		// transferring original jvm args
-
+		/* DO NOT TRANSFER ALL DETAILS SHOULD BE DERIVED HERE - NOT PULLED FROM THE 
+		 * DEFINITION OF THIS CURRENTLY RUN JVM
+		 */
+		/*
 		for (int i = 0; i < jvmArgs.size(); ++i) {
 			String jvmArg = jvmArgs.get(i);
 			if (!jvmArg.startsWith("-agentlib")) {
 				outArgs.add(jvmArgs.get(i));
 			}
 		}
-
+		*/
+		
 		outArgs.add(jniLibraryPath);
 		outArgs.add("-cp");
 		outArgs.add(classpath);
 
 		// outArgs.add(classpath);
 		// outArgs.add("org.myrobotlab.service.Runtime"); DOUBLE ENTRY !
+		
+		boolean hasService = false;
+		for (int i = 0; i < in.length; ++i){
+			String arg = in[i];
+			if (arg.startsWith("org.myrobotlab.service")){
+				hasService = true;
+			}
+		}
+		
+		if (!hasService){
+			outArgs.add("org.myrobotlab.service.Runtime");
+		}
 
 		// TODO preserve/serialize command line parameters
 		if (in.length > 0) {
@@ -215,7 +229,7 @@ public class Bootstrap {
 			}
 		} else {
 			// (default) - no parameters supplied
-			outArgs.add("org.myrobotlab.service.Runtime");
+			
 			outArgs.add("-service");
 			outArgs.add("gui");
 			outArgs.add("GUIService");
@@ -247,6 +261,7 @@ public class Bootstrap {
 				log.info("moved update !");
 			} catch (FileSystemException e) {
 				try {
+					// FIXME FIXME - normalize the start !!!!
 					log.info("file myrobotlab.jar is locked - ejecting bootstrap.jar");
 					createBootstrapJar();
 
@@ -550,7 +565,7 @@ public class Bootstrap {
 	public Integer getTotalPhysicalMemory() {
 		try {
 			com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-			Integer physicalMemorySize = (int) os.getTotalPhysicalMemorySize() / 1048576;
+			Integer physicalMemorySize = (int) (os.getTotalPhysicalMemorySize() / 1048576);
 
 			return physicalMemorySize;
 		} catch (Exception e) {

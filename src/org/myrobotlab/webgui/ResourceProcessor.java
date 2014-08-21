@@ -146,11 +146,14 @@ public class ResourceProcessor implements HTTPProcessor {
 					uri = documentIndex;
 				}
 			} else {
+				// FileIO.getResource(resoucePath); FIXME - got tired of trying to refactor
+				// FileIO.getSource();
 				fis = FileIO.class.getResourceAsStream(resoucePath);
 			}
 
-			if (fis == null)
+			if (fis == null){
 				return new Response(Response.Status.NOT_FOUND, WSServer.MIME_PLAINTEXT, "Error 404, file not found.");
+			}
 
 			try {
 				// Get MIME type from file name extension, if possible
