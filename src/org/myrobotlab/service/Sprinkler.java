@@ -15,7 +15,7 @@ public class Sprinkler extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Sprinkler.class);
 
-	WebGUI wegui;
+	WebGUI webgui;
 	Arduino arduino;
 	Cron cron;
 	
@@ -60,6 +60,8 @@ public class Sprinkler extends Service {
 		// FIXME - start schedule
 		cron.addScheduledEvent("0 7 */3 * *", this.getName(), "onTimeToWater");
 		cron.addScheduledEvent("30 7 */3 * *", this.getName(), "stop");
+		
+		webgui = (WebGUI)startPeer("webgui");
 	}
 	
 	public void stop(){
