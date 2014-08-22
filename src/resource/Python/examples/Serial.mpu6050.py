@@ -1,3 +1,4 @@
+from __future__ import division
 serial = Runtime.createAndStart("serial","Serial")
 serial.connect("COM3",38400,8,1,0)
 serial.addListener("publishByte","python","prova")
@@ -8,5 +9,6 @@ def prova(data):
     if (code !=10 and code !=13):
       ax += chr(code)
     elif (code == 10):
-      print ax
+      servo = (30 +(((int(ax) + 18832)/(18832 + 18832))*(150 - 30)))
+      print int(servo)
       ax = ""
