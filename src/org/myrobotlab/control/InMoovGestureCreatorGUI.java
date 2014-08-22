@@ -24,6 +24,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -136,16 +137,14 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		JPanel top = new JPanel();
 
-		tabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
+		JTabbedPane top_tabs = new JTabbedPane(JTabbedPane.TOP,
+				JTabbedPane.WRAP_TAB_LAYOUT);
 
 		// JPanels for the JTabbedPane
 		final JPanel mainpanel = new JPanel();
-		final JPanel rhpanel = new JPanel();
-		final JPanel rapanel = new JPanel();
-		final JPanel lhpanel = new JPanel();
-		final JPanel lapanel = new JPanel();
-		final JPanel hpanel = new JPanel();
-		final JPanel tpanel = new JPanel();
+		final JPanel c1panel = new JPanel();
+		final JPanel c2panel = new JPanel();
+		final JPanel c3panel = new JPanel();
 
 		// mainpanel (enabeling / disabeling sections)
 		mainpanel.setLayout(new BoxLayout(mainpanel, BoxLayout.Y_AXIS));
@@ -173,26 +172,6 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 				@Override
 				public void itemStateChanged(ItemEvent arg0) {
 					tabs_main_checkbox_states[fi] = checkbox.isSelected();
-					tabs.removeAll();
-					tabs.addTab("main", mainpanel);
-					if (tabs_main_checkbox_states[0]) {
-						tabs.addTab("Right Hand", rhpanel);
-					}
-					if (tabs_main_checkbox_states[1]) {
-						tabs.addTab("Right Arm", rapanel);
-					}
-					if (tabs_main_checkbox_states[2]) {
-						tabs.addTab("Left Hand", lhpanel);
-					}
-					if (tabs_main_checkbox_states[3]) {
-						tabs.addTab("Left Arm", lapanel);
-					}
-					if (tabs_main_checkbox_states[4]) {
-						tabs.addTab("Head", hpanel);
-					}
-					if (tabs_main_checkbox_states[5]) {
-						tabs.addTab("Torso", tpanel);
-					}
 					myService.send(boundServiceName,
 							"tabs_main_checkbox_states_changed",
 							tabs_main_checkbox_states);
@@ -203,25 +182,34 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 			mainpanel.add(checkbox);
 		}
 
-		// rh-, ra-, lh-, la-, h-, t-panel
+		Container c1con = c1panel;
+		Container c2con = c2panel;
+		Container c3con = c3panel;
+
+		GridBagLayout c1gbl = new GridBagLayout();
+		c1con.setLayout(c1gbl);
+		GridBagLayout c2gbl = new GridBagLayout();
+		c2con.setLayout(c2gbl);
+		GridBagLayout c3gbl = new GridBagLayout();
+		c3con.setLayout(c3gbl);
+
+		// c1-, c2-, c3-panel
 		for (int i1 = 0; i1 < 6; i1++) {
-
+			
 			Container con = null;
-
-			if (i1 == 0) {
-				con = rhpanel;
-			} else if (i1 == 1) {
-				con = rapanel;
-			} else if (i1 == 2) {
-				con = lhpanel;
-			} else if (i1 == 3) {
-				con = lapanel;
-			} else if (i1 == 4) {
-				con = hpanel;
-			} else if (i1 == 5) {
-				con = tpanel;
+			GridBagLayout gbl = null;
+			
+			if (i1 == 0 || i1 == 1) {
+				con = c1con;
+				gbl = c1gbl;
+			} else if (i1 == 2 || i1 == 3) {
+				con = c2con;
+				gbl = c2gbl;
+			} else if (i1 == 4 || i1 == 5) {
+				con = c3con;
+				gbl = c3gbl;
 			}
-
+			
 			int size = 0;
 
 			if (i1 == 0 || i1 == 2) {
@@ -233,9 +221,13 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 			} else if (i1 == 5) {
 				size = 3;
 			}
-
-			GridBagLayout gbl = new GridBagLayout();
-			con.setLayout(gbl);
+			
+			int offset = 0;
+			if (i1 == 1 || i1 == 3) {
+				offset = 6;
+			} else if (i1 == 5) {
+				offset = 5;
+			}
 
 			ServoItemHolder[] sih1 = new ServoItemHolder[size];
 
@@ -300,38 +292,33 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 				sih11.spe = new JTextField("1.00");
 
 				// x y w h wx wy
-				gridbaglayout_addComponent(con, gbl, sih11.fin, 0, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.fin, offset+i2, 0, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.min, 1, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.min, offset+i2, 1, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.res, 2, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.res, offset+i2, 2, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.max, 3, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.max, offset+i2, 3, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.sli, 4, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.sli, offset+i2, 4, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.akt, 5, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.akt, offset+i2, 5, 1, 1,
 						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.spe, 6, i2, 1, 1,
+				gridbaglayout_addComponent(con, gbl, sih11.spe, offset+i2, 6, 1, 1,
 						1.0, 1.0);
 
 				sih1[i2] = sih11;
 			}
-
 			myService.send(boundServiceName, "servoitemholder_set_sih1", i1,
 					sih1);
-
 		}
-
-		tabs.addTab("main", mainpanel);
-		tabs.addTab("Right Hand", rhpanel);
-		tabs.addTab("Right Arm", rapanel);
-		tabs.addTab("Left Hand", lhpanel);
-		tabs.addTab("Left Arm", lapanel);
-		tabs.addTab("Head", hpanel);
-		tabs.addTab("Torso", tpanel);
-
-		top.add(BorderLayout.CENTER, tabs);
+		
+		top_tabs.addTab("Main", mainpanel);
+		top_tabs.addTab("Right Side", c1panel);
+		top_tabs.addTab("Left Side", c2panel);
+		top_tabs.addTab("Head + Torso", c3panel);
+		
+		top.add(BorderLayout.CENTER, top_tabs);
 
 		JPanel bottom = new JPanel();
 
@@ -463,14 +450,14 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		JSplitPane splitpanebottom1bottom2 = new JSplitPane(
 				JSplitPane.HORIZONTAL_SPLIT, bottom1, bottom2);
 		splitpanebottom1bottom2.setOneTouchExpandable(true);
-		splitpanebottom1bottom2.setDividerLocation(200);
+		// splitpanebottom1bottom2.setDividerLocation(200);
 
 		bottom.add(splitpanebottom1bottom2);
 
 		JSplitPane splitpanetopbottom = new JSplitPane(
 				JSplitPane.VERTICAL_SPLIT, top, bottom);
 		splitpanetopbottom.setOneTouchExpandable(true);
-		splitpanetopbottom.setDividerLocation(300);
+		// splitpanetopbottom.setDividerLocation(300);
 
 		display.add(splitpanetopbottom);
 	}
@@ -577,6 +564,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 	public void customizeslider(JSlider slider, final int t1, final int t2,
 			int[] minresmaxpos11) {
 		// preset the slider
+		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.setMinimum(minresmaxpos11[0]);
 		slider.setMaximum(minresmaxpos11[2]);
 		slider.setMajorTickSpacing(20);
