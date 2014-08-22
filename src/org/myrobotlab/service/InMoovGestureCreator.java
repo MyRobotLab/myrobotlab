@@ -47,7 +47,7 @@ public class InMoovGestureCreator extends Service {
 		frameitemholder = new ArrayList<FrameItemHolder>();
 
 		tabs_main_checkbox_states = new boolean[6];
-		
+
 		Python python = (Python) Runtime.getService("python");
 		Script script = python.getScript();
 		String code = script.getCode();

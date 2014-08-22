@@ -51,19 +51,24 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 	boolean[] tabs_main_checkbox_states;
 
-	JTextArea generatedcode;
-	JList framelist;
-	JTextField frame_add_textfield;
-	JTextField frame_addsleep_textfield;
-	JTextField frame_addspeech_textfield;
+	JTextField control_gestname;
+	JTextField control_funcname;
 
-	JButton exportcode;
-	JButton testgesture;
+	JButton control_connect;
+	JButton control_load;
+	JButton control_save;
+	JButton control_add;
+	JButton control_remove;
+
+	JList control_list;
 
 	JButton frame_connect;
+	JTextField frame_add_textfield;
 	JButton frame_add;
 	JButton frame_addspeed;
+	JTextField frame_addsleep_textfield;
 	JButton frame_addsleep;
+	JTextField frame_addspeech_textfield;
 	JButton frame_addspeech;
 
 	JButton frame_importminresmax;
@@ -75,6 +80,8 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 	JButton frame_down;
 	JButton frame_test;
 	JCheckBox frame_moverealtime;
+
+	JList framelist;
 
 	public InMoovGestureCreatorGUI(final String boundServiceName,
 			final GUIService myService, final JTabbedPane tabs) {
@@ -195,10 +202,10 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		// c1-, c2-, c3-panel
 		for (int i1 = 0; i1 < 6; i1++) {
-			
+
 			Container con = null;
 			GridBagLayout gbl = null;
-			
+
 			if (i1 == 0 || i1 == 1) {
 				con = c1con;
 				gbl = c1gbl;
@@ -209,7 +216,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 				con = c3con;
 				gbl = c3gbl;
 			}
-			
+
 			int size = 0;
 
 			if (i1 == 0 || i1 == 2) {
@@ -221,7 +228,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 			} else if (i1 == 5) {
 				size = 3;
 			}
-			
+
 			int offset = 0;
 			if (i1 == 1 || i1 == 3) {
 				offset = 6;
@@ -292,61 +299,88 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 				sih11.spe = new JTextField("1.00");
 
 				// x y w h wx wy
-				gridbaglayout_addComponent(con, gbl, sih11.fin, offset+i2, 0, 1, 1,
-						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.min, offset+i2, 1, 1, 1,
-						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.res, offset+i2, 2, 1, 1,
-						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.max, offset+i2, 3, 1, 1,
-						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.sli, offset+i2, 4, 1, 1,
-						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.akt, offset+i2, 5, 1, 1,
-						1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.spe, offset+i2, 6, 1, 1,
-						1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.fin, offset + i2, 0,
+						1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.min, offset + i2, 1,
+						1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.res, offset + i2, 2,
+						1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.max, offset + i2, 3,
+						1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.sli, offset + i2, 4,
+						1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.akt, offset + i2, 5,
+						1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.spe, offset + i2, 6,
+						1, 1, 1.0, 1.0);
 
 				sih1[i2] = sih11;
 			}
 			myService.send(boundServiceName, "servoitemholder_set_sih1", i1,
 					sih1);
 		}
-		
+
 		top_tabs.addTab("Main", mainpanel);
 		top_tabs.addTab("Right Side", c1panel);
 		top_tabs.addTab("Left Side", c2panel);
 		top_tabs.addTab("Head + Torso", c3panel);
-		
+
 		top.add(BorderLayout.CENTER, top_tabs);
 
 		JPanel bottom = new JPanel();
 
 		JPanel bottom1 = new JPanel();
+		bottom1.setLayout(new BorderLayout());
 
 		JPanel bottom1top = new JPanel();
+		bottom1top.setLayout(new BoxLayout(bottom1top, BoxLayout.X_AXIS));
 
-		exportcode = new JButton("Export Code");
-		bottom1top.add(exportcode);
-		exportcode.addActionListener(this);
+		control_gestname = new JTextField("Gest. Name");
+		bottom1top.add(control_gestname);
 
-		testgesture = new JButton("Test Gesture");
-		bottom1top.add(testgesture);
-		testgesture.addActionListener(this);
+		control_funcname = new JTextField("Func. Name");
+		bottom1top.add(control_funcname);
 
 		bottom1.add(BorderLayout.NORTH, bottom1top);
 
-		generatedcode = new JTextArea(10, 20);
-		generatedcode.setLineWrap(true);
-		generatedcode.setEditable(false);
+		JPanel bottom1right = new JPanel();
+		bottom1right.setLayout(new BoxLayout(bottom1right, BoxLayout.Y_AXIS));
 
-		JScrollPane generatedcodescroller = new JScrollPane(generatedcode);
-		generatedcodescroller
+		control_connect = new JButton("Connect");
+		bottom1right.add(control_connect);
+		control_connect.addActionListener(this);
+
+		control_load = new JButton("Load");
+		bottom1right.add(control_load);
+		control_load.addActionListener(this);
+
+		control_save = new JButton("Save");
+		bottom1right.add(control_save);
+		control_save.addActionListener(this);
+
+		control_add = new JButton("Add");
+		bottom1right.add(control_add);
+		control_add.addActionListener(this);
+
+		control_remove = new JButton("Remove");
+		bottom1right.add(control_remove);
+		control_remove.addActionListener(this);
+
+		bottom1.add(BorderLayout.EAST, bottom1right);
+
+		String[] te1 = { "                                                  ",
+				"T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10" };
+
+		control_list = new JList(te1);
+		control_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		JScrollPane control_listscroller = new JScrollPane(control_list);
+		control_listscroller
 				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		generatedcodescroller
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		control_listscroller
+				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		bottom1.add(BorderLayout.CENTER, generatedcodescroller);
+		bottom1.add(BorderLayout.CENTER, control_listscroller);
 
 		JPanel bottom2 = new JPanel();
 		bottom2.setLayout(new BoxLayout(bottom2, BoxLayout.Y_AXIS));
@@ -432,11 +466,11 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		bottom2.add(BorderLayout.NORTH, bottom2top);
 
-		String[] te = {
+		String[] te2 = {
 				"                                                                                                                                                                                                        ",
 				"T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10" };
 
-		framelist = new JList(te);
+		framelist = new JList(te2);
 		framelist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JScrollPane framelistscroller = new JScrollPane(framelist);
@@ -493,11 +527,11 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		Object o = ae.getSource();
 
 		// Button - Events
-		if (o == testgesture) {
-			myService.send(boundServiceName, "testgesture");
-		} else if (o == exportcode) {
-			myService.send(boundServiceName, "exportcode", generatedcode);
-		} else if (o == frame_connect) {
+		/*
+		 * if (o == testgesture) { myService.send(boundServiceName,
+		 * "testgesture"); } else if (o == exportcode) {
+		 * myService.send(boundServiceName, "exportcode", generatedcode); } else
+		 */if (o == frame_connect) {
 			myService.send(boundServiceName, "frame_connect", frame_connect);
 		} else if (o == frame_add) {
 			myService.send(boundServiceName, "frame_add", framelist,
