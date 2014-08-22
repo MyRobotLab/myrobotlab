@@ -15,6 +15,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Python.Script;
 import org.slf4j.Logger;
 
 /**
@@ -46,6 +47,11 @@ public class InMoovGestureCreator extends Service {
 		frameitemholder = new ArrayList<FrameItemHolder>();
 
 		tabs_main_checkbox_states = new boolean[6];
+		
+		Python python = (Python) Runtime.getService("python");
+		Script script = python.getScript();
+		String code = script.getCode();
+		System.out.println(code);
 	}
 
 	@Override
