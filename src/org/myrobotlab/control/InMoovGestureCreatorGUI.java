@@ -58,11 +58,12 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 	JButton control_load;
 	JButton control_save;
 	JButton control_add;
+	JButton control_update;
 	JButton control_remove;
+	JButton control_testgest;
 
 	JList control_list;
 
-	JButton frame_connect;
 	JTextField frame_add_textfield;
 	JButton frame_add;
 	JButton frame_addspeed;
@@ -361,10 +362,18 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		control_add = new JButton("Add");
 		bottom1right.add(control_add);
 		control_add.addActionListener(this);
+		
+		control_update = new JButton("Update");
+		bottom1right.add(control_update);
+		control_update.addActionListener(this);
 
 		control_remove = new JButton("Remove");
 		bottom1right.add(control_remove);
 		control_remove.addActionListener(this);
+		
+		control_testgest = new JButton("Test Gest.");
+		bottom1right.add(control_testgest);
+		control_testgest.addActionListener(this);
 
 		bottom1.add(BorderLayout.EAST, bottom1right);
 
@@ -390,10 +399,6 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		JPanel bottom2top1 = new JPanel();
 		bottom2top1.setLayout(new BoxLayout(bottom2top1, BoxLayout.X_AXIS));
-
-		frame_connect = new JButton("Connect");
-		bottom2top1.add(frame_connect);
-		frame_connect.addActionListener(this);
 
 		frame_add_textfield = new JTextField("Frame-Name");
 		bottom2top1.add(frame_add_textfield);
@@ -527,12 +532,20 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		Object o = ae.getSource();
 
 		// Button - Events
-		/*
-		 * if (o == testgesture) { myService.send(boundServiceName,
-		 * "testgesture"); } else if (o == exportcode) {
-		 * myService.send(boundServiceName, "exportcode", generatedcode); } else
-		 */if (o == frame_connect) {
-			myService.send(boundServiceName, "frame_connect", frame_connect);
+		if (o == control_connect) {
+			myService.send(boundServiceName, "control_connect", control_connect);
+		} else if (o == control_load) {
+			myService.send(boundServiceName, "control_load");
+		} else if (o == control_save) {
+			myService.send(boundServiceName, "control_save");
+		} else if (o == control_add) {
+			myService.send(boundServiceName, "control_add");
+		} else if (o == control_update) {
+			myService.send(boundServiceName, "control_update");
+		} else if (o == control_remove) {
+			myService.send(boundServiceName, "control_remove");
+		} else if (o == control_testgest) {
+			myService.send(boundServiceName, "control_testgest");
 		} else if (o == frame_add) {
 			myService.send(boundServiceName, "frame_add", framelist,
 					frame_add_textfield);
