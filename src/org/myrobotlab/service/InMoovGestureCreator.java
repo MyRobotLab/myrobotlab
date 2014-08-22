@@ -75,7 +75,43 @@ public class InMoovGestureCreator extends Service {
 		tabs_main_checkbox_states = tabs_main_checkbox_states2;
 	}
 
-	public void testgesture() {
+	public void control_connect(JButton control_connect) {
+		// Connect / Disconnect to / from the InMoov service (button bottom-left)
+		if (control_connect.getText().equals("Connect")) {
+			i01 = (InMoov) Runtime.getService("i01");
+			control_connect.setText("Disconnect");
+		} else {
+			i01 = null;
+			control_connect.setText("Connect");
+		}
+	}
+
+	public void control_load() {
+		//Load the current Python-Script for editing (out Python-Service) (button bottom-left)
+		//TODO - add functionality
+	}
+
+	public void control_save() {
+		//Save the current Python-Script (in Python-Service) (button bottom-left)
+		//TODO - add functionality
+	}
+
+	public void control_add() {
+		//Add the current gesture to the script (button bottom-left)
+		//TODO - add functionality
+	}
+	
+	public void control_update() {
+		//Update the current gesture in the script (button bottom-left)
+		//TODO - add functionality
+	}
+
+	public void control_remove() {
+		//Remove the selected gesture from the script (button bottom-left)
+		//TODO - add functionality
+	}
+
+	public void control_testgest() {
 		// test (execute) the created gesture (button bottom-left)
 		if (i01 != null) {
 			for (FrameItemHolder fih : frameitemholder) {
@@ -145,6 +181,7 @@ public class InMoovGestureCreator extends Service {
 		}
 	}
 
+	// TODO - this is not used any longer - REUSE it!
 	public void exportcode(JTextArea generatedcode) {
 		// export the code for using it in a InMoov gesture (button bottom-left)
 		String code = "";
@@ -236,17 +273,6 @@ public class InMoovGestureCreator extends Service {
 			code = code + code1;
 		}
 		generatedcode.setText(code);
-	}
-
-	public void frame_connect(JButton frame_connect) {
-		// Connect / Disconnect to / from the InMoov service
-		if (frame_connect.getText().equals("Connect")) {
-			i01 = (InMoov) Runtime.getService("i01");
-			frame_connect.setText("Disconnect");
-		} else {
-			i01 = null;
-			frame_connect.setText("Connect");
-		}
 	}
 
 	public void frame_add(JList framelist, JTextField frame_add_textfield) {
