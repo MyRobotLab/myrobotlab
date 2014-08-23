@@ -1,0 +1,85 @@
+package org.myrobotlab.control;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.OculusRift;
+import org.myrobotlab.service.OpenCV;
+import org.myrobotlab.service.interfaces.VideoGUISource;
+import org.slf4j.Logger;
+
+public class OculusRiftGUI extends ServiceGUI implements VideoGUISource, ActionListener {
+	
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(OculusRiftGUI.class.toString());
+	
+	// Left and right eye video widgets
+	VideoWidget leftEye = null;
+	VideoWidget rightEye = null;
+	
+	public OculusRiftGUI(String boundServiceName, GUIService myService, JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public VideoWidget getLocalDisplay() {
+		// TODO : Who calls this ever?
+		return null;
+	}
+
+	@Override
+	public void init() {
+		// Create the 2 video widgets
+		String leftEyeServiceName = OculusRift.LEFT_OPEN_CV;
+		String rightEyeServiceName = OculusRift.RIGHT_OPEN_CV;
+		leftEye = new VideoWidget(leftEyeServiceName, myService, tabs, false);
+		leftEye.init();
+		
+		rightEye = new VideoWidget(rightEyeServiceName, myService, tabs, false);
+		rightEye.init();
+		
+		JPanel leftVideoPanel = new JPanel();
+		leftVideoPanel.add(leftEye.display);
+		
+		JPanel rightVideoPanel = new JPanel();
+		rightVideoPanel.add(rightEye.display);
+		
+		// the two video widgets add to display.
+		display.add(leftVideoPanel);
+		display.add(rightVideoPanel);
+		
+	}
+
+	@Override
+	public void attachGUI() {
+		// 
+		subscribe("publishState", "getState", OculusRift.class);
+		myService.send(boundServiceName, "publishState");
+		// TODO: anything else special here?
+		leftEye.attachGUI(); 
+		rightEye.attachGUI();
+
+	}
+
+	@Override
+	public void detachGUI() {
+		// 
+		unsubscribe("publishState", "getState", OpenCV.class);
+		leftEye.detachGUI();
+		rightEye.detachGUI();
+		
+	}
+
+}
