@@ -362,7 +362,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		control_add = new JButton("Add");
 		bottom1right.add(control_add);
 		control_add.addActionListener(this);
-		
+
 		control_update = new JButton("Update");
 		bottom1right.add(control_update);
 		control_update.addActionListener(this);
@@ -370,7 +370,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		control_remove = new JButton("Remove");
 		bottom1right.add(control_remove);
 		control_remove.addActionListener(this);
-		
+
 		control_testgest = new JButton("Test Gest.");
 		bottom1right.add(control_testgest);
 		control_testgest.addActionListener(this);
@@ -533,9 +533,10 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		// Button - Events
 		if (o == control_connect) {
-			myService.send(boundServiceName, "control_connect", control_connect);
+			myService
+					.send(boundServiceName, "control_connect", control_connect);
 		} else if (o == control_load) {
-			myService.send(boundServiceName, "control_load");
+			myService.send(boundServiceName, "control_load", control_list);
 		} else if (o == control_save) {
 			myService.send(boundServiceName, "control_save");
 		} else if (o == control_add) {
