@@ -1,14 +1,13 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
-import org.myrobotlab.opencv.VideoProcessor;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;
-import com.oculusvr.capi.HmdDesc;
 import com.oculusvr.capi.OvrLibrary;
 import com.oculusvr.capi.SensorState;
 
@@ -39,6 +38,11 @@ public class OculusRift extends Service {
 	// Two OpenCV services, one for the left eye, one for the right eye.
 	public OpenCV leftOpenCV;
 	public OpenCV rightOpenCV;
+	
+	public static class RiftFrame{
+		SerializableImage left;
+		SerializableImage right;	
+	}
 	
 	public OculusRift(String reservedKey) {
 		super(reservedKey);
