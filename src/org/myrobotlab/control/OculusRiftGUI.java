@@ -61,8 +61,10 @@ public class OculusRiftGUI extends ServiceGUI implements VideoGUISource, ActionL
 	}
 	
 	public void onRiftFrame(RiftFrame frame){
-		leftEye.displayFrame(frame.left);
-		rightEye.displayFrame(frame.right);
+		if (frame.left != null && frame.right != null) {
+			leftEye.displayFrame(frame.left);
+			rightEye.displayFrame(frame.right);
+		}
 	}
 
 	@Override

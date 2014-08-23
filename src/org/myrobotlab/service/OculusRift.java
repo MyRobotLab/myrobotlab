@@ -101,8 +101,11 @@ public class OculusRift extends Service {
 			
 			// create msg routes from opencv services
 			// a bit kludgy because OpenCV is old :P
-			subscribe(leftOpenCV.getName(), "publishDisplay", "onPublishDisplay", SerializableImage.class);
-			subscribe(rightOpenCV.getName(), "publishDisplay", "onPublishDisplay", SerializableImage.class);
+			//subscribe(leftOpenCV.getName(), "publishDisplay", "onPublishDisplay", SerializableImage.class);
+			//subscribe(rightOpenCV.getName(), "publishDisplay", "onPublishDisplay", SerializableImage.class);
+			subscribe(leftOpenCV.getName(), "publishDisplay", "onPublishDisplay");
+			subscribe(rightOpenCV.getName(), "publishDisplay", "onPublishDisplay");
+
 			
 			// Add some filters to rotate the images (cameras are mounted on their sides.)
 			// TODO: use 1 filter per eye for the rotations.  (might not be exactly 90degree rotation)
@@ -110,9 +113,9 @@ public class OculusRift extends Service {
 			t1.flipCode = 1;
 			OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2");
 			t2.flipCode = 1;
-			OpenCVFilterTranspose t3 = new OpenCVFilterTranspose("t3");
+			OpenCVFilterTranspose t3 = new OpenCVFilterTranspose("left");
 			t3.flipCode = 1;
-			OpenCVFilterTranspose t4 = new OpenCVFilterTranspose("t4");
+			OpenCVFilterTranspose t4 = new OpenCVFilterTranspose("right");
 			t4.flipCode = 1;
 
 			//rotate 270
