@@ -33,6 +33,7 @@ public class InMoovGestureCreator extends Service {
 
 	ServoItemHolder[][] servoitemholder;
 	ArrayList<FrameItemHolder> frameitemholder;
+	ArrayList<PythonItemHolder> pythonitemholder;
 
 	boolean[] tabs_main_checkbox_states;
 
@@ -40,18 +41,16 @@ public class InMoovGestureCreator extends Service {
 
 	InMoov i01;
 
+	String pythonscript;
+
 	public InMoovGestureCreator(String n) {
 		super(n);
 		// intializing variables
 		servoitemholder = new ServoItemHolder[6][];
 		frameitemholder = new ArrayList<FrameItemHolder>();
+		pythonitemholder = new ArrayList<PythonItemHolder>();
 
 		tabs_main_checkbox_states = new boolean[6];
-
-		Python python = (Python) Runtime.getService("python");
-		Script script = python.getScript();
-		String code = script.getCode();
-		System.out.println(code);
 	}
 
 	@Override
@@ -76,7 +75,8 @@ public class InMoovGestureCreator extends Service {
 	}
 
 	public void control_connect(JButton control_connect) {
-		// Connect / Disconnect to / from the InMoov service (button bottom-left)
+		// Connect / Disconnect to / from the InMoov service (button
+		// bottom-left)
 		if (control_connect.getText().equals("Connect")) {
 			i01 = (InMoov) Runtime.getService("i01");
 			control_connect.setText("Disconnect");
@@ -86,29 +86,161 @@ public class InMoovGestureCreator extends Service {
 		}
 	}
 
-	public void control_load() {
-		//Load the current Python-Script for editing (out Python-Service) (button bottom-left)
-		//TODO - add functionality
+	public void control_load(JList control_list) {
+		// Load the Python-Script (out Python-Service) (button bottom-left)
+		Python python = (Python) Runtime.getService("python");
+		Script script = python.getScript();
+		pythonscript = script.getCode();
+		
+		if (true) {
+			String pscript = pythonscript;
+			String[] pscriptsplit = pscript.split("\n");
+			PythonItemHolder pih = null;
+			boolean keepgoing = true;
+			int pos = 0;
+			while (keepgoing) {
+				if (pih == null) {
+					pih = new PythonItemHolder();
+				}
+				if (pos >= pscriptsplit.length) {
+					keepgoing = false;
+					break;
+				}
+				String line = pscriptsplit[pos];
+				String linewithoutspace = line.replace(" ", "");
+				if (linewithoutspace.equals("")) {
+					pos++;
+					continue;
+				}
+				if (linewithoutspace.startsWith("#")) {
+					pih.code = pih.code + "\n" + line;
+					pos++;
+					continue;
+				}
+				line = line.replace("  ", "    "); // 2 -> 4
+				line = line.replace("   ", "    "); // 3 -> 4
+				line = line.replace("     ", "    "); // 5 -> 4
+				line = line.replace("      ", "    "); // 6 -> 4
+				if (!(pih.function) && !(pih.notfunction)) {
+					if (line.startsWith("def")) {
+						pih.function = true;
+						pih.notfunction = false;
+						pih.modifyable = false;
+						pih.code = line;
+						pos++;
+					} else {
+						pih.notfunction = true;
+						pih.function = false;
+						pih.modifyable = false;
+						pih.code = line;
+						pos++;
+					}
+				} else if (pih.function && !(pih.notfunction)) {
+					if (line.startsWith("    ")) {
+						pih.code = pih.code + "\n" + line;
+						pos++;
+					} else {
+						pythonitemholder.add(pih);
+						pih = null;
+					}
+				} else if (!(pih.function) && pih.notfunction) {
+					if (!(line.startsWith("def"))) {
+						pih.code = pih.code + "\n" + line;
+						pos++;
+					} else {
+						pythonitemholder.add(pih);
+						pih = null;
+					}
+				} else {
+					// it should never end here ...
+					// .function & .notfunction true ...
+					// would be wrong ...
+				}
+			}
+			pythonitemholder.add(pih);
+		}
+		
+		if (true) {
+			ArrayList<PythonItemHolder> pythonitemholder1 = pythonitemholder;
+			pythonitemholder = new ArrayList<PythonItemHolder>();
+			for (PythonItemHolder pih : pythonitemholder1) {
+				if (pih.function && !(pih.notfunction)) {
+					String code = pih.code;
+					String[] codesplit = code.split("\n");
+					String code2 = "";
+					for (String line : codesplit) {
+						line = line.replace(" ", "");
+						if (line.startsWith("def")) {
+							line = "";
+						} else if (line.startsWith("sleep")) {
+							line = "";
+						} else if (line.startsWith("i01")) {
+							if (line.startsWith("i01.move")) {
+								if (line.startsWith("i01.moveHead")) {
+									line = "";
+								} else if (line.startsWith("i01.moveHand")) {
+									line = "";
+								} else if (line.startsWith("i01.moveArm")) {
+									line = "";
+								} else if (line.startsWith("i01.moveTorso")) {
+									line = "";
+								}
+							} else if (line.startsWith("i01.set")) {
+								if (line.startsWith("i01.setHeadSpeed")) {
+									line = "";
+								} else if (line.startsWith("i01.setHandSpeed")) {
+									line = "";
+								} else if (line.startsWith("i01.setArmSpeed")) {
+									line = "";
+								} else if (line.startsWith("i01.setTorsoSpeed")) {
+									line = "";
+								}
+							} else if (line.startsWith("i01.mouth.speak")) {
+								line = "";
+							}
+						}
+						code2 = code2 + line;
+					}
+					if (code2.length() > 0) {
+						pih.modifyable = false;
+					} else {
+						pih.modifyable = true;
+					}
+				} else if (!(pih.function) && pih.notfunction) {
+					pih.modifyable = false;
+				} else {
+					// shouldn't get here
+					// both true or both false
+					// wrong
+				}
+				pythonitemholder.add(pih);
+			}
+		}
+		controllistact(control_list);
 	}
 
 	public void control_save() {
-		//Save the current Python-Script (in Python-Service) (button bottom-left)
-		//TODO - add functionality
+		// Save the Python-Script (in Python-Service) (button bottom-left)
+		// TODO - add functionality
+		// FIXME - "save" is not working
+		Python python = (Python) Runtime.getService("python");
+		Script script = python.getScript();
+		script.setCode(pythonscript + "\nfg = 58");
 	}
 
 	public void control_add() {
-		//Add the current gesture to the script (button bottom-left)
-		//TODO - add functionality
+		// Add the current gesture to the script (button bottom-left)
+		// TODO - add functionality
 	}
-	
+
 	public void control_update() {
-		//Update the current gesture in the script (button bottom-left)
-		//TODO - add functionality
+		// Update the current gesture in the script (button bottom-left)
+		// TODO - add functionality
 	}
 
 	public void control_remove() {
-		//Remove the selected gesture from the script (button bottom-left)
-		//TODO - add functionality
+		// Remove the selected gesture from the script (button bottom-left)
+		// TODO - add functionality
 	}
 
 	public void control_testgest() {
@@ -179,6 +311,31 @@ public class InMoovGestureCreator extends Service {
 				}
 			}
 		}
+	}
+	
+	public void controllistact(JList control_list) {
+		String[] listdata = new String[pythonitemholder.size()];
+		for (int i = 0; i < pythonitemholder.size(); i++) {
+			PythonItemHolder pih = pythonitemholder.get(i);
+			
+			String pre;
+			if (!(pih.modifyable)) {
+				pre = "X    ";
+			} else {
+				pre = "     ";
+			}
+			
+			int he = 21;
+			if (pih.code.length() < he) {
+				he = pih.code.length();
+			}
+			
+			String des = pih.code.substring(0, he);
+			
+			String displaytext = pre + des;
+			listdata[i] = displaytext;
+		}
+		control_list.setListData(listdata);
 	}
 
 	// TODO - this is not used any longer - REUSE it!
@@ -1059,7 +1216,6 @@ public class InMoovGestureCreator extends Service {
 	}
 
 	public static class ServoItemHolder {
-
 		public JLabel fin;
 		public JLabel min;
 		public JLabel res;
@@ -1070,7 +1226,6 @@ public class InMoovGestureCreator extends Service {
 	}
 
 	public static class FrameItemHolder {
-
 		int rthumb, rindex, rmajeure, rringfinger, rpinky, rwrist;
 		int rbicep, rrotate, rshoulder, romoplate;
 		int lthumb, lindex, lmajeure, lringfinger, lpinky, lwrist;
@@ -1089,6 +1244,13 @@ public class InMoovGestureCreator extends Service {
 		int sleep;
 		String speech;
 		String name;
+	}
+
+	public static class PythonItemHolder {
+		String code;
+		boolean modifyable;
+		boolean function;
+		boolean notfunction;
 	}
 
 	public static void main(String[] args) throws InterruptedException {
