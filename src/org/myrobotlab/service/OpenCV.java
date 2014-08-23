@@ -96,7 +96,7 @@ public class OpenCV extends VideoSource {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCV.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(OpenCV.class);
 
 	// FIXME - make more simple
 	transient public final static String INPUT_SOURCE_CAMERA = "camera";
