@@ -61,7 +61,7 @@ public class Pingdar extends Service {
 		sensor = getSensor();
 		servo = getServo();
 		
-		sensor.addPublishRangeListener(this);
+		sensor.addRangeListener(this);
 		servo.addServoEventListener(this);
 		
 		servo.setSpeed(0.20f);
@@ -129,7 +129,9 @@ public class Pingdar extends Service {
 			return false;
 		}
 		
-		sensor.addPublishRangeListener(this);
+		// FIXME sensor.addRangeListener
+		// publishRange --> onRange
+		sensor.addRangeListener(this);
 		servo.addServoEventListener(this);
 		
 		if (!servo.attach(arduino, servoPin)){

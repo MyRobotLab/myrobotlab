@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.util.HashMap;
 
+import org.java_websocket.WebSocket;
 import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Message;
@@ -286,12 +287,23 @@ public class WebGUI extends Service {
 		return BasicSecurity.addUser(username, password);
 	}
 
-
-	public void addMsgListener(Service listener) {
-		// TODO Auto-generated method stub
-		
+	
+	public void addConnectListener(Service service) {
+		addListener("publishConnect", service.getName(), "onConnect", WebSocket.class);
 	}
 	
+	public WebSocket publishConnect(WebSocket conn){
+		return conn;
+	}
+
+	public void addDisconnectListener(Service service) {
+		addListener("publishDisconnect", service.getName(), "onDisconnect", WebSocket.class);
+	}
+	
+	public WebSocket publishDisconnect(WebSocket conn){
+		return conn;
+	}
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
@@ -316,8 +328,5 @@ public class WebGUI extends Service {
 		webgui.startService();
 
 	}
-
-
-	
 
 }
