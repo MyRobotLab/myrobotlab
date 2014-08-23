@@ -5,6 +5,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.slf4j.Logger;
 
@@ -35,6 +36,7 @@ public class OculusRift extends Service {
 	public final static Logger log = LoggerFactory.getLogger(OculusRift.class);
 	protected Hmd hmd;
 	private boolean initialized = false;
+	private RiftFrame lastRiftFrame = new RiftFrame();
 	
 	// Two OpenCV services, one for the left eye, one for the right eye.
 	transient public OpenCV leftOpenCV;
@@ -97,6 +99,11 @@ public class OculusRift extends Service {
 			leftOpenCV.setCameraIndex(0);
 			rightOpenCV.setCameraIndex(1);
 			
+			// create msg routes from opencv services
+			// a bit kludgy because OpenCV is old :P
+			subscribe(leftOpenCV.getName(), "publishDisplay", "onPublishDisplay", SerializableImage.class);
+			subscribe(rightOpenCV.getName(), "publishDisplay", "onPublishDisplay", SerializableImage.class);
+			
 			// Add some filters to rotate the images (cameras are mounted on their sides.)
 			// TODO: use 1 filter per eye for the rotations.  (might not be exactly 90degree rotation)
 			OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1");
@@ -125,11 +132,19 @@ public class OculusRift extends Service {
 		} else {
 			log.info("Rift interface already initialized.");
 		}
-		
-		
+	}
+	
+	public void onPublishDisplay(SerializableImage frame){
+		if ("left".equals(frame.getSource())){
+			lastRiftFrame.left = frame;
+		} else if ("right".equals(frame.getSource())){
+			lastRiftFrame.right = frame;
+		} else {
+			error("unknown source %s", frame.getSource());
+		}
+		invoke("publishRiftFrame", lastRiftFrame);
 	}
 
-	
 	@Override
 	public void stopService() {
 		super.stopService();
