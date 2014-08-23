@@ -3,7 +3,6 @@ package org.myrobotlab.control;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -42,12 +41,10 @@ public class OculusRiftGUI extends ServiceGUI implements VideoGUISource, ActionL
 	@Override
 	public void init() {
 		// Create the 2 video widgets
-		String leftEyeServiceName = OculusRift.LEFT_OPEN_CV;
-		String rightEyeServiceName = OculusRift.RIGHT_OPEN_CV;
-		leftEye = new VideoWidget(leftEyeServiceName, myService, tabs, false);
+		leftEye = new VideoWidget(String.format("%s."+OculusRift.LEFT_OPEN_CV, boundServiceName), myService, tabs, false);
 		leftEye.init();
 		
-		rightEye = new VideoWidget(rightEyeServiceName, myService, tabs, false);
+		rightEye = new VideoWidget(String.format("%s."+OculusRift.RIGHT_OPEN_CV, boundServiceName), myService, tabs, false);
 		rightEye.init();
 		
 		JPanel leftVideoPanel = new JPanel();
@@ -70,7 +67,6 @@ public class OculusRiftGUI extends ServiceGUI implements VideoGUISource, ActionL
 		// TODO: anything else special here?
 		leftEye.attachGUI(); 
 		rightEye.attachGUI();
-
 	}
 
 	@Override
@@ -79,7 +75,6 @@ public class OculusRiftGUI extends ServiceGUI implements VideoGUISource, ActionL
 		unsubscribe("publishState", "getState", OpenCV.class);
 		leftEye.detachGUI();
 		rightEye.detachGUI();
-		
 	}
 
 }

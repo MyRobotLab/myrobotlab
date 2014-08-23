@@ -1,14 +1,13 @@
 package org.myrobotlab.service;
 
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
-import org.myrobotlab.opencv.VideoProcessor;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;
-import com.oculusvr.capi.HmdDesc;
 import com.oculusvr.capi.OvrLibrary;
 import com.oculusvr.capi.SensorState;
 
@@ -37,8 +36,8 @@ public class OculusRift extends Service {
 	private boolean initialized = false;
 	
 	// Two OpenCV services, one for the left eye, one for the right eye.
-	public OpenCV leftOpenCV;
-	public OpenCV rightOpenCV;
+	transient public OpenCV leftOpenCV;
+	transient public OpenCV rightOpenCV;
 	
 	public OculusRift(String reservedKey) {
 		super(reservedKey);
@@ -48,6 +47,20 @@ public class OculusRift extends Service {
 	public void startService() {
 		super.startService();
 		initContext();
+	}
+	
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		peers.put("leftOpenCV", "OpenCV", "Left Eye Camera");
+		peers.put("rightOpenCV", "OpenCV", "Right Eye Camera");
+		return peers;		
+	}
+	
+	// Boradcast the state of the peers to notify the gui.
+	public void broadcastState() {
+		// notify the gui
+		leftOpenCV.broadcastState();
+		rightOpenCV.broadcastState();		
 	}
 	
 	private void initContext() {
