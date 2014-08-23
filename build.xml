@@ -3,6 +3,7 @@
 	
 	proxy
 	-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+	curl -i  -x http://webproxy:80 https://api.github.com/repos/MyRobotLab/myrobotlab/releases -H "Accept:application/vnd.github.manifold-preview+json"
 	
 	The goal is always to make the build more simple :)
 	Currently the only dependencies come with the git clone are in the build directory.
@@ -98,6 +99,8 @@
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
 
+	<!-- property name="tag" value="1.0.49" / -->
+	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
 	<property name="src" location="src" />
@@ -119,6 +122,7 @@
 	<target name="init" depends="repoDoesNotExists, repoExists">
 
 		<echo message="compiling with ${ant.java.version}" />
+		<echoproperties/>
 		<!-- FIXME add unit tests if 
 		<property name="junit.jar" location="../myrobotlab-tests/../lib" />
 		<property name="junit.src" location="../myrobotlab-tests/src" />
@@ -166,7 +170,6 @@
 		<!-- local tag git commit index <property name="tag" value="1.0.${BUILD_NUMBER}" /> -->
 
 		<!-- property name="tag" value="${DSTAMP}.${TSTAMP}" /-->
-		<echo message="tag ${tag}" />
 
 		<!-- git log -1 - -pretty=%B -->
 		<!-- FIXME - OOPS forgot about mrl pull ! only have repo !!! -->
@@ -311,6 +314,7 @@
 		<pathelement location="../repo/org.aitools.programd/4.6/programd-main.jar" />
 		<pathelement location="../repo/org.aitools.programd/4.6/programd-rhino.jar" />
 		<pathelement location="../repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar" />
+		<pathelement location="../repo/org.alicebot.ab/0.0.6.26/Ab.jar"/>
 	</path>
 
 	<!-- class path for testing FIXME - add junit normalize git -->
@@ -419,7 +423,7 @@
 	<!-- FYI - HTTP STATUS 422 - MEANS YOU ALREADY HAVE THAT RELEASE MADE !!! -->
 	<target name="createGitHubRelease" depends="init">
 		<echo message="token = ${github.token}" />
-		<http method="POST" url="https://api.github.com/repos/MyRobotLab/myrobotlab/releases" expected="201" printresponseheaders="false" printrequestheaders="false" printresponse="false" entityProperty="release.response">
+		<http method="POST" url="https://api.github.com/repos/MyRobotLab/myrobotlab/releases" expected="201" printresponseheaders="true" printrequestheaders="true" printresponse="true" entityProperty="release.response">
 			<headers>
 				<header name="Authorization" value="token ${github.token}" />
 			</headers>

@@ -78,7 +78,7 @@ public class WSServer extends WebSocketServer {
 		// default uri map
 
 		processors.put("/services", new RESTProcessor());
-		processors.put("/api/soap", new SOAPProcessor());
+//		processors.put("/api/soap", new SOAPProcessor()); SOAP is stupid
 		defaultProcessor = new ResourceProcessor(webgui);
 		processors.put("/resource", defaultProcessor);// FIXME < wrong should be
 														// root
@@ -98,6 +98,7 @@ public class WSServer extends WebSocketServer {
 		webgui.clients.put(clientkey, clientkey);
 		// this.sendToAll( "new connection: " +
 		// handshake.getResourceDescriptor() );
+		webgui.invoke("publishConnect", conn);
 	}
 
 	@Override
@@ -105,6 +106,7 @@ public class WSServer extends WebSocketServer {
 		String clientkey = String.format("%s:%d", conn.getRemoteSocketAddress().getAddress().getHostAddress(), conn.getRemoteSocketAddress().getPort());
 		webgui.clients.remove(clientkey);
 		// this.sendToAll( conn + " has left the room!" );
+		webgui.invoke("publishDisconnect", conn);
 	}
 
 	@Override

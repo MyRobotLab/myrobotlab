@@ -53,7 +53,7 @@ public class Sprinkler extends Service {
 			// send mail error !!!
 			// send xmpp error !!
 		}
-		
+		stop();
 		// FIXME - custom MRLComm.ino build to start with all digital pins = 1 HIGH
 		// for the funky stinky nature of the relay board
 		cron = (Cron)startPeer("cron");
@@ -62,6 +62,7 @@ public class Sprinkler extends Service {
 		cron.addScheduledEvent("30 7 */3 * *", this.getName(), "stop");
 		
 		webgui = (WebGUI)startPeer("webgui");
+		
 	}
 	
 	public void stop(){
