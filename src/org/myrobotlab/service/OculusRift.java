@@ -41,8 +41,8 @@ public class OculusRift extends Service {
 	transient public OpenCV rightOpenCV;
 	
 	public static class RiftFrame{
-		SerializableImage left;
-		SerializableImage right;	
+		public SerializableImage left;
+		public SerializableImage right;	
 	}
 	
 	
@@ -185,9 +185,16 @@ public class OculusRift extends Service {
   		return x;
 	}
 	
+	public void addRiftFrameListener(Service service){
+		addListener("publishRiftFrame", service.getName(), "onRiftFrame", RiftFrame.class);
+	}
+	
+	public RiftFrame publishRiftFrame(RiftFrame frame){
+		return frame;
+	}
+	
 	@Override
 	public String getDescription() {
-		// 
 		return "The Oculus Rift Head Tracking Service";
 	}
 	
