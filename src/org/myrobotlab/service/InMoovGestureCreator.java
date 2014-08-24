@@ -231,6 +231,175 @@ public class InMoovGestureCreator extends Service {
 	public void control_loadgest(JList control_list) {
 		// Load the current gesture from the script (button bottom-left)
 		// TODO - add functionality
+		int posl = control_list.getSelectedIndex();
+		
+		if (posl != -1) {
+			if (pythonitemholder.get(posl).modifyable) {
+				frameitemholder = new ArrayList<FrameItemHolder>();
+				
+				String code = pythonitemholder.get(posl).code;
+				String[] codesplit = code.split("\n");
+				FrameItemHolder fih = null;
+				boolean ismove = false;
+				boolean isspeed = false;
+				boolean keepgoing = true;
+				int pos = 0;
+				while(keepgoing) {
+					if (fih == null) {
+						fih = new FrameItemHolder();
+					}
+					if (pos >= codesplit.length) {
+						keepgoing = false;
+						break;
+					}
+					String line = codesplit[pos];
+					String linewithoutspace = line.replace(" ", "");
+					if (linewithoutspace.equals("")) {
+						pos++;
+						continue;
+					}
+					String line2 = line.replace(" ", "");
+					if (!(ismove) && !(isspeed)) {
+						if (line.startsWith("def")) {
+							//TODO - set "def-name"
+							pos++;
+						} else if (line.startsWith("sleep")) {
+							String sleeptime = line.substring(line.indexOf("("), line.lastIndexOf(")"));
+							fih.sleep = Integer.parseInt(sleeptime);
+							frameitemholder.add(fih);
+							fih = null;
+							pos++;
+						} else if (line2.startsWith("i01")) {
+							if (line2.startsWith("i01.mouth.speak")) {
+								fih.speech = line.substring(line.indexOf("("), line.lastIndexOf(")"));
+								frameitemholder.add(fih);
+								fih = null;
+								pos++;
+							} else if (line2.startsWith("i01.move")) {
+								ismove = true;
+								String good = line2.substring(line2.indexOf("("), line2.lastIndexOf(")"));
+								String[] goodsplit = good.split(",");
+								if (line2.startsWith("i01.moveHead")) {
+									fih.neck = Integer.parseInt(goodsplit[0]);
+									fih.rothead = Integer.parseInt(goodsplit[1]);
+									if (goodsplit.length > 2) {
+										fih.eyeX = Integer.parseInt(goodsplit[2]);
+										fih.eyeY = Integer.parseInt(goodsplit[3]);
+										fih.jaw = Integer.parseInt(goodsplit[4]);
+									} else {
+										fih.eyeX = 90;
+										fih.eyeY = 90;
+										fih.jaw = 90;
+									}
+								} else if (line2.startsWith("i01.moveHand")) {
+									String side = goodsplit[0];
+									if (side.equals("right")) {
+										fih.rthumb = Integer.parseInt(goodsplit[1]);
+										fih.rindex = Integer.parseInt(goodsplit[2]);
+										fih.rmajeure = Integer.parseInt(goodsplit[3]);
+										fih.rringfinger = Integer.parseInt(goodsplit[4]);
+										fih.rpinky = Integer.parseInt(goodsplit[5]);
+										if (goodsplit.length > 6) {
+											fih.rwrist = Integer.parseInt(goodsplit[6]);
+										} else {
+											fih.rwrist = 90;
+										}
+									} else if (side.equals("left")) {
+										fih.lthumb = Integer.parseInt(goodsplit[1]);
+										fih.lindex = Integer.parseInt(goodsplit[2]);
+										fih.lmajeure = Integer.parseInt(goodsplit[3]);
+										fih.lringfinger = Integer.parseInt(goodsplit[4]);
+										fih.lpinky = Integer.parseInt(goodsplit[5]);
+										fih.lwrist = Integer.parseInt(goodsplit[6]);
+									}
+								} else if (line2.startsWith("i01.moveArm")) {
+									String side = goodsplit[0];
+									if (side.equals("right")) {
+										fih.rbicep = Integer.parseInt(goodsplit[1]);
+										fih.rrotate = Integer.parseInt(goodsplit[2]);
+										fih.rshoulder = Integer.parseInt(goodsplit[3]);
+										fih.romoplate = Integer.parseInt(goodsplit[4]);
+									} else if (side.equals("left")) {
+										fih.lbicep = Integer.parseInt(goodsplit[1]);
+										fih.lrotate = Integer.parseInt(goodsplit[2]);
+										fih.lshoulder = Integer.parseInt(goodsplit[3]);
+										fih.lomoplate = Integer.parseInt(goodsplit[4]);
+									}
+								} else if (line2.startsWith("i01.moveTorso")) {
+									fih.topStom = Integer.parseInt(goodsplit[0]);
+									fih.midStom = Integer.parseInt(goodsplit[1]);
+									fih.lowStom = Integer.parseInt(goodsplit[2]);
+								}
+							} else if (line2.startsWith("i01.set")) {
+								isspeed = true;
+								String good = line2.substring(line2.indexOf("("), line2.lastIndexOf(")"));
+								String[] goodsplit = good.split(",");
+								if (line2.startsWith("i01.setHeadSpeed")) {
+									fih.neckspeed = Float.parseFloat(goodsplit[0]);
+									fih.rotheadspeed = Float.parseFloat(goodsplit[1]);
+									if (goodsplit.length > 2) {
+										fih.eyeXspeed = Float.parseFloat(goodsplit[2]);
+										fih.eyeYspeed = Float.parseFloat(goodsplit[3]);
+										fih.jawspeed = Float.parseFloat(goodsplit[4]);
+									} else {
+										fih.eyeXspeed = 1.0f;
+										fih.eyeYspeed = 1.0f;
+										fih.jawspeed = 1.0f;
+									}
+								} else if (line2.startsWith("i01.setHandSpeed")) {
+									String side = goodsplit[0];
+									if (side.equals("right")) {
+										fih.rthumbspeed = Float.parseFloat(goodsplit[1]);
+										fih.rindexspeed = Float.parseFloat(goodsplit[2]);
+										fih.rmajeurespeed = Float.parseFloat(goodsplit[3]);
+										fih.rringfingerspeed = Float.parseFloat(goodsplit[4]);
+										fih.rpinkyspeed = Float.parseFloat(goodsplit[5]);
+										if (goodsplit.length > 6) {
+											fih.rwristspeed = Float.parseFloat(goodsplit[6]);
+										} else {
+											fih.rwristspeed = 1.0f;
+										}
+									} else if (side.equals("left")) {
+										fih.lthumbspeed = Float.parseFloat(goodsplit[1]);
+										fih.lindexspeed = Float.parseFloat(goodsplit[2]);
+										fih.lmajeurespeed = Float.parseFloat(goodsplit[3]);
+										fih.lringfingerspeed = Float.parseFloat(goodsplit[4]);
+										fih.lpinkyspeed = Float.parseFloat(goodsplit[5]);
+										fih.lwristspeed = Float.parseFloat(goodsplit[6]);
+									}
+								} else if (line2.startsWith("i01.setArmSpeed")) {
+									String side = goodsplit[0];
+									if (side.equals("right")) {
+										fih.rbicepspeed = Float.parseFloat(goodsplit[1]);
+										fih.rrotatespeed = Float.parseFloat(goodsplit[2]);
+										fih.rshoulderspeed = Float.parseFloat(goodsplit[3]);
+										fih.romoplatespeed = Float.parseFloat(goodsplit[4]);
+									} else if (side.equals("left")) {
+										fih.lbicepspeed = Float.parseFloat(goodsplit[1]);
+										fih.lrotatespeed = Float.parseFloat(goodsplit[2]);
+										fih.lshoulderspeed = Float.parseFloat(goodsplit[3]);
+										fih.lomoplatespeed = Float.parseFloat(goodsplit[4]);
+									}
+								} else if (line2.startsWith("i01.setTorsoSpeed")) {
+									fih.topStomspeed = Float.parseFloat(goodsplit[0]);
+									fih.midStomspeed = Float.parseFloat(goodsplit[1]);
+									fih.lowStomspeed = Float.parseFloat(goodsplit[2]);
+								}
+							}
+						}
+					} else if (ismove && !(isspeed)) {
+						//TODO
+					} else if (!(ismove) && isspeed) {
+						//TODO
+					} else {
+						// this shouldn't be reached
+						// ismove & isspeed true
+						// wrong
+					}
+				}
+				frameitemholder.add(fih);
+			}
+		}
 	}
 
 	public void control_addgest() {
@@ -1245,7 +1414,6 @@ public class InMoovGestureCreator extends Service {
 		float lbicepspeed, lrotatespeed, lshoulderspeed, lomoplatespeed;
 		float neckspeed, rotheadspeed, eyeXspeed, eyeYspeed, jawspeed;
 		float topStomspeed, midStomspeed, lowStomspeed;
-		int speed;
 		int sleep;
 		String speech;
 		String name;
