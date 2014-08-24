@@ -55,11 +55,12 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 	JTextField control_funcname;
 
 	JButton control_connect;
-	JButton control_load;
-	JButton control_save;
-	JButton control_add;
-	JButton control_update;
-	JButton control_remove;
+	JButton control_loadscri;
+	JButton control_savescri;
+	JButton control_loadgest;
+	JButton control_addgest;
+	JButton control_updategest;
+	JButton control_removegest;
 	JButton control_testgest;
 
 	JList control_list;
@@ -351,27 +352,31 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		bottom1right.add(control_connect);
 		control_connect.addActionListener(this);
 
-		control_load = new JButton("Load");
-		bottom1right.add(control_load);
-		control_load.addActionListener(this);
+		control_loadscri = new JButton("Load Scri");
+		bottom1right.add(control_loadscri);
+		control_loadscri.addActionListener(this);
 
-		control_save = new JButton("Save");
-		bottom1right.add(control_save);
-		control_save.addActionListener(this);
+		control_savescri = new JButton("Save Scri");
+		bottom1right.add(control_savescri);
+		control_savescri.addActionListener(this);
 
-		control_add = new JButton("Add");
-		bottom1right.add(control_add);
-		control_add.addActionListener(this);
+		control_loadgest = new JButton("Load Gest");
+		bottom1right.add(control_loadgest);
+		control_loadgest.addActionListener(this);
+		
+		control_addgest = new JButton("Add Gest");
+		bottom1right.add(control_addgest);
+		control_addgest.addActionListener(this);
 
-		control_update = new JButton("Update");
-		bottom1right.add(control_update);
-		control_update.addActionListener(this);
+		control_updategest = new JButton("Update Gest");
+		bottom1right.add(control_updategest);
+		control_updategest.addActionListener(this);
 
-		control_remove = new JButton("Remove");
-		bottom1right.add(control_remove);
-		control_remove.addActionListener(this);
+		control_removegest = new JButton("Remove Gest");
+		bottom1right.add(control_removegest);
+		control_removegest.addActionListener(this);
 
-		control_testgest = new JButton("Test Gest.");
+		control_testgest = new JButton("Test Gest");
 		bottom1right.add(control_testgest);
 		control_testgest.addActionListener(this);
 
@@ -535,16 +540,18 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		if (o == control_connect) {
 			myService
 					.send(boundServiceName, "control_connect", control_connect);
-		} else if (o == control_load) {
-			myService.send(boundServiceName, "control_load", control_list);
-		} else if (o == control_save) {
-			myService.send(boundServiceName, "control_save");
-		} else if (o == control_add) {
-			myService.send(boundServiceName, "control_add");
-		} else if (o == control_update) {
-			myService.send(boundServiceName, "control_update");
-		} else if (o == control_remove) {
-			myService.send(boundServiceName, "control_remove");
+		} else if (o == control_loadscri) {
+			myService.send(boundServiceName, "control_loadscri", control_list);
+		} else if (o == control_savescri) {
+			myService.send(boundServiceName, "control_savescri");
+		} else if (o == control_loadgest) {
+			myService.send(boundServiceName, "control_loadgest", control_list);
+		} else if (o == control_addgest) {
+			myService.send(boundServiceName, "control_addgest");
+		} else if (o == control_updategest) {
+			myService.send(boundServiceName, "control_updategest");
+		} else if (o == control_removegest) {
+			myService.send(boundServiceName, "control_removegest");
 		} else if (o == control_testgest) {
 			myService.send(boundServiceName, "control_testgest");
 		} else if (o == frame_add) {
