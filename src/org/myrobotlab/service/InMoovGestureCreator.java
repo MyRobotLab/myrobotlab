@@ -86,7 +86,7 @@ public class InMoovGestureCreator extends Service {
 		}
 	}
 
-	public void control_load(JList control_list) {
+	public void control_loadscri(JList control_list) {
 		// Load the Python-Script (out Python-Service) (button bottom-left)
 		Python python = (Python) Runtime.getService("python");
 		Script script = python.getScript();
@@ -219,7 +219,7 @@ public class InMoovGestureCreator extends Service {
 		controllistact(control_list);
 	}
 
-	public void control_save() {
+	public void control_savescri() {
 		// Save the Python-Script (in Python-Service) (button bottom-left)
 		// TODO - add functionality
 		// FIXME - "save" is not working
@@ -227,18 +227,23 @@ public class InMoovGestureCreator extends Service {
 		Script script = python.getScript();
 		script.setCode(pythonscript + "\nfg = 58");
 	}
+	
+	public void control_loadgest(JList control_list) {
+		// Load the current gesture from the script (button bottom-left)
+		// TODO - add functionality
+	}
 
-	public void control_add() {
+	public void control_addgest() {
 		// Add the current gesture to the script (button bottom-left)
 		// TODO - add functionality
 	}
 
-	public void control_update() {
+	public void control_updategest() {
 		// Update the current gesture in the script (button bottom-left)
 		// TODO - add functionality
 	}
 
-	public void control_remove() {
+	public void control_removegest() {
 		// Remove the selected gesture from the script (button bottom-left)
 		// TODO - add functionality
 	}
