@@ -228,7 +228,7 @@ public class InMoovGestureCreator extends Service {
 		script.setCode(pythonscript + "\nfg = 58");
 	}
 	
-	public void control_loadgest(JList control_list) {
+	public void control_loadgest(JList control_list, JList framelist) {
 		// Load the current gesture from the script (button bottom-left)
 		// TODO - def-name and gest-name
 		int posl = control_list.getSelectedIndex();
@@ -540,6 +540,12 @@ public class InMoovGestureCreator extends Service {
 							frameitemholder.add(fih);
 							fih = null;
 							ismove = false;
+							head = false;
+							rhand = false;
+							lhand = false;
+							rarm = false;
+							larm = false;
+							torso = false;
 						}
 					} else if (!(ismove) && isspeed) {
 						if (line2.startsWith("i01.set")) {
@@ -656,6 +662,12 @@ public class InMoovGestureCreator extends Service {
 							frameitemholder.add(fih);
 							fih = null;
 							isspeed = false;
+							head = false;
+							rhand = false;
+							lhand = false;
+							rarm = false;
+							larm = false;
+							torso = false;
 						}
 					} else {
 						// this shouldn't be reached
@@ -665,6 +677,7 @@ public class InMoovGestureCreator extends Service {
 				}
 				frameitemholder.add(fih);
 			}
+			framelistact(framelist);
 		}
 	}
 
