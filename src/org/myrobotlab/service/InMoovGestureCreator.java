@@ -230,7 +230,7 @@ public class InMoovGestureCreator extends Service {
 	
 	public void control_loadgest(JList control_list) {
 		// Load the current gesture from the script (button bottom-left)
-		// TODO - add functionality
+		// TODO - def-name and gest-name
 		int posl = control_list.getSelectedIndex();
 		
 		if (posl != -1) {
@@ -242,6 +242,12 @@ public class InMoovGestureCreator extends Service {
 				FrameItemHolder fih = null;
 				boolean ismove = false;
 				boolean isspeed = false;
+				boolean head = false;
+				boolean rhand = false;
+				boolean lhand = false;
+				boolean rarm = false;
+				boolean larm = false;
+				boolean torso = false;
 				boolean keepgoing = true;
 				int pos = 0;
 				while(keepgoing) {
@@ -291,6 +297,7 @@ public class InMoovGestureCreator extends Service {
 										fih.eyeY = 90;
 										fih.jaw = 90;
 									}
+									head = true;
 									pos++;
 								} else if (line2.startsWith("i01.moveHand")) {
 									String side = goodsplit[0];
@@ -305,6 +312,8 @@ public class InMoovGestureCreator extends Service {
 										} else {
 											fih.rwrist = 90;
 										}
+										rhand = true;
+										pos++;
 									} else if (side.equals("left")) {
 										fih.lthumb = Integer.parseInt(goodsplit[1]);
 										fih.lindex = Integer.parseInt(goodsplit[2]);
@@ -316,8 +325,9 @@ public class InMoovGestureCreator extends Service {
 										} else {
 											fih.lwrist = 90;
 										}
+										lhand = true;
+										pos++;
 									}
-									pos++;
 								} else if (line2.startsWith("i01.moveArm")) {
 									String side = goodsplit[0];
 									if (side.equals("right")) {
@@ -325,17 +335,21 @@ public class InMoovGestureCreator extends Service {
 										fih.rrotate = Integer.parseInt(goodsplit[2]);
 										fih.rshoulder = Integer.parseInt(goodsplit[3]);
 										fih.romoplate = Integer.parseInt(goodsplit[4]);
+										rarm = true;
+										pos++;
 									} else if (side.equals("left")) {
 										fih.lbicep = Integer.parseInt(goodsplit[1]);
 										fih.lrotate = Integer.parseInt(goodsplit[2]);
 										fih.lshoulder = Integer.parseInt(goodsplit[3]);
 										fih.lomoplate = Integer.parseInt(goodsplit[4]);
+										larm = true;
+										pos++;
 									}
-									pos++;
 								} else if (line2.startsWith("i01.moveTorso")) {
 									fih.topStom = Integer.parseInt(goodsplit[0]);
 									fih.midStom = Integer.parseInt(goodsplit[1]);
 									fih.lowStom = Integer.parseInt(goodsplit[2]);
+									torso = true;
 									pos++;
 								}
 							} else if (line2.startsWith("i01.set")) {
@@ -354,6 +368,7 @@ public class InMoovGestureCreator extends Service {
 										fih.eyeYspeed = 1.0f;
 										fih.jawspeed = 1.0f;
 									}
+									head = true;
 									pos++;
 								} else if (line2.startsWith("i01.setHandSpeed")) {
 									String side = goodsplit[0];
@@ -368,6 +383,8 @@ public class InMoovGestureCreator extends Service {
 										} else {
 											fih.rwristspeed = 1.0f;
 										}
+										rhand = true;
+										pos++;
 									} else if (side.equals("left")) {
 										fih.lthumbspeed = Float.parseFloat(goodsplit[1]);
 										fih.lindexspeed = Float.parseFloat(goodsplit[2]);
@@ -379,8 +396,9 @@ public class InMoovGestureCreator extends Service {
 										} else {
 											fih.lwristspeed = 1.0f;
 										}
+										lhand = true;
+										pos++;
 									}
-									pos++;
 								} else if (line2.startsWith("i01.setArmSpeed")) {
 									String side = goodsplit[0];
 									if (side.equals("right")) {
@@ -388,25 +406,257 @@ public class InMoovGestureCreator extends Service {
 										fih.rrotatespeed = Float.parseFloat(goodsplit[2]);
 										fih.rshoulderspeed = Float.parseFloat(goodsplit[3]);
 										fih.romoplatespeed = Float.parseFloat(goodsplit[4]);
+										rarm = true;
+										pos++;
 									} else if (side.equals("left")) {
 										fih.lbicepspeed = Float.parseFloat(goodsplit[1]);
 										fih.lrotatespeed = Float.parseFloat(goodsplit[2]);
 										fih.lshoulderspeed = Float.parseFloat(goodsplit[3]);
 										fih.lomoplatespeed = Float.parseFloat(goodsplit[4]);
+										larm = true;
+										pos++;
 									}
-									pos++;
 								} else if (line2.startsWith("i01.setTorsoSpeed")) {
 									fih.topStomspeed = Float.parseFloat(goodsplit[0]);
 									fih.midStomspeed = Float.parseFloat(goodsplit[1]);
 									fih.lowStomspeed = Float.parseFloat(goodsplit[2]);
+									torso = true;
 									pos++;
 								}
 							}
 						}
 					} else if (ismove && !(isspeed)) {
-						//TODO
+						if (line2.startsWith("i01.move")) {
+							String good = line2.substring(line2.indexOf("("), line2.lastIndexOf(")"));
+							String[] goodsplit = good.split(",");
+							if (line2.startsWith("i01.moveHead")) {
+								fih.neck = Integer.parseInt(goodsplit[0]);
+								fih.rothead = Integer.parseInt(goodsplit[1]);
+								if (goodsplit.length > 2) {
+									fih.eyeX = Integer.parseInt(goodsplit[2]);
+									fih.eyeY = Integer.parseInt(goodsplit[3]);
+									fih.jaw = Integer.parseInt(goodsplit[4]);
+								} else {
+									fih.eyeX = 90;
+									fih.eyeY = 90;
+									fih.jaw = 90;
+								}
+								head = true;
+								pos++;
+							} else if (line2.startsWith("i01.moveHand")) {
+								String side = goodsplit[0];
+								if (side.equals("right")) {
+									fih.rthumb = Integer.parseInt(goodsplit[1]);
+									fih.rindex = Integer.parseInt(goodsplit[2]);
+									fih.rmajeure = Integer.parseInt(goodsplit[3]);
+									fih.rringfinger = Integer.parseInt(goodsplit[4]);
+									fih.rpinky = Integer.parseInt(goodsplit[5]);
+									if (goodsplit.length > 6) {
+										fih.rwrist = Integer.parseInt(goodsplit[6]);
+									} else {
+										fih.rwrist = 90;
+									}
+									rhand = true;
+									pos++;
+								} else if (side.equals("left")) {
+									fih.lthumb = Integer.parseInt(goodsplit[1]);
+									fih.lindex = Integer.parseInt(goodsplit[2]);
+									fih.lmajeure = Integer.parseInt(goodsplit[3]);
+									fih.lringfinger = Integer.parseInt(goodsplit[4]);
+									fih.lpinky = Integer.parseInt(goodsplit[5]);
+									if (goodsplit.length > 6) {
+										fih.lwrist = Integer.parseInt(goodsplit[6]);
+									} else {
+										fih.lwrist = 90;
+									}
+									lhand = true;
+									pos++;
+								}
+							} else if (line2.startsWith("i01.moveArm")) {
+								String side = goodsplit[0];
+								if (side.equals("right")) {
+									fih.rbicep = Integer.parseInt(goodsplit[1]);
+									fih.rrotate = Integer.parseInt(goodsplit[2]);
+									fih.rshoulder = Integer.parseInt(goodsplit[3]);
+									fih.romoplate = Integer.parseInt(goodsplit[4]);
+									rarm = true;
+									pos++;
+								} else if (side.equals("left")) {
+									fih.lbicep = Integer.parseInt(goodsplit[1]);
+									fih.lrotate = Integer.parseInt(goodsplit[2]);
+									fih.lshoulder = Integer.parseInt(goodsplit[3]);
+									fih.lomoplate = Integer.parseInt(goodsplit[4]);
+									larm = true;
+									pos++;
+								}
+							} else if (line2.startsWith("i01.moveTorso")) {
+								fih.topStom = Integer.parseInt(goodsplit[0]);
+								fih.midStom = Integer.parseInt(goodsplit[1]);
+								fih.lowStom = Integer.parseInt(goodsplit[2]);
+								torso = true;
+								pos++;
+							}
+						} else {
+							if (!head) {
+								fih.neck = 90;
+								fih.rothead = 90;
+								fih.eyeX = 90;
+								fih.eyeY = 90;
+								fih.jaw = 90;
+							}
+							if (!rhand) {
+								fih.rthumb = 90;
+								fih.rindex = 90;
+								fih.rmajeure = 90;
+								fih.rringfinger = 90;
+								fih.rpinky = 90;
+								fih.rwrist = 90;
+							}
+							if (!lhand) {
+								fih.lthumb = 90;
+								fih.lindex = 90;
+								fih.lmajeure = 90;
+								fih.lringfinger = 90;
+								fih.lpinky = 90;
+								fih.lwrist = 90;
+							}
+							if (!rarm) {
+								fih.rbicep = 90;
+								fih.rrotate = 90;
+								fih.rshoulder = 90;
+								fih.romoplate = 90;
+							}
+							if (!larm) {
+								fih.lbicep = 90;
+								fih.lrotate = 90;
+								fih.lshoulder = 90;
+								fih.lomoplate = 90;
+							}
+							if (!torso) {
+								fih.topStom = 90;
+								fih.midStom = 90;
+								fih.lowStom = 90;
+							}
+							frameitemholder.add(fih);
+							fih = null;
+							ismove = false;
+						}
 					} else if (!(ismove) && isspeed) {
-						//TODO
+						if (line2.startsWith("i01.set")) {
+							String good = line2.substring(line2.indexOf("("), line2.lastIndexOf(")"));
+							String[] goodsplit = good.split(",");
+							if (line2.startsWith("i01.setHeadSpeed")) {
+								fih.neckspeed = Float.parseFloat(goodsplit[0]);
+								fih.rotheadspeed = Float.parseFloat(goodsplit[1]);
+								if (goodsplit.length > 2) {
+									fih.eyeXspeed = Float.parseFloat(goodsplit[2]);
+									fih.eyeYspeed = Float.parseFloat(goodsplit[3]);
+									fih.jawspeed = Float.parseFloat(goodsplit[4]);
+								} else {
+									fih.eyeXspeed = 1.0f;
+									fih.eyeYspeed = 1.0f;
+									fih.jawspeed = 1.0f;
+								}
+								head = true;
+								pos++;
+							} else if (line2.startsWith("i01.setHandSpeed")) {
+								String side = goodsplit[0];
+								if (side.equals("right")) {
+									fih.rthumbspeed = Float.parseFloat(goodsplit[1]);
+									fih.rindexspeed = Float.parseFloat(goodsplit[2]);
+									fih.rmajeurespeed = Float.parseFloat(goodsplit[3]);
+									fih.rringfingerspeed = Float.parseFloat(goodsplit[4]);
+									fih.rpinkyspeed = Float.parseFloat(goodsplit[5]);
+									if (goodsplit.length > 6) {
+										fih.rwristspeed = Float.parseFloat(goodsplit[6]);
+									} else {
+										fih.rwristspeed = 1.0f;
+									}
+									rhand = true;
+									pos++;
+								} else if (side.equals("left")) {
+									fih.lthumbspeed = Float.parseFloat(goodsplit[1]);
+									fih.lindexspeed = Float.parseFloat(goodsplit[2]);
+									fih.lmajeurespeed = Float.parseFloat(goodsplit[3]);
+									fih.lringfingerspeed = Float.parseFloat(goodsplit[4]);
+									fih.lpinkyspeed = Float.parseFloat(goodsplit[5]);
+									if (goodsplit.length > 6) {
+										fih.lwristspeed = Float.parseFloat(goodsplit[6]);
+									} else {
+										fih.lwristspeed = 1.0f;
+									}
+									lhand = true;
+									pos++;
+								}
+							} else if (line2.startsWith("i01.setArmSpeed")) {
+								String side = goodsplit[0];
+								if (side.equals("right")) {
+									fih.rbicepspeed = Float.parseFloat(goodsplit[1]);
+									fih.rrotatespeed = Float.parseFloat(goodsplit[2]);
+									fih.rshoulderspeed = Float.parseFloat(goodsplit[3]);
+									fih.romoplatespeed = Float.parseFloat(goodsplit[4]);
+									rarm = true;
+									pos++;
+								} else if (side.equals("left")) {
+									fih.lbicepspeed = Float.parseFloat(goodsplit[1]);
+									fih.lrotatespeed = Float.parseFloat(goodsplit[2]);
+									fih.lshoulderspeed = Float.parseFloat(goodsplit[3]);
+									fih.lomoplatespeed = Float.parseFloat(goodsplit[4]);
+									larm = true;
+									pos++;
+								}
+							} else if (line2.startsWith("i01.setTorsoSpeed")) {
+								fih.topStomspeed = Float.parseFloat(goodsplit[0]);
+								fih.midStomspeed = Float.parseFloat(goodsplit[1]);
+								fih.lowStomspeed = Float.parseFloat(goodsplit[2]);
+								torso = true;
+								pos++;
+							}
+						} else {
+							if (!head) {
+								fih.neckspeed = 1.0f;
+								fih.rotheadspeed = 1.0f;
+								fih.eyeXspeed = 1.0f;
+								fih.eyeYspeed = 1.0f;
+								fih.jawspeed = 1.0f;
+							}
+							if (!rhand) {
+								fih.rthumbspeed = 1.0f;
+								fih.rindexspeed = 1.0f;
+								fih.rmajeurespeed = 1.0f;
+								fih.rringfingerspeed = 1.0f;
+								fih.rpinkyspeed = 1.0f;
+								fih.rwristspeed = 1.0f;
+							}
+							if (!lhand) {
+								fih.lthumbspeed = 1.0f;
+								fih.lindexspeed = 1.0f;
+								fih.lmajeurespeed = 1.0f;
+								fih.lringfingerspeed = 1.0f;
+								fih.lpinkyspeed = 1.0f;
+								fih.lwristspeed = 1.0f;
+							}
+							if (!rarm) {
+								fih.rbicepspeed = 1.0f;
+								fih.rrotatespeed = 1.0f;
+								fih.rshoulderspeed = 1.0f;
+								fih.romoplatespeed = 1.0f;
+							}
+							if (!larm) {
+								fih.lbicepspeed = 1.0f;
+								fih.lrotatespeed = 1.0f;
+								fih.lshoulderspeed = 1.0f;
+								fih.lomoplatespeed = 1.0f;
+							}
+							if (!torso) {
+								fih.topStomspeed = 1.0f;
+								fih.midStomspeed = 1.0f;
+								fih.lowStomspeed = 1.0f;
+							}
+							frameitemholder.add(fih);
+							fih = null;
+							isspeed = false;
+						}
 					} else {
 						// this shouldn't be reached
 						// ismove & isspeed true
