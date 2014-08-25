@@ -363,7 +363,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		control_loadgest = new JButton("Load Gest");
 		bottom1right.add(control_loadgest);
 		control_loadgest.addActionListener(this);
-		
+
 		control_addgest = new JButton("Add Gest");
 		bottom1right.add(control_addgest);
 		control_addgest.addActionListener(this);
@@ -545,7 +545,8 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		} else if (o == control_savescri) {
 			myService.send(boundServiceName, "control_savescri");
 		} else if (o == control_loadgest) {
-			myService.send(boundServiceName, "control_loadgest", control_list, framelist);
+			myService.send(boundServiceName, "control_loadgest", control_list,
+					framelist);
 		} else if (o == control_addgest) {
 			myService.send(boundServiceName, "control_addgest");
 		} else if (o == control_updategest) {

@@ -91,9 +91,9 @@ public class InMoovGestureCreator extends Service {
 		Python python = (Python) Runtime.getService("python");
 		Script script = python.getScript();
 		pythonscript = script.getCode();
-		
+
 		pythonitemholder.clear();
-		
+
 		if (true) {
 			String pscript = pythonscript;
 			String[] pscriptsplit = pscript.split("\n");
@@ -161,7 +161,7 @@ public class InMoovGestureCreator extends Service {
 			}
 			pythonitemholder.add(pih);
 		}
-		
+
 		if (true) {
 			ArrayList<PythonItemHolder> pythonitemholder1 = pythonitemholder;
 			pythonitemholder = new ArrayList<PythonItemHolder>();
@@ -229,16 +229,16 @@ public class InMoovGestureCreator extends Service {
 		Script script = python.getScript();
 		script.setCode(pythonscript + "\nfg = 58");
 	}
-	
+
 	public void control_loadgest(JList control_list, JList framelist) {
 		// Load the current gesture from the script (button bottom-left)
 		// TODO - def-name and gest-name
 		int posl = control_list.getSelectedIndex();
-		
+
 		if (posl != -1) {
 			if (pythonitemholder.get(posl).modifyable) {
 				frameitemholder.clear();
-				
+
 				String code = pythonitemholder.get(posl).code;
 				String[] codesplit = code.split("\n");
 				FrameItemHolder fih = null;
@@ -252,7 +252,7 @@ public class InMoovGestureCreator extends Service {
 				boolean torso = false;
 				boolean keepgoing = true;
 				int pos = 0;
-				while(keepgoing) {
+				while (keepgoing) {
 					if (fih == null) {
 						fih = new FrameItemHolder();
 					}
@@ -271,10 +271,12 @@ public class InMoovGestureCreator extends Service {
 					String line2 = line.replace(" ", "");
 					if (!(ismove) && !(isspeed)) {
 						if (line2.startsWith("def")) {
-							//TODO - set "def-name"
+							// TODO - set "def-name"
 							pos++;
 						} else if (line2.startsWith("sleep")) {
-							String sleeptime = line.substring(line.indexOf("(")+1, line.lastIndexOf(")"));
+							String sleeptime = line.substring(
+									line.indexOf("(") + 1,
+									line.lastIndexOf(")"));
 							fih.sleep = Integer.parseInt(sleeptime);
 							fih.speech = null;
 							fih.name = null;
@@ -284,22 +286,30 @@ public class InMoovGestureCreator extends Service {
 						} else if (line2.startsWith("i01")) {
 							if (line2.startsWith("i01.mouth.speak")) {
 								fih.sleep = -1;
-								fih.speech = line.substring(line.indexOf("(")+1, line.lastIndexOf(")"));
+								fih.speech = line.substring(
+										line.indexOf("(") + 1,
+										line.lastIndexOf(")"));
 								fih.name = null;
 								frameitemholder.add(fih);
 								fih = null;
 								pos++;
 							} else if (line2.startsWith("i01.move")) {
 								ismove = true;
-								String good = line2.substring(line2.indexOf("(")+1, line2.lastIndexOf(")"));
+								String good = line2.substring(
+										line2.indexOf("(") + 1,
+										line2.lastIndexOf(")"));
 								String[] goodsplit = good.split(",");
 								if (line2.startsWith("i01.moveHead")) {
 									fih.neck = Integer.parseInt(goodsplit[0]);
-									fih.rothead = Integer.parseInt(goodsplit[1]);
+									fih.rothead = Integer
+											.parseInt(goodsplit[1]);
 									if (goodsplit.length > 2) {
-										fih.eyeX = Integer.parseInt(goodsplit[2]);
-										fih.eyeY = Integer.parseInt(goodsplit[3]);
-										fih.jaw = Integer.parseInt(goodsplit[4]);
+										fih.eyeX = Integer
+												.parseInt(goodsplit[2]);
+										fih.eyeY = Integer
+												.parseInt(goodsplit[3]);
+										fih.jaw = Integer
+												.parseInt(goodsplit[4]);
 									} else {
 										fih.eyeX = 90;
 										fih.eyeY = 90;
@@ -309,28 +319,42 @@ public class InMoovGestureCreator extends Service {
 									pos++;
 								} else if (line2.startsWith("i01.moveHand")) {
 									String gs = goodsplit[0];
-									String side =gs.substring(gs.indexOf("\"")+1, gs.lastIndexOf("\""));
+									String side = gs.substring(
+											gs.indexOf("\"") + 1,
+											gs.lastIndexOf("\""));
 									if (side.equals("right")) {
-										fih.rthumb = Integer.parseInt(goodsplit[1]);
-										fih.rindex = Integer.parseInt(goodsplit[2]);
-										fih.rmajeure = Integer.parseInt(goodsplit[3]);
-										fih.rringfinger = Integer.parseInt(goodsplit[4]);
-										fih.rpinky = Integer.parseInt(goodsplit[5]);
+										fih.rthumb = Integer
+												.parseInt(goodsplit[1]);
+										fih.rindex = Integer
+												.parseInt(goodsplit[2]);
+										fih.rmajeure = Integer
+												.parseInt(goodsplit[3]);
+										fih.rringfinger = Integer
+												.parseInt(goodsplit[4]);
+										fih.rpinky = Integer
+												.parseInt(goodsplit[5]);
 										if (goodsplit.length > 6) {
-											fih.rwrist = Integer.parseInt(goodsplit[6]);
+											fih.rwrist = Integer
+													.parseInt(goodsplit[6]);
 										} else {
 											fih.rwrist = 90;
 										}
 										rhand = true;
 										pos++;
 									} else if (side.equals("left")) {
-										fih.lthumb = Integer.parseInt(goodsplit[1]);
-										fih.lindex = Integer.parseInt(goodsplit[2]);
-										fih.lmajeure = Integer.parseInt(goodsplit[3]);
-										fih.lringfinger = Integer.parseInt(goodsplit[4]);
-										fih.lpinky = Integer.parseInt(goodsplit[5]);
+										fih.lthumb = Integer
+												.parseInt(goodsplit[1]);
+										fih.lindex = Integer
+												.parseInt(goodsplit[2]);
+										fih.lmajeure = Integer
+												.parseInt(goodsplit[3]);
+										fih.lringfinger = Integer
+												.parseInt(goodsplit[4]);
+										fih.lpinky = Integer
+												.parseInt(goodsplit[5]);
 										if (goodsplit.length > 6) {
-											fih.lwrist = Integer.parseInt(goodsplit[6]);
+											fih.lwrist = Integer
+													.parseInt(goodsplit[6]);
 										} else {
 											fih.lwrist = 90;
 										}
@@ -339,40 +363,60 @@ public class InMoovGestureCreator extends Service {
 									}
 								} else if (line2.startsWith("i01.moveArm")) {
 									String gs = goodsplit[0];
-									String side =gs.substring(gs.indexOf("\"")+1, gs.lastIndexOf("\""));
+									String side = gs.substring(
+											gs.indexOf("\"") + 1,
+											gs.lastIndexOf("\""));
 									if (side.equals("right")) {
-										fih.rbicep = Integer.parseInt(goodsplit[1]);
-										fih.rrotate = Integer.parseInt(goodsplit[2]);
-										fih.rshoulder = Integer.parseInt(goodsplit[3]);
-										fih.romoplate = Integer.parseInt(goodsplit[4]);
+										fih.rbicep = Integer
+												.parseInt(goodsplit[1]);
+										fih.rrotate = Integer
+												.parseInt(goodsplit[2]);
+										fih.rshoulder = Integer
+												.parseInt(goodsplit[3]);
+										fih.romoplate = Integer
+												.parseInt(goodsplit[4]);
 										rarm = true;
 										pos++;
 									} else if (side.equals("left")) {
-										fih.lbicep = Integer.parseInt(goodsplit[1]);
-										fih.lrotate = Integer.parseInt(goodsplit[2]);
-										fih.lshoulder = Integer.parseInt(goodsplit[3]);
-										fih.lomoplate = Integer.parseInt(goodsplit[4]);
+										fih.lbicep = Integer
+												.parseInt(goodsplit[1]);
+										fih.lrotate = Integer
+												.parseInt(goodsplit[2]);
+										fih.lshoulder = Integer
+												.parseInt(goodsplit[3]);
+										fih.lomoplate = Integer
+												.parseInt(goodsplit[4]);
 										larm = true;
 										pos++;
 									}
 								} else if (line2.startsWith("i01.moveTorso")) {
-									fih.topStom = Integer.parseInt(goodsplit[0]);
-									fih.midStom = Integer.parseInt(goodsplit[1]);
-									fih.lowStom = Integer.parseInt(goodsplit[2]);
+									fih.topStom = Integer
+											.parseInt(goodsplit[0]);
+									fih.midStom = Integer
+											.parseInt(goodsplit[1]);
+									fih.lowStom = Integer
+											.parseInt(goodsplit[2]);
 									torso = true;
 									pos++;
 								}
 							} else if (line2.startsWith("i01.set")) {
 								isspeed = true;
-								String good = line2.substring(line2.indexOf("(")+1, line2.lastIndexOf(")"));
+								String good = line2.substring(
+										line2.indexOf("(") + 1,
+										line2.lastIndexOf(")"));
 								String[] goodsplit = good.split(",");
 								if (line2.startsWith("i01.setHeadSpeed")) {
-									fih.neckspeed = Float.parseFloat(goodsplit[0]);
-									fih.rotheadspeed = Float.parseFloat(goodsplit[1]);
+									fih.neckspeed = Float
+											.parseFloat(goodsplit[0]);
+									fih.rotheadspeed = Float
+											.parseFloat(goodsplit[1]);
 									if (goodsplit.length > 2) {
-										fih.eyeXspeed = Float.parseFloat(goodsplit[2]);
-										fih.eyeYspeed = Float.parseFloat(goodsplit[3]);
-										fih.jawspeed = Float.parseFloat(goodsplit[4]);
+										fih.eyeXspeed = Float
+												.parseFloat(goodsplit[2]);
+										fih.eyeYspeed = Float
+												.parseFloat(goodsplit[3]);
+										fih.jawspeed = Float
+												.parseFloat(goodsplit[4]);
 									} else {
 										fih.eyeXspeed = 1.0f;
 										fih.eyeYspeed = 1.0f;
@@ -382,28 +426,42 @@ public class InMoovGestureCreator extends Service {
 									pos++;
 								} else if (line2.startsWith("i01.setHandSpeed")) {
 									String gs = goodsplit[0];
-									String side =gs.substring(gs.indexOf("\"")+1, gs.lastIndexOf("\""));
+									String side = gs.substring(
+											gs.indexOf("\"") + 1,
+											gs.lastIndexOf("\""));
 									if (side.equals("right")) {
-										fih.rthumbspeed = Float.parseFloat(goodsplit[1]);
-										fih.rindexspeed = Float.parseFloat(goodsplit[2]);
-										fih.rmajeurespeed = Float.parseFloat(goodsplit[3]);
-										fih.rringfingerspeed = Float.parseFloat(goodsplit[4]);
-										fih.rpinkyspeed = Float.parseFloat(goodsplit[5]);
+										fih.rthumbspeed = Float
+												.parseFloat(goodsplit[1]);
+										fih.rindexspeed = Float
+												.parseFloat(goodsplit[2]);
+										fih.rmajeurespeed = Float
+												.parseFloat(goodsplit[3]);
+										fih.rringfingerspeed = Float
+												.parseFloat(goodsplit[4]);
+										fih.rpinkyspeed = Float
+												.parseFloat(goodsplit[5]);
 										if (goodsplit.length > 6) {
-											fih.rwristspeed = Float.parseFloat(goodsplit[6]);
+											fih.rwristspeed = Float
+													.parseFloat(goodsplit[6]);
 										} else {
 											fih.rwristspeed = 1.0f;
 										}
 										rhand = true;
 										pos++;
 									} else if (side.equals("left")) {
-										fih.lthumbspeed = Float.parseFloat(goodsplit[1]);
-										fih.lindexspeed = Float.parseFloat(goodsplit[2]);
-										fih.lmajeurespeed = Float.parseFloat(goodsplit[3]);
-										fih.lringfingerspeed = Float.parseFloat(goodsplit[4]);
-										fih.lpinkyspeed = Float.parseFloat(goodsplit[5]);
+										fih.lthumbspeed = Float
+												.parseFloat(goodsplit[1]);
+										fih.lindexspeed = Float
+												.parseFloat(goodsplit[2]);
+										fih.lmajeurespeed = Float
+												.parseFloat(goodsplit[3]);
+										fih.lringfingerspeed = Float
+												.parseFloat(goodsplit[4]);
+										fih.lpinkyspeed = Float
+												.parseFloat(goodsplit[5]);
 										if (goodsplit.length > 6) {
-											fih.lwristspeed = Float.parseFloat(goodsplit[6]);
+											fih.lwristspeed = Float
+													.parseFloat(goodsplit[6]);
 										} else {
 											fih.lwristspeed = 1.0f;
 										}
@@ -412,26 +470,40 @@ public class InMoovGestureCreator extends Service {
 									}
 								} else if (line2.startsWith("i01.setArmSpeed")) {
 									String gs = goodsplit[0];
-									String side =gs.substring(gs.indexOf("\"")+1, gs.lastIndexOf("\""));
+									String side = gs.substring(
+											gs.indexOf("\"") + 1,
+											gs.lastIndexOf("\""));
 									if (side.equals("right")) {
-										fih.rbicepspeed = Float.parseFloat(goodsplit[1]);
-										fih.rrotatespeed = Float.parseFloat(goodsplit[2]);
-										fih.rshoulderspeed = Float.parseFloat(goodsplit[3]);
-										fih.romoplatespeed = Float.parseFloat(goodsplit[4]);
+										fih.rbicepspeed = Float
+												.parseFloat(goodsplit[1]);
+										fih.rrotatespeed = Float
+												.parseFloat(goodsplit[2]);
+										fih.rshoulderspeed = Float
+												.parseFloat(goodsplit[3]);
+										fih.romoplatespeed = Float
+												.parseFloat(goodsplit[4]);
 										rarm = true;
 										pos++;
 									} else if (side.equals("left")) {
-										fih.lbicepspeed = Float.parseFloat(goodsplit[1]);
-										fih.lrotatespeed = Float.parseFloat(goodsplit[2]);
-										fih.lshoulderspeed = Float.parseFloat(goodsplit[3]);
-										fih.lomoplatespeed = Float.parseFloat(goodsplit[4]);
+										fih.lbicepspeed = Float
+												.parseFloat(goodsplit[1]);
+										fih.lrotatespeed = Float
+												.parseFloat(goodsplit[2]);
+										fih.lshoulderspeed = Float
+												.parseFloat(goodsplit[3]);
+										fih.lomoplatespeed = Float
+												.parseFloat(goodsplit[4]);
 										larm = true;
 										pos++;
 									}
-								} else if (line2.startsWith("i01.setTorsoSpeed")) {
-									fih.topStomspeed = Float.parseFloat(goodsplit[0]);
-									fih.midStomspeed = Float.parseFloat(goodsplit[1]);
-									fih.lowStomspeed = Float.parseFloat(goodsplit[2]);
+								} else if (line2
+										.startsWith("i01.setTorsoSpeed")) {
+									fih.topStomspeed = Float
+											.parseFloat(goodsplit[0]);
+									fih.midStomspeed = Float
+											.parseFloat(goodsplit[1]);
+									fih.lowStomspeed = Float
+											.parseFloat(goodsplit[2]);
 									torso = true;
 									pos++;
 								}
@@ -439,7 +511,9 @@ public class InMoovGestureCreator extends Service {
 						}
 					} else if (ismove && !(isspeed)) {
 						if (line2.startsWith("i01.move")) {
-							String good = line2.substring(line2.indexOf("(")+1, line2.lastIndexOf(")"));
+							String good = line2.substring(
+									line2.indexOf("(") + 1,
+									line2.lastIndexOf(")"));
 							String[] goodsplit = good.split(",");
 							if (line2.startsWith("i01.moveHead")) {
 								fih.neck = Integer.parseInt(goodsplit[0]);
@@ -457,15 +531,20 @@ public class InMoovGestureCreator extends Service {
 								pos++;
 							} else if (line2.startsWith("i01.moveHand")) {
 								String gs = goodsplit[0];
-								String side =gs.substring(gs.indexOf("\"")+1, gs.lastIndexOf("\""));
+								String side = gs.substring(
+										gs.indexOf("\"") + 1,
+										gs.lastIndexOf("\""));
 								if (side.equals("right")) {
 									fih.rthumb = Integer.parseInt(goodsplit[1]);
 									fih.rindex = Integer.parseInt(goodsplit[2]);
-									fih.rmajeure = Integer.parseInt(goodsplit[3]);
-									fih.rringfinger = Integer.parseInt(goodsplit[4]);
+									fih.rmajeure = Integer
+											.parseInt(goodsplit[3]);
+									fih.rringfinger = Integer
+											.parseInt(goodsplit[4]);
 									fih.rpinky = Integer.parseInt(goodsplit[5]);
 									if (goodsplit.length > 6) {
-										fih.rwrist = Integer.parseInt(goodsplit[6]);
+										fih.rwrist = Integer
+												.parseInt(goodsplit[6]);
 									} else {
 										fih.rwrist = 90;
 									}
@@ -474,11 +553,14 @@ public class InMoovGestureCreator extends Service {
 								} else if (side.equals("left")) {
 									fih.lthumb = Integer.parseInt(goodsplit[1]);
 									fih.lindex = Integer.parseInt(goodsplit[2]);
-									fih.lmajeure = Integer.parseInt(goodsplit[3]);
-									fih.lringfinger = Integer.parseInt(goodsplit[4]);
+									fih.lmajeure = Integer
+											.parseInt(goodsplit[3]);
+									fih.lringfinger = Integer
+											.parseInt(goodsplit[4]);
 									fih.lpinky = Integer.parseInt(goodsplit[5]);
 									if (goodsplit.length > 6) {
-										fih.lwrist = Integer.parseInt(goodsplit[6]);
+										fih.lwrist = Integer
+												.parseInt(goodsplit[6]);
 									} else {
 										fih.lwrist = 90;
 									}
@@ -487,19 +569,27 @@ public class InMoovGestureCreator extends Service {
 								}
 							} else if (line2.startsWith("i01.moveArm")) {
 								String gs = goodsplit[0];
-								String side =gs.substring(gs.indexOf("\"")+1, gs.lastIndexOf("\""));
+								String side = gs.substring(
+										gs.indexOf("\"") + 1,
+										gs.lastIndexOf("\""));
 								if (side.equals("right")) {
 									fih.rbicep = Integer.parseInt(goodsplit[1]);
-									fih.rrotate = Integer.parseInt(goodsplit[2]);
-									fih.rshoulder = Integer.parseInt(goodsplit[3]);
-									fih.romoplate = Integer.parseInt(goodsplit[4]);
+									fih.rrotate = Integer
+											.parseInt(goodsplit[2]);
+									fih.rshoulder = Integer
+											.parseInt(goodsplit[3]);
+									fih.romoplate = Integer
+											.parseInt(goodsplit[4]);
 									rarm = true;
 									pos++;
 								} else if (side.equals("left")) {
 									fih.lbicep = Integer.parseInt(goodsplit[1]);
-									fih.lrotate = Integer.parseInt(goodsplit[2]);
-									fih.lshoulder = Integer.parseInt(goodsplit[3]);
-									fih.lomoplate = Integer.parseInt(goodsplit[4]);
+									fih.lrotate = Integer
+											.parseInt(goodsplit[2]);
+									fih.lshoulder = Integer
+											.parseInt(goodsplit[3]);
+									fih.lomoplate = Integer
+											.parseInt(goodsplit[4]);
 									larm = true;
 									pos++;
 								}
@@ -566,15 +656,21 @@ public class InMoovGestureCreator extends Service {
 						}
 					} else if (!(ismove) && isspeed) {
 						if (line2.startsWith("i01.set")) {
-							String good = line2.substring(line2.indexOf("(")+1, line2.lastIndexOf(")"));
+							String good = line2.substring(
+									line2.indexOf("(") + 1,
+									line2.lastIndexOf(")"));
 							String[] goodsplit = good.split(",");
 							if (line2.startsWith("i01.setHeadSpeed")) {
 								fih.neckspeed = Float.parseFloat(goodsplit[0]);
-								fih.rotheadspeed = Float.parseFloat(goodsplit[1]);
+								fih.rotheadspeed = Float
+										.parseFloat(goodsplit[1]);
 								if (goodsplit.length > 2) {
-									fih.eyeXspeed = Float.parseFloat(goodsplit[2]);
-									fih.eyeYspeed = Float.parseFloat(goodsplit[3]);
-									fih.jawspeed = Float.parseFloat(goodsplit[4]);
+									fih.eyeXspeed = Float
+											.parseFloat(goodsplit[2]);
+									fih.eyeYspeed = Float
+											.parseFloat(goodsplit[3]);
+									fih.jawspeed = Float
+											.parseFloat(goodsplit[4]);
 								} else {
 									fih.eyeXspeed = 1.0f;
 									fih.eyeYspeed = 1.0f;
@@ -584,28 +680,42 @@ public class InMoovGestureCreator extends Service {
 								pos++;
 							} else if (line2.startsWith("i01.setHandSpeed")) {
 								String gs = goodsplit[0];
-								String side =gs.substring(gs.indexOf("\"")+1, gs.lastIndexOf("\""));
+								String side = gs.substring(
+										gs.indexOf("\"") + 1,
+										gs.lastIndexOf("\""));
 								if (side.equals("right")) {
-									fih.rthumbspeed = Float.parseFloat(goodsplit[1]);
-									fih.rindexspeed = Float.parseFloat(goodsplit[2]);
-									fih.rmajeurespeed = Float.parseFloat(goodsplit[3]);
-									fih.rringfingerspeed = Float.parseFloat(goodsplit[4]);
-									fih.rpinkyspeed = Float.parseFloat(goodsplit[5]);
+									fih.rthumbspeed = Float
+											.parseFloat(goodsplit[1]);
+									fih.rindexspeed = Float
+											.parseFloat(goodsplit[2]);
+									fih.rmajeurespeed = Float
+											.parseFloat(goodsplit[3]);
+									fih.rringfingerspeed = Float
+											.parseFloat(goodsplit[4]);
+									fih.rpinkyspeed = Float
+											.parseFloat(goodsplit[5]);
 									if (goodsplit.length > 6) {
-										fih.rwristspeed = Float.parseFloat(goodsplit[6]);
+										fih.rwristspeed = Float
+												.parseFloat(goodsplit[6]);
 									} else {
 										fih.rwristspeed = 1.0f;
 									}
 									rhand = true;
 									pos++;
 								} else if (side.equals("left")) {
-									fih.lthumbspeed = Float.parseFloat(goodsplit[1]);
-									fih.lindexspeed = Float.parseFloat(goodsplit[2]);
-									fih.lmajeurespeed = Float.parseFloat(goodsplit[3]);
-									fih.lringfingerspeed = Float.parseFloat(goodsplit[4]);
-									fih.lpinkyspeed = Float.parseFloat(goodsplit[5]);
+									fih.lthumbspeed = Float
+											.parseFloat(goodsplit[1]);
+									fih.lindexspeed = Float
+											.parseFloat(goodsplit[2]);
+									fih.lmajeurespeed = Float
+											.parseFloat(goodsplit[3]);
+									fih.lringfingerspeed = Float
+											.parseFloat(goodsplit[4]);
+									fih.lpinkyspeed = Float
+											.parseFloat(goodsplit[5]);
 									if (goodsplit.length > 6) {
-										fih.lwristspeed = Float.parseFloat(goodsplit[6]);
+										fih.lwristspeed = Float
+												.parseFloat(goodsplit[6]);
 									} else {
 										fih.lwristspeed = 1.0f;
 									}
@@ -614,26 +724,39 @@ public class InMoovGestureCreator extends Service {
 								}
 							} else if (line2.startsWith("i01.setArmSpeed")) {
 								String gs = goodsplit[0];
-								String side =gs.substring(gs.indexOf("\"")+1, gs.lastIndexOf("\""));
+								String side = gs.substring(
+										gs.indexOf("\"") + 1,
+										gs.lastIndexOf("\""));
 								if (side.equals("right")) {
-									fih.rbicepspeed = Float.parseFloat(goodsplit[1]);
-									fih.rrotatespeed = Float.parseFloat(goodsplit[2]);
-									fih.rshoulderspeed = Float.parseFloat(goodsplit[3]);
-									fih.romoplatespeed = Float.parseFloat(goodsplit[4]);
+									fih.rbicepspeed = Float
+											.parseFloat(goodsplit[1]);
+									fih.rrotatespeed = Float
+											.parseFloat(goodsplit[2]);
+									fih.rshoulderspeed = Float
+											.parseFloat(goodsplit[3]);
+									fih.romoplatespeed = Float
+											.parseFloat(goodsplit[4]);
 									rarm = true;
 									pos++;
 								} else if (side.equals("left")) {
-									fih.lbicepspeed = Float.parseFloat(goodsplit[1]);
-									fih.lrotatespeed = Float.parseFloat(goodsplit[2]);
-									fih.lshoulderspeed = Float.parseFloat(goodsplit[3]);
-									fih.lomoplatespeed = Float.parseFloat(goodsplit[4]);
+									fih.lbicepspeed = Float
+											.parseFloat(goodsplit[1]);
+									fih.lrotatespeed = Float
+											.parseFloat(goodsplit[2]);
+									fih.lshoulderspeed = Float
+											.parseFloat(goodsplit[3]);
+									fih.lomoplatespeed = Float
+											.parseFloat(goodsplit[4]);
 									larm = true;
 									pos++;
 								}
 							} else if (line2.startsWith("i01.setTorsoSpeed")) {
-								fih.topStomspeed = Float.parseFloat(goodsplit[0]);
-								fih.midStomspeed = Float.parseFloat(goodsplit[1]);
-								fih.lowStomspeed = Float.parseFloat(goodsplit[2]);
+								fih.topStomspeed = Float
+										.parseFloat(goodsplit[0]);
+								fih.midStomspeed = Float
+										.parseFloat(goodsplit[1]);
+								fih.lowStomspeed = Float
+										.parseFloat(goodsplit[2]);
 								torso = true;
 								pos++;
 							}
@@ -786,26 +909,26 @@ public class InMoovGestureCreator extends Service {
 			}
 		}
 	}
-	
+
 	public void controllistact(JList control_list) {
 		String[] listdata = new String[pythonitemholder.size()];
 		for (int i = 0; i < pythonitemholder.size(); i++) {
 			PythonItemHolder pih = pythonitemholder.get(i);
-			
+
 			String pre;
 			if (!(pih.modifyable)) {
 				pre = "X    ";
 			} else {
 				pre = "     ";
 			}
-			
+
 			int he = 21;
 			if (pih.code.length() < he) {
 				he = pih.code.length();
 			}
-			
+
 			String des = pih.code.substring(0, he);
-			
+
 			String displaytext = pre + des;
 			listdata[i] = displaytext;
 		}
