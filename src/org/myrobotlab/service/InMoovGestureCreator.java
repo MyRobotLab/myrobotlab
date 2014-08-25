@@ -256,11 +256,13 @@ public class InMoovGestureCreator extends Service {
 					if (fih == null) {
 						fih = new FrameItemHolder();
 					}
-					if (pos >= codesplit.length) {
+					String line;
+					if (pos < codesplit.length) {
+						line = codesplit[pos];
+					} else {
+						line = "pweicmfh - only one run";
 						keepgoing = false;
-						break;
 					}
-					String line = codesplit[pos];
 					String linewithoutspace = line.replace(" ", "");
 					if (linewithoutspace.equals("")) {
 						pos++;
@@ -695,7 +697,6 @@ public class InMoovGestureCreator extends Service {
 						// wrong
 					}
 				}
-				frameitemholder.add(fih);
 			}
 			framelistact(framelist);
 		}
