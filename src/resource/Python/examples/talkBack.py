@@ -38,8 +38,8 @@ ear.addListener("recognized", python.getName(), "heard");
 # this method is invoked when something is 
 # recognized by the ear - in this case we
 # have the mouth "talk back" the word it recognized
-def heard():
-      data = msg_ear_recognized.data[0]
+def heard(data):
+      # data = msg_ear_recognized.data[0]
       mouth.speak("you said " + data)
       print "heard ", data
       if (data == "forward"):
