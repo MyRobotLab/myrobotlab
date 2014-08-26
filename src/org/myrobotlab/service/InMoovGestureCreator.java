@@ -230,7 +230,7 @@ public class InMoovGestureCreator extends Service {
 		script.setCode(pythonscript + "\nfg = 58");
 	}
 
-	public void control_loadgest(JList control_list, JList framelist) {
+	public void control_loadgest(JList control_list, JList framelist, JTextField control_gestname, JTextField control_funcname) {
 		// Load the current gesture from the script (button bottom-left)
 		// TODO - def-name and gest-name
 		int posl = control_list.getSelectedIndex();
@@ -239,6 +239,8 @@ public class InMoovGestureCreator extends Service {
 			if (pythonitemholder.get(posl).modifyable) {
 				frameitemholder.clear();
 
+				String defname = null;
+				
 				String code = pythonitemholder.get(posl).code;
 				String[] codesplit = code.split("\n");
 				FrameItemHolder fih = null;
@@ -271,7 +273,8 @@ public class InMoovGestureCreator extends Service {
 					String line2 = line.replace(" ", "");
 					if (!(ismove) && !(isspeed)) {
 						if (line2.startsWith("def")) {
-							// TODO - set "def-name"
+							String defn = line.substring(line.indexOf(" ")+1, line.lastIndexOf("():"));
+							defname = defn;
 							pos++;
 						} else if (line2.startsWith("sleep")) {
 							String sleeptime = line.substring(
@@ -820,8 +823,24 @@ public class InMoovGestureCreator extends Service {
 						// wrong
 					}
 				}
+				
+				framelistact(framelist);
+				
+				int defnamepos = pythonscript.indexOf(defname);
+				int earpos1 = pythonscript.lastIndexOf("\n", defnamepos);
+				int earpos2 = pythonscript.indexOf("\n", defnamepos);
+				String earline = pythonscript.substring(earpos1+1, earpos2);
+				if (earline.startsWith("ear.addCommand")) {
+					String good = earline.substring(earline.indexOf("("), earline.lastIndexOf(")"));
+					String[] goodsplit = good.split(",");
+					
+					String funcnamedirty = goodsplit[0];
+					String funcname = funcnamedirty.substring(funcnamedirty.indexOf("\"")+1, funcnamedirty.lastIndexOf("\""));
+					
+					control_gestname.setText(funcname);
+					control_funcname.setText(defname);
+				}
 			}
-			framelistact(framelist);
 		}
 	}
 
