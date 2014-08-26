@@ -546,7 +546,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 			myService.send(boundServiceName, "control_savescri");
 		} else if (o == control_loadgest) {
 			myService.send(boundServiceName, "control_loadgest", control_list,
-					framelist);
+					framelist, control_gestname, control_funcname);
 		} else if (o == control_addgest) {
 			myService.send(boundServiceName, "control_addgest");
 		} else if (o == control_updategest) {
