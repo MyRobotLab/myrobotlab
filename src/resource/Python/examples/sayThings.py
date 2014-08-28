@@ -16,9 +16,9 @@ from org.myrobotlab.service import Runtime
 # immediately
 
 # Create a running instance of the Speech Service.
-# Name it "speech".
-speech = Runtime.create("speech","Speech")
-speech.startService()
+# Name it "speech". And start it right away.
+speech = Runtime.createAndStart("speech","Speech")
+
 
 # Speak with initial defaults - Google en
 speech.speak("hello brave new world")
