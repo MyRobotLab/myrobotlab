@@ -92,133 +92,7 @@ public class InMoovGestureCreator extends Service {
 		Script script = python.getScript();
 		pythonscript = script.getCode();
 
-		pythonitemholder.clear();
-
-		if (true) {
-			String pscript = pythonscript;
-			String[] pscriptsplit = pscript.split("\n");
-			PythonItemHolder pih = null;
-			boolean keepgoing = true;
-			int pos = 0;
-			while (keepgoing) {
-				if (pih == null) {
-					pih = new PythonItemHolder();
-				}
-				if (pos >= pscriptsplit.length) {
-					keepgoing = false;
-					break;
-				}
-				String line = pscriptsplit[pos];
-				String linewithoutspace = line.replace(" ", "");
-				if (linewithoutspace.equals("")) {
-					pos++;
-					continue;
-				}
-				if (linewithoutspace.startsWith("#")) {
-					pih.code = pih.code + "\n" + line;
-					pos++;
-					continue;
-				}
-				line = line.replace("  ", "    "); // 2 -> 4
-				line = line.replace("   ", "    "); // 3 -> 4
-				line = line.replace("     ", "    "); // 5 -> 4
-				line = line.replace("      ", "    "); // 6 -> 4
-				if (!(pih.function) && !(pih.notfunction)) {
-					if (line.startsWith("def")) {
-						pih.function = true;
-						pih.notfunction = false;
-						pih.modifyable = false;
-						pih.code = line;
-						pos++;
-					} else {
-						pih.notfunction = true;
-						pih.function = false;
-						pih.modifyable = false;
-						pih.code = line;
-						pos++;
-					}
-				} else if (pih.function && !(pih.notfunction)) {
-					if (line.startsWith("    ")) {
-						pih.code = pih.code + "\n" + line;
-						pos++;
-					} else {
-						pythonitemholder.add(pih);
-						pih = null;
-					}
-				} else if (!(pih.function) && pih.notfunction) {
-					if (!(line.startsWith("def"))) {
-						pih.code = pih.code + "\n" + line;
-						pos++;
-					} else {
-						pythonitemholder.add(pih);
-						pih = null;
-					}
-				} else {
-					// it should never end here ...
-					// .function & .notfunction true ...
-					// would be wrong ...
-				}
-			}
-			pythonitemholder.add(pih);
-		}
-
-		if (true) {
-			ArrayList<PythonItemHolder> pythonitemholder1 = pythonitemholder;
-			pythonitemholder = new ArrayList<PythonItemHolder>();
-			for (PythonItemHolder pih : pythonitemholder1) {
-				if (pih.function && !(pih.notfunction)) {
-					String code = pih.code;
-					String[] codesplit = code.split("\n");
-					String code2 = "";
-					for (String line : codesplit) {
-						line = line.replace(" ", "");
-						if (line.startsWith("def")) {
-							line = "";
-						} else if (line.startsWith("sleep")) {
-							line = "";
-						} else if (line.startsWith("i01")) {
-							if (line.startsWith("i01.move")) {
-								if (line.startsWith("i01.moveHead")) {
-									line = "";
-								} else if (line.startsWith("i01.moveHand")) {
-									line = "";
-								} else if (line.startsWith("i01.moveArm")) {
-									line = "";
-								} else if (line.startsWith("i01.moveTorso")) {
-									line = "";
-								}
-							} else if (line.startsWith("i01.set")) {
-								if (line.startsWith("i01.setHeadSpeed")) {
-									line = "";
-								} else if (line.startsWith("i01.setHandSpeed")) {
-									line = "";
-								} else if (line.startsWith("i01.setArmSpeed")) {
-									line = "";
-								} else if (line.startsWith("i01.setTorsoSpeed")) {
-									line = "";
-								}
-							} else if (line.startsWith("i01.mouth.speak")) {
-								line = "";
-							}
-						}
-						code2 = code2 + line;
-					}
-					if (code2.length() > 0) {
-						pih.modifyable = false;
-					} else {
-						pih.modifyable = true;
-					}
-				} else if (!(pih.function) && pih.notfunction) {
-					pih.modifyable = false;
-				} else {
-					// shouldn't get here
-					// both true or both false
-					// wrong
-				}
-				pythonitemholder.add(pih);
-			}
-		}
-		controllistact(control_list);
+		parsescript(control_list);
 	}
 
 	public void control_savescri() {
@@ -232,7 +106,6 @@ public class InMoovGestureCreator extends Service {
 
 	public void control_loadgest(JList control_list, JList framelist, JTextField control_gestname, JTextField control_funcname) {
 		// Load the current gesture from the script (button bottom-left)
-		// TODO - def-name and gest-name
 		int posl = control_list.getSelectedIndex();
 
 		if (posl != -1) {
@@ -844,9 +717,109 @@ public class InMoovGestureCreator extends Service {
 		}
 	}
 
-	public void control_addgest() {
+	public void control_addgest(JList control_list, JTextField control_gestname, JTextField control_funcname) {
 		// Add the current gesture to the script (button bottom-left)
-		// TODO - add functionality
+		String defname = control_funcname.getText();
+		String gestname = control_gestname.getText();
+		
+		String code = "";
+		for (FrameItemHolder fih : frameitemholder) {
+			String code1;
+			if (fih.sleep != -1) {
+				code1 = "    sleep(" + fih.sleep + ")\n";
+			} else if (fih.speech != null) {
+				code1 = "    i01.mouth.speakBlocking(\"" + fih.speech + "\")\n";
+			} else if (fih.name != null) {
+				String code11 = "";
+				String code12 = "";
+				String code13 = "";
+				String code14 = "";
+				String code15 = "";
+				String code16 = "";
+				if (tabs_main_checkbox_states[0]) {
+					code11 = "    i01.moveHead(" + fih.neck + "," + fih.rothead
+							+ "," + fih.eyeX + "," + fih.eyeY + "," + fih.jaw
+							+ ")\n";
+				}
+				if (tabs_main_checkbox_states[1]) {
+					code12 = "    i01.moveArm(\"left\"," + fih.lbicep + ","
+							+ fih.lrotate + "," + fih.lshoulder + ","
+							+ fih.lomoplate + ")\n";
+				}
+				if (tabs_main_checkbox_states[2]) {
+					code13 = "    i01.moveArm(\"right\"," + fih.rbicep + ","
+							+ fih.rrotate + "," + fih.rshoulder + ","
+							+ fih.romoplate + ")\n";
+				}
+				if (tabs_main_checkbox_states[3]) {
+					code14 = "    i01.moveHand(\"left\"," + fih.lthumb + ","
+							+ fih.lindex + "," + fih.lmajeure + ","
+							+ fih.lringfinger + "," + fih.lpinky + ","
+							+ fih.lwrist + ")\n";
+				}
+				if (tabs_main_checkbox_states[4]) {
+					code15 = "    i01.moveHand(\"right\"," + fih.rthumb + ","
+							+ fih.rindex + "," + fih.rmajeure + ","
+							+ fih.rringfinger + "," + fih.rpinky + ","
+							+ fih.rwrist + ")\n";
+				}
+				if (tabs_main_checkbox_states[5]) {
+					code16 = "    i01.moveTorso(" + fih.topStom + "," + fih.midStom
+							+ "," + fih.lowStom + ")\n";
+				}
+				code1 = code11 + code12 + code13 + code14 + code15 + code16;
+			} else {
+				String code11 = "";
+				String code12 = "";
+				String code13 = "";
+				String code14 = "";
+				String code15 = "";
+				String code16 = "";
+				if (tabs_main_checkbox_states[0]) {
+					code11 = "    i01.setHeadSpeed(" + fih.neckspeed + ","
+							+ fih.rotheadspeed + "," + fih.eyeXspeed + ","
+							+ fih.eyeYspeed + "," + fih.jawspeed + ")\n";
+				}
+				if (tabs_main_checkbox_states[1]) {
+					code12 = "    i01.setArmSpeed(\"left\"," + fih.lbicepspeed
+							+ "," + fih.lrotatespeed + "," + fih.lshoulderspeed
+							+ "," + fih.lomoplatespeed + ")\n";
+				}
+				if (tabs_main_checkbox_states[2]) {
+					code13 = "    i01.setArmSpeed(\"right\"," + fih.rbicepspeed
+							+ "," + fih.rrotatespeed + "," + fih.rshoulderspeed
+							+ "," + fih.romoplatespeed + ")\n";
+				}
+				if (tabs_main_checkbox_states[3]) {
+					code14 = "    i01.setHandSpeed(\"left\"," + fih.lthumbspeed
+							+ "," + fih.lindexspeed + "," + fih.lmajeurespeed
+							+ "," + fih.lringfingerspeed + ","
+							+ fih.lpinkyspeed + "," + fih.lwristspeed + ")\n";
+				}
+				if (tabs_main_checkbox_states[4]) {
+					code15 = "    i01.setHandSpeed(\"right\"," + fih.rthumbspeed
+							+ "," + fih.rindexspeed + "," + fih.rmajeurespeed
+							+ "," + fih.rringfingerspeed + ","
+							+ fih.rpinkyspeed + "," + fih.rwristspeed + ")\n";
+				}
+				if (tabs_main_checkbox_states[5]) {
+					code16 = "    i01.setTorsoSpeed(" + fih.topStomspeed + ","
+							+ fih.midStomspeed + "," + fih.lowStomspeed + ")\n";
+				}
+				code1 = code11 + code12 + code13 + code14 + code15 + code16;
+			}
+			code = code + code1;
+		}
+		String finalcode = "def " + defname + "():\n" + code;
+		
+		String insert = "ear.addCommand(\"" + gestname + "\", \"python\", \"" + defname + "\")";
+		int posear = pythonscript.lastIndexOf("ear.addCommand");
+		int pos = pythonscript.indexOf("\n", posear);
+		pythonscript = pythonscript.substring(0, pos) + "\n" + insert + pythonscript.substring(pos, pythonscript.length());
+		
+		pythonscript = pythonscript + "\n" + finalcode;
+		
+		parsescript(control_list);
 	}
 
 	public void control_updategest() {
@@ -952,100 +925,6 @@ public class InMoovGestureCreator extends Service {
 			listdata[i] = displaytext;
 		}
 		control_list.setListData(listdata);
-	}
-
-	// TODO - this is not used any longer - REUSE it!
-	public void exportcode(JTextArea generatedcode) {
-		// export the code for using it in a InMoov gesture (button bottom-left)
-		String code = "";
-		for (FrameItemHolder fih : frameitemholder) {
-			String code1;
-			if (fih.sleep != -1) {
-				code1 = "sleep(" + fih.sleep + ")\n";
-			} else if (fih.speech != null) {
-				code1 = "i01.mouth.speakBlocking(\"" + fih.speech + "\")\n";
-			} else if (fih.name != null) {
-				String code11 = "";
-				String code12 = "";
-				String code13 = "";
-				String code14 = "";
-				String code15 = "";
-				String code16 = "";
-				if (tabs_main_checkbox_states[0]) {
-					code11 = "i01.moveHead(" + fih.neck + "," + fih.rothead
-							+ "," + fih.eyeX + "," + fih.eyeY + "," + fih.jaw
-							+ ")\n";
-				}
-				if (tabs_main_checkbox_states[1]) {
-					code12 = "i01.moveArm(\"left\"," + fih.lbicep + ","
-							+ fih.lrotate + "," + fih.lshoulder + ","
-							+ fih.lomoplate + ")\n";
-				}
-				if (tabs_main_checkbox_states[2]) {
-					code13 = "i01.moveArm(\"right\"," + fih.rbicep + ","
-							+ fih.rrotate + "," + fih.rshoulder + ","
-							+ fih.romoplate + ")\n";
-				}
-				if (tabs_main_checkbox_states[3]) {
-					code14 = "i01.moveHand(\"left\"," + fih.lthumb + ","
-							+ fih.lindex + "," + fih.lmajeure + ","
-							+ fih.lringfinger + "," + fih.lpinky + ","
-							+ fih.lwrist + ")\n";
-				}
-				if (tabs_main_checkbox_states[4]) {
-					code15 = "i01.moveHand(\"right\"," + fih.rthumb + ","
-							+ fih.rindex + "," + fih.rmajeure + ","
-							+ fih.rringfinger + "," + fih.rpinky + ","
-							+ fih.rwrist + ")\n";
-				}
-				if (tabs_main_checkbox_states[5]) {
-					code16 = "i01.moveTorso(" + fih.topStom + "," + fih.midStom
-							+ "," + fih.lowStom + ")\n";
-				}
-				code1 = code11 + code12 + code13 + code14 + code15 + code16;
-			} else {
-				String code11 = "";
-				String code12 = "";
-				String code13 = "";
-				String code14 = "";
-				String code15 = "";
-				String code16 = "";
-				if (tabs_main_checkbox_states[0]) {
-					code11 = "i01.setHeadSpeed(" + fih.neckspeed + ","
-							+ fih.rotheadspeed + "," + fih.eyeXspeed + ","
-							+ fih.eyeYspeed + "," + fih.jawspeed + ")\n";
-				}
-				if (tabs_main_checkbox_states[1]) {
-					code12 = "i01.setArmSpeed(\"left\"," + fih.lbicepspeed
-							+ "," + fih.lrotatespeed + "," + fih.lshoulderspeed
-							+ "," + fih.lomoplatespeed + ")\n";
-				}
-				if (tabs_main_checkbox_states[2]) {
-					code13 = "i01.setArmSpeed(\"right\"," + fih.rbicepspeed
-							+ "," + fih.rrotatespeed + "," + fih.rshoulderspeed
-							+ "," + fih.romoplatespeed + ")\n";
-				}
-				if (tabs_main_checkbox_states[3]) {
-					code14 = "i01.setHandSpeed(\"left\"," + fih.lthumbspeed
-							+ "," + fih.lindexspeed + "," + fih.lmajeurespeed
-							+ "," + fih.lringfingerspeed + ","
-							+ fih.lpinkyspeed + "," + fih.lwristspeed + ")\n";
-				}
-				if (tabs_main_checkbox_states[4]) {
-					code15 = "i01.setHandSpeed(\"right\"," + fih.rthumbspeed
-							+ "," + fih.rindexspeed + "," + fih.rmajeurespeed
-							+ "," + fih.rringfingerspeed + ","
-							+ fih.rpinkyspeed + "," + fih.rwristspeed + ")\n";
-				}
-				if (tabs_main_checkbox_states[5]) {
-					code16 = "i01.setTorsoSpeed(" + fih.topStomspeed + ","
-							+ fih.midStomspeed + "," + fih.lowStomspeed + ")\n";
-				}
-				code1 = code11 + code12 + code13 + code14 + code15 + code16;
-			}
-			code = code + code1;
-		}
-		generatedcode.setText(code);
 	}
 
 	public void frame_add(JList framelist, JTextField frame_add_textfield) {
@@ -1829,6 +1708,136 @@ public class InMoovGestureCreator extends Service {
 	public void servoitemholder_set_sih1(int i1, ServoItemHolder[] sih1) {
 		// Setting references
 		servoitemholder[i1] = sih1;
+	}
+	
+	public void parsescript(JList control_list) {
+		pythonitemholder.clear();
+
+		if (true) {
+			String pscript = pythonscript;
+			String[] pscriptsplit = pscript.split("\n");
+			PythonItemHolder pih = null;
+			boolean keepgoing = true;
+			int pos = 0;
+			while (keepgoing) {
+				if (pih == null) {
+					pih = new PythonItemHolder();
+				}
+				if (pos >= pscriptsplit.length) {
+					keepgoing = false;
+					break;
+				}
+				String line = pscriptsplit[pos];
+				String linewithoutspace = line.replace(" ", "");
+				if (linewithoutspace.equals("")) {
+					pos++;
+					continue;
+				}
+				if (linewithoutspace.startsWith("#")) {
+					pih.code = pih.code + "\n" + line;
+					pos++;
+					continue;
+				}
+				line = line.replace("  ", "    "); // 2 -> 4
+				line = line.replace("   ", "    "); // 3 -> 4
+				line = line.replace("     ", "    "); // 5 -> 4
+				line = line.replace("      ", "    "); // 6 -> 4
+				if (!(pih.function) && !(pih.notfunction)) {
+					if (line.startsWith("def")) {
+						pih.function = true;
+						pih.notfunction = false;
+						pih.modifyable = false;
+						pih.code = line;
+						pos++;
+					} else {
+						pih.notfunction = true;
+						pih.function = false;
+						pih.modifyable = false;
+						pih.code = line;
+						pos++;
+					}
+				} else if (pih.function && !(pih.notfunction)) {
+					if (line.startsWith("    ")) {
+						pih.code = pih.code + "\n" + line;
+						pos++;
+					} else {
+						pythonitemholder.add(pih);
+						pih = null;
+					}
+				} else if (!(pih.function) && pih.notfunction) {
+					if (!(line.startsWith("def"))) {
+						pih.code = pih.code + "\n" + line;
+						pos++;
+					} else {
+						pythonitemholder.add(pih);
+						pih = null;
+					}
+				} else {
+					// it should never end here ...
+					// .function & .notfunction true ...
+					// would be wrong ...
+				}
+			}
+			pythonitemholder.add(pih);
+		}
+
+		if (true) {
+			ArrayList<PythonItemHolder> pythonitemholder1 = pythonitemholder;
+			pythonitemholder = new ArrayList<PythonItemHolder>();
+			for (PythonItemHolder pih : pythonitemholder1) {
+				if (pih.function && !(pih.notfunction)) {
+					String code = pih.code;
+					String[] codesplit = code.split("\n");
+					String code2 = "";
+					for (String line : codesplit) {
+						line = line.replace(" ", "");
+						if (line.startsWith("def")) {
+							line = "";
+						} else if (line.startsWith("sleep")) {
+							line = "";
+						} else if (line.startsWith("i01")) {
+							if (line.startsWith("i01.move")) {
+								if (line.startsWith("i01.moveHead")) {
+									line = "";
+								} else if (line.startsWith("i01.moveHand")) {
+									line = "";
+								} else if (line.startsWith("i01.moveArm")) {
+									line = "";
+								} else if (line.startsWith("i01.moveTorso")) {
+									line = "";
+								}
+							} else if (line.startsWith("i01.set")) {
+								if (line.startsWith("i01.setHeadSpeed")) {
+									line = "";
+								} else if (line.startsWith("i01.setHandSpeed")) {
+									line = "";
+								} else if (line.startsWith("i01.setArmSpeed")) {
+									line = "";
+								} else if (line.startsWith("i01.setTorsoSpeed")) {
+									line = "";
+								}
+							} else if (line.startsWith("i01.mouth.speak")) {
+								line = "";
+							}
+						}
+						code2 = code2 + line;
+					}
+					if (code2.length() > 0) {
+						pih.modifyable = false;
+					} else {
+						pih.modifyable = true;
+					}
+				} else if (!(pih.function) && pih.notfunction) {
+					pih.modifyable = false;
+				} else {
+					// shouldn't get here
+					// both true or both false
+					// wrong
+				}
+				pythonitemholder.add(pih);
+			}
+		}
+		controllistact(control_list);
 	}
 
 	public static class ServoItemHolder {
