@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 // http://juliusdavies.ca/commons-ssl/ssl.html
 // http://stackoverflow.com/questions/4319496/how-to-encrypt-and-decrypt-data-in-java
 
+// controlling export is "nice" but its control messages are the most important to mediate
+
 public class Security extends Service implements AuthorizationProvider {
 
 	private static final long serialVersionUID = 1L;

@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.java_websocket.WebSocket;
 import org.myrobotlab.fileLib.Zip;
@@ -13,14 +14,16 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.security.BasicSecurity;
+import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.webgui.WSServer;
+import org.myrobotlab.webgui.WSServer.WSMsg;
 import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class WebGUI extends Service {
+public class WebGUI extends Service implements AuthorizationProvider {
 
 	// import javax.xml.transform.Transformer;
 
@@ -75,7 +78,7 @@ public class WebGUI extends Service {
 	}
 
 	public HashMap<String, String> clients = new HashMap<String, String>();
-
+	
 	public WebGUI(String n) {
 		super(n);
 		// first message web browser client is getRegistry
@@ -295,6 +298,14 @@ public class WebGUI extends Service {
 	public WebSocket publishConnect(WebSocket conn){
 		return conn;
 	}
+	
+	public void addWSMsgListener(Service service){
+		addListener("publishWSMsg", service.getName(), "onWSMsg", WSMsg.class);
+	}
+	
+	public WSMsg publishWSMsg(WSMsg wsmsg){
+		return wsmsg;
+	}
 
 	public void addDisconnectListener(Service service) {
 		addListener("publishDisconnect", service.getName(), "onDisconnect", WebSocket.class);
@@ -302,6 +313,11 @@ public class WebGUI extends Service {
 	
 	public WebSocket publishDisconnect(WebSocket conn){
 		return conn;
+	}
+	
+	public boolean allowDirectMessaging(boolean b){
+		wss.allowDirectMessaging(b);
+		return b;
 	}
 
 	public static void main(String[] args) {
@@ -328,5 +344,63 @@ public class WebGUI extends Service {
 		webgui.startService();
 
 	}
+	
+	// ============== security begin =========================
+		// FIXME - this will have to be keyed by the service name
+		// if the global datastructures are to be in Security
+	
+		// specifically for a gateway 
+		// this interface should be incorporated into Security Service
+	
+		// interesting - regular expresion matching .. its a combined key ! 
+		// Service.method or perhaps sender.Service.method ?
+		
+		private HashSet<String> allowMethods = new HashSet<String>();
+		private HashSet<String> excludeMethods = new HashSet<String>();
+
+		private HashSet<String> allowServices = new HashSet<String>();
+		private HashSet<String> excludeServices = new HashSet<String>();
+		
+		@Override
+		public boolean isAuthorized(Message msg) {
+			String method = msg.method;
+			String service = msg.name;
+			
+			if (allowMethods.size() > 0 && !allowMethods.contains(method)){
+				return false;
+			}
+			
+			if (excludeMethods.size() > 0 && excludeMethods.contains(method)){
+				return false;
+			}
+			
+			return true;
+		}
+		
+		public void allowREST(Boolean b){
+			if(wss != null){
+				wss.allowREST(b);
+			}
+		}
+		
+		public void allowMethod(String method){
+			allowMethods.add(method);
+		}
+
+		@Override
+		public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public boolean allowExport(String serviceName) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+		// ============== security end =========================
+		
+
+
 
 }

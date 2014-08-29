@@ -37,6 +37,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -2135,6 +2136,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return this.getClass().getDeclaredMethods();
 	}
 
+	public void close(Writer w){
+		if (w == null){
+			return;
+		}
+		try {
+			w.flush();
+		} catch(Exception e){
+			Logging.logException(e);
+		} finally {
+			try {
+			w.close();
+			} catch(Exception e){
+				// don't really care
+			}
+		}
+		
+	}
+	
 	public String help() {
 		return help("URL", "DECLARED");
 	}
