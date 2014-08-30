@@ -973,9 +973,39 @@ public class InMoovGestureCreator extends Service {
 		}
 	}
 
-	public void control_removegest() {
+	public void control_removegest(JList control_list) {
 		// Remove the selected gesture from the script (button bottom-left)
 		// TODO - add functionality
+		int posl = control_list.getSelectedIndex();
+
+		if (posl != -1) {
+
+			if (pythonitemholder.get(posl).function
+					&& !pythonitemholder.get(posl).notfunction) {
+
+				String codeold = pythonitemholder.get(posl).code;
+				String defnameold = codeold.substring(
+						codeold.indexOf("def ") + 4, codeold.indexOf("():"));
+
+				int olddefpos = pythonscript.indexOf(defnameold);
+				int pos1 = pythonscript.lastIndexOf("\n", olddefpos);
+				int pos2 = pythonscript.indexOf("\n", olddefpos);
+				pythonscript = pythonscript.substring(0, pos1)
+						+ pythonscript.substring(pos2, pythonscript.length());
+
+				int posscript = pythonscript.lastIndexOf(defnameold);
+				int posscriptnextdef = pythonscript.indexOf("def", posscript);
+				if (posscriptnextdef == -1) {
+					posscriptnextdef = pythonscript.length();
+				}
+
+				pythonscript = pythonscript.substring(0, posscript - 4)
+						+ pythonscript.substring(posscriptnextdef - 1,
+								pythonscript.length());
+
+				parsescript(control_list);
+			}
+		}
 	}
 
 	public void control_testgest() {
