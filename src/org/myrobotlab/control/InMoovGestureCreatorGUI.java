@@ -341,15 +341,15 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		control_funcname = new JTextField("Func. Name");
 		bottom1top.add(control_funcname);
+		
+		control_connect = new JButton("Connect");
+		bottom1top.add(control_connect);
+		control_connect.addActionListener(this);
 
 		bottom1.add(BorderLayout.NORTH, bottom1top);
 
 		JPanel bottom1right = new JPanel();
 		bottom1right.setLayout(new BoxLayout(bottom1right, BoxLayout.Y_AXIS));
-
-		control_connect = new JButton("Connect");
-		bottom1right.add(control_connect);
-		control_connect.addActionListener(this);
 
 		control_loadscri = new JButton("Load Scri");
 		bottom1right.add(control_loadscri);
