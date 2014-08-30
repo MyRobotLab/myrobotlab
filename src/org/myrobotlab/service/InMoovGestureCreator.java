@@ -4,10 +4,14 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -96,11 +100,18 @@ public class InMoovGestureCreator extends Service {
 
 	public void control_savescri() {
 		// Save the Python-Script (in Python-Service) (button bottom-left)
-		// TODO - add functionality
-		// FIXME - "save" is not working
-		Python python = (Python) Runtime.getService("python");
-		Script script = python.getScript();
-		script.setCode(pythonscript + "\nfg = 58");
+		JFrame frame = new JFrame();
+		JTextArea textarea = new JTextArea();
+		textarea.setText(pythonscript);
+		textarea.setEditable(false);
+		textarea.setLineWrap(true);
+		JScrollPane scrollpane = new JScrollPane(textarea);
+		scrollpane
+				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollpane
+				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		frame.add(scrollpane);
+		frame.setVisible(true);
 	}
 
 	public void control_loadgest(JList control_list, JList framelist,
@@ -975,7 +986,6 @@ public class InMoovGestureCreator extends Service {
 
 	public void control_removegest(JList control_list) {
 		// Remove the selected gesture from the script (button bottom-left)
-		// TODO - add functionality
 		int posl = control_list.getSelectedIndex();
 
 		if (posl != -1) {
