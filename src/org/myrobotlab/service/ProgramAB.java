@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.File;
+
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Chat;
 import org.myrobotlab.framework.Service;
@@ -36,9 +38,11 @@ public class ProgramAB extends Service {
 	 * Load the AIML 2.0 Bot config and start a chat session.  This must be called after the service is created.
 	 * 
 	 * @param path - should be the full path to the ProgramAB root
-	 * @param botName - The name of the bot to load.
+	 * @param botName - The name of the bot to load. (example: alice2)
 	 */
 	public void startSession(String path, String botName) {
+		// TODO don't allow to specify a different path
+		// it will be assumed to be ./ProgramAB
 		bot = new Bot(botName, path);
 		chatSession = new Chat(bot);				
 	}
@@ -67,7 +71,8 @@ public class ProgramAB extends Service {
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 		ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice", "ProgramAB");
-		String progABPath = "C:/tools/ProgramAB";
+		File f = new File("ProgramAB");
+		String progABPath = f.getAbsolutePath();
 		String botName = "alice2";
 		alice.startSession(progABPath, botName); 
 		String response = alice.getResponse("How are you?");
