@@ -3,6 +3,7 @@ package org.myrobotlab.control;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -37,7 +38,7 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 	private JButton askButton = new JButton("Ask Program AB");
 	private JScrollPane scrollResponse = new JScrollPane(response);
 	
-	private JTextField progABPath = new JTextField("C:\\tools\\ProgramAB", 16);
+	private JTextField progABPath = new JTextField(new File("ProgramAB").getAbsolutePath(), 16);
 	private JTextField botName = new JTextField("alice2", 16);
 	
 	private JButton startSessionButton = new JButton("Start Session");
@@ -96,7 +97,8 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 		Object o = event.getSource();
 		if (o == askButton || o == text) {
 			//myService.send(boundServiceName, "getResponse", new String(text.getText()), "1", "SampleBot");
-			String answer=(String) myService.sendBlocking(boundServiceName, "getResponse", text.getText());
+			
+			String answer=(String) myService.sendBlocking(boundServiceName, 10000, "getResponse", text.getText());
 			// response.setText(response.getText() + "<br/>\n\r" + answer);
 			if (answer != null) {
 				response.append("\n" + answer.trim());
