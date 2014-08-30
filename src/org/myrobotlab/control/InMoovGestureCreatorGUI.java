@@ -111,18 +111,19 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		// bottom1:
 		// |----------|
-		// |bottom1top| <- JButton's: exportcode, testgesture
+		// |bottom1top| <- JTextField's: gestname, funcname & JButton: connect
 		// |----------|
-		// |##########| <- JTextArea: generatedcode
+		// |##########| <- JList: control_list & JButton's: loadscript,
+		// savescript, loadgest, addgest, updategest, removegest, testgest
 		// |##########|
 		// |----------|
 
 		// bottom2:
 		// |----------|
-		// |bottom2top| <- JButton's & JTextField's: [frame_] connect, add,
+		// |bottom2top| <- JButton's & JTextField's: [frame_] add, addspeed,
 		// addsleep, addspeech
 		// |##########| <- JButton's: [frame_] importminresmax, remove, load,
-		// update, copy, up, down, test
+		// update, copy, up, down, test & JCheckBox: Move Real Time
 		// |----------|
 		// |##########|
 		// |##########| <- JList: framelist
@@ -341,7 +342,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		control_funcname = new JTextField("Func. Name");
 		bottom1top.add(control_funcname);
-		
+
 		control_connect = new JButton("Connect");
 		bottom1top.add(control_connect);
 		control_connect.addActionListener(this);
