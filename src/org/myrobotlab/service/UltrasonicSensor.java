@@ -157,7 +157,7 @@ public class UltrasonicSensor extends Service {
 		
 		//sr04.arduino.setLoadTimingEnabled(true);
 		
-		sr04.addPublishRangeListener(python);
+		sr04.addRangeListener(python);
 		
 		sr04.startRanging();
 		log.info("here");
@@ -210,7 +210,7 @@ public class UltrasonicSensor extends Service {
 	// The "chained" version takes 2 thread contexts :( .. but it has the benefit
 	// of the "publishRange" method being affected by the Sensor service e.g.
 	// change units, sample rate, etc
-	public void addPublishRangeListener(Service service) {
+	public void addRangeListener(Service service) {
 		addListener("publishRange", service.getName(), "onRange", long.class);
 	}
 
