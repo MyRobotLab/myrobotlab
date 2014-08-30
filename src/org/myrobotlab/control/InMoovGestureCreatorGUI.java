@@ -20,7 +20,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
@@ -551,7 +550,8 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 			myService.send(boundServiceName, "control_addgest", control_list,
 					control_gestname, control_funcname);
 		} else if (o == control_updategest) {
-			myService.send(boundServiceName, "control_updategest");
+			myService.send(boundServiceName, "control_updategest",
+					control_list, control_gestname, control_funcname);
 		} else if (o == control_removegest) {
 			myService.send(boundServiceName, "control_removegest");
 		} else if (o == control_testgest) {
