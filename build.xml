@@ -311,8 +311,6 @@
 		<pathelement location="../repo/io.netty/4.0.19/netty-all-4.0.19.Final.jar" />
 		<pathelement location="../repo/org.junit/4.11/junit-4.11.jar" />
 		<pathelement location="../repo/org.saintandreas.jovr/0.3.2.4/jovr-0.3.2.4.jar" />
-		<pathelement location="../repo/org.aitools.programd/4.6/programd-main.jar" />
-		<pathelement location="../repo/org.aitools.programd/4.6/programd-rhino.jar" />
 		<pathelement location="../repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar" />
 		<pathelement location="../repo/org.alicebot.ab/0.0.6.26/Ab.jar"/>
 	</path>
