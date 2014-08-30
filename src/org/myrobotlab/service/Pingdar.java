@@ -61,7 +61,7 @@ public class Pingdar extends Service {
 		sensor = getSensor();
 		servo = getServo();
 		
-		sensor.addPublishRangeListener(this);
+		sensor.addRangeListener(this);
 		servo.addServoEventListener(this);
 		
 		servo.setSpeed(0.20f);
@@ -129,7 +129,9 @@ public class Pingdar extends Service {
 			return false;
 		}
 		
-		sensor.addPublishRangeListener(this);
+		// FIXME sensor.addRangeListener
+		// publishRange --> onRange
+		sensor.addRangeListener(this);
 		servo.addServoEventListener(this);
 		
 		if (!servo.attach(arduino, servoPin)){
@@ -168,12 +170,15 @@ public class Pingdar extends Service {
 		Pingdar pingdar = (Pingdar)Runtime.start(getName(), "Pingdar");
 		pingdar.attach("COM15", 7, 8, 4);
 		
+		/*
 		for (int i = 0; i < 180; ++i){
 			Point p = new Point(i, i, i, System.currentTimeMillis());
 			p.z = 20;
 			invoke("publishPingdar", new Point(p));
 		}
-		
+		*/
+		pingdar.servo.sweep(40, 160);
+		pingdar.arduino.setSampleRate(5000);
 		pingdar.sweep(40, 160);
 		//pingdar.sensor.startRanging();
 		//pingdar.sensor.stopRanging();

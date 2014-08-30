@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.java_websocket.WebSocket;
-import org.java_websocket.WebSocketImpl;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 import org.myrobotlab.framework.Encoder;
@@ -61,9 +60,25 @@ public class WSServer extends WebSocketServer {
 	public static final String MIME_PLAINTEXT = "text/plain";
 	public static final String MIME_HTML = "text/html";
 	public static final String MIME_DEFAULT_BINARY = "application/octet-stream";
+	
+	/**
+	 * necessary for certain web displays and gui's
+	 * when javascript or anglular needs to send a message directly to a service
+	 * vs. have the service subscribe to a publishing point.
+	 */
+	private boolean allowDirectMessaging = true;
 
 	private Inbox inbox;
 	private WebGUI webgui;
+	
+	public static class WSMsg{
+		public WSMsg(WebSocket conn, Message msg) {
+			this.socket = conn;
+			this.msg = msg;
+		}
+		public WebSocket socket;
+		public Message msg;
+	}
 
 	public WSServer(WebGUI webgui, int port) throws UnknownHostException {
 		super(new InetSocketAddress(port));
@@ -77,8 +92,9 @@ public class WSServer extends WebSocketServer {
 		// processors.put("/api", new RESTProcessor());
 		// default uri map
 
+		//processors.put("/api/soap", new SOAPProcessor()); SOAP is stupid FIXME - refactor with jvm's JAXB default order - NO ANNOTATIONS !!! - no header? (that'd be good)
+
 		processors.put("/services", new RESTProcessor());
-		processors.put("/api/soap", new SOAPProcessor());
 		defaultProcessor = new ResourceProcessor(webgui);
 		processors.put("/resource", defaultProcessor);// FIXME < wrong should be
 														// root
@@ -88,6 +104,16 @@ public class WSServer extends WebSocketServer {
 	public WSServer(InetSocketAddress address) {
 		super(address);
 	}
+	
+	public void allowREST(Boolean b){
+		if (b){
+			processors.put("/services", new RESTProcessor());
+		} else {
+			if (processors.containsKey("/services")){
+				processors.remove("/services");
+			}
+		}
+	}
 
 	@Override
 	public void onOpen(WebSocket conn, ClientHandshake handshake) {
@@ -96,34 +122,38 @@ public class WSServer extends WebSocketServer {
 		log.info(String.format("onOpen %s", conn.getLocalSocketAddress().getHostName()));
 		log.info(String.format("onOpen %s", conn.getRemoteSocketAddress().getHostName()));
 		webgui.clients.put(clientkey, clientkey);
-		// this.sendToAll( "new connection: " +
-		// handshake.getResourceDescriptor() );
+		webgui.invoke("publishConnect", conn);
 	}
 
 	@Override
 	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
 		String clientkey = String.format("%s:%d", conn.getRemoteSocketAddress().getAddress().getHostAddress(), conn.getRemoteSocketAddress().getPort());
 		webgui.clients.remove(clientkey);
-		// this.sendToAll( conn + " has left the room!" );
+		webgui.invoke("publishDisconnect", conn);
 	}
-
+	
+	// FIXME - return aggregate of conn & MRL Message to publish
+	// keep authorization...
 	@Override
 	public void onMessage(WebSocket conn, String message) {
-		// this.sendToAll( message );
-		// System.out.println( conn.getLocalSocketAddress() + ": " + message );
-		// System.out.println("[" + message + "]" );
+	
 		log.info("webgui <---to--- client {}", message);
-		// Gson gson = new Gson();
-		// Gson gson = new
-		// GsonBuilder().setDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz").create();
-		// Message msg = gson.fromJson(message, Message.class);
 
 		Message msg = Encoder.gson.fromJson(message, Message.class);
+		msg.sender = conn.getRemoteSocketAddress().getAddress().getHostAddress();
+		
+		// FIXME - move to Security service
+		if (!webgui.isAuthorized(msg)){
+			webgui.error("unAuthorized message !!! %s.%s from sender %s",msg.name, msg.method, msg.sender);
+			return;
+		}
 
-		// log.info("{}",msg);
-		// log.info("parsed message");
-		// outbox.add(msg);
-		inbox.add(msg);
+		if (allowDirectMessaging){ // FIXME - this "could" be done at the inbox level ? check to see if you did it there
+			inbox.add(msg);
+		} 
+		
+		webgui.invoke("publishWSMsg", new WSMsg(conn, msg));
+		
 	}
 
 	@Override
@@ -154,17 +184,7 @@ public class WSServer extends WebSocketServer {
 				c.send(text);
 			}
 		}
-	}
-
-	/*
-	 * 
-	 * @Override public void onRawMessage(WebSocket conn, ByteBuffer d) {
-	 * 
-	 * log.error("onRawMessage ??? Not supposed to be here right ???");
-	 * 
-	 * 
-	 * }
-	 */
+	} 
 
 	// ///////////////////// FROM NANOHTTPD ///////////////////////
 
@@ -417,6 +437,11 @@ public class WSServer extends WebSocketServer {
 			conn.close();
 		}
 
+	}
+
+	public boolean allowDirectMessaging(boolean b) {
+		allowDirectMessaging = b;
+		return b;
 	}
 
 }
