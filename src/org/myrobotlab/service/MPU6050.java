@@ -130,13 +130,14 @@ public class MPU6050 extends Service {
 						//log.info(String.format("%d", msg[1]));
 						switch (function) {
 
+						/* FIXME
 						case MRLCOMM_ERROR: {
 							++error_mrl_to_arduino_rx_cnt;
 							error("MRL->Arduino rx %d type %d", error_mrl_to_arduino_rx_cnt, msg[1]);
 							break;
 						}
 
-						
+						*/
 						
 						
 						
