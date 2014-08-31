@@ -68,9 +68,9 @@ public class ProgramAB extends Service {
 	public static void main(String s[]) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel("INFO");
-		Runtime.start("gui", "GUIService");
-		Runtime.start("python", "Python");
-		ProgramAB alice = (ProgramAB) Runtime.start("alice", "ProgramAB");
+		Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
+		ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice", "ProgramAB");
 		File f = new File("ProgramAB");
 		String progABPath = f.getAbsolutePath();
 		String botName = "alice2";

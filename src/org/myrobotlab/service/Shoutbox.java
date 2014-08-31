@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +35,7 @@ public class Shoutbox extends Service {
 	Integer port = 6565;
 
 	int maxShoutsInMemory = 200;
-	ArrayList<Shout> shouts = (ArrayList<Shout>)Collections.synchronizedList(new ArrayList<Shout>());
+	ArrayList<Shout> shouts = new ArrayList<Shout>();
 	Users users = new Users();
 
 	int msgCount;
@@ -321,7 +320,6 @@ public class Shoutbox extends Service {
 		// TODO - broadcast to others new connection of user - (this mean's user has established new connection,
 		// this could be refreshing the page, going to a different page, opening a new tab or
 		// actually arriving on the site - how to tell the difference between all these activities?
-		
 		Shout shout = createShout("system", String.format("[%s]@[%s] is in the haus !", user.user, user.ip));
 		Message onShout = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		// out.sender = shout.user;
@@ -374,6 +372,35 @@ public class Shoutbox extends Service {
 			error("unAuthorized message !!! %s.%s from sender %s",msg.name, msg.method, msg.sender);
 		}
 	}
+	
+	public void onShout(WSMsg wsmsg) {
+		// webgui assigns client ip to Message.sender
+		Message m = wsmsg.msg;
+		info("%s", m);
+
+		String msg = (String) m.data[0];
+		// sender is put in by WebGUI / WSServer
+		// shout.ip = m.sender;
+		User user = users.getUser(wsmsg.socket);
+		
+		Shout shout = (Shout) Encoder.gson.fromJson(msg, Shout.class);
+		
+		if (user == null){
+			error("%s shouting but not found in ipToUser", m.sender);
+		}
+		
+		// transfer data - transfer personal properties
+		shout.user = user.user;
+		shout.ip = user.ip;
+		
+		updateSystemInfo(shout);
+		
+		shouts.add(shout);
+		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		webgui.sendToAll(out);
+	
+		archive(shout);
+	}
 
 	private Shout updateSystemInfo(Shout shout) {
 		SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
@@ -398,41 +425,6 @@ public class Shoutbox extends Service {
 		shoutbox.startService();
 		shoutbox.setNameProvider("org.myrobotlab.client.DrupalNameProvider");
 		webgui.allowREST(true);
-	}
-	
-	public void onShout(WSMsg wsmsg) {
-		// webgui assigns client ip to Message.sender
-		Message m = wsmsg.msg;
-		info("%s", m);
-
-		User user = users.getUser(wsmsg.socket);
-		
-		String msg = (String) m.data[0];
-		Shout shout = (Shout) Encoder.gson.fromJson(msg, Shout.class);
-		
-		if (user == null){
-			error("%s shouting but not found in ipToUser", m.sender);
-		}
-		
-		// transfer data - transfer personal properties
-		// seems kludgy FIXME ???
-		shout.user = user.user;
-		shout.ip = user.ip;
-		
-		updateSystemInfo(shout);
-		
-		// add to memory
-		shouts.add(shout);
-		
-		// broadcast
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
-		webgui.sendToAll(out);
-	
-		archive(shout);
-		
-		if (shouts.size() > maxShoutsInMemory){
-			shouts.remove(0);
-		}
 	}
 
 	public static void main(String[] args) {

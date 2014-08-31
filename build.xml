@@ -4,8 +4,7 @@
 	proxy
 	-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
 	curl -i  -x http://webproxy:80 https://api.github.com/repos/MyRobotLab/myrobotlab/releases -H "Accept:application/vnd.github.manifold-preview+json"
-	34
-	23
+	
 	The goal is always to make the build more simple :)
 	Currently the only dependencies come with the git clone are in the build directory.
 	
@@ -100,7 +99,7 @@
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
 
-	<property name="tag" value="1.0.55"/>
+	<!-- property name="tag" value="1.0.49" / -->
 	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
@@ -312,11 +311,8 @@
 		<pathelement location="../repo/io.netty/4.0.19/netty-all-4.0.19.Final.jar" />
 		<pathelement location="../repo/org.junit/4.11/junit-4.11.jar" />
 		<pathelement location="../repo/org.saintandreas.jovr/0.3.2.4/jovr-0.3.2.4.jar" />
-		<pathelement location="../repo/org.aitools.programd/4.6/programd-main.jar" />
-		<pathelement location="../repo/org.aitools.programd/4.6/programd-rhino.jar" />
 		<pathelement location="../repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar" />
 		<pathelement location="../repo/org.alicebot.ab/0.0.6.26/Ab.jar"/>
-		<pathelement location="../repo/javazoom.spi/1.9.5/mp3spi1.9.5.jar"/>
 	</path>
 
 	<!-- class path for testing FIXME - add junit normalize git -->

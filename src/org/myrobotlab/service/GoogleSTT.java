@@ -80,7 +80,7 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 	CaptureThread captureThread = null;
 
 	String language = "en";
-
+	
 	private Boolean isListening = true;
 
 	// audio format
@@ -150,6 +150,7 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 	public void stopAudioCapture() {
 		stopCapture = true;
 	}
+
 
 	public synchronized boolean setListening(boolean b) {
 		isListening = b;
@@ -281,7 +282,7 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 
 		// threads.add(transcription);
 	}
-
+	
 	/**
 	 * Event is sent when the listening Service is actually listening. There is
 	 * some delay when it initially loads.
@@ -290,17 +291,21 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 		return;
 	}
 
-	public void publishRecognized(String recognizedText) {
+	
+	public void publishRecognized(String recognizedText)
+	{
 		invoke("recognized", recognizedText);
 	}
 
-	public void startListening() {
-
+	public void startListening()
+	{
+		
+	}
+	public void stopListening()
+	{
+		
 	}
 
-	public void stopListening() {
-
-	}
 
 	public static void saveWavAsFile(byte[] byte_array, AudioFormat audioFormat, String file) {
 		try {
@@ -353,35 +358,38 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 		return "Uses the Google Speech To Text service";
 	}
 
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		GoogleSTT stt = new GoogleSTT("stt");
+		// stt.startService();
+		stt.captureAudio();
+		stt.stopAudioCapture();
+	}
+
 	@Override
 	public String recognized(String word) {
 		return word;
 	}
 
+
+
 	@Override
 	public void pauseListening() {
 		// TODO Auto-generated method stub
-
+		
 	}
 
-	public void releaseService() {
+	public void releaseService(){
 		super.releaseService();
 		stopAudioCapture();
 	}
-
+	
 	@Override
 	public void resumeListening() {
 		// TODO Auto-generated method stub
-
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		GoogleSTT stt = (GoogleSTT) Runtime.start("stt", "GoogleSTT");
-		stt.captureAudio();
-		stt.stopAudioCapture();
+		
 	}
 
 }

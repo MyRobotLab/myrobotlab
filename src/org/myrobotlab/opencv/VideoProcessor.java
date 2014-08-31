@@ -96,7 +96,7 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	transient SimpleDateFormat sdf = new SimpleDateFormat();
 
-	FrameRecorder frameRecorder = null;
+	transient HashMap<String, FrameRecorder> outputFileStreams = new HashMap<String, FrameRecorder>();
 
 	public static final String INPUT_KEY = "input";
 
@@ -555,26 +555,28 @@ public class VideoProcessor implements Runnable, Serializable {
 	public void record(OpenCVData data) {
 		try {
 
-			if (frameRecorder == null) {
+			if (!outputFileStreams.containsKey(recordingSource)) {
 				// FFmpegFrameRecorder recorder = new FFmpegFrameRecorder
 				// (String.format("%s.avi",filename), frame.width(),
 				// frame.height());
 
-				frameRecorder = new OpenCVFrameRecorder(String.format("%s.%d.avi", opencv.getName(), System.currentTimeMillis()), data.getDisplay().width(), data.getDisplay().height());
+				FrameRecorder recorder = new OpenCVFrameRecorder(String.format("%s.avi", recordingSource), frame.width(), frame.height());
 				// recorder.setCodecID(CV_FOURCC('M','J','P','G'));
 				// TODO - set frame rate to framerate
-				frameRecorder.setFrameRate(15);
-				frameRecorder.setPixelFormat(1);
-				frameRecorder.start();
+				recorder.setFrameRate(15);
+				recorder.setPixelFormat(1);
+				recorder.start();
+				outputFileStreams.put(recordingSource, recorder);
 			}
 
 			// TODO - add input, filter & display
-			frameRecorder.record(data.getDisplay());
+			outputFileStreams.get(recordingSource).record(data.getImage(recordingSource));
 
 			if (closeOutputs) {
-				frameRecorder.stop();
-				frameRecorder.release();
-				frameRecorder = null;
+				OpenCVFrameRecorder output = (OpenCVFrameRecorder) outputFileStreams.get(recordingSource);
+				outputFileStreams.remove(output);
+				output.stop();
+				output.release();
 				recordOutput = false;
 				closeOutputs = false;
 			}
