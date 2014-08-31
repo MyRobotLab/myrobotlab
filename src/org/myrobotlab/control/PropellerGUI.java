@@ -65,6 +65,28 @@ import org.myrobotlab.service.Propeller;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.data.Pin;
 
+/*
+ * TODO - move menu into PropellerGUI from editor
+ *      - synch up repo with createLabs
+ *      - correct pin state on menu
+ * 		- make Communication -> menu -> MRLComm.ino
+ *      - make menu builder
+ *      - auto-load - MRLComm first
+ *      - refresh serial ?
+ *      - message syphone - message pump - stdout stdin pipes process creator etc...
+ *      - all traces start stop at same time
+ *      - 100% on compile & upload
+ *      - arrow changed for upload to "up" duh
+ *      - incoming pin data -> determines state of inactive/active & oscope pin update
+ *      
+ *      - Java console - duh
+ *      - uploader progress - duh
+ *      - error goes to status	
+ *      - console info regarding the state & progress of "connecting" to a serialDevice
+ *      - TODO - "errorMessage vs message" warnMessage too - embed in Console logic
+ *      
+ */
+
 public class PropellerGUI extends ServiceGUI implements ItemListener, ActionListener, TabControlEventHandler {
 
 	public PropellerGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {

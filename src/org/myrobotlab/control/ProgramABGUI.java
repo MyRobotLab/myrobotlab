@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -15,13 +14,11 @@ import javax.swing.JTextField;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.ProgramAB;
-import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
 /**
- * A UI for controlling and interacting with ProgramAB
+ * A UI for controlling and interacting with ProgramD
  * 
  * @author kwatters
  *

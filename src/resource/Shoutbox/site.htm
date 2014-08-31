@@ -175,7 +175,7 @@ $(document).ready(function(){
 		}
 		if(type == 'system')
 		{
-			$('#system_message_box').html("<div class=\"system_msg\">"+umsg+"</div>");
+			$('#message_box').prepend("<div class=\"system_msg\">"+umsg+"</div>");
 		}
 
 		// system updates
@@ -187,8 +187,7 @@ $(document).ready(function(){
 <div class="chat_wrapper">
 	<div class="panel">
 		<input id="message" name="message" placeholder="Message" type="text" /></div>
-	<div id="id" class="system_msg"></div>
-	<div id="system" class="system_msg"></div>
-	<div id="system_message_box" class="system_msg"></div>
+	<div id="id"></div>
+	<div id="system"></div>
 	<div id="message_box"></div>
 </div>
