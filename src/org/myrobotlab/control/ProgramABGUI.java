@@ -16,12 +16,12 @@ import javax.swing.JTextField;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.OpenCV;
-import org.myrobotlab.service.ProgramD;
+import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
 /**
- * A UI for controlling and interacting with ProgramD
+ * A UI for controlling and interacting with ProgramAB
  * 
  * @author kwatters
  *
@@ -82,14 +82,14 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 	@Override
 	public void attachGUI() {
 		// 
-		subscribe("publishState", "getState", ProgramD.class);
+		subscribe("publishState", "getState", ProgramAB.class);
 		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void detachGUI() {
 		// 
-		unsubscribe("publishState", "getState", ProgramD.class);
+		unsubscribe("publishState", "getState", ProgramAB.class);
 	}
 	
 	@Override

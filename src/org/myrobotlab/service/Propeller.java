@@ -62,29 +62,8 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
-/**
- * Implementation of a Propeller Service connected to MRL through a serial port.
- * The protocol is basically a pass through of system calls to the Propeller
- * board. Data can be passed back from the digital or analog ports by request to
- * start polling. The serial port can be wireless (bluetooth), rf, or wired. The
- * communication protocol supported is in MRLComm.ino
- * 
- * Should support nearly all Propeller board types
- * 
- * digitalRead() works on all pins. It will just round the analog value received
- * and present it to you. If analogRead(A0) is greater than or equal to 512,
- * digitalRead(A0) will be 1, else 0. digitalWrite() works on all pins, with
- * allowed parameter 0 or 1. digitalWrite(A0,0) is the same as
- * analogWrite(A0,0), and digitalWrite(A0,1) is the same as analogWrite(A0,255)
- * analogRead() works only on analog pins. It can take any value between 0 and
- * 1023. analogWrite() works on all analog pins and all digital PWM pins. You
- * can supply it any value between 0 and 255
- * 
- */
-
 @Root
-public class Propeller extends Service implements SerialDeviceEventListener, SensorDataPublisher, ServoController, MotorController, StepperController, SerialDeviceService
-		 {
+public class Propeller extends Service implements SerialDeviceEventListener, SensorDataPublisher, ServoController, MotorController, StepperController, SerialDeviceService {
 
 	private static final long serialVersionUID = 1L;
 	public transient final static Logger log = LoggerFactory.getLogger(Propeller.class);
@@ -139,26 +118,26 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 
 	public static final int SERVO_SWEEP_START = 38;
 	public static final int SERVO_SWEEP_STOP = 39;
-				
+
 	// callback event - e.g. position arrived
 	// MSG MAGIC | SZ | SERVO-INDEX | POSITION
 	public static final int SERVO_EVENTS_ENABLE = 40;
 	public static final int SERVO_EVENT = 41;
-	
+
 	public static final int LOAD_TIMING_ENABLE = 42;
 	public static final int LOAD_TIMING_EVENT = 43;
 
-	public static final int STEPPER_ATTACH	= 44;
-	public static final int STEPPER_MOVE = 45; 
-	public static final int STEPPER_STOP = 46; 
-	public static final int STEPPER_RESET = 47; 
+	public static final int STEPPER_ATTACH = 44;
+	public static final int STEPPER_MOVE = 45;
+	public static final int STEPPER_STOP = 46;
+	public static final int STEPPER_RESET = 47;
 
-	public static final int STEPPER_EVENT = 48; 
-	public static final int STEPPER_EVENT_STOP = 1; 
+	public static final int STEPPER_EVENT = 48;
+	public static final int STEPPER_EVENT_STOP = 1;
 
-	public static final int STEPPER_TYPE_POLOLU = 1; 
-	
-// servo event types
+	public static final int STEPPER_TYPE_POLOLU = 1;
+
+	// servo event types
 	public static final int SERVO_EVENT_STOPPED = 1;
 	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
@@ -177,11 +156,9 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	public static final int NOP = 255;
 
 	// ---------- MRLCOMM FUNCTION INTERFACE END -----------
-	
-	
+
 	public static final int TRUE = 1;
 	public static final int FALSE = 0;
-	
 
 	public Integer mrlcommVersion = null;
 
@@ -203,8 +180,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	 * pin description of board
 	 */
 	ArrayList<Pin> pinList = null;
-	
-	
+
 	// data and mapping for data going from MRL ---to---> Propeller
 	HashMap<String, StepperControl> steppers = new HashMap<String, StepperControl>();
 	// index for data mapping going from Propeller ---to---> MRL
@@ -230,8 +206,6 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	// serial device info
 	private transient SerialDevice serialDevice;
 
-
-
 	// imported Propeller constants
 	public static final int HIGH = 0x1;
 	public static final int LOW = 0x0;
@@ -246,7 +220,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	private String boardType;
 
 	BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
-	
+
 	// remove - for Serial Service
 	StringBuilder debugTX = new StringBuilder();
 	StringBuilder debugRX = new StringBuilder();
@@ -326,7 +300,6 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		this.sketch = defaultSketch;
 	}
 
-
 	public String getSerialDeviceName() {
 		if (serialDevice != null) {
 			return serialDevice.getName();
@@ -335,7 +308,6 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		return null;
 	}
 
-	
 	/**
 	 * MRL protocol method
 	 * 
@@ -508,7 +480,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		ServoData sd = new ServoData();
 		sd.pin = pin;
 		sd.servoIndex = index;
-		ServoControl sc = (ServoControl)Runtime.getService(servoName);
+		ServoControl sc = (ServoControl) Runtime.getService(servoName);
 		sd.servo = sc;
 		servos.put(servoName, sd);
 		servoIndex.put(index, sd);
@@ -652,8 +624,9 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 
 	/**
 	 * This method is called with Pin data whene a pin value is changed on the
-	 * Propeller board the Propeller must be told to poll the desired pin(s). This
-	 * is done with a analogReadPollingStart(pin) or digitalReadPollingStart()
+	 * Propeller board the Propeller must be told to poll the desired pin(s).
+	 * This is done with a analogReadPollingStart(pin) or
+	 * digitalReadPollingStart()
 	 */
 	public Pin publishPin(Pin p) {
 		// log.debug(p);
@@ -704,7 +677,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	}
 
 	static final public int MAX_MSG_LEN = 64;
-	//StringBuilder rxDebug = new StringBuilder ();
+	// StringBuilder rxDebug = new StringBuilder ();
 
 	// TODO - define as int[] because Java bytes suck !
 	byte[] msg = new byte[64]; // TODO define outside
@@ -712,7 +685,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	int byteCount = 0;
 	int msgSize = 0;
 
-	//StringBuffer dump = new StringBuffer();
+	// StringBuffer dump = new StringBuffer();
 
 	@Element
 	private String portName = "";
@@ -769,7 +742,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 							byteCount = 0;
 							msgSize = 0;
 							warn(String.format("Propeller->MRL error - bad magic number %d - %d rx errors", newByte, ++error_arduino_to_mrl_rx_cnt));
-							//dump.setLength(0);
+							// dump.setLength(0);
 						}
 						continue;
 					} else if (byteCount == 2) {
@@ -797,7 +770,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 
 						// MSG CONTENTS = FN | D0 | D1 | ...
 						byte function = msg[0];
-						//log.info(String.format("%d", msg[1]));
+						// log.info(String.format("%d", msg[1]));
 						switch (function) {
 
 						case MRLCOMM_ERROR: {
@@ -842,12 +815,13 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 
 							long microsPerLoop = Serial.byteToLong(msg, 1, 4);
 							info("load %d us", microsPerLoop);
-							// log.info(String.format(" index %d type %d cur %d target %d", servoIndex, eventType, currentPos & 0xff, targetPos & 0xff));
+							// log.info(String.format(" index %d type %d cur %d target %d",
+							// servoIndex, eventType, currentPos & 0xff,
+							// targetPos & 0xff));
 							// invoke("publishPin", pin);
 							break;
 						}
-						
-						
+
 						case SERVO_EVENT: {
 
 							int index = msg[1];
@@ -856,13 +830,13 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 							int targetPos = msg[4];
 
 							log.info(String.format(" index %d type %d cur %d target %d", index, eventType, currentPos & 0xff, targetPos & 0xff));
-							// uber good - 
-							// TODO - deprecate ServoControl interface - not needed Servo is abstraction enough
+							// uber good -
+							// TODO - deprecate ServoControl interface - not
+							// needed Servo is abstraction enough
 							Servo servo = (Servo) servoIndex.get(index).servo;
-							servo.invoke("publishServoEvent", currentPos  & 0xff);
+							servo.invoke("publishServoEvent", currentPos & 0xff);
 							break;
 						}
-						
 
 						case SENSOR_DATA: {
 							int index = (int) msg[1];
@@ -886,19 +860,19 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 							int currentPos = (msg[3] << 8) + (msg[4] & 0xff);
 
 							log.info(String.format(" index %d type %d cur %d", index, eventType, currentPos));
-							// uber good - 
-							// TODO - stepper ServoControl interface - not needed Servo is abstraction enough
+							// uber good -
+							// TODO - stepper ServoControl interface - not
+							// needed Servo is abstraction enough
 							Stepper stepper = (Stepper) stepperIndex.get(index);
 							stepper.invoke("publishStepperEvent", currentPos);
 							break;
 						}
-						
+
 						default: {
 							error(formatMRLCommMsg("unknown serial event <- ", msg, msgSize));
 							break;
 						}
-						
-						
+
 						} // end switch
 
 						if (log.isDebugEnabled()) {
@@ -925,10 +899,10 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		}
 
 	}
-		
-	public String formatMRLCommMsg(String prefix, byte[] message, int size){
+
+	public String formatMRLCommMsg(String prefix, byte[] message, int size) {
 		debugRX.setLength(0);
-		if (prefix != null){
+		if (prefix != null) {
 			debugRX.append(prefix);
 		}
 		debugRX.append(String.format("MAGIC_NUMBER|SZ %d|FN %d", size, message[0]));
@@ -937,8 +911,6 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		}
 		return debugRX.toString();
 	}
-
-	
 
 	public String showMessage(String msg, String desc) {
 		log.info("showMessage " + msg);
@@ -1393,9 +1365,8 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	@Override
 	public void servoStop(String servoName) {
 		// FIXME DEPRECATE OR IMPLEMENT
-		//sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
+		// sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
 	}
-
 
 	// often used as a ping echo pulse - timing is critical
 	// so it has to be done on the uC .. therefore
@@ -1547,9 +1518,10 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	}
 
 	// --- stepper begin ---
-	// FIXME - relatively clean interface BUT - ALL THIS LOGIC SHOULD BE IN STEPPER NOT ARDUINO !!!
+	// FIXME - relatively clean interface BUT - ALL THIS LOGIC SHOULD BE IN
+	// STEPPER NOT ARDUINO !!!
 	// SO STEPPER MUST NEED TO KNOW ABOUT CONTROLLER TYPE
-	
+
 	public boolean stepperAttach(String stepperName) {
 		Stepper stepper = (Stepper) Runtime.getService(stepperName);
 		if (stepper == null) {
@@ -1575,29 +1547,30 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		}
 
 		stepper.setController(this);
-		
+
 		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())) {
-			// int type = Stepper.STEPPER_TYPE_POLOLU.hashCode(); heh, cool idea - but byte collision don't want to risk ;)
+			// int type = Stepper.STEPPER_TYPE_POLOLU.hashCode(); heh, cool idea
+			// - but byte collision don't want to risk ;)
 			int type = 1;
-			
+
 			// simple count = index mapping
 			index = steppers.size();
-			
-			Integer [] pins = stepper.getPins();
-			if (pins.length != 2){
+
+			Integer[] pins = stepper.getPins();
+			if (pins.length != 2) {
 				error("Pololu stepper needs 2 pins defined - direction pin & step pin");
 				return false;
 			}
 
 			// attach index pin
 			sendMsg(STEPPER_ATTACH, index, type, pins[0], pins[1]);
-			
+
 			stepper.setIndex(index);
 
 			steppers.put(stepperName, stepper);
 			stepperIndex.put(index, stepper);
 
-			log.info(String.format("stepper STEPPER_TYPE_POLOLU index %d pin direction %d step %d attached ", index,  pins[0], pins[1]));
+			log.info(String.format("stepper STEPPER_TYPE_POLOLU index %d pin direction %d step %d attached ", index, pins[0], pins[1]));
 		} else {
 			error("unkown type of stepper");
 			return false;
@@ -1605,42 +1578,41 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 
 		return true;
 	}
-	
 
 	public void stepperMove(String name, Integer newPos) {
-		if (!steppers.containsKey(name)){
+		if (!steppers.containsKey(name)) {
 			error("%s stepper not found", name);
 			return;
 		}
-		
+
 		StepperControl stepper = steppers.get(name);
-		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())){
+		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())) {
 		} else {
 			error("unknown stepper type");
 			return;
 		}
-		
+
 		int lsb = newPos & 0xff;
 		int msb = (newPos >> 8) & 0xff;
-		
+
 		sendMsg(STEPPER_MOVE, stepper.getIndex(), msb, lsb);
-		
+
 		// TODO - call back event - to say arrived ?
-		
+
 		// TODO - blocking method
-		
+
 	}
-	
+
 	// --- stepper end ---
 
 	public void test(String port) throws Exception {
 
 		// get running reference to self
-		Propeller propeller = (Propeller)Runtime.start(getName(),"Propeller");
-		
-		boolean useGUI = true;	
-		
-		if (useGUI){
+		Propeller propeller = (Propeller) Runtime.start(getName(), "Propeller");
+
+		boolean useGUI = true;
+
+		if (useGUI) {
 			Runtime.createAndStart("gui", "GUIService");
 		}
 
@@ -1658,7 +1630,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start("sr04", "UltrasonicSensor");
 		Runtime.start("gui", "GUIService");
 
-		//sr04.attach(propeller, port, 7, 8);
+		// sr04.attach(propeller, port, 7, 8);
 		sr04.startRanging();
 
 		log.info("here");
@@ -1672,48 +1644,49 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		// getAnalogPins
 
 	}
-	
-	public boolean setServoEventsEnabled(String servoName, boolean enable){
+
+	public boolean setServoEventsEnabled(String servoName, boolean enable) {
 		log.info(String.format("setServoEventsEnabled %s %b", servoName, enable));
 		if (servos.containsKey(servoName)) {
 			ServoData sd = servos.get(servoName);
-			
-			if (enable){
+
+			if (enable) {
 				sendMsg(SERVO_EVENTS_ENABLE, sd.servoIndex, TRUE);
 			} else {
-				sendMsg(SERVO_EVENTS_ENABLE, sd.servoIndex, FALSE);				
+				sendMsg(SERVO_EVENTS_ENABLE, sd.servoIndex, FALSE);
 			}
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
 
-	public boolean setLoadTimingEnabled(boolean enable){
+	public boolean setLoadTimingEnabled(boolean enable) {
 		log.info(String.format("setLoadTimingEnabled %b", enable));
-		
-			if (enable){
-				sendMsg(LOAD_TIMING_ENABLE, TRUE);
-			} else {
-				sendMsg(LOAD_TIMING_ENABLE, FALSE);				
-			}
-			
+
+		if (enable) {
+			sendMsg(LOAD_TIMING_ENABLE, TRUE);
+		} else {
+			sendMsg(LOAD_TIMING_ENABLE, FALSE);
+		}
+
 		return enable;
 	}
-	
-	
+
 	// String functions to interface are important
-	// Interfaces should support both - "real" references and "String" references
-	// the String reference just "gets" the real reference - but this is important
+	// Interfaces should support both - "real" references and "String"
+	// references
+	// the String reference just "gets" the real reference - but this is
+	// important
 	// to support all protocols
-	
+
 	@Override
 	public void stepperReset(String stepperName) {
 		StepperControl stepper = steppers.get(stepperName);
 		sendMsg(STEPPER_RESET, stepper.getIndex());
 	}
-	
+
 	public void stepperStop(String name) {
 		StepperControl stepper = steppers.get(name);
 		sendMsg(STEPPER_STOP, stepper.getIndex());
@@ -1758,6 +1731,5 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 			Logging.logException(e);
 		}
 	}
-
 
 }
