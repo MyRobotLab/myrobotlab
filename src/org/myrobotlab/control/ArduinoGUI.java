@@ -199,6 +199,8 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 
 	class SerialMenuListener implements ActionListener {
 
+		public SerialMenuListener(){}
+		
 		public void actionPerformed(ActionEvent e) {
 			JRadioButtonMenuItem checkbox = (JRadioButtonMenuItem) e.getSource();
 			if (checkbox.isSelected()) {
@@ -226,22 +228,8 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 				if (arduino != null) {
 					myArduino = arduino; // FIXME - super updates registry state
 											// ?
-					boardPreferences = myArduino.getBoardPreferences(); // FIXME
-																		// -
-																		// class
-																		// member
-																		// has
-																		// precedence
-																		// - do
-																		// away
-																		// with
-																		// properties
-																		// !
-					boardName = boardPreferences.get("name"); // FIXME - class
-																// member has
-																// precedence -
-																// do away with
-																// properties !
+					boardPreferences = myArduino.getBoardPreferences(); 
+					boardName = boardPreferences.get("name");
 					pinList = myArduino.getPinList();
 
 					// update panels based on state change
