@@ -40,9 +40,6 @@ import static com.googlecode.javacv.cpp.opencv_core.cvSize;
 import static com.googlecode.javacv.cpp.opencv_imgproc.CV_TM_SQDIFF;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvMatchTemplate;
 
-import java.awt.image.BufferedImage;
-import java.util.HashMap;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

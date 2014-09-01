@@ -1,14 +1,6 @@
 package org.myrobotlab.java;
 
-import java.io.IOException;
-import java.io.StringWriter;
-
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaFileObject;
-
 import com.strobel.decompiler.Decompiler;
-import com.strobel.decompiler.DecompilerDriver;
-import com.strobel.decompiler.ITextOutput;
 import com.strobel.decompiler.PlainTextOutput;
 
 public class DynaComp {

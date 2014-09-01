@@ -59,12 +59,31 @@ public class ProgramAB extends Service {
 			return "ERROR: Core not loaded, please load core before chatting.";
 		}
 		String res = chatSession.multisentenceRespond(text);
+		invoke("publishResponse", res);
 		System.out.println(res);
 		return res;
 	}
 	
 	
+	/**
+	 * publishing method of the pub sub pair - with addResponseListener allowing subscriptions
+	 * pub/sub routines have the following pattern
+	 * 
+	 * publishing routine -> publishX - must be invoked to provide data to subscribers
+	 * subscription routine -> addXListener - simply adds a Service listener to the notify framework
+	 * any service which subscribes must implement -> onX(data) - this is where the data will be sent (the call-back)
+	 * 
+	 * @param response
+	 * @return
+	 */
+	public String publishResponse(String response){
+		return response;
+	}
 
+	public void addResponseListener(Service service){
+		addListener("publishResponse", service.getName(), "onResponse", String.class);
+	}
+	
 	public static void main(String s[]) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel("INFO");

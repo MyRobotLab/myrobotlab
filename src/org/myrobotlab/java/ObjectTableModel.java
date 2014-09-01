@@ -1,6 +1,6 @@
 package org.myrobotlab.java;
 
-import javax.swing.table.*;
+import javax.swing.table.DefaultTableModel;
 
 public class ObjectTableModel extends DefaultTableModel {
 	int rows = 0;

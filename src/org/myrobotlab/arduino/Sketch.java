@@ -33,9 +33,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.myrobotlab.logging.LoggerFactory;
-
 import org.myrobotlab.arduino.compiler.AvrdudeUploader;
 import org.myrobotlab.arduino.compiler.Compiler;
 import org.myrobotlab.arduino.compiler.PdePreprocessor;
@@ -43,8 +40,9 @@ import org.myrobotlab.arduino.compiler.RunnerException;
 import org.myrobotlab.arduino.compiler.Sizer;
 import org.myrobotlab.arduino.compiler.Uploader;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.serial.SerialDeviceException;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
+import org.slf4j.Logger;
 
 public class Sketch {
 	Arduino myArduino;

@@ -4,6 +4,7 @@ package org.myrobotlab.mapper.gui;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Panel;
+
 import javax.media.j3d.Canvas3D;
 
 import org.myrobotlab.mapper.sim.EnvironmentDescription;

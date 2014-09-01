@@ -36,8 +36,6 @@ import org.myrobotlab.control.widget.DigitalButton;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 

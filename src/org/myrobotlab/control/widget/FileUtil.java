@@ -9,9 +9,8 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
+import org.slf4j.Logger;
 
 
 

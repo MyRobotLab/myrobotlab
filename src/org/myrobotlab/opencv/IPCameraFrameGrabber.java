@@ -1,5 +1,10 @@
 package org.myrobotlab.opencv;
 
+import static com.googlecode.javacv.cpp.opencv_core.CV_8UC1;
+import static com.googlecode.javacv.cpp.opencv_core.cvMat;
+import static com.googlecode.javacv.cpp.opencv_core.cvReleaseImage;
+import static com.googlecode.javacv.cpp.opencv_highgui.cvDecodeImage;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,23 +26,6 @@ import com.googlecode.javacpp.BytePointer;
 import com.googlecode.javacv.FrameGrabber;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
-
-
-import static com.googlecode.javacv.cpp.opencv_calib3d.*;
-import static com.googlecode.javacv.cpp.opencv_contrib.*;
-import static com.googlecode.javacv.cpp.opencv_core.*;
-import static com.googlecode.javacv.cpp.opencv_features2d.*;
-import static com.googlecode.javacv.cpp.opencv_flann.*;
-import static com.googlecode.javacv.cpp.opencv_highgui.*;
-import static com.googlecode.javacv.cpp.opencv_imgproc.*;
-import static com.googlecode.javacv.cpp.opencv_legacy.*;
-import static com.googlecode.javacv.cpp.opencv_ml.*;
-import static com.googlecode.javacv.cpp.opencv_nonfree.*;
-import static com.googlecode.javacv.cpp.opencv_objdetect.*;
-import static com.googlecode.javacv.cpp.opencv_photo.*;
-import static com.googlecode.javacv.cpp.opencv_stitching.*;
-import static com.googlecode.javacv.cpp.opencv_video.*;
-import static com.googlecode.javacv.cpp.opencv_videostab.*;
 
 
 public class IPCameraFrameGrabber extends FrameGrabber {

@@ -11,11 +11,10 @@ import java.util.Observable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.slf4j.Logger;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-
-import org.myrobotlab.framework.Service;
+import org.slf4j.Logger;
 
 /**
  * This class demonstrates symbolic regression with genetic programming. The

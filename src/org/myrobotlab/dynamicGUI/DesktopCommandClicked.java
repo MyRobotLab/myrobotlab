@@ -1,5 +1,6 @@
 package org.myrobotlab.dynamicGUI;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
 
 public class DesktopCommandClicked implements Runnable{
   Component c;

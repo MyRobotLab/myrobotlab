@@ -1,9 +1,6 @@
 package org.myrobotlab.dynamicGUI;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.JDialog;
-import javax.swing.JButton;
-import java.awt.event.*;
+import javax.swing.JOptionPane;
 
 /**
  * Class SimpleInput - input class for input of simple input types

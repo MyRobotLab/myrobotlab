@@ -1,10 +1,17 @@
 package org.myrobotlab.dynamicGUI;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.undo.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.Document;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 
 public class ConsoleArea extends JScrollPane{
     final UndoManager undo = new UndoManager();

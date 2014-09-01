@@ -29,7 +29,9 @@ public class Shoutbox extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Shoutbox.class);
 
-	transient private WebGUI webgui;
+	transient WebGUI webgui;
+	transient ProgramAB chatbot;
+
 	transient private static NameProvider nameProvider = new DefaultNameProvider();
 
 	Integer port = 6565;
@@ -372,35 +374,6 @@ public class Shoutbox extends Service {
 			error("unAuthorized message !!! %s.%s from sender %s",msg.name, msg.method, msg.sender);
 		}
 	}
-	
-	public void onShout(WSMsg wsmsg) {
-		// webgui assigns client ip to Message.sender
-		Message m = wsmsg.msg;
-		info("%s", m);
-
-		String msg = (String) m.data[0];
-		// sender is put in by WebGUI / WSServer
-		// shout.ip = m.sender;
-		User user = users.getUser(wsmsg.socket);
-		
-		Shout shout = (Shout) Encoder.gson.fromJson(msg, Shout.class);
-		
-		if (user == null){
-			error("%s shouting but not found in ipToUser", m.sender);
-		}
-		
-		// transfer data - transfer personal properties
-		shout.user = user.user;
-		shout.ip = user.ip;
-		
-		updateSystemInfo(shout);
-		
-		shouts.add(shout);
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
-		webgui.sendToAll(out);
-	
-		archive(shout);
-	}
 
 	private Shout updateSystemInfo(Shout shout) {
 		SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
@@ -427,6 +400,86 @@ public class Shoutbox extends Service {
 		webgui.allowREST(true);
 	}
 
+	
+	public void onShout(WSMsg wsmsg) {
+		// webgui assigns client ip to Message.sender
+		Message m = wsmsg.msg;
+		info("%s", m);
+
+		String msg = (String) m.data[0];
+		// sender is put in by WebGUI / WSServer
+		// shout.ip = m.sender;
+		User user = users.getUser(wsmsg.socket);
+		
+		Shout shout = (Shout) Encoder.gson.fromJson(msg, Shout.class);
+		
+		if (user == null){
+			error("%s shouting but not found in ipToUser", m.sender);
+		}
+		
+		// transfer data - transfer personal properties
+		shout.user = user.user;
+		shout.ip = user.ip;
+		
+		updateSystemInfo(shout);
+		
+		if (shout.msg.startsWith("/")){
+			log.info("system message");
+			
+			//Object ret = null;
+			
+			if (shout.msg.startsWith("/startChatBot")){
+				invoke("startChatBot");
+			} 
+			
+			// TODO return json response back to sender
+			return;
+		}
+		
+		if (shout.msg.startsWith("@mrturing") || shout.msg.startsWith("@mr.turing") || shout.msg.startsWith("@mrt") || shout.msg.startsWith("@t") ){
+			chatWithChatbot(shout);
+		}
+		
+		shouts.add(shout);
+		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		webgui.sendToAll(out);
+	
+		archive(shout);
+	}
+	
+	private void chatWithChatbot(Shout shout) {
+		String msg = shout.msg;
+		if (shout.msg.startsWith("@mrturing")){
+			msg = msg.substring(9);
+		} else if (shout.msg.startsWith("@mr.turing")){
+			msg = msg.substring(10);
+		} else if (shout.msg.startsWith("@mrt")){
+			msg = msg.substring(4);
+		} else if (shout.msg.startsWith("@t")){
+			msg = msg.substring(2);
+		}		
+		chatbot.getResponse(msg);
+	}
+
+	public void startChatBot(){
+		chatbot = (ProgramAB)Runtime.start("chatbot", "ProgramAB");
+		chatbot.startSession("ProgramAB", "alice2");
+		chatbot.addResponseListener(this);
+	}
+	
+	public String onResponse(String chat){
+		log.info("chatbot shouting");
+		Shout shout = createShout("usermsg", chat);
+		shout.user = "mr.turing";
+		
+		shouts.add(shout);
+		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		webgui.sendToAll(out);
+		archive(shout);
+		
+		return chat;
+	}
+	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		try {

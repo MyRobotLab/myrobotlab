@@ -25,9 +25,7 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.myrobotlab.framework.Errors;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;

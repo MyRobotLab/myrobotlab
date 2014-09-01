@@ -1,6 +1,5 @@
 package org.myrobotlab.pickToLight;
 
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Controller {

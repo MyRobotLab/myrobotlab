@@ -28,10 +28,9 @@ package org.myrobotlab.serial.gnu;
 import gnu.io.CommDriver;
 import gnu.io.CommPort;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
-
 import org.myrobotlab.serial.gnu.BinaryCommPort.LineDriver;
+import org.slf4j.Logger;
 
 public class BinaryDriver implements CommDriver {
 

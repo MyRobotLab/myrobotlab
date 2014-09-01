@@ -30,7 +30,6 @@ import static com.googlecode.javacv.cpp.opencv_core.cvCopy;
 import static com.googlecode.javacv.cpp.opencv_core.cvCreateImage;
 import static com.googlecode.javacv.cpp.opencv_core.cvSize;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;

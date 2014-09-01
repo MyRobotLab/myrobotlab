@@ -27,19 +27,12 @@
 package org.myrobotlab.opencv;
 
 
-import static com.googlecode.javacv.cpp.opencv_core.cvCreateImage;
-import static com.googlecode.javacv.cpp.opencv_core.cvGetSize;
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2GRAY;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvCanny;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 import com.googlecode.javacv.ObjectFinder;
 import com.googlecode.javacv.ObjectFinder.Settings;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
-import com.googlecode.javacv.cpp.opencv_nonfree.SURF;
 
 public class OpenCVFilterSURF extends OpenCVFilter {
 

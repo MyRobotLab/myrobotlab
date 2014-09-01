@@ -2,7 +2,6 @@ package org.myrobotlab.control.widget;
 
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
-import org.fife.ui.autocomplete.ShorthandCompletion;
 
 /**
  * Implementation of AbstractCompletionProvider for standard Java keywords.

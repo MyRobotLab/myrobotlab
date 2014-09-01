@@ -2,8 +2,8 @@ package org.myrobotlab.opencv;
 
 import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImage;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 import com.googlecode.javacv.FrameGrabber;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;

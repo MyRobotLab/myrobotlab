@@ -61,8 +61,8 @@ import org.myrobotlab.control.widget.JIntegerField;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.serial.SerialDevice;
-import org.myrobotlab.service.Propeller;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.Propeller;
 import org.myrobotlab.service.data.Pin;
 
 /*

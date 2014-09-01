@@ -26,6 +26,7 @@
 package org.myrobotlab.mapper.sim;
 
 import java.text.DecimalFormat;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 

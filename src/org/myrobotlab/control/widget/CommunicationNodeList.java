@@ -8,14 +8,11 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.logging.LoggingFactory;
-
 import org.myrobotlab.service.OpenCV;
+import org.slf4j.Logger;
 
 public class CommunicationNodeList extends JPanel {
 

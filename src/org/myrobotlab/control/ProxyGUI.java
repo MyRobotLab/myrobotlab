@@ -28,11 +28,11 @@ package org.myrobotlab.control;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.myrobotlab.logging.LoggerFactory;
 import javax.swing.JTabbedPane;
 
-import org.myrobotlab.service.Proxy;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.Proxy;
 import org.slf4j.Logger;
 
 public class ProxyGUI extends ServiceGUI implements ActionListener {

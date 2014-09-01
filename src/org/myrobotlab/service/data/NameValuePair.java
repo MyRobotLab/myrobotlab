@@ -27,9 +27,7 @@ package org.myrobotlab.service.data;
 
 import java.io.Serializable;
 
-
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 

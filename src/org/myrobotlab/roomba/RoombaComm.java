@@ -22,8 +22,8 @@
 
 package org.myrobotlab.roomba;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 
 /**

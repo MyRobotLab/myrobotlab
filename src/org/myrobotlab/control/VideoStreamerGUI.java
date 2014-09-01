@@ -28,13 +28,12 @@ package org.myrobotlab.control;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
-import org.myrobotlab.service.VideoStreamer;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.VideoStreamer;
 import org.slf4j.Logger;
 
 public class VideoStreamerGUI extends ServiceGUI implements ActionListener {
