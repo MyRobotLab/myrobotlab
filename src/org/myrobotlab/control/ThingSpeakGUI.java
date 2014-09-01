@@ -34,16 +34,14 @@ import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
-
-import org.myrobotlab.service.ThingSpeak;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.ThingSpeak;
+import org.slf4j.Logger;
 
 public class ThingSpeakGUI extends ServiceGUI implements ActionListener {
 

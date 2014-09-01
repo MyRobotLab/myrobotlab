@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.util.Map.Entry;
 
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;

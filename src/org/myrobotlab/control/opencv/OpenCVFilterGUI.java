@@ -35,11 +35,8 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 

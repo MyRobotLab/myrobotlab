@@ -1,10 +1,8 @@
 package org.myrobotlab.tracking;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
-
 import org.myrobotlab.service.Servo;
-import org.myrobotlab.service.Tracking;
+import org.slf4j.Logger;
 
 /**
  * ControlSystem is responsible for the underlying control of the tracking

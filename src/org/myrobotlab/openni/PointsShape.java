@@ -49,11 +49,10 @@ import javax.media.j3d.Shape3D;
 import javax.media.j3d.TransparencyAttributes;
 import javax.media.j3d.TriangleArray;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-
 import org.myrobotlab.service.data.SensorData;
+import org.slf4j.Logger;
 
 public class PointsShape extends Shape3D implements GeometryUpdater {
 

@@ -66,7 +66,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Python.Script;
-import org.myrobotlab.service.GUIService;
 import org.myrobotlab.ui.autocomplete.MRLCompletionProvider;
 
 /**

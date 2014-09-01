@@ -38,15 +38,12 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
-import org.slf4j.Logger;
-import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
-
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
-import org.myrobotlab.service.Runtime;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.Runtime;
+import org.slf4j.Logger;
 
 import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;

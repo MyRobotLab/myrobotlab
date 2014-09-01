@@ -29,14 +29,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.myrobotlab.logging.LoggerFactory;
-
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.myrobotlab.control.widget.JavaCompletionProvider;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.reflection.Locator;
 import org.myrobotlab.service.GUIService;
+import org.slf4j.Logger;
 
 /**
  * @author SwedaKonsult

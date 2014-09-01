@@ -1,6 +1,5 @@
 package org.myrobotlab.control.widget;
 
-import java.awt.Component;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -13,8 +12,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.service.GUIService;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;

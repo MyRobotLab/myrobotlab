@@ -18,7 +18,6 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
-import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.data.Point2Df;

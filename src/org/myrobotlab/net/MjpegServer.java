@@ -1,6 +1,5 @@
 package org.myrobotlab.net;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,8 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
-
-import javax.imageio.ImageIO;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;

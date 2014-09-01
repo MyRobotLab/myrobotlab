@@ -32,15 +32,14 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
+import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.WolframAlpha;
 import org.myrobotlab.service._TemplateService;
-import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
 public class WolframAlphaGUI extends ServiceGUI implements ActionListener {

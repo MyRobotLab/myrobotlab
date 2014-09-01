@@ -41,7 +41,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLDecoder;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -59,7 +58,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipException;
 
-import org.myrobotlab.framework.Bootstrap;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;

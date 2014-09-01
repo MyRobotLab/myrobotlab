@@ -2,10 +2,9 @@ package org.myrobotlab.opencv;
 
 import java.util.LinkedList;
 
-import org.slf4j.Logger;
-import org.myrobotlab.logging.LoggerFactory;
-
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 import com.googlecode.javacv.FrameGrabber;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;

@@ -26,7 +26,6 @@
 package org.myrobotlab.framework;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class RoutingEntry implements Serializable {
 	private static final long serialVersionUID = 1L;

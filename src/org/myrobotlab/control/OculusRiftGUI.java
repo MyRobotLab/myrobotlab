@@ -9,7 +9,6 @@ import javax.swing.JTabbedPane;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.OculusRift;
-import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.OculusRift.RiftFrame;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.slf4j.Logger;

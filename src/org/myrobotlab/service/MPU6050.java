@@ -7,8 +7,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.SerialDevice;
 import org.myrobotlab.serial.SerialDeviceEvent;
-import org.myrobotlab.service.Arduino.SensorData;
-import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 
 public class MPU6050 extends Service {

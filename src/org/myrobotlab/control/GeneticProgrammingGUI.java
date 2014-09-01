@@ -32,22 +32,20 @@ import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.slf4j.Logger;
-import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
-
 import org.myrobotlab.gp.GPMessageBestFound;
 import org.myrobotlab.gp.GPMessageEvaluatingIndividual;
 import org.myrobotlab.gp.RealPoint;
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.interfaces.VideoGUISource;
+import org.slf4j.Logger;
 
 public class GeneticProgrammingGUI extends ServiceGUI implements ListSelectionListener, VideoGUISource {
 

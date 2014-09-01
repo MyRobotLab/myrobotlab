@@ -32,7 +32,6 @@ import java.net.Socket;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.ServiceEnvironment;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 // http://zerioh.tripod.com/ressources/sockets.html
 class CommObjectStreamOverTCP extends Thread implements Communicator {
 	

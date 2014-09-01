@@ -28,19 +28,17 @@ import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JList;
+import javax.swing.JTabbedPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.slf4j.Logger;
-import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
-
 import org.myrobotlab.control.widget.Number;
 import org.myrobotlab.image.SerializableImage;
-import org.myrobotlab.service.Wii.IRData;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.Wii.IRData;
 import org.myrobotlab.service.interfaces.VideoGUISource;
+import org.slf4j.Logger;
 
 import wiiusej.values.IRSource;
 

@@ -26,20 +26,18 @@
 package org.myrobotlab.opencv;
 
 import static com.googlecode.javacv.cpp.opencv_core.cvAnd;
-import static com.googlecode.javacv.cpp.opencv_core.*;
-import static com.googlecode.javacv.cpp.opencv_core.cvConvertScale;
-import static com.googlecode.javacv.cpp.opencv_highgui.*;
+import static com.googlecode.javacv.cpp.opencv_core.cvRect;
+import static com.googlecode.javacv.cpp.opencv_core.cvResetImageROI;
+import static com.googlecode.javacv.cpp.opencv_core.cvSetImageROI;
+import static com.googlecode.javacv.cpp.opencv_highgui.CV_LOAD_IMAGE_GRAYSCALE;
+import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImage;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-
-import javax.imageio.ImageIO;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.CanvasFrame;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 public class OpenCVFilterAnd extends OpenCVFilter {

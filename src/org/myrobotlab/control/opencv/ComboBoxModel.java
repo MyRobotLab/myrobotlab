@@ -11,8 +11,6 @@ import javax.swing.MutableComboBoxModel;
 import javax.swing.event.ListDataListener;
 
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.slf4j.Logger;
 
 public class ComboBoxModel implements  MutableComboBoxModel, ActionListener

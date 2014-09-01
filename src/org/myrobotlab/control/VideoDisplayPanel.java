@@ -12,8 +12,6 @@ import javax.swing.JPanel;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 

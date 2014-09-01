@@ -1,8 +1,8 @@
 package org.myrobotlab.java;
-import java.awt.*;
-import java.lang.reflect.*;
-import javax.swing.*;
-import javax.swing.table.*;
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
+import javax.swing.table.AbstractTableModel;
 
 public class ThreadViewerTableModel extends AbstractTableModel {
 	private Object dataLock; 

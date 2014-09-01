@@ -3,8 +3,6 @@ package org.myrobotlab.framework;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.myrobotlab.logging.Logging;
-
 /**
  *  WARNING - this class used to extend Exception - but the gson serializer would stack overflow
  *  with self reference issue

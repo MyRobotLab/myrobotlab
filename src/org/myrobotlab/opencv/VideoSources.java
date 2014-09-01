@@ -1,10 +1,7 @@
 package org.myrobotlab.opencv;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-
-import org.myrobotlab.logging.Logging;
 
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 

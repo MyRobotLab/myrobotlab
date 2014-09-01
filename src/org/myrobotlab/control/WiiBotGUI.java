@@ -32,16 +32,14 @@ import java.text.SimpleDateFormat;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
-
 import org.myrobotlab.service.GUIService;
+import org.slf4j.Logger;
 
 public class WiiBotGUI extends ServiceGUI implements ListSelectionListener {
 

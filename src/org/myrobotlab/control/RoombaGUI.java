@@ -43,6 +43,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -52,12 +53,10 @@ import javax.swing.text.DefaultCaret;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.roomba.RoombaComm;
+import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Roomba;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
 public class RoombaGUI extends ServiceGUI implements ListSelectionListener, ActionListener, ChangeListener, KeyListener {
