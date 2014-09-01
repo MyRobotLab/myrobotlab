@@ -486,7 +486,8 @@ public class Repo implements Serializable {
 				// FIXME - native move up one directory !!! - from denormalized
 				// back to normalized Yay!
 				// maybe look for PlatformId in path ?
-				if (ret == 1 && "zip".equalsIgnoreCase(artifact.getType())) {
+				// ret > 0 &&  <-- retrieved - 
+				if ("zip".equalsIgnoreCase(artifact.getType())) {
 					String filename = String.format("libraries/zip/%s.zip", artifact.getName());
 					info("unzipping %s", filename);
 					Zip.unzip(filename, "./");
