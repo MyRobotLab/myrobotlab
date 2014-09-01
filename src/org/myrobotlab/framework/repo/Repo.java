@@ -72,6 +72,8 @@ public class Repo implements Serializable {
 	 */
 	public final String runtimeName;
 
+	private boolean getRemoteRepo = false;
+
 	/**
 	 * Repo default constructor is needed by serialization, although the
 	 * initialization procedures in the constructor will add incorrect data if
@@ -134,15 +136,14 @@ public class Repo implements Serializable {
 			localServiceData = ServiceData.getLocal();
 			return localServiceData;
 		} catch (FileNotFoundException e) {
-			info("local service data file not found");
+			info("local service data file not found - fetching remote");
+			getRemoteRepo = true;
 		}
 
 		// FIXME FIXME FIXME - DO NOT AUTO GRAB THE LATEST !!!
 		// failed getting local - try remote
 		// return from remote - last attempt
-		boolean checkRepoOnStartup = false;
-
-		if (checkRepoOnStartup) {
+		if (getRemoteRepo) {
 			remoteServiceData = getServiceDataFromRepo();
 
 			if (remoteServiceData != null) {
@@ -494,7 +495,6 @@ public class Repo implements Serializable {
 					info("unzipped %s", filename);
 				}
 			}
-
 		}
 
 		return report;
