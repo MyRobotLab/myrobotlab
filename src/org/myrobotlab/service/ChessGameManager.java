@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -22,6 +23,16 @@ public class ChessGameManager extends Service {
 	transient WebGUI webgui;
 	transient Serial serial;
 	transient Speech speech;
+	
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+
+		// put peer definitions in
+		peers.put("webgui", "WebGUI", "webgui");
+		peers.put("serial", "Serial", "serial");
+		peers.put("speech", "Speech", "speech");
+		return peers;
+	}
 
 	public ChessGameManager(String n) {
 		super(n);
@@ -31,6 +42,7 @@ public class ChessGameManager extends Service {
 	public String getDescription() {
 		return "used as a general template";
 	}
+	
 
 	public void test() {
 
