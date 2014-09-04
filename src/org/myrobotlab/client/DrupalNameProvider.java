@@ -26,9 +26,9 @@ public class DrupalNameProvider implements NameProvider {
 					return ip;
 				}
 			}
-			String sql = String
-					.format("SELECT users.name, sessions.uid, sessions.hostname FROM myrobotlab.users INNER JOIN myrobotlab.sessions ON sessions.uid=users.uid WHERE sessions.hostname = '%s'  ORDER BY sessions.uid DESC",
-							 ip);
+			String sql = String.format("SELECT users.name, sessions.uid, sessions.hostname FROM myrobotlab.users " + 
+						" INNER JOIN myrobotlab.sessions ON sessions.uid=users.uid "
+					+ " WHERE sessions.hostname = '%s' " + " ORDER BY sessions.uid DESC", ip);
 
 			Statement statement = this.conn.createStatement();
 			log.info("executing query");
