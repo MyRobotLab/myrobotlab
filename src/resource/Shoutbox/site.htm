@@ -8,21 +8,24 @@ a, span.link {
 	width: 200px;
 	height: 600px;
 	overflow: auto;
-margin-right: 10px;
+	margin-right: 10px;
 	font: 12px 'lucida grande',tahoma,verdana,arial,sans-serif;
+	z-index: 99999;
 }
 .chat_wrapper .message_box {
 	height: 650px;
 	overflow: auto;
-padding: 10px;
+	padding: 10px;
+	z-index: 99999;
 }
 .chat_wrapper .panel input{
-        width: 90%;
-padding: 10px 10px 10px 10px;
+    width: 90%;
+	padding: 10px 10px 10px 10px;
+	z-index: 99999;
 }
-.system_msg{color: #BDBDBD;font-style: italic;}
-.user_name{font-weight:bold;}
-.user_message{color: #336600;}
+.system_msg{color: #BDBDBD;font-style: italic; 	z-index: 99999;}
+.user_name{font-weight:bold; 	z-index: 99999;}
+.user_message{color: #336600; 	z-index: 99999;}
 --></style>
 	<link href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" rel="stylesheet" />
 	<script src="//code.jquery.com/jquery-1.10.2.js"></script><script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script><script language="javascript" type="text/javascript">
@@ -31,6 +34,7 @@ padding: 10px 10px 10px 10px;
 // reduce - no local vars - create full objects - big constructor
 
 var myUser = "";
+var expanded = false;
 
 function Message() {
 	this.data = [];
@@ -143,6 +147,28 @@ $(document).ready(function(){
 
 	};
 
+	// buttons
+	$(function() {
+	    $( "button" )
+	      .button()
+	      .click(function( event ) {
+	        event.preventDefault();
+	        if (expanded){
+				$(".chat_wrapper, .system_msg, .system_message_box, #message_box").animate({
+							width: "200px"
+				});
+				$("#expand").text("+");
+				expanded = false;
+	        } else {
+				$(".chat_wrapper, .system_msg, .system_message_box, #message_box").animate({
+							width: "1250px"
+				});
+				$("#expand").text("-");
+				expanded = true;
+			}
+	      });
+  	});
+
 	// menu
 	$(function() {
 		$( "#accordion" ).accordion({ heightStyle: "content", collapsible: true, active: false });
@@ -175,7 +201,7 @@ $(document).ready(function(){
 		}
 		if(type == 'system')
 		{
-			$('#message_box').prepend("<div class=\"system_msg\">"+umsg+"</div>");
+			$('#system_message_box').html("<div class=\"system_msg\">"+umsg+"</div>");
 		}
 
 		// system updates
@@ -187,7 +213,9 @@ $(document).ready(function(){
 <div class="chat_wrapper">
 	<div class="panel">
 		<input id="message" name="message" placeholder="Message" type="text" /></div>
-	<div id="id"></div>
-	<div id="system"></div>
+	<button id="expand">+</button>
+	<div id="id" class="system_msg"></div>
+	<div id="system" class="system_msg"></div>
+	<div id="system_message_box" class="system_msg"></div>
 	<div id="message_box"></div>
 </div>

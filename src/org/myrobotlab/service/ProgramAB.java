@@ -60,7 +60,7 @@ public class ProgramAB extends Service {
 		}
 		String res = chatSession.multisentenceRespond(text);
 		invoke("publishResponse", res);
-		System.out.println(res);
+		log.info(res);
 		return res;
 	}
 	
@@ -87,6 +87,7 @@ public class ProgramAB extends Service {
 	public static void main(String s[]) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel("INFO");
+		
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 		ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice", "ProgramAB");
@@ -95,7 +96,7 @@ public class ProgramAB extends Service {
 		String botName = "alice2";
 		alice.startSession(progABPath, botName); 
 		String response = alice.getResponse("How are you?");
-		System.out.println("Alice" + response);		
+		log.info("Alice" + response);		
 	}
 
 }
