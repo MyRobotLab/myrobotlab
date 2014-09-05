@@ -137,6 +137,8 @@ public class Runtime extends Service implements MessageListener {
 	private List<String> jvmArgs;
 	private List<String> args;
 
+	private boolean shutdownAfterUpdate = false;
+
 	/**
 	 * global startingArgs - whatever came into main each runtime will have its
 	 * individual copy
@@ -363,6 +365,19 @@ public class Runtime extends Service implements MessageListener {
 		invoke("updatesFinished", report.reports);
 		return report;
 	}
+	
+	/**
+	 * command line update
+	 * update myrobotlab.jar only
+	 * no user interaction is required - NO RESTART ONLY SHUTDOWN !!!
+	 * no endless loop of bootstrap getting -update param after update :P
+	 * @return
+	 */
+	public UpdateReport update() {
+		// we are going to force a shutdown after the update
+		shutdownAfterUpdate = true;
+		return runtime.applyUpdate();
+	}
 
 	/**
 	 * FIXME - if true - service data xml needs to be pulled from repo
@@ -444,12 +459,21 @@ public class Runtime extends Service implements MessageListener {
 			info("updating myrobotlab.jar");
 			if (runtime.repo.getLatestJar()) {
 
+				if (shutdownAfterUpdate){
+					log.info("shutdownAfterUpdate = true");
+					releaseAll();
+					System.exit(0);
+				}
+				
 				if (autoRestartAfterUpdate) {
+					log.info("autoRestartAfterUpdate = true");
 					// asynch call to get user or config data to determine if a
 					// restart
 					// is desired
 					restart();
 				} else {
+					log.info("autoRestartAfterUpdate = false");
+					log.info("needsRestart = true");
 					// async call to request permission to restart
 					// publish requestSpawnBootStrap
 					needsRestart = true;
@@ -1289,13 +1313,15 @@ public class Runtime extends Service implements MessageListener {
 	 */
 	static void mainHelp() {
 		System.out.println(String.format("Runtime %s", FileIO.resourceToString("version.txt")));
-		System.out.println("-h       			# help ");
-		System.out.println("-v        			# print version");
-		System.out.println("-update  			# force update");
-		System.out.println("-runtimeName  		# rename the Runtime service - prevents multiple instance name collisions");
-		System.out.println("-logToConsole       # redirects logging to console");
-		System.out.println("-logLevel        	# log level [DEBUG | INFO | WARNING | ERROR | FATAL]");
-		System.out.println("-service [Service Name] [Service Type] ...  # create and start list of services, e.g. -service gui GUIService");
+		System.out.println("-h --help			                       # help ");
+		System.out.println("-v --version		                       # print version");
+		System.out.println("-update   			                       # update myrobotlab");
+		System.out.println("-invoke name method [param1 param2 ...]    # invoke a method of a service");
+		System.out.println("-install [ServiceType1 ServiceType2 ...]   # install services - if no ServiceTypes are specified install all");
+		System.out.println("-runtimeName <runtime name>                # rename the Runtime service - prevents multiple instance name collisions");
+		System.out.println("-logToConsole                              # redirects logging to console");
+		System.out.println("-logLevel <DEBUG | INFO | WARNING | ERROR> # log level");
+		System.out.println("-service <name1 Type1 name2 Type2 ...>     # create and start list of services, e.g. -service gui GUIService");
 		System.out.println("example:");
 		String helpString = "java -Djava.library.path=./libraries/native/x86.32.windows org.myrobotlab.service.Runtime -service gui GUIService -logLevel INFO -logToConsole";
 		System.out.println(helpString);
@@ -2182,10 +2208,10 @@ public class Runtime extends Service implements MessageListener {
 			// http://blog.cedarsoft.com/2010/11/setting-java-library-path-programmatically/
 			// but does not work
 
-			if (cmdline.containsKey("-update")) {
+			if (cmdline.containsKey("-install")) {
 				// force all updates
-				ArrayList<String> services = cmdline.getArgumentList("-update");
-				Repo repo = new Repo("update");
+				ArrayList<String> services = cmdline.getArgumentList("-install");
+				Repo repo = new Repo("install");
 				if (services.size() == 0) {
 					repo.retrieveAll();
 					return;
@@ -2194,10 +2220,16 @@ public class Runtime extends Service implements MessageListener {
 						repo.retrieveServiceType(services.get(i));
 					}
 				}
+			} else if (cmdline.containsKey("-update")) {
+				// update myrobotlab
+				runtime = Runtime.getInstance();
+				runtime.update();
+
 			} else {
 				createAndStartServices(cmdline);
 			}
-
+			
+			
 			invokeCommands(cmdline);
 
 		} catch (Exception e) {
@@ -2206,5 +2238,6 @@ public class Runtime extends Service implements MessageListener {
 			Service.sleep(2000);
 		}
 	}
+
 
 }
