@@ -92,7 +92,7 @@
 	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
 -->
 <!-- FIXME - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="dist">
+<project name="myrobotlab" default="release">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
@@ -444,7 +444,7 @@
 		<echo message="${upload_url}" />
 	</target>
 
-	<target name="uploadMyrobotlab.jar" depends="compile, getAssetsURL">
+	<target name="release" depends="compile, getAssetsURL">
 		<echo message="${myrobotlab.jar}" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
@@ -460,7 +460,7 @@
 		</http>
 	</target>
 
-	<target name="uploadZip" depends="dist, getAssetsURL, uploadMyrobotlab.jar">
+	<target name="uploadZip" depends="dist, getAssetsURL, release">
 		<echo message="${myrobotlab.jar}" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
