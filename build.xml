@@ -92,14 +92,14 @@
 	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
 -->
 <!-- FIXME - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="uploadMyrobotlab.jar">
+<project name="myrobotlab" default="dist">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
 
-	<!-- property name="tag" value="1.0.49" / -->
+	<property name="tag" value="1.0.58" />
 	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
@@ -313,6 +313,8 @@
 		<pathelement location="../repo/org.saintandreas.jovr/0.3.2.4/jovr-0.3.2.4.jar" />
 		<pathelement location="../repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar" />
 		<pathelement location="../repo/org.alicebot.ab/0.0.6.26/Ab.jar"/>
+		<pathelement location="../repo/se.comhem.chess/1.1.2/cuckoo112.jar"/>
+		<pathelement location="../repo/javazoom.spi/1.9.5/mp3spi1.9.5.jar"/>
 	</path>
 
 	<!-- class path for testing FIXME - add junit normalize git -->
