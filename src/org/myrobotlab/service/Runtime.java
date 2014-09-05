@@ -2220,17 +2220,23 @@ public class Runtime extends Service implements MessageListener {
 						repo.retrieveServiceType(services.get(i));
 					}
 				}
-			} else if (cmdline.containsKey("-update")) {
+			}
+			
+			if (cmdline.containsKey("-update")) {
 				// update myrobotlab
 				runtime = Runtime.getInstance();
 				runtime.update();
 
-			} else {
+			} 
+			
+			if (cmdline.containsKey("-service"))
+			{
 				createAndStartServices(cmdline);
 			}
 			
-			
-			invokeCommands(cmdline);
+			if (cmdline.containsKey("-invoke")){
+				invokeCommands(cmdline);
+			}
 
 		} catch (Exception e) {
 			Logging.logException(e);
