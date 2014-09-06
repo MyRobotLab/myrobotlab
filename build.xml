@@ -92,7 +92,7 @@
 	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
 -->
 <!-- FIXME (NETWORK ANT VS NETWORK IDE VS NETWORK URLConnection VS NETWORK HTTP :P) - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="release">
+<project name="myrobotlab" default="dist">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
@@ -119,7 +119,7 @@
 	</taskdef>
 
 	<!-- ================ init begin ================= -->
-	<target name="init" depends="repoDoesNotExists, repoExists">
+	<target name="init" depends="repoClone">
 
 		<echo message="compiling with ${ant.java.version}" />
 		<echoproperties/>
@@ -334,6 +334,7 @@
 		<condition property="git.pull">
 			<and>
 				<available file="../repo" />
+				<istrue value="${network.available}" />
 			</and>
 		</condition>
 
@@ -342,7 +343,6 @@
 				<not>
 					<available file="../repo" />
 				</not>
-				<istrue value="${network.available}" />
 			</and>
 		</condition>
 	</target>
@@ -361,6 +361,14 @@
 			<arg value="https://github.com/MyRobotLab/repo.git" />
 			<arg value="../repo" />
 		</exec>
+	</target>
+	<target name="repoClone">
+			<echo message="git clone https://github.com/MyRobotLab/repo.git ../repo" />
+			<exec executable="git">
+				<arg value="clone" />
+				<arg value="https://github.com/MyRobotLab/repo.git" />
+				<arg value="../repo" />
+			</exec>
 	</target>
 	<!-- =============== repo end  =============== -->
 	<!--
