@@ -31,6 +31,8 @@ public class Shoutbox extends Service {
 
 	transient WebGUI webgui;
 	transient ProgramAB chatbot;
+	
+	ArrayList<String> chatbotNames = new ArrayList<String>();
 
 	transient private static NameProvider nameProvider = new DefaultNameProvider();
 
@@ -436,7 +438,7 @@ public class Shoutbox extends Service {
 			return;
 		}
 		
-		if (shout.msg.startsWith("@mrturing") || shout.msg.startsWith("@mr.turing") || shout.msg.startsWith("@mrt") || shout.msg.startsWith("@t") ){
+		if (shout.msg.contains("@mrturing") || shout.msg.startsWith("@mr.turing") || shout.msg.startsWith("@mrt") || shout.msg.startsWith("@t") ){
 			chatWithChatbot(shout);
 		}
 		
@@ -445,6 +447,16 @@ public class Shoutbox extends Service {
 		webgui.sendToAll(out);
 	
 		archive(shout);
+	}
+	
+	public boolean shoutForChatBot(String msg){
+		// load possible names init map
+		
+		// search for them
+		
+		// remove them
+		
+		return true;
 	}
 	
 	private void chatWithChatbot(Shout shout) {
