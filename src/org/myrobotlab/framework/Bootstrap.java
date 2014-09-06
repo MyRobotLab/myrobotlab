@@ -262,7 +262,7 @@ public class Bootstrap {
 			} catch (FileSystemException e) {
 				try {
 					// FIXME FIXME - normalize the start !!!!
-					log.info("file myrobotlab.jar is locked - ejecting bootstrap.jar");
+					log.info(String.format("file myrobotlab.jar is locked - ejecting bootstrap.jar - %s", e.getMessage()));
 					createBootstrapJar();
 
 					ArrayList<String> bootArgs = new ArrayList<String>();
@@ -274,11 +274,13 @@ public class Bootstrap {
 					for (int i = 0; i < in.length; ++i) {
 						bootArgs.add(in[i]);
 					}
-					String cmd = formatList(outArgs);
-					log.info(String.format("bootstrap.jar spawning -> %s", cmd));
-					ProcessBuilder builder = new ProcessBuilder(cmd);
+					String cmd = formatList(bootArgs);
+					log.info(String.format("bootstrap.jar spawning -> [%s]", cmd));
+					ProcessBuilder builder = new ProcessBuilder(bootArgs);
 					Process process = builder.start();
 
+					/*
+					FIXME - THIS WILL BLOCK AND HOLD THE PROCESS OPEN !!!
 					StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
 
 					// any output?
@@ -289,9 +291,14 @@ public class Bootstrap {
 					// start gobblers
 					outputGobbler.start();
 					errorGobbler.start();
+					*/
 
-					log.info(String.format("done - good luck new bootstrap - exitValue %d", process.exitValue()));
+					// FIXME process.exitValue() will throw if process has not exited
+					//log.info(String.format("done - good luck new bootstrap - exitValue %d", process.exitValue()));
+					
+					log.info(String.format("terminating - good luck new bootstrap :)"));
 					PreLogger.close();
+					System.exit(0);
 					return;
 				} catch (Exception ex) {
 					log.error("PANIC - failed to create bootstrap - terminating - bye :(");
@@ -359,6 +366,7 @@ public class Bootstrap {
 		// http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id
 		Process process = builder.start();
 
+		/* FIXME ??? MAYBE THIS IS OK - BUT ON THE BOOTLOADER IT HANGS
 		StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
 
 		// any output?
@@ -369,6 +377,7 @@ public class Bootstrap {
 		// start gobblers
 		outputGobbler.start();
 		errorGobbler.start();
+		*/
 
 		// int ret = process.waitFor();
 		// log.info(String.format("process returned %d", ret));

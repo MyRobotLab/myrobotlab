@@ -86,5 +86,7 @@
 	<classpathentry kind="lib" path="/repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.alicebot.ab/0.0.6.26/Ab.jar"/>
 	<classpathentry kind="lib" path="/repo/com.oracle.mysql/5.1.32/mysql-connector-java-5.1.32-bin.jar"/>
+	<classpathentry kind="lib" path="/repo/se.comhem.chess/1.1.2/cuckoo112.jar"/>
+	<classpathentry kind="lib" path="/repo/javazoom.spi/1.9.5/mp3spi1.9.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

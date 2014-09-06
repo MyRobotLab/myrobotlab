@@ -38,7 +38,7 @@ public class DrupalNameProvider implements NameProvider {
 			if (records.next()) {
 				user = records.getString("name");
 				log.info(String.format("found [%s] for ip %s", user, ip));
-				if ((user == null) || (user == "")) {
+				if ((user == null) || (user.trim() == "")) {
 					log.info("user blank - return ip");
 					return ip;
 				}
