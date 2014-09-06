@@ -1328,8 +1328,8 @@ public class InMoovGestureCreator extends Service {
 					servoitemholder[i1][i2].min.setText(min + "");
 					servoitemholder[i1][i2].res.setText(res + "");
 					servoitemholder[i1][i2].max.setText(max + "");
-					servoitemholder[i1][i2].sli.setMinimum(min);
-					servoitemholder[i1][i2].sli.setMaximum(max);
+//					servoitemholder[i1][i2].sli.setMinimum(min);
+//					servoitemholder[i1][i2].sli.setMaximum(max);
 					servoitemholder[i1][i2].sli.setValue(res);
 				}
 			}
