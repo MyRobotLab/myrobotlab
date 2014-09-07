@@ -1039,8 +1039,11 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 										
 								// convert
 								if (paramType == ARDUINO_TYPE_INT){
-									params[i] = ((msg[++paramIndex] & 0xFF) << 8) + (msg[++paramIndex] & 0xFF);
-									log.info(String.format("parameter %d is type ARDUINO_TYPE_INT value %d", i, params[i]));
+									//params[i] =
+									int x = ((msg[++paramIndex] & 0xFF) << 8) + (msg[++paramIndex] & 0xFF);
+									if (x > 32767){ x = x - 65536; }
+									params[i] = x;
+									log.info(String.format("parameter %d is type ARDUINO_TYPE_INT value %d", i, x));
 									++paramIndex;
 								} else {
 									error("CUSTOM_MSG - unhandled type %d", paramType);
@@ -1051,8 +1054,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							}
 							
 							// how to reflectively invoke multi-param method (Python?)
-							send(customEventListener.getName(), "onCustomMsg", params);
-							//customEventListener.invoke("onCustomMsg", params);
+							if (customEventListener != null){
+								send(customEventListener.getName(), "onCustomMsg", params);
+							}
+							
 							break;
 						}
 						
