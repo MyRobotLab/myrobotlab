@@ -1,27 +1,20 @@
 from __future__ import division
+
+arduino = Runtime.start("arduino","Arduino")
 i01 = Runtime.createAndStart("i01","InMoov")
 i01.startHead("COM5")
-serial = Runtime.createAndStart("serial","Serial")
-serial.connect("COM3",38400,8,1,0)
-serial.addListener("publishByte","python","prova")
-ax = ""
+arduino.addCustomMsgListener(python)
+arduino.connect("COM3")
+
 counter = 0
-servoint = 0
+servo = 90
 
 
-def prova( data ):
-    global ax
-    global counter
-    global servoint
-    code = (data & 0xff)
-    if (code !=10 and code !=13):
-      ax += chr(code)
-    elif (code == 10):
-      servo = (30 +(((int(ax) + 18832)/(18832 + 18832))*(150 - 30)))
-      servoint = int(servo)
-      print servoint
-      counter += 1
-      ax= ""
-      if (counter == 10):
-        i01.head.neck.moveTo(servoint)
-        counter = 0
+def onCustomMsg(ax ,ay ,az):
+  global counter
+  global servo
+  counter += 1
+  servo = (20 +(((ax - 20000)/(-20000 - 20000))*(160 - 20)))
+  if (counter == 25):
+      i01.head.neck.moveTo(int(servo))
+      counter = 0
