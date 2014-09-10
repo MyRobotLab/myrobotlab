@@ -38,6 +38,9 @@ public class XMPP extends Service implements Communicator, MessageListener {
 	public final static Logger log = LoggerFactory.getLogger(XMPP.class.getCanonicalName());
 	static final int packetReplyTimeout = 500; // millis
 
+	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS 
+	// FIXME - handle multiple user accounts
+	
 	// not sure how to initialize requirements .. probably a register Security
 	// event
 	// thread safe ???
@@ -610,7 +613,7 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			XMPP xmpp1 = (XMPP) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
 			Runtime.createAndStart(String.format("clock%d", i), "Clock");
 			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
-			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "hatchMe!");
+			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "xxxx");
 			xmpp1.addAuditor("Greg Perry");
 			// xmpp1.sendMessage("hello from incubator by name " +
 			// System.currentTimeMillis(), "Greg Perry");
@@ -618,53 +621,6 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			if (true) {
 				return;
 			}
-
-			// END--------------------------------------------
-
-			/*
-			 * XMPP xmpp = new XMPP("xmpp"); xmpp.startService();
-			 * 
-			 * // xmpp.connect("talk.google.com", 5222, "orbous@myrobotlab.org",
-			 * // "mrlRocks!"); xmpp.connect("talk.google.com", 5222,
-			 * "incubator@myrobotlab.org", "hatchMe!");
-			 * xmpp.sendMessage("hello from incubator xmpp name", "Greg Perry");
-			 * 
-			 * // xmpp.getUserList(); // Roster roster = xmpp.getRoster();
-			 * xmpp.sendMessage("hello from incubator by user",
-			 * "23d3ufvoz10m30jfv4adl5daav@public.talk.google.com");
-			 * xmpp.addRelay("Greg Perry");
-			 * xmpp.sendMessage("message from the REAL INCUBATOR !!!",
-			 * "Orbous Mundus"); xmpp.sendMessage("/runtime/getUptime",
-			 * "Orbous Mundus"); xmpp.sendMessage("/runtime/getUptime",
-			 * "Orbous Mundus"); // xmpp.sendMessage("/runtime/getUptime", //
-			 * "34duqo9xzvxh20rm34ihnf2cln@public.talk.google.com");
-			 * 
-			 * // RosterEntry user = //
-			 * roster.getEntry("34duqo9xzvxh20rm34ihnf2cln@public.talk.google.com"
-			 * ); // xmpp.connect("talk.google.com", 5222,
-			 * "robot02@myrobotlab.org", // "mrlRocks!");
-			 * 
-			 * // gets all users it can send messages to xmpp.getRoster();
-			 * xmpp.setStatus(true, String.format("online all the time - %s",
-			 * new Date())); xmpp.sendMessage("hello",
-			 * "23d3ufvoz10m30jfv4adl5daav@public.talk.google.com");
-			 * 
-			 * // TODO - autoRespond // TODO - auditCommand <-- to which
-			 * protocol? // xmpp.addRelay("grasshopperrocket@gmail.com"); //
-			 * orbous -> grasshopperrocket //
-			 * 389iq8ajgim8w2xm2rb4ho5l0c@public.talk.google.com // FIXME
-			 * addMsgListener - default gson encoded return message only
-			 * xmpp.addRelay
-			 * ("23d3ufvoz10m30jfv4adl5daav@public.talk.google.com");
-			 * 
-			 * // incubator -> supertick //
-			 * (23d3ufvoz10m30jfv4adl5daav@public.talk.google.com)
-			 * 
-			 * xmpp.addRelay("supertick@gmail.com");
-			 * 
-			 * // send a message xmpp.broadcast("reporting for duty *SIR* !");
-			 * xmpp.sendMessage("hail bepsl", "supertick@gmail.com");
-			 */
 
 		} catch (Exception e) {
 			Logging.logException(e);
