@@ -150,7 +150,7 @@ public class OpenCV extends VideoSource {
 	public ArrayList<SerializableImage> positive = new ArrayList<SerializableImage>();
 	public ArrayList<SerializableImage> negative = new ArrayList<SerializableImage>();
 
-	public boolean useCanvasFrame = true;
+	public boolean undockDisplay = true;
 
 	public OpenCV(String n) {
 		super(n);
@@ -807,6 +807,12 @@ public class OpenCV extends VideoSource {
 		setInputSource(INPUT_SOURCE_IMAGE_FILE);
 		setInputFileName(filename);
 		capture();
+	}
+	
+	public boolean undockDisplay(boolean b){
+		undockDisplay = b;
+		broadcastState();
+		return b;
 	}
 
 	public static void main(String[] args) throws Exception {
