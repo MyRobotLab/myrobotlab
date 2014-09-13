@@ -706,7 +706,7 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 					currentFilters.setSelectedValue(vp.displayFilterName, true);// .setSelectedIndex(index);
 					currentFilters.addListSelectionListener(self);
 					
-					if (opencv.useCanvasFrame == true){
+					if (opencv.undockDisplay == true){
 						cframe = new CanvasFrame("canvas frame");
 					} else {
 						if (cframe != null){
