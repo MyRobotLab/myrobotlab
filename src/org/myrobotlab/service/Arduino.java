@@ -1043,7 +1043,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 									int x = ((msg[++paramIndex] & 0xFF) << 8) + (msg[++paramIndex] & 0xFF);
 									if (x > 32767){ x = x - 65536; }
 									params[i] = x;
-									log.info(String.format("parameter %d is type ARDUINO_TYPE_INT value %d", i, x));
+									if (log.isDebugEnabled()){
+										log.debug(String.format("parameter %d is type ARDUINO_TYPE_INT value %d", i, x));
+									}
 									++paramIndex;
 								} else {
 									error("CUSTOM_MSG - unhandled type %d", paramType);

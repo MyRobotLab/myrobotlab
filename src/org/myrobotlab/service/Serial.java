@@ -577,6 +577,26 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		write(new byte[] { 16 });
 
 	}
+	
+	public void test2() throws IOException {
+		
+		info("creating virtual null modem cable");
+
+		createNullModemCable("UART1", "VCOM1");
+
+		info("creating uart");
+		Serial uart1 = (Serial) Runtime.start("UART1", "Serial");
+		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+		
+		InMoov i01 = (InMoov)Runtime.start("i01", "InMOov");
+		
+		info("connecting");
+		if (!uart1.connect("UART1")) {
+			throw new IOException("cant connect");
+		}
+
+
+	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		try {
