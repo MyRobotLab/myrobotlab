@@ -35,16 +35,18 @@ public class DrupalNameProvider implements NameProvider {
 			ResultSet records = statement.executeQuery(sql);
 
 			String user = null;
-			if (records.next()) {
+			while (records.next()) {
 				user = records.getString("name");
 				log.info(String.format("found [%s] for ip %s", user, ip));
-				if ((user == null) || (user.trim() == "")) {
-					log.info("user blank - return ip");
-					return ip;
+				if ((user == null) || (user.trim().length() == 0 || user.trim().equals(""))) {
+					log.info("user null or blank skipping");
+					continue;					
+				} else {
+					log.info(String.format("found user [%s]", user));
+					return user;
 				}
-				return user;
 			}
-			log.info("found no records returning ip");
+			log.info(String.format("no not blank records found returning ip [%s]", ip));
 			return ip;
 		} catch (Exception e) {
 			Logging.logException(e);

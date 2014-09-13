@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.util.HashMap;
 
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Chat;
@@ -19,8 +20,11 @@ import org.myrobotlab.logging.LoggingFactory;
  */
 public class ProgramAB extends Service {
 
-	private Bot bot=null;
-	private Chat chatSession=null;
+	private Bot bot = null;
+	private String path = "ProgramAB";
+	private String botName = "alice2";
+	//private Chat chatSession=null;
+	private HashMap<String, Chat> sessions = new HashMap<String, Chat>();
 	
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
@@ -40,13 +44,42 @@ public class ProgramAB extends Service {
 	 * @param path - should be the full path to the ProgramAB root
 	 * @param botName - The name of the bot to load. (example: alice2)
 	 */
-	public void startSession(String path, String botName) {
+	public void startSession(String path, String session, String botName) {
+		if (session == null){
+			session = "default";
+		}
+		
+		if (sessions.containsKey(session)){
+			warn("session %s already created", session);
+			return;
+		}
 		// TODO don't allow to specify a different path
 		// it will be assumed to be ./ProgramAB
-		bot = new Bot(botName, path);
-		chatSession = new Chat(bot);				
+		if (bot == null){
+			bot = new Bot(botName, path);
+		}
+		
+		sessions.put(session, new Chat(bot));
+		
+		if (!"default".equals(session)){
+			getResponse(session, String.format("my name is %s", session));
+		}
+	}
+	
+	public static class Response {
+		public String session;
+		public String msg;
+		
+		public Response(String session, String msg){
+			this.session = session;
+			this.msg = msg;
+		}
 	}
 
+	public Response getResponse(String text){
+		return getResponse(null, text);
+	}
+	
 	/**
 	 * 
 	 * @param text - the query string to the bot brain
@@ -54,16 +87,32 @@ public class ProgramAB extends Service {
 	 * @param robotName - the name of the bot you which to get the response from
 	 * @return
 	 */
-	public String getResponse(String text) {
-		if (bot == null || chatSession == null) {
-			return "ERROR: Core not loaded, please load core before chatting.";
+	public Response getResponse(String session, String text) {
+		if (session == null){
+			session = "default";
 		}
-		String res = chatSession.multisentenceRespond(text);
-		invoke("publishResponse", res);
-		log.info(res);
-		return res;
+		if (bot == null) {
+			String error = "ERROR: Core not loaded, please load core before chatting.";
+			error(error);
+			return new Response(session, error);
+		}
+		
+		if (!sessions.containsKey(session)){
+			startSession(path, session, botName);
+		}
+		
+		String res = sessions.get(session).multisentenceRespond(text);
+		Response response = new Response(session, res);
+		invoke("publishResponse", response);
+		info("to: %s - %s", session, res);
+		return response;
 	}
 	
+
+	public void startSession(String progABPath, String botName) {
+		startSession(progABPath	, null, botName);
+	}
+
 	
 	/**
 	 * publishing method of the pub sub pair - with addResponseListener allowing subscriptions
@@ -76,13 +125,22 @@ public class ProgramAB extends Service {
 	 * @param response
 	 * @return
 	 */
-	public String publishResponse(String response){
+	public Response publishResponse(Response response){
 		return response;
 	}
 
 	public void addResponseListener(Service service){
-		addListener("publishResponse", service.getName(), "onResponse", String.class);
+		addListener("publishResponse", service.getName(), "onResponse", Response.class);
 	}
+	
+	public void startSession() {
+		startSession(null);
+	}
+
+	public void startSession(String session) {
+		startSession(path, session, botName);
+	}
+
 	
 	public static void main(String s[]) {
 		LoggingFactory.getInstance().configure();
@@ -91,12 +149,17 @@ public class ProgramAB extends Service {
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 		ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice", "ProgramAB");
-		File f = new File("ProgramAB");
-		String progABPath = f.getAbsolutePath();
-		String botName = "alice2";
-		alice.startSession(progABPath, botName); 
-		String response = alice.getResponse("How are you?");
-		log.info("Alice" + response);		
+		// File f = new File("ProgramAB");
+		// String progABPath = f.getAbsolutePath();
+		// String botName = "alice2";
+		
+		alice.startSession(); 
+		Response response = alice.getResponse("How are you?");
+		
+		alice.startSession("GroG"); 
+		response = alice.getResponse("GroG", "How are you?");
+		log.info("Alice " + response.msg);		
 	}
+
 
 }

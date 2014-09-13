@@ -38,12 +38,24 @@ public class XMPP extends Service implements Communicator, MessageListener {
 	public final static Logger log = LoggerFactory.getLogger(XMPP.class.getCanonicalName());
 	static final int packetReplyTimeout = 500; // millis
 
-	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS 
+	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS
 	// FIXME - handle multiple user accounts
-	
+
 	// not sure how to initialize requirements .. probably a register Security
 	// event
 	// thread safe ???
+
+	// GOOD ! - bundle message in single object for event return
+	public static class XMPPMsg {
+		public Chat chat;
+		public Message msg;
+
+		public XMPPMsg(Chat chat, Message msg) {
+			this.chat = chat;
+			this.msg = msg;
+		}
+	}
+
 	HashMap<String, String> xmppSecurity = new HashMap<String, String>();
 
 	String user;
@@ -380,6 +392,19 @@ public class XMPP extends Service implements Communicator, MessageListener {
 	}
 
 	/**
+	 * MRL Interface to gateways .. onMsg(GatewayData d) addMsgListener(Service
+	 * s) publishMsg(Object..) returns gateway specific data
+	 */
+
+	public XMPPMsg publishXMPPMsg(Chat chat, Message msg) {
+		return new XMPPMsg(chat, msg);
+	}
+	
+	public void addXMPPMsgListener(Service service) {
+		addListener("publishXMPPMsg", service.getName(), "onXMPPMsg", XMPPMsg.class);
+	}
+
+	/**
 	 * processMessage is the XMPP / Smack API override which handles incoming
 	 * chat messages - XMPP comes with well defined and extendable capabilities,
 	 * however, Google Talk does not support much more than text messages with
@@ -506,7 +531,10 @@ public class XMPP extends Service implements Communicator, MessageListener {
 				broadcast(String.format("sorry sir, I do not understand your command %s", e.getMessage()));
 				Logging.logException(e);
 			}
-		} else if (body != null && body.length() > 0 && body.charAt(0) != '/') {
+		} 
+		
+		/* CUSTOS SPECIFIC - REMOVE
+		else if (body != null && body.length() > 0 && body.charAt(0) != '/') {
 			broadcast("sorry sir, I do not understand! I await your orders but,\n they must start with / for more information go to http://myrobotlab.org/service/XMPP");
 			broadcast("*HAIL BEPSL!*");
 			broadcast(String.format("for a list of possible commands please type /%s/help", getName()));
@@ -515,6 +543,10 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			// sendMessage(String.format("<b>hello</b>"),
 			// "supertick@gmail.com");
 		}
+		*/
+		
+		invoke("publishXMPPMsg", chat, msg);
+		//
 
 		// FIXME - decide if its a publishing point
 		// or do we directly invoke and expect a response type
