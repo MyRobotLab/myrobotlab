@@ -150,7 +150,7 @@ public class OpenCV extends VideoSource {
 	public ArrayList<SerializableImage> positive = new ArrayList<SerializableImage>();
 	public ArrayList<SerializableImage> negative = new ArrayList<SerializableImage>();
 
-	public boolean undockDisplay = true;
+	public boolean undockDisplay = false;
 
 	public OpenCV(String n) {
 		super(n);
