@@ -41,7 +41,7 @@
 #endif
 
 // ----------  MRLCOMM FUNCTION INTERFACE BEGIN -----------
-#define MRLCOMM_VERSION				18
+#define MRLCOMM_VERSION				19
 
 // serial protocol functions
 #define MAGIC_NUMBER  					170 // 10101010
