@@ -3,6 +3,7 @@
 	
 	proxy
 	-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+	curl -i  https://api.github.com/repos/MyRobotLab/myrobotlab/releases -H "Accept:application/vnd.github.manifold-preview+json"
 	curl -i  -x http://webproxy:80 https://api.github.com/repos/MyRobotLab/myrobotlab/releases -H "Accept:application/vnd.github.manifold-preview+json"
 	
 	The goal is always to make the build more simple :)
@@ -99,7 +100,7 @@
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
 
-	<property name="tag" value="1.0.60" />
+	<property name="tag" value="1.0.62" />
 	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
@@ -400,7 +401,7 @@
 		<!-- copy the latest serviceData.xml into package -->
 		<copy file="./../repo/serviceData.xml" todir="${bin}/resource/framework" />
 		
-		<jar jarfile="${toZip}/libraries/jar/myrobotlab.jar" basedir="${bin}">
+		<jar jarfile="${dist}/myrobotlab.jar" basedir="${bin}">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
 				<attribute name="Main-Class" value="org.myrobotlab.framework.Bootstrap" />
