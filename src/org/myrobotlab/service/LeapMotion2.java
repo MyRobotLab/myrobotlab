@@ -12,6 +12,7 @@ import java.lang.Math;
 
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
+import org.myrobotlab.leap.*;
 
 
 public class LeapMotion2 extends Service {
@@ -36,6 +37,24 @@ public class LeapMotion2 extends Service {
 		LeapMotion2 leap = new LeapMotion2("leap");
 			
 		Runtime.start("gui", "GUIService");
+		
+		SampleListener listener = new SampleListener();
+        Controller controller = new Controller();
+
+        // Have the sample listener receive events from the controller
+        controller.addListener(listener);
+
+        // Keep this process running until Enter is pressed
+        System.out.println("Press Enter to quit...");
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Remove the sample listener when done
+        controller.removeListener(listener);
+
 
 		
 		
