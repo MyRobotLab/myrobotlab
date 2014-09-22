@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.lang.Math;
+
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
@@ -32,16 +33,11 @@ public class LeapMotion2 extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		try {
-
-			LeapMotion2 template = (LeapMotion2)Runtime.start("leap", "LeapMotion2");
-			leap.test();
+		LeapMotion2 leap = new LeapMotion2("leap");
 			
-			Runtime.start("gui", "GUIService");
+		Runtime.start("gui", "GUIService");
 
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
+		
+		
 	}
-
 }

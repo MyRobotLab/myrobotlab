@@ -83,10 +83,9 @@
 	<classpathentry kind="lib" path="/repo/io.netty/4.0.19/netty-all-4.0.19.Final.jar"/>
 	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.3.2.4/jovr-0.3.2.4.jar"/>
-	<classpathentry kind="lib" path="/repo/org.aitools.programd/4.6/programd-main.jar"/>
-	<classpathentry kind="lib" path="/repo/org.aitools.programd/4.6/programd-rhino.jar"/>
 	<classpathentry kind="lib" path="/repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.alicebot.ab/0.0.6.26/Ab.jar"/>
 	<classpathentry kind="lib" path="/repo/com.oracle.mysql/5.1.32/mysql-connector-java-5.1.32-bin.jar"/>
+	<classpathentry kind="lib" path="/repo/com.leapmotion/2.1.3/LeapJava.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
