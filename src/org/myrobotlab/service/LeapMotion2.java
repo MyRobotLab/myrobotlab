@@ -12,19 +12,20 @@ import java.lang.Math;
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
-public class LeapMotion extends Service {
+
+public class LeapMotion2 extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(LeapMotion.class);
+	public final static Logger log = LoggerFactory.getLogger(LeapMotion2.class);
 
-	public LeapMotion(String n) {
+	public LeapMotion2(String n) {
 		super(n);
 	}
 
 	@Override
 	public String getDescription() {
-		return "Service to control a LeapMotion Device";
+		return "used as a general template";
 	}
 
 	public static void main(String[] args) {
@@ -33,7 +34,7 @@ public class LeapMotion extends Service {
 
 		try {
 
-			LeapMotion leap = (LeapMotion)Runtime.start("leap", "LeapMotion");
+			LeapMotion2 template = (LeapMotion2)Runtime.start("leap", "LeapMotion2");
 			leap.test();
 			
 			Runtime.start("gui", "GUIService");
