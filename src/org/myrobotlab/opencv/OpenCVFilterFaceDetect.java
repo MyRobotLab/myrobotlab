@@ -55,14 +55,10 @@ import static com.googlecode.javacv.cpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNIN
 import static com.googlecode.javacv.cpp.opencv_objdetect.CV_HAAR_FIND_BIGGEST_OBJECT;
 import static com.googlecode.javacv.cpp.opencv_objdetect.cvHaarDetectObjects;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import org.myrobotlab.service.data.Rectangle;
-
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.data.Rectangle;
 import org.slf4j.Logger;
 
 import com.googlecode.javacpp.Loader;

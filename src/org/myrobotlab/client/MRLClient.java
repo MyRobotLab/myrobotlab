@@ -3,8 +3,8 @@ package org.myrobotlab.client;
 import java.lang.reflect.Constructor;
 
 import org.myrobotlab.cmdline.CMDLine;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.Message;
 
 /**
  * MRLClient

@@ -28,8 +28,8 @@ package org.myrobotlab.image;
 import java.awt.Color;
 import java.io.Serializable;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 
 public class ColoredPoint implements Serializable {

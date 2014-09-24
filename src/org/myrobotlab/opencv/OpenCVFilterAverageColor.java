@@ -36,8 +36,6 @@ import static com.googlecode.javacv.cpp.opencv_core.cvResetImageROI;
 import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
 import static com.googlecode.javacv.cpp.opencv_core.cvSetImageROI;
 
-import java.awt.image.BufferedImage;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

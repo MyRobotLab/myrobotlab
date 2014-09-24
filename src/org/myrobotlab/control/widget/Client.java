@@ -36,8 +36,6 @@ import javax.swing.JPanel;
 
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.GUIService;

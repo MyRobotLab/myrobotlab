@@ -27,12 +27,9 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 
-
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.slf4j.Logger;
-
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class TestThrower extends Service {
 

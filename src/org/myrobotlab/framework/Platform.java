@@ -1,12 +1,8 @@
 package org.myrobotlab.framework;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-
-import org.myrobotlab.logging.Logging;
 
 //import org.myrobotlab.logging.Logging;
 

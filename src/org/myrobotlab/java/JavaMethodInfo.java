@@ -29,7 +29,7 @@
 package org.myrobotlab.java;
 
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 
 /**
  * The instances of this class provides informations about

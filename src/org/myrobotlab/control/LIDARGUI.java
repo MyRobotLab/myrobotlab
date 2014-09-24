@@ -36,18 +36,15 @@ import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JList;
+import javax.swing.JTabbedPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import static org.myrobotlab.control.LIDARGUI.log;
-
-import org.slf4j.Logger;
-import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.interfaces.VideoGUISource;
+import org.slf4j.Logger;
 
 public class LIDARGUI extends ServiceGUI implements ListSelectionListener, VideoGUISource {
 

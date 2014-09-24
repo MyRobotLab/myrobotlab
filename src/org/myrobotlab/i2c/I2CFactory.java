@@ -1,11 +1,8 @@
 package org.myrobotlab.i2c;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.logging.Logging;
 
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.impl.I2CBusImpl;

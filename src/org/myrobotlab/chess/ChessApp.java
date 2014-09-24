@@ -30,10 +30,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
-
 import org.op.chess.ChessBoard;
+import org.slf4j.Logger;
 
 public final class ChessApp extends JApplet implements Constants, VetoableChangeListener, PropertyChangeListener {
 	/**

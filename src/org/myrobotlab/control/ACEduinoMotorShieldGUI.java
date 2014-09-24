@@ -28,7 +28,6 @@ package org.myrobotlab.control;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -43,8 +42,8 @@ import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ACEduinoMotorShield;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class ACEduinoMotorShieldGUI extends ServiceGUI {

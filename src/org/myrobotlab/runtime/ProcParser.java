@@ -8,13 +8,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.logging.Level;
-import org.slf4j.Logger;
 
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.slf4j.Logger;
 
 /**
  * Extract information from the process information pseudo-file system called

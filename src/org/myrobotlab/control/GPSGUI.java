@@ -24,26 +24,17 @@
  */
 package org.myrobotlab.control;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
 
+import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.myrobotlab.control.widget.MemoryWidget;
-import org.myrobotlab.control.widget.NodeGUI;
-import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
-import org.myrobotlab.memory.Node;
-import org.myrobotlab.opencv.OpenCVData;
-import org.myrobotlab.service._TemplateService;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.interfaces.MemoryDisplay;
+import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
 public class GPSGUI extends ServiceGUI implements ActionListener {

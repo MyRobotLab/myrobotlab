@@ -1,7 +1,8 @@
 package org.myrobotlab.inverseKinematics;
 
 
-import java.awt.*;
+import java.awt.Canvas;
+import java.awt.Dimension;
 
 /**
  * class IKEngine

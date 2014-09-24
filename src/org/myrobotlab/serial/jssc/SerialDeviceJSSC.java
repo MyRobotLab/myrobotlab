@@ -1,8 +1,6 @@
 package org.myrobotlab.serial.jssc;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.EventListener;
 import java.util.TooManyListenersException;
 

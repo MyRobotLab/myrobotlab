@@ -8,7 +8,6 @@ import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 import javax.swing.BoxLayout;

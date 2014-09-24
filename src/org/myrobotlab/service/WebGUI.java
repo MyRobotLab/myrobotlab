@@ -78,7 +78,7 @@ public class WebGUI extends Service implements AuthorizationProvider {
 	}
 
 	public HashMap<String, String> clients = new HashMap<String, String>();
-	
+
 	public WebGUI(String n) {
 		super(n);
 		// first message web browser client is getRegistry
@@ -90,10 +90,15 @@ public class WebGUI extends Service implements AuthorizationProvider {
 	public Integer getPort() {
 		return port;
 	}
-	
-	public Integer setPort(Integer port){
+
+	public Integer setPort(Integer port) {
 		this.port = port;
 		return port;
+	}
+	
+	public void restart(){
+		stop();
+		startWebSocketServer(port);
 	}
 
 	/**
@@ -159,6 +164,17 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		return result;
 	}
 
+	public void stop() {
+		try {
+			if (wss != null) {
+				wss.stop();
+				wss = null;
+			}
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+	}
+
 	@Override
 	public String getDescription() {
 		return "The new web enabled GUIService 2.0 !";
@@ -173,9 +189,7 @@ public class WebGUI extends Service implements AuthorizationProvider {
 	public void stopService() {
 		try {
 			super.stopService();
-			if (wss != null) {
-				wss.stop();
-			}
+			stop();
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
@@ -285,37 +299,36 @@ public class WebGUI extends Service implements AuthorizationProvider {
 			log.error(String.format("toJson %s.%s is null", msg.name, msg.method));
 		}
 	}
-	
+
 	public boolean addUser(String username, String password) {
 		return BasicSecurity.addUser(username, password);
 	}
 
-	
 	public void addConnectListener(Service service) {
 		addListener("publishConnect", service.getName(), "onConnect", WebSocket.class);
 	}
-	
-	public WebSocket publishConnect(WebSocket conn){
+
+	public WebSocket publishConnect(WebSocket conn) {
 		return conn;
 	}
-	
-	public void addWSMsgListener(Service service){
+
+	public void addWSMsgListener(Service service) {
 		addListener("publishWSMsg", service.getName(), "onWSMsg", WSMsg.class);
 	}
-	
-	public WSMsg publishWSMsg(WSMsg wsmsg){
+
+	public WSMsg publishWSMsg(WSMsg wsmsg) {
 		return wsmsg;
 	}
 
 	public void addDisconnectListener(Service service) {
 		addListener("publishDisconnect", service.getName(), "onDisconnect", WebSocket.class);
 	}
-	
-	public WebSocket publishDisconnect(WebSocket conn){
+
+	public WebSocket publishDisconnect(WebSocket conn) {
 		return conn;
 	}
-	
-	public boolean allowDirectMessaging(boolean b){
+
+	public boolean allowDirectMessaging(boolean b) {
 		wss.allowDirectMessaging(b);
 		return b;
 	}
@@ -325,7 +338,7 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		try {
-			//String uri = "http\\://192.168.1.12:8080/?action=stream";
+			// String uri = "http\\://192.168.1.12:8080/?action=stream";
 			String uri = "\"http://192.168.1.12:8080/?action=stream\"";
 			Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").create();
 
@@ -337,70 +350,67 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		}
 
 		WebGUI webgui = new WebGUI("webgui");
-		//webgui.useLocalResources(true);
-		//webgui.autoStartBrowser(false);
+		// webgui.useLocalResources(true);
+		// webgui.autoStartBrowser(false);
 		// Runtime.createAndStart("webgui", "WebGUI");
 		// webgui.useLocalResources(true);
 		webgui.startService();
 
 	}
-	
+
 	// ============== security begin =========================
-		// FIXME - this will have to be keyed by the service name
-		// if the global datastructures are to be in Security
-	
-		// specifically for a gateway 
-		// this interface should be incorporated into Security Service
-	
-		// interesting - regular expresion matching .. its a combined key ! 
-		// Service.method or perhaps sender.Service.method ?
-		
-		private HashSet<String> allowMethods = new HashSet<String>();
-		private HashSet<String> excludeMethods = new HashSet<String>();
+	// FIXME - this will have to be keyed by the service name
+	// if the global datastructures are to be in Security
 
-		private HashSet<String> allowServices = new HashSet<String>();
-		private HashSet<String> excludeServices = new HashSet<String>();
-		
-		@Override
-		public boolean isAuthorized(Message msg) {
-			String method = msg.method;
-			String service = msg.name;
-			
-			if (allowMethods.size() > 0 && !allowMethods.contains(method)){
-				return false;
-			}
-			
-			if (excludeMethods.size() > 0 && excludeMethods.contains(method)){
-				return false;
-			}
-			
-			return true;
-		}
-		
-		public void allowREST(Boolean b){
-			if(wss != null){
-				wss.allowREST(b);
-			}
-		}
-		
-		public void allowMethod(String method){
-			allowMethods.add(method);
-		}
+	// specifically for a gateway
+	// this interface should be incorporated into Security Service
 
-		@Override
-		public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
-			// TODO Auto-generated method stub
+	// interesting - regular expresion matching .. its a combined key !
+	// Service.method or perhaps sender.Service.method ?
+
+	private HashSet<String> allowMethods = new HashSet<String>();
+	private HashSet<String> excludeMethods = new HashSet<String>();
+
+	private HashSet<String> allowServices = new HashSet<String>();
+	private HashSet<String> excludeServices = new HashSet<String>();
+
+	@Override
+	public boolean isAuthorized(Message msg) {
+		String method = msg.method;
+		String service = msg.name;
+
+		if (allowMethods.size() > 0 && !allowMethods.contains(method)) {
 			return false;
 		}
 
-		@Override
-		public boolean allowExport(String serviceName) {
-			// TODO Auto-generated method stub
+		if (excludeMethods.size() > 0 && excludeMethods.contains(method)) {
 			return false;
 		}
-		// ============== security end =========================
-		
 
+		return true;
+	}
 
+	public void allowREST(Boolean b) {
+		if (wss != null) {
+			wss.allowREST(b);
+		}
+	}
+
+	public void allowMethod(String method) {
+		allowMethods.add(method);
+	}
+
+	@Override
+	public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean allowExport(String serviceName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	// ============== security end =========================
 
 }

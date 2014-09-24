@@ -28,13 +28,7 @@ package org.myrobotlab.opencv;
 import static com.googlecode.javacv.cpp.opencv_core.CV_RGB;
 import static com.googlecode.javacv.cpp.opencv_core.cvDrawRect;
 import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2HSV;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvFloodFill;
-
-import java.awt.image.BufferedImage;
-
-import javax.swing.JFrame;
-import javax.swing.JTextField;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;

@@ -2,8 +2,6 @@ package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;

@@ -1251,85 +1251,87 @@ public class InMoovGestureCreator extends Service {
 
 	public void frame_importminresmax() {
 		// Import the Min- / Res- / Max- settings of your InMoov
-		for (int i1 = 0; i1 < servoitemholder.length; i1++) {
-			for (int i2 = 0; i2 < servoitemholder[i1].length; i2++) {
-				InMoovHand inmhand = null;
-				InMoovArm inmarm = null;
-				InMoovHead inmhead = null;
-				InMoovTorso inmtorso = null;
+		if (i01 != null) {
+			for (int i1 = 0; i1 < servoitemholder.length; i1++) {
+				for (int i2 = 0; i2 < servoitemholder[i1].length; i2++) {
+					InMoovHand inmhand = null;
+					InMoovArm inmarm = null;
+					InMoovHead inmhead = null;
+					InMoovTorso inmtorso = null;
 
-				if (i1 == 0) {
-					inmhand = i01.rightHand;
-				} else if (i1 == 1) {
-					inmarm = i01.rightArm;
-				} else if (i1 == 2) {
-					inmhand = i01.leftHand;
-				} else if (i1 == 3) {
-					inmarm = i01.rightArm;
-				} else if (i1 == 4) {
-					inmhead = i01.head;
-				} else if (i1 == 5) {
-					inmtorso = i01.torso;
+					if (i1 == 0) {
+						inmhand = i01.rightHand;
+					} else if (i1 == 1) {
+						inmarm = i01.rightArm;
+					} else if (i1 == 2) {
+						inmhand = i01.leftHand;
+					} else if (i1 == 3) {
+						inmarm = i01.rightArm;
+					} else if (i1 == 4) {
+						inmhead = i01.head;
+					} else if (i1 == 5) {
+						inmtorso = i01.torso;
+					}
+
+					Servo servo = null;
+
+					if (i1 == 0 || i1 == 2) {
+						if (i2 == 0) {
+							servo = inmhand.thumb;
+						} else if (i2 == 1) {
+							servo = inmhand.index;
+						} else if (i2 == 2) {
+							servo = inmhand.majeure;
+						} else if (i2 == 3) {
+							servo = inmhand.ringFinger;
+						} else if (i2 == 4) {
+							servo = inmhand.pinky;
+						} else if (i2 == 5) {
+							servo = inmhand.wrist;
+						}
+					} else if (i1 == 1 || i1 == 3) {
+						if (i2 == 0) {
+							servo = inmarm.bicep;
+						} else if (i2 == 1) {
+							servo = inmarm.rotate;
+						} else if (i2 == 2) {
+							servo = inmarm.shoulder;
+						} else if (i2 == 3) {
+							servo = inmarm.omoplate;
+						}
+					} else if (i1 == 4) {
+						if (i2 == 0) {
+							servo = inmhead.neck;
+						} else if (i2 == 1) {
+							servo = inmhead.rothead;
+						} else if (i2 == 2) {
+							servo = inmhead.eyeX;
+						} else if (i2 == 3) {
+							servo = inmhead.eyeY;
+						} else if (i2 == 4) {
+							servo = inmhead.jaw;
+						}
+					} else if (i1 == 5) {
+						if (i2 == 0) {
+							servo = inmtorso.topStom;
+						} else if (i2 == 1) {
+							servo = inmtorso.midStom;
+						} else if (i2 == 2) {
+							servo = inmtorso.lowStom;
+						}
+					}
+
+					int min = servo.getMin();
+					int res = servo.getRest();
+					int max = servo.getMax();
+
+					servoitemholder[i1][i2].min.setText(min + "");
+					servoitemholder[i1][i2].res.setText(res + "");
+					servoitemholder[i1][i2].max.setText(max + "");
+//					servoitemholder[i1][i2].sli.setMinimum(min);
+//					servoitemholder[i1][i2].sli.setMaximum(max);
+					servoitemholder[i1][i2].sli.setValue(res);
 				}
-
-				Servo servo = null;
-
-				if (i1 == 0 || i1 == 2) {
-					if (i2 == 0) {
-						servo = inmhand.thumb;
-					} else if (i2 == 1) {
-						servo = inmhand.index;
-					} else if (i2 == 2) {
-						servo = inmhand.majeure;
-					} else if (i2 == 3) {
-						servo = inmhand.ringFinger;
-					} else if (i2 == 4) {
-						servo = inmhand.pinky;
-					} else if (i2 == 5) {
-						servo = inmhand.wrist;
-					}
-				} else if (i1 == 1 || i1 == 3) {
-					if (i2 == 0) {
-						servo = inmarm.bicep;
-					} else if (i2 == 1) {
-						servo = inmarm.rotate;
-					} else if (i2 == 2) {
-						servo = inmarm.shoulder;
-					} else if (i2 == 3) {
-						servo = inmarm.omoplate;
-					}
-				} else if (i1 == 4) {
-					if (i2 == 0) {
-						servo = inmhead.neck;
-					} else if (i2 == 1) {
-						servo = inmhead.rothead;
-					} else if (i2 == 2) {
-						servo = inmhead.eyeX;
-					} else if (i2 == 3) {
-						servo = inmhead.eyeY;
-					} else if (i2 == 4) {
-						servo = inmhead.jaw;
-					}
-				} else if (i1 == 5) {
-					if (i2 == 0) {
-						servo = inmtorso.topStom;
-					} else if (i2 == 1) {
-						servo = inmtorso.midStom;
-					} else if (i2 == 2) {
-						servo = inmtorso.lowStom;
-					}
-				}
-
-				int min = servo.getMin();
-				int res = servo.getRest();
-				int max = servo.getMax();
-
-				servoitemholder[i1][i2].min.setText(min + "");
-				servoitemholder[i1][i2].res.setText(res + "");
-				servoitemholder[i1][i2].max.setText(max + "");
-				servoitemholder[i1][i2].sli.setMinimum(min);
-				servoitemholder[i1][i2].sli.setMaximum(max);
-				servoitemholder[i1][i2].sli.setValue(res);
 			}
 		}
 	}

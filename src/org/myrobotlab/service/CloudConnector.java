@@ -14,7 +14,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
-import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
