@@ -38,9 +38,24 @@ public class XMPP extends Service implements Communicator, MessageListener {
 	public final static Logger log = LoggerFactory.getLogger(XMPP.class.getCanonicalName());
 	static final int packetReplyTimeout = 500; // millis
 
+	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS
+	// FIXME - handle multiple user accounts
+
 	// not sure how to initialize requirements .. probably a register Security
 	// event
 	// thread safe ???
+
+	// GOOD ! - bundle message in single object for event return
+	public static class XMPPMsg {
+		public Chat chat;
+		public Message msg;
+
+		public XMPPMsg(Chat chat, Message msg) {
+			this.chat = chat;
+			this.msg = msg;
+		}
+	}
+
 	HashMap<String, String> xmppSecurity = new HashMap<String, String>();
 
 	String user;
@@ -377,6 +392,19 @@ public class XMPP extends Service implements Communicator, MessageListener {
 	}
 
 	/**
+	 * MRL Interface to gateways .. onMsg(GatewayData d) addMsgListener(Service
+	 * s) publishMsg(Object..) returns gateway specific data
+	 */
+
+	public XMPPMsg publishXMPPMsg(Chat chat, Message msg) {
+		return new XMPPMsg(chat, msg);
+	}
+	
+	public void addXMPPMsgListener(Service service) {
+		addListener("publishXMPPMsg", service.getName(), "onXMPPMsg", XMPPMsg.class);
+	}
+
+	/**
 	 * processMessage is the XMPP / Smack API override which handles incoming
 	 * chat messages - XMPP comes with well defined and extendable capabilities,
 	 * however, Google Talk does not support much more than text messages with
@@ -503,7 +531,10 @@ public class XMPP extends Service implements Communicator, MessageListener {
 				broadcast(String.format("sorry sir, I do not understand your command %s", e.getMessage()));
 				Logging.logException(e);
 			}
-		} else if (body != null && body.length() > 0 && body.charAt(0) != '/') {
+		} 
+		
+		/* CUSTOS SPECIFIC - REMOVE
+		else if (body != null && body.length() > 0 && body.charAt(0) != '/') {
 			broadcast("sorry sir, I do not understand! I await your orders but,\n they must start with / for more information go to http://myrobotlab.org/service/XMPP");
 			broadcast("*HAIL BEPSL!*");
 			broadcast(String.format("for a list of possible commands please type /%s/help", getName()));
@@ -512,6 +543,10 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			// sendMessage(String.format("<b>hello</b>"),
 			// "supertick@gmail.com");
 		}
+		*/
+		
+		invoke("publishXMPPMsg", chat, msg);
+		//
 
 		// FIXME - decide if its a publishing point
 		// or do we directly invoke and expect a response type
@@ -610,7 +645,7 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			XMPP xmpp1 = (XMPP) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
 			Runtime.createAndStart(String.format("clock%d", i), "Clock");
 			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
-			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "hatchMe!");
+			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "xxxx");
 			xmpp1.addAuditor("Greg Perry");
 			// xmpp1.sendMessage("hello from incubator by name " +
 			// System.currentTimeMillis(), "Greg Perry");
@@ -618,53 +653,6 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			if (true) {
 				return;
 			}
-
-			// END--------------------------------------------
-
-			/*
-			 * XMPP xmpp = new XMPP("xmpp"); xmpp.startService();
-			 * 
-			 * // xmpp.connect("talk.google.com", 5222, "orbous@myrobotlab.org",
-			 * // "mrlRocks!"); xmpp.connect("talk.google.com", 5222,
-			 * "incubator@myrobotlab.org", "hatchMe!");
-			 * xmpp.sendMessage("hello from incubator xmpp name", "Greg Perry");
-			 * 
-			 * // xmpp.getUserList(); // Roster roster = xmpp.getRoster();
-			 * xmpp.sendMessage("hello from incubator by user",
-			 * "23d3ufvoz10m30jfv4adl5daav@public.talk.google.com");
-			 * xmpp.addRelay("Greg Perry");
-			 * xmpp.sendMessage("message from the REAL INCUBATOR !!!",
-			 * "Orbous Mundus"); xmpp.sendMessage("/runtime/getUptime",
-			 * "Orbous Mundus"); xmpp.sendMessage("/runtime/getUptime",
-			 * "Orbous Mundus"); // xmpp.sendMessage("/runtime/getUptime", //
-			 * "34duqo9xzvxh20rm34ihnf2cln@public.talk.google.com");
-			 * 
-			 * // RosterEntry user = //
-			 * roster.getEntry("34duqo9xzvxh20rm34ihnf2cln@public.talk.google.com"
-			 * ); // xmpp.connect("talk.google.com", 5222,
-			 * "robot02@myrobotlab.org", // "mrlRocks!");
-			 * 
-			 * // gets all users it can send messages to xmpp.getRoster();
-			 * xmpp.setStatus(true, String.format("online all the time - %s",
-			 * new Date())); xmpp.sendMessage("hello",
-			 * "23d3ufvoz10m30jfv4adl5daav@public.talk.google.com");
-			 * 
-			 * // TODO - autoRespond // TODO - auditCommand <-- to which
-			 * protocol? // xmpp.addRelay("grasshopperrocket@gmail.com"); //
-			 * orbous -> grasshopperrocket //
-			 * 389iq8ajgim8w2xm2rb4ho5l0c@public.talk.google.com // FIXME
-			 * addMsgListener - default gson encoded return message only
-			 * xmpp.addRelay
-			 * ("23d3ufvoz10m30jfv4adl5daav@public.talk.google.com");
-			 * 
-			 * // incubator -> supertick //
-			 * (23d3ufvoz10m30jfv4adl5daav@public.talk.google.com)
-			 * 
-			 * xmpp.addRelay("supertick@gmail.com");
-			 * 
-			 * // send a message xmpp.broadcast("reporting for duty *SIR* !");
-			 * xmpp.sendMessage("hail bepsl", "supertick@gmail.com");
-			 */
 
 		} catch (Exception e) {
 			Logging.logException(e);

@@ -27,8 +27,6 @@ package org.myrobotlab.opencv;
 
 import static com.googlecode.javacv.cpp.opencv_core.cvNot;
 
-import java.awt.image.BufferedImage;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

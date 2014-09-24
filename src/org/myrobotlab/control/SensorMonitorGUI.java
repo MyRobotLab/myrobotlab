@@ -49,26 +49,24 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.slf4j.Logger;
-import org.myrobotlab.image.SerializableImage;
-import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
-
 import org.myrobotlab.control.widget.JIntegerField;
 import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SensorMonitor;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.Trigger;
-import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.VideoGUISource;
+import org.slf4j.Logger;
 
 /**
  * @author Gro-G Display data sent to the SensorMonitor service.

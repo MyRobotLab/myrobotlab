@@ -3,6 +3,7 @@
 	
 	proxy
 	-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+	curl -i  https://api.github.com/repos/MyRobotLab/myrobotlab/releases -H "Accept:application/vnd.github.manifold-preview+json"
 	curl -i  -x http://webproxy:80 https://api.github.com/repos/MyRobotLab/myrobotlab/releases -H "Accept:application/vnd.github.manifold-preview+json"
 	
 	The goal is always to make the build more simple :)
@@ -91,15 +92,15 @@
 	References:
 	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
 -->
-<!-- FIXME - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="uploadMyrobotlab.jar">
+<!-- FIXME (NETWORK ANT VS NETWORK IDE VS NETWORK URLConnection VS NETWORK HTTP :P) - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
+<project name="myrobotlab" default="dist">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
 
-	<!-- property name="tag" value="1.0.49" / -->
+	<property name="tag" value="1.0.62" />
 	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
@@ -119,7 +120,7 @@
 	</taskdef>
 
 	<!-- ================ init begin ================= -->
-	<target name="init" depends="repoDoesNotExists, repoExists">
+	<target name="init" depends="repoClone">
 
 		<echo message="compiling with ${ant.java.version}" />
 		<echoproperties/>
@@ -313,6 +314,8 @@
 		<pathelement location="../repo/org.saintandreas.jovr/0.3.2.4/jovr-0.3.2.4.jar" />
 		<pathelement location="../repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar" />
 		<pathelement location="../repo/org.alicebot.ab/0.0.6.26/Ab.jar"/>
+		<pathelement location="../repo/se.comhem.chess/1.1.2/cuckoo112.jar"/>
+		<pathelement location="../repo/javazoom.spi/1.9.5/mp3spi1.9.5.jar"/>
 	</path>
 
 	<!-- class path for testing FIXME - add junit normalize git -->
@@ -341,7 +344,6 @@
 				<not>
 					<available file="../repo" />
 				</not>
-				<istrue value="${network.available}" />
 			</and>
 		</condition>
 	</target>
@@ -360,6 +362,14 @@
 			<arg value="https://github.com/MyRobotLab/repo.git" />
 			<arg value="../repo" />
 		</exec>
+	</target>
+	<target name="repoClone">
+			<echo message="git clone https://github.com/MyRobotLab/repo.git ../repo" />
+			<exec executable="git">
+				<arg value="clone" />
+				<arg value="https://github.com/MyRobotLab/repo.git" />
+				<arg value="../repo" />
+			</exec>
 	</target>
 	<!-- =============== repo end  =============== -->
 	<!--
@@ -391,7 +401,7 @@
 		<!-- copy the latest serviceData.xml into package -->
 		<copy file="./../repo/serviceData.xml" todir="${bin}/resource/framework" />
 		
-		<jar jarfile="${toZip}/libraries/jar/myrobotlab.jar" basedir="${bin}">
+		<jar jarfile="${dist}/myrobotlab.jar" basedir="${bin}">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
 				<attribute name="Main-Class" value="org.myrobotlab.framework.Bootstrap" />
@@ -442,7 +452,7 @@
 		<echo message="${upload_url}" />
 	</target>
 
-	<target name="uploadMyrobotlab.jar" depends="compile, getAssetsURL">
+	<target name="release" depends="compile, getAssetsURL">
 		<echo message="${myrobotlab.jar}" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
@@ -458,7 +468,7 @@
 		</http>
 	</target>
 
-	<target name="uploadZip" depends="dist, getAssetsURL, uploadMyrobotlab.jar">
+	<target name="uploadZip" depends="dist, getAssetsURL, release">
 		<echo message="${myrobotlab.jar}" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->

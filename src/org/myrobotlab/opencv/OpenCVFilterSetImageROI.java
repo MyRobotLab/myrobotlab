@@ -26,7 +26,6 @@
 package org.myrobotlab.opencv;
 
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;

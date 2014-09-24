@@ -53,7 +53,6 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvFindContours;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvPyrDown;
 
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.myrobotlab.image.KinectImageNode;

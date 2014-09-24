@@ -25,12 +25,6 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2HSV;
-
-import java.awt.image.BufferedImage;
-
-import javax.swing.JFrame;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

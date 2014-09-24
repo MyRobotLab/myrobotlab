@@ -1,6 +1,7 @@
 package org.myrobotlab.java;
-import java.util.*;
-import javax.swing.table.*;
+import java.util.Hashtable;
+
+import javax.swing.table.AbstractTableModel;
 
 public class MethodsTableModel extends AbstractTableModel {
 int rows=0;

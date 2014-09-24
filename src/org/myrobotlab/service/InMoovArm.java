@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

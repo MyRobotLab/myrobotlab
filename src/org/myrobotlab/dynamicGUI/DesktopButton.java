@@ -1,5 +1,5 @@
 package org.myrobotlab.dynamicGUI;
-import javax.swing.*;
+import javax.swing.JButton;
 
 public class DesktopButton extends JButton{
 

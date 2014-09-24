@@ -1,7 +1,6 @@
 package org.myrobotlab.webgui;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,9 +17,6 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
-
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonWriter;
 
 // FIXME - normalize - make only ResourceProcessor (its twin) - move all this to Encoder !!!
 public class RESTProcessor implements HTTPProcessor {

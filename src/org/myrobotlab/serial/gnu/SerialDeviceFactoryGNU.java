@@ -5,13 +5,12 @@ import gnu.io.CommPortIdentifier;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import org.slf4j.Logger;
 import org.myrobotlab.logging.LoggerFactory;
-
 import org.myrobotlab.serial.SerialDevice;
 import org.myrobotlab.serial.SerialDeviceException;
 import org.myrobotlab.serial.SerialDeviceFactory;
 import org.myrobotlab.serial.SerialDeviceFrameworkFactory;
+import org.slf4j.Logger;
 
 public class SerialDeviceFactoryGNU implements SerialDeviceFrameworkFactory {
 

@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.ProgramAB;
+import org.myrobotlab.service.ProgramAB.Response;
 import org.slf4j.Logger;
 
 /**
@@ -95,10 +96,10 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 		if (o == askButton || o == text) {
 			//myService.send(boundServiceName, "getResponse", new String(text.getText()), "1", "SampleBot");
 			
-			String answer=(String) myService.sendBlocking(boundServiceName, 10000, "getResponse", text.getText());
+			Response answer=(Response) myService.sendBlocking(boundServiceName, 10000, "getResponse", text.getText());
 			// response.setText(response.getText() + "<br/>\n\r" + answer);
 			if (answer != null) {
-				response.append("\n" + answer.trim());
+				response.append("\n" + answer.msg.trim());
 			} else {
 				response.append("\nERROR: NULL Response");
 			}

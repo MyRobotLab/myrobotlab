@@ -28,8 +28,7 @@
 
 package org.myrobotlab.java;
 
-import koala.dynamicjava.tree.*;
-import koala.dynamicjava.util.*;
+import koala.dynamicjava.tree.TypeDeclaration;
 
 /**
  * The instances of the classes that implements this interface

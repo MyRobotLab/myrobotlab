@@ -25,6 +25,7 @@
 package org.myrobotlab.mapper.gui;
 
 import java.awt.BorderLayout;
+
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 

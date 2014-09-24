@@ -34,15 +34,14 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
+import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Twitter;
 import org.myrobotlab.service._TemplateService;
-import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
 public class TwitterGUI extends ServiceGUI implements ActionListener {

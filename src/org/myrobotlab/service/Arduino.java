@@ -111,7 +111,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
 
-	public static final int MRLCOMM_VERSION = 17;
+	public static final int MRLCOMM_VERSION = 18;
 
 	// serial protocol functions
 	public static final int MAGIC_NUMBER = 170; // 10101010
@@ -177,6 +177,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public static final int STEPPER_EVENT_STOP = 1; 
 
 	public static final int STEPPER_TYPE_POLOLU = 1; 
+	
+	public static final int CUSTOM_MSG = 50;
+	
+	public static final int ARDUINO_TYPE_INT = 16;
 	
 // servo event types
 	public static final int SERVO_EVENT_STOPPED = 1;
@@ -292,6 +296,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	HashMap<String, MotorData> motors = new HashMap<String, MotorData>();
+	
+	transient Service customEventListener = null;
 
 	class SensorData implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -1015,6 +1021,48 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							break;
 						}
 						
+						case CUSTOM_MSG: {
+							
+							// msg or data is of size byteCount
+							int paramCnt = msg[1];
+							int paramIndex = 2; // current index in buffer
+							// decode parameters
+							Object[] params = new Object[paramCnt];
+							
+							int paramType = 0;
+							
+							for (int i = 0; i < paramCnt; ++i){
+								
+								// get parameter type
+								//paramType = msg[];
+								paramType = msg[paramIndex];
+										
+								// convert
+								if (paramType == ARDUINO_TYPE_INT){
+									//params[i] =
+									int x = ((msg[++paramIndex] & 0xFF) << 8) + (msg[++paramIndex] & 0xFF);
+									if (x > 32767){ x = x - 65536; }
+									params[i] = x;
+									if (log.isDebugEnabled()){
+										log.debug(String.format("parameter %d is type ARDUINO_TYPE_INT value %d", i, x));
+									}
+									++paramIndex;
+								} else {
+									error("CUSTOM_MSG - unhandled type %d", paramType);
+								}
+								
+								// load it on boxing array
+								
+							}
+							
+							// how to reflectively invoke multi-param method (Python?)
+							if (customEventListener != null){
+								send(customEventListener.getName(), "onCustomMsg", params);
+							}
+							
+							break;
+						}
+						
 						default: {
 							error(formatMRLCommMsg("unknown serial event <- ", msg, msgSize));
 							break;
@@ -1047,6 +1095,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		}
 
 	}
+	
 		
 	public String formatMRLCommMsg(String prefix, byte[] message, int size){
 		debugRX.setLength(0);
@@ -2164,6 +2213,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		StepperControl stepper = steppers.get(name);
 		sendMsg(STEPPER_STOP, stepper.getIndex());
 	}
+	
+	public void onCustomMsg(Integer ax, Integer ay, Integer az){
+		log.info("here");
+	}
 
 	public static void main(String[] args) {
 		try {
@@ -2172,7 +2225,13 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.test("COM15");
+			Python python = (Python) Runtime.start("python", "Python");
+			Runtime.start("gui", "GUIService");
+			//arduino.addCustomMsgListener(python);
+			//arduino.customEventListener = python;
+			//arduino.connect("COM15");
+			
+			//arduino.test("COM15");
 
 			// blocking examples
 
@@ -2202,6 +2261,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+	}
+
+	public void addCustomMsgListener(Service service) {
+		customEventListener = service;
 	}
 
 

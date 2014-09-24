@@ -28,16 +28,13 @@ package org.myrobotlab.service;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.slf4j.Logger;
-
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.Trigger;
-import org.myrobotlab.service.interfaces.SensorDataPublisher;
+import org.slf4j.Logger;
 
 /**
  * @author GroG

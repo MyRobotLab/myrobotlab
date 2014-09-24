@@ -6,10 +6,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.memory.Node;
-import org.myrobotlab.service.interfaces.MemoryDisplay;
 import org.slf4j.Logger;
 
 

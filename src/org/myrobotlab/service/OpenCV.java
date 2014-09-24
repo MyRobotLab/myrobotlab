@@ -75,8 +75,6 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
-import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
-import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Instantiator;
 import org.myrobotlab.service.data.Point2Df;
@@ -94,6 +92,8 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 @Root
 public class OpenCV extends VideoSource {
 
+	// FIXME - don't return BufferedImage return SerializableImage always !
+	
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCV.class);
@@ -136,7 +136,7 @@ public class OpenCV extends VideoSource {
 
 	// yep its public - cause a whole lotta data
 	// will get set on it before a setState
-
+	
 	@Element
 	public VideoProcessor videoProcessor = new VideoProcessor();;
 
@@ -149,6 +149,8 @@ public class OpenCV extends VideoSource {
 	// P - N Learning TODO - remove - implement on "images"
 	public ArrayList<SerializableImage> positive = new ArrayList<SerializableImage>();
 	public ArrayList<SerializableImage> negative = new ArrayList<SerializableImage>();
+
+	public boolean undockDisplay = false;
 
 	public OpenCV(String n) {
 		super(n);
@@ -180,7 +182,13 @@ public class OpenCV extends VideoSource {
 		return img;
 	}
 
-	// publishing the big kahuna <output>
+	/**
+	 * the publishing point of all OpenCV goodies !
+	 * type conversion is held off until asked for - then its cached SMART ! :)
+	 * 
+	 * @param data
+	 * @return
+	 */
 	public final OpenCVData publishOpenCVData(OpenCVData data) {
 		return data;
 	}
@@ -800,6 +808,13 @@ public class OpenCV extends VideoSource {
 		setInputFileName(filename);
 		capture();
 	}
+	
+	public boolean undockDisplay(boolean b){
+		undockDisplay = b;
+		broadcastState();
+		return b;
+	}
+	
 
 	public static void main(String[] args) throws Exception {
 
@@ -817,11 +832,11 @@ public class OpenCV extends VideoSource {
 		Runtime.createAndStart("gui", "GUIService");
 		
 		opencv.capture();
-		OpenCVFilterTranspose transpose = new OpenCVFilterTranspose("transpose");
-		transpose.flipCode = 1;
+		//OpenCVFilterTranspose transpose = new OpenCVFilterTranspose("transpose");
+		//transpose.flipCode = 1;
 		
 		//OpenCVFilterLKOpticalTrack jj = new OpenCVFilterLKOpticalTrack("lk");
-		opencv.addFilter(transpose);
+		//opencv.addFilter(transpose);
 		
 		//opencv.test();
 		

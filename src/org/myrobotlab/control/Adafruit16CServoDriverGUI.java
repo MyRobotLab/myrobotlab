@@ -28,14 +28,13 @@ package org.myrobotlab.control;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import javax.swing.JTabbedPane;
-
 import org.myrobotlab.service.Adafruit16CServoDriver;
-import org.myrobotlab.service._TemplateService;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
 public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListener {

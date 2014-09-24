@@ -31,12 +31,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.myrobotlab.logging.LoggerFactory;
-
 import org.myrobotlab.arduino.Serial;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
+import org.slf4j.Logger;
 
 public abstract class Uploader {
 	static final String BUGS_URL = "https://developer.berlios.de/bugs/?group_id=3590";

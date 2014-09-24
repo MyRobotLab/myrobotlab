@@ -49,6 +49,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -73,6 +74,7 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.opencv.FilterWrapper;
+import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.VideoSources;
@@ -82,6 +84,7 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.slf4j.Logger;
 
+import com.googlecode.javacv.CanvasFrame;
 import com.googlecode.javacv.FrameGrabber;
 
 public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, VideoGUISource, ActionListener {
@@ -101,7 +104,10 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 	VideoWidget video0 = null;
 
 	JButton capture = new JButton("capture");
+	JCheckBox undock = new JCheckBox("undock");
 
+	CanvasFrame cframe = null;//new CanvasFrame("canvas frame");
+	
 	// input
 	JPanel captureCfg = new JPanel();
 	JRadioButton fileRadio = new JRadioButton();
@@ -144,6 +150,8 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 
 		video0 = new VideoWidget(boundServiceName, myService, tabs, false);
 		video0.init();
+		
+		undock.addActionListener(this);
 
 		capture.addActionListener(captureListener);
 
@@ -209,6 +217,8 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 		cpanel.setBorder(BorderFactory.createEtchedBorder());
 		cpanel.add(capture);
 		cpanel.add(grabberTypeSelect);
+		//cpanel.add(new JLabel(" canvas "));
+		cpanel.add(undock);
 		// build configuration for the various captures
 		// non visible - when not applicable
 		// disable when capturing
@@ -695,6 +705,15 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 					currentFilters.removeListSelectionListener(self);
 					currentFilters.setSelectedValue(vp.displayFilterName, true);// .setSelectedIndex(index);
 					currentFilters.addListSelectionListener(self);
+					
+					if (opencv.undockDisplay == true){
+						cframe = new CanvasFrame("canvas frame");
+					} else {
+						if (cframe != null){
+							cframe.dispose();
+							cframe = null;
+						}
+					}
 
 				} else {
 					log.error("getState for " + myService.getName() + " was called on " + boundServiceName + " with null reference to state info");
@@ -704,22 +723,34 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 		});
 
 	}
+	
+	public void onOpenCVData(OpenCVData data){
+		// GRRR BufferedImage - should have been a Serialized Image;		
+		
+		if (cframe != null){
+			cframe.showImage(data.getImage());
+		} else {
+			video0.displayFrame(new SerializableImage(data.getDisplayBufferedImage(), data.getDisplayFilterName()));
+		}
+	}
 
 	@Override
 	public void attachGUI() {
 		// TODO - bury in GUIService Framework?
 		subscribe("publishState", "getState", OpenCV.class);
+		subscribe("publishOpenCVData", "onOpenCVData", OpenCVData.class);
 		myService.send(boundServiceName, "publishState");
 
-		video0.attachGUI(); // default attachment
+		//video0.attachGUI(); // default attachment
 		// templateDisplay.attachGUI(); // default attachment
 	}
 
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", OpenCV.class);
+		unsubscribe("publishOpenCVData", "onOpenCVData", OpenCVData.class);
 
-		video0.detachGUI();
+		// video0.detachGUI();
 		// stemplateDisplay.detachGUI();
 	}
 
@@ -753,6 +784,18 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 			}
 		} else if (o == recordFrameButton) {
 			myService.send(boundServiceName, "recordSingleFrame");
+		} else if (o == undock){
+			if (undock.isSelected()){
+			if (cframe != null){
+				cframe.dispose();				
+			}
+			cframe = new CanvasFrame("canvas");
+			} else {
+				if (cframe != null){
+					cframe.dispose();				
+					cframe = null;
+				}
+			}
 		}
 	}
 

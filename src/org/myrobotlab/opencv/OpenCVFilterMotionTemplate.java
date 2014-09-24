@@ -55,8 +55,6 @@ import static com.googlecode.javacv.cpp.opencv_video.cvCalcMotionGradient;
 import static com.googlecode.javacv.cpp.opencv_video.cvSegmentMotion;
 import static com.googlecode.javacv.cpp.opencv_video.cvUpdateMotionHistory;
 
-import java.awt.image.BufferedImage;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

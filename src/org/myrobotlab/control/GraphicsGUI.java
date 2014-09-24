@@ -42,15 +42,13 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JButton;
 import javax.swing.JList;
-
-import org.slf4j.Logger;
-import org.myrobotlab.logging.LoggerFactory;
 import javax.swing.JTabbedPane;
 
-
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.interfaces.VideoGUISource;
+import org.slf4j.Logger;
 
 public class GraphicsGUI extends ServiceGUI implements VideoGUISource {
 

@@ -51,13 +51,10 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.myrobotlab.control.ServiceGUI;
-import org.myrobotlab.control.TabControl;
 import org.myrobotlab.control.TabControl2;
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Python;
-import org.myrobotlab.service.GUIService;
 
 /**
  * Editor

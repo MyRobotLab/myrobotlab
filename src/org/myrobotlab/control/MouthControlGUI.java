@@ -27,22 +27,13 @@ package org.myrobotlab.control;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
 
 import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
-
-import org.myrobotlab.control.widget.MemoryWidget;
-import org.myrobotlab.control.widget.NodeGUI;
-import org.myrobotlab.image.SerializableImage;
-import org.myrobotlab.logging.LoggerFactory;
 import javax.swing.JTabbedPane;
 
-import org.myrobotlab.memory.Node;
-import org.myrobotlab.opencv.OpenCVData;
-import org.myrobotlab.service.MouthControl;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.interfaces.MemoryDisplay;
+import org.myrobotlab.service.MouthControl;
 import org.slf4j.Logger;
 
 public class MouthControlGUI extends ServiceGUI implements ActionListener {

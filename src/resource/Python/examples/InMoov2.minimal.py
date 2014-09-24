@@ -11,7 +11,11 @@
 rightPort = "COM8"
 
 i01 = Runtime.createAndStart("i01", "InMoov")
+# starting parts
 i01.startEar()
+i01.startMouth()
+#to tweak the default voice
+i01.mouth.setGoogleURI("http://thehackettfamily.org/Voice_api/api2.php?voice=Ryan&txt=")
 ##############
 i01.startRightHand(rightPort)
 # tweaking defaults settings of right hand

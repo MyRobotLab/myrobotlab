@@ -27,7 +27,6 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.ArrayList;
 
-import org.myrobotlab.service.Stepper;
 import org.myrobotlab.service.data.Pin;
 
 public interface StepperController {

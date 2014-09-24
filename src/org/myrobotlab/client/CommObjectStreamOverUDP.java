@@ -11,7 +11,6 @@ import java.net.InetAddress;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.ServiceEnvironment;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 
 class CommObjectStreamOverUDP extends Thread implements Communicator {
 	
