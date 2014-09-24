@@ -173,11 +173,11 @@ public class Servo extends Service implements ServoControl {
 	 * org.myrobotlab.service.interfaces.ServoControl#attach(java.lang.String,
 	 * int)
 	 */
-	public boolean attach(String controller, int pin) {
+	public boolean attach(String controller, Integer pin) {
 		return attach((Arduino) Runtime.getService(controller), pin);
 	}
 
-	public boolean attach(Arduino controller, int pin) {
+	public boolean attach(Arduino controller, Integer pin) {
 		setPin(pin);
 
 		if (setController(controller)) {
@@ -204,7 +204,7 @@ public class Servo extends Service implements ServoControl {
 			return false;
 		}
 
-		isAttached = controller.servoAttach(getName(), pin) != -1;
+		isAttached = controller.servoAttach(getName(), pin);
 
 		if (isAttached) {
 			// changed state

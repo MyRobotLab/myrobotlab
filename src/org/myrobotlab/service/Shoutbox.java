@@ -29,11 +29,11 @@ import org.myrobotlab.webgui.WSServer.WSMsg;
 import org.slf4j.Logger;
 
 public class Shoutbox extends Service {
-
-	
 	private static final long serialVersionUID = 1L;
-
 	public final static Logger log = LoggerFactory.getLogger(Shoutbox.class);
+	
+	final public String SYSTEM = "system";
+	final public String USER = "usermsg";
 
 	transient WebGUI webgui;
 	transient ProgramAB chatbot;
@@ -46,7 +46,7 @@ public class Shoutbox extends Service {
 	int imageDefaultHeight = 200;
 	int imageDefaultWidth = 200;
 
-	transient private static NameProvider nameProvider = new DefaultNameProvider();
+	transient static NameProvider nameProvider = new DefaultNameProvider();
 
 	Integer port = 6565;
 
@@ -60,6 +60,9 @@ public class Shoutbox extends Service {
 
 	int maxArchiveRecordCount = 50;
 
+	// FIXME - Ma.  Vo. name link on shoutbox
+	// FIXME - 
+	// FIXME - startAll function - starts xmpp & chatbot
 	// FIXME xmpp - no system messages -> way to shutoff or turn on system messages
 	// FIXME xmpp - no taling or recieving messages from mr.turing (refactor "shouts") from everyone... (anywhere shout) -> invoke "onShout" ??/
 	// FIXME - way to reset user use nickname or force someone to have name
@@ -171,11 +174,11 @@ public class Shoutbox extends Service {
 	 * shout - these are to display server data on the clients
 	 */
 	public static class Shout {
-		public String user;
+		public String user; // FROM
 		public String type;
 		public String msg;
 		public String color;
-		public String ip;
+		public String ip; // TODO change to key
 
 		public String time;
 
@@ -192,7 +195,7 @@ public class Shoutbox extends Service {
 		public String ip;
 		public String port;
 		public String color;
-		transient public WebSocket socket;
+		transient public WebSocket socket; // FIXME - this is most recent websocket - loses other connections
 	}
 
 	// if new socket & recently closed socket of user - then
@@ -262,6 +265,16 @@ public class Shoutbox extends Service {
 		}
 	}
 
+	public NameProvider setNameProvider(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		Class<?> theClass = Class.forName(classname);
+		nameProvider = (NameProvider) theClass.newInstance();
+		return nameProvider;
+	}
+
+	public void setNameProvider(NameProvider nameProvider2) {
+		nameProvider = nameProvider2;
+	}
+
 	public void archive(Shout shout) {
 
 		try {
@@ -298,6 +311,10 @@ public class Shoutbox extends Service {
 		}
 	}
 
+	/**
+	 * archiving
+	 * restores last json file back into newly started shoutbox
+	 */
 	public void restore() {
 		try {
 			File latest = null;
@@ -334,31 +351,22 @@ public class Shoutbox extends Service {
 		}
 	}
 
-	// WTFU - onShout does not use this .. why??
-	public Shout createShout(String type, String msg) {
-		Shout shout = new Shout();
-		shout.type = type;
-		shout.msg = msg;
 
-		updateSystemInfo(shout);
-		return shout;
+	public void quickStart(String xmpp, String password){
+		startXMPP(xmpp, password);
+		startChatBot();
+		// incubator buddies
+		/*
+		addXMPPRelay("Keith McGerald");
+		addXMPPRelay("Orbous Mundus");
+		addXMPPRelay("Alessandro Didonna");
+		addXMPPRelay("Dwayne Williams");
+		addXMPPRelay("Aatur Mehta"); //21eikzp8j6z5o20jxbq6puzyxx@public.talk.google.com
+		*/
+		
+		addXMPPRelay("Greg Perry");
 	}
 
-	public Shout createSysetmShout(String msg) {
-		return createShout("system", msg);
-	}
-
-	/**
-	 * send system message to everyone
-	 * 
-	 * @param msg
-	 */
-	public void systemShout(String msg) {
-		Shout shout = createShout("system", msg);
-		Message onShout = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
-		// out.sender = shout.user;
-		webgui.sendToAll(onShout);
-	}
 
 	// TODO Create User INFO & INDEXES HERE
 	public void onConnect(WebSocket conn) {
@@ -367,7 +375,7 @@ public class Shoutbox extends Service {
 		// set javascript user object for this connection
 		User user = users.addUser(conn);
 		Message onConnect = createMessage("shoutclient", "onConnect", Encoder.gson.toJson(user));
-		conn.send(Encoder.gson.toJson(onConnect));// .sendToAll(onConnect);
+		conn.send(Encoder.gson.toJson(onConnect));
 
 		// BROADCAST ARRIVAL
 		// TODO - broadcast to others new connection of user - (this mean's user
@@ -376,7 +384,7 @@ public class Shoutbox extends Service {
 		// a new tab or
 		// actually arriving on the site - how to tell the difference between
 		// all these activities?
-		systemShout(String.format("[%s]@[%s] is in the haus !", user.user, user.ip));
+		broadcast(SYSTEM, String.format("[%s]@[%s] is in the haus !", user.user, user.ip));
 
 		// FIXME onShout which takes ARRAY of shouts !!! - send the whole thing
 		// in one shot
@@ -392,19 +400,9 @@ public class Shoutbox extends Service {
 	public void onDisconnect(WebSocket conn) {
 		User user = users.getUser(conn);
 		users.remove(user);
-		// log.info(conn.getRemoteSocketAddress().toString()); - always null
-		log.info("" + conn);
+		info("onDisconnect %s", conn);
 	}
 
-	public NameProvider setNameProvider(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		Class<?> theClass = Class.forName(classname);
-		nameProvider = (NameProvider) theClass.newInstance();
-		return nameProvider;
-	}
-
-	public void setNameProvider(NameProvider nameProvider2) {
-		nameProvider = nameProvider2;
-	}
 
 	/**
 	 * fabulous new "pub"lish method from WSServer sends Websocket + Message no
@@ -448,88 +446,11 @@ public class Shoutbox extends Service {
 		return "shoutbox server for myrobotlab";
 	}
 
-	public void onShout(WSMsg wsmsg) {
-		// webgui assigns client ip to Message.sender
-		Message m = wsmsg.msg;
-		info("%s", m);
 
-		String msg = (String) m.data[0];
-		// sender is put in by WebGUI / WSServer
-		// shout.ip = m.sender;
-		User user = users.getUser(wsmsg.socket);
-
-		Shout shout = (Shout) Encoder.gson.fromJson(msg, Shout.class);
-
-		if (user == null) {
-			error("%s shouting but not found in ipToUser", m.sender);
-		}
-
-		// transfer data - transfer personal properties
-		shout.user = user.user;
-		shout.ip = user.ip;
-
-		updateSystemInfo(shout);
-
-		// starts with "/" is a system message
-		if (shout.msg.startsWith("/")) {
-			log.info("system message");
-
-			// Object ret = null;
-			
-			String [] params =  shout.msg.split("/");
-
-			if (shout.msg.startsWith("/startChatBot")) {
-				invoke("startChatBot");
-				return;
-			}
-			
-			if (shout.msg.startsWith("/listConnections")) {
-				invoke("listConnections", wsmsg);
-				return;
-			}
-			
-			if (shout.msg.startsWith("/startXMPP")) {
-				invoke("startXMPP", params[2], params[3]);
-				return;
-			}
-			
-			if (shout.msg.startsWith("/addXMPPRelay")) {
-				invoke("addXMPPRelay", params[2]);
-				return;
-			}
-			
-			if (shout.msg.startsWith("/i")){
-				String src = params[2];
-				shout.msg = String.format("<a href=\"%s\"><img src=\"%s\" width=\"%d\" height=\"%d\"/></a>", src, src, imageDefaultWidth, imageDefaultHeight);
-			}
-		}
-		
-		// more general contains 
-		
-
-		String foundName = findChatBotName(shout.msg);
-		if (foundName != null) {
-			chatWithChatbot(foundName, shout);
-		}
-
-		shouts.add(shout);
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
-		webgui.sendToAll(out);
-		
-		if (xmpp != null){
-			for (int i = 0; i < xmppRelays.size(); ++i){
-				log.info(String.format("sending xmpp client %s %s",shout.user, shout.msg));
-				xmpp.sendMessage(String.format("%s:%s", shout.user, shout.msg), xmppRelays.get(i));
-			}
-		}
-
-		archive(shout);
-	}
-	
 	public void listConnections(WSMsg wsmsg){
 		log.info("listConnections");
 		
-		Shout shout = createShout("system", Encoder.gson.toJson(users.listConnections()));
+		Shout shout = createShout(SYSTEM, Encoder.gson.toJson(users.listConnections()));
 		Message listUsers = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 				
 		//Message catchup = createMessage("shoutclient", "onShout", Encoder.gson.toJson(users.listConnections()));
@@ -583,7 +504,7 @@ public class Shoutbox extends Service {
 		
 		String r = resizeImage(response.msg);
 		
-		Shout shout = createShout("usermsg", r);
+		Shout shout = createShout(USER, r);
 		shout.user = "mr.turing";
 
 		shouts.add(shout);
@@ -607,20 +528,6 @@ public class Shoutbox extends Service {
 			return false;
 		}
 		
-	}
-	
-	public void onXMPPMsg(XMPPMsg xmppMsg){
-		log.info(String.format("XMPP - %s %s", xmppMsg.msg.getFrom(), xmppMsg.msg.getBody()));
-		
-		//String r = resizeImage(response.msg);
-		
-		Shout shout = createShout("usermsg", xmppMsg.msg.getBody());
-		shout.user = "mr.turing";
-
-		shouts.add(shout);
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
-		webgui.sendToAll(out);
-		archive(shout);
 	}
 	
 	public boolean stopXMPP(){
@@ -652,19 +559,135 @@ public class Shoutbox extends Service {
 		return xmppRelays;
 	}
 	
-	// add relay - is a subset of the XMPP roster
-	/*
-	public boolean removeXMPPClient(String user){
-		if (xmppClients.containsKey(user)){
-			XMPP xmpp = xmppClients.get(user);
-			xmpp.releaseService();
-			xmppClients.remove(user);
-			return true;
-		}
-		return false;
-	}
-	*/
 	// --------- XMPP END ------------
+	
+	// EXCHANGE need "session-key" to do a - connection/session-key for user
+	// FIXME NOT NORMALIZED with onXMPPMsg() !!!!
+	public void onShout(WSMsg wsmsg) {
+		// webgui assigns client ip to Message.sender
+		Message m = wsmsg.msg;
+		info("%s", m);
+
+		String msg = (String) m.data[0];
+		// sender is put in by WebGUI / WSServer
+		// shout.ip = m.sender;
+		User user = users.getUser(wsmsg.socket);
+
+		Shout shout = (Shout) Encoder.gson.fromJson(msg, Shout.class);
+
+		if (user == null) {
+			error("%s shouting but not found in ipToUser", m.sender);
+		}
+
+		// transfer data - transfer personal properties
+		shout.user = user.user;
+		shout.ip = user.ip;
+
+		updateSystemInfo(shout);
+
+		// starts with "/" is a system message
+		if (shout.msg.startsWith("/")) {
+			log.info("system message");
+
+			// Object ret = null;
+			
+			String [] params =  shout.msg.split("/");
+
+			if (shout.msg.startsWith("/startChatBot")) {
+				invoke("startChatBot");
+				return;
+			}
+			
+			if (shout.msg.startsWith("/listConnections")) {
+				invoke("listConnections", wsmsg);
+				return;
+			}
+			
+			if (shout.msg.startsWith("/startXMPP")) {
+				invoke("startXMPP", params[2], params[3]);
+				return;
+			}
+			
+			if (shout.msg.startsWith("/addXMPPRelay")) {
+				invoke("addXMPPRelay", params[2]);
+				return;
+			}
+			
+			if (shout.msg.startsWith("/removeXMPPRelay")) {
+				invoke("removeXMPPRelay", params[2]);
+				return;
+			}
+			
+			if (shout.msg.startsWith("/getXMPPRoster")) {
+				invoke("getXMPPRoster");
+				return;
+			}
+
+			if (shout.msg.startsWith("/getXMPPRelays")) {
+				invoke("getXMPPRelays");
+				return;
+			}
+			
+			if (shout.msg.startsWith("/quickStart")) {
+				invoke("quickStart", params[2], params[3]);
+				return;
+			}
+			
+			/*
+			YOU THINK THIS WILL WORK > HAHAHAHA !
+			/i/http://crossfitlosgatos.com/wp-content/uploads/2013/05/coffee-black.jpg
+			 
+			if (shout.msg.startsWith("/i")){
+				String src = params[2];
+				shout.msg = String.format("<a href=\"%s\"><img src=\"%s\" width=\"%d\" height=\"%d\"/></a>", src, src, imageDefaultWidth, imageDefaultHeight);
+			}
+			*/
+		}
+		
+		// more general contains 
+		
+
+		String foundName = findChatBotName(shout.msg);
+		if (foundName != null) {
+			chatWithChatbot(foundName, shout);
+		}
+
+		shouts.add(shout);
+		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		webgui.sendToAll(out);
+		
+		if (xmpp != null){
+			for (int i = 0; i < xmppRelays.size(); ++i){
+				log.info(String.format("sending from %s -> to xmpp client %s %s",shout.user, xmppRelays.get(i), shout.msg));
+				xmpp.sendMessage(String.format("%s:%s", shout.user, shout.msg), xmppRelays.get(i));
+			}
+		}
+
+		archive(shout);
+	}
+	
+
+	// FIXME FIXME FIXME - not normalized with onShout(WebSocket) :PPPP
+	public void onXMPPMsg(XMPPMsg xmppMsg){
+		log.info(String.format("XMPP - %s %s", xmppMsg.msg.getFrom(), xmppMsg.msg.getBody()));
+		
+		Shout shout = createShout(USER, xmppMsg.msg.getBody());
+		//shout.user = "mr.turing";
+		shout.user = xmpp.getEntry(xmppMsg.msg.getFrom()).getName();
+
+		shouts.add(shout);
+		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		webgui.sendToAll(out);
+		if (xmpp != null){
+			for (int i = 0; i < xmppRelays.size(); ++i){
+				log.info(String.format("sending xmpp client %s %s",shout.user, shout.msg));
+				xmpp.sendMessage(String.format("%s:%s", shout.user, shout.msg), xmppRelays.get(i));
+			}
+		}
+		archive(shout);
+	}
+	
+	
 	public void test() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Shoutbox shoutbox = (Shoutbox) Runtime.create(getName(), "Shoutbox");
 		shoutbox.startService();
@@ -674,6 +697,47 @@ public class Shoutbox extends Service {
 		//shoutbox.addXMPPRelay("Greg Perry");
 	}
 	
+	// ---- outbound ---->
+	
+	
+	// WTFU - onShout does not use this .. why??
+	public Shout createShout(String type, String msg) {
+		Shout shout = new Shout();
+		shout.type = type;
+		shout.msg = msg;
+
+		updateSystemInfo(shout);
+		return shout;
+	}
+	
+	public void onShout(String key, String msg){
+		// from key - get User
+		
+		broadcast(USER, "test");
+		
+		// filter out system ?
+		// archive(shout);
+	}
+	
+	// fixme (from whom) ?? - websocket xmpp other ??
+	public void broadcast(String type, String data){
+		Shout shout = createShout(type, data);
+		Message onShout = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		
+		// RULES - TODO - if self don't send to self
+		
+		// WEBSOCKETS
+		webgui.sendToAll(onShout);
+		
+		// XMPP
+		if (xmpp != null){
+			for (int i = 0; i < xmppRelays.size(); ++i){
+				log.info(String.format("sending from %s -> to xmpp client %s %s",shout.user, xmppRelays.get(i), shout.msg));
+				xmpp.sendMessage(String.format("%s:%s", shout.user, shout.msg), xmppRelays.get(i));
+			}
+		}
+	}
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		try {

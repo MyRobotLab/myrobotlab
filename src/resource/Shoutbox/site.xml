@@ -1,0 +1,260 @@
+ <div id="block-block-5" class="block block-block">
+  <h2 class="block-title">ShoutBox (beta) - powered by MRL</h2>
+  <div class="content">
+    <style type="text/css">
+<!--
+a, span.link {
+  text-decoration: none;
+}
+
+.chat_wrapper {
+	width: 200px;
+	height: 600px;
+	overflow: auto;
+	margin-right: 10px;
+	font: 12px 'lucida grande',tahoma,verdana,arial,sans-serif;
+	z-index: 99999;
+}
+.chat_wrapper .message_box {
+	height: 650px;
+	overflow: auto;
+	padding: 10px;
+	z-index: 99999;
+}
+.chat_wrapper .panel input{
+    width: 90%;
+	padding: 10px 10px 10px 10px;
+	z-index: 99999;
+}
+.system_msg{color: #BDBDBD;font-style: italic; 	z-index: 99999;}
+.user_name{font-weight:bold; 	z-index: 99999;}
+.user_message{color: #336600; 	z-index: 99999;}
+--><!--
+a, span.link {
+  text-decoration: none;
+}
+
+.chat_wrapper {
+	width: 200px;
+	height: 600px;
+	overflow: auto;
+	margin-right: 10px;
+	font: 12px 'lucida grande',tahoma,verdana,arial,sans-serif;
+	z-index: 99999;
+}
+.chat_wrapper .message_box {
+	height: 650px;
+	overflow: auto;
+	padding: 10px;
+	z-index: 99999;
+}
+.chat_wrapper .panel input{
+    width: 90%;
+	padding: 10px 10px 10px 10px;
+	z-index: 99999;
+}
+.system_msg{color: #BDBDBD;font-style: italic; 	z-index: 99999;}
+.user_name{font-weight:bold; 	z-index: 99999;}
+.user_message{color: #336600; 	z-index: 99999;}
+-->
+</style>
+
+<link href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+
+<script language="javascript" type="text/javascript">
+<!-- 
+// TODO User / global level properties
+// TODO - save / send to my email - shouts to my email
+// reduce - no local vars - create full objects - big constructor
+
+var myUser = "";
+var expanded = false;
+
+function Message() {
+	this.data = [];
+}
+
+function Shout(user, msg) {
+  this.user = user;
+  this.msg = msg;
+  this.type = "usermsg";
+  this.color = "007AFF";
+  this.ip = "";
+
+  this.time = "";
+
+  // system data
+  this.connectionCount = 0;
+  this.userCount = 0;
+  this.guestCount = 0;
+  this.msgCount = 0;
+
+}
+
+function User(){
+	this.user;
+	this.ip;
+	this.port;
+}
+
+function addURLs(text) {
+        var url1 = /(^|&lt;|\s)(www\..+?\..+?)(\s|&gt;|$)/g,
+        url2 = /(^|&lt;|\s)(((https?|ftp):\/\/|mailto:).+?)(\s|&gt;|$)/g;
+
+        var html = $.trim(text);
+        if (html) {
+            html = html
+                .replace(url1, '$1<a style="color:blue; text-decoration:underline;" target="new"  href="http://$2">$2</a>$3')
+                .replace(url2, '$1<a style="color:blue; text-decoration:underline;" target="new"  href="$2">$2</a>$5');
+        }
+        return html;
+}
+
+function send(){
+		var mymessage = $('#message').val(); //get message text
+		var serviceName = "shoutbox"; // $('#name').val(); FIXME - hardcode .. should be set by shoutbox on inital contact
+		var method = "onShout";
+		var shout = new Shout("GroG", $('#message').val());
+
+		var data =  [JSON.stringify(shout)];
+
+		if(mymessage == ""){ //emtpy message?
+			alert("Enter Some message Please!");
+			return;
+		}
+
+		//prepare json data
+		var msg = {
+		message: mymessage,
+		name: serviceName,
+		method: method,
+		data: data,
+		color : '007AFF'
+		};
+		//convert and send data to server
+		websocket.send(JSON.stringify(msg));
+}
+
+$(document).ready(function(){
+	//create a new WebSocket object.
+	var wsUri = "ws://myrobotlab.org:6565";
+	websocket = new WebSocket(wsUri);
+
+	$(function() {
+		$( document ).tooltip();
+	});
+
+	$('#message').bind("enterKey",function(e){
+		send();
+		$('#message').val('');
+	});
+
+	$('#message').keyup(function(e){
+	if(e.keyCode == 13)
+	{
+	  $(this).trigger("enterKey");
+	}
+	});
+
+	websocket.onopen = function(ev) { // connection is open
+		$('#message_box').append("<div class=\"system_msg\">Connected!</div>"); //notify user
+	}
+
+
+	$('#send-btn').click(function(){
+		send();
+	});
+
+	//#### Message received from server
+	websocket.onmessage = function(ev) {
+	    // mrl message
+		var msg = JSON.parse(ev.data); //PHP sends Json data
+
+		// could eval the msg.method - but
+		// want more control and don't expect many methods
+		if (msg.method == 'onShout'){
+			onShout(msg);
+		} else if (msg.method == 'onConnect'){
+			onConnect(msg);
+		} else {
+			alert("unknown method "  + msg.method);
+		}
+
+	};
+
+	// buttons
+	$(function() {
+	    $( "button" )
+	      .button()
+	      .click(function( event ) {
+	        event.preventDefault();
+	        if (expanded){
+				$(".chat_wrapper, .system_msg, .system_message_box, #message_box").animate({
+							width: "200px"
+				});
+				$("#expand").text("+");
+				expanded = false;
+	        } else {
+				$(".chat_wrapper, .system_msg, .system_message_box, #message_box").animate({
+							width: "1250px"
+				});
+				$("#expand").text("-");
+				expanded = true;
+			}
+	      });
+  	});
+
+	// menu
+	$(function() {
+		$( "#accordion" ).accordion({ heightStyle: "content", collapsible: true, active: false });
+	  });
+
+	// setting call-backs
+	websocket.onerror	= function(ev){$('#message_box').append("<div class=\"system_error\">Error Occurred - "+ev.data+"</div>");};
+	websocket.onclose 	= function(ev){$('#message_box').append("<div class=\"system_msg\">Connection Closed</div>");};
+
+	function onConnect(msg){
+		var user = JSON.parse(msg.data);
+		myUser = user;
+		$('#id').prepend("I am "+user.user +"@" + user.ip +":" + user.port +"");
+	}
+
+	function onShout(msg){
+		var shout = JSON.parse(msg.data);
+		var type = shout.type; //message type
+		var umsg = shout.msg; //message text
+		var uname = shout.user; //user name
+		var ucolor = shout.color; //color
+
+		if (myUser.user == shout.user){
+			ucolor = "993366";
+		}
+
+		if(type == 'usermsg')
+		{
+			$('#message_box').prepend("<div>" + "<a title=\""+shout.time+"\" href=\"http://myrobotlab.org/users/"+uname+"\">"+ "<span class=\"user_name\" style=\"color:#"+ucolor+"\">"+uname+"</span></a>: <span class=\"user_message\">"+addURLs(umsg)+"</span></div>");
+		}
+		if(type == 'system')
+		{
+			$('#system_message_box').html("<div class=\"system_msg\">"+umsg+"</div>");
+		}
+
+		// system updates
+
+		$('#system').html("connections " + shout.connectionCount + " users " + shout.userCount + " guests " + shout.guestCount + " msgs " + shout.msgCount + "<hr />");
+	}
+});
+-->
+</script><div class="chat_wrapper">
+<div class="panel">
+		<input id="message" name="message" placeholder="Message" type="text" /></div>
+<p>	<button id="expand">+</button></p>
+<div class="system_msg" id="id"></div>
+<div class="system_msg" id="system"></div>
+<div class="system_msg" id="system_message_box"></div>
+<div id="message_box"></div>
+</div>
+  </div>
+</div>
