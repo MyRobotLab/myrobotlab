@@ -455,42 +455,42 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 			error("servoAttach can not attach %s no service exists", servoName);
 			return false;
 		}
-		return servoAttach(servoName, servo.getPin()) != -1;
+		return servoAttach(servoName, servo.getPin());
 	}
 
 	// FIXME - put in interface
-	public int servoAttach(Servo servo) {
+	public boolean servoAttach(Servo servo) {
 		if (servo == null) {
 			error("servoAttach servo is null");
-			return -1;
+			return false;
 		}
 
 		if (servo.getPin() == null) {
 			error("%s servo pin not set", servo.getName());
-			return -1;
+			return false;
 		}
 		return servoAttach(servo.getName(), servo.getPin());
 	}
 
 	@Override
-	public synchronized int servoAttach(String servoName, Integer pin) {
+	public synchronized boolean servoAttach(String servoName, Integer pin) {
 		log.info(String.format("servoAttach %s pin %d", servoName, pin));
 
 		if (serialDevice == null) {
 			error("could not attach servo to pin " + pin + " serial port is null - not initialized?");
-			return -1;
+			return false;
 		}
 
 		if (servos.containsKey(servoName)) {
 			log.warn("servo already attach - detach first");
-			return -1;
+			return false;
 		}
 
 		// simple re-map - to guarantee the same MRL Servo gets the same
 		// MRLComm.ino servo
 		if (pin < 2 || pin > MAX_SERVOS + 2) {
 			error("pin out of range 2 < %d < %d", pin, MAX_SERVOS + 2);
-			return -1;
+			return false;
 		}
 
 		// complex formula to calculate servo index
@@ -514,7 +514,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		servoIndex.put(index, sd);
 
 		log.info("servo index {} pin {} attached ", index, pin);
-		return index;
+		return true;
 	}
 
 	@Override
@@ -1249,7 +1249,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 				error("servo controller and servo must be local");
 				return false;
 			}
-			return servoAttach(serviceName, (Integer) (data[0])) != -1;
+			return servoAttach(serviceName, (Integer) (data[0]));
 		}
 
 		if (sw instanceof Motor) // Servo or ServoControl ???

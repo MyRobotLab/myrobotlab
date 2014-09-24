@@ -274,11 +274,10 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 	@Override
 	// string based method calls typed method
-	public int servoAttach(String servoName, Integer pin) {
+	public boolean servoAttach(String servoName, Integer pin) {
 		Servo servo = (Servo) Runtime.createAndStart(servoName, "Servo");
 		// FIXME ??? WRONG RIGHT?? DUNNO do I have an index ? prolly not :)
-		attach(servo, pin);
-		return pin;
+		return attach(servo, pin);
 	}
 
 	@Override
