@@ -26,6 +26,14 @@ public class SampleListener extends Listener {
     public void onExit(Controller controller) {
         System.out.println("Exited");
     }
+    
+    public void strenght(Controller controller){
+    	Frame frame = controller.frame();
+    	Hand hand = frame.hands().rightmost();
+    	System.out.println("Strenght is: " + hand.grabStrength());
+    	
+    	
+    }
 
     public void onFrame(Controller controller) {
         // Get the most recent frame and report some basic information
