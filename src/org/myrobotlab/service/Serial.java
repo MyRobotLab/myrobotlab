@@ -19,6 +19,7 @@ import org.myrobotlab.serial.SerialDeviceEventListener;
 import org.myrobotlab.serial.SerialDeviceFactory;
 import org.myrobotlab.serial.SerialDeviceService;
 import org.myrobotlab.serial.VirtualSerialPort;
+import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
 public class Serial extends Service implements SerialDeviceService, SerialDeviceEventListener {
@@ -27,41 +28,40 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 	public final static Logger log = LoggerFactory.getLogger(Serial.class);
 
-	private transient SerialDevice serialDevice;
+	transient SerialDevice serialDevice;
 	public ArrayList<String> portNames = new ArrayList<String>();
 
+	static public final String FORMAT_DECIMAL = "decimal";
+	static public final String FORMAT_HEX = "hex";
+	static public final String FORMAT_ASCII = "ascii";
+	String format = FORMAT_DECIMAL;
+	String delimeter = " ";
+	
 	int BUFFER_SIZE = 8192;
-	byte[] buffer = new byte[BUFFER_SIZE];
-	transient BlockingQueue<Byte> blockingData = new LinkedBlockingQueue<Byte>();
+	int[] buffer = new int[BUFFER_SIZE];
+	transient BlockingQueue<Integer> blockingData = new LinkedBlockingQueue<Integer>();
 
-	private int recievedByteCount = 0;
+	int recievedByteCount = 0;
 
 	boolean publish = true;
 	boolean blocking = false;
 
-	private boolean connected = false;
-	private String portName = "";
+	boolean connected = false;
+	String portName = null;
 
-	public static final int PUBLISH_BYTE = 0;
-	public static final int PUBLISH_LONG = 1;
-	public static final int PUBLISH_INT = 2;
-	public static final int PUBLISH_BYTE_ARRAY = 3;
-	public static final int PUBLISH_STRING = 4;
-	public static final int PUBLISH_MESSAGE = 5;
-	public static final int PUBLISH_MRL_MESSAGE = 6;
-
-	public int publishType = PUBLISH_BYTE;
-
-	// Arduino micro-controller specific at the moment
-	public int BYTE_SIZE_LONG = 4;
-	public int BYTE_SIZE_INT = 2;
+	// TODO use utility methods to help parse read data types
+	// because we should not assume we know the details of ints longs etc nor
+	// the endianess
+	// utility methods - ascii
 
 	// ====== file io begin ======
-	private boolean useRXFile = false;
-	transient private FileWriter fileWriterRX = null;
-	transient private BufferedWriter bufferedWriterRX = null;
-
+	boolean logRX = false;
+	transient FileWriter fileWriterRX = null;
+	transient BufferedWriter bufferedWriterRX = null;
+	
 	// ====== file io end ======
+
+	ArrayList<SerialDataListener> listeners = new ArrayList<SerialDataListener>();
 
 	// display buffer for all RX data
 	StringBuffer display = new StringBuffer();
@@ -76,7 +76,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	}
 
 	public void capacity(int size) {
-		buffer = new byte[size];
+		buffer = new int[size];
 	}
 
 	/**
@@ -105,28 +105,40 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return retVal;
 	}
 	
-	public boolean record(){
-		return useRXFile(true);
-	}
-	
-	public boolean stopRecording(){
-		return useRXFile(false);
+	public static long byteToLong(int[] bytes, int offset, int length) {
+
+		long retVal = 0;
+
+		for (int i = 0; i < length; ++i) {
+			retVal |= ((long) bytes[offset + i] & 0xFF);
+			if (i != length - 1) {
+				retVal <<= 8;
+			}
+		}
+
+		return retVal;
 	}
 
-	public boolean useRXFile(boolean b) {
+	public boolean record() {
+		return logRX(true);
+	}
+
+	public boolean stopRecording() {
+		return logRX(false);
+	}
+
+	public boolean logRX(boolean b) {
 		try {
-			useRXFile = b;
-			if (useRXFile) {
+			logRX = b;
+			if (logRX) {
 				if (fileWriterRX == null) {
-					fileWriterRX = new FileWriter(String.format("rx.%d.data", System.currentTimeMillis()));
+					fileWriterRX = new FileWriter(String.format("rx.%s.data", getName(), System.currentTimeMillis()));
 					bufferedWriterRX = new BufferedWriter(fileWriterRX);
 				}
 			} else {
 				if (fileWriterRX != null) {
-					fileWriterRX.flush();
-					bufferedWriterRX.flush();
-					fileWriterRX.close();
 					bufferedWriterRX.close();
+					fileWriterRX.close();
 				}
 			}
 
@@ -144,18 +156,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 	public String getPortName() {
 		return portName;
-	}
-
-	public void publishType(Integer type) {
-		publishType = type;
-	}
-
-	public void publish(Boolean b) {
-		publish = b;
-	}
-
-	public void publishInt() {
-		publishType = PUBLISH_INT;
 	}
 
 	/**
@@ -179,9 +179,8 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 			try {
 
 				// stupid Java signed byte :(
-				byte newByte;
+				int newByte;
 				// necessary Java unsigned byte in a signed int :(
-				int newInt;
 				recievedByteCount = 0;
 
 				// log.info("--------begin---------------");
@@ -190,27 +189,31 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				// "messages"
 				// come in groups of bytes
 
+				// FIXME - use ints not bytes for gods sakes
+				// does read() block ? if so - you want to publish byte by byte
+				// (cuz we don't want to block)
+				// if it does not block - then we can publish an array of ints
 
-				while (serialDevice.isOpen() && (newInt = serialDevice.read()) > -1) {
-					newByte = (byte) newInt;
-
+				while (serialDevice.isOpen() && (newByte = serialDevice.read()) > -1) {
 					++recievedByteCount;
 
 					// display / debug option ? - mrl message format ?
-					// display.append(String.format("%02x ", newInt));
-					display.append(String.format("%03d ", newInt));
-					if (display.length() % displayWidth == 0) {
-						// display.append("\n");
-						log.info(display.toString());
-						display.setLength(0);
+					// display.append(String.format("%02x ", newByte));
+					
+					display.append(String.format("%03d%s", newByte, delimeter));
+					
+					// send data to listeners
+					for (int i = 0; i < listeners.size(); ++i) {
+						listeners.get(i).onByte(newByte);
 					}
-					// display.append(String.format(" %d ", (int) (newByte &
-					// 0xFF)));
 
-					if (useRXFile) {
-						// TODO - why use this encoding stream thing?
+					if (logRX) {
+						// FIXME - why use this encoding stream thingy?
 						// what about just a buffered FileOutputStream ??
-						fileWriterRX.write(newInt);
+						// fileWriterRX.write(newByte);
+						
+						bufferedWriterRX.write(display.toString());
+						
 					}
 
 					if (blocking) {
@@ -222,30 +225,12 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 						}
 					}
 
+					// publish if desired
 					if (publish) {
-						switch (publishType) {
-						
-						// PUBLISH_BYTE_ARRAY - wouldnt be bad at all
-						// but would require a fixed width OR NOT !!! 
-						// JUST PUBLISH WHEN YOU BREAK OUT OF LOOP ???
-
-						// FIXME - remove / deprecate -
-						// "publishInt should be in PUBLISH_BYTE"
-						case PUBLISH_INT: {
-							buffer[recievedByteCount - 1] = newByte;
-							invoke("publishInt", newInt);
-
-							break;
-						}
-
-						case PUBLISH_BYTE: {
-							invoke("publishByte", newByte);
-							// log.info(String.format(" %d ", newInt));
-							break;
-						}
-
-						}
-					} // if publish
+						invoke("publishByte", newByte);
+					}
+					
+					display.setLength(0);
 				}
 
 				// Very useful debugging here
@@ -283,10 +268,9 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 			if (serialDevice != null) {
 				if (!serialDevice.isOpen()) {
 					serialDevice.open();
-					serialDevice.addEventListener(this); // TODO - only add if
-															// "publishing" ?
+					serialDevice.addEventListener(this);
 					serialDevice.notifyOnDataAvailable(true);
-					sleep(1000);
+					sleep(500); // changed from 1000 ms to 500 ms
 				}
 
 				serialDevice.setParams(rate, databits, stopbits, parity);
@@ -314,19 +298,11 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 * ------ publishing points begin -------
 	 */
 
-	// FIXME - fixed width and message delimeter
-	// FIXME - block read(until block size)
-
-	public byte publishByte(Byte data) {
-		// log.info(String.format(" %02x ", (int) (data.intValue() & 0xFF)));
+	public int publishByte(Integer data) {
 		return data;
 	}
 
-	public int publishInt(Integer data) {
-		return data;
-	}
-
-	public byte[] publishByteArray(byte[] data) {
+	public int[] publishByteBuffer(int[] data) {
 		return data;
 	}
 
@@ -343,39 +319,13 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 */
 
 	// http://stackoverflow.com/questions/11805300/rxtx-java-inputstream-does-not-return-all-the-buffer
-	public byte readByte() throws InterruptedException {
+	public int readByte() throws InterruptedException {
 		return blockingData.take().byteValue();
 	}
 
-	public char readChar() throws InterruptedException {
-		return (char) blockingData.take().byteValue();
-	}
-
-	public int readInt() throws InterruptedException {
+	public int[] readByteArray(int length) throws InterruptedException {
 		int count = 0;
-		int value = 0;
-		byte newByte = -1;
-		while ((newByte = blockingData.take().byteValue()) > 0 && count < BYTE_SIZE_INT) {
-			++count;
-			value = (value << 8) + (newByte & 0xff);
-		}
-		return value;
-	}
-
-	public long readLong() throws InterruptedException {
-		int count = 0;
-		long value = -1;
-		byte newByte = -1;
-		while ((newByte = blockingData.take().byteValue()) > 0 && count < BYTE_SIZE_LONG) {
-			++count;
-			value = (value << 8) + (newByte & 0xff);
-		}
-		return value;
-	}
-
-	public byte[] readByteArray(int length) throws InterruptedException {
-		int count = 0;
-		byte[] value = new byte[length];
+		int[] value = new int[length];
 		byte newByte = -1;
 		while (count < length && (newByte = blockingData.take().byteValue()) > 0) {
 			value[count] = newByte;
@@ -388,7 +338,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		StringBuffer value = new StringBuffer();
 		byte newByte = -1;
 		while ((newByte = blockingData.take().byteValue()) > 0 && newByte != delimeter) {
-			value.append(newByte);
+			value.append(newByte); // FIXME to ascii ?
 		}
 		return value.toString();
 	}
@@ -449,13 +399,13 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	public boolean disconnect() {
 		if (serialDevice == null) {
 			connected = false;
-			portName = "";
+			portName = null;
 			return false;
 		}
 
 		serialDevice.close();
 		connected = false;
-		portName = "";
+		portName = null;
 
 		broadcastState();
 		return true;
@@ -466,33 +416,81 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return blocking;
 	}
 
-	public void blocking(boolean b) {
+	public void setBlocking(boolean b) {
 		blocking = b;
 	}
 
+	/**
+	 * virtual serial ports will be used in the future to connect to simulated
+	 * environments or used in automated testing
+	 * 
+	 * @param port0
+	 *            - name of virtual port device
+	 */
 	public static VirtualSerialPort createVirtualSerialPort(String port) {
 		VirtualSerialPort vp0 = new VirtualSerialPort(port);
 		SerialDeviceFactory.add(vp0);
 		return vp0;
 	}
 
-	public static void createNullModemCable(String port0, String port1) {
-		// create 2 virtual ports
-		VirtualSerialPort vp0 = new VirtualSerialPort(port0);
-		VirtualSerialPort vp1 = new VirtualSerialPort(port1);
-		vp1.tx = vp0.rx;
-		vp1.rx = vp0.tx;
+	public static class VirtualNullModemCable {
+		public VirtualSerialPort vp0;
+		public VirtualSerialPort vp1;
 
-		// add virtual ports to the serial device factory
-		SerialDeviceFactory.add(vp0);
-		SerialDeviceFactory.add(vp1);
+		public VirtualNullModemCable(String port0, String port1) {
+			// create 2 virtual ports
+			vp0 = new VirtualSerialPort(port0);
+			vp1 = new VirtualSerialPort(port1);
+			// twist the cable
+			vp1.tx = vp0.rx;
+			vp1.rx = vp0.tx;
+
+			// add virtual ports to the serial device factory
+			SerialDeviceFactory.add(vp0);
+			SerialDeviceFactory.add(vp1);
+		}
+
+		public void close() {
+			// TODO Auto-generated method stub
+			// vp1.rx.add(SHUTDOWN) SHUTDOWN = largest signed int value ??
+			// vp1.release();
+			// vp0.release();
+			vp0.close();
+			vp1.close();
+			log.info("releasing virtual null modem cable");
+		}
+
 	}
 
+	/**
+	 * virtual null modem cable is used to connect to a simulated device or in
+	 * automated testing{
+	 * 
+	 * @param port0
+	 * @param port1
+	 */
+	public static VirtualNullModemCable createNullModemCable(String port0, String port1) {
+		return new VirtualNullModemCable(port0, port1);
+	}
+
+	/**
+	 * pass through to the serial device
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
 	@Override
 	public int read() throws IOException {
 		return serialDevice.read();
 	}
 
+	/**
+	 * pass through to the serial device
+	 * 
+	 * @param data
+	 * @return
+	 * @throws IOException
+	 */
 	@Override
 	public int read(byte[] data) throws IOException {
 		return serialDevice.read(data);
@@ -506,6 +504,8 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		// get that name - disconnect - and then reconnect when done
 
 		info("testing null modem with %s", getName());
+		Serial test = (Serial) Runtime.start(getName(), "Serial");
+		test.logRX(true);
 
 		info("creating virtual null modem cable");
 		String UART = "UART";
@@ -577,9 +577,9 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		write(new byte[] { 16 });
 
 	}
-	
+
 	public void test2() throws IOException {
-		
+
 		info("creating virtual null modem cable");
 
 		createNullModemCable("UART1", "VCOM1");
@@ -587,15 +587,19 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		info("creating uart");
 		Serial uart1 = (Serial) Runtime.start("UART1", "Serial");
 		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-		
-		InMoov i01 = (InMoov)Runtime.start("i01", "InMOov");
-		
+
+		InMoov i01 = (InMoov) Runtime.start("i01", "InMOov");
+
 		info("connecting");
 		if (!uart1.connect("UART1")) {
 			throw new IOException("cant connect");
 		}
 
+	}
 
+	public void stopService() {
+		super.stopService();
+		logRX(false);
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
@@ -609,6 +613,13 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+	}
+
+	public boolean isOpen() {
+		if (serialDevice != null && serialDevice.isOpen()){
+			return true;
+		}
+		return false;
 	}
 
 }

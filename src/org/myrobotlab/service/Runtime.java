@@ -1053,6 +1053,8 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	/**
+	 * This does not EXIT(1) !!! releasing just releases all services
+	 * 
 	 * FIXME FIXME FIXME - just call release on each - possibly saving runtime
 	 * for last .. send prepareForRelease before releasing
 	 * 
@@ -1070,12 +1072,6 @@ public class Runtime extends Service implements MessageListener {
 	{
 		log.debug("releaseAll");
 
-		// FIXME - release all by calling sub methods & normalize code
-
-		// FIXME - this is a bit of a lie
-		// broadcasting the info all services are released before releasing them
-		// but you can't send the info if everything has been released :P
-
 		ServiceEnvironment se = hosts.get(null); // local services only
 		if (se == null) {
 			log.info("releaseAll called when everything is released, all done here");
@@ -1084,30 +1080,43 @@ public class Runtime extends Service implements MessageListener {
 		Iterator<String> seit = se.serviceDirectory.keySet().iterator();
 		String serviceName;
 		ServiceInterface sw;
-		while (seit.hasNext()) {
-			serviceName = seit.next();
-			sw = se.serviceDirectory.get(serviceName);
-			runtime.invoke("released", se.serviceDirectory.get(serviceName));
-		}
-
+		
 		seit = se.serviceDirectory.keySet().iterator();
 		while (seit.hasNext()) {
 			serviceName = seit.next();
 			sw = se.serviceDirectory.get(serviceName);
+			
+			if (sw == Runtime.getInstance()){
+				// skipping runtime
+				continue;
+			}
+			
 			log.info(String.format("stopping service %s/%s", se.accessURL, serviceName));
 
 			if (sw == null) {
 				log.warn("unknown type and/or remote service");
 				continue;
 			}
+			// runtime.invoke("released", se.serviceDirectory.get(serviceName)); FIXME DO THIS 
+			try {
 			sw.stopService();
+			//sw.releaseService(); // FIXED ! - releaseService will mod the maps :P
+			runtime.invoke("released", sw);
+			} catch (Exception e){
+				runtime.error("%s threw while stopping");
+				Logging.logException(e);
+			}
 		}
 
+		runtime.stopService();
+		
 		log.info("clearing hosts environments");
 		hosts.clear();
 
 		log.info("clearing registry");
 		registry.clear();
+		
+		// exit () ?
 	}
 
 	/**

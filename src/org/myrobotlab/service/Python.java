@@ -23,6 +23,7 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 import org.python.core.PySystemState;
+import org.python.modules.thread.thread;
 import org.python.util.PythonInterpreter;
 import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
@@ -542,17 +543,24 @@ public class Python extends Service {
 	 * Get rid of the interpreter.
 	 */
 	public void stop() {
-		if (interp != null) {
-			if (interpThread != null) {
-				interpThread.interrupt();
-				interpThread = null;
-			}
+		if (interp != null) {			
 			// PySystemState.exit(); // the big hammar' throws like Thor
 			interp.cleanup();
 			interp = null;
 		}
-
-		inputQueueThread.interrupt();
+		
+		if (interpThread != null) {
+			interpThread.interrupt();
+			interpThread = null;
+		}
+		
+		if (inputQueueThread != null){
+			inputQueueThread.interrupt();
+			inputQueueThread = null;
+		}
+		
+		thread.interruptAllThreads();
+		Py.getSystemState()._systemRestart = true;
 	}
 
 	public void startService() {
@@ -565,7 +573,7 @@ public class Python extends Service {
 	 * stops threads releases interpreter
 	 */
 	public void stopService() {
-		super.stopService();
+		super.stopService();		
 		stop();// release the interpeter
 	}
 
@@ -729,7 +737,9 @@ public class Python extends Service {
 		// String f = "C:\\Program Files\\blah.1.py";
 		// log.info(getName(f));
 
-		Runtime.createAndStart("python", "Python");
+		Python python = (Python)Runtime.start("python", "Python");
+		//python.releaseService();
+		
 		Runtime.createAndStart("gui", "GUIService");
 
 	}
