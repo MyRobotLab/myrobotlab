@@ -11,11 +11,6 @@ import org.slf4j.Logger;
 
 public class VirtualSerialPort implements SerialDevice {
 	public String name;
-	/* BYTES SUCK IN JAVA :(
-	public BlockingQueue<Byte> rx = new LinkedBlockingQueue<Byte>();
-	public BlockingQueue<Byte> tx = new LinkedBlockingQueue<Byte>();
-	*/
-	
 	public BlockingQueue<Integer> rx = new LinkedBlockingQueue<Integer>();
 	public BlockingQueue<Integer> tx = new LinkedBlockingQueue<Integer>();
 	
@@ -30,6 +25,9 @@ public class VirtualSerialPort implements SerialDevice {
 	public SerialDeviceEventListener listener;
 	RXThread rxthread;
 	private boolean notifyOnDataAvailable;
+	
+	// poison pill "real" bytes are from 0 to 255 ;)
+	static public final Integer SHUTDOWN = -1;
 
 	private VirtualSerialPort nullModem = null;
 
@@ -102,7 +100,9 @@ public class VirtualSerialPort implements SerialDevice {
 	@Override
 	public void close() {
 		isOpen = false;
-		rxthread.interrupt();
+		if (rxthread != null){
+			rxthread.interrupt();
+		}
 		rxthread = null;
 	}
 
@@ -176,5 +176,9 @@ public class VirtualSerialPort implements SerialDevice {
 			Logging.logException(e);
 		}
 		return -1;
+	}
+	
+	public void release(){
+		rx.add(SHUTDOWN);
 	}
 }

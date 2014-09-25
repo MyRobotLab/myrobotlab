@@ -11,6 +11,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNIData;
 import org.myrobotlab.openni.Skeleton;
+import org.myrobotlab.service.Serial.VirtualNullModemCable;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.simpleframework.xml.Element;
@@ -86,7 +87,7 @@ public class InMoov extends Service {
 	// transient public XMPP xmpp;
 	// transient public Security security;
 
-	boolean speakErrors = true;
+	boolean speakErrors = false;
 	String lastError = "";
 
 	//long lastActivityTime;
@@ -1293,22 +1294,69 @@ public class InMoov extends Service {
 		return true;
 	}
 	
+	public void test(){
+		String rightPort = "COM8";
+		String leftPort = "COM7";
+		String rightUART = "UART51";
+		String leftUART = "UART52";
+		
+		VirtualNullModemCable vnm1 = Serial.createNullModemCable(rightPort, rightUART);
+		VirtualNullModemCable vnm2 = Serial.createNullModemCable(leftPort, leftUART);
+		
+		Serial luart = (Serial)Runtime.start(leftUART, "Serial");
+		Serial ruart = (Serial)Runtime.start(rightUART, "Serial");
+		luart.logRX(true);
+		ruart.logRX(true);
+		
+		luart.connect(leftUART);
+		ruart.connect(rightUART);
+		
+		InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
+		
+		GUIService gui = (GUIService)Runtime.start("gui", "GUIService");
+		
+		// TODO - run Gael's script
+		python = i01.getPython();
+		python.execResource("Python/examples/InMoov2.full3.byGael.Langevin.1.py");
+		
+		log.info("done");
+		//i01.startHead(leftPort);
+		//i01.systemCheck();
+		
+		luart.releaseService();
+		ruart.releaseService();
+		
+		vnm1.close();
+		vnm2.close();
+		
+		Runtime.releaseAll();
+		
+	}
+	
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
+		
+		InMoov i01 = (InMoov)Runtime.start("i01","InMoov");
+		i01.test();
+		
+		/*
 
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 		
 		InMoov i01 = (InMoov)Runtime.createAndStart("i01","InMoov");
 		
-		InMoovTorso torso = (InMoovTorso)i01.startTorso("COM4");
+		i01.startOpenNI();
+		*/
+		
+		//InMoovTorso torso = (InMoovTorso)i01.startTorso("COM4");
 
 
 		
-		i01.startMouth();
-		i01.startLeftArm("COM4");
+		//i01.startMouth();
+		//i01.startLeftArm("COM4");
 		//i01.copyGesture(true);
 
 		// Create two virtual ports for UART and user and null them together:

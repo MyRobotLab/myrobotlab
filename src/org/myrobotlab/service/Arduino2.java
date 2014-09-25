@@ -1,95 +1,48 @@
-/**
- *                    
- * @author grog (at) myrobotlab.org
- *  
- * This file is part of MyRobotLab (http://myrobotlab.org).
- *
- * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version (subject to the "Classpath" exception
- * as provided in the LICENSE.txt file that accompanied this code).
- *
- * MyRobotLab is distributed in the hope that it will be useful or fun,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * All libraries in thirdParty bundle are subject to their own license
- * requirements - please refer to http://myrobotlab.org/libraries for 
- * details.
- * 
- * Enjoy !
- * 
- * */
-
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SimpleTimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.arduino.PApplet;
-import org.myrobotlab.arduino.compiler.AvrdudeUploader;
-import org.myrobotlab.arduino.compiler.Compiler;
-import org.myrobotlab.arduino.compiler.MessageConsumer;
-import org.myrobotlab.arduino.compiler.Preferences;
-import org.myrobotlab.arduino.compiler.RunnerException;
-import org.myrobotlab.arduino.compiler.Target;
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.MRLError;
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ToolTip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.serial.SerialDevice;
-import org.myrobotlab.serial.SerialDeviceEvent;
-import org.myrobotlab.serial.SerialDeviceEventListener;
-import org.myrobotlab.serial.SerialDeviceException;
 import org.myrobotlab.serial.SerialDeviceFactory;
-import org.myrobotlab.serial.SerialDeviceService;
 import org.myrobotlab.service.data.Pin;
-import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
+import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.StepperControl;
 import org.myrobotlab.service.interfaces.StepperController;
-import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 /**
- * Implementation of a Arduino Service connected to MRL through a serial port.
- * The protocol is basically a pass through of system calls to the Arduino
+ * Implementation of a Arduino2 Service connected to MRL through a serial port.
+ * The protocol is basically a pass through of system calls to the Arduino2
  * board. Data can be passed back from the digital or analog ports by request to
  * start polling. The serial port can be wireless (bluetooth), rf, or wired. The
  * communication protocol supported is in MRLComm.ino
  * 
- * Should support nearly all Arduino board types
+ * Should support nearly all Arduino2 board types
  * 
  * digitalRead() works on all pins. It will just round the analog value received
  * and present it to you. If analogRead(A0) is greater than or equal to 512,
@@ -103,11 +56,10 @@ import org.slf4j.Logger;
  */
 
 @Root
-public class Arduino extends Service implements SerialDeviceEventListener, SensorDataPublisher, ServoController, MotorController, StepperController, SerialDeviceService,
-		MessageConsumer {
+public class Arduino2 extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, StepperController {
 
 	private static final long serialVersionUID = 1L;
-	public transient final static Logger log = LoggerFactory.getLogger(Arduino.class);
+	public transient final static Logger log = LoggerFactory.getLogger(Arduino2.class);
 
 	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
 
@@ -116,7 +68,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	// serial protocol functions
 	public static final int MAGIC_NUMBER = 170; // 10101010
 
-	// MRL ---> Arduino methods
+	// MRL ---> Arduino2 methods
 	public static final int DIGITAL_WRITE = 0;
 	public static final int DIGITAL_VALUE = 1; // normalized with PinData
 	public static final int ANALOG_WRITE = 2;
@@ -159,30 +111,30 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	public static final int SERVO_SWEEP_START = 38;
 	public static final int SERVO_SWEEP_STOP = 39;
-				
+
 	// callback event - e.g. position arrived
 	// MSG MAGIC | SZ | SERVO-INDEX | POSITION
 	public static final int SERVO_EVENTS_ENABLE = 40;
 	public static final int SERVO_EVENT = 41;
-	
+
 	public static final int LOAD_TIMING_ENABLE = 42;
 	public static final int LOAD_TIMING_EVENT = 43;
 
-	public static final int STEPPER_ATTACH	= 44;
-	public static final int STEPPER_MOVE = 45; 
-	public static final int STEPPER_STOP = 46; 
-	public static final int STEPPER_RESET = 47; 
+	public static final int STEPPER_ATTACH = 44;
+	public static final int STEPPER_MOVE = 45;
+	public static final int STEPPER_STOP = 46;
+	public static final int STEPPER_RESET = 47;
 
-	public static final int STEPPER_EVENT = 48; 
-	public static final int STEPPER_EVENT_STOP = 1; 
+	public static final int STEPPER_EVENT = 48;
+	public static final int STEPPER_EVENT_STOP = 1;
 
-	public static final int STEPPER_TYPE_POLOLU = 1; 
-	
+	public static final int STEPPER_TYPE_POLOLU = 1;
+
 	public static final int CUSTOM_MSG = 50;
-	
+
 	public static final int ARDUINO_TYPE_INT = 16;
-	
-// servo event types
+
+	// servo event types
 	public static final int SERVO_EVENT_STOPPED = 1;
 	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
@@ -201,11 +153,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public static final int NOP = 255;
 
 	// ---------- MRLCOMM FUNCTION INTERFACE END -----------
-	
-	
+
 	public static final int TRUE = 1;
 	public static final int FALSE = 0;
-	
 
 	public Integer mrlcommVersion = null;
 
@@ -218,25 +168,19 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public transient static final String BOARD_TYPE_ATMEGA1280 = "atmega1280";
 	public transient static final String BOARD_TYPE_ATMEGA32U4 = "atmega32u4";
 
-	// vendor specific pins start at 50
-	public static final String VENDOR_DEFINES_BEGIN = "// --VENDOR DEFINE SECTION BEGIN--";
-	public static final String VENDOR_SETUP_BEGIN = "// --VENDOR SETUP BEGIN--";
-	public static final String VENDOR_CODE_BEGIN = "// --VENDOR CODE BEGIN--";
-
 	/**
 	 * pin description of board
 	 */
 	ArrayList<Pin> pinList = null;
-	
-	
-	// data and mapping for data going from MRL ---to---> Arduino
+
+	// data and mapping for data going from MRL ---to---> Arduino2
 	HashMap<String, StepperControl> steppers = new HashMap<String, StepperControl>();
-	// index for data mapping going from Arduino ---to---> MRL
+	// index for data mapping going from Arduino2 ---to---> MRL
 	HashMap<Integer, StepperControl> stepperIndex = new HashMap<Integer, StepperControl>();
 
-	// data and mapping for data going from MRL ---to---> Arduino
+	// data and mapping for data going from MRL ---to---> Arduino2
 	HashMap<String, SensorData> sensors = new HashMap<String, SensorData>();
-	// index for data mapping going from Arduino ---to---> MRL
+	// index for data mapping going from Arduino2 ---to---> MRL
 	HashMap<Integer, SensorData> sensorsIndex = new HashMap<Integer, SensorData>();
 
 	// needed to dynamically adjust PWM rate (D. only?)
@@ -252,18 +196,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public static final int MAX_SERVOS = 48;
 
 	// serial device info
-	private transient SerialDevice serialDevice;
+	// private transient SerialDevice serial;
 
-	// from Arduino IDE (yuk)
-	static HashSet<File> libraries;
-
-	static boolean commandLine;
-	public HashMap<String, Target> targetsTable = new HashMap<String, Target>();
-
-	static File buildFolder;
-	static public HashMap<String, File> importToLibraryTable;
-
-	// imported Arduino constants
+	// imported Arduino2 constants
 	public static final int HIGH = 0x1;
 	public static final int LOW = 0x0;
 
@@ -277,9 +212,11 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	private String boardType;
 
 	BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
-	
+
 	StringBuilder debugTX = new StringBuilder();
 	StringBuilder debugRX = new StringBuilder();
+
+	String portName = null;
 
 	/**
 	 * MotorData is the combination of a Motor and any controller data needed to
@@ -296,7 +233,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	HashMap<String, MotorData> motors = new HashMap<String, MotorData>();
-	
+
 	transient Service customEventListener = null;
 
 	class SensorData implements Serializable {
@@ -326,143 +263,49 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	HashMap<String, ServoData> servos = new HashMap<String, ServoData>();
 	HashMap<Integer, ServoData> servoIndex = new HashMap<Integer, ServoData>();
 
-	// from the Arduino IDE :P
-	public Preferences preferences;
-	transient Compiler compiler;
-	transient AvrdudeUploader uploader;
-
-	// compile / upload
-	private String buildPath = "";
-	private String sketchName = "MRLComm";
-	private String sketch = "";
-
-	/**
-	 * list of serial port names from the system which the Arduino service is
-	 * running - this list is refreshed on querySerialDevices
-	 */
 	public ArrayList<String> portNames = new ArrayList<String>();
 
-	public Arduino(String n) {
+	// peers
+	transient Serial serial;
+
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+
+		peers.put("serial", "Serial", "serial device for this Arduino");
+		return peers;
+	}
+
+	public Arduino2(String n) {
 		super(n);
-		load();
+		// FIXME - load last serial port (if exists) THIS WILL NEED TO BE Serial
+		// serice data !!!
+		// FIXME - load board type - allow user to force - (possible to retrieve
+		// from connection? - good idea? or bad?)
+		load(); // config - last com port connected too - last rate
 
-		// target arduino
-		// board atmenga328
-		preferences = new Preferences(String.format("%s.preferences.txt", getName()), null);
-		preferences.set("sketchbook.path", ".myrobotlab");
-
-		preferences.setInteger("serial.debug_rate", 57600);
-		preferences.set("serial.parity", "N"); // f'ing stupid,
-		preferences.setInteger("serial.databits", 8);
-		preferences.setInteger("serial.stopbits", 1); // f'ing weird 1,1.5,2
-		preferences.setBoolean("upload.verbose", true);
-
-		File librariesFolder = getContentFile("libraries");
-
-		// FIXME - all below should be done inside Compiler2
-		try {
-
-			targetsTable = new HashMap<String, Target>();
-			loadHardware(getHardwareFolder());
-			loadHardware(getSketchbookHardwareFolder());
-			addLibraries(librariesFolder);
-			File sketchbookLibraries = getSketchbookLibrariesFolder();
-			addLibraries(sketchbookLibraries);
-		} catch (IOException e) {
-			Logging.logException(e);
-		}
-
-		compiler = new Compiler(this);
-		uploader = new AvrdudeUploader(this);
-
-		getPortNames();
-
-		// FIXME - hilacious long wait - need to incorporate
-		// .waitTillServiceReady
-		// especially if there are multiple initialization threads
-		// SWEEEET ! - Service already provides an isReady - just need to
-		// overload it with a Thread.sleep check -> broadcast setState
-
+		serial = (Serial) Runtime.create("serial", "Serial");
+		serial.getPortNames();
 		createPinList();
-
-		String filename = "MRLComm.ino";
-		String resourcePath = String.format("Arduino/%s", filename);
-		log.info(String.format("loadResourceFile %s", resourcePath));
-		String defaultSketch = FileIO.resourceToString(resourcePath);
-		this.sketch = defaultSketch;
+		// invoke("getPortNames"); // FIXME - this could happen before gui
+		// initialized - don't do it - waste of time
 	}
 
-	public void setBoard(String board) {
-		preferences.set("board", board);
-		createPinList();
-		preferences.save();
-		broadcastState();
+	public String setBoard(String board) {
+		boardType = board;
+		return board;
 	}
 
-	protected void loadHardware(File folder) {
-		if (!folder.isDirectory())
-			return;
-
-		String list[] = folder.list(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				// skip .DS_Store files, .svn folders, etc
-				if (name.charAt(0) == '.')
-					return false;
-				if (name.equals("CVS"))
-					return false;
-				return (new File(dir, name).isDirectory());
-			}
-		});
-		// if a bad folder or something like that, this might come back null
-		if (list == null)
-			return;
-
-		// alphabetize list, since it's not always alpha order
-		// replaced hella slow bubble sort with this feller for 0093
-		Arrays.sort(list, String.CASE_INSENSITIVE_ORDER);
-		// after that lovely searching of dirs - will come back with
-		// [arduino, tools]
-
-		for (String target : list) {
-			File subfolder = new File(folder, target);
-			targetsTable.put(target, new Target(target, subfolder, this));
+	public String getPortName() {
+		if (serial != null) {
+			return serial.getPortName();
 		}
-	}
-
-	public void setPreference(String name, String value) {
-		preferences.set(name, value);
-		if ("board".equals(name)) {
-			broadcastState();
-		}
-	}
-
-	public String getSerialDeviceName() {
-		if (serialDevice != null) {
-			return serialDevice.getName();
-		}
-
 		return null;
 	}
 
-	// FIXME - this should be in SerialService interface - get rid of query!!!
-	/*
-	 * public ArrayList<String> getPortNames() { return
-	 * SerialDeviceFactory.getSerialDeviceNames(); }
-	 */
-	// FIXME - this should be in SerialService interface !!!
-	/*
-	 * public ArrayList<String> querySerialDeviceNames() {
-	 * 
-	 * log.info("queryPortNames");
-	 * 
-	 * serialDeviceNames = SerialDeviceFactory.getSerialDeviceNames();
-	 * 
-	 * // adding connected serial port if connected if (serialDevice != null) {
-	 * if (serialDevice.getName() != null)
-	 * serialDeviceNames.add(serialDevice.getName()); }
-	 * 
-	 * return serialDeviceNames; }
-	 */
+	public void startService() {
+		super.startService();
+		serial.startService();
+	}
 
 	/**
 	 * MRL protocol method
@@ -479,26 +322,22 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		// + param2);
 		try {
 
-			// FIXME - determin bus speed e.g. 50Khz - and limit the messages
-			// (buffer them?) until they
-			// are under that max message send value :P
-
 			// not CRC16 - but cheesy error correction of bytestream
 			// http://www.java2s.com/Open-Source/Java/6.0-JDK-Modules-sun/misc/sun/misc/CRC16.java.htm
 			// #include <util/crc16.h>
 			// _crc16_update (test, testdata);
 
-			serialDevice.write(MAGIC_NUMBER);
+			serial.write(MAGIC_NUMBER);
 
 			// msg size = function byte + x param bytes
 			// msg size does not include MAGIC_NUMBER & size
 			// MAGIC_NUMBER|3|FUNCTION|PARAM0|PARAM2 would be valid
-			serialDevice.write(1 + params.length);
+			serial.write(1 + params.length);
 
-			serialDevice.write(function);
+			serial.write(function);
 
 			for (int i = 0; i < params.length; ++i) {
-				serialDevice.write(params[i]);
+				serial.write(params[i]);
 			}
 
 			if (log.isDebugEnabled()) {
@@ -518,28 +357,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			error("sendMsg " + e.getMessage());
 		}
 
-	}
-
-	@ToolTip("sends an array of data to the serial port which an Arduino is attached to")
-	@Override
-	public void write(String data) throws IOException {
-		write(data.getBytes());
-	}
-
-	public synchronized void write(byte[] data) throws IOException {
-		for (int i = 0; i < data.length; ++i) {
-			serialDevice.write(data[i]);
-		}
-	}
-
-	@Override
-	public void write(char data) throws IOException {
-		serialDevice.write(data);
-	}
-
-	@Override
-	public void write(int data) throws IOException {
-		serialDevice.write(data);
 	}
 
 	public void setPWMFrequency(Integer address, Integer freq) {
@@ -577,39 +394,25 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	// ----------ServoController begin-------------
 	// FIXME - is this re-entrant ???
 
-	public boolean servoAttach(String servoName) {
+	public boolean servoAttach(String servoName, Integer pin) {
 		Servo servo = (Servo) Runtime.getService(servoName);
 		if (servo == null) {
 			error("servoAttach can not attach %s no service exists", servoName);
 			return false;
 		}
-		return servoAttach(servoName, servo.getPin());
+		return servoAttach(servo, servo.getPin());
 	}
 
-	// FIXME - put in interface
-	public boolean servoAttach(Servo servo) {
-		if (servo == null) {
-			error("servoAttach servo is null");
+	// FIXME - need interface for this
+	public synchronized boolean servoAttach(Servo servo, Integer pin) {
+		log.info(String.format("servoAttach %s pin %d", servo.getName(), pin));
+
+		if (serial == null) {
+			error("could not attach servo to pin %d serial is null - not initialized?", pin);
 			return false;
 		}
 
-		if (servo.getPin() == null) {
-			error("%s servo pin not set", servo.getName());
-			return false;
-		}
-		return servoAttach(servo.getName(), servo.getPin());
-	}
-
-	@Override
-	public synchronized boolean servoAttach(String servoName, Integer pin) {
-		log.info(String.format("servoAttach %s pin %d", servoName, pin));
-
-		if (serialDevice == null) {
-			error("could not attach servo to pin " + pin + " serial port is null - not initialized?");
-			return false;
-		}
-
-		if (servos.containsKey(servoName)) {
+		if (servos.containsKey(servo.getName())) {
 			log.warn("servo already attach - detach first");
 			return false;
 		}
@@ -636,9 +439,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		ServoData sd = new ServoData();
 		sd.pin = pin;
 		sd.servoIndex = index;
-		ServoControl sc = (ServoControl)Runtime.getService(servoName);
-		sd.servo = sc;
-		servos.put(servoName, sd);
+		sd.servo = servo;
+		servos.put(servo.getName(), sd);
 		servoIndex.put(index, sd);
 
 		log.info("servo index {} pin {} attached ", index, pin);
@@ -646,7 +448,14 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	@Override
-	public synchronized boolean servoDetach(String servoName) {
+	public boolean servoDetach(String servoName) {
+		Servo servo = (Servo) Runtime.getService(servoName);
+		return servoDetach(servo);
+	}
+
+	// FIXME make & merge interface for this
+	public synchronized boolean servoDetach(Servo servo) {
+		String servoName = servo.getName();
 		log.info(String.format("servoDetach(%s)", servoName));
 
 		if (servos.containsKey(servoName)) {
@@ -662,106 +471,53 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 		error("servo %s detach failed - not found", servoName);
 		return false;
-
 	}
 
 	@Override
 	public void servoWrite(String servoName, Integer newPos) {
-		if (serialDevice == null) {
-			error("serialDevice is NULL !");
-			return;
-		}
-
 		if (!servos.containsKey(servoName)) {
 			warn("Servo %s not attached to %s", servoName, getName());
 			return;
 		}
 
 		int index = servos.get(servoName).servoIndex;
-
 		log.info(String.format("servoWrite %s %d index %d", servoName, newPos, index));
-
 		sendMsg(SERVO_WRITE, index, newPos);
-
 	}
 
 	@Override
-	public void servoSweep(String servoName, int min, int max, int step) { // delay
-																			// /
-																			// speed
-																			// ?
-																			// -
-																			// or
-																			// is
-																			// speed
-																			// same
-																			// as
-																			// delay
-		if (serialDevice == null) {
-			error("serialDevice is NULL !");
-			return;
-		}
-
+	public void servoSweep(String servoName, int min, int max, int step) {
 		if (!servos.containsKey(servoName)) {
 			warn("Servo %s not attached to %s", servoName, getName());
 			return;
 		}
-
 		int index = servos.get(servoName).servoIndex;
-
 		log.info(String.format("servoSweep %s index %d min %d max %d step %d", servoName, index, min, max, step));
-
 		sendMsg(SERVO_SWEEP_START, index, min, max, step);
-
 	}
-
-	/*
-	 * @Override public Integer getServoPin(String servoName) { if
-	 * (servos.containsKey(servoName)) { return servos.get(servoName).pin; }
-	 * return null; }
-	 */
 
 	// ---------------------------- ServoController End -----------------------
 	// ---------------------- Protocol Methods Begin ------------------
 
-	public void digitalReadPollStart(Integer address) {
-
-		log.info("digitalRead (" + address + ") to " + serialDevice.getName());
-		sendMsg(DIGITAL_READ_POLLING_START, address, 0);
-
-	}
-
-	public void digitalReadPollStop(Integer address) {
-
-		log.info("digitalRead (" + address + ") to " + serialDevice.getName());
-		sendMsg(DIGITAL_READ_POLLING_STOP, address, 0);
-
-	}
-
 	public void digitalWrite(Integer address, Integer value) {
-		log.info("digitalWrite (" + address + "," + value + ") to " + serialDevice.getName() + " function number " + DIGITAL_WRITE);
+		info("digitalWrite (%d,%d) to %s", address, value, serial.getName());
 		sendMsg(DIGITAL_WRITE, address, value);
 		pinList.get(address).value = value;
 	}
 
+	// FIXME - put in interface - use the last octet
 	public Integer getVersion() {
 		try {
-			if (serialDevice != null) {
-				blockingData.clear();
-				sendMsg(GET_MRLCOMM_VERSION, 0, 0);
-
-				mrlcommVersion = (Integer) blockingData.poll(1000, TimeUnit.MILLISECONDS);
-
-				// int version = Integer.parseInt();
-				return mrlcommVersion;
-			} else {
-				return null;
-			}
+			blockingData.clear();
+			sendMsg(GET_MRLCOMM_VERSION, 0, 0);
+			mrlcommVersion = (Integer) blockingData.poll(1000, TimeUnit.MILLISECONDS);
 
 		} catch (Exception e) {
 			Logging.logException(e);
-			return null;
 		}
+
+		invoke("publishVersion", mrlcommVersion);
+		return mrlcommVersion;
 	}
 
 	public Integer publishVersion(Integer version) {
@@ -769,28 +525,26 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	public void pinMode(Integer address, Integer value) {
-		log.info("pinMode (" + address + "," + value + ") to " + serialDevice.getName() + " function number " + PINMODE);
+		log.info(String.format("pinMode(%d,%d) to %s", address, value, serial.getName()));
 		sendMsg(PINMODE, address, value);
 	}
 
 	public void analogWrite(Integer address, Integer value) {
-		log.info("analogWrite (" + address + "," + value + ") to " + serialDevice.getName() + " function number " + ANALOG_WRITE);
+		log.info(String.format("analogWrite(%d,%d) to %s", address, value, serial.getName()));
+		// FIXME
+		// if (pin.mode == INPUT) {sendMsg(PIN_MODE, OUTPUT)}
 		sendMsg(ANALOG_WRITE, address, value);
 	}
 
 	/**
 	 * This method is called with Pin data whene a pin value is changed on the
-	 * Arduino board the Arduino must be told to poll the desired pin(s). This
+	 * Arduino2 board the Arduino2 must be told to poll the desired pin(s). This
 	 * is done with a analogReadPollingStart(pin) or digitalReadPollingStart()
 	 */
 	public Pin publishPin(Pin p) {
 		// log.debug(p);
 		pinList.get(p.pin).value = p.value;
 		return p;
-	}
-
-	public String readSerialMessage(String s) {
-		return s;
 	}
 
 	// force an digital read - data will be published in a call-back
@@ -820,286 +574,271 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	@Override
 	public String getDescription() {
-		return "<html>Arduino is a service which interfaces with an Arduino micro-controller.<br>" + "This interface can operate over radio, IR, or other communications,<br>"
+		return "<html>Arduino2 is a service which interfaces with an Arduino2 micro-controller.<br>" + "This interface can operate over radio, IR, or other communications,<br>"
 				+ "but and appropriate .PDE file must be loaded into the micro-controller.<br>" + "See http://myrobotlab.org/communication for details";
 	}
 
 	public void stopService() {
 		super.stopService();
-		if (serialDevice != null) {
-			serialDevice.close();
-		}
+		serial.stopService();
 	}
 
-	static final public int MAX_MSG_LEN = 64;
-	//StringBuilder rxDebug = new StringBuilder ();
+	int error_arduino_to_mrl_rx_cnt;
+	int error_mrl_to_arduino_rx_cnt;
+	int byteCount;
+	int msgSize;
+	int[] msg = new int[64]; // TODO define outside
 
-	// TODO - define as int[] because Java bytes suck !
-	byte[] msg = new byte[64]; // TODO define outside
-	int newByte;
-	int byteCount = 0;
-	int msgSize = 0;
-
-	//StringBuffer dump = new StringBuffer();
-
-	@Element
-	private String portName = "";
-	@Element
-	private int rate = 57600;
-	@Element
-	private int databits = 8;
-	@Element
-	private int stopbits = 1;
-	@Element
-	private int parity = 0;
-	private int error_arduino_to_mrl_rx_cnt;
-	private int error_mrl_to_arduino_rx_cnt;
+	/**
+	 * callback for Serial service - local (not remote)
+	 * 
+	 * FIXME - design problem of calling the function with a single byte
+	 * repeatedly is slow - best to have an "event" then read as many as
+	 * possible
+	 * 
+	 * POLL vs Block ?
+	 */
 
 	@Override
-	public void serialEvent(SerialDeviceEvent event) {
-		switch (event.getEventType()) {
-		case SerialDeviceEvent.BI:
-		case SerialDeviceEvent.OE:
-		case SerialDeviceEvent.FE:
-		case SerialDeviceEvent.PE:
-		case SerialDeviceEvent.CD:
-		case SerialDeviceEvent.CTS:
-		case SerialDeviceEvent.DSR:
-		case SerialDeviceEvent.RI:
-		case SerialDeviceEvent.OUTPUT_BUFFER_EMPTY:
-			break;
-		case SerialDeviceEvent.DATA_AVAILABLE:
+	public void onByte(int newByte) {
+		/*
+		 * switch (event.getEventType()) { case SerialDeviceEvent.BI: case
+		 * SerialDeviceEvent.OE: case SerialDeviceEvent.FE: case
+		 * SerialDeviceEvent.PE: case SerialDeviceEvent.CD: case
+		 * SerialDeviceEvent.CTS: case SerialDeviceEvent.DSR: case
+		 * SerialDeviceEvent.RI: case SerialDeviceEvent.OUTPUT_BUFFER_EMPTY:
+		 * break; case SerialDeviceEvent.DATA_AVAILABLE:
+		 */
 
-			// at this point we should have a complete message
-			// the msg contains only daat // METHOD | P0 | P1 ... | PN
+		// at this point we should have a complete message
+		// the msg contains only daat // METHOD | P0 | P1 ... | PN
 
-			// msg buffer
-			// msg[0] METHOD
-			// msg[1] P0
-			// msg[2] P1
-			// ...
-			// msg[N] PN+1
-			try {
+		// msg buffer
+		// msg[0] METHOD
+		// msg[1] P0
+		// msg[2] P1
+		// ...
+		// msg[N] PN+1
+		try {
 
-				/*
-				 * DON'T EVER MAKE THIS NON-MONOLITHIC ! - the overhead of going
-				 * into another method is high and will end up loss of data in
-				 * serial communications !
-				 * 
-				 * Optimize this as much as possible !
-				 */
-				while (serialDevice.isOpen() && (newByte = serialDevice.read()) > -1) {
+			/*
+			 * DON'T EVER MAKE THIS NON-MONOLITHIC ! - the overhead of going
+			 * into another method is high and will end up loss of data in
+			 * serial communications !
+			 * 
+			 * Optimize this as much as possible !
+			 */
+			while (serial.isOpen() && (newByte = serial.read()) > -1) {
 
-					++byteCount;
+				++byteCount;
 
-					if (byteCount == 1) {
-						if (newByte != MAGIC_NUMBER) {
-							byteCount = 0;
-							msgSize = 0;
-							warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++error_arduino_to_mrl_rx_cnt));
-							//dump.setLength(0);
-						}
-						continue;
-					} else if (byteCount == 2) {
-						// get the size of message
-						if (newByte > 64) {
-							byteCount = 0;
-							msgSize = 0;
-							error(String.format("Arduino->MRL error %d rx sz errors", ++error_arduino_to_mrl_rx_cnt));
-							continue;
-						}
-						msgSize = (byte) newByte;
-						// dump.append(String.format("MSG|SZ %d", msgSize));
-					} else if (byteCount > 2) {
-						// remove header - fill msg data - (2) headbytes -1
-						// (offset)
-						// dump.append(String.format("|P%d %d", byteCount,
-						// newByte));
-						msg[byteCount - 3] = (byte) newByte;
-					}
-
-					// process valid message
-					if (byteCount == 2 + msgSize) {
-						// log.error("A {}", dump.toString());
-						// dump.setLength(0);
-
-						// MSG CONTENTS = FN | D0 | D1 | ...
-						byte function = msg[0];
-						//log.info(String.format("%d", msg[1]));
-						switch (function) {
-
-						case MRLCOMM_ERROR: {
-							++error_mrl_to_arduino_rx_cnt;
-							error("MRL->Arduino rx %d type %d", error_mrl_to_arduino_rx_cnt, msg[1]);
-							break;
-						}
-
-						case GET_MRLCOMM_VERSION: {
-							// TODO - get vendor version
-							// String version = String.format("%d", msg[1]);
-							blockingData.add((int) msg[1] & 0xff);
-							invoke("publishVersion", (int) msg[1] & 0xff);
-							break;
-						}
-						case PULSE_IN: {
-							// extract signed Java long from byte array offset 1
-							// - length 4 :P
-							// FIXME dangerous - your re-using Version's
-							// blockingData :P
-							long pulse = Serial.byteToLong(msg, 1, 4);
-							blockingData.add(pulse);
-							break;
-						}
-						case ANALOG_VALUE: {
-							// Pin p = new Pin(msg[1], msg[0], (((msg[2] & 0xFF)
-							// << 8) + (msg[3] & 0xFF)), getName());
-							// FIXME
-							Pin pin = pinList.get(msg[1]);
-							pin.value = ((msg[2] & 0xFF) << 8) + (msg[3] & 0xFF);
-							invoke("publishPin", pin);
-							break;
-						}
-						case DIGITAL_VALUE: {
-							Pin pin = pinList.get(msg[1]);
-							pin.value = msg[2];
-							invoke("publishPin", pin);
-							break;
-						}
-
-						case LOAD_TIMING_EVENT: {
-
-							long microsPerLoop = Serial.byteToLong(msg, 1, 4);
-							info("load %d us", microsPerLoop);
-							// log.info(String.format(" index %d type %d cur %d target %d", servoIndex, eventType, currentPos & 0xff, targetPos & 0xff));
-							// invoke("publishPin", pin);
-							break;
-						}
-						
-						
-						case SERVO_EVENT: {
-
-							int index = msg[1];
-							int eventType = msg[2];
-							int currentPos = msg[3];
-							int targetPos = msg[4];
-
-							log.info(String.format(" index %d type %d cur %d target %d", index, eventType, currentPos & 0xff, targetPos & 0xff));
-							// uber good - 
-							// TODO - deprecate ServoControl interface - not needed Servo is abstraction enough
-							Servo servo = (Servo) servoIndex.get(index).servo;
-							servo.invoke("publishServoEvent", currentPos  & 0xff);
-							break;
-						}
-						
-
-						case SENSOR_DATA: {
-							int index = (int) msg[1];
-							SensorData sd = sensorsIndex.get(index);
-							sd.duration = Serial.byteToLong(msg, 2, 4);
-							// HMM WAY TO GO - is NOT to invoke its own but
-							// invoke publishSensorData on Sensor
-							// since its its own service
-							// invoke("publishSensorData", sd);
-							// NICE !! - force sensor to have publishSensorData
-							// or publishRange in interface !!!
-							// sd.sensor.invoke("publishRange", sd);
-							sd.sensor.invoke("publishRange", sd.duration);
-							break;
-						}
-
-						case STEPPER_EVENT: {
-
-							int eventType = msg[1];
-							int index = msg[2];
-							int currentPos = (msg[3] << 8) + (msg[4] & 0xff);
-
-							log.info(String.format(" index %d type %d cur %d", index, eventType, currentPos));
-							// uber good - 
-							// TODO - stepper ServoControl interface - not needed Servo is abstraction enough
-							Stepper stepper = (Stepper) stepperIndex.get(index);
-							stepper.invoke("publishStepperEvent", currentPos);
-							break;
-						}
-						
-						case CUSTOM_MSG: {
-							
-							// msg or data is of size byteCount
-							int paramCnt = msg[1];
-							int paramIndex = 2; // current index in buffer
-							// decode parameters
-							Object[] params = new Object[paramCnt];
-							
-							int paramType = 0;
-							
-							for (int i = 0; i < paramCnt; ++i){
-								
-								// get parameter type
-								//paramType = msg[];
-								paramType = msg[paramIndex];
-										
-								// convert
-								if (paramType == ARDUINO_TYPE_INT){
-									//params[i] =
-									int x = ((msg[++paramIndex] & 0xFF) << 8) + (msg[++paramIndex] & 0xFF);
-									if (x > 32767){ x = x - 65536; }
-									params[i] = x;
-									if (log.isDebugEnabled()){
-										log.debug(String.format("parameter %d is type ARDUINO_TYPE_INT value %d", i, x));
-									}
-									++paramIndex;
-								} else {
-									error("CUSTOM_MSG - unhandled type %d", paramType);
-								}
-								
-								// load it on boxing array
-								
-							}
-							
-							// how to reflectively invoke multi-param method (Python?)
-							if (customEventListener != null){
-								send(customEventListener.getName(), "onCustomMsg", params);
-							}
-							
-							break;
-						}
-						
-						default: {
-							error(formatMRLCommMsg("unknown serial event <- ", msg, msgSize));
-							break;
-						}
-						
-						
-						} // end switch
-
-						if (log.isDebugEnabled()) {
-							log.debug(formatMRLCommMsg("serialEvent <- ", msg, msgSize));
-						}
-
-						// processed msg
-						// reset msg buffer
-						msgSize = 0;
+				if (byteCount == 1) {
+					if (newByte != MAGIC_NUMBER) {
 						byteCount = 0;
+						msgSize = 0;
+						warn(String.format("Arduino2->MRL error - bad magic number %d - %d rx errors", newByte, ++error_arduino_to_mrl_rx_cnt));
+						// dump.setLength(0);
 					}
-				} // while (serialDevice.isOpen() && (newByte =
-					// serialDevice.read()) > -1
+					continue;
+				} else if (byteCount == 2) {
+					// get the size of message
+					if (newByte > 64) {
+						byteCount = 0;
+						msgSize = 0;
+						error(String.format("Arduino2->MRL error %d rx sz errors", ++error_arduino_to_mrl_rx_cnt));
+						continue;
+					}
+					msgSize = (byte) newByte;
+					// dump.append(String.format("MSG|SZ %d", msgSize));
+				} else if (byteCount > 2) {
+					// remove header - fill msg data - (2) headbytes -1
+					// (offset)
+					// dump.append(String.format("|P%d %d", byteCount,
+					// newByte));
+					msg[byteCount - 3] = (byte) newByte;
+				}
 
-			} catch (Exception e) {
-				++error_mrl_to_arduino_rx_cnt;
-				error("msg structure violation %d", error_mrl_to_arduino_rx_cnt);
-				// try again ?
-				msgSize = 0;
-				byteCount = 0;
-				Logging.logException(e);
-			}
+				// process valid message
+				if (byteCount == 2 + msgSize) {
+					// log.error("A {}", dump.toString());
+					// dump.setLength(0);
 
+					// MSG CONTENTS = FN | D0 | D1 | ...
+					int function = msg[0];
+					// log.info(String.format("%d", msg[1]));
+					switch (function) {
+
+					case MRLCOMM_ERROR: {
+						++error_mrl_to_arduino_rx_cnt;
+						error("MRL->Arduino2 rx %d type %d", error_mrl_to_arduino_rx_cnt, msg[1]);
+						break;
+					}
+
+					case GET_MRLCOMM_VERSION: {
+						// TODO - get vendor version
+						// String version = String.format("%d", msg[1]);
+						blockingData.add((int) msg[1] & 0xff);
+						invoke("publishVersion", (int) msg[1] & 0xff);
+						break;
+					}
+					case PULSE_IN: {
+						// extract signed Java long from byte array offset 1
+						// - length 4 :P
+						// FIXME dangerous - your re-using Version's
+						// blockingData :P
+						long pulse = Serial.byteToLong(msg, 1, 4);
+						blockingData.add(pulse);
+						break;
+					}
+					case ANALOG_VALUE: {
+						// Pin p = new Pin(msg[1], msg[0], (((msg[2] & 0xFF)
+						// << 8) + (msg[3] & 0xFF)), getName());
+						// FIXME
+						Pin pin = pinList.get(msg[1]);
+						pin.value = ((msg[2] & 0xFF) << 8) + (msg[3] & 0xFF);
+						invoke("publishPin", pin);
+						break;
+					}
+					case DIGITAL_VALUE: {
+						Pin pin = pinList.get(msg[1]);
+						pin.value = msg[2];
+						invoke("publishPin", pin);
+						break;
+					}
+
+					case LOAD_TIMING_EVENT: {
+
+						long microsPerLoop = Serial.byteToLong(msg, 1, 4);
+						info("load %d us", microsPerLoop);
+						// log.info(String.format(" index %d type %d cur %d target %d",
+						// servoIndex, eventType, currentPos & 0xff,
+						// targetPos & 0xff));
+						// invoke("publishPin", pin);
+						break;
+					}
+
+					case SERVO_EVENT: {
+
+						int index = msg[1];
+						int eventType = msg[2];
+						int currentPos = msg[3];
+						int targetPos = msg[4];
+
+						log.info(String.format(" index %d type %d cur %d target %d", index, eventType, currentPos & 0xff, targetPos & 0xff));
+						// uber good -
+						// TODO - deprecate ServoControl interface - not
+						// needed Servo is abstraction enough
+						Servo servo = (Servo) servoIndex.get(index).servo;
+						servo.invoke("publishServoEvent", currentPos & 0xff);
+						break;
+					}
+
+					case SENSOR_DATA: {
+						int index = (int) msg[1];
+						SensorData sd = sensorsIndex.get(index);
+						sd.duration = Serial.byteToLong(msg, 2, 4);
+						// HMM WAY TO GO - is NOT to invoke its own but
+						// invoke publishSensorData on Sensor
+						// since its its own service
+						// invoke("publishSensorData", sd);
+						// NICE !! - force sensor to have publishSensorData
+						// or publishRange in interface !!!
+						// sd.sensor.invoke("publishRange", sd);
+						sd.sensor.invoke("publishRange", sd.duration);
+						break;
+					}
+
+					case STEPPER_EVENT: {
+
+						int eventType = msg[1];
+						int index = msg[2];
+						int currentPos = (msg[3] << 8) + (msg[4] & 0xff);
+
+						log.info(String.format(" index %d type %d cur %d", index, eventType, currentPos));
+						// uber good -
+						// TODO - stepper ServoControl interface - not
+						// needed Servo is abstraction enough
+						Stepper stepper = (Stepper) stepperIndex.get(index);
+						stepper.invoke("publishStepperEvent", currentPos);
+						break;
+					}
+
+					case CUSTOM_MSG: {
+
+						// msg or data is of size byteCount
+						int paramCnt = msg[1];
+						int paramIndex = 2; // current index in buffer
+						// decode parameters
+						Object[] params = new Object[paramCnt];
+
+						int paramType = 0;
+
+						for (int i = 0; i < paramCnt; ++i) {
+
+							// get parameter type
+							// paramType = msg[];
+							paramType = msg[paramIndex];
+
+							// convert
+							if (paramType == ARDUINO_TYPE_INT) {
+								// params[i] =
+								int x = ((msg[++paramIndex] & 0xFF) << 8) + (msg[++paramIndex] & 0xFF);
+								if (x > 32767) {
+									x = x - 65536;
+								}
+								params[i] = x;
+								log.info(String.format("parameter %d is type ARDUINO_TYPE_INT value %d", i, x));
+								++paramIndex;
+							} else {
+								error("CUSTOM_MSG - unhandled type %d", paramType);
+							}
+
+							// load it on boxing array
+
+						}
+
+						// how to reflectively invoke multi-param method
+						// (Python?)
+						if (customEventListener != null) {
+							send(customEventListener.getName(), "onCustomMsg", params);
+						}
+
+						break;
+					}
+
+					default: {
+						error(formatMRLCommMsg("unknown serial event <- ", msg, msgSize));
+						break;
+					}
+
+					} // end switch
+
+					if (log.isDebugEnabled()) {
+						log.debug(formatMRLCommMsg("serialEvent <- ", msg, msgSize));
+					}
+
+					// processed msg
+					// reset msg buffer
+					msgSize = 0;
+					byteCount = 0;
+				}
+			} // while (serial.isOpen() && (newByte =
+				// serial.read()) > -1
+
+		} catch (Exception e) {
+			++error_mrl_to_arduino_rx_cnt;
+			error("msg structure violation %d", error_mrl_to_arduino_rx_cnt);
+			// try again ?
+			msgSize = 0;
+			byteCount = 0;
+			Logging.logException(e);
 		}
 
 	}
-	
-		
-	public String formatMRLCommMsg(String prefix, byte[] message, int size){
+
+	public String formatMRLCommMsg(String prefix, byte[] message, int size) {
 		debugRX.setLength(0);
-		if (prefix != null){
+		if (prefix != null) {
 			debugRX.append(prefix);
 		}
 		debugRX.append(String.format("MAGIC_NUMBER|SZ %d|FN %d", size, message[0]));
@@ -1152,285 +891,22 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return new File(working, name);
 	}
 
-	public Map<String, String> getBoardPreferences() {
-		Target target = getTarget();
-		if (target == null)
-			return new LinkedHashMap();
-		Map map = target.getBoards();
-		if (map == null)
-			return new LinkedHashMap();
-		map = (Map) map.get(preferences.get("board"));
-		if (map == null)
-			return new LinkedHashMap();
-		return map;
-	}
-
-	public Target getTarget() {
-		return targetsTable.get(preferences.get("target"));
-	}
-
-	public HashMap<String, Target> getTargetsTable() {
-		return targetsTable;
-	}
-
-	public String getSketchbookLibrariesPath() {
-		return getSketchbookLibrariesFolder().getAbsolutePath();
-	}
-
-	public File getSketchbookHardwareFolder() {
-		return new File(getSketchbookFolder(), "hardware");
-	}
-
-	protected File getDefaultSketchbookFolder() {
-		File sketchbookFolder = null;
-		try {
-			sketchbookFolder = new File("./.myrobotlab");// platform.getDefaultSketchbookFolder();
-		} catch (Exception e) {
-		}
-
-		// create the folder if it doesn't exist already
-		boolean result = true;
-		if (!sketchbookFolder.exists()) {
-			result = sketchbookFolder.mkdirs();
-		}
-
-		if (!result) {
-			showError("You forgot your sketchbook", "Arduino cannot run because it could not\n" + "create a folder to store your sketchbook.", null);
-		}
-
-		return sketchbookFolder;
-	}
-
-	public File getSketchbookLibrariesFolder() {
-		return new File(getSketchbookFolder(), "libraries");
-	}
-
-	public File getSketchbookFolder() {
-		return new File(preferences.get("sketchbook.path"));
-	}
-
-	public File getBuildFolder() {
-		if (buildFolder == null) {
-			String buildPath = preferences.get("build.path");
-			if (buildPath != null) {
-				buildFolder = new File(buildPath);
-
-			} else {
-				// File folder = new File(getTempFolder(), "build");
-				// if (!folder.exists()) folder.mkdirs();
-				buildFolder = createTempFolder("build");
-				buildFolder.deleteOnExit();
-			}
-		}
-		return buildFolder;
-	}
-
-	static public File createTempFolder(String name) {
-		try {
-			File folder = File.createTempFile(name, null);
-			// String tempPath = ignored.getParent();
-			// return new File(tempPath);
-			folder.delete();
-			folder.mkdirs();
-			return folder;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	public void removeDescendants(File dir) {
-		if (!dir.exists())
-			return;
-
-		String files[] = dir.list();
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].equals(".") || files[i].equals(".."))
-				continue;
-			File dead = new File(dir, files[i]);
-			if (!dead.isDirectory()) {
-				if (!preferences.getBoolean("compiler.save_build_files")) {
-					if (!dead.delete()) {
-						// temporarily disabled
-						System.err.println("Could not delete " + dead);
-					}
-				}
-			} else {
-				removeDir(dead);
-				// dead.delete();
-			}
-		}
+	public Serial getSerial() {
+		return serial;
 	}
 
 	/**
-	 * Remove all files in a directory and the directory itself.
+	 * getPortNames returns the current list of free serial ports on the machine
+	 * 
+	 * @return
 	 */
-	public void removeDir(File dir) {
-		if (dir.exists()) {
-			removeDescendants(dir);
-			if (!dir.delete()) {
-				System.err.println("Could not delete " + dir);
-			}
-		}
-	}
-
-	/**
-	 * Return an InputStream for a file inside the Processing lib folder.
-	 */
-	static public InputStream getLibStream(String filename) throws IOException {
-		return new FileInputStream(new File(getContentFile("lib"), filename));
-	}
-
-	static public void saveFile(String str, File file) throws IOException {
-		File temp = File.createTempFile(file.getName(), null, file.getParentFile());
-		PApplet.saveStrings(temp, new String[] { str });
-		if (file.exists()) {
-			boolean result = file.delete();
-			if (!result) {
-				throw new IOException("Could not remove old version of " + file.getAbsolutePath());
-			}
-		}
-		boolean result = temp.renameTo(file);
-		if (!result) {
-			throw new IOException("Could not replace " + file.getAbsolutePath());
-		}
-	}
-
-	public static boolean isCommandLine() {
-		return commandLine;
-	}
-
-	protected boolean addLibraries(File folder) throws IOException {
-		if (!folder.isDirectory())
-			return false;
-
-		String list[] = folder.list(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				// skip .DS_Store files, .svn folders, etc
-				if (name.charAt(0) == '.')
-					return false;
-				if (name.equals("CVS"))
-					return false;
-				return (new File(dir, name).isDirectory());
-			}
-		});
-		// if a bad folder or something like that, this might come back null
-		if (list == null)
-			return false;
-
-		// alphabetize list, since it's not always alpha order
-		// replaced hella slow bubble sort with this feller for 0093
-		Arrays.sort(list, String.CASE_INSENSITIVE_ORDER);
-
-		boolean ifound = false;
-
-		// reset the set of libraries
-		libraries = new HashSet<File>();
-		// reset the table mapping imports to libraries
-		importToLibraryTable = new HashMap<String, File>();
-
-		for (String libraryName : list) {
-			File subfolder = new File(folder, libraryName);
-
-			libraries.add(subfolder);
-			String packages[] = Compiler.headerListFromIncludePath(subfolder.getAbsolutePath());
-			for (String pkg : packages) {
-				importToLibraryTable.put(pkg, subfolder);
-			}
-
-			ifound = true;
-		}
-		return ifound;
-	}
-
-	public String showMessage(String msg, String desc) {
-		log.info("showMessage " + msg);
-		return msg;
-	}
-
-	public SerialDevice getSerialDevice() {
-		return serialDevice;
-	}
-
-	@Override
 	public ArrayList<String> getPortNames() {
-		// FIXME - is this inclusive or ones which are left ?????
 		portNames = SerialDeviceFactory.getSerialDeviceNames();
 		return portNames;
 	}
 
-	@Override
 	public boolean connect(String name, int rate, int databits, int stopbits, int parity) {
-		if (name == null || name.length() == 0) {
-			log.info("got emtpy connect name - disconnecting");
-			return disconnect();
-		}
-
-		if (isConnected()) {
-			if (portName != null && portName.equals(name)) {
-				log.info(String.format("%s already connected", portName));
-				return true;
-			} else if (portName != null && !portName.equals(name)) {
-				warn("requesting port change from %s to %s - disconnecting", portName, name);
-				disconnect();
-			}
-		}
-
-		try {
-			info("attempting to connect %s %d %d %d %d", name, rate, databits, stopbits, parity);
-			// LAME - this should be done in the constructor or don't get with
-			// details ! - this data makes no diff
-			serialDevice = SerialDeviceFactory.getSerialDevice(name, rate, databits, stopbits, parity);
-			if (serialDevice != null) {
-				this.portName = name; // serialDevice.getName();
-				this.rate = rate;
-				this.databits = databits;
-				this.stopbits = stopbits;
-				this.parity = parity;
-
-				// connect();
-				// MOVE ALL VALUES TO @ELEMENTS
-				// ----------------begin connect ----------------------------
-				message(String.format("\nconnecting to serial device %s\n", serialDevice.getName()));
-
-				if (!serialDevice.isOpen()) {
-					serialDevice.open();
-					serialDevice.addEventListener(this);
-					serialDevice.notifyOnDataAvailable(true);
-					serialDevice.setParams(rate, databits, stopbits, parity);
-					sleep(2000);
-
-					// TODO boolean config - supress getting version
-					Integer version = getVersion();
-					// String version = null;
-					if (version == null) {
-						error("did not get response from arduino....");
-					} else if (!version.equals(MRLCOMM_VERSION)) {
-						error(String.format("MRLComm.ino responded with version %s expected version is %s", version, MRLCOMM_VERSION));
-					} else {
-						info(String.format("connected %s responded version %s ... goodtimes...", serialDevice.getName(), version));
-					}
-				} else {
-					warn(String.format("\n%s is already open, close first before opening again\n", serialDevice.getName()));
-				}
-
-				connected = true;
-				// -----------------end connect -------
-
-				save(); // successfully bound to port - saving
-				preferences.set("serial.port", portName);
-				// FIXME - normalize
-				preferences.save();
-				broadcastState(); // state has changed let everyone know
-				return true;
-			}
-		} catch (Exception e) {
-			logException(e);
-		}
-
-		error("could not connect %s to port %s", getName(), name);
-		return false;
+		return serial.connect(name, rate, databits, stopbits, parity);
 	}
 
 	public void setCompilingProgress(Integer progress) {
@@ -1457,53 +933,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	}
 
-	public void compile(String sketchName, String sketch) {
-		// FYI - not thread safe
-		this.sketchName = sketchName;
-		this.sketch = sketch;
-		this.buildPath = createBuildPath(sketchName);
-
-		try {
-			compiler.compile(sketchName, sketch, buildPath, true);
-		} catch (RunnerException e) {
-			logException(e);
-			invoke("compilerError", e.getMessage());
-		}
-		log.debug(sketch);
-	}
-
-	public void upload(String sketch) throws Throwable {
-		compile("MRLComm", sketch); // FIXME throw push error();
-		uploader.uploadUsingPreferences(buildPath, sketchName, false);
-	}
-
-	public void uploadFile(String filename) throws Throwable {
-		upload(FileIO.fileToString(filename));
-	}
-
-	/**
-	 * Get the number of lines in a file by counting the number of newline
-	 * characters inside a String (and adding 1).
-	 */
-	static public int countLines(String what) {
-		int count = 1;
-		for (char c : what.toCharArray()) {
-			if (c == '\n')
-				count++;
-		}
-		return count;
-	}
-
-	/**
-	 * Grab the contents of a file as a string.
-	 */
-	static public String loadFile(File file) throws IOException {
-		String[] contents = PApplet.loadStrings(file);
-		if (contents == null)
-			return null;
-		return PApplet.join(contents, "\n");
-	}
-
 	@Override
 	public ArrayList<Pin> getPinList() {
 		return pinList;
@@ -1511,7 +940,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	public ArrayList<Pin> createPinList() {
 		pinList = new ArrayList<Pin>();
-		boardType = preferences.get("board");
 		int pinType = Pin.DIGITAL_VALUE;
 
 		if (boardType != null && boardType.contains("mega")) {
@@ -1544,12 +972,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return pinList;
 	}
 
-	@Override
-	public void message(String msg) {
-		log.info(msg);
-		invoke("publishMessage", msg);
-	}
-
 	static public String showError(String error, String desc, Exception e) {
 		return error;
 	}
@@ -1563,7 +985,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	public boolean connect() {
-		return connect(portName, rate, databits, stopbits, parity);
+		return connect();
 	}
 
 	/**
@@ -1582,23 +1004,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return connected;
 	}
 
-	@Override
 	public boolean disconnect() {
-		connected = false;
-		if (serialDevice == null) {
-			return false;
-		}
-
-		serialDevice.close();
-		portName = "";
-
-		info("disconnected");
-		broadcastState();
-		return true;
-	}
-
-	public String getPortName() {
-		return portName;
+		return serial.disconnect();
 	}
 
 	// ----------- Motor Controller API Begin ----------------
@@ -1749,33 +1156,16 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			return motorAttach(serviceName, data);
 		}
 
-		if (sw instanceof ArduinoShield) // Servo or ServoControl ???
-		{
-
-			if (!sw.isLocal()) {
-				error("motor controller and motor must be local");
-				return false;
-			}
-
-			return ((ArduinoShield) sw).attach(this);
-		}
-
+		/*
+		 * if (sw instanceof ArduinoShield) // Servo or ServoControl ??? {
+		 * 
+		 * if (!sw.isLocal()) {
+		 * error("motor controller and motor must be local"); return false; }
+		 * 
+		 * return ((ArduinoShield) sw).attach(this); }
+		 */
 		error("don't know how to attach");
 		return false;
-	}
-
-	public String getSketch() {
-		return this.sketch;
-	}
-
-	public String setSketch(String newSketch) {
-		sketch = newSketch;
-		return sketch;
-	}
-
-	public String loadSketchFromFile(String filename) throws FileNotFoundException {
-		sketch = FileIO.fileToString(filename);
-		return sketch;
 	}
 
 	@Override
@@ -1815,16 +1205,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	}
 
-	public void setSerialRate(int rate) {
-		try {
-			log.info(String.format("setSerialRate %d", rate));
-			sendMsg(SET_SERIAL_RATE, rate, 0);
-			serialDevice.setParams(rate, 8, 1, 0);
-		} catch (SerialDeviceException e) {
-			logException(e);
-		}
-	}
-
 	// -- StepperController begin ----
 
 	@Override
@@ -1857,11 +1237,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return null;
 	}
 
-	/**
-	 * connect to serial port with default parameters 57600 rate, 8 data bits, 1
-	 * stop bit, 0 parity
-	 */
-	@Override
 	public boolean connect(String port) {
 		return connect(port, 57600, 8, 1, 0);
 	}
@@ -1870,7 +1245,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	 * this sets the sample rate of polling reads both digital and analog it is
 	 * a loop count modulus - default is 1 which seems to be a bit high of a
 	 * rate to be broadcasting across the internet to several webclients :)
-	 * valid ranges are 1 to 32,767 (for Arduino's 2 byte signed integer)
+	 * valid ranges are 1 to 32,767 (for Arduino2's 2 byte signed integer)
 	 * 
 	 * @param rate
 	 */
@@ -1888,9 +1263,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	@Override
 	public void servoStop(String servoName) {
 		// FIXME DEPRECATE OR IMPLEMENT
-		//sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
+		// sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
 	}
-
 
 	// often used as a ping echo pulse - timing is critical
 	// so it has to be done on the uC .. therefore
@@ -1921,7 +1295,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	// and echo
 	public long pulseIn(int trigPin, int echoPin, int value, int timeout) {
 		try {
-			if (serialDevice != null) {
+			if (serial != null) {
 				blockingData.clear();
 				sendMsg(PULSE_IN, trigPin, echoPin, value, timeout);
 				// downstream longer timeout than upstream
@@ -1938,16 +1312,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			Logging.logException(e);
 			return 0;
 		}
-	}
-
-	@Override
-	public int read() throws IOException {
-		return serialDevice.read();
-	}
-
-	@Override
-	public int read(byte[] data) throws IOException {
-		return serialDevice.read(data);
 	}
 
 	public void pinMode(int address, String mode) {
@@ -1972,7 +1336,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		log.info(String.format("sensorAttach %s", sensorName));
 		int sensorIndex = -1;
 
-		if (serialDevice == null) {
+		if (serial == null) {
 			error("could not attach sensor - no serial device!");
 			return -1;
 		}
@@ -2042,9 +1406,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	// --- stepper begin ---
-	// FIXME - relatively clean interface BUT - ALL THIS LOGIC SHOULD BE IN STEPPER NOT ARDUINO !!!
+	// FIXME - relatively clean interface BUT - ALL THIS LOGIC SHOULD BE IN
+	// STEPPER NOT ARDUINO !!!
 	// SO STEPPER MUST NEED TO KNOW ABOUT CONTROLLER TYPE
-	
+
 	public boolean stepperAttach(String stepperName) {
 		Stepper stepper = (Stepper) Runtime.getService(stepperName);
 		if (stepper == null) {
@@ -2059,7 +1424,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		log.info(String.format("stepperAttach %s", stepperName));
 		Integer index = 0;
 
-		if (serialDevice == null) {
+		if (serial == null) {
 			error("could not attach stepper - no serial device!");
 			return false;
 		}
@@ -2070,29 +1435,30 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		}
 
 		stepper.setController(this);
-		
+
 		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())) {
-			// int type = Stepper.STEPPER_TYPE_POLOLU.hashCode(); heh, cool idea - but byte collision don't want to risk ;)
+			// int type = Stepper.STEPPER_TYPE_POLOLU.hashCode(); heh, cool idea
+			// - but byte collision don't want to risk ;)
 			int type = 1;
-			
+
 			// simple count = index mapping
 			index = steppers.size();
-			
-			Integer [] pins = stepper.getPins();
-			if (pins.length != 2){
+
+			Integer[] pins = stepper.getPins();
+			if (pins.length != 2) {
 				error("Pololu stepper needs 2 pins defined - direction pin & step pin");
 				return false;
 			}
 
 			// attach index pin
 			sendMsg(STEPPER_ATTACH, index, type, pins[0], pins[1]);
-			
+
 			stepper.setIndex(index);
 
 			steppers.put(stepperName, stepper);
 			stepperIndex.put(index, stepper);
 
-			log.info(String.format("stepper STEPPER_TYPE_POLOLU index %d pin direction %d step %d attached ", index,  pins[0], pins[1]));
+			log.info(String.format("stepper STEPPER_TYPE_POLOLU index %d pin direction %d step %d attached ", index, pins[0], pins[1]));
 		} else {
 			error("unkown type of stepper");
 			return false;
@@ -2100,47 +1466,55 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 		return true;
 	}
-	
+
+	public String formatMRLCommMsg(String prefix, int[] message, int size) {
+		debugRX.setLength(0);
+		if (prefix != null) {
+			debugRX.append(prefix);
+		}
+		debugRX.append(String.format("MAGIC_NUMBER|SZ %d|FN %d", size, message[0]));
+		for (int i = 1; i < size; ++i) {
+			debugRX.append(String.format("|P%d %d", i, message[i]));
+		}
+		return debugRX.toString();
+	}
 
 	public void stepperMove(String name, Integer newPos) {
-		if (!steppers.containsKey(name)){
+		if (!steppers.containsKey(name)) {
 			error("%s stepper not found", name);
 			return;
 		}
-		
+
 		StepperControl stepper = steppers.get(name);
-		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())){
+		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())) {
 		} else {
 			error("unknown stepper type");
 			return;
 		}
-		
+
 		int lsb = newPos & 0xff;
 		int msb = (newPos >> 8) & 0xff;
-		
+
 		sendMsg(STEPPER_MOVE, stepper.getIndex(), msb, lsb);
-		
+
 		// TODO - call back event - to say arrived ?
-		
+
 		// TODO - blocking method
-		
+
 	}
-	
+
 	// --- stepper end ---
 
-	public void test() throws Exception {
+	public void test(String port) throws Exception {
 
 		// get running reference to self
-		Arduino arduino = (Arduino)Runtime.start(getName(),"Arduino");
-		
-		boolean useGUI = true;	
-		if (useGUI){
+		Arduino2 arduino = (Arduino2) Runtime.start(getName(), "Arduino2");
+
+		boolean useGUI = true;
+
+		if (useGUI) {
 			Runtime.createAndStart("gui", "GUIService");
 		}
-		
-		String port = "COM51";
-		
-		Serial.createNullModemCable(port, "UART51");
 
 		if (!arduino.connect(port)) {
 			throw new MRLError("could not connect to port %s", port);
@@ -2156,7 +1530,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start("sr04", "UltrasonicSensor");
 		Runtime.start("gui", "GUIService");
 
-		sr04.attach(arduino, port, 7, 8);
+		// sr04.attach(arduino, port, 7, 8);
 		sr04.startRanging();
 
 		log.info("here");
@@ -2170,54 +1544,55 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		// getAnalogPins
 
 	}
-	
-	public boolean setServoEventsEnabled(String servoName, boolean enable){
+
+	public boolean setServoEventsEnabled(String servoName, boolean enable) {
 		log.info(String.format("setServoEventsEnabled %s %b", servoName, enable));
 		if (servos.containsKey(servoName)) {
 			ServoData sd = servos.get(servoName);
-			
-			if (enable){
+
+			if (enable) {
 				sendMsg(SERVO_EVENTS_ENABLE, sd.servoIndex, TRUE);
 			} else {
-				sendMsg(SERVO_EVENTS_ENABLE, sd.servoIndex, FALSE);				
+				sendMsg(SERVO_EVENTS_ENABLE, sd.servoIndex, FALSE);
 			}
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
 
-	public boolean setLoadTimingEnabled(boolean enable){
+	public boolean setLoadTimingEnabled(boolean enable) {
 		log.info(String.format("setLoadTimingEnabled %b", enable));
-		
-			if (enable){
-				sendMsg(LOAD_TIMING_ENABLE, TRUE);
-			} else {
-				sendMsg(LOAD_TIMING_ENABLE, FALSE);				
-			}
-			
+
+		if (enable) {
+			sendMsg(LOAD_TIMING_ENABLE, TRUE);
+		} else {
+			sendMsg(LOAD_TIMING_ENABLE, FALSE);
+		}
+
 		return enable;
 	}
-	
-	
+
 	// String functions to interface are important
-	// Interfaces should support both - "real" references and "String" references
-	// the String reference just "gets" the real reference - but this is important
+	// Interfaces should support both - "real" references and "String"
+	// references
+	// the String reference just "gets" the real reference - but this is
+	// important
 	// to support all protocols
-	
+
 	@Override
 	public void stepperReset(String stepperName) {
 		StepperControl stepper = steppers.get(stepperName);
 		sendMsg(STEPPER_RESET, stepper.getIndex());
 	}
-	
+
 	public void stepperStop(String name) {
 		StepperControl stepper = steppers.get(name);
 		sendMsg(STEPPER_STOP, stepper.getIndex());
 	}
-	
-	public void onCustomMsg(Integer ax, Integer ay, Integer az){
+
+	public void onCustomMsg(Integer ax, Integer ay, Integer az) {
 		log.info("here");
 	}
 
@@ -2227,14 +1602,14 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			Arduino2 arduino = (Arduino2) Runtime.start("arduino", "Arduino2");
 			Python python = (Python) Runtime.start("python", "Python");
 			Runtime.start("gui", "GUIService");
-			//arduino.addCustomMsgListener(python);
-			//arduino.customEventListener = python;
-			//arduino.connect("COM15");
-			
-			//arduino.test("COM15");
+			// arduino.addCustomMsgListener(python);
+			// arduino.customEventListener = python;
+			// arduino.connect("COM15");
+
+			// arduino.test("COM15");
 
 			// blocking examples
 
@@ -2269,6 +1644,5 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public void addCustomMsgListener(Service service) {
 		customEventListener = service;
 	}
-
 
 }

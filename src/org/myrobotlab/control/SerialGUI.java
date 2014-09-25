@@ -49,12 +49,9 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(SerialGUI.class.getCanonicalName());
-	public final String FORMAT_DECIMAL = "decimal";
-	public final String FORMAT_HEX = "hex";
-	public final String FORMAT_ASCII = "ascii";
 
 	// menu
-	JComboBox<String> format = new JComboBox<String>(new String[] { FORMAT_DECIMAL, FORMAT_HEX, FORMAT_ASCII });
+	JComboBox<String> format = new JComboBox<String>(new String[] { Serial.FORMAT_DECIMAL, Serial.FORMAT_HEX, Serial.FORMAT_ASCII });
 
 	JComboBox<String> port = new JComboBox<String>();
 
@@ -139,18 +136,18 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 		});
 	}
 
-	public void publishByte(final Byte b) {
+	public void publishByte(final Integer b) {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-
+				// FIXME - normalize with Serial.format
 				++rxCount;
 				String f = (String) format.getSelectedItem();
-				if (f.equals(FORMAT_DECIMAL)) {
-					rx.append(String.format("%03d%s", (int) b & 0xff, delimiter));
-				} else if (f.equals(FORMAT_HEX)) {
+				if (f.equals(Serial.FORMAT_DECIMAL)) {
+					rx.append(String.format("%03d%s",  b, delimiter));
+				} else if (f.equals(Serial.FORMAT_HEX)) {
 					rx.append(String.format("%02x%s", (int) b & 0xff, delimiter));
-				} else if (f.equals(FORMAT_ASCII)) {
+				} else if (f.equals(Serial.FORMAT_ASCII)) {
 					rx.append(String.format("%c%s", (int) b & 0xff, delimiter));
 				}
 				if (width != null && rxCount % width == 0) {
@@ -165,15 +162,14 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-
-		subscribe("publishByte", "publishByte", Byte.class);
-
+		subscribe("publishByte", "publishByte", Integer.class);
 		subscribe("publishState", "getState", Serial.class);
 		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void detachGUI() {
+		unsubscribe("publishByte", "publishByte", Integer.class);
 		unsubscribe("publishState", "getState", Serial.class);
 	}
 
