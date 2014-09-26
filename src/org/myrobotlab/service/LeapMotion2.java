@@ -35,8 +35,6 @@ public class LeapMotion2 extends Service {
 	}
 	
 	public float getStrength(){
-		Listener listener = new Listener();
-		controller.addListener(listener);
 		Frame frame = controller.frame();
 		Hand hand = frame.hands().rightmost();
 		float strength = hand.grabStrength();
@@ -46,8 +44,6 @@ public class LeapMotion2 extends Service {
 	public void strength(){
 		
 		log.info("event !");
-		Listener listener = new Listener();
-		controller.addListener(listener);
 		Frame frame = controller.frame();
 		Hand hand = frame.hands().rightmost();
 		float strength = hand.grabStrength();
