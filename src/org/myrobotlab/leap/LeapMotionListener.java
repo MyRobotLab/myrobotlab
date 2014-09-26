@@ -1,16 +1,18 @@
 package org.myrobotlab.leap;
 
-import java.io.IOException;
-import java.lang.Math;
-
-import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.LeapMotion2;
+import org.slf4j.Logger;
 
-import com.leapmotion.leap.*;
-import com.leapmotion.leap.Gesture.State;
+import com.leapmotion.leap.Controller;
+import com.leapmotion.leap.Frame;
+import com.leapmotion.leap.Gesture;
+import com.leapmotion.leap.Hand;
+import com.leapmotion.leap.Listener;
 
 public class LeapMotionListener extends Listener {
 	
+	public final static Logger log = LoggerFactory.getLogger(LeapMotionListener.class);
 	LeapMotion2 myService = null; 
 	
 	public LeapMotionListener(LeapMotion2 myService){ 
@@ -19,11 +21,11 @@ public class LeapMotionListener extends Listener {
 
 	
 	public void onInit(Controller controller) {
-        System.out.println("Initialized");
+        log.info("Initialized");
     }
 
     public void onConnect(Controller controller) {
-        System.out.println("Connected");
+        log.info("Connected");
         controller.enableGesture(Gesture.Type.TYPE_SWIPE);
         controller.enableGesture(Gesture.Type.TYPE_CIRCLE);
         controller.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
@@ -32,22 +34,22 @@ public class LeapMotionListener extends Listener {
 
     public void onDisconnect(Controller controller) {
         //Note: not dispatched when running in a debugger.
-        System.out.println("Disconnected");
+        log.info("Disconnected");
     }
 
     public void onExit(Controller controller) {
-        System.out.println("Exited");
+        log.info("Exited");
     }
 	
 	public void onFrame(Controller controller){
 	Frame frame = controller.frame();
 	Hand hand = frame.hands().rightmost();
-	System.out.println("Strenght is: " + hand.grabStrength());
+	log.info("Strenght is: " + hand.grabStrength());
 	float strength = hand.grabStrength();
 	myService.publishStrength();
     
 	
 	if (!frame.hands().isEmpty()) {
-        System.out.println();
+        log.info("");
     }
 }}
