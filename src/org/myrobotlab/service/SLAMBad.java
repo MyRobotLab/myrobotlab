@@ -33,7 +33,9 @@ public class SLAMBad extends Service {
 
 	private static final long serialVersionUID = 1L;
 	// Simbad simbad = new Simbad(new MyEnv() ,false);
-	Simbad simbad;
+	transient Simbad simbad;
+	transient MyEnv env;
+
 
 	public final static Logger log = LoggerFactory.getLogger(SLAMBad.class.getCanonicalName());
 
@@ -112,7 +114,6 @@ public class SLAMBad extends Service {
 		}
 	}
 
-	MyEnv env;
 
 	public void addWall(Double x, Double y, Double z, Float x1, Float y1, Float z1) {
 		Wall wall = new Wall(new Vector3d(x, y, z), x1, y1, z1, env);

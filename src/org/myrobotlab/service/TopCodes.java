@@ -23,7 +23,7 @@ public class TopCodes extends Service {
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(TopCodes.class.getCanonicalName());
-	Scanner scanner = new Scanner();
+	transient Scanner scanner = new Scanner();
 	
 	public TopCodes(String n) {
 		super(n);	

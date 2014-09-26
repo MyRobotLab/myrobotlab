@@ -1,13 +1,14 @@
 package org.myrobotlab.framework;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 
 /**
  *  WARNING - this class used to extend Exception - but the gson serializer would stack overflow
  *  with self reference issue
  */
-public class Status {// extends Exception {
+public class Status implements Serializable {// extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
@@ -16,7 +17,7 @@ public class Status {// extends Exception {
 	public final static String WARN = "warn";
 	public final static String ERROR = "error";
 
-	public String name;
+	public String name; // service name ???
 	public String level;
 	public String key;
 	public String detail;
@@ -42,7 +43,7 @@ public class Status {// extends Exception {
 
 
 	public Status(Exception e) {
-
+		this.level = ERROR;
 		StringWriter sw;
 		try {
 		sw = new StringWriter();

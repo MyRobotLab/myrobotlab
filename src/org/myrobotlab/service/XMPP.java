@@ -268,6 +268,18 @@ public class XMPP extends Service implements Communicator, MessageListener {
 	public void sendMRLMessage(org.myrobotlab.framework.Message msg, String id) {
 		// Base64.enc
 	}
+	
+	public String getJabberID(String id){
+		RosterEntry entry = getEntry(id);
+		String jabberID;
+		if (entry == null) {
+			// error("could not get entry for id - using %s", id);
+			jabberID = id;
+		} else {
+			jabberID = entry.getUser();
+		}
+		return jabberID;
+	}
 
 	// FIXME synchronized not needed?
 	synchronized public void sendMessage(String text, String id) {
@@ -275,24 +287,17 @@ public class XMPP extends Service implements Communicator, MessageListener {
 
 			connect();
 
-			RosterEntry entry = getEntry(id);
-			String buddyJID;
-			if (entry == null) {
-				// error("could not get entry for id - using %s", id);
-				buddyJID = id;
-			} else {
-				buddyJID = entry.getUser();
-			}
+			String jabberID = getJabberID(id);
 
 			// FIXME FIXME FIXME !!! - if
 			// "just connected - ie just connected and this is the first chat of the connection then "create
 			// chat" otherwise use existing chat !"
 			Chat chat = null;
-			if (chats.containsKey(buddyJID)) {
-				chat = chats.get(buddyJID);
+			if (chats.containsKey(jabberID)) {
+				chat = chats.get(jabberID);
 			} else {
-				chat = chatManager.createChat(buddyJID, this);
-				chats.put(buddyJID, chat);
+				chat = chatManager.createChat(jabberID, this);
+				chats.put(jabberID, chat);
 			}
 
 			if (text == null) {
@@ -300,14 +305,14 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			}
 
 			// log.info(String.format("sending %s (%s) %s", entry.getName(),
-			// buddyJID, text));
+			// jabberID, text));
 			if (log.isDebugEnabled()) {
-				log.info(String.format("sending %s %s", buddyJID, (text.length() > 32) ? String.format("%s...", text.substring(0, 32)) : text));
+				log.info(String.format("sending %s %s", jabberID, (text.length() > 32) ? String.format("%s...", text.substring(0, 32)) : text));
 			}
 			chat.sendMessage(text);
 
 		} catch (Exception e) {
-			// currentChats.remove(buddyJID);
+			// currentChats.remove(jabberID);
 			Logging.logException(e);
 		}
 	}
@@ -559,8 +564,8 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			error("can not add auditor %s", id);
 			return false;
 		}
-		String buddyJID = entry.getUser();
-		auditors.add(buddyJID);
+		String jabberID = entry.getUser();
+		auditors.add(jabberID);
 		broadcast(String.format("added buddy %s", entry.getName()));
 		return true;
 	}
@@ -571,22 +576,10 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			error("can not remove auditor %s", id);
 			return false;
 		}
-		String buddyJID = entry.getUser();
-		auditors.remove(buddyJID);
+		String jabberID = entry.getUser();
+		auditors.remove(jabberID);
 		return true;
 	}
-
-	/*
-	 * public boolean addRelay(String id) { RosterEntry entry = getEntry(id); if
-	 * (entry == null) { error("can not add relay %s", id); return false; }
-	 * String buddyJID = entry.getUser(); responseRelays.add(buddyJID); return
-	 * true; }
-	 * 
-	 * public boolean removeRelay(String id) { RosterEntry entry = getEntry(id);
-	 * if (entry == null) { error("can not remove relay %s", id); return false;
-	 * } String buddyJID = entry.getUser(); responseRelays.remove(buddyJID);
-	 * return true; }
-	 */
 
 	/**
 	 * publishing point for XMPP messages

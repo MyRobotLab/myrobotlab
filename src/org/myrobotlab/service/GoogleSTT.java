@@ -97,7 +97,7 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 	transient TranscriptionThread transcription = null;
 
 	// encoding
-	FLAC_FileEncoder encoder; // TODO - memory encoder
+	transient FLAC_FileEncoder encoder; // TODO - memory encoder
 
 	// root mean square level detection and capture management
 	// TODO - auto-gain adjustment

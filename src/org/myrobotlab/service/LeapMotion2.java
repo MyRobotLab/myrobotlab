@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Frame;
+import com.leapmotion.leap.Gesture;
 import com.leapmotion.leap.Hand;
-import com.leapmotion.leap.Listener;
 
 
 public class LeapMotion2 extends Service {
@@ -34,29 +34,51 @@ public class LeapMotion2 extends Service {
 		return "used as a general template";
 	}
 	
-	public float getStrength(){
+	public float getRightStrength(){
 		Frame frame = controller.frame();
 		Hand hand = frame.hands().rightmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
 	
-	public void strength(){
-		
-		log.info("event !");
+	public float getLeftStrength(){
 		Frame frame = controller.frame();
-		Hand hand = frame.hands().rightmost();
+		Hand hand = frame.hands().leftmost();
 		float strength = hand.grabStrength();
-		invoke("publishStrength", strength);
-		log.info("published!");
+		return strength;
+	}
+
+	public Frame publishFrame(Frame frame) {
+		return frame;
+	}
 	
-    }
+	public void addFrameListener(Service service){
+		addListener("publishFrame", service.getName(), "onFrame", Frame.class);
+	}
 	
+	public Controller publishInit(Controller controller) {
+		return controller;
+	}
+
+	public Controller publishConnect(Controller controller) {
+		return controller;
+	}
+
+	public Controller publishDisconnect(Controller controller) {
+		return controller;
+	}
+
+	public Controller publishExit(Controller controller) {
+		return controller;
+	}
 	
-    public void publishStrength(){
-    	log.info("event !");
-    }
+	public void startTracking(){
+		controller.addListener(listener);
+	}
 	
+	public void stopTracking(){
+		controller.removeListener(listener);
+	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -65,10 +87,9 @@ public class LeapMotion2 extends Service {
 		LeapMotion2 leap = new LeapMotion2("leap");
 			
 		Runtime.start("gui", "GUIService");
-		
+		leap.startTracking();
 
         // Have the sample listener receive events from the controller
-        
 
         // Keep this process running until Enter is pressed
         log.info("Press Enter to quit...");
@@ -79,8 +100,6 @@ public class LeapMotion2 extends Service {
         }
 
         // Remove the sample listener when done
-
-		
-		
 	}
+
 }
