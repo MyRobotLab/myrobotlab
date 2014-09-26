@@ -1,11 +1,16 @@
 package org.myrobotlab.leap;
+
 import java.io.IOException;
 import java.lang.Math;
+
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.LeapMotion2;
 
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
 public class Sample2 extends Listener {
+
 	
 	public void onInit(Controller controller) {
         System.out.println("Initialized");
@@ -32,6 +37,9 @@ public class Sample2 extends Listener {
 	Frame frame = controller.frame();
 	Hand hand = frame.hands().rightmost();
 	System.out.println("Strenght is: " + hand.grabStrength());
+	float strength = hand.grabStrength();
+	LeapMotion2 leap = new LeapMotion2("leap");
+	leap.publishStrength();
     
 	
 	if (!frame.hands().isEmpty()) {
