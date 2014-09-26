@@ -24,6 +24,7 @@ public class LeapMotion2 extends Service {
 	public final static Logger log = LoggerFactory.getLogger(LeapMotion2.class);
 	
 	LeapMotionListener listener = null;
+	Controller controller = new Controller();
 	
 	public LeapMotion2(String n) {
 		super(n);
@@ -47,7 +48,7 @@ public class LeapMotion2 extends Service {
 	
 	public void strength(){
 		
-		System.out.println("event !");
+		log.info("event !");
 		Controller controller = new Controller();
 		Listener listener = new Listener();
 		controller.addListener(listener);
@@ -55,13 +56,13 @@ public class LeapMotion2 extends Service {
 		Hand hand = frame.hands().rightmost();
 		float strength = hand.grabStrength();
 		invoke("publishStrength", strength);
-		System.out.println("published!");
+		log.info("published!");
 	
     }
 	
 	
     public void publishStrength(){
-    	System.out.println("event !");
+    	log.info("event !");
     }
 	
 
@@ -73,15 +74,12 @@ public class LeapMotion2 extends Service {
 			
 		Runtime.start("gui", "GUIService");
 		
-		LeapMotionListener listener = new LeapMotionListener();
-        Controller controller = new Controller();
 
         // Have the sample listener receive events from the controller
-        controller.addListener(listener);
         
 
         // Keep this process running until Enter is pressed
-        System.out.println("Press Enter to quit...");
+        log.info("Press Enter to quit...");
         try {
             System.in.read();
         } catch (IOException e) {
@@ -89,8 +87,6 @@ public class LeapMotion2 extends Service {
         }
 
         // Remove the sample listener when done
-        controller.removeListener(listener);
-
 
 		
 		
