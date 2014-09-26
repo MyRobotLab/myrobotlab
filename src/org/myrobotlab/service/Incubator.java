@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Index;
 import org.myrobotlab.framework.IndexNode;
 import org.myrobotlab.framework.Peers;
@@ -17,6 +18,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.UpdateReport;
+import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -66,13 +68,12 @@ public class Incubator extends Service {
 	@Override
 	public void startService() {
 		super.startService();
-	}
 
-	public void startPeers() {
-		xmpp = (XMPP) createPeer("xmpp");
-		python = (Python) createPeer("python");
+		xmpp = (XMPP) startPeer("xmpp");
+		python = (Python) startPeer("python");
 		webgui = (WebGUI) createPeer("webgui");
 		webgui.port = 4321;
+		webgui.startService();
 
 		xmpp.startService();
 		webgui.startService();
@@ -81,89 +82,71 @@ public class Incubator extends Service {
 
 		xmpp.addAuditor("Greg Perry");
 		python.startService();
-
 	}
-
-	/*
-	static public class Error {
-		public String name;
-		public String type;
-		public String description;
-
-		public Error(String name, String type, Exception e) {
-			this.name = name;
-			this.type = type;
-			this.description = Logging.stackToString(e);
-		}
-
-		public Error(String simpleType, String type) {
-			this.name = simpleType;
-			this.type = type;
-		}
-	}
-	*/
 
 	// FIXME - do all types of serialization
 	// TODO - encode decode test JSON & XML
-	public final ArrayList<Status> serializeTest() {
+	// final ArrayList<Status>
+	public ArrayList<Status> serializeTest() {
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 		ArrayList<Status> badServices = new ArrayList<Status>();
 
-		Runtime runtime = Runtime.getInstance();
-
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
+			
 			ServiceInterface s = null;
+			
 			ByteArrayOutputStream fos = null;
 			ObjectOutputStream out = null;
 			String fullType = serviceTypeNames[i];
+			
+
+			if ("org.myrobotlab.service.PickToLight".equals(fullType) || "org.myrobotlab.service.Incubator".equals(fullType) || "org.myrobotlab.service.Runtime".equals(fullType)  || "org.myrobotlab.service.Plantoid".equals(fullType)) {
+				continue;
+			}
+
 
 			try {
-				/*
-				if (fullType.equals(Incubator.class.getSimpleName())) {
-					log.warn("skipping Incubator class");
-					continue;
-				}
-				log.warn("starting " + fullType);
-				*/
 
 				Repo repo = new Repo("test");
-				
-				//String fullType = String.format("org.myrobotlab.service.%s", fullTypex);
-				if (!repo.isServiceTypeInstalled(fullType)) {
-					 ArrayList<ResolveReport> reports = repo.retrieveServiceType(fullType);
-					 
-					 for (int j = 0; j < reports.size(); ++j){
-						 ResolveReport report = reports.get(j);
-						 List<?> errors = report.getAllProblemMessages();
-						 if (errors.size() > 0){
-							 log.error("ERROR");
-							 badServices.add(Status.error("retrieving %s returned errors %s", fullType, Arrays.toString(errors.toArray())));
-						 }
-					 }
-					/*
-					badServices.add(new Error(simpleType, "notInstalled"));
-					continue;
-					*/
-				}
 
-				if (fullType.equals("tracking")){
-					log.info("here");
+				if (!repo.isServiceTypeInstalled(fullType)) {
+					ArrayList<ResolveReport> reports = repo.retrieveServiceType(fullType);
+
+					for (int j = 0; j < reports.size(); ++j) {
+						ResolveReport report = reports.get(j);
+						List<?> errors = report.getAllProblemMessages();
+						if (errors.size() > 0) {
+							log.error("ERROR");
+							badServices.add(Status.error("retrieving %s returned errors %s", fullType, Arrays.toString(errors.toArray())));
+						}
+					}
+					/*
+					 * badServices.add(new Error(simpleType, "notInstalled"));
+					 * continue;
+					 */
 				}
+				
+				log.info("creating {}", fullType);
 				s = Runtime.create(fullType, fullType);
 
-				//if (!Runtime.isHeadless() || (Runtime.isHeadless() && !s.hasDisplay())) {
-					s.startService();
-				//} else {
-				//	log.warn(String.format("won't start %s - do not have a display", fullType));
-				//}
+				// if (!Runtime.isHeadless() || (Runtime.isHeadless() &&
+				// !s.hasDisplay())) {
+				log.info("starting {}", fullType);
+				s.startService();
+				// } else {
+				// log.warn(String.format("won't start %s - do not have a display",
+				// fullType));
+				// }
 
 			} catch (Exception e) {
 				badServices.add(Status.error("%s - %s", fullType, e.getMessage()));
+				continue;
 			}
 
 			try {
-				log.warn("serializing " + fullType);
+
+				log.info("serializing {}", fullType);
 
 				// TODO put in encoder
 				fos = new ByteArrayOutputStream();
@@ -172,7 +155,7 @@ public class Incubator extends Service {
 				fos.flush();
 				out.close();
 
-				log.info("releasing " + fullType);
+				log.info("releasing {}", fullType);
 
 				if (s.hasPeers()) {
 					s.releasePeers();
@@ -180,19 +163,14 @@ public class Incubator extends Service {
 
 				s.releaseService();
 
-				log.warn("released %s", fullType);
+				log.warn("released {}", fullType);
+
 			} catch (Exception e) {
 				badServices.add(Status.error("serializing %s threw %s", fullType, e.getMessage()));
 			}
-
 		}
 
-		return badServices;
-	}
-
-	public void startTest() {
-		ArrayList<Status> errors = serializeTest();
-		log.info(String.format("found %d errors in serialization", errors.size()));
+ 		return badServices;
 	}
 
 	public IndexNode<Object> get(String robotName) {
@@ -283,26 +261,36 @@ public class Incubator extends Service {
 		}
 	}
 
+	public void test() {
+		ArrayList<Status> stati = serializeTest();
+		xmpp.sendMessage(Encoder.gson.toJson(stati), "Greg Perry");
+	}
+
 	// remove all - install single 1 - check for errors on start
 
 	// install all 3rd party libraries ???
 
+	public void handleError(Exception e) {
+		Logging.logException(e);
+		xmpp.sendMessage(String.format("%s -> %s", e.getMessage(), Logging.stackToString(e)), "Greg Perry");
+	}
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		LoggingFactory.getInstance().addAppender(Appender.FILE);
+		
 
-		Incubator incubator = new Incubator("incubator");
-		incubator.serializeTest();
-		//incubator.servoArduinoOpenCVGUIService();
+		Incubator incubator = (Incubator) Runtime.start("incubator", "Incubator");
+		incubator.test();
+		// incubator.servoArduinoOpenCVGUIService();
 
 		/*
-		incubator.installAll();
-		// incubator.startTest();
-
-		incubator.testPythonScripts();
-
-		// Runtime.createAndStart("gui", "GUIService");
+		 * incubator.installAll(); // incubator.startTest();
 		 * 
+		 * incubator.testPythonScripts();
+		 * 
+		 * // Runtime.createAndStart("gui", "GUIService");
 		 */
 
 	}

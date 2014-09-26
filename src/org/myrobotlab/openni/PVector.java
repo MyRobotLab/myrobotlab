@@ -1,6 +1,5 @@
 package org.myrobotlab.openni;
 
-import org.simpleframework.xml.Element;
 
 
 /* -*- mode: java; c-basic-offset: 2; indent-tabs-mode: nil -*- */
@@ -63,23 +62,15 @@ public class PVector {
 	protected float[] array;
 
 	// range mapping - in XY plane
-	@Element
 	private float XYminX = 0;
-	@Element
 	private float XYmaxX = 180;
-	@Element
 	private float XYminY = 0;
-	@Element
 	private float XYmaxY = 180;
 
 	// range mapping in YZ plane
-	@Element
 	private float YZminY = 0;
-	@Element
 	private float YZmaxY = 180;
-	@Element
 	private float YZminZ = 0;
-	@Element
 	private float YZmaxZ = 180;
 	
 	/**
