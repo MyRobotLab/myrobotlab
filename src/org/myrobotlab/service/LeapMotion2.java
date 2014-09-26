@@ -14,6 +14,7 @@ import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
 import org.myrobotlab.leap.*;
+import org.myrobotlab.service.WiiDAR.Point;
 
 
 public class LeapMotion2 extends Service {
@@ -41,8 +42,25 @@ public class LeapMotion2 extends Service {
 		return strength;
 	}
 	
-	
+	public void strength(){
 		
+		System.out.println("event !");
+		Controller controller = new Controller();
+		Listener listener = new Listener();
+		controller.addListener(listener);
+		Frame frame = controller.frame();
+		Hand hand = frame.hands().rightmost();
+		float strength = hand.grabStrength();
+		invoke("publishStrenght", strength);
+		System.out.println("published!");
+	
+    }
+	
+	
+    public void publishStrength(){
+    	System.out.println("event !");
+    }
+	
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
