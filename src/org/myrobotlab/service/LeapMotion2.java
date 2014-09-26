@@ -85,6 +85,7 @@ public class LeapMotion2 extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		LeapMotion2 leap = new LeapMotion2("leap");
+		leap.startService();
 			
 		Runtime.start("gui", "GUIService");
 		leap.startTracking();
