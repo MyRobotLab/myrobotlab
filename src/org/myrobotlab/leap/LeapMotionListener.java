@@ -9,7 +9,13 @@ import org.myrobotlab.service.LeapMotion2;
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
-public class Sample2 extends Listener {
+public class LeapMotionListener extends Listener {
+	
+	LeapMotion2 myService = null; 
+	
+	public LeapMotionListener(LeapMotion2 myService){ 
+		 this.myService = myService; 
+    }
 
 	
 	public void onInit(Controller controller) {
@@ -38,8 +44,7 @@ public class Sample2 extends Listener {
 	Hand hand = frame.hands().rightmost();
 	System.out.println("Strenght is: " + hand.grabStrength());
 	float strength = hand.grabStrength();
-	LeapMotion2 leap = new LeapMotion2("leap");
-	leap.publishStrength();
+	myService.publishStrength();
     
 	
 	if (!frame.hands().isEmpty()) {
