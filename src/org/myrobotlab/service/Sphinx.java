@@ -185,13 +185,15 @@ public class Sphinx extends Service implements SpeechRecognizer {
 	}
 
 	public void stopService() {
-		try {
-			stopListening();
+		super.stopService();
+		stopListening();
+		if (recognizer != null){
 			recognizer.deallocate();
-			super.stopService();
+			recognizer = null;
+		}
+		if (microphone != null){
 			microphone.stopRecording();
-		} catch (Exception e) {
-			Logging.logException(e);
+			microphone = null;
 		}
 	}
 

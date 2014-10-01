@@ -64,6 +64,7 @@ import javax.imageio.ImageIO;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
@@ -635,8 +636,10 @@ public class OpenCV extends VideoSource {
 		videoProcessor.showTimestamp(b);
 	}
 
-	public void test() {
+	public Status test() {
 
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		
 		try {
 			// smart testing - determine what environment has
 			// do i have a camera ?
@@ -789,11 +792,11 @@ public class OpenCV extends VideoSource {
 			}
 
 		} catch (Exception e) {
-			error(e);
-			return;
+			return status.addError(e);
 		}
 
-		info("test completed");
+		status.addInfo("test completed");
+		return status;
 	}
 
 	public void captureFromResourceFile(String filename) {

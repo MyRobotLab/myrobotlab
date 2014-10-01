@@ -41,6 +41,7 @@ import java.util.Map;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -521,7 +522,8 @@ public class Tracking extends Service {
 		opencv.removeFilters();
 	}
 
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		try {
 		for (int i = 0; i < 1000; ++i) {
 			// invoke("trackPoint", 0.5, 0.5);
@@ -539,6 +541,7 @@ public class Tracking extends Service {
 		}
 
 		info("test completed");
+		return status;
 	}
 
 	public void trackPoint() {

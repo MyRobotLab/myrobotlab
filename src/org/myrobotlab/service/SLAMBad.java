@@ -30,14 +30,11 @@ import org.slf4j.Logger;
  *         subsumption JMonkey
  */
 public class SLAMBad extends Service {
-
 	private static final long serialVersionUID = 1L;
-	// Simbad simbad = new Simbad(new MyEnv() ,false);
+	public final static Logger log = LoggerFactory.getLogger(SLAMBad.class.getCanonicalName());
+
 	transient Simbad simbad;
 	transient MyEnv env;
-
-
-	public final static Logger log = LoggerFactory.getLogger(SLAMBad.class.getCanonicalName());
 
 	public static class MyEnv extends EnvironmentDescription {
 		public MyEnv() {
@@ -114,6 +111,13 @@ public class SLAMBad extends Service {
 		}
 	}
 
+	public void stopService() {
+		super.stopService();
+		if (simbad != null) {
+			simbad.dispose();
+			simbad = null;
+		}
+	}
 
 	public void addWall(Double x, Double y, Double z, Float x1, Float y1, Float z1) {
 		Wall wall = new Wall(new Vector3d(x, y, z), x1, y1, z1, env);
@@ -156,14 +160,10 @@ public class SLAMBad extends Service {
 		Simbad simbad = new Simbad(env, false);
 
 		env.add(new Box(new Vector3d(3, 0, 0), new Vector3f(1, 1, 1), env));
-		// simbad.
-		/*
-		 * Simbad template = new Simbad("simulator"); template.startService();
-		 */
 
 		GUIService gui = new GUIService("gui");
 		gui.startService();
-		
+
 	}
 
 }

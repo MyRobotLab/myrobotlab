@@ -214,12 +214,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return host == null;
 	}
 
-	public void test() throws Exception {
-		test((Object[]) null);
+	public Status test() throws Exception {
+		return test((Object[]) null);
 	}
 
-	public void test(Object... data) throws Exception {
-		info("test completed - no valid tests");
+	public Status test(Object... data) throws Exception {
+		return Status.info("%s %s no valid tests", getName(), getTypeName());
 	}
 
 	/**

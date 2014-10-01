@@ -1250,8 +1250,6 @@ void sendMsg ( int num, ... )
 */
 
 #include <Servo.h>
-#include<MRLComm.h>
-
 
 MRLComm mrl = MRLComm();
 

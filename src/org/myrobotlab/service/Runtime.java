@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -2158,6 +2159,12 @@ public class Runtime extends Service implements MessageListener {
 	public void receive(Message msg) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	static public Thread[] getThreads(){
+		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+		Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+		return threadArray;
 	}
 
 	/**

@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -206,7 +207,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 	// motor controller api
 
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 
 		try {
 			setServo(0, SERVOMIN);
@@ -239,11 +241,10 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 			setPWM(0, 0, SERVOMAX);
 
 		} catch (Exception e) {
-			error(e);
-			return;
+			status.addError(e);
 		}
 
-		info("test completed");
+		return status;
 	}
 
 	@Override

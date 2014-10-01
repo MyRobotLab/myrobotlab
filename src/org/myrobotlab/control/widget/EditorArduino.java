@@ -60,7 +60,7 @@ public class EditorArduino extends Editor implements ActionListener {
 	ImageButton saveButton;
 	ImageButton fullscreenButton;
 	ImageButton monitorButton;
-	JLabel sketchName = new JLabel("MRLComm");
+	JLabel sketchName = new JLabel("MRLComm copy, paste and upload this sketch into the Arduinio IDE");
 
 	Arduino myArduino = null;
 	JMenu boardsMenu = new JMenu("Board");
@@ -109,15 +109,25 @@ public class EditorArduino extends Editor implements ActionListener {
 		super.init();
 		// NOTE !!! - must be lowercase to match image names
 		compileButton = addImageButtonToButtonBar("Arduino", "compile", this);
+		compileButton.setVisible(false);
 		uploadButton = addImageButtonToButtonBar("Arduino", "upload", this);
+		uploadButton.setVisible(false);
 		connectButton = addImageButtonToButtonBar("Arduino", "connect", this);
+		connectButton.setVisible(false);
 		newButton = addImageButtonToButtonBar("Arduino", "new", this);
+		newButton.setVisible(false);
 		openButton = addImageButtonToButtonBar("Arduino", "open", this);
+		openButton.setVisible(false);
 		saveButton = addImageButtonToButtonBar("Arduino", "save", this);
+		saveButton.setVisible(false);
 		fullscreenButton = addImageButtonToButtonBar("Arduino", "fullscreen", this);
+		fullscreenButton.setVisible(false);
 		monitorButton = addImageButtonToButtonBar("Arduino", "monitor", this);
+		monitorButton.setVisible(false);
 
 		buttonBar.setBackground(new Color(0, 100, 104));
+		//buttonBar.setForeground(new Color(255, 255, 255));
+		sketchName.setForeground(new Color(255, 255, 255));
 		buttonBar.add(sketchName);
 
 		// addHelpMenuURL("help blah", "http:blahblahblah");

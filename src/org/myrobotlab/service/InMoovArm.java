@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -249,7 +250,9 @@ public class InMoovArm extends Service {
 		this.omoplate.moveTo(omoplate);
 	}
 
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+
 		try {
 			if (arduino == null) {
 				throw new Exception("arduino is null");
@@ -267,11 +270,11 @@ public class InMoovArm extends Service {
 			sleep(300);
 			
 		} catch (Exception e) {
-			error(e);
-			return;
+			status.addError(e);
 		}
 
-		info("test completed");
+		status.addInfo("test completed");
+		return status;
 	}
 
 	public void setSide(String side) {

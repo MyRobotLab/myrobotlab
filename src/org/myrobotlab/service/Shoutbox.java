@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +21,7 @@ import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -100,8 +102,8 @@ public class Shoutbox extends Service {
 	}
 
 	// key to ---> User???
-	static public class Connections {
-
+	static public class Connections implements Serializable {
+		private static final long serialVersionUID = 1L;
 		HashMap<WebSocket, String> wsToKey = new HashMap<WebSocket, String>();
 		HashMap<String, Connection> keyToConn = new HashMap<String, Connection>();
 
@@ -222,7 +224,8 @@ public class Shoutbox extends Service {
 	 * a seperate system message we will have system data components of the
 	 * shout - these are to display server data on the clients
 	 */
-	public static class Shout {
+	public static class Shout implements Serializable {
+		private static final long serialVersionUID = 1L;
 		public String from;
 		public String type;
 		public String msg;
@@ -239,7 +242,8 @@ public class Shoutbox extends Service {
 
 	}
 
-	public static class Connection {
+	public static class Connection implements Serializable {
+		private static final long serialVersionUID = 1L;
 		public String user;
 		public String ip; // used ???
 		public String port;
@@ -249,6 +253,7 @@ public class Shoutbox extends Service {
 		transient public WebSocket ws; // FIXME - this is most recent websocket
 										// - loses other connections
 		public String xmpp;
+		public boolean xmppSystemMsgs = false;
 	}
 
 	// if new socket & recently closed socket of user - then
@@ -560,7 +565,8 @@ public class Shoutbox extends Service {
 	public Response onResponse(Response response) {
 		log.info("chatbot shouting");
 
-		String r = resizeImage(response.msg);
+		//String r = resizeImage(response.msg);
+		String r = response.msg;
 
 		conns.addConnection("mr.turing", "mr.turing");
 
@@ -661,6 +667,19 @@ public class Shoutbox extends Service {
 			// Object ret = null;
 
 			String[] params = shout.msg.split("/");
+			
+			// FIXME - reply with string "system msgs are now off/on"
+			if (shout.msg.startsWith("/system")) {
+				String onOff = params[2];
+				if ("on".startsWith(onOff.toLowerCase())){
+					conn.xmppSystemMsgs = true;
+				} else if ("off".startsWith(onOff.toLowerCase())){
+					conn.xmppSystemMsgs = false;
+				} else {
+					log.error("unkown param {}",  onOff);
+				}
+				return;
+			}
 
 			if (shout.msg.startsWith("/startChatBot")) {
 				invoke("startChatBot");
@@ -701,6 +720,11 @@ public class Shoutbox extends Service {
 				invoke("quickStart", params[2], params[3]);
 				return;
 			}
+			
+			if (shout.msg.startsWith("/t")) {
+				invoke("mimicTuring", params[2]);
+				return;
+			}
 
 			/*
 			 * YOU THINK THIS WILL WORK > HAHAHAHA !
@@ -731,16 +755,24 @@ public class Shoutbox extends Service {
 				String jabberID = xmpp.getJabberID(relayName);
 				// don't echo to self
 				// if (!key.startsWith(jabberID)) { filter took out mrt and other activity !
-					log.info(String.format("sending from %s -> to xmpp client - relayName [%s] jabberID [%s] shout.msg [%s]", shout.from, relayName, jabberID, shout.msg));
+					log.info(String.format("sending from %s %s -> to xmpp client - relayName [%s] jabberID [%s] shout.msg [%s]",  Thread.currentThread().getId(), shout.from, relayName, jabberID, shout.msg));
 					xmpp.sendMessage(String.format("%s: %s", shout.from, shout.msg), jabberID);
 				//}
 			}
 		}
-
+		
 		archive(shout);
+	}
+	
+	public void mimicTuring(String msg){
+		Shout shout = createShout(USER, msg);
+		shout.from = "mr.turing";
+		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		onShout("mr.turing", out);
 	}
 
 	// FIXME FIXME FIXME - not normalized with onShout(WebSocket) :PPPP
+	// FIXME - must fill in your name - "Greg Perry" somewhere..
 	public void onXMPPMsg(XMPPMsg xmppMsg) {
 		log.info(String.format("XMPP - %s %s", xmppMsg.msg.getFrom(), xmppMsg.msg.getBody()));
 
@@ -769,13 +801,15 @@ public class Shoutbox extends Service {
 		 */
 	}
 
-	public void test() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+	public Status test() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		Shoutbox shoutbox = (Shoutbox) Runtime.create(getName(), "Shoutbox");
 		shoutbox.startService();
 		shoutbox.setNameProvider("org.myrobotlab.client.DrupalNameProvider");
 		webgui.allowREST(true);
 		// shoutbox.startXMPP("incubator@myrobotlab.org", "xxxxxx");
 		// shoutbox.addXMPPRelay("Greg Perry");
+		return status;
 	}
 
 	// ---- outbound ---->

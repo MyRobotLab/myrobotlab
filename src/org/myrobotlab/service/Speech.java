@@ -41,6 +41,7 @@ import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -525,13 +526,15 @@ public class Speech extends Service {
 		speak(String.format("did you say. %s", text));
 	}
 	
-	public void test(){
+	public Status test(){
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		Speech mouth = (Speech)Runtime.start(getName(),"Speech");
 		mouth.speak("I don't use appostrophes, or other punctuation, do you?");
 		mouth.speak("I'm done with this test");
 		
 		// TODO non-blocking - blocking google freetts
-		log.info("done with test");
+		status.addInfo("done with test");
+		return status;
 	}
 
 	// codes - http://code.google.com/apis/language/translate/v2/using_rest.html

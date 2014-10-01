@@ -7,6 +7,7 @@ import java.util.List;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -37,7 +38,10 @@ public class SpeakerRecognition extends Service {
 		return "used as a general template";
 	}
 
-	public void test() throws UnsupportedAudioFileException, IOException {
+	public Status test() throws UnsupportedAudioFileException, IOException {
+		
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		
 		// Create a new Recognito instance defining the audio sample rate to be
 		// used
 		//Recognito<String> recognito = new Recognito<>(16000.0f);
@@ -65,6 +69,7 @@ public class SpeakerRecognition extends Service {
 			System.out.println("me is back !!! " + match.getLikelihoodRatio() + "% positive about it...");
 		}
 		*/
+		return status;
 	}
 
 	public static void main(String[] args) {

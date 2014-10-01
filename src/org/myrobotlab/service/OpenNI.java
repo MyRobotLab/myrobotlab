@@ -66,11 +66,11 @@ public class OpenNI extends Service // implements
 	*/
 
 	public final static Logger log = LoggerFactory.getLogger(OpenNI.class);
-	SimpleOpenNI context;
+	transient SimpleOpenNI context;
 
 	ArrayList<VideoSink> sinks = new ArrayList<VideoSink>();
 
-	Graphics2D g2d;
+	transient Graphics2D g2d;
 
 	int frameNumber = 0;
 
@@ -82,10 +82,10 @@ public class OpenNI extends Service // implements
 	PVector com = new PVector();
 	PVector com2d = new PVector();
 
-	BufferedImage frame;
+	transient BufferedImage frame;
 
-	FileOutputStream csvFile = null;
-	FileOutputStream rubySketchUpFile = null;
+	transient FileOutputStream csvFile = null;
+	transient FileOutputStream rubySketchUpFile = null;
 
 	// IMPORTANT - this single skeleton contains mapping information !
 	@Element
@@ -159,7 +159,6 @@ public class OpenNI extends Service // implements
 
 		if (context.isInit() == false) {
 			error("Can't init SimpleOpenNI, maybe the camera is not connected!");
-
 			return;
 		}
 
@@ -321,6 +320,10 @@ public class OpenNI extends Service // implements
 
 		invoke("publishOpenNIData", data);
 
+	}
+	
+	public void addOpenNIData(Service service){
+		addListener("publishOpenNIData", service.getName(), "onOpenNIData", OpenNIData.class);
 	}
 
 	// publishing the big kahuna <output>
@@ -860,6 +863,11 @@ public class OpenNI extends Service // implements
 		log.info("createPath");
 	}
 
+	// FIXME - doesnt currently work
+	public void recordSingleFrame() {
+		recordSingleFrame = true;
+	}
+	
 	public static void main(String s[]) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel("INFO");
@@ -874,7 +882,4 @@ public class OpenNI extends Service // implements
 		// openni.startHandTracking();
 	}
 
-	public void recordSingleFrame() {
-		recordSingleFrame = true;
-	}
 }

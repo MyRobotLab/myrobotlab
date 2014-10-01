@@ -29,16 +29,32 @@ public class Cron extends Service {
 	public ArrayList<Task> tasks = new ArrayList<Task>();
 	
 	@Default
-	public static class Task implements Serializable
+	public static class Task implements Serializable, Runnable
 	{
 		private static final long serialVersionUID = 1L;
+		transient Cron myService;
 		public String cronPattern;
-		public Message msg;
-		
-		public Task(String cronPattern, Message msg)
+		public String name;
+		public String method;
+		public Object[] data;
+				
+		public Task(Cron myService, String cronPattern, String name, String method)
 		{
+			this(myService, cronPattern, name, method, (Object[])null);
+		}
+		public Task(Cron myService, String cronPattern, String name, String method, Object ... data)
+		{
+			this.myService = myService;
 			this.cronPattern = cronPattern;
-			this.msg = msg;
+			this.name = name;
+			this.method = method;
+			this.data = data;
+		}
+		
+		@Override
+		public void run() {
+			Message msg = myService.createMessage(name, method, data);
+			myService.out(msg);
 		}
 	}
 	
@@ -52,22 +68,16 @@ public class Cron extends Service {
 		return "used as a general template";
 	}
 
-	public void addScheduledEvent(String cron, String serviceName, String method)
+	public void addTask(String cron, String serviceName, String method)
 	{
-		addScheduledEvent(cron, serviceName, method, (Object[])null);
+		addTask(cron, serviceName, method, (Object[])null);
 	}
 	
-	public void addScheduledEvent(String cron, String serviceName, String method, Object ... data)
+	public void addTask(String cron, String name, String method, Object ... data)
 	{
-		final Message msg = createMessage(serviceName, method, data);
-		
-		tasks.add(new Task(cron, msg));
-		
-		scheduler.schedule(cron, new Runnable() {
-			public void run() {
-				out(msg);
-			}
-		});
+		Task task = new Task(this, cron, name, method, data);
+		tasks.add(task);
+		scheduler.schedule(cron, task);
 	}
 	
 	public void startService(){
@@ -91,14 +101,19 @@ public class Cron extends Service {
 		}
 	}
 	
+	public int test(Integer data){
+		log.info("data {}", data);
+		return data;
+	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Cron cron = (Cron)Runtime.start("cron", "Cron");//new Cron("cron");
 		cron.startService();	
-				
+		
+		/*
 		cron.addScheduledEvent("0 6 * * 1,3,5","arduino","digitalWrite", 13, 1);
 		cron.addScheduledEvent("0 7 * * 1,3,5","arduino","digitalWrite", 12, 1);
 		cron.addScheduledEvent("0 8 * * 1,3,5","arduino","digitalWrite", 11, 1);
@@ -106,13 +121,15 @@ public class Cron extends Service {
 		cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 13, 0);
 		cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 12, 0);
 		cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 11, 0);
-
+		*/
+		cron.addTask("* * * * *","cron","test", 7);
+		
 		//cron.addScheduledEvent(EVERY_MINUTE, "log", "log");
 		// west wall | back | east wall
 		
 		cron.getTasks();
 		
-		Runtime.createAndStart("webgui", "WebGUI");
+		//Runtime.createAndStart("webgui", "WebGUI");
 		
 		// 1. doug - find location where checked in ----
 		// 2. take out security token from DL broker's response

@@ -11,8 +11,6 @@ import java.util.List;
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Encoder;
-import org.myrobotlab.framework.Index;
-import org.myrobotlab.framework.IndexNode;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -32,11 +30,12 @@ public class Incubator extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Incubator.class);
 
-	transient public XMPP xmpp;
-	transient public WebGUI webgui;
-	transient public Python python;
+	// transient public XMPP xmpp;
 
-	transient Index<Object> cache = new Index<Object>();
+	// transient public WebGUI webgui;
+	// transient public Python python;
+
+	// transient Index<Object> cache = new Index<Object>();
 
 	// TODO - take snapshot of threads - compare at
 	// any other times - find the diff of threads - generated errors
@@ -54,8 +53,8 @@ public class Incubator extends Service {
 		// "shared python instance");
 
 		peers.put("xmpp", "XMPP", "XMPP service");
-		peers.put("webgui", "WebGUI", "WebGUI service");
-		peers.put("python", "Python", "Python service");
+		// peers.put("webgui", "WebGUI", "WebGUI service");
+		// peers.put("python", "Python", "Python service");
 
 		return peers;
 	}
@@ -68,79 +67,72 @@ public class Incubator extends Service {
 	@Override
 	public void startService() {
 		super.startService();
+	}
 
-		xmpp = (XMPP) startPeer("xmpp");
-		python = (Python) startPeer("python");
-		webgui = (WebGUI) createPeer("webgui");
-		webgui.port = 4321;
-		webgui.startService();
+	public static Status install(String fullType) {
+		try {
 
-		xmpp.startService();
-		webgui.startService();
+			// install everything...
+			Repo repo = new Repo("test");
 
-		xmpp.login("incubator@myrobotlab.org", "hatchMe!");
+			if (!repo.isServiceTypeInstalled(fullType)) {
+				ArrayList<ResolveReport> reports = repo.retrieveServiceType(fullType);
 
-		xmpp.addAuditor("Greg Perry");
-		python.startService();
+				for (int j = 0; j < reports.size(); ++j) {
+					ResolveReport report = reports.get(j);
+					List<?> errors = report.getAllProblemMessages();
+					if (errors.size() > 0) {
+						return Status.error("retrieving %s returned errors %s", fullType, Arrays.toString(errors.toArray()));
+					}
+				}
+			}
+		} catch (Exception e) {
+			return Status.error(e);
+		}
+		return null;
 	}
 
 	// FIXME - do all types of serialization
 	// TODO - encode decode test JSON & XML
 	// final ArrayList<Status>
-	public ArrayList<Status> serializeTest() {
+	public Status serializeTest() {
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
-		ArrayList<Status> badServices = new ArrayList<Status>();
+		Status status = Status.info("serializeTest");
+
+		status.add(Status.info("will test %d services", serviceTypeNames.length));
+
+		int originalThrdCnt = Runtime.getThreads().length;
+		int runningDiffThrdTotal = 0;
 
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
-			
-			ServiceInterface s = null;
-			
-			ByteArrayOutputStream fos = null;
-			ObjectOutputStream out = null;
-			String fullType = serviceTypeNames[i];
-			
 
-			if ("org.myrobotlab.service.PickToLight".equals(fullType) || "org.myrobotlab.service.Incubator".equals(fullType) || "org.myrobotlab.service.Runtime".equals(fullType)  || "org.myrobotlab.service.Plantoid".equals(fullType)) {
+			ServiceInterface s = null;
+			String fullType = serviceTypeNames[i];
+
+			int preStartThrdCnt = Runtime.getThreads().length;
+
+			if ("org.myrobotlab.service.Incubator".equals(fullType) || "org.myrobotlab.service.Runtime".equals(fullType)) {
 				continue;
 			}
 
+			fullType = "org.myrobotlab.service.WebGUI";
 
 			try {
 
-				Repo repo = new Repo("test");
+				// install it
+				status.add(install(fullType));
 
-				if (!repo.isServiceTypeInstalled(fullType)) {
-					ArrayList<ResolveReport> reports = repo.retrieveServiceType(fullType);
-
-					for (int j = 0; j < reports.size(); ++j) {
-						ResolveReport report = reports.get(j);
-						List<?> errors = report.getAllProblemMessages();
-						if (errors.size() > 0) {
-							log.error("ERROR");
-							badServices.add(Status.error("retrieving %s returned errors %s", fullType, Arrays.toString(errors.toArray())));
-						}
-					}
-					/*
-					 * badServices.add(new Error(simpleType, "notInstalled"));
-					 * continue;
-					 */
-				}
-				
+				// create it
 				log.info("creating {}", fullType);
 				s = Runtime.create(fullType, fullType);
 
-				// if (!Runtime.isHeadless() || (Runtime.isHeadless() &&
-				// !s.hasDisplay())) {
+				// start it
 				log.info("starting {}", fullType);
 				s.startService();
-				// } else {
-				// log.warn(String.format("won't start %s - do not have a display",
-				// fullType));
-				// }
 
 			} catch (Exception e) {
-				badServices.add(Status.error("%s - %s", fullType, e.getMessage()));
+				status.add(Status.error("%s - %s", fullType, e.getMessage()));
 				continue;
 			}
 
@@ -149,6 +141,8 @@ public class Incubator extends Service {
 				log.info("serializing {}", fullType);
 
 				// TODO put in encoder
+				ByteArrayOutputStream fos = null;
+				ObjectOutputStream out = null;
 				fos = new ByteArrayOutputStream();
 				out = new ObjectOutputStream(fos);
 				out.writeObject(s);
@@ -157,33 +151,163 @@ public class Incubator extends Service {
 
 				log.info("releasing {}", fullType);
 
+				// int startedThreadCount = Runtime.getThreads().length;
+
 				if (s.hasPeers()) {
 					s.releasePeers();
 				}
 
 				s.releaseService();
 
-				log.warn("released {}", fullType);
+				sleep(300);
+
+				int addThreads = Runtime.getThreads().length - preStartThrdCnt;
+				if (addThreads > 0) {
+					runningDiffThrdTotal += addThreads;
+					status.addError("%s has added %d new threads", fullType, addThreads);
+				}
+
+				log.info("released {}", fullType);
 
 			} catch (Exception e) {
-				badServices.add(Status.error("serializing %s threw %s", fullType, e.getMessage()));
+				status.add(Status.error("serializing %s threw %s %s", fullType, e.getMessage(), Logging.stackToString(e)));
 			}
+		} // end of loop
+
+		int finishedTrdCnt = Runtime.getThreads().length;
+
+		if (originalThrdCnt != finishedTrdCnt) {
+			status.add(Status.info("serializeTest excess threads %d running total %d", finishedTrdCnt - originalThrdCnt, runningDiffThrdTotal));
 		}
 
- 		return badServices;
+		return status;
 	}
 
-	public IndexNode<Object> get(String robotName) {
-		return cache.getNode(robotName);
-	}
+	/*
+	 * public IndexNode<Object> get(String robotName) { return
+	 * cache.getNode(robotName); }
+	 */
 
 	@Override
 	public String getDescription() {
 		return "used as a general template";
 	}
 
+	public Status subTest() {
+
+		HashSet<String> keepMeRunning = new HashSet<String>();
+		List<ServiceInterface> list = Runtime.getServices();
+		for (int j = 0; j < list.size(); ++j) {
+			ServiceInterface si = list.get(j);
+			keepMeRunning.add(si.getName());
+		}
+
+		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
+		Status status = Status.info("subTest");
+
+		status.add(Status.info("will test %d services", serviceTypeNames.length));
+
+		for (int i = 0; i < serviceTypeNames.length; ++i) {
+			String fullName = serviceTypeNames[i];
+			String shortName = fullName.substring(fullName.lastIndexOf(".") + 1);
+
+			ServiceInterface si = Runtime.start(shortName, shortName);
+
+			try {
+				status.add(si.test());
+			} catch (Exception e) {
+				status.addError(e);
+			}
+
+			// clean services
+			Runtime.releaseAllServicesExcept(keepMeRunning);
+		}
+
+		return status;
+
+	}
+
+	public Status pythonTest() {
+		Python python = (Python) Runtime.start("python", "Python");
+		Serial uart99 = (Serial) Runtime.start("uart99", "Serial");
+		// take inventory of currently running services
+		HashSet<String> keepMeRunning = new HashSet<String>();
+
+		Serial.createNullModemCable("UART99", "COM12");
+
+		List<ServiceInterface> list = Runtime.getServices();
+		for (int j = 0; j < list.size(); ++j) {
+			ServiceInterface si = list.get(j);
+			keepMeRunning.add(si.getName());
+		}
+
+		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
+		Status status = Status.info("subTest");
+
+		status.add(Status.info("will test %d services", serviceTypeNames.length));
+
+		for (int i = 0; i < serviceTypeNames.length; ++i) {
+			String fullName = serviceTypeNames[i];
+			String shortName = fullName.substring(fullName.lastIndexOf(".") + 1);
+
+			String py = FileIO.resourceToString(String.format("Python/examples/%s.py", shortName));
+
+			if (py == null || py.length() == 0) {
+				status.addError("%s.py does not exist", shortName);
+			} else {
+				uart99.connect("UART99");
+				uart99.record(String.format("%s.rx", shortName)); // FIXME
+																	// FILENAME
+																	// OVERLOAD
+				python.exec(py);
+				uart99.stopRecording();
+				// check rx file against saved data
+			}
+
+			// get python errors !
+
+			// clean services
+			Runtime.releaseAllServicesExcept(keepMeRunning);
+		}
+
+		return null;
+
+	}
+
 	public void testPythonScripts() {
 		try {
+
+			Python python = (Python) Runtime.start("python", "Python");
+			// String script;
+			ArrayList<File> list = FileIO.listInternalContents("/resource/Python/examples");
+
+			Runtime.createAndStart("gui", "GUIService");
+			python = (Python) startPeer("python");
+			InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
+
+			HashSet<String> keepMeRunning = new HashSet<String>(Arrays.asList("i01", "gui", "runtime", "python", getName()));
+
+			for (int i = 0; i < list.size(); ++i) {
+				String r = list.get(i).getName();
+				if (r.startsWith("InMoov2")) {
+					warn("testing script %s", r);
+					String script = FileIO.resourceToString(String.format("Python/examples/%s", r));
+					python.exec(script);
+					log.info("here");
+					i01.detach();
+					Runtime.releaseAllServicesExcept(keepMeRunning);
+				}
+			}
+
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+	}
+
+	public void testInMoovPythonScripts() {
+		try {
+
+			Python python = (Python) Runtime.start("python", "Python");
 			// String script;
 			ArrayList<File> list = FileIO.listInternalContents("/resource/Python/examples");
 
@@ -229,8 +353,23 @@ public class Incubator extends Service {
 		subscribe(sw.getName(), "publishError", "handleError");
 	}
 
-	public void handleError(String msg) {
-		log.error(msg);
+	public void handleError(Status status) {
+		// FIXME - remove - only add xmp if HandleError requires an error alert
+		XMPP xmpp = (XMPP) startPeer("xmpp");
+		// python = (Python) startPeer("python");
+		/*
+		 * webgui = (WebGUI) createPeer("webgui"); webgui.port = 4321;
+		 * webgui.startService();
+		 */
+		xmpp.startService();
+		// webgui.startService();
+
+		xmpp.login("incubator@myrobotlab.org", "hatchMe!");
+
+		xmpp.addAuditor("Greg Perry");
+		// python.startService();
+		xmpp.sendMessage(Encoder.gson.toJson(status), "Greg Perry");
+		// xmpp.releaseService();
 		// TODO email
 	}
 
@@ -261,25 +400,23 @@ public class Incubator extends Service {
 		}
 	}
 
-	public void test() {
-		ArrayList<Status> stati = serializeTest();
-		xmpp.sendMessage(Encoder.gson.toJson(stati), "Greg Perry");
-	}
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 
-	// remove all - install single 1 - check for errors on start
+		status.add(subTest());
+		status.add(serializeTest());
 
-	// install all 3rd party libraries ???
+		if (status.hasError()) {
+			handleError(status);
+		}
 
-	public void handleError(Exception e) {
-		Logging.logException(e);
-		xmpp.sendMessage(String.format("%s -> %s", e.getMessage(), Logging.stackToString(e)), "Greg Perry");
+		return status;
 	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		LoggingFactory.getInstance().addAppender(Appender.FILE);
-		
 
 		Incubator incubator = (Incubator) Runtime.start("incubator", "Incubator");
 		incubator.test();

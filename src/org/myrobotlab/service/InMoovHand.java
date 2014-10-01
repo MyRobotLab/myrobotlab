@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -310,7 +311,8 @@ public class InMoovHand extends Service {
 		moveTo(130, 140, 180, 180, 180);
 	}
 
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		try {
 			if (arduino == null) {
 				// gson encoding prevents this
@@ -329,10 +331,11 @@ public class InMoovHand extends Service {
 			wrist.moveTo(wrist.getPos() + 2);
 
 		} catch (Exception e) {
-			error(e);
+			status.addError(e);
 		}
 
-		info("test completed");
+		status.addInfo("test completed");
+		return status;
 	}
 
 	public static void main(String[] args) {

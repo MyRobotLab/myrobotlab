@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -44,7 +45,8 @@ public class ChessGameManager extends Service {
 	}
 	
 
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 
 		ComputerPlayer white = new ComputerPlayer();
 		Game game2 = new Game(white, new ComputerPlayer());
@@ -64,6 +66,8 @@ public class ChessGameManager extends Service {
 		res = game.processString("undo");
 		res = game.processString("redo");
 		res = game.processString("new");
+		
+		return status;
 	}
 
 	public static void main(String[] args) {

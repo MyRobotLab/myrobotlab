@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -293,7 +294,8 @@ public class Stepper extends Service implements StepperControl {
 		}
 	}
 
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		// FIXME - there has to be a properties method to configure localized
 		// testing
 		boolean useGUI = true;
@@ -333,7 +335,7 @@ public class Stepper extends Service implements StepperControl {
 		stepper.move(-1);
 		log.info("here");
 		stepper.move(-300);
-		log.info("here");
+		return status;
 	}
 	
 	// Uber good - .. although this is "chained" versus star routing
