@@ -1,5 +1,7 @@
 package org.myrobotlab.openni;
 
+import java.io.Serializable;
+
 
 
 /* -*- mode: java; c-basic-offset: 2; indent-tabs-mode: nil -*- */
@@ -41,7 +43,9 @@ package org.myrobotlab.openni;
  * Initially based on the Vector3D class by <a
  * href="http://www.shiffman.net">Dan Shiffman</a>.
  */
-public class PVector {
+public class PVector implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	/** The x component of the vector. */
 	public float x;

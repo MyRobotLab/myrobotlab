@@ -3,6 +3,11 @@ package org.myrobotlab.framework;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.ArrayList;
+
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.InMoovHand;
+import org.slf4j.Logger;
 
 /**
  *  WARNING - this class used to extend Exception - but the gson serializer would stack overflow
@@ -11,6 +16,7 @@ import java.io.StringWriter;
 public class Status implements Serializable {// extends Exception {
 
 	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(Status.class);
 
 	public final static String DEBUG = "debug";
 	public final static String INFO = "info";
@@ -21,6 +27,18 @@ public class Status implements Serializable {// extends Exception {
 	public String level;
 	public String key;
 	public String detail;
+	
+	/**
+	 * list of sub status
+	 */
+	
+	private ArrayList<Status> statuses = new ArrayList<Status>();
+
+	// FIXME - do others
+	private boolean hasError = false;
+
+	// FIXME - do others
+	private boolean allowDebug = true;
 
 	public Status(String name, String level, String key, String detail) {
 		this.name = name;
@@ -54,6 +72,10 @@ public class Status implements Serializable {// extends Exception {
 		}
 		this.key = e.getMessage();
 		
+	}
+	
+	public void allowDebug(boolean b){
+		allowDebug  = b;
 	}
 
 	public boolean isDebug() {
@@ -96,6 +118,69 @@ public class Status implements Serializable {// extends Exception {
 		s.level = INFO;
 		return s;
 	}
+
+	public static Status debug(String format, Object... args) {
+		Status status = new Status(String.format(format, args));
+		status.level = DEBUG;
+		return status;
+	}
+	
+	public static Status info(String format, Object... args) {
+		Status status = new Status(String.format(format, args));
+		status.level = INFO;
+		return status;
+	}
+
+	public static Status error(String format, Object... args) {
+		Status status = new Status(String.format(format, args));
+		status.level = ERROR;
+		status.hasError  = true;
+		return status;
+	}
+
+	public Status addDebug(String format, Object... args){
+		Status status = debug(format, args);
+		add(status);
+		return status;
+	}
+	
+	public Status addInfo(String format, Object... args){
+		Status status = info(format, args);
+		add(status);
+		return status;
+	}
+	
+	public Status addError(String format, Object... args){
+		Status status = error(format, args);
+		add(status);
+		return status;
+	}
+	
+	public final static String stackToString(final Throwable e) {
+		StringWriter sw;
+		try {
+			sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+		} catch (Exception e2) {
+			return "bad stackToString";
+		}
+		return "------\r\n" + sw.toString() + "------\r\n";
+	}
+	
+	public Status addError(Exception e){
+		Status status = error("%s %s", e.getMessage(), stackToString(e));
+		add(status);
+		return status;
+	}
+	
+	public boolean hasError(){
+		boolean b = false;
+		for (int i = 0; i < statuses.size(); ++i){
+			b |= statuses.get(i).hasError();
+		}
+		return b;
+	}
 	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
@@ -115,18 +200,55 @@ public class Status implements Serializable {// extends Exception {
 			sb.append(detail);
 		}
 		
+		sb.append(" ");
+		
+		for (int i = 0; i < statuses.size(); ++i){
+			sb.append(statuses.get(i).toString());
+		}
+		
 		return sb.toString();
 	}
-
-	public static Status info(String format, Object... args) {
-		Status status = new Status(String.format(format, args));
-		status.level = INFO;
-		return status;
+	
+	public ArrayList<Status> flatten(){		
+		ArrayList<Status> ret = new ArrayList<Status>();
+		
+		for (int i = 0; i < statuses.size(); ++i){
+			Status status = statuses.get(i);
+			ArrayList<Status> s = status.flatten();
+			for (int j = 0; j < s.size(); ++j){
+				ret.add(s.get(j));
+			}
+		}
+		return ret;
 	}
 
-	public static Status error(String format, Object... args) {
-		Status status = new Status(String.format(format, args));
-		status.level = ERROR;
-		return status;
+	public void add(Status status) {
+		if (status != null){
+			if (status.isDebug() && !allowDebug){
+				return;
+			}
+			// if logging enabled
+			switch(status.level){
+			case DEBUG:{
+			}
+			
+			case INFO:{
+			}
+			
+			case WARN:{
+			}
+			
+			case ERROR:{
+			}
+			
+			default:{
+				log.error("unkown status level {}", status);
+			}
+			
+			}
+			}
+			
+			statuses.add(status);
+		}
 	}
-}
+

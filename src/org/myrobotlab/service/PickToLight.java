@@ -527,6 +527,10 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
 		raspi.startService();
 		webgui.startService();
+		
+	}
+	
+	public void start(){
 		createModules();
 
 		systemCheck();

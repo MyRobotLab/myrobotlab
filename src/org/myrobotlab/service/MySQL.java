@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -56,7 +57,8 @@ public class MySQL extends Service {
 		return resultSet;
 	}
 	
-	public void test() throws ClassNotFoundException, SQLException {
+	public Status test() throws ClassNotFoundException, SQLException {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		MySQL mysql = (MySQL) Runtime.start(getName(), "MySQL");
 		mysql.connect("jdbc:mysql://localhost/mydatabase?" + "user=root&password=");
 		
@@ -71,6 +73,8 @@ public class MySQL extends Service {
 		if (user == null){
 			user = ip;
 		}
+		
+		return status;
 	}
 
 	public static void main(String[] args) {

@@ -58,8 +58,8 @@ public class Sprinkler extends Service {
 		// for the funky stinky nature of the relay board
 		cron = (Cron)startPeer("cron");
 		// FIXME - start schedule
-		cron.addScheduledEvent("0 7 */3 * *", this.getName(), "onTimeToWater");
-		cron.addScheduledEvent("30 7 */3 * *", this.getName(), "stop");
+		cron.addTask("0 7 */3 * *", this.getName(), "onTimeToWater");
+		cron.addTask("30 7 */3 * *", this.getName(), "stop");
 		
 		webgui = (WebGUI)startPeer("webgui");
 		

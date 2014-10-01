@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -132,7 +133,8 @@ public class UltrasonicSensor extends Service {
 
 	// TODO - Virtual Serial test - do a record of tx & rx on a real sensor
 	// then send the data - IT MUST BE INTERLEAVED
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		// FIXME - there has to be a properties method to configure localized
 		// testing
 		boolean useGUI = true;
@@ -201,6 +203,8 @@ public class UltrasonicSensor extends Service {
 		sr04.startRanging();
 
 		sr04.stopRanging();
+		
+		return status;
 
 	}
 

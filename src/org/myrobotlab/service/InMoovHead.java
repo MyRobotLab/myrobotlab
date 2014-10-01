@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -227,7 +228,8 @@ public class InMoovHead extends Service {
 		return true;
 	}
 	
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		try {
 			
 			if (arduino == null) {
@@ -245,10 +247,11 @@ public class InMoovHead extends Service {
 			jaw.moveTo(jaw.getPos() + 2);
 			
 		} catch (Exception e) {
-			error(e);
+			status.addError(e);
 		}
 
-		info("test completed");
+		status.addInfo("test completed");
+		return status;
 	}
 
 	public void setLimits(int headXMin, int headXMax, int headYMin, int headYMax, int eyeXMin, int eyeXMax, int eyeYMin, int eyeYMax, int jawMin, int jawMax) {

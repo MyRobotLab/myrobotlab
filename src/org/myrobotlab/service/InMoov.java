@@ -81,6 +81,12 @@ public class InMoov extends Service {
 	transient public OpenNI openni;
 
 	transient public PID pid;
+	
+
+	boolean copyGesture = false;
+	boolean firstSkeleton = true;
+	boolean saveSkeletonFrame = false;
+
 
 	// reflective or non-interactive peers
 	// transient public WebGUI webgui;
@@ -244,16 +250,13 @@ public class InMoov extends Service {
 			
 			//openni.skeleton.leftShoulder
 
-			openni.addListener("publish", this.getName(), "getSkeleton");
+			//openni.addListener("publishOpenNIData", this.getName(), "getSkeleton");
+			openni.addOpenNIData(this);
 		}
 		return openni;
 	}
 
-	boolean copyGesture = false;
-	boolean firstSkeleton = true;
-	boolean saveSkeletonFrame = false;
-
-	public void getSkeleton(OpenNIData data) {
+	public void onOpenNIData(OpenNIData data) {
 		
 		Skeleton skeleton = data.skeleton;
 
@@ -282,6 +285,7 @@ public class InMoov extends Service {
 	}
 
 	public boolean copyGesture(boolean b) {
+		log.info("copyGesture {}", b);
 		if (b) {
 			if (openni == null) {
 				openni = startOpenNI();
@@ -1294,7 +1298,8 @@ public class InMoov extends Service {
 		return true;
 	}
 	
-	public void test(){
+	public Status test(){
+		Status status = Status.info("starting InMoov test");
 		String rightPort = "COM8";
 		String leftPort = "COM7";
 		String rightUART = "UART51";
@@ -1305,8 +1310,8 @@ public class InMoov extends Service {
 		
 		Serial luart = (Serial)Runtime.start(leftUART, "Serial");
 		Serial ruart = (Serial)Runtime.start(rightUART, "Serial");
-		luart.logRX(true);
-		ruart.logRX(true);
+		luart.record();
+		ruart.record();
 		
 		luart.connect(leftUART);
 		ruart.connect(rightUART);
@@ -1331,6 +1336,8 @@ public class InMoov extends Service {
 		
 		Runtime.releaseAll();
 		
+		return status;
+		
 	}
 	
 
@@ -1338,8 +1345,12 @@ public class InMoov extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		
+		Runtime.start("gui", "GUIService");
+		
 		InMoov i01 = (InMoov)Runtime.start("i01","InMoov");
-		i01.test();
+		i01.copyGesture(true);
+		
+		//i01.test();
 		
 		/*
 

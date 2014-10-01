@@ -318,13 +318,6 @@ public class Plantoid extends Service {
 		}
 	}
 	
-	@Override
-	public void stopService() {
-		super.stopService();
-		// nice !
-		Runtime.releaseAll();
-	}
-
 	public void initTelemetryPayload()
 	{
 		p.put("soildMoistureCurrent", 0);

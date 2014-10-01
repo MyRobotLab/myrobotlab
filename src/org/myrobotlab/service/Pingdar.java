@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -166,7 +167,8 @@ public class Pingdar extends Service {
 		return "used as a ultra sonic radar";
 	}
 	
-	public void test(){
+	public Status test(){
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		Pingdar pingdar = (Pingdar)Runtime.start(getName(), "Pingdar");
 		pingdar.attach("COM15", 7, 8, 4);
 		
@@ -183,6 +185,7 @@ public class Pingdar extends Service {
 		//pingdar.sensor.startRanging();
 		//pingdar.sensor.stopRanging();
 		pingdar.stop();
+		return status;
 	}
 	
 	public Point publishPingdar(Point point){

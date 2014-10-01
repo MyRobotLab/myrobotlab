@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -638,7 +639,8 @@ public class Roomba extends Service implements SerialDeviceService {
 		return roombacomm.bump();
 	}
 
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		try {
 			// must pause after every playNote to let to note sound
 			System.out.println("Playing some notes");
@@ -674,11 +676,11 @@ public class Roomba extends Service implements SerialDeviceService {
 			roombacomm.spinRightAt(15);
 			roombacomm.pause(1000);
 		} catch (Exception e) {
-			error(e);
-			return;
+			status.addError(e);
 		}
 
-		info("test completed");
+		status.addInfo("test completed");
+		return status;
 	}
 
 	public void purr() {

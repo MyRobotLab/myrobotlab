@@ -164,6 +164,7 @@ public class RemoteAdapter extends Service implements Communicator {
 		DatagramSocket socket = null;
 		RemoteAdapter myService = null;
 		int listeningPort;
+		boolean isRunning = false;
 
 		public UDPListener(int listeningPort, RemoteAdapter s) {
 			super(String.format("%s.usp.%d", s.getName(), listeningPort));
@@ -172,6 +173,7 @@ public class RemoteAdapter extends Service implements Communicator {
 		}
 
 		public void shutdown() {
+			isRunning = false;
 			if ((socket != null) && (!socket.isClosed())) {
 				socket.close();
 			}
@@ -181,7 +183,7 @@ public class RemoteAdapter extends Service implements Communicator {
 		// logic which handles the "Messaging" should be common to both
 		// tcp & udp & xmpp
 		public void run() {
-
+			isRunning = true;
 			try {
 				socket = new DatagramSocket(listeningPort);
 				log.info(String.format("%s listening on udp %s:%d", getName(), socket.getLocalAddress(), socket.getLocalPort()));
@@ -191,7 +193,7 @@ public class RemoteAdapter extends Service implements Communicator {
 				ByteArrayInputStream b_in = new ByteArrayInputStream(b);
 				DatagramPacket dgram = new DatagramPacket(b, b.length);
 
-				while (isRunning()) {
+				while (isRunning) {
 					socket.receive(dgram); // receives all datagrams
 					// FIXME - do we need o re-create???
 					ObjectInputStream o_in = new ObjectInputStream(b_in);
@@ -318,7 +320,6 @@ public class RemoteAdapter extends Service implements Communicator {
 		udpPort = port;
 		udpListener = new UDPListener(udpPort, this);
 		udpListener.start();
-
 	}
 
 	public void startTCP(int port) {
@@ -462,9 +463,10 @@ public class RemoteAdapter extends Service implements Communicator {
 
 			int i = 1;
 			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
-			RemoteAdapter remote = (RemoteAdapter) Runtime.createAndStart(String.format("remote%d", i), "RemoteAdapter");
+			RemoteAdapter remote = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
 			Runtime.createAndStart(String.format("clock%d", i), "Clock");
 			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
+			remote.stopService();
 
 			// FIXME - sholdn't this be sendRemote ??? or at least
 			// in an interface

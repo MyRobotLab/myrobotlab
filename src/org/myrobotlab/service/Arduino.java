@@ -57,6 +57,7 @@ import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.ToolTip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -2128,29 +2129,46 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	
 	// --- stepper end ---
 
-	public void test() throws Exception {
+	public Status test() {
+
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 
 		// get running reference to self
 		Arduino arduino = (Arduino)Runtime.start(getName(),"Arduino");
 		
-		boolean useGUI = true;	
+		boolean useGUI = false;	
 		if (useGUI){
 			Runtime.createAndStart("gui", "GUIService");
 		}
 		
-		String port = "COM51";
+		// create virtual null modem cable
+		String port = "COM99";
+		String uartPort = "UART99";
 		
-		Serial.createNullModemCable(port, "UART51");
-
+		Serial.createNullModemCable(port, uartPort);
+		Serial uart = (Serial)Runtime.start(uartPort, "Serial");
+		uart.record(String.format("%s.rx", uartPort));
+		
+		// set board type
+		// FIXME - this should be done by MRLComm.ino (compiled in)
+		status.addInfo("setting board type to %s", BOARD_TYPE_ATMEGA2560);
+		setBoard(BOARD_TYPE_ATMEGA2560);
+	
 		if (!arduino.connect(port)) {
-			throw new MRLError("could not connect to port %s", port);
+			status.addError("could not conntect %s on %s", getName(), port);
 		}
+		
+		ArrayList<Pin> pinList = getPinList();
+		status.addInfo("found %d pins", pinList.size());
+		
+		for (int i = 0; i < pinList.size(); ++i){
+			
+		}
+		
 
-		for (int i = 0; i < 1000; ++i) {
-
+		for (int i = 0; i < 10; ++i) {
 			long duration = arduino.pulseIn(7, 8);
 			log.info("duration {} uS", duration);
-			// sleep(100);
 		}
 
 		UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start("sr04", "UltrasonicSensor");
@@ -2168,6 +2186,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		// getDigitalPins
 
 		// getAnalogPins
+		
+		return status;
 
 	}
 	
@@ -2228,8 +2248,12 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			arduino.test();
+			
+			/*
 			Python python = (Python) Runtime.start("python", "Python");
 			Runtime.start("gui", "GUIService");
+			*/
 			//arduino.addCustomMsgListener(python);
 			//arduino.customEventListener = python;
 			//arduino.connect("COM15");

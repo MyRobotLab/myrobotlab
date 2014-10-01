@@ -67,6 +67,10 @@ public class Cortex extends Service implements MemoryChangeListener {
 		return "used as a general template";
 	}
 
+	public void stopService(){
+		super.stopService();
+		faceDetector.stopCapture();
+	}
 		
 	public void startService()
 	{

@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -187,7 +188,8 @@ public class InMoovTorso extends Service {
 
 	}
 
-	public void test() {
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		try {
 			if (arduino == null) {
 				throw new Exception("arduino is null");
@@ -206,11 +208,11 @@ public class InMoovTorso extends Service {
 			log.info(move);
 		
 		} catch (Exception e) {
-			error(e);
-			return;
+			status.addError(e);
 		}
 
-		info("test completed");
+		status.addInfo("test completed");
+		return status;
 	}
 
 	public long getLastActivityTime() {

@@ -95,8 +95,8 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		this.port = port;
 		return port;
 	}
-	
-	public void restart(){
+
+	public void restart() {
 		stop();
 		startWebSocketServer(port);
 	}
@@ -187,12 +187,8 @@ public class WebGUI extends Service implements AuthorizationProvider {
 
 	@Override
 	public void stopService() {
-		try {
-			super.stopService();
-			stop();
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
+		super.stopService();
+		stop();
 	}
 
 	/**

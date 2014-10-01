@@ -299,6 +299,8 @@ public class XMPP extends Service implements Communicator, MessageListener {
 				chat = chatManager.createChat(jabberID, this);
 				chats.put(jabberID, chat);
 			}
+			
+			log.info("chat threadid {} hashcode {}", chat.getThreadID(), chat.hashCode());
 
 			if (text == null) {
 				text = "null"; // dangerous converson?

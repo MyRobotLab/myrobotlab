@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Status;
 public interface ServiceInterface {
 	
 	// FIXME !!!! - refactor - split into 2 interfaces ServiceInterface - service related methods & Messaging
@@ -18,8 +19,8 @@ public interface ServiceInterface {
 	// can't be statics :( 
 	// but is good enough - probably a good idea to keep in mind
 	// is the ability to do "non destructive" tests on a "live" Service at any time
-	public void test(Object... data) throws Exception;
-	public void test() throws Exception;
+	public Status test(Object... data) throws Exception;
+	public Status test() throws Exception;
 	
 	public URI getHost();
 		

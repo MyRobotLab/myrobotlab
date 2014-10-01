@@ -109,10 +109,7 @@ public class CloudConnector extends Service {
 		return false;
 	}
 
-	public void test() {
-
-	}
-
+	
 	public String setRobotId(String robotId) {
 		this.robotId = robotId;
 		save();

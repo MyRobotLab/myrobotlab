@@ -180,7 +180,9 @@ public class Python extends Service {
 				error = error.replace("\r", "");
 				error = error.replace("<", "");
 				error = error.replace(">", "");
-				interp.exec(String.format("print '%s'", error));
+				if (interp != null){
+					interp.exec(String.format("print '%s'", error));
+				}
 				Logging.logException(e);
 				error("Python error");
 			} finally {

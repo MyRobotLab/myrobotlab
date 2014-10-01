@@ -9,6 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -36,7 +37,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	static public final String FORMAT_ASCII = "ascii";
 	String format = FORMAT_DECIMAL;
 	String delimeter = " ";
-	
+
 	int BUFFER_SIZE = 8192;
 	int[] buffer = new int[BUFFER_SIZE];
 	transient BlockingQueue<Integer> blockingData = new LinkedBlockingQueue<Integer>();
@@ -55,10 +56,10 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	// utility methods - ascii
 
 	// ====== file io begin ======
-	boolean logRX = false;
+	boolean isRXRecording = false;
 	transient FileWriter fileWriterRX = null;
 	transient BufferedWriter bufferedWriterRX = null;
-	
+
 	// ====== file io end ======
 
 	ArrayList<SerialDataListener> listeners = new ArrayList<SerialDataListener>();
@@ -104,7 +105,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 		return retVal;
 	}
-	
+
 	public static long byteToLong(int[] bytes, int offset, int length) {
 
 		long retVal = 0;
@@ -119,34 +120,44 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return retVal;
 	}
 
-	public boolean record() {
-		return logRX(true);
-	}
-
-	public boolean stopRecording() {
-		return logRX(false);
-	}
-
-	public boolean logRX(boolean b) {
+	public boolean record(String filename) {
 		try {
-			logRX = b;
-			if (logRX) {
-				if (fileWriterRX == null) {
-					fileWriterRX = new FileWriter(String.format("rx.%s.data", getName(), System.currentTimeMillis()));
-					bufferedWriterRX = new BufferedWriter(fileWriterRX);
-				}
-			} else {
-				if (fileWriterRX != null) {
-					bufferedWriterRX.close();
-					fileWriterRX.close();
-				}
+
+			if (filename == null) {
+				filename = String.format("rx.%s.data", getName(), System.currentTimeMillis());
 			}
 
-			return b;
+			if (fileWriterRX == null) {
+				fileWriterRX = new FileWriter(filename);
+				bufferedWriterRX = new BufferedWriter(fileWriterRX);
+			}
+
+			isRXRecording = true;
+			return true;
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
 		return false;
+	}
+
+	public boolean record() {
+		return record(null);
+	}
+
+	public boolean stopRecording() {
+		try {
+			isRXRecording = true;
+			if (fileWriterRX != null) {
+				bufferedWriterRX.close();
+				fileWriterRX.close();
+			}
+
+			return true;
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+		return false;
+
 	}
 
 	// @Override
@@ -199,21 +210,16 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 					// display / debug option ? - mrl message format ?
 					// display.append(String.format("%02x ", newByte));
-					
+
 					display.append(String.format("%03d%s", newByte, delimeter));
-					
+
 					// send data to listeners
 					for (int i = 0; i < listeners.size(); ++i) {
 						listeners.get(i).onByte(newByte);
 					}
 
-					if (logRX) {
-						// FIXME - why use this encoding stream thingy?
-						// what about just a buffered FileOutputStream ??
-						// fileWriterRX.write(newByte);
-						
+					if (isRXRecording) {
 						bufferedWriterRX.write(display.toString());
-						
 					}
 
 					if (blocking) {
@@ -229,7 +235,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 					if (publish) {
 						invoke("publishByte", newByte);
 					}
-					
+
 					display.setLength(0);
 				}
 
@@ -497,7 +503,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	}
 
 	@Override
-	public void test() throws IOException {
+	public Status test() throws IOException {
 
 		// non destructive tests
 		// TODO - if I am connected to a different serial port
@@ -505,7 +511,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 		info("testing null modem with %s", getName());
 		Serial test = (Serial) Runtime.start(getName(), "Serial");
-		test.logRX(true);
+		test.record();
 
 		info("creating virtual null modem cable");
 		String UART = "UART";
@@ -575,6 +581,8 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		uart.write(new byte[] { 6, 6, 6, 6, 6, 6 });
 
 		write(new byte[] { 16 });
+		
+		return null;
 
 	}
 
@@ -599,7 +607,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 	public void stopService() {
 		super.stopService();
-		logRX(false);
+		stopRecording();
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
@@ -616,7 +624,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	}
 
 	public boolean isOpen() {
-		if (serialDevice != null && serialDevice.isOpen()){
+		if (serialDevice != null && serialDevice.isOpen()) {
 			return true;
 		}
 		return false;

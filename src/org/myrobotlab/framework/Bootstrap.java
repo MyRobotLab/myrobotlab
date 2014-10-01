@@ -233,6 +233,8 @@ public class Bootstrap {
 			outArgs.add("-service");
 			outArgs.add("gui");
 			outArgs.add("GUIService");
+			outArgs.add("python");
+			outArgs.add("Python");
 		}
 
 		// ProcessBuilder builder = new ProcessBuilder(path, "-Xmx1024m", "-cp",
