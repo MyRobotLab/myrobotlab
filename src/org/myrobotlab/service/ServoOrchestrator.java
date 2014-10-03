@@ -149,18 +149,14 @@ public class ServoOrchestrator extends Service {
 			servos[middleright_shownitem] = (Servo) Runtime.start("so."
 					+ middleright_shownitem, "Servo");
 			servos[middleright_shownitem].attach(arduino, pin);
-			boolean attach = servos[middleright_shownitem].attach();
-			if (attach) {
-				sogui_ref.middleright_attach_button.setText("Detach");
-				settingsitemholder[middleright_shownitem].attached = true;
-			}
+			servos[middleright_shownitem].attach();
+			sogui_ref.middleright_attach_button.setText("Detach");
+			settingsitemholder[middleright_shownitem].attached = true;
 		} else {
-			boolean detach = servos[middleright_shownitem].detach();
+			servos[middleright_shownitem].detach();
 			servos[middleright_shownitem] = null;
-			if (detach) {
-				sogui_ref.middleright_attach_button.setText("Attach");
-				settingsitemholder[middleright_shownitem].attached = false;
-			}
+			sogui_ref.middleright_attach_button.setText("Attach");
+			settingsitemholder[middleright_shownitem].attached = false;
 		}
 	}
 
