@@ -359,7 +359,7 @@ public class ServoOrchestrator extends Service {
 		if (click_play) {
 			play_playclick();
 		}
-		if (pos >= sizex) {
+		if (pos <= sizex) {
 			play_searchblocks(pos);
 		}
 	}
