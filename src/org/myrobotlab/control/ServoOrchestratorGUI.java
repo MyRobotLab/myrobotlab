@@ -409,6 +409,7 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		bottomright.setLayout(new BoxLayout(bottomright, BoxLayout.Y_AXIS));
 
 		bottomright_click_checkbox = new JCheckBox("CLICK");
+		bottomright_click_checkbox.setSelected(true);
 		bottomright_click_checkbox.addItemListener(this);
 		bottomright.add(bottomright_click_checkbox);
 
