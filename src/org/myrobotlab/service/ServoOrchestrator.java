@@ -136,7 +136,11 @@ public class ServoOrchestrator extends Service {
 				.parseInt(sogui_ref.middleright_startvalue_textfield.getText());
 		
 		sogui_ref.middlemiddle_ref.prep[middleright_shownitem].channel_name.setText(settingsitemholder[middleright_shownitem].name);
-		//TODO - what else should be set here?
+		if (settingsitemholder[middleright_shownitem].attached) {
+			int min = settingsitemholder[middleright_shownitem].min;
+			int max = settingsitemholder[middleright_shownitem].max;
+			servos[middleright_shownitem].setMinMax(min, max);
+		}
 	}
 
 	public void middleright_attach_button() {
@@ -149,8 +153,8 @@ public class ServoOrchestrator extends Service {
 					.getSelectedValue();
 			int pin = Integer.parseInt((String) sogui_ref.middleright_pin_list
 					.getSelectedValue());
-			int min = Integer.parseInt(sogui_ref.middleright_min_textfield.getText());
-			int max = Integer.parseInt(sogui_ref.middleright_max_textfield.getText());
+			int min = settingsitemholder[middleright_shownitem].min;
+			int max = settingsitemholder[middleright_shownitem].max;
 			servos[middleright_shownitem] = (Servo) Runtime.start("so."
 					+ middleright_shownitem, "Servo");
 			servos[middleright_shownitem].setMinMax(min, max);
