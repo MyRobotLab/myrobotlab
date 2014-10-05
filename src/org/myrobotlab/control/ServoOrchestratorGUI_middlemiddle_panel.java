@@ -36,7 +36,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 	JLabel timesection_id;
 
 	JPanel channel_panel;
-	JLabel channel_name;
+	public JLabel channel_name;
 	JButton channel_mute;
 	JLabel channel_id;
 	JButton channel_solo;

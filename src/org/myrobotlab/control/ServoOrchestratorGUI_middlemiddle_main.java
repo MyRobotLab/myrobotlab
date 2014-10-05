@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 public class ServoOrchestratorGUI_middlemiddle_main {
 
 	// References to the panels
-	private final ServoOrchestratorGUI_middlemiddle_panel[][] panels;
+	public final ServoOrchestratorGUI_middlemiddle_panel[][] panels;
 
 	// This is the panel that will hold everything.
 	private final ServoOrchestratorGUI_middlemiddle_rootpanel rootPanel;
@@ -62,10 +62,10 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		panels = new ServoOrchestratorGUI_middlemiddle_panel[so_ref.sizex][so_ref.sizey];
 
 		// "border"-panels
-		prep = new ServoOrchestratorGUI_middlemiddle_panel[getRandomDragAndDropPanels().length
-				+ getRandomDragAndDropPanels()[0].length];
+		prep = new ServoOrchestratorGUI_middlemiddle_panel[panels.length
+				+ panels[0].length];
 		for (int i = 0; i < prep.length; i++) {
-			if (i < getRandomDragAndDropPanels()[0].length) {
+			if (i < panels[0].length) {
 				final int fi = i;
 				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel("channel");
 				prep[i].channel_id.setText(prep[i].id + "");
@@ -83,11 +83,11 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 						"timesection");
 				prep[i].timesection_id.setText(prep[i].id + "");
 				prep[i].timesection_headline.setText("TIMEUNIT "
-						+ (i - getRandomDragAndDropPanels().length + 1));
+						+ (i - panels.length + 1));
 				prep[i].setBackground(Color.green);
 			}
 		}
-		prep[getRandomDragAndDropPanels()[0].length].setBackground(Color.red);
+		prep[panels[0].length].setBackground(Color.red);
 
 		// refresh the gui
 		relayout();
@@ -98,15 +98,15 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		// Add the new panel to the array (on the first free space)
 		// after that - relayout!
 		boolean found = false;
-		for (int i1 = 0; i1 < getRandomDragAndDropPanels().length; i1++) {
+		for (int i1 = 0; i1 < panels.length; i1++) {
 			if (found) {
 				break;
 			}
-			for (int i2 = 0; i2 < getRandomDragAndDropPanels()[i1].length; i2++) {
+			for (int i2 = 0; i2 < panels[i1].length; i2++) {
 				if (found) {
 					break;
 				}
-				if (getRandomDragAndDropPanels()[i1][i2] == null) {
+				if (panels[i1][i2] == null) {
 					ServoOrchestratorGUI_middlemiddle_panel p = new ServoOrchestratorGUI_middlemiddle_panel(
 							"servo");
 					p.servo_id.setText(p.id + "");
@@ -115,7 +115,7 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 					// TODO - make the channelid independent of the y-position
 					// (i2)
 					p.setBackground(Color.yellow);
-					getRandomDragAndDropPanels()[i1][i2] = p;
+					panels[i1][i2] = p;
 					found = true;
 				}
 			}
@@ -159,8 +159,8 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		rootPanel.removeAll();
 
 		// Add the panels, if any & the "border"-panels
-		for (int i1 = 0; i1 < getRandomDragAndDropPanels().length + 1; i1++) {
-			for (int i2 = 0; i2 < getRandomDragAndDropPanels()[0].length + 1; i2++) {
+		for (int i1 = 0; i1 < panels.length + 1; i1++) {
+			for (int i2 = 0; i2 < panels[0].length + 1; i2++) {
 				if (i1 == 0 || i2 == 0) {
 					if (i1 != 0 || i2 != 0) {
 						gbc.gridx = i1;
@@ -169,12 +169,12 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 						if (i1 == 0) {
 							num = i2 - 1;
 						} else {
-							num = getRandomDragAndDropPanels().length - 1 + i1;
+							num = panels.length - 1 + i1;
 						}
 						rootPanel.add(prep[num], gbc);
 					}
 				} else {
-					ServoOrchestratorGUI_middlemiddle_panel p = getRandomDragAndDropPanels()[i1 - 1][i2 - 1];
+					ServoOrchestratorGUI_middlemiddle_panel p = panels[i1 - 1][i2 - 1];
 					gbc.gridx = i1;
 					gbc.gridy = i2;
 					if (p != null) {
@@ -213,20 +213,5 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		}
 
 		return dragAndDropPanelDataFlavor;
-	}
-
-	/**
-	 * <p>
-	 * Returns the Array of user-added panels.
-	 * </p>
-	 * <p>
-	 * Note that for drag and drop, these will be cleared, and the panels will
-	 * be added back in the correct order!
-	 * </p>
-	 *
-	 * @return
-	 */
-	public ServoOrchestratorGUI_middlemiddle_panel[][] getRandomDragAndDropPanels() {
-		return panels;
 	}
 }
