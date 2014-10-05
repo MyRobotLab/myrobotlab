@@ -44,11 +44,11 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 
 	JPanel servo_panel;
 	JTextField servo_start;
-	JLabel servo_channelid;
+	public JLabel servo_channelid;
 	public JTextField servo_goal;
-	JLabel servo_min;
+	public JLabel servo_min;
 	JLabel servo_id;
-	JLabel servo_max;
+	public JLabel servo_max;
 	JButton servo_more;
 
 	// JPanel stepper_panel;
