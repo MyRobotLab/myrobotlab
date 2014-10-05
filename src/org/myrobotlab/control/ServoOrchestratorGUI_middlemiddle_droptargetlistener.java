@@ -130,9 +130,9 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 		int dpid = droppedPanel.id;
 
 		int sizemax = rootPanel.getDragAndDropPanelsDemo()
-				.getRandomDragAndDropPanels().length
+				.panels.length
 				+ rootPanel.getDragAndDropPanelsDemo()
-						.getRandomDragAndDropPanels()[0].length;
+						.panels[0].length;
 		if (dpid <= sizemax) {
 			return;
 		}
@@ -142,12 +142,12 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 
 		// searching for it's orign
 		for (int i1 = 0; i1 < rootPanel.getDragAndDropPanelsDemo()
-				.getRandomDragAndDropPanels().length; i1++) {
+				.panels.length; i1++) {
 			for (int i2 = 0; i2 < rootPanel.getDragAndDropPanelsDemo()
-					.getRandomDragAndDropPanels()[i1].length; i2++) {
+					.panels[i1].length; i2++) {
 				ServoOrchestratorGUI_middlemiddle_panel p = rootPanel
 						.getDragAndDropPanelsDemo()
-						.getRandomDragAndDropPanels()[i1][i2];
+						.panels[i1][i2];
 				if (p != null && dpid == p.id) {
 					f1 = i1;
 					f2 = i2;
@@ -157,18 +157,18 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 
 		if (posx == -1 && posy == -1) {
 			// Deleting position - delete
-			rootPanel.getDragAndDropPanelsDemo().getRandomDragAndDropPanels()[f1][f2] = null;
+			rootPanel.getDragAndDropPanelsDemo().panels[f1][f2] = null;
 		} else {
 			// Move the panel
 			ServoOrchestratorGUI_middlemiddle_panel pold = rootPanel
-					.getDragAndDropPanelsDemo().getRandomDragAndDropPanels()[posx][posy];
+					.getDragAndDropPanelsDemo().panels[posx][posy];
 
 			// TODO - change other attributes, too
 			// TODO - make the channelid independent of the y-position (posy)
 			droppedPanel.servo_channelid.setText("CH" + (posy + 1));
-			rootPanel.getDragAndDropPanelsDemo().getRandomDragAndDropPanels()[posx][posy] = droppedPanel;
+			rootPanel.getDragAndDropPanelsDemo().panels[posx][posy] = droppedPanel;
 
-			rootPanel.getDragAndDropPanelsDemo().getRandomDragAndDropPanels()[f1][f2] = pold;
+			rootPanel.getDragAndDropPanelsDemo().panels[f1][f2] = pold;
 		}
 
 		this.rootPanel.getDragAndDropPanelsDemo().relayout();

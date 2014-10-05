@@ -134,6 +134,7 @@ public class ServoOrchestrator extends Service {
 				.parseInt(sogui_ref.middleright_max_textfield.getText());
 		settingsitemholder[middleright_shownitem].startvalue = Integer
 				.parseInt(sogui_ref.middleright_startvalue_textfield.getText());
+		sogui_ref.middlemiddle_ref.prep[middleright_shownitem].channel_name.setText(settingsitemholder[middleright_shownitem].name);
 	}
 
 	public void middleright_attach_button() {
@@ -268,7 +269,7 @@ public class ServoOrchestrator extends Service {
 	}
 
 	public void play_go_fa() {
-		pos1 = sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length;
+		pos1 = sogui_ref.middlemiddle_ref.panels[0].length;
 		pos2 = 4;
 		pos3 = 999;
 		play_updatetime(true, true, true);
@@ -311,8 +312,8 @@ public class ServoOrchestrator extends Service {
 	}
 
 	public void play_checktime() {
-		if (pos1 > sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length) {
-			pos1 = sogui_ref.middlemiddle_ref.getRandomDragAndDropPanels()[0].length;
+		if (pos1 > sogui_ref.middlemiddle_ref.panels[0].length) {
+			pos1 = sogui_ref.middlemiddle_ref.panels[0].length;
 		} else if (pos1 < 1) {
 			pos1 = 1;
 		}
@@ -343,13 +344,13 @@ public class ServoOrchestrator extends Service {
 
 	public void play_updatepanels(int pos) {
 		for (int i = 0; i < sogui_ref.middlemiddle_ref
-				.getRandomDragAndDropPanels()[0].length; i++) {
+				.panels[0].length; i++) {
 			sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref
-					.getRandomDragAndDropPanels()[0].length + i]
+					.panels[0].length + i]
 					.setBackground(Color.green);
 		}
 		sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref
-				.getRandomDragAndDropPanels()[0].length + pos - 1]
+				.panels[0].length + pos - 1]
 				.setBackground(Color.red);
 		sogui_ref.middlemiddle_ref.relayout();
 	}
@@ -382,7 +383,7 @@ public class ServoOrchestrator extends Service {
 	public void play_searchblocks(int pos) {
 		for (int i = 0; i < sizey; i++) {
 			ServoOrchestratorGUI_middlemiddle_panel panels11 = sogui_ref.middlemiddle_ref
-					.getRandomDragAndDropPanels()[pos][i];
+					.panels[pos][i];
 			if (panels11 != null) {
 				play_playblock(i, panels11);
 			}
