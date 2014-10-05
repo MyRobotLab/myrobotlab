@@ -393,9 +393,8 @@ public class ServoOrchestrator extends Service {
 	public void play_playclick() {
 		try {
 			AudioInputStream audioInputStream = AudioSystem
-					.getAudioInputStream(new File(
-							"C:\\Users\\Marvin\\Desktop\\temp\\click.wav")
-							.getAbsoluteFile());
+					.getAudioInputStream(getClass().getResourceAsStream(
+							"/resource/ServoOrchestrator/click.wav"));
 			Clip clip = AudioSystem.getClip();
 			clip.open(audioInputStream);
 			clip.start();
