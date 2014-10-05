@@ -134,13 +134,25 @@ public class ServoOrchestrator extends Service {
 				.parseInt(sogui_ref.middleright_max_textfield.getText());
 		settingsitemholder[middleright_shownitem].startvalue = Integer
 				.parseInt(sogui_ref.middleright_startvalue_textfield.getText());
-		
-		sogui_ref.middlemiddle_ref.prep[middleright_shownitem].channel_name.setText(settingsitemholder[middleright_shownitem].name);
+
+		sogui_ref.middlemiddle_ref.prep[middleright_shownitem].channel_name
+				.setText(settingsitemholder[middleright_shownitem].name);
 		if (settingsitemholder[middleright_shownitem].attached) {
 			int min = settingsitemholder[middleright_shownitem].min;
 			int max = settingsitemholder[middleright_shownitem].max;
 			servos[middleright_shownitem].setMinMax(min, max);
 		}
+		for (int i = 0; i < sogui_ref.middlemiddle_ref.panels.length; i++) {
+			if (sogui_ref.middlemiddle_ref.panels[i][middleright_shownitem] != null) {
+				sogui_ref.middlemiddle_ref.panels[i][middleright_shownitem].servo_min
+						.setText(settingsitemholder[middleright_shownitem].min
+								+ "");
+				sogui_ref.middlemiddle_ref.panels[i][middleright_shownitem].servo_max
+						.setText(settingsitemholder[middleright_shownitem].max
+								+ "");
+			}
+		}
+		// TODO - change the "startvalue"
 	}
 
 	public void middleright_attach_button() {
@@ -253,6 +265,13 @@ public class ServoOrchestrator extends Service {
 		}
 	}
 
+	public void externalcall_servopanelchangeinfo(int x, int y) {
+		sogui_ref.middlemiddle_ref.panels[x][y].servo_min
+				.setText(settingsitemholder[y].min + "");
+		sogui_ref.middlemiddle_ref.panels[x][y].servo_max
+				.setText(settingsitemholder[y].max + "");
+	}
+
 	public void play_go_start() {
 		sogui_ref.bottommiddlerightbottom_button_6.setEnabled(true);
 		sogui_ref.bottommiddlerightbottom_button_7.setEnabled(false);
@@ -352,15 +371,12 @@ public class ServoOrchestrator extends Service {
 	}
 
 	public void play_updatepanels(int pos) {
-		for (int i = 0; i < sogui_ref.middlemiddle_ref
-				.panels[0].length; i++) {
-			sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref
-					.panels[0].length + i]
-					.setBackground(Color.green);
+		for (int i = 0; i < sogui_ref.middlemiddle_ref.panels[0].length; i++) {
+			sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref.panels[0].length
+					+ i].setBackground(Color.green);
 		}
-		sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref
-				.panels[0].length + pos - 1]
-				.setBackground(Color.red);
+		sogui_ref.middlemiddle_ref.prep[sogui_ref.middlemiddle_ref.panels[0].length
+				+ pos - 1].setBackground(Color.red);
 		sogui_ref.middlemiddle_ref.relayout();
 	}
 
@@ -391,8 +407,7 @@ public class ServoOrchestrator extends Service {
 
 	public void play_searchblocks(int pos) {
 		for (int i = 0; i < sizey; i++) {
-			ServoOrchestratorGUI_middlemiddle_panel panels11 = sogui_ref.middlemiddle_ref
-					.panels[pos][i];
+			ServoOrchestratorGUI_middlemiddle_panel panels11 = sogui_ref.middlemiddle_ref.panels[pos][i];
 			if (panels11 != null) {
 				play_playblock(i, panels11);
 			}
@@ -417,13 +432,13 @@ public class ServoOrchestrator extends Service {
 
 	public class SettingsItemHolder {
 
-		String name;
-		int min;
-		int max;
-		int startvalue;
-		int arduinopos;
-		int pinpos;
-		boolean attached;
+		public String name;
+		public int min;
+		public int max;
+		public int startvalue;
+		public int arduinopos;
+		public int pinpos;
+		public boolean attached;
 	}
 
 	public class ClockThread implements Runnable {

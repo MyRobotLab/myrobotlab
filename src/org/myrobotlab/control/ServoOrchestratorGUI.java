@@ -90,21 +90,24 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		middlemiddle_ref = new ServoOrchestratorGUI_middlemiddle_main(
 				ServoOrchestratorGUI.this);
 
+		JPanel top = new JPanel();
+
 		// --------------------------------------------------
-		JButton addPanelButton = new JButton("ADD");
-		addPanelButton.addActionListener(new ActionListener() {
+
+		// only for testing
+		// TODO - (re-)move
+
+		JButton top_addservo_button = new JButton("ADD Servo (-Movement)");
+		top_addservo_button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent ae) {
 				middlemiddle_ref.externalcall_addPanel();
 			}
 		});
 
-		// --------------------------------------------------
-		JPanel top = new JPanel();
+		top.add(top_addservo_button, BorderLayout.CENTER);
 
-		// only for testing
-		// TODO - (re-)move
-		top.add(addPanelButton, BorderLayout.CENTER);
+		// --------------------------------------------------
 
 		JPanel middlebottom = new JPanel();
 
@@ -536,5 +539,10 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 
 	public void externalcall_loadsettings(int pos) {
 		myService.send(boundServiceName, "externalcall_loadsettings", pos);
+	}
+
+	public void externalcall_servopanelchangeinfo(int x, int y) {
+		myService.send(boundServiceName, "externalcall_servopanelchangeinfo",
+				x, y);
 	}
 }

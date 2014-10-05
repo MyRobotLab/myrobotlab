@@ -32,6 +32,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 	// "main"-panel
 	private final JPanel middlemiddle;
 
+	// TODO - should try to remove this
+	public final ServoOrchestratorGUI so_ref;
+
 	/**
 	 * <p>
 	 * This represents the data that is transmitted in drag and drop.
@@ -48,7 +51,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 	private static DataFlavor dragAndDropPanelDataFlavor = null;
 
 	public ServoOrchestratorGUI_middlemiddle_main(
-			final ServoOrchestratorGUI so_ref) {
+			final ServoOrchestratorGUI so_reft) {
+
+		so_ref = so_reft;
 
 		middlemiddle = new JPanel();
 
@@ -110,13 +115,17 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 					ServoOrchestratorGUI_middlemiddle_panel p = new ServoOrchestratorGUI_middlemiddle_panel(
 							"servo");
 					p.servo_id.setText(p.id + "");
-					p.servo_channelid.setText("CH" + (i2 + 1));
-					// TODO - add remaining attributes
 					// TODO - make the channelid independent of the y-position
 					// (i2)
+					p.servo_channelid.setText("CH" + (i2 + 1));
+					// min is changed with the externalcall below
+					// max is changed with the externalcall below
+					// TODO - add remaining attributes
 					p.setBackground(Color.yellow);
 					panels[i1][i2] = p;
 					found = true;
+
+					so_ref.externalcall_servopanelchangeinfo(i1, i2);
 				}
 			}
 		}

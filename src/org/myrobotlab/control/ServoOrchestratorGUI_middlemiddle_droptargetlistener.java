@@ -166,10 +166,14 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 			// TODO - change other attributes, too
 			// TODO - make the channelid independent of the y-position (posy)
 			droppedPanel.servo_channelid.setText("CH" + (posy + 1));
+			// min is changed with the externalcall below
+			// max is changed with the externalcall below
 			rootPanel.getDragAndDropPanelsDemo().panels[posx][posy] = droppedPanel;
 
 			rootPanel.getDragAndDropPanelsDemo().panels[f1][f2] = pold;
 		}
+
+		rootPanel.getDragAndDropPanelsDemo().so_ref.externalcall_servopanelchangeinfo(posx, posy);
 
 		this.rootPanel.getDragAndDropPanelsDemo().relayout();
 	}
