@@ -29,6 +29,7 @@ import java.util.Vector;
 
 import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -85,8 +86,6 @@ public class Servo extends Service implements ServoControl {
 	@Element
 	private float maxY = 180;
 
-	boolean isBlocking = false;
-
 	@Element
 	private int rest = 90;
 
@@ -126,24 +125,20 @@ public class Servo extends Service implements ServoControl {
 		super.releaseService();
 	}
 
-	public boolean setBlocking(boolean b) {
-		isBlocking = b;
-		return b;
-	}
-
 	@Override
 	public boolean setController(ServoController controller) {
-		log.info(String.format("%s setController %s", getName(), controller));
+		if (controller == null) {
+			error("setting null as controller");
+			return false;
+		}
+
+		log.info(String.format("%s setController %s", getName(), controller.getName()));
 
 		if (isAttached()) {
 			warn("can not set controller %s when servo %s is attached", controller, getName());
 			return false;
 		}
 
-		if (controller == null) {
-			error("setting null as controller");
-			return false;
-		}
 		this.controller = controller;
 		broadcastState();
 		return true;
@@ -494,8 +489,6 @@ public class Servo extends Service implements ServoControl {
 		return setController(sc);
 	}
 
-
-
 	public boolean setEventsEnabled(boolean b) {
 		controller.setServoEventsEnabled(getName(), b);
 		return b;
@@ -504,9 +497,9 @@ public class Servo extends Service implements ServoControl {
 	public void setSpeedControlOnUC(boolean b) {
 		speedControlOnUC = b;
 	}
-	
+
 	// uber good
-	public Integer publishServoEvent(Integer position){
+	public Integer publishServoEvent(Integer position) {
 		return position;
 	}
 
@@ -514,9 +507,13 @@ public class Servo extends Service implements ServoControl {
 	public void addServoEventListener(Service service) {
 		addListener("publishServoEvent", service.getName(), "onServoEvent", Integer.class);
 	}
-	
 
-	public void test(String port, int pin) throws MRLError {
+	public Status test(String port, int pin) {
+		Status status = null;
+		
+		try {			
+			
+		super.test();
 
 		// FIXME GSON or PYTHON MESSAGES
 
@@ -652,14 +649,13 @@ public class Servo extends Service implements ServoControl {
 			servo.moveTo(max);
 		}
 
-		if (testBlocking) {
-			info("test blocking");
-			servo.setBlocking(true);
-		}
-
 		info("test completed");
+		} catch(Exception e){
+			status.addError(e);
+		}
+		return status;
 	}
-	
+
 	public static void main(String[] args) throws InterruptedException {
 
 		LoggingFactory.getInstance().configure();
@@ -678,6 +674,5 @@ public class Servo extends Service implements ServoControl {
 		}
 
 	}
-
 
 }

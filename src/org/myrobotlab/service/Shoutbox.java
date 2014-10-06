@@ -41,7 +41,7 @@ public class Shoutbox extends Service {
 	transient WebGUI webgui;
 	transient ProgramAB chatbot;
 	transient XMPP xmpp;
-	
+
 	ArrayList<String> xmppRelays = new ArrayList<String>();
 	ArrayList<String> chatbotNames = new ArrayList<String>();
 
@@ -62,14 +62,17 @@ public class Shoutbox extends Service {
 
 	int maxArchiveRecordCount = 50;
 
-	// FIXME - standard interfaces for all GATEWAY SERVICES - onMsg() addListener()
+	// FIXME - standard interfaces for all GATEWAY SERVICES - onMsg()
+	// addListener()
 	// FIXME - Ma. Vo. name link on shoutbox
-	// FIXME - decoding or encoing on specific GATEWAY Interface - e.g. ws or xmpp
-	// FIXME - login, Security, Authentication & Authorization done through the Security service - restrictions only at Gateway
+	// FIXME - decoding or encoing on specific GATEWAY Interface - e.g. ws or
+	// xmpp
+	// FIXME - login, Security, Authentication & Authorization done through the
+	// Security service - restrictions only at Gateway
 	// FIXME - impersonate mr.turing ?
 
 	// FIXME make userShout userShoutAll systemShout systemShoutAll
-	
+
 	// TODO - system commands - refresh / clear / reload / history /
 	// resize-format / stats / show times / set my color
 	// FIXME - define client & server - system and user commands
@@ -85,14 +88,16 @@ public class Shoutbox extends Service {
 	// TODO - days alive ! - stats (poll thread - only pushes on changes)
 	// TODO - force logout command
 	// FIXME - color options
-	
+
 	/**
-	 * Core to managing the connections are the keys
-	 * The keys for websockets are defined as remoteIp:remotePort - unfortunately these are null on disconnect so a seperate
-	 *   lookup needs to be utilized
-	 * The keys for xmpp "buddies" are simply their jabber ids
+	 * Core to managing the connections are the keys The keys for websockets are
+	 * defined as remoteIp:remotePort - unfortunately these are null on
+	 * disconnect so a seperate lookup needs to be utilized The keys for xmpp
+	 * "buddies" are simply their jabber ids
 	 * 
-	 *  A Connection's UserId is a "user friendly" identification of the user using that connection
+	 * A Connection's UserId is a "user friendly" identification of the user
+	 * using that connection
+	 * 
 	 * @param ws
 	 * @return
 	 */
@@ -107,8 +112,33 @@ public class Shoutbox extends Service {
 		HashMap<WebSocket, String> wsToKey = new HashMap<WebSocket, String>();
 		HashMap<String, Connection> keyToConn = new HashMap<String, Connection>();
 
+		// HashMap<String, Integer> userConnCnts = new HashMap<String,
+		// Integer>();
+
 		public int getConnectionCount() {
 			return keyToConn.size();
+		}
+
+		// FIXME - finish
+		public HashMap<String, Integer> getUserConnCnts() {
+			HashMap<String, Integer> ret = new HashMap<String, Integer>();
+
+			for (Map.Entry<String, Connection> entry : keyToConn.entrySet()) {
+				// WebSocket ws = entry.getKey();
+				Connection conn = entry.getValue();
+
+				// user is in key - get it out and count it
+				if (conn.ws != null) {
+
+				} else if (conn.xmpp != null) {
+
+				} else {
+					// mr.turing .. ???
+				}
+			}
+
+			return ret;
+
 		}
 
 		public int getUserCount() {
@@ -200,11 +230,11 @@ public class Shoutbox extends Service {
 			log.info(String.format("remove %s", jabberID));
 			String match = null;
 			for (Map.Entry<String, Connection> o : keyToConn.entrySet()) {
-				if (o.getKey().startsWith(jabberID)){
+				if (o.getKey().startsWith(jabberID)) {
 					match = o.getKey();
 				}
 			}
-			if (match != null){
+			if (match != null) {
 				keyToConn.remove(match);
 				log.info(String.format("removed %s", match));
 			} else {
@@ -411,13 +441,12 @@ public class Shoutbox extends Service {
 	public void quickStart(String xmpp, String password) {
 		startXMPP(xmpp, password);
 		startChatBot();
-		
+
 		addXMPPRelay("Keith McGerald");
-		//addXMPPRelay("Orbous Mundus");
-		addXMPPRelay("Alessandro Didonna"); 
-		addXMPPRelay("Dwayne Williams");
-		addXMPPRelay("Aatur Mehta");
-		
+		// addXMPPRelay("Orbous Mundus");
+		// addXMPPRelay("Alessandro Didonna");
+		// addXMPPRelay("Dwayne Williams");
+		// addXMPPRelay("Aatur Mehta");
 		addXMPPRelay("Greg Perry");
 	}
 
@@ -437,7 +466,7 @@ public class Shoutbox extends Service {
 		// a new tab or
 		// actually arriving on the site - how to tell the difference between
 		// all these activities?
-		broadcast(SYSTEM, String.format("[%s]@[%s] is in the haus !", conn.user, conn.ip));
+		systemBroadcast(String.format("[%s]@[%s] is in the haus !", conn.user, conn.ip));
 
 		// FIXME onShout which takes ARRAY of shouts !!! - send the whole thing
 		// in one shot
@@ -565,7 +594,7 @@ public class Shoutbox extends Service {
 	public Response onResponse(Response response) {
 		log.info("chatbot shouting");
 
-		//String r = resizeImage(response.msg);
+		// String r = resizeImage(response.msg);
 		String r = response.msg;
 
 		conns.addConnection("mr.turing", "mr.turing");
@@ -624,8 +653,8 @@ public class Shoutbox extends Service {
 
 	// --------- XMPP END ------------
 
-	//String lastShoutMsg = null;
-	
+	// String lastShoutMsg = null;
+
 	// EXCHANGE need "session-key" to do a - connection/session-key for user
 	// FIXME NOT NORMALIZED with onXMPPMsg() !!!!
 	// public void onShout(WSMsg wsmsg) { is Message necessary here?
@@ -633,16 +662,14 @@ public class Shoutbox extends Service {
 		log.info(String.format("onShout %s %s", key, m));
 
 		String msg = (String) m.data[0];
-		
+
 		// Could cause errors in control or monitoring
 		// but in xmpp you can't "overwrite" a message
 		// as you can in the ws shoutbox
 		// correct way would be to establish a session monitoring thread
 		/*
-		if (msg.equals(lastShoutMsg)){
-			log.info("we don't like to repeat");
-		}
-		*/
+		 * if (msg.equals(lastShoutMsg)){ log.info("we don't like to repeat"); }
+		 */
 		// sender is put in by WebGUI / WSServer
 		// shout.ip = m.sender;
 		Connection conn = conns.getConnection(key);
@@ -650,13 +677,12 @@ public class Shoutbox extends Service {
 		Shout shout = (Shout) Encoder.gson.fromJson(msg, Shout.class);
 
 		if (conn == null) {
-			error("onShout key %s from sender", key , m.sender);
-			return;
+			info("conn/User is null - better be a system msg");
+		} else {
+			// transfer data - transfer personal properties
+			shout.from = conn.user;
+			shout.ip = conn.ip;
 		}
-
-		// transfer data - transfer personal properties
-		shout.from = conn.user;
-		shout.ip = conn.ip;
 
 		updateSystemInfo(shout);
 
@@ -667,16 +693,16 @@ public class Shoutbox extends Service {
 			// Object ret = null;
 
 			String[] params = shout.msg.split("/");
-			
+
 			// FIXME - reply with string "system msgs are now off/on"
 			if (shout.msg.startsWith("/system")) {
 				String onOff = params[2];
-				if ("on".startsWith(onOff.toLowerCase())){
+				if ("on".startsWith(onOff.toLowerCase())) {
 					conn.xmppSystemMsgs = true;
-				} else if ("off".startsWith(onOff.toLowerCase())){
+				} else if ("off".startsWith(onOff.toLowerCase())) {
 					conn.xmppSystemMsgs = false;
 				} else {
-					log.error("unkown param {}",  onOff);
+					log.error("unkown param {}", onOff);
 				}
 				return;
 			}
@@ -720,7 +746,7 @@ public class Shoutbox extends Service {
 				invoke("quickStart", params[2], params[3]);
 				return;
 			}
-			
+
 			if (shout.msg.startsWith("/t")) {
 				invoke("mimicTuring", params[2]);
 				return;
@@ -749,22 +775,24 @@ public class Shoutbox extends Service {
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		webgui.sendToAll(out);
 
-		if (xmpp != null) {
+		if (xmpp != null && !SYSTEM.equals(shout.type)) {
 			for (int i = 0; i < xmppRelays.size(); ++i) {
 				String relayName = xmppRelays.get(i);
 				String jabberID = xmpp.getJabberID(relayName);
 				// don't echo to self
-				// if (!key.startsWith(jabberID)) { filter took out mrt and other activity !
-					log.info(String.format("sending from %s %s -> to xmpp client - relayName [%s] jabberID [%s] shout.msg [%s]",  Thread.currentThread().getId(), shout.from, relayName, jabberID, shout.msg));
-					xmpp.sendMessage(String.format("%s: %s", shout.from, shout.msg), jabberID);
-				//}
+				// if (!key.startsWith(jabberID)) { filter took out mrt and
+				// other activity !
+				log.info(String.format("sending from %s %s -> to xmpp client - relayName [%s] jabberID [%s] shout.msg [%s]", Thread.currentThread().getId(), shout.from, relayName,
+						jabberID, shout.msg));
+				xmpp.sendMessage(String.format("%s: %s", shout.from, shout.msg), jabberID);
+				// }
 			}
 		}
-		
+
 		archive(shout);
 	}
-	
-	public void mimicTuring(String msg){
+
+	public void mimicTuring(String msg) {
 		Shout shout = createShout(USER, msg);
 		shout.from = "mr.turing";
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
@@ -801,14 +829,18 @@ public class Shoutbox extends Service {
 		 */
 	}
 
-	public Status test() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		Status status = Status.info("starting %s %s test", getName(), getTypeName());
-		Shoutbox shoutbox = (Shoutbox) Runtime.create(getName(), "Shoutbox");
-		shoutbox.startService();
-		shoutbox.setNameProvider("org.myrobotlab.client.DrupalNameProvider");
-		webgui.allowREST(true);
-		// shoutbox.startXMPP("incubator@myrobotlab.org", "xxxxxx");
-		// shoutbox.addXMPPRelay("Greg Perry");
+	public Status test() {
+		Status status = super.test();
+		try {
+			Shoutbox shoutbox = (Shoutbox) Runtime.create(getName(), "Shoutbox");
+			shoutbox.startService();
+			shoutbox.setNameProvider("org.myrobotlab.client.DrupalNameProvider");
+			webgui.allowREST(true);
+			// shoutbox.startXMPP("incubator@myrobotlab.org", "xxxxxx");
+			// shoutbox.addXMPPRelay("Greg Perry");
+		} catch (Exception e) {
+			status.addError(e);
+		}
 		return status;
 	}
 
@@ -824,32 +856,11 @@ public class Shoutbox extends Service {
 		return shout;
 	}
 
-	public void onShout(String key, String msg) {
-		// from key - get User
-
-		broadcast(USER, "test");
-
-		// filter out system ?
-		// archive(shout);
-	}
-
 	// fixme (from whom) ?? - websocket xmpp other ??
-	public void broadcast(String type, String data) {
-		Shout shout = createShout(type, data);
+	public void systemBroadcast(String data) {
+		Shout shout = createShout(SYSTEM, data);
 		Message onShout = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
-
-		// RULES - TODO - if self don't send to self
-
-		// WEBSOCKETS
-		webgui.sendToAll(onShout);
-
-		// XMPP
-		if (xmpp != null) {
-			for (int i = 0; i < xmppRelays.size(); ++i) {
-				log.info(String.format("sending from %s -> to xmpp client %s %s", shout.from, xmppRelays.get(i), shout.msg));
-				xmpp.sendMessage(String.format("%s:%s", shout.from, shout.msg), xmppRelays.get(i));
-			}
-		}
+		onShout(null, onShout);
 	}
 
 	@Override

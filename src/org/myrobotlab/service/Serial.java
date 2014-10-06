@@ -56,9 +56,16 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	// utility methods - ascii
 
 	// ====== file io begin ======
+	String filenameRX;
 	boolean isRXRecording = false;
 	transient FileWriter fileWriterRX = null;
 	transient BufferedWriter bufferedWriterRX = null;
+	
+	String filenameTX;
+	boolean isTXRecording = false;
+	transient FileWriter fileWriterTX = null;
+	transient BufferedWriter bufferedWriterTX = null;
+
 
 	// ====== file io end ======
 
@@ -120,15 +127,20 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return retVal;
 	}
 
-	public boolean record(String filename) {
+	public boolean recordRX(String filename) {
 		try {
 
 			if (filename == null) {
-				filename = String.format("rx.%s.data", getName(), System.currentTimeMillis());
+				filenameRX = String.format("rx.%s.data", getName(), System.currentTimeMillis());
+			}
+			
+			if (filenameTX.equals(filename)){
+				fileWriterRX = fileWriterTX;
+				bufferedWriterRX = bufferedWriterTX;
 			}
 
 			if (fileWriterRX == null) {
-				fileWriterRX = new FileWriter(filename);
+				fileWriterRX = new FileWriter(filenameRX);
 				bufferedWriterRX = new BufferedWriter(fileWriterRX);
 			}
 
@@ -139,17 +151,61 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		}
 		return false;
 	}
+	
+	public boolean recordTX(String filename) {
+		try {
 
-	public boolean record() {
+			if (filename == null) {
+				filenameTX = String.format("tx.%s.data", getName(), System.currentTimeMillis());
+			}
+			
+			if (filenameRX.equals(filename)){
+				fileWriterTX = fileWriterRX;
+				bufferedWriterTX = bufferedWriterRX;
+			}
+
+			if (fileWriterTX == null) {
+				fileWriterTX = new FileWriter(filenameTX);
+				bufferedWriterTX = new BufferedWriter(fileWriterTX);
+			}
+
+			isTXRecording = true;
+			return true;
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+		return false;
+	}
+
+
+	public boolean record(String filename) {
+		boolean ret = true;
+		ret &= recordTX(filename);
+		ret &= recordRX(filename);
+		return ret;
+	}
+	
+	public boolean record(){
 		return record(null);
 	}
 
 	public boolean stopRecording() {
 		try {
 			isRXRecording = true;
+			isTXRecording = true;
+			
 			if (fileWriterRX != null) {
 				bufferedWriterRX.close();
 				fileWriterRX.close();
+				fileWriterRX = null;
+				bufferedWriterRX = null;
+			}
+			
+			if (fileWriterTX != null) {
+				bufferedWriterTX.close();
+				fileWriterTX.close();
+				fileWriterTX = null;
+				bufferedWriterTX = null;
 			}
 
 			return true;
@@ -503,11 +559,13 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	}
 
 	@Override
-	public Status test() throws IOException {
+	public Status test(){
 
 		// non destructive tests
 		// TODO - if I am connected to a different serial port
 		// get that name - disconnect - and then reconnect when done
+		Status status = super.test();
+		try {
 
 		info("testing null modem with %s", getName());
 		Serial test = (Serial) Runtime.start(getName(), "Serial");
@@ -581,8 +639,11 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		uart.write(new byte[] { 6, 6, 6, 6, 6, 6 });
 
 		write(new byte[] { 16 });
+		} catch(Exception e){
+			status.addError(e);
+		}
 		
-		return null;
+		return status;
 
 	}
 
@@ -630,4 +691,5 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return false;
 	}
 
+	
 }
