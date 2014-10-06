@@ -38,10 +38,12 @@ public class SpeakerRecognition extends Service {
 		return "used as a general template";
 	}
 
-	public Status test() throws UnsupportedAudioFileException, IOException {
+	public Status test() {
 		
-		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		Status status = super.test();
 		
+		try {
+				
 		// Create a new Recognito instance defining the audio sample rate to be
 		// used
 		//Recognito<String> recognito = new Recognito<>(16000.0f);
@@ -64,11 +66,14 @@ public class SpeakerRecognition extends Service {
 			System.out.println(String.format("match with %s %d percent positive", match.getKey(), match.getLikelihoodRatio()));
 		}
 		
-		/*
-		if (match.getKey().equals("me3")) {
-			System.out.println("me is back !!! " + match.getLikelihoodRatio() + "% positive about it...");
+			/*
+			 * if (match.getKey().equals("me3")) {
+			 * System.out.println("me is back !!! " + match.getLikelihoodRatio()
+			 * + "% positive about it..."); }
+			 */
+		} catch (Exception e) {
+			status.addError(e);
 		}
-		*/
 		return status;
 	}
 

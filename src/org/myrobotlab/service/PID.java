@@ -159,6 +159,8 @@ public class PID extends Service {
 			ki = (0 - ki);
 			kd = (0 - kd);
 		}
+		
+		broadcastState();
 	}
 
 	/*
@@ -175,6 +177,8 @@ public class PID extends Service {
 			kd /= ratio;
 			sampleTime = (long) NewSampleTime;
 		}
+		
+		broadcastState();
 	}
 
 	/*
@@ -204,6 +208,7 @@ public class PID extends Service {
 			else if (ITerm < outMin)
 				ITerm = outMin;
 		}
+		broadcastState();
 	}
 
 	/*
@@ -220,6 +225,7 @@ public class PID extends Service {
 			init();
 		}
 		inAuto = newAuto;
+		broadcastState();
 	}
 
 	/*
@@ -258,6 +264,7 @@ public class PID extends Service {
 			kd = (0 - kd);
 		}
 		controllerDirection = direction;
+		broadcastState();
 	}
 	
 	public void invert()
@@ -323,6 +330,7 @@ public class PID extends Service {
 		log.info("{}",test);
 
 		
+		
 		log.debug("hello");
 		log.trace("trace");
 		log.error("error");
@@ -331,6 +339,7 @@ public class PID extends Service {
 		PID pid = new PID("pid");
 		pid.startService();
 		pid.setPID(2.0, 5.0, 1.0);
+		log.info("{}", pid.getKp());
 		pid.setControllerDirection(DIRECTION_DIRECT);
 		pid.setMode(MODE_AUTOMATIC);
 		pid.setOutputRange(0, 255);

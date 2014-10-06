@@ -181,8 +181,10 @@ public class WebGUI extends Service implements AuthorizationProvider {
 	}
 
 	public void startService() {
-		super.startService();
-		start();
+		if (!isRunning()) {
+			super.startService();
+			start();
+		}
 	}
 
 	@Override

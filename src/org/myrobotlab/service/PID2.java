@@ -169,6 +169,8 @@ public class PID2 extends Service {
 			piddata.ki = (0 - piddata.ki);
 			piddata.kd = (0 - piddata.kd);
 		}
+		
+		broadcastState();
 	}
 
 	/*
@@ -186,6 +188,8 @@ public class PID2 extends Service {
 			piddata.kd /= ratio;
 			piddata.sampleTime = (long) NewSampleTime;
 		}
+		
+		broadcastState();
 	}
 
 	/*
@@ -218,6 +222,7 @@ public class PID2 extends Service {
 			else if (piddata.ITerm < piddata.outMin)
 				piddata.ITerm = piddata.outMin;
 		}
+		broadcastState();
 	}
 
 	/*
@@ -235,6 +240,7 @@ public class PID2 extends Service {
 			init(key);
 		}
 		piddata.inAuto = newAuto;
+		broadcastState();
 	}
 
 	/*
@@ -275,6 +281,7 @@ public class PID2 extends Service {
 			piddata.kd = (0 - piddata.kd);
 		}
 		piddata.controllerDirection = direction;
+		broadcastState();
 	}
 	
 	public void invert(String key)
