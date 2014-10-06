@@ -16,8 +16,8 @@
 *
 */
 
-#ifndef MRLComm_h
-#define MRLComm_h
+// #ifndef MRLComm_h
+// #define MRLComm_h
 
 #include "Servo.h"
 
@@ -26,19 +26,6 @@
 
 #include <inttypes.h>
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"	// for digitalRead, digitalWrite, etc
-#else
-#include "WProgram.h"
-#endif
-
-// Normally Servo.h must be included before Firmata.h (which then includes
-// this file).  If Servo.h wasn't included, this allows the code to still
-// compile, but without support for any Servos.  Hopefully that's what the
-// user intended by not including Servo.h
-#ifndef MAX_SERVOS
-#define MAX_SERVOS 0
-#endif
 
 // ----------  MRLCOMM FUNCTION INTERFACE BEGIN -----------
 #define MRLCOMM_VERSION				19
@@ -327,27 +314,9 @@ public:
 	bool blinkState;
 };
 
-#endif
-/*==================== MRLCOMM.H END ====================*/
+// #endif
+/*==================== MRLCOMM.H END ========================*/
 /*==================== MRLCOMM.CPP BEGIN ====================*/
-/**
-*
-* @author GroG (at) myrobotlab.org
-*
-* This file is part of MyRobotLab.
-*
-* Enjoy !
-*
-* MRLComm Library
-* -----------------
-* Purpose: support servos, sensors, analog & digital polling
-* oscope, motors, range sensors, pingdar & steppers.
-*
-* Requirements: MyRobotLab running on a computer & a serial connection
-*
-*/
-
-// FIXED BY MOVING UP #include "Servo.h"
 // FIXME #include <MRLComm.h>
 
 MRLComm::MRLComm(){
