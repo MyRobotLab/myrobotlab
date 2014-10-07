@@ -112,7 +112,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
 
-	public static final int MRLCOMM_VERSION = 19;
+	public static final int MRLCOMM_VERSION = 20;
 
 	// serial protocol functions
 	public static final int MAGIC_NUMBER = 170; // 10101010

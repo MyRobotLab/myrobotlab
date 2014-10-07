@@ -24,6 +24,12 @@ public class Cron extends Service {
 	transient private Scheduler scheduler = new Scheduler();
 
 	public final static String EVERY_MINUTE = "* * * * *";
+	
+	// Schedule a once-a-week task at 8am on Sunday.   
+	// 0 8 * * 7
+	//Schedule a twice a day task at 7am and 6pm on weekdays
+	// 0 7 * * 1-5 |0 18 * * 1-5
+	
 
 	@ElementList(required = false)
 	public ArrayList<Task> tasks = new ArrayList<Task>();
@@ -65,14 +71,14 @@ public class Cron extends Service {
 		return "used as a general template";
 	}
 
-	public void addTask(String cron, String serviceName, String method) {
-		addTask(cron, serviceName, method, (Object[]) null);
+	public String addTask(String cron, String serviceName, String method) {
+		return addTask(cron, serviceName, method, (Object[]) null);
 	}
 
-	public void addTask(String cron, String name, String method, Object... data) {
+	public String addTask(String cron, String name, String method, Object... data) {
 		Task task = new Task(this, cron, name, method, data);
 		tasks.add(task);
-		scheduler.schedule(cron, task);
+		return scheduler.schedule(cron, task);
 	}
 
 	public void startService() {
