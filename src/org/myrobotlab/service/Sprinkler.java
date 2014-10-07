@@ -66,8 +66,8 @@ public class Sprinkler extends Service {
 			cron.addTask("0 7 */3 * *", this.getName(), "onTimeToWater");
 			cron.addTask("30 7 */3 * *", this.getName(), "stop");
 
-			cron.addTask("* * * * *", this.getName(), "onTimeToWater");
-			cron.addTask("*/2 * * * *", this.getName(), "stop");
+			//cron.addTask("* * * * *", this.getName(), "onTimeToWater");
+			//cron.addTask("*/2 * * * *", this.getName(), "stop");
 
 			webgui = (WebGUI) startPeer("webgui");
 		}

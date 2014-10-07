@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 
@@ -60,14 +61,8 @@ public class Instantiator {
 			@SuppressWarnings("unchecked")
 			Class<? extends T> c = (Class<? extends T>) Class.forName(classname);
 			return Instantiator.<T> getNewInstance(c, params);
-		} catch (ClassCastException e) {
-			log.error("Error", e);
-		} catch (ClassNotFoundException e) {
-			log.error("Error", e);
-		} catch (SecurityException e) {
-			log.error("Error", e);
-		} catch (RuntimeException e) {
-			log.error("Error", e);
+		} catch (Exception e) {
+			Logging.logException(e);
 		}
 		return null;
 	}
@@ -89,18 +84,8 @@ public class Instantiator {
 			Class<?>[] paramTypes = getParameterTypes(params);
 			Constructor<?> mc = c.getConstructor(paramTypes);
 			return (T) mc.newInstance(params);
-		} catch (SecurityException e) {
-			log.error("Error", e);
-		} catch (NoSuchMethodException e) {
-			log.error("Error", e);
-		} catch (RuntimeException e) {
-			log.error("Error", e);
-		} catch (InstantiationException e) {
-			log.error("Error", e);
-		} catch (IllegalAccessException e) {
-			log.error("Error", e);
-		} catch (InvocationTargetException e) {
-			log.error("Error", e);
+		} catch (Exception e) {
+			Logging.logException(e);
 		}
 		return null;
 	}
@@ -162,16 +147,8 @@ public class Instantiator {
 		try {
 			Method meth = c.getMethod(method, paramTypes);
 			return (T) meth.invoke(object, params);
-		} catch (NoSuchMethodException e) {
-			log.error("Error", e);
-		} catch (SecurityException e) {
-			log.error("Error", e);
-		} catch (IllegalAccessException e) {
-			log.error("Error", e);
-		} catch (IllegalArgumentException e) {
-			log.error("Error", e);
-		} catch (InvocationTargetException e) {
-			log.error("Error", e);
+		} catch (Exception e) {
+			Logging.logException(e);
 		}
 		return null;
 	}
