@@ -59,6 +59,11 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 	public JList middleright_pin_list;
 	public JButton middleright_attach_button;
 
+	JButton middleleft_timeunitadd_button;
+	JButton middleleft_timeunitremove_button;
+	JButton middleleft_channeladd_button;
+	JButton middleleft_channelremove_button;
+
 	JButton bottommiddleleft_update_button;
 
 	public JTextField bottommiddlerighttop_textfield_1;
@@ -201,20 +206,39 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		middleright_attach_button.addActionListener(this);
 
 		JPanel middlemiddlemiddleleft = new JPanel();
-		
-		//TODO - don't define the panels size
+
+		// TODO - don't define the panels size
 		JPanel middlemiddle = middlemiddle_ref.externalcall_getmiddlemiddle();
-		//middlemiddle.setPreferredSize(new Dimension(130*5,80*5));
+		// middlemiddle.setPreferredSize(new Dimension(130*5,80*5));
 		middlemiddle.setAutoscrolls(true);
-		
-		//TODO - don't define the panels size
+
+		// TODO - don't define the panels size
 		JScrollPane middlemiddle_scrollpane = new JScrollPane(middlemiddle);
-		middlemiddle_scrollpane.setPreferredSize(new Dimension(130*5,80*5));
+		middlemiddle_scrollpane
+				.setPreferredSize(new Dimension(130 * 5, 80 * 5));
 
 		JPanel middleleft = new JPanel();
+		middleleft.setLayout(new BoxLayout(middleleft, BoxLayout.Y_AXIS));
+
+		middleleft_timeunitadd_button = new JButton("Add Timeunit");
+		middleleft.add(middleleft_timeunitadd_button);
+		middleleft_timeunitadd_button.addActionListener(this);
+
+		middleleft_timeunitremove_button = new JButton("Remove Timeunit");
+		middleleft.add(middleleft_timeunitremove_button);
+		middleleft_timeunitremove_button.addActionListener(this);
+
+		middleleft_channeladd_button = new JButton("Add Channel");
+		middleleft.add(middleleft_channeladd_button);
+		middleleft_channeladd_button.addActionListener(this);
+
+		middleleft_channelremove_button = new JButton("Remove Channel");
+		middleleft.add(middleleft_channelremove_button);
+		middleleft_channelremove_button.addActionListener(this);
 
 		JSplitPane splitpane_middlemiddle_middleleft = new JSplitPane(
-				JSplitPane.HORIZONTAL_SPLIT, middlemiddle_scrollpane, middleleft);
+				JSplitPane.HORIZONTAL_SPLIT, middlemiddle_scrollpane,
+				middleleft);
 		splitpane_middlemiddle_middleleft.setOneTouchExpandable(true);
 		// splitpane_middlemiddle_middleleft.setDividerLocation(700);
 
@@ -489,6 +513,15 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 			myService.send(boundServiceName, "middleright_update_button");
 		} else if (o == middleright_attach_button) {
 			myService.send(boundServiceName, "middleright_attach_button");
+		} else if (o == middleleft_timeunitadd_button) {
+			myService.send(boundServiceName, "middleleft_timeunitadd_button");
+		} else if (o == middleleft_timeunitremove_button) {
+			myService
+					.send(boundServiceName, "middleleft_timeunitremove_button");
+		} else if (o == middleleft_channeladd_button) {
+			myService.send(boundServiceName, "middleleft_channeladd_button");
+		} else if (o == middleleft_channelremove_button) {
+			myService.send(boundServiceName, "middleleft_channelremove_button");
 		} else if (o == bottommiddleleft_update_button) {
 			// TODO - add functionality
 		} else if (o == bottommiddlerighttop_update_button) {
