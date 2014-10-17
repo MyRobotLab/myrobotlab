@@ -9,6 +9,6 @@ def onKey(key):
     print "you pressed ", key
 
 # blocking example
-print 'here waiting'
+print "here waiting"
 keypress = keyboard.readKey()
-print 'finally you pressed', keypress, '!'
+print "finally you pressed", keypress, "!"
