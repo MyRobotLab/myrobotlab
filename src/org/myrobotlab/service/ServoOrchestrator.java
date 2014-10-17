@@ -63,7 +63,6 @@ public class ServoOrchestrator extends Service {
 		super(n);
 		// intializing variables
 		settingsitemholder = new SettingsItemHolder[sizey];
-		servos = new Servo[sizey];
 		for (int i = 0; i < settingsitemholder.length; i++) {
 			SettingsItemHolder sih = new SettingsItemHolder();
 			sih.name = "Channel " + (i + 1);
@@ -75,6 +74,7 @@ public class ServoOrchestrator extends Service {
 			sih.attached = false;
 			settingsitemholder[i] = sih;
 		}
+		servos = new Servo[sizey];
 		pos1 = 1;
 		pos2 = 1;
 		pos3 = 000;
@@ -180,6 +180,26 @@ public class ServoOrchestrator extends Service {
 			sogui_ref.middleright_attach_button.setText("Attach");
 			settingsitemholder[middleright_shownitem].attached = false;
 		}
+	}
+
+	public void middleleft_timeunitadd_button() {
+		sizex++;
+		sogui_ref.sizex = sizex;
+		sogui_ref.middlemiddle_ref.externallcall_refreshsize();
+	}
+
+	public void middleleft_timeunitremove_button() {
+		sizex--;
+		sogui_ref.sizex = sizex;
+		sogui_ref.middlemiddle_ref.externallcall_refreshsize();
+	}
+
+	public void middleleft_channeladd_button() {
+		// TODO - add functionality
+	}
+
+	public void middleleft_channelremove_button() {
+		// TODO - add functionality
 	}
 
 	public void bottommiddlerighttop_update_button() {
