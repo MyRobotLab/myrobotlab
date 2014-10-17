@@ -1,6 +1,7 @@
 package org.myrobotlab.control;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -200,13 +201,20 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		middleright_attach_button.addActionListener(this);
 
 		JPanel middlemiddlemiddleleft = new JPanel();
-
+		
+		//TODO - don't define the panels size
 		JPanel middlemiddle = middlemiddle_ref.externalcall_getmiddlemiddle();
+		//middlemiddle.setPreferredSize(new Dimension(130*5,80*5));
+		middlemiddle.setAutoscrolls(true);
+		
+		//TODO - don't define the panels size
+		JScrollPane middlemiddle_scrollpane = new JScrollPane(middlemiddle);
+		middlemiddle_scrollpane.setPreferredSize(new Dimension(130*5,80*5));
 
 		JPanel middleleft = new JPanel();
 
 		JSplitPane splitpane_middlemiddle_middleleft = new JSplitPane(
-				JSplitPane.HORIZONTAL_SPLIT, middlemiddle, middleleft);
+				JSplitPane.HORIZONTAL_SPLIT, middlemiddle_scrollpane, middleleft);
 		splitpane_middlemiddle_middleleft.setOneTouchExpandable(true);
 		// splitpane_middlemiddle_middleleft.setDividerLocation(700);
 
