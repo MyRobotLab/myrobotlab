@@ -346,8 +346,8 @@ public class PID extends Service {
 		pid.setSetpoint(100);
 		pid.setSampleTime(40);
 		
-		GUIService gui = new GUIService("gui");
-		gui.startService();
+		//GUIService gui = new GUIService("gui");
+		//gui.startService();
 		
 
 		for (int i = 0; i < 200; ++i) {

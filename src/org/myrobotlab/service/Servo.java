@@ -272,6 +272,31 @@ public class Servo extends Service implements ServoControl {
 		lastActivityTime = System.currentTimeMillis();
 
 	}
+	
+	public void writeMicroseconds(Integer pos) {
+		if (controller == null) {
+			error(String.format("%s's controller is not set", getName()));
+			return;
+		}
+
+		inputX = pos.floatValue();
+
+		// the magic mapping
+		int outputY = calc(inputX);
+
+		if (outputY > outputYMax || outputY < outputYMin) {
+			warn(String.format("%s.moveTo(%d) out of range", getName(), (int) outputY));
+			return;
+		}
+
+		// FIXME - currently their is no timerPosition
+		// this could be gotten with 100 * outputY for some valid range
+		log.info("servoWrite({})", outputY);
+		controller.servoWriteMicroseconds(getName(), outputY);
+		lastActivityTime = System.currentTimeMillis();
+
+	}
+	
 
 	public boolean isAttached() {
 		return isAttached;
