@@ -94,10 +94,14 @@ public class Clock extends Service {
 		if (myClock == null) {
 			isClockRunning = true;
 			myClock = new ClockThread();
+			invoke("clockStarted");
+		} else {
+			log.warn("clock already started");
 		}
-		// have requestors broadcast state !
-		// broadcastState();
-		// broadcastState();
+	}
+	
+	// clock started  event
+	public void clockStarted(){
 	}
 
 	public void stopClock() {
@@ -110,9 +114,15 @@ public class Clock extends Service {
 			myClock = null;
 			// have requestors broadcast state !
 			// broadcastState();
+			invoke("clockStopped");
+		} else {
+			log.warn("clock already stopped");
 		}
 
 		isClockRunning = false;
+	}
+
+	public void clockStopped(){
 	}
 
 	public Date pulse(Date time) {

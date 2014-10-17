@@ -115,9 +115,11 @@ public class SerialDeviceGNU implements SerialDevice, SerialPortEventListener {
 					// port.IOLocked = 0;
 					RXTXHack.closeRxtxPort(port);
 					SerialPort hangMe = port;
-					hangMe.removeEventListener();
-					hangMe.close();
-					hangMe = null;
+					if (hangMe != null) {
+						hangMe.removeEventListener();
+						hangMe.close();
+						hangMe = null;
+					}
 				}
 			}.start();
 			// port.close();

@@ -104,7 +104,7 @@
 			try {
 				//$("<h3><img src='/" + className + ".png' /> " + serviceName + " <span class='error' id='"+serviceName+"-status'></span></h3>" ).appendTo( "#accordion1" );
 				$("<h3><img src='/" + className + ".png' width='24' height='24'/> " + serviceName + " <span id='"+serviceName+"-status'></span></h3>" ).appendTo( "#accordion1" );
-				$("<div id='" + serviceName + "-gui'><button id='"+serviceName+"-releaseService' name='"+serviceName+"'>release</button></div>" ).appendTo( "#accordion1" );
+				$("<div id='" + serviceName + "-gui'></div>" ).appendTo( "#accordion1" );
 				$("#accordion1").accordion("refresh");
 
 				newClass = " new " + className + "GUI('"+serviceName+"');";

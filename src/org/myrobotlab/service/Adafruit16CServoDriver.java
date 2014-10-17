@@ -126,9 +126,9 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 	public static final String ADAFRUIT_CODE = "\n\n" +
 
-	"            case AF_SET_PWM: \n" + "             pwm.setPWM(ioCommand[1], ioCommand[2], ioCommand[3]); \n" + "            break; \n" + "            case AF_BEGIN: \n"
-			+ "             pwm.begin(); \n" + "            break; \n" + "            case AF_SET_SERVO: \n"
-			+ "            pwm.setPWM(ioCommand[1], 0, (ioCommand[2] << 8) + ioCommand[3]); \n" + "            break; \n";
+	"            case AF_SET_PWM:{ \n" + "             pwm.setPWM(ioCmd[1], ioCmd[2], ioCmd[3]); \n" + "            break;} \n" + "            case AF_BEGIN:{ \n"
+			+ "             pwm.begin(); \n" + "            break;} \n" + "            case AF_SET_SERVO:{ \n"
+			+ "            pwm.setPWM(ioCmd[1], 0, (ioCmd[2] << 8) + ioCmd[3]); \n" + "            break; }\n";
 
 	// attachControllerBoard ??? FIXME FIXME FIXME - should "attach" call
 	// another's attach?
@@ -301,6 +301,24 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		arduino.setServoSpeed(servoName, speed); // FIXME - is this correct?
 	}
 
+	@Override
+	public void servoStop(String servoName) {
+		super.stopService();
+		arduino.servoStop(servoName);
+	}
+
+	@Override
+	public void servoSweep(String servoName, int min, int max, int step) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean setServoEventsEnabled(String servoName, boolean b) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
@@ -318,19 +336,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	}
 
 	@Override
-	public void servoStop(String servoName) {
-		arduino.servoStop(servoName);
-	}
-
-	@Override
-	public void servoSweep(String servoName, int min, int max, int step) {
+	public void servoWriteMicroseconds(String name, Integer ms) {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public boolean setServoEventsEnabled(String servoName, boolean b) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 }

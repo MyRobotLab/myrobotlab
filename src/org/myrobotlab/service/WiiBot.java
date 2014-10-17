@@ -44,15 +44,13 @@ public class WiiBot extends Service {
 	Arduino arduino = null;
 	Wii wii = new Wii("wii");
 	Servo servo = new Servo("servo");
-	// OpenCV opencv = new OpenCV("opencv");
+	OpenCV opencv = new OpenCV("opencv");
 	WiiDAR wiidar = new WiiDAR("wiidar");
 	GUIService gui = new GUIService("gui");
 
 	public WiiBot(String n) {
 		super(n);
 	}
-
-
 
 	public void startRobot() {
 		arduino = new Arduino("arduino");
@@ -63,7 +61,7 @@ public class WiiBot extends Service {
 		 * (CommDriver) new WiiDriver(wii));
 		 */
 
-		gui.startService();
+		//gui.startService();
 		wiidar.servo = servo;
 		// setting up servo
 		// servo.attach(arduino.getName(), 9);

@@ -13,10 +13,12 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
+/*
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+*/
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -202,12 +204,16 @@ public class Runtime extends Service implements MessageListener {
 		log.info("============== prelog begin ==============");
 		try {
 			// when having issues next time just close the prelogger... duh
-			Path prelog = Paths.get(PreLogger.PRELOG_FILENAME);
+			// can't use java.nio.file on Androi
+			// Path prelog = Paths.get(PreLogger.PRELOG_FILENAME);
 
-			if (Files.exists(prelog)) {
+			File prelog = new File(PreLogger.PRELOG_FILENAME);
+			
+			if (prelog.exists()) {
 				log.info(FileIO.fileToString(PreLogger.PRELOG_FILENAME));
 				log.info(String.format("deleting %s", PreLogger.PRELOG_FILENAME));
-				Files.delete(prelog);
+				prelog.delete();
+				//Files.delete(prelog);
 				log.info(String.format("deleted %s", PreLogger.PRELOG_FILENAME));
 			} else {
 				log.info("prelog does not exist");
@@ -1790,7 +1796,9 @@ public class Runtime extends Service implements MessageListener {
 			try {
 				// Files.move(src.toPath(), dst.toPath(),
 				// StandardCopyOption.REPLACE_EXISTING);
-				Files.move(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				// NO NIO ON ANDROID !!!
+				// Files.move(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				FileIO.copy(src, dst);
 			} catch (IOException e) {
 				Logging.logException(e);
 			}

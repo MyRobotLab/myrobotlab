@@ -1,6 +1,8 @@
 package org.myrobotlab.webgui;
 
+
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,6 +38,83 @@ public class SOAPProcessor implements HTTPProcessor {
 	static private String templateResponse = null;
 
 	transient private Serializer serializer = new Persister();
+	
+	/**
+	 * a CodeBlock is an execution unit ready to be invoked with converted
+	 * parameters and data
+	 * 
+	 */
+	static public class CodeBlock {
+		public Method method;
+		public Object[] params;
+
+		CodeBlock(Method method, Object[] params) {
+			this.method = method;
+			this.params = params;
+		}
+	}
+
+	
+	// TODO - this is a specific xml decode - e.g. Jaxb versus simplexml
+	static public CodeBlock getCodeBlockFromXML(String serviceType, String methodName, ArrayList<SOAPBodyElement> parms) {
+		ArrayList<Method> candidates = Encoder.getMethodCandidates(serviceType, methodName, parms.size());
+		Object[] params = new Object[parms.size()];
+		for (int i = 0; i < candidates.size(); ++i) {
+			Method m = candidates.get(i);
+			Class<?>[] mParms = m.getParameterTypes();
+			boolean converted = false;
+			// parameter converter
+			try {
+				for (int j = 0; j < parms.size(); ++j) {
+					SOAPBodyElement parm = parms.get(j);
+					String value = parm.getValue();
+					// if the parm has a value it is a simple type
+					// cuz that's the way my xml rolls ;)
+					if (value != null) {
+						// instead of reflectively invoking a converter
+						// i chose manual construction - for possible
+						// performance gain
+						Class<?> c = mParms[j];
+						if (c == Integer.class || c == int.class) {
+							params[j] = Integer.parseInt(value);
+						} else if (c == String.class) {
+							params[j] = value;
+						} else if (c == Float.class || c == float.class) {
+							params[j] = Float.parseFloat(value);
+						} else if (c == Boolean.class || c == boolean.class) {
+							params[j] = Boolean.parseBoolean(value);
+						} else if (c == Byte.class || c == byte.class) {
+							params[j] = Byte.parseByte(value);
+						} else if (c == Double.class || c == double.class) {
+							params[j] = Double.parseDouble(value);
+						} else if (c == Long.class || c == long.class) {
+							params[j] = Long.parseLong(value);
+						} else if (c == Short.class || c == short.class) {
+							params[j] = Short.parseShort(value);
+						} else if (c == Character.class || c == char.class) {
+							// FIXME - if value.length > 1 - ERROR !! ABORT
+							if (value.length() > 1) {
+								throw new Exception(String.format("conversion to char - incorrect size of string %s", value));
+							}
+							params[j] = value.charAt(0);
+						}
+					}
+				} // for each parameter
+				converted = true;
+			} catch (Exception e) {
+				Logging.logException(e);
+				converted = false;
+			}
+			
+			if (converted){
+				return new CodeBlock(m, params);
+			}
+
+		}
+
+		log.error(String.format("could not make CodeBlock for %s.%s.%d", serviceType, methodName, parms.size()));
+		return null;
+	}
 
 	static public class RESTException extends Exception {
 		public RESTException(String format) {
@@ -123,7 +202,7 @@ public class SOAPProcessor implements HTTPProcessor {
 			}
 			
 			Object responseObject = null;
-			Encoder.CodeBlock cb = Encoder.getCodeBlockFromXML(si.getClass().getCanonicalName(), fn, params);
+			CodeBlock cb = getCodeBlockFromXML(si.getClass().getCanonicalName(), fn, params);
 			if (cb != null){
 				// FIXME FIXME FIXME FIXME FIXME FIXME !!!!
 				// optimize by an overloaded invoke which accepts the 

@@ -93,4 +93,6 @@ public interface ServoController {
 
 	public boolean setServoEventsEnabled(String servoName, boolean b);
 
+	public void servoWriteMicroseconds(String name, Integer ms);
+
 }

@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

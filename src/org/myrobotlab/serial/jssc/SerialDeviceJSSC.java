@@ -43,7 +43,7 @@ public class SerialDeviceJSSC implements SerialDevice, SerialPortEventListener {
 	private int databits = 8;
 	private int stopbits = 1;
 	private int parity = 0;
-
+	
 	protected EventListenerList listenerList = new EventListenerList();
 
 	public SerialDeviceJSSC(String portName) throws SerialDeviceException {
@@ -205,7 +205,8 @@ public class SerialDeviceJSSC implements SerialDevice, SerialPortEventListener {
 		try {
 			port.writeInt(data);
 		} catch (SerialPortException e) {
-			throw new IOException(e);
+			//throw new IOException(e);
+			Logging.logException(e);
 		}
 	}
 

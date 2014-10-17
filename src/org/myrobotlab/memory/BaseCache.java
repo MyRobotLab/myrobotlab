@@ -3,7 +3,7 @@
  */
 package org.myrobotlab.memory;
 
-import org.myrobotlab.reflection.Instantiator;
+import org.myrobotlab.reflection.Reflector;
 
 /**
  * Base class that contains the public facing methods.
@@ -85,17 +85,17 @@ public abstract class BaseCache implements ManagedCache {
 	@SuppressWarnings("unchecked")
 	public <T> T get(String name, Class<? extends T> cls) {
 		if (name == null || !contains(name)) {
-			if (!Instantiator.isPrimitive(cls)) {
+			if (!Reflector.isPrimitive(cls)) {
 				return null;
 			}
-			return (T) Instantiator.getPrimitive(cls);
+			return (T) Reflector.getPrimitive(cls);
 		}
 		Object value = getFromCache(name);
 
 		if (value != null && cls.isInstance(value)) {
 			return (T) value;
 		}
-		if (!Instantiator.isPrimitive(cls)) {
+		if (!Reflector.isPrimitive(cls)) {
 			return null;
 		}
 		// else return whichever primitive they're asking for
