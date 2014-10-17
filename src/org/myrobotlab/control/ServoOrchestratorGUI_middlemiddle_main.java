@@ -88,7 +88,7 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 						"timesection");
 				prep[i].timesection_id.setText(prep[i].id + "");
 				prep[i].timesection_headline.setText("TIMEUNIT "
-						+ (i - panels.length + 1));
+						+ (i - panels[0].length + 1));
 				prep[i].setBackground(Color.green);
 			}
 		}

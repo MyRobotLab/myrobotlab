@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -195,11 +194,17 @@ public class ServoOrchestrator extends Service {
 	}
 
 	public void middleleft_channeladd_button() {
-		// TODO - add functionality
+		sizey++;
+		sogui_ref.sizey = sizey;
+		sogui_ref.middlemiddle_ref.externallcall_refreshsize();
+		refreshsize();
 	}
 
 	public void middleleft_channelremove_button() {
-		// TODO - add functionality
+		sizey--;
+		sogui_ref.sizey = sizey;
+		sogui_ref.middlemiddle_ref.externallcall_refreshsize();
+		refreshsize();
 	}
 
 	public void bottommiddlerighttop_update_button() {
@@ -290,6 +295,38 @@ public class ServoOrchestrator extends Service {
 				.setText(settingsitemholder[y].min + "");
 		sogui_ref.middlemiddle_ref.panels[x][y].servo_max
 				.setText(settingsitemholder[y].max + "");
+	}
+
+	public void refreshsize() {
+		SettingsItemHolder[] settingsitemholderold = new SettingsItemHolder[sizey];
+		settingsitemholderold = settingsitemholder.clone();
+
+		Servo[] servosold = new Servo[sizey];
+
+		settingsitemholder = new SettingsItemHolder[sizey];
+		for (int i = 0; i < settingsitemholder.length; i++) {
+			if (i >= settingsitemholderold.length) {
+				SettingsItemHolder sih = new SettingsItemHolder();
+				sih.name = "Channel " + (i + 1);
+				sih.min = 0;
+				sih.max = 180;
+				sih.startvalue = (sih.min + sih.max) / 2;
+				sih.arduinopos = 0;
+				sih.pinpos = 0;
+				sih.attached = false;
+				settingsitemholder[i] = sih;
+				continue;
+			}
+			settingsitemholder[i] = settingsitemholderold[i];
+		}
+
+		servos = new Servo[sizey];
+		for (int i = 0; i < servos.length; i++) {
+			if (i >= servosold.length) {
+				continue;
+			}
+			servos[i] = servosold[i];
+		}
 	}
 
 	public void play_go_start() {
