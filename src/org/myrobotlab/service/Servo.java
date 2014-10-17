@@ -222,12 +222,21 @@ public class Servo extends Service implements ServoControl {
 	public boolean isInverted() {
 		return inverted;
 	}
+	
+	public float getMinInput(){
+		return minX;
+	}
+	
+	public float getMaxInput(){
+		return maxX;
+	}
 
 	public void map(float minX, float maxX, float minY, float maxY) {
 		this.minX = minX;
 		this.maxX = maxX;
 		this.minY = minY;
 		this.maxY = maxY;
+		broadcastState();
 	}
 
 	public void map(int minX, int maxX, int minY, int maxY) {
@@ -235,6 +244,7 @@ public class Servo extends Service implements ServoControl {
 		this.maxX = maxX;
 		this.minY = minY;
 		this.maxY = maxY;
+		broadcastState();
 	}
 
 	public int calc(float s) {
