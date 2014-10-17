@@ -1750,4 +1750,11 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	}
 
 
+	@Override
+	public void servoWriteMicroseconds(String name, Integer ms) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 }

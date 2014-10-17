@@ -45,7 +45,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.control.widget.ImageButton;
-import org.myrobotlab.reflection.Instantiator;
+import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
@@ -240,7 +240,7 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 				String attachGUIName = String.format("org.myrobotlab.control.Stepper_%sGUI", type);
 
 				controllerPanel.remove(controllerTypePanel);
-				controllerTypePanel = Instantiator.getNewInstance(attachGUIName, new Object[] { myService, boundServiceName, newController });
+				controllerTypePanel = Reflector.getNewInstance(attachGUIName, new Object[] { myService, boundServiceName, newController });
 				controllerPanel.add(controllerTypePanel, BorderLayout.CENTER);
 				// setEnabled(true);
 

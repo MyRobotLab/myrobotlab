@@ -154,8 +154,9 @@ public class VirtualSerialPort implements SerialDevice {
 	@Override
 	public int read() throws IOException {
 		try {
-			log.info("rx.take() size {}", rx.size());
+			log.debug("rx.take() size {}", rx.size());
 			//rx.poll(100, unit);
+			// Thread.sleep(5);
 			return rx.take();
 		} catch (InterruptedException e) {
 			return -1;

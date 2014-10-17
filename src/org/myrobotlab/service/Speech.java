@@ -47,12 +47,13 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 import com.sun.speech.freetts.Voice;
 import com.sun.speech.freetts.VoiceManager;
 
-public class Speech extends Service {
+public class Speech extends Service implements TextListener {
 
 	/*
 	 * Speech supports 2 different text to speech systems One is FreeTTS and the
@@ -581,6 +582,11 @@ public class Speech extends Service {
 		
 		speech.setGoogleURI("http://tts-api.com/tts.mp3?q=");
 
+	}
+
+	@Override
+	public void onText(String text) {
+		speak(text);
 	}
 
 

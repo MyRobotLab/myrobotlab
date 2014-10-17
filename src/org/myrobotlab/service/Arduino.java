@@ -685,6 +685,25 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		sendMsg(SERVO_WRITE, index, newPos);
 
 	}
+	
+	public void servoWriteMicroseconds(String servoName, Integer newPos) {
+		if (serialDevice == null) {
+			error("serialDevice is NULL !");
+			return;
+		}
+
+		if (!servos.containsKey(servoName)) {
+			warn("Servo %s not attached to %s", servoName, getName());
+			return;
+		}
+
+		int index = servos.get(servoName).servoIndex;
+
+		log.info(String.format("writeMicroseconds %s %d index %d", servoName, newPos, index));
+
+		sendMsg(SERVO_WRITE_MICROSECONDS, index, newPos);
+
+	}
 
 	@Override
 	public void servoSweep(String servoName, int min, int max, int step) { // delay

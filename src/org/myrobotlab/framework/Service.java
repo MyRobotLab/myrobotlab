@@ -851,11 +851,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * Stops the service. Stops threads.
 	 */
 	public void stopService() {
-		/*
-		 * FIXME - re-implement but only start if there is a task if (timer !=
-		 * null) { timer.cancel(); timer.purge(); }
-		 */
-
 		isRunning = false;
 		outbox.stop();
 		if (thisThread != null) {

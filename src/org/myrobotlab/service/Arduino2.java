@@ -1635,4 +1635,10 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		customEventListener = service;
 	}
 
+	@Override
+	public void servoWriteMicroseconds(String name, Integer ms) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
