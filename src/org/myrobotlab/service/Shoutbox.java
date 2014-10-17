@@ -647,9 +647,6 @@ public class Shoutbox extends Service {
 		return user;
 	}
 
-	public ArrayList<String> getXMPPRelays() {
-		return xmppRelays;
-	}
 
 	// --------- XMPP END ------------
 
@@ -751,6 +748,17 @@ public class Shoutbox extends Service {
 				invoke("mimicTuring", params[2]);
 				return;
 			}
+			
+			if (shout.msg.startsWith("/v")) {
+				//invoke("version");
+				// FIXME - since your filtering specifically which functions to do 
+				// we should call directly so compiling will flush out method signature mis-matches
+				// FIXME - BUT CALLING DIRECTLY DOES NOT PUT IT ON THE "PUB" SIDE OF FRAMEWORK !!!
+				// IS ONSHOUT THE ONLY PUB/SUB ALLOWED ?
+				version(params[2]);
+				return;
+			}
+			
 
 			/*
 			 * YOU THINK THIS WILL WORK > HAHAHAHA !
@@ -798,6 +806,24 @@ public class Shoutbox extends Service {
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout("mr.turing", out);
 	}
+	
+	public void version(String connId) {
+		sendTo(SYSTEM, connId, conns.listConnections());
+		Shout shout = createShout(USER, Runtime.getVersion());
+		shout.from = "mr.turing";
+		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		onShout("mr.turing", out);
+	}
+	
+	
+	public void getXMPPRelays() {
+		Shout shout = createShout(USER, Arrays.toString(xmppRelays.toArray()));
+		shout.from = "mr.turing";
+		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		onShout("mr.turing", out);
+	}
+	
+	
 
 	// FIXME FIXME FIXME - not normalized with onShout(WebSocket) :PPPP
 	// FIXME - must fill in your name - "Greg Perry" somewhere..

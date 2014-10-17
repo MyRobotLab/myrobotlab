@@ -817,10 +817,7 @@ public class Joystick extends Service {
 		joy.startService();
 		// joy.setController(2);
 		// joy.startPolling();
-
-		GUIService gui = new GUIService("gui");
-		gui.startService();
-		
+		Runtime.start("gui", "GUIService");		
 
 	}
 

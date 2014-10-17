@@ -371,8 +371,8 @@ public class PID2 extends Service {
 		pid.setSetpoint(key, 100);
 		pid.setSampleTime(key, 40);
 		
-		GUIService gui = new GUIService("gui");
-		gui.startService();
+		//GUIService gui = new GUIService("gui");
+		//gui.startService();
 		
 
 		for (int i = 0; i < 200; ++i) {

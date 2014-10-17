@@ -7,6 +7,7 @@ import org.alicebot.ab.Bot;
 import org.alicebot.ab.Chat;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.TextListener;
 
 /**
  * Program AB service for MyRobotLab
@@ -104,6 +105,7 @@ public class ProgramAB extends Service {
 		String res = sessions.get(session).multisentenceRespond(text);
 		Response response = new Response(session, res);
 		invoke("publishResponse", response);
+		invoke("publishResponseText", response);
 		info("to: %s - %s", session, res);
 		return response;
 	}
@@ -128,9 +130,22 @@ public class ProgramAB extends Service {
 	public Response publishResponse(Response response){
 		return response;
 	}
+	
+	/**
+	 * Test only publishing point - for simple consumers
+	 * @param response
+	 * @return
+	 */
+	public String publishResponseText(Response response){
+		return response.msg;
+	}
 
 	public void addResponseListener(Service service){
 		addListener("publishResponse", service.getName(), "onResponse", Response.class);
+	}
+	
+	public void addTextListener(TextListener service){
+		addListener("publishResponseText", service.getName(), "onText", String.class);
 	}
 	
 	public void startSession() {

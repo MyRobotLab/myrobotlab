@@ -118,5 +118,11 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 		return false;
 	}
 
+	@Override
+	public void servoWriteMicroseconds(String name, Integer ms) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

@@ -4,28 +4,26 @@
 package org.myrobotlab.reflection;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
-
-
 /**
- * Class to help make life easier when instantiating objects using the String
- * name of the class along with an optional array of constructor parameters.
  * 
- * @author SwedaKonsult
- * 
+ * @author SwedaKonsult & GroG
+ *
  */
-public class Instantiator {
-	/**
-	 * Logger
-	 */
-	private static final Logger log;
+public class Reflector {
+	
+	private static HashMap<String, Method> cache = new  HashMap<String, Method>();
+	
+	static final Logger log = LoggerFactory.getLogger(Reflector.class);
+	
+	//final static String getSignature
 
 	/**
 	 * Allow for checking if a boxed primitive is being used.
@@ -33,8 +31,7 @@ public class Instantiator {
 	public final static HashSet<Class<?>> primitiveTypes;
 
 	static {
-		log = LoggerFactory.getLogger(Instantiator.class);
-
+		
 		primitiveTypes = new HashSet<Class<?>>(8);
 		primitiveTypes.add(Boolean.class);
 		primitiveTypes.add(Character.class);
@@ -60,7 +57,7 @@ public class Instantiator {
 		try {
 			@SuppressWarnings("unchecked")
 			Class<? extends T> c = (Class<? extends T>) Class.forName(classname);
-			return Instantiator.<T> getNewInstance(c, params);
+			return Reflector.<T> getNewInstance(c, params);
 		} catch (Exception e) {
 			Logging.logException(e);
 		}

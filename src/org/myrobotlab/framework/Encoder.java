@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.xml.soap.SOAPBodyElement;
-
 import org.apache.commons.codec.binary.Base64;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -286,81 +284,8 @@ public class Encoder {
 		return methodOrdinal.get(ordinalKey);
 	}
 
-	/**
-	 * a CodeBlock is an execution unit ready to be invoked with converted
-	 * parameters and data
-	 * 
-	 */
-	static public class CodeBlock {
-		public Method method;
-		public Object[] params;
 
-		CodeBlock(Method method, Object[] params) {
-			this.method = method;
-			this.params = params;
-		}
-	}
 
-	// TODO - this is a specific xml decode - e.g. Jaxb versus simplexml
-	static public CodeBlock getCodeBlockFromXML(String serviceType, String methodName, ArrayList<SOAPBodyElement> parms) {
-		ArrayList<Method> candidates = getMethodCandidates(serviceType, methodName, parms.size());
-		Object[] params = new Object[parms.size()];
-		for (int i = 0; i < candidates.size(); ++i) {
-			Method m = candidates.get(i);
-			Class<?>[] mParms = m.getParameterTypes();
-			boolean converted = false;
-			// parameter converter
-			try {
-				for (int j = 0; j < parms.size(); ++j) {
-					SOAPBodyElement parm = parms.get(j);
-					String value = parm.getValue();
-					// if the parm has a value it is a simple type
-					// cuz that's the way my xml rolls ;)
-					if (value != null) {
-						// instead of reflectively invoking a converter
-						// i chose manual construction - for possible
-						// performance gain
-						Class<?> c = mParms[j];
-						if (c == Integer.class || c == int.class) {
-							params[j] = Integer.parseInt(value);
-						} else if (c == String.class) {
-							params[j] = value;
-						} else if (c == Float.class || c == float.class) {
-							params[j] = Float.parseFloat(value);
-						} else if (c == Boolean.class || c == boolean.class) {
-							params[j] = Boolean.parseBoolean(value);
-						} else if (c == Byte.class || c == byte.class) {
-							params[j] = Byte.parseByte(value);
-						} else if (c == Double.class || c == double.class) {
-							params[j] = Double.parseDouble(value);
-						} else if (c == Long.class || c == long.class) {
-							params[j] = Long.parseLong(value);
-						} else if (c == Short.class || c == short.class) {
-							params[j] = Short.parseShort(value);
-						} else if (c == Character.class || c == char.class) {
-							// FIXME - if value.length > 1 - ERROR !! ABORT
-							if (value.length() > 1) {
-								throw new Exception(String.format("conversion to char - incorrect size of string %s", value));
-							}
-							params[j] = value.charAt(0);
-						}
-					}
-				} // for each parameter
-				converted = true;
-			} catch (Exception e) {
-				Logging.logException(e);
-				converted = false;
-			}
-			
-			if (converted){
-				return new CodeBlock(m, params);
-			}
-
-		}
-
-		log.error(String.format("could not make CodeBlock for %s.%s.%d", serviceType, methodName, parms.size()));
-		return null;
-	}
 
 	// FIXME - axis's Method cache - loads only requested methods
 	// this would probably be more gracefull than batch loading as I am doing..
