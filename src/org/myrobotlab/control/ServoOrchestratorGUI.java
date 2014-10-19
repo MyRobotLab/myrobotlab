@@ -216,6 +216,10 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		JScrollPane middlemiddle_scrollpane = new JScrollPane(middlemiddle);
 		middlemiddle_scrollpane
 				.setPreferredSize(new Dimension(130 * 5, 80 * 5));
+		middlemiddle_scrollpane
+				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		middlemiddle_scrollpane
+				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 
 		JPanel middleleft = new JPanel();
 		middleleft.setLayout(new BoxLayout(middleleft, BoxLayout.Y_AXIS));
