@@ -302,6 +302,9 @@ public class SerialDeviceGNU implements SerialDevice, SerialPortEventListener {
 		return input.read();
 	}
 
+	// WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer
+	// is ever bigger than the read and no end of stream has occurred
+	// it will block forever :P
 	@Override
 	public int read(byte[] data) throws IOException {
 		return input.read(data);
