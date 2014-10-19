@@ -38,24 +38,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.zip.ZipException;
 
 import org.myrobotlab.logging.Level;
@@ -409,6 +395,22 @@ public class FileIO {
 		return list.toArray(new File[] {});
 	}
 
+	static public void copy(File src, File dst) throws IOException {
+	    InputStream in = new FileInputStream(src);
+	    OutputStream out = new FileOutputStream(dst);
+
+	    // Transfer bytes from in to out
+	    byte[] buf = new byte[1024];
+	    int len;
+	    while ((len = in.read(buf)) > 0) {
+	        out.write(buf, 0, len);
+	    }
+	    in.close();
+	    out.close();
+	}
+	
+	/**
+	 *  NO NIO ON ANDROID !!!
 	private static FileSystem createZipFileSystem(String zipFilename, boolean create) throws IOException {
 		// convert the filename to a URI
 		final Path path = Paths.get(zipFilename);
@@ -446,13 +448,7 @@ public class FileIO {
 					return FileVisitResult.CONTINUE;
 				}
 
-				/**
-				 * prints out details about the specified path such as size and
-				 * modification time
-				 * 
-				 * @param file
-				 * @throws IOException
-				 */
+				
 				private void print(Path file) throws IOException {
 					final DateFormat df = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
 					final String modTime = df.format(new Date(Files.getLastModifiedTime(file).toMillis()));
@@ -463,7 +459,7 @@ public class FileIO {
 			Logging.logException(e);
 		}
 	}
-
+*/
 	// jar pathing end ---------------
 	// -- os primitives begin -------
 

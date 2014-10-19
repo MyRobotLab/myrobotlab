@@ -1514,16 +1514,6 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		return sensorIndex;
 	}
 
-	public String captureServoScript() {
-		StringBuffer sb = new StringBuffer();
-		for (Map.Entry<String, ServoData> o : servos.entrySet()) {
-			String name = o.getKey();
-			sb.append(String.format("%s.moveTo(%d)\n", name, ((Servo) Runtime.getService(name)).getPos()));
-		}
-
-		return sb.toString();
-	}
-
 	public boolean sensorPollingStart(String name, int timeoutMS) {
 		info("sensorPollingStart %s", name);
 		if (!sensors.containsKey(name)) {
@@ -1757,6 +1747,13 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+	}
+
+
+	@Override
+	public void servoWriteMicroseconds(String name, Integer ms) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

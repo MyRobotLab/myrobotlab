@@ -1,7 +1,7 @@
 python = Runtime.start("python","Python")
 sr04 = Runtime.start("sr04", "UltrasonicSensor")
-sr04.attach("COM15", 7, 8)
-sr04.addPublishRangeListener(python)
+sr04.attach("COM15", 12, 11)
+sr04.addRangeListener(python)
 
 def onRange(distance):
   print "distance ", distance, " cm"

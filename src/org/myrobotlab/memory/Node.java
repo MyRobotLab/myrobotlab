@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import javax.imageio.ImageIO;
-
-import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -167,8 +164,8 @@ public class Node implements Serializable {
 			
 			Node node5 = root.getNode("root/node2/node5");
 
-			SerializableImage img = new SerializableImage(ImageIO.read(new File("opencv.4084.jpg")), "myImage");
-			node2.put("img", img);
+			//SerializableImage img = new SerializableImage(ImageIO.read(new File("opencv.4084.jpg")), "myImage");
+			//node2.put("img", img);
 
 			File cfg = new File(String.format("node.xml"));
 			serializer.write(root, cfg);

@@ -224,11 +224,13 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 	public void removeListeners(){
 		controller.removeActionListener(this);
 		pin.removeActionListener(this);
+		slider.removeChangeListener(sliderListener);		
 	}
 	
 	public void restoreListeners(){
 		controller.addActionListener(this);
 		pin.addActionListener(this);
+		slider.addChangeListener(sliderListener);
 	}
 	
 	synchronized public void getState(final Servo servo) {
@@ -253,11 +255,13 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 				if (servo.getPosFloat() == null) {
 					boundPos.setText("");
 				} else {
-					boundPos.setText(servo.getPosFloat().toString());
-					slider.removeChangeListener(sliderListener);
-					slider.setValue(Math.round(servo.getPosFloat()));
-					slider.addChangeListener(sliderListener);
+					boundPos.setText(servo.getPosFloat().toString());					
+					slider.setValue(Math.round(servo.getPosFloat()));					
 				}
+				
+				slider.setMinimum((int)servo.getMinInput());
+				slider.setMaximum((int)servo.getMaxInput());
+				
 				posMin.setText(servo.getMin().toString());
 				posMax.setText(servo.getMax().toString());
 				

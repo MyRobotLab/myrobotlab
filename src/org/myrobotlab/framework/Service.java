@@ -214,11 +214,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return host == null;
 	}
 
-	public Status test() throws Exception {
+	public Status test() {
 		return test((Object[]) null);
 	}
 
-	public Status test(Object... data) throws Exception {
+	public Status test(Object... data) {
 		return Status.info("%s %s no valid tests", getName(), getTypeName());
 	}
 
@@ -851,11 +851,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * Stops the service. Stops threads.
 	 */
 	public void stopService() {
-		/*
-		 * FIXME - re-implement but only start if there is a task if (timer !=
-		 * null) { timer.cancel(); timer.purge(); }
-		 */
-
 		isRunning = false;
 		outbox.stop();
 		if (thisThread != null) {

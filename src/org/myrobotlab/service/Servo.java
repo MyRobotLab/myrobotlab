@@ -29,6 +29,7 @@ import java.util.Vector;
 
 import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -85,8 +86,6 @@ public class Servo extends Service implements ServoControl {
 	@Element
 	private float maxY = 180;
 
-	boolean isBlocking = false;
-
 	@Element
 	private int rest = 90;
 
@@ -126,24 +125,20 @@ public class Servo extends Service implements ServoControl {
 		super.releaseService();
 	}
 
-	public boolean setBlocking(boolean b) {
-		isBlocking = b;
-		return b;
-	}
-
 	@Override
 	public boolean setController(ServoController controller) {
-		log.info(String.format("%s setController %s", getName(), controller));
+		if (controller == null) {
+			error("setting null as controller");
+			return false;
+		}
+
+		log.info(String.format("%s setController %s", getName(), controller.getName()));
 
 		if (isAttached()) {
 			warn("can not set controller %s when servo %s is attached", controller, getName());
 			return false;
 		}
 
-		if (controller == null) {
-			error("setting null as controller");
-			return false;
-		}
 		this.controller = controller;
 		broadcastState();
 		return true;
@@ -227,12 +222,21 @@ public class Servo extends Service implements ServoControl {
 	public boolean isInverted() {
 		return inverted;
 	}
+	
+	public float getMinInput(){
+		return minX;
+	}
+	
+	public float getMaxInput(){
+		return maxX;
+	}
 
 	public void map(float minX, float maxX, float minY, float maxY) {
 		this.minX = minX;
 		this.maxX = maxX;
 		this.minY = minY;
 		this.maxY = maxY;
+		broadcastState();
 	}
 
 	public void map(int minX, int maxX, int minY, int maxY) {
@@ -240,6 +244,7 @@ public class Servo extends Service implements ServoControl {
 		this.maxX = maxX;
 		this.minY = minY;
 		this.maxY = maxY;
+		broadcastState();
 	}
 
 	public int calc(float s) {
@@ -277,6 +282,31 @@ public class Servo extends Service implements ServoControl {
 		lastActivityTime = System.currentTimeMillis();
 
 	}
+	
+	public void writeMicroseconds(Integer pos) {
+		if (controller == null) {
+			error(String.format("%s's controller is not set", getName()));
+			return;
+		}
+
+		inputX = pos.floatValue();
+
+		// the magic mapping
+		int outputY = calc(inputX);
+
+		if (outputY > outputYMax || outputY < outputYMin) {
+			warn(String.format("%s.moveTo(%d) out of range", getName(), (int) outputY));
+			return;
+		}
+
+		// FIXME - currently their is no timerPosition
+		// this could be gotten with 100 * outputY for some valid range
+		log.info("servoWrite({})", outputY);
+		controller.servoWriteMicroseconds(getName(), outputY);
+		lastActivityTime = System.currentTimeMillis();
+
+	}
+	
 
 	public boolean isAttached() {
 		return isAttached;
@@ -494,8 +524,6 @@ public class Servo extends Service implements ServoControl {
 		return setController(sc);
 	}
 
-
-
 	public boolean setEventsEnabled(boolean b) {
 		controller.setServoEventsEnabled(getName(), b);
 		return b;
@@ -504,9 +532,9 @@ public class Servo extends Service implements ServoControl {
 	public void setSpeedControlOnUC(boolean b) {
 		speedControlOnUC = b;
 	}
-	
+
 	// uber good
-	public Integer publishServoEvent(Integer position){
+	public Integer publishServoEvent(Integer position) {
 		return position;
 	}
 
@@ -514,9 +542,13 @@ public class Servo extends Service implements ServoControl {
 	public void addServoEventListener(Service service) {
 		addListener("publishServoEvent", service.getName(), "onServoEvent", Integer.class);
 	}
-	
 
-	public void test(String port, int pin) throws MRLError {
+	public Status test(String port, int pin) {
+		Status status = null;
+		
+		try {			
+			
+		super.test();
 
 		// FIXME GSON or PYTHON MESSAGES
 
@@ -652,14 +684,13 @@ public class Servo extends Service implements ServoControl {
 			servo.moveTo(max);
 		}
 
-		if (testBlocking) {
-			info("test blocking");
-			servo.setBlocking(true);
-		}
-
 		info("test completed");
+		} catch(Exception e){
+			status.addError(e);
+		}
+		return status;
 	}
-	
+
 	public static void main(String[] args) throws InterruptedException {
 
 		LoggingFactory.getInstance().configure();
@@ -678,6 +709,5 @@ public class Servo extends Service implements ServoControl {
 		}
 
 	}
-
 
 }

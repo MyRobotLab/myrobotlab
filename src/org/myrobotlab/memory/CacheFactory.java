@@ -6,7 +6,7 @@ package org.myrobotlab.memory;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.myrobotlab.reflection.Instantiator;
+import org.myrobotlab.reflection.Reflector;
 
 /**
  * Creates a cache based on configuration for the specified package and class.
@@ -64,7 +64,7 @@ public class CacheFactory {
 		if (cache != null) {
 			return cache;
 		}
-		cache = Instantiator.<Cache> getNewInstance(forClass, new Object[0]);
+		cache = Reflector.<Cache> getNewInstance(forClass, new Object[0]);
 		caches.put(createKey(forClass), cache);
 		return cache;
 	}

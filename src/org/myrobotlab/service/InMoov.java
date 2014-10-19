@@ -1318,6 +1318,8 @@ public class InMoov extends Service {
 		
 		InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
 		
+		//i01.reserve(key, actualName, simpleTypeName, comment)
+		
 		GUIService gui = (GUIService)Runtime.start("gui", "GUIService");
 		
 		// TODO - run Gael's script
