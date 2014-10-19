@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -11,6 +12,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.alicebot.ab.Bot;
+import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
@@ -36,6 +38,17 @@ public class ProgramAB extends Service {
 	//private Chat chatSession=null;
 	private HashMap<String, Chat> sessions = new HashMap<String, Chat>();
 	private Pattern oobPattern = Pattern.compile("<oob>(.*?)</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+	private boolean processOOB = true;
+	
+	public boolean isProcessOOB() {
+		return processOOB;
+	}
+
+
+	public void setProcessOOB(boolean processOOB) {
+		this.processOOB = processOOB;
+	}
+
 
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
@@ -69,7 +82,9 @@ public class ProgramAB extends Service {
 		if (bot == null){
 			bot = new Bot(botName, path);
 		}
-		
+		for (Category c : bot.brain.getCategories()) {
+			System.out.println(c.getPattern());
+		}
 		sessions.put(session, new Chat(bot));
 
 		if (!"default".equals(session)){
@@ -115,7 +130,9 @@ public class ProgramAB extends Service {
 		String res = sessions.get(session).multisentenceRespond(text);
 		// Check the AIML response to see if there is OOB (out of band data) 
 		// If so, publish that data independent of the text response.
-		processOOB(res);
+		if (processOOB) {
+			processOOB(res);
+		}
 		Response response = new Response(session, res);
 		invoke("publishResponse", response);
 		invoke("publishResponseText", response);
@@ -161,6 +178,20 @@ public class ProgramAB extends Service {
 	}
 
 
+	/** 
+	 * Return a list of all patterns that the AIML Bot knows to match against.
+	 * 
+	 * @param botName
+	 * @return
+	 */
+	public ArrayList<String> listPatterns(String botName) {
+		ArrayList<String> patterns = new ArrayList<String>();
+		for (Category c : bot.brain.getCategories()) {
+			patterns.add(c.getPattern());
+		}
+		return patterns;
+	}
+	
 	public void startSession(String progABPath, String botName) {
 		startSession(progABPath	, null, botName);
 	}
