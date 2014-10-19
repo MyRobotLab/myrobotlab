@@ -6,7 +6,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.InMoovHand;
 import org.slf4j.Logger;
 
 /**

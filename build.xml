@@ -100,7 +100,7 @@
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
 
-	<property name="tag" value="1.0.62" />
+	<property name="tag" value="1.0.66" />
 	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
@@ -419,11 +419,12 @@
 			</manifest>
 		</jar>
 
-		<property name="myrobotlab.jar" location="${toZip}/libraries/jar/myrobotlab.jar" />
-
+		<!-- <property name="myrobotlab.jar" location="${toZip}/libraries/jar/myrobotlab.jar" /> -->
+		<!--
 		<copy todir="${toZip}">
 			<fileset dir="${resource.root}" />
 		</copy>
+		-->
 
 		<!-- FIXME - use Ivy to get the files there ! filebase or url resolver -->
 		<echo>compile end</echo>
@@ -454,7 +455,7 @@
 	</target>
 
 	<target name="release" depends="compile, getAssetsURL">
-		<echo message="${myrobotlab.jar}" />
+		<echo message="creating tag" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
 			<headers>
@@ -465,29 +466,31 @@
 			<query>
 				<parameter name="name" value="myrobotlab.jar" />
 			</query>
-			<entity file="${myrobotlab.jar}" binary="true" />
+			<entity file="${dist}/myrobotlab.jar" binary="true" />
 		</http>
 	</target>
 
+	<!--
 	<target name="uploadZip" depends="dist, getAssetsURL, release">
 		<echo message="${myrobotlab.jar}" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
-			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
 			<headers>
 				<header name="Authorization" value="token ${github.token}" />
 				<header name="Accept" value="application/vnd.github.manifold-preview" />
 				<header name="Content-Type" value="application/java-archive" />
 			</headers>
 			<query>
-				<parameter name="name" value="myrobotlab.${tag}.zip" />
+				<parameter name="name" value="myrobotlab.jar" />
 			</query>
-			<entity file="${temp}/myrobotlab.${tag}.zip" binary="true" />
+			<entity file="${dist}/myrobotlab.jar" binary="true" />
 		</http>
 	</target>
+	-->
 
 	<target name="dist" depends="compile" description="generate the distribution">
-		<chmod file="${toZip}/*.sh" perm="ugo+rx" />
-		<zip destfile="${temp}/myrobotlab.${tag}.zip" basedir="${toZip}" />
+		<!-- <chmod file="${toZip}/*.sh" perm="ugo+rx" /> -->
+		<!-- <zip destfile="${dist}/archive/myrobotlab.${tag}.zip" basedir="${toZip}" /> -->
+		<copy file="${dist}/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}.jar" />
 	</target>
 
 	<target name="clean" description="clean up">

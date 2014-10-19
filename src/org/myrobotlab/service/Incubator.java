@@ -5,10 +5,12 @@ import java.io.File;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
 import org.apache.ivy.core.report.ResolveReport;
+import org.junit.Test;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Peers;
@@ -29,6 +31,8 @@ public class Incubator extends Service {
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(Incubator.class);
+	
+	Date now = new Date();
 
 	// transient public XMPP xmpp;
 
@@ -57,6 +61,10 @@ public class Incubator extends Service {
 		// peers.put("python", "Python", "Python service");
 
 		return peers;
+	}
+	
+	public Incubator(){
+		this("incubator");
 	}
 
 	public Incubator(String n) {
@@ -92,6 +100,8 @@ public class Incubator extends Service {
 		return null;
 	}
 
+	// FIXME - 2 sets of services - 1 by serviceData.xml & 1 by all files in
+	// org.myrobotlab.service
 	// FIXME - do all types of serialization
 	// TODO - encode decode test JSON & XML
 	// final ArrayList<Status>
@@ -116,7 +126,7 @@ public class Incubator extends Service {
 				continue;
 			}
 
-			fullType = "org.myrobotlab.service.WebGUI";
+			// fullType = "org.myrobotlab.service.WebGUI";
 
 			try {
 
@@ -132,7 +142,8 @@ public class Incubator extends Service {
 				s.startService();
 
 			} catch (Exception e) {
-				status.add(Status.error("%s - %s", fullType, e.getMessage()));
+				status.addError("ERROR - %s", fullType);
+				status.addError(e);
 				continue;
 			}
 
@@ -169,8 +180,8 @@ public class Incubator extends Service {
 
 				log.info("released {}", fullType);
 
-			} catch (Exception e) {
-				status.add(Status.error("serializing %s threw %s %s", fullType, e.getMessage(), Logging.stackToString(e)));
+			} catch (Exception ex) {
+				status.addError(ex);
 			}
 		} // end of loop
 
@@ -210,10 +221,8 @@ public class Incubator extends Service {
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 			String fullName = serviceTypeNames[i];
 			String shortName = fullName.substring(fullName.lastIndexOf(".") + 1);
-
-			ServiceInterface si = Runtime.start(shortName, shortName);
-
 			try {
+				ServiceInterface si = Runtime.start(shortName, shortName);
 				status.add(si.test());
 			} catch (Exception e) {
 				status.addError(e);
@@ -256,7 +265,7 @@ public class Incubator extends Service {
 				status.addError("%s.py does not exist", shortName);
 			} else {
 				uart99.connect("UART99");
-				uart99.record(String.format("%s.rx", shortName)); // FIXME
+				uart99.recordRX(String.format("%s.rx", shortName)); // FIXME
 																	// FILENAME
 																	// OVERLOAD
 				python.exec(py);
@@ -283,7 +292,7 @@ public class Incubator extends Service {
 
 			Runtime.createAndStart("gui", "GUIService");
 			python = (Python) startPeer("python");
-			InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
+			// InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 
 			HashSet<String> keepMeRunning = new HashSet<String>(Arrays.asList("i01", "gui", "runtime", "python", getName()));
 
@@ -294,7 +303,7 @@ public class Incubator extends Service {
 					String script = FileIO.resourceToString(String.format("Python/examples/%s", r));
 					python.exec(script);
 					log.info("here");
-					i01.detach();
+					// i01.detach();
 					Runtime.releaseAllServicesExcept(keepMeRunning);
 				}
 			}
@@ -313,7 +322,7 @@ public class Incubator extends Service {
 
 			Runtime.createAndStart("gui", "GUIService");
 			python = (Python) startPeer("python");
-			InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
+			// InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 
 			HashSet<String> keepMeRunning = new HashSet<String>(Arrays.asList("i01", "gui", "runtime", "python", getName()));
 
@@ -324,7 +333,7 @@ public class Incubator extends Service {
 					String script = FileIO.resourceToString(String.format("Python/examples/%s", r));
 					python.exec(script);
 					log.info("here");
-					i01.detach();
+					// i01.detach();
 					Runtime.releaseAllServicesExcept(keepMeRunning);
 				}
 			}
@@ -383,27 +392,10 @@ public class Incubator extends Service {
 		log.info(report.toString());
 	}
 
-	public void servoArduinoOpenCVGUIService() {
-		try {
-			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-			GUIService gui = (GUIService) Runtime.start("gui", "GUIService");
-
-			opencv.addFilter("PyramidDown");
-			opencv.capture();
-
-			sleep(5000);
-
-			servo.test();
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 
-		status.add(subTest());
+		//status.add(subTest());
 		status.add(serializeTest());
 
 		if (status.hasError()) {

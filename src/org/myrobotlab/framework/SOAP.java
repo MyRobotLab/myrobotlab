@@ -1,22 +1,8 @@
 package org.myrobotlab.framework;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.SchemaOutputResolver;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.Level;
@@ -24,9 +10,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Clock;
-import org.myrobotlab.service.PickToLight;
 import org.slf4j.Logger;
-import org.w3c.dom.Document;
 
 // Service processing should be subset of "any" class processing
 
@@ -34,8 +18,6 @@ public class SOAP {
 
 	// http://www.soapclient.com/soaptest.html
 	// http://publib.boulder.ibm.com/infocenter/iseries/v5r4/index.jsp?topic=%2Frzatz%2F51%2Fwebserv%2Fwsdevmap.htm
-	
-	
 
 	public final static Logger log = LoggerFactory.getLogger(Clock.class.getCanonicalName());
 
@@ -50,7 +32,6 @@ public class SOAP {
 	}
 
 	// TODO - put in TypesUtil
-
 
 	public HashSet<String> getFilter() {
 		HashSet<String> filter = new HashSet<String>();
@@ -118,7 +99,7 @@ public class SOAP {
 
 	String getPrimitiveWSDL(Class<?> type, HashSet<String> filter, boolean includeFilter) {
 		ArrayList<Method> ret = new ArrayList<Method>();
-		//Method[] methods = type.getMethods();
+		// Method[] methods = type.getMethods();
 		Method[] methods = type.getDeclaredMethods();
 		for (int i = 0; i < methods.length; ++i) {
 			Method m = methods[i];
@@ -195,7 +176,9 @@ public class SOAP {
 				// parameter type <element><complexType><sequence>....
 				if (p.length == 0) {
 					params = "     <element name=\"%methodName%\">\n" + "       <complexType/>\n" + "   </element>\n";
-					//params = "     <element name=\"%methodName%\">\n" + "       <complexType><sequence><element name=\"%methodName%\"/></sequence></complexType>\n" + "   </element>\n";
+					// params = "     <element name=\"%methodName%\">\n" +
+					// "       <complexType><sequence><element name=\"%methodName%\"/></sequence></complexType>\n"
+					// + "   </element>\n";
 				} else {
 					params = "     <element name=\"%methodName%\">\n" + "    <complexType>\n" + "     <sequence>\n";
 					for (int j = 0; j < p.length; ++j) {
@@ -215,14 +198,14 @@ public class SOAP {
 
 			// get <!-- [[%wsdl:message%]] --> message
 			String messagesTemplate = FileIO.resourceToString("soap/messages.xml.tmpl");
-			
+
 			// for (int i = 0; i < methods.length; ++i) {
 			// Method m = methods[i];
 			if ((!filter.contains(m.getName()) && !includeFilter) || (filter.contains(m.getName()) && includeFilter)) {
 				StringBuffer p = new StringBuffer("");
-				
+
 				p.append("<wsdl:part element=\"impl:%methodName%\" name=\"%methodName%\"></wsdl:part>\n");
-				
+
 				Class<?>[] parameters = m.getParameterTypes();
 				for (int j = 0; j < parameters.length; ++j) {
 					p.append("<wsdl:part element=\"impl:%methodName%\" name=\"p" + j + "\"></wsdl:part>\n");
@@ -265,168 +248,71 @@ public class SOAP {
 
 		return wsdlTemplate;
 	}
-	
-	public static void pojoToXSD(JAXBContext context, Object pojo, OutputStream out) 
-		    throws IOException, TransformerException 
-		{
-		    final List<DOMResult> results = new ArrayList<DOMResult>();
 
-		    context.generateSchema(new SchemaOutputResolver() {
-
-		        @Override
-		        public Result createOutput(String ns, String file)
-		                throws IOException {
-		            DOMResult result = new DOMResult();
-		            result.setSystemId(file);
-		            results.add(result);
-		            return result;
-		        }
-		    });
-
-		    DOMResult domResult = results.get(0);
-		    Document doc = (Document) domResult.getNode();
-
-		    // Use a Transformer for output
-		    TransformerFactory tFactory = TransformerFactory.newInstance();
-		    Transformer transformer = tFactory.newTransformer();
-
-		    DOMSource source = new DOMSource(doc);
-		    StreamResult result = new StreamResult(out);
-		    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		    transformer.transform(source, result);
-		}
-	
-
-	// Yes it may seem like a good place to use HttpServletRequest, but we aren't going to get caught
-	// in the muck of J2EE..  ITS A TRAP !!!
-	/*
-	public SOAPMessage getSOAPMessage(MimeHeaders headers, HTTPRequest request) throws Exception {
-		MessageFactory messageFactory = MessageFactory.newInstance(); // SOAPConstants.SOAP_1_1_PROTOCOL
-
-		// FIXME - framework shows headers - and if you have to de-serialize do
-		// so in the framework
-		// de-serialize data
-		String data = Util.StreamToStringBuffer(request.getInputStream());
-		log.info(String.format("incoming xml [%s]", data));
-
-		// FIXME - put in framework
-		// strip BOM if it exists
-		// References : - BOM Byte Order Marker -
-		// http://www.javapractices.com/topic/TopicAction.do?Id=257
-		// http://stackoverflow.com/questions/5386991/java-most-efficient-method-to-iterate-over-all-elements-in-a-org-w3c-dom-docume
-		if (data.startsWith("﻿")) {
-			data = data.substring(3);
-			log.info("removing BOM");
-		}
-
-		// creating new stream :P
-		InputStream stream = new ByteArrayInputStream(data.getBytes("UTF-8"));
-
-		SOAPMessage msg = messageFactory.createMessage(headers, stream);
-		SOAPBody body = msg.getSOAPBody();
-		SOAPHeader header = msg.getSOAPHeader(); // FIXME  - security
-		
-		/* ELEMENT EXTRACTION
-		String xmlns = config.get("dlclient.xmlns");
-
-		// FIXME - don't use configurable namespace - since it is now stablized to 
-		// diagnosticlink.daimler.com
-		NodeList tokenList = body.getElementsByTagNameNS(xmlns, "toolId");
-		log.info(String.format("toolId count %d", tokenList.getLength()));
-		for (int i = 0; i < tokenList.getLength(); i++) {
-			Node node = tokenList.item(i);
-			toolid = node.getFirstChild().getNodeValue();
-		}
-		
-		tokenList = body.getElementsByTagNameNS(xmlns, "version");
-		log.info(String.format("version count %d", tokenList.getLength()));
-		for (int i = 0; i < tokenList.getLength(); i++) {
-			Node node = tokenList.item(i);
-			version = node.getFirstChild().getNodeValue();
-		}
-		**/
-		/*
-		return msg;
-	}
-*/
-
-	public static void main(String[] args)  {
+	public static void main(String[] args) {
 
 		try {
 
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.DEBUG);
-			
-			
-			//SOAPBody body = msg.getSOAPBody();
-			
-			
-			JAXBContext context = JAXBContext.newInstance(Clock.class); 
-			
-			//pojoToXSD(context, pojo, out)
-			
-			/* WSDL4J IS NOT GOING TO WORK - no param names during runtime 
+
+			// SOAPBody body = msg.getSOAPBody();
+
+			//JAXBContext context = JAXBContext.newInstance(Clock.class);
+
+			// pojoToXSD(context, pojo, out)
+
+			/*
+			 * WSDL4J IS NOT GOING TO WORK - no param names during runtime
 			 * Interesting project - https://github.com/paul-hammant/paranamer
-			 * compiles the param names into another jar during compile time.... clever, but
-			 * might be better just to put Annotations on parameters with a loosy-goosy binding
-			 * where param names don't (have to) map to soap elements - just defaulted that way
+			 * compiles the param names into another jar during compile time....
+			 * clever, but might be better just to put Annotations on parameters
+			 * with a loosy-goosy binding where param names don't (have to) map
+			 * to soap elements - just defaulted that way
 			 */
 			String tns = "urn:xmltoday-delayed-quotes";
 			String xsd = "http://www.w3.org/2001/XMLSchema";
-/*
-			WSDLFactory factory = WSDLFactory.newInstance();
-			Definition def = factory.newDefinition();
-			Part part1 = def.createPart();
-			Part part2 = def.createPart();
-			javax.wsdl.Message msg1 = def.createMessage();
-			javax.wsdl.Message msg2 = def.createMessage();
-			Input input = def.createInput();
-			Output output = def.createOutput();
-			Operation operation = def.createOperation();
-			PortType portType = def.createPortType();
+			/*
+			 * WSDLFactory factory = WSDLFactory.newInstance(); Definition def =
+			 * factory.newDefinition(); Part part1 = def.createPart(); Part
+			 * part2 = def.createPart(); javax.wsdl.Message msg1 =
+			 * def.createMessage(); javax.wsdl.Message msg2 =
+			 * def.createMessage(); Input input = def.createInput(); Output
+			 * output = def.createOutput(); Operation operation =
+			 * def.createOperation(); PortType portType = def.createPortType();
+			 * 
+			 * def.setQName(new QName(tns, "StockQuoteService"));
+			 * def.setTargetNamespace(tns); def.addNamespace("tns", tns);
+			 * def.addNamespace("xsd", xsd);
+			 * 
+			 * part1.setName("symbol"); part1.setTypeName(new QName(xsd,
+			 * "string")); msg1.setQName(new QName(tns, "getQuoteInput"));
+			 * msg1.addPart(part1); msg1.setUndefined(false);
+			 * def.addMessage(msg1);
+			 * 
+			 * part2.setName("quote"); part2.setTypeName(new QName(xsd,
+			 * "float")); msg2.setQName(new QName(tns, "getQuoteOutput"));
+			 * msg2.addPart(part2); msg2.setUndefined(false);
+			 * def.addMessage(msg2);
+			 * 
+			 * input.setMessage(msg1); output.setMessage(msg2);
+			 * operation.setName("getQuote"); operation.setInput(input);
+			 * operation.setOutput(output); operation.setUndefined(false);
+			 * portType.setQName(new QName(tns, "GetQuote"));
+			 * portType.addOperation(operation);
+			 * 
+			 * portType.setUndefined(false); def.addPortType(portType);
+			 * 
+			 * WSDLWriter wsdlWriter = factory.newWSDLWriter();
+			 * 
+			 * FileOutputStream out = new FileOutputStream(new
+			 * File("test.wsdl")); wsdlWriter.writeWSDL(def, out);
+			 * 
+			 * String wsdl = def.toString(); log.info(wsdl);
+			 */
+			Class<?> clazz = Clock.class;
 
-			def.setQName(new QName(tns, "StockQuoteService"));
-			def.setTargetNamespace(tns);
-			def.addNamespace("tns", tns);
-			def.addNamespace("xsd", xsd);
-
-			part1.setName("symbol");
-			part1.setTypeName(new QName(xsd, "string"));
-			msg1.setQName(new QName(tns, "getQuoteInput"));
-			msg1.addPart(part1);
-			msg1.setUndefined(false);
-			def.addMessage(msg1);
-
-			part2.setName("quote");
-			part2.setTypeName(new QName(xsd, "float"));
-			msg2.setQName(new QName(tns, "getQuoteOutput"));
-			msg2.addPart(part2);
-			msg2.setUndefined(false);
-			def.addMessage(msg2);
-
-			input.setMessage(msg1);
-			output.setMessage(msg2);
-			operation.setName("getQuote");
-			operation.setInput(input);
-			operation.setOutput(output);
-			operation.setUndefined(false);
-			portType.setQName(new QName(tns, "GetQuote"));
-			portType.addOperation(operation);
-			
-			portType.setUndefined(false); 
-			def.addPortType(portType);
-			
-			WSDLWriter wsdlWriter = factory.newWSDLWriter();
-			
-			FileOutputStream out = new FileOutputStream(new File("test.wsdl"));
-			wsdlWriter.writeWSDL(def, out);
-			
-			String wsdl = def.toString();
-			log.info(wsdl);
-*/
-			Class<?> clazz = PickToLight.class;
-
-			//clazz = Clock.class;
+			// clazz = Clock.class;
 
 			SOAP soap = new SOAP();
 			// String xml = soap.getWSDL(Clock.class);

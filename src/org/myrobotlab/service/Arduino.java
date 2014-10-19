@@ -54,7 +54,6 @@ import org.myrobotlab.arduino.compiler.Preferences;
 import org.myrobotlab.arduino.compiler.RunnerException;
 import org.myrobotlab.arduino.compiler.Target;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -69,6 +68,7 @@ import org.myrobotlab.serial.SerialDeviceEventListener;
 import org.myrobotlab.serial.SerialDeviceException;
 import org.myrobotlab.serial.SerialDeviceFactory;
 import org.myrobotlab.serial.SerialDeviceService;
+import org.myrobotlab.service.Serial.VirtualNullModemCable;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -112,7 +112,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
 
-	public static final int MRLCOMM_VERSION = 19;
+	public static final int MRLCOMM_VERSION = 20;
 
 	// serial protocol functions
 	public static final int MAGIC_NUMBER = 170; // 10101010
@@ -685,6 +685,25 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		sendMsg(SERVO_WRITE, index, newPos);
 
 	}
+	
+	public void servoWriteMicroseconds(String servoName, Integer newPos) {
+		if (serialDevice == null) {
+			error("serialDevice is NULL !");
+			return;
+		}
+
+		if (!servos.containsKey(servoName)) {
+			warn("Servo %s not attached to %s", servoName, getName());
+			return;
+		}
+
+		int index = servos.get(servoName).servoIndex;
+
+		log.info(String.format("writeMicroseconds %s %d index %d", servoName, newPos, index));
+
+		sendMsg(SERVO_WRITE_MICROSECONDS, index, newPos);
+
+	}
 
 	@Override
 	public void servoSweep(String servoName, int min, int max, int step) { // delay
@@ -740,6 +759,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	public void digitalWrite(Integer address, Integer value) {
+		if (serialDevice == null){
+			error("serial device is null");
+			return;
+		}
 		log.info("digitalWrite (" + address + "," + value + ") to " + serialDevice.getName() + " function number " + DIGITAL_WRITE);
 		sendMsg(DIGITAL_WRITE, address, value);
 		pinList.get(address).value = value;
@@ -2010,16 +2033,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return sensorIndex;
 	}
 
-	public String captureServoScript() {
-		StringBuffer sb = new StringBuffer();
-		for (Map.Entry<String, ServoData> o : servos.entrySet()) {
-			String name = o.getKey();
-			sb.append(String.format("%s.moveTo(%d)\n", name, ((Servo) Runtime.getService(name)).getPos()));
-		}
-
-		return sb.toString();
-	}
-
 	public boolean sensorPollingStart(String name, int timeoutMS) {
 		info("sensorPollingStart %s", name);
 		if (!sensors.containsKey(name)) {
@@ -2145,14 +2158,15 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		String port = "COM99";
 		String uartPort = "UART99";
 		
-		Serial.createNullModemCable(port, uartPort);
+		VirtualNullModemCable nullModem = Serial.createNullModemCable(port, uartPort);
 		Serial uart = (Serial)Runtime.start(uartPort, "Serial");
-		uart.record(String.format("%s.rx", uartPort));
+		uart.recordRX(String.format("%s.rx", uartPort));
+		uart.recordTX(String.format("%s.tx", uartPort));
 		
 		// set board type
 		// FIXME - this should be done by MRLComm.ino (compiled in)
 		status.addInfo("setting board type to %s", BOARD_TYPE_ATMEGA2560);
-		setBoard(BOARD_TYPE_ATMEGA2560);
+		arduino.setBoard(BOARD_TYPE_ATMEGA2560);
 	
 		if (!arduino.connect(port)) {
 			status.addError("could not conntect %s on %s", getName(), port);
@@ -2162,8 +2176,18 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		status.addInfo("found %d pins", pinList.size());
 		
 		for (int i = 0; i < pinList.size(); ++i){
-			
+			arduino.analogWrite(pinList.get(i).pin, 0);
+			arduino.analogWrite(pinList.get(i).pin, 128);
+			arduino.analogWrite(pinList.get(i).pin, 255);
 		}
+		
+		for (int i = 0; i < pinList.size(); ++i){
+			arduino.digitalWrite(pinList.get(i).pin, 1);
+			arduino.digitalWrite(pinList.get(i).pin, 0);
+		}
+		
+		arduino.disconnect();
+		nullModem.close();
 		
 
 		for (int i = 0; i < 10; ++i) {

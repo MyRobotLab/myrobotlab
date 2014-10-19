@@ -8,6 +8,7 @@ import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -181,8 +182,10 @@ public class WebGUI extends Service implements AuthorizationProvider {
 	}
 
 	public void startService() {
-		super.startService();
-		start();
+		if (!isRunning()) {
+			super.startService();
+			start();
+		}
 	}
 
 	@Override
@@ -329,31 +332,6 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		return b;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		try {
-			// String uri = "http\\://192.168.1.12:8080/?action=stream";
-			String uri = "\"http://192.168.1.12:8080/?action=stream\"";
-			Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").create();
-
-			Object o = gson.fromJson(uri, String.class);
-
-			log.info("{}", o);
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		WebGUI webgui = new WebGUI("webgui");
-		// webgui.useLocalResources(true);
-		// webgui.autoStartBrowser(false);
-		// Runtime.createAndStart("webgui", "WebGUI");
-		// webgui.useLocalResources(true);
-		webgui.startService();
-
-	}
-
 	// ============== security begin =========================
 	// FIXME - this will have to be keyed by the service name
 	// if the global datastructures are to be in Security
@@ -408,5 +386,33 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		return false;
 	}
 	// ============== security end =========================
+	
+	public Status test(){
+		Status status = super.test();
+		
+		try {
+			
+			// test re-entrant starting
+			WebGUI webgui = (WebGUI)Runtime.start(getName(),"WebGUI");
+			
+		} catch(Exception e){
+			status.addError(e);
+		}
+		
+		return status;
+	}
 
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+	
+		WebGUI webgui = (WebGUI)Runtime.start("webgui","WebGUI");
+		
+		webgui.test();
+		// webgui.useLocalResources(true);
+		// webgui.autoStartBrowser(false);
+		// Runtime.createAndStart("webgui", "WebGUI");
+		// webgui.useLocalResources(true);
+
+	}
 }

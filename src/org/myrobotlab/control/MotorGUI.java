@@ -44,7 +44,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.control.widget.ImageButton;
-import org.myrobotlab.reflection.Instantiator;
+import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Motor;
@@ -233,7 +233,7 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
 				String attachGUIName = String.format("org.myrobotlab.control.Motor_%sGUI", type);
 
 				controllerPanel.remove(controllerTypePanel);
-				controllerTypePanel = Instantiator.getNewInstance(attachGUIName, new Object[] { myService, boundServiceName, newController });
+				controllerTypePanel = Reflector.getNewInstance(attachGUIName, new Object[] { myService, boundServiceName, newController });
 				controllerPanel.add(controllerTypePanel, BorderLayout.CENTER);
 				// setEnabled(true);
 

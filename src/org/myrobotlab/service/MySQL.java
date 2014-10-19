@@ -57,8 +57,10 @@ public class MySQL extends Service {
 		return resultSet;
 	}
 	
-	public Status test() throws ClassNotFoundException, SQLException {
+	public Status test() {
+		
 		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		try {
 		MySQL mysql = (MySQL) Runtime.start(getName(), "MySQL");
 		mysql.connect("jdbc:mysql://localhost/mydatabase?" + "user=root&password=");
 		
@@ -72,6 +74,9 @@ public class MySQL extends Service {
 		}
 		if (user == null){
 			user = ip;
+		}
+		} catch(Exception e){
+			status.addError(e);
 		}
 		
 		return status;

@@ -1,3 +1,4 @@
+/*==================== MRLCOMM.H BEGIN ====================*/
 /**
 *
 * @author GroG (at) myrobotlab.org
@@ -6,7 +7,7 @@
 *
 * Enjoy !
 *
-* MRLComm.ino
+* MRLComm Library
 * -----------------
 * Purpose: support servos, sensors, analog & digital polling
 * oscope, motors, range sensors, pingdar & steppers.
@@ -15,10 +16,13 @@
 *
 */
 
-#include <Servo.h>
+// #ifndef MRLComm_h
+// #define MRLComm_h
+
+#include "Servo.h"
 
 // ----------  MRLCOMM FUNCTION INTERFACE BEGIN -----------
-#define MRLCOMM_VERSION				20
+#define MRLCOMM_VERSION				19
 
 // serial protocol functions
 #define MAGIC_NUMBER  					170 // 10101010
@@ -70,7 +74,7 @@
 // callback event - e.g. position arrived
 // MSG MAGIC | SZ | SERVO-INDEX | POSITION
 #define SERVO_EVENTS_ENABLE				40
-#define SERVO_EVENT					41
+#define SERVO_EVENT						41
 
 #define LOAD_TIMING_ENABLE				42
 #define LOAD_TIMING_EVENT				43
@@ -122,9 +126,6 @@
 #define ECHO_STATE_GOOD_RANGE	6
 #define ECHO_STATE_TIMEOUT	7
 
-// --VENDOR DEFINE SECTION BEGIN--
-// --VENDOR DEFINE SECTION END--
-
 // FIXME FIXME FIXME
 // -- FIXME - modified by board type BEGIN --
 // Need Arduino to do a hardware abstraction layer
@@ -149,13 +150,9 @@
 *
 */
 
-int msgSize = 0; // the NUM_BYTES of current message
+//---- data record definitions begin -----
 
-unsigned int debounceDelay = 50; // in ms
-long lastDebounceTime[DIGITAL_PIN_COUNT];
-byte msgBuf[64];
-
-typedef struct
+struct sensor_type
   {
       int type;
       int trigPin;
@@ -166,11 +163,10 @@ typedef struct
       unsigned long lastValue;
       int state;
       //NewPing* ping;
-  }  sensor_type;
+  };
 
-sensor_type sensors[SENSORS_MAX];
 
-typedef struct
+struct stepper_type
   {
   	  int ts;
       int type;
@@ -186,12 +182,10 @@ typedef struct
       int step1;
       int step2;
       int step3;
-  }  stepper_type;
-
-stepper_type steppers[STEPPERS_MAX];
+  };
 
 // Servos
-typedef struct
+struct servo_type
 {
     Servo* servo;
     int index; // index of this servo
@@ -211,47 +205,15 @@ typedef struct
 
     // event related
     bool eventsEnabled;
-} servo_type;
+};
 
-servo_type servos[MAX_SERVOS];
-
-
-unsigned long loopCount     = 0;
-unsigned long lastMicros 	= 0;
-int byteCount               = 0;
-unsigned char newByte 		= 0;
-unsigned char ioCmd[64];  // message buffer for all inbound messages
-int readValue;
-
-// FIXME - normalize with sampleRate ..
-int loadTimingModulus = 1000;
-
-boolean loadTimingEnabled = false;
-unsigned long loadTime = 0;
-// TODO - avg load time
-
-unsigned int sampleRate = 1; // 1 - 65,535 modulus of the loopcount - allowing you to sample less
-
-int digitalReadPin[DIGITAL_PIN_COUNT];        // array of pins to read from
-int digitalReadPollingPinCount = 0;           // number of pins currently reading
-int lastDigitalInputValue[DIGITAL_PIN_COUNT]; // array of last input values
-bool digitalTriggerOnly	= false;      // send data back only if its different
-
-int analogReadPin[ANALOG_PIN_COUNT];          // array of pins to read from
-int analogReadPollingPinCount = 0;            // number of pins currently reading
-int lastAnalogInputValue[ANALOG_PIN_COUNT];   // array of last input values
-bool analogTriggerOnly = false;         // send data back only if its different
-
-unsigned int errorCount = 0;
-
-//---- data record definitions begin -----
-
+//---- data record definitions end -----
 
 // TODO - all well and good .. but you dont control Servo's data (yet)
 // should have a struct for it too - contains all the data info you'd want to have
 // in a servo - same with stepper
 
-typedef struct
+struct pingdar_type
   {
       int servoIndex; // id of servo in servos array
       //int servoPos; in servo
@@ -260,29 +222,128 @@ typedef struct
       int sweepMax;
       int step;
       bool isRunning; // needed ? - is combo of two
-  }  pingdar_type;
+  };
 
-pingdar_type pingdars[PINGDARS_MAX];
-//===custom msg interface begin===
+class MRLComm {
+public:
+
+	stepper_type steppers[STEPPERS_MAX];
+	sensor_type sensors[SENSORS_MAX];
+
+	int msgSize; // the NUM_BYTES of current message
+
+	unsigned int debounceDelay; // in ms
+	long lastDebounceTime[DIGITAL_PIN_COUNT];
+	byte msgBuf[64];
+
+	servo_type servos[MAX_SERVOS];
+
+
+	unsigned long loopCount;
+	unsigned long lastMicros;
+	int byteCount;
+	unsigned char newByte;
+	unsigned char ioCmd[64];  // message buffer for all inbound messages
+	int readValue;
+
+	// FIXME - normalize with sampleRate ..
+	int loadTimingModulus;
+
+	boolean loadTimingEnabled;
+	unsigned long loadTime;
+	// TODO - avg load time
+
+	unsigned int sampleRate; // 1 - 65,535 modulus of the loopcount - allowing you to sample less
+
+	int digitalReadPin[DIGITAL_PIN_COUNT];        // array of pins to read from
+	int digitalReadPollingPinCount;           // number of pins currently reading
+	int lastDigitalInputValue[DIGITAL_PIN_COUNT]; // array of last input values
+	bool digitalTriggerOnly;      // send data back only if its different
+
+	int analogReadPin[ANALOG_PIN_COUNT];          // array of pins to read from
+	int analogReadPollingPinCount;            // number of pins currently reading
+	int lastAnalogInputValue[ANALOG_PIN_COUNT];   // array of last input values
+	bool analogTriggerOnly;         // send data back only if its different
+
+	unsigned int errorCount;
+
+	pingdar_type pingdars[PINGDARS_MAX];
+
+	HardwareSerial *serial;
+
+	//===custom msg interface begin===
 	byte customParams[256];
 	int paramBuffIndex;
 	int paramCnt;
-//===custom msg interface end===
+	//===custom msg interface end===
+
+	/* could optimize - but makes for ugly code - just to save a couple clock cycles - counting to 6 :P
+	not worth it
+	int pingdarsRunningCount = 0;
+	int pingdarsRunning[6]; // map array of running pingdars
+	*/
+
+	// void sendMsg ( int num, ... );
+
+	MRLComm();
+	void setup(HardwareSerial *s);
+	boolean getCommand();
+	void softReset();
+	void process();
+	void sendError(int type);
+	void sendServoEvent(servo_type& s, int eventType);
+	unsigned long getUltrasonicRange(sensor_type& sensor);
+	void setPWMFrequency (int address, int prescalar);
+	void removeAndShift (int array [], int& len, int removeValue);
+
+	//===custom msg interface begin===
+	void startMsg();
+	//void append(const unsigned int& data);
+	void append(const int& data);
+	//void append(const unsigned long& data);
+	//void append(const long& data);
+	void sendMsg();
+	//===custom msg interface end===
+
+	bool blinkState;
+};
+
+// #endif
+/*==================== MRLCOMM.H END ========================*/
+/*==================== MRLCOMM.CPP BEGIN ====================*/
+// FIXME #include <MRLComm.h>
+
+MRLComm::MRLComm(){
+	msgSize = 0;
+	debounceDelay = 50;
+	loopCount   = 0;
+	lastMicros 	= 0;
+	byteCount   = 0;
+	newByte     = 0;
+
+	paramCnt = 0;
+	paramBuffIndex = 0;
+
+	loadTimingModulus = 1000;
+	loadTimingEnabled = false;
+	loadTime = 0;
+	sampleRate = 1;
+	digitalReadPollingPinCount = 0;
+	digitalTriggerOnly = false;
+	analogReadPollingPinCount = 0;
+	analogTriggerOnly = false;
+	errorCount = 0;
 
 
-/* could optimize - but makes for ugly code - just to save a couple clock cycles - counting to 6 :P
-not worth it
-int pingdarsRunningCount = 0;
-int pingdarsRunning[6]; // map array of running pingdars
-*/
+}
 
-void sendServoEvent(servo_type& s, int eventType);
-unsigned long getUltrasonicRange(sensor_type& sensor);
-// void sendMsg ( int num, ... );
+//===custom msg interface begin===
 
-//---- data record definitions end -----
+void MRLComm::startMsg() {
+}
 
-void append(const int& data) {
+
+void MRLComm::append(const int& data) {
 	++paramCnt;
 	customParams[paramBuffIndex] = ARDUINO_TYPE_INT;
 	customParams[++paramBuffIndex] = (byte)(data >> 8);
@@ -290,30 +351,29 @@ void append(const int& data) {
 	++paramBuffIndex;
 }
 
-void startMsg() {
+/*
+
+void MRLComm::append(const unsigned int& data) {
 }
 
-void setup() {
-	Serial.begin(57600);        // connect to the serial port
-
-	softReset();
-
-	// --VENDOR SETUP BEGIN--
-	// --VENDOR SETUP END--
+void MRLComm::append(const unsigned long& data) {
 }
 
+void MRLComm::append(const signed long& data) {
+}
+*/
 
-void sendMsg(){
+void MRLComm::sendMsg(){
 
 	// unbox
-	Serial.write(MAGIC_NUMBER);
-	Serial.write(paramBuffIndex + 2); // = param buff size + FN + paramCnt
-	//Serial.write(2); // = param buff size + FN + paramCnt
-	Serial.write(CUSTOM_MSG);
-	Serial.write(paramCnt);
+	serial->write(MAGIC_NUMBER);
+	serial->write(paramBuffIndex + 2); // = param buff size + FN + paramCnt
+	//serial->write(2); // = param buff size + FN + paramCnt
+	serial->write(CUSTOM_MSG);
+	serial->write(paramCnt);
 
 	for (int i = 0; i < paramBuffIndex; ++i){
-		Serial.write(customParams[i]);
+		serial->write(customParams[i]);
 	}
 
 	paramCnt = 0;
@@ -321,8 +381,17 @@ void sendMsg(){
 }
 
 
+//===custom msg interface end===
 
-void softReset()
+
+void MRLComm::setup(HardwareSerial *s) {
+	serial = s;
+	//Serial.begin(rate);
+	softReset();
+}
+
+
+void MRLComm::softReset()
 {
 	for (int i = 0; i < MAX_SERVOS - 1; ++i)
 	{
@@ -345,7 +414,7 @@ void softReset()
 
 }
 
-void setPWMFrequency (int address, int prescalar)
+void MRLComm::setPWMFrequency (int address, int prescalar)
 {
 	int clearBits = 0x07;
 	if (address == 0x25)
@@ -364,7 +433,7 @@ void setPWMFrequency (int address, int prescalar)
 
 }
 
-void removeAndShift (int array [], int& len, int removeValue)
+void MRLComm::removeAndShift (int array [], int& len, int removeValue)
 {
 	int pos = -1;
 
@@ -400,13 +469,16 @@ void removeAndShift (int array [], int& len, int removeValue)
 	}
 }
 
-boolean getCommand ()
+boolean MRLComm::getCommand()
 {
 	// handle serial data begin
-	if (Serial.available() > 0)
+	if (serial->available() > 0)
 	{
+		//blink LED to indicate activity
+		blinkState = !blinkState;
+
 		// read the incoming byte:
-		newByte = Serial.read();
+		newByte = serial->read();
 		++byteCount;
 
 		// checking first byte - beginning of message?
@@ -442,7 +514,7 @@ boolean getCommand ()
 	return false;
 }
 
-void loop () {
+void MRLComm::process() {
 
 	++loopCount;
 
@@ -612,17 +684,17 @@ void loop () {
 
 		case SET_SERIAL_RATE:
 		{
-			Serial.end();
+			serial->end();
 			delay(500);
-			Serial.begin(ioCmd[1]);
+			serial->begin(ioCmd[1]);
 			break;
 		}
 
 		case GET_MRLCOMM_VERSION:{
-			Serial.write(MAGIC_NUMBER);
-			Serial.write(2); // size
-			Serial.write(GET_MRLCOMM_VERSION);
-			Serial.write((byte)MRLCOMM_VERSION);
+			serial->write(MAGIC_NUMBER);
+			serial->write(2); // size
+			serial->write(GET_MRLCOMM_VERSION);
+			serial->write((byte)MRLCOMM_VERSION);
 			break;
 			}
 
@@ -654,14 +726,14 @@ void loop () {
  			//sendMsg(6, SENSOR_DATA, 47, duration >> 24, duration >> 16, duration >> 8, duration & 0xFF);
 
 
-			Serial.write(MAGIC_NUMBER);
-			Serial.write(5); // size 1 FN + 4 bytes of unsigned long
-			Serial.write(PULSE_IN);
+			serial->write(MAGIC_NUMBER);
+			serial->write(5); // size 1 FN + 4 bytes of unsigned long
+			serial->write(PULSE_IN);
             // write the long value out
-			Serial.write((byte)(duration >> 24));
-			Serial.write((byte)(duration >> 16));
-			Serial.write((byte)(duration >> 8));
-			Serial.write((byte)duration & 0xFF);
+			serial->write((byte)(duration >> 24));
+			serial->write((byte)(duration >> 16));
+			serial->write((byte)(duration >> 8));
+			serial->write((byte)duration & 0xFF);
 
 
 			break;
@@ -734,13 +806,13 @@ void loop () {
 				stepper.isRunning = false;
 				stepper.targetPos = stepper.currentPos;
 
-				Serial.write(MAGIC_NUMBER);
-				Serial.write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
-				Serial.write(STEPPER_EVENT);
-				Serial.write(STEPPER_EVENT_STOP);
-				Serial.write(stepper.index); // send my index
-				Serial.write(stepper.currentPos >> 8);   // MSB
-				Serial.write(stepper.currentPos & 0xFF);	// LSB
+				serial->write(MAGIC_NUMBER);
+				serial->write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
+				serial->write(STEPPER_EVENT);
+				serial->write(STEPPER_EVENT_STOP);
+				serial->write(stepper.index); // send my index
+				serial->write(stepper.currentPos >> 8);   // MSB
+				serial->write(stepper.currentPos & 0xFF);	// LSB
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}
@@ -835,11 +907,11 @@ void loop () {
 			// if my value is different from last time  && config - send it
 			if (lastDigitalInputValue[digitalReadPin[i]] != readValue  || !digitalTriggerOnly)
 			{
-				Serial.write(MAGIC_NUMBER);
-				Serial.write(3); // size
-				Serial.write(DIGITAL_VALUE);
-				Serial.write(digitalReadPin[i]);// Pin#
-				Serial.write(readValue); 	// LSB
+				serial->write(MAGIC_NUMBER);
+				serial->write(3); // size
+				serial->write(DIGITAL_VALUE);
+				serial->write(digitalReadPin[i]);// Pin#
+				serial->write(readValue); 	// LSB
 
 			    lastDebounceTime[digitalReadPin[i]] = millis();
 			}
@@ -860,12 +932,12 @@ void loop () {
 			{
 				//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xFF);
 
-				Serial.write(MAGIC_NUMBER);
-				Serial.write(4); //size
-				Serial.write(ANALOG_VALUE);
-				Serial.write(analogReadPin[i]);
-				Serial.write(readValue >> 8);   // MSB
-				Serial.write(readValue & 0xFF);	// LSB
+				serial->write(MAGIC_NUMBER);
+				serial->write(4); //size
+				serial->write(ANALOG_VALUE);
+				serial->write(analogReadPin[i]);
+				serial->write(readValue >> 8);   // MSB
+				serial->write(readValue & 0xFF);	// LSB
 
 	        }
 			// set the last input value of this pin
@@ -981,15 +1053,15 @@ void loop () {
 					}
 
 				} else if (sensor.state == ECHO_STATE_GOOD_RANGE || sensor.state == ECHO_STATE_TIMEOUT) {
-					Serial.write(MAGIC_NUMBER);
-					Serial.write(6); // size 1 FN + 4 bytes of unsigned long
-					Serial.write(SENSOR_DATA);
-					Serial.write(i);
+					serial->write(MAGIC_NUMBER);
+					serial->write(6); // size 1 FN + 4 bytes of unsigned long
+					serial->write(SENSOR_DATA);
+					serial->write(i);
 		            // write the long value out
-					Serial.write((byte)(sensor.lastValue >> 24));
-					Serial.write((byte)(sensor.lastValue >> 16));
-					Serial.write((byte)(sensor.lastValue >> 8));
-					Serial.write((byte) sensor.lastValue & 0xFF);
+					serial->write((byte)(sensor.lastValue >> 24));
+					serial->write((byte)(sensor.lastValue >> 16));
+					serial->write((byte)(sensor.lastValue >> 8));
+					serial->write((byte) sensor.lastValue & 0xFF);
 					sensor.state = ECHO_STATE_START;
 				} // end else if
 
@@ -1027,13 +1099,13 @@ void loop () {
 				} else {
 					stepper.isRunning = false;
 					stepper.currentPos = stepper.targetPos; // forcing ? :P
-					Serial.write(MAGIC_NUMBER);
-					Serial.write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
-					Serial.write(STEPPER_EVENT);
-					Serial.write(STEPPER_EVENT_STOP);
-					Serial.write(stepper.index); // send my index
-					Serial.write(stepper.currentPos >> 8);   // MSB
-					Serial.write(stepper.currentPos & 0xFF);	// LSB
+					serial->write(MAGIC_NUMBER);
+					serial->write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
+					serial->write(STEPPER_EVENT);
+					serial->write(STEPPER_EVENT_STOP);
+					serial->write(stepper.index); // send my index
+					serial->write(stepper.currentPos >> 8);   // MSB
+					serial->write(stepper.currentPos & 0xFF);	// LSB
 				}
 
 			}
@@ -1048,20 +1120,19 @@ void loop () {
 	if (loadTimingEnabled && (loopCount%loadTimingModulus == 0)) {
 
  		// send it
-		Serial.write(MAGIC_NUMBER);
-		Serial.write(5); // size 1 FN + 4 bytes of unsigned long
-		Serial.write(LOAD_TIMING_EVENT);
+		serial->write(MAGIC_NUMBER);
+		serial->write(5); // size 1 FN + 4 bytes of unsigned long
+		serial->write(LOAD_TIMING_EVENT);
         // write the long value out
-		Serial.write((byte)(loadTime >> 24));
-		Serial.write((byte)(loadTime >> 16));
-		Serial.write((byte)(loadTime >> 8));
-		Serial.write((byte) loadTime & 0xFF);
+		serial->write((byte)(loadTime >> 24));
+		serial->write((byte)(loadTime >> 16));
+		serial->write((byte)(loadTime >> 8));
+		serial->write((byte) loadTime & 0xFF);
 	}
-
 
 } // end of big loop
 
-unsigned long getUltrasonicRange(sensor_type& sensor){
+unsigned long MRLComm::getUltrasonicRange(sensor_type& sensor){
 
 		// added for sensors which have single pin !
 		pinMode(sensor.trigPin, OUTPUT);
@@ -1080,24 +1151,24 @@ unsigned long getUltrasonicRange(sensor_type& sensor){
 		return pulseIn(sensor.echoPin, HIGH);
 }
 
-void sendServoEvent(servo_type& s, int eventType){
+void MRLComm::sendServoEvent(servo_type& s, int eventType){
   	// check type of event - STOP vs CURRENT POS
 
-	Serial.write(MAGIC_NUMBER);
-	Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
-	Serial.write(SERVO_EVENT);
-	Serial.write(s.index); // send my index
+	serial->write(MAGIC_NUMBER);
+	serial->write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
+	serial->write(SERVO_EVENT);
+	serial->write(s.index); // send my index
 	// write the long value out
-	Serial.write(eventType);
-	Serial.write(s.currentPos);
-	Serial.write(s.targetPos);
+	serial->write(eventType);
+	serial->write(s.currentPos);
+	serial->write(s.targetPos);
 }
 
-void sendError(int type){
-	Serial.write(MAGIC_NUMBER);
-	Serial.write(2); // size = 1 FN + 1 TYPE
-	Serial.write(MRLCOMM_ERROR);
-	Serial.write(type);
+void MRLComm::sendError(int type){
+	serial->write(MAGIC_NUMBER);
+	serial->write(2); // size = 1 FN + 1 TYPE
+	serial->write(MRLCOMM_ERROR);
+	serial->write(type);
 }
 
 /* SEEMED LIKE A GOOD IDEA NOT !!!!
@@ -1117,7 +1188,61 @@ void sendMsg ( int num, ... )
 		msgBuf[x] = (byte) va_arg ( arguments, int );
 	}
 	va_end ( arguments );                  // Cleans up the list
-	Serial.write(msgBuf, num + 2);
+	serial->write(msgBuf, num + 2);
 	return;
 }
 */
+
+/*==================== MRLCOMM.CPP END ====================*/
+/*==================== MRLCOMM.INO BEGIN ====================*/
+/**
+*
+* @author GroG (at) myrobotlab.org
+*
+* This file is part of MyRobotLab.
+*
+* Enjoy !
+*
+* MRLComm.ino
+* -----------------
+* Purpose: support servos, sensors, analog & digital polling
+* oscope, motors, range sensors, pingdar & steppers.
+*
+* Requirements: MyRobotLab running on a computer & a serial connection
+*
+*/
+
+#include <Servo.h>
+
+MRLComm mrl = MRLComm();
+
+void setup() {
+
+    Serial.begin(57600);
+    mrl.setup(&Serial);
+}
+
+void loop() {
+
+  // process mrl commands
+  // servo control, sensor, control send & recieve
+  // oscope, analog polling, digital polling etc..
+  // mrl messages
+  mrl.process();
+
+  // example how to
+  // send 3 vars to mrl
+  /*
+  int ax = 28;
+  int ay = 583;
+  int az = 32767;
+
+  mrl.startMsg();
+  mrl.append(ax);
+  mrl.append(ay);
+  mrl.append(az);
+  mrl.sendMsg();
+  */
+
+}
+/*==================== MRLCOMM.INO END ====================*/

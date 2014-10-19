@@ -640,8 +640,10 @@ public class XMPP extends Service implements Communicator, MessageListener {
 			XMPP xmpp1 = (XMPP) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
 			Runtime.createAndStart(String.format("clock%d", i), "Clock");
 			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
-			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "xxxx");
-			xmpp1.addAuditor("Greg Perry");
+			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "xxxxxxx");
+			xmpp1.addAuditor("Ma. Vo.");
+			xmpp1.sendMessage("Ma. Vo. - xmpp test", "Ma. Vo.");
+			//xmpp1.send("Ma. Vo.", "xmpp test");
 			// xmpp1.sendMessage("hello from incubator by name " +
 			// System.currentTimeMillis(), "Greg Perry");
 			xmpp1.sendMessage("xmpp 2", "robot02 02");
