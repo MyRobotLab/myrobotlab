@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import javax.xml.bind.Unmarshaller;
 
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Chat;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.OOBPayload;
@@ -130,7 +128,7 @@ public class ProgramAB extends Service {
 		while (oobMatcher.find()) {
 			// We found some OOB text.
 			// assume only one OOB in the text?
-			String oobPayload = oobMatcher.group();
+			String oobPayload = oobMatcher.group(1);
 			OOBPayload payload = parseOOB(oobPayload);
 			// TODO: maybe we dont' want this? 
 			// Notifiy endpoints
@@ -232,12 +230,9 @@ public class ProgramAB extends Service {
 		// File f = new File("ProgramAB");
 		// String progABPath = f.getAbsolutePath();
 		// String botName = "alice2";
-		alice.startSession(); 
-		Response response = alice.getResponse("How are you?");
-		alice.startSession("GroG"); 
-		response = alice.getResponse("GroG", "How are you?");
-		log.info("Alice " + response.msg);		
-		response = alice.getResponse("GroG", "dial 1234566");
+		// alice.startSession(); 
+		alice.startSession("ProgramAB", "default", "lloyd");
+		Response response = alice.getResponse("TEST OOB");
 		log.info("Alice " + response.msg);		
 	}
 	
