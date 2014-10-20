@@ -73,7 +73,7 @@ import org.slf4j.Logger;
  * foreign Runtimes It is a singleton and should be the only service of Runtime
  * running in a process The host and registry maps are used in routing
  * communication to the appropriate service (be it local or remote) It will be
- * the first Service created It also wraps the real JVM Runtime object
+ * the first Service created It also wraps the real JVM Runtime object.
  * 
  * TODO - get last args & better restart (with Agent possibly?)
  * 
