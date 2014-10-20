@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
@@ -15,12 +16,70 @@ import org.slf4j.Logger;
 public class EddieControlBoard extends Service {
 
 	private static final long serialVersionUID = 1L;
+	
+	// Peers
 	private transient Serial serial;
 	private transient Keyboard keyboard;
+
+	HashMap<String, Float> lastSensorValues = new HashMap<String, Float>();
+	int sampleCount = 0;
 
 	Map mapper = new Map(-1.0f, 1.0f, -127.0f, 127.0f);
 	float leftMotorPower = 0.0f;
 	float rightMotorPower = 0.0f;
+
+	SensorPoller sensorPoller = null;
+
+	class SensorPoller extends Thread {
+
+		boolean isPolling = false;
+
+		public void run() {
+			isPolling = true;
+			while (isPolling) {
+				try {
+					String dataString = getAnalogValues();
+					if (dataString.length() == 32) {
+						invoke("publishSensors", dataString);
+					} else {
+						error("invalid data string %s", dataString);
+					}
+				} catch (Exception e) {
+					Logging.logException(e);
+				}
+			}
+
+		}
+	}
+	
+	public HashMap<String, Float> publishSensors(String dataString) {
+		log.info(dataString);
+		String[] values = dataString.split(" ");
+		lastSensorValues.put("LEFT_IR", new Float(Integer.parseInt(values[0].trim(),16)));
+		lastSensorValues.put("MIDDLE_IR", new Float(Integer.parseInt(values[1].trim(),16)));
+		lastSensorValues.put("RIGHT_IR", new Float(Integer.parseInt(values[2].trim(),16)));
+		lastSensorValues.put("BATTERY", new Float(0.00039f * Integer.parseInt(values[7].trim(),16)));
+		++sampleCount;
+		return lastSensorValues;
+	}
+
+	public boolean startSensors() {
+		if (sensorPoller == null) {
+			sensorPoller = new SensorPoller();
+			sensorPoller.start();
+			return true;
+		}
+		return false;
+	}
+
+	public boolean stopSensors() {
+		if (sensorPoller != null) {
+			sensorPoller.isPolling = false;
+			sensorPoller = null;
+			return true;
+		}
+		return false;
+	}
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -48,10 +107,10 @@ public class EddieControlBoard extends Service {
 
 		keyboard.addKeyListener(this);
 	}
-	
+
 	public boolean connect(String port) throws IOException {
 		boolean ret = serial.connect(port, 115200, 8, 1, 0);
-		if (ret){
+		if (ret) {
 			stop();
 		}
 		return ret;
@@ -67,13 +126,13 @@ public class EddieControlBoard extends Service {
 		String ret = serial.readString(5);
 		return ret;
 	}
-	
+
 	public String getVersion() throws InterruptedException, IOException {
 		serial.write("VER\r");
 		String ret = serial.readString(5);
 		return ret;
 	}
-	
+
 	public String getPingValues() throws InterruptedException, IOException {
 		// depends
 		serial.write("PING\r");
@@ -82,11 +141,12 @@ public class EddieControlBoard extends Service {
 	}
 
 	public String getAnalogValues() throws InterruptedException, IOException {
+		serial.clear();
 		serial.write("ADC\r");
-		String ret = serial.readString(33);
+		String ret = serial.readString(32);
 		return ret;
 	}
-	
+
 	public String getGPIOInputs() throws InterruptedException, IOException {
 		serial.write("INS\r");
 		String ret = serial.readString(9);
@@ -98,7 +158,7 @@ public class EddieControlBoard extends Service {
 		String ret = serial.readString(9);
 		return ret;
 	}
-	
+
 	public String getGPIOLowValues() throws InterruptedException, IOException {
 		serial.write("LOWS\r");
 		String ret = serial.readString(9);
@@ -110,12 +170,12 @@ public class EddieControlBoard extends Service {
 		String ret = serial.readString(9);
 		return ret;
 	}
-	
+
 	public String read() throws InterruptedException, IOException {
 		return sendCommand("READ");
 	}
-	// read commands end ---
 
+	// read commands end ---
 
 	public void onKey(String cmd) throws IOException {
 		switch (cmd) {
@@ -225,8 +285,8 @@ public class EddieControlBoard extends Service {
 
 		}
 	}
-	
-	public String sendCmd(String cmd, int expectedResponseLength) throws IOException, InterruptedException{
+
+	public String sendCmd(String cmd, int expectedResponseLength) throws IOException, InterruptedException {
 		log.info(String.format("sendCommand %s", cmd));
 		String ret = null;
 
@@ -249,10 +309,10 @@ public class EddieControlBoard extends Service {
 		log.info(String.format("sendCommand %s", cmd));
 		String ret = null;
 
-		//serial.setBlocking(true);
+		// serial.setBlocking(true);
 		serial.write(String.format("%s\r", cmd));
-		//ret = serial.readString();
-		//serial.setBlocking(false);
+		// ret = serial.readString();
+		// serial.setBlocking(false);
 
 		return ret;
 	}
@@ -296,14 +356,54 @@ public class EddieControlBoard extends Service {
 		try {
 			EddieControlBoard ecb = (EddieControlBoard) Runtime.start(getName(), "EddieControlBoard");
 			Runtime.start("gui", "GUIService");
-			ecb.serial.connectToVirtualUART();
+			Serial uart = ecb.serial.connectToVirtualUART();
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 00A CCE\r");
+			ecb.startSensors();
 			// ecb.connect(port)
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
+			uart.write("011 011 011 004 004 004 004 CBB\r");
 			// ecb.go(1, 1);
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
 
 		return status;
+	}
+	
+	class Simulator extends Thread {
+		public void run(){
+			while (isRunning()){
+				// how to auto correct & read the various parts
+				// you know how to do this - ORIGINAL InputStream API Argggg !
+				
+			}
+		}
 	}
 
 	public static void main(String[] args) {

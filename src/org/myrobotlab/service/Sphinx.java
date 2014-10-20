@@ -47,6 +47,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
+import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.speech.DialogManager;
 import org.slf4j.Logger;
 
@@ -56,7 +57,7 @@ import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 import edu.cmu.sphinx.util.props.PropertyException;
 
-public class Sphinx extends Service implements SpeechRecognizer {
+public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Sphinx.class.getCanonicalName());
@@ -331,7 +332,8 @@ public class Sphinx extends Service implements SpeechRecognizer {
 								}
 							}
 
-							publishRecognized(resultText);
+							//publishRecognized(resultText);
+							invoke("recognized", resultText);
 						}
 
 					} else {
@@ -352,10 +354,12 @@ public class Sphinx extends Service implements SpeechRecognizer {
 
 	}
 
+	/*
 	public void publishRecognized(String recognizedText) {
 		invoke("recognized", recognizedText);
 	}
-
+	*/
+	
 	public void stopListening() {
 		isListening = false;
 		if (speechProcessor != null) {
@@ -576,6 +580,11 @@ public class Sphinx extends Service implements SpeechRecognizer {
 		// ear.createGrammar("hello | up | down | yes | no");
 		// ear.startService();
 
+	}
+
+	@Override
+	public String publishText(String recognizedText) {
+		return recognizedText;
 	}
 
 }

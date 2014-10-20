@@ -3,7 +3,7 @@ package org.myrobotlab.service.interfaces;
 public interface SpeechRecognizer {
 	
 	public String recognized(String word);
-	public void publishRecognized(String recognizedText);
+
 	/**
 	 * Event is sent when the listening Service is actually listening. There is
 	 * some delay when it initially loads.

@@ -94,9 +94,10 @@ public class VirtualSerialPort implements SerialDevice {
 								// currentDataSize intervals
 					if (listener != null && notifyOnDataAvailable) {
 						SerialDeviceEvent sde = new SerialDeviceEvent(srcport, SerialDeviceEvent.DATA_AVAILABLE, false, true);
+						// this does a blocking read in the Serial service
+						// while (serialDevice.read()...
 						listener.serialEvent(sde);
 					}
-					
 					Thread.sleep(pollingPause);
 				}
 
@@ -188,7 +189,7 @@ public class VirtualSerialPort implements SerialDevice {
 
 	@Override
 	public void write(int data) throws IOException {
-		log.info(name);
+		//log.info(name);
 		tx.add(data);
 		// the read will activate this rx thread - which is blocked on the "listener's" read/rx.take()
 	}
@@ -203,9 +204,9 @@ public class VirtualSerialPort implements SerialDevice {
 	@Override
 	public int read() throws IOException {
 		try {
-			log.info(name);
+			//log.info(name);
 			//tx.take();
-			log.debug("rx.take() size {}", rx.size());
+			//log.debug("rx.take() size {}", rx.size());
 			//rx.poll(100, unit);
 			// Thread.sleep(5);
 			return rx.take();

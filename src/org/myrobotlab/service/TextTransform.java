@@ -27,9 +27,8 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 	}
 
 	@Override
-	public String publishText() {
-		// TODO Auto-generated method stub
-		return null;
+	public String publishText(String text) {
+		return text;
 	}
 
 	@Override

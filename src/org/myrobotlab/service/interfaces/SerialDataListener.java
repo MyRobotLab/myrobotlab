@@ -28,5 +28,6 @@ package org.myrobotlab.service.interfaces;
 public interface SerialDataListener {
 
 	public void onByte(int b);
+	public String getName();
 
 }

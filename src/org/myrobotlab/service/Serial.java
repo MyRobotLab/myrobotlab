@@ -51,13 +51,9 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	transient BlockingQueue<Integer> blockingData = new LinkedBlockingQueue<Integer>();
 
 	int recievedByteCount = 0;
-
-	boolean publish = true;
 	boolean blocking = true;
-
 	boolean connected = false;
 	String portName = null;
-	
 	int rate = 57600;
 
 	/**
@@ -65,7 +61,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 * use blocking only from lower level api InputStream !!!
 	 * BUT ! - implement timeout similar to python serial
 	 */
-	
 	
 	// TODO use utility methods to help parse read data types
 	// because we should not assume we know the details of ints longs etc nor
@@ -86,16 +81,13 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	String txFileFormat;
 
 	// ====== file io end ======
-
-	ArrayList<SerialDataListener> listeners = new ArrayList<SerialDataListener>();
+	// removed local listeners - in favor of pub/sub framework
+	//ArrayList<SerialDataListener> listeners = new ArrayList<SerialDataListener>();
 
 	// display buffer for all RX data
 	StringBuffer display = new StringBuffer();
 	// pretty print = 3 chars e.g 'FF '
 	// * number of bytes 8
-
-	// decimal format will be 4 chars e.g. '127 '
-	int displayWidth = 4 * 8;
 
 	public Serial(String n) {
 		super(n);
@@ -125,19 +117,17 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return false;
 	}
 
+	
 	/**
-	 * No ByteBuffer do to referrence - AND the fact
-	 * http://royontechnology.blogspot
-	 * .com/2012/04/converting-byte-array-to-long.html
+	 * converts part of a byte array to a long
+	 * FIXME - remove this implementation for the int[]
+	 * FIXME - support for endianess 
 	 * 
-	 * TODO - add Endianess switch TODO - add "padding" for length < 8 e.g.
-	 * Arduino length is 4
-	 * 
-	 * @param bytes
-	 * @param offset
-	 * @return
+	 * @param bytes - input 
+	 * @param offset - offset to begin
+	 * @param length - size
+	 * @return - converted long
 	 */
-
 	public static long byteToLong(byte[] bytes, int offset, int length) {
 
 		long retVal = 0;
@@ -291,7 +281,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 				// stupid Java signed byte :(
 				int newByte;
-				// necessary Java unsigned byte in a signed int :(
 				recievedByteCount = 0;
 
 				// log.info("--------begin---------------");
@@ -323,10 +312,18 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 					
 					display.setLength(0);
 
-					// send data to listeners
+					// send data to listeners - local callback
+					// design decision - removing direct callback
+					// in favor of pub/sub framework - to add remote 
+					// capability as well
+					/*
 					for (int i = 0; i < listeners.size(); ++i) {
 						listeners.get(i).onByte(newByte);
 					}
+					*/
+					// publish if desired - simplified to "always" publish
+					// needs to fork the data to a buffer to support IOStream like interface
+					invoke("publishByte", newByte);
 
 					if (blocking) {
 						if (blockingData.size() < BUFFER_SIZE) {
@@ -336,12 +333,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 							blockingData.clear(); // clears the buffer
 						}
 					}
-
-					// publish if desired
-					if (publish) {
-						invoke("publishByte", newByte);
-					}
-
 					
 				}
 				
@@ -362,6 +353,12 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	@Override
 	public ArrayList<String> getPortNames() {
 		return SerialDeviceFactory.getSerialDeviceNames();
+	}
+	
+	
+	
+	public void addByteListener(SerialDataListener service) {
+		addListener("publishByte", service.getName(), "onByte", Integer.class);
 	}
 
 	
@@ -443,6 +440,11 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 * 
 	 * @throws InterruptedException
 	 */
+	/*
+	public int read(){
+		return 7;
+	}
+	*/
 
 	// http://stackoverflow.com/questions/11805300/rxtx-java-inputstream-does-not-return-all-the-buffer
 	public int readByte() throws InterruptedException {
@@ -612,6 +614,11 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 */
 	@Override
 	public int read() throws IOException {
+		
+		// block - use pySerial as a guide of interface !
+		
+		// default - block forever - timeout configurable
+		
 		return serialDevice.read();
 	}
 

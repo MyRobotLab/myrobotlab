@@ -100,7 +100,8 @@
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
 
-	<property name="tag" value="1.0.66" />
+	<!-- FIXME - get version from tag unless manually forced -->
+	<property name="tag" value="1.0.74" />
 	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
@@ -433,10 +434,12 @@
 	<!-- FYI - HTTP STATUS 422 - MEANS YOU ALREADY HAVE THAT RELEASE MADE !!! -->
 	<target name="createGitHubRelease" depends="init">
 		<echo message="token = ${github.token}" />
+		<echo message="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${tag}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}"/>
+
 		<http method="POST" url="https://api.github.com/repos/MyRobotLab/myrobotlab/releases" expected="201" printresponseheaders="true" printrequestheaders="true" printresponse="true" entityProperty="release.response">
 			<headers>
 				<header name="Authorization" value="token ${github.token}" />
-			</headers>
+			</headers>			
 			<entity value="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${tag}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}">
 			</entity>
 		</http>
