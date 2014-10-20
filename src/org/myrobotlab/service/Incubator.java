@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.ivy.core.report.ResolveReport;
-import org.junit.Test;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Peers;
@@ -23,6 +22,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.serial.VirtualSerialPort;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -242,7 +242,7 @@ public class Incubator extends Service {
 		// take inventory of currently running services
 		HashSet<String> keepMeRunning = new HashSet<String>();
 
-		Serial.createNullModemCable("UART99", "COM12");
+		VirtualSerialPort.createNullModemCable("UART99", "COM12");
 
 		List<ServiceInterface> list = Runtime.getServices();
 		for (int j = 0; j < list.size(); ++j) {

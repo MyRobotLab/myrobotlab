@@ -71,17 +71,6 @@ public interface SerialDevice {
 
 	public void write(int[] data) throws IOException;
 
-	/*
-	 * public void write(byte data) throws IOException;
-	 * 
-	 * public void write(char data) throws IOException;
-	 * 
-	 * public void write(byte[] data) throws IOException;
-	 * 
-	 * public void write(String data) throws IOException;
-	 */
-
-
 	public int read() throws IOException;
 
 	// LAME - but Java goes both ways with InputStream

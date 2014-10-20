@@ -16,9 +16,7 @@ public interface SerialDeviceService {
 	 */
 	
 	// FIXME - should probably throw general Exception - and allow implementation a specific exception
-	// FIXME - connect versus open ? why its just another char dev ?
-	public SerialDevice getSerialDevice();
-	
+	// FIXME - connect versus open ? why its just another char dev ?	
 	public boolean connect(String name); // left to the service to determine parameters
 
 	public boolean connect(String name, int rate, int databits, int stopbits, int parity);

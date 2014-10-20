@@ -68,7 +68,8 @@ import org.myrobotlab.serial.SerialDeviceEventListener;
 import org.myrobotlab.serial.SerialDeviceException;
 import org.myrobotlab.serial.SerialDeviceFactory;
 import org.myrobotlab.serial.SerialDeviceService;
-import org.myrobotlab.service.Serial.VirtualNullModemCable;
+import org.myrobotlab.serial.VirtualSerialPort;
+import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -2158,7 +2159,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		String port = "COM99";
 		String uartPort = "UART99";
 		
-		VirtualNullModemCable nullModem = Serial.createNullModemCable(port, uartPort);
+		VirtualNullModemCable nullModem = VirtualSerialPort.createNullModemCable(port, uartPort);
 		Serial uart = (Serial)Runtime.start(uartPort, "Serial");
 		uart.recordRX(String.format("%s.rx", uartPort));
 		uart.recordTX(String.format("%s.tx", uartPort));

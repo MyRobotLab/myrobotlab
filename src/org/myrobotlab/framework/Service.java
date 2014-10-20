@@ -215,11 +215,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	public Status test() {
-		return test((Object[]) null);
-	}
-
-	public Status test(Object... data) {
-		return Status.info("%s %s no valid tests", getName(), getTypeName());
+		return Status.info("testing %s of type %s", getName(), getTypeName());
 	}
 
 	/**

@@ -29,6 +29,8 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 	private static final long serialVersionUID = 1L;
 
+	// TODO - test blocking / non blocking / time-out blocking / reading an array (or don't bother?) or do with length? num bytes to block or timeout
+	
 	public final static Logger log = LoggerFactory.getLogger(Serial.class);
 
 	transient SerialDevice serialDevice;
@@ -40,6 +42,10 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	String format = FORMAT_DECIMAL;
 	String delimeter = " ";
 
+	// there is a stream of data that is event driven
+	// but somtimes a request / response is desired
+	// the buffer supports this - the stream is forked
+	// and a buffer
 	transient int BUFFER_SIZE = 8192;
 	transient int[] buffer = new int[BUFFER_SIZE];
 	transient BlockingQueue<Integer> blockingData = new LinkedBlockingQueue<Integer>();
@@ -47,13 +53,20 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	int recievedByteCount = 0;
 
 	boolean publish = true;
-	boolean blocking = false;
+	boolean blocking = true;
 
 	boolean connected = false;
 	String portName = null;
 	
 	int rate = 57600;
 
+	/**
+	 * FIXME FIXME FIXME FIXME 
+	 * use blocking only from lower level api InputStream !!!
+	 * BUT ! - implement timeout similar to python serial
+	 */
+	
+	
 	// TODO use utility methods to help parse read data types
 	// because we should not assume we know the details of ints longs etc nor
 	// the endianess
@@ -124,6 +137,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 * @param offset
 	 * @return
 	 */
+
 	public static long byteToLong(byte[] bytes, int offset, int length) {
 
 		long retVal = 0;
@@ -137,7 +151,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 		return retVal;
 	}
-
+	
 	public static long byteToLong(int[] bytes, int offset, int length) {
 
 		long retVal = 0;
@@ -151,6 +165,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 		return retVal;
 	}
+
 
 	public boolean recordRX(String filename) {
 		try {
@@ -349,11 +364,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return SerialDeviceFactory.getSerialDeviceNames();
 	}
 
-	// access to "lowest" level object
-	@Override
-	public SerialDevice getSerialDevice() {
-		return serialDevice;
-	}
 	
 	/*** FIXME FIXME FIXME FIXME - WE NEED METHOD CACHE & BETTER FINDING/RESOLVING/UPCASTING OF METHODS -
 	 * THE RESULT IS MAKING HORRIBLE ABOMINATIONS LIKE THIS
@@ -453,19 +463,23 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		int count = 0;
 		int[] value = new int[length];
 		Integer newByte = null;
+		//blockingData.clear(); <-- you can't clear because write came earlier & events have already proccessed
+		// including unloading it on the blockingData
+		// blocking = true; <-- always true GAH NO !! unless you round robin it
 		while (count < length) {
 			newByte = blockingData.poll(timeout, TimeUnit.MILLISECONDS);
 			if (newByte == null){
-				// no "partial" returns
-				// either return it all or nothing
-				return null;
+				error("expecting %d bytes got %d", length, count);
+				return Arrays.copyOfRange(value, 0, count);
 			}
 			value[count] = newByte;
 			++count;
 		}
+		//blocking = false;
 		return value;
 	}
 
+	/*
 	public String readString(char delimeter) throws InterruptedException {
 		StringBuffer value = new StringBuffer();
 		byte newByte = -1;
@@ -478,6 +492,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	public String readString() throws InterruptedException {
 		return readString('\n');
 	}
+	*/
 
 	/**
 	 * -------- blocking reads begin --------
@@ -489,7 +504,38 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		// the SerialDevice is transient
 		return connected;
 	}
+	
+	// FIXME remove blocking public
+	// FIXME overload with timeouts etc - remove exposed blocking
+	// FIXME - implement
+	public byte[] readToDelimiter(String delimeter){
+		return null;
+	}
+	
+	/*
 
+	public byte[] writeAndRead(byte[] send) throws IOException{
+		return writeAndRead(send, -1, -1);
+	}
+	
+	// http://pyserial.sourceforge.net/pyserial_api.html
+	
+	public byte[] writeAndRead(byte[] send, int size, int timeoutms) throws IOException{
+		blocking = true;
+		write(send);
+		
+		byte[] data = new byte[size]; // < does this work ?
+		// TODO RTFM !!!
+		int numBytes = read(data); <--- WTF this is int low level !!!! FIX
+		
+		Arrays.copyOfRange(original, from, to)
+		// i don't think gnu rxtx serial interface blocks "much"
+		// FIXME - return a re-sized byte array
+		// FIXME - static resize function
+		blocking = false;
+	}
+	*/
+	
 	@Override
 	public void write(String data) throws IOException {
 		write(data.getBytes());
@@ -559,59 +605,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		
 
 	/**
-	 * virtual serial ports will be used in the future to connect to simulated
-	 * environments or used in automated testing
-	 * 
-	 * @param port0
-	 *            - name of virtual port device
-	 */
-	public static VirtualSerialPort createVirtualSerialPort(String port) {
-		VirtualSerialPort vp0 = new VirtualSerialPort(port);
-		SerialDeviceFactory.add(vp0);
-		return vp0;
-	}
-
-	public static class VirtualNullModemCable {
-		public VirtualSerialPort vp0;
-		public VirtualSerialPort vp1;
-
-		public VirtualNullModemCable(String port0, String port1) {
-			// create 2 virtual ports
-			vp0 = new VirtualSerialPort(port0);
-			vp1 = new VirtualSerialPort(port1);
-			// twist the cable
-			vp1.tx = vp0.rx;
-			vp1.rx = vp0.tx;
-
-			// add virtual ports to the serial device factory
-			SerialDeviceFactory.add(vp0);
-			SerialDeviceFactory.add(vp1);
-		}
-
-		public void close() {
-			// TODO Auto-generated method stub
-			// vp1.rx.add(SHUTDOWN) SHUTDOWN = largest signed int value ??
-			// vp1.release();
-			// vp0.release();
-			vp0.close();
-			vp1.close();
-			log.info("releasing virtual null modem cable");
-		}
-
-	}
-
-	/**
-	 * virtual null modem cable is used to connect to a simulated device or in
-	 * automated testing{
-	 * 
-	 * @param port0
-	 * @param port1
-	 */
-	public static VirtualNullModemCable createNullModemCable(String port0, String port1) {
-		return new VirtualNullModemCable(port0, port1);
-	}
-
-	/**
 	 * pass through to the serial device
 	 * 
 	 * @return
@@ -623,6 +616,13 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	}
 
 	/**
+	 * FIXME - make like http://pyserial.sourceforge.net/pyserial_api.html
+	 * with blocking & timeout
+	 * 
+	 * WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer
+	 * is ever bigger than the read and no end of stream has occurred
+	 * it will block forever :P
+	 * 
 	 * pass through to the serial device
 	 * 
 	 * @param data
@@ -631,7 +631,19 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 */
 	@Override
 	public int read(byte[] data) throws IOException {
-		return serialDevice.read(data);
+		//return serialDevice.read(data);
+		return 0;
+	}
+	
+	
+	public String readString(int length) throws IOException, InterruptedException{
+		// FIXME - lower level does timeout non-blocking etc ..
+		/*
+		byte[] data = new byte[length];
+		int total = read(data);
+		return new String(data);
+		*/
+		return new String(intArrayToByteArray(readByteArray(length)));
 	}
 	
 	public static byte[] intArrayToByteArray(int[] src){
@@ -641,6 +653,10 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 			ret[i] = (byte)src[i];
 		}
 		return ret;
+	}
+	
+	public void clear(){
+		blockingData.clear();
 	}
 
 	@Override
@@ -653,7 +669,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		Status status = super.test();
 		try {
 			
-			//Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "GUIService");
 			//Runtime.start("webgui", "WebGUI");
 			
 			Serial serial = (Serial) Runtime.start(getName(), "Serial");
@@ -673,11 +689,19 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				throw new IOException(String.format("%s not connected", uart.getName()));
 			}
 			
+			// mimic eddie control board
+			// TODO add uart.ifThen("VER\r","OOOD");
+			
+			serial.write("VER\r");
+			uart.write("XXX000D");
+			info(serial.readString(5));
+
 			info("test blocking");
-			serial.setBlocking(true);
+			//serial.setBlocking(false);
+			//uart.setBlocking(false);
 			
 			uart.write("HELO");
-			int[] bytes = serial.readByteArray(4);
+			int[] bytes = serial.readByteArray(5);
 			
 			String helo = new String(intArrayToByteArray(bytes));
 			log.info(String.format("read back [%s]", helo));
@@ -732,7 +756,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		String name = getName();
 		String uartName = String.format("%s_uart", name);
 		log.info(String.format("connectToVirtualUART - creating uart %s <--> %s <---> %s <-->", name, name.toUpperCase(), uartName.toUpperCase(), uartName));
-		createNullModemCable(name.toUpperCase(), uartName.toUpperCase());
+		VirtualSerialPort.createNullModemCable(name.toUpperCase(), uartName.toUpperCase());
 		Serial uart = (Serial)Runtime.start(uartName, "Serial");
 		uart.connect(uartName.toUpperCase());
 		connect(name.toUpperCase());

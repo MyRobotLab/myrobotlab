@@ -11,7 +11,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNIData;
 import org.myrobotlab.openni.Skeleton;
-import org.myrobotlab.service.Serial.VirtualNullModemCable;
+import org.myrobotlab.serial.VirtualSerialPort;
+import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.simpleframework.xml.Element;
@@ -1305,8 +1306,8 @@ public class InMoov extends Service {
 		String rightUART = "UART51";
 		String leftUART = "UART52";
 		
-		VirtualNullModemCable vnm1 = Serial.createNullModemCable(rightPort, rightUART);
-		VirtualNullModemCable vnm2 = Serial.createNullModemCable(leftPort, leftUART);
+		VirtualNullModemCable vnm1 = VirtualSerialPort.createNullModemCable(rightPort, rightUART);
+		VirtualNullModemCable vnm2 = VirtualSerialPort.createNullModemCable(leftPort, leftUART);
 		
 		Serial luart = (Serial)Runtime.start(leftUART, "Serial");
 		Serial ruart = (Serial)Runtime.start(rightUART, "Serial");

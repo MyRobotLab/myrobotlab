@@ -77,11 +77,6 @@ public class Roomba extends Service implements SerialDeviceService {
 	}
 
 	@Override
-	public SerialDevice getSerialDevice() {
-		return roombacomm.port;
-	}
-
-	@Override
 	public boolean connect(String name, int rate, int databits, int stopbits, int parity) {
 		// TODO Auto-generated method stub
 		return false;
