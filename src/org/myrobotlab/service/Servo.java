@@ -34,6 +34,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.serial.VirtualSerialPort;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.simpleframework.xml.Element;
@@ -561,7 +562,7 @@ public class Servo extends Service implements ServoControl {
 
 		if (useVirtualPorts) {
 			// virtual testing
-			Serial.createNullModemCable("COM15", "UART");
+			VirtualSerialPort.createNullModemCable("COM15", "UART");
 			Serial uart = (Serial) Runtime.start("uart", "Serial");
 			uart.connect("UART");
 		}

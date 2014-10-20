@@ -5,8 +5,10 @@ import java.util.TooManyListenersException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class VirtualSerialPort implements SerialDevice {
@@ -32,6 +34,50 @@ public class VirtualSerialPort implements SerialDevice {
 	private VirtualSerialPort nullModem = null;
 
 	// underlying serial event management thread
+	/*
+	class RXThread extends Thread {
+
+		int currentDataSize = 0;
+		long pollingPause = 100;
+
+		public RXThread() {
+			super(String.format("%s_virtual_rx", name));
+		}
+
+		
+		public void run() {
+			try {
+				while (isOpen) {
+					Integer b = rx.peek(); // userRX.add(b); // TODO -generate only at
+								// currentDataSize intervals
+					if (listener != null && notifyOnDataAvailable && b != null) {
+						SerialDeviceEvent sde = new SerialDeviceEvent(srcport, SerialDeviceEvent.DATA_AVAILABLE, false, true);
+						listener.serialEvent(sde);
+					}
+					
+					Thread.sleep(pollingPause);
+				}
+
+			} catch (Exception e) {
+				if (e instanceof InterruptedException) {
+					log.info("shutting down rx thread on port");
+				} else {
+					Logging.logException(e);
+				}
+			}
+		}
+	}
+	*/
+	
+	/**
+	 * at some point this thread will be caught in the listener's while loop with a serial.read()
+	 * which will result in a blocking rx.take()
+	 * 
+	 * future - will need to interrupt when closing !!!
+	 * 
+	 * @author GRPERRY
+	 *
+	 */
 	class RXThread extends Thread {
 
 		int currentDataSize = 0;
@@ -44,9 +90,9 @@ public class VirtualSerialPort implements SerialDevice {
 		public void run() {
 			try {
 				while (isOpen) {
-					Integer b = rx.peek(); // userRX.add(b); // TODO -generate only at
+					//Integer b = rx.peek(); // userRX.add(b); // TODO -generate only at
 								// currentDataSize intervals
-					if (listener != null && notifyOnDataAvailable && b != null) {
+					if (listener != null && notifyOnDataAvailable) {
 						SerialDeviceEvent sde = new SerialDeviceEvent(srcport, SerialDeviceEvent.DATA_AVAILABLE, false, true);
 						listener.serialEvent(sde);
 					}
@@ -87,7 +133,6 @@ public class VirtualSerialPort implements SerialDevice {
 		}
 
 		isOpen = true;
-
 		rxthread = new RXThread();
 		rxthread.start();
 	}
@@ -100,6 +145,7 @@ public class VirtualSerialPort implements SerialDevice {
 	@Override
 	public void close() {
 		isOpen = false;
+		
 		if (rxthread != null){
 			rxthread.interrupt();
 		}
@@ -124,6 +170,7 @@ public class VirtualSerialPort implements SerialDevice {
 	// TODO - make this silly like RXTX - so that it throws TooManyListners :P
 	@Override
 	public void addEventListener(SerialDeviceEventListener lsnr) throws TooManyListenersException {
+		listener = lsnr;
 		if (nullModem != null) {
 			// if is a null modem
 			// then tx on one modem will be the thread
@@ -141,19 +188,23 @@ public class VirtualSerialPort implements SerialDevice {
 
 	@Override
 	public void write(int data) throws IOException {
+		log.info(name);
 		tx.add(data);
+		// the read will activate this rx thread - which is blocked on the "listener's" read/rx.take()
 	}
 
 	@Override
 	public void write(int[] data) throws IOException {
 		for (int i = 0; i < data.length; ++i) {
-			tx.add(data[i]);
+			write(data[i]);
 		}
 	}
 
 	@Override
 	public int read() throws IOException {
 		try {
+			log.info(name);
+			//tx.take();
 			log.debug("rx.take() size {}", rx.size());
 			//rx.poll(100, unit);
 			// Thread.sleep(5);
@@ -179,7 +230,66 @@ public class VirtualSerialPort implements SerialDevice {
 		return -1;
 	}
 	
-	public void release(){
-		rx.add(SHUTDOWN);
+
+	/**
+	 * virtual serial ports will be used in the future to connect to simulated
+	 * environments or used in automated testing
+	 * 
+	 * @param port0
+	 *            - name of virtual port device
+	 */
+	public static VirtualSerialPort createVirtualSerialPort(String port) {
+		VirtualSerialPort vp0 = new VirtualSerialPort(port);
+		SerialDeviceFactory.add(vp0);
+		return vp0;
 	}
+
+	public static class VirtualNullModemCable {
+		public VirtualSerialPort vp0;
+		public VirtualSerialPort vp1;
+
+		public VirtualNullModemCable(String port0, String port1) {
+			// create 2 virtual ports
+			vp0 = new VirtualSerialPort(port0);
+			vp1 = new VirtualSerialPort(port1);
+			
+			// twist the cable
+			vp1.tx = vp0.rx;
+			vp1.rx = vp0.tx;
+			
+			// make each aware of the other so that
+			// when event listers are added the
+			// correct reference is used
+			vp0.nullModem = vp1;
+			vp1.nullModem = vp0;
+						
+			// add virtual ports to the serial device factory
+			SerialDeviceFactory.add(vp0);
+			SerialDeviceFactory.add(vp1);
+		}
+
+		public void close() {
+			// TODO Auto-generated method stub
+			// vp1.rx.add(SHUTDOWN) SHUTDOWN = largest signed int value ??
+			// vp1.release();
+			// vp0.release();
+			vp0.close();
+			vp1.close();
+			log.info("releasing virtual null modem cable");
+		}
+
+	}
+
+	/**
+	 * virtual null modem cable is used to connect to a simulated device or in
+	 * automated testing{
+	 * 
+	 * @param port0
+	 * @param port1
+	 */
+	public static VirtualNullModemCable createNullModemCable(String port0, String port1) {
+		return new VirtualNullModemCable(port0, port1);
+	}
+
+	
 }

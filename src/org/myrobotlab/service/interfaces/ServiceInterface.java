@@ -19,7 +19,6 @@ public interface ServiceInterface {
 	// can't be statics :( 
 	// but is good enough - probably a good idea to keep in mind
 	// is the ability to do "non destructive" tests on a "live" Service at any time
-	public Status test(Object... data) throws Exception;
 	public Status test() throws Exception;
 	
 	public URI getHost();

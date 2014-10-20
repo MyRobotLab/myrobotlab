@@ -63,35 +63,52 @@ public class EddieControlBoard extends Service {
 
 	// read commands begin ---
 	public String getHwVersion() throws InterruptedException, IOException {
-		return sendCommand("HWVER");
+		serial.write("HWVER\r");
+		String ret = serial.readString(5);
+		return ret;
 	}
-
+	
 	public String getVersion() throws InterruptedException, IOException {
-		return sendCommand("VER");
+		serial.write("VER\r");
+		String ret = serial.readString(5);
+		return ret;
 	}
 	
 	public String getPingValues() throws InterruptedException, IOException {
-		return sendCommand("PING");
+		// depends
+		serial.write("PING\r");
+		String ret = serial.readString(5);
+		return ret;
 	}
 
 	public String getAnalogValues() throws InterruptedException, IOException {
-		return sendCommand("ADC");
+		serial.write("ADC\r");
+		String ret = serial.readString(33);
+		return ret;
 	}
 	
 	public String getGPIOInputs() throws InterruptedException, IOException {
-		return sendCommand("INS");
+		serial.write("INS\r");
+		String ret = serial.readString(9);
+		return ret;
 	}
 
 	public String getGPIOOutputs() throws InterruptedException, IOException {
-		return sendCommand("OUTS");
+		serial.write("OUTS\r");
+		String ret = serial.readString(9);
+		return ret;
 	}
 	
 	public String getGPIOLowValues() throws InterruptedException, IOException {
-		return sendCommand("LOWS");
+		serial.write("LOWS\r");
+		String ret = serial.readString(9);
+		return ret;
 	}
 
 	public String getGPIOHighValues() throws InterruptedException, IOException {
-		return sendCommand("HIGHS");
+		serial.write("HIGHS\r");
+		String ret = serial.readString(9);
+		return ret;
 	}
 	
 	public String read() throws InterruptedException, IOException {
@@ -208,6 +225,16 @@ public class EddieControlBoard extends Service {
 
 		}
 	}
+	
+	public String sendCmd(String cmd, int expectedResponseLength) throws IOException, InterruptedException{
+		log.info(String.format("sendCommand %s", cmd));
+		String ret = null;
+
+		serial.write(String.format("%s\r", cmd));
+		ret = serial.readString(expectedResponseLength);
+
+		return ret;
+	}
 
 	/**
 	 * sending a command when expecting a string response in the context of
@@ -222,10 +249,10 @@ public class EddieControlBoard extends Service {
 		log.info(String.format("sendCommand %s", cmd));
 		String ret = null;
 
-		serial.setBlocking(true);
+		//serial.setBlocking(true);
 		serial.write(String.format("%s\r", cmd));
-		ret = serial.readString();
-		serial.setBlocking(false);
+		//ret = serial.readString();
+		//serial.setBlocking(false);
 
 		return ret;
 	}
