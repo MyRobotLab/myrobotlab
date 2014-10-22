@@ -10,9 +10,10 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.RangeListener;
 import org.slf4j.Logger;
 
-public class UltrasonicSensor extends Service {
+public class UltrasonicSensor extends Service implements RangeListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -140,7 +141,7 @@ public class UltrasonicSensor extends Service {
 		boolean useGUI = true;
 
 		UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start(getName(), "UltrasonicSensor");
-		Python python = (Python) Runtime.start("python", "Python");
+		//Python python = (Python) Runtime.start("python", "Python");
 
 		// TODO - remove servo - after test
 		Servo servo = (Servo) Runtime.start("servo", "Servo");
@@ -153,17 +154,21 @@ public class UltrasonicSensor extends Service {
 		// nice simple interface
 		
 		sr04.attach("COM15", 7, 8);
+		//arduino.re
 		// TODO - VIRTUAL NULL MODEM WITH TEST DATA !!!!
 		// RECORD FROM ACTUAL SENSOR !!!
 		
 		//sr04.arduino.setLoadTimingEnabled(true);
 		
-		sr04.addRangeListener(python);
+		sr04.addRangeListener(this);
+		arduino.recordRX(null);
 		
 		sr04.startRanging();
 		log.info("here");
 		sr04.stopRanging();
 
+		arduino.stopRecording();
+		
 		sr04.arduino.setLoadTimingEnabled(true);
 		sr04.arduino.setLoadTimingEnabled(false);
 		
@@ -214,7 +219,12 @@ public class UltrasonicSensor extends Service {
 	// of the "publishRange" method being affected by the Sensor service e.g.
 	// change units, sample rate, etc
 	public void addRangeListener(Service service) {
-		addListener("publishRange", service.getName(), "onRange", long.class);
+		addListener("publishRange", service.getName(), "onRange", Long.class);
+	}
+	
+	@Override
+	public void onRange(Long range) {
+		log.info(String.format("RANGE: %d", range));
 	}
 
 	// ---- part of interfaces end -----
@@ -230,5 +240,6 @@ public class UltrasonicSensor extends Service {
 		 * GUIService gui = new GUIService("gui"); gui.startService();
 		 */
 	}
+
 
 }

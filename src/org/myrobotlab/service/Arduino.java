@@ -25,9 +25,11 @@
 
 package org.myrobotlab.service;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -915,6 +917,10 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 				 */
 				while (serialDevice.isOpen() && (newByte = serialDevice.read()) > -1) {
 
+					if (isRXRecording) {
+						bufferedWriterRX.write(newByte);
+					}
+					
 					++byteCount;
 
 					if (byteCount == 1) {
@@ -1028,7 +1034,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							// NICE !! - force sensor to have publishSensorData
 							// or publishRange in interface !!!
 							// sd.sensor.invoke("publishRange", sd);
-							sd.sensor.invoke("publishRange", sd.duration);
+							if (sd.duration != 0){
+								sd.sensor.invoke("publishRange", sd.duration);
+							}
 							break;
 						}
 
@@ -2319,5 +2327,52 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		customEventListener = service;
 	}
 
+	String filenameRX;
+	boolean isRXRecording = true;
+	transient FileWriter fileWriterRX = null;
+	transient BufferedWriter bufferedWriterRX = null;
+	String rxFileFormat;
 
+	public boolean recordRX(String filename) {
+		try {
+
+			if (filename == null) {
+				filenameRX = String.format("rx.%s.%d.data", getName(), System.currentTimeMillis());
+			} else {
+				//filenameTX = filename;
+			}
+
+			if (fileWriterRX == null) {
+				fileWriterRX = new FileWriter(filenameRX);
+				bufferedWriterRX = new BufferedWriter(fileWriterRX);
+			}
+
+			isRXRecording = true;
+			return true;
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+		return false;
+	}
+	
+	public boolean stopRecording() {
+		try {
+			isRXRecording = false;
+		
+
+			if (fileWriterRX != null) {
+				bufferedWriterRX.close();
+				fileWriterRX.close();
+				fileWriterRX = null;
+				bufferedWriterRX = null;
+			}
+
+
+			return true;
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+		return false;
+
+	}
 }
