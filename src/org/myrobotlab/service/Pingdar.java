@@ -167,6 +167,23 @@ public class Pingdar extends Service {
 		return "used as a ultra sonic radar";
 	}
 	
+	public Point publishPingdar(Point point){
+		return point;
+	}
+
+	public void stop() {
+		super.stopService();
+		sensor.stopRanging();
+		servo.setEventsEnabled(false);
+		servo.stop();
+	}
+	
+	public void startService(){
+		super.startService();
+		servo = (Servo)startPeer("servo");
+		sensor = (UltrasonicSensor)startPeer("sensor");
+	}
+	
 	public Status test(){
 		Status status = Status.info("starting %s %s test", getName(), getTypeName());
 		Pingdar pingdar = (Pingdar)Runtime.start(getName(), "Pingdar");
@@ -186,23 +203,6 @@ public class Pingdar extends Service {
 		//pingdar.sensor.stopRanging();
 		pingdar.stop();
 		return status;
-	}
-	
-	public Point publishPingdar(Point point){
-		return point;
-	}
-
-	public void stop() {
-		super.stopService();
-		sensor.stopRanging();
-		servo.setEventsEnabled(false);
-		servo.stop();
-	}
-	
-	public void startService(){
-		super.startService();
-		servo = (Servo)startPeer("servo");
-		sensor = (UltrasonicSensor)startPeer("sensor");
 	}
 
 	public static void main(String[] args) {

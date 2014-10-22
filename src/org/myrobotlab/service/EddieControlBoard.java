@@ -44,6 +44,7 @@ public class EddieControlBoard extends Service {
 					} else {
 						error("invalid data string %s", dataString);
 					}
+					sleep(500);
 				} catch (Exception e) {
 					Logging.logException(e);
 				}
@@ -141,7 +142,7 @@ public class EddieControlBoard extends Service {
 	}
 
 	public String getAnalogValues() throws InterruptedException, IOException {
-		serial.clear();
+		//serial.clear();
 		serial.write("ADC\r");
 		String ret = serial.readString(32);
 		return ret;
