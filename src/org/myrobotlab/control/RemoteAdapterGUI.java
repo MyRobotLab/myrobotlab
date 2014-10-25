@@ -29,16 +29,18 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
+import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import org.myrobotlab.control.widget.CommunicationNodeEntry;
 import org.myrobotlab.control.widget.CommunicationNodeList;
-import org.myrobotlab.control.widget.ConnectDialog;
-import org.myrobotlab.framework.Message;
+import org.myrobotlab.image.Util;
+import org.myrobotlab.net.CommData;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.RemoteAdapter;
 
@@ -46,14 +48,14 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
 	JLabel numClients = new JLabel("0");
-	
-	// TODO - got to get these from service
-	public String lastHost = "127.0.0.1";
-	public String lastPort = "6767";
-	
-	JButton connection = new JButton("new connection");
-	
+
+	JButton connection = new JButton("connect");
+
+	// display of the CommData getClients
 	CommunicationNodeList list = new CommunicationNodeList();
+	String lastProtoKey;
+
+	RemoteAdapter myRemote = null;
 
 	public RemoteAdapterGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
@@ -75,63 +77,39 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 		gc.gridwidth = 4;
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		display.add(list, gc);
-		
-		updateNodeList(null);
 		connection.addActionListener(this);
 	}
 
-	public void updateNodeList(RemoteAdapter remote) {
-		if (remote != null)
-		{
-			/*
-			// FIXME - handle this better !!!
-			CommunicationInterface cf = remote.getComm();
-			
-			if (cf != null)
-			{
-			Communicator cm = cf.getComm();
-			
-			HashMap<URI, CommData> clients = cm.getClients();
-			
-			for (Map.Entry<URI,CommData> o : clients.entrySet())
-			{
-				//Map.Entry<String,SerializableImage> pairs = o;
-				URI uri = o.getKey();
-				CommData data = o.getValue();
-				list.model.add(0, (Object) new CommunicationNodeEntry(uri, data));
-			}
-			
-			numClients.setText(String.format("%d",clients.size()));
-			}
-			*/
-
-		}
-	}
-	
 	@Override
-	public void actionPerformed(ActionEvent action){
+	public void actionPerformed(ActionEvent action) {
 		Object o = action.getSource();
 		if (o == connection) {
-			ConnectDialog dlg = new ConnectDialog(new JFrame(), "connect", "message", myService, lastHost, lastPort);
-			lastHost = dlg.host.getText();
-			lastPort = dlg.port.getText();
-			String uris = String.format("tcp://%s:%s", lastHost, lastPort);
-			try {
-				URI uri = new URI(uris);
-				Message msg = myService.createMessage("", "register", myService);
-				send("sendRemote", uri, msg);
-			} catch(Exception e){
-				myService.error(e);
+			String newProtoKey = (String) JOptionPane.showInputDialog(myService.getFrame(), "<html>connect to a remote MyRobotLab</html>", "connect", JOptionPane.WARNING_MESSAGE,
+					Util.getResourceIcon("RemoteAdapter/connect.png"), null, lastProtoKey);
+			
+			if (newProtoKey == null || newProtoKey == "") {
+				return;
 			}
-		} 
+
+			send("connect", newProtoKey);
+			lastProtoKey = newProtoKey;
+		}
 	}
-	
 
 	public void getState(final RemoteAdapter remote) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-
-					updateNodeList(remote);
+				myRemote = remote;
+				lastProtoKey = remote.lastProtoKey;
+				if (remote.getClients() == null){
+					return;
+				}
+				for (Map.Entry<URI, CommData> o : remote.getClients().entrySet()) {
+					// Map.Entry<String,SerializableImage> pairs = o;
+					URI uri = o.getKey();
+					CommData data = o.getValue();
+					list.model.add(0, (Object) new CommunicationNodeEntry(uri, data));
+				}
 			}
 		});
 	}
@@ -139,6 +117,7 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 	@Override
 	public void attachGUI() {
 		subscribe("publishState", "getState", RemoteAdapter.class);
+		send("broadcastState");
 	}
 
 	@Override

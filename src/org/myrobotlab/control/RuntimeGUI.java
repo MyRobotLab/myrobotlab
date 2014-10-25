@@ -35,6 +35,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -308,9 +309,14 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		++fgc.gridy;
 
 		Repo repo = myRuntime.getRepo();
+		
+		if (myRuntime != Runtime.getInstance()){
+			log.info("foreign runtime");
+		}
 
 		ServiceData sd = repo.getServiceDataFile();
-		String[] cats = sd.getCategoryNames();
+		String[] cats =sd.getCategoryNames();
+		Arrays.sort(cats);
 
 		for (int j = 0; j < cats.length; ++j) {
 			JButton b = new JButton(cats[j]);
@@ -551,8 +557,6 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	}
 
 	public void onPossibleServicesRefresh(final String[] serviceTypeNames) {
-		log.info("here");
-		// FIXED - a new AWT Thread is spawned off to do the rendering
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				for (int i = possibleServicesModel.getRowCount(); i > 0; --i) {

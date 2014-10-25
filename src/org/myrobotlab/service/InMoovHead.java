@@ -302,6 +302,7 @@ public class InMoovHead extends Service {
 	}
 
 
+	/*
 	public boolean load(){
 		super.load();
 		rothead.load();
@@ -311,6 +312,7 @@ public class InMoovHead extends Service {
 		jaw.load();
 		return true;
 	}
+	*/
 
 
 }

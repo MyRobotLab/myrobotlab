@@ -36,7 +36,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
-import org.myrobotlab.service.interfaces.Communicator;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -49,7 +49,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 
 	static HashMap<URI,URI> mrlToProtocol = new HashMap<URI,URI>();
 	
-	private Communicator comm = null;
+	private Gateway comm = null;
 
 	public CommunicationManager(Service myService) {
 		// set local private references
@@ -59,7 +59,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
   		//GOOD IDEA - outbox communicator - however now Remote communication is done with gateway Services
 		String communicatorClass = "org.myrobotlab.net.CommObjectStreamOverTCP";
 		log.info("instanciating a " + communicatorClass);
-		Communicator c = (Communicator) Service.getNewInstance(Service.class, communicatorClass,  myService);
+		Gateway c = (Gateway) Service.getNewInstance(Service.class, communicatorClass,  myService);
 
 		outbox.setCommunicationManager(this);
 
@@ -107,15 +107,15 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 		}
 	}
 
-	public void setComm(Communicator comm) {
+	public void setComm(Gateway comm) {
 		this.comm = comm;
 	}
 
-	public Communicator getComm(URI uri) {
+	public Gateway getComm(URI uri) {
 		if (uri.getScheme().equals(Encoder.SCHEME_MRL))
 		{
 			ServiceInterface sw = Runtime.getService(uri.getHost());
-			Communicator c = (Communicator)sw;
+			Gateway c = (Gateway)sw;
 			return c;
 		}
 		// FIXME remove - keeping only for deprecated RemoteAdapter	

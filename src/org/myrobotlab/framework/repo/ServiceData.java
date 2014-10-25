@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
@@ -29,15 +30,18 @@ public class ServiceData implements Serializable {
 	transient public final static Logger log = LoggerFactory.getLogger(Service.class);
 
 	transient static private Serializer serializer = new Persister();
-
+	// cannot be transient !!!
 	@ElementMap(key = "name", entry = "serviceType", inline = false, required = false)
-	private transient TreeMap<String, ServiceType> serviceTypesNameIndex = new TreeMap<String, ServiceType>();
+	//private transient TreeMap<String, ServiceType> serviceTypesNameIndex = new TreeMap<String, ServiceType>();
+	private HashMap<String, ServiceType> serviceTypesNameIndex = new HashMap<String, ServiceType>();
 
 	@ElementMap(key = "name", entry = "categories", inline = true, required = false)
-	private transient TreeMap<String, Category> categoriesNameIndex = new TreeMap<String, Category>();
+	//private transient TreeMap<String, Category> categoriesNameIndex = new TreeMap<String, Category>();
+	private HashMap<String, Category> categoriesNameIndex = new HashMap<String, Category>();
 
 	@ElementMap(key = "name", name = "thirdPartyLibs", entry = "lib", inline = false, required = false)
-	private transient TreeMap<String, Dependency> dependenciesOrgIndex = new TreeMap<String, Dependency>();
+	//private transient TreeMap<String, Dependency> dependenciesOrgIndex = new TreeMap<String, Dependency>();
+	private HashMap<String, Dependency> dependenciesOrgIndex = new HashMap<String, Dependency>();
 
 	public ServiceData() {
 	}
@@ -358,7 +362,9 @@ public class ServiceData implements Serializable {
 	public String[] getServiceTypeNames(String filter) {
 		
 		if (filter == null || filter.length() == 0 || filter.equals("all")){
-			return serviceTypesNameIndex.keySet().toArray(new String[0]);
+			String[] ret = (String[])serviceTypesNameIndex.keySet().toArray(new String[0]);
+			Arrays.sort(ret);
+			return ret;
 		}
 		
 		if (!categoriesNameIndex.containsKey(filter)){
@@ -457,7 +463,6 @@ public class ServiceData implements Serializable {
 	}
 
 	public String[] getCategoryNames() {
-
 		String[] cat = new String[categoriesNameIndex.size()];
 
 		int i = 0;

@@ -281,7 +281,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		// serice data !!!
 		// FIXME - load board type - allow user to force - (possible to retrieve
 		// from connection? - good idea? or bad?)
-		load(); // config - last com port connected too - last rate
+		//load(); // config - last com port connected too - last rate
 
 		serial = (Serial) Runtime.create("serial", "Serial");
 		serial.getPortNames();

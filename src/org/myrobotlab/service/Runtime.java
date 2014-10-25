@@ -14,11 +14,11 @@ import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
 /*
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-*/
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+ import java.nio.file.Paths;
+ import java.nio.file.StandardCopyOption;
+ */
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +58,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
-import org.myrobotlab.service.interfaces.Communicator;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.simpleframework.xml.Element;
@@ -166,6 +166,10 @@ public class Runtime extends Service implements MessageListener {
 		return sb.toString();
 	}
 
+	public static void setRuntimeName(String inName) {
+		runtimeName = inName;
+	}
+
 	public Runtime(String n) {
 		super(n);
 
@@ -208,12 +212,12 @@ public class Runtime extends Service implements MessageListener {
 			// Path prelog = Paths.get(PreLogger.PRELOG_FILENAME);
 
 			File prelog = new File(PreLogger.PRELOG_FILENAME);
-			
+
 			if (prelog.exists()) {
 				log.info(FileIO.fileToString(PreLogger.PRELOG_FILENAME));
 				log.info(String.format("deleting %s", PreLogger.PRELOG_FILENAME));
 				prelog.delete();
-				//Files.delete(prelog);
+				// Files.delete(prelog);
 				log.info(String.format("deleted %s", PreLogger.PRELOG_FILENAME));
 			} else {
 				log.info("prelog does not exist");
@@ -360,24 +364,24 @@ public class Runtime extends Service implements MessageListener {
 
 	// GAH !!! retrieveAll / updateAll / UpdateReport / ResolveReport :P
 	public UpdateReport updateAll() {
-		
+
 		UpdateReport report = new UpdateReport();
 		report.updates = new Updates(runtimeName);
 		report.updates.isValid = true; // forcing since this is direct request
 		report.updates.serviceTypesToUpdate = Arrays.asList(getServiceTypeNames());
-		
+
 		invoke("updatesBegin", report.updates);
-		// :D optimized ! 
+		// :D optimized !
 		report.reports = repo.retrieveAll();
 		invoke("updatesFinished", report.reports);
 		return report;
 	}
-	
+
 	/**
-	 * command line update
-	 * update myrobotlab.jar only
-	 * no user interaction is required - NO RESTART ONLY SHUTDOWN !!!
-	 * no endless loop of bootstrap getting -update param after update :P
+	 * command line update update myrobotlab.jar only no user interaction is
+	 * required - NO RESTART ONLY SHUTDOWN !!! no endless loop of bootstrap
+	 * getting -update param after update :P
+	 * 
 	 * @return
 	 */
 	public UpdateReport update() {
@@ -387,10 +391,10 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	/**
-	 * FIXME - if true - service data xml needs to be pulled from repo
-	 * this method is called by the user (or system) when a specific service
-	 * needs to be installed (or updated) - it should resolve all the
-	 * dependencies for that service
+	 * FIXME - if true - service data xml needs to be pulled from repo this
+	 * method is called by the user (or system) when a specific service needs to
+	 * be installed (or updated) - it should resolve all the dependencies for
+	 * that service
 	 * 
 	 * @param fullServiceTypeName
 	 *            - full service type for dependency resolution
@@ -405,13 +409,14 @@ public class Runtime extends Service implements MessageListener {
 
 	/**
 	 * headless call - no user intervention needed / no "publishUpdates"
+	 * 
 	 * @return
 	 */
-	public UpdateReport applyUpdate(){
+	public UpdateReport applyUpdate() {
 		Updates updates = checkForUpdates();
 		return applyUpdates(updates);
 	}
-	
+
 	/**
 	 * all the data contained in updates is used to apply against the running
 	 * system. this is where are the business logic of the merge between the
@@ -422,7 +427,7 @@ public class Runtime extends Service implements MessageListener {
 	synchronized public UpdateReport applyUpdates(Updates updates) {
 		UpdateReport ret = new UpdateReport();
 		ret.updates = updates;
-		
+
 		if (!updates.isValid) {
 			error("can not apply updates - updates are not valid");
 			return null;
@@ -455,7 +460,7 @@ public class Runtime extends Service implements MessageListener {
 				Logging.logException(e);
 			}
 		}
-		
+
 		ret.reports = reports;
 
 		// FIXME - selectively choose which parts to update !!!
@@ -466,12 +471,12 @@ public class Runtime extends Service implements MessageListener {
 			info("updating myrobotlab.jar");
 			if (runtime.repo.getLatestJar()) {
 
-				if (shutdownAfterUpdate){
+				if (shutdownAfterUpdate) {
 					log.info("shutdownAfterUpdate = true");
 					releaseAll();
 					System.exit(0);
 				}
-				
+
 				if (autoRestartAfterUpdate) {
 					log.info("autoRestartAfterUpdate = true");
 					// asynch call to get user or config data to determine if a
@@ -555,16 +560,14 @@ public class Runtime extends Service implements MessageListener {
 			// WRONG - jvm args should be created and maintained in bootstrap
 			// FIXME - get jvm arguments and other original args
 			/*
-			ArrayList<String> restartArgs = new ArrayList<String>();
-			for (int i = 0; i < jvmArgs.size(); ++i) {
-				restartArgs.add(jvmArgs.get(i));
-			}
-			*/
+			 * ArrayList<String> restartArgs = new ArrayList<String>(); for (int
+			 * i = 0; i < jvmArgs.size(); ++i) {
+			 * restartArgs.add(jvmArgs.get(i)); }
+			 */
 			/*
-			for (int i = 0; i < args.size(); ++i) {
-				restartArgs.add(args.get(i));
-			}
-			*/
+			 * for (int i = 0; i < args.size(); ++i) {
+			 * restartArgs.add(args.get(i)); }
+			 */
 			bootstrap.spawn(args);
 			System.exit(0);
 
@@ -653,7 +656,7 @@ public class Runtime extends Service implements MessageListener {
 	 * @return
 	 */
 	public static final long getTotalMemory() {
-		
+
 		return java.lang.Runtime.getRuntime().totalMemory();
 	}
 
@@ -731,21 +734,25 @@ public class Runtime extends Service implements MessageListener {
 			se = hosts.get(url);
 		}
 
-		if (se.serviceDirectory.containsKey(s.getName())) {
-			log.info(String.format("attempting to register %1$s which is already registered in %2$s", s.getName(), url));
-			if (runtime != null) {
-				runtime.invoke("collision", s.getName());
-				runtime.warn("collision registering %s", s.getName());
-				runtime.info(String.format(" name collision with %s", s.getName()));
+		if (s != null) {
+			if (se.serviceDirectory.containsKey(s.getName())) {
+				log.info(String.format("attempting to register %1$s which is already registered in %2$s", s.getName(), url));
+				if (runtime != null) {
+					runtime.invoke("collision", s.getName());
+					runtime.warn("collision registering %s", s.getName());
+					runtime.info(String.format(" name collision with %s", s.getName()));
+				}
+				return s;// <--- BUG ?!?!? WHAT ABOUT THE REMOTE GATEWAYS !!!
 			}
-			return s;
-		}
+		
 
 		// REMOTE BROADCAST to all foreign environments
 		// FIXME - Security determines what to export
 		// for each gateway
+		
+		// NEW PART !!!
 
-		Vector<String> remoteGateways = getServicesFromInterface(Communicator.class.getCanonicalName());
+		Vector<String> remoteGateways = getServicesFromInterface(Gateway.class.getCanonicalName());
 		for (int ri = 0; ri < remoteGateways.size(); ++ri) {
 			String n = remoteGateways.get(ri);
 			// Communicator gateway = (Communicator)registry.get(n);
@@ -784,6 +791,9 @@ public class Runtime extends Service implements MessageListener {
 		}
 
 		return s;
+		}
+		
+		return null;
 	}
 
 	/**
@@ -1087,42 +1097,44 @@ public class Runtime extends Service implements MessageListener {
 		Iterator<String> seit = se.serviceDirectory.keySet().iterator();
 		String serviceName;
 		ServiceInterface sw;
-		
+
 		seit = se.serviceDirectory.keySet().iterator();
 		while (seit.hasNext()) {
 			serviceName = seit.next();
 			sw = se.serviceDirectory.get(serviceName);
-			
-			if (sw == Runtime.getInstance()){
+
+			if (sw == Runtime.getInstance()) {
 				// skipping runtime
 				continue;
 			}
-			
+
 			log.info(String.format("stopping service %s/%s", se.accessURL, serviceName));
 
 			if (sw == null) {
 				log.warn("unknown type and/or remote service");
 				continue;
 			}
-			// runtime.invoke("released", se.serviceDirectory.get(serviceName)); FIXME DO THIS 
+			// runtime.invoke("released", se.serviceDirectory.get(serviceName));
+			// FIXME DO THIS
 			try {
-			sw.stopService();
-			//sw.releaseService(); // FIXED ! - releaseService will mod the maps :P
-			runtime.invoke("released", sw);
-			} catch (Exception e){
+				sw.stopService();
+				// sw.releaseService(); // FIXED ! - releaseService will mod the
+				// maps :P
+				runtime.invoke("released", sw);
+			} catch (Exception e) {
 				runtime.error("%s threw while stopping");
 				Logging.logException(e);
 			}
 		}
 
 		runtime.stopService();
-		
+
 		log.info("clearing hosts environments");
 		hosts.clear();
 
 		log.info("clearing registry");
 		registry.clear();
-		
+
 		// exit () ?
 	}
 
@@ -1466,8 +1478,8 @@ public class Runtime extends Service implements MessageListener {
 		}
 
 	}
-	
-	static public ServiceInterface start(String name, String type){
+
+	static public ServiceInterface start(String name, String type) {
 		return createAndStart(name, type);
 	}
 
@@ -1797,7 +1809,8 @@ public class Runtime extends Service implements MessageListener {
 				// Files.move(src.toPath(), dst.toPath(),
 				// StandardCopyOption.REPLACE_EXISTING);
 				// NO NIO ON ANDROID !!!
-				// Files.move(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				// Files.move(src.toPath(), dst.toPath(),
+				// StandardCopyOption.REPLACE_EXISTING);
 				FileIO.copy(src, dst);
 			} catch (IOException e) {
 				Logging.logException(e);
@@ -2168,8 +2181,8 @@ public class Runtime extends Service implements MessageListener {
 		// TODO Auto-generated method stub
 
 	}
-	
-	static public Thread[] getThreads(){
+
+	static public Thread[] getThreads() {
 		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 		Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
 		return threadArray;
@@ -2245,20 +2258,19 @@ public class Runtime extends Service implements MessageListener {
 					}
 				}
 			}
-			
+
 			if (cmdline.containsKey("-update")) {
 				// update myrobotlab
 				runtime = Runtime.getInstance();
 				runtime.update();
 
-			} 
-			
-			if (cmdline.containsKey("-service"))
-			{
+			}
+
+			if (cmdline.containsKey("-service")) {
 				createAndStartServices(cmdline);
 			}
-			
-			if (cmdline.containsKey("-invoke")){
+
+			if (cmdline.containsKey("-invoke")) {
 				invokeCommands(cmdline);
 			}
 
@@ -2268,6 +2280,5 @@ public class Runtime extends Service implements MessageListener {
 			Service.sleep(2000);
 		}
 	}
-
 
 }

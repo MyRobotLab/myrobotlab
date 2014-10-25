@@ -307,7 +307,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 
 	public Propeller(String n) {
 		super(n);
-		load();
+		//load();
 
 		getPortNames();
 

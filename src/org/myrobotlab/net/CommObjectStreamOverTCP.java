@@ -50,6 +50,7 @@ import java.io.Serializable;
 import java.io.WriteAbortedException;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,11 +62,11 @@ import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.Communicator;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
-public class CommObjectStreamOverTCP implements Communicator, Serializable {
+public class CommObjectStreamOverTCP implements Gateway, Serializable {
 
 	transient public final static Logger log = LoggerFactory.getLogger(CommObjectStreamOverTCP.class);
 	private static final long serialVersionUID = 1L;
@@ -288,6 +289,10 @@ public class CommObjectStreamOverTCP implements Communicator, Serializable {
 		this.myService = service;
 	}
 
+	@Override
+	public void sendRemote(final String uri, final Message msg) throws URISyntaxException {
+		sendRemote(new URI(uri), msg);
+	}
 	// send tcp
 	@Override
 	public void sendRemote(final URI url, final Message msg) {
@@ -385,6 +390,12 @@ public class CommObjectStreamOverTCP implements Communicator, Serializable {
 		}
 
 		return data;
+	}
+
+	@Override
+	public void connect(String uri) throws URISyntaxException {
+		Message msg = myService.createMessage("", "register", null);
+		sendRemote(uri, msg);
 	}
 
 }

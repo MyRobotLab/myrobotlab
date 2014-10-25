@@ -22,6 +22,9 @@ public class TCPThread2 extends Thread {
 
 	public final static Logger log = LoggerFactory.getLogger(TCPThread2.class);
 
+	int rxCount = 0;
+	//int txCount = 0;
+	
 	URI uri;
 	Service myService;
 	Socket socket = null;
@@ -59,7 +62,9 @@ public class TCPThread2 extends Thread {
 
 				o = in.readObject();
 				msg = (Message) o;
+				++rxCount;
 
+				// FIXME - THIS NEEDS TO BE NORMALIZED - WILL BE THE SAME IN XMPP & WEBGUI & REMOTEADAPTER
 				// FIXME - normalize to single method - check for data
 				// type too ? !!!
 				if (msg.method.equals("register")) { 
@@ -81,10 +86,17 @@ public class TCPThread2 extends Thread {
 					// Security will filter appropriately
 					ServiceEnvironment foreignProcess = Runtime.getServiceEnvironment(uri);
 					
-					ServiceInterface si = (ServiceInterface) msg.data[0];
+					Object[] data = msg.data;
+					
+					ServiceInterface si = null;
+					
+					if (data != null){
+						si = (ServiceInterface) msg.data[0];
+						si.setHost(uri);
+					}
 					// HMMM a vote for String vs URI here - since we need to
 					// catch syntax !!!
-					si.setHost(uri);
+					
 
 					// if security ... msg within msg
 					// getOutbox().add(createMessage(Runtime.getInstance().getName(),

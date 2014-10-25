@@ -1269,7 +1269,7 @@ public class InMoov extends Service {
 		
 		return true;
 	}
-	
+	/*
 	public boolean load(){
 		super.load();
 		if (leftHand != null){
@@ -1298,6 +1298,7 @@ public class InMoov extends Service {
 
 		return true;
 	}
+	*/
 	
 	public Status test(){
 		Status status = Status.info("starting InMoov test");

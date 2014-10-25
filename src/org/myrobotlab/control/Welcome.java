@@ -78,15 +78,6 @@ public class Welcome extends ServiceGUI {
 		return state;
 	}
 
-	class connect implements ActionListener {
-
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			myService.connect(loginValue.getText(), loginPasswordValue.getText(), hostnameValue.getText(), servicePortValue.getInt()); 
-		}
-
-	}
-
 	@Override
 	public void attachGUI() {
 	}

@@ -348,7 +348,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	public Arduino(String n) {
 		super(n);
-		load();
+		//load(); put in Service
 
 		// target arduino
 		// board atmenga328
@@ -917,9 +917,11 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 				 */
 				while (serialDevice.isOpen() && (newByte = serialDevice.read()) > -1) {
 
+					/*
 					if (isRXRecording) {
 						bufferedWriterRX.write(newByte);
 					}
+					*/
 					
 					++byteCount;
 
@@ -1034,9 +1036,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							// NICE !! - force sensor to have publishSensorData
 							// or publishRange in interface !!!
 							// sd.sensor.invoke("publishRange", sd);
-							if (sd.duration != 0){
+//							if (sd.duration != 0){
 								sd.sensor.invoke("publishRange", sd.duration);
-							}
+//							}
 							break;
 						}
 
@@ -1920,8 +1922,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	@Override
 	public void servoStop(String servoName) {
-		// FIXME DEPRECATE OR IMPLEMENT
-		//sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
+		// FIXME prolly should stop speed controlled movement as well as sweep
+		sendMsg(SERVO_SWEEP_STOP, servos.get(servoName).servoIndex);
 	}
 
 

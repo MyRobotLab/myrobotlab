@@ -127,7 +127,8 @@ public class UltrasonicSensor extends Service implements RangeListener {
 		// TODO - add TimeUnits - cm
 		//long range = sd.duration / 58;
 		lastRange = duration / 58;
-		log.info(String.format("publishRange name %s duration %d range %d cm", getName(), duration, lastRange));
+		//if (log.isDebugEnabled()){
+			//log.debug(String.format("publishRange name %s duration %d range %d cm", getName(), duration, lastRange));
 		// }
 		return lastRange;
 	}

@@ -722,7 +722,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		cm = new CommunicationManager(this);
 
 		TSFormatter.setCalendar(cal);
-
+		load();
 		Runtime.register(this, null);
 	}
 
@@ -853,6 +853,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			thisThread.interrupt();
 		}
 		thisThread = null;
+		
+		save();
 	}
 
 	/**
@@ -1701,29 +1703,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 		return "localhost"; // no network - still can't be null // chumby
 	}
-
-	// connection publish points - begin ---------------
-	/**
-	 * 
-	 * @param conn
-	 * @return
-	 */
-	public IPAndPort noConnection(IPAndPort conn) {
-		log.error(String.format("could not connect to %s:%d", conn.IPAddress, conn.port));
-		return conn;
-	}
-
-	/**
-	 * 
-	 * @param conn
-	 * @return
-	 */
-	public IPAndPort connectionBroken(IPAndPort conn) {
-		log.error(String.format("the connection %s:%d has been broken", conn.IPAddress, conn.port));
-		return conn;
-	}
-
-	// connection publish points - end ---------------
 
 	/**
 	 * 

@@ -6,7 +6,6 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.WiiDAR.Point;
 import org.slf4j.Logger;
 
 public class Pingdar extends Service {
@@ -28,7 +27,19 @@ public class Pingdar extends Service {
 	private Long lastRange;
 	private Integer lastPos;
 	
-	private int rngCount = 0;
+	private int rangeCount = 0;
+	
+	public static class Point {
+		
+		public float r;
+		public float theta;
+		
+		public Point(float servoPos, float z){
+			this.theta = servoPos;
+			this.r = z;
+		}
+		
+	}
 	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -52,7 +63,7 @@ public class Pingdar extends Service {
 	public boolean sweep(int sweepMin, int sweepMax) {
 		this.sweepMin = sweepMin;
 		this.sweepMax = sweepMax;
-		this.step = step; // FIXME STEP
+		this.step = 1; // FIXME STEP
 
 		if (!isAttached) {
 			error("not attached");
@@ -144,21 +155,40 @@ public class Pingdar extends Service {
 		return true;
 	}
 	
+	long rangeAvg = 0;
+	
 	// sensor data has come in
 	// grab the latest position
 	public Long onRange(Long range){
 		info("range %d", range);
+		// filter too low
+		// TODO this should be done on the Arduino
+		if (range < 10){
+			return range;
+		}
+		
+		rangeAvg += range;
+		
 		lastRange = range;
-		++rngCount;
-		Point p = new Point(rngCount, lastPos, 1, System.currentTimeMillis());
-		p.z = range;
-		invoke("publishPingdar", new Point(p));
+		++rangeCount;
+		
+		/*
+		Point p = new Point(lastPos, range);
+		invoke("publishPingdar", p);
+		*/
 		return lastRange;
 	}
 	
 	public Integer onServoEvent(Integer pos){
 		info("pos %d", pos);
 		lastPos = pos;
+		if (rangeCount > 0){
+			Point p = new Point(lastPos, rangeAvg/rangeCount);
+			rangeAvg = 0;
+			rangeCount = 0;
+			invoke("publishPingdar", p);
+		}
+		
 		return lastPos;
 	}
 
@@ -189,19 +219,14 @@ public class Pingdar extends Service {
 		Pingdar pingdar = (Pingdar)Runtime.start(getName(), "Pingdar");
 		pingdar.attach("COM15", 7, 8, 4);
 		
-		/*
-		for (int i = 0; i < 180; ++i){
-			Point p = new Point(i, i, i, System.currentTimeMillis());
-			p.z = 20;
-			invoke("publishPingdar", new Point(p));
-		}
-		*/
-		pingdar.servo.sweep(40, 160);
-		pingdar.arduino.setSampleRate(5000);
-		pingdar.sweep(40, 160);
-		//pingdar.sensor.startRanging();
-		//pingdar.sensor.stopRanging();
+		pingdar.arduino.setSampleRate(5000); // <-- DOES THIS MAKE A DIFFERENCE ???
+		pingdar.sweep(20, 160);
+		
 		pingdar.stop();
+		
+		pingdar.sweep(80, 90);
+		pingdar.stop();
+		
 		return status;
 	}
 
