@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,13 +26,13 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.CommData;
-import org.myrobotlab.service.interfaces.Communicator;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.webgui.RESTProcessor;
 import org.myrobotlab.webgui.RESTProcessor.RESTException;
 import org.slf4j.Logger;
 
-public class XMPP extends Service implements Communicator, MessageListener {
+public class XMPP extends Service implements Gateway, MessageListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -593,7 +594,12 @@ public class XMPP extends Service implements Communicator, MessageListener {
 		log.info(String.format("%s sent msg %s", msg.getFrom(), msg.getBody()));
 		return msg;
 	}
-
+	
+	@Override
+	public void sendRemote(String uri, org.myrobotlab.framework.Message msg) throws URISyntaxException {
+		sendRemote(new URI(uri), msg);
+	}
+	
 	/**
 	 * sending remotely - need uri key data to send to client adds to history
 	 * list as a hop - to "hopefully" prevent infinite routing problems
@@ -612,15 +618,6 @@ public class XMPP extends Service implements Communicator, MessageListener {
 		msg.historyList.add(getName());
 		String base64 = Encoder.msgToBase64(msg);
 		sendMessage(base64, remoteURI);
-	}
-
-	// out of band data of client - no known endpoint of service !!!!
-	// Message with "null" name !
-	// cache connection data - buddy name
-	@Override
-	public void addClient(URI uri, Object commData) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -656,5 +653,13 @@ public class XMPP extends Service implements Communicator, MessageListener {
 		}
 
 	}
+
+	@Override
+	public void connect(String uri) throws URISyntaxException {
+		org.myrobotlab.framework.Message msg = createMessage("", "register", null);
+		sendRemote(uri, msg);
+	}
+
+
 
 }

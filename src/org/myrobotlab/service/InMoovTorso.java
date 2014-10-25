@@ -239,6 +239,7 @@ public class InMoovTorso extends Service {
 		return true;
 	}
 
+	/*
 	public boolean load() {
 		super.load();
 		topStom.load();
@@ -246,6 +247,7 @@ public class InMoovTorso extends Service {
 		lowStom.load();
 		return true;
 	}
+	*/
 
 	static public void main(String[] args) {
 		LoggingFactory.getInstance().configure();

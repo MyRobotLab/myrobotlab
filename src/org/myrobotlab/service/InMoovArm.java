@@ -311,7 +311,7 @@ public class InMoovArm extends Service {
 		omoplate.save();
 		return true;
 	}
-	
+	/*
 	public boolean load(){
 		super.load();
 		bicep.load();
@@ -320,4 +320,5 @@ public class InMoovArm extends Service {
 		omoplate.load();
 		return true;
 	}
+	*/
 }

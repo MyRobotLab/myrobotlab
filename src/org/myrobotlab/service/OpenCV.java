@@ -155,7 +155,7 @@ public class OpenCV extends VideoSource {
 
 	public OpenCV(String n) {
 		super(n);
-		load(); // FIXME - go into service frame work .. after construction ..
+		//load(); // FIXME - go into service frame work .. after construction ..
 				// somewhere ...
 		videoProcessor.setOpencv(this);
 	}

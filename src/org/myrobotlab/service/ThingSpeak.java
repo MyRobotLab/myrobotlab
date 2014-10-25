@@ -49,7 +49,6 @@ public class ThingSpeak extends Service {
 
 	public ThingSpeak(String n) {
 		super(n);
-		load();
 	}
 
 	public void saveConfig() {

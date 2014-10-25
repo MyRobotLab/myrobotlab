@@ -142,7 +142,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		Runtime.getInstance().addListener("registered", n, "registered");
 		Runtime.getInstance().addListener("released", n, "released");
 		// TODO - add the release route too
-		load();// <-- HA was looking all over for it
+		//load();// <-- HA was looking all over for it
 	}
 
 	public Service registered(final Service s) {

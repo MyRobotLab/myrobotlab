@@ -47,6 +47,7 @@ import java.io.Serializable;
 import java.io.WriteAbortedException;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,11 +57,11 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.Communicator;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
-public class CommObjectStreamOverDynamicProtocol implements Communicator, Serializable {
+public class CommObjectStreamOverDynamicProtocol implements Gateway, Serializable {
 
 	transient public final static Logger log = LoggerFactory.getLogger(CommObjectStreamOverDynamicProtocol.class.getCanonicalName());
 	private static final long serialVersionUID = 1L;
@@ -189,7 +190,7 @@ public class CommObjectStreamOverDynamicProtocol implements Communicator, Serial
 			}
 
 			// connection has been broken
-			// myService.invoke("connectionBroken", url); FIXME
+			// myService.invoke("connectionBroken", url); FIXME ADD TO Gateway Interface?
 		}
 
 		// FIXME - UDP must do this too? - put in common location
@@ -270,6 +271,11 @@ public class CommObjectStreamOverDynamicProtocol implements Communicator, Serial
 	}
 
 	// send tcp
+	@Override
+	public void sendRemote(final String uri, final Message msg) throws URISyntaxException {
+		sendRemote(new URI(uri), msg);
+	}
+	
 	@Override
 	public void sendRemote(final URI url, final Message msg) {
 
@@ -367,6 +373,12 @@ public class CommObjectStreamOverDynamicProtocol implements Communicator, Serial
 		}
 
 		return data;
+	}
+
+	@Override
+	public void connect(String uri) throws URISyntaxException {
+		Message msg = myService.createMessage("", "register", null);
+		sendRemote(uri, msg);
 	}
 
 }

@@ -21,9 +21,6 @@ import org.myrobotlab.webgui.WSServer.WSMsg;
 import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 public class WebGUI extends Service implements AuthorizationProvider {
 
 	// import javax.xml.transform.Transformer;
@@ -85,7 +82,6 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		// first message web browser client is getRegistry
 		// so we want it routed back here to deliver to client
 		subscribe(Runtime.getInstance().getIntanceName(), "getRegistry");
-		load();
 	}
 
 	public Integer getPort() {
@@ -415,4 +411,5 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		// webgui.useLocalResources(true);
 
 	}
+
 }

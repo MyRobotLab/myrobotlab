@@ -108,7 +108,7 @@ public class Servo extends Service implements ServoControl {
 
 	// sweep types
 	// TODO - computer implemented speed control (non-sweep)
-	boolean speedControlOnUC = true;
+	boolean speedControlOnUC = false;
 
 	transient Thread sweeper = null;
 
@@ -117,7 +117,6 @@ public class Servo extends Service implements ServoControl {
 
 	public Servo(String n) {
 		super(n);
-		load();
 		lastActivityTime = System.currentTimeMillis();
 	}
 
@@ -259,14 +258,23 @@ public class Servo extends Service implements ServoControl {
 	 * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
 	 * response
 	 */
+	
 	@Override
 	public void moveTo(Integer pos) {
+		moveTo((float)pos);
+	}
+	
+	public void moveTo(Double pos) {
+		moveTo(pos.floatValue());
+	}
+	
+	public void moveTo(float pos) {
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
 
-		inputX = pos.floatValue();
+		inputX = pos;
 
 		// the magic mapping
 		int outputY = calc(inputX);
@@ -494,10 +502,8 @@ public class Servo extends Service implements ServoControl {
 	 */
 	@Override
 	public void stop() {
-		// stop sweeper thread if running
 		isSweeping = false;
 		sweeper = null;
-		// send a stop to the uC
 		controller.servoStop(getName());
 	}
 
@@ -544,12 +550,10 @@ public class Servo extends Service implements ServoControl {
 		addListener("publishServoEvent", service.getName(), "onServoEvent", Integer.class);
 	}
 
-	public Status test(String port, int pin) {
-		Status status = null;
+	public Status test() {
+		Status status = super.test();
 		
 		try {			
-			
-		super.test();
 
 		// FIXME GSON or PYTHON MESSAGES
 
@@ -559,10 +563,13 @@ public class Servo extends Service implements ServoControl {
 		boolean testSweep = true;
 		boolean testDetachReAttach = false;
 		boolean testBlocking = false;
+		
+		String port = "COM15";
+		int pin = 4;
 
 		if (useVirtualPorts) {
 			// virtual testing
-			VirtualSerialPort.createNullModemCable("COM15", "UART");
+			VirtualSerialPort.createNullModemCable(port, "UART");
 			Serial uart = (Serial) Runtime.start("uart", "Serial");
 			uart.connect("UART");
 		}
@@ -589,7 +596,7 @@ public class Servo extends Service implements ServoControl {
 		// into some script or other code
 		// also good to guarantee being started
 
-		Servo servo = (Servo) Runtime.start(getName(), "Arduino");
+		Servo servo = (Servo) Runtime.start(getName(), "Servo");
 
 		// TODO test errros on servo move before attach
 
@@ -691,6 +698,21 @@ public class Servo extends Service implements ServoControl {
 		}
 		return status;
 	}
+	
+	public void test2(){
+
+		Servo servo = (Servo) Runtime.start(getName(), "Servo");
+		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+		arduino.connect("COM15");
+		
+		RemoteAdapter remote2 = (RemoteAdapter)Runtime.create("remote2", "RemoteAdapter");
+		remote2.setTCPPort(6868);
+		remote2.setUDPPort(6868);
+		remote2.startService();
+		servo.map(-1.0f, 1.0f, 0.0f, 180.0f);
+		Runtime.start("gui2", "GUIService");
+	}
+	
 
 	public static void main(String[] args) throws InterruptedException {
 
@@ -699,12 +721,13 @@ public class Servo extends Service implements ServoControl {
 		try {
 
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
+			servo.test2();
 			/*
 			 * Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			 * servo.setSpeedControlOnUC(true);
 			 * Serial.createNullModemCable("COM15", "UART");
 			 */
-			servo.test();
+			//servo.test();
 		} catch (Exception e) {
 			Logging.logException(e);
 		}

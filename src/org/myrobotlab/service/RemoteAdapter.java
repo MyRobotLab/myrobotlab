@@ -37,6 +37,7 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -52,46 +53,38 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.CommData;
 import org.myrobotlab.net.TCPThread2;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
-import org.myrobotlab.service.interfaces.Communicator;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
-/***
- * 
- * @author GroG
- * 
- *         This is a service which allows foreign clients to connect
- * 
- */
-
-public class RemoteAdapter extends Service implements Communicator {
+public class RemoteAdapter extends Service implements Gateway {
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(RemoteAdapter.class);
 
-	@Element
-	public String lastHost = "127.0.0.1";
-	@Element
-	public String lastPort = "6767";
-
+	@Element(required=false)
+	public String lastProtoKey;
 	
 	// types of listening threads - multiple could be managed
 	// when correct interfaces and base classes are done
 	transient TCPListener tcpListener = null;
 	transient UDPListener udpListener = null;
 
-	private Integer udpPort = 6767;
-	private Integer tcpPort = 6767;
+	@Element(required=false)
+	private Integer udpPort;
+	@Element(required=false)
+	private Integer tcpPort;
 
-	private int udpRx = 0;
-	private int udpTx = 0;
-	private int tcpTx = 0;
+	private int udpRx;
+	private int udpTx;
 
-	transient HashMap<URI, TCPThread2> clientList = new HashMap<URI, TCPThread2>();
+	transient HashMap<URI, TCPThread2> tcpClientList = new HashMap<URI, TCPThread2>();
+	HashMap<URI, CommData> clientList = new HashMap<URI, CommData> ();
 
 	public RemoteAdapter(String n) {
 		super(n);
+		log.info("here");
 	}
 
 	@Override
@@ -103,15 +96,17 @@ public class RemoteAdapter extends Service implements Communicator {
 	}
 
 	class TCPListener extends Thread {
+		int rxCount = 0;
+		int txCount = 0;
 		RemoteAdapter myService = null;
 		transient ServerSocket serverSocket = null;
 		ObjectOutputStream out;
 		ObjectInputStream in;
-		int listeningPort;
+		int remotePort;
 
-		public TCPListener(int listeningPort, RemoteAdapter s) {
-			super(String.format("%s.tcp.%d", s.getName(), listeningPort));
-			this.listeningPort = listeningPort;
+		public TCPListener(int remotePort, RemoteAdapter s) {
+			super(String.format("%s.tcp.%d", s.getName(), remotePort));
+			this.remotePort = remotePort;
 			myService = s;
 		}
 
@@ -129,7 +124,7 @@ public class RemoteAdapter extends Service implements Communicator {
 		public void run() {
 			try {
 
-				serverSocket = new ServerSocket(listeningPort, 10);
+				serverSocket = new ServerSocket(remotePort, 10);
 
 				log.info(getName() + " TCPListener listening on " + serverSocket.getLocalSocketAddress());
 				myService.info(String.format("listening on %s tcp", serverSocket.getLocalSocketAddress()));
@@ -137,18 +132,13 @@ public class RemoteAdapter extends Service implements Communicator {
 				while (isRunning()) {
 					// FIXME - on contact register the "environment" regardless
 					// if a service registers !!!
-					Socket clientSocket = serverSocket.accept(); // FIXME
-																	// ENCODER
-																	// SHOULD BE
-																	// DOING
-																	// THIS
+					Socket clientSocket = serverSocket.accept(); 
+					// inbound connection FIXME - all keys constructed in Encoder
 					String clientKey = String.format("tcp://%s:%d", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
-					// String newHostEntryKey = String.format("mrl://%s/%s",
-					// myService.getName(), clientKey);
-					// info(String.format("connection from %s",
-					// newHostEntryKey));
 					URI uri = new URI(clientKey);
-					clientList.put(uri, new TCPThread2(myService, uri, clientSocket));
+					// HELP PROTOKEY VS MRL KEY ??
+					tcpClientList.put(uri, new TCPThread2(myService, uri, clientSocket));
+					broadcastState();
 				}
 
 				serverSocket.close();
@@ -166,7 +156,7 @@ public class RemoteAdapter extends Service implements Communicator {
 		int listeningPort;
 		boolean isRunning = false;
 
-		public UDPListener(int listeningPort, RemoteAdapter s) {
+		public UDPListener(Integer listeningPort, RemoteAdapter s) {
 			super(String.format("%s.usp.%d", s.getName(), listeningPort));
 			this.listeningPort = listeningPort;
 			myService = s;
@@ -300,11 +290,6 @@ public class RemoteAdapter extends Service implements Communicator {
 		return null;
 	}
 
-	@Override
-	public void startService() {
-		super.startService();
-		startListening();
-	}
 
 	public void startListening() {
 		startListening(udpPort, tcpPort);
@@ -315,15 +300,21 @@ public class RemoteAdapter extends Service implements Communicator {
 		startTCP(tcpPort);
 	}
 
-	public void startUDP(int port) {
+	public void startUDP(Integer port) {
 		stopUDP();
+		if (port == null){
+			port = 6767;
+		}
 		udpPort = port;
 		udpListener = new UDPListener(udpPort, this);
 		udpListener.start();
 	}
 
-	public void startTCP(int port) {
+	public void startTCP(Integer port) {
 		stopTCP();
+		if (port == null){
+			port = 6767;
+		}
 		tcpPort = port;
 		tcpListener = new TCPListener(tcpPort, this);
 		tcpListener.start();
@@ -379,8 +370,14 @@ public class RemoteAdapter extends Service implements Communicator {
 	}
 
 	@Override
+	synchronized public void sendRemote(String uri, Message msg) throws URISyntaxException {
+		sendRemote(new URI(uri), msg);
+	}	
+	
+	@Override
 	synchronized public void sendRemote(URI uri, Message msg) {
 		String scheme = uri.getScheme();
+		lastProtoKey = uri.toString();
 		if ("tcp".equals(scheme)) {
 			sendRemoteTCP(uri, msg);
 		} else if ("udp".equals(scheme)) {
@@ -393,14 +390,14 @@ public class RemoteAdapter extends Service implements Communicator {
 	public void sendRemoteTCP(URI uri, Message msg) {
 		TCPThread2 t = null;
 		try {
-			if (clientList.containsKey(uri)) {
-				t = clientList.get(uri);
+			if (tcpClientList.containsKey(uri)) {
+				t = tcpClientList.get(uri);
 			} else {
 
 				t = new TCPThread2(this, uri, null);
 				// clientList.put(new URI(String.format("mrl://%s/%s",
 				// getName(), uri.toString())), t);
-				clientList.put(uri, t);
+				tcpClientList.put(uri, t);
 			}
 
 			if (t == null) {
@@ -432,13 +429,6 @@ public class RemoteAdapter extends Service implements Communicator {
 
 	}
 
-	// FIXME - remote
-	@Override
-	public void addClient(URI uri, Object commData) {
-		// TODO Auto-generated method stub
-		log.info("add client");
-	}
-
 	public Integer getUdpPort() {
 		return udpPort;
 	}
@@ -454,20 +444,35 @@ public class RemoteAdapter extends Service implements Communicator {
 	public void setTCPPort(Integer tcpPort) {
 		this.tcpPort = tcpPort;
 	}
+
+	@Override
+	public void connect(String uri) throws URISyntaxException {
+		Message msg = createMessage("", "register", null);
+		sendRemote(uri, msg);
+	}
 	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.ERROR);
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		try {
 
-			int i = 1;
-			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
+			int i = 5;
+			//Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
 			RemoteAdapter remote = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
-			Runtime.createAndStart(String.format("clock%d", i), "Clock");
-			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
-			remote.stopService();
-
+			Runtime.start(String.format("clock%d", i), "Clock");
+			Runtime.start(String.format("gui%d", i), "GUIService");
+			
+			// what if null service is passed "register()" no parameters -
+			// I'm sending a registration of nothing?
+			remote.broadcastState();
+			
+			//remote.connect("tcp://127.0.0.1:6868");
+			/* THIS WORKS
+			Message msg = remote.createMessage("", "register", remote);
+			remote.sendRemote("tcp://127.0.0.1:6868", msg);
+			*/
+			
 			// FIXME - sholdn't this be sendRemote ??? or at least
 			// in an interface
 			// remote.sendRemote(uri, msg);
@@ -476,5 +481,6 @@ public class RemoteAdapter extends Service implements Communicator {
 			Logging.logException(e);
 		}
 	}
+
 
 }

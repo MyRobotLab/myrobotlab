@@ -10,7 +10,7 @@ public interface CommunicationInterface {
 
 	public void send(final URI uri, final Message msg);
 
-	public void setComm(final Communicator comm);
+	public void setComm(final Gateway comm);
 
 	/**
 	 * gets the appropriate local service based communicator to relay 
@@ -19,7 +19,7 @@ public interface CommunicationInterface {
 	 * @param uri
 	 * @return
 	 */
-	public Communicator getComm(final URI uri);
+	public Gateway getComm(final URI uri);
 	
 	public void addRemote(URI mrlHost, URI protoKey);
 

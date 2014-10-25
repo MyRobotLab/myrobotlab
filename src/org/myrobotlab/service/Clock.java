@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -159,26 +158,19 @@ public class Clock extends Service {
 			// TCP CONNECT WORKS BEGIN ---------------------------------
 			try {
 
-				int i = 5;
+				int i = 0;
 				Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
-				// RemoteAdapter remote = (RemoteAdapter)
-				// Runtime.createAndStart(String.format("remote%d", i),
-				// "RemoteAdapter");
-				RemoteAdapter remote = new RemoteAdapter(String.format("remote%d", i));
-				remote.setUDPPort(7776);
-				remote.setTCPPort(7776);
-				remote.startService();
-				// remote.startListening(7776, 7776); FIXME - problem starting
-				// server threads which rely on isRunning() - which is false -
-				// cuz you have not started it yet
-				Clock clock = (Clock) Runtime.createAndStart(String.format("clock%d", i), "Clock");
-				Runtime.createAndStart(String.format("gui%d", i), "GUIService");
 				
-				//myservice.subscribe("clock", "pulse", "pulseMe");
-
-				Message msg = remote.createMessage("", "register", clock);
-				URI uri = new URI("tcp://127.0.0.1:6767");
-				remote.sendRemote(uri, msg);
+				// auto-grab the next port if can not listen???
+				RemoteAdapter remote = new RemoteAdapter(String.format("remote%d", i));
+				remote.setUDPPort(6868);
+				remote.setTCPPort(6868);
+				remote.startService();
+				remote.startListening();
+				
+				Runtime.start(String.format("clock%d", i), "Clock");
+				Runtime.start(String.format("gui%d", i), "GUIService");
+				
 
 				// FIXME - sholdn't this be sendRemote ??? or at least
 				// in an interface

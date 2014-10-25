@@ -24,6 +24,8 @@
 
 package org.myrobotlab.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.TreeMap;
 
 import net.java.games.input.Component;
@@ -33,9 +35,12 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Rumbler;
 
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -104,7 +109,6 @@ public class Joystick extends Service {
 
 				// FIXME - switch statement (it's Java 7 !)
 				for (int i = 0; i < components.length; i++) {
-
 
 					Component component = components[i];
 					Identifier id = component.getIdentifier();
@@ -326,11 +330,9 @@ public class Joystick extends Service {
 		}
 	}
 
-	public boolean isPolling()
-	{
+	public boolean isPolling() {
 		return pollingThread != null;
 	}
-
 
 	@Override
 	public String getDescription() {
@@ -666,10 +668,8 @@ public class Joystick extends Service {
 	}
 
 	/*
-	public Integer button0(Integer value) {
-		return value;
-	}
-	*/
+	 * public Integer button0(Integer value) { return value; }
+	 */
 
 	public Integer button1(Integer value) {
 		return value;
@@ -718,7 +718,7 @@ public class Joystick extends Service {
 	public Integer button12(Integer value) {
 		return value;
 	}
-	
+
 	public Integer button13(Integer value) {
 		return value;
 	}
@@ -804,20 +804,50 @@ public class Joystick extends Service {
 		ZRotOffset = 0;
 	}
 
+	public Status test() {
+		Status status = super.test();
+
+		try {
+
+			Joystick joy = (Joystick) Runtime.getService(getName());
+			joy.addListener("ZAxisRaw", "python", "onZAxis");
+			joy.startService();
+
+			RemoteAdapter remote = (RemoteAdapter) Runtime.start("remote", "RemoteAdapter");
+			Runtime.start("python", "Python");
+
+			Runtime.start("gui", "GUIService");
+
+			sleep(1000);
+
+			// from java.net import URI
+			// TODO - PREFIX (CHOOSE PREFIX SO NO NAME COLLISION)
+			// SIMPLE CONNECT URI
+			Message msg = remote.createMessage("", "register", joy);
+			remote.sendRemote(new URI("tcp://127.0.0.1:6868"), msg);
+
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+
+		return status;
+	}
+
 	public static void main(String args[]) {
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		// First you need to create controller.
 		// http://theuzo007.wordpress.com/2012/09/02/joystick-in-java-with-jinput/
 		// JInputJoystick joystick = new JInputJoystick(Controller.Type.STICK,
 		// Controller.Type.GAMEPAD);
 
-		Joystick joy = new Joystick("joystick");
-		joy.startService();
+		Runtime.setRuntimeName("joyrun");
+		Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+		joy.test();
+
 		// joy.setController(2);
 		// joy.startPolling();
-		Runtime.start("gui", "GUIService");		
 
 	}
 

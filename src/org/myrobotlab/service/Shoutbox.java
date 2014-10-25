@@ -33,8 +33,11 @@ import org.slf4j.Logger;
 public class Shoutbox extends Service {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Shoutbox.class);
-
+	
+	// FIXME - do not allow double entries on quickStart - make re-entrant
+	// FIXME if link = youtube.com - then embedd (at least with hyperlink & video splash
 	// FIXME - refactor these are ugly
+	
 	final public String SYSTEM = "system";
 	final public String USER = "usermsg";
 

@@ -39,12 +39,12 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -69,7 +69,8 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	transient SpeechProcessor speechProcessor = null;
 
 	private boolean isListening = false;
-	private String lockPhrase = null;
+	//private String lockPhrase = null;
+	HashSet<String> lockPhrases = new HashSet<String>();
 
 	HashMap<String, Command> commands = null;
 	HashMap<String, Command> confirmations = null;
@@ -225,11 +226,11 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	 */
 
 	public void lockOutAllGrammarExcept(String lockPhrase) {
-		this.lockPhrase = lockPhrase;
+		this.lockPhrases.add(lockPhrase);
 	}
 
 	public void clearLock() {
-		lockPhrase = null;
+		lockPhrases.clear();
 	}
 
 	class SpeechProcessor extends Thread {
@@ -287,8 +288,8 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 						String resultText = result.getBestFinalResultNoFiller();
 						log.info("recognized: " + resultText + '\n');
 						if (resultText.length() > 0 && isListening) {
-							if (lockPhrase != null && !lockPhrase.equals(resultText) && lockPhrase != null && !confirmations.containsKey(resultText)) {
-								log.info(String.format("but locked on %s", lockPhrase));
+							if (lockPhrases.size() > 0 && !lockPhrases.contains(resultText) && !confirmations.containsKey(resultText)) {
+								log.info(String.format("but locked on %s", resultText));
 								continue;
 							}
 

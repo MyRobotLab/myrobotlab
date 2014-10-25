@@ -40,17 +40,18 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.interfaces.Communicator;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
 // FIXME remove communication interface
-public class CommObjectStreamOverUDP implements Communicator, Serializable {
+public class CommObjectStreamOverUDP implements Gateway, Serializable {
 
 	public final static Logger log = LoggerFactory.getLogger(CommObjectStreamOverUDP.class.getCanonicalName());
 	private static final long serialVersionUID = 1L;
@@ -179,6 +180,11 @@ public class CommObjectStreamOverUDP implements Communicator, Serializable {
 	public CommObjectStreamOverUDP(Service service) {
 		this.myService = service;
 	}
+	
+	@Override
+	public void sendRemote(final String uri, final Message msg) throws URISyntaxException {
+		sendRemote(new URI(uri), msg);
+	}
 
 	@Override
 	public void sendRemote(final URI url, final Message msg) {
@@ -237,6 +243,12 @@ public class CommObjectStreamOverUDP implements Communicator, Serializable {
 		}
 
 		return data;
+	}
+
+	@Override
+	public void connect(String uri) throws URISyntaxException {
+		Message msg = myService.createMessage("", "register", null);
+		sendRemote(uri, msg);
 	}
 
 }
