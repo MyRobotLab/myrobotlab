@@ -298,10 +298,8 @@ public class Speech extends Service implements TextListener {
 		
 		if (backendType == BackendType.FREETTS) { // festival tts
 			speakFreeTTS(toSpeak);
-		} else if (backendType == BackendType.GOOGLE) { // festival tts
-			speakGoogle(toSpeak.replace("?", "")); // needed ? is not a valid in
-													// a filename - TODO - look
-													// up all characters
+		} else if (backendType == BackendType.GOOGLE) { // google tts
+			speakGoogle(toSpeak); 
 		} else {
 			log.error("back-end speech backendType " + backendType + " not supported ");
 			return false;
@@ -408,6 +406,9 @@ public class Speech extends Service implements TextListener {
 			}
 		}
 
+		
+		// Sanitize the filename so it can be properly cached.
+		toSpeak = cleanFilename(toSpeak);
 		String audioFileName = "audioFile/google/" + language + "/" + voiceName + "/" + toSpeak + ".mp3";
 		File f = new File(audioFileName);
 		log.info(f + (f.exists() ? " is found " : " is missing "));
@@ -463,6 +464,18 @@ public class Speech extends Service implements TextListener {
 		audioFile.playFile(audioFileName, true);
 		sleep(afterSpeechPause);// important pause after speech
 		invoke("isSpeaking", false);
+	}
+
+	private String cleanFilename(String toSpeak) {
+		// Strip all chars that are not valid to use in a filename
+		// windows list 
+		// A filename cannot contain any of the following characters: 
+		//  \ / : * ? " < > |
+		// ; is forbidden on unix..  not sure what else we need 
+		// get rid of parens also maybe?
+		// TODO: find a nice clean list / library to do this
+		String cleanSpeak = toSpeak.replaceAll("^[.\\\\/:;*?\"<>|]?[\\\\/:*?\"<>|\\(\\)]*", "");
+		return cleanSpeak.trim().toLowerCase();
 	}
 
 	public byte[] getByteArrayFromResponse(HttpResponse response) {
