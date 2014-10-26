@@ -47,6 +47,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
+import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.speech.DialogManager;
 import org.slf4j.Logger;
@@ -107,7 +108,6 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	 * @return the word
 	 */
 	public String recognized(String word) {
-		invoke("publishText", word);
 		return word;
 	}
 
@@ -335,6 +335,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 							}
 
 							//publishRecognized(resultText);
+							invoke("publishText", resultText);
 							invoke("recognized", resultText);
 						}
 
@@ -487,6 +488,10 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		addListener("recognized", s.getName(), "heard", String.class);
 	}
 
+	public void addTextListener(TextListener service){
+		addListener("publishText", service.getName(), "onText", String.class);
+	}
+	
 	public void addBypass(String... txt) {
 		if (bypass == null) {
 			bypass = new HashMap<String, Command>();

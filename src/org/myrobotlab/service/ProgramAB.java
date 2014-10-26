@@ -40,7 +40,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	private HashMap<String, Chat> sessions = new HashMap<String, Chat>();
 	private Pattern oobPattern = Pattern.compile("<oob>(.*?)</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 	private boolean processOOB = true;
-	
+
 
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
@@ -87,10 +87,12 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	public static class Response {
 		public String session;
 		public String msg;
+		public OOBPayload payload;
 
-		public Response(String session, String msg){
+		public Response(String session, String msg, OOBPayload payload){
 			this.session = session;
 			this.msg = msg;
+			this.payload = payload;
 		}
 	}
 
@@ -112,7 +114,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		if (bot == null) {
 			String error = "ERROR: Core not loaded, please load core before chatting.";
 			error(error);
-			return new Response(session, error);
+			return new Response(session, error, null);
 		}
 
 		if (!sessions.containsKey(session)){
@@ -122,17 +124,23 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		String res = sessions.get(session).multisentenceRespond(text);
 		// Check the AIML response to see if there is OOB (out of band data) 
 		// If so, publish that data independent of the text response.
+		OOBPayload payload = null;
 		if (processOOB) {
-			processOOB(res);
+			payload = processOOB(res);
 		}
-		Response response = new Response(session, res);
+		
+		// OOB text should not be published as part of the response text.
+		Matcher matcher = oobPattern.matcher(res);
+		res = matcher.replaceAll("");
+		
+		Response response = new Response(session, res, payload);
 		invoke("publishResponse", response);
 		invoke("publishResponseText", response);
 		info("to: %s - %s", session, res);
 		return response;
 	}
 
-	private void processOOB(String text) {		
+	private OOBPayload processOOB(String text) {		
 		Matcher oobMatcher = oobPattern.matcher(text);
 		while (oobMatcher.find()) {
 			// We found some OOB text.
@@ -144,12 +152,18 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 			invoke("publishOOBText", oobPayload);
 			// grab service and invoke method.
 			ServiceInterface s = Runtime.getService(payload.getServiceName());
+			if (s == null) {
+				log.warn("Service name in OOB tag unknown. {}" , oobPayload );
+				return null;
+			}
 			if (payload.getParams()!=null) {
 				s.invoke(payload.getMethodName(), payload.getParams().toArray());
 			} else {
 				s.invoke(payload.getMethodName());				
 			}
-		}		
+			return payload;
+		}
+		return null;
 	}
 
 	private OOBPayload parseOOB(String oobPayload) {
@@ -164,7 +178,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		log.info("OOB tag found, but it's not an MRL tag. {}", oobPayload );
 		return null;
 	}
@@ -183,10 +197,10 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		}
 		return patterns;
 	}
-	
+
 	public void startSession(String progABPath, String botName) {
 		startSession(progABPath	, null, botName);
-		
+
 	}
 
 
@@ -229,7 +243,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	}
 
 	public void addTextListener(TextListener service){
-		addListener("publishResponseText", service.getName(), "onText", String.class);
+		addListener("publishText", service.getName(), "onText", String.class);
 	}
 
 	public void addOOBTextListener(TextListener service){
@@ -238,13 +252,12 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 
 	public void addTextPublisher(TextPublisher service){
 		addListener("publishText", service.getName(), "onText", String.class);
-		// subscribe(service.getName(), "publishText", "onText", String.class);
 	}
-	
+
 	public void startSession() {
 		startSession(null);
 	}
-	
+
 	public void writeAIML() {
 		bot.writeAIMLFiles();
 	}
@@ -252,11 +265,11 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	public void writeAIMLIF() {
 		bot.writeAIMLIFFiles();
 	}
-	
+
 	public void writeAndQuit() {
 		bot.writeQuit();
 	}
-	
+
 	public void startSession(String session) {
 		startSession(path, session, botName);
 	}
@@ -290,7 +303,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	public String publishText(String text) {
 		return text;
 	}
-	
+
 	public boolean isProcessOOB() {
 		return processOOB;
 	}
@@ -299,6 +312,6 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		this.processOOB = processOOB;
 	}
 
-	
-	
+
+
 }
