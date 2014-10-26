@@ -7,7 +7,7 @@
  * MyRobotLab is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version (subject to the "Classpath" exception
+ * (at your option) any later version (subject to the "Classpath" exzception
  * as provided in the LICENSE.txt file that accompanied this code).
  *
  * MyRobotLab is distributed in the hope that it will be useful or fun,
@@ -107,6 +107,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	 * @return the word
 	 */
 	public String recognized(String word) {
+		invoke("publishText", word);
 		return word;
 	}
 
