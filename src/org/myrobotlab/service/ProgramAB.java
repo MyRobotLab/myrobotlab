@@ -19,6 +19,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.OOBPayload;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.TextListener;
+import org.myrobotlab.service.interfaces.TextPublisher;
 
 /**
  * Program AB service for MyRobotLab
@@ -30,7 +31,7 @@ import org.myrobotlab.service.interfaces.TextListener;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service {
+public class ProgramAB extends Service implements TextListener,TextPublisher {
 
 	private Bot bot = null;
 	private String path = "ProgramAB";
@@ -40,15 +41,6 @@ public class ProgramAB extends Service {
 	private Pattern oobPattern = Pattern.compile("<oob>(.*?)</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 	private boolean processOOB = true;
 	
-	public boolean isProcessOOB() {
-		return processOOB;
-	}
-
-
-	public void setProcessOOB(boolean processOOB) {
-		this.processOOB = processOOB;
-	}
-
 
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
@@ -194,6 +186,7 @@ public class ProgramAB extends Service {
 	
 	public void startSession(String progABPath, String botName) {
 		startSession(progABPath	, null, botName);
+		
 	}
 
 
@@ -231,7 +224,6 @@ public class ProgramAB extends Service {
 		return oobText;
 	}
 
-
 	public void addResponseListener(Service service){
 		addListener("publishResponse", service.getName(), "onResponse", Response.class);
 	}
@@ -244,10 +236,27 @@ public class ProgramAB extends Service {
 		addListener("publishOOBText", service.getName(), "onOOBText", String.class);
 	}
 
+	public void addTextPublisher(TextPublisher service){
+		addListener("publishText", service.getName(), "onText", String.class);
+		// subscribe(service.getName(), "publishText", "onText", String.class);
+	}
+	
 	public void startSession() {
 		startSession(null);
 	}
+	
+	public void writeAIML() {
+		bot.writeAIMLFiles();
+	}
 
+	public void writeAIMLIF() {
+		bot.writeAIMLIFFiles();
+	}
+	
+	public void writeAndQuit() {
+		bot.writeQuit();
+	}
+	
 	public void startSession(String session) {
 		startSession(path, session, botName);
 	}
@@ -266,5 +275,30 @@ public class ProgramAB extends Service {
 		Response response = alice.getResponse("TEST OOB");
 		log.info("Alice " + response.msg);		
 	}
+
+	@Override
+	public void onText(String text) {
+		// What else should we do here?  seems reasonable to just do this.
+		// this should actually call getResponse
+		// on input, get the proper response
+		Response resp = getResponse(text);
+		// push that to the next end point.
+		invoke("publishText", resp.msg);
+	}
+
+	@Override
+	public String publishText(String text) {
+		return text;
+	}
+	
+	public boolean isProcessOOB() {
+		return processOOB;
+	}
+
+	public void setProcessOOB(boolean processOOB) {
+		this.processOOB = processOOB;
+	}
+
+	
 	
 }
