@@ -474,7 +474,7 @@ public class Speech extends Service implements TextListener {
 		// ; is forbidden on unix..  not sure what else we need 
 		// get rid of parens also maybe?
 		// TODO: find a nice clean list / library to do this
-		String cleanSpeak = toSpeak.replaceAll("^[.\\\\/:;*?\"<>|]?[\\\\/:*?\"<>|\\(\\)]*", "");
+		String cleanSpeak = toSpeak.replaceAll("^[.\\\\/:;*?\"<>|]?[\\\\/:*?\"<>|\\(\\)]*", " ");
 		return cleanSpeak.trim().toLowerCase();
 	}
 
