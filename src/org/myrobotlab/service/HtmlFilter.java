@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
+import org.myrobotlab.service.interfaces.TextPublisher;
 
 /**
  * A service that will either strip out html from input text or
@@ -11,7 +12,7 @@ import org.myrobotlab.service.interfaces.TextListener;
  * @author kwatters
  *
  */
-public class HtmlFilter extends Service implements TextListener  {
+public class HtmlFilter extends Service implements TextListener, TextPublisher  {
 
 	private static final long serialVersionUID = 1L;
 	// true will strip html, false will add html
@@ -31,7 +32,6 @@ public class HtmlFilter extends Service implements TextListener  {
 	
 	@Override
 	public void onText(String text) {
-		// TODO Auto-generated method stub
 		// process the text and then publish the new text.
 		if (stripHtml) { 
 			String cleanText = stripHtml(text);

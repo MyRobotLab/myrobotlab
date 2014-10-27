@@ -134,8 +134,10 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		res = matcher.replaceAll("");
 		
 		Response response = new Response(session, res, payload);
+		// EEK! clean up the API!
 		invoke("publishResponse", response);
 		invoke("publishResponseText", response);
+		invoke("publishText", response.msg);
 		info("to: %s - %s", session, res);
 		return response;
 	}
@@ -284,7 +286,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		// String progABPath = f.getAbsolutePath();
 		// String botName = "alice2";
 		// alice.startSession(); 
-		alice.startSession("ProgramAB", "default", "lloyd");
+		alice.startSession("ProgramAB", "default", "alice");
 		Response response = alice.getResponse("TEST OOB");
 		log.info("Alice " + response.msg);		
 	}
