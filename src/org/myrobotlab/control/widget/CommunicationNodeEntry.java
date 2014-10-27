@@ -19,11 +19,11 @@ public class CommunicationNodeEntry extends JPanel {
 	public CommunicationNodeEntry(URI uri, CommData data) {
 		this.uri = uri;
 		this.data = data;
-		this.image = Util.getResourceIcon("RemoteAdapter/computer.png");
+		this.image = Util.getResourceIcon("instance.png");
 	}
 
 	public String getTitle() {
-		return uri.toString();
+		return String.format("<html>%s %s<br/>RX %s.%s %d<br/>TX %s.%s %d</html>", uri, data.state, data.rxName, data.rxMethod, data.rx, data.txName, data.txMethod, data.tx);// data.toString();//String.format("%s connected rx %d tx %d         ", uri.toString(), data.rx, data.tx);
 	}
 
 	public ImageIcon getImage() {

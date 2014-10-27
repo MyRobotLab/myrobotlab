@@ -25,7 +25,7 @@
 
 package org.myrobotlab.control;
 
-import java.awt.GridBagConstraints;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
@@ -34,6 +34,7 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
@@ -49,7 +50,10 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 	static final long serialVersionUID = 1L;
 	JLabel numClients = new JLabel("0");
 
-	JButton connection = new JButton("connect");
+	JButton connect = new JButton("connect");
+	//JButton listenTCP = new JButton("listen tcp");
+	//JButton listenUDP = new JButton("listen udp");
+	JButton listen = new JButton("listen");
 
 	// display of the CommData getClients
 	CommunicationNodeList list = new CommunicationNodeList();
@@ -62,28 +66,29 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 	}
 
 	public void init() {
-		gc.gridx = 0;
-		gc.gridy = 0;
-
-		display.add(connection, gc);
-		++gc.gridy;
-		display.add(new JLabel("number of connections :"), gc);
-		++gc.gridy;
-		display.add(new JLabel("last activity : "), gc);
-		++gc.gridy;
-		display.add(new JLabel("number of messages : "), gc);
-		++gc.gridy;
-		// list.setPreferredSize(new Dimension(arg0, arg1))
-		gc.gridwidth = 4;
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		display.add(list, gc);
-		connection.addActionListener(this);
+		
+		display.setLayout(new BorderLayout());
+		
+		JPanel top = new JPanel();
+		top.add(connect);
+		top.add(listen);
+		//top.add(listenTCP);
+		//top.add(listenUDP);
+		connect.addActionListener(this);
+		listen.addActionListener(this);
+		/*
+		listenTCP.addActionListener(this);
+		listenUDP.addActionListener(this);
+		*/
+		
+		display.add(top, BorderLayout.NORTH);
+		display.add(list, BorderLayout.CENTER);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent action) {
 		Object o = action.getSource();
-		if (o == connection) {
+		if (o == connect) {
 			String newProtoKey = (String) JOptionPane.showInputDialog(myService.getFrame(), "<html>connect to a remote MyRobotLab</html>", "connect", JOptionPane.WARNING_MESSAGE,
 					Util.getResourceIcon("RemoteAdapter/connect.png"), null, lastProtoKey);
 			
@@ -93,6 +98,12 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 
 			send("connect", newProtoKey);
 			lastProtoKey = newProtoKey;
+		} else if (o == listen){
+			if (listen.getText().equals("stop listening")){
+				send("stopListening");
+			} else {
+				send("startListening");	
+			}			
 		}
 	}
 
@@ -100,10 +111,16 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				myRemote = remote;
+				if (myRemote.isListening()){
+					listen.setText("stop listening");
+				} else {
+					listen.setText("listen");
+				}
 				lastProtoKey = remote.lastProtoKey;
 				if (remote.getClients() == null){
 					return;
 				}
+				list.model.clear();
 				for (Map.Entry<URI, CommData> o : remote.getClients().entrySet()) {
 					// Map.Entry<String,SerializableImage> pairs = o;
 					URI uri = o.getKey();

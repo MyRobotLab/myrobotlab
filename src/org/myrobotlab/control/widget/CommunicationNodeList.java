@@ -9,10 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.OpenCV;
-import org.slf4j.Logger;
 
 public class CommunicationNodeList extends JPanel {
 
@@ -32,11 +29,7 @@ public class CommunicationNodeList extends JPanel {
 		add(pane, BorderLayout.NORTH);
 		// add(button, BorderLayout.SOUTH);
 	}
-
-	public final static Logger log = LoggerFactory.getLogger(OpenCV.class.getCanonicalName());
-
 	
-
 	public static void main(String s[]) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
@@ -48,7 +41,6 @@ public class CommunicationNodeList extends JPanel {
 		frame.setContentPane(cl);
 		frame.pack();
 		frame.setVisible(true);
-
 	}
 
 }

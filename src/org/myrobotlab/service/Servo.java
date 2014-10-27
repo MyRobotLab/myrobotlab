@@ -313,7 +313,10 @@ public class Servo extends Service implements ServoControl {
 		log.info("servoWrite({})", outputY);
 		controller.servoWriteMicroseconds(getName(), outputY);
 		lastActivityTime = System.currentTimeMillis();
-
+		
+		// trying out broadcast after
+		// position change
+		broadcastState();
 	}
 	
 

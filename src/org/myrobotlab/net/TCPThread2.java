@@ -22,23 +22,19 @@ public class TCPThread2 extends Thread {
 
 	public final static Logger log = LoggerFactory.getLogger(TCPThread2.class);
 
-	int rxCount = 0;
-	//int txCount = 0;
-	
-	URI uri;
 	Service myService;
-	Socket socket = null;
-	CommData data = new CommData();
-	ObjectInputStream in = null;
-	ObjectOutputStream out = null;
+	public Socket socket;
+	public CommData data;
+	ObjectInputStream in;
+	ObjectOutputStream out;
 	boolean isRunning = false;
 
-	public TCPThread2(Service service, URI url, Socket socket) throws UnknownHostException, IOException {
-		super(String.format("%s_%s", service.getName(), url));
+	public TCPThread2(Service service, URI uri, Socket socket) throws UnknownHostException, IOException {
+		super(String.format("%s_%s", service.getName(), uri));
 		this.myService = service;
-		this.uri = url;
+		this.data = new CommData(uri);
 		if (socket == null) {
-			socket = new Socket(url.getHost(), url.getPort());
+			socket = new Socket(uri.getHost(), uri.getPort());
 		}
 		this.socket = socket;
 		out = new ObjectOutputStream((socket.getOutputStream()));
@@ -54,7 +50,7 @@ public class TCPThread2 extends Thread {
 	public void run() {
 		try {
 			isRunning = true;
-
+			data.state = CommData.CONNECTED;
 			while (socket != null && isRunning) {
 
 				Message msg = null;
@@ -62,12 +58,17 @@ public class TCPThread2 extends Thread {
 
 				o = in.readObject();
 				msg = (Message) o;
-				++rxCount;
+				++data.rx;
+				data.rxSender = msg.sender;
+				data.rxSendingMethod = msg.sendingMethod;
+				data.rxName = msg.name;
+				data.rxMethod = msg.method;
 
-				// FIXME - THIS NEEDS TO BE NORMALIZED - WILL BE THE SAME IN XMPP & WEBGUI & REMOTEADAPTER
+				// FIXME - THIS NEEDS TO BE NORMALIZED - WILL BE THE SAME IN
+				// XMPP & WEBGUI & REMOTEADAPTER
 				// FIXME - normalize to single method - check for data
 				// type too ? !!!
-				if (msg.method.equals("register")) { 
+				if (msg.method.equals("register")) {
 					// BEGIN ENCAPSULATION --- ENCODER BEGIN -------------
 					// IMPORTANT - (should be in Encoder) - create the key
 					// for foreign service environment
@@ -85,27 +86,25 @@ public class TCPThread2 extends Thread {
 					// send back the services which we want to export -
 					// Security will filter appropriately
 					ServiceEnvironment foreignProcess = Runtime.getServiceEnvironment(uri);
-					
-					Object[] data = msg.data;
-					
+
+					Object[] msgData = msg.data;
 					ServiceInterface si = null;
-					
-					if (data != null){
+
+					if (msgData != null) {
 						si = (ServiceInterface) msg.data[0];
 						si.setHost(uri);
 					}
 					// HMMM a vote for String vs URI here - since we need to
 					// catch syntax !!!
-					
 
 					// if security ... msg within msg
 					// getOutbox().add(createMessage(Runtime.getInstance().getName(),
 					// "register", inboundMsg));
 					Runtime.register(si, uri);// <-- not an INVOKE !!! // -
 					// no security ! :P
-					
+
 					if (foreignProcess == null) {
-						
+
 						// not defined we will send export
 						// TODO - Security filters - default export (include
 						// exclude) - mapset of name
@@ -118,24 +117,28 @@ public class TCPThread2 extends Thread {
 							name = it.next();
 							toRegister = localProcess.serviceDirectory.get(name);
 
-							// the following will wrap a message within a message and send it remotely
-							// This Thread CANNOT Write on The ObjectOutputStream directly - 
-							// IT SHOULD NEVER DO ANY METHOD WHICH CAN BLOCK !!!! - 3 days of bug chasing when
-							// it wrote to ObjectOutputStream and oos blocked when the buffer was full - causing deadlock
-							// putting it on the inbox will move it to a different thread
+							// the following will wrap a message within a
+							// message and send it remotely
+							// This Thread CANNOT Write on The
+							// ObjectOutputStream directly -
+							// IT SHOULD NEVER DO ANY METHOD WHICH CAN BLOCK
+							// !!!! - 3 days of bug chasing when
+							// it wrote to ObjectOutputStream and oos blocked
+							// when the buffer was full - causing deadlock
+							// putting it on the inbox will move it to a
+							// different thread
 							Message sendService = myService.createMessage("", "register", toRegister);
-							Message outbound = myService.createMessage(myService.getName(), "sendRemote", new Object[]{protoKey, sendService});
+							Message outbound = myService.createMessage(myService.getName(), "sendRemote", new Object[] { protoKey, sendService });
 							myService.getInbox().add(outbound);
-						
+
 						}
 
 					}
 
-					
 					// BEGIN ENCAPSULATION --- ENCODER END -------------
 				} else {
-					++data.rx;
 					myService.getOutbox().add(msg);
+					++data.rx;
 				}
 			} // while
 
@@ -147,6 +150,7 @@ public class TCPThread2 extends Thread {
 			isRunning = false;
 			socket = null;
 			Logging.logException(e);
+			data.state = CommData.DISCONNECTED;
 		}
 
 		releaseConnect();
@@ -155,10 +159,15 @@ public class TCPThread2 extends Thread {
 		// myService.invoke("connectionBroken", url); FIXME
 	}
 
+	// FIXME - prepare for re-init / or completely de-init
+	// and have RA re-establish connection
 	public void releaseConnect() {
 		try {
-			log.error("removing {} from registry", uri);
-			Runtime.release(uri);
+			data.state = CommData.DISCONNECTED;
+			log.error("removing {} from registry", data.uri);
+			// FIXME - not working - are you sure you want to do this?
+			// just because the connection is broken
+			Runtime.release(data.uri);
 			log.error("shutting down thread");
 			isRunning = false;
 			log.error("attempting to close streams");
@@ -173,19 +182,25 @@ public class TCPThread2 extends Thread {
 	public synchronized void send(Message msg) {
 		try {
 
+			/* debugging logging
 			if (msg.data != null && msg.data[0] != null && msg.data[0] instanceof Service) {
 				String n = ((Service) msg.data[0]).getName();
 				log.info(String.format("serializing %s", n));
-				if (n.equals("r1")){
+				if (n.equals("r1")) {
 					log.info("here");
-					//return;
+					// return;
 				}
-				
+
 			}
+			*/
 			out.writeObject(msg);
 			out.flush();
 			out.reset(); // magic line OMG - that took WAY TO LONG TO FIGURE
 							// OUT !!!!!!!
+			data.txSender = msg.sender;
+			data.txSendingMethod = msg.sendingMethod;
+			data.txName = msg.name;
+			data.txMethod = msg.method;
 			++data.tx;
 
 		} catch (Exception e) {
