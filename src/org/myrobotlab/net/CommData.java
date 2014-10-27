@@ -1,5 +1,6 @@
 package org.myrobotlab.net;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 
@@ -14,27 +15,58 @@ import java.util.HashMap;
  * HashMap of properties for specific elements
  * 
  * future data might include session info, session time outs, heartbeat details, etc
+ * 
+ * this will contain all serializable contextual data regarding the connection without containing
+ * the connection itself
  *
  */
-public class CommData {
+public class CommData implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+
+	// states
+	public final static String CONNECTED = "CONNECTED";
+	public final static String UNKNOWN = "UNKNOWN";
+	public final static String DISCONNECTED = "DISCONNECTED";
+	public final static String CONNECTING = "CONNECTING";
 	
 	/**
 	 * proto key - mrlkey is mrl://gatewayName/protoKey
+	 * 
 	 */
 	
-	public URI uri;
-	//public URI protoKey; - use it if its useful
+	public URI uri; // protokey ? name appropriately?
 	
-	String mode; // adaptive ?
+	//String mode; // adaptive ?
+	public String state = UNKNOWN; // adaptive ?
 	
+	// statistics and info
 	public int rx = 0;
 	public int tx = 0;
-
-	public String method;
-	public String sender;
+	
+	public String rxSender;
+	public String rxSendingMethod;
+	public String rxName;
+	public String rxMethod;
+	
+	public String txSender;
+	public String txSendingMethod;
+	public String txName;
+	public String txMethod;
 	
 	public boolean authenticated = false;
 	
 	public HashMap<String, String> addInfo = new HashMap<String, String>();
+	
+	public CommData(){		
+	}
+	
+	public CommData(URI uri){
+		this.uri = uri;		
+	}
+	
+	public String toString(){
+		return String.format("%s %s rx %d %s.%s --> %s.%s tx %d %s.%s --> %s.%s", uri, state, rx, rxSender, rxSendingMethod, rxName, rxMethod, tx, txSender, txSendingMethod, txName, txMethod );
+	}
 
 }
