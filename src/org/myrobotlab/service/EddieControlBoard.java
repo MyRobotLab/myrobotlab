@@ -11,16 +11,19 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.interfaces.KeyListener;
 import org.slf4j.Logger;
 
-public class EddieControlBoard extends Service {
+public class EddieControlBoard extends Service implements KeyListener {
 
 	private static final long serialVersionUID = 1L;
 	
 	// Peers
-	private transient Serial serial;
-	private transient Keyboard keyboard;
-	private transient WebGUI webgui;
+	transient Serial serial;
+	transient Keyboard keyboard;
+	transient WebGUI webgui;
+	transient Joystick joystick;
+	transient RemoteAdapter remote;
 
 	HashMap<String, Float> lastSensorValues = new HashMap<String, Float>();
 	int sampleCount = 0;
@@ -92,6 +95,8 @@ public class EddieControlBoard extends Service {
 		peers.put("serial", "Serial", "serial");
 		peers.put("keyboard", "Keyboard", "serial");
 		peers.put("webgui", "WebGUI", "webgui");
+		peers.put("remote", "RemoteAdapter", "remote interface");
+		peers.put("joystick", "Joystick", "joystick");
 		return peers;
 	}
 
@@ -115,6 +120,27 @@ public class EddieControlBoard extends Service {
 
 	public void startWebGUI(){
 		webgui = (WebGUI) startPeer("webgui");
+	}
+
+	public void startJoystick(){
+		joystick = (Joystick) startPeer("joystick");
+		joystick.addYListener(getName(), "onY");
+		joystick.addYListener(getName(), "onRZ");
+	}
+	
+	public void onY(Float y) throws IOException{
+		rightMotorPower = y;
+		go(leftMotorPower, rightMotorPower);
+	}
+
+	public void onRZ(Float rz) throws IOException{
+		leftMotorPower = rz;
+		go(leftMotorPower, rightMotorPower);
+	}
+	
+	public void startRemoteAdapter(){
+		remote = (RemoteAdapter) startPeer("remote");
+		remote.startListening();
 	}
 	
 	public boolean connect(String port) throws IOException {
@@ -420,7 +446,10 @@ public class EddieControlBoard extends Service {
 			// COM 9 Mega
 			// COM 8 UNO
 			// COM 10 Usb
+			Runtime.start("gui","GUIService");
 			EddieControlBoard ecb = (EddieControlBoard) Runtime.getService(getName());
+			ecb.startRemoteAdapter();
+			ecb.startJoystick();
 			ecb.connect("COM10");
 			ecb.startSensors();
 			sleep(10000);
