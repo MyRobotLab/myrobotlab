@@ -740,7 +740,7 @@ public class Runtime extends Service implements MessageListener {
 				if (runtime != null) {
 					runtime.invoke("collision", s.getName());
 					runtime.warn("collision registering %s", s.getName());
-					runtime.info(String.format(" name collision with %s", s.getName()));
+					runtime.error(String.format(" name collision with %s", s.getName()));
 				}
 				return s;// <--- BUG ?!?!? WHAT ABOUT THE REMOTE GATEWAYS !!!
 			}
@@ -1027,7 +1027,9 @@ public class Runtime extends Service implements MessageListener {
 			return false;
 		}
 		ServiceInterface sw = registry.remove(name);
-		sw.stopService();
+		if (sw.isLocal()){
+			sw.stopService();
+		}
 		ServiceEnvironment se = hosts.get(sw.getHost());
 		se.serviceDirectory.remove(name);
 		rt.invoke("released", sw);

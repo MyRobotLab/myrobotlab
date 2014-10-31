@@ -45,6 +45,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.control.widget.JoystickButtonsPanel;
@@ -58,6 +59,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 	static final long serialVersionUID = 1L;
 
 	JComboBox controllers = new JComboBox();
+	JoystickGUI self = null;
 
 	TreeMap<String, Integer> controllerNamess;
 
@@ -70,6 +72,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 
 	public JoystickGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
+		self = this;
 	}
 
 	// ////// transforms begin ///////////////////
@@ -346,23 +349,28 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 
 	// FIXME - is get/set state interact with Runtime registry ???
 	// it probably should
-	public void getState(Joystick joy) {
-		if (joy != null) {
+	public void getState(final Joystick joy) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
 
-			controllers.removeAllItems();
+				if (joy != null) {
 
-			controllerNamess = joy.getControllerNames();
-			Iterator<String> it = controllerNamess.keySet().iterator();
+					controllers.removeAllItems();
 
-			controllers.addItem("");
-			while (it.hasNext()) {
-				String name = it.next();
-				controllers.addItem(name);
+					controllerNamess = joy.getControllerNames();
+					Iterator<String> it = controllerNamess.keySet().iterator();
+
+					controllers.addItem("");
+					while (it.hasNext()) {
+						String name = it.next();
+						controllers.addItem(name);
+					}
+
+					controllers.addActionListener(self);
+					// controllers.setSelectedItem(null);
+				}
 			}
-
-			controllers.addActionListener(this);
-			// controllers.setSelectedItem(null);
-		}
+		});
 
 	}
 
@@ -372,76 +380,64 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 	public void attachGUI() {
 		subscribe("publishState", "getState", Joystick.class);
 
-		subscribe("XAxisRaw", "XAxisRaw", Float.class);
-		subscribe("YAxisRaw", "YAxisRaw", Float.class);
-		subscribe("ZAxisRaw", "ZAxisRaw", Float.class);
-		subscribe("ZRotationRaw", "ZRotationRaw", Float.class);
-		subscribe("hatSwitchRaw", "hatSwitchRaw", Float.class);
+		subscribe("publishX", "publishX", Float.class);
+		subscribe("publishY", "publishY", Float.class);
+		subscribe("publishZ", "publishZ", Float.class);
+		subscribe("publishRZ", "publishRZ", Float.class);
+		subscribe("publishPOV", "publishPOV", Float.class);
 
+		/*
 		subscribe("XAxis", "XAxis", Integer.class);
 		subscribe("YAxis", "YAxis", Integer.class);
 		subscribe("ZAxis", "ZAxis", Integer.class);
 		subscribe("ZRotation", "ZRotation", Integer.class);
 		subscribe("hatSwitch", "hatSwitch", Integer.class);
+		*/
 
-		subscribe("button1", "button1", Integer.class);
-		subscribe("button2", "button2", Integer.class);
-		subscribe("button3", "button3", Integer.class);
-		subscribe("button4", "button4", Integer.class);
-		subscribe("button5", "button5", Integer.class);
-		subscribe("button6", "button6", Integer.class);
-		subscribe("button7", "button7", Integer.class);
-		subscribe("button8", "button8", Integer.class);
-		subscribe("button9", "button9", Integer.class);
-		subscribe("button10", "button10", Integer.class);
-		subscribe("button11", "button11", Integer.class);
-		subscribe("button12", "button12", Integer.class);
+		subscribe("publish0", "publish0", Float.class);
+		subscribe("publish1", "publish1", Float.class);
+		subscribe("publish2", "publish2", Float.class);
+		subscribe("publish3", "publish3", Float.class);
+		subscribe("publish4", "publish4", Float.class);
+		subscribe("publish5", "publish5", Float.class);
+		subscribe("publish6", "publish6", Float.class);
+		subscribe("publish7", "publish7", Float.class);
+		subscribe("publish8", "publish8", Float.class);
+		subscribe("publish9", "publish9", Float.class);
+		subscribe("publish10", "publish10", Float.class);
+		subscribe("publish11", "publish11", Float.class);
+		subscribe("publish12", "publish12", Float.class);
+		subscribe("publish13", "publish13", Float.class);
 
 		myService.send(boundServiceName, "publishState");
 	}
 
-	public void XAxis(Integer value) {
-		XAxisOutput.setText(String.format("%d", value));
-	}
 
-	public void XAxisRaw(Float value) {
+	public void publishX(Float value) {
 		xyPanel.setX(value);
 		xyPanel.repaint();
 		XAxisOutput.setText(String.format("%.3f", value));
 	}
 
-	public void YAxis(Integer value) {
-		YAxisOutput.setText(String.format("%d", value));
-	}
-
-	public void YAxisRaw(Float value) {
+	public void publishY(Float value) {
 		xyPanel.setY(value);
 		xyPanel.repaint();
 		YAxisOutput.setText(String.format("%.3f", value));
 	}
 
-	public void ZAxis(Integer value) {
-		ZAxisOutput.setText(String.format("%d", value));
-	}
-
-	public void ZAxisRaw(Float value) {
+	public void publishZ(Float value) {
 		zrzPanel.setX(value);
 		zrzPanel.repaint();
 		ZAxisOutput.setText(String.format("%.3f", value));
-
 	}
 
-	public void ZRotation(Integer value) {
-		ZRotOutput.setText(String.format("%d", value));
-	}
-
-	public void ZRotationRaw(Float value) {
+	public void publishRZ(Float value) {
 		zrzPanel.setY(value);
 		zrzPanel.repaint();
 		ZRotOutput.setText(String.format("%.3f", value));
 	}
 
-	public void hatSwitchRaw(Float value) {
+	public void publishPOV(Float value) {
 		log.debug("{}", value);
 		hatPanel.setDir(value);
 		hatPanel.repaint();
@@ -449,54 +445,62 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 
 	}
 
-	public void button13(Integer value) {
-		buttonsPanel.setButton(13, value);
+	public void publish0(Float value) {
+		buttonsPanel.setButton(0, value);
 	}
 
-	public void button1(Integer value) {
+	public void publish1(Float value) {
 		buttonsPanel.setButton(1, value);
 	}
 
-	public void button2(Integer value) {
+	public void publish2(Float value) {
 		buttonsPanel.setButton(2, value);
 	}
 
-	public void button3(Integer value) {
+	public void publish3(Float value) {
 		buttonsPanel.setButton(3, value);
 	}
 
-	public void button4(Integer value) {
+	public void publish4(Float value) {
 		buttonsPanel.setButton(4, value);
 	}
 
-	public void button5(Integer value) {
+	public void publish5(Float value) {
 		buttonsPanel.setButton(5, value);
 	}
 
-	public void button6(Integer value) {
+	public void publish6(Float value) {
 		buttonsPanel.setButton(6, value);
 	}
 
-	public void button7(Integer value) {
+	public void publish7(Float value) {
 		buttonsPanel.setButton(7, value);
 	}
-
-	public void button8(Integer value) {
+	
+	public void publish8(Float value) {
 		buttonsPanel.setButton(8, value);
 	}
 
-	public void button9(Integer value) {
+	public void publish9(Float value) {
 		buttonsPanel.setButton(9, value);
 	}
 
-	public void button10(Integer value) {
+	public void publish10(Float value) {
 		buttonsPanel.setButton(10, value);
 	}
-
-	public void button11(Integer value) {
+	
+	public void publish11(Float value) {
 		buttonsPanel.setButton(11, value);
 	}
 
+	public void publish12(Float value) {
+		buttonsPanel.setButton(12, value);
+	}
+	
+	public void publish13(Float value) {
+		buttonsPanel.setButton(13, value);
+	}
+	
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", Joystick.class);
@@ -507,24 +511,24 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("ZRotationRaw", "ZRotationRaw", Float.class);
 		unsubscribe("hatSwitchRaw", "hatSwitchRaw", Float.class);
 
-		unsubscribe("XAxis", "XAxis", Integer.class);
-		unsubscribe("YAxis", "YAxis", Integer.class);
-		unsubscribe("ZAxis", "ZAxis", Integer.class);
-		unsubscribe("ZRotation", "ZRotation", Integer.class);
-		unsubscribe("hatSwitch", "hatSwitch", Integer.class);
+		unsubscribe("XAxis", "XAxis", Float.class);
+		unsubscribe("YAxis", "YAxis", Float.class);
+		unsubscribe("ZAxis", "ZAxis", Float.class);
+		unsubscribe("ZRotation", "ZRotation", Float.class);
+		unsubscribe("hatSwitch", "hatSwitch", Float.class);
 
-		unsubscribe("button0", "button0", Integer.class);
-		unsubscribe("button1", "button1", Integer.class);
-		unsubscribe("button2", "button2", Integer.class);
-		unsubscribe("button3", "button3", Integer.class);
-		unsubscribe("button4", "button4", Integer.class);
-		unsubscribe("button5", "button5", Integer.class);
-		unsubscribe("button6", "button6", Integer.class);
-		unsubscribe("button7", "button7", Integer.class);
-		unsubscribe("button8", "button8", Integer.class);
-		unsubscribe("button9", "button9", Integer.class);
-		unsubscribe("button10", "button10", Integer.class);
-		unsubscribe("button11", "button11", Integer.class);
+		unsubscribe("button0", "button0", Float.class);
+		unsubscribe("button1", "button1", Float.class);
+		unsubscribe("button2", "button2", Float.class);
+		unsubscribe("button3", "button3", Float.class);
+		unsubscribe("button4", "button4", Float.class);
+		unsubscribe("button5", "button5", Float.class);
+		unsubscribe("button6", "button6", Float.class);
+		unsubscribe("button7", "button7", Float.class);
+		unsubscribe("button8", "button8", Float.class);
+		unsubscribe("button9", "button9", Float.class);
+		unsubscribe("button10", "button10", Float.class);
+		unsubscribe("button11", "button11", Float.class);
 	}
 
 }

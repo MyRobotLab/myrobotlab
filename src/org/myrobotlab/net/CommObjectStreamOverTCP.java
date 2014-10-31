@@ -80,10 +80,10 @@ public class CommObjectStreamOverTCP implements Gateway, Serializable {
 	public class TCPThread extends Thread {
 
 		URI url;
-		transient Socket socket = null;
-		CommData data = new CommData();
-		ObjectInputStream in = null;
-		ObjectOutputStream out = null;
+		transient Socket socket;
+		CommData data;
+		ObjectInputStream in;
+		ObjectOutputStream out;
 		public final String name; // name of the creator, who created this
 									// thread
 		boolean isRunning = false;

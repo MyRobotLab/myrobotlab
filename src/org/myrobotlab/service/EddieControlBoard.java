@@ -10,7 +10,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.util.Map;
+import org.myrobotlab.math.Mapper;
 import org.slf4j.Logger;
 
 public class EddieControlBoard extends Service {
@@ -24,7 +24,7 @@ public class EddieControlBoard extends Service {
 	HashMap<String, Float> lastSensorValues = new HashMap<String, Float>();
 	int sampleCount = 0;
 
-	Map mapper = new Map(-1.0f, 1.0f, -127.0f, 127.0f);
+	Mapper mapper = new Mapper(-1.0f, 1.0f, -127.0f, 127.0f);
 	float leftMotorPower = 0.0f;
 	float rightMotorPower = 0.0f;
 
@@ -320,11 +320,11 @@ public class EddieControlBoard extends Service {
 
 	public void go(float left, float right) throws IOException {
 		log.info(String.format("go %f %f", left, right));
-		int l = mapper.calc(left);
+		int l = mapper.calcInt(left);
 		if (l > 127) {
 			l = 128 - l;
 		}
-		int r = mapper.calc(right);
+		int r = mapper.calcInt(right);
 		if (r > 127) {
 			r = 128 - r;
 		}

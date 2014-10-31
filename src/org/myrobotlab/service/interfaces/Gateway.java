@@ -60,5 +60,6 @@ public interface Gateway {
 	public HashMap<URI, CommData> getClients();
 	
 	public void connect(String uri) throws URISyntaxException;
+	//String getName();
 	
 }

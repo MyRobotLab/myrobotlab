@@ -15,6 +15,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -32,7 +33,7 @@ public class TCPThread2 extends Thread {
 	public TCPThread2(Service service, URI uri, Socket socket) throws UnknownHostException, IOException {
 		super(String.format("%s_%s", service.getName(), uri));
 		this.myService = service;
-		this.data = new CommData(uri);
+		this.data = new CommData(service.getName(), uri);
 		if (socket == null) {
 			socket = new Socket(uri.getHost(), uri.getPort());
 		}

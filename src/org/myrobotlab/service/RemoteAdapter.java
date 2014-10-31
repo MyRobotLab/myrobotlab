@@ -91,7 +91,7 @@ public class RemoteAdapter extends Service implements Gateway {
 
 	public RemoteAdapter(String n) {
 		super(n);
-		addLocalTask(5 * 1000, "broadcastHeartbeat");
+//		addLocalTask(5 * 1000, "broadcastHeartbeat");
 	}
 
 	public boolean isListening() {
@@ -515,7 +515,7 @@ public class RemoteAdapter extends Service implements Gateway {
 
 		try {
 
-			int i = 7;
+			int i = 5;
 			// Runtime.main(new String[] { "-runtimeName", String.format("r%d",
 			// i) });
 			RemoteAdapter remote = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
