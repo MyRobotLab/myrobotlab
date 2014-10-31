@@ -1,6 +1,10 @@
 package org.myrobotlab.math;
 
-public final class Mapper {
+import java.io.Serializable;
+
+public final class Mapper implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	float minX;
 	float maxX;
