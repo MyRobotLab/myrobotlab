@@ -51,8 +51,6 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 	JLabel numClients = new JLabel("0");
 
 	JButton connect = new JButton("connect");
-	//JButton listenTCP = new JButton("listen tcp");
-	//JButton listenUDP = new JButton("listen udp");
 	JButton listen = new JButton("listen");
 
 	// display of the CommData getClients
@@ -72,14 +70,8 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 		JPanel top = new JPanel();
 		top.add(connect);
 		top.add(listen);
-		//top.add(listenTCP);
-		//top.add(listenUDP);
 		connect.addActionListener(this);
 		listen.addActionListener(this);
-		/*
-		listenTCP.addActionListener(this);
-		listenUDP.addActionListener(this);
-		*/
 		
 		display.add(top, BorderLayout.NORTH);
 		display.add(list, BorderLayout.CENTER);

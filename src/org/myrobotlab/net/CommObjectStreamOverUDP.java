@@ -63,7 +63,7 @@ public class CommObjectStreamOverUDP implements Gateway, Serializable {
 	public class UDPThread extends Thread {
 		URI url;
 		transient DatagramSocket socket = null;
-		CommData data = new CommData();
+		CommData data;
 
 		ObjectInputStream in = null;
 		ObjectOutputStream out = null;

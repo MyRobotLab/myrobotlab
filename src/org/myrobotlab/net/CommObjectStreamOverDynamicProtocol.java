@@ -76,7 +76,7 @@ public class CommObjectStreamOverDynamicProtocol implements Gateway, Serializabl
 
 		URI url;
 		transient Socket socket = null;
-		CommData data = new CommData();
+		CommData data;
 		ObjectInputStream in = null;
 		ObjectOutputStream out = null;
 		public final String name; // name of the creator, who created this

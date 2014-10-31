@@ -3,8 +3,10 @@ package org.myrobotlab.service;
 import java.io.IOException;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.data.Pin;
 import org.simpleframework.xml.Element;
@@ -127,8 +129,8 @@ public class ThingSpeak extends Service {
 	}
 
 	public static void main(String[] args) {
-		// LoggingFactory.getInstance().configure();
-		// LoggingFactory.getInstance().setLevel(Level.WARN);
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		// BasicConfigurator.
 

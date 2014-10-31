@@ -24,24 +24,25 @@
 
 package org.myrobotlab.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Component.POV;
 import net.java.games.input.Controller;
+import net.java.games.input.Controller.Type;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Rumbler;
 
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 public class Joystick extends Service {
@@ -49,7 +50,6 @@ public class Joystick extends Service {
 	private static final long serialVersionUID = 1L;
 
 	public static final int NUM_BUTTONS = 12;
-
 	public static final int BUTTON_OFF = 0;
 	public static final int BUTTON_ON = 1;
 
@@ -68,16 +68,30 @@ public class Joystick extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Joystick.class.getCanonicalName());
 
-	public final static String Z_AXIS = "Z_AXIS";
-	public final static String Z_ROTATION = "Z_ROTATION";
-
 	transient Controller[] controllers;
 	TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
 
 	InputPollingThread pollingThread = null;
 	int myDeviceIndex = -1;
 	transient Controller controller = null;
-	double[] lastValues;
+	HashMap<String, Float> lastValues = new HashMap<String, Float>();
+
+	private Component[] comps; // holds the components
+	private int xAxisIdx, yAxisIdx, zAxisIdx, rzAxisIdx;
+	// indices for the analog sticks axes
+	private int povIdx; // index for the POV hat
+	private int buttonsIdx[]; // indices for the buttons
+
+	private Rumbler[] rumblers;
+	private int rumblerIdx; // index for the rumbler being used
+	private boolean rumblerOn = false; // whether rumbler is on or off
+
+	private HashMap<String, Mapper> mappers = new HashMap<String, Mapper>();
+
+	public void setMapper(String name, float x0, float x1, float y0, float y1) {
+		Mapper mapper = new Mapper(x0, x1, y0, y1);
+		mappers.put(name, mapper);
+	}
 
 	public class InputPollingThread extends Thread {
 		public boolean isPolling = false;
@@ -90,11 +104,12 @@ public class Joystick extends Service {
 
 			if (controller == null) {
 				error("controller is null - can not poll");
+				return;
 			}
 
 			/* Get all the axis and buttons */
 			Component[] components = controller.getComponents();
-			lastValues = new double[components.length];
+			info("found %d components", components.length);
 
 			isPolling = true;
 			while (isPolling) {
@@ -102,160 +117,57 @@ public class Joystick extends Service {
 				/* Poll the controller */
 				controller.poll();
 
-				// StringBuffer buffer = new StringBuffer();
-
-				// TODO - selectively publish ... publish Direction? Yes
-				/* For each component, get it's name, and it's current value */
-
-				// FIXME - switch statement (it's Java 7 !)
 				for (int i = 0; i < components.length; i++) {
 
 					Component component = components[i];
 					Identifier id = component.getIdentifier();
+					
 
-					String n = components[i].getName();
-					float data = components[i].getPollData();
+					// String ids = id.toString();
+					String method = String.format("publish%s", id.toString().toUpperCase());
+					Float input = components[i].getPollData();
 
-					// buffer.append(n);
-					// TODO - invoke based on
-					// invoke(String.trim(component.getName()),
-					// mapMultiplier(getName()), mapOffset(getName()) - REFACTOR
-					// REFACTOR !!! use switch statement
-					if (Identifier.Axis.Z.equals(id)) {
-						if (lastValues[i] != data) {
-							if (ZAxisTransform) {
-								invoke("ZAxis", (int) (ZAxisMultiplier * data) + ZAxisOffset);
-							} else {
-								invoke("ZAxisRaw", data);
-							}
-						}
+					// FIXME - pre-load with 0.0 then don't need to test for null
+					Float lastValue = null;
+					if (lastValues.containsKey(method)) {
+						lastValue = lastValues.get(method);
+					}
+					
+					/*
+					if (lastValue != null && Math.abs(input - lastValue) > 0.1){
+						log.info(String.format("GREATER %f", Math.abs(input - lastValue)));
+					} else if  (lastValue != null && Math.abs(input - lastValue) < 0.1) {
+						log.info(String.format("LESS THAN %f", Math.abs(input - lastValue)));
+					}
+					*/
 
-					} else if (Identifier.Axis.RZ.equals(id)) {
-						if (lastValues[i] != data) {
-							if (ZRotTransform) {
-								invoke("ZRotation", (int) (ZRotMultiplier * data) + ZRotOffset);
-							} else {
-								invoke("ZRotationRaw", data);
-							}
+					Float output = input;
+					if (lastValue == null || Math.abs(input - lastValue) > 0.0001) {
+						
+						if (mappers.containsKey(method)) {
+							output = mappers.get(method).calc(input);
 						}
-					} else if (Identifier.Axis.X.equals(id)) {
-						if (lastValues[i] != data) {
-							if (XAxisTransform) {
-								invoke("XAxis", (int) (XAxisMultiplier * data) + XAxisOffset);
-							} else {
-								invoke("XAxisRaw", data);
-							}
+						Type type = controller.getType();
+						
+						if ((type == Controller.Type.GAMEPAD) || (type == Controller.Type.STICK))
+						{
+							invoke(method, output);
+						} else if (type == Type.KEYBOARD) {
+							invoke("keyPress", output);
+						} else if (type == Type.MOUSE){
+							invoke(method, output);
+						} else {
+							error("unsupported type");
 						}
-					} else if (Identifier.Axis.Y.equals(id)) {
-						if (lastValues[i] != data) {
-							if (YAxisTransform) {
-								invoke("YAxis", (int) (YAxisMultiplier * data) + YAxisOffset);
-							} else {
-								invoke("YAxisRaw", data);
-							}
-						}
-					} else if (Identifier.Axis.POV.equals(id)) {
-						if (lastValues[i] != data) {
-							if (hatTransform) {
-								invoke("hatSwitch", (int) (hatMultiplier * data) + hatOffset);
-							} else {
-								invoke("hatSwitchRaw", data);
-							}
-						}
-						// WTF ??? - A on Linux _0 on Windows, really? I mean
-						// really? Why?
-					} else if (Identifier.Button.A.equals(id) || Identifier.Button._0.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button1", pos);
-						}
-					} else if (Identifier.Button.B.equals(id) || Identifier.Button._1.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button2", pos);
-						}
-					} else if (Identifier.Button.C.equals(id) || Identifier.Button._2.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button3", pos);
-						}
-					} else if (Identifier.Button.X.equals(id) || Identifier.Button._3.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button4", pos);
-						}
-					} else if (Identifier.Button.Y.equals(id) || Identifier.Button._4.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button5", pos);
-						}
-					} else if (Identifier.Button.Z.equals(id) || Identifier.Button._5.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button6", pos);
-						}
-					} else if (Identifier.Button.LEFT_THUMB.equals(id) || Identifier.Button._6.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button7", pos);
-						}
-					} else if (Identifier.Button.RIGHT_THUMB.equals(id) || Identifier.Button._7.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button8", pos);
-						}
-					} else if (Identifier.Button.LEFT_THUMB2.equals(id) || Identifier.Button._8.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button9", pos);
-						}
-					} else if (Identifier.Button.RIGHT_THUMB2.equals(id) || Identifier.Button._9.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button10", pos);
-						}
-					} else if (Identifier.Button.SELECT.equals(id) || Identifier.Button._10.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button11", pos);
-						}
-					} else if (Identifier.Button.UNKNOWN.equals(id) || Identifier.Button._11.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button12", pos);
-						}
-					} else if (Identifier.Button._12.equals(id)) {
-						int pos = (int) data;
-						if (lastValues[i] != data) {
-							invoke("button13", pos);
-						}
-					} else {
-						log.debug(String.format("unknown identifier %s", id.toString()));
+												
 					}
 
-					lastValues[i] = data;
-
-					/*
-					 * buffer.append(": "); if (components[i].isAnalog()) { //
-					 * Get the value at the last poll of this component
-					 * buffer.append(components[i].getPollData()); } else {
-					 * buffer.append(components[i].getPollData()); if
-					 * (components[i].getPollData() == 1.0f) {
-					 * buffer.append("On"); } else { buffer.append("Off"); } }
-					 */
+					lastValues.put(method, input);
 				}
 
-				// log.info(buffer.toString());
-				/*
-				 * Sleep for 20 millis, this is just so the example doesn't
-				 * thrash the system. FIXME - can a polling system be avoided -
-				 * could this block with the JNI code?
-				 */
 				try {
 					Thread.sleep(20);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 		}
@@ -263,31 +175,13 @@ public class Joystick extends Service {
 
 	public Joystick(String n) {
 		super(n);
-
 		log.info(String.format("%s getting controllers", n));
 		controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 		info(String.format("found %d controllers", controllers.length));
 		for (int i = 0; i < controllers.length; i++) {
 			log.info(String.format("Found input device: %d %s", i, controllers[i].getName()));
-			// if (controllers[i].getType() == Controller.Type.GAMEPAD ||
-			// controllers[i].getType() == Controller.Type.STICK) {
 			controllerNames.put(String.format("%d - %s", i, controllers[i].getName()), i);
-			// }
-			// search for gamepad or joystick
 		}
-	}
-
-	public boolean attach(Servo servo, String axis) {
-		if (Z_AXIS.equals(axis)) {
-			servo.subscribe("ZAxis", getName(), "moveTo", Integer.class);
-			return true;
-		} else if (Z_ROTATION.equals(axis)) {
-			servo.subscribe("ZRotation", getName(), "moveTo", Integer.class);
-			return true;
-		}
-
-		error("unknown axis %s", axis);
-		return false;
 	}
 
 	public boolean setController(int index) {
@@ -295,12 +189,10 @@ public class Joystick extends Service {
 		if (index > -1 && index < controllers.length) {
 			controller = controllers[index];
 			// findRumblers(controller);
-			log.info("here 1");
 			findCompIndices(controller);
-			log.info("here 2");
+			//broadcastState();
 			return true;
 		}
-		log.info("here 3");
 		error("bad index");
 		return false;
 	}
@@ -308,6 +200,7 @@ public class Joystick extends Service {
 	public boolean setController(String s) {
 		if (controllerNames.containsKey(s)) {
 			setController(controllerNames.get(s));
+			//broadcastState();
 			return true;
 		}
 		error("cant find %s", s);
@@ -343,20 +236,10 @@ public class Joystick extends Service {
 		return controllerNames;
 	}
 
-	// ///////////////////////////
-	private Component[] comps; // holds the components
-	private int xAxisIdx, yAxisIdx, zAxisIdx, rzAxisIdx;
-	// indices for the analog sticks axes
-	private int povIdx; // index for the POV hat
-	private int buttonsIdx[]; // indices for the buttons
-
-	private Rumbler[] rumblers;
-	private int rumblerIdx; // index for the rumbler being used
-	private boolean rumblerOn = false; // whether rumbler is on or off
-
 	/**
-	 * Search the array of controllers until a suitable game pad controller is
-	 * found (either of type GAMEPAD or STICK).
+	 * Possibly useful for Auto-Find controller Search the array of controllers
+	 * until a suitable game pad controller is found (either of type GAMEPAD or
+	 * STICK).
 	 */
 	private Controller findGamePad(Controller[] cs) {
 		Controller.Type type;
@@ -427,13 +310,12 @@ public class Joystick extends Service {
 		}
 	} // end of findButtons()
 
-	private boolean isButton(Component c)
-	/*
+	/**
 	 * Return true if the component is a digital/absolute button, and its
 	 * identifier name ends with "Button" (i.e. the identifier class is
 	 * Component.Identifier.Button).
 	 */
-	{
+	private boolean isButton(Component c) {
 		if (!c.isAnalog() && !c.isRelative()) { // digital and absolute
 			String className = c.getIdentifier().getClass().getName();
 			// log.info(c.getName() + " identifier: " + className);
@@ -441,14 +323,13 @@ public class Joystick extends Service {
 				return true;
 		}
 		return false;
-	} // end of isButton()
+	}
 
-	private void findRumblers(Controller controller)
-	/*
+	/**
 	 * Find the rumblers. Use the last rumbler for making vibrations, an
 	 * arbitrary decision.
 	 */
-	{
+	private void findRumblers(Controller controller) {
 		// get the game pad's rumblers
 		rumblers = controller.getRumblers();
 		if (rumblers.length == 0) {
@@ -458,14 +339,13 @@ public class Joystick extends Service {
 			log.info("Rumblers found: " + rumblers.length);
 			rumblerIdx = rumblers.length - 1; // use last rumbler
 		}
-	} // end of findRumblers()
+	}
 
-	private void findCompIndices(Controller controller)
-	/*
+	/**
 	 * Store the indices for the analog sticks axes (x,y) and (z,rz), POV hat,
 	 * and button components of the controller.
 	 */
-	{
+	private void findCompIndices(Controller controller) {
 		comps = controller.getComponents();
 		if (comps.length == 0) {
 			log.info("No Components found");
@@ -486,15 +366,16 @@ public class Joystick extends Service {
 		findButtons(comps);
 	} // end of findCompIndices()
 
-	public int getXYStickDir()
-	// return the (x,y) analog stick compass direction
-	{
+	/**
+	 * @return - return the (x,y) analog stick compass direction
+	 */
+	public int getXYStickDir() {
 		if ((xAxisIdx == -1) || (yAxisIdx == -1)) {
 			log.info("(x,y) axis data unavailable");
 			return NONE;
 		} else
 			return getCompassDir(xAxisIdx, yAxisIdx);
-	} // end of getXYStickDir()
+	}
 
 	public int getZRZStickDir()
 	// return the (z,rz) analog stick compass direction
@@ -504,11 +385,16 @@ public class Joystick extends Service {
 			return NONE;
 		} else
 			return getCompassDir(zAxisIdx, rzAxisIdx);
-	} // end of getXYStickDir()
+	}
 
-	private int getCompassDir(int xA, int yA)
-	// Return the axes as a single compass value
-	{
+	/**
+	 * Return the axes as a single compass value
+	 * 
+	 * @param xA
+	 * @param yA
+	 * @return
+	 */
+	private int getCompassDir(int xA, int yA) {
 		float xCoord = comps[xA].getPollData();
 		float yCoord = comps[yA].getPollData();
 		// log.info("(x,y): (" + xCoord + "," + yCoord + ")");
@@ -626,205 +512,220 @@ public class Joystick extends Service {
 	}
 
 	// ----Component Publishing Begin ---------
-	public Integer XAxis(Integer value) {
+
+	public Float publishX(Float x) {
+		return x;
+	}
+
+	public Float publishY(Float y) {
+		return y;
+	}
+
+	public Float publishZ(Float z) {
+		return z;
+	}
+
+	public Float publishRZ(Float rz) {
+		return rz;
+	}
+
+	public Float publishPOV(Float pov) {
+		return pov;
+	}
+
+	public Float publish0(Float value) {
 		return value;
 	}
 
-	public Float XAxisRaw(Float value) {
-		log.debug(String.format("XAxisRaw %s", value));
+	public Float publish1(Float value) {
 		return value;
 	}
 
-	public Integer YAxis(Integer value) {
+	public Float publish2(Float value) {
 		return value;
 	}
 
-	public Float YAxisRaw(Float value) {
+	public Float publish3(Float value) {
 		return value;
 	}
 
-	public Integer ZAxis(Integer value) {
+	public Float publish4(Float value) {
 		return value;
 	}
 
-	public Float ZAxisRaw(Float value) {
+	public Float publish5(Float value) {
 		return value;
 	}
 
-	public Integer ZRotation(Integer value) {
+	public Float publish6(Float value) {
 		return value;
 	}
 
-	public Float ZRotationRaw(Float value) {
+	public Float publish7(Float value) {
 		return value;
 	}
 
-	public Integer hatSwitch(Integer value) {
+	public Float publish8(Float value) {
 		return value;
 	}
 
-	public Float hatSwitchRaw(Float value) {
+	public Float publish9(Float value) {
 		return value;
 	}
 
-	/*
-	 * public Integer button0(Integer value) { return value; }
-	 */
-
-	public Integer button1(Integer value) {
+	public Float publish10(Float value) {
 		return value;
 	}
 
-	public Integer button2(Integer value) {
+	public Float publish11(Float value) {
 		return value;
 	}
 
-	public Integer button3(Integer value) {
+	public Float publish12(Float value) {
 		return value;
 	}
 
-	public Integer button4(Integer value) {
+	public Float publish13(Float value) {
 		return value;
 	}
 
-	public Integer button5(Integer value) {
-		return value;
+	// ---add listeners begin---
+	// --axis begin---
+	public void addXListener(ServoControl sc) {
+		setMapper("publishX", -1.0f, 1.0f, 0.0f, 180f);
+		addXListener(sc.getName(), "moveTo");
 	}
 
-	public Integer button6(Integer value) {
-		return value;
+	public void addXListener(String service, String method) {
+		addListener("publishX", service, method);
 	}
 
-	public Integer button7(Integer value) {
-		return value;
+	public void addYListener(ServoControl sc) {
+		setMapper("publishY", -1.0f, 1.0f, 0.0f, 180f);
+		addYListener(sc.getName(), "moveTo");
 	}
 
-	public Integer button8(Integer value) {
-		return value;
+	public void addYListener(String service, String method) {
+		addListener("publishY", service, method);
 	}
 
-	public Integer button9(Integer value) {
-		return value;
+	public void addZListener(ServoControl sc) {
+		setMapper("publishZ", -1.0f, 1.0f, 0.0f, 180f);
+		addZListener(sc.getName(), "moveTo");
 	}
 
-	public Integer button10(Integer value) {
-		return value;
+	public void addZListener(String service, String method) {
+		addListener("publishZ", service, method);
 	}
 
-	public Integer button11(Integer value) {
-		return value;
+	public void addRZListener(ServoControl sc) {
+		setMapper("publishRZ", -1.0f, 1.0f, 0.0f, 180f);
+		addRZListener(sc.getName(), "moveTo");
 	}
 
-	public Integer button12(Integer value) {
-		return value;
+	public void addRZListener(String service, String method) {
+		addListener("publishRZ", service, method);
 	}
 
-	public Integer button13(Integer value) {
-		return value;
+	// --axis end---
+	// --pov begin---
+	public void addPOVListener(String service, String method) {
+		addListener("publishPOV", service, method);
 	}
+
+	// --pov end---
+	// --buttons begin---
+	public void add0Listener(String service, String method) {
+		addListener("publish0", service, method);
+	}
+
+	public void add1Listener(String service, String method) {
+		addListener("publish1", service, method);
+	}
+
+	public void add2Listener(String service, String method) {
+		addListener("publish2", service, method);
+	}
+
+	public void add3Listener(String service, String method) {
+		addListener("publish3", service, method);
+	}
+
+	public void add4Listener(String service, String method) {
+		addListener("publish4", service, method);
+	}
+
+	public void add5Listener(String service, String method) {
+		addListener("publish5", service, method);
+	}
+
+	public void add6Listener(String service, String method) {
+		addListener("publish6", service, method);
+	}
+
+	public void add7Listener(String service, String method) {
+		addListener("publish7", service, method);
+	}
+
+	public void add8Listener(String service, String method) {
+		addListener("publish8", service, method);
+	}
+
+	public void add9Listener(String service, String method) {
+		addListener("publish9", service, method);
+	}
+
+	public void add10Listener(String service, String method) {
+		addListener("publish10", service, method);
+	}
+
+	public void add11Listener(String service, String method) {
+		addListener("publish11", service, method);
+	}
+
+	public void add12Listener(String service, String method) {
+		addListener("publish12", service, method);
+	}
+
+	public void add13Listener(String service, String method) {
+		addListener("publish13", service, method);
+	}
+
+	// --buttons end---
+
+	// ---add listeners end---
 
 	// ----Component Publishing End ---------
-	boolean hatTransform = false;
-	int hatMultiplier = 1;
-	int hatOffset = 0;
-
-	public void setHatTransform(Integer multiplier, Integer offset) {
-		hatTransform = true;
-		hatMultiplier = multiplier;
-		hatOffset = offset;
-	}
-
-	public void resetHatTransform() {
-		hatTransform = false;
-		hatMultiplier = 1;
-		hatOffset = 0;
-	}
-
-	boolean XAxisTransform = false;
-	int XAxisMultiplier = 1;
-	int XAxisOffset = 0;
-
-	public void setXAxisTransform(Integer multiplier, Integer offset) {
-		XAxisTransform = true;
-		XAxisMultiplier = multiplier;
-		XAxisOffset = offset;
-	}
-
-	public void resetXAxisTransform() {
-		XAxisTransform = false;
-		XAxisMultiplier = 1;
-		XAxisOffset = 0;
-	}
-
-	boolean YAxisTransform = false;
-	int YAxisMultiplier = 1;
-	int YAxisOffset = 0;
-
-	public void setYAxisTransform(Integer multiplier, Integer offset) {
-		YAxisTransform = true;
-		YAxisMultiplier = multiplier;
-		YAxisOffset = offset;
-	}
-
-	public void resetYAxisTransform() {
-		YAxisTransform = false;
-		YAxisMultiplier = 1;
-		YAxisOffset = 0;
-	}
-
-	boolean ZAxisTransform = false;
-	int ZAxisMultiplier = 1;
-	int ZAxisOffset = 0;
-
-	public void setZAxisTransform(Integer multiplier, Integer offset) {
-		ZAxisTransform = true;
-		ZAxisMultiplier = multiplier;
-		ZAxisOffset = offset;
-	}
-
-	public void resetZAxisTransform() {
-		ZAxisTransform = false;
-		ZAxisMultiplier = 1;
-		ZAxisOffset = 0;
-	}
-
-	boolean ZRotTransform = false;
-	int ZRotMultiplier = 1;
-	int ZRotOffset = 0;
-
-	public void setZRotTransform(Integer multiplier, Integer offset) {
-		ZRotTransform = true;
-		ZRotMultiplier = multiplier;
-		ZRotOffset = offset;
-	}
-
-	public void resetZRotTransform() {
-		ZRotTransform = false;
-		ZRotMultiplier = 1;
-		ZRotOffset = 0;
-	}
 
 	public Status test() {
 		Status status = super.test();
 
 		try {
 
-			Joystick joy = (Joystick) Runtime.getService(getName());
-			joy.addListener("ZAxisRaw", "python", "onZAxis");
-			joy.startService();
-
-			RemoteAdapter remote = (RemoteAdapter) Runtime.start("remote", "RemoteAdapter");
-			Runtime.start("python", "Python");
-
 			Runtime.start("gui", "GUIService");
+			Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+//			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			Servo servo = (Servo) Runtime.start("servo", "Servo");
 
-			sleep(1000);
+//			arduino.connect("COM15");
+//			servo.attach(arduino, 4);
 
-			// from java.net import URI
-			// TODO - PREFIX (CHOOSE PREFIX SO NO NAME COLLISION)
-			// SIMPLE CONNECT URI
-			Message msg = remote.createMessage("", "register", joy);
-			remote.sendRemote(new URI("tcp://127.0.0.1:6868"), msg);
+//			joy.addZListener(servo);
+			
+			//joy.setController(2);
+
+			/*
+			 * RemoteAdapter remote = (RemoteAdapter) Runtime.start("remote",
+			 * "RemoteAdapter"); Runtime.start("python", "Python");
+			 * 
+			 * 
+			 * sleep(1000);
+			 * 
+			 * // from java.net import URI // TODO - PREFIX (CHOOSE PREFIX SO NO
+			 * NAME COLLISION) // SIMPLE CONNECT URI Message msg =
+			 * remote.createMessage("", "register", joy); remote.sendRemote(new
+			 * URI("tcp://127.0.0.1:6868"), msg);
+			 */
 
 		} catch (Exception e) {
 			Logging.logException(e);
@@ -842,7 +743,7 @@ public class Joystick extends Service {
 		// JInputJoystick joystick = new JInputJoystick(Controller.Type.STICK,
 		// Controller.Type.GAMEPAD);
 
-		Runtime.setRuntimeName("joyrun");
+		// Runtime.setRuntimeName("joyrun");
 		Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
 		joy.test();
 

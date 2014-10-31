@@ -2,7 +2,11 @@ package org.myrobotlab.net;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
+
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.interfaces.Gateway;
 
 /**
  * @author GroG
@@ -58,11 +62,17 @@ public class CommData implements Serializable {
 	
 	public HashMap<String, String> addInfo = new HashMap<String, String>();
 	
+	/*
 	public CommData(){		
 	}
+	*/
 	
-	public CommData(URI uri){
-		this.uri = uri;		
+	public CommData(String gatewayName, URI uri){
+		try {
+			this.uri = new URI(String.format("mrl://%s/%s", gatewayName, uri));
+		} catch (URISyntaxException e) {
+			Logging.logException(e);
+		}		
 	}
 	
 	public String toString(){

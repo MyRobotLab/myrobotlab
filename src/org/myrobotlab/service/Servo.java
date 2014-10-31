@@ -268,7 +268,7 @@ public class Servo extends Service implements ServoControl {
 		moveTo(pos.floatValue());
 	}
 	
-	public void moveTo(float pos) {
+	public void moveTo(Float pos) {
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
