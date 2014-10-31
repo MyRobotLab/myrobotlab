@@ -69,22 +69,24 @@ public class Joystick extends Service {
 	public final static Logger log = LoggerFactory.getLogger(Joystick.class.getCanonicalName());
 
 	transient Controller[] controllers;
+	transient Component[] comps; // holds the components
+
 	TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
 
-	InputPollingThread pollingThread = null;
+	transient InputPollingThread pollingThread = null;
 	int myDeviceIndex = -1;
 	transient Controller controller = null;
 	HashMap<String, Float> lastValues = new HashMap<String, Float>();
 
-	private Component[] comps; // holds the components
+	// TODO - remove - direction and any details (e.g. index) - should be published
 	private int xAxisIdx, yAxisIdx, zAxisIdx, rzAxisIdx;
 	// indices for the analog sticks axes
 	private int povIdx; // index for the POV hat
 	private int buttonsIdx[]; // indices for the buttons
 
-	private Rumbler[] rumblers;
-	private int rumblerIdx; // index for the rumbler being used
-	private boolean rumblerOn = false; // whether rumbler is on or off
+	transient Rumbler[] rumblers;
+	int rumblerIdx; // index for the rumbler being used
+	boolean rumblerOn = false; // whether rumbler is on or off
 
 	private HashMap<String, Mapper> mappers = new HashMap<String, Mapper>();
 
