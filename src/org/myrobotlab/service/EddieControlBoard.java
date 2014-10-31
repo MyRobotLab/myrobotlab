@@ -20,6 +20,7 @@ public class EddieControlBoard extends Service {
 	// Peers
 	private transient Serial serial;
 	private transient Keyboard keyboard;
+	private transient WebGUI webgui;
 
 	HashMap<String, Float> lastSensorValues = new HashMap<String, Float>();
 	int sampleCount = 0;
@@ -29,6 +30,8 @@ public class EddieControlBoard extends Service {
 	float rightMotorPower = 0.0f;
 
 	SensorPoller sensorPoller = null;
+	
+	int sensorPollIntervalMS = 100; // 10 times a second
 
 	class SensorPoller extends Thread {
 
@@ -44,7 +47,7 @@ public class EddieControlBoard extends Service {
 					} else {
 						error("invalid data string %s", dataString);
 					}
-					sleep(500);
+					sleep(sensorPollIntervalMS);
 				} catch (Exception e) {
 					Logging.logException(e);
 				}
@@ -88,6 +91,7 @@ public class EddieControlBoard extends Service {
 		// put peer definitions in
 		peers.put("serial", "Serial", "serial");
 		peers.put("keyboard", "Keyboard", "serial");
+		peers.put("webgui", "WebGUI", "webgui");
 		return peers;
 	}
 
@@ -109,6 +113,10 @@ public class EddieControlBoard extends Service {
 		keyboard.addKeyListener(this);
 	}
 
+	public void startWebGUI(){
+		webgui = (WebGUI) startPeer("webgui");
+	}
+	
 	public boolean connect(String port) throws IOException {
 		boolean ret = serial.connect(port, 115200, 8, 1, 0);
 		if (ret) {
@@ -406,6 +414,23 @@ public class EddieControlBoard extends Service {
 			}
 		}
 	}
+	
+	public void test2() {
+		try {
+			// COM 9 Mega
+			// COM 8 UNO
+			// COM 10 Usb
+			EddieControlBoard ecb = (EddieControlBoard) Runtime.getService(getName());
+			ecb.connect("COM10");
+			ecb.startSensors();
+			sleep(10000);
+			ecb.stopSensors();
+			
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+	}
+
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -414,7 +439,7 @@ public class EddieControlBoard extends Service {
 		try {
 
 			EddieControlBoard ecb = (EddieControlBoard) Runtime.start("ecb", "EddieControlBoard");
-			ecb.test();
+			ecb.test2();
 
 			// 129 -> 81
 			// 128 -> 80 (full reverse)
