@@ -46,6 +46,9 @@ public class InMoovGestureCreator extends Service {
 
 	String pythonscript;
 
+	String pythonname;
+	String referencename;
+
 	public InMoovGestureCreator(String n) {
 		super(n);
 		// intializing variables
@@ -81,7 +84,10 @@ public class InMoovGestureCreator extends Service {
 		// Connect / Disconnect to / from the InMoov service (button
 		// bottom-left)
 		if (control_connect.getText().equals("Connect")) {
-			i01 = (InMoov) Runtime.getService("i01");
+			if (referencename == null) {
+				referencename = "i01";
+			}
+			i01 = (InMoov) Runtime.getService(referencename);
 			control_connect.setText("Disconnect");
 		} else {
 			i01 = null;
@@ -171,8 +177,8 @@ public class InMoovGestureCreator extends Service {
 							frameitemholder.add(fih);
 							fih = null;
 							pos++;
-						} else if (line2.startsWith("i01")) {
-							if (line2.startsWith("i01.mouth.speak")) {
+						} else if (line2.startsWith(pythonname)) {
+							if (line2.startsWith(pythonname + ".mouth.speak")) {
 								fih.sleep = -1;
 								fih.speech = line.substring(
 										line.indexOf("(") + 1,
@@ -181,13 +187,13 @@ public class InMoovGestureCreator extends Service {
 								frameitemholder.add(fih);
 								fih = null;
 								pos++;
-							} else if (line2.startsWith("i01.move")) {
+							} else if (line2.startsWith(pythonname + ".move")) {
 								ismove = true;
 								String good = line2.substring(
 										line2.indexOf("(") + 1,
 										line2.lastIndexOf(")"));
 								String[] goodsplit = good.split(",");
-								if (line2.startsWith("i01.moveHead")) {
+								if (line2.startsWith(pythonname + ".moveHead")) {
 									fih.neck = Integer.parseInt(goodsplit[0]);
 									fih.rothead = Integer
 											.parseInt(goodsplit[1]);
@@ -205,7 +211,8 @@ public class InMoovGestureCreator extends Service {
 									}
 									head = true;
 									pos++;
-								} else if (line2.startsWith("i01.moveHand")) {
+								} else if (line2.startsWith(pythonname
+										+ ".moveHand")) {
 									String gs = goodsplit[0];
 									String side = gs.substring(
 											gs.indexOf("\"") + 1,
@@ -249,7 +256,8 @@ public class InMoovGestureCreator extends Service {
 										lhand = true;
 										pos++;
 									}
-								} else if (line2.startsWith("i01.moveArm")) {
+								} else if (line2.startsWith(pythonname
+										+ ".moveArm")) {
 									String gs = goodsplit[0];
 									String side = gs.substring(
 											gs.indexOf("\"") + 1,
@@ -277,7 +285,8 @@ public class InMoovGestureCreator extends Service {
 										larm = true;
 										pos++;
 									}
-								} else if (line2.startsWith("i01.moveTorso")) {
+								} else if (line2.startsWith(pythonname
+										+ ".moveTorso")) {
 									fih.topStom = Integer
 											.parseInt(goodsplit[0]);
 									fih.midStom = Integer
@@ -287,13 +296,14 @@ public class InMoovGestureCreator extends Service {
 									torso = true;
 									pos++;
 								}
-							} else if (line2.startsWith("i01.set")) {
+							} else if (line2.startsWith(pythonname + ".set")) {
 								isspeed = true;
 								String good = line2.substring(
 										line2.indexOf("(") + 1,
 										line2.lastIndexOf(")"));
 								String[] goodsplit = good.split(",");
-								if (line2.startsWith("i01.setHeadSpeed")) {
+								if (line2.startsWith(pythonname
+										+ ".setHeadSpeed")) {
 									fih.neckspeed = Float
 											.parseFloat(goodsplit[0]);
 									fih.rotheadspeed = Float
@@ -312,7 +322,8 @@ public class InMoovGestureCreator extends Service {
 									}
 									head = true;
 									pos++;
-								} else if (line2.startsWith("i01.setHandSpeed")) {
+								} else if (line2.startsWith(pythonname
+										+ ".setHandSpeed")) {
 									String gs = goodsplit[0];
 									String side = gs.substring(
 											gs.indexOf("\"") + 1,
@@ -356,7 +367,8 @@ public class InMoovGestureCreator extends Service {
 										lhand = true;
 										pos++;
 									}
-								} else if (line2.startsWith("i01.setArmSpeed")) {
+								} else if (line2.startsWith(pythonname
+										+ ".setArmSpeed")) {
 									String gs = goodsplit[0];
 									String side = gs.substring(
 											gs.indexOf("\"") + 1,
@@ -384,8 +396,8 @@ public class InMoovGestureCreator extends Service {
 										larm = true;
 										pos++;
 									}
-								} else if (line2
-										.startsWith("i01.setTorsoSpeed")) {
+								} else if (line2.startsWith(pythonname
+										+ ".setTorsoSpeed")) {
 									fih.topStomspeed = Float
 											.parseFloat(goodsplit[0]);
 									fih.midStomspeed = Float
@@ -398,12 +410,12 @@ public class InMoovGestureCreator extends Service {
 							}
 						}
 					} else if (ismove && !(isspeed)) {
-						if (line2.startsWith("i01.move")) {
+						if (line2.startsWith(pythonname + ".move")) {
 							String good = line2.substring(
 									line2.indexOf("(") + 1,
 									line2.lastIndexOf(")"));
 							String[] goodsplit = good.split(",");
-							if (line2.startsWith("i01.moveHead")) {
+							if (line2.startsWith(pythonname + ".moveHead")) {
 								fih.neck = Integer.parseInt(goodsplit[0]);
 								fih.rothead = Integer.parseInt(goodsplit[1]);
 								if (goodsplit.length > 2) {
@@ -417,7 +429,8 @@ public class InMoovGestureCreator extends Service {
 								}
 								head = true;
 								pos++;
-							} else if (line2.startsWith("i01.moveHand")) {
+							} else if (line2.startsWith(pythonname
+									+ ".moveHand")) {
 								String gs = goodsplit[0];
 								String side = gs.substring(
 										gs.indexOf("\"") + 1,
@@ -455,7 +468,8 @@ public class InMoovGestureCreator extends Service {
 									lhand = true;
 									pos++;
 								}
-							} else if (line2.startsWith("i01.moveArm")) {
+							} else if (line2
+									.startsWith(pythonname + ".moveArm")) {
 								String gs = goodsplit[0];
 								String side = gs.substring(
 										gs.indexOf("\"") + 1,
@@ -481,7 +495,8 @@ public class InMoovGestureCreator extends Service {
 									larm = true;
 									pos++;
 								}
-							} else if (line2.startsWith("i01.moveTorso")) {
+							} else if (line2.startsWith(pythonname
+									+ ".moveTorso")) {
 								fih.topStom = Integer.parseInt(goodsplit[0]);
 								fih.midStom = Integer.parseInt(goodsplit[1]);
 								fih.lowStom = Integer.parseInt(goodsplit[2]);
@@ -543,12 +558,12 @@ public class InMoovGestureCreator extends Service {
 							torso = false;
 						}
 					} else if (!(ismove) && isspeed) {
-						if (line2.startsWith("i01.set")) {
+						if (line2.startsWith(pythonname + ".set")) {
 							String good = line2.substring(
 									line2.indexOf("(") + 1,
 									line2.lastIndexOf(")"));
 							String[] goodsplit = good.split(",");
-							if (line2.startsWith("i01.setHeadSpeed")) {
+							if (line2.startsWith(pythonname + ".setHeadSpeed")) {
 								fih.neckspeed = Float.parseFloat(goodsplit[0]);
 								fih.rotheadspeed = Float
 										.parseFloat(goodsplit[1]);
@@ -566,7 +581,8 @@ public class InMoovGestureCreator extends Service {
 								}
 								head = true;
 								pos++;
-							} else if (line2.startsWith("i01.setHandSpeed")) {
+							} else if (line2.startsWith(pythonname
+									+ ".setHandSpeed")) {
 								String gs = goodsplit[0];
 								String side = gs.substring(
 										gs.indexOf("\"") + 1,
@@ -610,7 +626,8 @@ public class InMoovGestureCreator extends Service {
 									lhand = true;
 									pos++;
 								}
-							} else if (line2.startsWith("i01.setArmSpeed")) {
+							} else if (line2.startsWith(pythonname
+									+ ".setArmSpeed")) {
 								String gs = goodsplit[0];
 								String side = gs.substring(
 										gs.indexOf("\"") + 1,
@@ -638,7 +655,8 @@ public class InMoovGestureCreator extends Service {
 									larm = true;
 									pos++;
 								}
-							} else if (line2.startsWith("i01.setTorsoSpeed")) {
+							} else if (line2.startsWith(pythonname
+									+ ".setTorsoSpeed")) {
 								fih.topStomspeed = Float
 										.parseFloat(goodsplit[0]);
 								fih.midStomspeed = Float
@@ -744,7 +762,8 @@ public class InMoovGestureCreator extends Service {
 			if (fih.sleep != -1) {
 				code1 = "    sleep(" + fih.sleep + ")\n";
 			} else if (fih.speech != null) {
-				code1 = "    i01.mouth.speakBlocking(\"" + fih.speech + "\")\n";
+				code1 = "    " + pythonname + ".mouth.speakBlocking(\""
+						+ fih.speech + "\")\n";
 			} else if (fih.name != null) {
 				String code11 = "";
 				String code12 = "";
@@ -753,35 +772,35 @@ public class InMoovGestureCreator extends Service {
 				String code15 = "";
 				String code16 = "";
 				if (tabs_main_checkbox_states[0]) {
-					code11 = "    i01.moveHead(" + fih.neck + "," + fih.rothead
-							+ "," + fih.eyeX + "," + fih.eyeY + "," + fih.jaw
-							+ ")\n";
+					code11 = "    " + pythonname + ".moveHead(" + fih.neck
+							+ "," + fih.rothead + "," + fih.eyeX + ","
+							+ fih.eyeY + "," + fih.jaw + ")\n";
 				}
 				if (tabs_main_checkbox_states[1]) {
-					code12 = "    i01.moveArm(\"left\"," + fih.lbicep + ","
-							+ fih.lrotate + "," + fih.lshoulder + ","
-							+ fih.lomoplate + ")\n";
+					code12 = "    " + pythonname + ".moveArm(\"left\","
+							+ fih.lbicep + "," + fih.lrotate + ","
+							+ fih.lshoulder + "," + fih.lomoplate + ")\n";
 				}
 				if (tabs_main_checkbox_states[2]) {
-					code13 = "    i01.moveArm(\"right\"," + fih.rbicep + ","
-							+ fih.rrotate + "," + fih.rshoulder + ","
-							+ fih.romoplate + ")\n";
+					code13 = "    " + pythonname + ".moveArm(\"right\","
+							+ fih.rbicep + "," + fih.rrotate + ","
+							+ fih.rshoulder + "," + fih.romoplate + ")\n";
 				}
 				if (tabs_main_checkbox_states[3]) {
-					code14 = "    i01.moveHand(\"left\"," + fih.lthumb + ","
-							+ fih.lindex + "," + fih.lmajeure + ","
-							+ fih.lringfinger + "," + fih.lpinky + ","
-							+ fih.lwrist + ")\n";
+					code14 = "    " + pythonname + ".moveHand(\"left\","
+							+ fih.lthumb + "," + fih.lindex + ","
+							+ fih.lmajeure + "," + fih.lringfinger + ","
+							+ fih.lpinky + "," + fih.lwrist + ")\n";
 				}
 				if (tabs_main_checkbox_states[4]) {
-					code15 = "    i01.moveHand(\"right\"," + fih.rthumb + ","
-							+ fih.rindex + "," + fih.rmajeure + ","
-							+ fih.rringfinger + "," + fih.rpinky + ","
-							+ fih.rwrist + ")\n";
+					code15 = "    " + pythonname + ".moveHand(\"right\","
+							+ fih.rthumb + "," + fih.rindex + ","
+							+ fih.rmajeure + "," + fih.rringfinger + ","
+							+ fih.rpinky + "," + fih.rwrist + ")\n";
 				}
 				if (tabs_main_checkbox_states[5]) {
-					code16 = "    i01.moveTorso(" + fih.topStom + ","
-							+ fih.midStom + "," + fih.lowStom + ")\n";
+					code16 = "    " + pythonname + ".moveTorso(" + fih.topStom
+							+ "," + fih.midStom + "," + fih.lowStom + ")\n";
 				}
 				code1 = code11 + code12 + code13 + code14 + code15 + code16;
 			} else {
@@ -792,36 +811,41 @@ public class InMoovGestureCreator extends Service {
 				String code15 = "";
 				String code16 = "";
 				if (tabs_main_checkbox_states[0]) {
-					code11 = "    i01.setHeadSpeed(" + fih.neckspeed + ","
-							+ fih.rotheadspeed + "," + fih.eyeXspeed + ","
-							+ fih.eyeYspeed + "," + fih.jawspeed + ")\n";
+					code11 = "    " + pythonname + ".setHeadSpeed("
+							+ fih.neckspeed + "," + fih.rotheadspeed + ","
+							+ fih.eyeXspeed + "," + fih.eyeYspeed + ","
+							+ fih.jawspeed + ")\n";
 				}
 				if (tabs_main_checkbox_states[1]) {
-					code12 = "    i01.setArmSpeed(\"left\"," + fih.lbicepspeed
-							+ "," + fih.lrotatespeed + "," + fih.lshoulderspeed
-							+ "," + fih.lomoplatespeed + ")\n";
+					code12 = "    " + pythonname + ".setArmSpeed(\"left\","
+							+ fih.lbicepspeed + "," + fih.lrotatespeed + ","
+							+ fih.lshoulderspeed + "," + fih.lomoplatespeed
+							+ ")\n";
 				}
 				if (tabs_main_checkbox_states[2]) {
-					code13 = "    i01.setArmSpeed(\"right\"," + fih.rbicepspeed
-							+ "," + fih.rrotatespeed + "," + fih.rshoulderspeed
-							+ "," + fih.romoplatespeed + ")\n";
+					code13 = "    " + pythonname + ".setArmSpeed(\"right\","
+							+ fih.rbicepspeed + "," + fih.rrotatespeed + ","
+							+ fih.rshoulderspeed + "," + fih.romoplatespeed
+							+ ")\n";
 				}
 				if (tabs_main_checkbox_states[3]) {
-					code14 = "    i01.setHandSpeed(\"left\"," + fih.lthumbspeed
-							+ "," + fih.lindexspeed + "," + fih.lmajeurespeed
-							+ "," + fih.lringfingerspeed + ","
-							+ fih.lpinkyspeed + "," + fih.lwristspeed + ")\n";
+					code14 = "    " + pythonname + ".setHandSpeed(\"left\","
+							+ fih.lthumbspeed + "," + fih.lindexspeed + ","
+							+ fih.lmajeurespeed + "," + fih.lringfingerspeed
+							+ "," + fih.lpinkyspeed + "," + fih.lwristspeed
+							+ ")\n";
 				}
 				if (tabs_main_checkbox_states[4]) {
-					code15 = "    i01.setHandSpeed(\"right\","
+					code15 = "    " + pythonname + ".setHandSpeed(\"right\","
 							+ fih.rthumbspeed + "," + fih.rindexspeed + ","
 							+ fih.rmajeurespeed + "," + fih.rringfingerspeed
 							+ "," + fih.rpinkyspeed + "," + fih.rwristspeed
 							+ ")\n";
 				}
 				if (tabs_main_checkbox_states[5]) {
-					code16 = "    i01.setTorsoSpeed(" + fih.topStomspeed + ","
-							+ fih.midStomspeed + "," + fih.lowStomspeed + ")\n";
+					code16 = "    " + pythonname + ".setTorsoSpeed("
+							+ fih.topStomspeed + "," + fih.midStomspeed + ","
+							+ fih.lowStomspeed + ")\n";
 				}
 				code1 = code11 + code12 + code13 + code14 + code15 + code16;
 			}
@@ -864,8 +888,8 @@ public class InMoovGestureCreator extends Service {
 					if (fih.sleep != -1) {
 						code1 = "    sleep(" + fih.sleep + ")\n";
 					} else if (fih.speech != null) {
-						code1 = "    i01.mouth.speakBlocking(\"" + fih.speech
-								+ "\")\n";
+						code1 = "    " + pythonname + ".mouth.speakBlocking(\""
+								+ fih.speech + "\")\n";
 					} else if (fih.name != null) {
 						String code11 = "";
 						String code12 = "";
@@ -874,35 +898,41 @@ public class InMoovGestureCreator extends Service {
 						String code15 = "";
 						String code16 = "";
 						if (tabs_main_checkbox_states[0]) {
-							code11 = "    i01.moveHead(" + fih.neck + ","
-									+ fih.rothead + "," + fih.eyeX + ","
-									+ fih.eyeY + "," + fih.jaw + ")\n";
+							code11 = "    " + pythonname + ".moveHead("
+									+ fih.neck + "," + fih.rothead + ","
+									+ fih.eyeX + "," + fih.eyeY + "," + fih.jaw
+									+ ")\n";
 						}
 						if (tabs_main_checkbox_states[1]) {
-							code12 = "    i01.moveArm(\"left\"," + fih.lbicep
-									+ "," + fih.lrotate + "," + fih.lshoulder
-									+ "," + fih.lomoplate + ")\n";
+							code12 = "    " + pythonname + ".moveArm(\"left\","
+									+ fih.lbicep + "," + fih.lrotate + ","
+									+ fih.lshoulder + "," + fih.lomoplate
+									+ ")\n";
 						}
 						if (tabs_main_checkbox_states[2]) {
-							code13 = "    i01.moveArm(\"right\"," + fih.rbicep
-									+ "," + fih.rrotate + "," + fih.rshoulder
-									+ "," + fih.romoplate + ")\n";
+							code13 = "    " + pythonname
+									+ ".moveArm(\"right\"," + fih.rbicep + ","
+									+ fih.rrotate + "," + fih.rshoulder + ","
+									+ fih.romoplate + ")\n";
 						}
 						if (tabs_main_checkbox_states[3]) {
-							code14 = "    i01.moveHand(\"left\"," + fih.lthumb
-									+ "," + fih.lindex + "," + fih.lmajeure
-									+ "," + fih.lringfinger + "," + fih.lpinky
-									+ "," + fih.lwrist + ")\n";
+							code14 = "    " + pythonname
+									+ ".moveHand(\"left\"," + fih.lthumb + ","
+									+ fih.lindex + "," + fih.lmajeure + ","
+									+ fih.lringfinger + "," + fih.lpinky + ","
+									+ fih.lwrist + ")\n";
 						}
 						if (tabs_main_checkbox_states[4]) {
-							code15 = "    i01.moveHand(\"right\"," + fih.rthumb
-									+ "," + fih.rindex + "," + fih.rmajeure
-									+ "," + fih.rringfinger + "," + fih.rpinky
-									+ "," + fih.rwrist + ")\n";
+							code15 = "    " + pythonname
+									+ ".moveHand(\"right\"," + fih.rthumb + ","
+									+ fih.rindex + "," + fih.rmajeure + ","
+									+ fih.rringfinger + "," + fih.rpinky + ","
+									+ fih.rwrist + ")\n";
 						}
 						if (tabs_main_checkbox_states[5]) {
-							code16 = "    i01.moveTorso(" + fih.topStom + ","
-									+ fih.midStom + "," + fih.lowStom + ")\n";
+							code16 = "    " + pythonname + ".moveTorso("
+									+ fih.topStom + "," + fih.midStom + ","
+									+ fih.lowStom + ")\n";
 						}
 						code1 = code11 + code12 + code13 + code14 + code15
 								+ code16;
@@ -914,25 +944,28 @@ public class InMoovGestureCreator extends Service {
 						String code15 = "";
 						String code16 = "";
 						if (tabs_main_checkbox_states[0]) {
-							code11 = "    i01.setHeadSpeed(" + fih.neckspeed
-									+ "," + fih.rotheadspeed + ","
-									+ fih.eyeXspeed + "," + fih.eyeYspeed + ","
-									+ fih.jawspeed + ")\n";
+							code11 = "    " + pythonname + ".setHeadSpeed("
+									+ fih.neckspeed + "," + fih.rotheadspeed
+									+ "," + fih.eyeXspeed + "," + fih.eyeYspeed
+									+ "," + fih.jawspeed + ")\n";
 						}
 						if (tabs_main_checkbox_states[1]) {
-							code12 = "    i01.setArmSpeed(\"left\","
+							code12 = "    " + pythonname
+									+ ".setArmSpeed(\"left\","
 									+ fih.lbicepspeed + "," + fih.lrotatespeed
 									+ "," + fih.lshoulderspeed + ","
 									+ fih.lomoplatespeed + ")\n";
 						}
 						if (tabs_main_checkbox_states[2]) {
-							code13 = "    i01.setArmSpeed(\"right\","
+							code13 = "    " + pythonname
+									+ ".setArmSpeed(\"right\","
 									+ fih.rbicepspeed + "," + fih.rrotatespeed
 									+ "," + fih.rshoulderspeed + ","
 									+ fih.romoplatespeed + ")\n";
 						}
 						if (tabs_main_checkbox_states[3]) {
-							code14 = "    i01.setHandSpeed(\"left\","
+							code14 = "    " + pythonname
+									+ ".setHandSpeed(\"left\","
 									+ fih.lthumbspeed + "," + fih.lindexspeed
 									+ "," + fih.lmajeurespeed + ","
 									+ fih.lringfingerspeed + ","
@@ -940,7 +973,8 @@ public class InMoovGestureCreator extends Service {
 									+ ")\n";
 						}
 						if (tabs_main_checkbox_states[4]) {
-							code15 = "    i01.setHandSpeed(\"right\","
+							code15 = "    " + pythonname
+									+ ".setHandSpeed(\"right\","
 									+ fih.rthumbspeed + "," + fih.rindexspeed
 									+ "," + fih.rmajeurespeed + ","
 									+ fih.rringfingerspeed + ","
@@ -948,7 +982,7 @@ public class InMoovGestureCreator extends Service {
 									+ ")\n";
 						}
 						if (tabs_main_checkbox_states[5]) {
-							code16 = "    i01.setTorsoSpeed("
+							code16 = "    " + pythonname + ".setTorsoSpeed("
 									+ fih.topStomspeed + "," + fih.midStomspeed
 									+ "," + fih.lowStomspeed + ")\n";
 						}
@@ -1328,8 +1362,8 @@ public class InMoovGestureCreator extends Service {
 					servoitemholder[i1][i2].min.setText(min + "");
 					servoitemholder[i1][i2].res.setText(res + "");
 					servoitemholder[i1][i2].max.setText(max + "");
-//					servoitemholder[i1][i2].sli.setMinimum(min);
-//					servoitemholder[i1][i2].sli.setMaximum(max);
+					// servoitemholder[i1][i2].sli.setMinimum(min);
+					// servoitemholder[i1][i2].sli.setMaximum(max);
 					servoitemholder[i1][i2].sli.setValue(res);
 				}
 			}
@@ -1904,6 +1938,20 @@ public class InMoovGestureCreator extends Service {
 		if (true) {
 			String pscript = pythonscript;
 			String[] pscriptsplit = pscript.split("\n");
+
+			// get the name of the InMoov-reference
+			for (String line : pscriptsplit) {
+				if (line.contains(" = Runtime.createAndStart(")
+						|| line.contains("Runtime.start(")) {
+					if (line.contains(", \"InMoov\")")) {
+						pythonname = line.substring(0, line.indexOf(" = "));
+						referencename = line.substring(line.indexOf("(\"") + 2,
+								line.indexOf("\", \"InMoov\")"));
+					}
+
+				}
+			}
+
 			PythonItemHolder pih = null;
 			boolean keepgoing = true;
 			int pos = 0;
@@ -1930,6 +1978,7 @@ public class InMoovGestureCreator extends Service {
 				line = line.replace("   ", "    "); // 3 -> 4
 				line = line.replace("     ", "    "); // 5 -> 4
 				line = line.replace("      ", "    "); // 6 -> 4
+
 				if (!(pih.function) && !(pih.notfunction)) {
 					if (line.startsWith("def")) {
 						pih.function = true;
@@ -1983,28 +2032,36 @@ public class InMoovGestureCreator extends Service {
 							line = "";
 						} else if (line.startsWith("sleep")) {
 							line = "";
-						} else if (line.startsWith("i01")) {
-							if (line.startsWith("i01.move")) {
-								if (line.startsWith("i01.moveHead")) {
+						} else if (line.startsWith(pythonname)) {
+							if (line.startsWith(pythonname + ".move")) {
+								if (line.startsWith(pythonname + ".moveHead")) {
 									line = "";
-								} else if (line.startsWith("i01.moveHand")) {
+								} else if (line.startsWith(pythonname
+										+ ".moveHand")) {
 									line = "";
-								} else if (line.startsWith("i01.moveArm")) {
+								} else if (line.startsWith(pythonname
+										+ ".moveArm")) {
 									line = "";
-								} else if (line.startsWith("i01.moveTorso")) {
-									line = "";
-								}
-							} else if (line.startsWith("i01.set")) {
-								if (line.startsWith("i01.setHeadSpeed")) {
-									line = "";
-								} else if (line.startsWith("i01.setHandSpeed")) {
-									line = "";
-								} else if (line.startsWith("i01.setArmSpeed")) {
-									line = "";
-								} else if (line.startsWith("i01.setTorsoSpeed")) {
+								} else if (line.startsWith(pythonname
+										+ ".moveTorso")) {
 									line = "";
 								}
-							} else if (line.startsWith("i01.mouth.speak")) {
+							} else if (line.startsWith(pythonname + ".set")) {
+								if (line.startsWith(pythonname
+										+ ".setHeadSpeed")) {
+									line = "";
+								} else if (line.startsWith(pythonname
+										+ ".setHandSpeed")) {
+									line = "";
+								} else if (line.startsWith(pythonname
+										+ ".setArmSpeed")) {
+									line = "";
+								} else if (line.startsWith(pythonname
+										+ ".setTorsoSpeed")) {
+									line = "";
+								}
+							} else if (line.startsWith(pythonname
+									+ ".mouth.speak")) {
 								line = "";
 							}
 						}
