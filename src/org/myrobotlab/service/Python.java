@@ -336,7 +336,7 @@ public class Python extends Service {
 	public void attachPythonConsole() {
 		if (!pythonConsoleInitialized) {
 			/** REMOVE IF FLAKEY BUGS APPEAR !! */
-			String consoleScript = getServiceResourceFile("examples/pythonConsole.py");
+			String consoleScript = getServiceResourceFile("pythonConsole.py");
 			exec(consoleScript, false);
 		}
 	}
