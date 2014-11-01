@@ -515,12 +515,14 @@ public class RemoteAdapter extends Service implements Gateway {
 
 		try {
 
-			int i = 5;
+			int i = 1;
 			// Runtime.main(new String[] { "-runtimeName", String.format("r%d",
 			// i) });
 			RemoteAdapter remote = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
-			Runtime.start(String.format("clock%d", i), "Clock");
+			//Runtime.start(String.format("clock%d", i), "Clock");
 			Runtime.start(String.format("gui%d", i), "GUIService");
+			Runtime.start(String.format("joystick%d", i), "Joystick");
+			Runtime.start(String.format("python%d", i), "Python");
 
 			// what if null service is passed "register()" no parameters -
 			// I'm sending a registration of nothing?

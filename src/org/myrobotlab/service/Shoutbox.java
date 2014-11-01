@@ -33,11 +33,12 @@ import org.slf4j.Logger;
 public class Shoutbox extends Service {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Shoutbox.class);
-	
+
 	// FIXME - do not allow double entries on quickStart - make re-entrant
-	// FIXME if link = youtube.com - then embedd (at least with hyperlink & video splash
+	// FIXME if link = youtube.com - then embedd (at least with hyperlink &
+	// video splash
 	// FIXME - refactor these are ugly
-	
+
 	final public String SYSTEM = "system";
 	final public String USER = "usermsg";
 
@@ -455,30 +456,42 @@ public class Shoutbox extends Service {
 
 	// TODO Create User INFO & INDEXES HERE
 	public void onConnect(WebSocket ws) {
-		log.info(ws.getRemoteSocketAddress().toString());
+		try {
+			if (ws == null || ws.getRemoteSocketAddress() == null) {
+				error("ws or getRemoteSocketAddress() == null");
+				return;
+			}
+			log.info(ws.getRemoteSocketAddress().toString());
 
-		// set javascript user object for this connection
-		Connection conn = conns.addConnection(ws);
-		Message onConnect = createMessage("shoutclient", "onConnect", Encoder.gson.toJson(conn));
-		ws.send(Encoder.gson.toJson(onConnect));
+			// set javascript user object for this connection
+			Connection conn = conns.addConnection(ws);
+			Message onConnect = createMessage("shoutclient", "onConnect", Encoder.gson.toJson(conn));
+			ws.send(Encoder.gson.toJson(onConnect));
 
-		// BROADCAST ARRIVAL
-		// TODO - broadcast to others new connection of user - (this mean's user
-		// has established new connection,
-		// this could be refreshing the page, going to a different page, opening
-		// a new tab or
-		// actually arriving on the site - how to tell the difference between
-		// all these activities?
-		systemBroadcast(String.format("[%s]@[%s] is in the haus !", conn.user, conn.ip));
+			// BROADCAST ARRIVAL
+			// TODO - broadcast to others new connection of user - (this mean's
+			// user
+			// has established new connection,
+			// this could be refreshing the page, going to a different page,
+			// opening
+			// a new tab or
+			// actually arriving on the site - how to tell the difference
+			// between
+			// all these activities?
+			systemBroadcast(String.format("[%s]@[%s] is in the haus !", conn.user, conn.ip));
 
-		// FIXME onShout which takes ARRAY of shouts !!! - send the whole thing
-		// in one shot
-		// UPDATE NEW CONNECTION'S DISPLAY
-		for (int i = 0; i < shouts.size(); ++i) {
-			Shout s = shouts.get(i);
-			String ss = Encoder.gson.toJson(s);
-			Message catchup = createMessage("shoutclient", "onShout", ss);
-			ws.send(Encoder.gson.toJson(catchup));
+			// FIXME onShout which takes ARRAY of shouts !!! - send the whole
+			// thing
+			// in one shot
+			// UPDATE NEW CONNECTION'S DISPLAY
+			for (int i = 0; i < shouts.size(); ++i) {
+				Shout s = shouts.get(i);
+				String ss = Encoder.gson.toJson(s);
+				Message catchup = createMessage("shoutclient", "onShout", ss);
+				ws.send(Encoder.gson.toJson(catchup));
+			}
+		} catch (Exception e) {
+			Logging.logException(e);
 		}
 	}
 
@@ -650,7 +663,6 @@ public class Shoutbox extends Service {
 		return user;
 	}
 
-
 	// --------- XMPP END ------------
 
 	// String lastShoutMsg = null;
@@ -751,17 +763,19 @@ public class Shoutbox extends Service {
 				invoke("mimicTuring", params[2]);
 				return;
 			}
-			
+
 			if (shout.msg.startsWith("/v")) {
-				//invoke("version");
-				// FIXME - since your filtering specifically which functions to do 
-				// we should call directly so compiling will flush out method signature mis-matches
-				// FIXME - BUT CALLING DIRECTLY DOES NOT PUT IT ON THE "PUB" SIDE OF FRAMEWORK !!!
+				// invoke("version");
+				// FIXME - since your filtering specifically which functions to
+				// do
+				// we should call directly so compiling will flush out method
+				// signature mis-matches
+				// FIXME - BUT CALLING DIRECTLY DOES NOT PUT IT ON THE "PUB"
+				// SIDE OF FRAMEWORK !!!
 				// IS ONSHOUT THE ONLY PUB/SUB ALLOWED ?
 				version(params[2]);
 				return;
 			}
-			
 
 			/*
 			 * YOU THINK THIS WILL WORK > HAHAHAHA !
@@ -809,7 +823,7 @@ public class Shoutbox extends Service {
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout("mr.turing", out);
 	}
-	
+
 	public void version(String connId) {
 		sendTo(SYSTEM, connId, conns.listConnections());
 		Shout shout = createShout(USER, Runtime.getVersion());
@@ -817,16 +831,13 @@ public class Shoutbox extends Service {
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout("mr.turing", out);
 	}
-	
-	
+
 	public void getXMPPRelays() {
 		Shout shout = createShout(USER, Arrays.toString(xmppRelays.toArray()));
 		shout.from = "mr.turing";
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout("mr.turing", out);
 	}
-	
-	
 
 	// FIXME FIXME FIXME - not normalized with onShout(WebSocket) :PPPP
 	// FIXME - must fill in your name - "Greg Perry" somewhere..

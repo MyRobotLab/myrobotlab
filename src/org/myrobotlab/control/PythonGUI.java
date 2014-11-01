@@ -61,9 +61,9 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.myrobotlab.control.widget.Console;
 import org.myrobotlab.control.widget.FileUtil;
 import org.myrobotlab.control.widget.ImageButton;
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Python.Script;
@@ -91,6 +91,7 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 	JSplitPane splitPane;
 
 	final JLabel statusInfo;
+	JMenu examples;
 
 	HashMap<String, EditorPanel> scripts = new HashMap<String, EditorPanel>();
 
@@ -246,9 +247,14 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		} else if (m.getText().equals("close")) {
 			closeFile();
 		} else if (m.getActionCommand().equals("examples")) {
+		//} else if (m.getActionCommand().equals("examples")) {
+			
+			//BareBonesBrowserLaunch.openURL("https://github.com/MyRobotLab/pyrobotlab");
+			/*
 			String filename = String.format("Python/examples/%1$s", m.getText());
 			Script script = new Script(filename, FileIO.resourceToString(filename));
 			addNewEditorPanel(script);
+			*/
 		}
 	}
 
@@ -567,11 +573,14 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		createFileMenu(fileMenu);
 
 		// examples -----
-		JMenu examples = new JMenu("examples");
+		examples = new JMenu("examples");
 		menuBar.add(examples);
 		examples.setMnemonic(examplesMenuMnemonic);
-		createExamplesMenu(examples);
+		//createExamplesMenu(examples);
+		//examples.addActionListener(this);
 
+		examples.addMouseListener(this);
+		
 		return menuBar;
 	}
 
@@ -740,6 +749,9 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 	public void mousePressed(MouseEvent me) {
 		// TODO Auto-generated method stub
 		Object o = me.getSource();
+		if (o == examples){
+			BareBonesBrowserLaunch.openURL("https://github.com/MyRobotLab/pyrobotlab");
+		}
 		if (o instanceof TabControl2) {
 			TabControl2 tc = (TabControl2) o;
 			currentScriptName = tc.getText();
