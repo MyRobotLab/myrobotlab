@@ -25,7 +25,6 @@
 package org.myrobotlab.service;
 
 import java.util.HashMap;
-import java.util.TreeMap;
 
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
@@ -68,15 +67,20 @@ public class Joystick extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Joystick.class.getCanonicalName());
 
+	// FIXME - needs refactoring - remove all below
+	// need a serializable hashmap string & index
+	
 	transient Controller[] controllers;
 	transient Component[] comps; // holds the components
+	transient Rumbler[] rumblers;
+	int rumblerIdx; // index for the rumbler being used
+	boolean rumblerOn = false; // whether rumbler is on or off
 
-	TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
+	HashMap<String, Integer> controllerNames = new HashMap<String, Integer>();
+	HashMap<String, Float> lastValues = new HashMap<String, Float>();
 
 	transient InputPollingThread pollingThread = null;
-	int myDeviceIndex = -1;
 	transient Controller controller = null;
-	HashMap<String, Float> lastValues = new HashMap<String, Float>();
 
 	// TODO - remove - direction and any details (e.g. index) - should be published
 	private int xAxisIdx, yAxisIdx, zAxisIdx, rzAxisIdx;
@@ -84,9 +88,6 @@ public class Joystick extends Service {
 	private int povIdx; // index for the POV hat
 	private int buttonsIdx[]; // indices for the buttons
 
-	transient Rumbler[] rumblers;
-	int rumblerIdx; // index for the rumbler being used
-	boolean rumblerOn = false; // whether rumbler is on or off
 
 	private HashMap<String, Mapper> mappers = new HashMap<String, Mapper>();
 
@@ -177,20 +178,14 @@ public class Joystick extends Service {
 
 	public Joystick(String n) {
 		super(n);
-		log.info(String.format("%s getting controllers", n));
-		controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
-		info(String.format("found %d controllers", controllers.length));
-		for (int i = 0; i < controllers.length; i++) {
-			log.info(String.format("Found input device: %d %s", i, controllers[i].getName()));
-			controllerNames.put(String.format("%d - %s", i, controllers[i].getName()), i);
-		}
+		getControllers();
 	}
 
 	public boolean setController(int index) {
 		log.info(String.format("attaching controller %d", index));
 		if (index > -1 && index < controllers.length) {
 			controller = controllers[index];
-			// findRumblers(controller);
+			findRumblers(controller);
 			findCompIndices(controller);
 			//broadcastState();
 			return true;
@@ -202,7 +197,6 @@ public class Joystick extends Service {
 	public boolean setController(String s) {
 		if (controllerNames.containsKey(s)) {
 			setController(controllerNames.get(s));
-			//broadcastState();
 			return true;
 		}
 		error("cant find %s", s);
@@ -234,7 +228,15 @@ public class Joystick extends Service {
 		return "used for interfacing with a Joystick";
 	}
 
-	public TreeMap<String, Integer> getControllerNames() {
+	public HashMap<String, Integer> getControllers() {
+		log.info(String.format("%s getting controllers", getName()));
+		controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
+		info(String.format("found %d controllers", controllers.length));
+		controllerNames.clear();
+		for (int i = 0; i < controllers.length; i++) {
+			log.info(String.format("Found input device: %d %s", i, controllers[i].getName()));
+			controllerNames.put(String.format("%d - %s", i, controllers[i].getName()), i);
+		}
 		return controllerNames;
 	}
 
@@ -780,7 +782,8 @@ public class Joystick extends Service {
 
 		// Runtime.setRuntimeName("joyrun");
 		Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-		joy.test();
+		Runtime.start("gui", "GUIService");
+		//joy.test();
 
 		// joy.setController(2);
 		// joy.startPolling();
