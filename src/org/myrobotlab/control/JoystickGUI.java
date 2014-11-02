@@ -33,6 +33,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
 
@@ -58,14 +59,16 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
 
-	JComboBox controllers = new JComboBox();
+	JComboBox<String> controllers = new JComboBox<String>();
+	TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
+	
+	JButton refresh = new JButton("refresh");
+
 	JoystickGUI self = null;
+	Joystick myJoy = null;
 
-	TreeMap<String, Integer> controllerNamess;
-
-	JComboBox outputFormat = new JComboBox();
-	JButton startJoystick = null;
-	Joystick myJoystick = null;
+	JPanel output = new JPanel();
+	
 	JoystickButtonsPanel buttonsPanel = null;
 
 	private JoystickCompassPanel xyPanel, zrzPanel, hatPanel;
@@ -137,9 +140,10 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		JPanel input = new JPanel();
 		input.setBorder(title);
 		input.add(controllers);
+		input.add(refresh);
 		center.add(input);
 
-		JPanel output = new JPanel(new GridBagLayout());
+		
 		GridBagConstraints gc = new GridBagConstraints();
 		gc.fill = GridBagConstraints.BOTH;
 
@@ -180,63 +184,10 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		++gc.gridx;
 		output.add(XAxisOutput, gc);
 		++gc.gridx;
+		
+		//output.removeAll();
 
-		gc.gridx = 0;
-		++gc.gridy;
-		output.add(YAxisTransform, gc);
-		++gc.gridx;
-		output.add(new JLabel(" Y Axis ", SwingConstants.LEFT), gc);
-		++gc.gridx;
-		output.add(new JLabel(" X "), gc);
-		++gc.gridx;
-		output.add(YAxisMultiplier, gc);
-		++gc.gridx;
-		output.add(new JLabel(" + "), gc);
-		++gc.gridx;
-		output.add(YAxisOffset, gc);
-		++gc.gridx;
-		output.add(new JLabel(" = "), gc);
-		++gc.gridx;
-		output.add(YAxisOutput, gc);
-		++gc.gridx;
-
-		gc.gridx = 0;
-		++gc.gridy;
-		output.add(ZRotTransform, gc);
-		++gc.gridx;
-		output.add(new JLabel(" Z Rotation ", SwingConstants.LEFT), gc);
-		++gc.gridx;
-		output.add(new JLabel(" X "), gc);
-		++gc.gridx;
-		output.add(ZRotMultiplier, gc);
-		++gc.gridx;
-		output.add(new JLabel(" + "), gc);
-		++gc.gridx;
-		output.add(ZRotOffset, gc);
-		++gc.gridx;
-		output.add(new JLabel(" = "), gc);
-		++gc.gridx;
-		output.add(ZRotOutput, gc);
-		++gc.gridx;
-
-		gc.gridx = 0;
-		++gc.gridy;
-		output.add(ZAxisTransform, gc);
-		++gc.gridx;
-		output.add(new JLabel(" Z Axis ", SwingConstants.LEFT), gc);
-		++gc.gridx;
-		output.add(new JLabel(" X "), gc);
-		++gc.gridx;
-		output.add(ZAxisMultiplier, gc);
-		++gc.gridx;
-		output.add(new JLabel(" + "), gc);
-		++gc.gridx;
-		output.add(ZAxisOffset, gc);
-		++gc.gridx;
-		output.add(new JLabel(" = "), gc);
-		++gc.gridx;
-		output.add(ZAxisOutput, gc);
-		++gc.gridx;
+		refresh.addActionListener(this);
 
 		hatTransform.addActionListener(this);
 		XAxisTransform.addActionListener(this);
@@ -244,46 +195,23 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		ZAxisTransform.addActionListener(this);
 		ZRotTransform.addActionListener(this);
 
-		/*
-		 * output.add(getTranformPanel("Hat        ", hatMultiplier, hatOffset,
-		 * hatOutput)); output.add(getTranformPanel("X Axis     ",
-		 * XAxisMultiplier, XAxisOffset, XAxisOutput));
-		 * output.add(getTranformPanel("Y Axis     ", YAxisMultiplier,
-		 * YAxisOffset, YAxisOutput));
-		 * output.add(getTranformPanel("Z Rotation ", ZRotMultiplier,
-		 * ZRotOffset, ZRotOutput)); output.add(getTranformPanel("ZAxis      ",
-		 * ZAxisMultiplier, ZAxisOffset, ZAxisOutput));
-		 */
 		title = BorderFactory.createTitledBorder("output");
 		output.setBorder(title);
 
 		center.add(output);
 
 		// PAGE_END
-		JPanel page_end = new JPanel();
 		buttonsPanel = new JoystickButtonsPanel();
 		display.add(buttonsPanel, BorderLayout.PAGE_END);
 
 		display.add(center, BorderLayout.CENTER);
-		myJoystick = (Joystick) Runtime.getService(boundServiceName);
-	}
-
-	public JPanel getTranformPanel(String title, JTextField multiplier, JTextField offset, JLabel output) {
-		JPanel pov = new JPanel();
-		pov.add(new JButton("transform"));
-		pov.add(new JLabel(title));
-		pov.add(new JLabel("X"));
-		pov.add(multiplier);
-		pov.add(new JLabel("+"));
-		pov.add(offset);
-		pov.add(new JLabel("="));
-		pov.add(output);
-		return pov;
+		myJoy = (Joystick) Runtime.getService(boundServiceName);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == controllers) {
+		Object o = e.getSource();
+		if (o == controllers) {
 			String selected = (String) controllers.getSelectedItem();
 			if (selected == null || "".equals(selected)) {
 				myService.send(boundServiceName, "stopPolling");
@@ -292,57 +220,8 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 				myService.send(boundServiceName, "setController", selected);
 				myService.send(boundServiceName, "startPolling");
 			}
-
-		} else if (e.getSource() == hatTransform) {
-			if (hatTransform.getText().equals("transform")) {
-				myService.send(boundServiceName, "setHatTransform", Integer.parseInt(hatMultiplier.getText()), Integer.parseInt(hatOffset.getText()));
-				hatTransform.setText("reset");
-			} else {
-				myService.send(boundServiceName, "resetHatTransform");
-				hatTransform.setText("transform");
-				hatMultiplier.setText("1");
-				hatOffset.setText("0");
-			}
-		} else if (e.getSource() == XAxisTransform) {
-			if (XAxisTransform.getText().equals("transform")) {
-				myService.send(boundServiceName, "setXAxisTransform", Integer.parseInt(XAxisMultiplier.getText()), Integer.parseInt(XAxisOffset.getText()));
-				XAxisTransform.setText("reset");
-			} else {
-				myService.send(boundServiceName, "resetXAxisTransform");
-				XAxisTransform.setText("transform");
-				XAxisMultiplier.setText("1");
-				XAxisOffset.setText("0");
-			}
-		} else if (e.getSource() == YAxisTransform) {
-			if (YAxisTransform.getText().equals("transform")) {
-				myService.send(boundServiceName, "setYAxisTransform", Integer.parseInt(YAxisMultiplier.getText()), Integer.parseInt(YAxisOffset.getText()));
-				YAxisTransform.setText("reset");
-			} else {
-				myService.send(boundServiceName, "resetYAxisTransform");
-				YAxisTransform.setText("transform");
-				YAxisMultiplier.setText("1");
-				YAxisOffset.setText("0");
-			}
-		} else if (e.getSource() == ZRotTransform) {
-			if (ZRotTransform.getText().equals("transform")) {
-				myService.send(boundServiceName, "setZRotTransform", Integer.parseInt(ZRotMultiplier.getText()), Integer.parseInt(ZRotOffset.getText()));
-				ZRotTransform.setText("reset");
-			} else {
-				myService.send(boundServiceName, "resetZRotTransform");
-				ZRotTransform.setText("transform");
-				ZRotMultiplier.setText("1");
-				ZRotOffset.setText("0");
-			}
-		} else if (e.getSource() == ZAxisTransform) {
-			if (ZAxisTransform.getText().equals("transform")) {
-				myService.send(boundServiceName, "setZAxisTransform", Integer.parseInt(ZAxisMultiplier.getText()), Integer.parseInt(ZAxisOffset.getText()));
-				ZAxisTransform.setText("reset");
-			} else {
-				myService.send(boundServiceName, "resetZAxisTransform");
-				ZAxisTransform.setText("transform");
-				ZAxisMultiplier.setText("1");
-				ZAxisOffset.setText("0");
-			}
+		} else if (o == refresh){
+			send("getControllers");
 		}
 		// myService.send(boundServiceName, "setType", e.getActionCommand());
 	}
@@ -352,72 +231,15 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 	public void getState(final Joystick joy) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
+				// update reference
+				myJoy = joy;
 
-				if (joy != null) {
+				// controllers.setSelectedItem(null);
 
-					controllers.removeAllItems();
-
-					controllerNamess = joy.getControllerNames();
-					Iterator<String> it = controllerNamess.keySet().iterator();
-
-					controllers.addItem("");
-					while (it.hasNext()) {
-						String name = it.next();
-						controllers.addItem(name);
-					}
-
-					controllers.addActionListener(self);
-					// controllers.setSelectedItem(null);
-				}
 			}
 		});
 
 	}
-
-	// FIXME sendNotifyStateRequest("publishState", "getState", String type); <-
-	// Class.forName(type)
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", Joystick.class);
-
-		subscribe("publishX", "publishX", Float.class);
-		subscribe("publishY", "publishY", Float.class);
-		
-		// xbox specific begin
-		subscribe("publishRX", "publishRX", Float.class);
-		subscribe("publishRY", "publishRY", Float.class);
-		// xbox specific end 
-		
-		subscribe("publishZ", "publishZ", Float.class);
-		subscribe("publishRZ", "publishRZ", Float.class);
-		subscribe("publishPOV", "publishPOV", Float.class);
-
-		/*
-		subscribe("XAxis", "XAxis", Integer.class);
-		subscribe("YAxis", "YAxis", Integer.class);
-		subscribe("ZAxis", "ZAxis", Integer.class);
-		subscribe("ZRotation", "ZRotation", Integer.class);
-		subscribe("hatSwitch", "hatSwitch", Integer.class);
-		*/
-
-		subscribe("publish0", "publish0", Float.class);
-		subscribe("publish1", "publish1", Float.class);
-		subscribe("publish2", "publish2", Float.class);
-		subscribe("publish3", "publish3", Float.class);
-		subscribe("publish4", "publish4", Float.class);
-		subscribe("publish5", "publish5", Float.class);
-		subscribe("publish6", "publish6", Float.class);
-		subscribe("publish7", "publish7", Float.class);
-		subscribe("publish8", "publish8", Float.class);
-		subscribe("publish9", "publish9", Float.class);
-		subscribe("publish10", "publish10", Float.class);
-		subscribe("publish11", "publish11", Float.class);
-		subscribe("publish12", "publish12", Float.class);
-		subscribe("publish13", "publish13", Float.class);
-
-		myService.send(boundServiceName, "publishState");
-	}
-
 
 	public void publishX(Float value) {
 		xyPanel.setX(value);
@@ -482,7 +304,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 	public void publish7(Float value) {
 		buttonsPanel.setButton(7, value);
 	}
-	
+
 	public void publish8(Float value) {
 		buttonsPanel.setButton(8, value);
 	}
@@ -494,7 +316,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 	public void publish10(Float value) {
 		buttonsPanel.setButton(10, value);
 	}
-	
+
 	public void publish11(Float value) {
 		buttonsPanel.setButton(11, value);
 	}
@@ -502,11 +324,73 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 	public void publish12(Float value) {
 		buttonsPanel.setButton(12, value);
 	}
-	
+
 	public void publish13(Float value) {
 		buttonsPanel.setButton(13, value);
 	}
+
+	public void getControllers(final HashMap<String, Integer> contrls){
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				controllers.removeAllItems();
+				controllerNames.clear();
+				controllerNames.putAll(contrls);
+				Iterator<String> it = controllerNames.keySet().iterator();
+				controllers.addItem("");
+				while (it.hasNext()) {
+					String name = it.next();
+					controllers.addItem(name);
+				}
+				controllers.addActionListener(self);
+
+			}
+		});
+
+	}
 	
+	@Override
+	public void attachGUI() {
+		subscribe("publishState", "getState", Joystick.class);
+		subscribe("getControllers", "getControllers", HashMap.class);
+
+		subscribe("publishX", "publishX", Float.class);
+		subscribe("publishY", "publishY", Float.class);
+
+		// xbox specific begin
+		subscribe("publishRX", "publishRX", Float.class);
+		subscribe("publishRY", "publishRY", Float.class);
+		// xbox specific end
+
+		subscribe("publishZ", "publishZ", Float.class);
+		subscribe("publishRZ", "publishRZ", Float.class);
+		subscribe("publishPOV", "publishPOV", Float.class);
+
+		/*
+		 * subscribe("XAxis", "XAxis", Integer.class); subscribe("YAxis",
+		 * "YAxis", Integer.class); subscribe("ZAxis", "ZAxis", Integer.class);
+		 * subscribe("ZRotation", "ZRotation", Integer.class);
+		 * subscribe("hatSwitch", "hatSwitch", Integer.class);
+		 */
+
+		subscribe("publish0", "publish0", Float.class);
+		subscribe("publish1", "publish1", Float.class);
+		subscribe("publish2", "publish2", Float.class);
+		subscribe("publish3", "publish3", Float.class);
+		subscribe("publish4", "publish4", Float.class);
+		subscribe("publish5", "publish5", Float.class);
+		subscribe("publish6", "publish6", Float.class);
+		subscribe("publish7", "publish7", Float.class);
+		subscribe("publish8", "publish8", Float.class);
+		subscribe("publish9", "publish9", Float.class);
+		subscribe("publish10", "publish10", Float.class);
+		subscribe("publish11", "publish11", Float.class);
+		subscribe("publish12", "publish12", Float.class);
+		subscribe("publish13", "publish13", Float.class);
+
+		send("publishState");
+		send("getControllers");
+	}
+
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", Joystick.class);
