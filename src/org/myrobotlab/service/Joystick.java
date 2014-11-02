@@ -523,6 +523,39 @@ public class Joystick extends Service {
 		return y;
 	}
 
+	// xbox 360 specific - begin --
+	public Float publishRX(Float z) {
+		//invoke("publishZ", z); possible solution ;p
+		return z;
+	}
+	
+	public void addRXListener(String service, String method) {
+		addListener("publishRX", service, method);
+	}
+	
+
+	public void addRXListener(ServoControl sc) {
+		setMapper("publishRX", -1.0f, 1.0f, 0.0f, 180f);
+		addYListener(sc.getName(), "moveTo");
+	}
+	
+//
+	public Float publishRY(Float z) {
+		//invoke("publishRZ", z); possible solition :P
+		return z;
+	}
+	
+	public void addRYListener(String service, String method) {
+		addListener("publishRY", service, method);
+	}
+	
+	public void addRYListener(ServoControl sc) {
+		setMapper("publishRY", -1.0f, 1.0f, 0.0f, 180f);
+		addYListener(sc.getName(), "moveTo");
+	}
+
+	// xbox 360 specific - end --
+	
 	public Float publishZ(Float z) {
 		return z;
 	}
