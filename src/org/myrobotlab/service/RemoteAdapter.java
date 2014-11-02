@@ -528,7 +528,7 @@ public class RemoteAdapter extends Service implements Gateway {
 			// I'm sending a registration of nothing?
 			remote.broadcastState();
 
-			// remote.connect("tcp://127.0.0.1:6868");
+			//remote.connect("tcp://127.0.0.1:6767");
 			/*
 			 * THIS WORKS Message msg = remote.createMessage("", "register",
 			 * remote); remote.sendRemote("tcp://127.0.0.1:6868", msg);

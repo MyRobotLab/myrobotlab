@@ -163,8 +163,8 @@ public class Clock extends Service {
 				
 				// auto-grab the next port if can not listen???
 				RemoteAdapter remote = new RemoteAdapter(String.format("remote%d", i));
-				remote.setUDPPort(6868);
-				remote.setTCPPort(6868);
+				//remote.setUDPPort(6868);
+				//remote.setTCPPort(6868);
 				remote.startService();
 				remote.startListening();
 				
