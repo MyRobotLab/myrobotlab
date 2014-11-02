@@ -66,6 +66,9 @@ public class Shoutbox extends Service {
 
 	int maxArchiveRecordCount = 50;
 
+	// FIXME - the amount of methods you DONT want exposed will be dwarfed by the number you do - So, Security
+	// will need to wildcard or list a filter of excludes
+	
 	// FIXME - standard interfaces for all GATEWAY SERVICES - onMsg()
 	// addListener()
 	// FIXME - Ma. Vo. name link on shoutbox
@@ -759,6 +762,11 @@ public class Shoutbox extends Service {
 				return;
 			}
 
+			if (shout.msg.startsWith("/getUptime")) {
+				systemBroadcast(Runtime.getUptime());
+				return;
+			}
+			
 			if (shout.msg.startsWith("/t")) {
 				invoke("mimicTuring", params[2]);
 				return;
@@ -897,7 +905,8 @@ public class Shoutbox extends Service {
 	}
 
 	// fixme (from whom) ?? - websocket xmpp other ??
-	public void systemBroadcast(String data) {
+	public void systemBroadcast(Object inData) {
+		String data = Encoder.gson.toJson(inData);
 		Shout shout = createShout(SYSTEM, data);
 		Message onShout = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout(null, onShout);
