@@ -125,7 +125,7 @@ public class EddieControlBoard extends Service implements KeyListener {
 	public void startJoystick(){
 		joystick = (Joystick) startPeer("joystick");
 		joystick.addYListener(getName(), "onY");
-		joystick.addYListener(getName(), "onRZ");
+		joystick.addRYListener(getName(), "onRY");
 	}
 	
 	public void onY(Float y) throws IOException{
@@ -133,8 +133,8 @@ public class EddieControlBoard extends Service implements KeyListener {
 		go(leftMotorPower, rightMotorPower);
 	}
 
-	public void onRZ(Float rz) throws IOException{
-		leftMotorPower = rz;
+	public void onRY(Float ry) throws IOException{
+		leftMotorPower = ry;
 		go(leftMotorPower, rightMotorPower);
 	}
 	

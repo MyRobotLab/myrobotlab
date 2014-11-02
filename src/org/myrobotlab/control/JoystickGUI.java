@@ -382,6 +382,12 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 
 		subscribe("publishX", "publishX", Float.class);
 		subscribe("publishY", "publishY", Float.class);
+		
+		// xbox specific begin
+		subscribe("publishRX", "publishRX", Float.class);
+		subscribe("publishRY", "publishRY", Float.class);
+		// xbox specific end 
+		
 		subscribe("publishZ", "publishZ", Float.class);
 		subscribe("publishRZ", "publishRZ", Float.class);
 		subscribe("publishPOV", "publishPOV", Float.class);
