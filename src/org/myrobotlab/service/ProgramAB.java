@@ -35,7 +35,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 
 	private Bot bot = null;
 	private String path = "ProgramAB";
-	private String botName = "alice2";
+	private String botName = "lloyd";
 	//private Chat chatSession=null;
 	private HashMap<String, Chat> sessions = new HashMap<String, Chat>();
 	private Pattern oobPattern = Pattern.compile("<oob>(.*?)</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
@@ -51,6 +51,25 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	@Override
 	public String getDescription() {
 		return "AIML 2.0 Reference interpreter based on Program AB";
+	}
+
+	public void reloadSession(String path, String botName) {
+		reloadSession(path, null, botName);
+	}
+
+	public void reloadSession(String path, String session, String botName) {
+		if (session == null){
+			session = "default";
+		}
+		// kill the bot
+		bot = null;
+		// kill the session
+		if (sessions.containsKey(session)) {
+			// TODO: will garbage collection clean up the bot now ?
+			// Or are there other handles to it?
+			sessions.remove(session);
+		}
+		startSession(path, session, botName);
 	}
 
 
@@ -74,14 +93,19 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		if (bot == null){
 			bot = new Bot(botName, path);
 		}
-		for (Category c : bot.brain.getCategories()) {
-			System.out.println(c.getPattern());
+		if (log.isDebugEnabled()) {
+			for (Category c : bot.brain.getCategories()) {
+				log.debug(c.getPattern());
+			}
 		}
 		sessions.put(session, new Chat(bot));
 
 		if (!"default".equals(session)){
 			getResponse(session, String.format("my name is %s", session));
 		}
+		
+		// TODO: to make sure if the start session is updated, that the button updates in the gui
+		// broadcastState();
 	}
 
 	public static class Response {
@@ -117,6 +141,8 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 			return new Response(session, error, null);
 		}
 
+		System.out.println("BOT:" + bot.toString());
+
 		if (!sessions.containsKey(session)){
 			startSession(path, session, botName);
 		}
@@ -128,11 +154,11 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		if (processOOB) {
 			payload = processOOB(res);
 		}
-		
+
 		// OOB text should not be published as part of the response text.
 		Matcher matcher = oobPattern.matcher(res);
 		res = matcher.replaceAll("");
-		
+
 		Response response = new Response(session, res, payload);
 		// EEK! clean up the API!
 		invoke("publishResponse", response);
@@ -202,9 +228,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 
 	public void startSession(String progABPath, String botName) {
 		startSession(progABPath	, null, botName);
-
 	}
-
 
 	/**
 	 * publishing method of the pub sub pair - with addResponseListener allowing subscriptions
@@ -281,13 +305,13 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		LoggingFactory.getInstance().setLevel("INFO");
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
-		ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice", "ProgramAB");
+		ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
 		// File f = new File("ProgramAB");
 		// String progABPath = f.getAbsolutePath();
 		// String botName = "alice2";
 		// alice.startSession(); 
-		alice.startSession("ProgramAB", "default", "alice");
-		Response response = alice.getResponse("TEST OOB");
+		alice.startSession("ProgramAB", "default", "alice2");
+		Response response = alice.getResponse("Hello.");
 		log.info("Alice " + response.msg);		
 	}
 
