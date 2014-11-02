@@ -29,9 +29,9 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 	public final static Logger log = LoggerFactory.getLogger(ProgramABGUI.class.toString());
 	static final long serialVersionUID = 1L;
 	public final String boundServiceName;
-	
+	static final String START_SESSION_LABEL = "Start Session";
 	// TODO: make this auto-resize when added to gui..
-	private JTextField text = new JTextField("Say Hello:", 60);
+	private JTextField text = new JTextField("By your command:", 60);
 	private JTextArea response = new JTextArea("Program AB Response:");
 	private JButton askButton = new JButton("Ask Program AB");
 	private JScrollPane scrollResponse = new JScrollPane(response);
@@ -39,8 +39,7 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 	private JTextField progABPath = new JTextField(new File("ProgramAB").getAbsolutePath(), 16);
 	private JTextField botName = new JTextField("alice2", 16);
 	
-	private JButton startSessionButton = new JButton("Start Session");
-	
+	private JButton startSessionButton = new JButton(START_SESSION_LABEL);	
 	private JButton saveAIML = new JButton("Save AIML");
 	
 	
@@ -111,7 +110,14 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 			// clear out the original question.
 			text.setText("");			
 		} else if (o == startSessionButton) {
-			myService.send(boundServiceName, "startSession", progABPath.getText().trim(), botName.getText().trim());
+			if (startSessionButton.getText().equals(START_SESSION_LABEL)) {
+				myService.send(boundServiceName, "startSession", progABPath.getText().trim(), botName.getText().trim());
+				startSessionButton.setText("Reload Session");
+			} else {
+				myService.send(boundServiceName, "reloadSession", progABPath.getText().trim(), botName.getText().trim());
+			}
+			
+			
 		} else if (o == saveAIML) {
 			myService.send(boundServiceName, "writeAIML");
 			myService.send(boundServiceName, "writeAIMLIF");
