@@ -39,7 +39,7 @@ public class JoystickButtonsPanel extends JPanel {
 		// initialize buttonTFs[]
 		buttonTFs = new JTextField[Joystick.NUM_BUTTONS];
 		for (int i = 0; i < Joystick.NUM_BUTTONS; i++) {
-			buttonTFs[i] = new JTextField("" + (i + 1), 2);
+			buttonTFs[i] = new JTextField("" + (i), 2);
 			buttonTFs[i].setEditable(false);
 			buttonTFs[i].setBackground(OFF_COLOUR);
 		}
