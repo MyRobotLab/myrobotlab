@@ -30,7 +30,6 @@ package org.myrobotlab.control;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -54,6 +53,7 @@ import org.myrobotlab.control.widget.JoystickCompassPanel;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Joystick;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Joystick.Button;
 
 public class JoystickGUI extends ServiceGUI implements ActionListener {
 
@@ -61,14 +61,16 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 
 	JComboBox<String> controllers = new JComboBox<String>();
 	TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
-	
+	TreeMap<String, Integer> components = new TreeMap<String, Integer>();
+	HashMap<String, JLabel> outputValues = new HashMap<String, JLabel>();
+
 	JButton refresh = new JButton("refresh");
 
 	JoystickGUI self = null;
 	Joystick myJoy = null;
 
 	JPanel output = new JPanel();
-	
+
 	JoystickButtonsPanel buttonsPanel = null;
 
 	private JoystickCompassPanel xyPanel, zrzPanel, hatPanel;
@@ -115,77 +117,41 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		display.setLayout(new BorderLayout());
 
 		// PAGE_START
-		JPanel page_start = new JPanel();
+		TitledBorder title;
+		title = BorderFactory.createTitledBorder("axis");
+
+		JPanel axisDisplay = new JPanel();
+		axisDisplay.setBorder(title);
 		// page_start.setLayout(new BoxLayout(page_start, BoxLayout.X_AXIS)); //
 		// horizontal box
 		// layout
 		// three CompassPanels in a row
 		hatPanel = new JoystickCompassPanel("POV");
-		page_start.add(hatPanel);
+		axisDisplay.add(hatPanel);
 
 		xyPanel = new JoystickCompassPanel("xy");
-		page_start.add(xyPanel);
+		axisDisplay.add(xyPanel);
 
 		zrzPanel = new JoystickCompassPanel("zRz");
-		page_start.add(zrzPanel);
+		axisDisplay.add(zrzPanel);
 
-		display.add(page_start, BorderLayout.PAGE_START);
+		JPanel north = new JPanel(new BorderLayout());
+		north.add(axisDisplay, BorderLayout.NORTH);
 
 		// CENTER
-		JPanel center = new JPanel();
-		center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+		JPanel topCenter = new JPanel();
+		// center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
 
-		TitledBorder title;
-		title = BorderFactory.createTitledBorder("input");
-		JPanel input = new JPanel();
-		input.setBorder(title);
-		input.add(controllers);
-		input.add(refresh);
-		center.add(input);
+		title = BorderFactory.createTitledBorder("controller");
+		JPanel controllerPanel = new JPanel();
+		controllerPanel.setBorder(title);
+		controllerPanel.add(controllers);
+		controllerPanel.add(refresh);
 
-		
-		GridBagConstraints gc = new GridBagConstraints();
-		gc.fill = GridBagConstraints.BOTH;
+		topCenter.add(controllerPanel);
+		north.add(topCenter, BorderLayout.CENTER);
 
-		gc.gridx = 0;
-		gc.gridy = 0;
-		output.add(hatTransform, gc);
-		++gc.gridx;
-		output.add(new JLabel(" Hat ", SwingConstants.LEFT), gc);
-		++gc.gridx;
-		output.add(new JLabel(" X "), gc);
-		++gc.gridx;
-		output.add(hatMultiplier, gc);
-		++gc.gridx;
-		output.add(new JLabel(" + "), gc);
-		++gc.gridx;
-		output.add(hatOffset, gc);
-		++gc.gridx;
-		output.add(new JLabel(" = "), gc);
-		++gc.gridx;
-		output.add(hatOutput, gc);
-		++gc.gridx;
-
-		gc.gridx = 0;
-		++gc.gridy;
-		output.add(XAxisTransform, gc);
-		++gc.gridx;
-		output.add(new JLabel(" X Axis ", SwingConstants.LEFT), gc);
-		++gc.gridx;
-		output.add(new JLabel(" X "), gc);
-		++gc.gridx;
-		output.add(XAxisMultiplier, gc);
-		++gc.gridx;
-		output.add(new JLabel(" + "), gc);
-		++gc.gridx;
-		output.add(XAxisOffset, gc);
-		++gc.gridx;
-		output.add(new JLabel(" = "), gc);
-		++gc.gridx;
-		output.add(XAxisOutput, gc);
-		++gc.gridx;
-		
-		//output.removeAll();
+		display.add(north, BorderLayout.NORTH);
 
 		refresh.addActionListener(this);
 
@@ -198,13 +164,13 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		title = BorderFactory.createTitledBorder("output");
 		output.setBorder(title);
 
-		center.add(output);
+		topCenter.add(output);
 
 		// PAGE_END
 		buttonsPanel = new JoystickButtonsPanel();
 		display.add(buttonsPanel, BorderLayout.PAGE_END);
 
-		display.add(center, BorderLayout.CENTER);
+		display.add(output, BorderLayout.CENTER);
 		myJoy = (Joystick) Runtime.getService(boundServiceName);
 	}
 
@@ -220,7 +186,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 				myService.send(boundServiceName, "setController", selected);
 				myService.send(boundServiceName, "startPolling");
 			}
-		} else if (o == refresh){
+		} else if (o == refresh) {
 			send("getControllers");
 		}
 		// myService.send(boundServiceName, "setType", e.getActionCommand());
@@ -329,7 +295,7 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		buttonsPanel.setButton(13, value);
 	}
 
-	public void getControllers(final HashMap<String, Integer> contrls){
+	public void getControllers(final HashMap<String, Integer> contrls) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				controllers.removeAllItems();
@@ -347,7 +313,51 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		});
 
 	}
-	
+
+	public void getComponents(final HashMap<String, Integer> cmpnts) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+
+				output.removeAll();
+				outputValues.clear();
+
+				components.clear();
+				components.putAll(cmpnts);
+
+				Iterator<String> it = components.keySet().iterator();
+
+				while (it.hasNext()) {
+					String name = it.next();
+					JPanel p = new JPanel();
+
+					TitledBorder title = BorderFactory.createTitledBorder("");
+					p.setBorder(title);
+
+					p.add(new JLabel(String.format("%s:", name)));
+					JLabel l = new JLabel("0.0");
+					outputValues.put(name, l);
+					p.add(l);
+					output.add(p);
+				}
+
+				output.invalidate();
+				output.repaint();
+			}
+		});
+
+	}
+
+	public void onButton(final Button button) {
+		log.info(String.format("onButton %s", button));
+		if (button.value == null) {
+			outputValues.get(button.id).setText("null");
+			return;
+		}
+		if (outputValues.containsKey(button.id)) {
+			outputValues.get(button.id).setText(button.value.toString());
+		}
+	}
+
 	@Override
 	public void attachGUI() {
 		subscribe("publishState", "getState", Joystick.class);
@@ -386,6 +396,9 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		subscribe("publish11", "publish11", Float.class);
 		subscribe("publish12", "publish12", Float.class);
 		subscribe("publish13", "publish13", Float.class);
+
+		subscribe("getComponents", "getComponents", HashMap.class);
+		subscribe("publishButton", "onButton", Float.class);
 
 		send("publishState");
 		send("getControllers");
