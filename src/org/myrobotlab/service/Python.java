@@ -33,56 +33,7 @@ import org.slf4j.Logger;
  * 
  *         a Service to access Python interpreter.
  * 
- *         references : http://wiki.python.org/python/InstallationInstructions
- *         http://www.python.org/javadoc/org/python/util/PythonInterpreter.html
- *         http
- *         ://etutorials.org/Programming/Python+tutorial/Part+V+Extending+and
- *         +EmbeddinggetCompiledMethod
- *         /Chapter+25.+Extending+and+Embedding+Python/25.2+Embedding+Python
- *         +in+Java/ http://wiki.python.org/moin/PythonEditors - list of editors
- *         http://java-source.net/open-source/scripting-languages
- *         http://java.sun.com/products/jfc/tsc/articles/text/editor_kit/ -
- *         syntax highlighting text editor
- *         http://download.oracle.com/javase/tutorial
- *         /uiswing/components/generaltext.html#editorkits
- *         http://download.oracle
- *         .com/javase/tutorial/uiswing/components/editorpane.html
- *         http://stackoverflow
- *         .com/questions/2441525/how-to-use-netbeans-platform
- *         -syntax-highlight-with-jeditorpane
- *         http://book.javanb.com/jfc-swing-tutorial
- *         -the-a-guide-to-constructing-guis-2nd/ch03lev2sec6.html
- * 
- *         http://ostermiller.org/syntax/editor.html Text Editor Tutorial - with
- *         syntax highlighting
- *         http://stackoverflow.com/questions/4151950/syntax-
- *         highlighting-in-jeditorpane-in-java - example of non-tokenized
- *         highlighting
- *         http://saveabend.blogspot.com/2008/06/java-syntax-highlighting
- *         -with.html
- * 
- *         swing components http://fifesoft.com/rsyntaxtextarea/ <- AMAZING
- *         PROJECT
- *         http://www.pushing-pixels.org/2008/06/27/syntax-coloring-for-the
- *         -swing-editor-pane.html
- * 
- *         Java Python integration
- *         http://pythonpodcast.hostjava.net/pythonbook/en
- *         /1.0/PythonAndJavaIntegration
- *         .html#using-python-within-java-applications
- * 
- *         Redirecting std out
- *         http://bytes.com/topic/python/answers/40880-redirect
- *         -standard-output-python-jtextarea
- *         http://stefaanlippens.net/redirect_python_print
- *         http://stackoverflow.com
- *         /questions/1000360/python-print-on-stdout-on-a-terminal
- *         http://coreygoldberg
- *         .blogspot.com/2009/05/python-redirect-or-turn-off-stdout-and.html
- *         https
- *         ://www.ibm.com/developerworks/mydeveloperworks/blogs/PythonSwing/
- *         ?lang=en
- * 
+ *   
  */
 public class Python extends Service {
 
@@ -106,16 +57,15 @@ public class Python extends Service {
 		objectCache = new HashMap<String, PyObject>();
 	}
 
-	@Element
+	@Element(required=false)
 	String inputScript = null;
-	@Element
+	@Element(required=false)
 	String setupScript = null;
-	@Element
+	@Element(required=false)
 	String msgHandlerScript = null;
-	@Element
+	@Element(required=false)
 	private Script currentScript = new Script("untitled.py", "");
 	boolean pythonConsoleInitialized = false;
-	@Element
 	String initialServiceScript = "";
 
 	String rootPath = null;
@@ -740,6 +690,7 @@ public class Python extends Service {
 		// log.info(getName(f));
 
 		Python python = (Python)Runtime.start("python", "Python");
+		python.save();
 		//python.releaseService();
 		
 		Runtime.createAndStart("gui", "GUIService");

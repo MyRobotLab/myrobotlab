@@ -24,6 +24,7 @@
 
 package org.myrobotlab.service;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 import net.java.games.input.Component;
@@ -66,17 +67,21 @@ public class Joystick extends Service {
 	public static final int SE = 8;
 
 	public final static Logger log = LoggerFactory.getLogger(Joystick.class.getCanonicalName());
+	
+	public final static String TYPE_BUTTON = "button";
+	public final static String TYPE_AXIS = "axis";
+	public final static String TYPE_KEY = "key";
 
 	// FIXME - needs refactoring - remove all below
 	// need a serializable hashmap string & index
 	
 	transient Controller[] controllers;
-	transient Component[] comps; // holds the components
+	transient Component[] components; // holds the components
 	transient Rumbler[] rumblers;
-	int rumblerIdx; // index for the rumbler being used
-	boolean rumblerOn = false; // whether rumbler is on or off
 
+	// these data structures are serializable
 	HashMap<String, Integer> controllerNames = new HashMap<String, Integer>();
+	HashMap<String, Integer> componentNames = new HashMap<String, Integer>();
 	HashMap<String, Float> lastValues = new HashMap<String, Float>();
 
 	transient InputPollingThread pollingThread = null;
@@ -84,12 +89,32 @@ public class Joystick extends Service {
 
 	// TODO - remove - direction and any details (e.g. index) - should be published
 	private int xAxisIdx, yAxisIdx, zAxisIdx, rzAxisIdx;
+	int rumblerIdx; // index for the rumbler being used
+	boolean rumblerOn = false; // whether rumbler is on or off
+	
 	// indices for the analog sticks axes
 	private int povIdx; // index for the POV hat
 	private int buttonsIdx[]; // indices for the buttons
-
+	
 
 	private HashMap<String, Mapper> mappers = new HashMap<String, Mapper>();
+	
+	static public class Button implements Serializable {
+		private static final long serialVersionUID = 1L;
+		public String id;
+		public String type;
+		public Float value;
+		
+		public Button(String id, String type, Float value){
+			this.id = id;
+			this.type = type;
+			this.value = value;
+		}
+		
+		public String toString(){
+			return String.format("%s %s %f", id, type, value);
+		}
+	}
 
 	public void setMapper(String name, float x0, float x1, float y0, float y1) {
 		Mapper mapper = new Mapper(x0, x1, y0, y1);
@@ -135,14 +160,7 @@ public class Joystick extends Service {
 					if (lastValues.containsKey(method)) {
 						lastValue = lastValues.get(method);
 					}
-					
-					/*
-					if (lastValue != null && Math.abs(input - lastValue) > 0.1){
-						log.info(String.format("GREATER %f", Math.abs(input - lastValue)));
-					} else if  (lastValue != null && Math.abs(input - lastValue) < 0.1) {
-						log.info(String.format("LESS THAN %f", Math.abs(input - lastValue)));
-					}
-					*/
+			
 
 					Float output = input;
 					if (lastValue == null || Math.abs(input - lastValue) > 0.0001) {
@@ -150,17 +168,27 @@ public class Joystick extends Service {
 						if (mappers.containsKey(method)) {
 							output = mappers.get(method).calc(input);
 						}
+						
 						Type type = controller.getType();
+						
+						String ctype = TYPE_BUTTON;
+						if (id.getClass() == Component.Identifier.Axis.class){
+							ctype = TYPE_AXIS;
+						} else if  (id.getClass() == Component.Identifier.Key.class){
+							ctype = TYPE_KEY;
+						}
+						
+						invoke("publishButton", new Button(id.toString(), ctype, output));
 						
 						if ((type == Controller.Type.GAMEPAD) || (type == Controller.Type.STICK))
 						{
 							invoke(method, output);
 						} else if (type == Type.KEYBOARD) {
-							invoke("keyPress", output);
+							//invoke("keyPress", output);
 						} else if (type == Type.MOUSE){
-							invoke(method, output);
+							//invoke(method, output);
 						} else {
-							error("unsupported type");
+							// error("unsupported controller type");
 						}
 												
 					}
@@ -186,12 +214,58 @@ public class Joystick extends Service {
 		if (index > -1 && index < controllers.length) {
 			controller = controllers[index];
 			findRumblers(controller);
-			findCompIndices(controller);
+			invoke("getComponents");
 			//broadcastState();
 			return true;
 		}
 		error("bad index");
 		return false;
+	}
+	
+	
+	/**
+	 * Store the indices for the analog sticks axes (x,y) and (z,rz), POV hat,
+	 * and button components of the controller.
+	 */
+	
+	public HashMap<String, Integer> getComponents(){
+		HashMap<String, Integer> ret = new HashMap<String, Integer>();
+		if (controller == null){
+			error("no controller set");
+			return ret;
+		}
+		
+		components = controller.getComponents();
+		if (components.length == 0) {
+			error("No Components found");
+			return ret;
+		} else {
+			info("Num. Components: " + components.length);
+		}
+		
+		Component c;
+		for (int i = 0; i < components.length; i++) {
+			c = components[i];
+			Identifier id = c.getIdentifier();
+			if (id instanceof Component.Identifier.Axis){
+				
+			}
+			ret.put(c.getIdentifier().toString(), i);
+		}
+
+		// get the indices for the axes of the analog sticks: (x,y) and (z,rz)
+		xAxisIdx = findCompIndex(components, Component.Identifier.Axis.X, "x-axis");
+		yAxisIdx = findCompIndex(components, Component.Identifier.Axis.Y, "y-axis");
+
+		
+		zAxisIdx = findCompIndex(components, Component.Identifier.Axis.Z, "z-axis");
+		rzAxisIdx = findCompIndex(components, Component.Identifier.Axis.RZ, "rz-axis");
+
+		// get POV hat index
+		povIdx = findCompIndex(components, Component.Identifier.Axis.POV, "POV hat");
+
+		findButtons(components);
+		return ret;
 	}
 
 	public boolean setController(String s) {
@@ -264,6 +338,7 @@ public class Joystick extends Service {
 	} // end of findGamePad()
 
 	/**
+	 * TODO - remove this - not needed
 	 * Search through comps[] for id, returning the corresponding array index,
 	 * or -1
 	 */
@@ -346,31 +421,6 @@ public class Joystick extends Service {
 	}
 
 	/**
-	 * Store the indices for the analog sticks axes (x,y) and (z,rz), POV hat,
-	 * and button components of the controller.
-	 */
-	private void findCompIndices(Controller controller) {
-		comps = controller.getComponents();
-		if (comps.length == 0) {
-			log.info("No Components found");
-			System.exit(0);
-		} else
-			log.info("Num. Components: " + comps.length);
-
-		// get the indices for the axes of the analog sticks: (x,y) and (z,rz)
-		xAxisIdx = findCompIndex(comps, Component.Identifier.Axis.X, "x-axis");
-		yAxisIdx = findCompIndex(comps, Component.Identifier.Axis.Y, "y-axis");
-
-		zAxisIdx = findCompIndex(comps, Component.Identifier.Axis.Z, "z-axis");
-		rzAxisIdx = findCompIndex(comps, Component.Identifier.Axis.RZ, "rz-axis");
-
-		// get POV hat index
-		povIdx = findCompIndex(comps, Component.Identifier.Axis.POV, "POV hat");
-
-		findButtons(comps);
-	} // end of findCompIndices()
-
-	/**
 	 * @return - return the (x,y) analog stick compass direction
 	 */
 	public int getXYStickDir() {
@@ -399,8 +449,8 @@ public class Joystick extends Service {
 	 * @return
 	 */
 	private int getCompassDir(int xA, int yA) {
-		float xCoord = comps[xA].getPollData();
-		float yCoord = comps[yA].getPollData();
+		float xCoord = components[xA].getPollData();
+		float yCoord = components[yA].getPollData();
 		// log.info("(x,y): (" + xCoord + "," + yCoord + ")");
 
 		int xc = Math.round(xCoord);
@@ -438,7 +488,7 @@ public class Joystick extends Service {
 			log.info("POV hat data unavailable");
 			return NONE;
 		} else {
-			float povDir = comps[povIdx].getPollData();
+			float povDir = components[povIdx].getPollData();
 			if (povDir == POV.CENTER) // 0.0f
 				return NONE;
 			else if (povDir == POV.DOWN) // 0.75f
@@ -472,7 +522,7 @@ public class Joystick extends Service {
 		boolean[] buttons = new boolean[NUM_BUTTONS];
 		float value;
 		for (int i = 0; i < NUM_BUTTONS; i++) {
-			value = comps[buttonsIdx[i]].getPollData();
+			value = components[buttonsIdx[i]].getPollData();
 			buttons[i] = ((value == 0.0f) ? false : true);
 		}
 		return buttons;
@@ -492,7 +542,7 @@ public class Joystick extends Service {
 		if (buttonsIdx[pos - 1] == -1) // no button found at that pos
 			return false;
 
-		float value = comps[buttonsIdx[pos - 1]].getPollData();
+		float value = components[buttonsIdx[pos - 1]].getPollData();
 		// array range is 0-NUM_BUTTONS-1
 		return ((value == 0.0f) ? false : true);
 	} // end of isButtonPressed()
@@ -769,6 +819,10 @@ public class Joystick extends Service {
 		}
 
 		return status;
+	}
+	
+	public Button publishButton(final Button button){
+		return button;
 	}
 
 	public static void main(String args[]) {
