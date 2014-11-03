@@ -149,7 +149,6 @@ public class Joystick extends Service {
 
 					Component component = components[i];
 					Identifier id = component.getIdentifier();
-					
 
 					// String ids = id.toString();
 					String method = String.format("publish%s", id.toString().toUpperCase());
