@@ -26,6 +26,7 @@ package org.myrobotlab.service;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
@@ -42,10 +43,13 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 public class Joystick extends Service {
+
+	public final static Logger log = LoggerFactory.getLogger(Joystick.class.getCanonicalName());
 
 	private static final long serialVersionUID = 1L;
 
@@ -53,6 +57,7 @@ public class Joystick extends Service {
 	public static final int BUTTON_OFF = 0;
 	public static final int BUTTON_ON = 1;
 
+	// FIXME - don't really care remove all this
 	// public stick and hat compass positions
 	public static final int NUM_COMPASS_DIRS = 9;
 
@@ -66,17 +71,18 @@ public class Joystick extends Service {
 	public static final int SOUTH = 7;
 	public static final int SE = 8;
 
-	public final static Logger log = LoggerFactory.getLogger(Joystick.class.getCanonicalName());
-	
 	public final static String TYPE_BUTTON = "button";
 	public final static String TYPE_AXIS = "axis";
 	public final static String TYPE_KEY = "key";
 
 	// FIXME - needs refactoring - remove all below
 	// need a serializable hashmap string & index
-	
+
+	// array of "real" hardware non-serializable controls
 	transient Controller[] controllers;
+	// array of "real" hardware non-serializable components
 	transient Component[] components; // holds the components
+	// array of "real" hardware non-serializable bumplers
 	transient Rumbler[] rumblers;
 
 	// these data structures are serializable
@@ -85,40 +91,49 @@ public class Joystick extends Service {
 	HashMap<String, Float> lastValues = new HashMap<String, Float>();
 
 	transient InputPollingThread pollingThread = null;
+	// current selected controller
 	transient Controller controller = null;
 
-	// TODO - remove - direction and any details (e.g. index) - should be published
+	// TODO - remove - direction and any details (e.g. index) - should be
+	// published
 	private int xAxisIdx, yAxisIdx, zAxisIdx, rzAxisIdx;
 	int rumblerIdx; // index for the rumbler being used
 	boolean rumblerOn = false; // whether rumbler is on or off
-	
+
 	// indices for the analog sticks axes
 	private int povIdx; // index for the POV hat
 	private int buttonsIdx[]; // indices for the buttons
-	
+
+	// TODO - define uber components - optional publishComponent method
 
 	private HashMap<String, Mapper> mappers = new HashMap<String, Mapper>();
-	
+	private HashMap<String, String> mapIds = new HashMap<String, String>();
+
 	static public class Button implements Serializable {
 		private static final long serialVersionUID = 1L;
 		public String id;
 		public String type;
 		public Float value;
-		
-		public Button(String id, String type, Float value){
+
+		public Button(String id, String type, Float value) {
 			this.id = id;
 			this.type = type;
 			this.value = value;
 		}
-		
-		public String toString(){
+
+		public String toString() {
 			return String.format("%s %s %f", id, type, value);
 		}
 	}
 
-	public void setMapper(String name, float x0, float x1, float y0, float y1) {
+	public void map(String name, float x0, float x1, float y0, float y1) {
 		Mapper mapper = new Mapper(x0, x1, y0, y1);
 		mappers.put(name, mapper);
+	}
+
+	public void mapId(String from, String to) {
+		mapIds.put(from, to);
+		invoke("getComponents");
 	}
 
 	public class InputPollingThread extends Thread {
@@ -148,51 +163,58 @@ public class Joystick extends Service {
 				for (int i = 0; i < components.length; i++) {
 
 					Component component = components[i];
-					Identifier id = component.getIdentifier();
+					Identifier identifier = component.getIdentifier();
 
-					// String ids = id.toString();
-					String method = String.format("publish%s", id.toString().toUpperCase());
+					String id = identifier.toString();
+					// FIXME - or something like that....
+					if (mapIds.containsKey(id)) {							
+						id = mapIds.get(id);
+					}
+					String method = String.format("publish%s", id.toUpperCase());
+					
 					Float input = components[i].getPollData();
 
-					// FIXME - pre-load with 0.0 then don't need to test for null
+					// FIXME - pre-load with 0.0 then don't need to test for
+					// null
 					Float lastValue = null;
-					if (lastValues.containsKey(method)) {
-						lastValue = lastValues.get(method);
+					if (lastValues.containsKey(id)) {
+						lastValue = lastValues.get(id);
 					}
-			
 
 					Float output = input;
 					if (lastValue == null || Math.abs(input - lastValue) > 0.0001) {
-						
-						if (mappers.containsKey(method)) {
-							output = mappers.get(method).calc(input);
+
+						if (mappers.containsKey(id)) {
+							output = mappers.get(id).calc(input);
 						}
-						
+
 						Type type = controller.getType();
-						
+
 						String ctype = TYPE_BUTTON;
-						if (id.getClass() == Component.Identifier.Axis.class){
+						if (identifier.getClass() == Component.Identifier.Axis.class) {
 							ctype = TYPE_AXIS;
-						} else if  (id.getClass() == Component.Identifier.Key.class){
+						} else if (identifier.getClass() == Component.Identifier.Key.class) {
 							ctype = TYPE_KEY;
 						}
-						
+
+						// FIXME - change to "generalized" Component - not Button
+						// FIXME - configuration to turn this on or off
 						invoke("publishButton", new Button(id.toString(), ctype, output));
-						
-						if ((type == Controller.Type.GAMEPAD) || (type == Controller.Type.STICK))
-						{
+
+						if ((type == Controller.Type.GAMEPAD) || (type == Controller.Type.STICK)) {
 							invoke(method, output);
 						} else if (type == Type.KEYBOARD) {
-							//invoke("keyPress", output);
-						} else if (type == Type.MOUSE){
-							//invoke(method, output);
+							//invoke("publishKey", output);
+							invoke("publishKey", id);
+						} else if (type == Type.MOUSE) {
+							invoke(method, output);
 						} else {
 							// error("unsupported controller type");
-						}
-												
-					}
+						}			
+						
+					} // if (lastValue == null || Math.abs(input - lastValue) > 0.0001)
 
-					lastValues.put(method, input);
+					lastValues.put(id, input);
 				}
 
 				try {
@@ -214,26 +236,25 @@ public class Joystick extends Service {
 			controller = controllers[index];
 			findRumblers(controller);
 			invoke("getComponents");
-			//broadcastState();
+			// broadcastState();
 			return true;
 		}
 		error("bad index");
 		return false;
 	}
-	
-	
+
 	/**
 	 * Store the indices for the analog sticks axes (x,y) and (z,rz), POV hat,
 	 * and button components of the controller.
 	 */
-	
-	public HashMap<String, Integer> getComponents(){
+
+	public HashMap<String, Integer> getComponents() {
 		HashMap<String, Integer> ret = new HashMap<String, Integer>();
-		if (controller == null){
+		if (controller == null) {
 			error("no controller set");
 			return ret;
 		}
-		
+
 		components = controller.getComponents();
 		if (components.length == 0) {
 			error("No Components found");
@@ -241,22 +262,31 @@ public class Joystick extends Service {
 		} else {
 			info("Num. Components: " + components.length);
 		}
-		
+
 		Component c;
 		for (int i = 0; i < components.length; i++) {
 			c = components[i];
 			Identifier id = c.getIdentifier();
-			if (id instanceof Component.Identifier.Axis){
-				
+			if (id instanceof Component.Identifier.Axis) {
+
 			}
 			ret.put(c.getIdentifier().toString(), i);
+		}
+		
+		// substitutions
+		for (Map.Entry<String, String> entry : mapIds.entrySet()) {
+		    String from = entry.getKey();
+		    String to = entry.getValue();
+		    if (ret.containsKey(from)){
+		    	Integer move = ret.get(from);
+		    	ret.put(mapIds.get(from), move);
+		    }
 		}
 
 		// get the indices for the axes of the analog sticks: (x,y) and (z,rz)
 		xAxisIdx = findCompIndex(components, Component.Identifier.Axis.X, "x-axis");
 		yAxisIdx = findCompIndex(components, Component.Identifier.Axis.Y, "y-axis");
 
-		
 		zAxisIdx = findCompIndex(components, Component.Identifier.Axis.Z, "z-axis");
 		rzAxisIdx = findCompIndex(components, Component.Identifier.Axis.RZ, "rz-axis");
 
@@ -337,9 +367,8 @@ public class Joystick extends Service {
 	} // end of findGamePad()
 
 	/**
-	 * TODO - remove this - not needed
-	 * Search through comps[] for id, returning the corresponding array index,
-	 * or -1
+	 * TODO - remove this - not needed Search through comps[] for id, returning
+	 * the corresponding array index, or -1
 	 */
 	private int findCompIndex(Component[] comps, Component.Identifier id, String nm) {
 		Component c;
@@ -430,9 +459,10 @@ public class Joystick extends Service {
 			return getCompassDir(xAxisIdx, yAxisIdx);
 	}
 
-	public int getZRZStickDir()
-	// return the (z,rz) analog stick compass direction
-	{
+	/**
+	 * @return the (z,rz) analog stick compass direction
+	 */
+	public int getZRZStickDir() {
 		if ((zAxisIdx == -1) || (rzAxisIdx == -1)) {
 			log.info("(z,rz) axis data unavailable");
 			return NONE;
@@ -576,37 +606,36 @@ public class Joystick extends Service {
 
 	// xbox 360 specific - begin --
 	public Float publishRX(Float z) {
-		//invoke("publishZ", z); possible solution ;p
+		// invoke("publishZ", z); possible solution ;p
 		return z;
 	}
-	
+
 	public void addRXListener(String service, String method) {
 		addListener("publishRX", service, method);
 	}
-	
 
 	public void addRXListener(ServoControl sc) {
-		setMapper("publishRX", -1.0f, 1.0f, 0.0f, 180f);
+		map("publishRX", -1.0f, 1.0f, 0.0f, 180f);
 		addYListener(sc.getName(), "moveTo");
 	}
-	
-//
+
+	//
 	public Float publishRY(Float z) {
-		//invoke("publishRZ", z); possible solition :P
+		// invoke("publishRZ", z); possible solition :P
 		return z;
 	}
-	
+
 	public void addRYListener(String service, String method) {
 		addListener("publishRY", service, method);
 	}
-	
+
 	public void addRYListener(ServoControl sc) {
-		setMapper("publishRY", -1.0f, 1.0f, 0.0f, 180f);
+		map("publishRY", -1.0f, 1.0f, 0.0f, 180f);
 		addYListener(sc.getName(), "moveTo");
 	}
 
 	// xbox 360 specific - end --
-	
+
 	public Float publishZ(Float z) {
 		return z;
 	}
@@ -678,7 +707,7 @@ public class Joystick extends Service {
 	// ---add listeners begin---
 	// --axis begin---
 	public void addXListener(ServoControl sc) {
-		setMapper("publishX", -1.0f, 1.0f, 0.0f, 180f);
+		map("publishX", -1.0f, 1.0f, 0.0f, 180f);
 		addXListener(sc.getName(), "moveTo");
 	}
 
@@ -687,7 +716,7 @@ public class Joystick extends Service {
 	}
 
 	public void addYListener(ServoControl sc) {
-		setMapper("publishY", -1.0f, 1.0f, 0.0f, 180f);
+		map("publishY", -1.0f, 1.0f, 0.0f, 180f);
 		addYListener(sc.getName(), "moveTo");
 	}
 
@@ -696,7 +725,7 @@ public class Joystick extends Service {
 	}
 
 	public void addZListener(ServoControl sc) {
-		setMapper("publishZ", -1.0f, 1.0f, 0.0f, 180f);
+		map("publishZ", -1.0f, 1.0f, 0.0f, 180f);
 		addZListener(sc.getName(), "moveTo");
 	}
 
@@ -705,7 +734,7 @@ public class Joystick extends Service {
 	}
 
 	public void addRZListener(ServoControl sc) {
-		setMapper("publishRZ", -1.0f, 1.0f, 0.0f, 180f);
+		map("publishRZ", -1.0f, 1.0f, 0.0f, 180f);
 		addRZListener(sc.getName(), "moveTo");
 	}
 
@@ -777,7 +806,27 @@ public class Joystick extends Service {
 		addListener("publish13", service, method);
 	}
 
+	
+	
 	// --buttons end---
+	
+	public void addKeyListener(Service service) {
+		addListener("publishKey", service.getName(), "onKey", String.class);
+	}
+
+	public void addKeyListener(String serviceName) {
+		ServiceInterface s = Runtime.getService(serviceName);
+		addKeyListener((Service) s);
+	}
+
+	/**
+	 * internal publishing point - private ?
+	 * 
+	 * @param key
+	 */
+	public String publishKey(String key) {
+		return key;
+	}
 
 	// ---add listeners end---
 
@@ -790,15 +839,15 @@ public class Joystick extends Service {
 
 			Runtime.start("gui", "GUIService");
 			Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-//			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
 
-//			arduino.connect("COM15");
-//			servo.attach(arduino, 4);
+			// arduino.connect("COM15");
+			// servo.attach(arduino, 4);
 
-//			joy.addZListener(servo);
-			
-			//joy.setController(2);
+			// joy.addZListener(servo);
+
+			// joy.setController(2);
 
 			/*
 			 * RemoteAdapter remote = (RemoteAdapter) Runtime.start("remote",
@@ -819,8 +868,8 @@ public class Joystick extends Service {
 
 		return status;
 	}
-	
-	public Button publishButton(final Button button){
+
+	public Button publishButton(final Button button) {
 		return button;
 	}
 
@@ -835,8 +884,10 @@ public class Joystick extends Service {
 
 		// Runtime.setRuntimeName("joyrun");
 		Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+		joy.mapId("x", "rx");
+		joy.map("y", -1, 1, 0, 180);
 		Runtime.start("gui", "GUIService");
-		//joy.test();
+		// joy.test();
 
 		// joy.setController(2);
 		// joy.startPolling();

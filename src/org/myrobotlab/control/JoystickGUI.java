@@ -73,45 +73,14 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 
 	JoystickButtonsPanel buttonsPanel = null;
 
-	private JoystickCompassPanel xyPanel, zrzPanel, hatPanel;
+	private JoystickCompassPanel xyPanel, zrzPanel, rxryPanel, hatPanel;
 
 	public JoystickGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		self = this;
 	}
 
-	// ////// transforms begin ///////////////////
-	// hat
-	JTextField hatMultiplier = new JTextField("1", 3);
-	JTextField hatOffset = new JTextField("0", 6);
-	JLabel hatOutput = new JLabel("0.000");
-	JButton hatTransform = new JButton("transform");
-
-	// xaxis
-	JTextField XAxisMultiplier = new JTextField("1", 3);
-	JTextField XAxisOffset = new JTextField("0", 6);
-	JLabel XAxisOutput = new JLabel("0.000");
-	JButton XAxisTransform = new JButton("transform");
-
-	// yaxis
-	JTextField YAxisMultiplier = new JTextField("1", 3);
-	JTextField YAxisOffset = new JTextField("0", 6);
-	JLabel YAxisOutput = new JLabel("0.000");
-	JButton YAxisTransform = new JButton("transform");
-
-	// zaxis
-	JTextField ZAxisMultiplier = new JTextField("1", 3);
-	JTextField ZAxisOffset = new JTextField("0", 6);
-	JLabel ZAxisOutput = new JLabel("0.000");
-	JButton ZAxisTransform = new JButton("transform");
-
-	// xaxis
-	JTextField ZRotMultiplier = new JTextField("1", 3);
-	JTextField ZRotOffset = new JTextField("0", 6);
-	JLabel ZRotOutput = new JLabel("0.000");
-	JButton ZRotTransform = new JButton("transform");
-
-	// ////// transforms end ///////////////////
+	
 
 	public void init() {
 		display.setLayout(new BorderLayout());
@@ -129,10 +98,13 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		hatPanel = new JoystickCompassPanel("POV");
 		axisDisplay.add(hatPanel);
 
-		xyPanel = new JoystickCompassPanel("xy");
+		xyPanel = new JoystickCompassPanel("x y");
 		axisDisplay.add(xyPanel);
-
-		zrzPanel = new JoystickCompassPanel("zRz");
+		
+		rxryPanel = new JoystickCompassPanel("rx ry");
+		axisDisplay.add(rxryPanel);
+		
+		zrzPanel = new JoystickCompassPanel("z rz");
 		axisDisplay.add(zrzPanel);
 
 		JPanel north = new JPanel(new BorderLayout());
@@ -154,12 +126,6 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		display.add(north, BorderLayout.NORTH);
 
 		refresh.addActionListener(this);
-
-		hatTransform.addActionListener(this);
-		XAxisTransform.addActionListener(this);
-		YAxisTransform.addActionListener(this);
-		ZAxisTransform.addActionListener(this);
-		ZRotTransform.addActionListener(this);
 
 		title = BorderFactory.createTitledBorder("output");
 		output.setBorder(title);
@@ -210,33 +176,38 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 	public void publishX(Float value) {
 		xyPanel.setX(value);
 		xyPanel.repaint();
-		XAxisOutput.setText(String.format("%.3f", value));
 	}
 
 	public void publishY(Float value) {
 		xyPanel.setY(value);
 		xyPanel.repaint();
-		YAxisOutput.setText(String.format("%.3f", value));
+	}
+	
+	public void publishRX(Float value) {
+		rxryPanel.setX(value);
+		rxryPanel.repaint();
+	}
+
+	public void publishRY(Float value) {
+		rxryPanel.setY(value);
+		rxryPanel.repaint();
 	}
 
 	public void publishZ(Float value) {
 		zrzPanel.setX(value);
 		zrzPanel.repaint();
-		ZAxisOutput.setText(String.format("%.3f", value));
 	}
 
 	public void publishRZ(Float value) {
 		zrzPanel.setY(value);
 		zrzPanel.repaint();
-		ZRotOutput.setText(String.format("%.3f", value));
 	}
 
 	public void publishPOV(Float value) {
 		log.debug("{}", value);
 		hatPanel.setDir(value);
 		hatPanel.repaint();
-		hatOutput.setText(String.format("%.3f", value));
-
+		//hatOutput.setText(String.format("%.3f", value));
 	}
 
 	public void publish0(Float value) {
