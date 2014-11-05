@@ -590,4 +590,9 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		myService.send(boundServiceName, "externalcall_servopanelchangeinfo",
 				x, y);
 	}
+
+	public void externalcall_servopanelsettostartpos(int x, int y, boolean withgoal) {
+		myService.send(boundServiceName,
+				"externalcall_servopanelsettostartpos", x, y, withgoal);
+	}
 }

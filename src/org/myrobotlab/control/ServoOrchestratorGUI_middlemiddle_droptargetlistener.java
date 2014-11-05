@@ -3,7 +3,6 @@ package org.myrobotlab.control;
 import java.awt.Cursor;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DropTargetContext;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
@@ -91,7 +90,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 					.getDragAndDropPanelDataFlavor();
 
 			transferable = dtde.getTransferable();
-			DropTargetContext c = dtde.getDropTargetContext();
+			// DropTargetContext c = dtde.getDropTargetContext();
 
 			// What does the Transferable support
 			if (transferable.isDataFlavorSupported(dragAndDropPanelFlavor)) {
@@ -129,10 +128,8 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 		// Getting the ID of the panel
 		int dpid = droppedPanel.id;
 
-		int sizemax = rootPanel.getDragAndDropPanelsDemo()
-				.panels.length
-				+ rootPanel.getDragAndDropPanelsDemo()
-						.panels[0].length;
+		int sizemax = rootPanel.getDragAndDropPanelMain().panels.length
+				+ rootPanel.getDragAndDropPanelMain().panels[0].length;
 		if (dpid <= sizemax) {
 			return;
 		}
@@ -141,13 +138,10 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 		int f2 = 0;
 
 		// searching for it's orign
-		for (int i1 = 0; i1 < rootPanel.getDragAndDropPanelsDemo()
-				.panels.length; i1++) {
-			for (int i2 = 0; i2 < rootPanel.getDragAndDropPanelsDemo()
-					.panels[i1].length; i2++) {
+		for (int i1 = 0; i1 < rootPanel.getDragAndDropPanelMain().panels.length; i1++) {
+			for (int i2 = 0; i2 < rootPanel.getDragAndDropPanelMain().panels[i1].length; i2++) {
 				ServoOrchestratorGUI_middlemiddle_panel p = rootPanel
-						.getDragAndDropPanelsDemo()
-						.panels[i1][i2];
+						.getDragAndDropPanelMain().panels[i1][i2];
 				if (p != null && dpid == p.id) {
 					f1 = i1;
 					f2 = i2;
@@ -157,24 +151,100 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 
 		if (posx == -1 && posy == -1) {
 			// Deleting position - delete
-			rootPanel.getDragAndDropPanelsDemo().panels[f1][f2] = null;
+			rootPanel.getDragAndDropPanelMain().panels[f1][f2] = null;
 		} else {
 			// Move the panel
 			ServoOrchestratorGUI_middlemiddle_panel pold = rootPanel
-					.getDragAndDropPanelsDemo().panels[posx][posy];
+					.getDragAndDropPanelMain().panels[posx][posy];
+
+			rootPanel.getDragAndDropPanelMain().panels[posx][posy] = droppedPanel;
+
+			rootPanel.getDragAndDropPanelMain().panels[f1][f2] = pold;
+
+			boolean later_externalcall_servopanelsettostartpos = false;
+			boolean later_externalcall_servopanelsettostartpos2 = false;
+			int otherpanelx = 0;
 
 			// TODO - change other attributes, too
 			// TODO - make the channelid independent of the y-position (posy)
 			droppedPanel.servo_channelid.setText("CH" + (posy + 1));
 			// min is changed with the externalcall below
 			// max is changed with the externalcall below
-			rootPanel.getDragAndDropPanelsDemo().panels[posx][posy] = droppedPanel;
 
-			rootPanel.getDragAndDropPanelsDemo().panels[f1][f2] = pold;
+			int start = -1;
+			int searchpos = posx - 1;
+			while (searchpos >= 0) {
+				if (rootPanel.getDragAndDropPanelMain().panels[searchpos][posy] == null) {
+					searchpos--;
+				} else {
+					start = Integer
+							.parseInt(rootPanel.getDragAndDropPanelMain().panels[searchpos][posy].servo_goal
+									.getText());
+					break;
+				}
+			}
+			if (start == -1) {
+				later_externalcall_servopanelsettostartpos = true;
+				// it's the first panel in this row,
+				// start changed with the externalcall below
+			}
+			droppedPanel.servo_start.setText(start + "");
+			searchpos = posx + 1;
+			while (searchpos < rootPanel.getDragAndDropPanelMain().panels.length) {
+				if (rootPanel.getDragAndDropPanelMain().panels[searchpos][posy] == null) {
+					searchpos++;
+				} else {
+					int goal = Integer
+							.parseInt(rootPanel.getDragAndDropPanelMain().panels[searchpos][posy].servo_start
+									.getText());
+					droppedPanel.servo_goal.setText(goal + "");
+					break;
+				}
+			}
+
+			// change attributes where the panel left
+			int start2 = -1;
+			searchpos = posx - 1;
+			while (searchpos >= 0) {
+				if (rootPanel.getDragAndDropPanelMain().panels[searchpos][f2] == null) {
+					searchpos--;
+				} else {
+					start2 = Integer
+							.parseInt(rootPanel.getDragAndDropPanelMain().panels[searchpos][f2].servo_goal
+									.getText());
+					break;
+				}
+			}
+
+			searchpos = posx + 1;
+			while (searchpos < rootPanel.getDragAndDropPanelMain().panels.length) {
+				if (rootPanel.getDragAndDropPanelMain().panels[searchpos][f2] == null) {
+					searchpos++;
+				} else {
+					rootPanel.getDragAndDropPanelMain().panels[searchpos][f2].servo_start
+							.setText(start2 + "");
+					if (start2 == -1) {
+						later_externalcall_servopanelsettostartpos2 = true;
+						// it's the first panel in this row,
+						// start changed with the externalcall below
+						otherpanelx = searchpos;
+					}
+					break;
+				}
+			}
+
+			rootPanel.getDragAndDropPanelMain().so_ref
+					.externalcall_servopanelchangeinfo(posx, posy);
+			if (later_externalcall_servopanelsettostartpos) {
+				rootPanel.getDragAndDropPanelMain().so_ref
+						.externalcall_servopanelsettostartpos(posx, posy, false);
+			}
+			if (later_externalcall_servopanelsettostartpos2) {
+				rootPanel.getDragAndDropPanelMain().so_ref
+						.externalcall_servopanelsettostartpos(otherpanelx, f2,
+								false);
+			}
 		}
-
-		rootPanel.getDragAndDropPanelsDemo().so_ref.externalcall_servopanelchangeinfo(posx, posy);
-
-		this.rootPanel.getDragAndDropPanelsDemo().relayout();
+		this.rootPanel.getDragAndDropPanelMain().relayout();
 	}
 }
