@@ -14,6 +14,8 @@ import javax.swing.JPanel;
  */
 public class ServoOrchestratorGUI_middlemiddle_rootpanel extends JPanel {
 
+	private static final long serialVersionUID = 1L;
+
 	private final ServoOrchestratorGUI_middlemiddle_main demo;
 
 	ServoOrchestratorGUI_middlemiddle_rootpanel(
@@ -33,7 +35,7 @@ public class ServoOrchestratorGUI_middlemiddle_rootpanel extends JPanel {
 						ServoOrchestratorGUI_middlemiddle_rootpanel.this)));
 	}
 
-	public ServoOrchestratorGUI_middlemiddle_main getDragAndDropPanelsDemo() {
+	public ServoOrchestratorGUI_middlemiddle_main getDragAndDropPanelMain() {
 		return demo;
 	}
 }

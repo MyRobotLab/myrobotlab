@@ -25,6 +25,8 @@ import javax.swing.JTextField;
 public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 		Transferable {
 
+	private static final long serialVersionUID = 1L;
+
 	public String type;
 
 	private static int counter = 0;
@@ -43,7 +45,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 	JButton channel_settings;
 
 	JPanel servo_panel;
-	JTextField servo_start;
+	public JTextField servo_start;
 	public JLabel servo_channelid;
 	public JTextField servo_goal;
 	public JLabel servo_min;
@@ -110,6 +112,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 		servo_panel.setLayout(new GridBagLayout());
 
 		servo_start = new JTextField("STAR");
+		servo_start.setEditable(false);
 		servo_channelid = new JLabel("CHID");
 		servo_goal = new JTextField("GOAL");
 		servo_min = new JLabel("MIN#");
@@ -134,57 +137,21 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 			timesection_panel.setVisible(true);
 			channel_panel.setVisible(false);
 			servo_panel.setVisible(false);
+			this.setBackground(Color.GREEN);
 			break;
 		case "channel":
 			timesection_panel.setVisible(false);
 			channel_panel.setVisible(true);
 			servo_panel.setVisible(false);
+			this.setBackground(Color.GREEN);
 			break;
 		case "servo":
 			timesection_panel.setVisible(false);
 			channel_panel.setVisible(false);
 			servo_panel.setVisible(true);
+			this.setBackground(Color.YELLOW);
 			break;
 		}
-
-		// stepper_panel = new JPanel();
-		// //TODO - work it further
-		// JLabel valueLabel = new JLabel(counter + "");
-		// // valueLabel.setForeground(Color.WHITE);
-		// // this.add(valueLabel);
-		// servo_panel.add(valueLabel);
-		//
-		// JTextField tf = new JTextField(counter + "");
-		// // this.add(tf);
-		// stepper_panel.add(tf);
-		//
-		// this.add(stepper_panel);
-		// TODO - Remove it
-		// // Set a random background color so can easily distinguish
-		// switch (random.nextInt(6)) {
-		// case 0:
-		// this.setBackground(Color.BLUE);
-		// // servo_panel.setVisible(false);
-		// // stepper_panel.setVisible(true);
-		// break;
-		// case 1:
-		// this.setBackground(Color.DARK_GRAY);
-		// // servo_panel.setVisible(true);
-		// // stepper_panel.setVisible(false);
-		// break;
-		// case 2:
-		// this.setBackground(Color.GREEN);
-		// break;
-		// case 3:
-		// this.setBackground(Color.ORANGE);
-		// break;
-		// case 4:
-		// this.setBackground(Color.RED);
-		// break;
-		// case 5:
-		// this.setBackground(Color.BLACK);
-		// break;
-		// }
 
 		// TODO - maybe remove ???
 		// This won't take the entire width for easy drag and drop
@@ -304,22 +271,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 
 		return false;
 	}
-
-	// TODO - remove
-	// //Getting the panel's ID
-	// public int getid() {
-	// return id;
-	// }
-	// TODO - remove
-	// public void setpanel1() {
-	// servo_panel.setVisible(true);
-	// stepper_panel.setVisible(false);
-	// }
-	// TODO - remove
-	// public void setpanel2() {
-	// servo_panel.setVisible(false);
-	// stepper_panel.setVisible(true);
-	// }
+	
 	public GridBagConstraints gridbaglayout_set(int x, int y, int w, int h) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.anchor = GridBagConstraints.NORTH;
