@@ -82,14 +82,12 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 								so_ref.externalcall_loadsettings(fi);
 							}
 						});
-				prep[i].setBackground(Color.green);
 			} else {
 				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
 						"timesection");
 				prep[i].timesection_id.setText(prep[i].id + "");
 				prep[i].timesection_headline.setText("TIMEUNIT "
 						+ (i - panels[0].length + 1));
-				prep[i].setBackground(Color.green);
 			}
 		}
 		prep[panels[0].length].setBackground(Color.red);
@@ -114,18 +112,66 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 				if (panels[i1][i2] == null) {
 					ServoOrchestratorGUI_middlemiddle_panel p = new ServoOrchestratorGUI_middlemiddle_panel(
 							"servo");
+					panels[i1][i2] = p;
+
+					boolean later_externalcall_servopanelsettostartpos = false;
+					boolean withgoal = false;
+
 					p.servo_id.setText(p.id + "");
 					// TODO - make the channelid independent of the y-position
 					// (i2)
 					p.servo_channelid.setText("CH" + (i2 + 1));
+					int start = -1;
+					int searchpos = i1 - 1;
+					while (searchpos >= 0) {
+						if (panels[searchpos][i2] == null) {
+							searchpos--;
+						} else {
+							start = Integer
+									.parseInt(panels[searchpos][i2].servo_goal
+											.getText());
+							break;
+						}
+					}
+					if (start == -1) {
+						later_externalcall_servopanelsettostartpos = true;
+						// it's the first panel in this row,
+						// start changed with the externalcall below
+					}
+					p.servo_start.setText(start + "");
+					p.servo_goal.setText(start + "");
+					// this is probably useless
+					int goal = -1;
+					searchpos = i1 + 1;
+					while (searchpos < panels.length) {
+						if (panels[searchpos][i2] == null) {
+							searchpos++;
+						} else {
+							goal = Integer
+									.parseInt(panels[searchpos][i2].servo_start
+											.getText());
+							break;
+						}
+					}
+					p.servo_goal.setText(goal + "");
+					if (goal == -1) {
+						p.servo_goal.setText(start + "");
+						if (start == -1) {
+							withgoal = true;
+						}
+					}
 					// min is changed with the externalcall below
 					// max is changed with the externalcall below
 					// TODO - add remaining attributes
-					p.setBackground(Color.yellow);
-					panels[i1][i2] = p;
+					// (only button left) (others only fixes) (I think)
+
 					found = true;
 
 					so_ref.externalcall_servopanelchangeinfo(i1, i2);
+					if (later_externalcall_servopanelsettostartpos) {
+						so_ref.externalcall_servopanelsettostartpos(i1, i2,
+								withgoal);
+					}
 				}
 			}
 		}
