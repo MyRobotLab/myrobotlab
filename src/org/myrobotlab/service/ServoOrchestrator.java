@@ -36,8 +36,6 @@ public class ServoOrchestrator extends Service {
 
 	org.myrobotlab.control.ServoOrchestratorGUI sogui_ref;
 
-	// TODO - don't define size (or at least make it bigger)
-	// rework, that it could be made bigger
 	int sizex = 5;
 	int sizey = 5;
 
@@ -295,6 +293,16 @@ public class ServoOrchestrator extends Service {
 				.setText(settingsitemholder[y].min + "");
 		sogui_ref.middlemiddle_ref.panels[x][y].servo_max
 				.setText(settingsitemholder[y].max + "");
+	}
+
+	public void externalcall_servopanelsettostartpos(int x, int y,
+			boolean withgoal) {
+		sogui_ref.middlemiddle_ref.panels[x][y].servo_start
+				.setText(settingsitemholder[y].startvalue + "");
+		if (withgoal) {
+			sogui_ref.middlemiddle_ref.panels[x][y].servo_goal
+					.setText(settingsitemholder[y].startvalue + "");
+		}
 	}
 
 	public void refreshsize() {

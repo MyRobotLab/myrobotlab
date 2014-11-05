@@ -25,6 +25,8 @@ import javax.swing.JTextField;
 public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 		Transferable {
 
+	private static final long serialVersionUID = 1L;
+
 	public String type;
 
 	private static int counter = 0;
@@ -43,7 +45,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 	JButton channel_settings;
 
 	JPanel servo_panel;
-	JTextField servo_start;
+	public JTextField servo_start;
 	public JLabel servo_channelid;
 	public JTextField servo_goal;
 	public JLabel servo_min;
