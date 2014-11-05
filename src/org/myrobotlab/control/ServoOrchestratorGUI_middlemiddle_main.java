@@ -82,14 +82,12 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 								so_ref.externalcall_loadsettings(fi);
 							}
 						});
-				prep[i].setBackground(Color.green);
 			} else {
 				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
 						"timesection");
 				prep[i].timesection_id.setText(prep[i].id + "");
 				prep[i].timesection_headline.setText("TIMEUNIT "
 						+ (i - panels[0].length + 1));
-				prep[i].setBackground(Color.green);
 			}
 		}
 		prep[panels[0].length].setBackground(Color.red);
@@ -166,7 +164,6 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 					// max is changed with the externalcall below
 					// TODO - add remaining attributes
 					// (only button left) (others only fixes) (I think)
-					p.setBackground(Color.yellow);
 
 					found = true;
 
