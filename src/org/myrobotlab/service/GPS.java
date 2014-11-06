@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -15,31 +16,27 @@ public class GPS extends Service {
     private static final long serialVersionUID = 1L;
     public final static Logger log = LoggerFactory.getLogger(GPS.class.getCanonicalName());
     public static final String MODEL = "FV_M8";
-    public String serialName;
-    public transient Serial serial;
+    
     public ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     String model;
-    // states
-//    public static final String STATE_PRE_INITIALIZATION = "state pre initialization";
-//    public static final String STATE_INITIALIZATION_STAGE_1 = "state initialization stage 1";
-//    public static final String STATE_INITIALIZATION_STAGE_2 = "state initialization stage 2";
-//    public static final String STATE_INITIALIZATION_STAGE_3 = "state initialization stage 3";
-//    public static final String STATE_INITIALIZATION_STAGE_4 = "state initialization stage 4";
-//    public static final String STATE_SINGLE_SCAN = "taking a single scan";
-//    public static final String STATE_MODE_CHANGE = "changing mode";
-//    public static final String STATE_NOMINAL = "waiting on user to tell me what to do";
-    // public int dataMessageSize = 213; 
-//    String state = STATE_SINGLE_SCAN;//STATE_PRE_INITIALIZATION;
     int index = 0;
     private int GPSbaudRate = 38400; //by default
     private String serialPort;
     private byte[] message;
     private boolean dataAvailable = false;
     public static final int PUBLISH_STRING = 4;
+    
+    // peers
+    public transient Serial serial;
+
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		peers.put("serial", "Serial", "serial port for GPS");
+		return peers;
+	}
 
     public GPS(String n) {
 		super(n);
-        reserve(String.format("%s_serial", n), "Serial", "serial port for GPS");
     }
 
     @Override
@@ -55,7 +52,7 @@ public class GPS extends Service {
             serial = getSerial();
             // setting callback / message route
             serial.addListener("publishByte", getName(), "byteReceived");
-            serial.startService();
+            
             if (model == null) {
                 model = MODEL;
             }
@@ -193,10 +190,6 @@ public class GPS extends Service {
        invoke ("setValues");
        return tokens;  //This should return data to the python code if the user has subscribed to it
     }//end dataToString
-
-    
-
-    
     
     public boolean connect(String port, int baud) {
         serial = getSerial();
@@ -237,10 +230,7 @@ public class GPS extends Service {
     }
 
     public Serial getSerial() {
-        if (serialName == null) {
-            serialName = String.format("%s_serial", getName());
-        }
-        serial = (Serial) Runtime.create(serialName, "Serial");
+        serial = (Serial)startPeer("serial");
         return serial;
     }
 

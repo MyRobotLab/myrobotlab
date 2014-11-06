@@ -62,14 +62,6 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
-// import android.annotation.TargetApi;
-/*
- import java.nio.file.Files;
- import java.nio.file.Path;
- import java.nio.file.Paths;
- import java.nio.file.StandardCopyOption;
- */
-
 /**
  * 
  * Runtime is responsible for the creation and removal of all Services and the
