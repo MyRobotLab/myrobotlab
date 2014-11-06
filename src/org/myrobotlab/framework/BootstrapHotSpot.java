@@ -32,6 +32,8 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.myrobotlab.service.interfaces.Bootstrap;
+
 /**
  * @author GroG
  * 
@@ -67,7 +69,7 @@ import java.util.zip.ZipInputStream;
  * 
  * 
  */
-public class Bootstrap {
+public class BootstrapHotSpot implements Bootstrap {
 
 	static int BUFFER_SIZE = 2048;
 	// BAD BAD BUG LEAVING IT COMMENTED
@@ -95,6 +97,8 @@ public class Bootstrap {
 	// http://stackoverflow.com/questions/9911686/getresource-some-jar-returns-null-although-some-jar-exists-in-geturls
 	// RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 	// List<String> arguments = runtimeMxBean.getInputArguments();
+	
+	public BootstrapHotSpot(){}
 
 	private class StreamGobbler extends Thread {
 		InputStream is;
@@ -121,7 +125,7 @@ public class Bootstrap {
 		}
 	}
 
-	public static List<String> getJVMArgs() {
+	public List<String> getJVMArgs() {
 		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 		return runtimeMxBean.getInputArguments();
 	}
@@ -140,7 +144,7 @@ public class Bootstrap {
 
 		// FIXME - details on space / %20 decoding in URI
 		// http://stackoverflow.com/questions/320542/how-to-get-the-path-of-a-running-jar-file
-		String protectedDomain = URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8");
+		String protectedDomain = URLDecoder.decode(BootstrapHotSpot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8");
 
 		// this is null in jar :P
 		// String location = File.class.getResource(".").getPath();
@@ -409,7 +413,7 @@ public class Bootstrap {
 
 	public String getVersion() {
 		log = PreLogger.getInstance();
-		InputStream isr = Bootstrap.class.getResourceAsStream("/resource/version.txt");
+		InputStream isr = BootstrapHotSpot.class.getResourceAsStream("/resource/version.txt");
 		if (isr == null) {
 			log.error("can not find resource [/resource/version.txt]");
 			return null;
@@ -527,7 +531,7 @@ public class Bootstrap {
 		// global.put(new Attributes.Name("SPECIFICATION_TITLE"),
 		// "dummy title");
 		// global.put(new Attributes.Name("CLASS_PATH"), "dummy classpath");
-		global.put(Attributes.Name.MAIN_CLASS, Bootstrap.class.getCanonicalName());
+		global.put(Attributes.Name.MAIN_CLASS, BootstrapHotSpot.class.getCanonicalName());
 
 		JarOutputStream out = new JarOutputStream(stream, manifest);
 
@@ -588,7 +592,7 @@ public class Bootstrap {
 	public static void main(String[] args) {
 		try {
 			System.out.println("starting bootstrap");
-			Bootstrap bootstrap = new Bootstrap();
+			BootstrapHotSpot bootstrap = new BootstrapHotSpot();
 			bootstrap.spawn(args);
 			System.out.println("leaving bootstrap");
 		} catch (Exception e) {

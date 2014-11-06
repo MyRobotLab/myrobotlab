@@ -24,7 +24,7 @@
  * */
 
 package org.myrobotlab.control;
-
+import org.myrobotlab.service.Runtime;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,10 +52,9 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 
 	// menu
 	JComboBox<String> format = new JComboBox<String>(new String[] { Serial.FORMAT_DECIMAL, Serial.FORMAT_HEX, Serial.FORMAT_ASCII });
-
 	JComboBox<String> port = new JComboBox<String>();
 
-	JButton createNullModemCabel = new JButton("create null modem cable");
+	JButton createVirtualUART = new JButton("create virtual uart");
 	JButton captureRX = new JButton("capture rx to file");
 	JButton sendTx = new JButton("send tx from file");
 
@@ -73,7 +72,9 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 
 	int bufferSize = 999;
 	JTextField sendData = new JTextField(40);
-	JButton sendButton = new JButton("send");
+	JButton send = new JButton("send");
+	
+	Serial mySerial = null;
 
 	// TODO
 	// save data to file button
@@ -83,6 +84,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 
 	public SerialGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
+		mySerial = (Serial)Runtime.getService(boundServiceName);
 	}
 
 	public void init() {
@@ -94,7 +96,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 		north.add(format);
 		north.add(new JLabel("width "));
 		north.add(widthMenu);
-		north.add(createNullModemCabel);
+		north.add(createVirtualUART);
 		north.add(captureRX);
 		north.add(sendTx);
 
@@ -110,13 +112,17 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 		JPanel south = new JPanel();
 
 		south.add(sendData);
-		south.add(sendButton);
+		south.add(send);
 		south.add(new JLabel("rx"));
 		south.add(rxTotal);
 		south.add(new JLabel("tx"));
 		south.add(txTotal);
 		display.add(south, BorderLayout.SOUTH);
-
+		
+		createVirtualUART.addActionListener(this);
+		sendTx.addActionListener(this);
+		captureRX.addActionListener(this);
+		
 	}
 
 	public void autoScroll(boolean b) {
@@ -128,14 +134,16 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 		}
 	}
 
-	public void getState(Serial template) {
+	public void getState(final Serial serial) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-
+				mySerial = serial;
+				if (serial.isConnected()){
+					
+				}
 			}
 		});
 	}
-
 	public void publishByte(final Integer b) {
 
 		SwingUtilities.invokeLater(new Runnable() {
@@ -154,7 +162,6 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 					rx.append("\n");
 				}
 				rxTotal.setText(String.format("%d", rxCount));
-
 			}
 		});
 
@@ -164,9 +171,10 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 	public void attachGUI() {
 		subscribe("publishByte", "publishByte", Integer.class);
 		subscribe("publishState", "getState", Serial.class);
-		myService.send(boundServiceName, "publishState");
+		
+		send("publishState");
 	}
-
+	
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishByte", "publishByte", Integer.class);
@@ -174,9 +182,24 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		if (o == captureRX){
+			send("recordRX");
+			send("broadcastState");
+			/*
+			JFileChooser fileChooser = new JFileChooser();
+			// set current directory
+			// fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+			int result = fileChooser.showOpenDialog(this.getDisplay());
+			if (result == JFileChooser.APPROVE_OPTION) {
+			    // user selects a file
+				File selectedFile = fileChooser.getSelectedFile();
+				
+			}
+			*/
+			
+		}
 	}
 
 }

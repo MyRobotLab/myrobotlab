@@ -1,10 +1,8 @@
 package org.myrobotlab.service;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -162,8 +160,18 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return retVal;
 	}
 
+	public boolean recordRX(){
+		return recordRX(null);
+	}
+	
 	public boolean recordRX(String filename) {
 		try {
+			info(String.format("record RX %s", filename));
+			
+			if (isRXRecording){
+				log.info("already recording");
+				return true;
+			}
 
 			if (filename == null) {
 				filenameRX = String.format("rx.%s.%d.data", getName(), System.currentTimeMillis());
@@ -188,9 +196,28 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		}
 		return false;
 	}
+	
+	public boolean isRXRecording(){
+		return isRXRecording;
+	}
 
+	public boolean isTXRecording(){
+		return isTXRecording;
+	}
+
+	public boolean recordTX(){
+		return recordTX(null);
+	}
+	
 	public boolean recordTX(String filename) {
 		try {
+			
+		info(String.format("record TX %s", filename));
+			
+			if (isTXRecording){
+				log.info("already recording");
+				return true;
+			}
 
 			if (filename == null) {
 				filenameTX = String.format("tx.%s.%d.data", getName(), System.currentTimeMillis());
@@ -207,7 +234,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				fileWriterTX = new FileWriter(filenameTX);
 				bufferedWriterTX = new BufferedWriter(fileWriterTX);
 			}
-
+			
 			isTXRecording = true;
 			return true;
 		} catch (Exception e) {

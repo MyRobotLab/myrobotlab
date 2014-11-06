@@ -125,7 +125,7 @@ public class Platform implements Serializable {
 		return vmName;
 	}
 
-	public boolean isDavlik() {
+	public boolean isDalvik() {
 		return VM_DALVIK.equals(vmName);
 	}
 

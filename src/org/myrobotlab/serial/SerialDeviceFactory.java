@@ -32,7 +32,7 @@ public class SerialDeviceFactory {
 
 	static public ArrayList<String> getSerialDeviceNames() {
 		Platform platform = Platform.getLocalInstance();
-		if (platform.isDavlik()) {
+		if (platform.isDalvik()) {
 			return getSerialDeviceNames(TYPE_ANDROID_BLUETOOTH);
 		} else {
 			return getSerialDeviceNames(TYPE_GNU);
@@ -80,7 +80,7 @@ public class SerialDeviceFactory {
 		Platform platform = Platform.getLocalInstance();
 		if (virtualPorts.containsKey(name)){
 			return virtualPorts.get(name);
-		} else if (platform.isDavlik()) {
+		} else if (platform.isDalvik()) {
 			// FIXME Bluetooth rate databits stopbits & parity are all
 			// meaningless
 			return getSerialDevice(TYPE_ANDROID_BLUETOOTH, name, rate, databits, stopbits, parity);
