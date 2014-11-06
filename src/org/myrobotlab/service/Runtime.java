@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,12 +15,6 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
-/*
- import java.nio.file.Files;
- import java.nio.file.Path;
- import java.nio.file.Paths;
- import java.nio.file.StandardCopyOption;
- */
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +34,7 @@ import java.util.Vector;
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.cmdline.CMDLine;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Bootstrap;
+import org.myrobotlab.framework.BootstrapFactory;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -58,12 +54,21 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
+import org.myrobotlab.service.interfaces.Bootstrap;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
+
+// import android.annotation.TargetApi;
+/*
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+ import java.nio.file.Paths;
+ import java.nio.file.StandardCopyOption;
+ */
 
 /**
  * 
@@ -194,7 +199,8 @@ public class Runtime extends Service implements MessageListener {
 		gmtf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		log.info("============== args begin ==============");
 		StringBuffer sb = new StringBuffer();
-		jvmArgs = Bootstrap.getJVMArgs();
+		Bootstrap bootstrap = BootstrapFactory.getInstance();
+		jvmArgs = bootstrap.getJVMArgs();
 		args = new ArrayList<String>();
 		if (globalArgs != null) {
 			for (int i = 0; i < globalArgs.length; ++i) {
@@ -554,7 +560,7 @@ public class Runtime extends Service implements MessageListener {
 			Runtime.releaseAll();
 
 			// create bootstrap.jar
-			Bootstrap bootstrap = new Bootstrap();
+			Bootstrap bootstrap = BootstrapFactory.getInstance();
 			bootstrap.createBootstrapJar();
 
 			// WRONG - jvm args should be created and maintained in bootstrap
@@ -1785,7 +1791,9 @@ public class Runtime extends Service implements MessageListener {
 		 */
 
 		// SHOULD BE THREADED? PROLLY
-		Process p = new ProcessBuilder().inheritIO().command(args).start();
+		// ANDROID DOES NOT SUPPORT inheritIO()
+		//Process p = new ProcessBuilder().inheritIO().command(args).start();
+		Process p = new ProcessBuilder().command(args).start();
 		// p.waitFor();
 		// int rc = p.exitValue();
 		return 0;
@@ -2093,6 +2101,7 @@ public class Runtime extends Service implements MessageListener {
 		return ret;
 	}
 
+	//@TargetApi(9)
 	static public ArrayList<String> getLocalHardwareAddresses() {
 		log.info("getLocalHardwareAddresses");
 		ArrayList<String> ret = new ArrayList<String>();
