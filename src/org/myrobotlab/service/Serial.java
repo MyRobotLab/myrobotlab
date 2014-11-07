@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
@@ -50,7 +52,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	// transient int[] buffer = new int[BUFFER_SIZE];
 	transient BlockingQueue<Integer> blockingData = new LinkedBlockingQueue<Integer>();
 
-	int recievedByteCount = 0;
 	boolean blocking = true;
 	boolean connected = false;
 	String portName = null;
@@ -67,13 +68,13 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	// utility methods - ascii
 
 	// ====== file io begin ======
-	String filenameRX;
+	String rxFileName;
 	boolean isRXRecording = false;
 	transient FileWriter fileWriterRX = null;
 	transient BufferedWriter bufferedWriterRX = null;
 	String rxFileFormat;
 
-	String filenameTX;
+	String txFileName;
 	boolean isTXRecording = false;
 	transient FileWriter fileWriterTX = null;
 	transient BufferedWriter bufferedWriterTX = null;
@@ -86,6 +87,10 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 	// display buffer for all RX data
 	StringBuffer display = new StringBuffer();
+
+	// gui has its own counters
+	int txCount = 0;
+	int rxCount = 0;
 
 	// pretty print = 3 chars e.g 'FF '
 	// * number of bytes 8
@@ -160,32 +165,32 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return retVal;
 	}
 
-	public boolean recordRX(){
+	public boolean recordRX() {
 		return recordRX(null);
 	}
-	
+
 	public boolean recordRX(String filename) {
 		try {
 			info(String.format("record RX %s", filename));
-			
-			if (isRXRecording){
+
+			if (isRXRecording) {
 				log.info("already recording");
 				return true;
 			}
 
 			if (filename == null) {
-				filenameRX = String.format("rx.%s.%d.data", getName(), System.currentTimeMillis());
+				rxFileName = String.format("rx.%s.%d.data", getName(), System.currentTimeMillis());
 			} else {
-				filenameTX = filename;
+				txFileName = filename;
 			}
 
-			if (filenameTX != null && filenameTX.equals(filename)) {
+			if (txFileName != null && txFileName.equals(filename)) {
 				fileWriterRX = fileWriterTX;
 				bufferedWriterRX = bufferedWriterTX;
 			}
 
 			if (fileWriterRX == null) {
-				fileWriterRX = new FileWriter(filenameRX);
+				fileWriterRX = new FileWriter(rxFileName);
 				bufferedWriterRX = new BufferedWriter(fileWriterRX);
 			}
 
@@ -196,45 +201,45 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		}
 		return false;
 	}
-	
-	public boolean isRXRecording(){
+
+	public boolean isRXRecording() {
 		return isRXRecording;
 	}
 
-	public boolean isTXRecording(){
+	public boolean isTXRecording() {
 		return isTXRecording;
 	}
 
-	public boolean recordTX(){
+	public boolean recordTX() {
 		return recordTX(null);
 	}
-	
+
 	public boolean recordTX(String filename) {
 		try {
-			
-		info(String.format("record TX %s", filename));
-			
-			if (isTXRecording){
+
+			info(String.format("record TX %s", filename));
+
+			if (isTXRecording) {
 				log.info("already recording");
 				return true;
 			}
 
 			if (filename == null) {
-				filenameTX = String.format("tx.%s.%d.data", getName(), System.currentTimeMillis());
+				txFileName = String.format("tx.%s.%d.data", getName(), System.currentTimeMillis());
 			} else {
-				filenameTX = filename;
+				txFileName = filename;
 			}
 
-			if (filenameRX != null && filenameRX.equals(filename)) {
+			if (rxFileName != null && rxFileName.equals(filename)) {
 				fileWriterTX = fileWriterRX;
 				bufferedWriterTX = bufferedWriterRX;
 			}
 
 			if (fileWriterTX == null) {
-				fileWriterTX = new FileWriter(filenameTX);
+				fileWriterTX = new FileWriter(txFileName);
 				bufferedWriterTX = new BufferedWriter(fileWriterTX);
 			}
-			
+
 			isTXRecording = true;
 			return true;
 		} catch (Exception e) {
@@ -250,15 +255,15 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return ret;
 	}
 
+	// DEPRECATE ???
 	public boolean record() {
 		String filename = String.format("rxtx.%s.%d.data", getName(), System.currentTimeMillis());
 		return record(filename);
 	}
-
-	public boolean stopRecording() {
+	
+	public boolean stopRXRecording(){
 		try {
 			isRXRecording = false;
-			isTXRecording = false;
 
 			if (fileWriterRX != null) {
 				bufferedWriterRX.close();
@@ -266,6 +271,16 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				fileWriterRX = null;
 				bufferedWriterRX = null;
 			}
+			return true;
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+		return false;
+	}
+
+	public boolean stopTXRecording(){
+		try {
+			isTXRecording = false;
 
 			if (fileWriterTX != null) {
 				bufferedWriterTX.close();
@@ -273,13 +288,18 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				fileWriterTX = null;
 				bufferedWriterTX = null;
 			}
-
 			return true;
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
 		return false;
+	}
 
+	public boolean stopRecording() {
+		boolean ret = true;
+		ret &= stopRXRecording();
+		ret &= stopTXRecording();
+		return ret;
 	}
 
 	// @Override
@@ -313,7 +333,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 				// stupid Java signed byte :(
 				int newByte;
-				recievedByteCount = 0;
 
 				// log.info("--------begin---------------");
 				// jump into loop and process as much as there is
@@ -327,7 +346,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				// if it does not block - then we can publish an array of ints
 
 				while (serialDevice.isOpen() && (newByte = serialDevice.read()) > -1) {
-					++recievedByteCount;
+					++rxCount;
 
 					// display / debug option ? - mrl message format ?
 					// display.append(String.format("%02x ", newByte));
@@ -339,7 +358,9 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 					// respond immediately and incur overhead + buffer overrun
 
 					if (isRXRecording) {
-						bufferedWriterRX.write(display.toString());
+						// allow change of format 
+						//bufferedWriterRX.write(display.toString());
+						bufferedWriterRX.write(newByte);
 					}
 
 					display.setLength(0);
@@ -393,7 +414,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	/***
 	 * FIXME FIXME FIXME FIXME - WE NEED METHOD CACHE & BETTER
 	 * FINDING/RESOLVING/UPCASTING OF METHODS - THE RESULT IS MAKING HORRIBLE
-	 * ABOMINATIONS LIKE THIS
+	 * ABOMINATIONS LIKE THIS - (all gson comes in doubles)
 	 */
 
 	public boolean connect(String name, Double rate, Double databits, Double stopbits, Double parity) {
@@ -433,7 +454,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				return true;
 
 			} else {
-				log.error("could not get serial device");
+				error("could not get serial device");
 			}
 		} catch (Exception e) {
 			logException(e);
@@ -517,34 +538,29 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		return count;
 	}
 
-	String readString(int length) throws InterruptedException{
+	String readString(int length) throws InterruptedException {
 		int[] bytes = new int[length];
 		read(bytes);
 		return new String(intArrayToByteArray(bytes));
 	}
 
-	
 	/*
-	public static int[] byteArrayToIntArray(byte[] src) {
-		IntBuffer
-		return intBuffer.array();
-	}
-	*/
-	
+	 * public static int[] byteArrayToIntArray(byte[] src) { IntBuffer return
+	 * intBuffer.array(); }
+	 */
+
 	public static byte[] intArrayToByteArray(int[] src) {
 
 		/*
-		ByteBuffer byteBuffer = ByteBuffer.allocate(src.length * 4);
-		IntBuffer intBuffer = byteBuffer.asIntBuffer();
-		intBuffer.put(src);
-		return byteBuffer.array();
-		*/
-		
-		
+		 * ByteBuffer byteBuffer = ByteBuffer.allocate(src.length * 4);
+		 * IntBuffer intBuffer = byteBuffer.asIntBuffer(); intBuffer.put(src);
+		 * return byteBuffer.array();
+		 */
+
 		if (src == null) {
 			return null;
 		}
-		
+
 		byte[] ret = new byte[src.length];
 		for (int i = 0; i < src.length; ++i) {
 			ret[i] = (byte) src[i];
@@ -635,12 +651,14 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	@Override
 	public void write(byte[] data) throws IOException {
 		for (int i = 0; i < data.length; ++i) {
+			++txCount;
 			serialDevice.write(data[i] & 0xff);
 		}
 	}
 
 	@Override
 	public void write(char data) throws IOException {
+		++txCount;
 		serialDevice.write(data);
 	}
 
@@ -662,6 +680,14 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	public void write(char[] cs) throws IOException {
 		for (int i = 0; i < cs.length; ++i)
 			write(cs[i]);
+	}
+
+	public void writeFile(String filename) {
+		try {
+			write(FileIO.fileToByteArray(new File(filename)));
+		} catch (Exception e) {
+			error(e);
+		}
 	}
 
 	@Override
@@ -708,7 +734,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 			// Runtime.start("webgui", "WebGUI");
 
 			Serial serial = (Serial) Runtime.start(getName(), "Serial");
-			Serial uart = connectToVirtualUART();
+			Serial uart = createVirtualUART();
 
 			// TEST LATER
 			// serial.record();
@@ -791,14 +817,16 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 	}
 
-	public Serial connectToVirtualUART() {
+	public Serial createVirtualUART() {
 		String name = getName();
 		String uartName = String.format("%s_uart", name);
 		log.info(String.format("connectToVirtualUART - creating uart %s <--> %s <---> %s <-->", name, name.toUpperCase(), uartName.toUpperCase(), uartName));
 		VirtualSerialPort.createNullModemCable(name.toUpperCase(), uartName.toUpperCase());
+		// broadcast the new serial ports
+		invoke("getPortNames");
 		Serial uart = (Serial) Runtime.start(uartName, "Serial");
-		uart.connect(uartName.toUpperCase());
-		connect(name.toUpperCase());
+		uart.connect(name.toUpperCase());
+		connect(uartName.toUpperCase());
 		return uart;
 	}
 
@@ -839,13 +867,20 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		stopRecording();
 		log.info(String.format("%s closed ports and files", getName()));
 	}
+	
+	public String getRXFileName(){
+		return rxFileName;
+	}
+	
+	public String getTXFileName(){
+		return txFileName;
+	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		try {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
-			
-			
+
 			// Runtime.start("gui", "GUIService");
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
 			// serial.connect("COM15");

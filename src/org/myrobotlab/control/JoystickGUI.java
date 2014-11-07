@@ -29,7 +29,6 @@
 package org.myrobotlab.control;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -37,14 +36,11 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
@@ -52,8 +48,8 @@ import org.myrobotlab.control.widget.JoystickButtonsPanel;
 import org.myrobotlab.control.widget.JoystickCompassPanel;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Joystick;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Joystick.Button;
+import org.myrobotlab.service.Runtime;
 
 public class JoystickGUI extends ServiceGUI implements ActionListener {
 
@@ -146,11 +142,11 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		if (o == controllers) {
 			String selected = (String) controllers.getSelectedItem();
 			if (selected == null || "".equals(selected)) {
-				myService.send(boundServiceName, "stopPolling");
+				send("stopPolling");
 			} else {
 				log.info(String.format("changed to %s ", selected));
-				myService.send(boundServiceName, "setController", selected);
-				myService.send(boundServiceName, "startPolling");
+				send("setController", selected);
+				send("startPolling");
 			}
 		} else if (o == refresh) {
 			send("getControllers");

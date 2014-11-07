@@ -391,7 +391,7 @@ public class EddieControlBoard extends Service implements KeyListener {
 		try {
 			EddieControlBoard ecb = (EddieControlBoard) Runtime.start(getName(), "EddieControlBoard");
 			Runtime.start("gui", "GUIService");
-			Serial uart = ecb.serial.connectToVirtualUART();
+			Serial uart = ecb.serial.createVirtualUART();
 			uart.write("011 011 011 004 004 004 004 CBB\r");
 			uart.write("011 011 011 004 004 004 004 CBB\r");
 			uart.write("011 011 011 004 004 004 004 CBB\r");
