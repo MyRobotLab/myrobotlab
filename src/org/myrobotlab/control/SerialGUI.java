@@ -24,13 +24,18 @@
  * */
 
 package org.myrobotlab.control;
-import org.myrobotlab.service.Runtime;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -40,23 +45,28 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
 
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
 import org.slf4j.Logger;
 
-public class SerialGUI extends ServiceGUI implements ActionListener {
+public class SerialGUI extends ServiceGUI implements ActionListener, ItemListener {
 
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(SerialGUI.class.getCanonicalName());
 
 	// menu
 	JComboBox<String> format = new JComboBox<String>(new String[] { Serial.FORMAT_DECIMAL, Serial.FORMAT_HEX, Serial.FORMAT_ASCII });
-	JComboBox<String> port = new JComboBox<String>();
+	JComboBox<String> ports = new JComboBox<String>();
 
 	JButton createVirtualUART = new JButton("create virtual uart");
-	JButton captureRX = new JButton("capture rx to file");
+	JButton captureRX = new JButton();
+	JButton captureTX = new JButton();
 	JButton sendTx = new JButton("send tx from file");
+
+	JLabel connectLight = new JLabel();
 
 	JTextArea rx = new JTextArea(20, 40);
 	JLabel rxTotal = new JLabel("0");
@@ -65,15 +75,13 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 	Integer width = 16;
 	JTextField widthMenu = new JTextField("16");
 
-	// String format = FORMAT_DECIMAL; // HEX, ASCII
-
 	int rxCount = 0;
 	int txCount = 0;
 
-	int bufferSize = 999;
 	JTextField sendData = new JTextField(40);
 	JButton send = new JButton("send");
-	
+	JButton sendFile = new JButton("send file");
+
 	Serial mySerial = null;
 
 	// TODO
@@ -84,15 +92,17 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 
 	public SerialGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
-		mySerial = (Serial)Runtime.getService(boundServiceName);
+		mySerial = (Serial) Runtime.getService(boundServiceName);
 	}
 
 	public void init() {
 		display.setLayout(new BorderLayout());
 
-		// JPanel toolbar = new JPanel(new BorderLayout());
 		JPanel north = new JPanel();
-		north.add(new JLabel("format "));
+		north.add(new JLabel("port "));
+		north.add(ports);
+		north.add(connectLight);
+		north.add(new JLabel(" "));
 		north.add(format);
 		north.add(new JLabel("width "));
 		north.add(widthMenu);
@@ -113,16 +123,19 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 
 		south.add(sendData);
 		south.add(send);
+		south.add(sendFile);
 		south.add(new JLabel("rx"));
 		south.add(rxTotal);
 		south.add(new JLabel("tx"));
 		south.add(txTotal);
 		display.add(south, BorderLayout.SOUTH);
-		
+
 		createVirtualUART.addActionListener(this);
 		sendTx.addActionListener(this);
+		sendFile.addActionListener(this);
 		captureRX.addActionListener(this);
-		
+		ports.addItemListener(this);
+
 	}
 
 	public void autoScroll(boolean b) {
@@ -138,12 +151,51 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				mySerial = serial;
-				if (serial.isConnected()){
-					
+				setPortStatus();
+				if (serial.isRXRecording()){
+					captureRX.setText(serial.getRXFileName());
+				} else {
+					captureRX.setText("capture rx to file");
 				}
+				/*
+				if (serial.isTXRecording()){
+					captureTX.setText(serial.getTXFileName());
+				}
+				*/
 			}
 		});
 	}
+
+	public void setPortStatus() {
+		ports.removeItemListener((ItemListener) self);
+		if (mySerial.isConnected()) {
+			connectLight.setIcon(Util.getImageIcon("green.png"));
+			log.info(String.format("displaying %s", mySerial.getPortName()));
+			ports.setSelectedItem(mySerial.getPortName());
+		} else {
+			connectLight.setIcon(Util.getImageIcon("red.png"));
+			ports.setSelectedItem("");
+		}
+		ports.addItemListener((ItemListener) self);
+	}
+
+	public void getPortNames(final ArrayList<String> inPorts) {
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+
+				ports.removeItemListener((ItemListener) self);
+				ports.removeAllItems();
+				ports.addItem("");
+				for (int i = 0; i < inPorts.size(); ++i) {
+					ports.addItem(inPorts.get(i));
+				}
+				ports.addItemListener((ItemListener) self);
+				setPortStatus();
+			}
+		});
+	}
+
 	public void publishByte(final Integer b) {
 
 		SwingUtilities.invokeLater(new Runnable() {
@@ -152,7 +204,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 				++rxCount;
 				String f = (String) format.getSelectedItem();
 				if (f.equals(Serial.FORMAT_DECIMAL)) {
-					rx.append(String.format("%03d%s",  b, delimiter));
+					rx.append(String.format("%03d%s", b, delimiter));
 				} else if (f.equals(Serial.FORMAT_HEX)) {
 					rx.append(String.format("%02x%s", (int) b & 0xff, delimiter));
 				} else if (f.equals(Serial.FORMAT_ASCII)) {
@@ -171,34 +223,84 @@ public class SerialGUI extends ServiceGUI implements ActionListener {
 	public void attachGUI() {
 		subscribe("publishByte", "publishByte", Integer.class);
 		subscribe("publishState", "getState", Serial.class);
-		
+		subscribe("getPortNames", "getPortNames", ArrayList.class);
+
 		send("publishState");
+		send("getPortNames");
 	}
-	
+
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishByte", "publishByte", Integer.class);
 		unsubscribe("publishState", "getState", Serial.class);
+		unsubscribe("getPortNames", "getPortNames", ArrayList.class);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
-		if (o == captureRX){
-			send("recordRX");
+		if (o == captureRX) {
+			if (captureRX.getText().startsWith("capture")){
+				send("recordRX");
+				send("broadcastState");
+			} else {
+				send("stopRXRecording");
+				send("broadcastState");
+			}
+		}
+
+		if (o == captureTX) {
+			if (captureTX.getText().startsWith("capture")){
+			send("recordTX");
 			send("broadcastState");
-			/*
+			} else {
+				send("stopTXRecording");
+			}
+		}
+
+		if (o == createVirtualUART){
+			send("createVirtualUART");
+		}
+		
+		if (o == sendFile) {
+
 			JFileChooser fileChooser = new JFileChooser();
 			// set current directory
-			// fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+			
+			fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 			int result = fileChooser.showOpenDialog(this.getDisplay());
 			if (result == JFileChooser.APPROVE_OPTION) {
-			    // user selects a file
+				// user selects a file
 				File selectedFile = fileChooser.getSelectedFile();
-				
+				send("writeFile", selectedFile.getAbsolutePath());
 			}
-			*/
-			
+
+		}
+
+		if (o == ports) {
+			String selected = (String) ports.getSelectedItem();
+			if (selected == null || "".equals(selected)) {
+				send("stopPolling");
+			} else {
+				log.info(String.format("changed to %s ", selected));
+				send("setController", selected);
+				send("startPolling");
+			}
+		}
+	}
+
+	// onChange of ports
+	@Override
+	public void itemStateChanged(ItemEvent event) {
+		Object o = event.getSource();
+		if (o == ports){
+			String port = (String)ports.getSelectedItem();
+			if (port != null && !port.equals(mySerial.getPortName()) && port.length() > 0){
+				send("disconnect");
+				send("connect", port);
+			} else if (port.length() == 0){
+				send("disconnect");
+			}
 		}
 	}
 

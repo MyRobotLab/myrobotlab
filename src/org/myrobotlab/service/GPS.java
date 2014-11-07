@@ -19,12 +19,6 @@ public class GPS extends Service {
     
     public ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     String model;
-    int index = 0;
-    private int GPSbaudRate = 38400; //by default
-    private String serialPort;
-    private byte[] message;
-    private boolean dataAvailable = false;
-    public static final int PUBLISH_STRING = 4;
     
     // peers
     public transient Serial serial;
@@ -57,7 +51,6 @@ public class GPS extends Service {
                 model = MODEL;
             }
 
-
         } catch (Exception e) {
             error(e.getMessage());
         }
@@ -76,10 +69,9 @@ public class GPS extends Service {
     }
     String messageString;
 
-    public void byteReceived(Byte b) {
+    public void byteReceived(Integer b) {
 
         try {
-            index++;
 //            log.info("byteReceived Index = " + index + " actual data byte = " + String.format("%02x", b));
             buffer.write(b);
             // so a byte was appended
@@ -89,10 +81,9 @@ public class GPS extends Service {
 
 //                log.info("Buffer size = " + buffer.size() + " Buffer = " + buffer.toString());
                 buffer.flush();   //flush entire buffer so I can convert it to a byte array
-                message = buffer.toByteArray();
+                //message = buffer.toByteArray();
                 messageString = new String(buffer.toByteArray(), ("UTF-8"));
 //                log.info("size of message = " + message.length);
-                dataAvailable = true;
 
                 if (messageString.contains("GGA")) {
                    log.info("GGA string detected");
@@ -129,7 +120,6 @@ public class GPS extends Service {
                    log.info("unknown string detected");
                 }
                 buffer.reset();
-                index = 0;
             }
 
         } catch (Exception e) {
@@ -193,19 +183,13 @@ public class GPS extends Service {
     
     public boolean connect(String port, int baud) {
         serial = getSerial();
-        serialPort = port;
-        GPSbaudRate = baud;
-        boolean connect = serial.connect(port, baud, 8, 1, 0);
-
-        return serial.isConnected();
+        return serial.connect(port, baud, 8, 1, 0);
     }
 
     public boolean connect(String port) {
         serial = getSerial();
-        serialPort = port;
-        boolean connect = serial.connect(port, GPSbaudRate, 8, 1, 0);
+        return serial.connect(port, 38400, 8, 1, 0);
 //        serial.publishType(PUBLISH_STRING); // GPS units publish strings
-        return serial.isConnected();
     }
 
     public boolean disconnect() {
@@ -215,12 +199,7 @@ public class GPS extends Service {
     }
 
     public void setBaud(int baudRate) throws IOException {
-
-        GPSbaudRate = baudRate;
-
-        index = 0;
         buffer.reset();
-
         if (baudRate == 9600) {
         } else if (baudRate == 19200) {
         } else if (baudRate == 38400) {
