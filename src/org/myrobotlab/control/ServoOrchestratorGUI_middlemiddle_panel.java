@@ -13,6 +13,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  * source modified from:
@@ -112,9 +114,11 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 		servo_panel.setLayout(new GridBagLayout());
 
 		servo_start = new JTextField("STAR");
+		servo_start.setColumns(3);
 		servo_start.setEditable(false);
 		servo_channelid = new JLabel("CHID");
 		servo_goal = new JTextField("GOAL");
+		servo_goal.setColumns(3);
 		servo_min = new JLabel("MIN#");
 		servo_id = new JLabel("ID##");
 		servo_max = new JLabel("MAX#");

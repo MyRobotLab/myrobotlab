@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  * source modified from:
@@ -166,6 +168,42 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 					// (only button left) (others only fixes) (I think)
 
 					found = true;
+					
+					final int fi1 = i1;
+					final int fi2 = i2;
+					final ServoOrchestratorGUI_middlemiddle_panel fp = p;
+					p.servo_goal.getDocument().addDocumentListener(new DocumentListener() {
+						@Override
+						public void insertUpdate(DocumentEvent e) {
+							adjust();
+							
+						}
+						@Override
+						public void removeUpdate(DocumentEvent e) {
+							adjust();
+							
+						}
+						@Override
+						public void changedUpdate(DocumentEvent e) {
+							adjust();
+							
+						}
+						public void adjust() {
+							int i1 = fi1;
+							int i2 = fi2;
+							ServoOrchestratorGUI_middlemiddle_panel p = fp;
+							int searchpos = i1 + 1;
+							while (searchpos < panels.length) {
+								if (panels[searchpos][i2] == null) {
+									searchpos++;
+								} else {
+									panels[searchpos][i2].servo_start
+											.setText(p.servo_goal.getText() + "");
+									break;
+								}
+							}
+						}
+					});
 
 					so_ref.externalcall_servopanelchangeinfo(i1, i2);
 					if (later_externalcall_servopanelsettostartpos) {
