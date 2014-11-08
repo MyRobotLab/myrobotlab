@@ -18,6 +18,8 @@ import javax.swing.TransferHandler;
 public class ServoOrchestratorGUI_middlemiddle_transferhandler extends
 		TransferHandler implements DragSourceMotionListener {
 
+	private static final long serialVersionUID = 1L;
+
 	public ServoOrchestratorGUI_middlemiddle_transferhandler() {
 		super();
 	}

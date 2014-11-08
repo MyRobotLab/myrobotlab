@@ -165,7 +165,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 			boolean later_externalcall_servopanelsettostartpos2 = false;
 			int otherpanelx = 0;
 
-			// TODO - change other attributes, too
+			// TODO - change other attributes, too (all done, or?)
 			// TODO - make the channelid independent of the y-position (posy)
 			droppedPanel.servo_channelid.setText("CH" + (posy + 1));
 			// min is changed with the externalcall below
