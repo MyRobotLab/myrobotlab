@@ -363,7 +363,7 @@ public class ServoOrchestrator extends Service {
 
 	public void play_go_fa() {
 		pos1 = sogui_ref.middlemiddle_ref.panels[0].length;
-		pos2 = 4;
+		pos2 = sizex-1;
 		pos3 = 999;
 		play_updatetime(true, true, true);
 		play_updatepanels(pos1);
@@ -381,6 +381,8 @@ public class ServoOrchestrator extends Service {
 		pos1++;
 		if (pos1 > sizex) {
 			play_go_stop();
+			pos2 = 4;
+			pos3 = 999;
 		}
 		play_updatetime(true, false, false);
 		play_playreally(pos1);
@@ -389,17 +391,23 @@ public class ServoOrchestrator extends Service {
 	public void play_play_2_1() {
 		pos2++;
 		if (pos2 > 4) {
-			play_play_1_1();
 			pos2 -= 4;
+			play_play_1_1();
 		}
 		play_updatetime(false, true, false);
 	}
 
 	public void play_play_3_1() {
+		
+		//first block
+		if (pos1 == 1 && pos2 == 1 && pos3 == 0) {
+			play_playreally(pos1);
+		}
+		
 		pos3++;
 		if (pos3 > 999) {
-			play_play_2_1();
 			pos3 -= 999;
+			play_play_2_1();
 		}
 		play_updatetime(false, false, true);
 	}
@@ -471,7 +479,7 @@ public class ServoOrchestrator extends Service {
 
 	public void play_searchblocks(int pos) {
 		for (int i = 0; i < sizey; i++) {
-			ServoOrchestratorGUI_middlemiddle_panel panels11 = sogui_ref.middlemiddle_ref.panels[pos][i];
+			ServoOrchestratorGUI_middlemiddle_panel panels11 = sogui_ref.middlemiddle_ref.panels[pos-1][i];
 			if (panels11 != null) {
 				play_playblock(i, panels11);
 			}
