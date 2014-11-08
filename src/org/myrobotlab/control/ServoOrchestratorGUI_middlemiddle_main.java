@@ -34,7 +34,6 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 	// "main"-panel
 	private final JPanel middlemiddle;
 
-	// TODO - should try to remove this
 	public final ServoOrchestratorGUI so_ref;
 
 	/**
