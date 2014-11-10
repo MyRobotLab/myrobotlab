@@ -365,8 +365,9 @@ public class Servo extends Service implements ServoControl {
 		int min;
 		int max;
 		int delay; // depending on type - this is 2 different things COMPUTER
-					// its ms delay - CONTROLLER its modulus loop count
+		// its ms delay - CONTROLLER its modulus loop count
 		int step;
+		boolean oneWay;
 
 		public Sweeper(String name, int min, int max, int delay, int step) {
 			super(String.format("%s.sweeper", name));
@@ -374,8 +375,17 @@ public class Servo extends Service implements ServoControl {
 			this.max = max;
 			this.delay = delay;
 			this.step = step;
+			this.oneWay = false;
 		}
 
+		public Sweeper(String name, int min, int max, int delay, int step, boolean oneWay) {
+			super(String.format("%s.sweeper", name));
+			this.min = min;
+			this.max = max;
+			this.delay = delay;
+			this.step = step;
+			this.oneWay = oneWay;
+		}
 		@Override
 		public void run() {
 
@@ -387,17 +397,23 @@ public class Servo extends Service implements ServoControl {
 
 			try {
 				while (isSweeping) {
-
-					inputX += step;
-
-					// switch directions
+					// increment position that we should go to.
+					if (inputX < max && step >= 0) { 
+						inputX += step;
+					} else if (inputX > min && step < 0) {
+						inputX += step;
+					} 
+					
+					// switch directions or exit if we are sweeping 1 way
 					if ((inputX <= min && step < 0) || (inputX >= max && step > 0)) {
+						if (oneWay) {
+							isSweeping = false;
+							break;
+						}
 						step = step * -1;
 					}
-
 					moveTo(inputX.intValue());
 					Thread.sleep(delay);
-
 				}
 
 			} catch (Exception e) {
@@ -409,7 +425,16 @@ public class Servo extends Service implements ServoControl {
 				}
 			}
 		}
+		
+		// for non-controller based sweeping,
+		// this is the delay for the sweeper thread.
+		public int getDelay() {
+			return delay;
+		}
 
+		public void setDelay(int delay) {
+			this.delay = delay;
+		}
 	}
 
 	public void sweep(int min, int max) {
@@ -419,6 +444,10 @@ public class Servo extends Service implements ServoControl {
 	// FIXME - is it really speed control - you don't currently thread for
 	// factional speed values
 	public void sweep(int min, int max, int delay, int step) {
+		sweep(min, max, delay, step, false);
+	}
+	
+	public void sweep(int min, int max, int delay, int step, boolean oneWay) {
 		// CONTROLLER TYPE SWITCH
 		if (speedControlOnUC) {
 			controller.servoSweep(getName(), min, max, step); // delay & step
@@ -428,11 +457,15 @@ public class Servo extends Service implements ServoControl {
 				stop();
 			}
 
-			sweeper = new Sweeper(getName(), min, max, delay, step);
+			sweeper = new Sweeper(getName(), min, max, delay, step, oneWay);
 			sweeper.start();
 		}
 	}
 
+	public void setSweeperDelay(int delay) {
+		((Sweeper)sweeper).setDelay(delay);
+	}
+	
 	public void sweep() {
 		sweep(Math.round(minX), Math.round(maxX), 1, 1);
 	}
@@ -539,10 +572,16 @@ public class Servo extends Service implements ServoControl {
 		return b;
 	}
 
+	// choose to handle sweep on arduino or in MRL on host computer thread.
 	public void setSpeedControlOnUC(boolean b) {
 		speedControlOnUC = b;
 	}
 
+	// only if the sweep control is controled by computer and not arduino
+	public boolean isSweeping() {
+		return isSweeping;
+	}
+	
 	// uber good
 	public Integer publishServoEvent(Integer position) {
 		return position;
@@ -736,5 +775,7 @@ public class Servo extends Service implements ServoControl {
 		}
 
 	}
+
+
 
 }
