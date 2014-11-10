@@ -616,7 +616,7 @@ public class Joystick extends Service {
 
 	public void addRXListener(ServoControl sc) {
 		map("publishRX", -1.0f, 1.0f, 0.0f, 180f);
-		addYListener(sc.getName(), "moveTo");
+		addRXListener(sc.getName(), "moveTo");
 	}
 
 	//
@@ -631,7 +631,7 @@ public class Joystick extends Service {
 
 	public void addRYListener(ServoControl sc) {
 		map("publishRY", -1.0f, 1.0f, 0.0f, 180f);
-		addYListener(sc.getName(), "moveTo");
+		addRYListener(sc.getName(), "moveTo");
 	}
 
 	// xbox 360 specific - end --
@@ -884,13 +884,13 @@ public class Joystick extends Service {
 
 		// Runtime.setRuntimeName("joyrun");
 		Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-		joy.mapId("x", "rx");
-		joy.map("y", -1, 1, 0, 180);
+		// joy.mapId("x", "rx");
+		// joy.map("y", -1, 1, 0, 180);
 		Runtime.start("gui", "GUIService");
 		// joy.test();
 
-		// joy.setController(2);
-		// joy.startPolling();
+		joy.setController(2);
+		joy.startPolling();
 
 	}
 
