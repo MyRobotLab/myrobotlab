@@ -90,19 +90,25 @@ public class GPS extends Service {
                     invoke("publishGGAData");
                 } else if (messageString.contains("RMC")) {
                    log.info("RMC string detected");
-//                invoke("publishRMCData");
+                   invoke("publishRMCData");
                 } else if (messageString.contains("VTG")) {
                    log.info("VTG string detected");
-//                invoke("publishVTGData");
+                   invoke("publishVTGData");
                 } else if (messageString.contains("GSA")) {
                    log.info("GSA string detected");
-//                invoke("publishGSAData");
+                   invoke("publishGSAData");
                 } else if (messageString.contains("GSV")) {
                    log.info("GSV string detected");
-//                invoke("publishGSVData");
+                   invoke("publishGSVData");
                 } else if (messageString.contains("GLL")) {
                    log.info("GLL string detected");
-//                invoke("publishGLLData");
+                   invoke("publishGLLData");
+                } else if (messageString.contains("ZDA")) {
+                   log.info("ZDA string detected");
+                   invoke("publishZDAData");
+                } else if (messageString.contains("MSS")) {
+                   log.info("MSS string detected");
+                   invoke("publishMSSData");
                 } else if (messageString.contains("POLYN")) //San Jose navigation FV-M8 specific?
                 {
                    log.info("POLYN string detected");
@@ -139,7 +145,7 @@ public class GPS extends Service {
        log.info("Full data String = " + messageString);
        
        
-       String[] tokens = messageString.split(",");
+       String[] tokens = messageString.split("[,*]",-1);
        
        log.info("String type: "+tokens[0]);
        
@@ -149,17 +155,16 @@ public class GPS extends Service {
        if(tokens[3].contains("S")) //if negative latitude, prepend a - sign
            tokens[2]= "-"+tokens[2];
        
-       log.info("Latitude llll.llll "+tokens[2]);
+       log.info("Latitude: "+tokens[2]);
        log.info("North or South: "+tokens[3]);
        
        
        if(tokens[5].contains("W")) //if negative longitude, prepend a - sign
            tokens[4]= "-"+tokens[4];
-       log.info("Longitude llll.llll "+tokens[4]);
+       log.info("Longitude: "+tokens[4]);
        log.info("East or West: "+tokens[5]);
 
-       log.info("GPS quality ('8' = simulated): "+tokens[6]);
-
+       log.info("GPS quality ('0' = no fix, '1' = GPS SPS fix valid, '2' = DGPS, SPS fix valid, '6' = Dead Reckoning fix valid, '8' = simulated): "+tokens[6]);
        
        log.info("# of Satellites: "+tokens[7]);
        
@@ -169,22 +174,247 @@ public class GPS extends Service {
        log.info("meters?: "+tokens[10]);
        
        
-       log.info("Height of geoid: "+tokens[11]);
+       log.info("Geoid Separation: (Geoid-to-ellipsoid separation. Ellipsoid altitude = MSL Altitude + Geoid Separation.) "+tokens[11]);
        log.info("meters?: "+tokens[12]); 
        
        log.info("Seconds since last update (likely blank): "+tokens[13]);
        
-//       log.info("DGPS reference (likely blank): "+tokens[14]);
-
-       log.info("Checksum: "+tokens[14]);
-       invoke ("setValues");
+       if (tokens.length == 16) {
+            log.info("DGPS reference station ID (likely blank): "+tokens[14]);
+            log.info("Checksum: "+tokens[15]);
+       }else{
+            log.info("Checksum: "+tokens[14]);
+       }
        return tokens;  //This should return data to the python code if the user has subscribed to it
     }//end dataToString
     
+    public String[] publishGLLData() {
+
+
+       log.info("publishGLLData has been called");
+       log.info("Full data String = " + messageString);
+
+
+       String[] tokens = messageString.split("[,*]",-1);
+
+       log.info("String type: "+tokens[0]);
+
+
+       if(tokens[2].contains("S")) //if negative latitude, prepend a - sign
+           tokens[1]= "-"+tokens[2];
+
+       log.info("Latitude: "+tokens[1]);
+       log.info("North or South: "+tokens[2]);
+
+       if(tokens[4].contains("W")) //if negative longitude, prepend a - sign
+           tokens[3]= "-"+tokens[3];
+       log.info("Longitude: "+tokens[3]);
+       log.info("East or West: "+tokens[4]);
+
+       log.info("Time hhmmss.ss: "+tokens[5]);
+
+       log.info("Status: ('A' = valid, 'V' = not valid): "+tokens[6]);
+
+       if (tokens.length == 9) {
+            log.info("Mode: ('A'=Autonomous, 'D'=DGPS, 'E'=DR (Only present in NMEA v3.00)) "+tokens[7]);
+            log.info("Checksum: "+tokens[8]);
+       }else{
+            log.info("Checksum: "+tokens[7]);
+       }
+       return tokens;  //This should return data to the python code if the user has subscribed to it
+    }//end dataToString
+
+    public String[] publishGSAData() {
+
+       log.info("publishGSAData has been called");
+       log.info("Full data String = " + messageString);
+
+       String[] tokens = messageString.split("[,*]",-1);
+
+       log.info("String type: "+tokens[0]);
+
+       log.info("Mode 1: ('M' = Manually forced into 2D or 3D, 'A' = Automatically allowed to switch between 2D/3D) "+tokens[1]);
+
+       log.info("Mode 2: ('1' = no fix, '2' = 2D, '3' = 3D) "+tokens[2]);
+
+       for (int x = 1; x <13; x++) {
+           log.info("Channel "+x+" (Satellite #): "+tokens[x+2]);
+       }
+
+       log.info("PDOP (positional dilution): "+tokens[15]);
+
+       log.info("HDOP (horizontal dilution): "+tokens[16]);
+
+       log.info("VDOP (vertical dilution): "+tokens[17]);
+
+       log.info("Checksum: "+tokens[18]);
+       return tokens;  //This should return data to the python code if the user has subscribed to it
+    }//end dataToString
+
+    public String[] publishGSVData() {
+
+       log.info("publishGSVData has been called");
+       log.info("Full data String = " + messageString);
+
+       String[] tokens = messageString.split("[,*]",-1);
+       int last = tokens.length - 1;
+
+       log.info("String type: "+tokens[0]);
+
+       log.info("Num. GSV messages: "+tokens[1]);
+
+       log.info("Message number: "+tokens[2]);
+
+       log.info("Satellites in view: "+tokens[3]);
+
+       int svBlocks = (tokens.length - 5) / 4; // each GSV string can have 1-4 SV blocks and each has 4 tokens
+       for (int x = 0; x < svBlocks; x++) {
+           log.info("Satellite ID: "+tokens[4+x*4]);
+           log.info("Elevation (0-90 degrees): "+tokens[5+x*4]);
+           log.info("Azimuth (0-359 degrees): "+tokens[6+x*4]);
+           log.info("Signal Strength (dBHz): "+tokens[7+x*4]);
+       }
+                
+       log.info("Checksum: "+tokens[last]);
+       return tokens;  //This should return data to the python code if the user has subscribed to it
+    }//end dataToString
+
+    public String[] publishRMCData() {
+
+       log.info("publishRMCData has been called");
+       log.info("Full data String = " + messageString);
+
+       String[] tokens = messageString.split("[,*]",-1);
+
+       log.info("String type: "+tokens[0]);
+
+       log.info("Time (hhmmss.ss): "+tokens[1]);
+
+       log.info("Status ('V' = warning, 'A' = Valid): "+tokens[2]);
+
+       if(tokens[4].contains("S")) //if negative latitude, prepend a - sign
+           tokens[3]= "-"+tokens[3];
+
+       log.info("Latitude: "+tokens[3]);
+       log.info("North or South: "+tokens[4]);
+
+       if(tokens[6].contains("W")) //if negative longitude, prepend a - sign
+           tokens[5]= "-"+tokens[5];
+       log.info("Longitude: "+tokens[5]);
+       log.info("East or West: "+tokens[6]);
+
+       log.info("Speed (knots): "+tokens[7]);
+
+       log.info("Course (deg): "+tokens[8]);
+
+       log.info("Date (ddmmyy): "+tokens[9]);
+
+       log.info("Magnetic Variation (deg): "+tokens[10]);
+
+       log.info("Magnetic Variation Direction (E/W): "+tokens[11]);
+
+       if (tokens.length == 14) { 
+          log.info("Position Mode Indicator: "+tokens[12]);
+          log.info("Checksum: "+tokens[13]);
+       }else{
+          log.info("Checksum: "+tokens[12]);
+       }
+       return tokens;  //This should return data to the python code if the user has subscribed to it
+    }//end dataToString
+
+    public String[] publishVTGData() {
+
+       log.info("publishVTGData has been called");
+       log.info("Full data String = " + messageString);
+
+       String[] tokens = messageString.split("[,*]",-1);
+
+       log.info("String type: "+tokens[0]);
+
+       log.info("Course (deg): "+tokens[1]);
+
+       log.info("Reference (True): "+tokens[2]);
+
+       log.info("Course (deg): "+tokens[3]);
+
+       log.info("Reference (Magnetic): "+tokens[4]);
+
+       log.info("Speed (knots): "+tokens[5]);
+
+       log.info("Units (knots): "+tokens[6]);
+
+       log.info("Speed (km/hr): "+tokens[7]);
+
+       log.info("Units (km/hr): "+tokens[8]);
+
+       if (tokens.length == 11) {
+          log.info("Mode ('A' = Autonomous, 'D' = DGPS, 'E' = DR): "+tokens[9]);
+          log.info("Checksum: "+tokens[10]);
+       }else{
+          log.info("Checksum: "+tokens[9]);
+       }
+       return tokens;  //This should return data to the python code if the user has subscribed to it
+    }//end dataToString
+
+    public String[] publishZDAData() {
+
+       log.info("publishZDAData has been called");
+       log.info("Full data String = " + messageString);
+
+       String[] tokens = messageString.split("[,*]",-1);
+
+       log.info("String type: "+tokens[0]);
+
+       log.info("Time UTC (hhmmss.ss): "+tokens[1]);
+
+       log.info("Day: "+tokens[2]);
+
+       log.info("Month: "+tokens[3]);
+
+       log.info("Year: "+tokens[4]);
+
+       log.info("Local TZ hours: "+tokens[5]);
+
+       log.info("Local TZ minutes: "+tokens[6]);
+
+       log.info("Checksum: "+tokens[7]);
+
+       return tokens;  //This should return data to the python code if the user has subscribed to it
+    }//end dataToString
+
+
+    public String[] publishMSSData() {
+
+       log.info("publishMSSData has been called");
+       log.info("Full data String = " + messageString);
+
+       String[] tokens = messageString.split("[,*]",-1);
+
+       log.info("String type: "+tokens[0]);
+
+       log.info("Signal Strength (dB): "+tokens[1]);
+
+       log.info("Signal to Noise Ratio (dB): "+tokens[2]);
+
+       log.info("Beacon Freq (kHz): "+tokens[3]);
+
+       log.info("Beacon bitrate (bps): "+tokens[4]);
+       
+       if (tokens.length == 7) {
+          log.info("Channel Num: "+tokens[5]);
+          log.info("Checksum: "+tokens[6]);
+       }else{
+           log.info("Checksum: "+tokens[5]);
+       }
+       return tokens;  //This should return data to the python code if the user has subscribed to it
+    }//end dataToString
+
+
     public boolean connect(String port, int baud) {
         serial = getSerial();
         return serial.connect(port, baud, 8, 1, 0);
     }
+
 
     public boolean connect(String port) {
         serial = getSerial();
@@ -248,3 +478,4 @@ public class GPS extends Service {
         }
     }
 }
+
