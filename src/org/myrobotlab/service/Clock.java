@@ -98,9 +98,9 @@ public class Clock extends Service {
 			log.warn("clock already started");
 		}
 	}
-	
-	// clock started  event
-	public void clockStarted(){
+
+	// clock started event
+	public void clockStarted() {
 	}
 
 	public void stopClock() {
@@ -121,7 +121,7 @@ public class Clock extends Service {
 		isClockRunning = false;
 	}
 
-	public void clockStopped(){
+	public void clockStopped() {
 	}
 
 	public Date pulse(Date time) {
@@ -157,25 +157,28 @@ public class Clock extends Service {
 		if ("tcp".equals(test)) {
 			// TCP CONNECT WORKS BEGIN ---------------------------------
 			try {
-
-				int i = 0;
-				Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
 				
+				int i = 4;
+
+				// for (int i = 1; i < 4; ++i) {
+				Runtime.main(new String[] { "-runtimeName", String.format("client%d", i) });
+
 				// auto-grab the next port if can not listen???
 				RemoteAdapter remote = new RemoteAdapter(String.format("remote%d", i));
-				//remote.setUDPPort(6868);
-				//remote.setTCPPort(6868);
+				// remote.setUDPPort(6868);
+				// remote.setTCPPort(6868);
 				remote.startService();
-				remote.startListening();
-				
+				// remote.startListening();
+				remote.connect("tcp://127.0.0.1:6767");
+
 				Runtime.start(String.format("clock%d", i), "Clock");
 				Runtime.start(String.format("gui%d", i), "GUIService");
-				
 
 				// FIXME - sholdn't this be sendRemote ??? or at least
 				// in an interface
 				// remote.sendRemote(uri, msg);
 				// xmpp1.sendMessage("xmpp 2", "robot02 02");
+				// }
 			} catch (Exception e) {
 				Logging.logException(e);
 			}

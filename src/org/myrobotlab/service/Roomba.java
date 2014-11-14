@@ -40,7 +40,7 @@ import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 @Root
-public class Roomba extends Service implements SerialDeviceService {
+public class Roomba extends Service {
 
 	private static final long serialVersionUID = 1L;
 
@@ -71,12 +71,10 @@ public class Roomba extends Service implements SerialDeviceService {
 		return "used as a general template";
 	}
 
-	@Override
 	public ArrayList<String> getPortNames() {
 		return SerialDeviceFactory.getSerialDeviceNames();
 	}
 
-	@Override
 	public boolean connect(String name, int rate, int databits, int stopbits, int parity) {
 		// TODO Auto-generated method stub
 		return false;
@@ -783,46 +781,5 @@ public class Roomba extends Service implements SerialDeviceService {
 
 	}
 
-	@Override
-	public void write(String data) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void write(byte[] data) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void write(char data) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void write(int data) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean isConnected() {
-		return isConnected;
-	}
-
-
-	@Override
-	public int read() throws IOException {
-		//return serialDevice.read();
-		return 0;
-	}
-
-	@Override
-	public int read(byte[] data) throws IOException {
-		//return serialDevice.read(data);
-		return 0;
-	}
 
 }

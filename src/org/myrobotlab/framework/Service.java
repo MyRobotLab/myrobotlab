@@ -2008,7 +2008,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	private long lastInfo = 0;
 	private long lastWarn = 0;
-	private long lastError = 0;
+	//private long lastError = 0;
 
 	public String lastErrorMsg;
 
@@ -2055,17 +2055,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		// if (System.currentTimeMillis() - lastError > 300) {
 		invoke("publishStatus", "error", msg);
 		invoke("publishError", msg);
-		lastError = System.currentTimeMillis();
+		//lastError = System.currentTimeMillis();
 		// }
 
 		return lastErrorMsg;
 	}
+	
+	private Status lastError = null;
 
-	public String getLastError() {
-		return lastErrorMsg;
+	public boolean hasError() {
+		return lastErrorMsg != null;
+	}
+	
+	public Status getLastError(){
+		return lastError;
 	}
 
 	public String clearLastError() {
+		lastError = null;
 		String le = lastErrorMsg;
 		lastErrorMsg = null;
 		return le;
@@ -2081,7 +2088,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	public Status publishStatus(String level, String msg) {
-		return new Status(getName(), level, null, msg);
+		Status s = new Status(getName(), level, null, msg);
+		if (level.equals(Status.ERROR)){
+			lastError = s;
+		}
+		return s;
 	}
 
 	public String publishError(String msg) {

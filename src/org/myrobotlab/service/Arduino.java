@@ -77,6 +77,7 @@ import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
+import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -537,11 +538,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	@Override
-	public void write(char data) throws IOException {
-		serialDevice.write(data);
-	}
-
-	@Override
 	public void write(int data) throws IOException {
 		serialDevice.write(data);
 	}
@@ -979,7 +975,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 							// - length 4 :P
 							// FIXME dangerous - your re-using Version's
 							// blockingData :P
-							long pulse = Serial.byteToLong(msg, 1, 4);
+							long pulse = Serial.bytesToLong(msg, 1, 4);
 							blockingData.add(pulse);
 							break;
 						}
@@ -1001,7 +997,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 						case LOAD_TIMING_EVENT: {
 
-							long microsPerLoop = Serial.byteToLong(msg, 1, 4);
+							long microsPerLoop = Serial.bytesToLong(msg, 1, 4);
 							info("load %d us", microsPerLoop);
 							// log.info(String.format(" index %d type %d cur %d target %d", servoIndex, eventType, currentPos & 0xff, targetPos & 0xff));
 							// invoke("publishPin", pin);
@@ -1028,7 +1024,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 						case SENSOR_DATA: {
 							int index = (int) msg[1];
 							SensorData sd = sensorsIndex.get(index);
-							sd.duration = Serial.byteToLong(msg, 2, 4);
+							sd.duration = Serial.bytesToLong(msg, 2, 4);
 							// HMM WAY TO GO - is NOT to invoke its own but
 							// invoke publishSensorData on Sensor
 							// since its its own service
@@ -2376,5 +2372,14 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		}
 		return false;
 
+	}
+	
+	public void addByteListener(SerialDataListener service){
+		
+	}
+
+	@Override
+	public void write(int[] data) throws IOException {
+		serialDevice.write(data);
 	}
 }

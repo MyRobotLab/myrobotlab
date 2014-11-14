@@ -282,6 +282,14 @@ public class Incubator extends Service {
 		return null;
 
 	}
+	
+	public void testServiceScripts() {
+		// get download zip
+		
+		// uncompress locally
+		
+		// test - instrumentation for 
+	}
 
 	public void testPythonScripts() {
 		try {

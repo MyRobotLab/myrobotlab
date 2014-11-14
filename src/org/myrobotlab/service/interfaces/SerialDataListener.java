@@ -27,7 +27,8 @@ package org.myrobotlab.service.interfaces;
 
 public interface SerialDataListener {
 
-	public void onByte(int b);
+	// FIXME - Integer object because no method cache
+	public void onByte(Integer b);
 	public String getName();
 
 }

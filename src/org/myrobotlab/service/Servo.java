@@ -222,12 +222,12 @@ public class Servo extends Service implements ServoControl {
 	public boolean isInverted() {
 		return inverted;
 	}
-	
-	public float getMinInput(){
+
+	public float getMinInput() {
 		return minX;
 	}
-	
-	public float getMaxInput(){
+
+	public float getMaxInput() {
 		return maxX;
 	}
 
@@ -258,16 +258,16 @@ public class Servo extends Service implements ServoControl {
 	 * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
 	 * response
 	 */
-	
+
 	@Override
 	public void moveTo(Integer pos) {
-		moveTo((float)pos);
+		moveTo((float) pos);
 	}
-	
+
 	public void moveTo(Double pos) {
 		moveTo(pos.floatValue());
 	}
-	
+
 	public void moveTo(Float pos) {
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
@@ -291,7 +291,7 @@ public class Servo extends Service implements ServoControl {
 		lastActivityTime = System.currentTimeMillis();
 
 	}
-	
+
 	public void writeMicroseconds(Integer pos) {
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
@@ -313,12 +313,11 @@ public class Servo extends Service implements ServoControl {
 		log.info("servoWrite({})", outputY);
 		controller.servoWriteMicroseconds(getName(), outputY);
 		lastActivityTime = System.currentTimeMillis();
-		
+
 		// trying out broadcast after
 		// position change
 		broadcastState();
 	}
-	
 
 	public boolean isAttached() {
 		return isAttached;
@@ -386,6 +385,7 @@ public class Servo extends Service implements ServoControl {
 			this.step = step;
 			this.oneWay = oneWay;
 		}
+
 		@Override
 		public void run() {
 
@@ -398,12 +398,12 @@ public class Servo extends Service implements ServoControl {
 			try {
 				while (isSweeping) {
 					// increment position that we should go to.
-					if (inputX < max && step >= 0) { 
+					if (inputX < max && step >= 0) {
 						inputX += step;
 					} else if (inputX > min && step < 0) {
 						inputX += step;
-					} 
-					
+					}
+
 					// switch directions or exit if we are sweeping 1 way
 					if ((inputX <= min && step < 0) || (inputX >= max && step > 0)) {
 						if (oneWay) {
@@ -425,7 +425,7 @@ public class Servo extends Service implements ServoControl {
 				}
 			}
 		}
-		
+
 		// for non-controller based sweeping,
 		// this is the delay for the sweeper thread.
 		public int getDelay() {
@@ -446,7 +446,7 @@ public class Servo extends Service implements ServoControl {
 	public void sweep(int min, int max, int delay, int step) {
 		sweep(min, max, delay, step, false);
 	}
-	
+
 	public void sweep(int min, int max, int delay, int step, boolean oneWay) {
 		// CONTROLLER TYPE SWITCH
 		if (speedControlOnUC) {
@@ -463,9 +463,9 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public void setSweeperDelay(int delay) {
-		((Sweeper)sweeper).setDelay(delay);
+		((Sweeper) sweeper).setDelay(delay);
 	}
-	
+
 	public void sweep() {
 		sweep(Math.round(minX), Math.round(maxX), 1, 1);
 	}
@@ -581,7 +581,7 @@ public class Servo extends Service implements ServoControl {
 	public boolean isSweeping() {
 		return isSweeping;
 	}
-	
+
 	// uber good
 	public Integer publishServoEvent(Integer position) {
 		return position;
@@ -594,167 +594,178 @@ public class Servo extends Service implements ServoControl {
 
 	public Status test() {
 		Status status = super.test();
-		
-		try {			
 
-		// FIXME GSON or PYTHON MESSAGES
+		try {
 
-		boolean useGUI = false;
-		boolean useVirtualPorts = false;
-		boolean testBasicMoves = false;
-		boolean testSweep = true;
-		boolean testDetachReAttach = false;
-		boolean testBlocking = false;
-		
-		String port = "COM15";
-		int pin = 4;
+			// FIXME GSON or PYTHON MESSAGES
 
-		if (useVirtualPorts) {
-			// virtual testing
-			VirtualSerialPort.createNullModemCable(port, "UART");
-			Serial uart = (Serial) Runtime.start("uart", "Serial");
-			uart.connect("UART");
-		}
+			boolean useGUI = true;
+			boolean useVirtualPorts = true;
+			boolean testBasicMoves = false;
+			boolean testSweep = true;
+			boolean testDetachReAttach = false;
+			boolean testBlocking = false;
 
-		// dependencies - hardware - servocontroll & servo & port
-		// challenges - no "real" feedback - even with hardware (visual?
-		// contact?)
-		// without hardware - possible serial binary MRLFile comparison !
+			
+			// roll call of current services - because we are
+			// going to make sure we whipe out all the "test" services
+			// when we are done
+			
+			String port = "COM15";
+			int pin = 4;
 
-		// TODO - check if !headless
-		if (useGUI) {
-			Runtime.start("gui", "GUIService");
-		}
+			info("setting up environment");
+	
+			Serial uart = null;
+			if (useVirtualPorts) {
+				info("starting virtual uart and serial port %s", port);
+				// virtual testing
+				VirtualSerialPort.createNullModemCable(port, "UART");
+				uart = (Serial) Runtime.start("uart", "Serial");
+				uart.connect("UART");
+				info("recording rx file of uart");
+				uart.recordRX("Servo.test.rx");
+			}
+			
+			// TODO - check if !headless
+			if (useGUI) {
+				Runtime.start("gui", "GUIService");
+			}
 
-		// step 1 - test for success
-		// step 2 - test for failures & recovery
-		String arduinoName = "arduino";
-		int min = 10;
-		int max = 170;
+			// step 1 - test for success
+			// step 2 - test for failures & recovery
+			//String arduinoName = "arduino";
+			int min = 10;
+			int max = 170;
 
-		int pause = 2000;
+			int pause = 2000;
 
-		// weird notation - but its nice when copying out
-		// into some script or other code
-		// also good to guarantee being started
+			// weird notation - but its nice when copying out
+			// into some script or other code
+			// also good to guarantee being started
 
-		Servo servo = (Servo) Runtime.start(getName(), "Servo");
+			Servo servo = (Servo) Runtime.start(getName(), "Servo");
 
-		// TODO test errros on servo move before attach
+			// TODO test errros on servo move before attach
 
-		Arduino arduino = (Arduino) Runtime.start(arduinoName, "Arduino");
-		arduino.connect(port);
-		info("attaching to pin %d", pin);
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			arduino.connect(port);
+			info("attaching to pin %d", pin);
 
-		if (!servo.attach(arduino, pin)) {
-			throw new MRLError("could not attach to arduino");
-		}
+			if (!servo.attach(arduino, pin)) {
+				error("could not attach to arduino");
+			}
 
-		if (servo.getPin() != pin) {
-			throw new MRLError("bad pin value");
-		}
+			if (servo.getPin() != pin) {
+				error("bad pin value");
+			}
 
-		Vector<String> controllers = servo.refreshControllers();
-		if (controllers.size() != 1) {
-			throw new MRLError("should be on controller");
-		}
+			Vector<String> controllers = servo.refreshControllers();
+			if (controllers.size() != 1) {
+				error("should be on controller");
+			}
 
-		servo.setMinMax(min, max);
+			servo.setMinMax(min, max);
 
-		info("should not move");
-		sleep(pause);
-		servo.moveTo(min - 1);
-		servo.moveTo(max + 1);
-
-		if (testBasicMoves) {
-
-			info("testing 10 speeds on uC");
+			info("should not move");
 			sleep(pause);
-			// TODO - moveToBlocking or callback when
-			// servo reaches position would be nice here !
-			for (int i = 0; i < 10; ++i) {
-				float newSpeed = 1.0f - ((float) i * 0.1f);
-				info("moveTo(pos=%d) %03f speed ", min, newSpeed);
-				servo.setSpeed(newSpeed);
+			servo.moveTo(min - 1);
+			servo.moveTo(max + 1);
+
+			if (testBasicMoves) {
+
+				info("testing 10 speeds on uC");
+				sleep(pause);
+				// TODO - moveToBlocking or callback when
+				// servo reaches position would be nice here !
+				for (int i = 0; i < 10; ++i) {
+					float newSpeed = 1.0f - ((float) i * 0.1f);
+					info("moveTo(pos=%d) %03f speed ", min, newSpeed);
+					servo.setSpeed(newSpeed);
+					servo.moveTo(min);
+					sleep(pause);
+					info("moveTo(pos=%d) %03f speed ", max, newSpeed);
+					servo.moveTo(max);
+					sleep(pause);
+				}
+			}
+
+			info("back to rest");
+			servo.setSpeed(1.0f);
+			servo.rest();
+
+			servo.setEventsEnabled(true);
+
+			if (testSweep) {
+
+				servo.setSpeed(0.9f);
+				servo.sweep(min, max, 30, 1);
+
+				servo.setEventsEnabled(false);
+
+				/*
+				 * 
+				 * info("computer controlled sweep speed"); int newDelay; for
+				 * (int i = 0; i < 10; ++i) { newDelay = i * 100 + 1; // FIXME -
+				 * make GSON or PYTHON message output
+				 * info("sweep (min=%d max=%d delay=%d step=%d )", min, max,
+				 * newDelay, 1); servo.setSpeed(0.3f); servo.sweep(min, max,
+				 * newDelay, 1); sleep(3 * pause); servo.stop(); servo.rest(); }
+				 */
+
+				info("uc controlled sweep speed");
+				servo.stop();
+
+				// TODO - test blocking ..
+				servo.setSpeed(1.0f);
+
+				servo.setSpeedControlOnUC(false);
+				servo.sweep(min, max, 10, 1);
+			}
+
+			// TODO - detach - re-attach - detach (move) - re-attach - check for
+			// no
+			// move !
+
+			if (testDetachReAttach) {
+				info("testing detach re-attach");
+				servo.detach();
+				sleep(pause);
+				servo.attach();
+
+				info("make sure we can move after a re-attach");
+				// put in testMode - collect controller data
+
 				servo.moveTo(min);
 				sleep(pause);
-				info("moveTo(pos=%d) %03f speed ", max, newSpeed);
 				servo.moveTo(max);
-				sleep(pause);
 			}
-		}
 
-		info("back to rest");
-		servo.setSpeed(1.0f);
-		servo.rest();
-		
-		servo.setEventsEnabled(true);
-
-		if (testSweep) {
-
-			servo.setSpeed(0.9f);
-			servo.sweep(min, max, 30, 1);
+			info("test completed");
 			
-			servo.setEventsEnabled(false);
-
-			/*
-			 * 
-			 * info("computer controlled sweep speed"); int newDelay; for (int i
-			 * = 0; i < 10; ++i) { newDelay = i * 100 + 1; // FIXME - make GSON
-			 * or PYTHON message output
-			 * info("sweep (min=%d max=%d delay=%d step=%d )", min, max,
-			 * newDelay, 1); servo.setSpeed(0.3f); servo.sweep(min, max,
-			 * newDelay, 1); sleep(3 * pause); servo.stop(); servo.rest(); }
-			 */
-
-			info("uc controlled sweep speed");
-			servo.stop();
+			if (useVirtualPorts){
+				uart.stopRecording();
+			}
 			
-			// TODO - test blocking ..
-			servo.setSpeed(1.0f);
-			
-			servo.setSpeedControlOnUC(false);
-			servo.sweep(min, max, 10, 1);
-		}
-
-		// TODO - detach - re-attach - detach (move) - re-attach - check for no
-		// move !
-
-		if (testDetachReAttach) {
-			info("testing detach re-attach");
-			servo.detach();
-			sleep(pause);
-			servo.attach();
-
-			info("make sure we can move after a re-attach");
-			// put in testMode - collect controller data
-
-			servo.moveTo(min);
-			sleep(pause);
-			servo.moveTo(max);
-		}
-
-		info("test completed");
-		} catch(Exception e){
+		} catch (Exception e) {
 			status.addError(e);
 		}
 		return status;
 	}
-	
-	public void test2(){
+
+	public void test2() {
 
 		Servo servo = (Servo) Runtime.start(getName(), "Servo");
 		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 		arduino.connect("COM15");
-		
-		RemoteAdapter remote2 = (RemoteAdapter)Runtime.create("remote2", "RemoteAdapter");
+
+		RemoteAdapter remote2 = (RemoteAdapter) Runtime.create("remote2", "RemoteAdapter");
 		remote2.setTCPPort(6868);
 		remote2.setUDPPort(6868);
 		remote2.startService();
 		servo.map(-1.0f, 1.0f, 0.0f, 180.0f);
 		Runtime.start("gui2", "GUIService");
 	}
-	
 
 	public static void main(String[] args) throws InterruptedException {
 
@@ -763,19 +774,18 @@ public class Servo extends Service implements ServoControl {
 		try {
 
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			servo.test2();
+			servo.test();
+			//servo.test2();
 			/*
 			 * Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			 * servo.setSpeedControlOnUC(true);
 			 * Serial.createNullModemCable("COM15", "UART");
 			 */
-			//servo.test();
+			// servo.test();
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
 
 	}
-
-
 
 }
