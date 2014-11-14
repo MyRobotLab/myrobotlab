@@ -137,13 +137,13 @@ public class GPS extends Service {
 /**
  * The FV-M8 module skips one of the latter elements in the string, 
  * leaving only 0-14 elements.
- * GGA —Global Positioning System Fixed Data
- * GLL—Geographic Position - Latitude/Longitude
- * GSV—GNSS Satellites in View
- * RMC—Recommended Minimum Specific GNSS Data
- * VTG—Course Over Ground and Ground Speed
- * GSA—GNSS DOP and Active Satellites
- * MSS—MSK Receiver Signal
+ * GGA Global Positioning System Fixed Data
+ * GLL Geographic Position - Latitude/Longitude
+ * GSV GNSS Satellites in View
+ * RMC Recommended Minimum Specific GNSS Data
+ * VTG Course Over Ground and Ground Speed
+ * GSA GNSS DOP and Active Satellites
+ * MSS MSK Receiver Signal
  * kmc - so the data you have doesn't have two (GLL and MSK)
  * @return 
  */
