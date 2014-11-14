@@ -421,6 +421,10 @@ public class InMoov extends Service {
 	}
 
 	public InMoovArm startRightArm(String port, String type) {
+		if (rightArm != null){
+			info("right arm already started");
+			return rightArm;
+		}
 		rightArm = startArm(RIGHT, port, type);
 		return rightArm;
 	}

@@ -12,8 +12,6 @@ public interface ServiceInterface {
 	
 	// getTestEnvironment() - hasServo hasArduino ???
 	
-	// getLastError()
-	
 	// hasError() - publish subscribe - getError().getSourceName()
 	
 	// can't be statics :( 
