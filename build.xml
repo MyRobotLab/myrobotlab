@@ -93,7 +93,7 @@
 	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
 -->
 <!-- FIXME (NETWORK ANT VS NETWORK IDE VS NETWORK URLConnection VS NETWORK HTTP :P) - LOCAL VERSUS NETWORKED - NETWORK-BUILD NUMBER ONLY - INCREMENTAL BUILD -->
-<project name="myrobotlab" default="dist">
+<project name="myrobotlab" default="release">
 	<description>http://myrobotlab.org myrobotlab build file</description>
 	<!-- 
 		${build.properties} external build properties - you can override the location of the build properties file
@@ -101,7 +101,7 @@
 	-->
 
 	<!-- FIXME - get version from tag unless manually forced -->
-	<property name="tag" value="1.0.74" />
+	<property name="tag" value="1.0.85" />
 	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
@@ -175,11 +175,13 @@
 
 		<!-- git log -1 - -pretty=%B -->
 		<!-- FIXME - OOPS forgot about mrl pull ! only have repo !!! -->
-		<exec executable="git" dir="./" outputproperty="comment">
+		<exec executable="git" dir="./" outputproperty="gitcomment">
 			<arg value="log" />
 			<arg value="-1" />
 			<arg value="--pretty=%B" />
 		</exec>
+		<!-- TODO you need to filter out brackets []{} -->
+		<propertyregex property="comment" input="${gitcomment}" regexp="\r|\n" replace=" " global="true" />
 		<echo message="comment [${comment}]" />
 		<!-- property name="comment" value="${DSTAMP}.${TSTAMP}" /-->
 		<!-- ============ tag end ================= -->
@@ -406,7 +408,7 @@
 		<jar jarfile="${dist}/myrobotlab.jar" basedir="${bin}">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
-				<attribute name="Main-Class" value="org.myrobotlab.framework.Bootstrap" />
+				<attribute name="Main-Class" value="org.myrobotlab.framework.BootstrapHotSpot" />
 				<attribute name="Built-By" value="${user.name}" />
 				<!-- section name="myrobotlab" -->
 				<section name="compile">
