@@ -131,10 +131,10 @@ public class Python extends Service {
 				error = error.replace("<", "");
 				error = error.replace(">", "");
 				if (interp != null){
-					interp.exec(String.format("print '%s'", error));
+					interp.exec(String.format("print '%s'", error));					
 				}
 				Logging.logException(e);
-				error("Python error");
+				error("Python error - %s", error);
 			} finally {
 				executing = false;
 				invoke("finishedExecutingScript");

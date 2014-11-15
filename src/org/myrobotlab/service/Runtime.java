@@ -200,8 +200,11 @@ public class Runtime extends Service implements MessageListener {
 				args.add(globalArgs[i]);
 			}
 		}
-		log.info(String.format("jvmArgs %s", Arrays.toString(jvmArgs.toArray())));
+		if (jvmArgs != null){
+			log.info(String.format("jvmArgs %s", Arrays.toString(jvmArgs.toArray())));
+		}
 		log.info(String.format("args %s", Arrays.toString(args.toArray())));
+		
 		log.info("============== args end ==============");
 		log.info("============== prelog begin ==============");
 		try {

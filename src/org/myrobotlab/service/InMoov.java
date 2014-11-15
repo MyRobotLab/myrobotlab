@@ -101,6 +101,10 @@ public class InMoov extends Service {
 
 	int maxInactivityTimeSeconds = 120;
 
+	
+	// 
+	private boolean mute = false;
+	
 	// static in Java are not overloaded but overwritten - there is no
 	// polymorphism for statics
 	public static Peers getPeers(String name) {
@@ -421,6 +425,10 @@ public class InMoov extends Service {
 	}
 
 	public InMoovArm startRightArm(String port, String type) {
+		if (rightArm != null){
+			info("right arm already started");
+			return rightArm;
+		}
 		rightArm = startArm(RIGHT, port, type);
 		return rightArm;
 	}
@@ -544,7 +552,7 @@ public class InMoov extends Service {
 	}
 
 	boolean speakBlocking(String speak, Object... fdata) {
-		if (mouth != null) {
+		if (mouth != null && !mute) {
 			return mouth.speakBlocking(speak, fdata);
 		}
 
@@ -552,14 +560,14 @@ public class InMoov extends Service {
 	}
 
 	public boolean speakBlocking(String toSpeak) {
-		if (mouth != null) {
+		if (mouth != null && !mute) {
 			return mouth.speakBlocking(toSpeak);
 		}
 		return false;
 	}
 
 	public boolean speakBlocking(Status test) {
-		if (test != null) {
+		if (test != null && !mute) {
 			return speakBlocking(test.toString());
 		}
 		return false;
@@ -1422,6 +1430,14 @@ public class InMoov extends Service {
 		 * Tracking neck = i01.startHeadTracking(leftPort); i01.detach();
 		 */
 
+	}
+
+	public boolean isMute() {
+		return mute;
+	}
+
+	public void setMute(boolean mute) {
+		this.mute = mute;
 	}
 
 }

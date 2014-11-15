@@ -77,22 +77,16 @@ public class ProcParser {
 			throw new IllegalArgumentException();
 		}
 		ArrayList<String> usageData = null;
-
-		switch (uType.toUpperCase()) {
-		case CPU:
+		String type = uType.toUpperCase();
+		
+		if (type.equals("CPU")){
 			usageData = getCpuUsage();
-			break;
-		case MEMORY:
+		} else if (type.equals("MEMORY")){
 			usageData = getMemoryUsage(processPid);
-			break;
-		case DISK:
+		} else if (type.equals("DISK")){
 			usageData = getDiskUsage();
-			break;
-		case NETWORK:
+		} else if (type.equals("NETWORK")){
 			usageData = getNetworkUsage();
-			break;
-		default:
-			break;
 		}
 		return usageData;
 	}
@@ -218,7 +212,7 @@ public class ProcParser {
 			for (int i = 0; i < 4; i++) {
 				tempData = br.readLine().trim().split(SPACE);
 				for (String s : tempData) {
-					if (!s.isEmpty() && Encoder.tryParseInt(s)) {
+					if (s.length() != 0 && Encoder.tryParseInt(s)) {
 						data.add(s);
 					}
 				}

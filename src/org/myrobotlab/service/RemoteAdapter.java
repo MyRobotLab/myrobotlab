@@ -69,6 +69,9 @@ public class RemoteAdapter extends Service implements Gateway {
 
 	@Element(required = false)
 	public String lastProtoKey;
+	
+	private String defaultPrefix = null; 
+	private HashMap<String,String> prefixMap = new HashMap<String,String>();
 
 	// types of listening threads - multiple could be managed
 	// when correct interfaces and base classes are done
@@ -91,13 +94,23 @@ public class RemoteAdapter extends Service implements Gateway {
 
 	public RemoteAdapter(String n) {
 		super(n);
-//		addLocalTask(5 * 1000, "broadcastHeartbeat");
+		defaultPrefix = n;
+		addLocalTask(5 * 1000, "broadcastHeartbeat");
 	}
 
 	public boolean isListening() {
 		return isListening;
 	}
 
+	public String setDefaultPrefix(String prefix){
+		defaultPrefix = prefix;
+		return prefix;
+	}
+	
+	public void setPrefix(String source, String prefix){
+		prefixMap.put(source, prefix);
+	}
+	
 	@Override
 	public boolean isReady() {
 		if (tcpListener.serverSocket != null) {
@@ -515,18 +528,23 @@ public class RemoteAdapter extends Service implements Gateway {
 
 		try {
 
-			int i = 1;
-			// Runtime.main(new String[] { "-runtimeName", String.format("r%d",
-			// i) });
+			int i = 0;
+			
+			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
 			RemoteAdapter remote = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
 			//Runtime.start(String.format("clock%d", i), "Clock");
 			Runtime.start(String.format("gui%d", i), "GUIService");
-			Runtime.start(String.format("joystick%d", i), "Joystick");
-			Runtime.start(String.format("python%d", i), "Python");
+			//Security security = (Security)Runtime.start(String.format("security", i), "Security");
+			remote.startListening();
+			//security.allowExportByName("laptop", true);
+			//security.allowExportByName("laptop.gui", false);
+			//remote.connect("tcp://192.168.0.92:6767");
+			//Runtime.start(String.format("joystick%d", i), "Joystick");
+			//Runtime.start(String.format("python%d", i), "Python");
 
 			// what if null service is passed "register()" no parameters -
 			// I'm sending a registration of nothing?
-			remote.broadcastState();
+			//remote.broadcastState();
 
 			//remote.connect("tcp://127.0.0.1:6767");
 			/*
