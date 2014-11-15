@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 public class EddieControlBoard extends Service implements KeyListener {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	// Peers
 	transient Serial serial;
 	transient Keyboard keyboard;
@@ -31,9 +31,10 @@ public class EddieControlBoard extends Service implements KeyListener {
 	Mapper mapper = new Mapper(-1.0f, 1.0f, -127.0f, 127.0f);
 	float leftMotorPower = 0.0f;
 	float rightMotorPower = 0.0f;
+	int timeout = 500;// 500 ms serial timeout
 
 	SensorPoller sensorPoller = null;
-	
+
 	int sensorPollIntervalMS = 100; // 10 times a second
 
 	class SensorPoller extends Thread {
@@ -58,14 +59,18 @@ public class EddieControlBoard extends Service implements KeyListener {
 
 		}
 	}
-	
+
 	public HashMap<String, Float> publishSensors(String dataString) {
 		log.info(dataString);
 		String[] values = dataString.split(" ");
-		lastSensorValues.put("LEFT_IR", new Float(Integer.parseInt(values[0].trim(),16)));
-		lastSensorValues.put("MIDDLE_IR", new Float(Integer.parseInt(values[1].trim(),16)));
-		lastSensorValues.put("RIGHT_IR", new Float(Integer.parseInt(values[2].trim(),16)));
-		lastSensorValues.put("BATTERY", new Float(0.00039f * Integer.parseInt(values[7].trim(),16)));
+		lastSensorValues.put("LEFT_IR",
+				new Float(Integer.parseInt(values[0].trim(), 16)));
+		lastSensorValues.put("MIDDLE_IR",
+				new Float(Integer.parseInt(values[1].trim(), 16)));
+		lastSensorValues.put("RIGHT_IR",
+				new Float(Integer.parseInt(values[2].trim(), 16)));
+		lastSensorValues.put("BATTERY",
+				new Float(0.00039f * Integer.parseInt(values[7].trim(), 16)));
 		++sampleCount;
 		return lastSensorValues;
 	}
@@ -100,7 +105,8 @@ public class EddieControlBoard extends Service implements KeyListener {
 		return peers;
 	}
 
-	public final static Logger log = LoggerFactory.getLogger(EddieControlBoard.class);
+	public final static Logger log = LoggerFactory
+			.getLogger(EddieControlBoard.class);
 
 	public EddieControlBoard(String n) {
 		super(n);
@@ -118,31 +124,31 @@ public class EddieControlBoard extends Service implements KeyListener {
 		keyboard.addKeyListener(this);
 	}
 
-	public void startWebGUI(){
+	public void startWebGUI() {
 		webgui = (WebGUI) startPeer("webgui");
 	}
 
-	public void startJoystick(){
+	public void startJoystick() {
 		joystick = (Joystick) startPeer("joystick");
 		joystick.addYListener(getName(), "onY");
 		joystick.addRYListener(getName(), "onRY");
 	}
-	
-	public void onY(Float y) throws IOException{
+
+	public void onY(Float y) throws IOException {
 		rightMotorPower = y;
 		go(leftMotorPower, rightMotorPower);
 	}
 
-	public void onRY(Float ry) throws IOException{
+	public void onRY(Float ry) throws IOException {
 		leftMotorPower = ry;
 		go(leftMotorPower, rightMotorPower);
 	}
-	
-	public void startRemoteAdapter(){
+
+	public void startRemoteAdapter() {
 		remote = (RemoteAdapter) startPeer("remote");
 		remote.startListening();
 	}
-	
+
 	public boolean connect(String port) throws IOException {
 		boolean ret = serial.connect(port, 115200, 8, 1, 0);
 		if (ret) {
@@ -158,51 +164,51 @@ public class EddieControlBoard extends Service implements KeyListener {
 	// read commands begin ---
 	public String getHwVersion() throws InterruptedException, IOException {
 		serial.write("HWVER\r");
-		String ret = serial.readString(5);
+		String ret = serial.readString(5, timeout);
 		return ret;
 	}
 
 	public String getVersion() throws InterruptedException, IOException {
 		serial.write("VER\r");
-		String ret = serial.readString(5);
+		String ret = serial.readString(5, timeout);
 		return ret;
 	}
 
 	public String getPingValues() throws InterruptedException, IOException {
 		// depends
 		serial.write("PING\r");
-		String ret = serial.readString(5);
+		String ret = serial.readString(5, timeout);
 		return ret;
 	}
 
 	public String getAnalogValues() throws InterruptedException, IOException {
-		//serial.clear();
+		// serial.clear();
 		serial.write("ADC\r");
-		String ret = serial.readString(32);
+		String ret = serial.readString(32, timeout);
 		return ret;
 	}
 
 	public String getGPIOInputs() throws InterruptedException, IOException {
 		serial.write("INS\r");
-		String ret = serial.readString(9);
+		String ret = serial.readString(9, timeout);
 		return ret;
 	}
 
 	public String getGPIOOutputs() throws InterruptedException, IOException {
 		serial.write("OUTS\r");
-		String ret = serial.readString(9);
+		String ret = serial.readString(9, timeout);
 		return ret;
 	}
 
 	public String getGPIOLowValues() throws InterruptedException, IOException {
 		serial.write("LOWS\r");
-		String ret = serial.readString(9);
+		String ret = serial.readString(9, timeout);
 		return ret;
 	}
 
 	public String getGPIOHighValues() throws InterruptedException, IOException {
 		serial.write("HIGHS\r");
-		String ret = serial.readString(9);
+		String ret = serial.readString(9, timeout);
 		return ret;
 	}
 
@@ -213,18 +219,14 @@ public class EddieControlBoard extends Service implements KeyListener {
 	// read commands end ---
 
 	public void onKey(String cmd) throws IOException {
-		switch (cmd) {
-
-		// left begin ---
-		case "NumPad-7": {
+		if (cmd.equals("NumPad-7")) {
 			leftMotorPower += 0.01;
 			if (leftMotorPower > 1.0) {
 				leftMotorPower = 1.0f;
 			}
 			go(leftMotorPower, rightMotorPower);
-			break;
-		}
-		case "NumPad-4": {
+
+		} else if (cmd.equals("NumPad-4")) {
 			leftMotorPower -= 0.01;
 			if (leftMotorPower < -1.0) {
 				leftMotorPower = -1.0f;
@@ -234,28 +236,26 @@ public class EddieControlBoard extends Service implements KeyListener {
 				rightMotorPower = 1.0f;
 			}
 			go(leftMotorPower, rightMotorPower);
-			break;
-		}
-		case "NumPad-1": {
+
+		} else if (cmd.equals("NumPad-1")) {
 			leftMotorPower -= 0.01;
 			if (leftMotorPower < -1.0) {
 				leftMotorPower = -1.0f;
 			}
 			go(leftMotorPower, rightMotorPower);
-			break;
+
 		}
 		// left end ---
 
 		// right begin --
-		case "NumPad-9": {
+		else if (cmd.equals("NumPad-9")) {
 			rightMotorPower += 0.01;
 			if (rightMotorPower > 1.0) {
 				rightMotorPower = 1.0f;
 			}
 			go(leftMotorPower, rightMotorPower);
-			break;
-		}
-		case "NumPad-6": {
+
+		} else if (cmd.equals("NumPad-6")) {
 			rightMotorPower -= 0.01;
 			if (rightMotorPower < -1.0) {
 				rightMotorPower = -1.0f;
@@ -265,20 +265,19 @@ public class EddieControlBoard extends Service implements KeyListener {
 				leftMotorPower = 1.0f;
 			}
 			go(leftMotorPower, rightMotorPower);
-			break;
-		}
-		case "NumPad-3": {
+
+		} else if (cmd.equals("NumPad-3")) {
 			rightMotorPower -= 0.01;
 			if (rightMotorPower < -1.0) {
 				rightMotorPower = -1.0f;
 			}
 			go(leftMotorPower, rightMotorPower);
-			break;
+
 		}
 		// right end --
 
 		// center
-		case "NumPad-8": {
+		else if (cmd.equals("NumPad-8")) {
 			leftMotorPower += 0.01;
 			if (leftMotorPower > 1.0) {
 				leftMotorPower = 1.0f;
@@ -288,10 +287,10 @@ public class EddieControlBoard extends Service implements KeyListener {
 				rightMotorPower = 1.0f;
 			}
 			go(leftMotorPower, rightMotorPower);
-			break;
+
 		}
 
-		case "NumPad-2": {
+		else if (cmd.equals("NumPad-2")) {
 			leftMotorPower -= 0.01;
 			if (leftMotorPower > 1.0) {
 				leftMotorPower = 1.0f;
@@ -301,32 +300,29 @@ public class EddieControlBoard extends Service implements KeyListener {
 				rightMotorPower = 1.0f;
 			}
 			go(rightMotorPower, rightMotorPower);
-			break;
 		}
 
 		// stop all
-		case "NumPad-5":
-		case "Space": {
+		else if (cmd.equals("NumPad-5") || cmd.equals("Space")) {
 			leftMotorPower = 0.0f;
 			rightMotorPower = 0.0f;
 			go(rightMotorPower, rightMotorPower);
-			break;
 		}
 
-		default: {
+		else {
 			warn("key command - [%s] - not defined", cmd);
-			break;
-		}
 
 		}
+
 	}
 
-	public String sendCmd(String cmd, int expectedResponseLength) throws IOException, InterruptedException {
+	public String sendCmd(String cmd, int expectedResponseLength)
+			throws IOException, InterruptedException {
 		log.info(String.format("sendCommand %s", cmd));
 		String ret = null;
 
 		serial.write(String.format("%s\r", cmd));
-		ret = serial.readString(expectedResponseLength);
+		ret = serial.readString(expectedResponseLength, timeout);
 
 		return ret;
 	}
@@ -340,7 +336,8 @@ public class EddieControlBoard extends Service implements KeyListener {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public String sendCommand(String cmd) throws InterruptedException, IOException {
+	public String sendCommand(String cmd) throws InterruptedException,
+			IOException {
 		log.info(String.format("sendCommand %s", cmd));
 		String ret = null;
 
@@ -362,7 +359,8 @@ public class EddieControlBoard extends Service implements KeyListener {
 		if (r > 127) {
 			r = 128 - r;
 		}
-		String cmd = String.format("GO %s %s\r", Integer.toHexString(l & 0xFF), Integer.toHexString(r & 0xFF)).toUpperCase();
+		String cmd = String.format("GO %s %s\r", Integer.toHexString(l & 0xFF),
+				Integer.toHexString(r & 0xFF)).toUpperCase();
 		info("%s", cmd);
 		serial.write(cmd);
 	}
@@ -389,7 +387,8 @@ public class EddieControlBoard extends Service implements KeyListener {
 	public Status test() {
 		Status status = super.test();
 		try {
-			EddieControlBoard ecb = (EddieControlBoard) Runtime.start(getName(), "EddieControlBoard");
+			EddieControlBoard ecb = (EddieControlBoard) Runtime.start(
+					getName(), "EddieControlBoard");
 			Runtime.start("gui", "GUIService");
 			Serial uart = ecb.serial.createVirtualUART();
 			uart.write("011 011 011 004 004 004 004 CBB\r");
@@ -430,36 +429,36 @@ public class EddieControlBoard extends Service implements KeyListener {
 
 		return status;
 	}
-	
+
 	class Simulator extends Thread {
-		public void run(){
-			while (isRunning()){
+		public void run() {
+			while (isRunning()) {
 				// how to auto correct & read the various parts
 				// you know how to do this - ORIGINAL InputStream API Argggg !
-				
+
 			}
 		}
 	}
-	
+
 	public void test2() {
 		try {
 			// COM 9 Mega
 			// COM 8 UNO
 			// COM 10 Usb
-			Runtime.start("gui","GUIService");
-			EddieControlBoard ecb = (EddieControlBoard) Runtime.getService(getName());
+			Runtime.start("gui", "GUIService");
+			EddieControlBoard ecb = (EddieControlBoard) Runtime
+					.getService(getName());
 			ecb.startRemoteAdapter();
 			ecb.startJoystick();
 			ecb.connect("COM10");
 			ecb.startSensors();
 			sleep(10000);
 			ecb.stopSensors();
-			
+
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
 	}
-
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -467,7 +466,8 @@ public class EddieControlBoard extends Service implements KeyListener {
 
 		try {
 
-			EddieControlBoard ecb = (EddieControlBoard) Runtime.start("ecb", "EddieControlBoard");
+			EddieControlBoard ecb = (EddieControlBoard) Runtime.start("ecb",
+					"EddieControlBoard");
 			ecb.test2();
 
 			// 129 -> 81

@@ -55,7 +55,7 @@ public interface ServoControl {
 	 * @param offset
 	 *            - new offset
 	 */
-	//public void move(Float offset);
+	public void move(Float offset);
 
 	/**
 	 * moveTo moves the servo to a specific location. Typically, a servo has 0

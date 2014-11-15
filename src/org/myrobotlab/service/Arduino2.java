@@ -600,7 +600,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	 */
 
 	@Override
-	public void onByte(int newByte) {
+	public void onByte(Integer newByte) {
 		/*
 		 * switch (event.getEventType()) { case SerialDeviceEvent.BI: case
 		 * SerialDeviceEvent.OE: case SerialDeviceEvent.FE: case
@@ -628,6 +628,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			 * 
 			 * Optimize this as much as possible !
 			 */
+			// FIXME - DO NOT USE THIS - USE PUB / SUB !! its more effecient anyway
 			while (serial.isOpen() && (newByte = serial.read()) > -1) {
 
 				++byteCount;
@@ -648,14 +649,14 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 						error(String.format("Arduino2->MRL error %d rx sz errors", ++error_arduino_to_mrl_rx_cnt));
 						continue;
 					}
-					msgSize = (byte) newByte;
+					msgSize = (byte) newByte.intValue();
 					// dump.append(String.format("MSG|SZ %d", msgSize));
 				} else if (byteCount > 2) {
 					// remove header - fill msg data - (2) headbytes -1
 					// (offset)
 					// dump.append(String.format("|P%d %d", byteCount,
 					// newByte));
-					msg[byteCount - 3] = (byte) newByte;
+					msg[byteCount - 3] = (byte) newByte.intValue();
 				}
 
 				// process valid message
@@ -686,7 +687,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 						// - length 4 :P
 						// FIXME dangerous - your re-using Version's
 						// blockingData :P
-						long pulse = Serial.byteToLong(msg, 1, 4);
+						long pulse = Serial.bytesToLong(msg, 1, 4);
 						blockingData.add(pulse);
 						break;
 					}
@@ -708,7 +709,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 					case LOAD_TIMING_EVENT: {
 
-						long microsPerLoop = Serial.byteToLong(msg, 1, 4);
+						long microsPerLoop = Serial.bytesToLong(msg, 1, 4);
 						info("load %d us", microsPerLoop);
 						// log.info(String.format(" index %d type %d cur %d target %d",
 						// servoIndex, eventType, currentPos & 0xff,
@@ -736,7 +737,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 					case SENSOR_DATA: {
 						int index = (int) msg[1];
 						SensorData sd = sensorsIndex.get(index);
-						sd.duration = Serial.byteToLong(msg, 2, 4);
+						sd.duration = Serial.bytesToLong(msg, 2, 4);
 						// HMM WAY TO GO - is NOT to invoke its own but
 						// invoke publishSensorData on Sensor
 						// since its its own service

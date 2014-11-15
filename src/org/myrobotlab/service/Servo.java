@@ -776,6 +776,11 @@ public class Servo extends Service implements ServoControl {
 
 	}
 
+	@Override
+	public void move(Float offset) {
+		// TODO: need to implement?
+	}
+
 
 
 }

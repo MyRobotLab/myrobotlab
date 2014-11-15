@@ -64,7 +64,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	JButton createVirtualUART = new JButton("create virtual uart");
 	JButton captureRX = new JButton();
 	JButton captureTX = new JButton();
-	JButton sendTx = new JButton("send tx from file");
+	//JButton sendTx = new JButton("send tx from file");
 
 	JLabel connectLight = new JLabel();
 
@@ -78,7 +78,8 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	int rxCount = 0;
 	int txCount = 0;
 
-	JTextField sendData = new JTextField(40);
+	//JTextField sendData = new JTextField(40);
+	JTextArea sendData = new JTextArea(3, 40);
 	JButton send = new JButton("send");
 	JButton sendFile = new JButton("send file");
 
@@ -108,7 +109,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		north.add(widthMenu);
 		north.add(createVirtualUART);
 		north.add(captureRX);
-		north.add(sendTx);
+		//north.add(sendTx);
 
 		display.add(north, BorderLayout.NORTH);
 
@@ -131,7 +132,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		display.add(south, BorderLayout.SOUTH);
 
 		createVirtualUART.addActionListener(this);
-		sendTx.addActionListener(this);
+		send.addActionListener(this);
 		sendFile.addActionListener(this);
 		captureRX.addActionListener(this);
 		ports.addItemListener(this);
@@ -263,10 +264,8 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		}
 		
 		if (o == sendFile) {
-
 			JFileChooser fileChooser = new JFileChooser();
 			// set current directory
-			
 			fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 			int result = fileChooser.showOpenDialog(this.getDisplay());
 			if (result == JFileChooser.APPROVE_OPTION) {
@@ -274,7 +273,6 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 				File selectedFile = fileChooser.getSelectedFile();
 				send("writeFile", selectedFile.getAbsolutePath());
 			}
-
 		}
 
 		if (o == ports) {
@@ -287,6 +285,13 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 				send("startPolling");
 			}
 		}
+		
+		if (o == send) {
+			String data = sendData.getText();
+			send("write", data.getBytes());
+			myService.info("sent [%s]", data);
+		}
+
 	}
 
 	// onChange of ports

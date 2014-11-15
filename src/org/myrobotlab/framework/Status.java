@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 /**
@@ -168,6 +169,7 @@ public class Status implements Serializable {// extends Exception {
 	}
 	
 	public Status addError(Exception e){
+		Logging.logException(e);
 		Status status = error("%s %s", e.getMessage(), stackToString(e));
 		add(status);
 		return status;
@@ -227,6 +229,7 @@ public class Status implements Serializable {// extends Exception {
 				return;
 			}
 			// if logging enabled
+			/*
 			switch(status.level){
 			case DEBUG:{
 			}
@@ -245,6 +248,7 @@ public class Status implements Serializable {// extends Exception {
 			}
 			
 			}
+			*/
 			}
 			
 			statuses.add(status);
