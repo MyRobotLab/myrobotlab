@@ -92,5 +92,6 @@
 	<classpathentry kind="lib" path="/repo/org.junit/4.11/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/noggit-0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/solr-solrj-4.10.2.jar"/>
+        <classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/commons-io-2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
