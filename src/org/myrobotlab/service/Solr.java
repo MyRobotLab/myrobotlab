@@ -32,17 +32,17 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class SolrService extends Service {
+public class Solr extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(SolrService.class);
+	public final static Logger log = LoggerFactory.getLogger(Solr.class);
 
 	public String solrUrl = "http://localhost:8983/solr";
 	
 	private HttpSolrServer solrServer;
 	
-	public SolrService(String n) {
+	public Solr(String n) {
 		super(n);
 	}
 
@@ -63,7 +63,7 @@ public class SolrService extends Service {
 
 		try {
 
-			SolrService solr = (SolrService)Runtime.start("solr", "SolrService");
+			Solr solr = (Solr)Runtime.start("solr", "SolrService");
 			Runtime.start("gui", "GUIService");
 			
 			// Create a test document 
