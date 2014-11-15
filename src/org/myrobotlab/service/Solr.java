@@ -63,7 +63,7 @@ public class Solr extends Service {
 
 		try {
 
-			Solr solr = (Solr)Runtime.start("solr", "SolrService");
+			Solr solr = (Solr)Runtime.start("solr", "Solr");
 			Runtime.start("gui", "GUIService");
 			
 			// Create a test document 
@@ -237,6 +237,12 @@ public class Solr extends Service {
 	 */
 	public void setSolrUrl(String solrUrl) {
 		this.solrUrl = solrUrl;
+		// TODO: this isn't good to include behavior here but 
+		// if someone switches the url, we want to re-create the solr server.
+		// this breaks the bean pattern a bit..
+		if (solrServer != null) {
+			solrServer = new HttpSolrServer(solrUrl);
+		}
 	}
 	
 }

@@ -322,6 +322,7 @@
 		<pathelement location="../repo/javazoom.spi/1.9.5/mp3spi1.9.5.jar"/>
 		<pathelement location="../repo/org.apache.solr/4.10.2/noggit-0.5.jar"/>
 		<pathelement location="../repo/org.apache.solr/4.10.2/solr-solrj-4.10.2.jar"/>
+		<pathelement location="../repo/org.apache.solr/4.10.2/commons-io-2.3.jar"/>
 	</path>
 
 	<!-- class path for testing FIXME - add junit normalize git -->

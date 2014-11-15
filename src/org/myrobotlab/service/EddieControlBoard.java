@@ -11,10 +11,12 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.Joystick.Button;
+import org.myrobotlab.service.interfaces.ButtonListener;
 import org.myrobotlab.service.interfaces.KeyListener;
 import org.slf4j.Logger;
 
-public class EddieControlBoard extends Service implements KeyListener {
+public class EddieControlBoard extends Service implements KeyListener, ButtonListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,6 +26,8 @@ public class EddieControlBoard extends Service implements KeyListener {
 	transient WebGUI webgui;
 	transient Joystick joystick;
 	transient RemoteAdapter remote;
+	transient Python python;
+	transient Speech mouth;
 
 	HashMap<String, Float> lastSensorValues = new HashMap<String, Float>();
 	int sampleCount = 0;
@@ -63,14 +67,10 @@ public class EddieControlBoard extends Service implements KeyListener {
 	public HashMap<String, Float> publishSensors(String dataString) {
 		log.info(dataString);
 		String[] values = dataString.split(" ");
-		lastSensorValues.put("LEFT_IR",
-				new Float(Integer.parseInt(values[0].trim(), 16)));
-		lastSensorValues.put("MIDDLE_IR",
-				new Float(Integer.parseInt(values[1].trim(), 16)));
-		lastSensorValues.put("RIGHT_IR",
-				new Float(Integer.parseInt(values[2].trim(), 16)));
-		lastSensorValues.put("BATTERY",
-				new Float(0.00039f * Integer.parseInt(values[7].trim(), 16)));
+		lastSensorValues.put("LEFT_IR", new Float(Integer.parseInt(values[0].trim(), 16)));
+		lastSensorValues.put("MIDDLE_IR", new Float(Integer.parseInt(values[1].trim(), 16)));
+		lastSensorValues.put("RIGHT_IR", new Float(Integer.parseInt(values[2].trim(), 16)));
+		lastSensorValues.put("BATTERY", new Float(0.00039f * Integer.parseInt(values[7].trim(), 16)));
 		++sampleCount;
 		return lastSensorValues;
 	}
@@ -105,8 +105,7 @@ public class EddieControlBoard extends Service implements KeyListener {
 		return peers;
 	}
 
-	public final static Logger log = LoggerFactory
-			.getLogger(EddieControlBoard.class);
+	public final static Logger log = LoggerFactory.getLogger(EddieControlBoard.class);
 
 	public EddieControlBoard(String n) {
 		super(n);
@@ -122,6 +121,8 @@ public class EddieControlBoard extends Service implements KeyListener {
 		}
 
 		keyboard.addKeyListener(this);
+		python = (Python) Runtime.start("python", "Python");
+		mouth = (Speech) Runtime.start("mouth", "Speech");
 	}
 
 	public void startWebGUI() {
@@ -135,13 +136,13 @@ public class EddieControlBoard extends Service implements KeyListener {
 	}
 
 	public void onY(Float y) throws IOException {
-		rightMotorPower = y;
-		go(leftMotorPower, rightMotorPower);
+		rightMotorPower = y * -1;
+		go(rightMotorPower, leftMotorPower);
 	}
 
 	public void onRY(Float ry) throws IOException {
-		leftMotorPower = ry;
-		go(leftMotorPower, rightMotorPower);
+		leftMotorPower = ry * -1;
+		go(rightMotorPower, leftMotorPower);
 	}
 
 	public void startRemoteAdapter() {
@@ -316,8 +317,7 @@ public class EddieControlBoard extends Service implements KeyListener {
 
 	}
 
-	public String sendCmd(String cmd, int expectedResponseLength)
-			throws IOException, InterruptedException {
+	public String sendCmd(String cmd, int expectedResponseLength) throws IOException, InterruptedException {
 		log.info(String.format("sendCommand %s", cmd));
 		String ret = null;
 
@@ -336,8 +336,7 @@ public class EddieControlBoard extends Service implements KeyListener {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public String sendCommand(String cmd) throws InterruptedException,
-			IOException {
+	public String sendCommand(String cmd) throws InterruptedException, IOException {
 		log.info(String.format("sendCommand %s", cmd));
 		String ret = null;
 
@@ -359,8 +358,7 @@ public class EddieControlBoard extends Service implements KeyListener {
 		if (r > 127) {
 			r = 128 - r;
 		}
-		String cmd = String.format("GO %s %s\r", Integer.toHexString(l & 0xFF),
-				Integer.toHexString(r & 0xFF)).toUpperCase();
+		String cmd = String.format("GO %s %s\r", Integer.toHexString(l & 0xFF), Integer.toHexString(r & 0xFF)).toUpperCase();
 		info("%s", cmd);
 		serial.write(cmd);
 	}
@@ -387,8 +385,7 @@ public class EddieControlBoard extends Service implements KeyListener {
 	public Status test() {
 		Status status = super.test();
 		try {
-			EddieControlBoard ecb = (EddieControlBoard) Runtime.start(
-					getName(), "EddieControlBoard");
+			EddieControlBoard ecb = (EddieControlBoard) Runtime.start(getName(), "EddieControlBoard");
 			Runtime.start("gui", "GUIService");
 			Serial uart = ecb.serial.createVirtualUART();
 			uart.write("011 011 011 004 004 004 004 CBB\r");
@@ -446,14 +443,15 @@ public class EddieControlBoard extends Service implements KeyListener {
 			// COM 8 UNO
 			// COM 10 Usb
 			Runtime.start("gui", "GUIService");
-			EddieControlBoard ecb = (EddieControlBoard) Runtime
-					.getService(getName());
+			EddieControlBoard ecb = (EddieControlBoard) Runtime.getService(getName());
 			ecb.startRemoteAdapter();
 			ecb.startJoystick();
 			ecb.connect("COM10");
 			ecb.startSensors();
 			sleep(10000);
 			ecb.stopSensors();
+			joystick.setController(2);
+			joystick.add1Listener("ecb", "sayBatterLevel");
 
 		} catch (Exception e) {
 			Logging.logException(e);
@@ -466,8 +464,7 @@ public class EddieControlBoard extends Service implements KeyListener {
 
 		try {
 
-			EddieControlBoard ecb = (EddieControlBoard) Runtime.start("ecb",
-					"EddieControlBoard");
+			EddieControlBoard ecb = (EddieControlBoard) Runtime.start("ecb", "EddieControlBoard");
 			ecb.test2();
 
 			// 129 -> 81
@@ -495,5 +492,25 @@ public class EddieControlBoard extends Service implements KeyListener {
 			Logging.logException(e);
 		}
 	}
+	
+	public void sayBatterLevel(Float buttonValue){
+		Float bl = getBatteryLevel();
+		mouth.speak(String.format("current battery level is %d", bl.intValue()));
+	}
+	
+	public Float getBatteryLevel(){
+		startSensors();
+		sleep(1000);
+		stopSensors();
+		return lastSensorValues.get("BATTERY");
+	}
+	
+	@Override
+	public void onButton(Button button) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
 
 }

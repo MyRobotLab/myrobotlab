@@ -325,7 +325,8 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 				// (cuz we don't want to block)
 				// if it does not block - then we can publish an array of ints
 
-				while (serialDevice.isOpen() && (newByte = (serialDevice.read() & 0xff)) > -1) {
+				while (serialDevice.isOpen() && (newByte = (serialDevice.read())) > -1) {
+					newByte =  newByte & 0xff;
 					++rxCount;
 
 					// display / debug option ? - mrl message format ?
