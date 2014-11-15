@@ -27,7 +27,6 @@ package org.myrobotlab.service;
 
 import java.util.Vector;
 
-import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
@@ -791,7 +790,7 @@ public class Servo extends Service implements ServoControl {
 	@Override
 	public void move(Float offset) {
 		//ss();
-		
+		// need to implement
 	}
 
 }
