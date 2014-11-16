@@ -34,24 +34,33 @@ public class MQTT extends Service {
 		client = new MqttClient(broker, clientId, persistence);
 		MqttConnectOptions connOpts = new MqttConnectOptions();
 		connOpts.setCleanSession(true);
-		System.out.println("Connecting to broker: " + broker);
+		log.info("Connecting to broker: " + broker);
 		client.connect(connOpts);
-
-		System.out.println("Message published");
+		log.info("Connected");
 	}
 
 	public void publish(String content) throws MqttPersistenceException, MqttException {
-		System.out.println("Connected");
-		System.out.println("Publishing message: " + content);
-		MqttMessage message = new MqttMessage(content.getBytes());
-		message.setQos(qos);
-		client.publish(topic, message);
+		try {
+			log.info("Publishing message: " + content);
+			MqttMessage message = new MqttMessage(content.getBytes());
+			message.setQos(qos);
+			client.publish(topic, message);
+			log.info("Message published");
+		} catch (MqttException e) {
+			log.info("reason "+e.getReasonCode());
+			log.info("msg "+e.getMessage());
+			log.info("loc "+e.getLocalizedMessage());
+			log.info("cause "+e.getCause());
+			log.info("excep "+e);
+            //e.printStackTrace();
+		}
 	}
 
 	public void disconnect() {
 		try {
 			if (client != null) {
 				client.disconnect();
+				log.info("Disconnected");
 			}
 		} catch (Exception e) {
 			Logging.logException(e);
@@ -60,7 +69,7 @@ public class MQTT extends Service {
 
 	@Override
 	public String getDescription() {
-		return "used as a general template";
+		return "This is an MQTT client based on the Paho MQTT client library. MQTT is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org";
 	}
 
 	public Status test() {
@@ -69,10 +78,10 @@ public class MQTT extends Service {
 
 		try {
 
-			String topic = "MQTT Examples";
+			String topic = "mrl";
 			int qos = 2;
 			String broker = "tcp://iot.eclipse.org:1883";
-			String clientId = "JavaSample";
+			String clientId = "MRL_mqtt_client";
 
 			startClient(topic, qos, broker, clientId);
 			publish("HELLO I'VE JUST BEEN BORGED");
@@ -86,10 +95,11 @@ public class MQTT extends Service {
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		MQTT template = (MQTT) Runtime.start("template", "MQTT");
+	
+		MQTT mqtt = (MQTT) Runtime.start("mqtt", "MQTT");
 		Runtime.start("gui", "GUIService");
-		template.test();
+	
+		mqtt.test();
 
 	}
 
