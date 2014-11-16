@@ -35,7 +35,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 
 	private Bot bot = null;
 	private String path = "ProgramAB";
-	private String botName = "lloyd";
+	private String botName = "alice2";
 	//private Chat chatSession=null;
 	private HashMap<String, Chat> sessions = new HashMap<String, Chat>();
 	private Pattern oobPattern = Pattern.compile("<oob>(.*?)</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);

@@ -134,6 +134,9 @@ public class Python extends Service {
 					interp.exec(String.format("print '%s'", error));					
 				}
 				Logging.logException(e);
+				if (error.length() > 40){
+					error = error.substring(0, 40);
+				}
 				error("Python error - %s", error);
 			} finally {
 				executing = false;
