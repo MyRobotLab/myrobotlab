@@ -1,11 +1,20 @@
 package org.myrobotlab.service;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
+//import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+//import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+
+import java.sql.Timestamp;
+import java.util.Arrays;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
@@ -14,33 +23,91 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-public class MQTT extends Service {
+public class MQTT extends Service implements MqttCallback {
+	int state = BEGIN;
 
+	static final int BEGIN = 0;
+	static final int CONNECTED = 1;
+	static final int PUBLISHED = 2;
+	static final int SUBSCRIBED = 3;
+	static final int DISCONNECTED = 4;
+	static final int FINISH = 5;
+	static final int ERROR = 6;
+	static final int DISCONNECT = 7;
+	
 	private static final long serialVersionUID = 1L;
 
-	MqttClient client;
-	String topic;
-	int qos = 2;
-
+	MqttAsyncClient client;
+	boolean quietMode 	= false;
+	String action 		= "publish";
+	String message 		= "Message from async callback client";
+	int qos 			= 2;
+	String brokerURL 		= "m2m.eclipse.org";
+	int port 			= 1883;
+	String clientId 	= "MRL MQTT client";
+	String subTopic		= "mrl/#";
+	String pubTopic 	= "mrl";
+	boolean cleanSession = true;			// Non durable subscriptions
+	boolean ssl = false;
+	String password = null;
+	String userName = null;
+	Throwable 			ex = null;
+	Object 				waiter = new Object();
+	boolean 			donext = false;
+	private MqttConnectOptions 	conOpt;
+	String[] tokens;
+	
 	public final static Logger log = LoggerFactory.getLogger(MQTT.class);
 
 	public MQTT(String n) {
 		super(n);
 	}
 
-	public void startClient(String topic, int qos, String broker, String clientId) throws MqttException {
-		this.topic = topic;
+	public void setPubTopic (String topic) {
+		pubTopic = topic;
+	}
+	
+	public void setSubTopic (String topic) {
+		subTopic = topic;
+	}
+	
+	public void setBroker (String broker) {
+		brokerURL = broker;
+	}
+	
+	public void setQos(int q) {
+		qos = q;
+	}
+	
+	public void setClientId(String cId) {
+		clientId = cId;
+	}
+	
+	public void startClient() throws MqttException {
 		MemoryPersistence persistence = new MemoryPersistence();
-		client = new MqttClient(broker, clientId, persistence);
-		MqttConnectOptions connOpts = new MqttConnectOptions();
-		connOpts.setCleanSession(true);
-		log.info("Connecting to broker: " + broker);
-		client.connect(connOpts);
-		log.info("Connected");
+		//client = new MqttClient(broker, clientId, persistence);
+		try {
+			conOpt = new MqttConnectOptions();
+			conOpt.setCleanSession(true);
+			// Construct the MqttClient instance
+			client = new MqttAsyncClient(this.brokerURL,clientId, persistence);
+
+			// Set this wrapper as the callback handler
+			client.setCallback(this);
+
+		} catch (MqttException e) {
+			//e.printStackTrace();
+			log.info("Unable to set up client: "+e.toString());
+		}
+		
+		// connecting should be a separate method
+		//log.info("Connecting to broker: " + broker);
+		//client.connect(connOpts);
+		//log.info("Connected");
 	}
 
-	public void publish(String content) throws MqttPersistenceException, MqttException {
-		try {
+	public void publish(String content) throws Throwable { //MqttPersistenceException, MqttException {
+		/*try {
 			log.info("Publishing message: " + content);
 			MqttMessage message = new MqttMessage(content.getBytes());
 			message.setQos(qos);
@@ -53,10 +120,117 @@ public class MQTT extends Service {
 			log.info("cause "+e.getCause());
 			log.info("excep "+e);
             //e.printStackTrace();
-		}
-	}
+		}*/
+		// Use a state machine to decide which step to do next. State change occurs
+    	// when a notification is received that an MQTT action has completed
+    	while (state != FINISH) {
+    		switch (state) {
+    			case BEGIN:
+    				// Connect using a non-blocking connect
+    		    	MqttConnector con = new MqttConnector();
+    		    	con.doConnect();
+    				break;
+    			case CONNECTED:
+    				// Publish using a non-blocking publisher
+    				Publisher pub = new Publisher();
+    				pub.doPublish(pubTopic, qos, content.getBytes());
+    				break;
+    			case PUBLISHED:
+    				state = DISCONNECT;
+    				donext = true;
+    				break;
+    			case DISCONNECT:
+    				Disconnector disc = new Disconnector();
+    				disc.doDisconnect();
+    				break;
+    			case ERROR:
+    				throw ex;
+    			case DISCONNECTED:
+    				state = FINISH;
+    				donext = true;
+    				break;
+    		}
 
-	public void disconnect() {
+//    		if (state != FINISH) {
+    			// Wait until notified about a state change and then perform next action
+    			waitForStateChange(10000);
+//    		}
+    	}
+	}
+	
+	/**
+     * Wait for a maximum amount of time for a state change event to occur
+     * @param maxTTW  maximum time to wait in milliseconds
+     * @throws MqttException
+     */
+	private void waitForStateChange(int maxTTW ) throws MqttException {
+		synchronized (waiter) {
+    		if (!donext ) {
+    			try {
+					waiter.wait(maxTTW);
+				} catch (InterruptedException e) {
+					log.info("timed out");
+					e.printStackTrace();
+				}
+
+				if (ex != null) {
+					throw (MqttException)ex;
+				}
+    		}
+    		donext = false;
+    	}
+	}
+	
+	/**
+     * Subscribe to a topic on an MQTT server
+     * Once subscribed this method waits for the messages to arrive from the server
+     * that match the subscription. It continues listening for messages until the enter key is
+     * pressed.
+     * @param topicName to subscribe to (can be wild carded)
+     * @param qos the maximum quality of service to receive messages at for this subscription
+     * @throws MqttException
+     */
+    public void subscribe(String topicName, int qos) throws Throwable {
+    	// Use a state machine to decide which step to do next. State change occurs
+    	// when a notification is received that an MQTT action has completed
+    	while (state != FINISH) {
+    		switch (state) {
+    			case BEGIN:
+    				// Connect using a non-blocking connect
+    		    	MqttConnector con = new MqttConnector();
+    		    	con.doConnect();
+    				break;
+    			case CONNECTED:
+    				// Subscribe using a non-blocking subscribe
+    				Subscriber sub = new Subscriber();
+    				sub.doSubscribe(topicName, qos);
+    				break;
+    			case SUBSCRIBED:
+    		    	// Block until Enter is pressed allowing messages to arrive
+    		    	//log.info("Subscribed");
+    				//state = DISCONNECT;
+    				donext = true;
+    				break;
+    			case DISCONNECT:
+    				Disconnector disc = new Disconnector();
+    				disc.doDisconnect();
+    				break;
+    			case ERROR:
+    				throw ex;
+    			case DISCONNECTED:
+    				state = FINISH;
+    				donext = true;
+    				break;
+    		}
+
+//    		if (state != FINISH && state != DISCONNECT) {
+    			waitForStateChange(10000);
+    		}
+//    	}
+    }
+
+
+	/*public void disconnect() {
 		try {
 			if (client != null) {
 				client.disconnect();
@@ -65,6 +239,254 @@ public class MQTT extends Service {
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+	}*/
+
+	/**
+	 * Publish in a non-blocking way and then sit back and wait to be
+	 * notified that the action has completed.
+	 */
+	public class Publisher {
+		public void doPublish(String topicName, int qos, byte[] payload) {
+		 	// Send / publish a message to the server
+			// Get a token and setup an asynchronous listener on the token which
+			// will be notified once the message has been delivered
+	   		MqttMessage message = new MqttMessage(payload);
+	    	message.setQos(qos);
+
+
+	    	String time = new Timestamp(System.currentTimeMillis()).toString();
+	    	log.info("Publishing at: "+time+ " to topic \""+topicName+"\" qos "+qos);
+
+	    	// Setup a listener object to be notified when the publish completes.
+	    	//
+	    	IMqttActionListener pubListener = new IMqttActionListener() {
+				public void onSuccess(IMqttToken asyncActionToken) {
+			    	log.info("Publish Completed");
+			    	state = PUBLISHED;
+			    	carryOn();
+				}
+
+				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+					ex = exception;
+					state = ERROR;
+					log.info("Publish failed" +exception);
+					carryOn();
+				}
+
+				public void carryOn() {
+			    	synchronized (waiter) {
+			    		donext=true;
+			    		waiter.notifyAll();
+			    	}
+				}
+			};
+
+	    	try {
+		    	// Publish the message
+	    		client.publish(topicName, message, "Pub sample context", pubListener);
+	    	} catch (MqttException e) {
+				state = ERROR;
+				donext = true;
+				ex = e;
+			}
+		}
+	}
+
+	/**
+	 * Subscribe in a non-blocking way and then sit back and wait to be
+	 * notified that the action has completed.
+	 */
+	public class Subscriber {
+		public void doSubscribe(String topicName, int qos) {
+		 	// Make a subscription
+			// Get a token and setup an asynchronous listener on the token which
+			// will be notified once the subscription is in place.
+	    	log.info("Subscribing to topic \""+topicName+"\" qos "+qos);
+
+	    	IMqttActionListener subListener = new IMqttActionListener() {
+				public void onSuccess(IMqttToken asyncActionToken) {
+			    	log.info("Subscribe Completed");
+			    	state = SUBSCRIBED;
+			    	carryOn();
+				}
+
+				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+					ex = exception;
+					state = ERROR;
+					log.info("Subscribe failed" +exception);
+					carryOn();
+				}
+
+				public void carryOn() {
+			    	synchronized (waiter) {
+			    		donext=true;
+			    		waiter.notifyAll();
+			    	}
+				}
+			};
+
+	    	try {
+	    		client.subscribe(topicName, qos, "Subscribe sample context", subListener);
+	    	} catch (MqttException e) {
+				state = ERROR;
+				donext = true;
+				ex = e;
+			}
+		}
+	}
+	
+	/**
+	 * Connect in a non-blocking way and then sit back and wait to be
+	 * notified that the action has completed.
+	 */
+    public class MqttConnector {
+
+		public MqttConnector() {
+		}
+
+		public void doConnect() {
+	    	// Connect to the server
+			// Get a token and setup an asynchronous listener on the token which
+			// will be notified once the connect completes
+	    	log.info("Connecting to "+brokerURL + " with client ID "+client.getClientId());
+
+	    	IMqttActionListener conListener = new IMqttActionListener() {
+				public void onSuccess(IMqttToken asyncActionToken) {
+			    	log.info("Connected");
+			    	state = CONNECTED;
+			    	carryOn();
+				}
+
+				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+					ex = exception;
+					state = ERROR;
+					log.info("connect failed" +exception);
+					carryOn();
+				}
+
+				public void carryOn() {
+			    	synchronized (waiter) {
+			    		donext=true;
+			    		waiter.notifyAll();
+			    	}
+				}
+			};
+
+	    	try {
+	    		// Connect using a non-blocking connect
+	    		client.connect(conOpt,"Connect sample context", conListener);
+			} catch (MqttException e) {
+				// If though it is a non-blocking connect an exception can be
+				// thrown if validation of parms fails or other checks such
+				// as already connected fail.
+				state = ERROR;
+				donext = true;
+				ex = e;
+			}
+		}
+	}
+    
+    /**
+	 * Disconnect in a non-blocking way and then sit back and wait to be
+	 * notified that the action has completed.
+	 */
+	public class Disconnector {
+		public void doDisconnect() {
+	    	// Disconnect the client
+	    	log.info("Disconnecting");
+
+	    	IMqttActionListener discListener = new IMqttActionListener() {
+				public void onSuccess(IMqttToken asyncActionToken) {
+			    	log.info("Disconnect Completed");
+			    	state = DISCONNECTED;
+			    	carryOn();
+				}
+
+				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+					ex = exception;
+					state = ERROR;
+					log.info("Disconnect failed" +exception);
+					carryOn();
+				}
+				public void carryOn() {
+			    	synchronized (waiter) {
+			    		donext=true;
+			    		waiter.notifyAll();
+			    	}
+				}
+			};
+
+	    	try {
+	    		client.disconnect("Disconnect sample context", discListener);
+	    	} catch (MqttException e) {
+				state = ERROR;
+				donext = true;
+				ex = e;
+			}
+		}
+	}
+
+	/****************************************************************/
+	/* Methods to implement the MqttCallback interface              */
+	/****************************************************************/
+
+    /**
+     * @see MqttCallback#connectionLost(Throwable)
+     */
+	public void connectionLost(Throwable cause) {
+		// Called when the connection to the server has been lost.
+		// An application may choose to implement reconnection
+		// logic at this point. This sample simply exits.
+		log.info("Connection to " + brokerURL + " lost!" + cause);
+	}
+
+    /**
+     * @see MqttCallback#deliveryComplete(IMqttDeliveryToken)
+     */
+	public void deliveryComplete(IMqttDeliveryToken token) {
+		// Called when a message has been delivered to the
+		// server. The token passed in here is the same one
+		// that was returned from the original call to publish.
+		// This allows applications to perform asynchronous
+		// delivery without blocking until delivery completes.
+		//
+		// This sample demonstrates asynchronous deliver, registering
+		// a callback to be notified on each call to publish.
+		//
+		// The deliveryComplete method will also be called if
+		// the callback is set on the client
+		//
+		// note that token.getTopics() returns an array so we convert to a string
+		// before printing it on the console
+		log.info("Delivery complete callback: Publish Completed "+Arrays.toString(token.getTopics()));
+	}
+
+    /**
+     * @see MqttCallback#messageArrived(String, MqttMessage)
+     */
+	public void messageArrived(String topic, MqttMessage message) throws MqttException {
+		// Called when a message arrives from the server that matches any
+		// subscription made by the client
+		String time = new Timestamp(System.currentTimeMillis()).toString();
+
+		String messageStr = "Time: " +time +
+                "\tTopic: " + topic +
+                "\tMessage: " + new String(message.getPayload()) +
+                "\tQoS: " + message.getQos();
+		
+		log.info(messageStr);
+		
+		tokens = messageStr.split("\t");
+		invoke("publishMQTTMessage");
+	}
+
+	/****************************************************************/
+	/* End of MqttCallback methods                                  */
+	/****************************************************************/
+
+	public String[] publishMQTTMessage() {
+		//tokens = message.split(",");
+		return tokens;
 	}
 
 	@Override
@@ -78,16 +500,17 @@ public class MQTT extends Service {
 
 		try {
 
-			String topic = "mrl";
-			int qos = 2;
-			String broker = "tcp://iot.eclipse.org:1883";
-			String clientId = "MRL_mqtt_client";
+			setPubTopic("mrl");
+			setQos(2);
+			setBroker("tcp://iot.eclipse.org:1883");
+			setClientId("MRL_mqtt_client");
 
-			startClient(topic, qos, broker, clientId);
+			startClient();
+			
 			publish("HELLO I'VE JUST BEEN BORGED");
 
-		} catch (MqttException e) {
-			status.addError(e);
+		} catch (Throwable e) {
+			status.addError((Exception) e);
 		}
 		return status;
 	}
@@ -95,7 +518,8 @@ public class MQTT extends Service {
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-	
+		Python python = new Python("python");
+        python.startService();
 		MQTT mqtt = (MQTT) Runtime.start("mqtt", "MQTT");
 		Runtime.start("gui", "GUIService");
 	
