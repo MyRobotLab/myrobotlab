@@ -82,10 +82,8 @@ public class Sweety extends Service {
 	public void startService(){
 		super.startService();
 		
-		arduino = (Arduino) startPeer("arduino");
-		arduino = (Arduino) startPeer("arduino");
-		arduino = (Arduino) startPeer("arduino");
-		
+		arduino = (Arduino) startPeer("arduino");		
+		mouth = (Speech) startPeer("mouth");
 		mouth.setLanguage("fr");
 		mouth.setBackendType("GOOGLE");
 		mouth.setGenderFemale();
@@ -93,6 +91,7 @@ public class Sweety extends Service {
 		leftForearm = (Servo) startPeer("leftForearm");
 		rightForearm = (Servo) startPeer("rightForearm");
 		rightShoulder = (Servo) startPeer("rightShoulder");
+		leftShoulder = (Servo) startPeer("leftShoulder");
 		rightArm = (Servo) startPeer("rightArm");
 		neck = (Servo) startPeer("neck");
 		leftEye = (Servo) startPeer("leftEye");
@@ -132,6 +131,21 @@ public class Sweety extends Service {
 		rightWrist.moveTo(116);
 		leftHand.moveTo(150);
 		leftWrist.moveTo(85);
+	}
+
+	public void myShiftOut(String value){
+		arduino.digitalWrite(LATCH, 0);		// Stop the copy
+		for (int i = 0; i < 8; i++){
+			if (value.charAt(i) == '1') {
+				arduino.digitalWrite(DATA, 1);
+			}
+			else {
+				arduino.digitalWrite(DATA, 0);
+			}
+			arduino.digitalWrite(SHIFT, 1);
+			arduino.digitalWrite(SHIFT, 0);
+		arduino.digitalWrite(LATCH, 1);	// copy   
+		}
 	}
 	
 	public Sweety publishState(){
