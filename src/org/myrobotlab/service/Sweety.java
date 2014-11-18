@@ -14,7 +14,7 @@ public class Sweety extends Service {
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(Sweety.class);
-	transient Arduino arduino;
+	transient public Arduino arduino;
 	transient Sphinx ear;
 	transient Speech mouth;
 	
@@ -100,6 +100,7 @@ public class Sweety extends Service {
 		rightHand = (Servo) startPeer("rightHand");
 		rightWrist = (Servo) startPeer("rightWrist");
 		leftHand = (Servo) startPeer("leftHand");
+		leftWrist = (Servo) startPeer("leftWrist");
 		
 		leftForearm.setMinMax(85,140);
 		rightForearm.setMinMax(5,67);
@@ -146,6 +147,24 @@ public class Sweety extends Service {
 			arduino.digitalWrite(SHIFT, 0);
 		arduino.digitalWrite(LATCH, 1);	// copy   
 		}
+	}
+	
+	public void mouthState(String value){
+		if (value == "smile") {
+			myShiftOut("11011100");
+		}
+		else if (value == "notHappy"){
+			myShiftOut("00111110");
+		}
+		else if (value == "speechLess"){
+			myShiftOut("10111100");
+		}
+		
+		
+		/*------- TODO TODO TODO-------
+		else if (value == "talk"){
+			myShiftOut("10111100");
+		}*/
 	}
 	
 	public Sweety publishState(){
