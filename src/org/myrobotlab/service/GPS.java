@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
@@ -17,11 +18,38 @@ public class GPS extends Service {
     public final static Logger log = LoggerFactory.getLogger(GPS.class.getCanonicalName());
     public static final String MODEL = "FV_M8";
     
+    public static final String GEOID_SEPARATION_KEY = "GEOID_SEPARATION_KEY";
+    
     public ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     String model;
     
     // peers
     public transient Serial serial;
+
+    // publish gps data begin ---
+    public static class GPSData {
+    	public String type; // msg type
+    	public Double latitude;
+    	public Double longitude;
+    	String time;
+    	
+    	HashMap<String, String> addInfo = new HashMap<String,String>();
+    }
+    
+    public void addGPSListener(Service service) {
+		addListener("publishGPS", service.getName(), "onGPS", Long.class);
+	}
+	
+	public void onGPS(GPSData gps) {
+		log.info(String.format("lat: %f", gps.latitude));
+		log.info(String.format("long: %f", gps.longitude));
+	}
+	
+    public final GPSData publishGPS(final GPSData gps){
+    	return gps;
+    }
+    // publish gps data end ---
+    
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -149,24 +177,29 @@ public class GPS extends Service {
  */
     public String[] publishGGAData() {
 
+    	GPSData gps = new GPSData();
 
        log.info("publishGGAData has been called");
        log.info("Full data String = " + messageString);
        
-       
        String[] tokens = messageString.split("[,*]",-1);
-       
+       try {
        log.info("String type: "+tokens[0]);
        
        log.info("Time hhmmss.ss: "+tokens[1]);
+	       gps.time = tokens[1];
        
       
-       if(tokens[3].contains("S")) //if negative latitude, prepend a - sign
-           tokens[2]= "-"+tokens[2];
        
        log.info("Latitude: "+tokens[2]);
        log.info("North or South: "+tokens[3]);
-       
+       if (tokens[2].length() > 0){
+    	   gps.latitude = Double.parseDouble(tokens[2]);
+       }
+       if(tokens[3].contains("S")){ //if negative latitude, prepend a - sign
+           tokens[2]= "-"+tokens[2];
+           gps.latitude = gps.latitude * -1;
+       }
        
        if(tokens[5].contains("W")) //if negative longitude, prepend a - sign
            tokens[4]= "-"+tokens[4];
@@ -182,10 +215,11 @@ public class GPS extends Service {
        log.info("Altitude (meters above mean sealevel): "+tokens[9]);
        log.info("meters?: "+tokens[10]);
        
-       
        log.info("Geoid Separation: (Geoid-to-ellipsoid separation. Ellipsoid altitude = MSL Altitude + Geoid Separation.) "+tokens[11]);
        log.info("meters?: "+tokens[12]); 
        
+	       gps.addInfo.put(GEOID_SEPARATION_KEY, tokens[12]);
+	       
        log.info("Seconds since last update (likely blank): "+tokens[13]);
        
        if (tokens.length == 16) {
@@ -194,6 +228,10 @@ public class GPS extends Service {
        }else{
             log.info("Checksum: "+tokens[14]);
        }
+	       invoke("publishGPS", gps);
+    	} catch(Exception e){
+    		Logging.logException(e);
+    	}
        return tokens;  //This should return data to the python code if the user has subscribed to it
     }//end dataToString
     
@@ -537,9 +575,6 @@ public class GPS extends Service {
 
             GPS template = new GPS("gps1");
             template.startService();
-
-
-
 
             Python python = new Python("python");
             python.startService();
