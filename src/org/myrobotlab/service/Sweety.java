@@ -134,7 +134,7 @@ public class Sweety extends Service {
 		leftWrist.moveTo(85);
 	}
 
-	public void myShiftOut(String value){
+	private void myShiftOut(String value){
 		arduino.digitalWrite(LATCH, 0);		// Stop the copy
 		for (int i = 0; i < 8; i++){
 			if (value.charAt(i) == '1') {
@@ -145,8 +145,9 @@ public class Sweety extends Service {
 			}
 			arduino.digitalWrite(SHIFT, 1);
 			arduino.digitalWrite(SHIFT, 0);
+			}
 		arduino.digitalWrite(LATCH, 1);	// copy   
-		}
+		
 	}
 	
 	public void mouthState(String value){
@@ -159,7 +160,9 @@ public class Sweety extends Service {
 		else if (value == "speechLess"){
 			myShiftOut("10111100");
 		}
-		
+		else if (value == "empty"){
+			myShiftOut("00000000");
+		}
 		
 		/*------- TODO TODO TODO-------
 		else if (value == "talk"){
