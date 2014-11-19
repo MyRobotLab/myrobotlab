@@ -418,7 +418,75 @@ public class GPS extends Service {
        return tokens;  //This should return data to the python code if the user has subscribed to it
     }//end dataToString
 
+    /***********************************************************************************
+     * This block of methods will be used to GeoFencing
+     * This code is based on the examples on the following blog
+     * http://stefanbangels.blogspot.be/2012/12/for-several-years-now-i-have-been.html
+     * *********************************************************************************/
+    // We need a circle object to build a point/radius geofence
+    class Circle {
 
+        private double x;
+        private double y;
+        private int radius;
+
+        public Circle(double x, double y, int radius) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+        }
+
+        public double getLat() {
+            return x;
+        }
+
+        public double getLon() {
+            return y;
+        }
+
+        public int getRadius() {
+            return radius;
+        }
+        
+        public int setRadius(int m) {
+        	radius = m;
+        	return radius;
+        }
+            
+    }
+    
+    //When your radius is defined in meters, you will need the Haversine formula.  
+    //This formula will calculate the distance between two points (in meters) 
+    //while taking into account the earth curvation:
+
+    public double calculateDistance(double longitude1, double latitude1, double longitude2, double latitude2) {
+    	double c = 
+    	Math.sin(Math.toRadians(latitude1)) *
+    	Math.sin(Math.toRadians(latitude2)) +
+    	Math.cos(Math.toRadians(latitude1)) *
+    	Math.cos(Math.toRadians(latitude2)) *
+    	Math.cos(Math.toRadians(longitude2) - 
+    		Math.toRadians(longitude1));
+    	c = c > 0 ? Math.min(1, c) : Math.max(-1, c);
+        return 3959 * 1.609 * 1000 * Math.acos(c);
+    }
+    	
+    // Test if Lat(x) and Long(y) are inside your geofence.
+    public boolean checkInside(Circle circle, double x, double y) {
+        return calculateDistance(
+            circle.getLat(), circle.getLon(), x, y
+        ) < circle.getRadius();
+   	}
+    
+    public Circle setPointGeoFence (double lat, double lon, int radius) {
+    	Circle pointFence = new Circle(lat, lon, radius);
+    	return pointFence;
+    }
+
+    /***********************************************************************************
+     * This ends the GeoFence block
+     * *********************************************************************************/
+    
     public boolean connect(String port, int baud) {
         serial = getSerial();
         return serial.connect(port, baud, 8, 1, 0);
