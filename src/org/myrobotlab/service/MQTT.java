@@ -1,5 +1,8 @@
 package org.myrobotlab.service;
 
+// Much of this code was copied from the sample program provided by the Paho project
+//http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.java.git/tree/org.eclipse.paho.sample.mqttv3app/src/main/java/org/eclipse/paho/sample/mqttv3app/SampleAsyncCallBack.java
+
 //import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -85,7 +88,6 @@ public class MQTT extends Service implements MqttCallback {
 	
 	public void startClient() throws MqttException {
 		MemoryPersistence persistence = new MemoryPersistence();
-		//client = new MqttClient(broker, clientId, persistence);
 		try {
 			conOpt = new MqttConnectOptions();
 			conOpt.setCleanSession(true);
@@ -96,31 +98,12 @@ public class MQTT extends Service implements MqttCallback {
 			client.setCallback(this);
 
 		} catch (MqttException e) {
-			//e.printStackTrace();
 			log.info("Unable to set up client: "+e.toString());
 		}
 		
-		// connecting should be a separate method
-		//log.info("Connecting to broker: " + broker);
-		//client.connect(connOpts);
-		//log.info("Connected");
 	}
 
 	public void publish(String content) throws Throwable { //MqttPersistenceException, MqttException {
-		/*try {
-			log.info("Publishing message: " + content);
-			MqttMessage message = new MqttMessage(content.getBytes());
-			message.setQos(qos);
-			client.publish(topic, message);
-			log.info("Message published");
-		} catch (MqttException e) {
-			log.info("reason "+e.getReasonCode());
-			log.info("msg "+e.getMessage());
-			log.info("loc "+e.getLocalizedMessage());
-			log.info("cause "+e.getCause());
-			log.info("excep "+e);
-            //e.printStackTrace();
-		}*/
 		// Use a state machine to decide which step to do next. State change occurs
     	// when a notification is received that an MQTT action has completed
     	while (state != FINISH) {
@@ -206,8 +189,7 @@ public class MQTT extends Service implements MqttCallback {
     				sub.doSubscribe(topicName, qos);
     				break;
     			case SUBSCRIBED:
-    		    	// Block until Enter is pressed allowing messages to arrive
-    		    	//log.info("Subscribed");
+    				//We're not going to do anything extra in this state so the service can keep running
     				//state = DISCONNECT;
     				donext = true;
     				break;
@@ -225,21 +207,10 @@ public class MQTT extends Service implements MqttCallback {
 
 //    		if (state != FINISH && state != DISCONNECT) {
     			waitForStateChange(10000);
-    		}
-//    	}
+//    		}
+    	}
     }
 
-
-	/*public void disconnect() {
-		try {
-			if (client != null) {
-				client.disconnect();
-				log.info("Disconnected");
-			}
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}*/
 
 	/**
 	 * Publish in a non-blocking way and then sit back and wait to be
