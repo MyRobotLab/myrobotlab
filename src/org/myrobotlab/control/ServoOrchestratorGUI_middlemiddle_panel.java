@@ -13,8 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 /**
  * source modified from:
@@ -98,7 +96,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 		channel_solo = new JButton("S");
 		channel_settings = new JButton("SETTINGS");
 		// TODO - add ActionListener for "mute"
-		// TODO - add actionListener for "solo"
+		// TODO - add ActionListener for "solo"
 
 		// x y w h
 		channel_panel.add(channel_name, gridbaglayout_set(0, 0, 3, 1));
@@ -157,7 +155,6 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 			break;
 		}
 
-		// TODO - maybe remove ???
 		// This won't take the entire width for easy drag and drop
 		final Dimension d = new Dimension(130, 80);
 		this.setPreferredSize(d);
