@@ -363,7 +363,7 @@ public class ServoOrchestrator extends Service {
 
 	public void play_go_fa() {
 		pos1 = sogui_ref.middlemiddle_ref.panels[0].length;
-		pos2 = sizex-1;
+		pos2 = 4;
 		pos3 = 999;
 		play_updatetime(true, true, true);
 		play_updatepanels(pos1);
