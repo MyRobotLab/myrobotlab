@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import org.myrobotlab.programab.OOBPayload;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.python.antlr.base.mod;
 
 /**
  * Program AB service for MyRobotLab
@@ -90,6 +92,12 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		}
 		// TODO don't allow to specify a different path
 		// it will be assumed to be ./ProgramAB
+
+		// TODO : put some code here to delete the aimlif file 
+		// if the aiml file is 
+
+		cleanOutOfDateAimlIFFiles(botName, path);
+
 		if (bot == null){
 			bot = new Bot(botName, path);
 		}
@@ -103,9 +111,41 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		if (!"default".equals(session)){
 			getResponse(session, String.format("my name is %s", session));
 		}
-		
+
 		// TODO: to make sure if the start session is updated, that the button updates in the gui
 		// broadcastState();
+	}
+
+	private void cleanOutOfDateAimlIFFiles(String botName, String path) {
+		String aimlPath = path + File.separator  + "bots" + File.separator + botName + File.separator + "aiml";
+		String aimlIFPath = path + File.separator + "bots"+ File.separator + botName + File.separator + "aimlif";
+		log.info("AIML FILES:");
+		File folder = new File(aimlPath);
+		System.out.println(folder.getAbsolutePath());
+		HashMap<String, Long> modifiedDates = new HashMap<String, Long>();
+		for (File f : folder.listFiles()) {
+			log.info(f.getAbsolutePath());
+			// TODO: better stripping of the file extension
+			String aiml = f.getName().replace(".aiml", "");
+			modifiedDates.put(aiml,f.lastModified());
+		}
+		log.info("AIMLIF FILES:");
+		folder = new File(aimlIFPath);
+		for (File f : folder.listFiles()) {
+			log.info(f.getAbsolutePath());
+			String aimlIF = f.getName().replace(".aiml.csv", "");
+			Long lastMod = modifiedDates.get(aimlIF);
+			if (lastMod != null) {
+				if (f.lastModified() < lastMod) {
+					// the AIMLIF file is newer than the AIML file.
+					// delete the AIMLIF file so ProgramAB recompiles it properly.
+					log.info("Deleteing AIMLIF file because the original AIML file was modified. {}", aimlIF);
+					f.delete();
+				}
+			}
+		}
+
+
 	}
 
 	public static class Response {
@@ -199,6 +239,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		try {
 			jaxbContext = JAXBContext.newInstance(OOBPayload.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			log.info("OOB PAYLOAD :" + oobPayload);
 			Reader r = new StringReader(oobPayload);
 			OOBPayload oobMsg = (OOBPayload) jaxbUnmarshaller.unmarshal(r);
 			return oobMsg;
