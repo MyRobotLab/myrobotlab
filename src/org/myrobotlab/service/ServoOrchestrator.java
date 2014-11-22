@@ -122,6 +122,10 @@ public class ServoOrchestrator extends Service {
 		sogui_ref.middleright_arduino_list.setListData(arduinoarray);
 	}
 
+	public void top_addservo_butto() {
+		sogui_ref.middlemiddle_ref.externalcall_addPanel();
+	}
+
 	public void middleright_update_button() {
 		settingsitemholder[middleright_shownitem].name = sogui_ref.middleright_name_textfield
 				.getText();
@@ -398,12 +402,12 @@ public class ServoOrchestrator extends Service {
 	}
 
 	public void play_play_3_1() {
-		
-		//first block
+
+		// first block
 		if (pos1 == 1 && pos2 == 1 && pos3 == 0) {
 			play_playreally(pos1);
 		}
-		
+
 		pos3++;
 		if (pos3 > 999) {
 			pos3 -= 999;
@@ -479,7 +483,7 @@ public class ServoOrchestrator extends Service {
 
 	public void play_searchblocks(int pos) {
 		for (int i = 0; i < sizey; i++) {
-			ServoOrchestratorGUI_middlemiddle_panel panels11 = sogui_ref.middlemiddle_ref.panels[pos-1][i];
+			ServoOrchestratorGUI_middlemiddle_panel panels11 = sogui_ref.middlemiddle_ref.panels[pos - 1][i];
 			if (panels11 != null) {
 				play_playblock(i, panels11);
 			}
