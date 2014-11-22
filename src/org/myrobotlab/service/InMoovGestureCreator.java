@@ -107,7 +107,6 @@ public class InMoovGestureCreator extends Service {
 	public void control_savescri() {
 		// Save the Python-Script (in Python-Service) (button bottom-left)
 		JFrame frame = new JFrame();
-		frame.setSize(500, 500);
 		JTextArea textarea = new JTextArea();
 		textarea.setText(pythonscript);
 		textarea.setEditable(false);
@@ -118,6 +117,7 @@ public class InMoovGestureCreator extends Service {
 		scrollpane
 				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		frame.add(scrollpane);
+		frame.pack();
 		frame.setVisible(true);
 	}
 
