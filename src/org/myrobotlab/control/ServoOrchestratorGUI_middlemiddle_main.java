@@ -36,6 +36,8 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 
 	public final ServoOrchestratorGUI so_ref;
 
+	public int panel_counter;
+
 	/**
 	 * <p>
 	 * This represents the data that is transmitted in drag and drop.
@@ -64,6 +66,8 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		rootPanel.setLayout(new GridBagLayout());
 		middlemiddle.add(rootPanel);
 
+		panel_counter = 0;
+
 		// Create a list to hold all the panels
 		panels = new ServoOrchestratorGUI_middlemiddle_panel[so_ref.sizex][so_ref.sizey];
 
@@ -73,7 +77,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		for (int i = 0; i < prep.length; i++) {
 			if (i < panels[0].length) {
 				final int fi = i;
-				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel("channel");
+				panel_counter++;
+				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
+						"channel", panel_counter);
 				prep[i].channel_id.setText(prep[i].id + "");
 				prep[i].channel_name.setText("Channel " + (i + 1));
 				prep[i].channel_settings
@@ -84,8 +90,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 							}
 						});
 			} else {
+				panel_counter++;
 				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
-						"timesection");
+						"timesection", panel_counter);
 				prep[i].timesection_id.setText(prep[i].id + "");
 				prep[i].timesection_headline.setText("TIMEUNIT "
 						+ (i - panels[0].length + 1));
@@ -111,8 +118,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 					break;
 				}
 				if (panels[i1][i2] == null) {
+					panel_counter++;
 					ServoOrchestratorGUI_middlemiddle_panel p = new ServoOrchestratorGUI_middlemiddle_panel(
-							"servo");
+							"servo", panel_counter);
 					panels[i1][i2] = p;
 
 					boolean later_externalcall_servopanelsettostartpos = false;
@@ -257,7 +265,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		for (int i = 0; i < prep.length; i++) {
 			if (i < panels[0].length) {
 				final int fi = i;
-				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel("channel");
+				panel_counter++;
+				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
+						"channel", panel_counter);
 				prep[i].channel_id.setText(prep[i].id + "");
 				prep[i].channel_name.setText("Channel " + (i + 1));
 				prep[i].channel_settings
@@ -269,8 +279,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 						});
 				prep[i].setBackground(Color.green);
 			} else {
+				panel_counter++;
 				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
-						"timesection");
+						"timesection", panel_counter);
 				prep[i].timesection_id.setText(prep[i].id + "");
 				prep[i].timesection_headline.setText("TIMEUNIT "
 						+ (i - panels[0].length + 1));
