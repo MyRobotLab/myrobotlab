@@ -1,6 +1,5 @@
 package org.myrobotlab.control;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -48,7 +47,7 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 	public int sizex;
 	public int sizey;
 
-	public ServoOrchestratorGUI_middlemiddle_main middlemiddle_ref;
+	JButton top_addservo_button;
 
 	public JTextField middleright_name_textfield;
 	public JTextField middleright_min_textfield;
@@ -58,6 +57,8 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 	public JList middleright_arduino_list;
 	public JList middleright_pin_list;
 	public JButton middleright_attach_button;
+
+	public ServoOrchestratorGUI_middlemiddle_main middlemiddle_ref;
 
 	JButton middleleft_timeunitadd_button;
 	JButton middleleft_timeunitremove_button;
@@ -97,23 +98,12 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 				ServoOrchestratorGUI.this);
 
 		JPanel top = new JPanel();
+		top.setLayout(new BoxLayout(top, BoxLayout.X_AXIS));
 
-		// --------------------------------------------------
+		top_addservo_button = new JButton("ADD Servo (-Movement)");
+		top_addservo_button.addActionListener(this);
 
-		// only for testing
-		// TODO - (re-)move
-
-		JButton top_addservo_button = new JButton("ADD Servo (-Movement)");
-		top_addservo_button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent ae) {
-				middlemiddle_ref.externalcall_addPanel();
-			}
-		});
-
-		top.add(top_addservo_button, BorderLayout.CENTER);
-
-		// --------------------------------------------------
+		top.add(top_addservo_button);
 
 		JPanel middlebottom = new JPanel();
 
@@ -513,7 +503,9 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		Object o = ae.getSource();
 
 		// Button - Events
-		if (o == middleright_update_button) {
+		if (o == top_addservo_button) {
+			myService.send(boundServiceName, "top_addservo_butto");
+		} else if (o == middleright_update_button) {
 			myService.send(boundServiceName, "middleright_update_button");
 		} else if (o == middleright_attach_button) {
 			myService.send(boundServiceName, "middleright_attach_button");
@@ -591,7 +583,8 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 				x, y);
 	}
 
-	public void externalcall_servopanelsettostartpos(int x, int y, boolean withgoal) {
+	public void externalcall_servopanelsettostartpos(int x, int y,
+			boolean withgoal) {
 		myService.send(boundServiceName,
 				"externalcall_servopanelsettostartpos", x, y, withgoal);
 	}
