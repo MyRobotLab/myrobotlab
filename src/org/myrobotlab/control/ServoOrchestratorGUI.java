@@ -47,6 +47,8 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 	public int sizex;
 	public int sizey;
 
+	JButton top_save_button;
+	JButton top_load_button;
 	JButton top_addservo_button;
 
 	public JTextField middleright_name_textfield;
@@ -100,10 +102,17 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		JPanel top = new JPanel();
 		top.setLayout(new BoxLayout(top, BoxLayout.X_AXIS));
 
-		top_addservo_button = new JButton("ADD Servo (-Movement)");
-		top_addservo_button.addActionListener(this);
+		top_save_button = new JButton("Save");
+		top.add(top_save_button);
+		top_save_button.addActionListener(this);
 
+		top_load_button = new JButton("Load");
+		top.add(top_load_button);
+		top_load_button.addActionListener(this);
+
+		top_addservo_button = new JButton("ADD Servo (-Movement)");
 		top.add(top_addservo_button);
+		top_addservo_button.addActionListener(this);
 
 		JPanel middlebottom = new JPanel();
 
@@ -503,8 +512,12 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		Object o = ae.getSource();
 
 		// Button - Events
-		if (o == top_addservo_button) {
-			myService.send(boundServiceName, "top_addservo_butto");
+		if (o == top_save_button) {
+			myService.send(boundServiceName, "top_save_button");
+		} else if (o == top_load_button) {
+			myService.send(boundServiceName, "top_load_button");
+		} else if (o == top_addservo_button) {
+			myService.send(boundServiceName, "top_addservo_button");
 		} else if (o == middleright_update_button) {
 			myService.send(boundServiceName, "middleright_update_button");
 		} else if (o == middleright_attach_button) {
