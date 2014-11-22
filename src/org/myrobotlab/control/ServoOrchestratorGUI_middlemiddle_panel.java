@@ -29,12 +29,10 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 
 	public String type;
 
-	private static int counter = 0;
-
-	int id = 0;
+	public int id = 0;
 
 	JPanel timesection_panel;
-	JLabel timesection_headline;
+	public JLabel timesection_headline;
 	JLabel timesection_id;
 
 	JPanel channel_panel;
@@ -42,7 +40,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 	JButton channel_mute;
 	JLabel channel_id;
 	JButton channel_solo;
-	JButton channel_settings;
+	public JButton channel_settings;
 
 	JPanel servo_panel;
 	public JTextField servo_start;
@@ -54,7 +52,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 	JButton servo_more;
 
 	// JPanel stepper_panel;
-	public ServoOrchestratorGUI_middlemiddle_panel(String mode) {
+	public ServoOrchestratorGUI_middlemiddle_panel(String mode, int num) {
 		type = mode;
 
 		// Add the listener which will export this panel for dragging
@@ -65,9 +63,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 		this.setTransferHandler(new ServoOrchestratorGUI_middlemiddle_transferhandler());
 
 		// Create the ID of this panel
-		counter++;
-
-		id = counter;
+		id = num;
 
 		// Style it a bit to set apart from container
 		this.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
@@ -159,6 +155,24 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 		final Dimension d = new Dimension(130, 80);
 		this.setPreferredSize(d);
 		this.setMinimumSize(d);
+	}
+
+	public ServoOrchestratorGUI_middlemiddle_panel(String[] data) {
+		this(data[0], Integer.parseInt(data[1]));
+
+		if (type.equals("channel")) {
+			channel_id.setText(id + "");
+			channel_name.setText(data[2]);
+		} else if (type.equals("timesection")) {
+			timesection_id.setText(id + "");
+		} else if (type.equals("servo")) {
+			servo_id.setText(id + "");
+			servo_start.setText(data[3]);
+			servo_channelid.setText(data[4]);
+			servo_goal.setText(data[5]);
+			servo_min.setText(data[6]);
+			servo_max.setText(data[7]);
+		}
 	}
 
 	/**
@@ -272,7 +286,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 
 		return false;
 	}
-	
+
 	public GridBagConstraints gridbaglayout_set(int x, int y, int w, int h) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.anchor = GridBagConstraints.NORTH;
