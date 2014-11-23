@@ -2,7 +2,11 @@ package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
@@ -507,26 +511,28 @@ public class GPS extends Service {
      * This block of methods will be used to GeoFencing
      * This code is based on the examples on the following blog
      * http://stefanbangels.blogspot.be/2012/12/for-several-years-now-i-have-been.html
+     * http://stefanbangels.blogspot.be/2014/03/point-geo-fencing-sample-code.html
+     * http://stefanbangels.blogspot.nl/2013/10/geo-fencing-sample-code.html
      * *********************************************************************************/
     // We need a circle object to build a point/radius geofence
     class Circle {
 
-        private double x;
-        private double y;
+        private double lat;
+        private double lon;
         private int radius;
 
-        public Circle(double x, double y, int radius) {
-            this.x = x;
-            this.y = y;
+        public Circle(double lat, double lon, int radius) {
+            this.lat = lat;
+            this.lon = lon;
             this.radius = radius;
         }
 
         public double getLat() {
-            return x;
+            return lat;
         }
 
         public double getLon() {
-            return y;
+            return lon;
         }
 
         public int getRadius() {
@@ -540,11 +546,176 @@ public class GPS extends Service {
             
     }
     
+    // We need a point object to build a line or polygon
+    public class Point {
+
+        private double lat;
+        private double lon;
+
+        public Point(double lat, double lon) {
+            this.lat = lat;
+            this.lon = lon;
+        }
+
+        public double getLat() {
+            return lat;
+        }
+
+        public double getLon() {
+            return lon;
+        }
+
+    }
+
+    // We need a line to break a polygon down
+    class Line {
+            
+        private Point from;
+        private Point to;
+            
+        public Line(Point from, Point to) {
+            this.from = from;
+            this.to = to;
+        }
+
+        public Point getFrom() {
+            return from;
+        }
+
+        public Point getTo() {
+            return to;
+        }
+
+    }
+
+    public class Polygon {
+
+        private Point[] points;
+
+        public Polygon(Point[] points) {
+            this.points = points;
+        }
+
+        public Point[] getPoints() {
+            return points;
+        }
+
+    }
+    
+    List<Line> calculateLines(Polygon polygon) {
+        List<Line> results = new LinkedList<Line>();
+
+        // get the polygon points
+        Point[] points = polygon.getPoints();
+
+        // form lines by connecting the points
+        Point lastPoint = null;
+        for (Point point : points) {
+            if (lastPoint != null) {
+                results.add(new Line(lastPoint, point));
+            }
+            lastPoint = point;
+        }
+
+        // close the polygon by connecting the last point 
+        // to the first point
+        results.add(new Line(lastPoint, points[0]));
+
+        return results;
+    }
+
+    List<Line> filterIntersectingLines(List<Line> lines, double lon) {
+        List<Line> results = new LinkedList<Line>();
+        for (Line line : lines) {
+            if (isLineIntersectingAtLon(line, lon)) {
+                results.add(line);
+            }
+        }
+        return results;
+    }
+
+    boolean isLineIntersectingAtLon(Line line, double lon) {
+        double minLon = Math.min(
+            line.getFrom().getLon(), line.getTo().getLon()
+        );
+        double maxLon = Math.max(
+            line.getFrom().getLon(), line.getTo().getLon()
+        );
+        return lon > minLon && lon <= maxLon;
+    }
+    
+    List<Point> calculateIntersectionPoints(List<Line> lines, double lon) {
+    	List<Point> results = new LinkedList<Point>();
+    	for (Line line : lines) {
+   	        double lat = calculateLineLatAtLon(line, lon);
+   	        results.add(new Point(lat, lon));
+    	}
+   	    return results;
+    }
+
+	double calculateLineLatAtLon(Line line, double lon) {
+		Point from = line.getFrom();
+    	double slope = calculateSlope(line);
+    	return from.getLat() + (lon - from.getLon()) / slope;
+    }
+
+	double calculateSlope(Line line) {
+    	Point from = line.getFrom();
+    	Point to = line.getTo();
+    	return (to.getLon() - from.getLon()) / (to.getLat() - from.getLat());
+    }
+
+	void sortPointsByLat(List<Point> points) {
+	    Collections.sort(points, new Comparator<Point>() {
+	        public int compare(Point p1, Point p2) {
+	            return Double.compare(p1.getLat(), p2.getLat());
+	        }
+	    });
+	}
+	
+	boolean calculateInside(List<Point> sortedPoints, double lat) {
+	    boolean inside = false;
+	    for (Point point : sortedPoints) {
+	        if (lat < point.getLat()) {
+	            break;
+	        }
+	        inside = !inside;
+	    }
+	    return inside;
+	}
+	
+	/*********************************************************
+	 * Here's all the GeoFence methods you might want to call 
+	 * from outside.
+	 *********************************************************/
+	// This is how you create a Point
+	public Point setPoint(double lat, double lon) {
+		Point point = new Point(lat, lon);
+		return point;
+	}
+	
+	// This is how you create your polygon shaped GeoFence
+	public Polygon setPolygonGeoFence(Point[] points) {
+		Polygon polygon = new Polygon(points);
+		return polygon;
+	}
+	
+	// This is how you set your circular GeoFence around a point
+	public Circle setPointGeoFence (double lat, double lon, int radius) {
+    	Circle pointFence = new Circle(lat, lon, radius);
+    	return pointFence;
+    }
+	
+	// This is in case they want to use a Point object
+	public Circle setPointGeoFence (Point point, int radius) {
+		return setPointGeoFence(point.getLat(), point.getLon(), radius);
+	}
+    
     //When your radius is defined in meters, you will need the Haversine formula.  
     //This formula will calculate the distance between two points (in meters) 
     //while taking into account the earth curvation:
 
-    public double calculateDistance(double longitude1, double latitude1, double longitude2, double latitude2) {
+    public double calculateDistance(double latitude1, double longitude1, double latitude2, double longitude2) {
     	double c = 
     	Math.sin(Math.toRadians(latitude1)) *
     	Math.sin(Math.toRadians(latitude2)) +
@@ -555,22 +726,44 @@ public class GPS extends Service {
     	c = c > 0 ? Math.min(1, c) : Math.max(-1, c);
         return 3959 * 1.609 * 1000 * Math.acos(c);
     }
-    	
-    // Test if Lat(x) and Long(y) are inside your geofence.
-    public boolean checkInside(Circle circle, double x, double y) {
-        return calculateDistance(
-            circle.getLat(), circle.getLon(), x, y
-        ) < circle.getRadius();
+    
+    // If they want to calculate distance between Point objects
+    public double calculateDistance(Point point1, Point point2) {
+    	return calculateDistance(point1.getLat(), point1.getLon(), point2.getLat(), point2.getLon());
+    }
+    
+    // Test if Lat and Long are inside your circular GeoFence.
+    public boolean checkInside(Circle circle, double lat, double lon) {
+        return calculateDistance(circle.getLat(), circle.getLon(), lat, lon) < circle.getRadius();
    	}
     
-    public Circle setPointGeoFence (double lat, double lon, int radius) {
-    	Circle pointFence = new Circle(lat, lon, radius);
-    	return pointFence;
+    // If they want to use a Point object
+    public boolean checkInside(Circle circle, Point point) {
+    	return checkInside(circle, point.getLat(), point.getLon());
     }
+
+    // Test if Lat and Lon are inside your polygon GeoFence.
+    public boolean checkInside(Polygon polygon, double lat, double lon) {
+        List<Line> lines = calculateLines(polygon);
+        List<Line> intersectionLines = filterIntersectingLines(lines, lon);
+        List<Point> intersectionPoints = calculateIntersectionPoints(
+            intersectionLines, lon);
+        sortPointsByLat(intersectionPoints);
+        return calculateInside(intersectionPoints, lat);
+    }
+    
+    // If they want to use a Point object
+    public boolean checkInside(Polygon polygon, Point point) {
+    	return checkInside(polygon, point.getLat(), point.getLon());
+    }
+
+
 
     /***********************************************************************************
      * This ends the GeoFence block
      * *********************************************************************************/
+    
+    
     // NMEA Lat/Lon values are ddmm.mmmm or dddmm.mmmm respectively and need to be converted
     public double convertNMEAToDegrees(String nmea) {
     	String degrees;
