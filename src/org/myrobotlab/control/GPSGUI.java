@@ -66,21 +66,21 @@ public class GPSGUI extends ServiceGUI implements ActionListener {
         gc.gridy += 42;
 
 
-        display.add(new JLabel("Current Latitude:"), gc);
+        display.add(new JLabel("Current Latitude(degrees):"), gc);
         ++gc.gridx;
         display.add(latitudeTextField, gc);
         gc.gridx = 0;
         gc.gridy += 42;
 
 
-        display.add(new JLabel("Current Longitude:"), gc);
+        display.add(new JLabel("Current Longitude(degrees):"), gc);
         ++gc.gridx;
         display.add(longitudeTextField, gc);
         gc.gridy += 42;
         gc.gridx = 0;
 
 
-        display.add(new JLabel("Current Altitude:"), gc);
+        display.add(new JLabel("Current Altitude(meters):"), gc);
         ++gc.gridx;
         display.add(altitudeTextField, gc);
         gc.gridx = 0;

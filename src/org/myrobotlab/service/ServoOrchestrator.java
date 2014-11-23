@@ -1,6 +1,12 @@
 package org.myrobotlab.service;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +16,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_panel;
 import org.myrobotlab.framework.Service;
@@ -120,6 +128,193 @@ public class ServoOrchestrator extends Service {
 			arduinoarray[i + 2] = arduinolist.get(i);
 		}
 		sogui_ref.middleright_arduino_list.setListData(arduinoarray);
+	}
+
+	public void top_save_button() {
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(
+					"scratchconfig.txt"));
+			bw.write("#size");
+			bw.newLine();
+			bw.write(sizex + "");
+			bw.newLine();
+			bw.write(sizey + "");
+			bw.newLine();
+			bw.write(sogui_ref.middlemiddle_ref.panel_counter + "");
+			bw.newLine();
+			bw.write("#sih");
+			bw.newLine();
+			for (SettingsItemHolder sih : settingsitemholder) {
+				bw.write(sih.name + "~" + sih.min + "~" + sih.max + "~"
+						+ sih.startvalue + "~" + sih.arduinopos + "~"
+						+ sih.pinpos + "~" + sih.attached);
+				bw.newLine();
+			}
+			bw.write("#prep");
+			bw.newLine();
+			for (ServoOrchestratorGUI_middlemiddle_panel p : sogui_ref.middlemiddle_ref.prep) {
+				bw.write(p.type + "~" + p.id + "~" + p.channel_name.getText()
+						+ "~" + p.servo_start.getText() + "~"
+						+ p.servo_channelid.getText() + "~"
+						+ p.servo_goal.getText() + "~" + p.servo_min.getText()
+						+ "~" + p.servo_max.getText());
+				bw.newLine();
+			}
+			bw.write("#panels");
+			bw.newLine();
+			for (ServoOrchestratorGUI_middlemiddle_panel[] p1 : sogui_ref.middlemiddle_ref.panels) {
+				for (ServoOrchestratorGUI_middlemiddle_panel p : p1) {
+					if (p != null) {
+						bw.write(p.type + "~" + p.id + "~"
+								+ p.channel_name.getText() + "~"
+								+ p.servo_start.getText() + "~"
+								+ p.servo_channelid.getText() + "~"
+								+ p.servo_goal.getText() + "~"
+								+ p.servo_min.getText() + "~"
+								+ p.servo_max.getText());
+					} else {
+						bw.write("null");
+					}
+					bw.newLine();
+				}
+			}
+			bw.close();
+		} catch (IOException e) {
+		}
+	}
+
+	public void top_load_button() {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(
+					"scratchconfig.txt"));
+			int counter = 0;
+			int type = 0;
+			String line;
+			while ((line = br.readLine()) != null) {
+				if (line.equals("#size")) {
+					counter = 0;
+					type = 1;
+				} else if (line.equals("#sih")) {
+					counter = 0;
+					type = 2;
+				} else if (line.equals("#prep")) {
+					counter = 0;
+					type = 3;
+				} else if (line.equals("#panels")) {
+					counter = 0;
+					type = 4;
+				} else if (type == 1) {
+					int size = Integer.parseInt(line);
+					if (counter == 0) {
+						sizex = size;
+						sogui_ref.sizex = sizex;
+						sogui_ref.middlemiddle_ref.externallcall_refreshsize();
+					} else if (counter == 1) {
+						sizey = size;
+						sogui_ref.sizey = sizey;
+						sogui_ref.middlemiddle_ref.externallcall_refreshsize();
+						refreshsize();
+					} else {
+						sogui_ref.middlemiddle_ref.panel_counter = size;
+					}
+					counter++;
+				} else if (type == 2) {
+					String[] linesplit = line.split("~");
+					settingsitemholder[counter].name = linesplit[0];
+					settingsitemholder[counter].min = Integer
+							.parseInt(linesplit[1]);
+					settingsitemholder[counter].max = Integer
+							.parseInt(linesplit[2]);
+					settingsitemholder[counter].startvalue = Integer
+							.parseInt(linesplit[3]);
+					settingsitemholder[counter].arduinopos = Integer
+							.parseInt(linesplit[4]);
+					settingsitemholder[counter].pinpos = Integer
+							.parseInt(linesplit[5]);
+					settingsitemholder[counter].attached = Boolean
+							.parseBoolean(linesplit[6]);
+					counter++;
+				} else if (type == 3) {
+					String[] linesplit = line.split("~");
+					sogui_ref.middlemiddle_ref.prep[counter] = new ServoOrchestratorGUI_middlemiddle_panel(
+							linesplit);
+					if (linesplit[0].equals("channel")) {
+						final int counterf = counter;
+						sogui_ref.middlemiddle_ref.prep[counter].channel_settings
+								.addActionListener(new ActionListener() {
+									@Override
+									public void actionPerformed(ActionEvent ae) {
+										externalcall_loadsettings(counterf);
+									}
+								});
+					} else if (linesplit[0].equals("timesection")) {
+						sogui_ref.middlemiddle_ref.prep[counter].timesection_headline
+								.setText("TIMEUNIT " + (counter - sizey + 1));
+					}
+					sogui_ref.middlemiddle_ref.relayout();
+					counter++;
+				} else if (type == 4) {
+					if (line.equals("null")) {
+						sogui_ref.middlemiddle_ref.panels[counter / sizey][counter
+								% sizey] = null;
+					} else if (sogui_ref.middlemiddle_ref.panels[counter
+							/ sizey][counter % sizey] == null) {
+						String[] linesplit = line.split("~");
+						sogui_ref.middlemiddle_ref.panels[counter / sizey][counter
+								% sizey] = new ServoOrchestratorGUI_middlemiddle_panel(
+								linesplit);
+						final int counterf = counter;
+						sogui_ref.middlemiddle_ref.panels[counter / sizey][counter
+								% sizey].servo_goal.getDocument()
+								.addDocumentListener(new DocumentListener() {
+									@Override
+									public void insertUpdate(DocumentEvent e) {
+										adjust();
+
+									}
+
+									@Override
+									public void removeUpdate(DocumentEvent e) {
+										adjust();
+
+									}
+
+									@Override
+									public void changedUpdate(DocumentEvent e) {
+										adjust();
+
+									}
+
+									public void adjust() {
+										int i1 = counterf / sizey;
+										int i2 = counterf % sizey;
+										int searchpos = i1 + 1;
+										while (searchpos < sogui_ref.middlemiddle_ref.panels.length) {
+											if (sogui_ref.middlemiddle_ref.panels[searchpos][i2] == null) {
+												searchpos++;
+											} else {
+												sogui_ref.middlemiddle_ref.panels[searchpos][i2].servo_start
+														.setText(sogui_ref.middlemiddle_ref.panels[counterf
+																/ sizey][counterf
+																% sizey].servo_goal
+																.getText() + "");
+												break;
+											}
+										}
+									}
+								});
+					}
+					sogui_ref.middlemiddle_ref.relayout();
+					counter++;
+				}
+			}
+			br.close();
+		} catch (IOException e) {
+		}
+	}
+
+	public void top_addservo_button() {
+		sogui_ref.middlemiddle_ref.externalcall_addPanel();
 	}
 
 	public void middleright_update_button() {
@@ -363,7 +558,7 @@ public class ServoOrchestrator extends Service {
 
 	public void play_go_fa() {
 		pos1 = sogui_ref.middlemiddle_ref.panels[0].length;
-		pos2 = sizex-1;
+		pos2 = 4;
 		pos3 = 999;
 		play_updatetime(true, true, true);
 		play_updatepanels(pos1);
@@ -398,12 +593,12 @@ public class ServoOrchestrator extends Service {
 	}
 
 	public void play_play_3_1() {
-		
-		//first block
+
+		// first block
 		if (pos1 == 1 && pos2 == 1 && pos3 == 0) {
 			play_playreally(pos1);
 		}
-		
+
 		pos3++;
 		if (pos3 > 999) {
 			pos3 -= 999;
@@ -479,7 +674,7 @@ public class ServoOrchestrator extends Service {
 
 	public void play_searchblocks(int pos) {
 		for (int i = 0; i < sizey; i++) {
-			ServoOrchestratorGUI_middlemiddle_panel panels11 = sogui_ref.middlemiddle_ref.panels[pos-1][i];
+			ServoOrchestratorGUI_middlemiddle_panel panels11 = sogui_ref.middlemiddle_ref.panels[pos - 1][i];
 			if (panels11 != null) {
 				play_playblock(i, panels11);
 			}

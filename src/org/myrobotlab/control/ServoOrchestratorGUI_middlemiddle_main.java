@@ -34,8 +34,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 	// "main"-panel
 	private final JPanel middlemiddle;
 
-	// TODO - should try to remove this
 	public final ServoOrchestratorGUI so_ref;
+
+	public int panel_counter;
 
 	/**
 	 * <p>
@@ -65,6 +66,8 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		rootPanel.setLayout(new GridBagLayout());
 		middlemiddle.add(rootPanel);
 
+		panel_counter = 0;
+
 		// Create a list to hold all the panels
 		panels = new ServoOrchestratorGUI_middlemiddle_panel[so_ref.sizex][so_ref.sizey];
 
@@ -74,7 +77,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		for (int i = 0; i < prep.length; i++) {
 			if (i < panels[0].length) {
 				final int fi = i;
-				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel("channel");
+				panel_counter++;
+				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
+						"channel", panel_counter);
 				prep[i].channel_id.setText(prep[i].id + "");
 				prep[i].channel_name.setText("Channel " + (i + 1));
 				prep[i].channel_settings
@@ -85,8 +90,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 							}
 						});
 			} else {
+				panel_counter++;
 				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
-						"timesection");
+						"timesection", panel_counter);
 				prep[i].timesection_id.setText(prep[i].id + "");
 				prep[i].timesection_headline.setText("TIMEUNIT "
 						+ (i - panels[0].length + 1));
@@ -112,8 +118,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 					break;
 				}
 				if (panels[i1][i2] == null) {
+					panel_counter++;
 					ServoOrchestratorGUI_middlemiddle_panel p = new ServoOrchestratorGUI_middlemiddle_panel(
-							"servo");
+							"servo", panel_counter);
 					panels[i1][i2] = p;
 
 					boolean later_externalcall_servopanelsettostartpos = false;
@@ -168,42 +175,47 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 					// (only button left) (others only fixes) (I think)
 
 					found = true;
-					
+
 					final int fi1 = i1;
 					final int fi2 = i2;
 					final ServoOrchestratorGUI_middlemiddle_panel fp = p;
-					p.servo_goal.getDocument().addDocumentListener(new DocumentListener() {
-						@Override
-						public void insertUpdate(DocumentEvent e) {
-							adjust();
-							
-						}
-						@Override
-						public void removeUpdate(DocumentEvent e) {
-							adjust();
-							
-						}
-						@Override
-						public void changedUpdate(DocumentEvent e) {
-							adjust();
-							
-						}
-						public void adjust() {
-							int i1 = fi1;
-							int i2 = fi2;
-							ServoOrchestratorGUI_middlemiddle_panel p = fp;
-							int searchpos = i1 + 1;
-							while (searchpos < panels.length) {
-								if (panels[searchpos][i2] == null) {
-									searchpos++;
-								} else {
-									panels[searchpos][i2].servo_start
-											.setText(p.servo_goal.getText() + "");
-									break;
+					p.servo_goal.getDocument().addDocumentListener(
+							new DocumentListener() {
+								@Override
+								public void insertUpdate(DocumentEvent e) {
+									adjust();
+
 								}
-							}
-						}
-					});
+
+								@Override
+								public void removeUpdate(DocumentEvent e) {
+									adjust();
+
+								}
+
+								@Override
+								public void changedUpdate(DocumentEvent e) {
+									adjust();
+
+								}
+
+								public void adjust() {
+									int i1 = fi1;
+									int i2 = fi2;
+									ServoOrchestratorGUI_middlemiddle_panel p = fp;
+									int searchpos = i1 + 1;
+									while (searchpos < panels.length) {
+										if (panels[searchpos][i2] == null) {
+											searchpos++;
+										} else {
+											panels[searchpos][i2].servo_start
+													.setText(p.servo_goal
+															.getText() + "");
+											break;
+										}
+									}
+								}
+							});
 
 					so_ref.externalcall_servopanelchangeinfo(i1, i2);
 					if (later_externalcall_servopanelsettostartpos) {
@@ -231,11 +243,7 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 			panelsold[i] = panels[i].clone();
 		}
 
-		// TODO - don't know, if I need the old panels, if so they need to be
-		// copied back below
-		// ServoOrchestratorGUI_middlemiddle_panel[] prepold = new
-		// ServoOrchestratorGUI_middlemiddle_panel[prep.length];
-		// prepold = prep.clone();
+		ServoOrchestratorGUI_middlemiddle_panel[] prepold = prep.clone();
 
 		// Create a list to hold all the panels
 		panels = new ServoOrchestratorGUI_middlemiddle_panel[so_ref.sizex][so_ref.sizey];
@@ -251,15 +259,15 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 			}
 		}
 
-		// TODO - maybe channel names and similar things need to be set (changed
-		// ones)
 		// "border"-panels
 		prep = new ServoOrchestratorGUI_middlemiddle_panel[panels.length
 				+ panels[0].length];
 		for (int i = 0; i < prep.length; i++) {
 			if (i < panels[0].length) {
 				final int fi = i;
-				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel("channel");
+				panel_counter++;
+				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
+						"channel", panel_counter);
 				prep[i].channel_id.setText(prep[i].id + "");
 				prep[i].channel_name.setText("Channel " + (i + 1));
 				prep[i].channel_settings
@@ -271,8 +279,9 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 						});
 				prep[i].setBackground(Color.green);
 			} else {
+				panel_counter++;
 				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
-						"timesection");
+						"timesection", panel_counter);
 				prep[i].timesection_id.setText(prep[i].id + "");
 				prep[i].timesection_headline.setText("TIMEUNIT "
 						+ (i - panels[0].length + 1));
@@ -280,6 +289,10 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 			}
 		}
 		prep[panels[0].length].setBackground(Color.red);
+
+		for (int i = 0; i < panelsold[0].length && i < panels[0].length; i++) {
+			prep[i].channel_name.setText((prepold[i].channel_name.getText()));
+		}
 
 		// refresh the gui
 		relayout();
