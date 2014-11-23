@@ -185,25 +185,32 @@ public class GPS extends Service {
        String[] tokens = messageString.split("[,*]",-1);
        try {
        log.info("String type: "+tokens[0]);
+       gps.type = tokens[0];
        
        log.info("Time hhmmss.ss: "+tokens[1]);
 	       gps.time = tokens[1];
-       
-      
-       
+              
        log.info("Latitude: "+tokens[2]);
        log.info("North or South: "+tokens[3]);
        if (tokens[2].length() > 0){
-    	   gps.latitude = Double.parseDouble(tokens[2]);
+    	   gps.latitude = convertNMEAToDegrees(tokens[2]);
+           tokens[2]= String.valueOf(gps.latitude);
+
        }
-       if(tokens[3].contains("S")){ //if negative latitude, prepend a - sign
-           tokens[2]= "-"+tokens[2];
+       if(tokens[3].contains("S")){ //if South then negative latitude
            gps.latitude = gps.latitude * -1;
+           tokens[2]= String.valueOf(gps.latitude);
        }
        
-       if(tokens[5].contains("W")) //if negative longitude, prepend a - sign
-           tokens[4]= "-"+tokens[4];
-       log.info("Longitude: "+tokens[4]);
+       if(tokens[4].length() > 0){
+    	   gps.longitude =convertNMEAToDegrees(tokens[4]);
+           tokens[4]= String.valueOf(gps.longitude);
+       }
+       if(tokens[5].contains("W")) {//if West then negative longitude
+           gps.longitude = gps.longitude * -1;
+           tokens[4]= "-"+String.valueOf(gps.longitude);
+       }
+       log.info("Longitude: "+String.valueOf(gps.longitude));
        log.info("East or West: "+tokens[5]);
 
        log.info("GPS quality ('0' = no fix, '1' = GPS SPS fix valid, '2' = DGPS, SPS fix valid, '6' = Dead Reckoning fix valid, '8' = simulated): "+tokens[6]);
@@ -237,6 +244,7 @@ public class GPS extends Service {
     
     public String[] publishGLLData() {
 
+    	GPSData gps = new GPSData();
 
        log.info("publishGLLData has been called");
        log.info("Full data String = " + messageString);
@@ -245,21 +253,31 @@ public class GPS extends Service {
        String[] tokens = messageString.split("[,*]",-1);
 
        log.info("String type: "+tokens[0]);
+       gps.type = tokens[0];
+       
+       if (tokens[1].length() > 0){
+    	   gps.latitude = convertNMEAToDegrees(tokens[1]);
+           tokens[1]= String.valueOf(gps.latitude);
 
-
-       if(tokens[2].contains("S")) //if negative latitude, prepend a - sign
-           tokens[1]= "-"+tokens[2];
-
-       log.info("Latitude: "+tokens[1]);
-       log.info("North or South: "+tokens[2]);
-
-       if(tokens[4].contains("W")) //if negative longitude, prepend a - sign
-           tokens[3]= "-"+tokens[3];
-       log.info("Longitude: "+tokens[3]);
-       log.info("East or West: "+tokens[4]);
+       }
+       if(tokens[2].contains("S")){ //if South then negative latitude
+           gps.latitude = gps.latitude * -1;
+           tokens[1]= String.valueOf(gps.latitude);
+       }
+       
+       if(tokens[3].length() > 0){
+    	   gps.longitude =convertNMEAToDegrees(tokens[3]);
+           tokens[3]= String.valueOf(gps.longitude);
+       }
+       if(tokens[4].contains("W")) {//if West then negative longitude
+           gps.longitude = gps.longitude * -1;
+           tokens[3]= "-"+String.valueOf(gps.longitude);
+       }
+       log.info("Longitude: "+String.valueOf(gps.longitude));
 
        log.info("Time hhmmss.ss: "+tokens[5]);
-
+       gps.time = tokens[5];
+       
        log.info("Status: ('A' = valid, 'V' = not valid): "+tokens[6]);
 
        if (tokens.length == 9) {
@@ -272,6 +290,8 @@ public class GPS extends Service {
     }//end dataToString
 
     public String[] publishGSAData() {
+    
+    	GPSData gps = new GPSData();
 
        log.info("publishGSAData has been called");
        log.info("Full data String = " + messageString);
@@ -279,7 +299,8 @@ public class GPS extends Service {
        String[] tokens = messageString.split("[,*]",-1);
 
        log.info("String type: "+tokens[0]);
-
+       gps.type = tokens[0];
+       
        log.info("Mode 1: ('M' = Manually forced into 2D or 3D, 'A' = Automatically allowed to switch between 2D/3D) "+tokens[1]);
 
        log.info("Mode 2: ('1' = no fix, '2' = 2D, '3' = 3D) "+tokens[2]);
@@ -300,6 +321,8 @@ public class GPS extends Service {
 
     public String[] publishGSVData() {
 
+    	GPSData gps = new GPSData();
+
        log.info("publishGSVData has been called");
        log.info("Full data String = " + messageString);
 
@@ -307,7 +330,8 @@ public class GPS extends Service {
        int last = tokens.length - 1;
 
        log.info("String type: "+tokens[0]);
-
+       gps.type = tokens[0];
+       
        log.info("Num. GSV messages: "+tokens[1]);
 
        log.info("Message number: "+tokens[2]);
@@ -328,26 +352,42 @@ public class GPS extends Service {
 
     public String[] publishRMCData() {
 
+    	GPSData gps = new GPSData();
+
        log.info("publishRMCData has been called");
        log.info("Full data String = " + messageString);
 
        String[] tokens = messageString.split("[,*]",-1);
 
        log.info("String type: "+tokens[0]);
-
+       gps.type = tokens[0];
+       
        log.info("Time (hhmmss.ss): "+tokens[1]);
-
+       gps.time = tokens[1];
+       
        log.info("Status ('V' = warning, 'A' = Valid): "+tokens[2]);
-
-       if(tokens[4].contains("S")) //if negative latitude, prepend a - sign
-           tokens[3]= "-"+tokens[3];
 
        log.info("Latitude: "+tokens[3]);
        log.info("North or South: "+tokens[4]);
+       if (tokens[3].length() > 0){
+    	   gps.latitude = convertNMEAToDegrees(tokens[3]);
+           tokens[3]= String.valueOf(gps.latitude);
 
-       if(tokens[6].contains("W")) //if negative longitude, prepend a - sign
-           tokens[5]= "-"+tokens[5];
-       log.info("Longitude: "+tokens[5]);
+       }
+       if(tokens[4].contains("S")){ //if South then negative latitude
+           gps.latitude = gps.latitude * -1;
+           tokens[3]= String.valueOf(gps.latitude);
+       }
+       
+       if(tokens[5].length() > 0){
+    	   gps.longitude =convertNMEAToDegrees(tokens[5]);
+           tokens[5]= String.valueOf(gps.longitude);
+       }
+       if(tokens[6].contains("W")) {//if West then negative longitude
+           gps.longitude = gps.longitude * -1;
+           tokens[5]= "-"+String.valueOf(gps.longitude);
+       }
+       log.info("Longitude: "+String.valueOf(gps.longitude));
        log.info("East or West: "+tokens[6]);
 
        log.info("Speed (knots): "+tokens[7]);
@@ -371,13 +411,16 @@ public class GPS extends Service {
 
     public String[] publishVTGData() {
 
+    	GPSData gps = new GPSData();
+    	
        log.info("publishVTGData has been called");
        log.info("Full data String = " + messageString);
 
        String[] tokens = messageString.split("[,*]",-1);
 
        log.info("String type: "+tokens[0]);
-
+       gps.type = tokens[0];
+       
        log.info("Course (deg): "+tokens[1]);
 
        log.info("Reference (True): "+tokens[2]);
@@ -405,15 +448,19 @@ public class GPS extends Service {
 
     public String[] publishZDAData() {
 
+    	GPSData gps = new GPSData();
+    	
        log.info("publishZDAData has been called");
        log.info("Full data String = " + messageString);
 
        String[] tokens = messageString.split("[,*]",-1);
 
        log.info("String type: "+tokens[0]);
-
+       gps.type = tokens[0];
+       
        log.info("Time UTC (hhmmss.ss): "+tokens[1]);
-
+       gps.time = tokens[1];
+       
        log.info("Day: "+tokens[2]);
 
        log.info("Month: "+tokens[3]);
@@ -524,6 +571,21 @@ public class GPS extends Service {
     /***********************************************************************************
      * This ends the GeoFence block
      * *********************************************************************************/
+    // NMEA Lat/Lon values are ddmm.mmmm or dddmm.mmmm respectively and need to be converted
+    public double convertNMEAToDegrees(String nmea) {
+    	String degrees;
+    	String minutes;
+    	// If we have 5 leading digits it's a Longitude
+    	if (nmea.matches("\\d\\d\\d\\d\\d\\.\\d\\d\\d\\d")) {
+    		degrees = nmea.substring(0, 3);
+    		minutes = nmea.substring(3);
+    	}else{ // It's a Latitude
+    		degrees = nmea.substring(0, 2);
+    		minutes = nmea.substring(2);
+    	}
+    	double result = Double.parseDouble(degrees) + Double.parseDouble(minutes)/60;
+    	return result;
+    }
     
     public boolean connect(String port, int baud) {
         serial = getSerial();
