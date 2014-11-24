@@ -53,6 +53,10 @@ public class Sweety extends Service {
 	int SHIFT = 47;
 	int LATCH = 48;
 	int DATA = 49;
+	
+	public int delaytime = 1;
+	public int delaytimestop = 200;
+	public int delaytimeletter = 1;
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -163,11 +167,62 @@ public class Sweety extends Service {
 		else if (value == "empty"){
 			myShiftOut("00000000");
 		}
-		
-		/*------- TODO TODO TODO-------
-		else if (value == "talk"){
-			myShiftOut("10111100");
-		}*/
+
+	}
+	
+	public void setdelays(Integer d1, Integer d2, Integer d3) {
+		delaytime = d1;
+		delaytimestop = d2;
+		delaytimeletter = d3;
+	}
+	
+	public synchronized void saying(String text) { // Adapt mouth leds to words
+		log.info("Saying :" + text);
+		mouth.speak(text);
+		sleep(50);
+			boolean ison = false;
+			String testword;
+			String[] a = text.split(" ");
+			for (int w = 0; w < a.length; w++) {
+				// String word = ;
+				// log.info(String.valueOf(a[w].length()));
+
+				if (a[w].endsWith("es")) {
+					testword = a[w].substring(0, a[w].length() - 2);
+				} 
+				else if (a[w].endsWith("e")) {
+					testword = a[w].substring(0, a[w].length() - 1);
+					// log.info("e gone");
+				}
+				else {
+					testword = a[w];
+				}
+
+				char[] c = testword.toCharArray();
+
+				for (int x = 0; x < c.length; x++) {
+					char s = c[x];
+
+					if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y') && !ison) {
+
+						myShiftOut("00011100"); 
+						ison = true;
+						sleep(delaytime);
+						myShiftOut("00000100");					} 
+					else if (s == '.') {
+						ison = false;
+						myShiftOut("00000000");
+						sleep(delaytimestop);
+					} 
+					else {
+						ison = false;
+						sleep(delaytimeletter); // # sleep half a second
+					}
+
+				}
+				myShiftOut("00000000");
+				sleep(2);
+			}
 	}
 	
 	public Sweety publishState(){
