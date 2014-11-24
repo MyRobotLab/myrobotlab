@@ -380,7 +380,7 @@ public class RemoteAdapter extends Service implements Gateway {
 		boolean isRunning = false;
 
 		public UDPListener(Integer listeningPort, RemoteAdapter s) {
-			super(String.format("%s.usp.%d", s.getName(), listeningPort));
+			super(String.format("%s.udp.%d", s.getName(), listeningPort));
 			this.listeningPort = listeningPort;
 			myService = s;
 		}
@@ -773,7 +773,7 @@ public class RemoteAdapter extends Service implements Gateway {
 	// the best
 	public List<Connection> getConnections(URI clientKey) {
 		ArrayList<Connection> conns = new ArrayList<Connection>();
-		Connection tcpConn = new Connection();
+		
 		try {
 
 			// FIXME - dorky - probably fix with template method
@@ -781,19 +781,29 @@ public class RemoteAdapter extends Service implements Gateway {
 			ArrayList<ServiceInterface> services = Runtime.getServicesFromInterface(Gateway.class);
 			// ArrayList<Gateway> gateways = new ArrayList<Gateway>();
 
+			// if GLOBAL
 			for (int i = 0; i < services.size(); ++i) {
 				// Gateway
 				// gateways.add((Gateway) services.get(i));
 			}
+			
+			// else LOCAL 
+			// add (this) services connections
+			ArrayList<String> addr = Runtime.getLocalAddresses();
+			for (int i = 0; i < addr.size(); ++i){
+				Connection tcpConn = new Connection();
+				// theoretically you could advertise udp too (and others)
+				tcpConn.uri = new URI(String.format("mrl://%s/tcp://%s:%d", getName(), addr.get(i), getTcpPort()));
+				// tcpKey.prefix = suggestion
+				// tcpKey.prefix = prefix;
+				tcpConn.platform = Runtime.getInstance().getPlatform();
+				tcpConn.prefix = Runtime.getInstance().getName();// calls getPrefix
+																	// under hood
+				conns.add(tcpConn);
+			}
 
 			// ??
-			tcpConn.uri = new URI(String.format("mrl://%s/tcp://%s:%d", getName(), clientKey.getHost(), getTcpPort()));
-			// tcpKey.prefix = suggestion
-			// tcpKey.prefix = prefix;
-			tcpConn.platform = Runtime.getInstance().getPlatform();
-			tcpConn.prefix = Runtime.getInstance().getName();// calls getPrefix
-																// under hood
-			conns.add(tcpConn);
+	
 			// tcpKey.uri =
 		} catch (Exception e) {
 			Logging.logException(e);
@@ -838,15 +848,15 @@ public class RemoteAdapter extends Service implements Gateway {
 
 			int i = 2;
 
-			RemoteAdapter remote0 = (RemoteAdapter) Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
+			//RemoteAdapter remote0 = (RemoteAdapter) Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
 			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", 1), "RemoteAdapter");
 			Runtime.start(String.format("gui%d", i), "GUIService");
 			// remote0.startUDP(6767);
-			remote0.startListening();
+			remote1.startListening();
 			// remote1.startListening();
 
 			// remote1.startUDP(6767);
-			remote0.scan();
+			remote1.scan();
 			/*
 			 * Runtime.main(new String[] { "-runtimeName", String.format("r%d",
 			 * i) }); RemoteAdapter remote = (RemoteAdapter)
