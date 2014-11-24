@@ -103,6 +103,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * if host == null the service is local
 	 */
 	private URI host = null; // TODO - access directly
+	protected String prefix = null; // if foreign - this will be name prefix - set by Gateway
 
 	@Element
 	private final String name; // TODO - access directly
@@ -287,7 +288,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	public String getName() {
-		return name;
+		// prefix is set by Gateway
+		if (prefix == null){
+			return name;
+		} else {
+			return String.format("%s%s", prefix, name);
+		}
+	
 	}
 
 	public String getPeerKey(String key) {
@@ -2173,6 +2180,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		Logging logging = LoggingFactory.getInstance();
 		logging.setLevel(this.getClass().getCanonicalName(), level);
 		return level;
+	}
+	
+	public void setPrefix(String prefix){
+		this.prefix = prefix;
 	}
 
 }

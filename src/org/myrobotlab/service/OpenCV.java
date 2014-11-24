@@ -833,6 +833,8 @@ public class OpenCV extends VideoSource {
 
 		OpenCV opencv = (OpenCV) Runtime.createAndStart("opencv", "OpenCV");
 		Runtime.createAndStart("gui", "GUIService");
+		RemoteAdapter remote = (RemoteAdapter) Runtime.start("ocvremote", "RemoteAdapter");
+		remote.connect("tcp://localhost:6767");
 		
 		opencv.capture();
 		//OpenCVFilterTranspose transpose = new OpenCVFilterTranspose("transpose");

@@ -90,4 +90,6 @@ public interface ServiceInterface {
 	public boolean requiresSecurity();
 
 	public boolean isLocal();
+
+	public void setPrefix(String prefix);
 }

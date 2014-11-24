@@ -493,11 +493,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		}
 
 		public void setType(String type) {
-			// if (type.indexOf(".") == -1) {
-			// this.type = String.format("org.myrobotlab.service.%s", type);
-			// } else {
 			this.type = type;
-			// }
 		}
 
 		public String getSimpleName() {

@@ -47,61 +47,50 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 	Service myService = null;
 	Outbox outbox = null;
 
-	static HashMap<URI,URI> mrlToProtocol = new HashMap<URI,URI>();
-	
+	static HashMap<URI, URI> mrlToProtocol = new HashMap<URI, URI>();
+
 	private Gateway comm = null;
 
 	public CommunicationManager(Service myService) {
-		// set local private references
 		this.myService = myService;
 		this.outbox = myService.getOutbox();
-
-  		//GOOD IDEA - outbox communicator - however now Remote communication is done with gateway Services
-		String communicatorClass = "org.myrobotlab.net.CommObjectStreamOverTCP";
-		log.info("instanciating a " + communicatorClass);
-		Gateway c = (Gateway) Service.getNewInstance(Service.class, communicatorClass,  myService);
-
 		outbox.setCommunicationManager(this);
-
-		setComm(c);
-
-
 	}
-	
+
 	// FIXME - put in Runtime
-	public void addRemote(URI mrlHost, URI protoKey){
-		mrlToProtocol.put(mrlHost, protoKey);
+	public void addRemote(URI mrlHost, URI protocolKey) {
+		mrlToProtocol.put(mrlHost, protocolKey);
 	}
 
-	/**
-	 * getComm(uri) gets the local service responsible for sending the message remotely
-	 * .send(uri, msg) uri is a key into that service's data to send the message where it
-	 * needs to go
-	 * 
-	 */
-	public void send(final URI uri, final Message msg) {
+	final public void send(final URI uri, final Message msg) {
 		getComm(uri).sendRemote(uri, msg);
 	}
 
-	public void send(final Message msg) {
+	final public void send(final Message msg) {
 
 		ServiceInterface sw = Runtime.getService(msg.getName());
 		if (sw == null) {
 			log.error(String.format("could not find service %s to process %s from sender %s - tearing down route", msg.name, msg.method, msg.sender));
 			ServiceInterface sender = Runtime.getService(msg.sender);
-			if (sender != null){
+			if (sender != null) {
 				sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
 			}
 			return;
 		}
-		
+
 		URI host = sw.getHost();
 		if (host == null) {
-			//log.info(String.format("local %s.%s->%s/%s.%s(%s)", msg.sender, msg.sendingMethod, sw.getHost(), msg.name, msg.method, Encoder.getParameterSignature(msg.data)));
+			// local message
+			// log.info(String.format("local %s.%s->%s/%s.%s(%s)", msg.sender,
+			// msg.sendingMethod, sw.getHost(), msg.name, msg.method,
+			// Encoder.getParameterSignature(msg.data)));
 			sw.in(msg);
 		} else {
-			//log.info(String.format("remote %s.%s->%s/%s.%s(%s)", msg.sender, msg.sendingMethod, sw.getHost(), msg.name, msg.method, Encoder.getParameterSignature(msg.data)));
-			
+			// remote message
+			// log.info(String.format("remote %s.%s->%s/%s.%s(%s)", msg.sender,
+			// msg.sendingMethod, sw.getHost(), msg.name, msg.method,
+			// Encoder.getParameterSignature(msg.data)));
+
 			URI remote = mrlToProtocol.get(host);
 			getComm(host).sendRemote(remote, msg);
 		}
@@ -111,16 +100,21 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 		this.comm = comm;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.myrobotlab.service.interfaces.CommunicationInterface#getComm(java
+	 * .net.URI)
+	 */
 	public Gateway getComm(URI uri) {
-		if (uri.getScheme().equals(Encoder.SCHEME_MRL))
-		{
-			ServiceInterface sw = Runtime.getService(uri.getHost());
-			Gateway c = (Gateway)sw;
-			return c;
+		if (uri.getScheme().equals(Encoder.SCHEME_MRL)) {
+			Gateway gateway = (Gateway)Runtime.getService(uri.getHost());
+			return gateway;
+		} else {
+			log.error(String.format("%s not SCHEME_MRL", uri));
+			return null;
 		}
-		// FIXME remove - keeping only for deprecated RemoteAdapter	
-		// should be ERROR if can not return with URI !!! - return null
-		return comm;
 	}
 
 }

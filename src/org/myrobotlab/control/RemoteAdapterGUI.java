@@ -38,10 +38,9 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
-import org.myrobotlab.control.widget.CommunicationNodeEntry;
-import org.myrobotlab.control.widget.CommunicationNodeList;
+import org.myrobotlab.control.widget.ConnectionNodeList;
 import org.myrobotlab.image.Util;
-import org.myrobotlab.net.CommData;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.RemoteAdapter;
 
@@ -50,11 +49,15 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 	static final long serialVersionUID = 1L;
 	JLabel numClients = new JLabel("0");
 
+	JButton scan = new JButton("scan");
 	JButton connect = new JButton("connect");
 	JButton listen = new JButton("listen");
+	JLabel udpPort = new JLabel("");
+	JLabel tcpPort = new JLabel("");
+	JLabel newConn = new JLabel("");
 
-	// display of the CommData getClients
-	CommunicationNodeList list = new CommunicationNodeList();
+	// display of the Connections
+	ConnectionNodeList list = new ConnectionNodeList();
 	String lastProtoKey;
 
 	RemoteAdapter myRemote = null;
@@ -68,8 +71,15 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 		display.setLayout(new BorderLayout());
 		
 		JPanel top = new JPanel();
+		top.add(scan);
 		top.add(connect);
 		top.add(listen);
+		top.add(new JLabel("udp "));
+		top.add(udpPort);
+		top.add(new JLabel("tcp "));
+		top.add(tcpPort);
+		
+		scan.addActionListener(this);
 		connect.addActionListener(this);
 		listen.addActionListener(this);
 		
@@ -96,6 +106,12 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 			} else {
 				send("startListening");	
 			}			
+		} else if (o == scan){
+			if (listen.getText().equals("stop listening")){
+				send("stopScanning");
+			} else {
+				send("scan");	
+			}			
 		}
 	}
 
@@ -105,33 +121,48 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 				myRemote = remote;
 				if (myRemote.isListening()){
 					listen.setText("stop listening");
+					if (remote.getUdpPort() != null){
+						udpPort.setText(remote.getUdpPort().toString());
+					} else {
+						udpPort.setText("");
+					}
+					if (remote.getTcpPort() != null){
+						tcpPort.setText(remote.getTcpPort().toString());
+					} else {
+						tcpPort.setText("");
+					}
 				} else {
 					listen.setText("listen");
 				}
-				lastProtoKey = remote.lastProtoKey;
+				lastProtoKey = remote.lastProtocolKey;
 				if (remote.getClients() == null){
 					return;
 				}
 				list.model.clear();
-				for (Map.Entry<URI, CommData> o : remote.getClients().entrySet()) {
-					// Map.Entry<String,SerializableImage> pairs = o;
+				for (Map.Entry<URI, Connection> o : remote.getClients().entrySet()) {
 					URI uri = o.getKey();
-					CommData data = o.getValue();
-					list.model.add(0, (Object) new CommunicationNodeEntry(uri, data));
+					Connection data = o.getValue();
+					list.model.add(0, (Object) data);
 				}
 			}
 		});
+	}
+	
+	public void onNewConnection(Connection conn){
+		myService.info("new connection found %d %s", System.currentTimeMillis(), conn.toString());
 	}
 
 	@Override
 	public void attachGUI() {
 		subscribe("publishState", "getState", RemoteAdapter.class);
+		subscribe("publishNewConnection", "onNewConnection", Connection.class);
 		send("broadcastState");
 	}
 
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", RemoteAdapter.class);
+		unsubscribe("publishNewConnection", "onNewConnection", Connection.class);
 	}
 
 }

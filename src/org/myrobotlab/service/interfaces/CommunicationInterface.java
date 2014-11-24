@@ -17,10 +17,10 @@ public interface CommunicationInterface {
 	 * the message remotely
 	 * 
 	 * @param uri
-	 * @return
+	 * @return Gateway to allow remote communication
 	 */
-	public Gateway getComm(final URI uri);
+	//public Gateway getComm(final URI uri);
 	
-	public void addRemote(URI mrlHost, URI protoKey);
+	public void addRemote(URI mrlHost, URI protocolKey);
 
 }

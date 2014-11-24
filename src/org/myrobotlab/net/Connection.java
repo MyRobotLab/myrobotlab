@@ -5,8 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.interfaces.Gateway;
 
 /**
  * @author GroG
@@ -24,22 +24,28 @@ import org.myrobotlab.service.interfaces.Gateway;
  * the connection itself
  *
  */
-public class CommData implements Serializable {
+public class Connection implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	long lastStateChange = 0;
+	
 	// states
+	public final static String DISCOVERED = "DISCOVERED";
 	public final static String CONNECTED = "CONNECTED";
 	public final static String UNKNOWN = "UNKNOWN";
 	public final static String DISCONNECTED = "DISCONNECTED";
 	public final static String CONNECTING = "CONNECTING";
 	
+	// typs - connection / connection-less
+	
 	/**
-	 * proto key - mrlkey is mrl://gatewayName/protoKey
+	 * proto key - mrlkey is mrl://gatewayName/protocolKey
 	 * 
 	 */
-	
 	public URI uri; // protokey ? name appropriately?
+	public String prefix;
+	public Platform platform;
 	
 	//String mode; // adaptive ?
 	public String state = UNKNOWN; // adaptive ?
@@ -62,12 +68,9 @@ public class CommData implements Serializable {
 	
 	public HashMap<String, String> addInfo = new HashMap<String, String>();
 	
-	/*
-	public CommData(){		
-	}
-	*/
+	public Connection(){}
 	
-	public CommData(String gatewayName, URI uri){
+	public Connection(String gatewayName, URI uri){
 		try {
 			this.uri = new URI(String.format("mrl://%s/%s", gatewayName, uri));
 		} catch (URISyntaxException e) {

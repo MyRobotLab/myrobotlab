@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOError;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
@@ -798,6 +797,10 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	
 	public String getTXFileName(){
 		return txFileName;	
+	}
+	
+	public void refresh(){
+		invoke("getPortNames");
 	}
 	
 	/**

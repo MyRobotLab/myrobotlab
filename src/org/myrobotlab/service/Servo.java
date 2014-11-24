@@ -25,6 +25,7 @@
 
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import org.myrobotlab.framework.MRLError;
@@ -102,7 +103,7 @@ public class Servo extends Service implements ServoControl {
 	 * that way pin does not need to be stored on the Servo
 	 */
 	private Integer pin;
-	Vector<String> controllers;
+	ArrayList<String> controllers;
 	// computer thread based sweeping
 	boolean isSweeping = false;
 
@@ -526,8 +527,8 @@ public class Servo extends Service implements ServoControl {
 		return false;
 	}
 
-	public Vector<String> refreshControllers() {
-		controllers = Runtime.getServicesFromInterface(ServoController.class.getCanonicalName());
+	public ArrayList<String> refreshControllers() {
+		controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
 		return controllers;
 	}
 
@@ -654,7 +655,7 @@ public class Servo extends Service implements ServoControl {
 			throw new MRLError("bad pin value");
 		}
 
-		Vector<String> controllers = servo.refreshControllers();
+		ArrayList<String> controllers = servo.refreshControllers();
 		if (controllers.size() != 1) {
 			throw new MRLError("should be on controller");
 		}

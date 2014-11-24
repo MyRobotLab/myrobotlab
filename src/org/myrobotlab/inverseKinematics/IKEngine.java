@@ -1,15 +1,10 @@
 package org.myrobotlab.inverseKinematics;
-
-
-import java.awt.Canvas;
-import java.awt.Dimension;
-
 /**
  * class IKEngine
  *
  *
  */
-public class IKEngine extends Canvas{
+public class IKEngine {
 
 	private static final long serialVersionUID = 1L;
 /**
@@ -228,20 +223,6 @@ public class IKEngine extends Canvas{
       
   }
 	  return angles;
-  }
-
-  /**
-   * Used by layout manager
-   */
-  public Dimension minimumSize() {
-    return new Dimension(200,200);
-  }
-
-  /**
-   * Used by layout manager
-   */
-  public Dimension preferredSize() {
-    return minimumSize();
   }
 
 }
