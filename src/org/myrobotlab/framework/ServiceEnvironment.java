@@ -18,14 +18,11 @@ public class ServiceEnvironment implements Serializable {
 	public URI accessURL;
 	public HashMap<String, ServiceInterface> serviceDirectory; // TODO make public
 																// & concurrent
-
 	/**
 	 * platform of the environment - this can be used to implement proxy rules
 	 * depending on what Services will work on which platform
 	 */
 	public Platform platform;
-	
-	public String version;
 
 	public ServiceEnvironment(URI url) {
 		this.accessURL = url;

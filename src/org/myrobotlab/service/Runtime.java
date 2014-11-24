@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,7 +27,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.Vector;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.cmdline.CMDLine;
@@ -88,8 +85,10 @@ import org.slf4j.Logger;
 public class Runtime extends Service implements MessageListener {
 	final static private long serialVersionUID = 1L;
 
-	// ---- rte members begin ----------------------------
-	static private final HashMap<URI, ServiceEnvironment> hosts = new HashMap<URI, ServiceEnvironment>();
+	/**
+	 * instances of MRL - keyed with an instance key URI format is mrl://gateway/(protocol key)
+	 */
+	static private final HashMap<URI, ServiceEnvironment> instances = new HashMap<URI, ServiceEnvironment>();
 	static private final HashMap<String, ServiceInterface> registry = new HashMap<String, ServiceInterface>();
 
 	/**
@@ -117,10 +116,7 @@ public class Runtime extends Service implements MessageListener {
 
 	private Platform platform = Platform.getLocalInstance();
 
-	// ---- rte members end ------------------------------
 	private static long uniqueID = new Random(System.currentTimeMillis()).nextLong();
-
-	// ---- Runtime members end -----------------
 
 	public final static Logger log = LoggerFactory.getLogger(Runtime.class);
 
@@ -200,11 +196,11 @@ public class Runtime extends Service implements MessageListener {
 				args.add(globalArgs[i]);
 			}
 		}
-		if (jvmArgs != null){
+		if (jvmArgs != null) {
 			log.info(String.format("jvmArgs %s", Arrays.toString(jvmArgs.toArray())));
 		}
 		log.info(String.format("args %s", Arrays.toString(args.toArray())));
-		
+
 		log.info("============== args end ==============");
 		log.info("============== prelog begin ==============");
 		try {
@@ -294,7 +290,7 @@ public class Runtime extends Service implements MessageListener {
 	 * @return Platform description
 	 */
 	public Platform getPlatform(URI uri) {
-		ServiceEnvironment local = hosts.get(uri);
+		ServiceEnvironment local = instances.get(uri);
 		if (local != null) {
 			return local.platform;
 		}
@@ -322,9 +318,9 @@ public class Runtime extends Service implements MessageListener {
 	 * @return version string
 	 */
 	public String getVersion(URI uri) {
-		ServiceEnvironment local = hosts.get(uri);
+		ServiceEnvironment local = instances.get(uri);
 		if (local != null) {
-			return local.version;
+			return local.platform.getVersion();
 		}
 
 		error("can't get local version in service environment");
@@ -728,188 +724,90 @@ public class Runtime extends Service implements MessageListener {
 	 */
 	public final static synchronized ServiceInterface register(ServiceInterface s, URI url) {
 		ServiceEnvironment se = null;
-		if (!hosts.containsKey(url)) {
+		if (!instances.containsKey(url)) {
 			se = new ServiceEnvironment(url);
-			hosts.put(url, se);
+			instances.put(url, se);
 		} else {
-			se = hosts.get(url);
+			se = instances.get(url);
 		}
 
 		if (s != null) {
-			if (se.serviceDirectory.containsKey(s.getName())) {
-				log.info(String.format("attempting to register %1$s which is already registered in %2$s", s.getName(), url));
+			// x-forward encoding begin FIXME - should be in Encoder 
+			String name = s.getName();
+			/*
+			if (prefix != null){
+				name = String.format("%s%s", prefix, s.getName()); //< FIXME FYI - bug occured because I had %s.%s :P - not normalized !!!
+			} else {
+			 name = s.getName();
+			}
+			*/
+			// x-forward encoding end FIXME - should be in Encoder 
+			
+			if (se.serviceDirectory.containsKey(name)) {
+				log.info(String.format("attempting to register %1$s which is already registered in %2$s", name, url));
 				if (runtime != null) {
-					runtime.invoke("collision", s.getName());
-					runtime.warn("collision registering %s", s.getName());
-					runtime.error(String.format(" name collision with %s", s.getName()));
+					runtime.invoke("collision", name);
+					runtime.warn("collision registering %s", name);
+					runtime.error(String.format(" name collision with %s", name));
 				}
 				return s;// <--- BUG ?!?!? WHAT ABOUT THE REMOTE GATEWAYS !!!
 			}
-		
 
-		// REMOTE BROADCAST to all foreign environments
-		// FIXME - Security determines what to export
-		// for each gateway
-		
-		// NEW PART !!!
+			// REMOTE BROADCAST to all foreign environments
+			// FIXME - Security determines what to export
+			// for each gateway
 
-		Vector<String> remoteGateways = getServicesFromInterface(Gateway.class.getCanonicalName());
-		for (int ri = 0; ri < remoteGateways.size(); ++ri) {
-			String n = remoteGateways.get(ri);
-			// Communicator gateway = (Communicator)registry.get(n);
-			ServiceInterface gateway = registry.get(n);
+			// NEW PART !!!
 
-			// for each JVM this gateway is is attached too
-			for (Map.Entry<URI, ServiceEnvironment> o : hosts.entrySet()) {
-				// Map.Entry<String,SerializableImage> pairs = o;
-				URI uri = o.getKey();
-				// if its a foreign JVM & the gateway responsible for the remote
-				// connection and
-				// the foreign JVM is not the host which this service originated
-				// from - send it....
-				if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getHost())) {
-					log.info(String.format("gateway %s sending registration of %s remote to %s", gateway.getName(), s.getName(), uri));
-					// FIXME - Security determines what to export
-					Message msg = runtime.createMessage("", "register", s);
-					// ((Communicator) gateway).sendRemote(uri, msg);
-					// //mrl://remote2/tcp://127.0.0.1:50488 <-- wrong
-					// sendingRemote is wrong
-					// FIXME - optimize gateway.send(msg) && URI TO URI MAP IN
-					// RUNTIME !!!
-					gateway.in(msg);
+			ArrayList<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
+			for (int ri = 0; ri < remoteGateways.size(); ++ri) {
+				String n = remoteGateways.get(ri);
+				// Communicator gateway = (Communicator)registry.get(n);
+				ServiceInterface gateway = registry.get(n);
+
+				// for each JVM this gateway is is attached too
+				for (Map.Entry<URI, ServiceEnvironment> o : instances.entrySet()) {
+					// Map.Entry<String,SerializableImage> pairs = o;
+					URI uri = o.getKey();
+					// if its a foreign JVM & the gateway responsible for the
+					// remote
+					// connection and
+					// the foreign JVM is not the host which this service
+					// originated
+					// from - send it....
+					if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getHost())) {
+						log.info(String.format("gateway %s sending registration of %s remote to %s", gateway.getName(), name, uri));
+						// FIXME - Security determines what to export
+						Message msg = runtime.createMessage("", "register", s);
+						// ((Communicator) gateway).sendRemote(uri, msg);
+						// //mrl://remote2/tcp://127.0.0.1:50488 <-- wrong
+						// sendingRemote is wrong
+						// FIXME - optimize gateway.send(msg) && URI TO URI MAP
+						// IN
+						// RUNTIME !!!
+						gateway.in(msg);
+					}
 				}
 			}
+
+			// ServiceInterface sw = new ServiceInterface(s, se.accessURL);
+			se.serviceDirectory.put(name, s);
+			// WARNING - SHOULDN'T THIS BE DONE FIRST AVOID DEADLOCK / RACE
+			// CONDITION ????
+			registry.put(name, s); // FIXME FIXME FIXME FIXME !!!!!!
+											// pre-pend
+											// URI if not NULL !!!
+			if (runtime != null) {
+				runtime.invoke("registered", s);
+			}
+
+			return s;
 		}
 
-		// ServiceInterface sw = new ServiceInterface(s, se.accessURL);
-		se.serviceDirectory.put(s.getName(), s);
-		// WARNING - SHOULDN'T THIS BE DONE FIRST AVOID DEADLOCK / RACE
-		// CONDITION ????
-		registry.put(s.getName(), s); // FIXME FIXME FIXME FIXME !!!!!! pre-pend
-										// URI if not NULL !!!
-		if (runtime != null) {
-			runtime.invoke("registered", s);
-		}
-
-		return s;
-		}
-		
 		return null;
 	}
 
-	/**
-	 * called by remote/foreign systems to register a new service through a
-	 * subscription
-	 * 
-	 * @param sw
-	 */
-	public synchronized void register(ServiceInterface sw) {
-		log.debug(String.format("register(ServiceInterface %s)", sw.getName()));
-
-		if (registry.containsKey(sw.getName())) {
-			log.warn("{} already defined - will not re-register", sw.getName());
-			return;
-		}
-
-		ServiceEnvironment se = hosts.get(sw.getHost());
-		if (se == null) {
-			error("no service environment for %s", sw.getHost());
-			return;
-		}
-
-		if (se.serviceDirectory.containsKey(sw.getName())) {
-			log.info("{} already registered", sw.getName());
-			return;
-		}
-		// FIXME - does the refrence of this service wrapper need to point back
-		// to the
-		// service environment its referencing?
-		// sw.host = se; - can't do this because its final
-
-		se.serviceDirectory.put(sw.getName(), sw);
-		registry.put(sw.getName(), sw);
-		if (runtime != null) {
-			runtime.invoke("registered", sw);
-		}
-
-	}
-
-	/**
-	 * registers an initial ServiceEnvironment which is a complete set of
-	 * Services from a foreign instance of MRL. It returns whether changes have
-	 * been made. This is necessary to determine if the register should be
-	 * echoed back.
-	 * 
-	 * @param uri
-	 * @param s
-	 * @return false if it already matches
-	 */
-	public static synchronized boolean register(ServiceEnvironment s) {
-		URI uri = s.accessURL;
-
-		if (!hosts.containsKey(uri)) {
-			log.info(String.format("adding new ServiceEnvironment {}", uri));
-		} else {
-			// FIXME ? - replace regardless ???
-			if (areEqual(s)) {
-				log.info(String.format("ServiceEnvironment {} already exists - with same count and names", uri));
-				return false;
-			}
-			log.info(String.format("replacing ServiceEnvironment {}", uri.toString()));
-		}
-
-		hosts.put(uri, s);
-
-		Iterator<String> it = s.serviceDirectory.keySet().iterator();
-		String serviceName;
-		while (it.hasNext()) {
-			serviceName = it.next();
-			log.info(String.format("adding %s to registry", serviceName));
-			ServiceInterface si = s.serviceDirectory.get(serviceName);
-			// IMPORTANT - s.accessURL == service.host !! NORMALIZE !!!
-			si.setHost(uri);
-
-			registry.put(serviceName, si);
-			runtime.invoke("registered", s.serviceDirectory.get(serviceName));
-
-			// if I find a runtime - subscribe this Runtime to remote Runtime
-			if ("org.myrobotlab.service.Runtime".equals(s.getClass().getCanonicalName())) {
-				log.info(String.format("found runtime %s", serviceName));
-				runtime.subscribe("registered", serviceName, "register", ServiceInterface.class);
-			}
-
-		}
-
-		return true;
-	}
-
-	/**
-	 * Checks if s has the same service directory content as the environment at
-	 * url.
-	 * 
-	 * @param s
-	 * @param uri
-	 * @return
-	 */
-	private static boolean areEqual(ServiceEnvironment s) {
-		URI url = s.accessURL;
-		ServiceEnvironment se = hosts.get(url);
-		if (se.serviceDirectory.size() != s.serviceDirectory.size()) {
-			return false;
-		}
-
-		s.serviceDirectory.keySet().iterator();
-		Iterator<String> it = s.serviceDirectory.keySet().iterator();
-		String serviceName;
-		while (it.hasNext()) {
-			serviceName = it.next();
-			if (!se.serviceDirectory.containsKey(serviceName)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
+	
 	/**
 	 * Gets the current total number of services registered services. This is
 	 * the number of services in all Service Environments
@@ -918,11 +816,11 @@ public class Runtime extends Service implements MessageListener {
 	 */
 	public int getServiceCount() {
 		int cnt = 0;
-		Iterator<URI> it = hosts.keySet().iterator();
+		Iterator<URI> it = instances.keySet().iterator();
 		ServiceEnvironment se;
 		Iterator<String> it2;
 		while (it.hasNext()) {
-			se = hosts.get(it.next());
+			se = instances.get(it.next());
 			it2 = se.serviceDirectory.keySet().iterator();
 			while (it2.hasNext()) {
 				++cnt;
@@ -937,7 +835,7 @@ public class Runtime extends Service implements MessageListener {
 	 * @return
 	 */
 	public int getServiceEnvironmentCount() {
-		return hosts.size();
+		return instances.size();
 	}
 
 	/**
@@ -945,12 +843,12 @@ public class Runtime extends Service implements MessageListener {
 	 * @return
 	 */
 	public static ServiceEnvironment getLocalServices() {
-		if (!hosts.containsKey(null)) {
+		if (!instances.containsKey(null)) {
 			runtime.error("local (null) ServiceEnvironment does not exist");
 			return null;
 		}
 
-		return hosts.get(null);
+		return instances.get(null);
 	}
 
 	/**
@@ -970,12 +868,12 @@ public class Runtime extends Service implements MessageListener {
 	 * 
 	 */
 	public static ServiceEnvironment getLocalServicesForExport() {
-		if (!hosts.containsKey(null)) {
+		if (!instances.containsKey(null)) {
 			runtime.error("local (null) ServiceEnvironment does not exist");
 			return null;
 		}
 
-		ServiceEnvironment local = hosts.get(null);
+		ServiceEnvironment local = instances.get(null);
 
 		// URI is null but the "acceptor" will fill in the correct URI/ID
 		ServiceEnvironment export = new ServiceEnvironment(null);
@@ -1028,10 +926,10 @@ public class Runtime extends Service implements MessageListener {
 			return false;
 		}
 		ServiceInterface sw = registry.remove(name);
-		if (sw.isLocal()){
+		if (sw.isLocal()) {
 			sw.stopService();
 		}
-		ServiceEnvironment se = hosts.get(sw.getHost());
+		ServiceEnvironment se = instances.get(sw.getHost());
 		se.serviceDirectory.remove(name);
 		rt.invoke("released", sw);
 		log.warn("released{}", name);
@@ -1046,7 +944,7 @@ public class Runtime extends Service implements MessageListener {
 	public static boolean release(URI url) /* release process environment */
 	{
 		boolean ret = true;
-		ServiceEnvironment se = hosts.get(url);
+		ServiceEnvironment se = instances.get(url);
 		if (se == null) {
 			log.warn("attempt to release {} not successful - it does not exist", url);
 			return false;
@@ -1092,7 +990,7 @@ public class Runtime extends Service implements MessageListener {
 	{
 		log.debug("releaseAll");
 
-		ServiceEnvironment se = hosts.get(null); // local services only
+		ServiceEnvironment se = instances.get(null); // local services only
 		if (se == null) {
 			log.info("releaseAll called when everything is released, all done here");
 			return;
@@ -1111,7 +1009,7 @@ public class Runtime extends Service implements MessageListener {
 				continue;
 			}
 
-			log.info(String.format("stopping service %s/%s", se.accessURL, serviceName));
+			log.info(String.format("stopping service %s", serviceName));
 
 			if (sw == null) {
 				log.warn("unknown type and/or remote service");
@@ -1133,7 +1031,7 @@ public class Runtime extends Service implements MessageListener {
 		runtime.stopService();
 
 		log.info("clearing hosts environments");
-		hosts.clear();
+		instances.clear();
 
 		log.info("clearing registry");
 		registry.clear();
@@ -1155,8 +1053,8 @@ public class Runtime extends Service implements MessageListener {
 	 * @return
 	 */
 	public static ServiceEnvironment getServiceEnvironment(URI url) {
-		if (hosts.containsKey(url)) {
-			return hosts.get(url); // FIXME should return copy
+		if (instances.containsKey(url)) {
+			return instances.get(url); // FIXME should return copy
 		}
 		return null;
 	}
@@ -1166,7 +1064,7 @@ public class Runtime extends Service implements MessageListener {
 	 * @return
 	 */
 	public static HashMap<URI, ServiceEnvironment> getServiceEnvironments() {
-		return new HashMap<URI, ServiceEnvironment>(hosts);
+		return new HashMap<URI, ServiceEnvironment>(instances);
 	}
 
 	/**
@@ -1259,13 +1157,11 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	/**
-	 * WTF did you use a vector ?!?!?
-	 * 
-	 * @param interfaceName
-	 * @return
+	 * @param interfaze
+	 * @return services which match
 	 */
-	public static Vector<String> getServicesFromInterface(String interfaceName) {
-		Vector<String> ret = new Vector<String>();
+	public static ArrayList<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
+		ArrayList<ServiceInterface> ret = new ArrayList<ServiceInterface>();
 
 		Iterator<String> it = registry.keySet().iterator();
 		String serviceName;
@@ -1281,12 +1177,25 @@ public class Runtime extends Service implements MessageListener {
 			for (int i = 0; i < interfaces.length; ++i) {
 				m = interfaces[i];
 
-				if (m.getCanonicalName().equals(interfaceName)) {
-					ret.add(sw.getName());
+				if (m.equals(interfaze)) {
+					ret.add(sw);
 				}
 			}
 		}
 
+		return ret;
+	}
+	
+	/**
+	 * @param interfaceName
+	 * @return service names which match
+	 */
+	public static ArrayList<String> getServiceNamesFromInterface(Class<?> interfaze) {
+		ArrayList<String> ret = new ArrayList<String>();
+		ArrayList<ServiceInterface> services = getServicesFromInterface(interfaze);
+		for (int i = 0; i < services.size(); ++i){
+			ret.add(services.get(i).getName());
+		}
 		return ret;
 	}
 
@@ -1588,7 +1497,7 @@ public class Runtime extends Service implements MessageListener {
 
 	public static String dump() {
 		StringBuffer sb = new StringBuffer().append("\nhosts:\n");
-		Map<URI, ServiceEnvironment> sorted = hosts;
+		Map<URI, ServiceEnvironment> sorted = instances;
 		Iterator<URI> hkeys = sorted.keySet().iterator();
 		URI url;
 		ServiceEnvironment se;
@@ -1597,14 +1506,16 @@ public class Runtime extends Service implements MessageListener {
 		ServiceInterface sw;
 		while (hkeys.hasNext()) {
 			url = hkeys.next();
-			se = hosts.get(url);
+			se = instances.get(url);
 			sb.append("\t").append(url);
 
 			// good check :)
+			/*
 			if ((se.accessURL != url) && (!url.equals(se.accessURL))) {
 				sb.append(" key not equal to data ").append(se.accessURL);
 			}
 			sb.append("\n");
+			*/
 
 			// Service Environment
 			Map<String, ServiceInterface> sorted2 = new TreeMap<String, ServiceInterface>(se.serviceDirectory);
@@ -1787,7 +1698,7 @@ public class Runtime extends Service implements MessageListener {
 
 		// SHOULD BE THREADED? PROLLY
 		// ANDROID DOES NOT SUPPORT inheritIO()
-		//Process p = new ProcessBuilder().inheritIO().command(args).start();
+		// Process p = new ProcessBuilder().inheritIO().command(args).start();
 		Process p = new ProcessBuilder().command(args).start();
 		// p.waitFor();
 		// int rc = p.exitValue();
@@ -2096,7 +2007,7 @@ public class Runtime extends Service implements MessageListener {
 		return ret;
 	}
 
-	//@TargetApi(9)
+	// @TargetApi(9)
 	static public ArrayList<String> getLocalHardwareAddresses() {
 		log.info("getLocalHardwareAddresses");
 		ArrayList<String> ret = new ArrayList<String>();

@@ -19,13 +19,15 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Type;
 import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.net.CommData;
+import org.myrobotlab.net.Connection;
+import org.myrobotlab.service.RemoteAdapter.CommOptions;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.webgui.RESTProcessor;
@@ -38,6 +40,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 
 	public final static Logger log = LoggerFactory.getLogger(XMPP.class.getCanonicalName());
 	static final int packetReplyTimeout = 500; // millis
+	private String defaultPrefix;
 
 	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS
 	// FIXME - handle multiple user accounts
@@ -86,6 +89,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 
 	public XMPP(String n) {
 		super(n);
+		//defaultPrefix = n;
 	}
 
 	@Override
@@ -475,13 +479,13 @@ public class XMPP extends Service implements Gateway, MessageListener {
 					// BEGIN ENCAPSULATION --- ENCODER BEGIN -------------
 					// IMPORTANT - (should be in Encoder) - create the key for
 					// foreign service environment
-					URI protoKey = new URI(String.format("xmpp://%s", from));
-					String mrlURI = String.format("mrl://%s/%s", getName(), protoKey.toString());
+					URI protocolKey = new URI(String.format("xmpp://%s", from));
+					String mrlURI = String.format("mrl://%s/%s", getName(), protocolKey.toString());
 					URI uri = new URI(mrlURI);
 
 					// IMPORTANT - this is an optimization and probably should
 					// be in the Comm interface defintion
-					cm.addRemote(uri, protoKey);
+					cm.addRemote(uri, protocolKey);
 
 					// check if the URI is already defined - if not - we will
 					// send back the services which we want to export - Security
@@ -621,7 +625,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 	}
 
 	@Override
-	public HashMap<URI, CommData> getClients() {
+	public HashMap<URI, Connection> getClients() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -660,6 +664,41 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		sendRemote(uri, msg);
 	}
 
+	//@Override
+	public Platform getPlatform() {
+		return Runtime.getInstance().getPlatform();
+	}
+
+	@Override
+	public String getPrefix(URI protocolKey) {
+		if (defaultPrefix != null){
+			return defaultPrefix;
+		} else {
+			return "";// important - return "" not null
+		}
+	}
+	
+	public CommOptions getOptions(){
+		return null;
+	}
+
+	@Override
+	public List<Connection> getConnections(URI clientKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Connection publishNewConnection(Connection conn) {
+		return conn;
+	}
+
+	// FIXME normalize with all gateways?
+	@Override
+	public void addConnectionListener(String name) {
+		// TODO Auto-generated method stub
+		
+	}
 
 
 }

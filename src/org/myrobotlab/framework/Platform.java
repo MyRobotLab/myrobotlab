@@ -30,6 +30,7 @@ public class Platform implements Serializable {
 	private int bitness;
 	private String vmName;
 	private String mrlVersion;
+	private String instanceId;
 
 	static Platform localInstance = getLocalInstance();
 
@@ -178,6 +179,13 @@ public class Platform implements Serializable {
 
 	public String getPlatformId() {
 		return String.format("%s.%s.%s", getArch(), getBitness(), getOS());
+	}
+
+	public void getInstanceId(String isntanceId){
+		this.instanceId = isntanceId;
+	}
+	public String getInstanceId(){
+		return instanceId;
 	}
 
 }

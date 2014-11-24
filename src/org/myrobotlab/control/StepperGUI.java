@@ -115,9 +115,9 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 
 		controllerPanel.setBorder(BorderFactory.createTitledBorder("controller"));
 
-		Vector<String> v = Runtime.getServicesFromInterface(StepperController.class.getCanonicalName());
+		ArrayList<String> v = Runtime.getServiceNamesFromInterface(StepperController.class);
 		v.add(0, "");
-		controllerSelect = new JComboBox(v);
+		controllerSelect = new JComboBox(v.toArray());
 		controllerPanel.add(controllerSelect, BorderLayout.WEST);
 		controllerPanel.add(controllerTypePanel, BorderLayout.CENTER);
 

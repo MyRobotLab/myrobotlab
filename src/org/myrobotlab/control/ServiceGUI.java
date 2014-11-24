@@ -215,12 +215,12 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 				String label = tabControl.getText();
 				display.setVisible(true);
 				tabs.add(display);
-				log.info("here tabs count {}", tabs.getTabCount());
+				log.debug("here tabs count {}", tabs.getTabCount());
 				tabs.setTabComponentAt(tabs.getTabCount() - 1, tabControl);
 
 				savePosition();
 
-				log.info("{}", tabs.indexOfTab(label));
+				log.debug("{}", tabs.indexOfTab(label));
 
 				if (undocked != null) {
 					undocked.dispose();

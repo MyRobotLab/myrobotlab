@@ -1,7 +1,9 @@
 package org.myrobotlab.framework;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
@@ -27,8 +29,8 @@ import com.google.gson.GsonBuilder;
  * 
  * xmpp for example assumes (/api/string/gson)/service/method/param1/param2/ ...
  * 
- * scheme = alpha *( alpha | digit | "+" | "-" | "." )
- * Components of all URIs: [<scheme>:]<scheme-specific-part>[#<fragment>]
+ * scheme = alpha *( alpha | digit | "+" | "-" | "." ) Components of all URIs:
+ * [<scheme>:]<scheme-specific-part>[#<fragment>]
  * http://stackoverflow.com/questions/3641722/valid-characters-for-uri-schemes
  */
 public class Encoder {
@@ -70,9 +72,9 @@ public class Encoder {
 	public static boolean isWrapper(String className) {
 		return WRAPPER_TYPES_CANONICAL.contains(className);
 	}
-	
-	public static boolean setJSONPrettyPrinting(boolean b){
-		if (b){
+
+	public static boolean setJSONPrettyPrinting(boolean b) {
+		if (b) {
 			gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 		} else {
 			gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
@@ -251,6 +253,8 @@ public class Encoder {
 		}
 		return false;
 	}
+	
+	// FIXME !!! - encoding for Message ----> makeMethodKey(Message msg)
 
 	static public String makeMethodKey(String fullObjectName, String methodName, Class<?>[] paramTypes) {
 		StringBuffer sb = new StringBuffer();
@@ -283,9 +287,6 @@ public class Encoder {
 		}
 		return methodOrdinal.get(ordinalKey);
 	}
-
-
-
 
 	// FIXME - axis's Method cache - loads only requested methods
 	// this would probably be more gracefull than batch loading as I am doing..
@@ -334,96 +335,18 @@ public class Encoder {
 	// this getMethod with class form
 	// encoded data.. YA !
 	static public Method getMethod(String pkgName, String objectName, String methodName, Object[] params) {
-		// try {
 		String fullObjectName = String.format("%s.%s", pkgName, objectName);
-		// TODO - is param number incorrect? should the params
-		// String key = makeMethodKey(fullObjectName, methodName,
-		// params.length);
-		/*
-		 * Class<?>[] paramTypes = new Class<?>[params.length]; for (int i = 0;
-		 * i < params.length; ++i) { paramTypes[i] = params[i].getClass(); }
-		 * String methodKey = makeMethodKey(fullObjectName, methodName,
-		 * paramsTypes);
-		 */
-		/*
-		 * 
-		 * if (!objectsCached.contains(fullObjectName)){
-		 * objectsCached.add(fullObjectName); // first time for this object type
-		 * - we will cache all its methods Class<?> clazz =
-		 * Class.forName(String.format("%s.%s", pkgName, objectName)); Method[]
-		 * methods = clazz.getMethods(); for (int i = 0; i < methods.length;
-		 * ++i) { Method m = methods[i]; Class<?>[] types =
-		 * m.getParameterTypes();
-		 * 
-		 * String ordinalKey = makeMethodOrdinalKey(fullObjectName, methodName,
-		 * types.length); String methodKey = makeMethodKey(fullObjectName,
-		 * methodName, types);
-		 * 
-		 * 
-		 * if (!methodOrdinal.containsKey(ordinalKey)){
-		 * methodOrdinal.put(ordinalKey, m); }
-		 * 
-		 * methodCache.put(methodKey, m);
-		 * 
-		 * 
-		 * } }
-		 */
-
-		/*
-		 * 
-		 * if (!methodCache.containsKey(methodKey)) {
-		 * 
-		 * Class<?> clazz = Class.forName(String.format("%s.%s", pkgName,
-		 * objectName)); Method[] methods = clazz.getMethods(); for (int i = 0;
-		 * i < methods.length; ++i) { Method m = methods[i]; Class<?>[] types =
-		 * m.getParameterTypes();
-		 * 
-		 * if (!methodOrdinal.containsKey(ordinalKey)) {
-		 * methodOrdinal.put(ordinalKey, m); }
-		 * 
-		 * methodCache.put(methodKey, m);
-		 * 
-		 * } }
-		 * 
-		 * } catch (Exception e) { Logging.logException(e); return null; }
-		 */
 		return null;
 
 	}
-	/*
-	 * // --- xml codec end ------------------ public static void main(String[]
-	 * args) { LoggingFactory.getInstance().configure();
-	 * LoggingFactory.getInstance().setLevel(Level.INFO);
-	 * 
-	 * try {
-	 * 
-	 * Encoder.getMethod("Clock", "setInterval", new Object[] { new Integer(6)
-	 * });
-	 * 
-	 * String user = null; String group = null;
-	 * 
-	 * HashMap<String, String> userGroup = new HashMap<String, String>();
-	 * userGroup.put(String.format("%s", group), "ALLOW");
-	 * userGroup.put(String.format("%s.%s", user, group), "ALLOW");
-	 * 
-	 * String x = userGroup.get("null.null");
-	 * 
-	 * String url =
-	 * "http://gperry:blahblah@localhost:7777/api/string/gson/runtime/getUptime"
-	 * ; log.info(url.substring(5)); url = "mrl://remote/tcp://blah.com"; URI
-	 * uri = new URI(url);
-	 * 
-	 * log.info(uri.getHost()); log.info(uri.getScheme());
-	 * log.info(uri.getPath());
-	 * 
-	 * Message msg = decodeURI(uri);
-	 * 
-	 * decodePathInfo("/api"); decodePathInfo(null);
-	 * decodePathInfo("  /api/  ");
-	 * 
-	 * // REST rest = new REST(); } catch (Exception e) {
-	 * Logging.logException(e); }
-	 * 
-	 * }
-	 */
+
+	static public final byte[] getBytes(Object o) throws IOException {
+		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(5000);
+		ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(byteStream));
+		os.flush();
+		os.writeObject(o);
+		os.flush();
+		return byteStream.toByteArray();
+	}
+
 }

@@ -60,11 +60,13 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	// menu
 	JComboBox<String> format = new JComboBox<String>(new String[] { Serial.FORMAT_DECIMAL, Serial.FORMAT_HEX, Serial.FORMAT_ASCII });
 	JComboBox<String> ports = new JComboBox<String>();
-
+	JButton refresh = new JButton("refresh");
+	
 	JButton createVirtualUART = new JButton("create virtual uart");
 	JButton captureRX = new JButton();
 	JButton captureTX = new JButton();
 	//JButton sendTx = new JButton("send tx from file");
+	
 
 	JLabel connectLight = new JLabel();
 
@@ -102,6 +104,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		JPanel north = new JPanel();
 		north.add(new JLabel("port "));
 		north.add(ports);
+		north.add(refresh);
 		north.add(connectLight);
 		north.add(new JLabel(" "));
 		north.add(format);
@@ -136,6 +139,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		sendFile.addActionListener(this);
 		captureRX.addActionListener(this);
 		ports.addItemListener(this);
+		refresh.addActionListener(this);
 
 	}
 
@@ -261,6 +265,10 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 
 		if (o == createVirtualUART){
 			send("createVirtualUART");
+		}
+		
+		if (o == refresh){
+			send("refresh");
 		}
 		
 		if (o == sendFile) {

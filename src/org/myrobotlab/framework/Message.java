@@ -287,6 +287,7 @@ public class Message implements Serializable {
 	public String getName() {
 		return name;
 	}
+	
 
 	public static void main(String[] args) throws InterruptedException {
 		LoggingFactory.getInstance().configure();

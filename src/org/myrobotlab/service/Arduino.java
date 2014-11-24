@@ -865,15 +865,15 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	//StringBuffer dump = new StringBuffer();
 
-	@Element
+	@Element(required=false)
 	private String portName = "";
-	@Element
+	@Element(required=false)
 	private int rate = 57600;
-	@Element
+	@Element(required=false)
 	private int databits = 8;
-	@Element
+	@Element(required=false)
 	private int stopbits = 1;
-	@Element
+	@Element(required=false)
 	private int parity = 0;
 	private int error_arduino_to_mrl_rx_cnt;
 	private int error_mrl_to_arduino_rx_cnt;

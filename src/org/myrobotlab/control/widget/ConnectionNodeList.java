@@ -11,19 +11,19 @@ import javax.swing.JScrollPane;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 
-public class CommunicationNodeList extends JPanel {
+public class ConnectionNodeList extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
 	public DefaultListModel model = new DefaultListModel();
 	public JList nodeList;
 
-	public CommunicationNodeList() {
+	public ConnectionNodeList() {
 		setLayout(new BorderLayout());
 
 		model = new DefaultListModel();
 		nodeList = new JList(model);
-		nodeList.setCellRenderer(new CommunicationNodeRenderer());
+		nodeList.setCellRenderer(new ConnectionNodeRenderer());
 		nodeList.setVisibleRowCount(8);
 		JScrollPane pane = new JScrollPane(nodeList);
 		add(pane, BorderLayout.NORTH);
@@ -36,7 +36,7 @@ public class CommunicationNodeList extends JPanel {
 
 		JFrame frame = new JFrame("List Example");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		CommunicationNodeList cl = new CommunicationNodeList();
+		ConnectionNodeList cl = new ConnectionNodeList();
 
 		frame.setContentPane(cl);
 		frame.pack();

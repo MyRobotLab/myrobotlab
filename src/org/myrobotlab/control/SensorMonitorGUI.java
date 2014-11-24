@@ -34,6 +34,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
@@ -239,8 +240,8 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 		trace.add(addTrace, gc);
 
 		++gc.gridx;
-		Vector<String> v = Runtime.getServicesFromInterface(SensorDataPublisher.class.getCanonicalName());
-		traceController = new JComboBox(v);
+		ArrayList<String> v = Runtime.getServiceNamesFromInterface(SensorDataPublisher.class);
+		traceController = new JComboBox(v.toArray());
 		trace.add(traceController, gc);
 
 		// TODO - lame, pin config is based on Arduino D.
@@ -295,7 +296,7 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 		triggerPanel.add(addTrigger, gc);
 
 		++gc.gridx;
-		triggerController = new JComboBox(v);
+		triggerController = new JComboBox(v.toArray());
 		triggerPanel.add(triggerController, gc);
 
 		triggerPin = new JComboBox(p);
