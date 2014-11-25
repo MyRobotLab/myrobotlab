@@ -401,14 +401,14 @@ public class GUIServiceGUI extends ServiceGUI {
 
 			String blockColor = null;
 
-			if (sw.getHost() == null) {
+			if (sw.getInstanceId() == null) {
 				blockColor = mxUtils.getHexColorString(Style.background);
 			} else {
 				blockColor = mxUtils.getHexColorString(Style.remoteBackground);
 			}
 
 			if (showAccessURLs) {
-				displayName = sw.getHost() + "\n" + displayName;
+				displayName = sw.getInstanceId() + "\n" + displayName;
 			}
 
 			mxCell v1 = (mxCell) graph.insertVertex(parent, null, new GUIServiceGraphVertex(serviceName, canonicalName, displayName, toolTip, GUIServiceGraphVertex.Type.SERVICE),

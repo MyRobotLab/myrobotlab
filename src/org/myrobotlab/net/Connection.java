@@ -43,7 +43,8 @@ public class Connection implements Serializable {
 	 * proto key - mrlkey is mrl://gatewayName/protocolKey
 	 * 
 	 */
-	public URI uri; // protokey ? name appropriately?
+	private String service;
+	public URI protocolKey;
 	public String prefix;
 	public Platform platform;
 	
@@ -70,16 +71,20 @@ public class Connection implements Serializable {
 	
 	public Connection(){}
 	
-	public Connection(String gatewayName, URI uri){
+	public Connection(String gatewayName, URI protocolKey){
+		this.service = gatewayName;
+		this.protocolKey = protocolKey;
+		/*
 		try {
-			this.uri = new URI(String.format("mrl://%s/%s", gatewayName, uri));
+			this.protocolKey = new URI(String.format("mrl://%s/%s", gatewayName, uri));
 		} catch (URISyntaxException e) {
 			Logging.logException(e);
 		}		
+		*/
 	}
 	
 	public String toString(){
-		return String.format("%s %s rx %d %s.%s --> %s.%s tx %d %s.%s --> %s.%s", uri, state, rx, rxSender, rxSendingMethod, rxName, rxMethod, tx, txSender, txSendingMethod, txName, txMethod );
+		return String.format("%s %s rx %d %s.%s --> %s.%s tx %d %s.%s --> %s.%s", protocolKey, state, rx, rxSender, rxSendingMethod, rxName, rxMethod, tx, txSender, txSendingMethod, txName, txMethod );
 	}
 
 }

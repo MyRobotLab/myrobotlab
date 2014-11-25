@@ -94,7 +94,7 @@ public class TCPThread2 extends Thread {
 
 					if (msgData != null) {
 						si = (ServiceInterface) msg.data[0];
-						si.setHost(uri);
+						si.setInstanceId(uri);
 						si.setPrefix(myService.getPrefix(protocolKey));
 					}
 					// router x-forwarded inbound proxy end
@@ -133,7 +133,7 @@ public class TCPThread2 extends Thread {
 					// ALLOWED TO BE NULL - establishes initial contact & a ServiceEnvironment
 					if (msgData != null) {
 						si = (ServiceInterface) msg.data[0];
-						si.setHost(uri);
+						si.setInstanceId(uri);
 						si.setPrefix(myService.getPrefix(protocolKey));
 					}
 					
@@ -208,10 +208,11 @@ public class TCPThread2 extends Thread {
 	public void releaseConnect() {
 		try {
 			data.state = Connection.DISCONNECTED;
-			log.error("removing {} from registry", data.uri);
+			String instanceID = String.format("mrl://%s/%s", myService.getName(), data.protocolKey);
+			log.error("removing {} from registry", instanceID);
 			// FIXME - not working - are you sure you want to do this?
 			// just because the connection is broken
-			Runtime.release(data.uri);
+			Runtime.release(new URI(instanceID));
 			log.error("shutting down thread");
 			isRunning = false;
 			log.error("attempting to close streams");

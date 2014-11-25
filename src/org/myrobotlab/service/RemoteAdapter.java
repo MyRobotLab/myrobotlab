@@ -100,7 +100,7 @@ public class RemoteAdapter extends Service implements Gateway {
 	 * used as a data interface to all the non-serializable network objects - it
 	 * will report stats and states
 	 */
-	private HashMap<URI, Connection> clientList = new HashMap<URI, Connection>();
+	private HashMap<URI, Connection> connections = new HashMap<URI, Connection>();
 
 	static public class Scanner extends Thread {
 
@@ -281,7 +281,7 @@ public class RemoteAdapter extends Service implements Gateway {
 
 	// FIXME - add to Gateway interfaceS
 	public HashMap<URI, Connection> broadcastHeartbeat() {
-		for (Map.Entry<URI, Connection> entry : clientList.entrySet()) {
+		for (Map.Entry<URI, Connection> entry : connections.entrySet()) {
 			URI uri = entry.getKey();
 			Connection value = entry.getValue();
 
@@ -300,7 +300,7 @@ public class RemoteAdapter extends Service implements Gateway {
 				broadcastState();
 			}
 		}
-		return clientList;
+		return connections;
 	}
 
 	public Connection onHeartbeat(Connection data) {
@@ -364,7 +364,7 @@ public class RemoteAdapter extends Service implements Gateway {
 				// HELP PROTOKEY VS MRL KEY ??
 				TCPThread2 tcp = new TCPThread2(myService, uri, clientSocket);
 				tcpClientList.put(uri, tcp);
-				clientList.put(uri, tcp.data);
+				connections.put(uri, tcp.data);
 			} catch (Exception e) {
 				Logging.logException(e);
 			}
@@ -442,30 +442,30 @@ public class RemoteAdapter extends Service implements Gateway {
 							// for foreign service environment
 							// Runtime.addServiceEnvironment(name, protocolKey)
 							URI protocolKey = new URI(String.format("udp://%s:%d", socket.getInetAddress().getHostAddress(), socket.getPort()));
-							String mrlURI = String.format("mrl://%s/%s", myService.getName(), protocolKey.toString());
-							URI uri = new URI(mrlURI);
+							String mrl = String.format("mrl://%s/%s", myService.getName(), protocolKey.toString());
+							URI mrlURI = new URI(mrl);
 
 							// IMPORTANT - this is an optimization and probably
 							// should be in the Comm interface defintion
 							CommunicationInterface cm = myService.getComm();
-							cm.addRemote(uri, protocolKey);
+							cm.addRemote(mrlURI, protocolKey);
 
 							// check if the URI is already defined - if not - we
 							// will
 							// send back the services which we want to export -
 							// Security will filter appropriately
-							ServiceEnvironment foreignProcess = Runtime.getServiceEnvironment(uri);
+							ServiceEnvironment foreignProcess = Runtime.getServiceEnvironment(mrlURI);
 
 							ServiceInterface si = (ServiceInterface) msg.data[0];
 							// HMMM a vote for String vs URI here - since we
 							// need to
 							// catch syntax !!!
-							si.setHost(uri);
+							si.setInstanceId(mrlURI);
 
 							// if security ... msg within msg
 							// getOutbox().add(createMessage(Runtime.getInstance().getName(),
 							// "register", inboundMsg));
-							Runtime.register(si, uri);// <-- not an INVOKE !!!
+							Runtime.register(si, mrlURI);// <-- not an INVOKE !!!
 														// // -
 							// no security ! :P
 
@@ -528,7 +528,7 @@ public class RemoteAdapter extends Service implements Gateway {
 	}
 
 	public HashMap<URI, Connection> getClients() {
-		return clientList;
+		return connections;
 	}
 
 	public void startListening() {
@@ -620,7 +620,7 @@ public class RemoteAdapter extends Service implements Gateway {
 	}
 
 	@Override
-	synchronized public void sendRemote(String uri, Message msg) throws URISyntaxException {
+	public void sendRemote(String uri, Message msg) throws URISyntaxException {
 		sendRemote(new URI(uri), msg);
 	}
 
@@ -650,12 +650,12 @@ public class RemoteAdapter extends Service implements Gateway {
 				// port)
 				tcp = new TCPThread2(this, uri, null);
 				tcpClientList.put(uri, tcp);
-				clientList.put(uri, tcp.data);
+				connections.put(uri, tcp.data);
 				broadcastState();
 			}
 
 			tcp.send(msg);
-			clientList.get(uri).tx++;
+			connections.get(uri).tx++;
 
 		} catch (Exception e) {
 			Logging.logException(e);
@@ -793,7 +793,11 @@ public class RemoteAdapter extends Service implements Gateway {
 			for (int i = 0; i < addr.size(); ++i){
 				Connection tcpConn = new Connection();
 				// theoretically you could advertise udp too (and others)
-				tcpConn.uri = new URI(String.format("mrl://%s/tcp://%s:%d", getName(), addr.get(i), getTcpPort()));
+				//tcpConn.protocolKey = new URI(String.format("mrl://%s/tcp://%s:%d", getName(), addr.get(i), getTcpPort()));
+				tcpConn.protocolKey = new URI(String.format("tcp://%s:%d", addr.get(i), getTcpPort()));
+				// we dont fill in our own name
+// FIXME FIXME FIXME - DO THE CORRECT WAY !!!				
+///				tcpConn.protocolKey = new URI(String.format("tcp://%s:%d", addr.get(i), getTcpPort()));
 				// tcpKey.prefix = suggestion
 				// tcpKey.prefix = prefix;
 				tcpConn.platform = Runtime.getInstance().getPlatform();
@@ -827,8 +831,9 @@ public class RemoteAdapter extends Service implements Gateway {
 	// publishing point
 	@Override
 	public Connection publishNewConnection(Connection conn) {
-		if (!clientList.containsKey(conn.uri)) {
-			clientList.put(conn.uri, conn);
+		if (!connections.containsKey(conn.protocolKey)) {
+			// uri will now become my uri
+			connections.put(conn.protocolKey, conn);
 			broadcastState();
 		} else {
 			info("%d scanning no new connections", System.currentTimeMillis());
@@ -846,17 +851,17 @@ public class RemoteAdapter extends Service implements Gateway {
 
 		try {
 
-			int i = 2;
+			int i = 0;
 
 			//RemoteAdapter remote0 = (RemoteAdapter) Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
-			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", 1), "RemoteAdapter");
+			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
 			Runtime.start(String.format("gui%d", i), "GUIService");
 			// remote0.startUDP(6767);
 			remote1.startListening();
 			// remote1.startListening();
 
 			// remote1.startUDP(6767);
-			remote1.scan();
+			//remote1.scan();
 			/*
 			 * Runtime.main(new String[] { "-runtimeName", String.format("r%d",
 			 * i) }); RemoteAdapter remote = (RemoteAdapter)

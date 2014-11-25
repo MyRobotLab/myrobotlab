@@ -49,8 +49,6 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 
 	static HashMap<URI, URI> mrlToProtocol = new HashMap<URI, URI>();
 
-	private Gateway comm = null;
-
 	public CommunicationManager(Service myService) {
 		this.myService = myService;
 		this.outbox = myService.getOutbox();
@@ -63,7 +61,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 	}
 
 	final public void send(final URI uri, final Message msg) {
-		getComm(uri).sendRemote(uri, msg);
+		getComm(uri).sendRemote(uri, msg); 
 	}
 
 	final public void send(final Message msg) {
@@ -78,7 +76,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 			return;
 		}
 
-		URI host = sw.getHost();
+		URI host = sw.getInstanceId();
 		if (host == null) {
 			// local message
 			// log.info(String.format("local %s.%s->%s/%s.%s(%s)", msg.sender,
@@ -91,13 +89,9 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 			// msg.sendingMethod, sw.getHost(), msg.name, msg.method,
 			// Encoder.getParameterSignature(msg.data)));
 
-			URI remote = mrlToProtocol.get(host);
-			getComm(host).sendRemote(remote, msg);
+			URI protocolKey = mrlToProtocol.get(host);
+			getComm(host).sendRemote(protocolKey, msg);
 		}
-	}
-
-	public void setComm(Gateway comm) {
-		this.comm = comm;
 	}
 
 	/*

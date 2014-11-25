@@ -67,7 +67,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.CommunicationManager;
 import org.myrobotlab.net.Heartbeat;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.data.IPAndPort;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -102,7 +101,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * name]/scheme://key for gateway mrl://gateway/xmpp://incubator incubator
 	 * if host == null the service is local
 	 */
-	private URI host = null; // TODO - access directly
+	private URI instanceId = null;
 	protected String prefix = null; // if foreign - this will be name prefix - set by Gateway
 
 	@Element
@@ -203,16 +202,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		Logging.logTimeEnable(b);
 	}
 
-	public URI getHost() {
-		return host;
+	public URI getInstanceId() {
+		return instanceId;
 	}
 
-	public void setHost(URI uri) {
-		host = uri;
+	public void setInstanceId(URI uri) {
+		instanceId = uri;
 	}
 
 	public boolean isLocal() {
-		return host == null;
+		return instanceId == null;
 	}
 
 	public Status test() {

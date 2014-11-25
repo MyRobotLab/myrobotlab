@@ -19,9 +19,9 @@ public interface ServiceInterface {
 	// is the ability to do "non destructive" tests on a "live" Service at any time
 	public Status test() throws Exception;
 	
-	public URI getHost();
+	public URI getInstanceId();
 		
-	public void setHost(URI uri);
+	public void setInstanceId(URI uri);
 	
 	public String getName();
 

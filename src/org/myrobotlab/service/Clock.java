@@ -171,10 +171,10 @@ public class Clock extends Service {
 				Runtime.start(String.format("clock%d", i), "Clock");
 				Runtime.start(String.format("gui%d", i), "GUIService");
 				Runtime.start(String.format("p%d", i), "Python");
-				remote.scan();
+				//remote.scan();
 				
 				// remote.startListening();
-				//remote.connect("tcp://127.0.0.1:6767");
+				remote.connect("tcp://127.0.0.1:6767");
 
 				// FIXME - sholdn't this be sendRemote ??? or at least
 				// in an interface

@@ -775,7 +775,7 @@ public class Runtime extends Service implements MessageListener {
 					// the foreign JVM is not the host which this service
 					// originated
 					// from - send it....
-					if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getHost())) {
+					if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getInstanceId())) {
 						log.info(String.format("gateway %s sending registration of %s remote to %s", gateway.getName(), name, uri));
 						// FIXME - Security determines what to export
 						Message msg = runtime.createMessage("", "register", s);
@@ -929,7 +929,7 @@ public class Runtime extends Service implements MessageListener {
 		if (sw.isLocal()) {
 			sw.stopService();
 		}
-		ServiceEnvironment se = instances.get(sw.getHost());
+		ServiceEnvironment se = instances.get(sw.getInstanceId());
 		se.serviceDirectory.remove(name);
 		rt.invoke("released", sw);
 		log.warn("released{}", name);
@@ -1131,7 +1131,7 @@ public class Runtime extends Service implements MessageListener {
 		while (it.hasNext()) {
 			serviceName = it.next();
 			sw = sorted.get(serviceName);
-			sb.append("<service name=\"").append(sw.getName()).append("\" serviceEnironment=\"").append(sw.getHost()).append("\">");
+			sb.append("<service name=\"").append(sw.getName()).append("\" serviceEnironment=\"").append(sw.getInstanceId()).append("\">");
 			ArrayList<String> nlks = sw.getNotifyListKeySet();
 			if (nlks != null) {
 				Iterator<String> nit = nlks.iterator();
@@ -1496,7 +1496,7 @@ public class Runtime extends Service implements MessageListener {
 	// ---------------- Runtime end --------------
 
 	public static String dump() {
-		StringBuffer sb = new StringBuffer().append("\nhosts:\n");
+		StringBuffer sb = new StringBuffer().append("\ninstances:\n");
 		Map<URI, ServiceEnvironment> sorted = instances;
 		Iterator<URI> hkeys = sorted.keySet().iterator();
 		URI url;
@@ -1535,7 +1535,7 @@ public class Runtime extends Service implements MessageListener {
 		while (rkeys.hasNext()) {
 			serviceName = rkeys.next();
 			sw = sorted3.get(serviceName);
-			sb.append("\n").append(serviceName).append(" ").append(sw.getHost());
+			sb.append("\n").append(serviceName).append(" ").append(sw.getInstanceId());
 		}
 
 		return sb.toString();
