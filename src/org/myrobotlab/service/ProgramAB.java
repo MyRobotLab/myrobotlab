@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -40,12 +41,19 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	private String botName = "alice2";
 	//private Chat chatSession=null;
 	private HashMap<String, Chat> sessions = new HashMap<String, Chat>();
+	
+	// TODO: better parsing than a regex...
 	private Pattern oobPattern = Pattern.compile("<oob>(.*?)</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 	private boolean processOOB = true;
 
+	private final Date serviceStartTime;
+	private Date lastResponseTime = null;
 
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
+		// we started.. 
+		serviceStartTime = new Date();
+		
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -133,6 +141,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		folder = new File(aimlIFPath);
 		for (File f : folder.listFiles()) {
 			log.info(f.getAbsolutePath());
+			// TODO: better stripping of the file extension
 			String aimlIF = f.getName().replace(".aiml.csv", "");
 			Long lastMod = modifiedDates.get(aimlIF);
 			if (lastMod != null) {
@@ -152,11 +161,13 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		public String session;
 		public String msg;
 		public OOBPayload payload;
+		public Date timestamp;
 
-		public Response(String session, String msg, OOBPayload payload){
+		public Response(String session, String msg, OOBPayload payload, Date timestamp){
 			this.session = session;
 			this.msg = msg;
 			this.payload = payload;
+			this.timestamp = timestamp;
 		}
 	}
 
@@ -178,7 +189,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		if (bot == null) {
 			String error = "ERROR: Core not loaded, please load core before chatting.";
 			error(error);
-			return new Response(session, error, null);
+			return new Response(session, error, null, new Date());
 		}
 
 		System.out.println("BOT:" + bot.toString());
@@ -188,6 +199,9 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		}
 
 		String res = sessions.get(session).multisentenceRespond(text);
+		// grab and update the time when this response came in.
+		lastResponseTime = new Date();
+		
 		// Check the AIML response to see if there is OOB (out of band data) 
 		// If so, publish that data independent of the text response.
 		OOBPayload payload = null;
@@ -199,12 +213,13 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		Matcher matcher = oobPattern.matcher(res);
 		res = matcher.replaceAll("");
 
-		Response response = new Response(session, res, payload);
+		Response response = new Response(session, res, payload, lastResponseTime);
 		// EEK! clean up the API!
 		invoke("publishResponse", response);
 		invoke("publishResponseText", response);
 		invoke("publishText", response.msg);
 		info("to: %s - %s", session, res);
+		
 		return response;
 	}
 
@@ -271,6 +286,19 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		startSession(progABPath	, null, botName);
 	}
 
+	/**
+	 * Return the number of milliseconds since the last response was given
+	 * -1 if a response has never been given.
+	 * @return
+	 */
+	public long millisecondsSinceLastResponse() {
+		if (lastResponseTime == null) {
+			return -1;
+		}
+		long delta = System.currentTimeMillis()-lastResponseTime.getTime();
+		return delta;
+	}
+	
 	/**
 	 * publishing method of the pub sub pair - with addResponseListener allowing subscriptions
 	 * pub/sub routines have the following pattern
@@ -347,13 +375,13 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 		ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
-		// File f = new File("ProgramAB");
-		// String progABPath = f.getAbsolutePath();
-		// String botName = "alice2";
-		// alice.startSession(); 
-		alice.startSession("ProgramAB", "default", "alice2");
+		alice.startSession();
 		Response response = alice.getResponse("Hello.");
 		log.info("Alice " + response.msg);		
+		//ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
+		//lloyd.startSession("ProgramAB", "default", "lloyd");
+		//Response response = lloyd.getResponse("Hello.");
+		//log.info("Lloyd " + response.msg);		
 	}
 
 	@Override
