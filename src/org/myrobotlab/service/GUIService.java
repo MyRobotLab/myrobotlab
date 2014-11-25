@@ -281,7 +281,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 					TabControl2 tc = (TabControl2) c;
 
 					if (!sw.isLocal()) {
-						Color hsv = GUIService.getColorFromURI(sw.getHost());
+						Color hsv = GUIService.getColorFromURI(sw.getInstanceId());
 						tabs.setBackgroundAt(index, hsv);
 					}
 				}

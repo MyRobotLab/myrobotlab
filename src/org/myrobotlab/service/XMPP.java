@@ -514,7 +514,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 					ServiceInterface si = (ServiceInterface) inboundMsg.data[0];
 					// HMMM a vote for String vs URI here - since we need to
 					// catch syntax !!!
-					si.setHost(uri);
+					si.setInstanceId(uri);
 
 					// if security ... msg within msg
 					// getOutbox().add(createMessage(Runtime.getInstance().getName(),

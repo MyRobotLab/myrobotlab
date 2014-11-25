@@ -10,17 +10,6 @@ public interface CommunicationInterface {
 
 	public void send(final URI uri, final Message msg);
 
-	public void setComm(final Gateway comm);
-
-	/**
-	 * gets the appropriate local service based communicator to relay 
-	 * the message remotely
-	 * 
-	 * @param uri
-	 * @return Gateway to allow remote communication
-	 */
-	//public Gateway getComm(final URI uri);
-	
 	public void addRemote(URI mrlHost, URI protocolKey);
-
+	
 }

@@ -402,7 +402,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		while (it.hasNext()) {
 			String serviceName = it.next();
 			ServiceInterface sw = services.get(serviceName);
-			if (sw.getHost() != null) {
+			if (sw.getInstanceId() != null) {
 				ServiceEntry se = new ServiceEntry(serviceName, sw.getType(), true);
 				currentServicesModel.addElement(se);
 				nameToServiceEntry.put(serviceName, se);
@@ -418,7 +418,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	public ServiceInterface registered(Service sw) {
 		if (!nameToServiceEntry.containsKey(sw.getName())) {
 			String typeName = (sw == null) ? "unknown" : sw.getType();
-			ServiceEntry newServiceEntry = new ServiceEntry(sw.getName(), typeName, (sw.getHost() != null));
+			ServiceEntry newServiceEntry = new ServiceEntry(sw.getName(), typeName, (sw.getInstanceId() != null));
 			currentServicesModel.addElement(newServiceEntry);
 			nameToServiceEntry.put(sw.getName(), newServiceEntry);
 		}
