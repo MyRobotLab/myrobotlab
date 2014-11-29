@@ -160,6 +160,10 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		}
 		return result;
 	}
+	
+	public void openURL(String url){
+		BareBonesBrowserLaunch.openURL(url);
+	}
 
 	public void stop() {
 		try {
