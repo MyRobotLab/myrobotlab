@@ -22,7 +22,6 @@ import org.myrobotlab.programab.OOBPayload;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
-import org.python.antlr.base.mod;
 
 /**
  * Program AB service for MyRobotLab
@@ -47,8 +46,14 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	private boolean processOOB = true;
 
 	private final Date serviceStartTime;
+	// TODO: this should be per session, and probably not global
 	private Date lastResponseTime = null;
-
+	
+	// Number of milliseconds before the robot starts talking on its own.
+	private int maxConversationDelay = 5000;
+	// boolean to turn on and off the auto conversation logic.
+	private boolean enableAutoConversation = false;
+	
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
 		// we started.. 
@@ -171,6 +176,24 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		}
 	}
 
+	/**
+	 * Only respond if the last response was longer than delay ms ago
+	 * 
+	 * @param session - current session/username
+	 * @param text - text to get a response for
+	 * @param delay - min amount of time that must have transpired since the last response.
+	 * @return
+	 */
+	public Response getResponse(String session, String text, long delay) {
+		long delta = System.currentTimeMillis() - lastResponseTime.getTime();
+		if (delta > delay) {
+			return getResponse(session, text);
+		} else {
+			return null;
+		}
+		
+	}
+	
 	public Response getResponse(String text){
 		return getResponse(null, text);
 	}
@@ -214,6 +237,16 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		res = matcher.replaceAll("");
 
 		Response response = new Response(session, res, payload, lastResponseTime);
+		// Now that we've said something, lets create a timer task to wait for N seconds 
+		// and if nothing has been said.. try say something else.
+		// TODO: trigger a task to respond with something again
+		// if the humans get bored
+		if (enableAutoConversation) {
+			// TODO:  how do i properly pass params?
+			Object[] params = new Object[]{session, text, maxConversationDelay};
+			addLocalTask(maxConversationDelay, "getResponse", params);
+		}
+		
 		// EEK! clean up the API!
 		invoke("publishResponse", response);
 		invoke("publishResponseText", response);
@@ -378,10 +411,10 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		alice.startSession();
 		Response response = alice.getResponse("Hello.");
 		log.info("Alice " + response.msg);		
-		//ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
-		//lloyd.startSession("ProgramAB", "default", "lloyd");
-		//Response response = lloyd.getResponse("Hello.");
-		//log.info("Lloyd " + response.msg);		
+//		ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
+//		lloyd.startSession("ProgramAB", "default", "lloyd");
+//		Response response = lloyd.getResponse("Hello.");
+//		log.info("Lloyd " + response.msg);		
 	}
 
 	@Override
@@ -405,6 +438,22 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 
 	public void setProcessOOB(boolean processOOB) {
 		this.processOOB = processOOB;
+	}
+
+	public int getMaxConversationDelay() {
+		return maxConversationDelay;
+	}
+
+	public void setMaxConversationDelay(int maxConversationDelay) {
+		this.maxConversationDelay = maxConversationDelay;
+	}
+
+	public boolean isEnableAutoConversation() {
+		return enableAutoConversation;
+	}
+
+	public void setEnableAutoConversation(boolean enableAutoConversation) {
+		this.enableAutoConversation = enableAutoConversation;
 	}
 
 
