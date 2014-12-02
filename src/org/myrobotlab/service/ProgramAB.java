@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -58,7 +60,6 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		super(reservedKey);
 		// we started.. 
 		serviceStartTime = new Date();
-		
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -98,19 +99,13 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		if (session == null){
 			session = "default";
 		}
-
 		if (sessions.containsKey(session)){
 			warn("session %s already created", session);
 			return;
 		}
 		// TODO don't allow to specify a different path
 		// it will be assumed to be ./ProgramAB
-
-		// TODO : put some code here to delete the aimlif file 
-		// if the aiml file is 
-
 		cleanOutOfDateAimlIFFiles(botName, path);
-
 		if (bot == null){
 			bot = new Bot(botName, path);
 		}
@@ -119,14 +114,25 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 				log.debug(c.getPattern());
 			}
 		}
-		sessions.put(session, new Chat(bot));
+		Chat chat = new Chat(bot);
+		// load session specific predicates, these override the default ones.
+		String sessionPredicateFilename = createSessionPredicateFilename(session);
+		chat.predicates.getPredicateDefaults(sessionPredicateFilename);
+		sessions.put(session, chat);
 
 		if (!"default".equals(session)){
 			getResponse(session, String.format("my name is %s", session));
 		}
-
+		
 		// TODO: to make sure if the start session is updated, that the button updates in the gui
 		// broadcastState();
+	}
+
+	private String createSessionPredicateFilename(String session) {
+		// TODO: sanitize the session label so it can be safely used as a filename
+		String predicatePath = path + File.separator  + "bots" + File.separator + botName + File.separator + "config";
+		predicatePath += File.separator + session + ".predicates.txt";
+		return predicatePath;
 	}
 
 	private void cleanOutOfDateAimlIFFiles(String botName, String path) {
@@ -214,13 +220,9 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 			error(error);
 			return new Response(session, error, null, new Date());
 		}
-
-		System.out.println("BOT:" + bot.toString());
-
 		if (!sessions.containsKey(session)){
 			startSession(path, session, botName);
 		}
-
 		String res = sessions.get(session).multisentenceRespond(text);
 		// grab and update the time when this response came in.
 		lastResponseTime = new Date();
@@ -244,7 +246,12 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		if (enableAutoConversation) {
 			// TODO:  how do i properly pass params?
 			Object[] params = new Object[]{session, text, maxConversationDelay};
+//			ArrayList<Object> params = new ArrayList<Object>();
+//			params.add(session);
+//			params.add(text);
+//			params.add(maxConversationDelay);
 			addLocalTask(maxConversationDelay, "getResponse", params);
+			//addLocalTask(maxConversationDelay, "getResponse", session, text);
 		}
 		
 		// EEK! clean up the API!
@@ -252,6 +259,13 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		invoke("publishResponseText", response);
 		invoke("publishText", response.msg);
 		info("to: %s - %s", session, res);
+		
+		if (log.isDebugEnabled()) {
+			for (String key : sessions.get(session).predicates.keySet()) {
+				log.debug(session + " " + key + " " + sessions.get(session).predicates.get(key));
+			}
+		}
+		
 		
 		return response;
 	}
@@ -397,6 +411,29 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	public void writeAndQuit() {
 		bot.writeQuit();
 	}
+	
+	/**
+	 * Persist the predicates for all known sessions in the robot.
+	 * @throws IOException 
+	 * 
+	 */
+	public void savePredicates() throws IOException {
+		for (String session : sessions.keySet()) {
+			String sessionPredicateFilename = createSessionPredicateFilename(session);
+			File sessionPredFile = new File(sessionPredicateFilename);
+			Chat chat = sessions.get(session);
+			// overwrite the original file , this should always be a full set.
+			log.info("Writing predicate file for session {}", session);
+			FileWriter predWriter = new FileWriter(sessionPredFile, false);
+			for (String predicate : chat.predicates.keySet()) {
+				String value = chat.predicates.get(predicate);
+				predWriter.write(predicate + ":" + value + "\n");				
+			}
+			predWriter.close();
+		}
+		log.info("Done saving predicates.");
+	}
+	
 
 	public void startSession(String session) {
 		startSession(path, session, botName);
@@ -407,14 +444,17 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		LoggingFactory.getInstance().setLevel("INFO");
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
-		ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
-		alice.startSession();
-		Response response = alice.getResponse("Hello.");
-		log.info("Alice " + response.msg);		
-//		ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
-//		lloyd.startSession("ProgramAB", "default", "lloyd");
-//		Response response = lloyd.getResponse("Hello.");
-//		log.info("Lloyd " + response.msg);		
+		if (true) {
+			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
+			alice.startSession();
+			Response response = alice.getResponse("Hello.");
+			log.info("Alice " + response.msg);	
+		} else {
+			ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
+			lloyd.startSession("ProgramAB", "default", "lloyd");
+			Response response = lloyd.getResponse("Hello.");
+			log.info("Lloyd " + response.msg);	
+		}
 	}
 
 	@Override
