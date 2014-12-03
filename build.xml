@@ -100,8 +100,10 @@
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
 
+	<echo message="TRAVIS_TAG env var=${env.TRAVIS_TAG}" />
+	
 	<!-- FIXME - get version from tag unless manually forced -->
-	<property name="tag" value="1.0.85" />
+	<property name="tag" value="${env.TRAVIS_TAG}" />
 	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
