@@ -41,6 +41,7 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 	
 	private JButton startSessionButton = new JButton(START_SESSION_LABEL);	
 	private JButton saveAIML = new JButton("Save AIML");
+	private JButton savePredicates = new JButton("Save Predicates");
 	
 	
 	public ProgramABGUI(String boundServiceName, GUIService myService,JTabbedPane tabs) {
@@ -69,6 +70,7 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 		botControl.add(botName);
 		botControl.add(startSessionButton);
 		botControl.add(saveAIML);
+		botControl.add(savePredicates);
 		
 		display.add(botControl, BorderLayout.PAGE_END);
 		
@@ -78,6 +80,7 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 		startSessionButton.addActionListener(this);
 		
 		saveAIML.addActionListener(this);
+		savePredicates.addActionListener(this);
 		
 	}
 
@@ -116,11 +119,11 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 			} else {
 				myService.send(boundServiceName, "reloadSession", progABPath.getText().trim(), botName.getText().trim());
 			}
-			
-			
 		} else if (o == saveAIML) {
 			myService.send(boundServiceName, "writeAIML");
 			myService.send(boundServiceName, "writeAIMLIF");
+		} else if (o == savePredicates) {
+			myService.send(boundServiceName, "savePredicates");
 		} else {
 			log.info(o.toString());
 			log.info("Unknown action!");
