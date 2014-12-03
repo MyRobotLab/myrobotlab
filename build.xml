@@ -99,9 +99,10 @@
 		${build.properties} external build properties - you can override the location of the build properties file
 		by using JVM param -Dbuild.properties=newpathlocation or in the ant build call e.g. ant -propertyfile <newPathName> 
 	-->
-	
-	<!-- FIXME - get version from tag unless manually forced -->
+	<property environment="env" />
 	<property name="tag" value="${env.TRAVIS_TAG}" />
+	<echo message="env.TRAVIS_TAG=${env.TRAVIS_TAG}" />
+	<echo message="tag=${tag}" />
 	
 	<!-- TODO - junit tests multiple virtualbox os-->
 	<!-- set global properties for this build -->
@@ -147,30 +148,15 @@
 		<property name="mail.from" value="build@myrobotlab.org" />
 		<property name="mail.tolist" value="" />
 
-		<property environment="env" />
-		<echo message="TRAVIS_TAG env var=${env.TRAVIS_TAG}" />
+
 		<echoproperties />
 
-		<!-- TODO - create a local descriptor for non-build server (dev) builds -->
-		<!-- or will tag's be sufficient -->
 		<!-- TODO - get repo's comment -->
-		<!-- build.number = from main CI
-			tag = build number ? for incremental builds - unless overridden by dev build directive... -->
 
-		<property environment="env" />
-
-		<!-- ============ tag begin ================= -->
-		<!-- FIXME - internet build number if available - if fail use date or local file increment? -->
-
-		<!-- Travis and Jenkin build numbers
-		<echo message="env.BUILD_NUMBER env.BUILD_NUMBER=${env.BUILD_NUMBER}" />
-		<echo message="travis job id - $TRAVIS_JOB_ID" />
-		 -->
 		<echo message="date time ${DSTAMP}.${TSTAMP}" />
 		<property name="build.number" value="${env.BUILD_NUMBER}" />
 		<!-- property name="tag" value="1.0.${build.number}" / -->
 		<!-- property name="tag" value="${DSTAMP}.${TSTAMP}" / -->
-		<!-- TODO add missing link global method http://myrobotlab.org/buildnumber.php !!! -->
 		<!-- local tag git commit index <property name="tag" value="1.0.${BUILD_NUMBER}" /> -->
 
 		<!-- property name="tag" value="${DSTAMP}.${TSTAMP}" /-->
@@ -206,7 +192,7 @@
 		</http>
 		
 		 <!-- property name="tag" value="1.0.47" /--> 
-		<property name="tag" value="1.0.${buildnumber.response}" />
+		<!-- property name="tag" value="1.0.${buildnumber.response}" / -->
 		<!-- GOOD <property name="tag" value="1.0.${buildnumber.response}" /> -->
 		<echo message="tag ${tag}" />
 
