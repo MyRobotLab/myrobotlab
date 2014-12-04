@@ -245,12 +245,12 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		// if the humans get bored
 		if (enableAutoConversation) {
 			// TODO:  how do i properly pass params?
-			Object[] params = new Object[]{session, text, maxConversationDelay};
+//			Object[] params = new Object[]{session, text, maxConversationDelay};
 //			ArrayList<Object> params = new ArrayList<Object>();
 //			params.add(session);
 //			params.add(text);
 //			params.add(maxConversationDelay);
-			addLocalTask(maxConversationDelay, "getResponse", params);
+			addLocalTask(maxConversationDelay, "getResponse", session, text, maxConversationDelay);
 			//addLocalTask(maxConversationDelay, "getResponse", session, text);
 		}
 		
@@ -445,7 +445,9 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 		if (true) {
+			
 			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
+			alice.setEnableAutoConversation(true);
 			alice.startSession();
 			Response response = alice.getResponse("Hello.");
 			log.info("Alice " + response.msg);	

@@ -171,7 +171,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		
 	}
 
-	public void addLocalTask(int interval, String method, Object[]... params) {
+	public void addLocalTask(int interval, String method, Object... params) {
 		if (timer == null) {
 			timer = new Timer(String.format("%s.timer", getName()));
 		}
@@ -215,7 +215,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	public Status test() {
-		return Status.info("testing %s of type %s", getName(), getTypeName());
+		return Status.info("testing %s of type %s", getName(), getType());
 	}
 
 	/**
@@ -1892,10 +1892,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return simpleName;
 	}
 
-	public String getTypeName() {
-		return this.getClass().getCanonicalName();
-	}
-
 	// ---------------- logging end ---------------------------
 
 	/**
@@ -2171,9 +2167,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return sb.toString();
 	}
 	
+	
 	public String getType(){
 		return getClass().getCanonicalName();
 	}
+	
 
 	public String setLogLevel(String level) {
 		Logging logging = LoggingFactory.getInstance();
