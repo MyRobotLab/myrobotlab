@@ -58,10 +58,11 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
 	// controller
 	JPanel controllerPanel = new JPanel(new BorderLayout());
 	MotorControllerPanel controllerTypePanel = new Motor_UnknownGUI();
-	JComboBox controllerSelect = new JComboBox();
+	JComboBox<String> controllerSelect = new JComboBox<String>();
 	MotorController controller = null;
 	JCheckBox invert = new JCheckBox("invert");
 
+	
 	// power
 	JPanel powerPanel = new JPanel(new BorderLayout());
 	private FloatJSlider power = null;
@@ -72,8 +73,11 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
 
 	// position
 	JPanel positionPanel = null;
-	private JLabel posValue = new JLabel("0.00");
-
+	//private JLabel posValue = new JLabel("0.00");
+	JLabel currentPosition = new JLabel("0");
+	
+	Motor myMotor;
+	
 	// TODO - make MotorPanel - for 1 motor - for shared embedded widget
 	// TODO - stop sign button for panic stop
 	// TODO - tighten up interfaces
@@ -149,6 +153,9 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
 		// positionPanel begin ------------------
 		positionPanel = new JPanel();
 		positionPanel.setBorder(BorderFactory.createTitledBorder("position"));
+		positionPanel.add(new JLabel("current position "));
+		positionPanel.add(currentPosition);
+		
 		// positionPanel end ------------------
 
 		gc.gridx = 0;
@@ -178,26 +185,12 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
 
 	}
 
-	public void incrementPosition(Integer pos) {
-		posValue.setText(String.format("%d", pos));
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", Motor.class);
-		myService.send(boundServiceName, "publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", Arduino.class);
-
-	}
 
 	// FIXME put in sub gui
 	ArrayList<Pin> pinList = null;
 
 	public void getState(Motor motor) {
+		myMotor = motor;
 		setEnabled(motor.isAttached());
 		// FIXED - can't use a reference - because it changes mid-stream through
 		// this method
@@ -207,9 +200,14 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
 			// !!!!! - This actually fires the (makes a new
 			// MotorControllerPanel) !!!!!
 			controllerSelect.setSelectedItem(motor.getControllerName());
-			controllerTypePanel.setData(controller.getMotorData(boundServiceName));
+			controllerTypePanel.set(motor);
 		}
 		controllerTypePanel.setAttached(motor.isAttached());
+		if (motor.isInverted()){
+			invert.setSelected(true);
+		} else {
+			invert.setSelected(false);
+		}
 	}
 
 	@Override
@@ -257,9 +255,27 @@ public class MotorGUI extends ServiceGUI implements ActionListener, ChangeListen
 		Object source = ce.getSource();
 		if (power == source) {
 			// powerValue.setText(power.getValue() + "%");
-			powerValue.setText(String.format("%3.2f", power.getScaledValue()));
+			powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerMap().calc(power.getScaledValue())));
 			myService.send(boundServiceName, "move", power.getScaledValue());
 		}
 	}
+
+	public void onChangePos(Double newPos){
+		currentPosition.setText(String.format("%3.2f", newPos));
+	}
+
+	@Override
+	public void attachGUI() {
+		subscribe("publishState", "getState", Motor.class);
+		subscribe("publishChangePos", "onChangePos", Double.class);
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishState", "getState", Arduino.class);
+		unsubscribe("publishChangePos", "onChangePos", Double.class);
+	}
+
 
 }

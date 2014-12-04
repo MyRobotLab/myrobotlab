@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.data.Pin;
 
 public class Motor_ArduinoGUI extends MotorControllerPanel implements ActionListener {
@@ -18,10 +19,10 @@ public class Motor_ArduinoGUI extends MotorControllerPanel implements ActionList
 	private static final long serialVersionUID = 1L;
 	private GUIService myService;
 
-	JLabel powerPinLabel = new JLabel("<html>power pin<br><font color=white bgcolor=green>speed control</font></html>");
+	//  JLabel powerPinLabel = new JLabel("<html>power pin<br><font color=white bgcolor=green>speed control</font></html>");
 	JLabel directionPinLabel = new JLabel("direction pin");
-	JComboBox powerPin = new JComboBox();
-	JComboBox directionPin = new JComboBox();
+	JComboBox<String> powerPin = new JComboBox<String>();
+	JComboBox<String> directionPin = new JComboBox<String>();
 	JButton attachButton = new JButton("attach");
 	String arduinoName;
 	String motorName;
@@ -33,16 +34,32 @@ public class Motor_ArduinoGUI extends MotorControllerPanel implements ActionList
 		this.myService = myService;
 		this.arduinoName = controllerName;
 		this.motorName = motorName;
+
+		// FIXME - BLOCKING I BORKED
 		Arduino o = (Arduino) myService.sendBlocking(controllerName, "publishState", (Object[])null);
-		pinList = o.getPinList();
+	
+		if (o == null){
+			pinList = new ArrayList<Pin>();
+			for (int i = 2; i < 52; ++i){
+				Pin p = new Pin();
+				p.type = Pin.PWM_VALUE;
+				p.pin = i;
+				pinList.add(p);
+			}
+		} else {
+			pinList = o.getPinList();
+		}
 
 		for (int i = 0; i < pinList.size(); ++i) {
 			Pin pin = pinList.get(i);
+			/* nice green coloring - but impossible to match ;P
 			if (pin.type == Pin.PWM_VALUE) {
 				powerPin.addItem(String.format("<html><font color=white bgcolor=green>%d</font></html>", pin.pin));
 			} else {
 				powerPin.addItem(String.format("%d", pin.pin));
 			}
+			*/
+			powerPin.addItem(String.format("%d", pin.pin));
 		}
 
 		for (int i = 0; i < pinList.size(); ++i) {
@@ -51,7 +68,7 @@ public class Motor_ArduinoGUI extends MotorControllerPanel implements ActionList
 		}
 
 		setBorder(BorderFactory.createTitledBorder("type - Arduino with Simple 2 bit H-bridge"));
-		add(powerPinLabel);
+		//add(powerPinLabel);
 		add(powerPin);
 		add(directionPinLabel);
 		add(directionPin);
@@ -79,9 +96,9 @@ public class Motor_ArduinoGUI extends MotorControllerPanel implements ActionList
 	}
 
 	@Override
-	public void setData(Object[] data) {
-		powerPin.setSelectedItem(data[0]);
-		directionPin.setSelectedItem(data[1]);
+	public void set(Motor motor) {
+		powerPin.setSelectedItem(String.format("%d",motor.pwmPin));
+		directionPin.setSelectedItem(String.format("%d",motor.dirPin));
 	}
 
 	@Override

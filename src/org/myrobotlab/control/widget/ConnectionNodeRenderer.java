@@ -34,9 +34,12 @@ public class ConnectionNodeRenderer extends JLabel implements ListCellRenderer{
 		*/
 		//String path = data.protocolKey.getPath().substring(1);
 		
-		setText(String.format("<html>%s %s<br/>RX %s.%s %d<br/>TX %s.%s %d</html>", data.protocolKey, data.state, data.rxName, data.rxMethod, data.rx, data.txName, data.txMethod, data.tx));// data.toString();//String.format("%s connected rx %d tx %d         ", uri.toString(), data.rx, data.tx);
+		
+		setText(String.format("<html>%s %s %s<br/>RX %s.%s %d<br/>TX %s.%s %d</html>", data.prefix, data.protocolKey, data.state, data.rxName, data.rxMethod, data.rx, data.txName, data.txMethod, data.tx));// data.toString();//String.format("%s connected rx %d tx %d         ", uri.toString(), data.rx, data.tx);
 		//setIcon(Util.getResourceIcon("instance.png"));
 		setIcon(Util.getResourceIcon("connection.png"));
+		
+		//add(new JButton("BUTTON!"));
 		
 		// 
 		if (Connection.CONNECTED.equals(data.state)){
