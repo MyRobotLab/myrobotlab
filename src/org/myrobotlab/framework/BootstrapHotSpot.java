@@ -97,8 +97,9 @@ public class BootstrapHotSpot implements Bootstrap {
 	// http://stackoverflow.com/questions/9911686/getresource-some-jar-returns-null-although-some-jar-exists-in-geturls
 	// RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 	// List<String> arguments = runtimeMxBean.getInputArguments();
-	
-	public BootstrapHotSpot(){}
+
+	public BootstrapHotSpot() {
+	}
 
 	private class StreamGobbler extends Thread {
 		InputStream is;
@@ -137,7 +138,7 @@ public class BootstrapHotSpot implements Bootstrap {
 
 		log.info("============== args begin ==============");
 		List<String> jvmArgs = getJVMArgs();
-		
+
 		log.info(String.format("jvmArgs %s", Arrays.toString(jvmArgs.toArray())));
 		log.info(String.format("in %s", Arrays.toString(in)));
 		log.info("============== args end ==============");
@@ -176,7 +177,7 @@ public class BootstrapHotSpot implements Bootstrap {
 		// JNI
 		String jniLibraryPath = String.format("-Djava.library.path=libraries/native/%s", platformId);
 		// FIXME - JNA path
-		
+
 		// String jvmMemory = "-Xmx2048m -Xms256m";
 		Integer totalMemory = getTotalPhysicalMemory();
 		if (totalMemory == null) {
@@ -185,44 +186,40 @@ public class BootstrapHotSpot implements Bootstrap {
 			log.info("total physical memory returned is %d Mb", totalMemory);
 		}
 
-		/* mebbe windows does not like quotes anymore ?
-		if (platform.isWindows()) {
-			outArgs.add(String.format("\"%s\"", javaPath));
-		} else {
-			outArgs.add(javaPath);
-		}
-		*/
+		/*
+		 * mebbe windows does not like quotes anymore ? if
+		 * (platform.isWindows()) { outArgs.add(String.format("\"%s\"",
+		 * javaPath)); } else { outArgs.add(javaPath); }
+		 */
 		outArgs.add(javaPath);
 
 		// transferring original jvm args
-		/* DO NOT TRANSFER ALL DETAILS SHOULD BE DERIVED HERE - NOT PULLED FROM THE 
-		 * DEFINITION OF THIS CURRENTLY RUN JVM
+		/*
+		 * DO NOT TRANSFER ALL DETAILS SHOULD BE DERIVED HERE - NOT PULLED FROM
+		 * THE DEFINITION OF THIS CURRENTLY RUN JVM
 		 */
 		/*
-		for (int i = 0; i < jvmArgs.size(); ++i) {
-			String jvmArg = jvmArgs.get(i);
-			if (!jvmArg.startsWith("-agentlib")) {
-				outArgs.add(jvmArgs.get(i));
-			}
-		}
-		*/
-		
+		 * for (int i = 0; i < jvmArgs.size(); ++i) { String jvmArg =
+		 * jvmArgs.get(i); if (!jvmArg.startsWith("-agentlib")) {
+		 * outArgs.add(jvmArgs.get(i)); } }
+		 */
+
 		outArgs.add(jniLibraryPath);
 		outArgs.add("-cp");
 		outArgs.add(classpath);
 
 		// outArgs.add(classpath);
 		// outArgs.add("org.myrobotlab.service.Runtime"); DOUBLE ENTRY !
-		
+
 		boolean hasService = false;
-		for (int i = 0; i < in.length; ++i){
+		for (int i = 0; i < in.length; ++i) {
 			String arg = in[i];
-			if (arg.startsWith("org.myrobotlab.service")){
+			if (arg.startsWith("org.myrobotlab.service")) {
 				hasService = true;
 			}
 		}
-		
-		if (!hasService){
+
+		if (!hasService) {
 			outArgs.add("org.myrobotlab.service.Runtime");
 		}
 
@@ -233,7 +230,7 @@ public class BootstrapHotSpot implements Bootstrap {
 			}
 		} else {
 			// (default) - no parameters supplied
-			
+
 			outArgs.add("-service");
 			outArgs.add("gui");
 			outArgs.add("GUIService");
@@ -286,22 +283,24 @@ public class BootstrapHotSpot implements Bootstrap {
 					Process process = builder.start();
 
 					/*
-					FIXME - THIS WILL BLOCK AND HOLD THE PROCESS OPEN !!!
-					StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
+					 * FIXME - THIS WILL BLOCK AND HOLD THE PROCESS OPEN !!!
+					 * StreamGobbler errorGobbler = new
+					 * StreamGobbler(process.getErrorStream(), "ERROR");
+					 * 
+					 * // any output? // StreamGobbler outputGobbler = new //
+					 * StreamGobbler(process.getInputStream(), "OUTPUT");
+					 * StreamGobbler outputGobbler = new
+					 * StreamGobbler(process.getInputStream(), "OUTPUT");
+					 * 
+					 * // start gobblers outputGobbler.start();
+					 * errorGobbler.start();
+					 */
 
-					// any output?
-					// StreamGobbler outputGobbler = new
-					// StreamGobbler(process.getInputStream(), "OUTPUT");
-					StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
+					// FIXME process.exitValue() will throw if process has not
+					// exited
+					// log.info(String.format("done - good luck new bootstrap - exitValue %d",
+					// process.exitValue()));
 
-					// start gobblers
-					outputGobbler.start();
-					errorGobbler.start();
-					*/
-
-					// FIXME process.exitValue() will throw if process has not exited
-					//log.info(String.format("done - good luck new bootstrap - exitValue %d", process.exitValue()));
-					
 					log.info(String.format("terminating - good luck new bootstrap :)"));
 					PreLogger.close();
 					System.exit(0);
@@ -372,18 +371,18 @@ public class BootstrapHotSpot implements Bootstrap {
 		// http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id
 		Process process = builder.start();
 
-		/* FIXME ??? MAYBE THIS IS OK - BUT ON THE BOOTLOADER IT HANGS
-		StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
-
-		// any output?
-		// StreamGobbler outputGobbler = new
-		// StreamGobbler(process.getInputStream(), "OUTPUT");
-		StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
-
-		// start gobblers
-		outputGobbler.start();
-		errorGobbler.start();
-		*/
+		/*
+		 * FIXME ??? MAYBE THIS IS OK - BUT ON THE BOOTLOADER IT HANGS
+		 * StreamGobbler errorGobbler = new
+		 * StreamGobbler(process.getErrorStream(), "ERROR");
+		 * 
+		 * // any output? // StreamGobbler outputGobbler = new //
+		 * StreamGobbler(process.getInputStream(), "OUTPUT"); StreamGobbler
+		 * outputGobbler = new StreamGobbler(process.getInputStream(),
+		 * "OUTPUT");
+		 * 
+		 * // start gobblers outputGobbler.start(); errorGobbler.start();
+		 */
 
 		// int ret = process.waitFor();
 		// log.info(String.format("process returned %d", ret));
@@ -557,13 +556,15 @@ public class BootstrapHotSpot implements Bootstrap {
 
 			// FileInputStream in = new FileInputStream(tobeJared[i]);
 			InputStream in = File.class.getResourceAsStream(filename);
-			while (true) {
-				int nRead = in.read(buffer, 0, buffer.length);
-				if (nRead <= 0)
-					break;
-				out.write(buffer, 0, nRead);
+			if (in != null) {
+				while (true) {
+					int nRead = in.read(buffer, 0, buffer.length);
+					if (nRead <= 0)
+						break;
+					out.write(buffer, 0, nRead);
+				}
+				in.close();
 			}
-			in.close();
 		}
 
 		out.close();
