@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.SimpleTimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -1012,23 +1011,31 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	// ----------- Motor Controller API Begin ----------------
 
 	@Override
-	public boolean motorAttach(String motorName, Object... motorData) {
+	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin) {
+		return motorAttach(motorName, pwrPin, dirPin, null);
+	}
+
+	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin, Integer encoderPin) {
 		ServiceInterface sw = Runtime.getService(motorName);
 		if (!sw.isLocal()) {
 			error("motor is not in the same MRL instance as the motor controller");
 			return false;
 		}
 		ServiceInterface service = sw;
-		MotorControl motor = (MotorControl) service; // BE-AWARE - local
-														// optimization ! Will
-														// not work on remote
-														// !!!
-		return motorAttach(motor, motorData);
+		MotorControl motor = (MotorControl) service; 
+
+		MotorData md = new MotorData();
+		md.motor = motor;
+		md.PWMPin = pwrPin;
+		md.dirPin0 = dirPin;
+		motors.put(motor.getName(), md);
+		motor.setController(this);
+		sendMsg(PINMODE, md.PWMPin, OUTPUT);
+		sendMsg(PINMODE, md.dirPin0, OUTPUT);
+		return true;
+
 	}
 
-	public boolean motorAttach(String motorName, Integer PWMPin, Integer directionPin) {
-		return motorAttach(motorName, new Object[] { PWMPin, directionPin });
-	}
 
 	/**
 	 * an implementation which supports service names is important there is no
@@ -1081,20 +1088,20 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 		MotorData md = motors.get(name);
 		MotorControl m = md.motor;
-		float power = m.getPowerLevel();
+		double power = m.getPowerLevel();
 
 		if (power < 0) {
-			sendMsg(DIGITAL_WRITE, md.dirPin0, m.isDirectionInverted() ? MOTOR_FORWARD : MOTOR_BACKWARD);
+			sendMsg(DIGITAL_WRITE, md.dirPin0, m.isInverted() ? MOTOR_FORWARD : MOTOR_BACKWARD);
 			sendMsg(ANALOG_WRITE, md.PWMPin, Math.abs((int) (255 * m.getPowerLevel())));
 		} else if (power > 0) {
-			sendMsg(DIGITAL_WRITE, md.dirPin0, m.isDirectionInverted() ? MOTOR_BACKWARD : MOTOR_FORWARD);
+			sendMsg(DIGITAL_WRITE, md.dirPin0, m.isInverted() ? MOTOR_BACKWARD : MOTOR_FORWARD);
 			sendMsg(ANALOG_WRITE, md.PWMPin, (int) (255 * m.getPowerLevel()));
 		} else {
 			sendMsg(ANALOG_WRITE, md.PWMPin, 0);
 		}
 	}
 
-	public void motorMoveTo(String name, Integer position) {
+	public void motorMoveTo(String name, Float position) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1118,64 +1125,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	}
 
 	// ----------- MotorController API End ----------------
-
-	// FIXME - too complicated.. too much code bloat .. its nice you use names
-	// BUT
-	// IT MAKES NO SENSE TO HAVE SERVOS "connecte" ON A DIFFERENT INSTANCE
-	// SO USING ACTUAL TYPES SIMPLIFIES LIFE !
-
-	public Boolean attach(String serviceName, Object... data) {
-		log.info(String.format("attaching %s", serviceName));
-		ServiceInterface sw = Runtime.getService(serviceName);
-		if (sw == null) {
-			error("could not attach %s - not found in registry", serviceName);
-			return false;
-		}
-		if (sw instanceof Servo) // Servo or ServoControl ???
-		{
-			if (data.length != 1) {
-				error("can not attach a Servo without a pin number");
-				return false;
-			}
-			if (!sw.isLocal()) {
-				error("servo controller and servo must be local");
-				return false;
-			}
-			return servoAttach(serviceName, (Integer) (data[0]));
-		}
-
-		if (sw instanceof Motor) // Servo or ServoControl ???
-		{
-			if (data.length != 2) {
-				error("can not attach a Motor without a PWMPin & directionPin ");
-				return false;
-			}
-			if (!sw.isLocal()) {
-				error("motor controller and motor must be local");
-				return false;
-			}
-			return motorAttach(serviceName, data);
-		}
-
-		/*
-		 * if (sw instanceof ArduinoShield) // Servo or ServoControl ??? {
-		 * 
-		 * if (!sw.isLocal()) {
-		 * error("motor controller and motor must be local"); return false; }
-		 * 
-		 * return ((ArduinoShield) sw).attach(this); }
-		 */
-		error("don't know how to attach");
-		return false;
-	}
-
-	@Override
-	public Object[] getMotorData(String motorName) {
-		MotorData md = motors.get(motorName);
-		Object[] data = new Object[] { md.PWMPin, md.dirPin0 };
-		return data;
-	}
-
+	
 	public void softReset() {
 		sendMsg(SOFT_RESET, 0, 0);
 	}
@@ -1638,6 +1588,12 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	@Override
 	public void servoWriteMicroseconds(String name, Integer ms) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void motorMoveTo(String name, double position) {
 		// TODO Auto-generated method stub
 		
 	}

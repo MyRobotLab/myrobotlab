@@ -73,12 +73,9 @@ import org.myrobotlab.serial.SerialDeviceService;
 import org.myrobotlab.serial.VirtualSerialPort;
 import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
 import org.myrobotlab.service.data.Pin;
-import org.myrobotlab.service.interfaces.ArduinoShield;
-import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.StepperControl;
@@ -286,23 +283,17 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	StringBuilder debugTX = new StringBuilder();
 	StringBuilder debugRX = new StringBuilder();
 
-	/**
-	 * MotorData is the combination of a Motor and any controller data needed to
-	 * implement all of MotorController API
-	 * 
-	 */
-	class MotorData implements Serializable {
-		private static final long serialVersionUID = 1L;
-		transient MotorControl motor = null;
-		String type = null;
-		int PWMPin = -1;
-		int dirPin0 = -1;
-		int dirPin1 = -1;
-	}
-
-	HashMap<String, MotorData> motors = new HashMap<String, MotorData>();
+	HashMap<String, Motor> motors = new HashMap<String, Motor>();
+	HashMap<Integer, String> encoderPins = new HashMap<Integer, String>();
 	
 	transient Service customEventListener = null;
+	
+	String filenameRX;
+	boolean isRXRecording = true;
+	transient FileWriter fileWriterRX = null;
+	transient BufferedWriter bufferedWriterRX = null;
+	String rxFileFormat;
+
 
 	class SensorData implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -398,6 +389,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	public void setBoard(String board) {
+		boardType = board;
 		preferences.set("board", board);
 		createPinList();
 		preferences.save();
@@ -809,6 +801,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public Pin publishPin(Pin p) {
 		// log.debug(p);
 		pinList.get(p.pin).value = p.value;
+		if (encoderPins.containsKey(p.pin)){
+			motors.get(encoderPins.get(p.pin)).setCurrentPos((double)p.value);
+		}
 		return p;
 	}
 
@@ -1632,63 +1627,36 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return portName;
 	}
 
-	// ----------- Motor Controller API Begin ----------------
+	// ----------- motor controller api begin ----------------
 
 	@Override
-	public boolean motorAttach(String motorName, Object... motorData) {
-		ServiceInterface sw = Runtime.getService(motorName);
-		if (!sw.isLocal()) {
+	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin) {
+		return motorAttach(motorName, pwrPin, dirPin, null);
+	}
+
+	public boolean motorAttach(String motorName, Integer pwmPin, Integer dirPin, Integer encoderPin) {
+		Motor motor = (Motor)Runtime.getService(motorName);
+		if (!motor.isLocal()) {
 			error("motor is not in the same MRL instance as the motor controller");
 			return false;
 		}
-		ServiceInterface service = sw;
-		MotorControl motor = (MotorControl) service; // BE-AWARE - local
-														// optimization ! Will
-														// not work on remote
-														// !!!
-		return motorAttach(motor, motorData);
-	}
-
-	public boolean motorAttach(String motorName, Integer PWMPin, Integer directionPin) {
-		return motorAttach(motorName, new Object[] { PWMPin, directionPin });
-	}
-
-	/**
-	 * an implementation which supports service names is important there is no
-	 * benefit in the object array parameter here all methods should have their
-	 * own signature
-	 */
-
-	/**
-	 * implementation of motorAttach(String motorName, Object... motorData) is
-	 * private so that interfacing consistently uses service names to attach,
-	 * even though service is local
-	 * 
-	 * @param motor
-	 * @param motorData
-	 * @return
-	 */
-	private boolean motorAttach(MotorControl motor, Object... motorData) {
-		if (motor == null || motorData == null) {
-			error("null data or motor - can't attach motor");
-			return false;
-		}
-
-		if (motorData.length != 2 || motorData[0] == null || motorData[1] == null) {
-			error("motor data must be of the folowing format - motorAttach(Integer PWMPin, Integer directionPin)");
-			return false;
-		}
-
-		MotorData md = new MotorData();
-		md.motor = motor;
-		md.PWMPin = (Integer) motorData[0];
-		md.dirPin0 = (Integer) motorData[1];
-		motors.put(motor.getName(), md);
+		
+		motor.pwmPin = pwmPin;
+		motor.dirPin = dirPin;
+		motors.put(motor.getName(), motor);
 		motor.setController(this);
-		sendMsg(PINMODE, md.PWMPin, OUTPUT);
-		sendMsg(PINMODE, md.dirPin0, OUTPUT);
+		
+		if (encoderPin != null){
+			motor.encoderPin = encoderPin;
+			//sendMsg(PINMODE, md.encoderPin, INPUT);
+			encoderPins.put(motor.encoderPin, motor.getName());
+			analogReadPollingStart(motor.encoderPin);
+		}
+		
+		sendMsg(PINMODE, motor.pwmPin, OUTPUT);
+		sendMsg(PINMODE, motor.dirPin, OUTPUT);
+		motor.broadcastState();
 		return true;
-
 	}
 
 	@Override
@@ -1702,26 +1670,21 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	public void motorMove(String name) {
 
-		MotorData md = motors.get(name);
-		MotorControl m = md.motor;
-		float power = m.getPowerLevel();
-
-		if (power < 0) {
-			sendMsg(DIGITAL_WRITE, md.dirPin0, m.isDirectionInverted() ? MOTOR_FORWARD : MOTOR_BACKWARD);
-			sendMsg(ANALOG_WRITE, md.PWMPin, Math.abs((int) (255 * m.getPowerLevel())));
-		} else if (power > 0) {
-			sendMsg(DIGITAL_WRITE, md.dirPin0, m.isDirectionInverted() ? MOTOR_BACKWARD : MOTOR_FORWARD);
-			sendMsg(ANALOG_WRITE, md.PWMPin, (int) (255 * m.getPowerLevel()));
-		} else {
-			sendMsg(ANALOG_WRITE, md.PWMPin, 0);
-		}
+		Motor motor = motors.get(name);
+		double powerLevel = motor.getPowerLevel();
+		
+		sendMsg(DIGITAL_WRITE, motor.dirPin, (powerLevel < 0)? MOTOR_BACKWARD : MOTOR_FORWARD);
+		sendMsg(ANALOG_WRITE, motor.pwmPin, Math.abs((int)(powerLevel)));
+	}
+	
+	@Override // add speed?
+	public void motorMoveTo(String name, double position) {
+		// default speed
 	}
 
-	public void motorMoveTo(String name, Integer position) {
-		// TODO Auto-generated method stub
-
-	}
-
+	// ----------- motor controller api end ----------------
+	
+	
 	public void digitalDebounceOn() {
 		digitalDebounceOn(50);
 	}
@@ -1740,61 +1703,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		sendMsg(DIGITAL_DEBOUNCE_OFF, 0, 0);
 	}
 
-	// ----------- MotorController API End ----------------
-
-	// FIXME - too complicated.. too much code bloat .. its nice you use names
-	// BUT
-	// IT MAKES NO SENSE TO HAVE SERVOS "connecte" ON A DIFFERENT INSTANCE
-	// SO USING ACTUAL TYPES SIMPLIFIES LIFE !
-
-	public Boolean attach(String serviceName, Object... data) {
-		log.info(String.format("attaching %s", serviceName));
-		ServiceInterface sw = Runtime.getService(serviceName);
-		if (sw == null) {
-			error("could not attach %s - not found in registry", serviceName);
-			return false;
-		}
-		if (sw instanceof Servo) // Servo or ServoControl ???
-		{
-			if (data.length != 1) {
-				error("can not attach a Servo without a pin number");
-				return false;
-			}
-			if (!sw.isLocal()) {
-				error("servo controller and servo must be local");
-				return false;
-			}
-			return servoAttach(serviceName, (Integer) (data[0]));
-		}
-
-		if (sw instanceof Motor) // Servo or ServoControl ???
-		{
-			if (data.length != 2) {
-				error("can not attach a Motor without a PWMPin & directionPin ");
-				return false;
-			}
-			if (!sw.isLocal()) {
-				error("motor controller and motor must be local");
-				return false;
-			}
-			return motorAttach(serviceName, data);
-		}
-
-		if (sw instanceof ArduinoShield) // Servo or ServoControl ???
-		{
-
-			if (!sw.isLocal()) {
-				error("motor controller and motor must be local");
-				return false;
-			}
-
-			return ((ArduinoShield) sw).attach(this);
-		}
-
-		error("don't know how to attach");
-		return false;
-	}
-
 	public String getSketch() {
 		return this.sketch;
 	}
@@ -1809,12 +1717,6 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return sketch;
 	}
 
-	@Override
-	public Object[] getMotorData(String motorName) {
-		MotorData md = motors.get(motorName);
-		Object[] data = new Object[] { md.PWMPin, md.dirPin0 };
-		return data;
-	}
 
 	public void softReset() {
 		sendMsg(SOFT_RESET, 0, 0);
@@ -2151,7 +2053,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	public Status test() {
 
-		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		Status status = Status.info("starting %s %s test", getName(), getType());
 
 		// get running reference to self
 		Arduino arduino = (Arduino)Runtime.start(getName(),"Arduino");
@@ -2272,64 +2174,11 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		log.info("here");
 	}
 
-	public static void main(String[] args) {
-		try {
-
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
-
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.test();
-			
-			/*
-			Python python = (Python) Runtime.start("python", "Python");
-			Runtime.start("gui", "GUIService");
-			*/
-			//arduino.addCustomMsgListener(python);
-			//arduino.customEventListener = python;
-			//arduino.connect("COM15");
-			
-			//arduino.test("COM15");
-
-			// blocking examples
-
-			/*
-			 * long duration = sr04.ping(); log.info("duration {}", duration);
-			 * long range = sr04.range(); log.info("range {}", range);
-			 */
-			// non blocking - event example
-			// sr04.publishRange(long duration);
-
-			// arduino.pinMode(trigPin, "OUTPUT");
-			// arduino.pinMode(echoPin, "INPUT");
-
-			// arduino.digitalWrite(7, 0);
-			// arduino.digitalWrite(7, 1);
-			// arduino.digitalWrite(7, 0);
-
-			// Runtime.createAndStart("python", "Python");
-			// Runtime.createAndStart("gui01", "GUIService");
-			// arduino.connect("COM15");
-
-			// log.info("{}", arduino.pulseIn(5));
-
-			// FIXME - null pointer error
-			log.info("here");
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
+	
 
 	public void addCustomMsgListener(Service service) {
 		customEventListener = service;
 	}
-
-	String filenameRX;
-	boolean isRXRecording = true;
-	transient FileWriter fileWriterRX = null;
-	transient BufferedWriter bufferedWriterRX = null;
-	String rxFileFormat;
 
 	public boolean recordRX(String filename) {
 		try {
@@ -2382,4 +2231,61 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	public void write(int[] data) throws IOException {
 		serialDevice.write(data);
 	}
+
+	public String getBoardType() {		
+		return boardType;
+	}
+	
+	public static void main(String[] args) {
+		try {
+
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
+
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			Runtime.start("gui", "GUIService");
+			//arduino.test();
+			
+			/*
+			Python python = (Python) Runtime.start("python", "Python");
+			Runtime.start("gui", "GUIService");
+			*/
+			//arduino.addCustomMsgListener(python);
+			//arduino.customEventListener = python;
+			//arduino.connect("COM15");
+			
+			//arduino.test("COM15");
+
+			// blocking examples
+
+			/*
+			 * long duration = sr04.ping(); log.info("duration {}", duration);
+			 * long range = sr04.range(); log.info("range {}", range);
+			 */
+			// non blocking - event example
+			// sr04.publishRange(long duration);
+
+			// arduino.pinMode(trigPin, "OUTPUT");
+			// arduino.pinMode(echoPin, "INPUT");
+
+			// arduino.digitalWrite(7, 0);
+			// arduino.digitalWrite(7, 1);
+			// arduino.digitalWrite(7, 0);
+
+			// Runtime.createAndStart("python", "Python");
+			// Runtime.createAndStart("gui01", "GUIService");
+			// arduino.connect("COM15");
+
+			// log.info("{}", arduino.pulseIn(5));
+
+			// FIXME - null pointer error
+			log.info("here");
+
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+	}
+
+
+
 }

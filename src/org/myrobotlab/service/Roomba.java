@@ -633,7 +633,7 @@ public class Roomba extends Service {
 	}
 
 	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		Status status = Status.info("starting %s %s test", getName(), getType());
 		try {
 			// must pause after every playNote to let to note sound
 			System.out.println("Playing some notes");

@@ -371,11 +371,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		return true;
 	}
 
-	@Override
-	public void motorMoveTo(String name, Integer position) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void motorMove(String name) {
@@ -384,7 +379,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		// adafruit to be attached to motors defined outside of
 		// initialization
 		MotorControl mc = (MotorControl) Runtime.getService(name);
-		Float pwr = mc.getPowerLevel();
+		double pwr = mc.getPowerLevel();
 		int pwm = (int) (pwr * 255);
 		int motorPortNumber = deviceNameToNumber.get(name);
 
@@ -405,7 +400,12 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	}
 
 	@Override
-	public boolean motorAttach(String motorName, Object... motorData) {
+	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin) {
+		return motorAttach(motorName, pwrPin, dirPin, null);
+	}
+	
+	@Override
+	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin, Integer encoderPin) {
 		ServiceInterface sw = Runtime.getService(motorName);
 		if (!sw.isLocal()) {
 			error("motor needs to be in same instance of mrl as controller");
@@ -426,13 +426,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 
 	public boolean isAttached() {
 		return arduino != null;
-	}
-
-	@Override
-	public Object[] getMotorData(String motorName) {
-		String ret = String.format("m%d", deviceNameToNumber.get(motorName));
-		Object[] data = new Object[] { ret };
-		return data;
 	}
 	
 	// MotorController end ----
@@ -548,6 +541,12 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 
 	@Override
 	public void stepperReset(String stepper) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void motorMoveTo(String name, double position) {
 		// TODO Auto-generated method stub
 		
 	}

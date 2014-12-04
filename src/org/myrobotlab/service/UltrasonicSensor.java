@@ -136,7 +136,7 @@ public class UltrasonicSensor extends Service implements RangeListener {
 	// TODO - Virtual Serial test - do a record of tx & rx on a real sensor
 	// then send the data - IT MUST BE INTERLEAVED
 	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		Status status = Status.info("starting %s %s test", getName(), getType());
 		// FIXME - there has to be a properties method to configure localized
 		// testing
 		boolean useGUI = true;

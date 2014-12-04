@@ -185,7 +185,7 @@ public class Joystick extends Service {
 					if (lastValue == null || Math.abs(input - lastValue) > 0.0001) {
 
 						if (mappers.containsKey(id)) {
-							output = mappers.get(id).calc(input);
+							output = (float)mappers.get(id).calc(input);
 						}
 
 						Type type = controller.getType();

@@ -541,7 +541,7 @@ public class Speech extends Service implements TextListener {
 	}
 	
 	public Status test(){
-		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		Status status = Status.info("starting %s %s test", getName(), getType());
 		Speech mouth = (Speech)Runtime.start(getName(),"Speech");
 		mouth.speak("I don't use appostrophes, or other punctuation, do you?");
 		mouth.speak("I'm done with this test");

@@ -45,6 +45,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +80,7 @@ public class RemoteAdapter extends Service implements Gateway {
 
 	private String defaultPrefix = null;
 	private HashMap<String, String> prefixMap = new HashMap<String, String>();
+	private HashSet<URI> localProtocolKeys = new HashSet<URI>();
 
 	// types of listening threads - multiple could be managed
 	// when correct interfaces and base classes are done
@@ -91,7 +93,8 @@ public class RemoteAdapter extends Service implements Gateway {
 	private Integer tcpPort;
 
 	boolean isListening = false;
-
+	boolean isScanning = false;
+	
 	// TODO - multiple scanners for parallel port/broadcast scanning
 	transient Scanner scanner;
 
@@ -757,10 +760,19 @@ public class RemoteAdapter extends Service implements Gateway {
 	}
 
 	public void scan() {
+		if (scanner != null){
+			stopScanning();
+		}
 		scanner = new Scanner(this);
 		scanner.start();
+		isScanning = true;
 	}
 
+	public void stopScanning(){
+		scanner.isScanning = false;
+		isScanning = false;
+		scanner = null;
+	}
 	/**
 	 * important initial communication function related to discovery a broadcast
 	 * goes out and replies must include details of communication so that a
@@ -845,6 +857,11 @@ public class RemoteAdapter extends Service implements Gateway {
 		addListener("publishNewConnection", name, "onNewConnection", Connection.class);
 	}
 
+
+	public boolean isScanning() {
+		return isScanning;
+	}
+	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
@@ -896,4 +913,5 @@ public class RemoteAdapter extends Service implements Gateway {
 			Logging.logException(e);
 		}
 	}
+
 }
