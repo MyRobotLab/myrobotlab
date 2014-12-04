@@ -59,7 +59,7 @@ public class MySQL extends Service {
 	
 	public Status test() {
 		
-		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		Status status = Status.info("starting %s %s test", getName(), getType());
 		try {
 		MySQL mysql = (MySQL) Runtime.start(getName(), "MySQL");
 		mysql.connect("jdbc:mysql://localhost/mydatabase?" + "user=root&password=");

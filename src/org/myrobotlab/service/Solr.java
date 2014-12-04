@@ -119,7 +119,7 @@ public class Solr extends Service {
 	public void deleteDocument(String docId) {
 		try {
 			solrServer.deleteById(docId);
-		} catch (SolrServerException | IOException e) {
+		} catch (Exception e) {
 			// TODO better error handling/reporting?
 			log.warn("An exception occurred when deleting doc", e);
 		}

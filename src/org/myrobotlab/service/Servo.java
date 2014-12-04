@@ -26,7 +26,6 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Service;
@@ -265,6 +264,7 @@ public class Servo extends Service implements ServoControl {
 		moveTo((float)pos);
 	}
 	
+	// FIXME - bs from gson encoding :P - or should it be Double :P
 	public void moveTo(Double pos) {
 		moveTo(pos.floatValue());
 	}
@@ -778,7 +778,7 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	@Override
-	public void move(Float offset) {
+	public void moveStep(Float offset) {
 		// TODO: need to implement?
 	}
 

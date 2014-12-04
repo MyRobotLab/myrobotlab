@@ -61,7 +61,7 @@ public interface MotorControl {
 	 * @param power
 	 *            - new power level
 	 */
-	public void move(Float power);
+	public void move(double power);
 
 	/**
 	 * moveTo moves the motor to a specific location. Typically, an encoder is
@@ -69,7 +69,7 @@ public interface MotorControl {
 	 * 
 	 * @param newPos
 	 */
-	public void moveTo(Integer newPos);
+	public void moveTo(double newPos);
 
 	/**
 	 * moveFor move for a duration of time. Sub-second movement can be expressed
@@ -80,7 +80,7 @@ public interface MotorControl {
 	 * @param duration
 	 *            - in seconds
 	 */
-	public void moveFor(Float power, Float duration);
+	public void moveFor(double power, double duration);
 
 	/**
 	 * moveFor with the option to block on the thread and wait for the movement
@@ -90,14 +90,14 @@ public interface MotorControl {
 	 * @param duration
 	 * @param block
 	 */
-	public void moveFor(Float power, Float duration, Boolean block);
+	public void moveFor(double power, double duration, Boolean block);
 
 	/**
 	 * get the current power level of the motor
 	 * 
 	 * @return
 	 */
-	public float getPowerLevel();
+	public double getPowerLevel();
 
 	/**
 	 * change the motors direction such that negative power levels become
@@ -106,14 +106,14 @@ public interface MotorControl {
 	 * 
 	 * @param invert
 	 */
-	public void invertDirection(boolean invert);
+	public void setInverted(boolean invert);
 
 	/**
 	 * query the motor as to its inverted status
 	 * 
 	 * @return
 	 */
-	public boolean isDirectionInverted();
+	public boolean isInverted();
 
 	/**
 	 * a safety mechanism - stop and lock will stop and lock the motor no other
@@ -139,6 +139,6 @@ public interface MotorControl {
 	 * 
 	 * @param max
 	 */
-	public void setMaxPower(float max);
+	//public void setMaxPower(float max);
 
 }

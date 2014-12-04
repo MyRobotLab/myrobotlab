@@ -157,24 +157,25 @@ public class Clock extends Service {
 		if ("tcp".equals(test)) {
 			// TCP CONNECT WORKS BEGIN ---------------------------------
 			try {
-				
+
 				int i = 7;
 
 				// for (int i = 1; i < 4; ++i) {
 				Runtime.main(new String[] { "-runtimeName", String.format("client%d", i) });
 
 				// auto-grab the next port if can not listen???
-				RemoteAdapter remote = (RemoteAdapter)Runtime.start(String.format("remote%d", i), "RemoteAdapter");
+				RemoteAdapter remote = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
 				// remote.setUDPPort(6868);
 				// remote.setTCPPort(6868);
+				remote.scan();
 
 				Runtime.start(String.format("clock%d", i), "Clock");
 				Runtime.start(String.format("gui%d", i), "GUIService");
-				Runtime.start(String.format("p%d", i), "Python");
-				//remote.scan();
-				
+				// Runtime.start(String.format("p%d", i), "Python");
+				// remote.scan();
+
 				// remote.startListening();
-				remote.connect("tcp://127.0.0.1:6767");
+				// remote.connect("tcp://127.0.0.1:6767");
 
 				// FIXME - sholdn't this be sendRemote ??? or at least
 				// in an interface

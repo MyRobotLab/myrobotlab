@@ -229,7 +229,7 @@ public class InMoovHead extends Service {
 	}
 	
 	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getTypeName());
+		Status status = Status.info("starting %s %s test", getName(), getType());
 		try {
 			
 			if (arduino == null) {
