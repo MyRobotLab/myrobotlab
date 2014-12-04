@@ -41,14 +41,18 @@ import javax.swing.JTabbedPane;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.myrobotlab.arduino.compiler.Target;
+import org.myrobotlab.control.ServiceGUI;
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.slf4j.Logger;
 
 public class EditorArduino extends Editor implements ActionListener {
 
+	public final static Logger log = LoggerFactory.getLogger(EditorArduino.class);
 	static final long serialVersionUID = 1L;
 
 	// button bar buttons

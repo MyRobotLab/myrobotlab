@@ -151,7 +151,7 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 	GridBagConstraints epgc = new GridBagConstraints();
 	Dimension size = new Dimension(620, 512);
 	Map<String, String> boardPreferences;
-	String boardName;
+	// String boardName;
 	// JCheckBoxMenuItem serialDevice;
 	SerialMenuListener serialMenuListener = new SerialMenuListener();
 
@@ -178,7 +178,7 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 				getEditorPanel();
 
 				display.add(tabs, BorderLayout.CENTER);
-				//tabs.setSelectedIndex(0);
+				// tabs.setSelectedIndex(0);
 
 				serialRefresh.addActionListener(self);
 				softReset.addActionListener(self);
@@ -189,12 +189,12 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 	}
 
 	public void getPinPanel() {
-
-		if (myArduino != null && boardName != null && boardName.contains("Mega")) {
+		//if (myArduino != null && myArduino.getBoardType() != null && (myArduino.getBoardType().equals("atmega1280") || myArduino.getBoardType().equals("atmega2560") || myArduino.getBoardType().equals("mega2560") || myArduino.getBoardType().equals("mega"))) {
+		if (myArduino != null && myArduino.getPinList() != null && myArduino.getPinList().size() > 20){
 			getMegaPanel();
-			return;
+		} else {
+			getDuemilanovePanel();
 		}
-		getDuemilanovePanel();
 	}
 
 	class SerialMenuListener implements ActionListener {
@@ -237,11 +237,12 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 																		// with
 																		// properties
 																		// !
-					boardName = boardPreferences.get("name"); // FIXME - class
-																// member has
-																// precedence -
-																// do away with
-																// properties !
+					// boardName = boardPreferences.get("name"); // FIXME -
+					// class
+					// member has
+					// precedence -
+					// do away with
+					// properties !
 					pinList = myArduino.getPinList();
 
 					// update panels based on state change
@@ -258,9 +259,10 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 
 						JRadioButtonMenuItem serialDevice = new JRadioButtonMenuItem(myArduino.portNames.get(i));
 						SerialDevice sd = myArduino.getSerialDevice();
-						if (sd != null && sd.getName().equals(portName)  && editor.connectButton != null) {
+						if (sd != null && sd.getName().equals(portName) && editor.connectButton != null) {
 							if (sd.isOpen()) {
-								// FIXME - editor is often == null - race condition :(
+								// FIXME - editor is often == null - race
+								// condition :(
 								editor.connectButton.activate();
 								serialDevice.setSelected(true);
 							} else {
@@ -289,7 +291,7 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 				editor.serialDeviceMenu.add(serialDisconnect);
 				editor.serialDeviceMenu.add(softReset);
 
-				String statusString = boardName + " " + myArduino.preferences.get("serial.port");
+				String statusString = myArduino.getBoardType() + " " + myArduino.preferences.get("serial.port");
 				editor.setStatus(statusString);
 
 			}
@@ -463,14 +465,11 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 						b.setOn();
 					}
 				}
-
 			} else {
 				log.error("unknown pin type " + b.type);
 			}
-
 			log.info("DigitalButton");
 		}
-
 	}
 
 	public void closeSerialDevice() {
@@ -717,24 +716,16 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 					p.inOut.addActionListener(self);
 					p.activeInActive.addActionListener(self);
 					p.trace.addActionListener(self);
-					// p.inOut2.addActionListener(this);
-
 					pinComponentList.add(p);
 
 				}
 
-				JFrame top = myService.getFrame();
 				tabs.insertTab("pins", null, imageMap, "pin panel", 0);
-				GUIService gui = (GUIService) myService;// FIXME - bad bad bad
-				
-				//TabControl2(TabControlEventHandler handler, JTabbedPane tabs, Container myPanel, String label)
 				tabs.setTabComponentAt(0, new TabControl2(self, tabs, imageMap, "pins"));
-				
+
 			}
 		});
 	}
-
-	// public
 
 	public void getDuemilanovePanel() {
 
@@ -776,7 +767,6 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 					p.inOut.addActionListener(self);
 					p.activeInActive.addActionListener(self);
 					p.trace.addActionListener(self);
-					// p.inOut2.addActionListener(this);
 
 					pinComponentList.add(p);
 
@@ -818,10 +808,6 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 				tabs.insertTab("pins", null, imageMap, "pin panel", 0);
 				GUIService gui = (GUIService) myService;// FIXME - bad bad bad
 														// ...
-
-				// FIXME TabControl2 - tabs.setTabComponentAt(0, new
-				// TabControl(gui,
-				// tabs, imageMap, boundServiceName, "pins"));
 			}
 		});
 	}
@@ -834,7 +820,7 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 					tabs.remove(oscopePanel);
 				}
 
-				// CREATE SERVICE GUI !!! 
+				// CREATE SERVICE GUI !!!
 				oscopePanel = new JPanel(new GridBagLayout());
 				GridBagConstraints opgc = new GridBagConstraints();
 
@@ -882,7 +868,6 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 				++opgc.gridx;
 				oscopePanel.add(oscope.display, opgc);
 
-				JFrame top = myService.getFrame();
 				tabs.insertTab("oscope", null, oscopePanel, "oscope panel", 0);
 				tabs.setTabComponentAt(0, new TabControl2(self, tabs, oscopePanel, "oscope"));
 				myService.getFrame().pack();
@@ -894,7 +879,7 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 
 	public void getEditorPanel() {
 		editor = new EditorArduino(boundServiceName, myService, tabs);
-		
+
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				// if (editorPanel != null) {
@@ -903,7 +888,6 @@ public class ArduinoGUI extends ServiceGUI implements ItemListener, ActionListen
 
 				// editorPanel = new JPanel(new BorderLayout());
 
-				
 				editor.init();
 				// editorPanel.add(editor.getDisplay());
 

@@ -107,10 +107,12 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 				send("startListening");	
 			}			
 		} else if (o == scan){
-			if (listen.getText().equals("stop listening")){
+			if (scan.getText().equals("stop scanning")){
 				send("stopScanning");
+				send("broadcastState");
 			} else {
 				send("scan");	
+				send("broadcastState");
 			}			
 		}
 	}
@@ -119,6 +121,11 @@ public class RemoteAdapterGUI extends ServiceGUI implements ActionListener {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				myRemote = remote;
+				if (myRemote.isScanning()){
+					scan.setText("stop scanning");
+				} else {
+					scan.setText("scan");
+				}
 				if (myRemote.isListening()){
 					listen.setText("stop listening");
 					if (remote.getUdpPort() != null){

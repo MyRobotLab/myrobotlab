@@ -10,6 +10,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.data.Pin;
 
 public class Motor_AdafruitMotorShieldGUI extends MotorControllerPanel implements ActionListener {
@@ -67,9 +68,9 @@ public class Motor_AdafruitMotorShieldGUI extends MotorControllerPanel implement
 	 * method to update the GUIService from MotorController data
 	 */
 	@Override
-	public void setData(Object[] data) {
+	public void set(Motor motor) {
 		// TODO Auto-generated method stub
-		motorPort.setSelectedItem(data[0]);
+		motorPort.setSelectedItem(motor.getName());
 	}
 
 	@Override

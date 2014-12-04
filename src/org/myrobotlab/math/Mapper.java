@@ -6,28 +6,82 @@ public final class Mapper implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	float minX;
-	float maxX;
-	float minY;
-	float maxY;
+	// input range
+	double minX;
+	double maxX;
+	
+	// output range
+	double minY;
+	double maxY;
+	
+	// clipping
+	double minOutput;
+	double maxOutput;
+	
+	boolean inverted = false;
 
-	public Mapper(float minX, float maxX, float minY, float maxY) {
+	public Mapper(double minX, double maxX, double minY, double maxY) {
 		this.minX = minX;
 		this.maxX = maxX;
 		this.minY = minY;
 		this.maxY = maxY;
-	}
-
-	final public float calc(float s) {
-		return minY + ((s - minX) * (maxY - minY)) / (maxX - minX);
+		
+		this.minOutput = minY;
+		this.maxOutput = maxY;
 	}
 	
-	final public int calcInt(float s) {
-		return java.lang.Math.round(minY + ((s - minX) * (maxY - minY)) / (maxX - minX));
+	public void setMin(double min){
+		minOutput = min;
 	}
-	/*
-	final public int calc(Float s) {
-		return java.lang.Math.round(minY + ((s - minX) * (maxY - minY)) / (maxX - minX));
+
+	public void setMax(double max){
+		maxOutput = max;
 	}
-	*/
+	
+	public double getMinX(){
+		return minX;
+	}
+	
+	public double getMaxX(){
+		return maxX;
+	}
+	
+	public double getMinY(){
+		return minY;
+	}
+	
+	public double getMaxY(){
+		return maxY;
+	}
+	
+	final public double calc(double in) {
+		double c =  minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
+		if (c < minOutput){
+			return minOutput;
+		}
+		if (c > maxOutput){
+			return maxOutput;
+		}
+		return c;
+	}
+	
+	final public int calcInt(double in) {
+		return (int)calc(in);
+	}
+
+	public void setInverted(boolean invert) {
+		if (invert && !inverted){
+			double t = minX;
+			minX = maxX;
+			maxX = t;
+			inverted = true;
+		} else {
+			inverted = false;
+		}
+	}
+	
+	public boolean isInverted(){
+		return inverted;
+	}
+	
 }

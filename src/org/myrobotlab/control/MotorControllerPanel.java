@@ -3,6 +3,8 @@ package org.myrobotlab.control;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import org.myrobotlab.service.Motor;
+
 /**
  * @author GroG interface to update a MotorGUI's Controller Panel
  * 
@@ -17,6 +19,6 @@ abstract class MotorControllerPanel extends JPanel {
 
 	abstract void setAttached(boolean state);
 
-	abstract public void setData(Object[] data);
+	abstract public void set(Motor motor);
 
 }
