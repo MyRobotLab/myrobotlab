@@ -1,0 +1,3010 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>Arduino2</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="Arduino2";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/Arduino2.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/service/ArduinoBT.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/service/Arduino2.html" target="_top">Frames</a></li>
+<li><a href="Arduino2.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.service</div>
+<h2 title="Class Arduino2" class="title">Class Arduino2</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">org.myrobotlab.framework.Service</a></li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.service.Arduino2</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>java.io.Serializable, java.lang.Runnable, <a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a>, <a href="../../../org/myrobotlab/service/interfaces/SensorDataPublisher.html" title="interface in org.myrobotlab.service.interfaces">SensorDataPublisher</a>, <a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html" title="interface in org.myrobotlab.service.interfaces">SerialDataListener</a>, <a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a>, <a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a>, <a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public class <span class="strong">Arduino2</span>
+extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>
+implements <a href="../../../org/myrobotlab/service/interfaces/SensorDataPublisher.html" title="interface in org.myrobotlab.service.interfaces">SensorDataPublisher</a>, <a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html" title="interface in org.myrobotlab.service.interfaces">SerialDataListener</a>, <a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a>, <a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a>, <a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></pre>
+<div class="block">Implementation of a Arduino2 Service connected to MRL through a serial port.
+ The protocol is basically a pass through of system calls to the Arduino2
+ board. Data can be passed back from the digital or analog ports by request to
+ start polling. The serial port can be wireless (bluetooth), rf, or wired. The
+ communication protocol supported is in MRLComm.ino
+ 
+ Should support nearly all Arduino2 board types
+ 
+ digitalRead() works on all pins. It will just round the analog value received
+ and present it to you. If analogRead(A0) is greater than or equal to 512,
+ digitalRead(A0) will be 1, else 0. digitalWrite() works on all pins, with
+ allowed parameter 0 or 1. digitalWrite(A0,0) is the same as
+ analogWrite(A0,0), and digitalWrite(A0,1) is the same as analogWrite(A0,255)
+ analogRead() works only on analog pins. It can take any value between 0 and
+ 1023. analogWrite() works on all analog pins and all digital PWM pins. You
+ can supply it any value between 0 and 255</div>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../serialized-form.html#org.myrobotlab.service.Arduino2">Serialized Form</a></dd></dl>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#ANALOG_READ_POLLING_START">ANALOG_READ_POLLING_START</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#ANALOG_READ_POLLING_STOP">ANALOG_READ_POLLING_STOP</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#ANALOG_VALUE">ANALOG_VALUE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#ANALOG_WRITE">ANALOG_WRITE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#ARDUINO_TYPE_INT">ARDUINO_TYPE_INT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#BOARD_TYPE_ATMEGA1280">BOARD_TYPE_ATMEGA1280</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#BOARD_TYPE_ATMEGA168">BOARD_TYPE_ATMEGA168</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#BOARD_TYPE_ATMEGA2560">BOARD_TYPE_ATMEGA2560</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#BOARD_TYPE_ATMEGA328P">BOARD_TYPE_ATMEGA328P</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#BOARD_TYPE_ATMEGA32U4">BOARD_TYPE_ATMEGA32U4</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#BOARD_TYPE_UNO">BOARD_TYPE_UNO</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#COMMUNICATION_RESET">COMMUNICATION_RESET</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#CUSTOM_MSG">CUSTOM_MSG</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#DIGITAL_DEBOUNCE_OFF">DIGITAL_DEBOUNCE_OFF</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#DIGITAL_DEBOUNCE_ON">DIGITAL_DEBOUNCE_ON</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#DIGITAL_READ_POLLING_START">DIGITAL_READ_POLLING_START</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#DIGITAL_READ_POLLING_STOP">DIGITAL_READ_POLLING_STOP</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#DIGITAL_TRIGGER_ONLY_OFF">DIGITAL_TRIGGER_ONLY_OFF</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#DIGITAL_TRIGGER_ONLY_ON">DIGITAL_TRIGGER_ONLY_ON</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#DIGITAL_VALUE">DIGITAL_VALUE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#DIGITAL_WRITE">DIGITAL_WRITE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#ERROR_SERIAL">ERROR_SERIAL</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#ERROR_UNKOWN_CMD">ERROR_UNKOWN_CMD</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#FALSE">FALSE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#GET_MRLCOMM_VERSION">GET_MRLCOMM_VERSION</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#HIGH">HIGH</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#INPUT">INPUT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#LOAD_TIMING_ENABLE">LOAD_TIMING_ENABLE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#LOAD_TIMING_EVENT">LOAD_TIMING_EVENT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static org.slf4j.Logger</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#log">log</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#LOW">LOW</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#MAGIC_NUMBER">MAGIC_NUMBER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#MAX_SERVOS">MAX_SERVOS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#MOTOR_BACKWARD">MOTOR_BACKWARD</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#MOTOR_FORWARD">MOTOR_FORWARD</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#MRLCOMM_ERROR">MRLCOMM_ERROR</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#MRLCOMM_VERSION">MRLCOMM_VERSION</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Integer</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#mrlcommVersion">mrlcommVersion</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#NOP">NOP</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#OUTPUT">OUTPUT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#PINGDAR_ATTACH">PINGDAR_ATTACH</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#PINGDAR_DATA">PINGDAR_DATA</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#PINGDAR_START">PINGDAR_START</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#PINGDAR_STOP">PINGDAR_STOP</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#PINMODE">PINMODE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.ArrayList&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#portNames">portNames</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#PULSE_IN">PULSE_IN</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#REMOVE_ANALOG_TRIGGER">REMOVE_ANALOG_TRIGGER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#REMOVE_DIGITAL_TRIGGER">REMOVE_DIGITAL_TRIGGER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#REVISION">REVISION</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SENSOR_ATTACH">SENSOR_ATTACH</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SENSOR_DATA">SENSOR_DATA</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SENSOR_POLLING_START">SENSOR_POLLING_START</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SENSOR_POLLING_STOP">SENSOR_POLLING_STOP</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SENSOR_ULTRASONIC">SENSOR_ULTRASONIC</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_ATTACH">SERVO_ATTACH</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_DETACH">SERVO_DETACH</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_EVENT">SERVO_EVENT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_EVENT_POSITION_UPDATE">SERVO_EVENT_POSITION_UPDATE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_EVENT_STOPPED">SERVO_EVENT_STOPPED</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_EVENTS_ENABLE">SERVO_EVENTS_ENABLE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_SET_MAX_PULSE">SERVO_SET_MAX_PULSE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_SWEEP_START">SERVO_SWEEP_START</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_SWEEP_STOP">SERVO_SWEEP_STOP</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_WRITE">SERVO_WRITE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SERVO_WRITE_MICROSECONDS">SERVO_WRITE_MICROSECONDS</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SET_ANALOG_TRIGGER">SET_ANALOG_TRIGGER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SET_DIGITAL_TRIGGER">SET_DIGITAL_TRIGGER</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SET_PWM_FREQUENCY">SET_PWM_FREQUENCY</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SET_SAMPLE_RATE">SET_SAMPLE_RATE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SET_SERIAL_RATE">SET_SERIAL_RATE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SET_SERVO_SPEED">SET_SERVO_SPEED</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#SOFT_RESET">SOFT_RESET</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#STEPPER_ATTACH">STEPPER_ATTACH</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#STEPPER_EVENT">STEPPER_EVENT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#STEPPER_EVENT_STOP">STEPPER_EVENT_STOP</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#STEPPER_MOVE">STEPPER_MOVE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#STEPPER_RESET">STEPPER_RESET</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#STEPPER_STOP">STEPPER_STOP</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#STEPPER_TYPE_POLOLU">STEPPER_TYPE_POLOLU</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#TCCR0B">TCCR0B</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#TCCR1B">TCCR1B</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#TCCR2B">TCCR2B</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#TRUE">TRUE</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="fields_inherited_from_class_org.myrobotlab.framework.Service">
+<!--   -->
+</a>
+<h3>Fields inherited from class&nbsp;org.myrobotlab.framework.<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></h3>
+<code><a href="../../../org/myrobotlab/framework/Service.html#cfgDir">cfgDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#dna">dna</a>, <a href="../../../org/myrobotlab/framework/Service.html#lastErrorMsg">lastErrorMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#MESSAGE_RECORDING_FORMAT_BINARY">MESSAGE_RECORDING_FORMAT_BINARY</a>, <a href="../../../org/myrobotlab/framework/Service.html#MESSAGE_RECORDING_FORMAT_XML">MESSAGE_RECORDING_FORMAT_XML</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="fields_inherited_from_class_org.myrobotlab.service.interfaces.ServoController">
+<!--   -->
+</a>
+<h3>Fields inherited from interface&nbsp;org.myrobotlab.service.interfaces.<a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></h3>
+<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoAttach">servoAttach</a>, <a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoDetach">servoDetach</a>, <a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoWrite">servoWrite</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="fields_inherited_from_class_org.myrobotlab.service.interfaces.StepperController">
+<!--   -->
+</a>
+<h3>Fields inherited from interface&nbsp;org.myrobotlab.service.interfaces.<a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></h3>
+<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#STYLE_DOUBLE">STYLE_DOUBLE</a>, <a href="../../../org/myrobotlab/service/interfaces/StepperController.html#STYLE_INTERLEAVE">STYLE_INTERLEAVE</a>, <a href="../../../org/myrobotlab/service/interfaces/StepperController.html#STYLE_MICROSTEP">STYLE_MICROSTEP</a>, <a href="../../../org/myrobotlab/service/interfaces/StepperController.html#STYLE_SINGLE">STYLE_SINGLE</a></code></li>
+</ul>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#Arduino2(java.lang.String)">Arduino2</a></strong>(java.lang.String&nbsp;n)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#addCustomMsgListener(org.myrobotlab.framework.Service)">addCustomMsgListener</a></strong>(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;service)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#analogReadPollingStart(java.lang.Integer)">analogReadPollingStart</a></strong>(java.lang.Integer&nbsp;pin)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#analogReadPollingStop(java.lang.Integer)">analogReadPollingStop</a></strong>(java.lang.Integer&nbsp;pin)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#analogWrite(java.lang.Integer, java.lang.Integer)">analogWrite</a></strong>(java.lang.Integer&nbsp;address,
+           java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#compilerError(java.lang.String)">compilerError</a></strong>(java.lang.String&nbsp;error)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#connect()">connect</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#connect(java.lang.String)">connect</a></strong>(java.lang.String&nbsp;port)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#connect(java.lang.String, int, int, int, int)">connect</a></strong>(java.lang.String&nbsp;name,
+       int&nbsp;rate,
+       int&nbsp;databits,
+       int&nbsp;stopbits,
+       int&nbsp;parity)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#createBuildPath(java.lang.String)">createBuildPath</a></strong>(java.lang.String&nbsp;sketchName)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a>&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#createPinList()">createPinList</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#digitalDebounceOff()">digitalDebounceOff</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#digitalDebounceOn()">digitalDebounceOn</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#digitalDebounceOn(int)">digitalDebounceOn</a></strong>(int&nbsp;delay)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#digitalReadPollingStart(java.lang.Integer)">digitalReadPollingStart</a></strong>(java.lang.Integer&nbsp;pin)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#digitalReadPollingStop(java.lang.Integer)">digitalReadPollingStop</a></strong>(java.lang.Integer&nbsp;pin)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#digitalWrite(java.lang.Integer, java.lang.Integer)">digitalWrite</a></strong>(java.lang.Integer&nbsp;address,
+            java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#disconnect()">disconnect</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#formatMRLCommMsg(java.lang.String, byte[], int)">formatMRLCommMsg</a></strong>(java.lang.String&nbsp;prefix,
+                byte[]&nbsp;message,
+                int&nbsp;size)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#formatMRLCommMsg(java.lang.String, int[], int)">formatMRLCommMsg</a></strong>(java.lang.String&nbsp;prefix,
+                int[]&nbsp;message,
+                int&nbsp;size)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getAvrBasePath()">getAvrBasePath</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static java.io.File</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getContentFile(java.lang.String)">getContentFile</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getDescription()">getDescription</a></strong>()</code>
+<div class="block">Short description of the service</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static java.io.File</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getHardwareFolder()">getHardwareFolder</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getHardwarePath()">getHardwarePath</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../org/myrobotlab/framework/Peers.html" title="class in org.myrobotlab.framework">Peers</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getPeers(java.lang.String)">getPeers</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a>&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getPinList()">getPinList</a></strong>()</code>
+<div class="block">a list of pins from the controller which might be applicable for
+ controlling a Servo</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getPortName()">getPortName</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.ArrayList&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getPortNames()">getPortNames</a></strong>()</code>
+<div class="block">getPortNames returns the current list of free serial ports on the machine</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getSerial()">getSerial</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Object[]</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getStepperData(java.lang.String)">getStepperData</a></strong>(java.lang.String&nbsp;stepperName)</code>
+<div class="block">method to return stepper information</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Integer</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#getVersion()">getVersion</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#isConnected()">isConnected</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#isValid()">isValid</a></strong>()</code>
+<div class="block">valid means - connected and MRLComm was found at the correct version</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer)">motorAttach</a></strong>(java.lang.String&nbsp;motorName,
+           java.lang.Integer&nbsp;pwrPin,
+           java.lang.Integer&nbsp;dirPin)</code>
+<div class="block">Remote attachment activation - used by services not in the same instance
+ to attach a Motor to a MotorController</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)">motorAttach</a></strong>(java.lang.String&nbsp;motorName,
+           java.lang.Integer&nbsp;pwrPin,
+           java.lang.Integer&nbsp;dirPin,
+           java.lang.Integer&nbsp;encoderPin)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#motorDetach(java.lang.String)">motorDetach</a></strong>(java.lang.String&nbsp;motorName)</code>
+<div class="block">MotorDetach - detach the Motor from a specific pin on the controller</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#motorMove(java.lang.String)">motorMove</a></strong>(java.lang.String&nbsp;name)</code>
+<div class="block">request for motor to move the motor can be queried for the new powerlevel
+ and the controller shall appropriately change power level and direction
+ if necessary</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#motorMoveTo(java.lang.String, double)">motorMoveTo</a></strong>(java.lang.String&nbsp;name,
+           double&nbsp;position)</code>
+<div class="block">moveTo - move the Motor a relative amount the amount can be negative or
+ positive an integer value is expected</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#motorMoveTo(java.lang.String, java.lang.Float)">motorMoveTo</a></strong>(java.lang.String&nbsp;name,
+           java.lang.Float&nbsp;position)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#onByte(java.lang.Integer)">onByte</a></strong>(java.lang.Integer&nbsp;newByte)</code>
+<div class="block">callback for Serial service - local (not remote)
+ 
+ FIXME - design problem of calling the function with a single byte
+ repeatedly is slow - best to have an "event" then read as many as
+ possible
+ 
+ POLL vs Block ?</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#onCustomMsg(java.lang.Integer, java.lang.Integer, java.lang.Integer)">onCustomMsg</a></strong>(java.lang.Integer&nbsp;ax,
+           java.lang.Integer&nbsp;ay,
+           java.lang.Integer&nbsp;az)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#pinMode(java.lang.Integer, java.lang.Integer)">pinMode</a></strong>(java.lang.Integer&nbsp;address,
+       java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#pinMode(int, java.lang.String)">pinMode</a></strong>(int&nbsp;address,
+       java.lang.String&nbsp;mode)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Integer</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#publishCompilingProgress(java.lang.Integer)">publishCompilingProgress</a></strong>(java.lang.Integer&nbsp;progress)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#publishMessage(java.lang.String)">publishMessage</a></strong>(java.lang.String&nbsp;msg)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#publishPin(org.myrobotlab.service.data.Pin)">publishPin</a></strong>(<a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a>&nbsp;p)</code>
+<div class="block">This method is called with Pin data whene a pin value is changed on the
+ Arduino2 board the Arduino2 must be told to poll the desired pin(s).</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Integer</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#publishVersion(java.lang.Integer)">publishVersion</a></strong>(java.lang.Integer&nbsp;version)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>long</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#pulseIn(int, int)">pulseIn</a></strong>(int&nbsp;trigPin,
+       int&nbsp;echoPin)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>long</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#pulseIn(int, int, java.lang.Integer)">pulseIn</a></strong>(int&nbsp;trigPin,
+       int&nbsp;echoPin,
+       java.lang.Integer&nbsp;timeout)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>long</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#pulseIn(int, int, int, int)">pulseIn</a></strong>(int&nbsp;trigPin,
+       int&nbsp;echoPin,
+       int&nbsp;value,
+       int&nbsp;timeout)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>long</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#pulseIn(int, int, int, java.lang.String)">pulseIn</a></strong>(int&nbsp;trigPin,
+       int&nbsp;echoPin,
+       int&nbsp;timeout,
+       java.lang.String&nbsp;highLow)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#releaseService()">releaseService</a></strong>()</code>
+<div class="block">Releases resources, and unregisters service from the runtime</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#sendMsg(int, int...)">sendMsg</a></strong>(int&nbsp;function,
+       int...&nbsp;params)</code>
+<div class="block">MRL protocol method</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#sensorAttach(java.lang.String)">sensorAttach</a></strong>(java.lang.String&nbsp;sensorName)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#sensorAttach(org.myrobotlab.service.UltrasonicSensor)">sensorAttach</a></strong>(<a href="../../../org/myrobotlab/service/UltrasonicSensor.html" title="class in org.myrobotlab.service">UltrasonicSensor</a>&nbsp;sensor)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#sensorPollingStart(java.lang.String, int)">sensorPollingStart</a></strong>(java.lang.String&nbsp;name,
+                  int&nbsp;timeoutMS)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#sensorPollingStop(java.lang.String)">sensorPollingStop</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#servoAttach(org.myrobotlab.service.Servo, java.lang.Integer)">servoAttach</a></strong>(<a href="../../../org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a>&nbsp;servo,
+           java.lang.Integer&nbsp;pin)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#servoAttach(java.lang.String, java.lang.Integer)">servoAttach</a></strong>(java.lang.String&nbsp;servoName,
+           java.lang.Integer&nbsp;pin)</code>
+<div class="block">servoAttach - attach the servo to a specific pin on the controller</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#servoDetach(org.myrobotlab.service.Servo)">servoDetach</a></strong>(<a href="../../../org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a>&nbsp;servo)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#servoDetach(java.lang.String)">servoDetach</a></strong>(java.lang.String&nbsp;servoName)</code>
+<div class="block">servoDetach - detach the servo from a specific pin on the controller</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#servoStop(java.lang.String)">servoStop</a></strong>(java.lang.String&nbsp;servoName)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#servoSweep(java.lang.String, int, int, int)">servoSweep</a></strong>(java.lang.String&nbsp;servoName,
+          int&nbsp;min,
+          int&nbsp;max,
+          int&nbsp;step)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#servoWrite(java.lang.String, java.lang.Integer)">servoWrite</a></strong>(java.lang.String&nbsp;servoName,
+          java.lang.Integer&nbsp;newPos)</code>
+<div class="block">servoWrite - move the servo at an angle between 0 - 180</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#servoWriteMicroseconds(java.lang.String, java.lang.Integer)">servoWriteMicroseconds</a></strong>(java.lang.String&nbsp;name,
+                      java.lang.Integer&nbsp;ms)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#setBoard(java.lang.String)">setBoard</a></strong>(java.lang.String&nbsp;board)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#setCompilingProgress(java.lang.Integer)">setCompilingProgress</a></strong>(java.lang.Integer&nbsp;progress)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#setDigitalTriggerOnly(java.lang.Boolean)">setDigitalTriggerOnly</a></strong>(java.lang.Boolean&nbsp;b)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#setLoadTimingEnabled(boolean)">setLoadTimingEnabled</a></strong>(boolean&nbsp;enable)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#setPWMFrequency(java.lang.Integer, java.lang.Integer)">setPWMFrequency</a></strong>(java.lang.Integer&nbsp;address,
+               java.lang.Integer&nbsp;freq)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#setSampleRate(int)">setSampleRate</a></strong>(int&nbsp;rate)</code>
+<div class="block">this sets the sample rate of polling reads both digital and analog it is
+ a loop count modulus - default is 1 which seems to be a bit high of a
+ rate to be broadcasting across the internet to several webclients :)
+ valid ranges are 1 to 32,767 (for Arduino2's 2 byte signed integer)</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#setServoEventsEnabled(java.lang.String, boolean)">setServoEventsEnabled</a></strong>(java.lang.String&nbsp;servoName,
+                     boolean&nbsp;enable)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#setServoSpeed(java.lang.String, java.lang.Float)">setServoSpeed</a></strong>(java.lang.String&nbsp;servoName,
+             java.lang.Float&nbsp;speed)</code>
+<div class="block">return the current pin this servo is attached to</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#setSpeed(java.lang.Integer)">setSpeed</a></strong>(java.lang.Integer&nbsp;speed)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#showError(java.lang.String, java.lang.String, java.lang.Exception)">showError</a></strong>(java.lang.String&nbsp;error,
+         java.lang.String&nbsp;desc,
+         java.lang.Exception&nbsp;e)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#softReset()">softReset</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#startService()">startService</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#stepperAttach(org.myrobotlab.service.interfaces.StepperControl)">stepperAttach</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/StepperControl.html" title="interface in org.myrobotlab.service.interfaces">StepperControl</a>&nbsp;stepper)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#stepperAttach(java.lang.String)">stepperAttach</a></strong>(java.lang.String&nbsp;stepperName)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#stepperDetach(java.lang.String)">stepperDetach</a></strong>(java.lang.String&nbsp;name)</code>
+<div class="block">StepperDetach - detach the Stepper from a specific pin on the controller</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#stepperMove(java.lang.String, java.lang.Integer)">stepperMove</a></strong>(java.lang.String&nbsp;name,
+           java.lang.Integer&nbsp;newPos)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#stepperReset(java.lang.String)">stepperReset</a></strong>(java.lang.String&nbsp;stepperName)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#stepperStep(java.lang.String, java.lang.Integer)">stepperStep</a></strong>(java.lang.String&nbsp;name,
+           java.lang.Integer&nbsp;steps)</code>
+<div class="block">stepperStep - move stepper an increment</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#stepperStep(java.lang.String, java.lang.Integer, java.lang.Integer)">stepperStep</a></strong>(java.lang.String&nbsp;name,
+           java.lang.Integer&nbsp;steps,
+           java.lang.Integer&nbsp;style)</code>
+<div class="block">stepperStep - move stepper an increment</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#stepperStop(java.lang.String)">stepperStop</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#stopService()">stopService</a></strong>()</code>
+<div class="block">Stops the service.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Arduino2.html#test(java.lang.String)">test</a></strong>(java.lang.String&nbsp;port)</code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.framework.Service">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;org.myrobotlab.framework.<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></h3>
+<code><a href="../../../org/myrobotlab/framework/Service.html#addListener(org.myrobotlab.framework.MRLListener)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addLocalTask(int, java.lang.String, java.lang.Object...)">addLocalTask</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay()">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay(java.lang.Boolean)">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#broadcastState()">broadcastState</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(org.myrobotlab.framework.Index, java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#clearLastError()">clearLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#close(java.io.Writer)">close</a>, <a href="../../../org/myrobotlab/framework/Service.html#connect(java.lang.String, java.lang.String, java.lang.String, int)">connect</a>, <a href="../../../org/myrobotlab/framework/Service.html#copyShallowFrom(java.lang.Object, java.lang.Object)">copyShallowFrom</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object)">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object[])">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String, java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createRootReserved(java.lang.String)">createRootReserved</a>, <a href="../../../org/myrobotlab/framework/Service.html#display()">display</a>, <a href="../../../org/myrobotlab/framework/Service.html#echoHeartbeat(org.myrobotlab.net.Heartbeat)">echoHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.Exception)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String, java.lang.Object...)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#getCFGDir()">getCFGDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#getComm()">getComm</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDeclaredMethods()">getDeclaredMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDNA()">getDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHostName(java.lang.String)">getHostName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInbox()">getInbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInstanceId()">getInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#getIntanceName()">getIntanceName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLastError()">getLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.Class)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.String)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMessageSet()">getMessageSet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethods()">getMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethodToolTip(java.lang.String, java.lang.String, java.lang.Class[])">getMethodToolTip</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMsg()">getMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#getName()">getName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class, java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyList(java.lang.String)">getNotifyList</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyListKeySet()">getNotifyListKeySet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getOutbox()">getOutbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getPeerKey(java.lang.String)">getPeerKey</a>, <a href="../../../org/myrobotlab/framework/Service.html#getServiceResourceFile(java.lang.String)">getServiceResourceFile</a>, <a href="../../../org/myrobotlab/framework/Service.html#getSimpleName()">getSimpleName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThisThread()">getThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThrowableNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getThrowableNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getType()">getType</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasDisplay()">hasDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasError()">hasError</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasPeers()">hasPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#help()">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#help(java.lang.String, java.lang.String)">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#in(org.myrobotlab.framework.Message)">in</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String, java.lang.Object...)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(org.myrobotlab.framework.Message)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String, java.lang.Object...)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invokeOn(java.lang.Object, java.lang.String, java.lang.Object...)">invokeOn</a>, <a href="../../../org/myrobotlab/framework/Service.html#isLocal()">isLocal</a>, <a href="../../../org/myrobotlab/framework/Service.html#isReady()">isReady</a>, <a href="../../../org/myrobotlab/framework/Service.html#isRunning()">isRunning</a>, <a href="../../../org/myrobotlab/framework/Service.html#load()">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#load(java.lang.Object, java.lang.String)">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#loadRecording(java.lang.String)">loadRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#logException(java.lang.Throwable)">logException</a>, <a href="../../../org/myrobotlab/framework/Service.html#logTimeEnable(java.lang.Boolean)">logTimeEnable</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNA(java.lang.String, java.lang.String)">mergePeerDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNAx(java.lang.String, java.lang.String)">mergePeerDNAx</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(org.myrobotlab.framework.Message)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(java.lang.String, java.lang.Object)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#preRoutingHook(org.myrobotlab.framework.Message)">preRoutingHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#proxySend(java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">proxySend</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishError(java.lang.String)">publishError</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishState()">publishState</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishStatus(java.lang.String, java.lang.String)">publishStatus</a>, <a href="../../../org/myrobotlab/framework/Service.html#purgeAllTasks()">purgeAllTasks</a>, <a href="../../../org/myrobotlab/framework/Service.html#releasePeers()">releasePeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeAllListeners()">removeAllListeners</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(org.myrobotlab.framework.MRLListener)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#requiresSecurity()">requiresSecurity</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRootAs(java.lang.String, java.lang.String)">reserveRootAs</a>, <a href="../../../org/myrobotlab/framework/Service.html#run()">run</a>, <a href="../../../org/myrobotlab/framework/Service.html#save()">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.Object, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.String, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String, java.lang.Object...)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.net.URI, java.lang.String, java.lang.Object)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.Integer, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#setInstanceId(java.net.URI)">setInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#setLogLevel(java.lang.String)">setLogLevel</a>, <a href="../../../org/myrobotlab/framework/Service.html#setPrefix(java.lang.String)">setPrefix</a>, <a href="../../../org/myrobotlab/framework/Service.html#setSecurityProvider(org.myrobotlab.service.interfaces.AuthorizationProvider)">setSecurityProvider</a>, <a href="../../../org/myrobotlab/framework/Service.html#setState(org.myrobotlab.framework.Service)">setState</a>, <a href="../../../org/myrobotlab/framework/Service.html#setThisThread(java.lang.Thread)">setThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#sleep(int)">sleep</a>, <a href="../../../org/myrobotlab/framework/Service.html#stackToString(java.lang.Throwable)">stackToString</a>, <a href="../../../org/myrobotlab/framework/Service.html#startHeartbeat()">startHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#startMsgRecording(java.lang.String)">startMsgRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String, java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startRecording()">startRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopHeartbeat()">stopHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopMsgRecording()">stopMsgRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#test()">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">unsubscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String)">warn</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String, java.lang.Object...)">warn</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.service.interfaces.SerialDataListener">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;org.myrobotlab.service.interfaces.<a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html" title="interface in org.myrobotlab.service.interfaces">SerialDataListener</a></h3>
+<code><a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html#getName()">getName</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.service.interfaces.ServoController">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;org.myrobotlab.service.interfaces.<a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></h3>
+<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#getName()">getName</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.service.interfaces.MotorController">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;org.myrobotlab.service.interfaces.<a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></h3>
+<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#getName()">getName</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.service.interfaces.StepperController">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;org.myrobotlab.service.interfaces.<a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></h3>
+<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#getName()">getName</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a name="log">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>log</h4>
+<pre>public static final transient&nbsp;org.slf4j.Logger log</pre>
+</li>
+</ul>
+<a name="MRLCOMM_VERSION">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MRLCOMM_VERSION</h4>
+<pre>public static final&nbsp;int MRLCOMM_VERSION</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.MRLCOMM_VERSION">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MAGIC_NUMBER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MAGIC_NUMBER</h4>
+<pre>public static final&nbsp;int MAGIC_NUMBER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.MAGIC_NUMBER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITAL_WRITE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITAL_WRITE</h4>
+<pre>public static final&nbsp;int DIGITAL_WRITE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.DIGITAL_WRITE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITAL_VALUE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITAL_VALUE</h4>
+<pre>public static final&nbsp;int DIGITAL_VALUE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.DIGITAL_VALUE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ANALOG_WRITE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ANALOG_WRITE</h4>
+<pre>public static final&nbsp;int ANALOG_WRITE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.ANALOG_WRITE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ANALOG_VALUE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ANALOG_VALUE</h4>
+<pre>public static final&nbsp;int ANALOG_VALUE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.ANALOG_VALUE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="PINMODE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>PINMODE</h4>
+<pre>public static final&nbsp;int PINMODE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.PINMODE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="PULSE_IN">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>PULSE_IN</h4>
+<pre>public static final&nbsp;int PULSE_IN</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.PULSE_IN">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_ATTACH">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_ATTACH</h4>
+<pre>public static final&nbsp;int SERVO_ATTACH</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_ATTACH">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_WRITE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_WRITE</h4>
+<pre>public static final&nbsp;int SERVO_WRITE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_WRITE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_SET_MAX_PULSE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_SET_MAX_PULSE</h4>
+<pre>public static final&nbsp;int SERVO_SET_MAX_PULSE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_SET_MAX_PULSE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_DETACH">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_DETACH</h4>
+<pre>public static final&nbsp;int SERVO_DETACH</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_DETACH">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SET_PWM_FREQUENCY">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SET_PWM_FREQUENCY</h4>
+<pre>public static final&nbsp;int SET_PWM_FREQUENCY</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SET_PWM_FREQUENCY">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SET_SERVO_SPEED">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SET_SERVO_SPEED</h4>
+<pre>public static final&nbsp;int SET_SERVO_SPEED</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SET_SERVO_SPEED">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ANALOG_READ_POLLING_START">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ANALOG_READ_POLLING_START</h4>
+<pre>public static final&nbsp;int ANALOG_READ_POLLING_START</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.ANALOG_READ_POLLING_START">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ANALOG_READ_POLLING_STOP">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ANALOG_READ_POLLING_STOP</h4>
+<pre>public static final&nbsp;int ANALOG_READ_POLLING_STOP</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.ANALOG_READ_POLLING_STOP">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITAL_READ_POLLING_START">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITAL_READ_POLLING_START</h4>
+<pre>public static final&nbsp;int DIGITAL_READ_POLLING_START</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.DIGITAL_READ_POLLING_START">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITAL_READ_POLLING_STOP">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITAL_READ_POLLING_STOP</h4>
+<pre>public static final&nbsp;int DIGITAL_READ_POLLING_STOP</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.DIGITAL_READ_POLLING_STOP">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SET_ANALOG_TRIGGER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SET_ANALOG_TRIGGER</h4>
+<pre>public static final&nbsp;int SET_ANALOG_TRIGGER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SET_ANALOG_TRIGGER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOVE_ANALOG_TRIGGER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOVE_ANALOG_TRIGGER</h4>
+<pre>public static final&nbsp;int REMOVE_ANALOG_TRIGGER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.REMOVE_ANALOG_TRIGGER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SET_DIGITAL_TRIGGER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SET_DIGITAL_TRIGGER</h4>
+<pre>public static final&nbsp;int SET_DIGITAL_TRIGGER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SET_DIGITAL_TRIGGER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="REMOVE_DIGITAL_TRIGGER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REMOVE_DIGITAL_TRIGGER</h4>
+<pre>public static final&nbsp;int REMOVE_DIGITAL_TRIGGER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.REMOVE_DIGITAL_TRIGGER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITAL_DEBOUNCE_ON">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITAL_DEBOUNCE_ON</h4>
+<pre>public static final&nbsp;int DIGITAL_DEBOUNCE_ON</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.DIGITAL_DEBOUNCE_ON">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITAL_DEBOUNCE_OFF">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITAL_DEBOUNCE_OFF</h4>
+<pre>public static final&nbsp;int DIGITAL_DEBOUNCE_OFF</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.DIGITAL_DEBOUNCE_OFF">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITAL_TRIGGER_ONLY_ON">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITAL_TRIGGER_ONLY_ON</h4>
+<pre>public static final&nbsp;int DIGITAL_TRIGGER_ONLY_ON</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.DIGITAL_TRIGGER_ONLY_ON">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="DIGITAL_TRIGGER_ONLY_OFF">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DIGITAL_TRIGGER_ONLY_OFF</h4>
+<pre>public static final&nbsp;int DIGITAL_TRIGGER_ONLY_OFF</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.DIGITAL_TRIGGER_ONLY_OFF">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SET_SERIAL_RATE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SET_SERIAL_RATE</h4>
+<pre>public static final&nbsp;int SET_SERIAL_RATE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SET_SERIAL_RATE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="GET_MRLCOMM_VERSION">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>GET_MRLCOMM_VERSION</h4>
+<pre>public static final&nbsp;int GET_MRLCOMM_VERSION</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.GET_MRLCOMM_VERSION">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SET_SAMPLE_RATE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SET_SAMPLE_RATE</h4>
+<pre>public static final&nbsp;int SET_SAMPLE_RATE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SET_SAMPLE_RATE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_WRITE_MICROSECONDS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_WRITE_MICROSECONDS</h4>
+<pre>public static final&nbsp;int SERVO_WRITE_MICROSECONDS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_WRITE_MICROSECONDS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MRLCOMM_ERROR">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MRLCOMM_ERROR</h4>
+<pre>public static final&nbsp;int MRLCOMM_ERROR</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.MRLCOMM_ERROR">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="PINGDAR_ATTACH">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>PINGDAR_ATTACH</h4>
+<pre>public static final&nbsp;int PINGDAR_ATTACH</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.PINGDAR_ATTACH">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="PINGDAR_START">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>PINGDAR_START</h4>
+<pre>public static final&nbsp;int PINGDAR_START</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.PINGDAR_START">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="PINGDAR_STOP">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>PINGDAR_STOP</h4>
+<pre>public static final&nbsp;int PINGDAR_STOP</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.PINGDAR_STOP">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="PINGDAR_DATA">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>PINGDAR_DATA</h4>
+<pre>public static final&nbsp;int PINGDAR_DATA</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.PINGDAR_DATA">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSOR_ATTACH">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSOR_ATTACH</h4>
+<pre>public static final&nbsp;int SENSOR_ATTACH</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SENSOR_ATTACH">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSOR_POLLING_START">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSOR_POLLING_START</h4>
+<pre>public static final&nbsp;int SENSOR_POLLING_START</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SENSOR_POLLING_START">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSOR_POLLING_STOP">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSOR_POLLING_STOP</h4>
+<pre>public static final&nbsp;int SENSOR_POLLING_STOP</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SENSOR_POLLING_STOP">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSOR_DATA">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSOR_DATA</h4>
+<pre>public static final&nbsp;int SENSOR_DATA</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SENSOR_DATA">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_SWEEP_START">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_SWEEP_START</h4>
+<pre>public static final&nbsp;int SERVO_SWEEP_START</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_SWEEP_START">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_SWEEP_STOP">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_SWEEP_STOP</h4>
+<pre>public static final&nbsp;int SERVO_SWEEP_STOP</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_SWEEP_STOP">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_EVENTS_ENABLE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_EVENTS_ENABLE</h4>
+<pre>public static final&nbsp;int SERVO_EVENTS_ENABLE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_EVENTS_ENABLE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_EVENT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_EVENT</h4>
+<pre>public static final&nbsp;int SERVO_EVENT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_EVENT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="LOAD_TIMING_ENABLE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>LOAD_TIMING_ENABLE</h4>
+<pre>public static final&nbsp;int LOAD_TIMING_ENABLE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.LOAD_TIMING_ENABLE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="LOAD_TIMING_EVENT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>LOAD_TIMING_EVENT</h4>
+<pre>public static final&nbsp;int LOAD_TIMING_EVENT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.LOAD_TIMING_EVENT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="STEPPER_ATTACH">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>STEPPER_ATTACH</h4>
+<pre>public static final&nbsp;int STEPPER_ATTACH</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.STEPPER_ATTACH">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="STEPPER_MOVE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>STEPPER_MOVE</h4>
+<pre>public static final&nbsp;int STEPPER_MOVE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.STEPPER_MOVE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="STEPPER_STOP">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>STEPPER_STOP</h4>
+<pre>public static final&nbsp;int STEPPER_STOP</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.STEPPER_STOP">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="STEPPER_RESET">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>STEPPER_RESET</h4>
+<pre>public static final&nbsp;int STEPPER_RESET</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.STEPPER_RESET">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="STEPPER_EVENT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>STEPPER_EVENT</h4>
+<pre>public static final&nbsp;int STEPPER_EVENT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.STEPPER_EVENT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="STEPPER_EVENT_STOP">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>STEPPER_EVENT_STOP</h4>
+<pre>public static final&nbsp;int STEPPER_EVENT_STOP</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.STEPPER_EVENT_STOP">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="STEPPER_TYPE_POLOLU">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>STEPPER_TYPE_POLOLU</h4>
+<pre>public static final&nbsp;int STEPPER_TYPE_POLOLU</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.STEPPER_TYPE_POLOLU">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="CUSTOM_MSG">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>CUSTOM_MSG</h4>
+<pre>public static final&nbsp;int CUSTOM_MSG</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.CUSTOM_MSG">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ARDUINO_TYPE_INT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ARDUINO_TYPE_INT</h4>
+<pre>public static final&nbsp;int ARDUINO_TYPE_INT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.ARDUINO_TYPE_INT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_EVENT_STOPPED">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_EVENT_STOPPED</h4>
+<pre>public static final&nbsp;int SERVO_EVENT_STOPPED</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_EVENT_STOPPED">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SERVO_EVENT_POSITION_UPDATE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SERVO_EVENT_POSITION_UPDATE</h4>
+<pre>public static final&nbsp;int SERVO_EVENT_POSITION_UPDATE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SERVO_EVENT_POSITION_UPDATE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ERROR_SERIAL">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ERROR_SERIAL</h4>
+<pre>public static final&nbsp;int ERROR_SERIAL</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.ERROR_SERIAL">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ERROR_UNKOWN_CMD">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ERROR_UNKOWN_CMD</h4>
+<pre>public static final&nbsp;int ERROR_UNKOWN_CMD</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.ERROR_UNKOWN_CMD">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SENSOR_ULTRASONIC">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SENSOR_ULTRASONIC</h4>
+<pre>public static final&nbsp;int SENSOR_ULTRASONIC</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SENSOR_ULTRASONIC">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="COMMUNICATION_RESET">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>COMMUNICATION_RESET</h4>
+<pre>public static final&nbsp;int COMMUNICATION_RESET</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.COMMUNICATION_RESET">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="SOFT_RESET">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SOFT_RESET</h4>
+<pre>public static final&nbsp;int SOFT_RESET</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.SOFT_RESET">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="NOP">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>NOP</h4>
+<pre>public static final&nbsp;int NOP</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.NOP">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="TRUE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TRUE</h4>
+<pre>public static final&nbsp;int TRUE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.TRUE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="FALSE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>FALSE</h4>
+<pre>public static final&nbsp;int FALSE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.FALSE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="mrlcommVersion">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>mrlcommVersion</h4>
+<pre>public&nbsp;java.lang.Integer mrlcommVersion</pre>
+</li>
+</ul>
+<a name="REVISION">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>REVISION</h4>
+<pre>public static final transient&nbsp;int REVISION</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.REVISION">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BOARD_TYPE_UNO">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BOARD_TYPE_UNO</h4>
+<pre>public static final transient&nbsp;java.lang.String BOARD_TYPE_UNO</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.BOARD_TYPE_UNO">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BOARD_TYPE_ATMEGA168">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BOARD_TYPE_ATMEGA168</h4>
+<pre>public static final transient&nbsp;java.lang.String BOARD_TYPE_ATMEGA168</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.BOARD_TYPE_ATMEGA168">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BOARD_TYPE_ATMEGA328P">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BOARD_TYPE_ATMEGA328P</h4>
+<pre>public static final transient&nbsp;java.lang.String BOARD_TYPE_ATMEGA328P</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.BOARD_TYPE_ATMEGA328P">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BOARD_TYPE_ATMEGA2560">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BOARD_TYPE_ATMEGA2560</h4>
+<pre>public static final transient&nbsp;java.lang.String BOARD_TYPE_ATMEGA2560</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.BOARD_TYPE_ATMEGA2560">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BOARD_TYPE_ATMEGA1280">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BOARD_TYPE_ATMEGA1280</h4>
+<pre>public static final transient&nbsp;java.lang.String BOARD_TYPE_ATMEGA1280</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.BOARD_TYPE_ATMEGA1280">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="BOARD_TYPE_ATMEGA32U4">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>BOARD_TYPE_ATMEGA32U4</h4>
+<pre>public static final transient&nbsp;java.lang.String BOARD_TYPE_ATMEGA32U4</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.BOARD_TYPE_ATMEGA32U4">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="TCCR0B">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TCCR0B</h4>
+<pre>public static final&nbsp;int TCCR0B</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.TCCR0B">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="TCCR1B">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TCCR1B</h4>
+<pre>public static final&nbsp;int TCCR1B</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.TCCR1B">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="TCCR2B">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TCCR2B</h4>
+<pre>public static final&nbsp;int TCCR2B</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.TCCR2B">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MAX_SERVOS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MAX_SERVOS</h4>
+<pre>public static final&nbsp;int MAX_SERVOS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.MAX_SERVOS">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="HIGH">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>HIGH</h4>
+<pre>public static final&nbsp;int HIGH</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.HIGH">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="LOW">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>LOW</h4>
+<pre>public static final&nbsp;int LOW</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.LOW">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="INPUT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>INPUT</h4>
+<pre>public static final&nbsp;int INPUT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.INPUT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="OUTPUT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>OUTPUT</h4>
+<pre>public static final&nbsp;int OUTPUT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.OUTPUT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MOTOR_FORWARD">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MOTOR_FORWARD</h4>
+<pre>public static final&nbsp;int MOTOR_FORWARD</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.MOTOR_FORWARD">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="MOTOR_BACKWARD">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>MOTOR_BACKWARD</h4>
+<pre>public static final&nbsp;int MOTOR_BACKWARD</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Arduino2.MOTOR_BACKWARD">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="portNames">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>portNames</h4>
+<pre>public&nbsp;java.util.ArrayList&lt;java.lang.String&gt; portNames</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="Arduino2(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>Arduino2</h4>
+<pre>public&nbsp;Arduino2(java.lang.String&nbsp;n)</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="getPeers(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPeers</h4>
+<pre>public static&nbsp;<a href="../../../org/myrobotlab/framework/Peers.html" title="class in org.myrobotlab.framework">Peers</a>&nbsp;getPeers(java.lang.String&nbsp;name)</pre>
+</li>
+</ul>
+<a name="setBoard(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setBoard</h4>
+<pre>public&nbsp;java.lang.String&nbsp;setBoard(java.lang.String&nbsp;board)</pre>
+</li>
+</ul>
+<a name="getPortName()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPortName</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getPortName()</pre>
+</li>
+</ul>
+<a name="startService()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startService</h4>
+<pre>public&nbsp;void&nbsp;startService()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#startService()">startService</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#startService()">startService</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="sendMsg(int, int...)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sendMsg</h4>
+<pre>public&nbsp;void&nbsp;sendMsg(int&nbsp;function,
+           int...&nbsp;params)</pre>
+<div class="block">MRL protocol method</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>function</code> - </dd><dd><code>param1</code> - </dd><dd><code>param2</code> - TODO - take the cheese out of this method .. it shold be
+            sendMsg(byte[]...data)</dd></dl>
+</li>
+</ul>
+<a name="setPWMFrequency(java.lang.Integer, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setPWMFrequency</h4>
+<pre>public&nbsp;void&nbsp;setPWMFrequency(java.lang.Integer&nbsp;address,
+                   java.lang.Integer&nbsp;freq)</pre>
+</li>
+</ul>
+<a name="servoAttach(java.lang.String, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>servoAttach</h4>
+<pre>public&nbsp;boolean&nbsp;servoAttach(java.lang.String&nbsp;servoName,
+                  java.lang.Integer&nbsp;pin)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoAttach(java.lang.String, java.lang.Integer)">ServoController</a></code></strong></div>
+<div class="block">servoAttach - attach the servo to a specific pin on the controller</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoAttach(java.lang.String, java.lang.Integer)">servoAttach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></code></dd>
+<dd><code>pin</code> - - pin number</dd>
+<dt><span class="strong">Returns:</span></dt><dd>boolean boolean</dd></dl>
+</li>
+</ul>
+<a name="servoAttach(org.myrobotlab.service.Servo, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>servoAttach</h4>
+<pre>public&nbsp;boolean&nbsp;servoAttach(<a href="../../../org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a>&nbsp;servo,
+                  java.lang.Integer&nbsp;pin)</pre>
+</li>
+</ul>
+<a name="servoDetach(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>servoDetach</h4>
+<pre>public&nbsp;boolean&nbsp;servoDetach(java.lang.String&nbsp;servoName)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoDetach(java.lang.String)">ServoController</a></code></strong></div>
+<div class="block">servoDetach - detach the servo from a specific pin on the controller</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoDetach(java.lang.String)">servoDetach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></code></dd>
+<dt><span class="strong">Returns:</span></dt><dd>boolean</dd></dl>
+</li>
+</ul>
+<a name="servoDetach(org.myrobotlab.service.Servo)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>servoDetach</h4>
+<pre>public&nbsp;boolean&nbsp;servoDetach(<a href="../../../org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a>&nbsp;servo)</pre>
+</li>
+</ul>
+<a name="servoWrite(java.lang.String, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>servoWrite</h4>
+<pre>public&nbsp;void&nbsp;servoWrite(java.lang.String&nbsp;servoName,
+              java.lang.Integer&nbsp;newPos)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoWrite(java.lang.String, java.lang.Integer)">ServoController</a></code></strong></div>
+<div class="block">servoWrite - move the servo at an angle between 0 - 180</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoWrite(java.lang.String, java.lang.Integer)">servoWrite</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></code></dd>
+<dd><code>newPos</code> - - positive or negative relative amount to move the servo</dd></dl>
+</li>
+</ul>
+<a name="servoSweep(java.lang.String, int, int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>servoSweep</h4>
+<pre>public&nbsp;void&nbsp;servoSweep(java.lang.String&nbsp;servoName,
+              int&nbsp;min,
+              int&nbsp;max,
+              int&nbsp;step)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoSweep(java.lang.String, int, int, int)">servoSweep</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="digitalWrite(java.lang.Integer, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>digitalWrite</h4>
+<pre>public&nbsp;void&nbsp;digitalWrite(java.lang.Integer&nbsp;address,
+                java.lang.Integer&nbsp;value)</pre>
+</li>
+</ul>
+<a name="getVersion()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getVersion</h4>
+<pre>public&nbsp;java.lang.Integer&nbsp;getVersion()</pre>
+</li>
+</ul>
+<a name="publishVersion(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>publishVersion</h4>
+<pre>public&nbsp;java.lang.Integer&nbsp;publishVersion(java.lang.Integer&nbsp;version)</pre>
+</li>
+</ul>
+<a name="pinMode(java.lang.Integer, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>pinMode</h4>
+<pre>public&nbsp;void&nbsp;pinMode(java.lang.Integer&nbsp;address,
+           java.lang.Integer&nbsp;value)</pre>
+</li>
+</ul>
+<a name="analogWrite(java.lang.Integer, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>analogWrite</h4>
+<pre>public&nbsp;void&nbsp;analogWrite(java.lang.Integer&nbsp;address,
+               java.lang.Integer&nbsp;value)</pre>
+</li>
+</ul>
+<a name="publishPin(org.myrobotlab.service.data.Pin)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>publishPin</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a>&nbsp;publishPin(<a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a>&nbsp;p)</pre>
+<div class="block">This method is called with Pin data whene a pin value is changed on the
+ Arduino2 board the Arduino2 must be told to poll the desired pin(s). This
+ is done with a analogReadPollingStart(pin) or digitalReadPollingStart()</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/SensorDataPublisher.html#publishPin(org.myrobotlab.service.data.Pin)">publishPin</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/SensorDataPublisher.html" title="interface in org.myrobotlab.service.interfaces">SensorDataPublisher</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="digitalReadPollingStart(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>digitalReadPollingStart</h4>
+<pre>public&nbsp;void&nbsp;digitalReadPollingStart(java.lang.Integer&nbsp;pin)</pre>
+</li>
+</ul>
+<a name="digitalReadPollingStop(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>digitalReadPollingStop</h4>
+<pre>public&nbsp;void&nbsp;digitalReadPollingStop(java.lang.Integer&nbsp;pin)</pre>
+</li>
+</ul>
+<a name="analogReadPollingStart(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>analogReadPollingStart</h4>
+<pre>public&nbsp;void&nbsp;analogReadPollingStart(java.lang.Integer&nbsp;pin)</pre>
+</li>
+</ul>
+<a name="analogReadPollingStop(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>analogReadPollingStop</h4>
+<pre>public&nbsp;void&nbsp;analogReadPollingStop(java.lang.Integer&nbsp;pin)</pre>
+</li>
+</ul>
+<a name="getDescription()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getDescription</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getDescription()</pre>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html#getDescription()">Service</a></code></strong></div>
+<div class="block">Short description of the service</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#getDescription()">getDescription</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#getDescription()">getDescription</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="stopService()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stopService</h4>
+<pre>public&nbsp;void&nbsp;stopService()</pre>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html#stopService()">Service</a></code></strong></div>
+<div class="block">Stops the service. Stops threads.</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#stopService()">stopService</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#stopService()">stopService</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="onByte(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>onByte</h4>
+<pre>public&nbsp;void&nbsp;onByte(java.lang.Integer&nbsp;newByte)</pre>
+<div class="block">callback for Serial service - local (not remote)
+ 
+ FIXME - design problem of calling the function with a single byte
+ repeatedly is slow - best to have an "event" then read as many as
+ possible
+ 
+ POLL vs Block ?</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html#onByte(java.lang.Integer)">onByte</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html" title="interface in org.myrobotlab.service.interfaces">SerialDataListener</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="formatMRLCommMsg(java.lang.String, byte[], int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>formatMRLCommMsg</h4>
+<pre>public&nbsp;java.lang.String&nbsp;formatMRLCommMsg(java.lang.String&nbsp;prefix,
+                                byte[]&nbsp;message,
+                                int&nbsp;size)</pre>
+</li>
+</ul>
+<a name="getAvrBasePath()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAvrBasePath</h4>
+<pre>public static&nbsp;java.lang.String&nbsp;getAvrBasePath()</pre>
+</li>
+</ul>
+<a name="getHardwarePath()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getHardwarePath</h4>
+<pre>public static&nbsp;java.lang.String&nbsp;getHardwarePath()</pre>
+</li>
+</ul>
+<a name="getHardwareFolder()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getHardwareFolder</h4>
+<pre>public static&nbsp;java.io.File&nbsp;getHardwareFolder()</pre>
+</li>
+</ul>
+<a name="getContentFile(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getContentFile</h4>
+<pre>public static&nbsp;java.io.File&nbsp;getContentFile(java.lang.String&nbsp;name)</pre>
+</li>
+</ul>
+<a name="getSerial()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSerial</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a>&nbsp;getSerial()</pre>
+</li>
+</ul>
+<a name="getPortNames()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPortNames</h4>
+<pre>public&nbsp;java.util.ArrayList&lt;java.lang.String&gt;&nbsp;getPortNames()</pre>
+<div class="block">getPortNames returns the current list of free serial ports on the machine</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="connect(java.lang.String, int, int, int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>connect</h4>
+<pre>public&nbsp;boolean&nbsp;connect(java.lang.String&nbsp;name,
+              int&nbsp;rate,
+              int&nbsp;databits,
+              int&nbsp;stopbits,
+              int&nbsp;parity)</pre>
+</li>
+</ul>
+<a name="setCompilingProgress(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setCompilingProgress</h4>
+<pre>public&nbsp;void&nbsp;setCompilingProgress(java.lang.Integer&nbsp;progress)</pre>
+</li>
+</ul>
+<a name="publishCompilingProgress(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>publishCompilingProgress</h4>
+<pre>public&nbsp;java.lang.Integer&nbsp;publishCompilingProgress(java.lang.Integer&nbsp;progress)</pre>
+</li>
+</ul>
+<a name="createBuildPath(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>createBuildPath</h4>
+<pre>public&nbsp;java.lang.String&nbsp;createBuildPath(java.lang.String&nbsp;sketchName)</pre>
+</li>
+</ul>
+<a name="getPinList()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPinList</h4>
+<pre>public&nbsp;java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a>&gt;&nbsp;getPinList()</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#getPinList()">ServoController</a></code></strong></div>
+<div class="block">a list of pins from the controller which might be applicable for
+ controlling a Servo</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#getPinList()">getPinList</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/SensorDataPublisher.html#getPinList()">getPinList</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/SensorDataPublisher.html" title="interface in org.myrobotlab.service.interfaces">SensorDataPublisher</a></code></dd>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#getPinList()">getPinList</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></code></dd>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#getPinList()">getPinList</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></code></dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="createPinList()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>createPinList</h4>
+<pre>public&nbsp;java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a>&gt;&nbsp;createPinList()</pre>
+</li>
+</ul>
+<a name="showError(java.lang.String, java.lang.String, java.lang.Exception)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>showError</h4>
+<pre>public static&nbsp;java.lang.String&nbsp;showError(java.lang.String&nbsp;error,
+                         java.lang.String&nbsp;desc,
+                         java.lang.Exception&nbsp;e)</pre>
+</li>
+</ul>
+<a name="compilerError(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>compilerError</h4>
+<pre>public&nbsp;java.lang.String&nbsp;compilerError(java.lang.String&nbsp;error)</pre>
+</li>
+</ul>
+<a name="publishMessage(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>publishMessage</h4>
+<pre>public&nbsp;java.lang.String&nbsp;publishMessage(java.lang.String&nbsp;msg)</pre>
+</li>
+</ul>
+<a name="connect()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>connect</h4>
+<pre>public&nbsp;boolean&nbsp;connect()</pre>
+</li>
+</ul>
+<a name="isValid()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isValid</h4>
+<pre>public&nbsp;boolean&nbsp;isValid()</pre>
+<div class="block">valid means - connected and MRLComm was found at the correct version</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="isConnected()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isConnected</h4>
+<pre>public&nbsp;boolean&nbsp;isConnected()</pre>
+</li>
+</ul>
+<a name="disconnect()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>disconnect</h4>
+<pre>public&nbsp;boolean&nbsp;disconnect()</pre>
+</li>
+</ul>
+<a name="motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorAttach</h4>
+<pre>public&nbsp;boolean&nbsp;motorAttach(java.lang.String&nbsp;motorName,
+                  java.lang.Integer&nbsp;pwrPin,
+                  java.lang.Integer&nbsp;dirPin)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer)">MotorController</a></code></strong></div>
+<div class="block">Remote attachment activation - used by services not in the same instance
+ to attach a Motor to a MotorController</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer)">motorAttach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorAttach</h4>
+<pre>public&nbsp;boolean&nbsp;motorAttach(java.lang.String&nbsp;motorName,
+                  java.lang.Integer&nbsp;pwrPin,
+                  java.lang.Integer&nbsp;dirPin,
+                  java.lang.Integer&nbsp;encoderPin)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)">motorAttach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="motorDetach(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorDetach</h4>
+<pre>public&nbsp;boolean&nbsp;motorDetach(java.lang.String&nbsp;motorName)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorDetach(java.lang.String)">MotorController</a></code></strong></div>
+<div class="block">MotorDetach - detach the Motor from a specific pin on the controller</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorDetach(java.lang.String)">motorDetach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
+<dt><span class="strong">Parameters:</span></dt><dd><code>motorName</code> - - name of the Motor</dd>
+<dt><span class="strong">Returns:</span></dt><dd>void</dd></dl>
+</li>
+</ul>
+<a name="motorMove(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorMove</h4>
+<pre>public&nbsp;void&nbsp;motorMove(java.lang.String&nbsp;name)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorMove(java.lang.String)">MotorController</a></code></strong></div>
+<div class="block">request for motor to move the motor can be queried for the new powerlevel
+ and the controller shall appropriately change power level and direction
+ if necessary</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorMove(java.lang.String)">motorMove</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="motorMoveTo(java.lang.String, java.lang.Float)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>motorMoveTo</h4>
+<pre>public&nbsp;void&nbsp;motorMoveTo(java.lang.String&nbsp;name,
+               java.lang.Float&nbsp;position)</pre>
+</li>
+</ul>
+<a name="digitalDebounceOn()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>digitalDebounceOn</h4>
+<pre>public&nbsp;void&nbsp;digitalDebounceOn()</pre>
+</li>
+</ul>
+<a name="digitalDebounceOn(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>digitalDebounceOn</h4>
+<pre>public&nbsp;void&nbsp;digitalDebounceOn(int&nbsp;delay)</pre>
+</li>
+</ul>
+<a name="digitalDebounceOff()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>digitalDebounceOff</h4>
+<pre>public&nbsp;void&nbsp;digitalDebounceOff()</pre>
+</li>
+</ul>
+<a name="softReset()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>softReset</h4>
+<pre>public&nbsp;void&nbsp;softReset()</pre>
+</li>
+</ul>
+<a name="setServoSpeed(java.lang.String, java.lang.Float)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setServoSpeed</h4>
+<pre>public&nbsp;void&nbsp;setServoSpeed(java.lang.String&nbsp;servoName,
+                 java.lang.Float&nbsp;speed)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#setServoSpeed(java.lang.String, java.lang.Float)">ServoController</a></code></strong></div>
+<div class="block">return the current pin this servo is attached to</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#setServoSpeed(java.lang.String, java.lang.Float)">setServoSpeed</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="releaseService()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>releaseService</h4>
+<pre>public&nbsp;void&nbsp;releaseService()</pre>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html#releaseService()">Service</a></code></strong></div>
+<div class="block">Releases resources, and unregisters service from the runtime</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#releaseService()">releaseService</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#releaseService()">releaseService</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="setDigitalTriggerOnly(java.lang.Boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setDigitalTriggerOnly</h4>
+<pre>public&nbsp;void&nbsp;setDigitalTriggerOnly(java.lang.Boolean&nbsp;b)</pre>
+</li>
+</ul>
+<a name="stepperStep(java.lang.String, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stepperStep</h4>
+<pre>public&nbsp;void&nbsp;stepperStep(java.lang.String&nbsp;name,
+               java.lang.Integer&nbsp;steps)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#stepperStep(java.lang.String, java.lang.Integer)">StepperController</a></code></strong></div>
+<div class="block">stepperStep - move stepper an increment</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#stepperStep(java.lang.String, java.lang.Integer)">stepperStep</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></code></dd>
+<dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - - name of the Stepper</dd></dl>
+</li>
+</ul>
+<a name="stepperStep(java.lang.String, java.lang.Integer, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stepperStep</h4>
+<pre>public&nbsp;void&nbsp;stepperStep(java.lang.String&nbsp;name,
+               java.lang.Integer&nbsp;steps,
+               java.lang.Integer&nbsp;style)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#stepperStep(java.lang.String, java.lang.Integer, java.lang.Integer)">StepperController</a></code></strong></div>
+<div class="block">stepperStep - move stepper an increment</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#stepperStep(java.lang.String, java.lang.Integer, java.lang.Integer)">stepperStep</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></code></dd>
+<dd><code>style</code> - - style of stepping STYLE_SINGLE STYLE_DOUBLE STYLE_INTERLEAVE STYLE_MICROSTEP</dd></dl>
+</li>
+</ul>
+<a name="setSpeed(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSpeed</h4>
+<pre>public&nbsp;void&nbsp;setSpeed(java.lang.Integer&nbsp;speed)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#setSpeed(java.lang.Integer)">setSpeed</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="stepperDetach(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stepperDetach</h4>
+<pre>public&nbsp;boolean&nbsp;stepperDetach(java.lang.String&nbsp;name)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#stepperDetach(java.lang.String)">StepperController</a></code></strong></div>
+<div class="block">StepperDetach - detach the Stepper from a specific pin on the controller</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#stepperDetach(java.lang.String)">stepperDetach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></code></dd>
+<dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - - name of the Stepper</dd>
+<dt><span class="strong">Returns:</span></dt><dd>void</dd></dl>
+</li>
+</ul>
+<a name="getStepperData(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getStepperData</h4>
+<pre>public&nbsp;java.lang.Object[]&nbsp;getStepperData(java.lang.String&nbsp;stepperName)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#getStepperData(java.lang.String)">StepperController</a></code></strong></div>
+<div class="block">method to return stepper information</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#getStepperData(java.lang.String)">getStepperData</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></code></dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="connect(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>connect</h4>
+<pre>public&nbsp;boolean&nbsp;connect(java.lang.String&nbsp;port)</pre>
+</li>
+</ul>
+<a name="setSampleRate(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSampleRate</h4>
+<pre>public&nbsp;int&nbsp;setSampleRate(int&nbsp;rate)</pre>
+<div class="block">this sets the sample rate of polling reads both digital and analog it is
+ a loop count modulus - default is 1 which seems to be a bit high of a
+ rate to be broadcasting across the internet to several webclients :)
+ valid ranges are 1 to 32,767 (for Arduino2's 2 byte signed integer)</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>rate</code> - </dd></dl>
+</li>
+</ul>
+<a name="servoStop(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>servoStop</h4>
+<pre>public&nbsp;void&nbsp;servoStop(java.lang.String&nbsp;servoName)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoStop(java.lang.String)">servoStop</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="pulseIn(int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>pulseIn</h4>
+<pre>public&nbsp;long&nbsp;pulseIn(int&nbsp;trigPin,
+           int&nbsp;echoPin)</pre>
+</li>
+</ul>
+<a name="pulseIn(int, int, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>pulseIn</h4>
+<pre>public&nbsp;long&nbsp;pulseIn(int&nbsp;trigPin,
+           int&nbsp;echoPin,
+           java.lang.Integer&nbsp;timeout)</pre>
+</li>
+</ul>
+<a name="pulseIn(int, int, int, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>pulseIn</h4>
+<pre>public&nbsp;long&nbsp;pulseIn(int&nbsp;trigPin,
+           int&nbsp;echoPin,
+           int&nbsp;timeout,
+           java.lang.String&nbsp;highLow)</pre>
+</li>
+</ul>
+<a name="pulseIn(int, int, int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>pulseIn</h4>
+<pre>public&nbsp;long&nbsp;pulseIn(int&nbsp;trigPin,
+           int&nbsp;echoPin,
+           int&nbsp;value,
+           int&nbsp;timeout)</pre>
+</li>
+</ul>
+<a name="pinMode(int, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>pinMode</h4>
+<pre>public&nbsp;void&nbsp;pinMode(int&nbsp;address,
+           java.lang.String&nbsp;mode)</pre>
+</li>
+</ul>
+<a name="sensorAttach(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensorAttach</h4>
+<pre>public&nbsp;int&nbsp;sensorAttach(java.lang.String&nbsp;sensorName)</pre>
+</li>
+</ul>
+<a name="sensorAttach(org.myrobotlab.service.UltrasonicSensor)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensorAttach</h4>
+<pre>public&nbsp;int&nbsp;sensorAttach(<a href="../../../org/myrobotlab/service/UltrasonicSensor.html" title="class in org.myrobotlab.service">UltrasonicSensor</a>&nbsp;sensor)</pre>
+</li>
+</ul>
+<a name="sensorPollingStart(java.lang.String, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensorPollingStart</h4>
+<pre>public&nbsp;boolean&nbsp;sensorPollingStart(java.lang.String&nbsp;name,
+                         int&nbsp;timeoutMS)</pre>
+</li>
+</ul>
+<a name="sensorPollingStop(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sensorPollingStop</h4>
+<pre>public&nbsp;boolean&nbsp;sensorPollingStop(java.lang.String&nbsp;name)</pre>
+</li>
+</ul>
+<a name="stepperAttach(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stepperAttach</h4>
+<pre>public&nbsp;boolean&nbsp;stepperAttach(java.lang.String&nbsp;stepperName)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#stepperAttach(java.lang.String)">stepperAttach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="stepperAttach(org.myrobotlab.service.interfaces.StepperControl)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stepperAttach</h4>
+<pre>public&nbsp;boolean&nbsp;stepperAttach(<a href="../../../org/myrobotlab/service/interfaces/StepperControl.html" title="interface in org.myrobotlab.service.interfaces">StepperControl</a>&nbsp;stepper)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#stepperAttach(org.myrobotlab.service.interfaces.StepperControl)">stepperAttach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="formatMRLCommMsg(java.lang.String, int[], int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>formatMRLCommMsg</h4>
+<pre>public&nbsp;java.lang.String&nbsp;formatMRLCommMsg(java.lang.String&nbsp;prefix,
+                                int[]&nbsp;message,
+                                int&nbsp;size)</pre>
+</li>
+</ul>
+<a name="stepperMove(java.lang.String, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stepperMove</h4>
+<pre>public&nbsp;void&nbsp;stepperMove(java.lang.String&nbsp;name,
+               java.lang.Integer&nbsp;newPos)</pre>
+</li>
+</ul>
+<a name="test(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>test</h4>
+<pre>public&nbsp;void&nbsp;test(java.lang.String&nbsp;port)
+          throws java.lang.Exception</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.lang.Exception</code></dd></dl>
+</li>
+</ul>
+<a name="setServoEventsEnabled(java.lang.String, boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setServoEventsEnabled</h4>
+<pre>public&nbsp;boolean&nbsp;setServoEventsEnabled(java.lang.String&nbsp;servoName,
+                            boolean&nbsp;enable)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#setServoEventsEnabled(java.lang.String, boolean)">setServoEventsEnabled</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="setLoadTimingEnabled(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setLoadTimingEnabled</h4>
+<pre>public&nbsp;boolean&nbsp;setLoadTimingEnabled(boolean&nbsp;enable)</pre>
+</li>
+</ul>
+<a name="stepperReset(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stepperReset</h4>
+<pre>public&nbsp;void&nbsp;stepperReset(java.lang.String&nbsp;stepperName)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html#stepperReset(java.lang.String)">stepperReset</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="stepperStop(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stepperStop</h4>
+<pre>public&nbsp;void&nbsp;stepperStop(java.lang.String&nbsp;name)</pre>
+</li>
+</ul>
+<a name="onCustomMsg(java.lang.Integer, java.lang.Integer, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>onCustomMsg</h4>
+<pre>public&nbsp;void&nbsp;onCustomMsg(java.lang.Integer&nbsp;ax,
+               java.lang.Integer&nbsp;ay,
+               java.lang.Integer&nbsp;az)</pre>
+</li>
+</ul>
+<a name="main(java.lang.String[])">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>main</h4>
+<pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;args)</pre>
+</li>
+</ul>
+<a name="addCustomMsgListener(org.myrobotlab.framework.Service)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addCustomMsgListener</h4>
+<pre>public&nbsp;void&nbsp;addCustomMsgListener(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;service)</pre>
+</li>
+</ul>
+<a name="servoWriteMicroseconds(java.lang.String, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>servoWriteMicroseconds</h4>
+<pre>public&nbsp;void&nbsp;servoWriteMicroseconds(java.lang.String&nbsp;name,
+                          java.lang.Integer&nbsp;ms)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html#servoWriteMicroseconds(java.lang.String, java.lang.Integer)">servoWriteMicroseconds</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="motorMoveTo(java.lang.String, double)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>motorMoveTo</h4>
+<pre>public&nbsp;void&nbsp;motorMoveTo(java.lang.String&nbsp;name,
+               double&nbsp;position)</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorMoveTo(java.lang.String, double)">MotorController</a></code></strong></div>
+<div class="block">moveTo - move the Motor a relative amount the amount can be negative or
+ positive an integer value is expected</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorMoveTo(java.lang.String, double)">motorMoveTo</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
+<dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - - name of the Motor</dd><dd><code>position</code> - - positive or negative absolute amount to move the Motor</dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/Arduino2.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/service/ArduinoBT.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/service/Arduino2.html" target="_top">Frames</a></li>
+<li><a href="Arduino2.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

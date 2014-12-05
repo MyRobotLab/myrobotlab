@@ -200,11 +200,11 @@ implements java.awt.event.ActionListener, javax.swing.event.ChangeListener</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/MotorGUI.html#incrementPosition(java.lang.Integer)">incrementPosition</a></strong>(java.lang.Integer&nbsp;pos)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/MotorGUI.html#init()">init</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/MotorGUI.html#init()">init</a></strong>()</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/MotorGUI.html#onChangePos(java.lang.Double)">onChangePos</a></strong>(java.lang.Double&nbsp;newPos)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
@@ -291,41 +291,6 @@ implements java.awt.event.ActionListener, javax.swing.event.ChangeListener</pre>
 <pre>public&nbsp;void&nbsp;setEnabled(boolean&nbsp;enable)</pre>
 </li>
 </ul>
-<a name="incrementPosition(java.lang.Integer)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>incrementPosition</h4>
-<pre>public&nbsp;void&nbsp;incrementPosition(java.lang.Integer&nbsp;pos)</pre>
-</li>
-</ul>
-<a name="attachGUI()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>attachGUI</h4>
-<pre>public&nbsp;void&nbsp;attachGUI()</pre>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/control/ServiceGUI.html#attachGUI()">attachGUI</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="detachGUI()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>detachGUI</h4>
-<pre>public&nbsp;void&nbsp;detachGUI()</pre>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/control/ServiceGUI.html#detachGUI()">detachGUI</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></code></dd>
-</dl>
-</li>
-</ul>
 <a name="getState(org.myrobotlab.service.Motor)">
 <!--   -->
 </a>
@@ -351,13 +316,48 @@ implements java.awt.event.ActionListener, javax.swing.event.ChangeListener</pre>
 <a name="stateChanged(javax.swing.event.ChangeEvent)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>stateChanged</h4>
 <pre>public&nbsp;void&nbsp;stateChanged(javax.swing.event.ChangeEvent&nbsp;ce)</pre>
 <dl>
 <dt><strong>Specified by:</strong></dt>
 <dd><code>stateChanged</code>&nbsp;in interface&nbsp;<code>javax.swing.event.ChangeListener</code></dd>
+</dl>
+</li>
+</ul>
+<a name="onChangePos(java.lang.Double)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>onChangePos</h4>
+<pre>public&nbsp;void&nbsp;onChangePos(java.lang.Double&nbsp;newPos)</pre>
+</li>
+</ul>
+<a name="attachGUI()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>attachGUI</h4>
+<pre>public&nbsp;void&nbsp;attachGUI()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/control/ServiceGUI.html#attachGUI()">attachGUI</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="detachGUI()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>detachGUI</h4>
+<pre>public&nbsp;void&nbsp;detachGUI()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/control/ServiceGUI.html#detachGUI()">detachGUI</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></code></dd>
 </dl>
 </li>
 </ul>

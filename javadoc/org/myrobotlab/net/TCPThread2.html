@@ -139,8 +139,16 @@ extends java.lang.Thread</pre>
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/net/Connection.html" title="class in org.myrobotlab.net">Connection</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/TCPThread2.html#data">data</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>static org.slf4j.Logger</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/TCPThread2.html#log">log</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.net.Socket</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/TCPThread2.html#socket">socket</a></strong></code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -164,8 +172,8 @@ extends java.lang.Thread</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../org/myrobotlab/net/TCPThread2.html#TCPThread2(org.myrobotlab.framework.Service, java.net.URI, java.net.Socket)">TCPThread2</a></strong>(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;service,
-          java.net.URI&nbsp;url,
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/net/TCPThread2.html#TCPThread2(org.myrobotlab.service.RemoteAdapter, java.net.URI, java.net.Socket)">TCPThread2</a></strong>(<a href="../../../org/myrobotlab/service/RemoteAdapter.html" title="class in org.myrobotlab.service">RemoteAdapter</a>&nbsp;service,
+          java.net.URI&nbsp;uri,
           java.net.Socket&nbsp;socket)</code>&nbsp;</td>
 </tr>
 </table>
@@ -229,10 +237,28 @@ extends java.lang.Thread</pre>
 <a name="log">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>log</h4>
 <pre>public static final&nbsp;org.slf4j.Logger log</pre>
+</li>
+</ul>
+<a name="socket">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>socket</h4>
+<pre>public&nbsp;java.net.Socket socket</pre>
+</li>
+</ul>
+<a name="data">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>data</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/net/Connection.html" title="class in org.myrobotlab.net">Connection</a> data</pre>
 </li>
 </ul>
 </li>
@@ -243,14 +269,14 @@ extends java.lang.Thread</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="TCPThread2(org.myrobotlab.framework.Service, java.net.URI, java.net.Socket)">
+<a name="TCPThread2(org.myrobotlab.service.RemoteAdapter, java.net.URI, java.net.Socket)">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>TCPThread2</h4>
-<pre>public&nbsp;TCPThread2(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;service,
-          java.net.URI&nbsp;url,
+<pre>public&nbsp;TCPThread2(<a href="../../../org/myrobotlab/service/RemoteAdapter.html" title="class in org.myrobotlab.service">RemoteAdapter</a>&nbsp;service,
+          java.net.URI&nbsp;uri,
           java.net.Socket&nbsp;socket)
            throws java.net.UnknownHostException,
                   java.io.IOException</pre>

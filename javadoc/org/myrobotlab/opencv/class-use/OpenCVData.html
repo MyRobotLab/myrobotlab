@@ -74,10 +74,14 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><a href="#org.myrobotlab.opencv">org.myrobotlab.opencv</a></td>
+<td class="colFirst"><a href="#org.myrobotlab.control">org.myrobotlab.control</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><a href="#org.myrobotlab.opencv">org.myrobotlab.opencv</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><a href="#org.myrobotlab.service">org.myrobotlab.service</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -86,6 +90,24 @@
 </li>
 <li class="blockList">
 <ul class="blockList">
+<li class="blockList"><a name="org.myrobotlab.control">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a> in <a href="../../../../org/myrobotlab/control/package-summary.html">org.myrobotlab.control</a></h3>
+<table border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../org/myrobotlab/control/package-summary.html">org.myrobotlab.control</a> with parameters of type <a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><span class="strong">OpenCVGUI.</span><code><strong><a href="../../../../org/myrobotlab/control/OpenCVGUI.html#onOpenCVData(org.myrobotlab.opencv.OpenCVData)">onOpenCVData</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;data)</code>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</li>
 <li class="blockList"><a name="org.myrobotlab.opencv">
 <!--   -->
 </a>
@@ -427,7 +449,10 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a></code></td>
-<td class="colLast"><span class="strong">OpenCV.</span><code><strong><a href="../../../../org/myrobotlab/service/OpenCV.html#publishOpenCVData(org.myrobotlab.opencv.OpenCVData)">publishOpenCVData</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;data)</code>&nbsp;</td>
+<td class="colLast"><span class="strong">OpenCV.</span><code><strong><a href="../../../../org/myrobotlab/service/OpenCV.html#publishOpenCVData(org.myrobotlab.opencv.OpenCVData)">publishOpenCVData</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;data)</code>
+<div class="block">the publishing point of all OpenCV goodies !
+ type conversion is held off until asked for - then its cached SMART ! :)</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a></code></td>
@@ -455,22 +480,21 @@
 <td class="colLast"><span class="strong">Cortex.</span><code><strong><a href="../../../../org/myrobotlab/service/Cortex.html#foundFace(org.myrobotlab.opencv.OpenCVData)">foundFace</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;faces)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">FindHuman.</span><code><strong><a href="../../../../org/myrobotlab/service/FindHuman.html#input(org.myrobotlab.opencv.OpenCVData)">input</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;opencvData)</code>&nbsp;</td>
+<td class="colFirst"><code><a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a></code></td>
+<td class="colLast"><span class="strong">OpenCV.</span><code><strong><a href="../../../../org/myrobotlab/service/OpenCV.html#publishOpenCVData(org.myrobotlab.opencv.OpenCVData)">publishOpenCVData</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;data)</code>
+<div class="block">the publishing point of all OpenCV goodies !
+ type conversion is held off until asked for - then its cached SMART ! :)</div>
+</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code><a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a></code></td>
-<td class="colLast"><span class="strong">OpenCV.</span><code><strong><a href="../../../../org/myrobotlab/service/OpenCV.html#publishOpenCVData(org.myrobotlab.opencv.OpenCVData)">publishOpenCVData</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;data)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a></code></td>
 <td class="colLast"><span class="strong">Tracking.</span><code><strong><a href="../../../../org/myrobotlab/service/Tracking.html#setOpenCVData(org.myrobotlab.opencv.OpenCVData)">setOpenCVData</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a></code></td>
 <td class="colLast"><span class="strong">Tracking.</span><code><strong><a href="../../../../org/myrobotlab/service/Tracking.html#toProcess(org.myrobotlab.opencv.OpenCVData)">toProcess</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">Tracking.</span><code><strong><a href="../../../../org/myrobotlab/service/Tracking.html#waitForObjects(org.myrobotlab.opencv.OpenCVData)">waitForObjects</a></strong>(<a href="../../../../org/myrobotlab/opencv/OpenCVData.html" title="class in org.myrobotlab.opencv">OpenCVData</a>&nbsp;data)</code>&nbsp;</td>
 </tr>

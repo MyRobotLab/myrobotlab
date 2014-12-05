@@ -35,7 +35,7 @@
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../org/myrobotlab/service/JFugue.html" title="class in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/myrobotlab/service/Joystick.InputPollingThread.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/myrobotlab/service/Joystick.Button.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/myrobotlab/service/Joystick.html" target="_top">Frames</a></li>
@@ -125,6 +125,10 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <th class="colLast" scope="col">Class and Description</th>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static class&nbsp;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.Button.html" title="class in org.myrobotlab.service">Joystick.Button</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.InputPollingThread.html" title="class in org.myrobotlab.service">Joystick.InputPollingThread</a></strong></code>&nbsp;</td>
 </tr>
@@ -196,16 +200,20 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#SW">SW</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#WEST">WEST</a></strong></code>&nbsp;</td>
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#TYPE_AXIS">TYPE_AXIS</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#Z_AXIS">Z_AXIS</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#TYPE_BUTTON">TYPE_BUTTON</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#Z_ROTATION">Z_ROTATION</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#TYPE_KEY">TYPE_KEY</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#WEST">WEST</a></strong></code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -247,69 +255,156 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#attach(org.myrobotlab.service.Servo, java.lang.String)">attach</a></strong>(<a href="../../../org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a>&nbsp;servo,
-      java.lang.String&nbsp;axis)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add0Listener(java.lang.String, java.lang.String)">add0Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button1(java.lang.Integer)">button1</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add10Listener(java.lang.String, java.lang.String)">add10Listener</a></strong>(java.lang.String&nbsp;service,
+             java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button10(java.lang.Integer)">button10</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add11Listener(java.lang.String, java.lang.String)">add11Listener</a></strong>(java.lang.String&nbsp;service,
+             java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button11(java.lang.Integer)">button11</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add12Listener(java.lang.String, java.lang.String)">add12Listener</a></strong>(java.lang.String&nbsp;service,
+             java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button12(java.lang.Integer)">button12</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add13Listener(java.lang.String, java.lang.String)">add13Listener</a></strong>(java.lang.String&nbsp;service,
+             java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button13(java.lang.Integer)">button13</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add1Listener(java.lang.String, java.lang.String)">add1Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button2(java.lang.Integer)">button2</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add2Listener(java.lang.String, java.lang.String)">add2Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button3(java.lang.Integer)">button3</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add3Listener(java.lang.String, java.lang.String)">add3Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button4(java.lang.Integer)">button4</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add4Listener(java.lang.String, java.lang.String)">add4Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button5(java.lang.Integer)">button5</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add5Listener(java.lang.String, java.lang.String)">add5Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button6(java.lang.Integer)">button6</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add6Listener(java.lang.String, java.lang.String)">add6Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button7(java.lang.Integer)">button7</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add7Listener(java.lang.String, java.lang.String)">add7Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button8(java.lang.Integer)">button8</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add8Listener(java.lang.String, java.lang.String)">add8Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#button9(java.lang.Integer)">button9</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#add9Listener(java.lang.String, java.lang.String)">add9Listener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addKeyListener(org.myrobotlab.framework.Service)">addKeyListener</a></strong>(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;service)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addKeyListener(java.lang.String)">addKeyListener</a></strong>(java.lang.String&nbsp;serviceName)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addPOVListener(java.lang.String, java.lang.String)">addPOVListener</a></strong>(java.lang.String&nbsp;service,
+              java.lang.String&nbsp;method)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addRXListener(org.myrobotlab.service.interfaces.ServoControl)">addRXListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addRXListener(java.lang.String, java.lang.String)">addRXListener</a></strong>(java.lang.String&nbsp;service,
+             java.lang.String&nbsp;method)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addRYListener(org.myrobotlab.service.interfaces.ServoControl)">addRYListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addRYListener(java.lang.String, java.lang.String)">addRYListener</a></strong>(java.lang.String&nbsp;service,
+             java.lang.String&nbsp;method)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addRZListener(org.myrobotlab.service.interfaces.ServoControl)">addRZListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addRZListener(java.lang.String, java.lang.String)">addRZListener</a></strong>(java.lang.String&nbsp;service,
+             java.lang.String&nbsp;method)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addXListener(org.myrobotlab.service.interfaces.ServoControl)">addXListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addXListener(java.lang.String, java.lang.String)">addXListener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addYListener(org.myrobotlab.service.interfaces.ServoControl)">addYListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addYListener(java.lang.String, java.lang.String)">addYListener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addZListener(org.myrobotlab.service.interfaces.ServoControl)">addZListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#addZListener(java.lang.String, java.lang.String)">addZListener</a></strong>(java.lang.String&nbsp;service,
+            java.lang.String&nbsp;method)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>boolean[]</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#getButtons()">getButtons</a></strong>()</code>&nbsp;</td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.HashMap&lt;java.lang.String,java.lang.Integer&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#getComponents()">getComponents</a></strong>()</code>
+<div class="block">Store the indices for the analog sticks axes (x,y) and (z,rz), POV hat,
+ and button components of the controller.</div>
+</td>
+</tr>
 <tr class="rowColor">
-<td class="colFirst"><code>java.util.TreeMap&lt;java.lang.String,java.lang.Integer&gt;</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#getControllerNames()">getControllerNames</a></strong>()</code>&nbsp;</td>
+<td class="colFirst"><code>java.util.HashMap&lt;java.lang.String,java.lang.Integer&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#getControllers()">getControllers</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
@@ -330,14 +425,6 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#getZRZStickDir()">getZRZStickDir</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#hatSwitch(java.lang.Integer)">hatSwitch</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.lang.Float</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#hatSwitchRaw(java.lang.Float)">hatSwitchRaw</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#isButtonPressed(int)">isButtonPressed</a></strong>(int&nbsp;pos)</code>&nbsp;</td>
 </tr>
@@ -355,23 +442,110 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#resetHatTransform()">resetHatTransform</a></strong>()</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#map(java.lang.String, float, float, float, float)">map</a></strong>(java.lang.String&nbsp;name,
+   float&nbsp;x0,
+   float&nbsp;x1,
+   float&nbsp;y0,
+   float&nbsp;y1)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#resetXAxisTransform()">resetXAxisTransform</a></strong>()</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#mapId(java.lang.String, java.lang.String)">mapId</a></strong>(java.lang.String&nbsp;from,
+     java.lang.String&nbsp;to)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#resetYAxisTransform()">resetYAxisTransform</a></strong>()</code>&nbsp;</td>
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish0(java.lang.Float)">publish0</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#resetZAxisTransform()">resetZAxisTransform</a></strong>()</code>&nbsp;</td>
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish1(java.lang.Float)">publish1</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#resetZRotTransform()">resetZRotTransform</a></strong>()</code>&nbsp;</td>
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish10(java.lang.Float)">publish10</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish11(java.lang.Float)">publish11</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish12(java.lang.Float)">publish12</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish13(java.lang.Float)">publish13</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish2(java.lang.Float)">publish2</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish3(java.lang.Float)">publish3</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish4(java.lang.Float)">publish4</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish5(java.lang.Float)">publish5</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish6(java.lang.Float)">publish6</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish7(java.lang.Float)">publish7</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish8(java.lang.Float)">publish8</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publish9(java.lang.Float)">publish9</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Joystick.Button.html" title="class in org.myrobotlab.service">Joystick.Button</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publishButton(org.myrobotlab.service.Joystick.Button)">publishButton</a></strong>(<a href="../../../org/myrobotlab/service/Joystick.Button.html" title="class in org.myrobotlab.service">Joystick.Button</a>&nbsp;button)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publishKey(java.lang.String)">publishKey</a></strong>(java.lang.String&nbsp;key)</code>
+<div class="block">internal publishing point - private ?</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publishPOV(java.lang.Float)">publishPOV</a></strong>(java.lang.Float&nbsp;pov)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publishRX(java.lang.Float)">publishRX</a></strong>(java.lang.Float&nbsp;z)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publishRY(java.lang.Float)">publishRY</a></strong>(java.lang.Float&nbsp;z)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publishRZ(java.lang.Float)">publishRZ</a></strong>(java.lang.Float&nbsp;rz)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publishX(java.lang.Float)">publishX</a></strong>(java.lang.Float&nbsp;x)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publishY(java.lang.Float)">publishY</a></strong>(java.lang.Float&nbsp;y)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.Float</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#publishZ(java.lang.Float)">publishZ</a></strong>(java.lang.Float&nbsp;z)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
@@ -383,72 +557,19 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#setHatTransform(java.lang.Integer, java.lang.Integer)">setHatTransform</a></strong>(java.lang.Integer&nbsp;multiplier,
-               java.lang.Integer&nbsp;offset)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#setRumbler(boolean)">setRumbler</a></strong>(boolean&nbsp;switchOn)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#setXAxisTransform(java.lang.Integer, java.lang.Integer)">setXAxisTransform</a></strong>(java.lang.Integer&nbsp;multiplier,
-                 java.lang.Integer&nbsp;offset)</code>&nbsp;</td>
-</tr>
 <tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#setYAxisTransform(java.lang.Integer, java.lang.Integer)">setYAxisTransform</a></strong>(java.lang.Integer&nbsp;multiplier,
-                 java.lang.Integer&nbsp;offset)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#setZAxisTransform(java.lang.Integer, java.lang.Integer)">setZAxisTransform</a></strong>(java.lang.Integer&nbsp;multiplier,
-                 java.lang.Integer&nbsp;offset)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#setZRotTransform(java.lang.Integer, java.lang.Integer)">setZRotTransform</a></strong>(java.lang.Integer&nbsp;multiplier,
-                java.lang.Integer&nbsp;offset)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#startPolling()">startPolling</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#stopPolling()">stopPolling</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#XAxis(java.lang.Integer)">XAxis</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
-</tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.Float</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#XAxisRaw(java.lang.Float)">XAxisRaw</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#YAxis(java.lang.Integer)">YAxis</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>java.lang.Float</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#YAxisRaw(java.lang.Float)">YAxisRaw</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#ZAxis(java.lang.Integer)">ZAxis</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>java.lang.Float</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#ZAxisRaw(java.lang.Float)">ZAxisRaw</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#ZRotation(java.lang.Integer)">ZRotation</a></strong>(java.lang.Integer&nbsp;value)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>java.lang.Float</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#ZRotationRaw(java.lang.Float)">ZRotationRaw</a></strong>(java.lang.Float&nbsp;value)</code>&nbsp;</td>
+<td class="colFirst"><code><a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Joystick.html#test()">test</a></strong>()</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -456,7 +577,7 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;org.myrobotlab.framework.<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></h3>
-<code><a href="../../../org/myrobotlab/framework/Service.html#addListener(org.myrobotlab.framework.MRLListener)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addLocalTask(int, java.lang.String, java.lang.Object[]...)">addLocalTask</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay()">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay(java.lang.Boolean)">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#broadcastState()">broadcastState</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(org.myrobotlab.framework.Index, java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#clearLastError()">clearLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#connect(java.lang.String, java.lang.String, java.lang.String, int)">connect</a>, <a href="../../../org/myrobotlab/framework/Service.html#connectionBroken(org.myrobotlab.service.data.IPAndPort)">connectionBroken</a>, <a href="../../../org/myrobotlab/framework/Service.html#copyShallowFrom(java.lang.Object, java.lang.Object)">copyShallowFrom</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object)">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object[])">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String, java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createRootReserved(java.lang.String)">createRootReserved</a>, <a href="../../../org/myrobotlab/framework/Service.html#display()">display</a>, <a href="../../../org/myrobotlab/framework/Service.html#echoHeartbeat(org.myrobotlab.net.Heartbeat)">echoHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.Exception)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String, java.lang.Object...)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#getCFGDir()">getCFGDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#getComm()">getComm</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDeclaredMethods()">getDeclaredMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDNA()">getDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHost()">getHost</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHostName(java.lang.String)">getHostName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInbox()">getInbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getIntanceName()">getIntanceName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLastError()">getLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.Class)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.String)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMessageSet()">getMessageSet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethods()">getMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethodToolTip(java.lang.String, java.lang.String, java.lang.Class[])">getMethodToolTip</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMsg()">getMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#getName()">getName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class, java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyList(java.lang.String)">getNotifyList</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyListKeySet()">getNotifyListKeySet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getOutbox()">getOutbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getPeerKey(java.lang.String)">getPeerKey</a>, <a href="../../../org/myrobotlab/framework/Service.html#getServiceResourceFile(java.lang.String)">getServiceResourceFile</a>, <a href="../../../org/myrobotlab/framework/Service.html#getSimpleName()">getSimpleName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThisThread()">getThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThrowableNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getThrowableNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getType()">getType</a>, <a href="../../../org/myrobotlab/framework/Service.html#getTypeName()">getTypeName</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasDisplay()">hasDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasPeers()">hasPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#help()">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#help(java.lang.String, java.lang.String)">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#in(org.myrobotlab.framework.Message)">in</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String, java.lang.Object...)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(org.myrobotlab.framework.Message)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String, java.lang.Object...)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invokeOn(java.lang.Object, java.lang.String, java.lang.Object...)">invokeOn</a>, <a href="../../../org/myrobotlab/framework/Service.html#isLocal()">isLocal</a>, <a href="../../../org/myrobotlab/framework/Service.html#isReady()">isReady</a>, <a href="../../../org/myrobotlab/framework/Service.html#isRunning()">isRunning</a>, <a href="../../../org/myrobotlab/framework/Service.html#load()">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#load(java.lang.Object, java.lang.String)">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#loadRecording(java.lang.String)">loadRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#logException(java.lang.Throwable)">logException</a>, <a href="../../../org/myrobotlab/framework/Service.html#logTimeEnable(java.lang.Boolean)">logTimeEnable</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNA(java.lang.String, java.lang.String)">mergePeerDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNAx(java.lang.String, java.lang.String)">mergePeerDNAx</a>, <a href="../../../org/myrobotlab/framework/Service.html#noConnection(org.myrobotlab.service.data.IPAndPort)">noConnection</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(org.myrobotlab.framework.Message)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(java.lang.String, java.lang.Object)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#preRoutingHook(org.myrobotlab.framework.Message)">preRoutingHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#proxySend(java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">proxySend</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishError(java.lang.String)">publishError</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishState()">publishState</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishStatus(java.lang.String, java.lang.String)">publishStatus</a>, <a href="../../../org/myrobotlab/framework/Service.html#purgeAllTasks()">purgeAllTasks</a>, <a href="../../../org/myrobotlab/framework/Service.html#releasePeers()">releasePeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#releaseService()">releaseService</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeAllListeners()">removeAllListeners</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(org.myrobotlab.framework.MRLListener)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#requiresSecurity()">requiresSecurity</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRootAs(java.lang.String, java.lang.String)">reserveRootAs</a>, <a href="../../../org/myrobotlab/framework/Service.html#run()">run</a>, <a href="../../../org/myrobotlab/framework/Service.html#save()">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.Object, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.String, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String, java.lang.Object...)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.net.URI, java.lang.String, java.lang.Object)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.Integer, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#setHost(java.net.URI)">setHost</a>, <a href="../../../org/myrobotlab/framework/Service.html#setLogLevel(java.lang.String)">setLogLevel</a>, <a href="../../../org/myrobotlab/framework/Service.html#setSecurityProvider(org.myrobotlab.service.interfaces.AuthorizationProvider)">setSecurityProvider</a>, <a href="../../../org/myrobotlab/framework/Service.html#setState(org.myrobotlab.framework.Service)">setState</a>, <a href="../../../org/myrobotlab/framework/Service.html#setThisThread(java.lang.Thread)">setThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#sleep(int)">sleep</a>, <a href="../../../org/myrobotlab/framework/Service.html#stackToString(java.lang.Throwable)">stackToString</a>, <a href="../../../org/myrobotlab/framework/Service.html#startHeartbeat()">startHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String, java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startRecording()">startRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startRecording(java.lang.String)">startRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startService()">startService</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopHeartbeat()">stopHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopRecording()">stopRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopService()">stopService</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#test()">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#test(java.lang.Object...)">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">unsubscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String)">warn</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String, java.lang.Object...)">warn</a></code></li>
+<code><a href="../../../org/myrobotlab/framework/Service.html#addListener(org.myrobotlab.framework.MRLListener)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addLocalTask(int, java.lang.String, java.lang.Object...)">addLocalTask</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay()">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay(java.lang.Boolean)">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#broadcastState()">broadcastState</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(org.myrobotlab.framework.Index, java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#clearLastError()">clearLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#close(java.io.Writer)">close</a>, <a href="../../../org/myrobotlab/framework/Service.html#connect(java.lang.String, java.lang.String, java.lang.String, int)">connect</a>, <a href="../../../org/myrobotlab/framework/Service.html#copyShallowFrom(java.lang.Object, java.lang.Object)">copyShallowFrom</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object)">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object[])">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String, java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createRootReserved(java.lang.String)">createRootReserved</a>, <a href="../../../org/myrobotlab/framework/Service.html#display()">display</a>, <a href="../../../org/myrobotlab/framework/Service.html#echoHeartbeat(org.myrobotlab.net.Heartbeat)">echoHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.Exception)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String, java.lang.Object...)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#getCFGDir()">getCFGDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#getComm()">getComm</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDeclaredMethods()">getDeclaredMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDNA()">getDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHostName(java.lang.String)">getHostName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInbox()">getInbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInstanceId()">getInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#getIntanceName()">getIntanceName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLastError()">getLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.Class)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.String)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMessageSet()">getMessageSet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethods()">getMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethodToolTip(java.lang.String, java.lang.String, java.lang.Class[])">getMethodToolTip</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMsg()">getMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#getName()">getName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class, java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyList(java.lang.String)">getNotifyList</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyListKeySet()">getNotifyListKeySet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getOutbox()">getOutbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getPeerKey(java.lang.String)">getPeerKey</a>, <a href="../../../org/myrobotlab/framework/Service.html#getServiceResourceFile(java.lang.String)">getServiceResourceFile</a>, <a href="../../../org/myrobotlab/framework/Service.html#getSimpleName()">getSimpleName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThisThread()">getThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThrowableNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getThrowableNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getType()">getType</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasDisplay()">hasDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasError()">hasError</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasPeers()">hasPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#help()">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#help(java.lang.String, java.lang.String)">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#in(org.myrobotlab.framework.Message)">in</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String, java.lang.Object...)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(org.myrobotlab.framework.Message)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String, java.lang.Object...)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invokeOn(java.lang.Object, java.lang.String, java.lang.Object...)">invokeOn</a>, <a href="../../../org/myrobotlab/framework/Service.html#isLocal()">isLocal</a>, <a href="../../../org/myrobotlab/framework/Service.html#isReady()">isReady</a>, <a href="../../../org/myrobotlab/framework/Service.html#isRunning()">isRunning</a>, <a href="../../../org/myrobotlab/framework/Service.html#load()">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#load(java.lang.Object, java.lang.String)">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#loadRecording(java.lang.String)">loadRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#logException(java.lang.Throwable)">logException</a>, <a href="../../../org/myrobotlab/framework/Service.html#logTimeEnable(java.lang.Boolean)">logTimeEnable</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNA(java.lang.String, java.lang.String)">mergePeerDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNAx(java.lang.String, java.lang.String)">mergePeerDNAx</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(org.myrobotlab.framework.Message)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(java.lang.String, java.lang.Object)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#preRoutingHook(org.myrobotlab.framework.Message)">preRoutingHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#proxySend(java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">proxySend</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishError(java.lang.String)">publishError</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishState()">publishState</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishStatus(java.lang.String, java.lang.String)">publishStatus</a>, <a href="../../../org/myrobotlab/framework/Service.html#purgeAllTasks()">purgeAllTasks</a>, <a href="../../../org/myrobotlab/framework/Service.html#releasePeers()">releasePeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#releaseService()">releaseService</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeAllListeners()">removeAllListeners</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(org.myrobotlab.framework.MRLListener)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#requiresSecurity()">requiresSecurity</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRootAs(java.lang.String, java.lang.String)">reserveRootAs</a>, <a href="../../../org/myrobotlab/framework/Service.html#run()">run</a>, <a href="../../../org/myrobotlab/framework/Service.html#save()">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.Object, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.String, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String, java.lang.Object...)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.net.URI, java.lang.String, java.lang.Object)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.Integer, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#setInstanceId(java.net.URI)">setInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#setLogLevel(java.lang.String)">setLogLevel</a>, <a href="../../../org/myrobotlab/framework/Service.html#setPrefix(java.lang.String)">setPrefix</a>, <a href="../../../org/myrobotlab/framework/Service.html#setSecurityProvider(org.myrobotlab.service.interfaces.AuthorizationProvider)">setSecurityProvider</a>, <a href="../../../org/myrobotlab/framework/Service.html#setState(org.myrobotlab.framework.Service)">setState</a>, <a href="../../../org/myrobotlab/framework/Service.html#setThisThread(java.lang.Thread)">setThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#sleep(int)">sleep</a>, <a href="../../../org/myrobotlab/framework/Service.html#stackToString(java.lang.Throwable)">stackToString</a>, <a href="../../../org/myrobotlab/framework/Service.html#startHeartbeat()">startHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#startMsgRecording(java.lang.String)">startMsgRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String, java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startRecording()">startRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startService()">startService</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopHeartbeat()">stopHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopMsgRecording()">stopMsgRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopService()">stopService</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">unsubscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String)">warn</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String, java.lang.Object...)">warn</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
@@ -479,6 +600,15 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <!--   -->
 </a>
 <h3>Field Detail</h3>
+<a name="log">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>log</h4>
+<pre>public static final&nbsp;org.slf4j.Logger log</pre>
+</li>
+</ul>
 <a name="NUM_BUTTONS">
 <!--   -->
 </a>
@@ -609,33 +739,34 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Joystick.SE">Constant Field Values</a></dd></dl>
 </li>
 </ul>
-<a name="log">
+<a name="TYPE_BUTTON">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>log</h4>
-<pre>public static final&nbsp;org.slf4j.Logger log</pre>
+<h4>TYPE_BUTTON</h4>
+<pre>public static final&nbsp;java.lang.String TYPE_BUTTON</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Joystick.TYPE_BUTTON">Constant Field Values</a></dd></dl>
 </li>
 </ul>
-<a name="Z_AXIS">
+<a name="TYPE_AXIS">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>Z_AXIS</h4>
-<pre>public static final&nbsp;java.lang.String Z_AXIS</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Joystick.Z_AXIS">Constant Field Values</a></dd></dl>
+<h4>TYPE_AXIS</h4>
+<pre>public static final&nbsp;java.lang.String TYPE_AXIS</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Joystick.TYPE_AXIS">Constant Field Values</a></dd></dl>
 </li>
 </ul>
-<a name="Z_ROTATION">
+<a name="TYPE_KEY">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>Z_ROTATION</h4>
-<pre>public static final&nbsp;java.lang.String Z_ROTATION</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Joystick.Z_ROTATION">Constant Field Values</a></dd></dl>
+<h4>TYPE_KEY</h4>
+<pre>public static final&nbsp;java.lang.String TYPE_KEY</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Joystick.TYPE_KEY">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 </li>
@@ -663,14 +794,27 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="attach(org.myrobotlab.service.Servo, java.lang.String)">
+<a name="map(java.lang.String, float, float, float, float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>attach</h4>
-<pre>public&nbsp;boolean&nbsp;attach(<a href="../../../org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a>&nbsp;servo,
-             java.lang.String&nbsp;axis)</pre>
+<h4>map</h4>
+<pre>public&nbsp;void&nbsp;map(java.lang.String&nbsp;name,
+       float&nbsp;x0,
+       float&nbsp;x1,
+       float&nbsp;y0,
+       float&nbsp;y1)</pre>
+</li>
+</ul>
+<a name="mapId(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>mapId</h4>
+<pre>public&nbsp;void&nbsp;mapId(java.lang.String&nbsp;from,
+         java.lang.String&nbsp;to)</pre>
 </li>
 </ul>
 <a name="setController(int)">
@@ -680,6 +824,17 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <li class="blockList">
 <h4>setController</h4>
 <pre>public&nbsp;boolean&nbsp;setController(int&nbsp;index)</pre>
+</li>
+</ul>
+<a name="getComponents()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getComponents</h4>
+<pre>public&nbsp;java.util.HashMap&lt;java.lang.String,java.lang.Integer&gt;&nbsp;getComponents()</pre>
+<div class="block">Store the indices for the analog sticks axes (x,y) and (z,rz), POV hat,
+ and button components of the controller.</div>
 </li>
 </ul>
 <a name="setController(java.lang.String)">
@@ -735,13 +890,13 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 </dl>
 </li>
 </ul>
-<a name="getControllerNames()">
+<a name="getControllers()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getControllerNames</h4>
-<pre>public&nbsp;java.util.TreeMap&lt;java.lang.String,java.lang.Integer&gt;&nbsp;getControllerNames()</pre>
+<h4>getControllers</h4>
+<pre>public&nbsp;java.util.HashMap&lt;java.lang.String,java.lang.Integer&gt;&nbsp;getControllers()</pre>
 </li>
 </ul>
 <a name="getXYStickDir()">
@@ -751,6 +906,7 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <li class="blockList">
 <h4>getXYStickDir</h4>
 <pre>public&nbsp;int&nbsp;getXYStickDir()</pre>
+<dl><dt><span class="strong">Returns:</span></dt><dd>- return the (x,y) analog stick compass direction</dd></dl>
 </li>
 </ul>
 <a name="getZRZStickDir()">
@@ -760,6 +916,7 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <li class="blockList">
 <h4>getZRZStickDir</h4>
 <pre>public&nbsp;int&nbsp;getZRZStickDir()</pre>
+<dl><dt><span class="strong">Returns:</span></dt><dd>the (z,rz) analog stick compass direction</dd></dl>
 </li>
 </ul>
 <a name="getHatDir()">
@@ -807,306 +964,510 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <pre>public&nbsp;boolean&nbsp;isRumblerOn()</pre>
 </li>
 </ul>
-<a name="XAxis(java.lang.Integer)">
+<a name="publishX(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>XAxis</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;XAxis(java.lang.Integer&nbsp;value)</pre>
+<h4>publishX</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publishX(java.lang.Float&nbsp;x)</pre>
 </li>
 </ul>
-<a name="XAxisRaw(java.lang.Float)">
+<a name="publishY(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>XAxisRaw</h4>
-<pre>public&nbsp;java.lang.Float&nbsp;XAxisRaw(java.lang.Float&nbsp;value)</pre>
+<h4>publishY</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publishY(java.lang.Float&nbsp;y)</pre>
 </li>
 </ul>
-<a name="YAxis(java.lang.Integer)">
+<a name="publishRX(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>YAxis</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;YAxis(java.lang.Integer&nbsp;value)</pre>
+<h4>publishRX</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publishRX(java.lang.Float&nbsp;z)</pre>
 </li>
 </ul>
-<a name="YAxisRaw(java.lang.Float)">
+<a name="addRXListener(java.lang.String, java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>YAxisRaw</h4>
-<pre>public&nbsp;java.lang.Float&nbsp;YAxisRaw(java.lang.Float&nbsp;value)</pre>
+<h4>addRXListener</h4>
+<pre>public&nbsp;void&nbsp;addRXListener(java.lang.String&nbsp;service,
+                 java.lang.String&nbsp;method)</pre>
 </li>
 </ul>
-<a name="ZAxis(java.lang.Integer)">
+<a name="addRXListener(org.myrobotlab.service.interfaces.ServoControl)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>ZAxis</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;ZAxis(java.lang.Integer&nbsp;value)</pre>
+<h4>addRXListener</h4>
+<pre>public&nbsp;void&nbsp;addRXListener(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</pre>
 </li>
 </ul>
-<a name="ZAxisRaw(java.lang.Float)">
+<a name="publishRY(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>ZAxisRaw</h4>
-<pre>public&nbsp;java.lang.Float&nbsp;ZAxisRaw(java.lang.Float&nbsp;value)</pre>
+<h4>publishRY</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publishRY(java.lang.Float&nbsp;z)</pre>
 </li>
 </ul>
-<a name="ZRotation(java.lang.Integer)">
+<a name="addRYListener(java.lang.String, java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>ZRotation</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;ZRotation(java.lang.Integer&nbsp;value)</pre>
+<h4>addRYListener</h4>
+<pre>public&nbsp;void&nbsp;addRYListener(java.lang.String&nbsp;service,
+                 java.lang.String&nbsp;method)</pre>
 </li>
 </ul>
-<a name="ZRotationRaw(java.lang.Float)">
+<a name="addRYListener(org.myrobotlab.service.interfaces.ServoControl)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>ZRotationRaw</h4>
-<pre>public&nbsp;java.lang.Float&nbsp;ZRotationRaw(java.lang.Float&nbsp;value)</pre>
+<h4>addRYListener</h4>
+<pre>public&nbsp;void&nbsp;addRYListener(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</pre>
 </li>
 </ul>
-<a name="hatSwitch(java.lang.Integer)">
+<a name="publishZ(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>hatSwitch</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;hatSwitch(java.lang.Integer&nbsp;value)</pre>
+<h4>publishZ</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publishZ(java.lang.Float&nbsp;z)</pre>
 </li>
 </ul>
-<a name="hatSwitchRaw(java.lang.Float)">
+<a name="publishRZ(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>hatSwitchRaw</h4>
-<pre>public&nbsp;java.lang.Float&nbsp;hatSwitchRaw(java.lang.Float&nbsp;value)</pre>
+<h4>publishRZ</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publishRZ(java.lang.Float&nbsp;rz)</pre>
 </li>
 </ul>
-<a name="button1(java.lang.Integer)">
+<a name="publishPOV(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button1</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button1(java.lang.Integer&nbsp;value)</pre>
+<h4>publishPOV</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publishPOV(java.lang.Float&nbsp;pov)</pre>
 </li>
 </ul>
-<a name="button2(java.lang.Integer)">
+<a name="publish0(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button2</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button2(java.lang.Integer&nbsp;value)</pre>
+<h4>publish0</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish0(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button3(java.lang.Integer)">
+<a name="publish1(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button3</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button3(java.lang.Integer&nbsp;value)</pre>
+<h4>publish1</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish1(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button4(java.lang.Integer)">
+<a name="publish2(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button4</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button4(java.lang.Integer&nbsp;value)</pre>
+<h4>publish2</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish2(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button5(java.lang.Integer)">
+<a name="publish3(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button5</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button5(java.lang.Integer&nbsp;value)</pre>
+<h4>publish3</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish3(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button6(java.lang.Integer)">
+<a name="publish4(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button6</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button6(java.lang.Integer&nbsp;value)</pre>
+<h4>publish4</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish4(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button7(java.lang.Integer)">
+<a name="publish5(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button7</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button7(java.lang.Integer&nbsp;value)</pre>
+<h4>publish5</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish5(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button8(java.lang.Integer)">
+<a name="publish6(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button8</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button8(java.lang.Integer&nbsp;value)</pre>
+<h4>publish6</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish6(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button9(java.lang.Integer)">
+<a name="publish7(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button9</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button9(java.lang.Integer&nbsp;value)</pre>
+<h4>publish7</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish7(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button10(java.lang.Integer)">
+<a name="publish8(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button10</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button10(java.lang.Integer&nbsp;value)</pre>
+<h4>publish8</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish8(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button11(java.lang.Integer)">
+<a name="publish9(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button11</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button11(java.lang.Integer&nbsp;value)</pre>
+<h4>publish9</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish9(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button12(java.lang.Integer)">
+<a name="publish10(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button12</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button12(java.lang.Integer&nbsp;value)</pre>
+<h4>publish10</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish10(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="button13(java.lang.Integer)">
+<a name="publish11(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>button13</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;button13(java.lang.Integer&nbsp;value)</pre>
+<h4>publish11</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish11(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="setHatTransform(java.lang.Integer, java.lang.Integer)">
+<a name="publish12(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setHatTransform</h4>
-<pre>public&nbsp;void&nbsp;setHatTransform(java.lang.Integer&nbsp;multiplier,
-                   java.lang.Integer&nbsp;offset)</pre>
+<h4>publish12</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish12(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="resetHatTransform()">
+<a name="publish13(java.lang.Float)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>resetHatTransform</h4>
-<pre>public&nbsp;void&nbsp;resetHatTransform()</pre>
+<h4>publish13</h4>
+<pre>public&nbsp;java.lang.Float&nbsp;publish13(java.lang.Float&nbsp;value)</pre>
 </li>
 </ul>
-<a name="setXAxisTransform(java.lang.Integer, java.lang.Integer)">
+<a name="addXListener(org.myrobotlab.service.interfaces.ServoControl)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setXAxisTransform</h4>
-<pre>public&nbsp;void&nbsp;setXAxisTransform(java.lang.Integer&nbsp;multiplier,
-                     java.lang.Integer&nbsp;offset)</pre>
+<h4>addXListener</h4>
+<pre>public&nbsp;void&nbsp;addXListener(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</pre>
 </li>
 </ul>
-<a name="resetXAxisTransform()">
+<a name="addXListener(java.lang.String, java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>resetXAxisTransform</h4>
-<pre>public&nbsp;void&nbsp;resetXAxisTransform()</pre>
+<h4>addXListener</h4>
+<pre>public&nbsp;void&nbsp;addXListener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
 </li>
 </ul>
-<a name="setYAxisTransform(java.lang.Integer, java.lang.Integer)">
+<a name="addYListener(org.myrobotlab.service.interfaces.ServoControl)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setYAxisTransform</h4>
-<pre>public&nbsp;void&nbsp;setYAxisTransform(java.lang.Integer&nbsp;multiplier,
-                     java.lang.Integer&nbsp;offset)</pre>
+<h4>addYListener</h4>
+<pre>public&nbsp;void&nbsp;addYListener(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</pre>
 </li>
 </ul>
-<a name="resetYAxisTransform()">
+<a name="addYListener(java.lang.String, java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>resetYAxisTransform</h4>
-<pre>public&nbsp;void&nbsp;resetYAxisTransform()</pre>
+<h4>addYListener</h4>
+<pre>public&nbsp;void&nbsp;addYListener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
 </li>
 </ul>
-<a name="setZAxisTransform(java.lang.Integer, java.lang.Integer)">
+<a name="addZListener(org.myrobotlab.service.interfaces.ServoControl)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setZAxisTransform</h4>
-<pre>public&nbsp;void&nbsp;setZAxisTransform(java.lang.Integer&nbsp;multiplier,
-                     java.lang.Integer&nbsp;offset)</pre>
+<h4>addZListener</h4>
+<pre>public&nbsp;void&nbsp;addZListener(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</pre>
 </li>
 </ul>
-<a name="resetZAxisTransform()">
+<a name="addZListener(java.lang.String, java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>resetZAxisTransform</h4>
-<pre>public&nbsp;void&nbsp;resetZAxisTransform()</pre>
+<h4>addZListener</h4>
+<pre>public&nbsp;void&nbsp;addZListener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
 </li>
 </ul>
-<a name="setZRotTransform(java.lang.Integer, java.lang.Integer)">
+<a name="addRZListener(org.myrobotlab.service.interfaces.ServoControl)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setZRotTransform</h4>
-<pre>public&nbsp;void&nbsp;setZRotTransform(java.lang.Integer&nbsp;multiplier,
-                    java.lang.Integer&nbsp;offset)</pre>
+<h4>addRZListener</h4>
+<pre>public&nbsp;void&nbsp;addRZListener(<a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a>&nbsp;sc)</pre>
 </li>
 </ul>
-<a name="resetZRotTransform()">
+<a name="addRZListener(java.lang.String, java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>resetZRotTransform</h4>
-<pre>public&nbsp;void&nbsp;resetZRotTransform()</pre>
+<h4>addRZListener</h4>
+<pre>public&nbsp;void&nbsp;addRZListener(java.lang.String&nbsp;service,
+                 java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="addPOVListener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addPOVListener</h4>
+<pre>public&nbsp;void&nbsp;addPOVListener(java.lang.String&nbsp;service,
+                  java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add0Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add0Listener</h4>
+<pre>public&nbsp;void&nbsp;add0Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add1Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add1Listener</h4>
+<pre>public&nbsp;void&nbsp;add1Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add2Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add2Listener</h4>
+<pre>public&nbsp;void&nbsp;add2Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add3Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add3Listener</h4>
+<pre>public&nbsp;void&nbsp;add3Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add4Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add4Listener</h4>
+<pre>public&nbsp;void&nbsp;add4Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add5Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add5Listener</h4>
+<pre>public&nbsp;void&nbsp;add5Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add6Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add6Listener</h4>
+<pre>public&nbsp;void&nbsp;add6Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add7Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add7Listener</h4>
+<pre>public&nbsp;void&nbsp;add7Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add8Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add8Listener</h4>
+<pre>public&nbsp;void&nbsp;add8Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add9Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add9Listener</h4>
+<pre>public&nbsp;void&nbsp;add9Listener(java.lang.String&nbsp;service,
+                java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add10Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add10Listener</h4>
+<pre>public&nbsp;void&nbsp;add10Listener(java.lang.String&nbsp;service,
+                 java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add11Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add11Listener</h4>
+<pre>public&nbsp;void&nbsp;add11Listener(java.lang.String&nbsp;service,
+                 java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add12Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add12Listener</h4>
+<pre>public&nbsp;void&nbsp;add12Listener(java.lang.String&nbsp;service,
+                 java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="add13Listener(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add13Listener</h4>
+<pre>public&nbsp;void&nbsp;add13Listener(java.lang.String&nbsp;service,
+                 java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="addKeyListener(org.myrobotlab.framework.Service)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addKeyListener</h4>
+<pre>public&nbsp;void&nbsp;addKeyListener(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;service)</pre>
+</li>
+</ul>
+<a name="addKeyListener(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addKeyListener</h4>
+<pre>public&nbsp;void&nbsp;addKeyListener(java.lang.String&nbsp;serviceName)</pre>
+</li>
+</ul>
+<a name="publishKey(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>publishKey</h4>
+<pre>public&nbsp;java.lang.String&nbsp;publishKey(java.lang.String&nbsp;key)</pre>
+<div class="block">internal publishing point - private ?</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>key</code> - </dd></dl>
+</li>
+</ul>
+<a name="test()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>test</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a>&nbsp;test()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#test()">test</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#test()">test</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="publishButton(org.myrobotlab.service.Joystick.Button)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>publishButton</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/service/Joystick.Button.html" title="class in org.myrobotlab.service">Joystick.Button</a>&nbsp;publishButton(<a href="../../../org/myrobotlab/service/Joystick.Button.html" title="class in org.myrobotlab.service">Joystick.Button</a>&nbsp;button)</pre>
 </li>
 </ul>
 <a name="main(java.lang.String[])">
@@ -1145,7 +1506,7 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../org/myrobotlab/service/JFugue.html" title="class in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/myrobotlab/service/Joystick.InputPollingThread.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/myrobotlab/service/Joystick.Button.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/myrobotlab/service/Joystick.html" target="_top">Frames</a></li>

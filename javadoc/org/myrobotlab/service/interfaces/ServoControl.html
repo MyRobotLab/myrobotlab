@@ -118,8 +118,8 @@
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#attach(java.lang.String, int)">attach</a></strong>(java.lang.String&nbsp;controller,
-      int&nbsp;pin)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#attach(java.lang.String, java.lang.Integer)">attach</a></strong>(java.lang.String&nbsp;controller,
+      java.lang.Integer&nbsp;pin)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
@@ -147,21 +147,28 @@
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#moveStep(java.lang.Float)">moveStep</a></strong>(java.lang.Float&nbsp;offset)</code>
+<div class="block">The command accepts a parameter of offset which can be of the range -1.0
+ to 1.0.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#moveTo(java.lang.Integer)">moveTo</a></strong>(java.lang.Integer&nbsp;newPos)</code>
 <div class="block">moveTo moves the servo to a specific location.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#setController(org.myrobotlab.service.interfaces.ServoController)">setController</a></strong>(<a href="../../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a>&nbsp;controller)</code>
 <div class="block">Attach a servo controller to the servo.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#setController(java.lang.String)">setController</a></strong>(java.lang.String&nbsp;controller)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#setMinMax(int, int)">setMinMax</a></strong>(int&nbsp;min,
          int&nbsp;max)</code>
@@ -169,18 +176,18 @@
  if servos should not move thier full range</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#setPin(int)">setPin</a></strong>(int&nbsp;pin)</code>
 <div class="block">memory of the controllers pin - so that it can be re-attached
  after a detach</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#setSpeed(java.lang.Float)">setSpeed</a></strong>(java.lang.Float&nbsp;speed)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoControl.html#stop()">stop</a></strong>()</code>
 <div class="block">stops the servo if currently in motion
@@ -234,6 +241,21 @@
 <li class="blockList">
 <h4>setController</h4>
 <pre>boolean&nbsp;setController(java.lang.String&nbsp;controller)</pre>
+</li>
+</ul>
+<a name="moveStep(java.lang.Float)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>moveStep</h4>
+<pre>void&nbsp;moveStep(java.lang.Float&nbsp;offset)</pre>
+<div class="block">The command accepts a parameter of offset which can be of the range -1.0
+ to 1.0. Negative values are in one direction and positive values are in
+ the opposite value. For example -1.0 would be maximum offset in a counter
+ clock-wise direction and 0.9 would be 90% offset in a clockwise
+ direction. 0.0 of course would be stop</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>offset</code> - - new offset</dd></dl>
 </li>
 </ul>
 <a name="moveTo(java.lang.Integer)">
@@ -335,14 +357,14 @@
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
-<a name="attach(java.lang.String, int)">
+<a name="attach(java.lang.String, java.lang.Integer)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>attach</h4>
 <pre>boolean&nbsp;attach(java.lang.String&nbsp;controller,
-             int&nbsp;pin)</pre>
+             java.lang.Integer&nbsp;pin)</pre>
 </li>
 </ul>
 <a name="detach()">

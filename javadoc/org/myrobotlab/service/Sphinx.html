@@ -34,7 +34,7 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/myrobotlab/service/Speech.FrontendType.html" title="enum in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/service/SpeechRecognitionGoogle.html" title="class in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
 <li><a href="../../../org/myrobotlab/service/Sphinx.Command.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -99,13 +99,13 @@
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>java.io.Serializable, java.lang.Runnable, <a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a>, <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.html" title="interface in org.myrobotlab.service.interfaces">SpeechRecognizer</a></dd>
+<dd>java.io.Serializable, java.lang.Runnable, <a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a>, <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.html" title="interface in org.myrobotlab.service.interfaces">SpeechRecognizer</a>, <a href="../../../org/myrobotlab/service/interfaces/TextPublisher.html" title="interface in org.myrobotlab.service.interfaces">TextPublisher</a></dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="strong">Sphinx</span>
 extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>
-implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.html" title="interface in org.myrobotlab.service.interfaces">SpeechRecognizer</a></pre>
+implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.html" title="interface in org.myrobotlab.service.interfaces">SpeechRecognizer</a>, <a href="../../../org/myrobotlab/service/interfaces/TextPublisher.html" title="interface in org.myrobotlab.service.interfaces">TextPublisher</a></pre>
 <dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../serialized-form.html#org.myrobotlab.service.Sphinx">Serialized Form</a></dd></dl>
 </li>
 </ul>
@@ -128,8 +128,8 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 <tr class="altColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.Command.html" title="class in org.myrobotlab.service">Sphinx.Command</a></strong></code>
-<div class="block">Commands must be created "before" startListening
- startListening will create a grammar file from the data</div>
+<div class="block">Commands must be created "before" startListening startListening will
+ create a grammar file from the data</div>
 </td>
 </tr>
 </table>
@@ -211,26 +211,30 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#addVoiceRecognitionListener(org.myrobotlab.framework.Service)">addVoiceRecognitionListener</a></strong>(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;s)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#addTextListener(org.myrobotlab.service.interfaces.TextListener)">addTextListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/TextListener.html" title="interface in org.myrobotlab.service.interfaces">TextListener</a>&nbsp;service)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#addVoiceRecognitionListener(org.myrobotlab.framework.Service)">addVoiceRecognitionListener</a></strong>(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;s)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#attach(org.myrobotlab.service.Speech)">attach</a></strong>(<a href="../../../org/myrobotlab/service/Speech.html" title="class in org.myrobotlab.service">Speech</a>&nbsp;mouth)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#buildGrammar(java.lang.StringBuffer, java.util.HashMap)">buildGrammar</a></strong>(java.lang.StringBuffer&nbsp;sb,
             java.util.HashMap&lt;java.lang.String,<a href="../../../org/myrobotlab/service/Sphinx.Command.html" title="class in org.myrobotlab.service">Sphinx.Command</a>&gt;&nbsp;cmds)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#clearLock()">clearLock</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#confirmed(java.lang.String)">confirmed</a></strong>(java.lang.String&nbsp;txt)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#createGrammar(java.lang.String)">createGrammar</a></strong>(java.lang.String&nbsp;grammar)</code>
 <div class="block">createGrammar must be called before the Service starts if a new grammar
@@ -240,17 +244,17 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
  ear = Runtime.create("ear", "Sphinx")</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#getDescription()">getDescription</a></strong>()</code>
 <div class="block">Short description of the service</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#isRecording()">isRecording</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#isSpeaking(java.lang.Boolean)">isSpeaking</a></strong>(java.lang.Boolean&nbsp;talking)</code>
 <div class="block">an inbound port for Speaking Services (TTS) - which suppress listening
@@ -258,17 +262,17 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
  loop can occur</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#listeningEvent()">listeningEvent</a></strong>()</code>
 <div class="block">Event is sent when the listening Service is actually listening.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#lockOutAllGrammarExcept(java.lang.String)">lockOutAllGrammarExcept</a></strong>(java.lang.String&nbsp;lockPhrase)</code>
-<div class="block">FIXME - the trunk is broke - the configuration is horrible
- find a way to make this work, despite Sphinx's chaos !
+<div class="block">FIXME - the trunk is broke - the configuration is horrible find a way to
+ make this work, despite Sphinx's chaos !
  
  function to swap grammars to allow sphinx a little more capability
  regarding "new words"
@@ -276,15 +280,15 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
  check http://cmusphinx.sourceforge.net/wiki/sphinx4:swappinggrammars</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#negated(java.lang.String)">negated</a></strong>(java.lang.String&nbsp;txt)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#pauseListening()">pauseListening</a></strong>()</code>
 <div class="block">method to suppress recognition listening events This is important when
@@ -294,52 +298,52 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
  recreate the speech processor - so its not as heavy handed</div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#publishRecognized(java.lang.String)">publishRecognized</a></strong>(java.lang.String&nbsp;recognizedText)</code>&nbsp;</td>
-</tr>
 <tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#publishText(java.lang.String)">publishText</a></strong>(java.lang.String&nbsp;recognizedText)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#recognized(java.lang.String)">recognized</a></strong>(java.lang.String&nbsp;word)</code>
 <div class="block">The main output for this service.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#requestConfirmation(java.lang.String)">requestConfirmation</a></strong>(java.lang.String&nbsp;txt)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#resumeListening()">resumeListening</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#startListening()">startListening</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#startListening(java.lang.String)">startListening</a></strong>(java.lang.String&nbsp;grammar)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#startRecording()">startRecording</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#startService()">startService</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#stopListening()">stopListening</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#stopRecording()">stopRecording</a></strong>()</code>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#stopMsgRecording()">stopMsgRecording</a></strong>()</code>
 <div class="block">stopRecording - it does "work", however, the speech recognition part
  seems to degrade when startRecording is called.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sphinx.html#stopService()">stopService</a></strong>()</code>
 <div class="block">Stops the service.</div>
@@ -351,7 +355,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;org.myrobotlab.framework.<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></h3>
-<code><a href="../../../org/myrobotlab/framework/Service.html#addListener(org.myrobotlab.framework.MRLListener)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addLocalTask(int, java.lang.String, java.lang.Object[]...)">addLocalTask</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay()">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay(java.lang.Boolean)">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#broadcastState()">broadcastState</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(org.myrobotlab.framework.Index, java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#clearLastError()">clearLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#connect(java.lang.String, java.lang.String, java.lang.String, int)">connect</a>, <a href="../../../org/myrobotlab/framework/Service.html#connectionBroken(org.myrobotlab.service.data.IPAndPort)">connectionBroken</a>, <a href="../../../org/myrobotlab/framework/Service.html#copyShallowFrom(java.lang.Object, java.lang.Object)">copyShallowFrom</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object)">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object[])">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String, java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createRootReserved(java.lang.String)">createRootReserved</a>, <a href="../../../org/myrobotlab/framework/Service.html#display()">display</a>, <a href="../../../org/myrobotlab/framework/Service.html#echoHeartbeat(org.myrobotlab.net.Heartbeat)">echoHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.Exception)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String, java.lang.Object...)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#getCFGDir()">getCFGDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#getComm()">getComm</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDeclaredMethods()">getDeclaredMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDNA()">getDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHost()">getHost</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHostName(java.lang.String)">getHostName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInbox()">getInbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getIntanceName()">getIntanceName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLastError()">getLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.Class)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.String)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMessageSet()">getMessageSet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethods()">getMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethodToolTip(java.lang.String, java.lang.String, java.lang.Class[])">getMethodToolTip</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMsg()">getMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#getName()">getName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class, java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyList(java.lang.String)">getNotifyList</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyListKeySet()">getNotifyListKeySet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getOutbox()">getOutbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getPeerKey(java.lang.String)">getPeerKey</a>, <a href="../../../org/myrobotlab/framework/Service.html#getServiceResourceFile(java.lang.String)">getServiceResourceFile</a>, <a href="../../../org/myrobotlab/framework/Service.html#getSimpleName()">getSimpleName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThisThread()">getThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThrowableNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getThrowableNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getType()">getType</a>, <a href="../../../org/myrobotlab/framework/Service.html#getTypeName()">getTypeName</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasDisplay()">hasDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasPeers()">hasPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#help()">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#help(java.lang.String, java.lang.String)">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#in(org.myrobotlab.framework.Message)">in</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String, java.lang.Object...)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(org.myrobotlab.framework.Message)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String, java.lang.Object...)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invokeOn(java.lang.Object, java.lang.String, java.lang.Object...)">invokeOn</a>, <a href="../../../org/myrobotlab/framework/Service.html#isLocal()">isLocal</a>, <a href="../../../org/myrobotlab/framework/Service.html#isReady()">isReady</a>, <a href="../../../org/myrobotlab/framework/Service.html#isRunning()">isRunning</a>, <a href="../../../org/myrobotlab/framework/Service.html#load()">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#load(java.lang.Object, java.lang.String)">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#loadRecording(java.lang.String)">loadRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#logException(java.lang.Throwable)">logException</a>, <a href="../../../org/myrobotlab/framework/Service.html#logTimeEnable(java.lang.Boolean)">logTimeEnable</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNA(java.lang.String, java.lang.String)">mergePeerDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNAx(java.lang.String, java.lang.String)">mergePeerDNAx</a>, <a href="../../../org/myrobotlab/framework/Service.html#noConnection(org.myrobotlab.service.data.IPAndPort)">noConnection</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(org.myrobotlab.framework.Message)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(java.lang.String, java.lang.Object)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#preRoutingHook(org.myrobotlab.framework.Message)">preRoutingHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#proxySend(java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">proxySend</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishError(java.lang.String)">publishError</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishState()">publishState</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishStatus(java.lang.String, java.lang.String)">publishStatus</a>, <a href="../../../org/myrobotlab/framework/Service.html#purgeAllTasks()">purgeAllTasks</a>, <a href="../../../org/myrobotlab/framework/Service.html#releasePeers()">releasePeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#releaseService()">releaseService</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeAllListeners()">removeAllListeners</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(org.myrobotlab.framework.MRLListener)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#requiresSecurity()">requiresSecurity</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRootAs(java.lang.String, java.lang.String)">reserveRootAs</a>, <a href="../../../org/myrobotlab/framework/Service.html#run()">run</a>, <a href="../../../org/myrobotlab/framework/Service.html#save()">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.Object, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.String, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String, java.lang.Object...)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.net.URI, java.lang.String, java.lang.Object)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.Integer, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#setHost(java.net.URI)">setHost</a>, <a href="../../../org/myrobotlab/framework/Service.html#setLogLevel(java.lang.String)">setLogLevel</a>, <a href="../../../org/myrobotlab/framework/Service.html#setSecurityProvider(org.myrobotlab.service.interfaces.AuthorizationProvider)">setSecurityProvider</a>, <a href="../../../org/myrobotlab/framework/Service.html#setState(org.myrobotlab.framework.Service)">setState</a>, <a href="../../../org/myrobotlab/framework/Service.html#setThisThread(java.lang.Thread)">setThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#sleep(int)">sleep</a>, <a href="../../../org/myrobotlab/framework/Service.html#stackToString(java.lang.Throwable)">stackToString</a>, <a href="../../../org/myrobotlab/framework/Service.html#startHeartbeat()">startHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String, java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startRecording(java.lang.String)">startRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopHeartbeat()">stopHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#test()">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#test(java.lang.Object...)">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">unsubscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String)">warn</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String, java.lang.Object...)">warn</a></code></li>
+<code><a href="../../../org/myrobotlab/framework/Service.html#addListener(org.myrobotlab.framework.MRLListener)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addLocalTask(int, java.lang.String, java.lang.Object...)">addLocalTask</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay()">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay(java.lang.Boolean)">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#broadcastState()">broadcastState</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(org.myrobotlab.framework.Index, java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#clearLastError()">clearLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#close(java.io.Writer)">close</a>, <a href="../../../org/myrobotlab/framework/Service.html#connect(java.lang.String, java.lang.String, java.lang.String, int)">connect</a>, <a href="../../../org/myrobotlab/framework/Service.html#copyShallowFrom(java.lang.Object, java.lang.Object)">copyShallowFrom</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object)">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object[])">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String, java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createRootReserved(java.lang.String)">createRootReserved</a>, <a href="../../../org/myrobotlab/framework/Service.html#display()">display</a>, <a href="../../../org/myrobotlab/framework/Service.html#echoHeartbeat(org.myrobotlab.net.Heartbeat)">echoHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.Exception)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String, java.lang.Object...)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#getCFGDir()">getCFGDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#getComm()">getComm</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDeclaredMethods()">getDeclaredMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDNA()">getDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHostName(java.lang.String)">getHostName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInbox()">getInbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInstanceId()">getInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#getIntanceName()">getIntanceName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLastError()">getLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.Class)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.String)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMessageSet()">getMessageSet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethods()">getMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethodToolTip(java.lang.String, java.lang.String, java.lang.Class[])">getMethodToolTip</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMsg()">getMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#getName()">getName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class, java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyList(java.lang.String)">getNotifyList</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyListKeySet()">getNotifyListKeySet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getOutbox()">getOutbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getPeerKey(java.lang.String)">getPeerKey</a>, <a href="../../../org/myrobotlab/framework/Service.html#getServiceResourceFile(java.lang.String)">getServiceResourceFile</a>, <a href="../../../org/myrobotlab/framework/Service.html#getSimpleName()">getSimpleName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThisThread()">getThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThrowableNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getThrowableNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getType()">getType</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasDisplay()">hasDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasError()">hasError</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasPeers()">hasPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#help()">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#help(java.lang.String, java.lang.String)">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#in(org.myrobotlab.framework.Message)">in</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String, java.lang.Object...)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(org.myrobotlab.framework.Message)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String, java.lang.Object...)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invokeOn(java.lang.Object, java.lang.String, java.lang.Object...)">invokeOn</a>, <a href="../../../org/myrobotlab/framework/Service.html#isLocal()">isLocal</a>, <a href="../../../org/myrobotlab/framework/Service.html#isReady()">isReady</a>, <a href="../../../org/myrobotlab/framework/Service.html#isRunning()">isRunning</a>, <a href="../../../org/myrobotlab/framework/Service.html#load()">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#load(java.lang.Object, java.lang.String)">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#loadRecording(java.lang.String)">loadRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#logException(java.lang.Throwable)">logException</a>, <a href="../../../org/myrobotlab/framework/Service.html#logTimeEnable(java.lang.Boolean)">logTimeEnable</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNA(java.lang.String, java.lang.String)">mergePeerDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNAx(java.lang.String, java.lang.String)">mergePeerDNAx</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(org.myrobotlab.framework.Message)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(java.lang.String, java.lang.Object)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#preRoutingHook(org.myrobotlab.framework.Message)">preRoutingHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#proxySend(java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">proxySend</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishError(java.lang.String)">publishError</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishState()">publishState</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishStatus(java.lang.String, java.lang.String)">publishStatus</a>, <a href="../../../org/myrobotlab/framework/Service.html#purgeAllTasks()">purgeAllTasks</a>, <a href="../../../org/myrobotlab/framework/Service.html#releasePeers()">releasePeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#releaseService()">releaseService</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeAllListeners()">removeAllListeners</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(org.myrobotlab.framework.MRLListener)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#requiresSecurity()">requiresSecurity</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRootAs(java.lang.String, java.lang.String)">reserveRootAs</a>, <a href="../../../org/myrobotlab/framework/Service.html#run()">run</a>, <a href="../../../org/myrobotlab/framework/Service.html#save()">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.Object, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.String, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String, java.lang.Object...)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.net.URI, java.lang.String, java.lang.Object)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.Integer, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#setInstanceId(java.net.URI)">setInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#setLogLevel(java.lang.String)">setLogLevel</a>, <a href="../../../org/myrobotlab/framework/Service.html#setPrefix(java.lang.String)">setPrefix</a>, <a href="../../../org/myrobotlab/framework/Service.html#setSecurityProvider(org.myrobotlab.service.interfaces.AuthorizationProvider)">setSecurityProvider</a>, <a href="../../../org/myrobotlab/framework/Service.html#setState(org.myrobotlab.framework.Service)">setState</a>, <a href="../../../org/myrobotlab/framework/Service.html#setThisThread(java.lang.Thread)">setThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#sleep(int)">sleep</a>, <a href="../../../org/myrobotlab/framework/Service.html#stackToString(java.lang.Throwable)">stackToString</a>, <a href="../../../org/myrobotlab/framework/Service.html#startHeartbeat()">startHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#startMsgRecording(java.lang.String)">startMsgRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String, java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopHeartbeat()">stopHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#test()">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">unsubscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String)">warn</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String, java.lang.Object...)">warn</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
@@ -359,6 +363,13 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
 <code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.service.interfaces.TextPublisher">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;org.myrobotlab.service.interfaces.<a href="../../../org/myrobotlab/service/interfaces/TextPublisher.html" title="interface in org.myrobotlab.service.interfaces">TextPublisher</a></h3>
+<code><a href="../../../org/myrobotlab/service/interfaces/TextPublisher.html#getName()">getName</a></code></li>
 </ul>
 </li>
 </ul>
@@ -454,19 +465,19 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 <dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
-<a name="stopRecording()">
+<a name="stopMsgRecording()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>stopRecording</h4>
-<pre>public&nbsp;void&nbsp;stopRecording()</pre>
+<h4>stopMsgRecording</h4>
+<pre>public&nbsp;void&nbsp;stopMsgRecording()</pre>
 <div class="block">stopRecording - it does "work", however, the speech recognition part
  seems to degrade when startRecording is called. I have worked around this
  by not stopping the recording, but by not processing what was recognized</div>
 <dl>
 <dt><strong>Overrides:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/framework/Service.html#stopRecording()">stopRecording</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#stopMsgRecording()">stopMsgRecording</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -531,8 +542,8 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 <li class="blockList">
 <h4>lockOutAllGrammarExcept</h4>
 <pre>public&nbsp;void&nbsp;lockOutAllGrammarExcept(java.lang.String&nbsp;lockPhrase)</pre>
-<div class="block">FIXME - the trunk is broke - the configuration is horrible
- find a way to make this work, despite Sphinx's chaos !
+<div class="block">FIXME - the trunk is broke - the configuration is horrible find a way to
+ make this work, despite Sphinx's chaos !
  
  function to swap grammars to allow sphinx a little more capability
  regarding "new words"
@@ -552,19 +563,6 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 <li class="blockList">
 <h4>clearLock</h4>
 <pre>public&nbsp;void&nbsp;clearLock()</pre>
-</li>
-</ul>
-<a name="publishRecognized(java.lang.String)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>publishRecognized</h4>
-<pre>public&nbsp;void&nbsp;publishRecognized(java.lang.String&nbsp;recognizedText)</pre>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.html#publishRecognized(java.lang.String)">publishRecognized</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.html" title="interface in org.myrobotlab.service.interfaces">SpeechRecognizer</a></code></dd>
-</dl>
 </li>
 </ul>
 <a name="stopListening()">
@@ -692,6 +690,15 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 <pre>public&nbsp;void&nbsp;addVoiceRecognitionListener(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;s)</pre>
 </li>
 </ul>
+<a name="addTextListener(org.myrobotlab.service.interfaces.TextListener)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addTextListener</h4>
+<pre>public&nbsp;void&nbsp;addTextListener(<a href="../../../org/myrobotlab/service/interfaces/TextListener.html" title="interface in org.myrobotlab.service.interfaces">TextListener</a>&nbsp;service)</pre>
+</li>
+</ul>
 <a name="addBypass(java.lang.String...)">
 <!--   -->
 </a>
@@ -761,10 +768,23 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 <a name="main(java.lang.String[])">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>main</h4>
 <pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;args)</pre>
+</li>
+</ul>
+<a name="publishText(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>publishText</h4>
+<pre>public&nbsp;java.lang.String&nbsp;publishText(java.lang.String&nbsp;recognizedText)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/TextPublisher.html#publishText(java.lang.String)">publishText</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/TextPublisher.html" title="interface in org.myrobotlab.service.interfaces">TextPublisher</a></code></dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -793,7 +813,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/SpeechRecognizer.
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/myrobotlab/service/Speech.FrontendType.html" title="enum in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/service/SpeechRecognitionGoogle.html" title="class in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
 <li><a href="../../../org/myrobotlab/service/Sphinx.Command.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">

@@ -1,0 +1,1043 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>ServoOrchestrator</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="ServoOrchestrator";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/ServoOrchestrator.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/service/Servo.Sweeper.html" title="class in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/service/ServoOrchestrator.ClockThread.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/service/ServoOrchestrator.html" target="_top">Frames</a></li>
+<li><a href="ServoOrchestrator.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li><a href="#nested_class_summary">Nested</a>&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">org.myrobotlab.service</div>
+<h2 title="Class ServoOrchestrator" class="title">Class ServoOrchestrator</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">org.myrobotlab.framework.Service</a></li>
+<li>
+<ul class="inheritance">
+<li>org.myrobotlab.service.ServoOrchestrator</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>java.io.Serializable, java.lang.Runnable, <a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public class <span class="strong">ServoOrchestrator</span>
+extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></pre>
+<dl><dt><span class="strong">Author:</span></dt>
+  <dd>LunDev (github), Ma. Vo. (MyRobotlab)</dd>
+<dt><span class="strong">See Also:</span></dt><dd><a href="../../../serialized-form.html#org.myrobotlab.service.ServoOrchestrator">Serialized Form</a></dd></dl>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="nested_class_summary">
+<!--   -->
+</a>
+<h3>Nested Class Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Nested Class Summary table, listing nested classes, and an explanation">
+<caption><span>Nested Classes</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.ClockThread.html" title="class in org.myrobotlab.service">ServoOrchestrator.ClockThread</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.SettingsItemHolder.html" title="class in org.myrobotlab.service">ServoOrchestrator.SettingsItemHolder</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#interval">interval</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#isClockRunning">isClockRunning</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static org.slf4j.Logger</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#log">log</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/ServoOrchestrator.ClockThread.html" title="class in org.myrobotlab.service">ServoOrchestrator.ClockThread</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#myClock">myClock</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="fields_inherited_from_class_org.myrobotlab.framework.Service">
+<!--   -->
+</a>
+<h3>Fields inherited from class&nbsp;org.myrobotlab.framework.<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></h3>
+<code><a href="../../../org/myrobotlab/framework/Service.html#cfgDir">cfgDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#dna">dna</a>, <a href="../../../org/myrobotlab/framework/Service.html#lastErrorMsg">lastErrorMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#MESSAGE_RECORDING_FORMAT_BINARY">MESSAGE_RECORDING_FORMAT_BINARY</a>, <a href="../../../org/myrobotlab/framework/Service.html#MESSAGE_RECORDING_FORMAT_XML">MESSAGE_RECORDING_FORMAT_XML</a></code></li>
+</ul>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#ServoOrchestrator(java.lang.String)">ServoOrchestrator</a></strong>(java.lang.String&nbsp;n)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottommiddlerightbottom_button_1()">bottommiddlerightbottom_button_1</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottommiddlerightbottom_button_2()">bottommiddlerightbottom_button_2</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottommiddlerightbottom_button_3()">bottommiddlerightbottom_button_3</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottommiddlerightbottom_button_4()">bottommiddlerightbottom_button_4</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottommiddlerightbottom_button_5()">bottommiddlerightbottom_button_5</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottommiddlerightbottom_button_6()">bottommiddlerightbottom_button_6</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottommiddlerightbottom_button_7()">bottommiddlerightbottom_button_7</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottommiddlerightbottom_button_8()">bottommiddlerightbottom_button_8</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottommiddlerighttop_update_button()">bottommiddlerighttop_update_button</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#bottomright_click_checkbox()">bottomright_click_checkbox</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#externalcall_loadsettings(int)">externalcall_loadsettings</a></strong>(int&nbsp;pos)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#externalcall_servopanelchangeinfo(int, int)">externalcall_servopanelchangeinfo</a></strong>(int&nbsp;x,
+                                 int&nbsp;y)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#externalcall_servopanelsettostartpos(int, int, boolean)">externalcall_servopanelsettostartpos</a></strong>(int&nbsp;x,
+                                    int&nbsp;y,
+                                    boolean&nbsp;withgoal)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#getDescription()">getDescription</a></strong>()</code>
+<div class="block">Short description of the service</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#middleleft_channeladd_button()">middleleft_channeladd_button</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#middleleft_channelremove_button()">middleleft_channelremove_button</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#middleleft_timeunitadd_button()">middleleft_timeunitadd_button</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#middleleft_timeunitremove_button()">middleleft_timeunitremove_button</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#middleright_arduino_list()">middleright_arduino_list</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#middleright_attach_button()">middleright_attach_button</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#middleright_update_button()">middleright_update_button</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_checktime()">play_checktime</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_go_b1()">play_go_b1</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_go_ba()">play_go_ba</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_go_f1()">play_go_f1</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_go_fa()">play_go_fa</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_go_start()">play_go_start</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_go_stop()">play_go_stop</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_play_1_1()">play_play_1_1</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_play_2_1()">play_play_2_1</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_play_3_1()">play_play_3_1</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_playblock(int, org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_panel)">play_playblock</a></strong>(int&nbsp;channel,
+              <a href="../../../org/myrobotlab/control/ServoOrchestratorGUI_middlemiddle_panel.html" title="class in org.myrobotlab.control">ServoOrchestratorGUI_middlemiddle_panel</a>&nbsp;block)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_playclick()">play_playclick</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_playreally(int)">play_playreally</a></strong>(int&nbsp;pos)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_searchblocks(int)">play_searchblocks</a></strong>(int&nbsp;pos)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_updatepanels(int)">play_updatepanels</a></strong>(int&nbsp;pos)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#play_updatetime(boolean, boolean, boolean)">play_updatetime</a></strong>(boolean&nbsp;t1,
+               boolean&nbsp;t2,
+               boolean&nbsp;t3)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#refreshsize()">refreshsize</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#set_middleright_arduino_list_items()">set_middleright_arduino_list_items</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#setmiddlemiddlesize()">setmiddlemiddlesize</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#setsoguireference(org.myrobotlab.control.ServoOrchestratorGUI)">setsoguireference</a></strong>(<a href="../../../org/myrobotlab/control/ServoOrchestratorGUI.html" title="class in org.myrobotlab.control">ServoOrchestratorGUI</a>&nbsp;so_ref)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#startClock()">startClock</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#startService()">startService</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#stopClock()">stopClock</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#stopService()">stopService</a></strong>()</code>
+<div class="block">Stops the service.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#top_addservo_button()">top_addservo_button</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#top_load_button()">top_load_button</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ServoOrchestrator.html#top_save_button()">top_save_button</a></strong>()</code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.framework.Service">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;org.myrobotlab.framework.<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></h3>
+<code><a href="../../../org/myrobotlab/framework/Service.html#addListener(org.myrobotlab.framework.MRLListener)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addLocalTask(int, java.lang.String, java.lang.Object...)">addLocalTask</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay()">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay(java.lang.Boolean)">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#broadcastState()">broadcastState</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(org.myrobotlab.framework.Index, java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#clearLastError()">clearLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#close(java.io.Writer)">close</a>, <a href="../../../org/myrobotlab/framework/Service.html#connect(java.lang.String, java.lang.String, java.lang.String, int)">connect</a>, <a href="../../../org/myrobotlab/framework/Service.html#copyShallowFrom(java.lang.Object, java.lang.Object)">copyShallowFrom</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object)">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object[])">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String, java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createRootReserved(java.lang.String)">createRootReserved</a>, <a href="../../../org/myrobotlab/framework/Service.html#display()">display</a>, <a href="../../../org/myrobotlab/framework/Service.html#echoHeartbeat(org.myrobotlab.net.Heartbeat)">echoHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.Exception)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String, java.lang.Object...)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#getCFGDir()">getCFGDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#getComm()">getComm</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDeclaredMethods()">getDeclaredMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDNA()">getDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHostName(java.lang.String)">getHostName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInbox()">getInbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInstanceId()">getInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#getIntanceName()">getIntanceName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLastError()">getLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.Class)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.String)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMessageSet()">getMessageSet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethods()">getMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethodToolTip(java.lang.String, java.lang.String, java.lang.Class[])">getMethodToolTip</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMsg()">getMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#getName()">getName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class, java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyList(java.lang.String)">getNotifyList</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyListKeySet()">getNotifyListKeySet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getOutbox()">getOutbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getPeerKey(java.lang.String)">getPeerKey</a>, <a href="../../../org/myrobotlab/framework/Service.html#getServiceResourceFile(java.lang.String)">getServiceResourceFile</a>, <a href="../../../org/myrobotlab/framework/Service.html#getSimpleName()">getSimpleName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThisThread()">getThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThrowableNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getThrowableNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getType()">getType</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasDisplay()">hasDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasError()">hasError</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasPeers()">hasPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#help()">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#help(java.lang.String, java.lang.String)">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#in(org.myrobotlab.framework.Message)">in</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String, java.lang.Object...)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(org.myrobotlab.framework.Message)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String, java.lang.Object...)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invokeOn(java.lang.Object, java.lang.String, java.lang.Object...)">invokeOn</a>, <a href="../../../org/myrobotlab/framework/Service.html#isLocal()">isLocal</a>, <a href="../../../org/myrobotlab/framework/Service.html#isReady()">isReady</a>, <a href="../../../org/myrobotlab/framework/Service.html#isRunning()">isRunning</a>, <a href="../../../org/myrobotlab/framework/Service.html#load()">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#load(java.lang.Object, java.lang.String)">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#loadRecording(java.lang.String)">loadRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#logException(java.lang.Throwable)">logException</a>, <a href="../../../org/myrobotlab/framework/Service.html#logTimeEnable(java.lang.Boolean)">logTimeEnable</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNA(java.lang.String, java.lang.String)">mergePeerDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNAx(java.lang.String, java.lang.String)">mergePeerDNAx</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(org.myrobotlab.framework.Message)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(java.lang.String, java.lang.Object)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#preRoutingHook(org.myrobotlab.framework.Message)">preRoutingHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#proxySend(java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">proxySend</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishError(java.lang.String)">publishError</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishState()">publishState</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishStatus(java.lang.String, java.lang.String)">publishStatus</a>, <a href="../../../org/myrobotlab/framework/Service.html#purgeAllTasks()">purgeAllTasks</a>, <a href="../../../org/myrobotlab/framework/Service.html#releasePeers()">releasePeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#releaseService()">releaseService</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeAllListeners()">removeAllListeners</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(org.myrobotlab.framework.MRLListener)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#requiresSecurity()">requiresSecurity</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRootAs(java.lang.String, java.lang.String)">reserveRootAs</a>, <a href="../../../org/myrobotlab/framework/Service.html#run()">run</a>, <a href="../../../org/myrobotlab/framework/Service.html#save()">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.Object, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.String, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String, java.lang.Object...)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.net.URI, java.lang.String, java.lang.Object)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.Integer, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#setInstanceId(java.net.URI)">setInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#setLogLevel(java.lang.String)">setLogLevel</a>, <a href="../../../org/myrobotlab/framework/Service.html#setPrefix(java.lang.String)">setPrefix</a>, <a href="../../../org/myrobotlab/framework/Service.html#setSecurityProvider(org.myrobotlab.service.interfaces.AuthorizationProvider)">setSecurityProvider</a>, <a href="../../../org/myrobotlab/framework/Service.html#setState(org.myrobotlab.framework.Service)">setState</a>, <a href="../../../org/myrobotlab/framework/Service.html#setThisThread(java.lang.Thread)">setThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#sleep(int)">sleep</a>, <a href="../../../org/myrobotlab/framework/Service.html#stackToString(java.lang.Throwable)">stackToString</a>, <a href="../../../org/myrobotlab/framework/Service.html#startHeartbeat()">startHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#startMsgRecording(java.lang.String)">startMsgRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String, java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startRecording()">startRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopHeartbeat()">stopHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopMsgRecording()">stopMsgRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#test()">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">unsubscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String)">warn</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String, java.lang.Object...)">warn</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field_detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a name="log">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>log</h4>
+<pre>public static final&nbsp;org.slf4j.Logger log</pre>
+</li>
+</ul>
+<a name="isClockRunning">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isClockRunning</h4>
+<pre>public&nbsp;boolean isClockRunning</pre>
+</li>
+</ul>
+<a name="interval">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>interval</h4>
+<pre>public&nbsp;int interval</pre>
+</li>
+</ul>
+<a name="myClock">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>myClock</h4>
+<pre>public transient&nbsp;<a href="../../../org/myrobotlab/service/ServoOrchestrator.ClockThread.html" title="class in org.myrobotlab.service">ServoOrchestrator.ClockThread</a> myClock</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="ServoOrchestrator(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>ServoOrchestrator</h4>
+<pre>public&nbsp;ServoOrchestrator(java.lang.String&nbsp;n)</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="startService()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startService</h4>
+<pre>public&nbsp;void&nbsp;startService()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#startService()">startService</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#startService()">startService</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="stopService()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stopService</h4>
+<pre>public&nbsp;void&nbsp;stopService()</pre>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html#stopService()">Service</a></code></strong></div>
+<div class="block">Stops the service. Stops threads.</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#stopService()">stopService</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#stopService()">stopService</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="getDescription()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getDescription</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getDescription()</pre>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html#getDescription()">Service</a></code></strong></div>
+<div class="block">Short description of the service</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#getDescription()">getDescription</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#getDescription()">getDescription</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="setsoguireference(org.myrobotlab.control.ServoOrchestratorGUI)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setsoguireference</h4>
+<pre>public&nbsp;void&nbsp;setsoguireference(<a href="../../../org/myrobotlab/control/ServoOrchestratorGUI.html" title="class in org.myrobotlab.control">ServoOrchestratorGUI</a>&nbsp;so_ref)</pre>
+</li>
+</ul>
+<a name="setmiddlemiddlesize()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setmiddlemiddlesize</h4>
+<pre>public&nbsp;void&nbsp;setmiddlemiddlesize()</pre>
+</li>
+</ul>
+<a name="set_middleright_arduino_list_items()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>set_middleright_arduino_list_items</h4>
+<pre>public&nbsp;void&nbsp;set_middleright_arduino_list_items()</pre>
+</li>
+</ul>
+<a name="top_save_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>top_save_button</h4>
+<pre>public&nbsp;void&nbsp;top_save_button()</pre>
+</li>
+</ul>
+<a name="top_load_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>top_load_button</h4>
+<pre>public&nbsp;void&nbsp;top_load_button()</pre>
+</li>
+</ul>
+<a name="top_addservo_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>top_addservo_button</h4>
+<pre>public&nbsp;void&nbsp;top_addservo_button()</pre>
+</li>
+</ul>
+<a name="middleright_update_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>middleright_update_button</h4>
+<pre>public&nbsp;void&nbsp;middleright_update_button()</pre>
+</li>
+</ul>
+<a name="middleright_attach_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>middleright_attach_button</h4>
+<pre>public&nbsp;void&nbsp;middleright_attach_button()</pre>
+</li>
+</ul>
+<a name="middleleft_timeunitadd_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>middleleft_timeunitadd_button</h4>
+<pre>public&nbsp;void&nbsp;middleleft_timeunitadd_button()</pre>
+</li>
+</ul>
+<a name="middleleft_timeunitremove_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>middleleft_timeunitremove_button</h4>
+<pre>public&nbsp;void&nbsp;middleleft_timeunitremove_button()</pre>
+</li>
+</ul>
+<a name="middleleft_channeladd_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>middleleft_channeladd_button</h4>
+<pre>public&nbsp;void&nbsp;middleleft_channeladd_button()</pre>
+</li>
+</ul>
+<a name="middleleft_channelremove_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>middleleft_channelremove_button</h4>
+<pre>public&nbsp;void&nbsp;middleleft_channelremove_button()</pre>
+</li>
+</ul>
+<a name="bottommiddlerighttop_update_button()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottommiddlerighttop_update_button</h4>
+<pre>public&nbsp;void&nbsp;bottommiddlerighttop_update_button()</pre>
+</li>
+</ul>
+<a name="bottommiddlerightbottom_button_1()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottommiddlerightbottom_button_1</h4>
+<pre>public&nbsp;void&nbsp;bottommiddlerightbottom_button_1()</pre>
+</li>
+</ul>
+<a name="bottommiddlerightbottom_button_2()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottommiddlerightbottom_button_2</h4>
+<pre>public&nbsp;void&nbsp;bottommiddlerightbottom_button_2()</pre>
+</li>
+</ul>
+<a name="bottommiddlerightbottom_button_3()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottommiddlerightbottom_button_3</h4>
+<pre>public&nbsp;void&nbsp;bottommiddlerightbottom_button_3()</pre>
+</li>
+</ul>
+<a name="bottommiddlerightbottom_button_4()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottommiddlerightbottom_button_4</h4>
+<pre>public&nbsp;void&nbsp;bottommiddlerightbottom_button_4()</pre>
+</li>
+</ul>
+<a name="bottommiddlerightbottom_button_5()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottommiddlerightbottom_button_5</h4>
+<pre>public&nbsp;void&nbsp;bottommiddlerightbottom_button_5()</pre>
+</li>
+</ul>
+<a name="bottommiddlerightbottom_button_6()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottommiddlerightbottom_button_6</h4>
+<pre>public&nbsp;void&nbsp;bottommiddlerightbottom_button_6()</pre>
+</li>
+</ul>
+<a name="bottommiddlerightbottom_button_7()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottommiddlerightbottom_button_7</h4>
+<pre>public&nbsp;void&nbsp;bottommiddlerightbottom_button_7()</pre>
+</li>
+</ul>
+<a name="bottommiddlerightbottom_button_8()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottommiddlerightbottom_button_8</h4>
+<pre>public&nbsp;void&nbsp;bottommiddlerightbottom_button_8()</pre>
+</li>
+</ul>
+<a name="bottomright_click_checkbox()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bottomright_click_checkbox</h4>
+<pre>public&nbsp;void&nbsp;bottomright_click_checkbox()</pre>
+</li>
+</ul>
+<a name="middleright_arduino_list()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>middleright_arduino_list</h4>
+<pre>public&nbsp;void&nbsp;middleright_arduino_list()</pre>
+</li>
+</ul>
+<a name="externalcall_loadsettings(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>externalcall_loadsettings</h4>
+<pre>public&nbsp;void&nbsp;externalcall_loadsettings(int&nbsp;pos)</pre>
+</li>
+</ul>
+<a name="externalcall_servopanelchangeinfo(int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>externalcall_servopanelchangeinfo</h4>
+<pre>public&nbsp;void&nbsp;externalcall_servopanelchangeinfo(int&nbsp;x,
+                                     int&nbsp;y)</pre>
+</li>
+</ul>
+<a name="externalcall_servopanelsettostartpos(int, int, boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>externalcall_servopanelsettostartpos</h4>
+<pre>public&nbsp;void&nbsp;externalcall_servopanelsettostartpos(int&nbsp;x,
+                                        int&nbsp;y,
+                                        boolean&nbsp;withgoal)</pre>
+</li>
+</ul>
+<a name="refreshsize()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>refreshsize</h4>
+<pre>public&nbsp;void&nbsp;refreshsize()</pre>
+</li>
+</ul>
+<a name="play_go_start()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_go_start</h4>
+<pre>public&nbsp;void&nbsp;play_go_start()</pre>
+</li>
+</ul>
+<a name="play_go_stop()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_go_stop</h4>
+<pre>public&nbsp;void&nbsp;play_go_stop()</pre>
+</li>
+</ul>
+<a name="play_go_f1()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_go_f1</h4>
+<pre>public&nbsp;void&nbsp;play_go_f1()</pre>
+</li>
+</ul>
+<a name="play_go_b1()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_go_b1</h4>
+<pre>public&nbsp;void&nbsp;play_go_b1()</pre>
+</li>
+</ul>
+<a name="play_go_fa()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_go_fa</h4>
+<pre>public&nbsp;void&nbsp;play_go_fa()</pre>
+</li>
+</ul>
+<a name="play_go_ba()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_go_ba</h4>
+<pre>public&nbsp;void&nbsp;play_go_ba()</pre>
+</li>
+</ul>
+<a name="play_play_1_1()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_play_1_1</h4>
+<pre>public&nbsp;void&nbsp;play_play_1_1()</pre>
+</li>
+</ul>
+<a name="play_play_2_1()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_play_2_1</h4>
+<pre>public&nbsp;void&nbsp;play_play_2_1()</pre>
+</li>
+</ul>
+<a name="play_play_3_1()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_play_3_1</h4>
+<pre>public&nbsp;void&nbsp;play_play_3_1()</pre>
+</li>
+</ul>
+<a name="play_checktime()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_checktime</h4>
+<pre>public&nbsp;void&nbsp;play_checktime()</pre>
+</li>
+</ul>
+<a name="play_updatetime(boolean, boolean, boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_updatetime</h4>
+<pre>public&nbsp;void&nbsp;play_updatetime(boolean&nbsp;t1,
+                   boolean&nbsp;t2,
+                   boolean&nbsp;t3)</pre>
+</li>
+</ul>
+<a name="play_updatepanels(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_updatepanels</h4>
+<pre>public&nbsp;void&nbsp;play_updatepanels(int&nbsp;pos)</pre>
+</li>
+</ul>
+<a name="play_playreally(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_playreally</h4>
+<pre>public&nbsp;void&nbsp;play_playreally(int&nbsp;pos)</pre>
+</li>
+</ul>
+<a name="play_playclick()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_playclick</h4>
+<pre>public&nbsp;void&nbsp;play_playclick()</pre>
+</li>
+</ul>
+<a name="play_searchblocks(int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_searchblocks</h4>
+<pre>public&nbsp;void&nbsp;play_searchblocks(int&nbsp;pos)</pre>
+</li>
+</ul>
+<a name="play_playblock(int, org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_panel)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>play_playblock</h4>
+<pre>public&nbsp;void&nbsp;play_playblock(int&nbsp;channel,
+                  <a href="../../../org/myrobotlab/control/ServoOrchestratorGUI_middlemiddle_panel.html" title="class in org.myrobotlab.control">ServoOrchestratorGUI_middlemiddle_panel</a>&nbsp;block)</pre>
+</li>
+</ul>
+<a name="startClock()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startClock</h4>
+<pre>public&nbsp;void&nbsp;startClock()</pre>
+</li>
+</ul>
+<a name="stopClock()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stopClock</h4>
+<pre>public&nbsp;void&nbsp;stopClock()</pre>
+</li>
+</ul>
+<a name="main(java.lang.String[])">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>main</h4>
+<pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;args)
+                 throws java.lang.InterruptedException</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.lang.InterruptedException</code></dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="class-use/ServoOrchestrator.html">Use</a></li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-files/index-1.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../org/myrobotlab/service/Servo.Sweeper.html" title="class in org.myrobotlab.service"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/service/ServoOrchestrator.ClockThread.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?org/myrobotlab/service/ServoOrchestrator.html" target="_top">Frames</a></li>
+<li><a href="ServoOrchestrator.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li><a href="#nested_class_summary">Nested</a>&nbsp;|&nbsp;</li>
+<li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

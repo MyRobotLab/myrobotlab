@@ -104,13 +104,13 @@
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>java.awt.event.ActionListener, java.awt.event.WindowFocusListener, java.awt.event.WindowListener, java.awt.event.WindowStateListener, java.util.EventListener, <a href="../../../org/myrobotlab/control/TabControlEventHandler.html" title="interface in org.myrobotlab.control">TabControlEventHandler</a></dd>
+<dd>java.awt.event.ActionListener, java.awt.event.ItemListener, java.awt.event.WindowFocusListener, java.awt.event.WindowListener, java.awt.event.WindowStateListener, java.util.EventListener, <a href="../../../org/myrobotlab/control/TabControlEventHandler.html" title="interface in org.myrobotlab.control">TabControlEventHandler</a></dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="strong">SerialGUI</span>
 extends <a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a>
-implements java.awt.event.ActionListener</pre>
+implements java.awt.event.ActionListener, java.awt.event.ItemListener</pre>
 </li>
 </ul>
 </div>
@@ -130,18 +130,6 @@ implements java.awt.event.ActionListener</pre>
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#FORMAT_ASCII">FORMAT_ASCII</a></strong></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#FORMAT_DECIMAL">FORMAT_DECIMAL</a></strong></code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#FORMAT_HEX">FORMAT_HEX</a></strong></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code>static org.slf4j.Logger</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#log">log</a></strong></code>&nbsp;</td>
 </tr>
@@ -188,7 +176,7 @@ implements java.awt.event.ActionListener</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#actionPerformed(java.awt.event.ActionEvent)">actionPerformed</a></strong>(java.awt.event.ActionEvent&nbsp;arg0)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#actionPerformed(java.awt.event.ActionEvent)">actionPerformed</a></strong>(java.awt.event.ActionEvent&nbsp;e)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
@@ -204,15 +192,27 @@ implements java.awt.event.ActionListener</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#getState(org.myrobotlab.service.Serial)">getState</a></strong>(<a href="../../../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a>&nbsp;template)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#getPortNames(java.util.ArrayList)">getPortNames</a></strong>(java.util.ArrayList&lt;java.lang.String&gt;&nbsp;inPorts)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#init()">init</a></strong>()</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#getState(org.myrobotlab.service.Serial)">getState</a></strong>(<a href="../../../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a>&nbsp;serial)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#publishByte(java.lang.Byte)">publishByte</a></strong>(java.lang.Byte&nbsp;b)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#init()">init</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#itemStateChanged(java.awt.event.ItemEvent)">itemStateChanged</a></strong>(java.awt.event.ItemEvent&nbsp;event)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#publishByte(java.lang.Integer)">publishByte</a></strong>(java.lang.Integer&nbsp;b)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#setPortStatus()">setPortStatus</a></strong>()</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -253,40 +253,10 @@ implements java.awt.event.ActionListener</pre>
 <a name="log">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>log</h4>
 <pre>public static final&nbsp;org.slf4j.Logger log</pre>
-</li>
-</ul>
-<a name="FORMAT_DECIMAL">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>FORMAT_DECIMAL</h4>
-<pre>public final&nbsp;java.lang.String FORMAT_DECIMAL</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.control.SerialGUI.FORMAT_DECIMAL">Constant Field Values</a></dd></dl>
-</li>
-</ul>
-<a name="FORMAT_HEX">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>FORMAT_HEX</h4>
-<pre>public final&nbsp;java.lang.String FORMAT_HEX</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.control.SerialGUI.FORMAT_HEX">Constant Field Values</a></dd></dl>
-</li>
-</ul>
-<a name="FORMAT_ASCII">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>FORMAT_ASCII</h4>
-<pre>public final&nbsp;java.lang.String FORMAT_ASCII</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.control.SerialGUI.FORMAT_ASCII">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 </li>
@@ -344,16 +314,34 @@ implements java.awt.event.ActionListener</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>getState</h4>
-<pre>public&nbsp;void&nbsp;getState(<a href="../../../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a>&nbsp;template)</pre>
+<pre>public&nbsp;void&nbsp;getState(<a href="../../../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a>&nbsp;serial)</pre>
 </li>
 </ul>
-<a name="publishByte(java.lang.Byte)">
+<a name="setPortStatus()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setPortStatus</h4>
+<pre>public&nbsp;void&nbsp;setPortStatus()</pre>
+</li>
+</ul>
+<a name="getPortNames(java.util.ArrayList)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPortNames</h4>
+<pre>public&nbsp;void&nbsp;getPortNames(java.util.ArrayList&lt;java.lang.String&gt;&nbsp;inPorts)</pre>
+</li>
+</ul>
+<a name="publishByte(java.lang.Integer)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>publishByte</h4>
-<pre>public&nbsp;void&nbsp;publishByte(java.lang.Byte&nbsp;b)</pre>
+<pre>public&nbsp;void&nbsp;publishByte(java.lang.Integer&nbsp;b)</pre>
 </li>
 </ul>
 <a name="attachGUI()">
@@ -385,13 +373,26 @@ implements java.awt.event.ActionListener</pre>
 <a name="actionPerformed(java.awt.event.ActionEvent)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>actionPerformed</h4>
-<pre>public&nbsp;void&nbsp;actionPerformed(java.awt.event.ActionEvent&nbsp;arg0)</pre>
+<pre>public&nbsp;void&nbsp;actionPerformed(java.awt.event.ActionEvent&nbsp;e)</pre>
 <dl>
 <dt><strong>Specified by:</strong></dt>
 <dd><code>actionPerformed</code>&nbsp;in interface&nbsp;<code>java.awt.event.ActionListener</code></dd>
+</dl>
+</li>
+</ul>
+<a name="itemStateChanged(java.awt.event.ItemEvent)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>itemStateChanged</h4>
+<pre>public&nbsp;void&nbsp;itemStateChanged(java.awt.event.ItemEvent&nbsp;event)</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code>itemStateChanged</code>&nbsp;in interface&nbsp;<code>java.awt.event.ItemListener</code></dd>
 </dl>
 </li>
 </ul>

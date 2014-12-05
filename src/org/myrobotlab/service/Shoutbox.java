@@ -66,9 +66,10 @@ public class Shoutbox extends Service {
 
 	int maxArchiveRecordCount = 50;
 
-	// FIXME - the amount of methods you DONT want exposed will be dwarfed by the number you do - So, Security
+	// FIXME - the amount of methods you DONT want exposed will be dwarfed by
+	// the number you do - So, Security
 	// will need to wildcard or list a filter of excludes
-	
+
 	// FIXME - standard interfaces for all GATEWAY SERVICES - onMsg()
 	// addListener()
 	// FIXME - Ma. Vo. name link on shoutbox
@@ -455,6 +456,19 @@ public class Shoutbox extends Service {
 		// addXMPPRelay("Dwayne Williams");
 		// addXMPPRelay("Aatur Mehta");
 		addXMPPRelay("Greg Perry");
+
+		addLocalTask(30 * 60 * 1000, "savePredicates");
+	}
+
+	public void savePredicates() {
+		try {
+			log.info("saving Predicates");
+			if (chatbot != null) {
+				chatbot.savePredicates();
+			}
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
 	}
 
 	// TODO Create User INFO & INDEXES HERE
@@ -766,7 +780,7 @@ public class Shoutbox extends Service {
 				systemBroadcast(Runtime.getUptime());
 				return;
 			}
-			
+
 			if (shout.msg.startsWith("/t")) {
 				invoke("mimicTuring", params[2]);
 				return;

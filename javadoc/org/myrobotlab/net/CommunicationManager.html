@@ -34,8 +34,8 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/myrobotlab/net/CommObjectStreamOverUDP.UDPThread.html" title="class in org.myrobotlab.net"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/myrobotlab/net/DiscoveryThread.html" title="class in org.myrobotlab.net"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/myrobotlab/net/ClientHttpRequest.html" title="class in org.myrobotlab.net"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/net/Connection.html" title="class in org.myrobotlab.net"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/myrobotlab/net/CommunicationManager.html" target="_top">Frames</a></li>
@@ -159,14 +159,11 @@ implements java.io.Serializable, <a href="../../../org/myrobotlab/service/interf
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/CommunicationManager.html#addRemote(java.net.URI, java.net.URI)">addRemote</a></strong>(java.net.URI&nbsp;mrlHost,
-         java.net.URI&nbsp;protoKey)</code>&nbsp;</td>
+         java.net.URI&nbsp;protocolKey)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code><a href="../../../org/myrobotlab/service/interfaces/Communicator.html" title="interface in org.myrobotlab.service.interfaces">Communicator</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/CommunicationManager.html#getComm(java.net.URI)">getComm</a></strong>(java.net.URI&nbsp;uri)</code>
-<div class="block">gets the appropriate local service based communicator to relay 
- the message remotely</div>
-</td>
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/interfaces/Gateway.html" title="interface in org.myrobotlab.service.interfaces">Gateway</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/CommunicationManager.html#getComm(java.net.URI)">getComm</a></strong>(java.net.URI&nbsp;uri)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
@@ -175,15 +172,7 @@ implements java.io.Serializable, <a href="../../../org/myrobotlab/service/interf
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/CommunicationManager.html#send(java.net.URI, org.myrobotlab.framework.Message)">send</a></strong>(java.net.URI&nbsp;uri,
-    <a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>
-<div class="block">getComm(uri) gets the local service responsible for sending the message remotely
- .send(uri, msg) uri is a key into that service's data to send the message where it
- needs to go</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/net/CommunicationManager.html#setComm(org.myrobotlab.service.interfaces.Communicator)">setComm</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/Communicator.html" title="interface in org.myrobotlab.service.interfaces">Communicator</a>&nbsp;comm)</code>&nbsp;</td>
+    <a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -248,7 +237,7 @@ implements java.io.Serializable, <a href="../../../org/myrobotlab/service/interf
 <li class="blockList">
 <h4>addRemote</h4>
 <pre>public&nbsp;void&nbsp;addRemote(java.net.URI&nbsp;mrlHost,
-             java.net.URI&nbsp;protoKey)</pre>
+             java.net.URI&nbsp;protocolKey)</pre>
 <dl>
 <dt><strong>Specified by:</strong></dt>
 <dd><code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html#addRemote(java.net.URI, java.net.URI)">addRemote</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html" title="interface in org.myrobotlab.service.interfaces">CommunicationInterface</a></code></dd>
@@ -261,11 +250,8 @@ implements java.io.Serializable, <a href="../../../org/myrobotlab/service/interf
 <ul class="blockList">
 <li class="blockList">
 <h4>send</h4>
-<pre>public&nbsp;void&nbsp;send(java.net.URI&nbsp;uri,
+<pre>public final&nbsp;void&nbsp;send(java.net.URI&nbsp;uri,
         <a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</pre>
-<div class="block">getComm(uri) gets the local service responsible for sending the message remotely
- .send(uri, msg) uri is a key into that service's data to send the message where it
- needs to go</div>
 <dl>
 <dt><strong>Specified by:</strong></dt>
 <dd><code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html#send(java.net.URI, org.myrobotlab.framework.Message)">send</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html" title="interface in org.myrobotlab.service.interfaces">CommunicationInterface</a></code></dd>
@@ -278,23 +264,10 @@ implements java.io.Serializable, <a href="../../../org/myrobotlab/service/interf
 <ul class="blockList">
 <li class="blockList">
 <h4>send</h4>
-<pre>public&nbsp;void&nbsp;send(<a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</pre>
+<pre>public final&nbsp;void&nbsp;send(<a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</pre>
 <dl>
 <dt><strong>Specified by:</strong></dt>
 <dd><code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html#send(org.myrobotlab.framework.Message)">send</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html" title="interface in org.myrobotlab.service.interfaces">CommunicationInterface</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="setComm(org.myrobotlab.service.interfaces.Communicator)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setComm</h4>
-<pre>public&nbsp;void&nbsp;setComm(<a href="../../../org/myrobotlab/service/interfaces/Communicator.html" title="interface in org.myrobotlab.service.interfaces">Communicator</a>&nbsp;comm)</pre>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html#setComm(org.myrobotlab.service.interfaces.Communicator)">setComm</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html" title="interface in org.myrobotlab.service.interfaces">CommunicationInterface</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -304,14 +277,7 @@ implements java.io.Serializable, <a href="../../../org/myrobotlab/service/interf
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getComm</h4>
-<pre>public&nbsp;<a href="../../../org/myrobotlab/service/interfaces/Communicator.html" title="interface in org.myrobotlab.service.interfaces">Communicator</a>&nbsp;getComm(java.net.URI&nbsp;uri)</pre>
-<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html#getComm(java.net.URI)">CommunicationInterface</a></code></strong></div>
-<div class="block">gets the appropriate local service based communicator to relay 
- the message remotely</div>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html#getComm(java.net.URI)">getComm</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/CommunicationInterface.html" title="interface in org.myrobotlab.service.interfaces">CommunicationInterface</a></code></dd>
-<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/service/interfaces/Gateway.html" title="interface in org.myrobotlab.service.interfaces">Gateway</a>&nbsp;getComm(java.net.URI&nbsp;uri)</pre>
 </li>
 </ul>
 </li>
@@ -340,8 +306,8 @@ implements java.io.Serializable, <a href="../../../org/myrobotlab/service/interf
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/myrobotlab/net/CommObjectStreamOverUDP.UDPThread.html" title="class in org.myrobotlab.net"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/myrobotlab/net/DiscoveryThread.html" title="class in org.myrobotlab.net"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/myrobotlab/net/ClientHttpRequest.html" title="class in org.myrobotlab.net"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../org/myrobotlab/net/Connection.html" title="class in org.myrobotlab.net"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/myrobotlab/net/CommunicationManager.html" target="_top">Frames</a></li>

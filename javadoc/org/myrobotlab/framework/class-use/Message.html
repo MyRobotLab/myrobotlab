@@ -74,27 +74,27 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><a href="#org.myrobotlab.client">org.myrobotlab.client</a></td>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><a href="#org.myrobotlab.control">org.myrobotlab.control</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="#org.myrobotlab.framework">org.myrobotlab.framework</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="#org.myrobotlab.net">org.myrobotlab.net</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="#org.myrobotlab.service">org.myrobotlab.service</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="#org.myrobotlab.service.interfaces">org.myrobotlab.service.interfaces</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="#org.myrobotlab.webgui">org.myrobotlab.webgui</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 </tbody>
@@ -102,44 +102,6 @@
 </li>
 <li class="blockList">
 <ul class="blockList">
-<li class="blockList"><a name="org.myrobotlab.client">
-<!--   -->
-</a>
-<h3>Uses of <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a> in <a href="../../../../org/myrobotlab/client/package-summary.html">org.myrobotlab.client</a></h3>
-<table border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
-<caption><span>Methods in <a href="../../../../org/myrobotlab/client/package-summary.html">org.myrobotlab.client</a> with parameters of type <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">TestHarness.</span><code><strong><a href="../../../../org/myrobotlab/client/TestHarness.html#receive(org.myrobotlab.framework.Message)">receive</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">Receiver.</span><code><strong><a href="../../../../org/myrobotlab/client/Receiver.html#receive(org.myrobotlab.framework.Message)">receive</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">MyApp.</span><code><strong><a href="../../../../org/myrobotlab/client/MyApp.html#receive(org.myrobotlab.framework.Message)">receive</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">MRLClient.</span><code><strong><a href="../../../../org/myrobotlab/client/MRLClient.html#receive(org.myrobotlab.framework.Message)">receive</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">MainTest.</span><code><strong><a href="../../../../org/myrobotlab/client/MainTest.html#receive(org.myrobotlab.framework.Message)">receive</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>
-<div class="block">"receive" is the main gatway for all MRL messages into your application
- you can subscribe to all the other services's methods you would like and they
- will come to your application through this method.</div>
-</td>
-</tr>
-</tbody>
-</table>
-</li>
 <li class="blockList"><a name="org.myrobotlab.control">
 <!--   -->
 </a>
@@ -311,47 +273,7 @@
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">CommunicationManager.</span><code><strong><a href="../../../../org/myrobotlab/net/CommunicationManager.html#send(java.net.URI, org.myrobotlab.framework.Message)">send</a></strong>(java.net.URI&nbsp;uri,
-    <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>
-<div class="block">getComm(uri) gets the local service responsible for sending the message remotely
- .send(uri, msg) uri is a key into that service's data to send the message where it
- needs to go</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">CommObjectStreamOverUDP.UDPThread.</span><code><strong><a href="../../../../org/myrobotlab/net/CommObjectStreamOverUDP.UDPThread.html#send(java.net.URI, org.myrobotlab.framework.Message)">send</a></strong>(java.net.URI&nbsp;url,
     <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">CommObjectStreamOverTCP.TCPThread.</span><code><strong><a href="../../../../org/myrobotlab/net/CommObjectStreamOverTCP.TCPThread.html#send(java.net.URI, org.myrobotlab.framework.Message)">send</a></strong>(java.net.URI&nbsp;url2,
-    <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">CommObjectStreamOverDynamicProtocol.TCPThread.</span><code><strong><a href="../../../../org/myrobotlab/net/CommObjectStreamOverDynamicProtocol.TCPThread.html#send(java.net.URI, org.myrobotlab.framework.Message)">send</a></strong>(java.net.URI&nbsp;url2,
-    <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">CommObjectStreamOverDynamicProtocol.TCPThread.</span><code><strong><a href="../../../../org/myrobotlab/net/CommObjectStreamOverDynamicProtocol.TCPThread.html#send(java.net.URI, org.myrobotlab.framework.Message, java.lang.String)">send</a></strong>(java.net.URI&nbsp;url2,
-    <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg,
-    java.lang.String&nbsp;requestProtoco)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">CommObjectStreamOverUDP.</span><code><strong><a href="../../../../org/myrobotlab/net/CommObjectStreamOverUDP.html#sendRemote(java.net.URI, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.net.URI&nbsp;url,
-          <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">CommObjectStreamOverTCP.</span><code><strong><a href="../../../../org/myrobotlab/net/CommObjectStreamOverTCP.html#sendRemote(java.net.URI, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.net.URI&nbsp;url,
-          <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">CommObjectStreamOverDynamicProtocol.</span><code><strong><a href="../../../../org/myrobotlab/net/CommObjectStreamOverDynamicProtocol.html#sendRemote(java.net.URI, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.net.URI&nbsp;url,
-          <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>
@@ -360,19 +282,6 @@
 <!--   -->
 </a>
 <h3>Uses of <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a> in <a href="../../../../org/myrobotlab/service/package-summary.html">org.myrobotlab.service</a></h3>
-<table border="0" cellpadding="3" cellspacing="0" summary="Use table, listing fields, and an explanation">
-<caption><span>Fields in <a href="../../../../org/myrobotlab/service/package-summary.html">org.myrobotlab.service</a> declared as <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Field and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code><a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></code></td>
-<td class="colLast"><span class="strong">Cron.Task.</span><code><strong><a href="../../../../org/myrobotlab/service/Cron.Task.html#msg">msg</a></strong></code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
 <table border="0" cellpadding="3" cellspacing="0" summary="Use table, listing fields, and an explanation">
 <caption><span>Fields in <a href="../../../../org/myrobotlab/service/package-summary.html">org.myrobotlab.service</a> with type parameters of type <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></span><span class="tabEnd">&nbsp;</span></caption>
 <tr>
@@ -420,11 +329,20 @@
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><span class="strong">Security.</span><code><strong><a href="../../../../org/myrobotlab/service/Security.html#isAuthorized(org.myrobotlab.framework.Message)">isAuthorized</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
+<td class="colLast"><span class="strong">WebGUI.</span><code><strong><a href="../../../../org/myrobotlab/service/WebGUI.html#isAuthorized(org.myrobotlab.framework.Message)">isAuthorized</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><span class="strong">Security.</span><code><strong><a href="../../../../org/myrobotlab/service/Security.html#isAuthorized(org.myrobotlab.framework.Message)">isAuthorized</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></code></td>
 <td class="colLast"><span class="strong">Log.</span><code><strong><a href="../../../../org/myrobotlab/service/Log.html#log(org.myrobotlab.framework.Message)">log</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;m)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><span class="strong">Shoutbox.</span><code><strong><a href="../../../../org/myrobotlab/service/Shoutbox.html#onShout(java.lang.String, org.myrobotlab.framework.Message)">onShout</a></strong>(java.lang.String&nbsp;key,
+       <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;m)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
@@ -463,14 +381,11 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><span class="strong">Java.</span><code><strong><a href="../../../../org/myrobotlab/service/Java.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>
-<div class="block">preProcessHook is used to intercept messages and process or route them
- before being processed/invoked in the Service.</div>
-</td>
+<td class="colLast"><span class="strong">GUIService.</span><code><strong><a href="../../../../org/myrobotlab/service/GUIService.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;m)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><span class="strong">GUIService.</span><code><strong><a href="../../../../org/myrobotlab/service/GUIService.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;m)</code>&nbsp;</td>
+<td class="colLast"><span class="strong">CloudConnector.</span><code><strong><a href="../../../../org/myrobotlab/service/CloudConnector.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;m)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
@@ -484,18 +399,32 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
+<td class="colLast"><span class="strong">CloudConnector.</span><code><strong><a href="../../../../org/myrobotlab/service/CloudConnector.html#sendMessage(org.myrobotlab.framework.Message)">sendMessage</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;message)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">XMPP.</span><code><strong><a href="../../../../org/myrobotlab/service/XMPP.html#sendMRLMessage(org.myrobotlab.framework.Message, java.lang.String)">sendMRLMessage</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg,
               java.lang.String&nbsp;id)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">XMPP.</span><code><strong><a href="../../../../org/myrobotlab/service/XMPP.html#sendMyRobotLabJSONMessage(org.myrobotlab.framework.Message)">sendMyRobotLabJSONMessage</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">XMPP.</span><code><strong><a href="../../../../org/myrobotlab/service/XMPP.html#sendMyRobotLabRESTMessage(org.myrobotlab.framework.Message)">sendMyRobotLabRESTMessage</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><span class="strong">XMPP.</span><code><strong><a href="../../../../org/myrobotlab/service/XMPP.html#sendRemote(java.lang.String, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.lang.String&nbsp;uri,
+          <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
+</tr>
 <tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><span class="strong">RemoteAdapter.</span><code><strong><a href="../../../../org/myrobotlab/service/RemoteAdapter.html#sendRemote(java.lang.String, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.lang.String&nbsp;uri,
+          <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">XMPP.</span><code><strong><a href="../../../../org/myrobotlab/service/XMPP.html#sendRemote(java.net.URI, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.net.URI&nbsp;uri,
           <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>
@@ -503,46 +432,34 @@
  list as a hop - to "hopefully" prevent infinite routing problems</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">RemoteAdapter.</span><code><strong><a href="../../../../org/myrobotlab/service/RemoteAdapter.html#sendRemote(java.net.URI, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.net.URI&nbsp;uri,
           <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">RemoteAdapter.</span><code><strong><a href="../../../../org/myrobotlab/service/RemoteAdapter.html#sendRemoteTCP(java.net.URI, org.myrobotlab.framework.Message)">sendRemoteTCP</a></strong>(java.net.URI&nbsp;uri,
              <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">RemoteAdapter.</span><code><strong><a href="../../../../org/myrobotlab/service/RemoteAdapter.html#sendRemoteUDP(java.net.URI, org.myrobotlab.framework.Message)">sendRemoteUDP</a></strong>(java.net.URI&nbsp;uri,
              <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">WebGUI.</span><code><strong><a href="../../../../org/myrobotlab/service/WebGUI.html#sendToAll(org.myrobotlab.framework.Message)">sendToAll</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>
 <div class="block">sends JSON encoded MyRobotLab Message to all clients currently connected
  through web sockets</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><span class="strong">WebGUI.</span><code><strong><a href="../../../../org/myrobotlab/service/WebGUI.html#toJson(org.myrobotlab.framework.Message)">toJson</a></strong>(<a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>
 <div class="block">Encodes MyRobotLab message into JSON so that it can be sent over
  websockets to listening clients</div>
 </td>
-</tr>
-</tbody>
-</table>
-<table border="0" cellpadding="3" cellspacing="0" summary="Use table, listing constructors, and an explanation">
-<caption><span>Constructors in <a href="../../../../org/myrobotlab/service/package-summary.html">org.myrobotlab.service</a> with parameters of type <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colOne" scope="col">Constructor and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/Cron.Task.html#Cron.Task(java.lang.String, org.myrobotlab.framework.Message)">Cron.Task</a></strong>(java.lang.String&nbsp;cronPattern,
-         <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>
@@ -580,16 +497,51 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">Communicator.</span><code><strong><a href="../../../../org/myrobotlab/service/interfaces/Communicator.html#sendRemote(java.net.URI, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.net.URI&nbsp;uri,
+<td class="colLast"><span class="strong">Gateway.</span><code><strong><a href="../../../../org/myrobotlab/service/interfaces/Gateway.html#sendRemote(java.lang.String, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.lang.String&nbsp;key,
+          <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><span class="strong">Gateway.</span><code><strong><a href="../../../../org/myrobotlab/service/interfaces/Gateway.html#sendRemote(java.net.URI, org.myrobotlab.framework.Message)">sendRemote</a></strong>(java.net.URI&nbsp;key,
           <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>
-<div class="block">will send a message to the mrl key'ed uri
- the expectation is the uri is directly from the hosts registry in runtime
- therefore it has the following format
+<div class="block">will send a message to the mrl key'ed uri the expectation is the uri is
+ directly from the hosts registry in runtime therefore it has the
+ following format
  
- mrl://[hostname]/proto://protohost:protoport/otherkeyinfo
+ mrl://[gatewayName]/proto://protohost:protoport/otherkeyinfo
  
  e.g.</div>
 </td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="org.myrobotlab.webgui">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a> in <a href="../../../../org/myrobotlab/webgui/package-summary.html">org.myrobotlab.webgui</a></h3>
+<table border="0" cellpadding="3" cellspacing="0" summary="Use table, listing fields, and an explanation">
+<caption><span>Fields in <a href="../../../../org/myrobotlab/webgui/package-summary.html">org.myrobotlab.webgui</a> declared as <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></code></td>
+<td class="colLast"><span class="strong">WSServer.WSMsg.</span><code><strong><a href="../../../../org/myrobotlab/webgui/WSServer.WSMsg.html#msg">msg</a></strong></code>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<table border="0" cellpadding="3" cellspacing="0" summary="Use table, listing constructors, and an explanation">
+<caption><span>Constructors in <a href="../../../../org/myrobotlab/webgui/package-summary.html">org.myrobotlab.webgui</a> with parameters of type <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/webgui/WSServer.WSMsg.html#WSServer.WSMsg(org.java_websocket.WebSocket, org.myrobotlab.framework.Message)">WSServer.WSMsg</a></strong>(org.java_websocket.WebSocket&nbsp;conn,
+              <a href="../../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>

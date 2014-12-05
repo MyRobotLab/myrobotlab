@@ -35,7 +35,7 @@
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html" title="interface in org.myrobotlab.service.interfaces"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../../org/myrobotlab/service/interfaces/VideoGUISource.html" title="interface in org.myrobotlab.service.interfaces"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../../org/myrobotlab/service/interfaces/TextListener.html" title="interface in org.myrobotlab.service.interfaces"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?org/myrobotlab/service/interfaces/StepperController.html" target="_top">Frames</a></li>
@@ -86,7 +86,7 @@
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../../org/myrobotlab/service/AdafruitMotorShield.html" title="class in org.myrobotlab.service">AdafruitMotorShield</a>, <a href="../../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a></dd>
+<dd><a href="../../../../org/myrobotlab/service/AdafruitMotorShield.html" title="class in org.myrobotlab.service">AdafruitMotorShield</a>, <a href="../../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a>, <a href="../../../../org/myrobotlab/service/Arduino2.html" title="class in org.myrobotlab.service">Arduino2</a>, <a href="../../../../org/myrobotlab/service/Propeller.html" title="class in org.myrobotlab.service">Propeller</a></dd>
 </dl>
 <hr>
 <br>
@@ -162,19 +162,11 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperController.html#stepperAttach(org.myrobotlab.service.interfaces.StepperControl, java.lang.Integer, java.lang.Object...)">stepperAttach</a></strong>(<a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html" title="interface in org.myrobotlab.service.interfaces">StepperControl</a>&nbsp;stepper,
-             java.lang.Integer&nbsp;steps,
-             java.lang.Object...&nbsp;data)</code>
-<div class="block">typed attachment</div>
-</td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperController.html#stepperAttach(org.myrobotlab.service.interfaces.StepperControl)">stepperAttach</a></strong>(<a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html" title="interface in org.myrobotlab.service.interfaces">StepperControl</a>&nbsp;stepper)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperController.html#stepperAttach(java.lang.String, java.lang.Integer, java.lang.Object...)">stepperAttach</a></strong>(java.lang.String&nbsp;stepperName,
-             java.lang.Integer&nbsp;steps,
-             java.lang.Object...&nbsp;data)</code>
-<div class="block">attach a stepper named to this controller</div>
-</td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperController.html#stepperAttach(java.lang.String)">stepperAttach</a></strong>(java.lang.String&nbsp;stepperName)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
@@ -184,12 +176,16 @@
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperController.html#stepperReset(java.lang.String)">stepperReset</a></strong>(java.lang.String&nbsp;stepper)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperController.html#stepperStep(java.lang.String, java.lang.Integer)">stepperStep</a></strong>(java.lang.String&nbsp;name,
            java.lang.Integer&nbsp;steps)</code>
 <div class="block">stepperStep - move stepper an increment</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperController.html#stepperStep(java.lang.String, java.lang.Integer, java.lang.Integer)">stepperStep</a></strong>(java.lang.String&nbsp;name,
            java.lang.Integer&nbsp;steps,
@@ -256,32 +252,22 @@
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="stepperAttach(java.lang.String, java.lang.Integer, java.lang.Object...)">
+<a name="stepperAttach(java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>stepperAttach</h4>
-<pre>boolean&nbsp;stepperAttach(java.lang.String&nbsp;stepperName,
-                    java.lang.Integer&nbsp;steps,
-                    java.lang.Object...&nbsp;data)</pre>
-<div class="block">attach a stepper named to this controller</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>stepperName</code> - </dd><dd><code>steps</code> - </dd><dd><code>pin1</code> - </dd><dd><code>pin2</code> - </dd><dd><code>pin3</code> - </dd><dd><code>pin4</code> - </dd>
-<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+<pre>boolean&nbsp;stepperAttach(java.lang.String&nbsp;stepperName)</pre>
 </li>
 </ul>
-<a name="stepperAttach(org.myrobotlab.service.interfaces.StepperControl, java.lang.Integer, java.lang.Object...)">
+<a name="stepperAttach(org.myrobotlab.service.interfaces.StepperControl)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>stepperAttach</h4>
-<pre>boolean&nbsp;stepperAttach(<a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html" title="interface in org.myrobotlab.service.interfaces">StepperControl</a>&nbsp;stepper,
-                    java.lang.Integer&nbsp;steps,
-                    java.lang.Object...&nbsp;data)</pre>
-<div class="block">typed attachment</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>stepper</code> - </dd><dd><code>steps</code> - </dd><dd><code>pin1</code> - </dd><dd><code>pin2</code> - </dd><dd><code>pin3</code> - </dd><dd><code>pin4</code> - </dd>
-<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+<pre>boolean&nbsp;stepperAttach(<a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html" title="interface in org.myrobotlab.service.interfaces">StepperControl</a>&nbsp;stepper)</pre>
 </li>
 </ul>
 <a name="getPinList()">
@@ -355,13 +341,22 @@
 <a name="getStepperData(java.lang.String)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getStepperData</h4>
 <pre>java.lang.Object[]&nbsp;getStepperData(java.lang.String&nbsp;stepperName)</pre>
 <div class="block">method to return stepper information</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>stepperName</code> - </dd>
 <dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="stepperReset(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>stepperReset</h4>
+<pre>void&nbsp;stepperReset(java.lang.String&nbsp;stepper)</pre>
 </li>
 </ul>
 </li>
@@ -391,7 +386,7 @@
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html" title="interface in org.myrobotlab.service.interfaces"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../../org/myrobotlab/service/interfaces/VideoGUISource.html" title="interface in org.myrobotlab.service.interfaces"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../../org/myrobotlab/service/interfaces/TextListener.html" title="interface in org.myrobotlab.service.interfaces"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?org/myrobotlab/service/interfaces/StepperController.html" target="_top">Frames</a></li>

@@ -35,7 +35,7 @@
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../org/myrobotlab/control/PinComponent.html" title="class in org.myrobotlab.control"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/myrobotlab/control/ProxyGUI.html" title="class in org.myrobotlab.control"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/myrobotlab/control/ProgramABGUI.html" title="class in org.myrobotlab.control"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/myrobotlab/control/PingdarGUI.html" target="_top">Frames</a></li>
@@ -130,16 +130,8 @@ implements javax.swing.event.ListSelectionListener, <a href="../../../org/myrobo
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#lastIRData">lastIRData</a></strong></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code>static org.slf4j.Logger</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#log">log</a></strong></code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>java.util.Random</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#rand">rand</a></strong></code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -147,7 +139,7 @@ implements javax.swing.event.ListSelectionListener, <a href="../../../org/myrobo
 <!--   -->
 </a>
 <h3>Fields inherited from class&nbsp;org.myrobotlab.control.<a href="../../../org/myrobotlab/control/ServiceGUI.html" title="class in org.myrobotlab.control">ServiceGUI</a></h3>
-<code><a href="../../../org/myrobotlab/control/ServiceGUI.html#boundServiceName">boundServiceName</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#display">display</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#gc">gc</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#myService">myService</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#x">x</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#y">y</a></code></li>
+<code><a href="../../../org/myrobotlab/control/ServiceGUI.html#boundServiceName">boundServiceName</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#display">display</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#gc">gc</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#height">height</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#myService">myService</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#width">width</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#x">x</a>, <a href="../../../org/myrobotlab/control/ServiceGUI.html#y">y</a></code></li>
 </ul>
 </li>
 </ul>
@@ -196,51 +188,19 @@ implements javax.swing.event.ListSelectionListener, <a href="../../../org/myrobo
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#displaySweepData(java.util.ArrayList)">displaySweepData</a></strong>(java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a>&gt;&nbsp;points)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#drawStaticInfo()">drawStaticInfo</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/control/VideoWidget.html" title="class in org.myrobotlab.control">VideoWidget</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#getLocalDisplay()">getLocalDisplay</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#init()">init</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><code><a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#publishSinglePoint(org.myrobotlab.service.WiiDAR.Point)">publishSinglePoint</a></strong>(<a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a>&nbsp;p)</code>&nbsp;</td>
-</tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a>&gt;</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#publishSweepData(java.util.ArrayList)">publishSweepData</a></strong>(java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a>&gt;&nbsp;d)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.lang.Boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#setCalibrating(java.lang.Boolean)">setCalibrating</a></strong>(java.lang.Boolean&nbsp;t)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#setCurrentFilterMouseListener()">setCurrentFilterMouseListener</a></strong>()</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#setIRLeftMax(org.myrobotlab.service.Wii.IRData)">setIRLeftMax</a></strong>(<a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a>&nbsp;max)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#setIRRightMax(org.myrobotlab.service.Wii.IRData)">setIRRightMax</a></strong>(<a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a>&nbsp;max)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#setServoLeftMax(java.lang.Integer)">setServoLeftMax</a></strong>(java.lang.Integer&nbsp;max)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>java.lang.Integer</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#setServoRightMax(java.lang.Integer)">setServoRightMax</a></strong>(java.lang.Integer&nbsp;max)</code>&nbsp;</td>
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Pingdar.Point.html" title="class in org.myrobotlab.service">Pingdar.Point</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/PingdarGUI.html#onSinglePoint(org.myrobotlab.service.Pingdar.Point)">onSinglePoint</a></strong>(<a href="../../../org/myrobotlab/service/Pingdar.Point.html" title="class in org.myrobotlab.service">Pingdar.Point</a>&nbsp;p)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
@@ -285,28 +245,10 @@ implements javax.swing.event.ListSelectionListener, <a href="../../../org/myrobo
 <a name="log">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>log</h4>
 <pre>public static final&nbsp;org.slf4j.Logger log</pre>
-</li>
-</ul>
-<a name="rand">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>rand</h4>
-<pre>public&nbsp;java.util.Random rand</pre>
-</li>
-</ul>
-<a name="lastIRData">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>lastIRData</h4>
-<pre>public&nbsp;<a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a> lastIRData</pre>
 </li>
 </ul>
 </li>
@@ -384,78 +326,6 @@ implements javax.swing.event.ListSelectionListener, <a href="../../../org/myrobo
 </dl>
 </li>
 </ul>
-<a name="setServoLeftMax(java.lang.Integer)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setServoLeftMax</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;setServoLeftMax(java.lang.Integer&nbsp;max)</pre>
-</li>
-</ul>
-<a name="setServoRightMax(java.lang.Integer)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setServoRightMax</h4>
-<pre>public&nbsp;java.lang.Integer&nbsp;setServoRightMax(java.lang.Integer&nbsp;max)</pre>
-</li>
-</ul>
-<a name="setIRLeftMax(org.myrobotlab.service.Wii.IRData)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setIRLeftMax</h4>
-<pre>public&nbsp;<a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a>&nbsp;setIRLeftMax(<a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a>&nbsp;max)</pre>
-</li>
-</ul>
-<a name="setIRRightMax(org.myrobotlab.service.Wii.IRData)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setIRRightMax</h4>
-<pre>public&nbsp;<a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a>&nbsp;setIRRightMax(<a href="../../../org/myrobotlab/service/Wii.IRData.html" title="class in org.myrobotlab.service">Wii.IRData</a>&nbsp;max)</pre>
-</li>
-</ul>
-<a name="setCalibrating(java.lang.Boolean)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setCalibrating</h4>
-<pre>public&nbsp;java.lang.Boolean&nbsp;setCalibrating(java.lang.Boolean&nbsp;t)</pre>
-</li>
-</ul>
-<a name="publishSweepData(java.util.ArrayList)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>publishSweepData</h4>
-<pre>public&nbsp;java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a>&gt;&nbsp;publishSweepData(java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a>&gt;&nbsp;d)</pre>
-</li>
-</ul>
-<a name="displaySweepData(java.util.ArrayList)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>displaySweepData</h4>
-<pre>public&nbsp;void&nbsp;displaySweepData(java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a>&gt;&nbsp;points)</pre>
-</li>
-</ul>
-<a name="setCurrentFilterMouseListener()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setCurrentFilterMouseListener</h4>
-<pre>public&nbsp;void&nbsp;setCurrentFilterMouseListener()</pre>
-</li>
-</ul>
 <a name="drawStaticInfo()">
 <!--   -->
 </a>
@@ -465,13 +335,13 @@ implements javax.swing.event.ListSelectionListener, <a href="../../../org/myrobo
 <pre>public&nbsp;void&nbsp;drawStaticInfo()</pre>
 </li>
 </ul>
-<a name="publishSinglePoint(org.myrobotlab.service.WiiDAR.Point)">
+<a name="onSinglePoint(org.myrobotlab.service.Pingdar.Point)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>publishSinglePoint</h4>
-<pre>public&nbsp;<a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a>&nbsp;publishSinglePoint(<a href="../../../org/myrobotlab/service/WiiDAR.Point.html" title="class in org.myrobotlab.service">WiiDAR.Point</a>&nbsp;p)</pre>
+<h4>onSinglePoint</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/service/Pingdar.Point.html" title="class in org.myrobotlab.service">Pingdar.Point</a>&nbsp;onSinglePoint(<a href="../../../org/myrobotlab/service/Pingdar.Point.html" title="class in org.myrobotlab.service">Pingdar.Point</a>&nbsp;p)</pre>
 </li>
 </ul>
 <a name="getLocalDisplay()">
@@ -527,7 +397,7 @@ implements javax.swing.event.ListSelectionListener, <a href="../../../org/myrobo
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../org/myrobotlab/control/PinComponent.html" title="class in org.myrobotlab.control"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/myrobotlab/control/ProxyGUI.html" title="class in org.myrobotlab.control"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/myrobotlab/control/ProgramABGUI.html" title="class in org.myrobotlab.control"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/myrobotlab/control/PingdarGUI.html" target="_top">Frames</a></li>
