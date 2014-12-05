@@ -86,7 +86,7 @@
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a>, <a href="../../../org/myrobotlab/service/Roomba.html" title="class in org.myrobotlab.service">Roomba</a>, <a href="../../../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a></dd>
+<dd><a href="../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a>, <a href="../../../org/myrobotlab/service/Propeller.html" title="class in org.myrobotlab.service">Propeller</a>, <a href="../../../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a></dd>
 </dl>
 <hr>
 <br>
@@ -110,10 +110,14 @@
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#addByteListener(org.myrobotlab.service.interfaces.SerialDataListener)">addByteListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html" title="interface in org.myrobotlab.service.interfaces">SerialDataListener</a>&nbsp;service)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#connect(java.lang.String)">connect</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#connect(java.lang.String, int, int, int, int)">connect</a></strong>(java.lang.String&nbsp;name,
        int&nbsp;rate,
@@ -121,19 +125,15 @@
        int&nbsp;stopbits,
        int&nbsp;parity)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#disconnect()">disconnect</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.util.ArrayList&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#getPortNames()">getPortNames</a></strong>()</code>
 <div class="block">methods to return read-only information regarding a serialDevice</div>
 </td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code><a href="../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#getSerialDevice()">getSerialDevice</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
@@ -153,11 +153,11 @@
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#write(char)">write</a></strong>(char&nbsp;data)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#write(int)">write</a></strong>(int&nbsp;data)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#write(int)">write</a></strong>(int&nbsp;data)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#write(int[])">write</a></strong>(int[]&nbsp;data)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
@@ -188,17 +188,6 @@
 <div class="block">methods to return read-only information regarding a serialDevice</div>
 </li>
 </ul>
-<a name="getSerialDevice()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getSerialDevice</h4>
-<pre><a href="../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a>&nbsp;getSerialDevice()</pre>
-<dl><dt><span class="strong">Returns:</span></dt><dd>a read-only copy of the SerialDevice if it has bee serialized
-         over the network - the InputStream & OutputStream are transient</dd></dl>
-</li>
-</ul>
 <a name="connect(java.lang.String)">
 <!--   -->
 </a>
@@ -206,6 +195,8 @@
 <li class="blockList">
 <h4>connect</h4>
 <pre>boolean&nbsp;connect(java.lang.String&nbsp;name)</pre>
+<dl><dt><span class="strong">Returns:</span></dt><dd>a read-only copy of the SerialDevice if it has bee serialized
+         over the network - the InputStream & OutputStream are transient</dd></dl>
 </li>
 </ul>
 <a name="connect(java.lang.String, int, int, int, int)">
@@ -219,6 +210,15 @@
               int&nbsp;databits,
               int&nbsp;stopbits,
               int&nbsp;parity)</pre>
+</li>
+</ul>
+<a name="addByteListener(org.myrobotlab.service.interfaces.SerialDataListener)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addByteListener</h4>
+<pre>void&nbsp;addByteListener(<a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html" title="interface in org.myrobotlab.service.interfaces">SerialDataListener</a>&nbsp;service)</pre>
 </li>
 </ul>
 <a name="write(java.lang.String)">
@@ -245,18 +245,6 @@
 <dd><code>java.io.IOException</code></dd></dl>
 </li>
 </ul>
-<a name="write(char)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>write</h4>
-<pre>void&nbsp;write(char&nbsp;data)
-           throws java.io.IOException</pre>
-<dl><dt><span class="strong">Throws:</span></dt>
-<dd><code>java.io.IOException</code></dd></dl>
-</li>
-</ul>
 <a name="write(int)">
 <!--   -->
 </a>
@@ -269,14 +257,14 @@
 <dd><code>java.io.IOException</code></dd></dl>
 </li>
 </ul>
-<a name="read()">
+<a name="write(int[])">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>read</h4>
-<pre>int&nbsp;read()
-         throws java.io.IOException</pre>
+<h4>write</h4>
+<pre>void&nbsp;write(int[]&nbsp;data)
+           throws java.io.IOException</pre>
 <dl><dt><span class="strong">Throws:</span></dt>
 <dd><code>java.io.IOException</code></dd></dl>
 </li>
@@ -288,6 +276,18 @@
 <li class="blockList">
 <h4>read</h4>
 <pre>int&nbsp;read(byte[]&nbsp;data)
+         throws java.io.IOException</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="read()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>read</h4>
+<pre>int&nbsp;read()
          throws java.io.IOException</pre>
 <dl><dt><span class="strong">Throws:</span></dt>
 <dd><code>java.io.IOException</code></dd></dl>

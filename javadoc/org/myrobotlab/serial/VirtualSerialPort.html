@@ -35,7 +35,7 @@
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../org/myrobotlab/serial/SerialDeviceService.html" title="interface in org.myrobotlab.serial"><span class="strong">Prev Class</span></a></li>
-<li>Next Class</li>
+<li><a href="../../../org/myrobotlab/serial/VirtualSerialPort.VirtualNullModemCable.html" title="class in org.myrobotlab.serial"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/myrobotlab/serial/VirtualSerialPort.html" target="_top">Frames</a></li>
@@ -59,7 +59,7 @@
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#nested_class_summary">Nested</a>&nbsp;|&nbsp;</li>
 <li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method_summary">Method</a></li>
@@ -107,6 +107,25 @@ implements <a href="../../../org/myrobotlab/serial/SerialDevice.html" title="int
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="nested_class_summary">
+<!--   -->
+</a>
+<h3>Nested Class Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Nested Class Summary table, listing nested classes, and an explanation">
+<caption><span>Nested Classes</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static class&nbsp;</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/VirtualSerialPort.VirtualNullModemCable.html" title="class in org.myrobotlab.serial">VirtualSerialPort.VirtualNullModemCable</a></strong></code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
 <!-- =========== FIELD SUMMARY =========== -->
 <ul class="blockList">
 <li class="blockList"><a name="field_summary">
@@ -136,6 +155,10 @@ implements <a href="../../../org/myrobotlab/serial/SerialDevice.html" title="int
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/VirtualSerialPort.html#rx">rx</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static java.lang.Integer</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/VirtualSerialPort.html#SHUTDOWN">SHUTDOWN</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>java.util.concurrent.BlockingQueue&lt;java.lang.Integer&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/VirtualSerialPort.html#tx">tx</a></strong></code>&nbsp;</td>
 </tr>
@@ -189,6 +212,21 @@ implements <a href="../../../org/myrobotlab/serial/SerialDevice.html" title="int
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/VirtualSerialPort.html#close()">close</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../org/myrobotlab/serial/VirtualSerialPort.VirtualNullModemCable.html" title="class in org.myrobotlab.serial">VirtualSerialPort.VirtualNullModemCable</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/VirtualSerialPort.html#createNullModemCable(java.lang.String, java.lang.String)">createNullModemCable</a></strong>(java.lang.String&nbsp;port0,
+                    java.lang.String&nbsp;port1)</code>
+<div class="block">virtual null modem cable is used to connect to a simulated device or in
+ automated testing{</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../org/myrobotlab/serial/VirtualSerialPort.html" title="class in org.myrobotlab.serial">VirtualSerialPort</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/VirtualSerialPort.html#createVirtualSerialPort(java.lang.String)">createVirtualSerialPort</a></strong>(java.lang.String&nbsp;port)</code>
+<div class="block">virtual serial ports will be used in the future to connect to simulated
+ environments or used in automated testing</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
@@ -298,10 +336,19 @@ implements <a href="../../../org/myrobotlab/serial/SerialDevice.html" title="int
 <a name="listener">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>listener</h4>
 <pre>public&nbsp;<a href="../../../org/myrobotlab/serial/SerialDeviceEventListener.html" title="interface in org.myrobotlab.serial">SerialDeviceEventListener</a> listener</pre>
+</li>
+</ul>
+<a name="SHUTDOWN">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>SHUTDOWN</h4>
+<pre>public static final&nbsp;java.lang.Integer SHUTDOWN</pre>
 </li>
 </ul>
 </li>
@@ -516,7 +563,7 @@ implements <a href="../../../org/myrobotlab/serial/SerialDevice.html" title="int
 <a name="read(byte[])">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>read</h4>
 <pre>public&nbsp;int&nbsp;read(byte[]&nbsp;data)
@@ -526,6 +573,31 @@ implements <a href="../../../org/myrobotlab/serial/SerialDevice.html" title="int
 <dd><code><a href="../../../org/myrobotlab/serial/SerialDevice.html#read(byte[])">read</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/serial/SerialDevice.html" title="interface in org.myrobotlab.serial">SerialDevice</a></code></dd>
 <dt><span class="strong">Throws:</span></dt>
 <dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="createVirtualSerialPort(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>createVirtualSerialPort</h4>
+<pre>public static&nbsp;<a href="../../../org/myrobotlab/serial/VirtualSerialPort.html" title="class in org.myrobotlab.serial">VirtualSerialPort</a>&nbsp;createVirtualSerialPort(java.lang.String&nbsp;port)</pre>
+<div class="block">virtual serial ports will be used in the future to connect to simulated
+ environments or used in automated testing</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>port0</code> - - name of virtual port device</dd></dl>
+</li>
+</ul>
+<a name="createNullModemCable(java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>createNullModemCable</h4>
+<pre>public static&nbsp;<a href="../../../org/myrobotlab/serial/VirtualSerialPort.VirtualNullModemCable.html" title="class in org.myrobotlab.serial">VirtualSerialPort.VirtualNullModemCable</a>&nbsp;createNullModemCable(java.lang.String&nbsp;port0,
+                                                           java.lang.String&nbsp;port1)</pre>
+<div class="block">virtual null modem cable is used to connect to a simulated device or in
+ automated testing{</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>port0</code> - </dd><dd><code>port1</code> - </dd></dl>
 </li>
 </ul>
 </li>
@@ -555,7 +627,7 @@ implements <a href="../../../org/myrobotlab/serial/SerialDevice.html" title="int
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../org/myrobotlab/serial/SerialDeviceService.html" title="interface in org.myrobotlab.serial"><span class="strong">Prev Class</span></a></li>
-<li>Next Class</li>
+<li><a href="../../../org/myrobotlab/serial/VirtualSerialPort.VirtualNullModemCable.html" title="class in org.myrobotlab.serial"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/myrobotlab/serial/VirtualSerialPort.html" target="_top">Frames</a></li>
@@ -579,7 +651,7 @@ implements <a href="../../../org/myrobotlab/serial/SerialDevice.html" title="int
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#nested_class_summary">Nested</a>&nbsp;|&nbsp;</li>
 <li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method_summary">Method</a></li>

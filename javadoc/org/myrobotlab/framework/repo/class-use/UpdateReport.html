@@ -95,17 +95,32 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../org/myrobotlab/framework/repo/UpdateReport.html" title="class in org.myrobotlab.framework.repo">UpdateReport</a></code></td>
+<td class="colLast"><span class="strong">Runtime.</span><code><strong><a href="../../../../../org/myrobotlab/service/Runtime.html#applyUpdate()">applyUpdate</a></strong>()</code>
+<div class="block">headless call - no user intervention needed / no "publishUpdates"</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../org/myrobotlab/framework/repo/UpdateReport.html" title="class in org.myrobotlab.framework.repo">UpdateReport</a></code></td>
 <td class="colLast"><span class="strong">Runtime.</span><code><strong><a href="../../../../../org/myrobotlab/service/Runtime.html#applyUpdates(org.myrobotlab.framework.repo.Updates)">applyUpdates</a></strong>(<a href="../../../../../org/myrobotlab/framework/repo/Updates.html" title="class in org.myrobotlab.framework.repo">Updates</a>&nbsp;updates)</code>
 <div class="block">all the data contained in updates is used to apply against the running
  system.</div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../org/myrobotlab/framework/repo/UpdateReport.html" title="class in org.myrobotlab.framework.repo">UpdateReport</a></code></td>
+<td class="colLast"><span class="strong">Runtime.</span><code><strong><a href="../../../../../org/myrobotlab/service/Runtime.html#update()">update</a></strong>()</code>
+<div class="block">command line update update myrobotlab.jar only no user interaction is
+ required - NO RESTART ONLY SHUTDOWN !!! no endless loop of bootstrap
+ getting -update param after update :P</div>
+</td>
+</tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../org/myrobotlab/framework/repo/UpdateReport.html" title="class in org.myrobotlab.framework.repo">UpdateReport</a></code></td>
 <td class="colLast"><span class="strong">Runtime.</span><code><strong><a href="../../../../../org/myrobotlab/service/Runtime.html#update(java.lang.String)">update</a></strong>(java.lang.String&nbsp;fullServiceTypeName)</code>
-<div class="block">this method is called by the user (or system) when a specific service
- needs to be installed (or updated) - it should resolve all the
- dependencies for that service</div>
+<div class="block">FIXME - if true - service data xml needs to be pulled from repo this
+ method is called by the user (or system) when a specific service needs to
+ be installed (or updated) - it should resolve all the dependencies for
+ that service</div>
 </td>
 </tr>
 <tr class="altColor">

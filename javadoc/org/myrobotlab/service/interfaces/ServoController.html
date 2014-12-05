@@ -86,7 +86,7 @@
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../../org/myrobotlab/service/Adafruit16CServoDriver.html" title="class in org.myrobotlab.service">Adafruit16CServoDriver</a>, <a href="../../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a>, <a href="../../../../org/myrobotlab/service/ArduinoBT.html" title="class in org.myrobotlab.service">ArduinoBT</a>, <a href="../../../../org/myrobotlab/service/Maestro.html" title="class in org.myrobotlab.service">Maestro</a></dd>
+<dd><a href="../../../../org/myrobotlab/service/Adafruit16CServoDriver.html" title="class in org.myrobotlab.service">Adafruit16CServoDriver</a>, <a href="../../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a>, <a href="../../../../org/myrobotlab/service/Arduino2.html" title="class in org.myrobotlab.service">Arduino2</a>, <a href="../../../../org/myrobotlab/service/ArduinoBT.html" title="class in org.myrobotlab.service">ArduinoBT</a>, <a href="../../../../org/myrobotlab/service/Maestro.html" title="class in org.myrobotlab.service">Maestro</a>, <a href="../../../../org/myrobotlab/service/Propeller.html" title="class in org.myrobotlab.service">Propeller</a></dd>
 </dl>
 <hr>
 <br>
@@ -148,7 +148,7 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>int</code></td>
+<td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoController.html#servoAttach(java.lang.String, java.lang.Integer)">servoAttach</a></strong>(java.lang.String&nbsp;servoName,
            java.lang.Integer&nbsp;pin)</code>
 <div class="block">servoAttach - attach the servo to a specific pin on the controller</div>
@@ -179,11 +179,16 @@
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoController.html#servoWriteMicroseconds(java.lang.String, java.lang.Integer)">servoWriteMicroseconds</a></strong>(java.lang.String&nbsp;name,
+                      java.lang.Integer&nbsp;ms)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoController.html#setServoEventsEnabled(java.lang.String, boolean)">setServoEventsEnabled</a></strong>(java.lang.String&nbsp;servoName,
                      boolean&nbsp;b)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/ServoController.html#setServoSpeed(java.lang.String, java.lang.Float)">setServoSpeed</a></strong>(java.lang.String&nbsp;servoName,
              java.lang.Float&nbsp;speed)</code>
@@ -270,8 +275,8 @@
 <ul class="blockList">
 <li class="blockList">
 <h4>servoAttach</h4>
-<pre>int&nbsp;servoAttach(java.lang.String&nbsp;servoName,
-              java.lang.Integer&nbsp;pin)</pre>
+<pre>boolean&nbsp;servoAttach(java.lang.String&nbsp;servoName,
+                  java.lang.Integer&nbsp;pin)</pre>
 <div class="block">servoAttach - attach the servo to a specific pin on the controller</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - - name of the servo</dd><dd><code>pin</code> - - pin number</dd>
 <dt><span class="strong">Returns:</span></dt><dd>boolean boolean</dd></dl>
@@ -337,11 +342,21 @@
 <a name="setServoEventsEnabled(java.lang.String, boolean)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>setServoEventsEnabled</h4>
 <pre>boolean&nbsp;setServoEventsEnabled(java.lang.String&nbsp;servoName,
                             boolean&nbsp;b)</pre>
+</li>
+</ul>
+<a name="servoWriteMicroseconds(java.lang.String, java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>servoWriteMicroseconds</h4>
+<pre>void&nbsp;servoWriteMicroseconds(java.lang.String&nbsp;name,
+                          java.lang.Integer&nbsp;ms)</pre>
 </li>
 </ul>
 </li>

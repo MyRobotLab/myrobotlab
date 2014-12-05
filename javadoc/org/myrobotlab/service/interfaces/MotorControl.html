@@ -120,90 +120,84 @@
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#getName()">getName</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>float</code></td>
+<td class="colFirst"><code>double</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#getPowerLevel()">getPowerLevel</a></strong>()</code>
 <div class="block">get the current power level of the motor</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#invertDirection(boolean)">invertDirection</a></strong>(boolean&nbsp;invert)</code>
-<div class="block">change the motors direction such that negative power levels become
- clockwise if previous levels were counter clockwise and positive power
- levels would become counter clockwise</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#isAttached()">isAttached</a></strong>()</code>
 <div class="block">reports if a motor is attached to a motor controller</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#isDirectionInverted()">isDirectionInverted</a></strong>()</code>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#isInverted()">isInverted</a></strong>()</code>
 <div class="block">query the motor as to its inverted status</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#lock()">lock</a></strong>()</code>
 <div class="block">locks the motor so no other commands will affect it until it becomes
  unlocked</div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#move(double)">move</a></strong>(double&nbsp;power)</code>
+<div class="block">Move is the most common motor command.</div>
+</td>
+</tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#move(java.lang.Float)">move</a></strong>(java.lang.Float&nbsp;power)</code>
-<div class="block">Move is the most common motor command.</div>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#moveFor(double, double)">moveFor</a></strong>(double&nbsp;power,
+       double&nbsp;duration)</code>
+<div class="block">moveFor move for a duration of time.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#moveFor(java.lang.Float, java.lang.Float)">moveFor</a></strong>(java.lang.Float&nbsp;power,
-       java.lang.Float&nbsp;duration)</code>
-<div class="block">moveFor move for a duration of time.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#moveFor(java.lang.Float, java.lang.Float, java.lang.Boolean)">moveFor</a></strong>(java.lang.Float&nbsp;power,
-       java.lang.Float&nbsp;duration,
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#moveFor(double, double, java.lang.Boolean)">moveFor</a></strong>(double&nbsp;power,
+       double&nbsp;duration,
        java.lang.Boolean&nbsp;block)</code>
 <div class="block">moveFor with the option to block on the thread and wait for the movement
  to be done</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#moveTo(java.lang.Integer)">moveTo</a></strong>(java.lang.Integer&nbsp;newPos)</code>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#moveTo(double)">moveTo</a></strong>(double&nbsp;newPos)</code>
 <div class="block">moveTo moves the motor to a specific location.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#setController(org.myrobotlab.service.interfaces.MotorController)">setController</a></strong>(<a href="../../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a>&nbsp;controller)</code>
 <div class="block">Attach a motor controller to the motor.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#setMaxPower(float)">setMaxPower</a></strong>(float&nbsp;max)</code>
-<div class="block">a safety limit</div>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#setInverted(boolean)">setInverted</a></strong>(boolean&nbsp;invert)</code>
+<div class="block">change the motors direction such that negative power levels become
+ clockwise if previous levels were counter clockwise and positive power
+ levels would become counter clockwise</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#stop()">stop</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#stopAndLock()">stopAndLock</a></strong>()</code>
 <div class="block">a safety mechanism - stop and lock will stop and lock the motor no other
  commands will affect the motor until it is "unlocked"</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/MotorControl.html#unlock()">unlock</a></strong>()</code>
 <div class="block">unlocks the motor, so other commands can affect it</div>
@@ -269,13 +263,13 @@
 <div class="block">reports if a motor is attached to a motor controller</div>
 </li>
 </ul>
-<a name="move(java.lang.Float)">
+<a name="move(double)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>move</h4>
-<pre>void&nbsp;move(java.lang.Float&nbsp;power)</pre>
+<pre>void&nbsp;move(double&nbsp;power)</pre>
 <div class="block">Move is the most common motor command. The command accepts a parameter of
  power which can be of the range -1.0 to 1.0. Negative values are in one
  direction and positive values are in the opposite value. For example -1.0
@@ -284,39 +278,39 @@
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>power</code> - - new power level</dd></dl>
 </li>
 </ul>
-<a name="moveTo(java.lang.Integer)">
+<a name="moveTo(double)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>moveTo</h4>
-<pre>void&nbsp;moveTo(java.lang.Integer&nbsp;newPos)</pre>
+<pre>void&nbsp;moveTo(double&nbsp;newPos)</pre>
 <div class="block">moveTo moves the motor to a specific location. Typically, an encoder is
  needed in order to provide feedback data</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>newPos</code> - </dd></dl>
 </li>
 </ul>
-<a name="moveFor(java.lang.Float, java.lang.Float)">
+<a name="moveFor(double, double)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>moveFor</h4>
-<pre>void&nbsp;moveFor(java.lang.Float&nbsp;power,
-           java.lang.Float&nbsp;duration)</pre>
+<pre>void&nbsp;moveFor(double&nbsp;power,
+           double&nbsp;duration)</pre>
 <div class="block">moveFor move for a duration of time. Sub-second movement can be expressed
  as a float value. E.g. 0.01 s</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>power</code> - with range of -1.0 <-> 0.0 <-> 1.0</dd><dd><code>duration</code> - - in seconds</dd></dl>
 </li>
 </ul>
-<a name="moveFor(java.lang.Float, java.lang.Float, java.lang.Boolean)">
+<a name="moveFor(double, double, java.lang.Boolean)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>moveFor</h4>
-<pre>void&nbsp;moveFor(java.lang.Float&nbsp;power,
-           java.lang.Float&nbsp;duration,
+<pre>void&nbsp;moveFor(double&nbsp;power,
+           double&nbsp;duration,
            java.lang.Boolean&nbsp;block)</pre>
 <div class="block">moveFor with the option to block on the thread and wait for the movement
  to be done</div>
@@ -329,31 +323,31 @@
 <ul class="blockList">
 <li class="blockList">
 <h4>getPowerLevel</h4>
-<pre>float&nbsp;getPowerLevel()</pre>
+<pre>double&nbsp;getPowerLevel()</pre>
 <div class="block">get the current power level of the motor</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
-<a name="invertDirection(boolean)">
+<a name="setInverted(boolean)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>invertDirection</h4>
-<pre>void&nbsp;invertDirection(boolean&nbsp;invert)</pre>
+<h4>setInverted</h4>
+<pre>void&nbsp;setInverted(boolean&nbsp;invert)</pre>
 <div class="block">change the motors direction such that negative power levels become
  clockwise if previous levels were counter clockwise and positive power
  levels would become counter clockwise</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>invert</code> - </dd></dl>
 </li>
 </ul>
-<a name="isDirectionInverted()">
+<a name="isInverted()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>isDirectionInverted</h4>
-<pre>boolean&nbsp;isDirectionInverted()</pre>
+<h4>isInverted</h4>
+<pre>boolean&nbsp;isInverted()</pre>
 <div class="block">query the motor as to its inverted status</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
@@ -392,22 +386,11 @@
 <a name="unlock()">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>unlock</h4>
 <pre>void&nbsp;unlock()</pre>
 <div class="block">unlocks the motor, so other commands can affect it</div>
-</li>
-</ul>
-<a name="setMaxPower(float)">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>setMaxPower</h4>
-<pre>void&nbsp;setMaxPower(float&nbsp;max)</pre>
-<div class="block">a safety limit</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>max</code> - </dd></dl>
 </li>
 </ul>
 </li>

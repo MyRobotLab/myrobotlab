@@ -156,45 +156,81 @@ extends java.lang.Object</pre>
                byte[]&nbsp;data)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#copy(java.io.File, java.io.File)">copy</a></strong>(java.io.File&nbsp;src,
+    java.io.File&nbsp;dst)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#copy(java.lang.String, java.lang.String)">copy</a></strong>(java.lang.String&nbsp;from,
     java.lang.String&nbsp;to)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#copyResource(java.lang.String, java.lang.String)">copyResource</a></strong>(java.lang.String&nbsp;fromFilename,
-            java.lang.String&nbsp;toFilename)</code>&nbsp;</td>
+            java.lang.String&nbsp;toFilename)</code>
+<div class="block">NO NIO ON ANDROID !!!
+        private static FileSystem createZipFileSystem(String zipFilename, boolean create) throws IOException {
+                // convert the filename to a URI
+                final Path path = Paths.get(zipFilename);
+                final URI uri = URI.create("jar:file:" + path.toUri().getPath());
+
+                final Map<String, String> env = new HashMap<String, String>();
+                if (create) {
+                        env.put("create", "true");
+                }
+                return FileSystems.newFileSystem(uri, env);
+        }
+
+        public static void list(String zipFilename) throws IOException {
+
+                System.out.printf("Listing Archive:  %s\n", zipFilename);
+
+                FileSystem zipFileSystem = null;
+                try {
+                        // create the file system
+                        zipFileSystem = createZipFileSystem(zipFilename, false);
+
+                        final Path root = zipFileSystem.getPath("/");
+
+                        // walk the file tree and print out the directory and filenames
+                        Files.walkFileTree(root, new SimpleFileVisitor<Path>() {</div>
+</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#fileToByteArray(java.io.File)">fileToByteArray</a></strong>(java.io.File&nbsp;file)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#fileToString(java.io.File)">fileToString</a></strong>(java.io.File&nbsp;file)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#fileToString(java.lang.String)">fileToString</a></strong>(java.lang.String&nbsp;filename)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#getBinaryPath()">getBinaryPath</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#getCfgDir()">getCfgDir</a></strong>()</code>
 <div class="block">Single place to get configuration data directory - currently in
  cwd/.myrobotlab</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.io.File[]</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#getPackageContent(java.lang.String)">getPackageContent</a></strong>(java.lang.String&nbsp;packageName)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#getResouceLocation()">getResouceLocation</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static byte[]</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#getResource(java.lang.String)">getResource</a></strong>(java.lang.String&nbsp;resoucePath)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
@@ -205,18 +241,22 @@ extends java.lang.Object</pre>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#getRootLocation()">getRootLocation</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#getSource()">getSource</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#getURL(java.net.URL)">getURL</a></strong>(java.net.URL&nbsp;url)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#inJar()">inJar</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#list(java.lang.String)">list</a></strong>(java.lang.String&nbsp;zipFilename)</code>&nbsp;</td>
-</tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#isJar()">isJar</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static java.util.ArrayList&lt;java.io.File&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#listInternalContents(java.lang.String)">listInternalContents</a></strong>(java.lang.String&nbsp;path)</code>
 <div class="block">similar to ls - when running in jar form will return contents of path in
@@ -224,36 +264,36 @@ extends java.lang.Object</pre>
  of /bin + path</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.util.ArrayList&lt;java.io.File&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#listResourceContents(java.lang.String)">listResourceContents</a></strong>(java.lang.String&nbsp;path)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.lang.Object</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#readBinary(java.lang.String)">readBinary</a></strong>(java.lang.String&nbsp;filename)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#resourceToByteArray(java.lang.String)">resourceToByteArray</a></strong>(java.lang.String&nbsp;resourceName)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#resourceToString(java.lang.String)">resourceToString</a></strong>(java.lang.String&nbsp;filename)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#stringToFile(java.lang.String, java.lang.String)">stringToFile</a></strong>(java.lang.String&nbsp;filename,
             java.lang.String&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#toByteArray(java.io.InputStream)">toByteArray</a></strong>(java.io.InputStream&nbsp;is)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/fileLib/FileIO.html#writeBinary(java.lang.String, java.lang.Object)">writeBinary</a></strong>(java.lang.String&nbsp;filename,
            java.lang.Object&nbsp;toSave)</code>&nbsp;</td>
@@ -400,6 +440,24 @@ extends java.lang.Object</pre>
 <dd><code>java.io.FileNotFoundException</code></dd></dl>
 </li>
 </ul>
+<a name="getSource()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSource</h4>
+<pre>public static final&nbsp;java.lang.String&nbsp;getSource()</pre>
+</li>
+</ul>
+<a name="isJar()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isJar</h4>
+<pre>public static final&nbsp;boolean&nbsp;isJar()</pre>
+</li>
+</ul>
 <a name="resourceToByteArray(java.lang.String)">
 <!--   -->
 </a>
@@ -517,13 +575,14 @@ extends java.lang.Object</pre>
 <dd><code>java.io.IOException</code></dd></dl>
 </li>
 </ul>
-<a name="list(java.lang.String)">
+<a name="copy(java.io.File, java.io.File)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>list</h4>
-<pre>public static&nbsp;void&nbsp;list(java.lang.String&nbsp;zipFilename)
+<h4>copy</h4>
+<pre>public static&nbsp;void&nbsp;copy(java.io.File&nbsp;src,
+        java.io.File&nbsp;dst)
                  throws java.io.IOException</pre>
 <dl><dt><span class="strong">Throws:</span></dt>
 <dd><code>java.io.IOException</code></dd></dl>
@@ -537,6 +596,32 @@ extends java.lang.Object</pre>
 <h4>copyResource</h4>
 <pre>public static&nbsp;boolean&nbsp;copyResource(java.lang.String&nbsp;fromFilename,
                    java.lang.String&nbsp;toFilename)</pre>
+<div class="block">NO NIO ON ANDROID !!!
+        private static FileSystem createZipFileSystem(String zipFilename, boolean create) throws IOException {
+                // convert the filename to a URI
+                final Path path = Paths.get(zipFilename);
+                final URI uri = URI.create("jar:file:" + path.toUri().getPath());
+
+                final Map<String, String> env = new HashMap<String, String>();
+                if (create) {
+                        env.put("create", "true");
+                }
+                return FileSystems.newFileSystem(uri, env);
+        }
+
+        public static void list(String zipFilename) throws IOException {
+
+                System.out.printf("Listing Archive:  %s\n", zipFilename);
+
+                FileSystem zipFileSystem = null;
+                try {
+                        // create the file system
+                        zipFileSystem = createZipFileSystem(zipFilename, false);
+
+                        final Path root = zipFileSystem.getPath("/");
+
+                        // walk the file tree and print out the directory and filenames
+                        Files.walkFileTree(root, new SimpleFileVisitor<Path>() {</div>
 </li>
 </ul>
 <a name="copy(java.lang.String, java.lang.String)">
@@ -552,7 +637,7 @@ extends java.lang.Object</pre>
 <a name="main(java.lang.String[])">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>main</h4>
 <pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;args)
@@ -561,6 +646,15 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Throws:</span></dt>
 <dd><code>java.util.zip.ZipException</code></dd>
 <dd><code>java.io.IOException</code></dd></dl>
+</li>
+</ul>
+<a name="getResource(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getResource</h4>
+<pre>public static&nbsp;byte[]&nbsp;getResource(java.lang.String&nbsp;resoucePath)</pre>
 </li>
 </ul>
 </li>

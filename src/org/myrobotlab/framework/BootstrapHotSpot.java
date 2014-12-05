@@ -564,6 +564,8 @@ public class BootstrapHotSpot implements Bootstrap {
 					out.write(buffer, 0, nRead);
 				}
 				in.close();
+			} else {
+				log.error(String.format("cant get %s as resouce stream", filename));
 			}
 		}
 

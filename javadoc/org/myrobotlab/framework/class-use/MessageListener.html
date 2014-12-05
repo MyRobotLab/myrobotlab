@@ -74,10 +74,6 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><a href="#org.myrobotlab.client">org.myrobotlab.client</a></td>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><a href="#org.myrobotlab.service">org.myrobotlab.service</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -86,24 +82,6 @@
 </li>
 <li class="blockList">
 <ul class="blockList">
-<li class="blockList"><a name="org.myrobotlab.client">
-<!--   -->
-</a>
-<h3>Uses of <a href="../../../../org/myrobotlab/framework/MessageListener.html" title="interface in org.myrobotlab.framework">MessageListener</a> in <a href="../../../../org/myrobotlab/client/package-summary.html">org.myrobotlab.client</a></h3>
-<table border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
-<caption><span>Classes in <a href="../../../../org/myrobotlab/client/package-summary.html">org.myrobotlab.client</a> that implement <a href="../../../../org/myrobotlab/framework/MessageListener.html" title="interface in org.myrobotlab.framework">MessageListener</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Class and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/client/MainTest.html" title="class in org.myrobotlab.client">MainTest</a></strong></code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-</li>
 <li class="blockList"><a name="org.myrobotlab.service">
 <!--   -->
 </a>
@@ -124,17 +102,7 @@
  foreign Runtimes It is a singleton and should be the only service of Runtime
  running in a process The host and registry maps are used in routing
  communication to the appropriate service (be it local or remote) It will be
- the first Service created It also wraps the real JVM Runtime object
- 
- TODO - get last args & better restart (with Agent possibly?)
- 
- RuntimeMXBean - scares me - but the stackTrace is clever RuntimeMXBean
- runtimeMxBean = ManagementFactory.getRuntimeMXBean(); List<String> arguments
- = runtimeMxBean.getInputArguments();
- 
- final StackTraceElement[] stackTrace =
- Thread.currentThread().getStackTrace(); final String mainClassName =
- stackTrace[stackTrace.length - 1].getClassName();</div>
+ the first Service created It also wraps the real JVM Runtime object.</div>
 </td>
 </tr>
 </tbody>

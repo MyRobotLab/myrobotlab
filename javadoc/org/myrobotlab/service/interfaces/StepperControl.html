@@ -114,23 +114,47 @@
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#detach()">detach</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>java.lang.Integer</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#getIndex()">getIndex</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#getName()">getName</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.Integer[]</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#getPins()">getPins</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#getStepperType()">getStepperType</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#getSteps()">getSteps</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#isAttached()">isAttached</a></strong>()</code>
 <div class="block">reports if a stepper is attached to a stepper controller</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#lock()">lock</a></strong>()</code>
 <div class="block">locks the stepper so no other commands will affect it until it becomes
  unlocked</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#setController(org.myrobotlab.service.interfaces.StepperController)">setController</a></strong>(<a href="../../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a>&nbsp;controller)</code>
-<div class="block">Attach a stepper controller to the stepper.</div>
+<div class="block">setting controller is needed in the "attach" process</div>
 </td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/myrobotlab/service/interfaces/StepperControl.html#setIndex(java.lang.Integer)">setIndex</a></strong>(java.lang.Integer&nbsp;index)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
@@ -184,12 +208,7 @@
 <li class="blockList">
 <h4>setController</h4>
 <pre>boolean&nbsp;setController(<a href="../../../../org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a>&nbsp;controller)</pre>
-<div class="block">Attach a stepper controller to the stepper. The stepper and stepper controller
- "should be in the same instance of MRL and this reference to another
- service should be ok.
- 
- The stepper controller uses this method to pass a reference of itself to
- the stepper, to be used directly</div>
+<div class="block">setting controller is needed in the "attach" process</div>
 </li>
 </ul>
 <a name="isAttached()">
@@ -273,11 +292,65 @@
 <a name="unlock()">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>unlock</h4>
 <pre>void&nbsp;unlock()</pre>
 <div class="block">unlocks the stepper, so other commands can affect it</div>
+</li>
+</ul>
+<a name="getName()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getName</h4>
+<pre>java.lang.String&nbsp;getName()</pre>
+</li>
+</ul>
+<a name="getStepperType()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getStepperType</h4>
+<pre>java.lang.String&nbsp;getStepperType()</pre>
+</li>
+</ul>
+<a name="getPins()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPins</h4>
+<pre>java.lang.Integer[]&nbsp;getPins()</pre>
+</li>
+</ul>
+<a name="setIndex(java.lang.Integer)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setIndex</h4>
+<pre>void&nbsp;setIndex(java.lang.Integer&nbsp;index)</pre>
+</li>
+</ul>
+<a name="getIndex()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getIndex</h4>
+<pre>java.lang.Integer&nbsp;getIndex()</pre>
+</li>
+</ul>
+<a name="getSteps()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getSteps</h4>
+<pre>int&nbsp;getSteps()</pre>
 </li>
 </ul>
 </li>

@@ -2,13 +2,13 @@
 <!-- NewPage -->
 <html lang="en">
 <head>
-<title>SaberTooth</title>
+<title>Sabertooth</title>
 <link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
 </head>
 <body>
 <script type="text/javascript"><!--
     if (location.href.indexOf('is-external=true') == -1) {
-        parent.document.title="SaberTooth";
+        parent.document.title="Sabertooth";
     }
 //-->
 </script>
@@ -25,7 +25,7 @@
 <li><a href="../../../overview-summary.html">Overview</a></li>
 <li><a href="package-summary.html">Package</a></li>
 <li class="navBarCell1Rev">Class</li>
-<li><a href="class-use/SaberTooth.html">Use</a></li>
+<li><a href="class-use/Sabertooth.html">Use</a></li>
 <li><a href="package-tree.html">Tree</a></li>
 <li><a href="../../../deprecated-list.html">Deprecated</a></li>
 <li><a href="../../../index-files/index-1.html">Index</a></li>
@@ -38,8 +38,8 @@
 <li><a href="../../../org/myrobotlab/service/SEAR.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../../index.html?org/myrobotlab/service/SaberTooth.html" target="_top">Frames</a></li>
-<li><a href="SaberTooth.html" target="_top">No Frames</a></li>
+<li><a href="../../../index.html?org/myrobotlab/service/Sabertooth.html" target="_top">Frames</a></li>
+<li><a href="Sabertooth.html" target="_top">No Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_top">
 <li><a href="../../../allclasses-noframe.html">All Classes</a></li>
@@ -78,7 +78,7 @@
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">org.myrobotlab.service</div>
-<h2 title="Class SaberTooth" class="title">Class SaberTooth</h2>
+<h2 title="Class Sabertooth" class="title">Class Sabertooth</h2>
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
@@ -88,7 +88,7 @@
 <li><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">org.myrobotlab.framework.Service</a></li>
 <li>
 <ul class="inheritance">
-<li>org.myrobotlab.service.SaberTooth</li>
+<li>org.myrobotlab.service.Sabertooth</li>
 </ul>
 </li>
 </ul>
@@ -99,13 +99,12 @@
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>java.io.Serializable, java.lang.Runnable, <a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a>, <a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></dd>
+<dd>java.io.Serializable, java.lang.Runnable, <a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></dd>
 </dl>
 <hr>
 <br>
-<pre>public class <span class="strong">SaberTooth</span>
-extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>
-implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></pre>
+<pre>public class <span class="strong">Sabertooth</span>
+extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></pre>
 <dl><dt><span class="strong">Author:</span></dt>
   <dd>GroG
  
@@ -115,7 +114,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
  
          Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address
          + 0 + speed) & 0b01111111);</dd>
-<dt><span class="strong">See Also:</span></dt><dd><a href="../../../serialized-form.html#org.myrobotlab.service.SaberTooth">Serialized Form</a></dd></dl>
+<dt><span class="strong">See Also:</span></dt><dd><a href="../../../serialized-form.html#org.myrobotlab.service.Sabertooth">Serialized Form</a></dd></dl>
 </li>
 </ul>
 </div>
@@ -135,40 +134,52 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#INPUT">INPUT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>static org.slf4j.Logger</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#log">log</a></strong></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#MOTOR1_BACKWARD">MOTOR1_BACKWARD</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#log">log</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#MOTOR1_FORWARD">MOTOR1_FORWARD</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#MOTOR1_BACKWARD">MOTOR1_BACKWARD</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#MOTOR2_BACKWARD">MOTOR2_BACKWARD</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#MOTOR1_FORWARD">MOTOR1_FORWARD</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#MOTOR2_FORWARD">MOTOR2_FORWARD</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#MOTOR2_BACKWARD">MOTOR2_BACKWARD</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#PACKETIZED_SERIAL_MODE">PACKETIZED_SERIAL_MODE</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#MOTOR2_FORWARD">MOTOR2_FORWARD</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#OUTPUT">OUTPUT</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#PACKETIZED_SERIAL_MODE">PACKETIZED_SERIAL_MODE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#PINMODE">PINMODE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/serial/SerialDeviceService.html" title="interface in org.myrobotlab.serial">SerialDeviceService</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#serial">serial</a></strong></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#SET_MAX_VOLTAGE">SET_MAX_VOLTAGE</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#serial">serial</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#SET_MIN_VOLTAGE">SET_MIN_VOLTAGE</a></strong></code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#SET_MAX_VOLTAGE">SET_MAX_VOLTAGE</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#SET_MIN_VOLTAGE">SET_MIN_VOLTAGE</a></strong></code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -192,7 +203,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#SaberTooth(java.lang.String)">SaberTooth</a></strong>(java.lang.String&nbsp;n)</code>&nbsp;</td>
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#Sabertooth(java.lang.String)">Sabertooth</a></strong>(java.lang.String&nbsp;n)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -211,11 +222,11 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#connect(java.lang.String)">connect</a></strong>(java.lang.String&nbsp;port)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#connect(java.lang.String)">connect</a></strong>(java.lang.String&nbsp;port)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#connect(java.lang.String, int, int, int, int)">connect</a></strong>(java.lang.String&nbsp;port,
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#connect(java.lang.String, int, int, int, int)">connect</a></strong>(java.lang.String&nbsp;port,
        int&nbsp;baud,
        int&nbsp;data,
        int&nbsp;stop,
@@ -223,54 +234,51 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#disconnect()">disconnect</a></strong>()</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#disconnect()">disconnect</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#driveBackwardsMotor1(int)">driveBackwardsMotor1</a></strong>(int&nbsp;speed)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#driveBackwardsMotor1(int)">driveBackwardsMotor1</a></strong>(int&nbsp;speed)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#driveBackwardsMotor2(int)">driveBackwardsMotor2</a></strong>(int&nbsp;speed)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#driveBackwardsMotor2(int)">driveBackwardsMotor2</a></strong>(int&nbsp;speed)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#driveForwardMotor1(int)">driveForwardMotor1</a></strong>(int&nbsp;speed)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#driveForwardMotor1(int)">driveForwardMotor1</a></strong>(int&nbsp;speed)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#driveForwardMotor2(int)">driveForwardMotor2</a></strong>(int&nbsp;speed)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#driveForwardMotor2(int)">driveForwardMotor2</a></strong>(int&nbsp;speed)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#getDescription()">getDescription</a></strong>()</code>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#getDescription()">getDescription</a></strong>()</code>
 <div class="block">Short description of the service</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>java.lang.Object[]</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#getMotorData(java.lang.String)">getMotorData</a></strong>(java.lang.String&nbsp;motorName)</code>
-<div class="block">method to return motor information</div>
-</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#getMotorData(java.lang.String)">getMotorData</a></strong>(java.lang.String&nbsp;motorName)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../org/myrobotlab/framework/Peers.html" title="class in org.myrobotlab.framework">Peers</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#getPeers(java.lang.String)">getPeers</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#getPeers(java.lang.String)">getPeers</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a>&gt;</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#getPinList()">getPinList</a></strong>()</code>
-<div class="block">This is basic information to request from a Controller.</div>
-</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#getPinList()">getPinList</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#motorAttach(java.lang.String, int)">motorAttach</a></strong>(java.lang.String&nbsp;motorName,
-           int&nbsp;motorPort)</code>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer)">motorAttach</a></strong>(java.lang.String&nbsp;motorName,
+           java.lang.Integer&nbsp;pwrPin,
+           java.lang.Integer&nbsp;dirPin)</code>
 <div class="block">Motor Controller specific method for attaching a motor In the case of a
  SaberTooth - we will need the motor name (of course) and the motor port
  number - SaberTooth supports 2 (M1 & M2)</div>
@@ -278,50 +286,40 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#motorAttach(java.lang.String, java.lang.Object...)">motorAttach</a></strong>(java.lang.String&nbsp;motorName,
-           java.lang.Object...&nbsp;motorData)</code>
-<div class="block">Remote attachment activation - used by services not in the same instance
- to attach a Motor to a MotorController</div>
-</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)">motorAttach</a></strong>(java.lang.String&nbsp;motorName,
+           java.lang.Integer&nbsp;pwrPin,
+           java.lang.Integer&nbsp;dirPin,
+           java.lang.Integer&nbsp;encoderPin)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#motorDetach(java.lang.String)">motorDetach</a></strong>(java.lang.String&nbsp;name)</code>
-<div class="block">MotorDetach - detach the Motor from a specific pin on the controller</div>
-</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#motorDetach(java.lang.String)">motorDetach</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#motorMove(java.lang.String)">motorMove</a></strong>(java.lang.String&nbsp;name)</code>
-<div class="block">request for motor to move the motor can be queried for the new powerlevel
- and the controller shall appropriately change power level and direction
- if necessary</div>
-</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#motorMove(java.lang.String)">motorMove</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#motorMoveTo(java.lang.String, java.lang.Integer)">motorMoveTo</a></strong>(java.lang.String&nbsp;name,
-           java.lang.Integer&nbsp;position)</code>
-<div class="block">moveTo - move the Motor a relative amount the amount can be negative or
- positive an integer value is expected</div>
-</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#motorMoveTo(java.lang.String, java.lang.Integer)">motorMoveTo</a></strong>(java.lang.String&nbsp;name,
+           java.lang.Integer&nbsp;position)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#sendPacket(int, int)">sendPacket</a></strong>(int&nbsp;command,
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#sendPacket(int, int)">sendPacket</a></strong>(int&nbsp;command,
           int&nbsp;data)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#setAddress(java.lang.Integer)">setAddress</a></strong>(java.lang.Integer&nbsp;address)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#setAddress(java.lang.Integer)">setAddress</a></strong>(java.lang.Integer&nbsp;address)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#setMaxVoltage(int)">setMaxVoltage</a></strong>(int&nbsp;maxVolts)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#setMaxVoltage(int)">setMaxVoltage</a></strong>(int&nbsp;maxVolts)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/SaberTooth.html#setMinVoltage(int)">setMinVoltage</a></strong>(int&nbsp;min)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sabertooth.html#setMinVoltage(int)">setMinVoltage</a></strong>(int&nbsp;min)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -329,7 +327,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;org.myrobotlab.framework.<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></h3>
-<code><a href="../../../org/myrobotlab/framework/Service.html#addListener(org.myrobotlab.framework.MRLListener)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addLocalTask(int, java.lang.String, java.lang.Object[]...)">addLocalTask</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay()">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay(java.lang.Boolean)">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#broadcastState()">broadcastState</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(org.myrobotlab.framework.Index, java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#clearLastError()">clearLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#connect(java.lang.String, java.lang.String, java.lang.String, int)">connect</a>, <a href="../../../org/myrobotlab/framework/Service.html#connectionBroken(org.myrobotlab.service.data.IPAndPort)">connectionBroken</a>, <a href="../../../org/myrobotlab/framework/Service.html#copyShallowFrom(java.lang.Object, java.lang.Object)">copyShallowFrom</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object)">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object[])">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String, java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createRootReserved(java.lang.String)">createRootReserved</a>, <a href="../../../org/myrobotlab/framework/Service.html#display()">display</a>, <a href="../../../org/myrobotlab/framework/Service.html#echoHeartbeat(org.myrobotlab.net.Heartbeat)">echoHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.Exception)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String, java.lang.Object...)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#getCFGDir()">getCFGDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#getComm()">getComm</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDeclaredMethods()">getDeclaredMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDNA()">getDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHost()">getHost</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHostName(java.lang.String)">getHostName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInbox()">getInbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getIntanceName()">getIntanceName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLastError()">getLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.Class)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.String)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMessageSet()">getMessageSet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethods()">getMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethodToolTip(java.lang.String, java.lang.String, java.lang.Class[])">getMethodToolTip</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMsg()">getMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#getName()">getName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class, java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyList(java.lang.String)">getNotifyList</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyListKeySet()">getNotifyListKeySet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getOutbox()">getOutbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getPeerKey(java.lang.String)">getPeerKey</a>, <a href="../../../org/myrobotlab/framework/Service.html#getServiceResourceFile(java.lang.String)">getServiceResourceFile</a>, <a href="../../../org/myrobotlab/framework/Service.html#getSimpleName()">getSimpleName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThisThread()">getThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThrowableNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getThrowableNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getType()">getType</a>, <a href="../../../org/myrobotlab/framework/Service.html#getTypeName()">getTypeName</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasDisplay()">hasDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasPeers()">hasPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#help()">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#help(java.lang.String, java.lang.String)">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#in(org.myrobotlab.framework.Message)">in</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String, java.lang.Object...)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(org.myrobotlab.framework.Message)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String, java.lang.Object...)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invokeOn(java.lang.Object, java.lang.String, java.lang.Object...)">invokeOn</a>, <a href="../../../org/myrobotlab/framework/Service.html#isLocal()">isLocal</a>, <a href="../../../org/myrobotlab/framework/Service.html#isReady()">isReady</a>, <a href="../../../org/myrobotlab/framework/Service.html#isRunning()">isRunning</a>, <a href="../../../org/myrobotlab/framework/Service.html#load()">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#load(java.lang.Object, java.lang.String)">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#loadRecording(java.lang.String)">loadRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#logException(java.lang.Throwable)">logException</a>, <a href="../../../org/myrobotlab/framework/Service.html#logTimeEnable(java.lang.Boolean)">logTimeEnable</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNA(java.lang.String, java.lang.String)">mergePeerDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNAx(java.lang.String, java.lang.String)">mergePeerDNAx</a>, <a href="../../../org/myrobotlab/framework/Service.html#noConnection(org.myrobotlab.service.data.IPAndPort)">noConnection</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(org.myrobotlab.framework.Message)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(java.lang.String, java.lang.Object)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#preRoutingHook(org.myrobotlab.framework.Message)">preRoutingHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#proxySend(java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">proxySend</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishError(java.lang.String)">publishError</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishState()">publishState</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishStatus(java.lang.String, java.lang.String)">publishStatus</a>, <a href="../../../org/myrobotlab/framework/Service.html#purgeAllTasks()">purgeAllTasks</a>, <a href="../../../org/myrobotlab/framework/Service.html#releasePeers()">releasePeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#releaseService()">releaseService</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeAllListeners()">removeAllListeners</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(org.myrobotlab.framework.MRLListener)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#requiresSecurity()">requiresSecurity</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRootAs(java.lang.String, java.lang.String)">reserveRootAs</a>, <a href="../../../org/myrobotlab/framework/Service.html#run()">run</a>, <a href="../../../org/myrobotlab/framework/Service.html#save()">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.Object, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.String, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String, java.lang.Object...)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.net.URI, java.lang.String, java.lang.Object)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.Integer, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#setHost(java.net.URI)">setHost</a>, <a href="../../../org/myrobotlab/framework/Service.html#setLogLevel(java.lang.String)">setLogLevel</a>, <a href="../../../org/myrobotlab/framework/Service.html#setSecurityProvider(org.myrobotlab.service.interfaces.AuthorizationProvider)">setSecurityProvider</a>, <a href="../../../org/myrobotlab/framework/Service.html#setState(org.myrobotlab.framework.Service)">setState</a>, <a href="../../../org/myrobotlab/framework/Service.html#setThisThread(java.lang.Thread)">setThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#sleep(int)">sleep</a>, <a href="../../../org/myrobotlab/framework/Service.html#stackToString(java.lang.Throwable)">stackToString</a>, <a href="../../../org/myrobotlab/framework/Service.html#startHeartbeat()">startHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String, java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startRecording()">startRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startRecording(java.lang.String)">startRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startService()">startService</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopHeartbeat()">stopHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopRecording()">stopRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopService()">stopService</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#test()">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#test(java.lang.Object...)">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">unsubscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String)">warn</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String, java.lang.Object...)">warn</a></code></li>
+<code><a href="../../../org/myrobotlab/framework/Service.html#addListener(org.myrobotlab.framework.MRLListener)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">addListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#addLocalTask(int, java.lang.String, java.lang.Object...)">addLocalTask</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay()">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#allowDisplay(java.lang.Boolean)">allowDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#broadcastState()">broadcastState</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(org.myrobotlab.framework.Index, java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#buildDNA(java.lang.String, java.lang.String, java.lang.String)">buildDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#clearLastError()">clearLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#close(java.io.Writer)">close</a>, <a href="../../../org/myrobotlab/framework/Service.html#connect(java.lang.String, java.lang.String, java.lang.String, int)">connect</a>, <a href="../../../org/myrobotlab/framework/Service.html#copyShallowFrom(java.lang.Object, java.lang.Object)">copyShallowFrom</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object)">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createMessage(java.lang.String, java.lang.String, java.lang.Object[])">createMessage</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createPeer(java.lang.String, java.lang.String)">createPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#createRootReserved(java.lang.String)">createRootReserved</a>, <a href="../../../org/myrobotlab/framework/Service.html#display()">display</a>, <a href="../../../org/myrobotlab/framework/Service.html#echoHeartbeat(org.myrobotlab.net.Heartbeat)">echoHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.Exception)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#error(java.lang.String, java.lang.Object...)">error</a>, <a href="../../../org/myrobotlab/framework/Service.html#getCFGDir()">getCFGDir</a>, <a href="../../../org/myrobotlab/framework/Service.html#getComm()">getComm</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDeclaredMethods()">getDeclaredMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getDNA()">getDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#getHostName(java.lang.String)">getHostName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInbox()">getInbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getInstanceId()">getInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#getIntanceName()">getIntanceName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLastError()">getLastError</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.Class)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getLocalPeers(java.lang.String, java.lang.String)">getLocalPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMessageSet()">getMessageSet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethods()">getMethods</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMethodToolTip(java.lang.String, java.lang.String, java.lang.Class[])">getMethodToolTip</a>, <a href="../../../org/myrobotlab/framework/Service.html#getMsg()">getMsg</a>, <a href="../../../org/myrobotlab/framework/Service.html#getName()">getName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.Class, java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNewInstance(java.lang.String, java.lang.Object...)">getNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyList(java.lang.String)">getNotifyList</a>, <a href="../../../org/myrobotlab/framework/Service.html#getNotifyListKeySet()">getNotifyListKeySet</a>, <a href="../../../org/myrobotlab/framework/Service.html#getOutbox()">getOutbox</a>, <a href="../../../org/myrobotlab/framework/Service.html#getPeerKey(java.lang.String)">getPeerKey</a>, <a href="../../../org/myrobotlab/framework/Service.html#getServiceResourceFile(java.lang.String)">getServiceResourceFile</a>, <a href="../../../org/myrobotlab/framework/Service.html#getSimpleName()">getSimpleName</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThisThread()">getThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#getThrowableNewInstance(java.lang.Class[], java.lang.String, java.lang.Object...)">getThrowableNewInstance</a>, <a href="../../../org/myrobotlab/framework/Service.html#getType()">getType</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasDisplay()">hasDisplay</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasError()">hasError</a>, <a href="../../../org/myrobotlab/framework/Service.html#hasPeers()">hasPeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#help()">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#help(java.lang.String, java.lang.String)">help</a>, <a href="../../../org/myrobotlab/framework/Service.html#in(org.myrobotlab.framework.Message)">in</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#info(java.lang.String, java.lang.Object...)">info</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(org.myrobotlab.framework.Message)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invoke(java.lang.String, java.lang.Object...)">invoke</a>, <a href="../../../org/myrobotlab/framework/Service.html#invokeOn(java.lang.Object, java.lang.String, java.lang.Object...)">invokeOn</a>, <a href="../../../org/myrobotlab/framework/Service.html#isLocal()">isLocal</a>, <a href="../../../org/myrobotlab/framework/Service.html#isReady()">isReady</a>, <a href="../../../org/myrobotlab/framework/Service.html#isRunning()">isRunning</a>, <a href="../../../org/myrobotlab/framework/Service.html#load()">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#load(java.lang.Object, java.lang.String)">load</a>, <a href="../../../org/myrobotlab/framework/Service.html#loadRecording(java.lang.String)">loadRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#logException(java.lang.Throwable)">logException</a>, <a href="../../../org/myrobotlab/framework/Service.html#logTimeEnable(java.lang.Boolean)">logTimeEnable</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNA(java.lang.String, java.lang.String)">mergePeerDNA</a>, <a href="../../../org/myrobotlab/framework/Service.html#mergePeerDNAx(java.lang.String, java.lang.String)">mergePeerDNAx</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(org.myrobotlab.framework.Message)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#out(java.lang.String, java.lang.Object)">out</a>, <a href="../../../org/myrobotlab/framework/Service.html#preProcessHook(org.myrobotlab.framework.Message)">preProcessHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#preRoutingHook(org.myrobotlab.framework.Message)">preRoutingHook</a>, <a href="../../../org/myrobotlab/framework/Service.html#proxySend(java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">proxySend</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishError(java.lang.String)">publishError</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishState()">publishState</a>, <a href="../../../org/myrobotlab/framework/Service.html#publishStatus(java.lang.String, java.lang.String)">publishStatus</a>, <a href="../../../org/myrobotlab/framework/Service.html#purgeAllTasks()">purgeAllTasks</a>, <a href="../../../org/myrobotlab/framework/Service.html#releasePeers()">releasePeers</a>, <a href="../../../org/myrobotlab/framework/Service.html#releaseService()">releaseService</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeAllListeners()">removeAllListeners</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(org.myrobotlab.framework.MRLListener)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#removeListener(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">removeListener</a>, <a href="../../../org/myrobotlab/framework/Service.html#requiresSecurity()">requiresSecurity</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserve(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserve</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRoot(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">reserveRoot</a>, <a href="../../../org/myrobotlab/framework/Service.html#reserveRootAs(java.lang.String, java.lang.String)">reserveRootAs</a>, <a href="../../../org/myrobotlab/framework/Service.html#run()">run</a>, <a href="../../../org/myrobotlab/framework/Service.html#save()">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.Object, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#save(java.lang.String, java.lang.String)">save</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.lang.String, java.lang.String, java.lang.Object...)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#send(java.net.URI, java.lang.String, java.lang.Object)">send</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.Integer, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#sendBlocking(java.lang.String, java.lang.String, java.lang.Object...)">sendBlocking</a>, <a href="../../../org/myrobotlab/framework/Service.html#setInstanceId(java.net.URI)">setInstanceId</a>, <a href="../../../org/myrobotlab/framework/Service.html#setLogLevel(java.lang.String)">setLogLevel</a>, <a href="../../../org/myrobotlab/framework/Service.html#setPrefix(java.lang.String)">setPrefix</a>, <a href="../../../org/myrobotlab/framework/Service.html#setSecurityProvider(org.myrobotlab.service.interfaces.AuthorizationProvider)">setSecurityProvider</a>, <a href="../../../org/myrobotlab/framework/Service.html#setState(org.myrobotlab.framework.Service)">setState</a>, <a href="../../../org/myrobotlab/framework/Service.html#setThisThread(java.lang.Thread)">setThisThread</a>, <a href="../../../org/myrobotlab/framework/Service.html#sleep(int)">sleep</a>, <a href="../../../org/myrobotlab/framework/Service.html#stackToString(java.lang.Throwable)">stackToString</a>, <a href="../../../org/myrobotlab/framework/Service.html#startHeartbeat()">startHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#startMsgRecording(java.lang.String)">startMsgRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startPeer(java.lang.String, java.lang.String)">startPeer</a>, <a href="../../../org/myrobotlab/framework/Service.html#startRecording()">startRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#startService()">startService</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopHeartbeat()">stopHeartbeat</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopMsgRecording()">stopMsgRecording</a>, <a href="../../../org/myrobotlab/framework/Service.html#stopService()">stopService</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#subscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">subscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#test()">test</a>, <a href="../../../org/myrobotlab/framework/Service.html#unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.Class...)">unsubscribe</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String)">warn</a>, <a href="../../../org/myrobotlab/framework/Service.html#warn(java.lang.String, java.lang.Object...)">warn</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
@@ -337,13 +335,6 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
 <code>equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
-</ul>
-<ul class="blockList">
-<li class="blockList"><a name="methods_inherited_from_class_org.myrobotlab.service.interfaces.MotorController">
-<!--   -->
-</a>
-<h3>Methods inherited from interface&nbsp;org.myrobotlab.service.interfaces.<a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></h3>
-<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#getName()">getName</a></code></li>
 </ul>
 </li>
 </ul>
@@ -366,7 +357,17 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>PACKETIZED_SERIAL_MODE</h4>
 <pre>public static final&nbsp;int PACKETIZED_SERIAL_MODE</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.SaberTooth.PACKETIZED_SERIAL_MODE">Constant Field Values</a></dd></dl>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.PACKETIZED_SERIAL_MODE">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="PINMODE">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>PINMODE</h4>
+<pre>public static final&nbsp;int PINMODE</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.PINMODE">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 <a name="log">
@@ -387,6 +388,26 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <pre>public&nbsp;<a href="../../../org/myrobotlab/serial/SerialDeviceService.html" title="interface in org.myrobotlab.serial">SerialDeviceService</a> serial</pre>
 </li>
 </ul>
+<a name="INPUT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>INPUT</h4>
+<pre>public static final&nbsp;int INPUT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.INPUT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="OUTPUT">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>OUTPUT</h4>
+<pre>public static final&nbsp;int OUTPUT</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.OUTPUT">Constant Field Values</a></dd></dl>
+</li>
+</ul>
 <a name="MOTOR1_FORWARD">
 <!--   -->
 </a>
@@ -394,7 +415,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>MOTOR1_FORWARD</h4>
 <pre>public static final&nbsp;int MOTOR1_FORWARD</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.SaberTooth.MOTOR1_FORWARD">Constant Field Values</a></dd></dl>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.MOTOR1_FORWARD">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 <a name="MOTOR1_BACKWARD">
@@ -404,7 +425,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>MOTOR1_BACKWARD</h4>
 <pre>public static final&nbsp;int MOTOR1_BACKWARD</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.SaberTooth.MOTOR1_BACKWARD">Constant Field Values</a></dd></dl>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.MOTOR1_BACKWARD">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 <a name="SET_MIN_VOLTAGE">
@@ -414,7 +435,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>SET_MIN_VOLTAGE</h4>
 <pre>public static final&nbsp;int SET_MIN_VOLTAGE</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.SaberTooth.SET_MIN_VOLTAGE">Constant Field Values</a></dd></dl>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.SET_MIN_VOLTAGE">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 <a name="SET_MAX_VOLTAGE">
@@ -424,7 +445,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>SET_MAX_VOLTAGE</h4>
 <pre>public static final&nbsp;int SET_MAX_VOLTAGE</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.SaberTooth.SET_MAX_VOLTAGE">Constant Field Values</a></dd></dl>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.SET_MAX_VOLTAGE">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 <a name="MOTOR2_FORWARD">
@@ -434,7 +455,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>MOTOR2_FORWARD</h4>
 <pre>public static final&nbsp;int MOTOR2_FORWARD</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.SaberTooth.MOTOR2_FORWARD">Constant Field Values</a></dd></dl>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.MOTOR2_FORWARD">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 <a name="MOTOR2_BACKWARD">
@@ -444,7 +465,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>MOTOR2_BACKWARD</h4>
 <pre>public static final&nbsp;int MOTOR2_BACKWARD</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.SaberTooth.MOTOR2_BACKWARD">Constant Field Values</a></dd></dl>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Sabertooth.MOTOR2_BACKWARD">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 </li>
@@ -455,13 +476,13 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="SaberTooth(java.lang.String)">
+<a name="Sabertooth(java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>SaberTooth</h4>
-<pre>public&nbsp;SaberTooth(java.lang.String&nbsp;n)</pre>
+<h4>Sabertooth</h4>
+<pre>public&nbsp;Sabertooth(java.lang.String&nbsp;n)</pre>
 </li>
 </ul>
 </li>
@@ -602,14 +623,15 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <pre>public&nbsp;void&nbsp;driveBackwardsMotor2(int&nbsp;speed)</pre>
 </li>
 </ul>
-<a name="motorAttach(java.lang.String, int)">
+<a name="motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>motorAttach</h4>
 <pre>public&nbsp;boolean&nbsp;motorAttach(java.lang.String&nbsp;motorName,
-                  int&nbsp;motorPort)</pre>
+                  java.lang.Integer&nbsp;pwrPin,
+                  java.lang.Integer&nbsp;dirPin)</pre>
 <div class="block">Motor Controller specific method for attaching a motor In the case of a
  SaberTooth - we will need the motor name (of course) and the motor port
  number - SaberTooth supports 2 (M1 & M2)</div>
@@ -617,21 +639,16 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
-<a name="motorAttach(java.lang.String, java.lang.Object...)">
+<a name="motorAttach(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>motorAttach</h4>
 <pre>public&nbsp;boolean&nbsp;motorAttach(java.lang.String&nbsp;motorName,
-                  java.lang.Object...&nbsp;motorData)</pre>
-<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorAttach(java.lang.String, java.lang.Object...)">MotorController</a></code></strong></div>
-<div class="block">Remote attachment activation - used by services not in the same instance
- to attach a Motor to a MotorController</div>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorAttach(java.lang.String, java.lang.Object...)">motorAttach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
-</dl>
+                  java.lang.Integer&nbsp;pwrPin,
+                  java.lang.Integer&nbsp;dirPin,
+                  java.lang.Integer&nbsp;encoderPin)</pre>
 </li>
 </ul>
 <a name="getPinList()">
@@ -641,14 +658,6 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>getPinList</h4>
 <pre>public&nbsp;java.util.ArrayList&lt;<a href="../../../org/myrobotlab/service/data/Pin.html" title="class in org.myrobotlab.service.data">Pin</a>&gt;&nbsp;getPinList()</pre>
-<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#getPinList()">MotorController</a></code></strong></div>
-<div class="block">This is basic information to request from a Controller. A list of pins on
- the controller so GUIs or other services can figure out if there are any
- appropriate</div>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#getPinList()">getPinList</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
-<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
 <a name="motorMoveTo(java.lang.String, java.lang.Integer)">
@@ -659,13 +668,6 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <h4>motorMoveTo</h4>
 <pre>public&nbsp;void&nbsp;motorMoveTo(java.lang.String&nbsp;name,
                java.lang.Integer&nbsp;position)</pre>
-<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorMoveTo(java.lang.String, java.lang.Integer)">MotorController</a></code></strong></div>
-<div class="block">moveTo - move the Motor a relative amount the amount can be negative or
- positive an integer value is expected</div>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorMoveTo(java.lang.String, java.lang.Integer)">motorMoveTo</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
-<dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - - name of the Motor</dd><dd><code>position</code> - - positive or negative absolute amount to move the Motor</dd></dl>
 </li>
 </ul>
 <a name="motorMove(java.lang.String)">
@@ -675,14 +677,6 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>motorMove</h4>
 <pre>public&nbsp;void&nbsp;motorMove(java.lang.String&nbsp;name)</pre>
-<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorMove(java.lang.String)">MotorController</a></code></strong></div>
-<div class="block">request for motor to move the motor can be queried for the new powerlevel
- and the controller shall appropriately change power level and direction
- if necessary</div>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorMove(java.lang.String)">motorMove</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
-</dl>
 </li>
 </ul>
 <a name="motorDetach(java.lang.String)">
@@ -692,13 +686,6 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>motorDetach</h4>
 <pre>public&nbsp;boolean&nbsp;motorDetach(java.lang.String&nbsp;name)</pre>
-<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorDetach(java.lang.String)">MotorController</a></code></strong></div>
-<div class="block">MotorDetach - detach the Motor from a specific pin on the controller</div>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#motorDetach(java.lang.String)">motorDetach</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
-<dt><span class="strong">Parameters:</span></dt><dd><code>name</code> - - name of the Motor</dd>
-<dt><span class="strong">Returns:</span></dt><dd>void</dd></dl>
 </li>
 </ul>
 <a name="getMotorData(java.lang.String)">
@@ -708,12 +695,6 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li class="blockList">
 <h4>getMotorData</h4>
 <pre>public&nbsp;java.lang.Object[]&nbsp;getMotorData(java.lang.String&nbsp;motorName)</pre>
-<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#getMotorData(java.lang.String)">MotorController</a></code></strong></div>
-<div class="block">method to return motor information</div>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html#getMotorData(java.lang.String)">getMotorData</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a></code></dd>
-<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
 <a name="main(java.lang.String[])">
@@ -742,7 +723,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li><a href="../../../overview-summary.html">Overview</a></li>
 <li><a href="package-summary.html">Package</a></li>
 <li class="navBarCell1Rev">Class</li>
-<li><a href="class-use/SaberTooth.html">Use</a></li>
+<li><a href="class-use/Sabertooth.html">Use</a></li>
 <li><a href="package-tree.html">Tree</a></li>
 <li><a href="../../../deprecated-list.html">Deprecated</a></li>
 <li><a href="../../../index-files/index-1.html">Index</a></li>
@@ -755,8 +736,8 @@ implements <a href="../../../org/myrobotlab/service/interfaces/MotorController.h
 <li><a href="../../../org/myrobotlab/service/SEAR.html" title="class in org.myrobotlab.service"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../../index.html?org/myrobotlab/service/SaberTooth.html" target="_top">Frames</a></li>
-<li><a href="SaberTooth.html" target="_top">No Frames</a></li>
+<li><a href="../../../index.html?org/myrobotlab/service/Sabertooth.html" target="_top">Frames</a></li>
+<li><a href="Sabertooth.html" target="_top">No Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_bottom">
 <li><a href="../../../allclasses-noframe.html">All Classes</a></li>

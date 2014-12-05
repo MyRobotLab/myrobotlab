@@ -62,13 +62,13 @@
 <li>Nested&nbsp;|&nbsp;</li>
 <li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#methods_inherited_from_class_java.lang.Object">Method</a></li>
+<li><a href="#method_summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
-<li>Method</li>
+<li><a href="#method_detail">Method</a></li>
 </ul>
 </div>
 <a name="skip-navbar_top">
@@ -94,7 +94,7 @@
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>java.io.Serializable</dd>
+<dd>java.io.Serializable, java.lang.Runnable</dd>
 </dl>
 <dl>
 <dt>Enclosing class:</dt>
@@ -104,7 +104,7 @@
 <br>
 <pre>public static class <span class="strong">Cron.Task</span>
 extends java.lang.Object
-implements java.io.Serializable</pre>
+implements java.io.Serializable, java.lang.Runnable</pre>
 <dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../serialized-form.html#org.myrobotlab.service.Cron.Task">Serialized Form</a></dd></dl>
 </li>
 </ul>
@@ -129,8 +129,16 @@ implements java.io.Serializable</pre>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Cron.Task.html#cronPattern">cronPattern</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code><a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Cron.Task.html#msg">msg</a></strong></code>&nbsp;</td>
+<td class="colFirst"><code>java.lang.Object[]</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Cron.Task.html#data">data</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Cron.Task.html#method">method</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Cron.Task.html#name">name</a></strong></code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -147,8 +155,17 @@ implements java.io.Serializable</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../org/myrobotlab/service/Cron.Task.html#Cron.Task(java.lang.String, org.myrobotlab.framework.Message)">Cron.Task</a></strong>(java.lang.String&nbsp;cronPattern,
-         <a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/service/Cron.Task.html#Cron.Task(org.myrobotlab.service.Cron, java.lang.String, java.lang.String, java.lang.String)">Cron.Task</a></strong>(<a href="../../../org/myrobotlab/service/Cron.html" title="class in org.myrobotlab.service">Cron</a>&nbsp;myService,
+         java.lang.String&nbsp;cronPattern,
+         java.lang.String&nbsp;name,
+         java.lang.String&nbsp;method)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/service/Cron.Task.html#Cron.Task(org.myrobotlab.service.Cron, java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">Cron.Task</a></strong>(<a href="../../../org/myrobotlab/service/Cron.html" title="class in org.myrobotlab.service">Cron</a>&nbsp;myService,
+         java.lang.String&nbsp;cronPattern,
+         java.lang.String&nbsp;name,
+         java.lang.String&nbsp;method,
+         java.lang.Object...&nbsp;data)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -159,6 +176,17 @@ implements java.io.Serializable</pre>
 <!--   -->
 </a>
 <h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Cron.Task.html#run()">run</a></strong>()</code>&nbsp;</td>
+</tr>
+</table>
 <ul class="blockList">
 <li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
 <!--   -->
@@ -189,13 +217,31 @@ implements java.io.Serializable</pre>
 <pre>public&nbsp;java.lang.String cronPattern</pre>
 </li>
 </ul>
-<a name="msg">
+<a name="name">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>name</h4>
+<pre>public&nbsp;java.lang.String name</pre>
+</li>
+</ul>
+<a name="method">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>method</h4>
+<pre>public&nbsp;java.lang.String method</pre>
+</li>
+</ul>
+<a name="data">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>msg</h4>
-<pre>public&nbsp;<a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a> msg</pre>
+<h4>data</h4>
+<pre>public&nbsp;java.lang.Object[] data</pre>
 </li>
 </ul>
 </li>
@@ -206,14 +252,50 @@ implements java.io.Serializable</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="Cron.Task(java.lang.String, org.myrobotlab.framework.Message)">
+<a name="Cron.Task(org.myrobotlab.service.Cron, java.lang.String, java.lang.String, java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>Cron.Task</h4>
+<pre>public&nbsp;Cron.Task(<a href="../../../org/myrobotlab/service/Cron.html" title="class in org.myrobotlab.service">Cron</a>&nbsp;myService,
+         java.lang.String&nbsp;cronPattern,
+         java.lang.String&nbsp;name,
+         java.lang.String&nbsp;method)</pre>
+</li>
+</ul>
+<a name="Cron.Task(org.myrobotlab.service.Cron, java.lang.String, java.lang.String, java.lang.String, java.lang.Object...)">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>Cron.Task</h4>
-<pre>public&nbsp;Cron.Task(java.lang.String&nbsp;cronPattern,
-         <a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</pre>
+<pre>public&nbsp;Cron.Task(<a href="../../../org/myrobotlab/service/Cron.html" title="class in org.myrobotlab.service">Cron</a>&nbsp;myService,
+         java.lang.String&nbsp;cronPattern,
+         java.lang.String&nbsp;name,
+         java.lang.String&nbsp;method,
+         java.lang.Object...&nbsp;data)</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="run()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>run</h4>
+<pre>public&nbsp;void&nbsp;run()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code>run</code>&nbsp;in interface&nbsp;<code>java.lang.Runnable</code></dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -270,13 +352,13 @@ implements java.io.Serializable</pre>
 <li>Nested&nbsp;|&nbsp;</li>
 <li><a href="#field_summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#methods_inherited_from_class_java.lang.Object">Method</a></li>
+<li><a href="#method_summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li><a href="#field_detail">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
-<li>Method</li>
+<li><a href="#method_detail">Method</a></li>
 </ul>
 </div>
 <a name="skip-navbar_bottom">

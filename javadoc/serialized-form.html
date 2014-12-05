@@ -437,10 +437,6 @@
 <pre><a href="org/myrobotlab/service/GUIService.html" title="class in org.myrobotlab.service">GUIService</a> myService</pre>
 </li>
 <li class="blockList">
-<h4>powerPinLabel</h4>
-<pre>javax.swing.JLabel powerPinLabel</pre>
-</li>
-<li class="blockList">
 <h4>directionPinLabel</h4>
 <pre>javax.swing.JLabel directionPinLabel</pre>
 </li>
@@ -533,8 +529,8 @@
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockListLast">
-<h4>data</h4>
-<pre>java.lang.Object[] data</pre>
+<h4>motor</h4>
+<pre><a href="org/myrobotlab/service/Motor.html" title="class in org.myrobotlab.service">Motor</a> motor</pre>
 </li>
 </ul>
 </li>
@@ -561,6 +557,131 @@
 </ul>
 </li>
 </ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_panel">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/control/ServoOrchestratorGUI_middlemiddle_panel.html" title="class in org.myrobotlab.control">org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_panel</a> extends javax.swing.JPanel implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>type</h4>
+<pre>java.lang.String type</pre>
+</li>
+<li class="blockList">
+<h4>id</h4>
+<pre>int id</pre>
+</li>
+<li class="blockList">
+<h4>timesection_panel</h4>
+<pre>javax.swing.JPanel timesection_panel</pre>
+</li>
+<li class="blockList">
+<h4>timesection_headline</h4>
+<pre>javax.swing.JLabel timesection_headline</pre>
+</li>
+<li class="blockList">
+<h4>timesection_id</h4>
+<pre>javax.swing.JLabel timesection_id</pre>
+</li>
+<li class="blockList">
+<h4>channel_panel</h4>
+<pre>javax.swing.JPanel channel_panel</pre>
+</li>
+<li class="blockList">
+<h4>channel_name</h4>
+<pre>javax.swing.JLabel channel_name</pre>
+</li>
+<li class="blockList">
+<h4>channel_mute</h4>
+<pre>javax.swing.JButton channel_mute</pre>
+</li>
+<li class="blockList">
+<h4>channel_id</h4>
+<pre>javax.swing.JLabel channel_id</pre>
+</li>
+<li class="blockList">
+<h4>channel_solo</h4>
+<pre>javax.swing.JButton channel_solo</pre>
+</li>
+<li class="blockList">
+<h4>channel_settings</h4>
+<pre>javax.swing.JButton channel_settings</pre>
+</li>
+<li class="blockList">
+<h4>servo_panel</h4>
+<pre>javax.swing.JPanel servo_panel</pre>
+</li>
+<li class="blockList">
+<h4>servo_start</h4>
+<pre>javax.swing.JTextField servo_start</pre>
+</li>
+<li class="blockList">
+<h4>servo_channelid</h4>
+<pre>javax.swing.JLabel servo_channelid</pre>
+</li>
+<li class="blockList">
+<h4>servo_goal</h4>
+<pre>javax.swing.JTextField servo_goal</pre>
+</li>
+<li class="blockList">
+<h4>servo_min</h4>
+<pre>javax.swing.JLabel servo_min</pre>
+</li>
+<li class="blockList">
+<h4>servo_id</h4>
+<pre>javax.swing.JLabel servo_id</pre>
+</li>
+<li class="blockList">
+<h4>servo_max</h4>
+<pre>javax.swing.JLabel servo_max</pre>
+</li>
+<li class="blockListLast">
+<h4>servo_more</h4>
+<pre>javax.swing.JButton servo_more</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_rootpanel">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/control/ServoOrchestratorGUI_middlemiddle_rootpanel.html" title="class in org.myrobotlab.control">org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_rootpanel</a> extends javax.swing.JPanel implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>demo</h4>
+<pre><a href="org/myrobotlab/control/ServoOrchestratorGUI_middlemiddle_main.html" title="class in org.myrobotlab.control">ServoOrchestratorGUI_middlemiddle_main</a> demo</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_transferhandler">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/control/ServoOrchestratorGUI_middlemiddle_transferhandler.html" title="class in org.myrobotlab.control">org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_transferhandler</a> extends javax.swing.TransferHandler implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
 </li>
 <li class="blockList"><a name="org.myrobotlab.control.Stepper_AdafruitMotorShieldGUI">
 <!--   -->
@@ -988,40 +1109,10 @@
 </li>
 </ul>
 </li>
-<li class="blockList"><a name="org.myrobotlab.control.widget.CommunicationNodeEntry">
+<li class="blockList"><a name="org.myrobotlab.control.widget.ConnectionNodeList">
 <!--   -->
 </a>
-<h3>Class <a href="org/myrobotlab/control/widget/CommunicationNodeEntry.html" title="class in org.myrobotlab.control.widget">org.myrobotlab.control.widget.CommunicationNodeEntry</a> extends javax.swing.JPanel implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>uri</h4>
-<pre>java.net.URI uri</pre>
-</li>
-<li class="blockList">
-<h4>data</h4>
-<pre><a href="org/myrobotlab/net/CommData.html" title="class in org.myrobotlab.net">CommData</a> data</pre>
-</li>
-<li class="blockListLast">
-<h4>image</h4>
-<pre>javax.swing.ImageIcon image</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.control.widget.CommunicationNodeList">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/control/widget/CommunicationNodeList.html" title="class in org.myrobotlab.control.widget">org.myrobotlab.control.widget.CommunicationNodeList</a> extends javax.swing.JPanel implements Serializable</h3>
+<h3>Class <a href="org/myrobotlab/control/widget/ConnectionNodeList.html" title="class in org.myrobotlab.control.widget">org.myrobotlab.control.widget.ConnectionNodeList</a> extends javax.swing.JPanel implements Serializable</h3>
 <dl class="nameValue">
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
@@ -1044,60 +1135,14 @@
 </li>
 </ul>
 </li>
-<li class="blockList"><a name="org.myrobotlab.control.widget.CommunicationNodeRenderer">
+<li class="blockList"><a name="org.myrobotlab.control.widget.ConnectionNodeRenderer">
 <!--   -->
 </a>
-<h3>Class <a href="org/myrobotlab/control/widget/CommunicationNodeRenderer.html" title="class in org.myrobotlab.control.widget">org.myrobotlab.control.widget.CommunicationNodeRenderer</a> extends javax.swing.JLabel implements Serializable</h3>
+<h3>Class <a href="org/myrobotlab/control/widget/ConnectionNodeRenderer.html" title="class in org.myrobotlab.control.widget">org.myrobotlab.control.widget.ConnectionNodeRenderer</a> extends javax.swing.JLabel implements Serializable</h3>
 <dl class="nameValue">
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
 </dl>
-</li>
-<li class="blockList"><a name="org.myrobotlab.control.widget.ConnectDialog">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/control/widget/ConnectDialog.html" title="class in org.myrobotlab.control.widget">org.myrobotlab.control.widget.ConnectDialog</a> extends javax.swing.JDialog implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>host</h4>
-<pre>javax.swing.JTextField host</pre>
-</li>
-<li class="blockList">
-<h4>port</h4>
-<pre>javax.swing.JTextField port</pre>
-</li>
-<li class="blockList">
-<h4>connect</h4>
-<pre>javax.swing.JButton connect</pre>
-</li>
-<li class="blockList">
-<h4>cancel</h4>
-<pre>javax.swing.JButton cancel</pre>
-</li>
-<li class="blockList">
-<h4>myService</h4>
-<pre><a href="org/myrobotlab/service/GUIService.html" title="class in org.myrobotlab.service">GUIService</a> myService</pre>
-</li>
-<li class="blockList">
-<h4>CANCELED</h4>
-<pre>java.lang.String CANCELED</pre>
-</li>
-<li class="blockListLast">
-<h4>state</h4>
-<pre>java.lang.String state</pre>
-</li>
-</ul>
-</li>
-</ul>
 </li>
 <li class="blockList"><a name="org.myrobotlab.control.widget.DigitalButton">
 <!--   -->
@@ -1637,160 +1682,6 @@
 </ul>
 </li>
 <li class="blockList">
-<h2 title="Package">Package&nbsp;org.myrobotlab.dynamicGUI</h2>
-<ul class="blockList">
-<li class="blockList"><a name="org.myrobotlab.dynamicGUI.CommandField">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/dynamicGUI/CommandField.html" title="class in org.myrobotlab.dynamicGUI">org.myrobotlab.dynamicGUI.CommandField</a> extends javax.swing.JTextField implements Serializable</h3>
-</li>
-<li class="blockList"><a name="org.myrobotlab.dynamicGUI.ConsoleArea">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/dynamicGUI/ConsoleArea.html" title="class in org.myrobotlab.dynamicGUI">org.myrobotlab.dynamicGUI.ConsoleArea</a> extends javax.swing.JScrollPane implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>undo</h4>
-<pre>javax.swing.undo.UndoManager undo</pre>
-</li>
-<li class="blockListLast">
-<h4>ta</h4>
-<pre>javax.swing.JTextArea ta</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.dynamicGUI.Desktop">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/dynamicGUI/Desktop.html" title="class in org.myrobotlab.dynamicGUI">org.myrobotlab.dynamicGUI.Desktop</a> extends javax.swing.JFrame implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>popup1</h4>
-<pre>javax.swing.JPopupMenu popup1</pre>
-</li>
-<li class="blockList">
-<h4>popup2</h4>
-<pre>javax.swing.JPopupMenu popup2</pre>
-</li>
-<li class="blockList">
-<h4>popup3</h4>
-<pre>javax.swing.JPopupMenu popup3</pre>
-</li>
-<li class="blockList">
-<h4>popup4</h4>
-<pre>javax.swing.JPopupMenu popup4</pre>
-</li>
-<li class="blockList">
-<h4>x</h4>
-<pre>int x</pre>
-</li>
-<li class="blockList">
-<h4>y</h4>
-<pre>int y</pre>
-</li>
-<li class="blockList">
-<h4>x1</h4>
-<pre>int x1</pre>
-</li>
-<li class="blockList">
-<h4>y1</h4>
-<pre>int y1</pre>
-</li>
-<li class="blockList">
-<h4>x2</h4>
-<pre>int x2</pre>
-</li>
-<li class="blockList">
-<h4>y2</h4>
-<pre>int y2</pre>
-</li>
-<li class="blockList">
-<h4>drag</h4>
-<pre>boolean drag</pre>
-</li>
-<li class="blockList">
-<h4>comp</h4>
-<pre>java.awt.Component comp</pre>
-</li>
-<li class="blockList">
-<h4>cbmni</h4>
-<pre>javax.swing.JCheckBoxMenuItem cbmni</pre>
-</li>
-<li class="blockList">
-<h4>componentMap</h4>
-<pre>java.util.HashMap&lt;K,V&gt; componentMap</pre>
-</li>
-<li class="blockList">
-<h4>compx</h4>
-<pre>int compx</pre>
-</li>
-<li class="blockListLast">
-<h4>compy</h4>
-<pre>int compy</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.dynamicGUI.DesktopButton">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/dynamicGUI/DesktopButton.html" title="class in org.myrobotlab.dynamicGUI">org.myrobotlab.dynamicGUI.DesktopButton</a> extends javax.swing.JButton implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>type</h4>
-<pre>java.lang.String type</pre>
-</li>
-<li class="blockListLast">
-<h4>action</h4>
-<pre>java.lang.String action</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.dynamicGUI.ScriptArea">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/dynamicGUI/ScriptArea.html" title="class in org.myrobotlab.dynamicGUI">org.myrobotlab.dynamicGUI.ScriptArea</a> extends javax.swing.JScrollPane implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>undo</h4>
-<pre>javax.swing.undo.UndoManager undo</pre>
-</li>
-<li class="blockListLast">
-<h4>ta</h4>
-<pre>javax.swing.JTextArea ta</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList">
 <h2 title="Package">Package&nbsp;org.myrobotlab.framework</h2>
 <ul class="blockList">
 <li class="blockList"><a name="org.myrobotlab.framework.Errors">
@@ -2110,9 +2001,13 @@
 <h4>vmName</h4>
 <pre>java.lang.String vmName</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>mrlVersion</h4>
 <pre>java.lang.String mrlVersion</pre>
+</li>
+<li class="blockListLast">
+<h4>instanceId</h4>
+<pre>java.lang.String instanceId</pre>
 </li>
 </ul>
 </li>
@@ -2163,11 +2058,15 @@
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockList">
-<h4>host</h4>
-<pre>java.net.URI host</pre>
+<h4>instanceId</h4>
+<pre>java.net.URI instanceId</pre>
 <div class="block">key into Runtime's hosts of ServiceEnvironments mrlscheme://[gateway
  name]/scheme://key for gateway mrl://gateway/xmpp://incubator incubator
  if host == null the service is local</div>
+</li>
+<li class="blockList">
+<h4>prefix</h4>
+<pre>java.lang.String prefix</pre>
 </li>
 <li class="blockList">
 <h4>name</h4>
@@ -2215,12 +2114,12 @@
 <pre>long lastWarn</pre>
 </li>
 <li class="blockList">
-<h4>lastError</h4>
-<pre>long lastError</pre>
-</li>
-<li class="blockListLast">
 <h4>lastErrorMsg</h4>
 <pre>java.lang.String lastErrorMsg</pre>
+</li>
+<li class="blockListLast">
+<h4>lastError</h4>
+<pre><a href="org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a> lastError</pre>
 </li>
 </ul>
 </li>
@@ -2248,15 +2147,58 @@
 <h4>serviceDirectory</h4>
 <pre>java.util.HashMap&lt;K,V&gt; serviceDirectory</pre>
 </li>
-<li class="blockList">
+<li class="blockListLast">
 <h4>platform</h4>
 <pre><a href="org/myrobotlab/framework/Platform.html" title="class in org.myrobotlab.framework">Platform</a> platform</pre>
 <div class="block">platform of the environment - this can be used to implement proxy rules
  depending on what Services will work on which platform</div>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.framework.Status">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">org.myrobotlab.framework.Status</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>name</h4>
+<pre>java.lang.String name</pre>
+</li>
+<li class="blockList">
+<h4>level</h4>
+<pre>java.lang.String level</pre>
+</li>
+<li class="blockList">
+<h4>key</h4>
+<pre>java.lang.String key</pre>
+</li>
+<li class="blockList">
+<h4>detail</h4>
+<pre>java.lang.String detail</pre>
+</li>
+<li class="blockList">
+<h4>statuses</h4>
+<pre>java.util.ArrayList&lt;E&gt; statuses</pre>
+<div class="block">list of sub status</div>
+</li>
+<li class="blockList">
+<h4>hasError</h4>
+<pre>boolean hasError</pre>
+</li>
 <li class="blockListLast">
-<h4>version</h4>
-<pre>java.lang.String version</pre>
+<h4>allowDebug</h4>
+<pre>boolean allowDebug</pre>
 </li>
 </ul>
 </li>
@@ -2267,6 +2209,36 @@
 <li class="blockList">
 <h2 title="Package">Package&nbsp;org.myrobotlab.framework.repo</h2>
 <ul class="blockList">
+<li class="blockList"><a name="org.myrobotlab.framework.repo.Category">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/framework/repo/Category.html" title="class in org.myrobotlab.framework.repo">org.myrobotlab.framework.repo.Category</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>name</h4>
+<pre>java.lang.String name</pre>
+</li>
+<li class="blockList">
+<h4>description</h4>
+<pre>java.lang.String description</pre>
+</li>
+<li class="blockListLast">
+<h4>serviceTypes</h4>
+<pre>java.util.ArrayList&lt;E&gt; serviceTypes</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="blockList"><a name="org.myrobotlab.framework.repo.Dependency">
 <!--   -->
 </a>
@@ -2335,13 +2307,16 @@
 <h4>platform</h4>
 <pre><a href="org/myrobotlab/framework/Platform.html" title="class in org.myrobotlab.framework">Platform</a> platform</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>runtimeName</h4>
 <pre>java.lang.String runtimeName</pre>
-<div class="block">the Runtime's name which this Repo is operating in behalf of.
- There is a possiblity that this will be not a real name or null,
- in which case their will be no Runtime running - but Repo requests are
- still desired.</div>
+<div class="block">the Runtime's name which this Repo is operating in behalf of. There is a
+ possiblity that this will be not a real name or null, in which case their
+ will be no Runtime running - but Repo requests are still desired.</div>
+</li>
+<li class="blockListLast">
+<h4>getRemoteRepo</h4>
+<pre>boolean getRemoteRepo</pre>
 </li>
 </ul>
 </li>
@@ -2355,6 +2330,27 @@
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
 </dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>serviceTypesNameIndex</h4>
+<pre>java.util.HashMap&lt;K,V&gt; serviceTypesNameIndex</pre>
+</li>
+<li class="blockList">
+<h4>categoriesNameIndex</h4>
+<pre>java.util.HashMap&lt;K,V&gt; categoriesNameIndex</pre>
+</li>
+<li class="blockListLast">
+<h4>dependenciesOrgIndex</h4>
+<pre>java.util.HashMap&lt;K,V&gt; dependenciesOrgIndex</pre>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 <li class="blockList"><a name="org.myrobotlab.framework.repo.ServiceType">
 <!--   -->
@@ -2389,37 +2385,6 @@
 <li class="blockListLast">
 <h4>dependencyList</h4>
 <pre>java.util.ArrayList&lt;E&gt; dependencyList</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList">
-<h2 title="Package">Package&nbsp;org.myrobotlab.gp</h2>
-<ul class="blockList">
-<li class="blockList"><a name="org.myrobotlab.gp.Choices">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/gp/Choices.html" title="class in org.myrobotlab.gp">org.myrobotlab.gp.Choices</a> extends java.awt.Choice implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>label</h4>
-<pre>java.lang.String label</pre>
-</li>
-<li class="blockList">
-<h4>choices</h4>
-<pre>java.lang.Object[] choices</pre>
-</li>
-<li class="blockListLast">
-<h4>selection</h4>
-<pre>int selection</pre>
 </li>
 </ul>
 </li>
@@ -2585,526 +2550,6 @@
 <li class="blockListLast">
 <h4>frameIndex</h4>
 <pre>int frameIndex</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList">
-<h2 title="Package">Package&nbsp;org.myrobotlab.inverseKinematics</h2>
-<ul class="blockList">
-<li class="blockList"><a name="org.myrobotlab.inverseKinematics.IKEngine">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/inverseKinematics/IKEngine.html" title="class in org.myrobotlab.inverseKinematics">org.myrobotlab.inverseKinematics.IKEngine</a> extends java.awt.Canvas implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>stopped</h4>
-<pre>boolean stopped</pre>
-<div class="block">Used to synchronize the methods w/ the animating thread</div>
-</li>
-<li class="blockList">
-<h4>safeToChangeInternalState</h4>
-<pre>boolean safeToChangeInternalState</pre>
-<div class="block">Used to synchronize the methods w/ the animating thread</div>
-</li>
-<li class="blockList">
-<h4>angles</h4>
-<pre>double[] angles</pre>
-</li>
-<li class="blockList">
-<h4>lengths</h4>
-<pre>double[] lengths</pre>
-</li>
-<li class="blockList">
-<h4>thetas</h4>
-<pre>double[] thetas</pre>
-</li>
-<li class="blockList">
-<h4>myx</h4>
-<pre>double myx</pre>
-</li>
-<li class="blockList">
-<h4>myy</h4>
-<pre>double myy</pre>
-</li>
-<li class="blockList">
-<h4>numLinks</h4>
-<pre>int numLinks</pre>
-<div class="block">The number of links in the arm</div>
-</li>
-<li class="blockList">
-<h4>endPoint</h4>
-<pre><a href="org/myrobotlab/inverseKinematics/Matrix.html" title="class in org.myrobotlab.inverseKinematics">Matrix</a> endPoint</pre>
-<div class="block">Column vectors indicating the end affector and the goal point</div>
-</li>
-<li class="blockList">
-<h4>goal</h4>
-<pre><a href="org/myrobotlab/inverseKinematics/Matrix.html" title="class in org.myrobotlab.inverseKinematics">Matrix</a> goal</pre>
-</li>
-<li class="blockList">
-<h4>jointLocations</h4>
-<pre><a href="org/myrobotlab/inverseKinematics/Matrix.html" title="class in org.myrobotlab.inverseKinematics">Matrix</a>[] jointLocations</pre>
-<div class="block">array of column vectors indicating positions of each joint</div>
-</li>
-<li class="blockList">
-<h4>jacobian</h4>
-<pre><a href="org/myrobotlab/inverseKinematics/Matrix.html" title="class in org.myrobotlab.inverseKinematics">Matrix</a> jacobian</pre>
-<div class="block">Used in ik iteration:
- jInverse= jacobian.pseudoinverse
- dTheta=jInverse*dX</div>
-</li>
-<li class="blockList">
-<h4>jInverse</h4>
-<pre><a href="org/myrobotlab/inverseKinematics/Matrix.html" title="class in org.myrobotlab.inverseKinematics">Matrix</a> jInverse</pre>
-<div class="block">Used in ik iteration:
- jInverse= jacobian.pseudoinverse
- dTheta=jInverse*dX</div>
-</li>
-<li class="blockList">
-<h4>dX</h4>
-<pre><a href="org/myrobotlab/inverseKinematics/Matrix.html" title="class in org.myrobotlab.inverseKinematics">Matrix</a> dX</pre>
-</li>
-<li class="blockList">
-<h4>dTheta</h4>
-<pre><a href="org/myrobotlab/inverseKinematics/Matrix.html" title="class in org.myrobotlab.inverseKinematics">Matrix</a> dTheta</pre>
-</li>
-<li class="blockListLast">
-<h4>stepScaleFactor</h4>
-<pre>double stepScaleFactor</pre>
-<div class="block">Indicates how small dX is (smaller means more iterations)</div>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList">
-<h2 title="Package">Package&nbsp;org.myrobotlab.java</h2>
-<ul class="blockList">
-<li class="blockList"><a name="org.myrobotlab.java.FieldsTableModel">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/java/FieldsTableModel.html" title="class in org.myrobotlab.java">org.myrobotlab.java.FieldsTableModel</a> extends javax.swing.table.AbstractTableModel implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>rows</h4>
-<pre>int rows</pre>
-</li>
-<li class="blockList">
-<h4>ht</h4>
-<pre>java.util.Hashtable&lt;K,V&gt; ht</pre>
-</li>
-<li class="blockListLast">
-<h4>columnNames</h4>
-<pre>java.lang.String[] columnNames</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.java.MethodsTableModel">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/java/MethodsTableModel.html" title="class in org.myrobotlab.java">org.myrobotlab.java.MethodsTableModel</a> extends javax.swing.table.AbstractTableModel implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>rows</h4>
-<pre>int rows</pre>
-</li>
-<li class="blockList">
-<h4>ht</h4>
-<pre>java.util.Hashtable&lt;K,V&gt; ht</pre>
-</li>
-<li class="blockListLast">
-<h4>columnNames</h4>
-<pre>java.lang.String[] columnNames</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.java.ObjectTableModel">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/java/ObjectTableModel.html" title="class in org.myrobotlab.java">org.myrobotlab.java.ObjectTableModel</a> extends javax.swing.table.DefaultTableModel implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>rows</h4>
-<pre>int rows</pre>
-</li>
-<li class="blockListLast">
-<h4>columnNames</h4>
-<pre>java.lang.String[] columnNames</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.java.ObjectWindow">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/java/ObjectWindow.html" title="class in org.myrobotlab.java">org.myrobotlab.java.ObjectWindow</a> extends javax.swing.JFrame implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>jfields</h4>
-<pre><a href="org/myrobotlab/java/ObjectTableModel.html" title="class in org.myrobotlab.java">ObjectTableModel</a> jfields</pre>
-</li>
-<li class="blockList">
-<h4>jobjects</h4>
-<pre><a href="org/myrobotlab/java/ObjectTableModel.html" title="class in org.myrobotlab.java">ObjectTableModel</a> jobjects</pre>
-</li>
-<li class="blockList">
-<h4>fieldList</h4>
-<pre>java.util.LinkedList&lt;E&gt; fieldList</pre>
-</li>
-<li class="blockList">
-<h4>objectList</h4>
-<pre>java.util.LinkedList&lt;E&gt; objectList</pre>
-</li>
-<li class="blockList">
-<h4>fieldTable</h4>
-<pre>javax.swing.JTable fieldTable</pre>
-</li>
-<li class="blockListLast">
-<h4>objectTable</h4>
-<pre>javax.swing.JTable objectTable</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.java.Reflector">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/java/Reflector.html" title="class in org.myrobotlab.java">org.myrobotlab.java.Reflector</a> extends javax.swing.JFrame implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>FieldsData</h4>
-<pre><a href="org/myrobotlab/java/FieldsTableModel.html" title="class in org.myrobotlab.java">FieldsTableModel</a> FieldsData</pre>
-</li>
-<li class="blockList">
-<h4>MethodsData</h4>
-<pre><a href="org/myrobotlab/java/MethodsTableModel.html" title="class in org.myrobotlab.java">MethodsTableModel</a> MethodsData</pre>
-</li>
-<li class="blockList">
-<h4>rootNode</h4>
-<pre>javax.swing.tree.DefaultMutableTreeNode rootNode</pre>
-</li>
-<li class="blockList">
-<h4>mNode</h4>
-<pre>javax.swing.tree.DefaultMutableTreeNode mNode</pre>
-</li>
-<li class="blockList">
-<h4>treeModel</h4>
-<pre>javax.swing.tree.DefaultTreeModel treeModel</pre>
-</li>
-<li class="blockList">
-<h4>java</h4>
-<pre><a href="org/myrobotlab/service/Java.html" title="class in org.myrobotlab.service">Java</a> java</pre>
-</li>
-<li class="blockList">
-<h4>undo</h4>
-<pre>javax.swing.undo.UndoManager undo</pre>
-</li>
-<li class="blockList">
-<h4>parent</h4>
-<pre>java.lang.String parent</pre>
-</li>
-<li class="blockList">
-<h4>toplevel</h4>
-<pre>java.lang.String toplevel</pre>
-</li>
-<li class="blockList">
-<h4>o</h4>
-<pre>java.lang.Object o</pre>
-</li>
-<li class="blockList">
-<h4>sref</h4>
-<pre>java.lang.String sref</pre>
-</li>
-<li class="blockList">
-<h4>Panel0</h4>
-<pre>javax.swing.JPanel Panel0</pre>
-</li>
-<li class="blockList">
-<h4>Class</h4>
-<pre>javax.swing.JLabel Class</pre>
-</li>
-<li class="blockList">
-<h4>Implements</h4>
-<pre>javax.swing.JList&lt;E&gt; Implements</pre>
-</li>
-<li class="blockList">
-<h4>TabbedPane1</h4>
-<pre>javax.swing.JTabbedPane TabbedPane1</pre>
-</li>
-<li class="blockList">
-<h4>Panel3</h4>
-<pre>javax.swing.JPanel Panel3</pre>
-</li>
-<li class="blockList">
-<h4>Constructors</h4>
-<pre>javax.swing.JList&lt;E&gt; Constructors</pre>
-</li>
-<li class="blockList">
-<h4>Panel4</h4>
-<pre>javax.swing.JPanel Panel4</pre>
-</li>
-<li class="blockList">
-<h4>Fields</h4>
-<pre>javax.swing.JTable Fields</pre>
-</li>
-<li class="blockList">
-<h4>Panel6</h4>
-<pre>javax.swing.JPanel Panel6</pre>
-</li>
-<li class="blockList">
-<h4>Methods</h4>
-<pre>javax.swing.JTable Methods</pre>
-</li>
-<li class="blockList">
-<h4>Panel7</h4>
-<pre>javax.swing.JPanel Panel7</pre>
-</li>
-<li class="blockList">
-<h4>Source</h4>
-<pre>javax.swing.JTextArea Source</pre>
-</li>
-<li class="blockList">
-<h4>tree</h4>
-<pre>javax.swing.JTree tree</pre>
-</li>
-<li class="blockList">
-<h4>js</h4>
-<pre>javax.swing.JSplitPane js</pre>
-</li>
-<li class="blockList">
-<h4>Super</h4>
-<pre>javax.swing.JLabel Super</pre>
-</li>
-<li class="blockList">
-<h4>tempObject</h4>
-<pre>java.lang.Object tempObject</pre>
-</li>
-<li class="blockList">
-<h4>tempInt</h4>
-<pre>int tempInt</pre>
-</li>
-<li class="blockList">
-<h4>tempFloat</h4>
-<pre>float tempFloat</pre>
-</li>
-<li class="blockList">
-<h4>tempDouble</h4>
-<pre>double tempDouble</pre>
-</li>
-<li class="blockList">
-<h4>tempChar</h4>
-<pre>char tempChar</pre>
-</li>
-<li class="blockList">
-<h4>tempBoolean</h4>
-<pre>boolean tempBoolean</pre>
-</li>
-<li class="blockList">
-<h4>tempLong</h4>
-<pre>long tempLong</pre>
-</li>
-<li class="blockList">
-<h4>tempShort</h4>
-<pre>short tempShort</pre>
-</li>
-<li class="blockList">
-<h4>tempByte</h4>
-<pre>byte tempByte</pre>
-</li>
-<li class="blockListLast">
-<h4>objectName</h4>
-<pre>java.lang.String objectName</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.java.STDOUT">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/java/STDOUT.html" title="class in org.myrobotlab.java">org.myrobotlab.java.STDOUT</a> extends javax.swing.JFrame implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>aTextArea</h4>
-<pre>javax.swing.JTextArea aTextArea</pre>
-</li>
-<li class="blockList">
-<h4>bTextArea</h4>
-<pre>javax.swing.JTextArea bTextArea</pre>
-</li>
-<li class="blockList">
-<h4>js</h4>
-<pre>javax.swing.JScrollPane js</pre>
-</li>
-<li class="blockList">
-<h4>errorDevice</h4>
-<pre><a href="org/myrobotlab/java/ObservableStream.html" title="class in org.myrobotlab.java">ObservableStream</a> errorDevice</pre>
-</li>
-<li class="blockList">
-<h4>outputDevice</h4>
-<pre><a href="org/myrobotlab/java/ObservableStream.html" title="class in org.myrobotlab.java">ObservableStream</a> outputDevice</pre>
-</li>
-<li class="blockList">
-<h4>_errorDevice</h4>
-<pre>java.io.ByteArrayOutputStream _errorDevice</pre>
-</li>
-<li class="blockList">
-<h4>_outputDevice</h4>
-<pre>java.io.ByteArrayOutputStream _outputDevice</pre>
-</li>
-<li class="blockList">
-<h4>errorStream</h4>
-<pre>java.io.PrintStream errorStream</pre>
-</li>
-<li class="blockList">
-<h4>outputStream</h4>
-<pre>java.io.PrintStream outputStream</pre>
-</li>
-<li class="blockList">
-<h4>_errorStream</h4>
-<pre>java.io.PrintStream _errorStream</pre>
-</li>
-<li class="blockList">
-<h4>_outputStream</h4>
-<pre>java.io.PrintStream _outputStream</pre>
-</li>
-<li class="blockList">
-<h4>clear</h4>
-<pre>javax.swing.JButton clear</pre>
-</li>
-<li class="blockList">
-<h4>bottomLock</h4>
-<pre>javax.swing.JToggleButton bottomLock</pre>
-</li>
-<li class="blockListLast">
-<h4>scrollFlag</h4>
-<pre>boolean scrollFlag</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.java.ThreadViewer">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/java/ThreadViewer.html" title="class in org.myrobotlab.java">org.myrobotlab.java.ThreadViewer</a> extends javax.swing.JFrame implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>tableModel</h4>
-<pre><a href="org/myrobotlab/java/ThreadViewerTableModel.html" title="class in org.myrobotlab.java">ThreadViewerTableModel</a> tableModel</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.java.ThreadViewerTableModel">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/java/ThreadViewerTableModel.html" title="class in org.myrobotlab.java">org.myrobotlab.java.ThreadViewerTableModel</a> extends javax.swing.table.AbstractTableModel implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>dataLock</h4>
-<pre>java.lang.Object dataLock</pre>
-</li>
-<li class="blockList">
-<h4>rowCount</h4>
-<pre>int rowCount</pre>
-</li>
-<li class="blockList">
-<h4>cellData</h4>
-<pre>java.lang.Object[][] cellData</pre>
-</li>
-<li class="blockList">
-<h4>pendingCellData</h4>
-<pre>java.lang.Object[][] pendingCellData</pre>
-</li>
-<li class="blockList">
-<h4>thread</h4>
-<pre>java.lang.Thread[] thread</pre>
-</li>
-<li class="blockList">
-<h4>columnCount</h4>
-<pre>int columnCount</pre>
-</li>
-<li class="blockList">
-<h4>columnName</h4>
-<pre>java.lang.String[] columnName</pre>
-</li>
-<li class="blockList">
-<h4>columnClass</h4>
-<pre>java.lang.Class&lt;T&gt;[] columnClass</pre>
-</li>
-<li class="blockList">
-<h4>internalThread</h4>
-<pre>java.lang.Thread internalThread</pre>
-</li>
-<li class="blockListLast">
-<h4>noStopRequested</h4>
-<pre>boolean noStopRequested</pre>
 </li>
 </ul>
 </li>
@@ -3470,6 +2915,57 @@
 </ul>
 </li>
 <li class="blockList">
+<h2 title="Package">Package&nbsp;org.myrobotlab.math</h2>
+<ul class="blockList">
+<li class="blockList"><a name="org.myrobotlab.math.Mapper">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/math/Mapper.html" title="class in org.myrobotlab.math">org.myrobotlab.math.Mapper</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>minX</h4>
+<pre>double minX</pre>
+</li>
+<li class="blockList">
+<h4>maxX</h4>
+<pre>double maxX</pre>
+</li>
+<li class="blockList">
+<h4>minY</h4>
+<pre>double minY</pre>
+</li>
+<li class="blockList">
+<h4>maxY</h4>
+<pre>double maxY</pre>
+</li>
+<li class="blockList">
+<h4>minOutput</h4>
+<pre>double minOutput</pre>
+</li>
+<li class="blockList">
+<h4>maxOutput</h4>
+<pre>double maxOutput</pre>
+</li>
+<li class="blockListLast">
+<h4>inverted</h4>
+<pre>boolean inverted</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList">
 <h2 title="Package">Package&nbsp;org.myrobotlab.memory</h2>
 <ul class="blockList">
 <li class="blockList"><a name="org.myrobotlab.memory.Node">
@@ -3545,92 +3041,6 @@
 <li class="blockList">
 <h2 title="Package">Package&nbsp;org.myrobotlab.net</h2>
 <ul class="blockList">
-<li class="blockList"><a name="org.myrobotlab.net.CommObjectStreamOverDynamicProtocol">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/net/CommObjectStreamOverDynamicProtocol.html" title="class in org.myrobotlab.net">org.myrobotlab.net.CommObjectStreamOverDynamicProtocol</a> extends java.lang.Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>heartbeatList</h4>
-<pre>java.util.HashMap&lt;K,V&gt; heartbeatList</pre>
-</li>
-<li class="blockList">
-<h4>useHeartbeat</h4>
-<pre>boolean useHeartbeat</pre>
-</li>
-<li class="blockListLast">
-<h4>heartbeatRunning</h4>
-<pre>boolean heartbeatRunning</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.net.CommObjectStreamOverTCP">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/net/CommObjectStreamOverTCP.html" title="class in org.myrobotlab.net">org.myrobotlab.net.CommObjectStreamOverTCP</a> extends java.lang.Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>heartbeatList</h4>
-<pre>java.util.HashMap&lt;K,V&gt; heartbeatList</pre>
-</li>
-<li class="blockList">
-<h4>useHeartbeat</h4>
-<pre>boolean useHeartbeat</pre>
-</li>
-<li class="blockListLast">
-<h4>heartbeatRunning</h4>
-<pre>boolean heartbeatRunning</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.net.CommObjectStreamOverUDP">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/net/CommObjectStreamOverUDP.html" title="class in org.myrobotlab.net">org.myrobotlab.net.CommObjectStreamOverUDP</a> extends java.lang.Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>isRunning</h4>
-<pre>boolean isRunning</pre>
-</li>
-<li class="blockListLast">
-<h4>myService</h4>
-<pre><a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> myService</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="blockList"><a name="org.myrobotlab.net.CommunicationManager">
 <!--   -->
 </a>
@@ -3649,13 +3059,100 @@
 <h4>myService</h4>
 <pre><a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> myService</pre>
 </li>
-<li class="blockList">
+<li class="blockListLast">
 <h4>outbox</h4>
 <pre><a href="org/myrobotlab/framework/Outbox.html" title="class in org.myrobotlab.framework">Outbox</a> outbox</pre>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.net.Connection">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/net/Connection.html" title="class in org.myrobotlab.net">org.myrobotlab.net.Connection</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>lastStateChange</h4>
+<pre>long lastStateChange</pre>
+</li>
+<li class="blockList">
+<h4>service</h4>
+<pre>java.lang.String service</pre>
+<div class="block">proto key - mrlkey is mrl://gatewayName/protocolKey</div>
+</li>
+<li class="blockList">
+<h4>protocolKey</h4>
+<pre>java.net.URI protocolKey</pre>
+</li>
+<li class="blockList">
+<h4>prefix</h4>
+<pre>java.lang.String prefix</pre>
+</li>
+<li class="blockList">
+<h4>platform</h4>
+<pre><a href="org/myrobotlab/framework/Platform.html" title="class in org.myrobotlab.framework">Platform</a> platform</pre>
+</li>
+<li class="blockList">
+<h4>state</h4>
+<pre>java.lang.String state</pre>
+</li>
+<li class="blockList">
+<h4>rx</h4>
+<pre>int rx</pre>
+</li>
+<li class="blockList">
+<h4>tx</h4>
+<pre>int tx</pre>
+</li>
+<li class="blockList">
+<h4>rxSender</h4>
+<pre>java.lang.String rxSender</pre>
+</li>
+<li class="blockList">
+<h4>rxSendingMethod</h4>
+<pre>java.lang.String rxSendingMethod</pre>
+</li>
+<li class="blockList">
+<h4>rxName</h4>
+<pre>java.lang.String rxName</pre>
+</li>
+<li class="blockList">
+<h4>rxMethod</h4>
+<pre>java.lang.String rxMethod</pre>
+</li>
+<li class="blockList">
+<h4>txSender</h4>
+<pre>java.lang.String txSender</pre>
+</li>
+<li class="blockList">
+<h4>txSendingMethod</h4>
+<pre>java.lang.String txSendingMethod</pre>
+</li>
+<li class="blockList">
+<h4>txName</h4>
+<pre>java.lang.String txName</pre>
+</li>
+<li class="blockList">
+<h4>txMethod</h4>
+<pre>java.lang.String txMethod</pre>
+</li>
+<li class="blockList">
+<h4>authenticated</h4>
+<pre>boolean authenticated</pre>
+</li>
 <li class="blockListLast">
-<h4>comm</h4>
-<pre><a href="org/myrobotlab/service/interfaces/Communicator.html" title="interface in org.myrobotlab.service.interfaces">Communicator</a> comm</pre>
+<h4>addInfo</h4>
+<pre>java.util.HashMap&lt;K,V&gt; addInfo</pre>
 </li>
 </ul>
 </li>
@@ -5835,6 +5332,179 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.openni.PVector">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">org.myrobotlab.openni.PVector</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>x</h4>
+<pre>float x</pre>
+<div class="block">The x component of the vector.</div>
+</li>
+<li class="blockList">
+<h4>y</h4>
+<pre>float y</pre>
+<div class="block">The y component of the vector.</div>
+</li>
+<li class="blockList">
+<h4>z</h4>
+<pre>float z</pre>
+<div class="block">The z component of the vector.</div>
+</li>
+<li class="blockList">
+<h4>quality</h4>
+<pre>float quality</pre>
+<div class="block">quality from openni</div>
+</li>
+<li class="blockList">
+<h4>angleXY</h4>
+<pre>float angleXY</pre>
+</li>
+<li class="blockList">
+<h4>angleYZ</h4>
+<pre>float angleYZ</pre>
+</li>
+<li class="blockList">
+<h4>array</h4>
+<pre>float[] array</pre>
+<div class="block">Array so that this can be temporarily used in an array context</div>
+</li>
+<li class="blockList">
+<h4>XYminX</h4>
+<pre>float XYminX</pre>
+</li>
+<li class="blockList">
+<h4>XYmaxX</h4>
+<pre>float XYmaxX</pre>
+</li>
+<li class="blockList">
+<h4>XYminY</h4>
+<pre>float XYminY</pre>
+</li>
+<li class="blockList">
+<h4>XYmaxY</h4>
+<pre>float XYmaxY</pre>
+</li>
+<li class="blockList">
+<h4>YZminY</h4>
+<pre>float YZminY</pre>
+</li>
+<li class="blockList">
+<h4>YZmaxY</h4>
+<pre>float YZmaxY</pre>
+</li>
+<li class="blockList">
+<h4>YZminZ</h4>
+<pre>float YZminZ</pre>
+</li>
+<li class="blockListLast">
+<h4>YZmaxZ</h4>
+<pre>float YZmaxZ</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.openni.Skeleton">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/openni/Skeleton.html" title="class in org.myrobotlab.openni">org.myrobotlab.openni.Skeleton</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>frameNumber</h4>
+<pre>int frameNumber</pre>
+</li>
+<li class="blockList">
+<h4>userId</h4>
+<pre>int userId</pre>
+</li>
+<li class="blockList">
+<h4>centerOfMass</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> centerOfMass</pre>
+</li>
+<li class="blockList">
+<h4>head</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> head</pre>
+</li>
+<li class="blockList">
+<h4>rightShoulder</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> rightShoulder</pre>
+</li>
+<li class="blockList">
+<h4>neck</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> neck</pre>
+</li>
+<li class="blockList">
+<h4>leftShoulder</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> leftShoulder</pre>
+</li>
+<li class="blockList">
+<h4>torso</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> torso</pre>
+</li>
+<li class="blockList">
+<h4>leftElbow</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> leftElbow</pre>
+</li>
+<li class="blockList">
+<h4>leftHand</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> leftHand</pre>
+</li>
+<li class="blockList">
+<h4>rightElbow</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> rightElbow</pre>
+</li>
+<li class="blockList">
+<h4>rightHand</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> rightHand</pre>
+</li>
+<li class="blockList">
+<h4>rightHip</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> rightHip</pre>
+</li>
+<li class="blockList">
+<h4>rightKnee</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> rightKnee</pre>
+</li>
+<li class="blockList">
+<h4>rightFoot</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> rightFoot</pre>
+</li>
+<li class="blockList">
+<h4>leftHip</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> leftHip</pre>
+</li>
+<li class="blockList">
+<h4>leftKnee</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> leftKnee</pre>
+</li>
+<li class="blockListLast">
+<h4>leftFoot</h4>
+<pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> leftFoot</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="blockList">
@@ -5892,28 +5562,6 @@
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
 </dl>
-</li>
-<li class="blockList"><a name="org.myrobotlab.service.ACEduinoMotorShield">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/ACEduinoMotorShield.html" title="class in org.myrobotlab.service">org.myrobotlab.service.ACEduinoMotorShield</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>arduino</h4>
-<pre><a href="org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a> arduino</pre>
-</li>
-</ul>
-</li>
-</ul>
 </li>
 <li class="blockList"><a name="org.myrobotlab.service.Adafruit16CServoDriver">
 <!--   -->
@@ -6162,8 +5810,32 @@
 <pre>java.util.concurrent.BlockingQueue&lt;E&gt; blockingData</pre>
 </li>
 <li class="blockList">
+<h4>debugTX</h4>
+<pre>java.lang.StringBuilder debugTX</pre>
+</li>
+<li class="blockList">
+<h4>debugRX</h4>
+<pre>java.lang.StringBuilder debugRX</pre>
+</li>
+<li class="blockList">
 <h4>motors</h4>
 <pre>java.util.HashMap&lt;K,V&gt; motors</pre>
+</li>
+<li class="blockList">
+<h4>encoderPins</h4>
+<pre>java.util.HashMap&lt;K,V&gt; encoderPins</pre>
+</li>
+<li class="blockList">
+<h4>filenameRX</h4>
+<pre>java.lang.String filenameRX</pre>
+</li>
+<li class="blockList">
+<h4>isRXRecording</h4>
+<pre>boolean isRXRecording</pre>
+</li>
+<li class="blockList">
+<h4>rxFileFormat</h4>
+<pre>java.lang.String rxFileFormat</pre>
 </li>
 <li class="blockList">
 <h4>servos</h4>
@@ -6195,15 +5867,6 @@
 <pre>java.util.ArrayList&lt;E&gt; portNames</pre>
 <div class="block">list of serial port names from the system which the Arduino service is
  running - this list is refreshed on querySerialDevices</div>
-</li>
-<li class="blockList">
-<h4>debugBuffer</h4>
-<pre>java.lang.StringBuffer debugBuffer</pre>
-<div class="block">MRL protocol method</div>
-</li>
-<li class="blockList">
-<h4>rxDebug</h4>
-<pre>java.lang.StringBuffer rxDebug</pre>
 </li>
 <li class="blockList">
 <h4>msg</h4>
@@ -6248,6 +5911,110 @@
 <li class="blockListLast">
 <h4>error_mrl_to_arduino_rx_cnt</h4>
 <pre>int error_mrl_to_arduino_rx_cnt</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Arduino2">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Arduino2.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Arduino2</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>mrlcommVersion</h4>
+<pre>java.lang.Integer mrlcommVersion</pre>
+</li>
+<li class="blockList">
+<h4>pinList</h4>
+<pre>java.util.ArrayList&lt;E&gt; pinList</pre>
+<div class="block">pin description of board</div>
+</li>
+<li class="blockList">
+<h4>steppers</h4>
+<pre>java.util.HashMap&lt;K,V&gt; steppers</pre>
+</li>
+<li class="blockList">
+<h4>stepperIndex</h4>
+<pre>java.util.HashMap&lt;K,V&gt; stepperIndex</pre>
+</li>
+<li class="blockList">
+<h4>sensors</h4>
+<pre>java.util.HashMap&lt;K,V&gt; sensors</pre>
+</li>
+<li class="blockList">
+<h4>sensorsIndex</h4>
+<pre>java.util.HashMap&lt;K,V&gt; sensorsIndex</pre>
+</li>
+<li class="blockList">
+<h4>connected</h4>
+<pre>boolean connected</pre>
+</li>
+<li class="blockList">
+<h4>boardType</h4>
+<pre>java.lang.String boardType</pre>
+</li>
+<li class="blockList">
+<h4>blockingData</h4>
+<pre>java.util.concurrent.BlockingQueue&lt;E&gt; blockingData</pre>
+</li>
+<li class="blockList">
+<h4>debugTX</h4>
+<pre>java.lang.StringBuilder debugTX</pre>
+</li>
+<li class="blockList">
+<h4>debugRX</h4>
+<pre>java.lang.StringBuilder debugRX</pre>
+</li>
+<li class="blockList">
+<h4>portName</h4>
+<pre>java.lang.String portName</pre>
+</li>
+<li class="blockList">
+<h4>motors</h4>
+<pre>java.util.HashMap&lt;K,V&gt; motors</pre>
+</li>
+<li class="blockList">
+<h4>servos</h4>
+<pre>java.util.HashMap&lt;K,V&gt; servos</pre>
+<div class="block">the local name to servo info</div>
+</li>
+<li class="blockList">
+<h4>servoIndex</h4>
+<pre>java.util.HashMap&lt;K,V&gt; servoIndex</pre>
+</li>
+<li class="blockList">
+<h4>portNames</h4>
+<pre>java.util.ArrayList&lt;E&gt; portNames</pre>
+</li>
+<li class="blockList">
+<h4>error_arduino_to_mrl_rx_cnt</h4>
+<pre>int error_arduino_to_mrl_rx_cnt</pre>
+</li>
+<li class="blockList">
+<h4>error_mrl_to_arduino_rx_cnt</h4>
+<pre>int error_mrl_to_arduino_rx_cnt</pre>
+</li>
+<li class="blockList">
+<h4>byteCount</h4>
+<pre>int byteCount</pre>
+</li>
+<li class="blockList">
+<h4>msgSize</h4>
+<pre>int msgSize</pre>
+</li>
+<li class="blockListLast">
+<h4>msg</h4>
+<pre>int[] msg</pre>
 </li>
 </ul>
 </li>
@@ -6445,6 +6212,19 @@
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
 </dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>pausedOnFrame</h4>
+<pre>int pausedOnFrame</pre>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 <li class="blockList"><a name="org.myrobotlab.service.AWTRobot">
 <!--   -->
@@ -6571,6 +6351,15 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.ChessGameManager">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/ChessGameManager.html" title="class in org.myrobotlab.service">org.myrobotlab.service.ChessGameManager</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.ChumbyBot">
 <!--   -->
 </a>
@@ -6681,6 +6470,32 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.CloudConnector">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/CloudConnector.html" title="class in org.myrobotlab.service">org.myrobotlab.service.CloudConnector</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>robotId</h4>
+<pre>java.lang.String robotId</pre>
+</li>
+<li class="blockListLast">
+<h4>propertyId</h4>
+<pre>java.lang.String propertyId</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.Cortex">
 <!--   -->
 </a>
@@ -6747,9 +6562,17 @@
 <h4>cronPattern</h4>
 <pre>java.lang.String cronPattern</pre>
 </li>
+<li class="blockList">
+<h4>name</h4>
+<pre>java.lang.String name</pre>
+</li>
+<li class="blockList">
+<h4>method</h4>
+<pre>java.lang.String method</pre>
+</li>
 <li class="blockListLast">
-<h4>msg</h4>
-<pre><a href="org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a> msg</pre>
+<h4>data</h4>
+<pre>java.lang.Object[] data</pre>
 </li>
 </ul>
 </li>
@@ -6845,6 +6668,56 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.EddieControlBoard">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/EddieControlBoard.html" title="class in org.myrobotlab.service">org.myrobotlab.service.EddieControlBoard</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>lastSensorValues</h4>
+<pre>java.util.HashMap&lt;K,V&gt; lastSensorValues</pre>
+</li>
+<li class="blockList">
+<h4>sampleCount</h4>
+<pre>int sampleCount</pre>
+</li>
+<li class="blockList">
+<h4>mapper</h4>
+<pre><a href="org/myrobotlab/math/Mapper.html" title="class in org.myrobotlab.math">Mapper</a> mapper</pre>
+</li>
+<li class="blockList">
+<h4>leftMotorPower</h4>
+<pre>float leftMotorPower</pre>
+</li>
+<li class="blockList">
+<h4>rightMotorPower</h4>
+<pre>float rightMotorPower</pre>
+</li>
+<li class="blockList">
+<h4>timeout</h4>
+<pre>int timeout</pre>
+</li>
+<li class="blockList">
+<h4>sensorPoller</h4>
+<pre>org.myrobotlab.service.EddieControlBoard.SensorPoller sensorPoller</pre>
+</li>
+<li class="blockListLast">
+<h4>sensorPollIntervalMS</h4>
+<pre>int sensorPollIntervalMS</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.FaceTracking">
 <!--   -->
 </a>
@@ -6914,286 +6787,6 @@
 <li class="blockListLast">
 <h4>canSpeak</h4>
 <pre>boolean canSpeak</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.service.FindHuman">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/FindHuman.html" title="class in org.myrobotlab.service">org.myrobotlab.service.FindHuman</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>arduino</h4>
-<pre><a href="org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a> arduino</pre>
-</li>
-<li class="blockList">
-<h4>speech</h4>
-<pre><a href="org/myrobotlab/service/Speech.html" title="class in org.myrobotlab.service">Speech</a> speech</pre>
-</li>
-<li class="blockList">
-<h4>pan</h4>
-<pre><a href="org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a> pan</pre>
-</li>
-<li class="blockList">
-<h4>tilt</h4>
-<pre><a href="org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a> tilt</pre>
-</li>
-<li class="blockList">
-<h4>twitter</h4>
-<pre><a href="org/myrobotlab/service/Twitter.html" title="class in org.myrobotlab.service">Twitter</a> twitter</pre>
-</li>
-<li class="blockList">
-<h4>opencv</h4>
-<pre><a href="org/myrobotlab/service/OpenCV.html" title="class in org.myrobotlab.service">OpenCV</a> opencv</pre>
-</li>
-<li class="blockList">
-<h4>xpid</h4>
-<pre><a href="org/myrobotlab/service/PID.html" title="class in org.myrobotlab.service">PID</a> xpid</pre>
-</li>
-<li class="blockList">
-<h4>ypid</h4>
-<pre><a href="org/myrobotlab/service/PID.html" title="class in org.myrobotlab.service">PID</a> ypid</pre>
-</li>
-<li class="blockList">
-<h4>java</h4>
-<pre><a href="org/myrobotlab/service/Java.html" title="class in org.myrobotlab.service">Java</a> java</pre>
-</li>
-<li class="blockList">
-<h4>tweetOn</h4>
-<pre>boolean tweetOn</pre>
-</li>
-<li class="blockList">
-<h4>raverLights</h4>
-<pre>boolean raverLights</pre>
-</li>
-<li class="blockList">
-<h4>actservox</h4>
-<pre>int actservox</pre>
-</li>
-<li class="blockList">
-<h4>actservoy</h4>
-<pre>int actservoy</pre>
-</li>
-<li class="blockList">
-<h4>frameSkip</h4>
-<pre>int frameSkip</pre>
-</li>
-<li class="blockList">
-<h4>frameSkipHuman</h4>
-<pre>int frameSkipHuman</pre>
-</li>
-<li class="blockList">
-<h4>spokeSearch</h4>
-<pre>boolean spokeSearch</pre>
-</li>
-<li class="blockList">
-<h4>x</h4>
-<pre>int x</pre>
-</li>
-<li class="blockList">
-<h4>y</h4>
-<pre>int y</pre>
-</li>
-<li class="blockList">
-<h4>dx</h4>
-<pre>double dx</pre>
-</li>
-<li class="blockList">
-<h4>dy</h4>
-<pre>double dy</pre>
-</li>
-<li class="blockList">
-<h4>rad</h4>
-<pre>double rad</pre>
-</li>
-<li class="blockList">
-<h4>dist</h4>
-<pre>double dist</pre>
-</li>
-<li class="blockList">
-<h4>raddir</h4>
-<pre>double raddir</pre>
-</li>
-<li class="blockList">
-<h4>distdir</h4>
-<pre>double distdir</pre>
-</li>
-<li class="blockList">
-<h4>speed</h4>
-<pre>double speed</pre>
-</li>
-<li class="blockListLast">
-<h4>speakOn</h4>
-<pre>boolean speakOn</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.service.FSM">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/FSM.html" title="class in org.myrobotlab.service">org.myrobotlab.service.FSM</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>transistionStates</h4>
-<pre>java.util.HashMap&lt;K,V&gt; transistionStates</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.service.FSMTest">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/FSMTest.html" title="class in org.myrobotlab.service">org.myrobotlab.service.FSMTest</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>context</h4>
-<pre>java.lang.String context</pre>
-</li>
-<li class="blockList">
-<h4>contextPerson</h4>
-<pre>java.lang.String contextPerson</pre>
-</li>
-<li class="blockList">
-<h4>lastAssociativeWord</h4>
-<pre>java.lang.String lastAssociativeWord</pre>
-</li>
-<li class="blockList">
-<h4>isSpeaking</h4>
-<pre>boolean isSpeaking</pre>
-</li>
-<li class="blockList">
-<h4>memory</h4>
-<pre>java.util.HashMap&lt;K,V&gt; memory</pre>
-</li>
-<li class="blockList">
-<h4>opencv</h4>
-<pre><a href="org/myrobotlab/service/OpenCV.html" title="class in org.myrobotlab.service">OpenCV</a> opencv</pre>
-</li>
-<li class="blockList">
-<h4>speechRecognition</h4>
-<pre><a href="org/myrobotlab/service/Sphinx.html" title="class in org.myrobotlab.service">Sphinx</a> speechRecognition</pre>
-</li>
-<li class="blockList">
-<h4>speech</h4>
-<pre><a href="org/myrobotlab/service/Speech.html" title="class in org.myrobotlab.service">Speech</a> speech</pre>
-</li>
-<li class="blockList">
-<h4>gui</h4>
-<pre><a href="org/myrobotlab/service/GUIService.html" title="class in org.myrobotlab.service">GUIService</a> gui</pre>
-</li>
-<li class="blockList">
-<h4>arduino</h4>
-<pre><a href="org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a> arduino</pre>
-</li>
-<li class="blockList">
-<h4>right</h4>
-<pre><a href="org/myrobotlab/service/Motor.html" title="class in org.myrobotlab.service">Motor</a> right</pre>
-</li>
-<li class="blockList">
-<h4>generator</h4>
-<pre>java.util.Random generator</pre>
-</li>
-<li class="blockList">
-<h4>phrases</h4>
-<pre>java.util.HashMap&lt;K,V&gt; phrases</pre>
-</li>
-<li class="blockList">
-<h4>filter</h4>
-<pre><a href="org/myrobotlab/opencv/OpenCVFilterKinectDepthMask.html" title="class in org.myrobotlab.opencv">OpenCVFilterKinectDepthMask</a> filter</pre>
-</li>
-<li class="blockList">
-<h4>result</h4>
-<pre>com.googlecode.javacv.cpp.opencv_core.IplImage result</pre>
-</li>
-<li class="blockList">
-<h4>minVal</h4>
-<pre>double[] minVal</pre>
-</li>
-<li class="blockList">
-<h4>maxVal</h4>
-<pre>double[] maxVal</pre>
-</li>
-<li class="blockList">
-<h4>minLoc</h4>
-<pre>com.googlecode.javacv.cpp.opencv_core.CvPoint minLoc</pre>
-</li>
-<li class="blockList">
-<h4>maxLoc</h4>
-<pre>com.googlecode.javacv.cpp.opencv_core.CvPoint maxLoc</pre>
-</li>
-<li class="blockList">
-<h4>tempRect0</h4>
-<pre>com.googlecode.javacv.cpp.opencv_core.CvPoint tempRect0</pre>
-</li>
-<li class="blockList">
-<h4>tempRect1</h4>
-<pre>com.googlecode.javacv.cpp.opencv_core.CvPoint tempRect1</pre>
-</li>
-<li class="blockList">
-<h4>resultWidth</h4>
-<pre>int resultWidth</pre>
-</li>
-<li class="blockListLast">
-<h4>resultHeight</h4>
-<pre>int resultHeight</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.service.GeneticProgramming">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/GeneticProgramming.html" title="class in org.myrobotlab.service">org.myrobotlab.service.GeneticProgramming</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>gp1</h4>
-<pre><a href="org/myrobotlab/gp/GP.html" title="class in org.myrobotlab.gp">GP</a> gp1</pre>
-</li>
-<li class="blockListLast">
-<h4>p</h4>
-<pre>java.lang.Thread p</pre>
 </li>
 </ul>
 </li>
@@ -7279,10 +6872,6 @@
 <pre>boolean bigEndian</pre>
 </li>
 <li class="blockList">
-<h4>encoder</h4>
-<pre>javaFlacEncoder.FLAC_FileEncoder encoder</pre>
-</li>
-<li class="blockList">
 <h4>rms</h4>
 <pre>float rms</pre>
 </li>
@@ -7337,36 +6926,12 @@
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockList">
-<h4>serialName</h4>
-<pre>java.lang.String serialName</pre>
-</li>
-<li class="blockList">
 <h4>buffer</h4>
 <pre>java.io.ByteArrayOutputStream buffer</pre>
 </li>
 <li class="blockList">
 <h4>model</h4>
 <pre>java.lang.String model</pre>
-</li>
-<li class="blockList">
-<h4>index</h4>
-<pre>int index</pre>
-</li>
-<li class="blockList">
-<h4>GPSbaudRate</h4>
-<pre>int GPSbaudRate</pre>
-</li>
-<li class="blockList">
-<h4>serialPort</h4>
-<pre>java.lang.String serialPort</pre>
-</li>
-<li class="blockList">
-<h4>message</h4>
-<pre>byte[] message</pre>
-</li>
-<li class="blockList">
-<h4>dataAvailable</h4>
-<pre>boolean dataAvailable</pre>
 </li>
 <li class="blockListLast">
 <h4>messageString</h4>
@@ -7417,28 +6982,6 @@
 <li class="blockListLast">
 <h4>plotTextStart</h4>
 <pre>int plotTextStart</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.service.GUIDynamic">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/GUIDynamic.html" title="class in org.myrobotlab.service">org.myrobotlab.service.GUIDynamic</a> extends <a href="org/myrobotlab/service/GUIService.html" title="class in org.myrobotlab.service">GUIService</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>desktop</h4>
-<pre><a href="org/myrobotlab/dynamicGUI/Desktop.html" title="class in org.myrobotlab.dynamicGUI">Desktop</a> desktop</pre>
 </li>
 </ul>
 </li>
@@ -7565,6 +7108,36 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.HtmlFilter">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/HtmlFilter.html" title="class in org.myrobotlab.service">org.myrobotlab.service.HtmlFilter</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>stripHtml</h4>
+<pre>boolean stripHtml</pre>
+</li>
+<li class="blockList">
+<h4>preHtmlTag</h4>
+<pre>java.lang.String preHtmlTag</pre>
+</li>
+<li class="blockListLast">
+<h4>postHtmlTag</h4>
+<pre>java.lang.String postHtmlTag</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.HTTPClient">
 <!--   -->
 </a>
@@ -7582,6 +7155,19 @@
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
 </dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>now</h4>
+<pre>java.util.Date now</pre>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 <li class="blockList"><a name="org.myrobotlab.service.InMoov">
 <!--   -->
@@ -7610,6 +7196,18 @@
 <pre>java.lang.String defaultRightPort</pre>
 </li>
 <li class="blockList">
+<h4>copyGesture</h4>
+<pre>boolean copyGesture</pre>
+</li>
+<li class="blockList">
+<h4>firstSkeleton</h4>
+<pre>boolean firstSkeleton</pre>
+</li>
+<li class="blockList">
+<h4>saveSkeletonFrame</h4>
+<pre>boolean saveSkeletonFrame</pre>
+</li>
+<li class="blockList">
 <h4>speakErrors</h4>
 <pre>boolean speakErrors</pre>
 </li>
@@ -7622,16 +7220,8 @@
 <pre>int maxInactivityTimeSeconds</pre>
 </li>
 <li class="blockList">
-<h4>copyGesture</h4>
-<pre>boolean copyGesture</pre>
-</li>
-<li class="blockList">
-<h4>firstSkeleton</h4>
-<pre>boolean firstSkeleton</pre>
-</li>
-<li class="blockList">
-<h4>saveSkeletonFrame</h4>
-<pre>boolean saveSkeletonFrame</pre>
+<h4>mute</h4>
+<pre>boolean mute</pre>
 </li>
 <li class="blockList">
 <h4>pirPin</h4>
@@ -7674,6 +7264,60 @@
 <li class="blockListLast">
 <h4>side</h4>
 <pre>java.lang.String side</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.InMoovGestureCreator">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/InMoovGestureCreator.html" title="class in org.myrobotlab.service">org.myrobotlab.service.InMoovGestureCreator</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>servoitemholder</h4>
+<pre><a href="org/myrobotlab/service/InMoovGestureCreator.ServoItemHolder.html" title="class in org.myrobotlab.service">InMoovGestureCreator.ServoItemHolder</a>[][] servoitemholder</pre>
+</li>
+<li class="blockList">
+<h4>frameitemholder</h4>
+<pre>java.util.ArrayList&lt;E&gt; frameitemholder</pre>
+</li>
+<li class="blockList">
+<h4>pythonitemholder</h4>
+<pre>java.util.ArrayList&lt;E&gt; pythonitemholder</pre>
+</li>
+<li class="blockList">
+<h4>tabs_main_checkbox_states</h4>
+<pre>boolean[] tabs_main_checkbox_states</pre>
+</li>
+<li class="blockList">
+<h4>moverealtime</h4>
+<pre>boolean moverealtime</pre>
+</li>
+<li class="blockList">
+<h4>i01</h4>
+<pre><a href="org/myrobotlab/service/InMoov.html" title="class in org.myrobotlab.service">InMoov</a> i01</pre>
+</li>
+<li class="blockList">
+<h4>pythonscript</h4>
+<pre>java.lang.String pythonscript</pre>
+</li>
+<li class="blockList">
+<h4>pythonname</h4>
+<pre>java.lang.String pythonname</pre>
+</li>
+<li class="blockListLast">
+<h4>referencename</h4>
+<pre>java.lang.String referencename</pre>
 </li>
 </ul>
 </li>
@@ -7779,82 +7423,6 @@
 </li>
 </ul>
 </li>
-<li class="blockList"><a name="org.myrobotlab.service.Java">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/Java.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Java</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>rootPath</h4>
-<pre>java.lang.String rootPath</pre>
-</li>
-<li class="blockList">
-<h4>modulesDir</h4>
-<pre>java.lang.String modulesDir</pre>
-</li>
-<li class="blockList">
-<h4>inputScript</h4>
-<pre>java.lang.String inputScript</pre>
-</li>
-<li class="blockList">
-<h4>setupScript</h4>
-<pre>java.lang.String setupScript</pre>
-</li>
-<li class="blockList">
-<h4>msgHandlerScript</h4>
-<pre>java.lang.String msgHandlerScript</pre>
-</li>
-<li class="blockList">
-<h4>currentScript</h4>
-<pre><a href="org/myrobotlab/service/Java.Script.html" title="class in org.myrobotlab.service">Java.Script</a> currentScript</pre>
-</li>
-<li class="blockList">
-<h4>javaConsoleInitialized</h4>
-<pre>boolean javaConsoleInitialized</pre>
-</li>
-<li class="blockListLast">
-<h4>initialServiceScript</h4>
-<pre>java.lang.String initialServiceScript</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.service.Java.Script">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/Java.Script.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Java.Script</a> extends java.lang.Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>name</h4>
-<pre>java.lang.String name</pre>
-</li>
-<li class="blockListLast">
-<h4>code</h4>
-<pre>java.lang.String code</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="blockList"><a name="org.myrobotlab.service.JFugue">
 <!--   -->
 </a>
@@ -7880,23 +7448,15 @@
 <ul class="blockList">
 <li class="blockList">
 <h4>controllerNames</h4>
-<pre>java.util.TreeMap&lt;K,V&gt; controllerNames</pre>
+<pre>java.util.HashMap&lt;K,V&gt; controllerNames</pre>
 </li>
 <li class="blockList">
-<h4>pollingThread</h4>
-<pre><a href="org/myrobotlab/service/Joystick.InputPollingThread.html" title="class in org.myrobotlab.service">Joystick.InputPollingThread</a> pollingThread</pre>
-</li>
-<li class="blockList">
-<h4>myDeviceIndex</h4>
-<pre>int myDeviceIndex</pre>
+<h4>componentNames</h4>
+<pre>java.util.HashMap&lt;K,V&gt; componentNames</pre>
 </li>
 <li class="blockList">
 <h4>lastValues</h4>
-<pre>double[] lastValues</pre>
-</li>
-<li class="blockList">
-<h4>comps</h4>
-<pre>net.java.games.input.Component[] comps</pre>
+<pre>java.util.HashMap&lt;K,V&gt; lastValues</pre>
 </li>
 <li class="blockList">
 <h4>xAxisIdx</h4>
@@ -7915,18 +7475,6 @@
 <pre>int rzAxisIdx</pre>
 </li>
 <li class="blockList">
-<h4>povIdx</h4>
-<pre>int povIdx</pre>
-</li>
-<li class="blockList">
-<h4>buttonsIdx</h4>
-<pre>int[] buttonsIdx</pre>
-</li>
-<li class="blockList">
-<h4>rumblers</h4>
-<pre>net.java.games.input.Rumbler[] rumblers</pre>
-</li>
-<li class="blockList">
 <h4>rumblerIdx</h4>
 <pre>int rumblerIdx</pre>
 </li>
@@ -7935,64 +7483,50 @@
 <pre>boolean rumblerOn</pre>
 </li>
 <li class="blockList">
-<h4>hatTransform</h4>
-<pre>boolean hatTransform</pre>
+<h4>povIdx</h4>
+<pre>int povIdx</pre>
 </li>
 <li class="blockList">
-<h4>hatMultiplier</h4>
-<pre>int hatMultiplier</pre>
+<h4>buttonsIdx</h4>
+<pre>int[] buttonsIdx</pre>
 </li>
 <li class="blockList">
-<h4>hatOffset</h4>
-<pre>int hatOffset</pre>
-</li>
-<li class="blockList">
-<h4>XAxisTransform</h4>
-<pre>boolean XAxisTransform</pre>
-</li>
-<li class="blockList">
-<h4>XAxisMultiplier</h4>
-<pre>int XAxisMultiplier</pre>
-</li>
-<li class="blockList">
-<h4>XAxisOffset</h4>
-<pre>int XAxisOffset</pre>
-</li>
-<li class="blockList">
-<h4>YAxisTransform</h4>
-<pre>boolean YAxisTransform</pre>
-</li>
-<li class="blockList">
-<h4>YAxisMultiplier</h4>
-<pre>int YAxisMultiplier</pre>
-</li>
-<li class="blockList">
-<h4>YAxisOffset</h4>
-<pre>int YAxisOffset</pre>
-</li>
-<li class="blockList">
-<h4>ZAxisTransform</h4>
-<pre>boolean ZAxisTransform</pre>
-</li>
-<li class="blockList">
-<h4>ZAxisMultiplier</h4>
-<pre>int ZAxisMultiplier</pre>
-</li>
-<li class="blockList">
-<h4>ZAxisOffset</h4>
-<pre>int ZAxisOffset</pre>
-</li>
-<li class="blockList">
-<h4>ZRotTransform</h4>
-<pre>boolean ZRotTransform</pre>
-</li>
-<li class="blockList">
-<h4>ZRotMultiplier</h4>
-<pre>int ZRotMultiplier</pre>
+<h4>mappers</h4>
+<pre>java.util.HashMap&lt;K,V&gt; mappers</pre>
 </li>
 <li class="blockListLast">
-<h4>ZRotOffset</h4>
-<pre>int ZRotOffset</pre>
+<h4>mapIds</h4>
+<pre>java.util.HashMap&lt;K,V&gt; mapIds</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Joystick.Button">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Joystick.Button.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Joystick.Button</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>id</h4>
+<pre>java.lang.String id</pre>
+</li>
+<li class="blockList">
+<h4>type</h4>
+<pre>java.lang.String type</pre>
+</li>
+<li class="blockListLast">
+<h4>value</h4>
+<pre>java.lang.Float value</pre>
 </li>
 </ul>
 </li>
@@ -8012,9 +7546,43 @@
 </a>
 <h3>Serialized Fields</h3>
 <ul class="blockList">
-<li class="blockListLast">
+<li class="blockList">
 <h4>commands</h4>
 <pre>java.util.HashMap&lt;K,V&gt; commands</pre>
+</li>
+<li class="blockList">
+<h4>remap</h4>
+<pre>java.util.HashMap&lt;K,V&gt; remap</pre>
+</li>
+<li class="blockListLast">
+<h4>isBlocking</h4>
+<pre>boolean isBlocking</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.LeapMotion2">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/LeapMotion2.html" title="class in org.myrobotlab.service">org.myrobotlab.service.LeapMotion2</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>listener</h4>
+<pre><a href="org/myrobotlab/leap/LeapMotionListener.html" title="class in org.myrobotlab.leap">LeapMotionListener</a> listener</pre>
+</li>
+<li class="blockListLast">
+<h4>controller</h4>
+<pre>com.leapmotion.leap.Controller controller</pre>
 </li>
 </ul>
 </li>
@@ -8135,15 +7703,6 @@
 <dd>1L</dd>
 </dl>
 </li>
-<li class="blockList"><a name="org.myrobotlab.service.Mapper">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/Mapper.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Mapper</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-</li>
 <li class="blockList"><a name="org.myrobotlab.service.MindWave">
 <!--   -->
 </a>
@@ -8168,37 +7727,52 @@
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockList">
-<h4>isAttached</h4>
-<pre>boolean isAttached</pre>
-<div class="block">state of Motor being attached to a motor controller</div>
-</li>
-<li class="blockList">
-<h4>directionInverted</h4>
-<pre>boolean directionInverted</pre>
-<div class="block">determines if the motor should spin CW or CCW relative to the positive or
- negative signed power</div>
-</li>
-<li class="blockList">
-<h4>powerLevel</h4>
-<pre>float powerLevel</pre>
-<div class="block">current power level of the motor - valid range between -1.0 and 1.0</div>
-</li>
-<li class="blockList">
-<h4>maxPower</h4>
-<pre>float maxPower</pre>
-<div class="block">limit on power level - valid range is between 0 and 1.0</div>
-</li>
-<li class="blockList">
-<h4>inMotion</h4>
-<pre>boolean inMotion</pre>
+<h4>controller</h4>
+<pre><a href="org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a> controller</pre>
 </li>
 <li class="blockList">
 <h4>locked</h4>
 <pre>boolean locked</pre>
 </li>
+<li class="blockList">
+<h4>isAttached</h4>
+<pre>boolean isAttached</pre>
+</li>
+<li class="blockList">
+<h4>pwmPin</h4>
+<pre>java.lang.Integer pwmPin</pre>
+</li>
+<li class="blockList">
+<h4>dirPin</h4>
+<pre>java.lang.Integer dirPin</pre>
+</li>
+<li class="blockList">
+<h4>encoderPin</h4>
+<pre>java.lang.Integer encoderPin</pre>
+</li>
+<li class="blockList">
+<h4>powerOutput</h4>
+<pre>double powerOutput</pre>
+</li>
+<li class="blockList">
+<h4>powerMap</h4>
+<pre><a href="org/myrobotlab/math/Mapper.html" title="class in org.myrobotlab.math">Mapper</a> powerMap</pre>
+</li>
+<li class="blockList">
+<h4>currentPos</h4>
+<pre>double currentPos</pre>
+</li>
+<li class="blockList">
+<h4>targetPos</h4>
+<pre>double targetPos</pre>
+</li>
+<li class="blockList">
+<h4>encoderMap</h4>
+<pre><a href="org/myrobotlab/math/Mapper.html" title="class in org.myrobotlab.math">Mapper</a> encoderMap</pre>
+</li>
 <li class="blockListLast">
-<h4>controller</h4>
-<pre><a href="org/myrobotlab/service/interfaces/MotorController.html" title="interface in org.myrobotlab.service.interfaces">MotorController</a> controller</pre>
+<h4>type</h4>
+<pre>java.lang.String type</pre>
 </li>
 </ul>
 </li>
@@ -8242,6 +7816,181 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.MPU6050">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/MPU6050.html" title="class in org.myrobotlab.service">org.myrobotlab.service.MPU6050</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>msg</h4>
+<pre>byte[] msg</pre>
+</li>
+<li class="blockList">
+<h4>newByte</h4>
+<pre>int newByte</pre>
+</li>
+<li class="blockList">
+<h4>byteCount</h4>
+<pre>int byteCount</pre>
+</li>
+<li class="blockList">
+<h4>msgSize</h4>
+<pre>int msgSize</pre>
+</li>
+<li class="blockList">
+<h4>error_arduino_to_mrl_rx_cnt</h4>
+<pre>int error_arduino_to_mrl_rx_cnt</pre>
+</li>
+<li class="blockList">
+<h4>error_mrl_to_arduino_rx_cnt</h4>
+<pre>int error_mrl_to_arduino_rx_cnt</pre>
+</li>
+<li class="blockListLast">
+<h4>debugRX</h4>
+<pre>java.lang.StringBuilder debugRX</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.MQTT">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/MQTT.html" title="class in org.myrobotlab.service">org.myrobotlab.service.MQTT</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>state</h4>
+<pre>int state</pre>
+</li>
+<li class="blockList">
+<h4>client</h4>
+<pre>org.eclipse.paho.client.mqttv3.MqttAsyncClient client</pre>
+</li>
+<li class="blockList">
+<h4>quietMode</h4>
+<pre>boolean quietMode</pre>
+</li>
+<li class="blockList">
+<h4>action</h4>
+<pre>java.lang.String action</pre>
+</li>
+<li class="blockList">
+<h4>message</h4>
+<pre>java.lang.String message</pre>
+</li>
+<li class="blockList">
+<h4>qos</h4>
+<pre>int qos</pre>
+</li>
+<li class="blockList">
+<h4>brokerURL</h4>
+<pre>java.lang.String brokerURL</pre>
+</li>
+<li class="blockList">
+<h4>port</h4>
+<pre>int port</pre>
+</li>
+<li class="blockList">
+<h4>clientId</h4>
+<pre>java.lang.String clientId</pre>
+</li>
+<li class="blockList">
+<h4>subTopic</h4>
+<pre>java.lang.String subTopic</pre>
+</li>
+<li class="blockList">
+<h4>pubTopic</h4>
+<pre>java.lang.String pubTopic</pre>
+</li>
+<li class="blockList">
+<h4>cleanSession</h4>
+<pre>boolean cleanSession</pre>
+</li>
+<li class="blockList">
+<h4>ssl</h4>
+<pre>boolean ssl</pre>
+</li>
+<li class="blockList">
+<h4>password</h4>
+<pre>java.lang.String password</pre>
+</li>
+<li class="blockList">
+<h4>userName</h4>
+<pre>java.lang.String userName</pre>
+</li>
+<li class="blockList">
+<h4>ex</h4>
+<pre>java.lang.Throwable ex</pre>
+</li>
+<li class="blockList">
+<h4>waiter</h4>
+<pre>java.lang.Object waiter</pre>
+</li>
+<li class="blockList">
+<h4>donext</h4>
+<pre>boolean donext</pre>
+</li>
+<li class="blockList">
+<h4>conOpt</h4>
+<pre>org.eclipse.paho.client.mqttv3.MqttConnectOptions conOpt</pre>
+</li>
+<li class="blockListLast">
+<h4>tokens</h4>
+<pre>java.lang.String[] tokens</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.MultiWii">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/MultiWii.html" title="class in org.myrobotlab.service">org.myrobotlab.service.MultiWii</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.MySQL">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/MySQL.html" title="class in org.myrobotlab.service">org.myrobotlab.service.MySQL</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>conn</h4>
+<pre>java.sql.Connection conn</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.Netty">
 <!--   -->
 </a>
@@ -8280,11 +8029,15 @@
 <ul class="blockList">
 <li class="blockList">
 <h4>hmd</h4>
-<pre>Hmd hmd</pre>
+<pre>com.oculusvr.capi.Hmd hmd</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>initialized</h4>
 <pre>boolean initialized</pre>
+</li>
+<li class="blockListLast">
+<h4>lastRiftFrame</h4>
+<pre><a href="org/myrobotlab/service/OculusRift.RiftFrame.html" title="class in org.myrobotlab.service">OculusRift.RiftFrame</a> lastRiftFrame</pre>
 </li>
 </ul>
 </li>
@@ -8312,9 +8065,13 @@
 <h4>positive</h4>
 <pre>java.util.ArrayList&lt;E&gt; positive</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>negative</h4>
 <pre>java.util.ArrayList&lt;E&gt; negative</pre>
+</li>
+<li class="blockListLast">
+<h4>undockDisplay</h4>
+<pre>boolean undockDisplay</pre>
 </li>
 </ul>
 </li>
@@ -8335,16 +8092,8 @@
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockList">
-<h4>context</h4>
-<pre>SimpleOpenNI.SimpleOpenNI context</pre>
-</li>
-<li class="blockList">
 <h4>sinks</h4>
 <pre>java.util.ArrayList&lt;E&gt; sinks</pre>
-</li>
-<li class="blockList">
-<h4>g2d</h4>
-<pre>java.awt.Graphics2D g2d</pre>
 </li>
 <li class="blockList">
 <h4>frameNumber</h4>
@@ -8369,18 +8118,6 @@
 <li class="blockList">
 <h4>com2d</h4>
 <pre><a href="org/myrobotlab/openni/PVector.html" title="class in org.myrobotlab.openni">PVector</a> com2d</pre>
-</li>
-<li class="blockList">
-<h4>frame</h4>
-<pre>java.awt.image.BufferedImage frame</pre>
-</li>
-<li class="blockList">
-<h4>csvFile</h4>
-<pre>java.io.FileOutputStream csvFile</pre>
-</li>
-<li class="blockList">
-<h4>rubySketchUpFile</h4>
-<pre>java.io.FileOutputStream rubySketchUpFile</pre>
 </li>
 <li class="blockList">
 <h4>skeleton</h4>
@@ -8441,15 +8178,6 @@
 </ul>
 </li>
 </ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.service.Oscope">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/Oscope.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Oscope</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
 </li>
 <li class="blockList"><a name="org.myrobotlab.service.ParallelPort">
 <!--   -->
@@ -8572,15 +8300,6 @@
 </li>
 </ul>
 </li>
-<li class="blockList"><a name="org.myrobotlab.service.PickToLightServer">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/PickToLightServer.html" title="class in org.myrobotlab.service">org.myrobotlab.service.PickToLightServer</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-</li>
 <li class="blockList"><a name="org.myrobotlab.service.PID">
 <!--   -->
 </a>
@@ -8671,6 +8390,28 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.PID2">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/PID2.html" title="class in org.myrobotlab.service">org.myrobotlab.service.PID2</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>data</h4>
+<pre>java.util.HashMap&lt;K,V&gt; data</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.Pingdar">
 <!--   -->
 </a>
@@ -8705,9 +8446,17 @@
 <h4>lastRange</h4>
 <pre>java.lang.Long lastRange</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>lastPos</h4>
 <pre>java.lang.Integer lastPos</pre>
+</li>
+<li class="blockList">
+<h4>rangeCount</h4>
+<pre>int rangeCount</pre>
+</li>
+<li class="blockListLast">
+<h4>rangeAvg</h4>
+<pre>long rangeAvg</pre>
 </li>
 </ul>
 </li>
@@ -8780,6 +8529,202 @@
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
 </dl>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.ProgramAB">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/ProgramAB.html" title="class in org.myrobotlab.service">org.myrobotlab.service.ProgramAB</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>bot</h4>
+<pre>org.alicebot.ab.Bot bot</pre>
+</li>
+<li class="blockList">
+<h4>path</h4>
+<pre>java.lang.String path</pre>
+</li>
+<li class="blockList">
+<h4>botName</h4>
+<pre>java.lang.String botName</pre>
+</li>
+<li class="blockList">
+<h4>sessions</h4>
+<pre>java.util.HashMap&lt;K,V&gt; sessions</pre>
+</li>
+<li class="blockList">
+<h4>oobPattern</h4>
+<pre>java.util.regex.Pattern oobPattern</pre>
+</li>
+<li class="blockList">
+<h4>processOOB</h4>
+<pre>boolean processOOB</pre>
+</li>
+<li class="blockList">
+<h4>serviceStartTime</h4>
+<pre>java.util.Date serviceStartTime</pre>
+</li>
+<li class="blockList">
+<h4>lastResponseTime</h4>
+<pre>java.util.Date lastResponseTime</pre>
+</li>
+<li class="blockList">
+<h4>maxConversationDelay</h4>
+<pre>int maxConversationDelay</pre>
+</li>
+<li class="blockListLast">
+<h4>enableAutoConversation</h4>
+<pre>boolean enableAutoConversation</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Propeller">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Propeller.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Propeller</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>mrlcommVersion</h4>
+<pre>java.lang.Integer mrlcommVersion</pre>
+</li>
+<li class="blockList">
+<h4>pinList</h4>
+<pre>java.util.ArrayList&lt;E&gt; pinList</pre>
+<div class="block">pin description of board</div>
+</li>
+<li class="blockList">
+<h4>steppers</h4>
+<pre>java.util.HashMap&lt;K,V&gt; steppers</pre>
+</li>
+<li class="blockList">
+<h4>stepperIndex</h4>
+<pre>java.util.HashMap&lt;K,V&gt; stepperIndex</pre>
+</li>
+<li class="blockList">
+<h4>sensors</h4>
+<pre>java.util.HashMap&lt;K,V&gt; sensors</pre>
+</li>
+<li class="blockList">
+<h4>sensorsIndex</h4>
+<pre>java.util.HashMap&lt;K,V&gt; sensorsIndex</pre>
+</li>
+<li class="blockList">
+<h4>connected</h4>
+<pre>boolean connected</pre>
+</li>
+<li class="blockList">
+<h4>boardType</h4>
+<pre>java.lang.String boardType</pre>
+</li>
+<li class="blockList">
+<h4>blockingData</h4>
+<pre>java.util.concurrent.BlockingQueue&lt;E&gt; blockingData</pre>
+</li>
+<li class="blockList">
+<h4>debugTX</h4>
+<pre>java.lang.StringBuilder debugTX</pre>
+</li>
+<li class="blockList">
+<h4>debugRX</h4>
+<pre>java.lang.StringBuilder debugRX</pre>
+</li>
+<li class="blockList">
+<h4>motors</h4>
+<pre>java.util.HashMap&lt;K,V&gt; motors</pre>
+</li>
+<li class="blockList">
+<h4>servos</h4>
+<pre>java.util.HashMap&lt;K,V&gt; servos</pre>
+<div class="block">the local name to servo info</div>
+</li>
+<li class="blockList">
+<h4>servoIndex</h4>
+<pre>java.util.HashMap&lt;K,V&gt; servoIndex</pre>
+</li>
+<li class="blockList">
+<h4>buildPath</h4>
+<pre>java.lang.String buildPath</pre>
+</li>
+<li class="blockList">
+<h4>sketchName</h4>
+<pre>java.lang.String sketchName</pre>
+</li>
+<li class="blockList">
+<h4>sketch</h4>
+<pre>java.lang.String sketch</pre>
+</li>
+<li class="blockList">
+<h4>portNames</h4>
+<pre>java.util.ArrayList&lt;E&gt; portNames</pre>
+<div class="block">list of serial port names from the system which the Propeller service is
+ running - this list is refreshed on querySerialDevices</div>
+</li>
+<li class="blockList">
+<h4>msg</h4>
+<pre>byte[] msg</pre>
+</li>
+<li class="blockList">
+<h4>newByte</h4>
+<pre>int newByte</pre>
+</li>
+<li class="blockList">
+<h4>byteCount</h4>
+<pre>int byteCount</pre>
+</li>
+<li class="blockList">
+<h4>msgSize</h4>
+<pre>int msgSize</pre>
+</li>
+<li class="blockList">
+<h4>portName</h4>
+<pre>java.lang.String portName</pre>
+</li>
+<li class="blockList">
+<h4>rate</h4>
+<pre>int rate</pre>
+</li>
+<li class="blockList">
+<h4>databits</h4>
+<pre>int databits</pre>
+</li>
+<li class="blockList">
+<h4>stopbits</h4>
+<pre>int stopbits</pre>
+</li>
+<li class="blockList">
+<h4>parity</h4>
+<pre>int parity</pre>
+</li>
+<li class="blockList">
+<h4>error_arduino_to_mrl_rx_cnt</h4>
+<pre>int error_arduino_to_mrl_rx_cnt</pre>
+</li>
+<li class="blockListLast">
+<h4>error_mrl_to_arduino_rx_cnt</h4>
+<pre>int error_mrl_to_arduino_rx_cnt</pre>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 <li class="blockList"><a name="org.myrobotlab.service.Proxy">
 <!--   -->
@@ -8979,12 +8924,20 @@
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockList">
-<h4>lastHost</h4>
-<pre>java.lang.String lastHost</pre>
+<h4>lastProtocolKey</h4>
+<pre>java.lang.String lastProtocolKey</pre>
 </li>
 <li class="blockList">
-<h4>lastPort</h4>
-<pre>java.lang.String lastPort</pre>
+<h4>defaultPrefix</h4>
+<pre>java.lang.String defaultPrefix</pre>
+</li>
+<li class="blockList">
+<h4>prefixMap</h4>
+<pre>java.util.HashMap&lt;K,V&gt; prefixMap</pre>
+</li>
+<li class="blockList">
+<h4>localProtocolKeys</h4>
+<pre>java.util.HashSet&lt;E&gt; localProtocolKeys</pre>
 </li>
 <li class="blockList">
 <h4>udpPort</h4>
@@ -8995,16 +8948,44 @@
 <pre>java.lang.Integer tcpPort</pre>
 </li>
 <li class="blockList">
-<h4>udpRx</h4>
-<pre>int udpRx</pre>
+<h4>isListening</h4>
+<pre>boolean isListening</pre>
 </li>
 <li class="blockList">
-<h4>udpTx</h4>
-<pre>int udpTx</pre>
+<h4>isScanning</h4>
+<pre>boolean isScanning</pre>
 </li>
 <li class="blockListLast">
-<h4>tcpTx</h4>
-<pre>int tcpTx</pre>
+<h4>connections</h4>
+<pre>java.util.HashMap&lt;K,V&gt; connections</pre>
+<div class="block">used as a data interface to all the non-serializable network objects - it
+ will report stats and states</div>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.RemoteAdapter.CommOptions">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/RemoteAdapter.CommOptions.html" title="class in org.myrobotlab.service">org.myrobotlab.service.RemoteAdapter.CommOptions</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>platform</h4>
+<pre><a href="org/myrobotlab/framework/Platform.html" title="class in org.myrobotlab.framework">Platform</a> platform</pre>
+</li>
+<li class="blockListLast">
+<h4>gateways</h4>
+<pre>java.util.ArrayList&lt;E&gt; gateways</pre>
 </li>
 </ul>
 </li>
@@ -9241,18 +9222,22 @@
 <h4>jvmArgs</h4>
 <pre>java.util.List&lt;E&gt; jvmArgs</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>args</h4>
 <pre>java.util.List&lt;E&gt; args</pre>
 </li>
-</ul>
+<li class="blockListLast">
+<h4>shutdownAfterUpdate</h4>
+<pre>boolean shutdownAfterUpdate</pre>
 </li>
 </ul>
 </li>
-<li class="blockList"><a name="org.myrobotlab.service.SaberTooth">
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Sabertooth">
 <!--   -->
 </a>
-<h3>Class <a href="org/myrobotlab/service/SaberTooth.html" title="class in org.myrobotlab.service">org.myrobotlab.service.SaberTooth</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<h3>Class <a href="org/myrobotlab/service/Sabertooth.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Sabertooth</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
 <dl class="nameValue">
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
@@ -9412,20 +9397,12 @@
 <pre>java.util.ArrayList&lt;E&gt; portNames</pre>
 </li>
 <li class="blockList">
-<h4>BUFFER_SIZE</h4>
-<pre>int BUFFER_SIZE</pre>
+<h4>format</h4>
+<pre>java.lang.String format</pre>
 </li>
 <li class="blockList">
-<h4>buffer</h4>
-<pre>byte[] buffer</pre>
-</li>
-<li class="blockList">
-<h4>recievedByteCount</h4>
-<pre>int recievedByteCount</pre>
-</li>
-<li class="blockList">
-<h4>publish</h4>
-<pre>boolean publish</pre>
+<h4>delimeter</h4>
+<pre>java.lang.String delimeter</pre>
 </li>
 <li class="blockList">
 <h4>blocking</h4>
@@ -9440,28 +9417,46 @@
 <pre>java.lang.String portName</pre>
 </li>
 <li class="blockList">
-<h4>publishType</h4>
-<pre>int publishType</pre>
+<h4>rate</h4>
+<pre>int rate</pre>
 </li>
 <li class="blockList">
-<h4>BYTE_SIZE_LONG</h4>
-<pre>int BYTE_SIZE_LONG</pre>
+<h4>rxFileName</h4>
+<pre>java.lang.String rxFileName</pre>
+<div class="block">FIXME FIXME FIXME FIXME use blocking only from lower level api
+ InputStream !!! BUT ! - implement timeout similar to python serial</div>
 </li>
 <li class="blockList">
-<h4>BYTE_SIZE_INT</h4>
-<pre>int BYTE_SIZE_INT</pre>
+<h4>isRXRecording</h4>
+<pre>boolean isRXRecording</pre>
 </li>
 <li class="blockList">
-<h4>useRXFile</h4>
-<pre>boolean useRXFile</pre>
+<h4>rxFileFormat</h4>
+<pre>java.lang.String rxFileFormat</pre>
+</li>
+<li class="blockList">
+<h4>txFileName</h4>
+<pre>java.lang.String txFileName</pre>
+</li>
+<li class="blockList">
+<h4>isTXRecording</h4>
+<pre>boolean isTXRecording</pre>
+</li>
+<li class="blockList">
+<h4>txFileFormat</h4>
+<pre>java.lang.String txFileFormat</pre>
 </li>
 <li class="blockList">
 <h4>display</h4>
 <pre>java.lang.StringBuffer display</pre>
 </li>
+<li class="blockList">
+<h4>txCount</h4>
+<pre>int txCount</pre>
+</li>
 <li class="blockListLast">
-<h4>displayWidth</h4>
-<pre>int displayWidth</pre>
+<h4>rxCount</h4>
+<pre>int rxCount</pre>
 </li>
 </ul>
 </li>
@@ -9514,10 +9509,6 @@
 <pre>float maxY</pre>
 </li>
 <li class="blockList">
-<h4>isBlocking</h4>
-<pre>boolean isBlocking</pre>
-</li>
-<li class="blockList">
 <h4>rest</h4>
 <pre>int rest</pre>
 </li>
@@ -9538,7 +9529,7 @@
 </li>
 <li class="blockList">
 <h4>controllers</h4>
-<pre>java.util.Vector&lt;E&gt; controllers</pre>
+<pre>java.util.ArrayList&lt;E&gt; controllers</pre>
 </li>
 <li class="blockList">
 <h4>isSweeping</h4>
@@ -9555,6 +9546,272 @@
 <li class="blockListLast">
 <h4>inverted</h4>
 <pre>boolean inverted</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.ServoOrchestrator">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/ServoOrchestrator.html" title="class in org.myrobotlab.service">org.myrobotlab.service.ServoOrchestrator</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>sogui_ref</h4>
+<pre><a href="org/myrobotlab/control/ServoOrchestratorGUI.html" title="class in org.myrobotlab.control">ServoOrchestratorGUI</a> sogui_ref</pre>
+</li>
+<li class="blockList">
+<h4>sizex</h4>
+<pre>int sizex</pre>
+</li>
+<li class="blockList">
+<h4>sizey</h4>
+<pre>int sizey</pre>
+</li>
+<li class="blockList">
+<h4>settingsitemholder</h4>
+<pre><a href="org/myrobotlab/service/ServoOrchestrator.SettingsItemHolder.html" title="class in org.myrobotlab.service">ServoOrchestrator.SettingsItemHolder</a>[] settingsitemholder</pre>
+</li>
+<li class="blockList">
+<h4>servos</h4>
+<pre><a href="org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a>[] servos</pre>
+</li>
+<li class="blockList">
+<h4>isClockRunning</h4>
+<pre>boolean isClockRunning</pre>
+</li>
+<li class="blockList">
+<h4>interval</h4>
+<pre>int interval</pre>
+</li>
+<li class="blockList">
+<h4>middleright_shownitem</h4>
+<pre>int middleright_shownitem</pre>
+</li>
+<li class="blockList">
+<h4>click_play</h4>
+<pre>boolean click_play</pre>
+</li>
+<li class="blockList">
+<h4>pos1</h4>
+<pre>int pos1</pre>
+</li>
+<li class="blockList">
+<h4>pos2</h4>
+<pre>int pos2</pre>
+</li>
+<li class="blockListLast">
+<h4>pos3</h4>
+<pre>int pos3</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Shoutbox">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Shoutbox.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Shoutbox</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>SYSTEM</h4>
+<pre>java.lang.String SYSTEM</pre>
+</li>
+<li class="blockList">
+<h4>USER</h4>
+<pre>java.lang.String USER</pre>
+</li>
+<li class="blockList">
+<h4>xmppRelays</h4>
+<pre>java.util.ArrayList&lt;E&gt; xmppRelays</pre>
+</li>
+<li class="blockList">
+<h4>chatbotNames</h4>
+<pre>java.util.ArrayList&lt;E&gt; chatbotNames</pre>
+</li>
+<li class="blockList">
+<h4>imageDefaultHeight</h4>
+<pre>int imageDefaultHeight</pre>
+</li>
+<li class="blockList">
+<h4>imageDefaultWidth</h4>
+<pre>int imageDefaultWidth</pre>
+</li>
+<li class="blockList">
+<h4>port</h4>
+<pre>java.lang.Integer port</pre>
+</li>
+<li class="blockList">
+<h4>maxShoutsInMemory</h4>
+<pre>int maxShoutsInMemory</pre>
+</li>
+<li class="blockList">
+<h4>shouts</h4>
+<pre>java.util.ArrayList&lt;E&gt; shouts</pre>
+</li>
+<li class="blockList">
+<h4>conns</h4>
+<pre><a href="org/myrobotlab/service/Shoutbox.Connections.html" title="class in org.myrobotlab.service">Shoutbox.Connections</a> conns</pre>
+</li>
+<li class="blockList">
+<h4>msgCount</h4>
+<pre>int msgCount</pre>
+</li>
+<li class="blockList">
+<h4>fw</h4>
+<pre>java.io.FileWriter fw</pre>
+</li>
+<li class="blockList">
+<h4>bw</h4>
+<pre>java.io.BufferedWriter bw</pre>
+</li>
+<li class="blockListLast">
+<h4>maxArchiveRecordCount</h4>
+<pre>int maxArchiveRecordCount</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Shoutbox.Connection">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Shoutbox.Connection.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Shoutbox.Connection</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>user</h4>
+<pre>java.lang.String user</pre>
+</li>
+<li class="blockList">
+<h4>ip</h4>
+<pre>java.lang.String ip</pre>
+</li>
+<li class="blockList">
+<h4>port</h4>
+<pre>java.lang.String port</pre>
+</li>
+<li class="blockList">
+<h4>color</h4>
+<pre>java.lang.String color</pre>
+</li>
+<li class="blockList">
+<h4>xmpp</h4>
+<pre>java.lang.String xmpp</pre>
+</li>
+<li class="blockListLast">
+<h4>xmppSystemMsgs</h4>
+<pre>boolean xmppSystemMsgs</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Shoutbox.Connections">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Shoutbox.Connections.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Shoutbox.Connections</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>wsToKey</h4>
+<pre>java.util.HashMap&lt;K,V&gt; wsToKey</pre>
+</li>
+<li class="blockListLast">
+<h4>keyToConn</h4>
+<pre>java.util.HashMap&lt;K,V&gt; keyToConn</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Shoutbox.Shout">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Shoutbox.Shout.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Shoutbox.Shout</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>from</h4>
+<pre>java.lang.String from</pre>
+</li>
+<li class="blockList">
+<h4>type</h4>
+<pre>java.lang.String type</pre>
+</li>
+<li class="blockList">
+<h4>msg</h4>
+<pre>java.lang.String msg</pre>
+</li>
+<li class="blockList">
+<h4>color</h4>
+<pre>java.lang.String color</pre>
+</li>
+<li class="blockList">
+<h4>ip</h4>
+<pre>java.lang.String ip</pre>
+</li>
+<li class="blockList">
+<h4>time</h4>
+<pre>java.lang.String time</pre>
+</li>
+<li class="blockList">
+<h4>connectionCount</h4>
+<pre>int connectionCount</pre>
+</li>
+<li class="blockList">
+<h4>userCount</h4>
+<pre>int userCount</pre>
+</li>
+<li class="blockList">
+<h4>guestCount</h4>
+<pre>int guestCount</pre>
+</li>
+<li class="blockListLast">
+<h4>msgCount</h4>
+<pre>int msgCount</pre>
 </li>
 </ul>
 </li>
@@ -9586,23 +9843,6 @@
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
 </dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>simbad</h4>
-<pre><a href="org/myrobotlab/mapper/gui/Simbad.html" title="class in org.myrobotlab.mapper.gui">Simbad</a> simbad</pre>
-</li>
-<li class="blockListLast">
-<h4>env</h4>
-<pre><a href="org/myrobotlab/service/SLAMBad.MyEnv.html" title="class in org.myrobotlab.service">SLAMBad.MyEnv</a> env</pre>
-</li>
-</ul>
-</li>
-</ul>
 </li>
 <li class="blockList"><a name="org.myrobotlab.service.SoccerGame">
 <!--   -->
@@ -9649,6 +9889,41 @@
 </ul>
 </li>
 </ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Solr">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Solr.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Solr</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>solrUrl</h4>
+<pre>java.lang.String solrUrl</pre>
+</li>
+<li class="blockListLast">
+<h4>solrServer</h4>
+<pre>org.apache.solr.client.solrj.impl.HttpSolrServer solrServer</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.SpeakerRecognition">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/SpeakerRecognition.html" title="class in org.myrobotlab.service">org.myrobotlab.service.SpeakerRecognition</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
 </li>
 <li class="blockList"><a name="org.myrobotlab.service.Speech">
 <!--   -->
@@ -9724,6 +9999,15 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.SpeechRecognitionGoogle">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/SpeechRecognitionGoogle.html" title="class in org.myrobotlab.service">org.myrobotlab.service.SpeechRecognitionGoogle</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.Sphinx">
 <!--   -->
 </a>
@@ -9755,8 +10039,8 @@
 <pre>boolean isListening</pre>
 </li>
 <li class="blockList">
-<h4>lockPhrase</h4>
-<pre>java.lang.String lockPhrase</pre>
+<h4>lockPhrases</h4>
+<pre>java.util.HashSet&lt;E&gt; lockPhrases</pre>
 </li>
 <li class="blockList">
 <h4>commands</h4>
@@ -9797,16 +10081,24 @@
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockList">
-<h4>wegui</h4>
-<pre><a href="org/myrobotlab/service/WebGUI.html" title="class in org.myrobotlab.service">WebGUI</a> wegui</pre>
+<h4>webgui</h4>
+<pre><a href="org/myrobotlab/service/WebGUI.html" title="class in org.myrobotlab.service">WebGUI</a> webgui</pre>
 </li>
 <li class="blockList">
 <h4>arduino</h4>
 <pre><a href="org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a> arduino</pre>
 </li>
+<li class="blockList">
+<h4>cron</h4>
+<pre><a href="org/myrobotlab/service/Cron.html" title="class in org.myrobotlab.service">Cron</a> cron</pre>
+</li>
+<li class="blockList">
+<h4>defaultPort</h4>
+<pre>java.lang.String defaultPort</pre>
+</li>
 <li class="blockListLast">
-<h4>xmpp</h4>
-<pre><a href="org/myrobotlab/service/XMPP.html" title="class in org.myrobotlab.service">XMPP</a> xmpp</pre>
+<h4>history</h4>
+<pre>java.util.ArrayList&lt;E&gt; history</pre>
 </li>
 </ul>
 </li>
@@ -9841,11 +10133,16 @@
 <li class="blockList">
 <h4>index</h4>
 <pre>java.lang.Integer index</pre>
-<div class="block">controller index for events & controllers to dumb to have dynamic string based containers</div>
+<div class="block">controller index for events & controllers to dumb to have dynamic string
+ based containers</div>
 </li>
 <li class="blockList">
 <h4>stepperingStyle</h4>
 <pre>java.lang.Integer stepperingStyle</pre>
+</li>
+<li class="blockList">
+<h4>blockingData</h4>
+<pre>java.util.concurrent.BlockingQueue&lt;E&gt; blockingData</pre>
 </li>
 <li class="blockList">
 <h4>steps</h4>
@@ -9857,14 +10154,128 @@
 <pre>java.lang.String type</pre>
 </li>
 <li class="blockList">
+<h4>currentPos</h4>
+<pre>java.lang.Integer currentPos</pre>
+</li>
+<li class="blockList">
 <h4>controller</h4>
 <pre><a href="org/myrobotlab/service/interfaces/StepperController.html" title="interface in org.myrobotlab.service.interfaces">StepperController</a> controller</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>pins</h4>
 <pre>java.lang.Integer[] pins</pre>
 <div class="block">step pins this can vary in size 2 for Pololu (dir & step) , 3, 4, 5, ...
  if more than one - they must be in the correct stepping order</div>
+</li>
+<li class="blockListLast">
+<h4>isBlockingOnStop</h4>
+<pre>boolean isBlockingOnStop</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="org.myrobotlab.service.Sweety">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Sweety.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Sweety</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>rightMotorBackwardPin</h4>
+<pre>int rightMotorBackwardPin</pre>
+</li>
+<li class="blockList">
+<h4>rightMotorForwardPin</h4>
+<pre>int rightMotorForwardPin</pre>
+</li>
+<li class="blockList">
+<h4>leftMotorForwardPin</h4>
+<pre>int leftMotorForwardPin</pre>
+</li>
+<li class="blockList">
+<h4>leftMotorBackwardPin</h4>
+<pre>int leftMotorBackwardPin</pre>
+</li>
+<li class="blockList">
+<h4>backUltrasonicTrig</h4>
+<pre>int backUltrasonicTrig</pre>
+</li>
+<li class="blockList">
+<h4>backUltrasonicEcho</h4>
+<pre>int backUltrasonicEcho</pre>
+</li>
+<li class="blockList">
+<h4>back_leftUltrasonicTrig</h4>
+<pre>int back_leftUltrasonicTrig</pre>
+</li>
+<li class="blockList">
+<h4>back_leftUltrasonicEcho</h4>
+<pre>int back_leftUltrasonicEcho</pre>
+</li>
+<li class="blockList">
+<h4>back_rightUltrasonicTrig</h4>
+<pre>int back_rightUltrasonicTrig</pre>
+</li>
+<li class="blockList">
+<h4>back_rightUltrasonicEcho</h4>
+<pre>int back_rightUltrasonicEcho</pre>
+</li>
+<li class="blockList">
+<h4>front_leftUltrasonicTrig</h4>
+<pre>int front_leftUltrasonicTrig</pre>
+</li>
+<li class="blockList">
+<h4>front_leftUltrasonicEcho</h4>
+<pre>int front_leftUltrasonicEcho</pre>
+</li>
+<li class="blockList">
+<h4>frontUltrasonicTrig</h4>
+<pre>int frontUltrasonicTrig</pre>
+</li>
+<li class="blockList">
+<h4>frontUltrasonicEcho</h4>
+<pre>int frontUltrasonicEcho</pre>
+</li>
+<li class="blockList">
+<h4>front_rightUltrasonicTrig</h4>
+<pre>int front_rightUltrasonicTrig</pre>
+</li>
+<li class="blockList">
+<h4>front_rightUltrasonicEcho</h4>
+<pre>int front_rightUltrasonicEcho</pre>
+</li>
+<li class="blockList">
+<h4>SHIFT</h4>
+<pre>int SHIFT</pre>
+</li>
+<li class="blockList">
+<h4>LATCH</h4>
+<pre>int LATCH</pre>
+</li>
+<li class="blockList">
+<h4>DATA</h4>
+<pre>int DATA</pre>
+</li>
+<li class="blockList">
+<h4>delaytime</h4>
+<pre>int delaytime</pre>
+</li>
+<li class="blockList">
+<h4>delaytimestop</h4>
+<pre>int delaytimestop</pre>
+</li>
+<li class="blockListLast">
+<h4>delaytimeletter</h4>
+<pre>int delaytimeletter</pre>
 </li>
 </ul>
 </li>
@@ -9908,48 +10319,6 @@
 <li class="blockListLast">
 <h4>data</h4>
 <pre>java.lang.String data</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="org.myrobotlab.service.TestService01">
-<!--   -->
-</a>
-<h3>Class <a href="org/myrobotlab/service/TestService01.html" title="class in org.myrobotlab.service">org.myrobotlab.service.TestService01</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>servoitemholder</h4>
-<pre><a href="org/myrobotlab/service/TestService01.ServoItemHolder.html" title="class in org.myrobotlab.service">TestService01.ServoItemHolder</a>[][] servoitemholder</pre>
-</li>
-<li class="blockList">
-<h4>frameitemholder</h4>
-<pre>java.util.ArrayList&lt;E&gt; frameitemholder</pre>
-</li>
-<li class="blockList">
-<h4>generatedcode</h4>
-<pre>javax.swing.JTextArea generatedcode</pre>
-</li>
-<li class="blockList">
-<h4>framelist</h4>
-<pre>javax.swing.JList&lt;E&gt; framelist</pre>
-</li>
-<li class="blockList">
-<h4>frame_add_textfield</h4>
-<pre>javax.swing.JTextField frame_add_textfield</pre>
-</li>
-<li class="blockListLast">
-<h4>frame_addsleep_textfield</h4>
-<pre>javax.swing.JTextField frame_addsleep_textfield</pre>
 </li>
 </ul>
 </li>
@@ -10005,6 +10374,15 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.TextTransform">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/TextTransform.html" title="class in org.myrobotlab.service">org.myrobotlab.service.TextTransform</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.ThingSpeak">
 <!--   -->
 </a>
@@ -10047,19 +10425,6 @@
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
 </dl>
-<ul class="blockList">
-<li class="blockList"><a name="serializedForm">
-<!--   -->
-</a>
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>scanner</h4>
-<pre>topcodes.Scanner scanner</pre>
-</li>
-</ul>
-</li>
-</ul>
 </li>
 <li class="blockList"><a name="org.myrobotlab.service.Tracking">
 <!--   -->
@@ -10439,9 +10804,25 @@
 <h4>messages</h4>
 <pre>int messages</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>clients</h4>
 <pre>java.util.HashMap&lt;K,V&gt; clients</pre>
+</li>
+<li class="blockList">
+<h4>allowMethods</h4>
+<pre>java.util.HashSet&lt;E&gt; allowMethods</pre>
+</li>
+<li class="blockList">
+<h4>excludeMethods</h4>
+<pre>java.util.HashSet&lt;E&gt; excludeMethods</pre>
+</li>
+<li class="blockList">
+<h4>allowServices</h4>
+<pre>java.util.HashSet&lt;E&gt; allowServices</pre>
+</li>
+<li class="blockListLast">
+<h4>excludeServices</h4>
+<pre>java.util.HashSet&lt;E&gt; excludeServices</pre>
 </li>
 </ul>
 </li>
@@ -10518,6 +10899,10 @@
 <li class="blockList">
 <h4>servo</h4>
 <pre><a href="org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a> servo</pre>
+</li>
+<li class="blockList">
+<h4>opencv</h4>
+<pre><a href="org/myrobotlab/service/OpenCV.html" title="class in org.myrobotlab.service">OpenCV</a> opencv</pre>
 </li>
 <li class="blockList">
 <h4>wiidar</h4>
@@ -10660,6 +11045,10 @@
 </a>
 <h3>Serialized Fields</h3>
 <ul class="blockList">
+<li class="blockList">
+<h4>defaultPrefix</h4>
+<pre>java.lang.String defaultPrefix</pre>
+</li>
 <li class="blockList">
 <h4>xmppSecurity</h4>
 <pre>java.util.HashMap&lt;K,V&gt; xmppSecurity</pre>
