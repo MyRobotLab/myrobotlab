@@ -18,6 +18,7 @@ import javax.xml.bind.Unmarshaller;
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
+import org.apache.commons.io.IOUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.OOBPayload;
@@ -120,11 +121,19 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		chat.predicates.getPredicateDefaults(sessionPredicateFilename);
 		sessions.put(session, chat);
 
-		if (!"default".equals(session)){
-			getResponse(session, String.format("my name is %s", session));
+		// lets test if the robot knows the name of the person in the session
+		String name = chat.predicates.get("name").trim();
+		// TODO: this implies that the default value for "name" is default "Friend" 
+		if (name == null || "Friend".equalsIgnoreCase(name)|| "unknown".equalsIgnoreCase(name)) {
+			// TODO: find another interface that's simpler to use for this
+			// create a string that represents the predicates file
+			String inputPredicateStream = "name:" + session;
+			// load those predicates
+			chat.predicates.getPredicateDefaultsFromInputStream(IOUtils.toInputStream(inputPredicateStream));
 		}
-		
-		// TODO: to make sure if the start session is updated, that the button updates in the gui
+		String userName = chat.predicates.get("name");
+		log.info("Started session for {} , username {}", session, userName);
+		// TODO: to make sure if the start session is updated, that the button updates in the gui ?
 		// broadcastState();
 	}
 
@@ -164,8 +173,6 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 				}
 			}
 		}
-
-
 	}
 
 	public static class Response {
@@ -190,7 +197,7 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	 * @param delay - min amount of time that must have transpired since the last response.
 	 * @return
 	 */
-	public Response getResponse(String session, String text, long delay) {
+	public Response getResponse(String session, String text, Long delay) {
 		long delta = System.currentTimeMillis() - lastResponseTime.getTime();
 		if (delta > delay) {
 			return getResponse(session, text);
@@ -244,14 +251,11 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		// TODO: trigger a task to respond with something again
 		// if the humans get bored
 		if (enableAutoConversation) {
-			// TODO:  how do i properly pass params?
-//			Object[] params = new Object[]{session, text, maxConversationDelay};
-//			ArrayList<Object> params = new ArrayList<Object>();
-//			params.add(session);
-//			params.add(text);
-//			params.add(maxConversationDelay);
-			addLocalTask(maxConversationDelay, "getResponse", session, text, maxConversationDelay);
-			//addLocalTask(maxConversationDelay, "getResponse", session, text);
+			// schedule one future reply.  (always get the last word in..)
+			// int numExecutions = 1;
+			// TODO: we need a way for the task to just execute one time
+			// it'd be good to have access to the timer here, but it's transient
+			addLocalTask(maxConversationDelay, "getResponse", session, text, new Long(maxConversationDelay));
 		}
 		
 		// EEK! clean up the API!
@@ -266,6 +270,8 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 			}
 		}
 		
+		// TODO: wire this in so the gui updates properly. ??
+		// broadcastState();
 		
 		return response;
 	}
@@ -444,17 +450,17 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		LoggingFactory.getInstance().setLevel("INFO");
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
+		String sessionName = null;
 		if (true) {
-			
 			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
 			alice.setEnableAutoConversation(true);
-			alice.startSession();
-			Response response = alice.getResponse("Hello.");
+			alice.startSession(sessionName);
+			Response response = alice.getResponse(sessionName, "CONVERSATION_SEED_STRING");
 			log.info("Alice " + response.msg);	
 		} else {
 			ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
-			lloyd.startSession("ProgramAB", "default", "lloyd");
-			Response response = lloyd.getResponse("Hello.");
+			lloyd.startSession("ProgramAB", sessionName, "lloyd");
+			Response response = lloyd.getResponse(sessionName, "Hello.");
 			log.info("Lloyd " + response.msg);	
 		}
 	}
