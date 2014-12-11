@@ -56,6 +56,7 @@ public class InMoov extends Service {
 	String defaultRightPort; // FIXME - THIS IS A BUG GET RID OF IT - ALL ACCESS
 								// THROUGH MAP !!!
 
+	// FIXME ALL PEERS NEED TO BE PRIVATE - ACCESS THROUGH GETTERS WHICH DO A Runtime.create !
 	// hands and arms
 	transient public InMoovHead head;
 	transient public InMoovTorso torso;
