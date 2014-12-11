@@ -337,7 +337,11 @@ public class Encoder {
 	static public Method getMethod(String pkgName, String objectName, String methodName, Object[] params) {
 		String fullObjectName = String.format("%s.%s", pkgName, objectName);
 		return null;
-
+	}
+	
+	static public final String getCallBack(String methodName){
+		String callback = String.format("on%s%s", methodName.substring(0, 1).toUpperCase(), methodName.substring(1));
+		return callback;
 	}
 
 	static public final byte[] getBytes(Object o) throws IOException {
