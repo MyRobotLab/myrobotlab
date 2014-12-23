@@ -15,8 +15,11 @@ public class Sweety extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Sweety.class);
 	transient public Arduino arduino;
-	transient Sphinx ear;
-	transient Speech mouth;
+	transient public Sphinx ear;
+	transient public Speech mouth;
+	transient public Tracking leftTracker;
+	transient public Tracking rightTracker;
+	transient public ProgramAB chatBot;
 	
 	transient Servo leftForearm;
 	transient Servo rightForearm;
@@ -31,6 +34,13 @@ public class Sweety extends Service {
 	transient Servo rightWrist;
 	transient Servo leftHand;
 	transient Servo leftWrist;
+	
+	transient UltrasonicSensor USfront;
+	transient UltrasonicSensor USfrontRight;
+	transient UltrasonicSensor USfrontLeft;
+	transient UltrasonicSensor USback;
+	transient UltrasonicSensor USbackRight;
+	transient UltrasonicSensor USbackLeft;
 	
 	int rightMotorBackwardPin = 2;
 	int rightMotorForwardPin = 3;
@@ -54,9 +64,9 @@ public class Sweety extends Service {
 	int LATCH = 48;
 	int DATA = 49;
 	
-	public int delaytime = 1;
+	public int delaytime = 50;
 	public int delaytimestop = 200;
-	public int delaytimeletter = 1;
+	public int delaytimeletter = 50;
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -65,6 +75,16 @@ public class Sweety extends Service {
 		peers.put("arduino", "Arduino", "arduino");
 		peers.put("mouth", "Speech", "sweetys mouth");
 		peers.put("ear", "Sphinx", "ear");
+		peers.put("chatBot", "ProgramAB", "chatBot");
+		peers.put("leftTracker", "Tracking", "leftTracker");
+		peers.put("rightTracker", "Tracking", "rightTracker");
+		
+		peers.put("USfront", "UltrasonicSensor", "USfront");
+		peers.put("USfrontRight", "UltrasonicSensor", "USfrontRight");
+		peers.put("USfrontLeft", "UltrasonicSensor", "USfrontLeft");
+		peers.put("USback", "UltrasonicSensor", "USback");
+		peers.put("USbackRight", "UltrasonicSensor", "USbackRight");
+		peers.put("USbackLeft", "UltrasonicSensor", "USbackLeft");
 		
 		peers.put("leftForearm", "Servo", "servo");
 		peers.put("rightForearm", "Servo", "servo");
@@ -86,7 +106,25 @@ public class Sweety extends Service {
 	public void startService(){
 		super.startService();
 		
-		arduino = (Arduino) startPeer("arduino");		
+		arduino = (Arduino) startPeer("arduino");
+		
+		// Share arduino service with trackers
+		reserveRootAs("sweety.leftTracker.arduino", "sweety.arduino"); 
+		reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
+		
+		leftTracker = (Tracking) startPeer("leftTracker");
+		rightTracker = (Tracking) startPeer("rightTracker");
+		chatBot = (ProgramAB) startPeer("chatBot");
+		
+		// TODO attach ultrasonicSensors to arduino
+		USfront = (UltrasonicSensor) startPeer("USfront");
+		USfrontRight = (UltrasonicSensor) startPeer("USfrontRight");
+		USfrontLeft = (UltrasonicSensor) startPeer("USfrontLeft");
+		USback = (UltrasonicSensor) startPeer("USback");
+		USbackRight = (UltrasonicSensor) startPeer("USbackRight");
+		USbackLeft = (UltrasonicSensor) startPeer("USbackLeft");
+		
+		
 		mouth = (Speech) startPeer("mouth");
 		mouth.setLanguage("fr");
 		mouth.setBackendType("GOOGLE");
@@ -121,7 +159,24 @@ public class Sweety extends Service {
 		leftWrist.setMinMax(0,180);
 	}
 	
+	// TODO protect against self collision with  -> servoName.getPos()
+	public void leftArm(int shoulderAngle, int armAngle, int forearmAngle, int wristAngle, int handAngle){
+		leftShoulder.moveTo(shoulderAngle);
+		leftArm.moveTo(armAngle);
+		leftForearm.moveTo(forearmAngle);
+		leftWrist.moveTo(wristAngle);
+		leftHand.moveTo(handAngle);
+	}
 	
+	// TODO protect against self collision
+	public void rightArm(int shoulderAngle, int armAngle, int forearmAngle, int wristAngle, int handAngle){
+		rightShoulder.moveTo(shoulderAngle);
+		rightArm.moveTo(armAngle);
+		rightForearm.moveTo(forearmAngle);
+		rightWrist.moveTo(wristAngle);
+		rightHand.moveTo(handAngle);
+	}
+
 	public void startPosition(){
 		leftForearm.moveTo(136);
 		rightForearm.moveTo(5);
@@ -137,10 +192,9 @@ public class Sweety extends Service {
 		leftHand.moveTo(150);
 		leftWrist.moveTo(85);
 	}
-
 	private void myShiftOut(String value){
 		arduino.digitalWrite(LATCH, 0);		// Stop the copy
-		for (int i = 0; i < 8; i++){
+		for (int i = 0; i < 8; i++){  // Store the data
 			if (value.charAt(i) == '1') {
 				arduino.digitalWrite(DATA, 1);
 			}
@@ -223,6 +277,11 @@ public class Sweety extends Service {
 				myShiftOut("00000000");
 				sleep(2);
 			}
+	}
+	
+	public int getPosition(Servo servo){
+		int answer = servo.getPos();
+		return answer;
 	}
 	
 	public Sweety publishState(){
