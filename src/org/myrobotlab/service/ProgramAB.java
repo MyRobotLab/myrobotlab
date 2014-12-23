@@ -8,6 +8,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -45,7 +46,9 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	private HashMap<String, Chat> sessions = new HashMap<String, Chat>();
 	
 	// TODO: better parsing than a regex...
-	private Pattern oobPattern = Pattern.compile("<oob>(.*?)</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+	Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+	Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+	
 	private boolean processOOB = true;
 
 	private final Date serviceStartTime;
@@ -178,13 +181,13 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 	public static class Response {
 		public String session;
 		public String msg;
-		public OOBPayload payload;
+		public List<OOBPayload> payloads;
 		public Date timestamp;
 
-		public Response(String session, String msg, OOBPayload payload, Date timestamp){
+		public Response(String session, String msg, List<OOBPayload> payloads, Date timestamp){
 			this.session = session;
 			this.msg = msg;
-			this.payload = payload;
+			this.payloads = payloads;
 			this.timestamp = timestamp;
 		}
 	}
@@ -236,16 +239,16 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		
 		// Check the AIML response to see if there is OOB (out of band data) 
 		// If so, publish that data independent of the text response.
-		OOBPayload payload = null;
+		List<OOBPayload> payloads = null;
 		if (processOOB) {
-			payload = processOOB(res);
+			payloads = processOOB(res);
 		}
 
 		// OOB text should not be published as part of the response text.
 		Matcher matcher = oobPattern.matcher(res);
 		res = matcher.replaceAll("");
 
-		Response response = new Response(session, res, payload, lastResponseTime);
+		Response response = new Response(session, res, payloads, lastResponseTime);
 		// Now that we've said something, lets create a timer task to wait for N seconds 
 		// and if nothing has been said.. try say something else.
 		// TODO: trigger a task to respond with something again
@@ -276,30 +279,43 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		return response;
 	}
 
-	private OOBPayload processOOB(String text) {		
+	private List<OOBPayload> processOOB(String text) {
+		// Find any oob tags
+		ArrayList<OOBPayload> payloads = new ArrayList<OOBPayload>();
 		Matcher oobMatcher = oobPattern.matcher(text);
 		while (oobMatcher.find()) {
+			
 			// We found some OOB text.
 			// assume only one OOB in the text?
-			String oobPayload = oobMatcher.group(1);
-			OOBPayload payload = parseOOB(oobPayload);
-			// TODO: maybe we dont' want this? 
-			// Notifiy endpoints
-			invoke("publishOOBText", oobPayload);
-			// grab service and invoke method.
-			ServiceInterface s = Runtime.getService(payload.getServiceName());
-			if (s == null) {
-				log.warn("Service name in OOB tag unknown. {}" , oobPayload );
-				return null;
-			}
-			if (payload.getParams()!=null) {
-				s.invoke(payload.getMethodName(), payload.getParams().toArray());
-			} else {
-				s.invoke(payload.getMethodName());				
-			}
-			return payload;
+			String oobPayload = oobMatcher.group(0);
+			Matcher mrlMatcher = mrlPattern.matcher(oobPayload);
+			while (mrlMatcher.find()) {
+				String mrlPayload =  mrlMatcher.group(0);
+				OOBPayload payload = parseOOB(mrlPayload);
+				payloads.add(payload);
+				// TODO: maybe we dont' want this? 
+				// Notifiy endpoints
+				invoke("publishOOBText", mrlPayload);
+				// grab service and invoke method.
+				ServiceInterface s = Runtime.getService(payload.getServiceName());
+				if (s == null) {
+					log.warn("Service name in OOB/MRL tag unknown. {}" , mrlPayload );
+					return null;
+				}
+				// TODO: should you be able to be synchronous for this execution?
+				if (payload.getParams()!=null) {
+					s.invoke(payload.getMethodName(), payload.getParams().toArray());
+				} else {
+					s.invoke(payload.getMethodName());				
+				}
+				
+			}			
 		}
-		return null;
+		if (payloads.size() > 0) {
+			return payloads;
+		} else {
+			return null;
+		}
 	}
 
 	private OOBPayload parseOOB(String oobPayload) {
@@ -445,25 +461,6 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		startSession(path, session, botName);
 	}
 
-	public static void main(String s[]) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("INFO");
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
-		String sessionName = null;
-		if (true) {
-			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
-			alice.setEnableAutoConversation(true);
-			alice.startSession(sessionName);
-			Response response = alice.getResponse(sessionName, "CONVERSATION_SEED_STRING");
-			log.info("Alice " + response.msg);	
-		} else {
-			ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
-			lloyd.startSession("ProgramAB", sessionName, "lloyd");
-			Response response = lloyd.getResponse(sessionName, "Hello.");
-			log.info("Lloyd " + response.msg);	
-		}
-	}
 
 	@Override
 	public void onText(String text) {
@@ -502,6 +499,26 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 
 	public void setEnableAutoConversation(boolean enableAutoConversation) {
 		this.enableAutoConversation = enableAutoConversation;
+	}
+
+	public static void main(String s[]) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("INFO");
+		Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
+		String sessionName = null;
+		if (true) {
+			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
+			alice.setEnableAutoConversation(false);
+			alice.startSession(sessionName);
+			Response response = alice.getResponse(sessionName, "CONVERSATION_SEED_STRING");
+			log.info("Alice " + response.msg);	
+		} else {
+			ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
+			lloyd.startSession("ProgramAB", sessionName, "lloyd");
+			Response response = lloyd.getResponse(sessionName, "Hello.");
+			log.info("Lloyd " + response.msg);	
+		}
 	}
 
 
