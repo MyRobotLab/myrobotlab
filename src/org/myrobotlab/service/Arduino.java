@@ -621,9 +621,28 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		// it proved very "bad"
 		// simplistic mapping where Java is in control seems best
 		int index = pin - 2;
+		
+		// we need to send the servo ascii name - format of SERVO_ATTCH is
+		// SERVO_ATTACH (1 byte) | servo index (1 byte) | servo pin (1 byte) | size of name (1 byte) | ASCII name of servo (N - bytes)
+		// The name is not needed in MRLComm.ino - but it is needed in virtualized Blender servo
+		int payloadSize = 1 + 1 + 1 + servoName.length();
+		
+		int[] payload = new int[payloadSize];
+		
+		//payload[0] = SERVO_ATTACH;
+		payload[0] = index;
+		payload[1] = pin;
+		payload[2] = servoName.length();
+		
+		byte ascii[] = servoName.getBytes();
+		for (int i = 0; i < servoName.length(); ++i){
+			payload[i + 3] = 0xFF & ascii[i];
+		}
 
 		// attach index pin
-		sendMsg(SERVO_ATTACH, index, pin);
+		//sendMsg(SERVO_ATTACH, index, pin, servoName.length(), servoName.get);
+		//sendMsg(function, params)
+		sendMsg(SERVO_ATTACH, payload);
 
 		ServoData sd = new ServoData();
 		sd.pin = pin;
@@ -767,6 +786,14 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 				mrlcommVersion = (Integer) blockingData.poll(1000, TimeUnit.MILLISECONDS);
 
+				if (mrlcommVersion == null) {
+					error("did not get response from arduino....");
+				} else if (!mrlcommVersion.equals(MRLCOMM_VERSION)) {
+					error(String.format("MRLComm.ino responded with version %s expected version is %s", mrlcommVersion, MRLCOMM_VERSION));
+				} else {
+					info(String.format("connected %s responded version %s ... goodtimes...", serialDevice.getName(), mrlcommVersion));
+				}
+				
 				// int version = Integer.parseInt();
 				return mrlcommVersion;
 			} else {
@@ -1427,16 +1454,8 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 					serialDevice.setParams(rate, databits, stopbits, parity);
 					sleep(2000);
 
-					// TODO boolean config - supress getting version
-					Integer version = getVersion();
 					// String version = null;
-					if (version == null) {
-						error("did not get response from arduino....");
-					} else if (!version.equals(MRLCOMM_VERSION)) {
-						error(String.format("MRLComm.ino responded with version %s expected version is %s", version, MRLCOMM_VERSION));
-					} else {
-						info(String.format("connected %s responded version %s ... goodtimes...", serialDevice.getName(), version));
-					}
+
 				} else {
 					warn(String.format("\n%s is already open, close first before opening again\n", serialDevice.getName()));
 				}
@@ -1449,6 +1468,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 				// FIXME - normalize
 				preferences.save();
 				broadcastState(); // state has changed let everyone know
+				invoke("getVersion");
 				return true;
 			}
 		} catch (Exception e) {

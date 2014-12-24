@@ -124,10 +124,12 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 			listening = true;
 			try {
 				while (listening) {
-					// in.read();
-					myService.write(in.read());
+					int x = in.read();
+					log.info(String.format("recvd %d", x));
+					myService.write(x);
 				}
 			} catch (Exception e) {
+				log.info("terminating socket");
 				Logging.logException(e);
 			} finally {
 				try {
@@ -888,8 +890,4 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		onByte.add(b);
 	}
 
-	public boolean connectTCPRelay(String host, Integer serialPort) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

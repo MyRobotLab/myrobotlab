@@ -39,15 +39,20 @@ public class Shoutbox extends Service {
 	// video splash
 	// FIXME - refactor these are ugly
 
-	final public String SYSTEM = "system";
-	final public String USER = "usermsg";
+	static final public String TYPE_SYSTEM = "TYPE_SYSTEM";
+	static final public String TYPE_USER = "TYPE_USER";
 
+	static final public String ORGIN_XMPP = "ORGIN_XMPP";
+	static final public String ORGIN_WEB = "ORGIN_WEB";
+	
 	transient WebGUI webgui;
 	transient ProgramAB chatbot;
 	transient XMPP xmpp;
 
 	ArrayList<String> xmppRelays = new ArrayList<String>();
 	ArrayList<String> chatbotNames = new ArrayList<String>();
+	
+	HashMap<String, String> aliases = new HashMap<String, String>();
 
 	int imageDefaultHeight = 200;
 	int imageDefaultWidth = 200;
@@ -257,7 +262,7 @@ public class Shoutbox extends Service {
 	}
 
 	/**
-	 * Shout is the most common message structure being sent from client to
+	 * POJO Shout is the most common message structure being sent from client to
 	 * WSServer and from WSServer broadcasted to clients - therefore instead of
 	 * a seperate system message we will have system data components of the
 	 * shout - these are to display server data on the clients
@@ -451,11 +456,13 @@ public class Shoutbox extends Service {
 		startChatBot();
 
 		addXMPPRelay("Keith McGerald");
+		aliases.put("Keith McGerald", "kmcgerald");
 		// addXMPPRelay("Orbous Mundus");
 		// addXMPPRelay("Alessandro Didonna");
 		// addXMPPRelay("Dwayne Williams");
 		// addXMPPRelay("Aatur Mehta");
 		addXMPPRelay("Greg Perry");
+		aliases.put("Greg Perry", "GroG");
 
 		addLocalTask(30 * 60 * 1000, "savePredicates");
 	}
@@ -556,11 +563,11 @@ public class Shoutbox extends Service {
 
 	public void listConnections(String key) {
 		log.info("listConnections");
-		sendTo(SYSTEM, key, conns.listConnections());
+		sendTo(TYPE_SYSTEM, key, conns.listConnections());
 	}
 
 	public void sendTo(String type, String key, Object data) {
-		Shout shout = createShout(SYSTEM, Encoder.gson.toJson(data));
+		Shout shout = createShout(TYPE_SYSTEM, Encoder.gson.toJson(data));
 		String msgString = Encoder.gson.toJson(shout);
 		Message sendTo = createMessage("shoutclient", "onShout", msgString);
 
@@ -632,7 +639,7 @@ public class Shoutbox extends Service {
 
 		conns.addConnection("mr.turing", "mr.turing");
 
-		Shout shout = createShout(USER, r);
+		Shout shout = createShout(TYPE_USER, r);
 		shout.from = "mr.turing";
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout("mr.turing", out);
@@ -822,7 +829,7 @@ public class Shoutbox extends Service {
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		webgui.sendToAll(out);
 
-		if (xmpp != null && !SYSTEM.equals(shout.type)) {
+		if (xmpp != null && !TYPE_SYSTEM.equals(shout.type)) {
 			for (int i = 0; i < xmppRelays.size(); ++i) {
 				String relayName = xmppRelays.get(i);
 				String jabberID = xmpp.getJabberID(relayName);
@@ -840,22 +847,22 @@ public class Shoutbox extends Service {
 	}
 
 	public void mimicTuring(String msg) {
-		Shout shout = createShout(USER, msg);
+		Shout shout = createShout(TYPE_USER, msg);
 		shout.from = "mr.turing";
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout("mr.turing", out);
 	}
 
 	public void version(String connId) {
-		sendTo(SYSTEM, connId, conns.listConnections());
-		Shout shout = createShout(USER, Runtime.getVersion());
+		sendTo(TYPE_SYSTEM, connId, conns.listConnections());
+		Shout shout = createShout(TYPE_USER, Runtime.getVersion());
 		shout.from = "mr.turing";
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout("mr.turing", out);
 	}
 
 	public void getXMPPRelays() {
-		Shout shout = createShout(USER, Arrays.toString(xmppRelays.toArray()));
+		Shout shout = createShout(TYPE_USER, Arrays.toString(xmppRelays.toArray()));
 		shout.from = "mr.turing";
 		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout("mr.turing", out);
@@ -870,7 +877,7 @@ public class Shoutbox extends Service {
 		String user = xmpp.getEntry(xmppMsg.msg.getFrom()).getName();
 		conns.addConnection(xmppMsg.msg.getFrom(), user);
 
-		Shout shout = createShout(USER, xmppMsg.msg.getBody());
+		Shout shout = createShout(TYPE_USER, xmppMsg.msg.getBody());
 		shout.from = user;
 
 		// shouts.add(shout);
@@ -879,7 +886,7 @@ public class Shoutbox extends Service {
 		onShout(xmppMsg.msg.getFrom(), out);
 
 		/*
-		 * Shout shout = createShout(USER, xmppMsg.msg.getBody()); shout.user =
+		 * Shout shout = createShout(TYPE_USER, xmppMsg.msg.getBody()); shout.user =
 		 * user;
 		 * 
 		 * shouts.add(shout); Message out = createMessage("shoutclient",
@@ -889,21 +896,6 @@ public class Shoutbox extends Service {
 		 * shout.msg)); xmpp.sendMessage(String.format("%s:%s", shout.user,
 		 * shout.msg), xmppRelays.get(i)); } } archive(shout);
 		 */
-	}
-
-	public Status test() {
-		Status status = super.test();
-		try {
-			Shoutbox shoutbox = (Shoutbox) Runtime.create(getName(), "Shoutbox");
-			shoutbox.startService();
-			shoutbox.setNameProvider("org.myrobotlab.client.DrupalNameProvider");
-			webgui.allowREST(true);
-			// shoutbox.startXMPP("incubator@myrobotlab.org", "xxxxxx");
-			// shoutbox.addXMPPRelay("Greg Perry");
-		} catch (Exception e) {
-			status.addError(e);
-		}
-		return status;
 	}
 
 	// ---- outbound ---->
@@ -921,7 +913,7 @@ public class Shoutbox extends Service {
 	// fixme (from whom) ?? - websocket xmpp other ??
 	public void systemBroadcast(Object inData) {
 		String data = Encoder.gson.toJson(inData);
-		Shout shout = createShout(SYSTEM, data);
+		Shout shout = createShout(TYPE_SYSTEM, data);
 		Message onShout = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
 		onShout(null, onShout);
 	}
@@ -930,6 +922,23 @@ public class Shoutbox extends Service {
 	public String getDescription() {
 		return "shoutbox server for myrobotlab";
 	}
+	
+
+	public Status test() {
+		Status status = super.test();
+		try {
+			Shoutbox shoutbox = (Shoutbox) Runtime.create(getName(), "Shoutbox");
+			shoutbox.startService();
+			shoutbox.setNameProvider("org.myrobotlab.client.DrupalNameProvider");
+			webgui.allowREST(true);
+			// shoutbox.startXMPP("incubator@myrobotlab.org", "xxxxxx");
+			// shoutbox.addXMPPRelay("Greg Perry");
+		} catch (Exception e) {
+			status.addError(e);
+		}
+		return status;
+	}
+
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
