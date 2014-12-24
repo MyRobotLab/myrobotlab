@@ -153,13 +153,15 @@ public class Blender extends Service {
 		sendMsg("getVersion");
 	}
 	
+	public void toJson() {
+		sendMsg("toJson");
+	}
+	
 	public String onGetVersion(String version) {
 		info("blender returned %s", version);
 		return version;
 	}
 	// -------- Blender.py --> callback api end --------
-
-
 
 	public String onBlenderVersion(String version) {
 		blenderVersion = version;
@@ -178,7 +180,7 @@ public class Blender extends Service {
 				Message msg = createMessage("Blender.py", method, data);
 				OutputStream out = control.getOutputStream();
 				String json = Encoder.gson.toJson(msg);
-				info("sending %s", json);
+				info("sending p%s", json);
 				out.write(json.getBytes());
 			} catch (Exception e) {
 				error(e);
@@ -192,8 +194,8 @@ public class Blender extends Service {
 	public Status test() {
 		Status status = super.test();
 		try {
-			// Runtime.start("gui", "GUIService");
-			Runtime.start("gui", "GUIService");
+
+			//Runtime.start("gui", "GUIService");
 			Blender blender = (Blender) Runtime.start(getName(), "Blender");
 			if (!blender.connect()) {
 				throw new Exception("could not connect");
@@ -204,20 +206,31 @@ public class Blender extends Service {
 			Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
 			
 			blender.attach(arduino01);
-			
-			Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+			sleep(3000);
+			Servo servo01 = (Servo) Runtime.start("i01.head.jaw", "Servo");
 			
 			servo01.attach(arduino01, 7);
 			
 			servo01.moveTo(90);
+			sleep(1000);
 			servo01.moveTo(120);
+			sleep(1000);
 			servo01.moveTo(0);
+			sleep(1000);
+			servo01.moveTo(90);
+			sleep(1000);
+			servo01.moveTo(120);
+			sleep(1000);
+			servo01.moveTo(0);
+			sleep(1000);
 			
-			servo01.sweep();
-			servo01.stop();
+			//servo01.sweep();
+			//servo01.stop();
 			servo01.detach();
 
 			blender.getVersion();
+			//blender.toJson();
+			//blender.toJson();
 
 		} catch (Exception e) {
 			status.addError(e);
@@ -232,6 +245,10 @@ public class Blender extends Service {
 		// let Blender know we are going
 		// to virtualize an Arduino
 		sendMsg("attach", service.getName(), service.getSimpleName());
+		// lets give a little time before we go
+		// assigning servos and such with serial commands
+		// to make sure we setup
+		//sleep(500);
 	}
 	
 	// call back from blender
@@ -248,9 +265,10 @@ public class Blender extends Service {
 			vp.cable = vp.serial.createNullModemCable(String.format("MRL.%d", vpn), String.format("BLND.%d", vpn));
 			virtualPorts.put(arduino.getName(), vp);
 			vp.serial.connect(String.format("BLND.%d", vpn));
-			arduino.connect(String.format("MRL.%d", vpn));
-			vp.serial.connectTCPRelay(host, serialPort);
 			vp.serial.addRelay(host, serialPort);
+			arduino.connect(String.format("MRL.%d", vpn));
+			// add the tcp relay pipes
+			
 			
 		} else {
 			error("onAttach %s not found", name);

@@ -16,38 +16,6 @@ public class Peers {
 		// comment)); ???
 	}
 
-	/*
-	 * // TODO - question on have to pas original root instance in ???? public
-	 * void putAll(Index<ServiceReservation> dna, String peer, String
-	 * inPeerType, String comment) { String myKey = getPeerKey(peer); String
-	 * peerType; if (!inPeerType.contains(".")) { peerType =
-	 * String.format("org.myrobotlab.service.%s", inPeerType); } else { peerType
-	 * = inPeerType; }
-	 * 
-	 * // put his type in // log.warn(String.format("adding %s %s", myKey,
-	 * peerType)); templateDNA.put(myKey, new ServiceReservation(myKey,
-	 * peerType, comment));
-	 * 
-	 * 
-	 * // load the dns from it's peers - and put them in // FIXME TODO -
-	 * loadType and recurse put // FIXME try { Class<?> theClass =
-	 * Class.forName(peerType); Method method = theClass.getMethod("getPeers",
-	 * String.class); Peers peers = (Peers) method.invoke(null, new Object[] {
-	 * myKey }); IndexNode<ServiceReservation> myNode =
-	 * peers.getDNA().getNode(myKey); // LOAD CLASS BY NAME - and do a
-	 * getReservations on it ! HashMap<String, IndexNode<ServiceReservation>>
-	 * peerRequests = myNode.getBranches(); for (Entry<String,
-	 * IndexNode<ServiceReservation>> o : peerRequests.entrySet()) { String
-	 * peerKey = o.getKey(); IndexNode<ServiceReservation> p = o.getValue();
-	 * 
-	 * String fullKey = String.format("%s.%s", peer, peerKey);
-	 * ServiceReservation peersr = p.getValue(); putAll(dna, fullKey,
-	 * peersr.fullTypeName, peersr.comment); }
-	 * 
-	 * } catch (Exception e) {
-	 * log.info(String.format("%s does not have a getPeers", peerType)); } }
-	 */
-
 	public void put(String key, String type, String comment) {
 		put(key, null, type, comment);
 	}

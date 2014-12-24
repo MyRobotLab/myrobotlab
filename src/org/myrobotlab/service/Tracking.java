@@ -57,7 +57,6 @@ import org.slf4j.Logger;
 
 // TODO - attach() ???  Static name peer key list ???
 
-
 public class Tracking extends Service {
 
 	private static final long serialVersionUID = 1L;
@@ -188,17 +187,12 @@ public class Tracking extends Service {
 		arduino.startService();
 		opencv.startService();
 	}
-	
+
 	/*
-	public void releaseService() {
-		x.releaseService();
-		y.releaseService();
-		xpid.releaseService();
-		ypid.releaseService();
-		arduino.releaseService();
-		opencv.releaseService();
-	}
-	*/
+	 * public void releaseService() { x.releaseService(); y.releaseService();
+	 * xpid.releaseService(); ypid.releaseService(); arduino.releaseService();
+	 * opencv.releaseService(); }
+	 */
 
 	// -------------- System Specific Initialization Begin --------------
 	// FIXME make interface
@@ -364,7 +358,7 @@ public class Tracking extends Service {
 		}
 
 		if (waitInterval < System.currentTimeMillis() - lastTimestamp) {
-			//setLocation(data);
+			// setLocation(data);
 			// number of objects have stated the same
 			if (STATE_LEARNING_BACKGROUND.equals(state)) {
 				if (numberOfNewObjects == 0) {
@@ -398,12 +392,9 @@ public class Tracking extends Service {
 	// TODO - array of attributes expanded Object[] ... ???
 	// TODO - use GEOTAG - LAT LONG ALT DIRECTION LOCATION CITY GPS TIME OFFSET
 	/*
-	public OpenCVData setLocation(OpenCVData data) {
-		data.setX(x.getPosition());
-		data.setY(y.getPosition());
-		return data;
-	}
-	*/
+	 * public OpenCVData setLocation(OpenCVData data) {
+	 * data.setX(x.getPosition()); data.setY(y.getPosition()); return data; }
+	 */
 
 	// ------------------- tracking & detecting methods end
 	// ---------------------
@@ -470,8 +461,8 @@ public class Tracking extends Service {
 		// if I'm at my min & and the target is further min - don't compute
 		// pid
 		if ((currentXServoPos <= x.getMin() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMax() && xSetpoint - targetPoint.x > 0)) {
-			if (currentXServoPos == (int)currentXServoPos){
-				error(String.format("%d x limit out of range", (int)currentXServoPos));
+			if (currentXServoPos == (int) currentXServoPos) {
+				error(String.format("%d x limit out of range", (int) currentXServoPos));
 			} else {
 				error(String.format("%f x limit out of range", currentXServoPos));
 			}
@@ -492,8 +483,8 @@ public class Tracking extends Service {
 		}
 
 		if ((currentYServoPos <= y.getMin() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMax() && ySetpoint - targetPoint.y > 0)) {
-			if (currentYServoPos == (int)currentYServoPos){
-				error(String.format("%d x limit out of range", (int)currentYServoPos));
+			if (currentYServoPos == (int) currentYServoPos) {
+				error(String.format("%d x limit out of range", (int) currentYServoPos));
 			} else {
 				error(String.format("%f x limit out of range", currentYServoPos));
 			}
@@ -520,28 +511,6 @@ public class Tracking extends Service {
 
 	public void removeFilters() {
 		opencv.removeFilters();
-	}
-
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-		try {
-		for (int i = 0; i < 1000; ++i) {
-			// invoke("trackPoint", 0.5, 0.5);
-			// faceDetect();
-			trackPoint();
-			// trackPoint(0.5f,0.5f);
-			setForegroundBackgroundFilter();
-			learnBackground();
-			searchForeground();
-			removeFilters();
-		}
-		
-		} catch(Exception e){
-			error(e);
-		}
-
-		info("test completed");
-		return status;
 	}
 
 	public void trackPoint() {
@@ -602,13 +571,13 @@ public class Tracking extends Service {
 
 		case STATE_FACE_DETECT:
 			// check for bounding boxes
-			//data.setSelectedFilterName(FaceDetectFilterName);
+			// data.setSelectedFilterName(FaceDetectFilterName);
 			ArrayList<Rectangle> bb = data.getBoundingBoxArray();
 
 			if (bb != null && bb.size() > 0) {
 
-				//data.logKeySet();
-				//log.error("{}",bb.size());
+				// data.logKeySet();
+				// log.error("{}",bb.size());
 
 				// found face
 				// find centroid of first bounding box
@@ -674,7 +643,7 @@ public class Tracking extends Service {
 
 		case STATE_LK_TRACKING_POINT:
 			// extract tracking info
-			//data.setSelectedFilterName(LKOpticalTrackFilterName);
+			// data.setSelectedFilterName(LKOpticalTrackFilterName);
 			Point2Df targetPoint = data.getFirstPoint();
 			if (targetPoint != null) {
 				updateTrackingPoint(targetPoint);
@@ -743,6 +712,29 @@ public class Tracking extends Service {
 
 	public void stopScan() {
 		scan = false;
+	}
+
+	public Status test() {
+		Status status = super.test();
+		Tracking track = (Tracking) Runtime.getService(getName());
+		try {
+			for (int i = 0; i < 1000; ++i) {
+				// invoke("trackPoint", 0.5, 0.5);
+				// faceDetect();
+				track.trackPoint();
+				// trackPoint(0.5f,0.5f);
+				track.setForegroundBackgroundFilter();
+				track.learnBackground();
+				track.searchForeground();
+				track.removeFilters();
+			}
+
+		} catch (Exception e) {
+			error(e);
+		}
+
+		info("test completed");
+		return status;
 	}
 
 	public static void main(String[] args) {

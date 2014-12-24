@@ -323,33 +323,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		} else {
 			genome.actualName = newName;
 		}
-		/*
-		 * IndexNode<ServiceReservation> node = dna.getNode(key); if (node ==
-		 * null) {
-		 * log.error(String.format("reserveAs can not find %s to reserve name %s !!"
-		 * , key, newName)); return false; } //reservations.get(key).actualName
-		 * = newName; node.getValue().actualName = newName;
-		 * log.info("reserving %s now as %s", key, newName);
-		 */
 		return true;
 	}
 
-	/**
-	 * This method re-binds the key to another name. An example of where this
-	 * would be used is within Tracking there is an Servo service named "x",
-	 * however it may be desired to bind this to an already existing service
-	 * named "pan" in a pan/tilt system
-	 * 
-	 * @param key
-	 *            key internal name
-	 * @param newName
-	 *            new name of bound peer service
-	 * @return true if re-binding took place
-	 */
-	/*
-	 * public boolean reserveAs(String key, String newName) { String peerKey =
-	 * getPeerKey(key); return reserveRootAs(peerKey, newName); }
-	 */
 	/**
 	 * Reserves a name for a root level Service. allows modifications to the
 	 * reservation map at the highest level
@@ -367,18 +343,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	static public void reserveRoot(String key, String actualName, String simpleTypeName, String comment) {
 		log.info(String.format("reserved key %s -> %s %s %s", key, actualName, simpleTypeName, comment));
 		dna.put(key, new ServiceReservation(key, actualName, simpleTypeName, comment));
-		/*
-		 * log.info("LKDJFLKDJKLFJDKLSJLF"); IndexNode<ServiceReservation> node
-		 * = reservations.getOrCreateNode(key); if (node == null) { // FIXME
-		 * SHOULD NOT BE SIMPLE NAME - NEEDS TO BE COMPLETE !!!
-		 * 
-		 * reservations.put(key, new ServiceReservation(key, actualName,
-		 * simpleTypeName, comment)); } else { //ServiceReservation sr =
-		 * reservations.get(key); log.warn(String.format(
-		 * "%s already reserved - change actual name [%s] if needed", key,
-		 * node.getValue().actualName)); }
-		 */
-
 	}
 
 	/**
@@ -427,41 +391,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return null;
 	}
 
-	/**
-	 * Create the reserved peer service if it has not already been created
-	 * 
-	 * @param key
-	 *            unique identification of the peer service used by the
-	 *            composite
-	 * @return true if successfully created
-	 */
-	/**
-	 * deprecated use createPeer public ServiceInterface createReserved(String
-	 * key) { String peerKey = getPeerKey(key); return
-	 * createRootReserved(peerKey); }
-	 */
-
-	/**
-	 * start reserved peer service by composite
-	 * 
-	 * @param key
-	 *            internal identifier
-	 * @return true if successfully started
-	 */
-	/**
-	 * deprecated use startPeer public ServiceInterface startReserved(String
-	 * key) { // String peerKey = getPeerKey(key); ServiceInterface s =
-	 * createReserved(key); if (s != null) { s.startService(); return s; }
-	 * error("could not start reserved %s%s", getName(), key); return null; }
-	 */
-
-	/**
-	 * Returns the current map of reservations. This can be used after a complex
-	 * composite services is created, it can be queried for what peer services
-	 * it will create.
-	 * 
-	 * @return
-	 */
 	static public Index<ServiceReservation> getDNA() {
 		return dna;
 	}
