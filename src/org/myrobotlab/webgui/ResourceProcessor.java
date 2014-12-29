@@ -396,7 +396,7 @@ public class ResourceProcessor implements HTTPProcessor {
 		if (webgui.useLocalResources()) {
 			filter = filter.replace("<%=mrl.script.location%>", "");
 		} else {
-			filter = filter.replace("<%=mrl.script.location%>", "http://myrobotlab.googlecode.com/svn/trunk/myrobotlab/src/resource/WebGUI/");
+			filter = filter.replace("<%=mrl.script.location%>", "http://github.com/MyRobotLab/myrobotlab/tree/master/src/resource/WebGUI/");
 		}
 		return filter.getBytes();
 
