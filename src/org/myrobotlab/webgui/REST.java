@@ -96,7 +96,7 @@ public class REST {
 						service.append(String.format("<a href=\"/services/%s/%s\">%s</a>", serviceName, m.getName(), m.getName()));
 					}
 					
-					String javadocURL = String.format("http://myrobotlab.googlecode.com/svn/trunk/myrobotlab/javadoc/org/myrobotlab/service/%s.html#%s(%s)", serviceType, m.getName(), javadocParams);
+					String javadocURL = String.format("http://rawgit.com/MyRobotLab/myrobotlab/master/javadoc/org/myrobotlab/service/%s.html#%s(%s)", serviceType, m.getName(), javadocParams);
 					
 					service.append(String.format("</td><td><a target=\"_blank\" href=\"%s\"><img src=\"/unknown_grey.png\" width=\"25\" height=\"25\" /></a></td></tr>", javadocURL));
 				}
