@@ -9,4 +9,5 @@ public class OpenNIData {
 	public PImage rbgPImage;
 	public BufferedImage depth;
 	public BufferedImage rgb;
+	public int[] depthMap;
 }
