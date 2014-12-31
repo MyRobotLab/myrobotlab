@@ -280,10 +280,14 @@ public class OpenNI extends Service // implements
 		context.update();
 		// FIXME - is PImage a faster data mech to get into OpenCV?
 		data.depthPImage = context.depthImage();
+		// This is the full depth map as an array , containing millimeters.
+		// we should be able to use this to compute the depth for each pixel in the RGB image.
+		data.depthMap = context.depthMap();
+		
 		if (enableRGB) {
 			data.rbgPImage = context.rgbImage();
 		}
-
+		
 		// FIXME REMOVE - and just like OpenCV - convert and cache only on a
 		// getBufferedImage !!!
 		data.depth = data.depthPImage.getImage();
@@ -878,7 +882,6 @@ public class OpenNI extends Service // implements
 		OpenNI openni = (OpenNI) Runtime.createAndStart("openni", "OpenNI");
 		openni.startUserTracking();
 		openni.recordSingleFrame();
-
 		// openni.startHandTracking();
 	}
 
