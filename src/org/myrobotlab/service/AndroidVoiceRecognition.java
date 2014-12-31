@@ -113,7 +113,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 					// Versions-Teil
 					break;
 				} else if (aktversionsplitint[i] > runversionsplitint[i]) {
-					// eigener Versions-Teil ist ÄLTER wie der aktuelleste
+					// eigener Versions-Teil ist AELTER wie der aktuelleste
 					// Versions-Teil
 					versionneuer = true;
 					break;
