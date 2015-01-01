@@ -143,7 +143,7 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Shoutbox.Shout.html" title="class in org.myrobotlab.service">Shoutbox.Shout</a></strong></code>
-<div class="block">Shout is the most common message structure being sent from client to
+<div class="block">POJO Shout is the most common message structure being sent from client to
  WSServer and from WSServer broadcasted to clients - therefore instead of
  a seperate system message we will have system data components of the
  shout - these are to display server data on the clients</div>
@@ -169,12 +169,20 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Shoutbox.html#log">log</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Shoutbox.html#SYSTEM">SYSTEM</a></strong></code>&nbsp;</td>
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Shoutbox.html#ORGIN_WEB">ORGIN_WEB</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Shoutbox.html#USER">USER</a></strong></code>&nbsp;</td>
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Shoutbox.html#ORGIN_XMPP">ORGIN_XMPP</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Shoutbox.html#TYPE_SYSTEM">TYPE_SYSTEM</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Shoutbox.html#TYPE_USER">TYPE_USER</a></strong></code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -408,24 +416,44 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <pre>public static final&nbsp;org.slf4j.Logger log</pre>
 </li>
 </ul>
-<a name="SYSTEM">
+<a name="TYPE_SYSTEM">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>SYSTEM</h4>
-<pre>public final&nbsp;java.lang.String SYSTEM</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Shoutbox.SYSTEM">Constant Field Values</a></dd></dl>
+<h4>TYPE_SYSTEM</h4>
+<pre>public static final&nbsp;java.lang.String TYPE_SYSTEM</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Shoutbox.TYPE_SYSTEM">Constant Field Values</a></dd></dl>
 </li>
 </ul>
-<a name="USER">
+<a name="TYPE_USER">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>TYPE_USER</h4>
+<pre>public static final&nbsp;java.lang.String TYPE_USER</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Shoutbox.TYPE_USER">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ORGIN_XMPP">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ORGIN_XMPP</h4>
+<pre>public static final&nbsp;java.lang.String ORGIN_XMPP</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Shoutbox.ORGIN_XMPP">Constant Field Values</a></dd></dl>
+</li>
+</ul>
+<a name="ORGIN_WEB">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>USER</h4>
-<pre>public final&nbsp;java.lang.String USER</pre>
-<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Shoutbox.USER">Constant Field Values</a></dd></dl>
+<h4>ORGIN_WEB</h4>
+<pre>public static final&nbsp;java.lang.String ORGIN_WEB</pre>
+<dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../constant-values.html#org.myrobotlab.service.Shoutbox.ORGIN_WEB">Constant Field Values</a></dd></dl>
 </li>
 </ul>
 </li>
@@ -744,21 +772,6 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <pre>public&nbsp;void&nbsp;onXMPPMsg(<a href="../../../org/myrobotlab/service/XMPP.XMPPMsg.html" title="class in org.myrobotlab.service">XMPP.XMPPMsg</a>&nbsp;xmppMsg)</pre>
 </li>
 </ul>
-<a name="test()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>test</h4>
-<pre>public&nbsp;<a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a>&nbsp;test()</pre>
-<dl>
-<dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#test()">test</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
-<dt><strong>Overrides:</strong></dt>
-<dd><code><a href="../../../org/myrobotlab/framework/Service.html#test()">test</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
-</dl>
-</li>
-</ul>
 <a name="createShout(java.lang.String, java.lang.String)">
 <!--   -->
 </a>
@@ -792,6 +805,21 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#getDescription()">getDescription</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
 <dt><strong>Specified by:</strong></dt>
 <dd><code><a href="../../../org/myrobotlab/framework/Service.html#getDescription()">getDescription</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="test()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>test</h4>
+<pre>public&nbsp;<a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a>&nbsp;test()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#test()">test</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../org/myrobotlab/framework/Service.html#test()">test</a></code>&nbsp;in class&nbsp;<code><a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a></code></dd>
 </dl>
 </li>
 </ul>

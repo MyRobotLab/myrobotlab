@@ -129,20 +129,40 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#arduino">arduino</a></strong></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/ProgramAB.html" title="class in org.myrobotlab.service">ProgramAB</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#chatBot">chatBot</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#delaytime">delaytime</a></strong></code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#delaytimeletter">delaytimeletter</a></strong></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#delaytimestop">delaytimestop</a></strong></code>&nbsp;</td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Sphinx.html" title="class in org.myrobotlab.service">Sphinx</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#ear">ear</a></strong></code>&nbsp;</td>
+</tr>
 <tr class="altColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Tracking.html" title="class in org.myrobotlab.service">Tracking</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#leftTracker">leftTracker</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>static org.slf4j.Logger</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#log">log</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Speech.html" title="class in org.myrobotlab.service">Speech</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#mouth">mouth</a></strong></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/myrobotlab/service/Tracking.html" title="class in org.myrobotlab.service">Tracking</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#rightTracker">rightTracker</a></strong></code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -206,6 +226,18 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#getPeers(java.lang.String)">getPeers</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#getPosition(org.myrobotlab.service.Servo)">getPosition</a></strong>(<a href="../../../org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a>&nbsp;servo)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#leftArm(int, int, int, int, int)">leftArm</a></strong>(int&nbsp;shoulderAngle,
+       int&nbsp;armAngle,
+       int&nbsp;forearmAngle,
+       int&nbsp;wristAngle,
+       int&nbsp;handAngle)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#mouthState(java.lang.String)">mouthState</a></strong>(java.lang.String&nbsp;value)</code>&nbsp;</td>
 </tr>
@@ -215,23 +247,31 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#saying(java.lang.String)">saying</a></strong>(java.lang.String&nbsp;text)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#rightArm(int, int, int, int, int)">rightArm</a></strong>(int&nbsp;shoulderAngle,
+        int&nbsp;armAngle,
+        int&nbsp;forearmAngle,
+        int&nbsp;wristAngle,
+        int&nbsp;handAngle)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#saying(java.lang.String)">saying</a></strong>(java.lang.String&nbsp;text)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#setdelays(java.lang.Integer, java.lang.Integer, java.lang.Integer)">setdelays</a></strong>(java.lang.Integer&nbsp;d1,
          java.lang.Integer&nbsp;d2,
          java.lang.Integer&nbsp;d3)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#startPosition()">startPosition</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#startService()">startService</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Sweety.html#test()">test</a></strong>()</code>&nbsp;</td>
 </tr>
@@ -280,6 +320,51 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <li class="blockList">
 <h4>arduino</h4>
 <pre>public transient&nbsp;<a href="../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a> arduino</pre>
+</li>
+</ul>
+<a name="ear">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ear</h4>
+<pre>public transient&nbsp;<a href="../../../org/myrobotlab/service/Sphinx.html" title="class in org.myrobotlab.service">Sphinx</a> ear</pre>
+</li>
+</ul>
+<a name="mouth">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>mouth</h4>
+<pre>public transient&nbsp;<a href="../../../org/myrobotlab/service/Speech.html" title="class in org.myrobotlab.service">Speech</a> mouth</pre>
+</li>
+</ul>
+<a name="leftTracker">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>leftTracker</h4>
+<pre>public transient&nbsp;<a href="../../../org/myrobotlab/service/Tracking.html" title="class in org.myrobotlab.service">Tracking</a> leftTracker</pre>
+</li>
+</ul>
+<a name="rightTracker">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>rightTracker</h4>
+<pre>public transient&nbsp;<a href="../../../org/myrobotlab/service/Tracking.html" title="class in org.myrobotlab.service">Tracking</a> rightTracker</pre>
+</li>
+</ul>
+<a name="chatBot">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>chatBot</h4>
+<pre>public transient&nbsp;<a href="../../../org/myrobotlab/service/ProgramAB.html" title="class in org.myrobotlab.service">ProgramAB</a> chatBot</pre>
 </li>
 </ul>
 <a name="delaytime">
@@ -358,6 +443,32 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 </dl>
 </li>
 </ul>
+<a name="leftArm(int, int, int, int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>leftArm</h4>
+<pre>public&nbsp;void&nbsp;leftArm(int&nbsp;shoulderAngle,
+           int&nbsp;armAngle,
+           int&nbsp;forearmAngle,
+           int&nbsp;wristAngle,
+           int&nbsp;handAngle)</pre>
+</li>
+</ul>
+<a name="rightArm(int, int, int, int, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>rightArm</h4>
+<pre>public&nbsp;void&nbsp;rightArm(int&nbsp;shoulderAngle,
+            int&nbsp;armAngle,
+            int&nbsp;forearmAngle,
+            int&nbsp;wristAngle,
+            int&nbsp;handAngle)</pre>
+</li>
+</ul>
 <a name="startPosition()">
 <!--   -->
 </a>
@@ -394,6 +505,15 @@ extends <a href="../../../org/myrobotlab/framework/Service.html" title="class in
 <li class="blockList">
 <h4>saying</h4>
 <pre>public&nbsp;void&nbsp;saying(java.lang.String&nbsp;text)</pre>
+</li>
+</ul>
+<a name="getPosition(org.myrobotlab.service.Servo)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPosition</h4>
+<pre>public&nbsp;int&nbsp;getPosition(<a href="../../../org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a>&nbsp;servo)</pre>
 </li>
 </ul>
 <a name="publishState()">

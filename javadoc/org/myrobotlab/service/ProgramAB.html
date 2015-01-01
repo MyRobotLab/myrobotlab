@@ -220,9 +220,9 @@ implements <a href="../../../org/myrobotlab/service/interfaces/TextListener.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/service/ProgramAB.Response.html" title="class in org.myrobotlab.service">ProgramAB.Response</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ProgramAB.html#getResponse(java.lang.String, java.lang.String, long)">getResponse</a></strong>(java.lang.String&nbsp;session,
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/ProgramAB.html#getResponse(java.lang.String, java.lang.String, java.lang.Long)">getResponse</a></strong>(java.lang.String&nbsp;session,
            java.lang.String&nbsp;text,
-           long&nbsp;delay)</code>
+           java.lang.Long&nbsp;delay)</code>
 <div class="block">Only respond if the last response was longer than delay ms ago</div>
 </td>
 </tr>
@@ -455,7 +455,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/TextListener.html
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>path</code> - - should be the full path to the ProgramAB root</dd><dd><code>botName</code> - - The name of the bot to load. (example: alice2)</dd></dl>
 </li>
 </ul>
-<a name="getResponse(java.lang.String, java.lang.String, long)">
+<a name="getResponse(java.lang.String, java.lang.String, java.lang.Long)">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -463,7 +463,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/TextListener.html
 <h4>getResponse</h4>
 <pre>public&nbsp;<a href="../../../org/myrobotlab/service/ProgramAB.Response.html" title="class in org.myrobotlab.service">ProgramAB.Response</a>&nbsp;getResponse(java.lang.String&nbsp;session,
                              java.lang.String&nbsp;text,
-                             long&nbsp;delay)</pre>
+                             java.lang.Long&nbsp;delay)</pre>
 <div class="block">Only respond if the last response was longer than delay ms ago</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>session</code> - - current session/username</dd><dd><code>text</code> - - text to get a response for</dd><dd><code>delay</code> - - min amount of time that must have transpired since the last response.</dd>
 <dt><span class="strong">Returns:</span></dt><dd></dd></dl>
@@ -659,15 +659,6 @@ implements <a href="../../../org/myrobotlab/service/interfaces/TextListener.html
 <pre>public&nbsp;void&nbsp;startSession(java.lang.String&nbsp;session)</pre>
 </li>
 </ul>
-<a name="main(java.lang.String[])">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>main</h4>
-<pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;s)</pre>
-</li>
-</ul>
 <a name="onText(java.lang.String)">
 <!--   -->
 </a>
@@ -742,10 +733,19 @@ implements <a href="../../../org/myrobotlab/service/interfaces/TextListener.html
 <a name="setEnableAutoConversation(boolean)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>setEnableAutoConversation</h4>
 <pre>public&nbsp;void&nbsp;setEnableAutoConversation(boolean&nbsp;enableAutoConversation)</pre>
+</li>
+</ul>
+<a name="main(java.lang.String[])">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>main</h4>
+<pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;s)</pre>
 </li>
 </ul>
 </li>
