@@ -114,6 +114,8 @@
 #define SENSORS_MAX			12
 #define STEPPERS_MAX		6
 
+#define MAX_MOTORS 10
+
 #define ECHO_STATE_START 1
 #define ECHO_STATE_TRIG_PULSE_BEGIN 2
 #define ECHO_STATE_TRIG_PULSE_END 3
@@ -146,6 +148,7 @@
 * format
 *
 * MAGIC_NUMBER|NUM_BYTES|FUNCTION|DATA0|DATA1|....|DATA(N)
+*              NUM_BYTES - is the number of bytes after NUM_BYTES to the end
 *
 */
 
@@ -213,8 +216,32 @@ typedef struct
     bool eventsEnabled;
 } servo_type;
 
+
 servo_type servos[MAX_SERVOS];
 
+// Motors
+typedef struct
+{
+    int index; // index of this motor
+    int speed;
+    int targetPos;
+    int currentPos;
+    bool isMoving;
+
+    int step; // affects speed usually 1
+
+    // sweep related
+    int min;
+    int max;
+    // int delay; - related to speed
+    int increment;
+    bool isSweeping;
+
+    // event related
+    bool eventsEnabled;
+} motor_type;
+
+motor_type motors[MAX_MOTORS];
 
 unsigned long loopCount     = 0;
 unsigned long lastMicros 	= 0;
