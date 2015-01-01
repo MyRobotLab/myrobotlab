@@ -1,6 +1,6 @@
 package test;
 
-
+// REMOVE
 public class Book {
 
 	private String thingy;

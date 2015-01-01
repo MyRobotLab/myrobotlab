@@ -23,6 +23,8 @@
 
 package SimpleOpenNI;
 
+// FIXME - make simple direct pathing 
+
 //import processing.core.*;
 import java.io.File;
 import java.lang.reflect.Method;

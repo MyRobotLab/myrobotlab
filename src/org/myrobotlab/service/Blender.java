@@ -195,7 +195,7 @@ public class Blender extends Service {
 		Status status = super.test();
 		try {
 
-			//Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "GUIService");
 			Blender blender = (Blender) Runtime.start(getName(), "Blender");
 			if (!blender.connect()) {
 				throw new Exception("could not connect");
@@ -209,18 +209,27 @@ public class Blender extends Service {
 			sleep(3000);
 			Servo servo01 = (Servo) Runtime.start("i01.head.jaw", "Servo");
 			
-			servo01.attach(arduino01, 7);
+			Servo rothead = (Servo) Runtime.start("i01.head.rothead", "Servo");
 			
+			servo01.attach(arduino01, 7);
+			rothead.attach(arduino01, 9);
+			
+			rothead.moveTo(90);
 			servo01.moveTo(90);
 			sleep(1000);
+			rothead.moveTo(120);
 			servo01.moveTo(120);
 			sleep(1000);
+			rothead.moveTo(0);
 			servo01.moveTo(0);
 			sleep(1000);
+			rothead.moveTo(90);
 			servo01.moveTo(90);
 			sleep(1000);
+			rothead.moveTo(120);
 			servo01.moveTo(120);
 			sleep(1000);
+			rothead.moveTo(0);
 			servo01.moveTo(0);
 			sleep(1000);
 			
