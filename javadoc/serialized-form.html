@@ -6300,6 +6300,56 @@
 <dd>1L</dd>
 </dl>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.Blender">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/Blender.html" title="class in org.myrobotlab.service">org.myrobotlab.service.Blender</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>control</h4>
+<pre>java.net.Socket control</pre>
+</li>
+<li class="blockList">
+<h4>controlHandler</h4>
+<pre><a href="org/myrobotlab/service/Blender.ControlHandler.html" title="class in org.myrobotlab.service">Blender.ControlHandler</a> controlHandler</pre>
+</li>
+<li class="blockList">
+<h4>host</h4>
+<pre>java.lang.String host</pre>
+</li>
+<li class="blockList">
+<h4>controlPort</h4>
+<pre>java.lang.Integer controlPort</pre>
+</li>
+<li class="blockList">
+<h4>serialPort</h4>
+<pre>java.lang.Integer serialPort</pre>
+</li>
+<li class="blockList">
+<h4>blenderVersion</h4>
+<pre>java.lang.String blenderVersion</pre>
+</li>
+<li class="blockList">
+<h4>expectedBlenderVersion</h4>
+<pre>java.lang.String expectedBlenderVersion</pre>
+</li>
+<li class="blockListLast">
+<h4>virtualPorts</h4>
+<pre>java.util.HashMap&lt;K,V&gt; virtualPorts</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.ChatBot">
 <!--   -->
 </a>
@@ -8565,6 +8615,10 @@
 <pre>java.util.regex.Pattern oobPattern</pre>
 </li>
 <li class="blockList">
+<h4>mrlPattern</h4>
+<pre>java.util.regex.Pattern mrlPattern</pre>
+</li>
+<li class="blockList">
 <h4>processOOB</h4>
 <pre>boolean processOOB</pre>
 </li>
@@ -9454,9 +9508,13 @@
 <h4>txCount</h4>
 <pre>int txCount</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>rxCount</h4>
 <pre>int rxCount</pre>
+</li>
+<li class="blockListLast">
+<h4>relays</h4>
+<pre>java.util.ArrayList&lt;E&gt; relays</pre>
 </li>
 </ul>
 </li>
@@ -9632,20 +9690,16 @@
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockList">
-<h4>SYSTEM</h4>
-<pre>java.lang.String SYSTEM</pre>
-</li>
-<li class="blockList">
-<h4>USER</h4>
-<pre>java.lang.String USER</pre>
-</li>
-<li class="blockList">
 <h4>xmppRelays</h4>
 <pre>java.util.ArrayList&lt;E&gt; xmppRelays</pre>
 </li>
 <li class="blockList">
 <h4>chatbotNames</h4>
 <pre>java.util.ArrayList&lt;E&gt; chatbotNames</pre>
+</li>
+<li class="blockList">
+<h4>aliases</h4>
+<pre>java.util.HashMap&lt;K,V&gt; aliases</pre>
 </li>
 <li class="blockList">
 <h4>imageDefaultHeight</h4>

@@ -189,6 +189,11 @@ implements <a href="../../../org/myrobotlab/serial/SerialDeviceService.html" tit
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#addByteListener(org.myrobotlab.service.interfaces.SerialDataListener)">addByteListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html" title="interface in org.myrobotlab.service.interfaces">SerialDataListener</a>&nbsp;service)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#addRelay(java.lang.String, int)">addRelay</a></strong>(java.lang.String&nbsp;host,
+        int&nbsp;port)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static long</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#bytesToLong(byte[], int, int)">bytesToLong</a></strong>(byte[]&nbsp;bytes,
            int&nbsp;offset,
@@ -197,25 +202,25 @@ implements <a href="../../../org/myrobotlab/serial/SerialDeviceService.html" tit
  implementation for the int[] FIXME - support for endianess</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static long</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#bytesToLong(int[], int, int)">bytesToLong</a></strong>(int[]&nbsp;bytes,
            int&nbsp;offset,
            int&nbsp;length)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#capacity(int)">capacity</a></strong>(int&nbsp;size)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#clearBlocking()">clearBlocking</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#connect(java.lang.String)">connect</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#connect(java.lang.String, java.lang.Double, java.lang.Double, java.lang.Double, java.lang.Double)">connect</a></strong>(java.lang.String&nbsp;name,
        java.lang.Double&nbsp;rate,
@@ -227,7 +232,7 @@ implements <a href="../../../org/myrobotlab/serial/SerialDeviceService.html" tit
  ABOMINATIONS LIKE THIS - (all gson comes in doubles)</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#connect(java.lang.String, int, int, int, int)">connect</a></strong>(java.lang.String&nbsp;name,
        int&nbsp;rate,
@@ -235,95 +240,95 @@ implements <a href="../../../org/myrobotlab/serial/SerialDeviceService.html" tit
        int&nbsp;stopbits,
        int&nbsp;parity)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/serial/VirtualSerialPort.VirtualNullModemCable.html" title="class in org.myrobotlab.serial">VirtualSerialPort.VirtualNullModemCable</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#createNullModemCable(java.lang.String, java.lang.String)">createNullModemCable</a></strong>(java.lang.String&nbsp;port0,
                     java.lang.String&nbsp;port1)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#createVirtualUART()">createVirtualUART</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#disconnect()">disconnect</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#getDescription()">getDescription</a></strong>()</code>
 <div class="block">Short description of the service</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#getPortName()">getPortName</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.util.ArrayList&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#getPortNames()">getPortNames</a></strong>()</code>
 <div class="block">methods to return read-only information regarding a serialDevice</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#getRXFileName()">getRXFileName</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#getTXFileName()">getTXFileName</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#intArrayToByteArray(int[])">intArrayToByteArray</a></strong>(int[]&nbsp;src)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#isBlocking()">isBlocking</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#isConnected()">isConnected</a></strong>()</code>
 <div class="block">-------- blocking reads begin --------</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#isOpen()">isOpen</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#isRXRecording()">isRXRecording</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#isTXRecording()">isTXRecording</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>
 <div class="block">TODO - blocking at 0 ms does not block forever</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#onByte(java.lang.Integer)">onByte</a></strong>(java.lang.Integer&nbsp;b)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#publishByte(java.lang.Integer)">publishByte</a></strong>(java.lang.Integer&nbsp;data)</code>
 <div class="block">------ publishing points begin -------</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>int[]</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#publishByteBuffer(int[])">publishByteBuffer</a></strong>(int[]&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#read()">read</a></strong>()</code>
 <div class="block">FIXME - make like http://pyserial.sourceforge.net/pyserial_api.html with
- blocking & timeout  
- InputStream like interface - but regrettably InputStream IS NOT A F#(@!! INTERFACE !!!!
+ blocking & timeout InputStream like interface - but regrettably
+ InputStream IS NOT A F#(@!! INTERFACE !!!!
  
  WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer is
  ever bigger than the read and no end of stream has occurred it will block
@@ -332,107 +337,107 @@ implements <a href="../../../org/myrobotlab/serial/SerialDeviceService.html" tit
  pass through to the serial device</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#read(byte[])">read</a></strong>(byte[]&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#read(int[])">read</a></strong>(int[]&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#read(int[], int)">read</a></strong>(int[]&nbsp;data,
     int&nbsp;timeoutMS)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>byte[]</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#readToDelimiter(java.lang.String)">readToDelimiter</a></strong>(java.lang.String&nbsp;delimeter)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#record()">record</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#record(java.lang.String)">record</a></strong>(java.lang.String&nbsp;filename)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#recordRX()">recordRX</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#recordRX(java.lang.String)">recordRX</a></strong>(java.lang.String&nbsp;filename)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#recordTX()">recordTX</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#recordTX(java.lang.String)">recordTX</a></strong>(java.lang.String&nbsp;filename)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#refresh()">refresh</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#releaseService()">releaseService</a></strong>()</code>
 <div class="block">Releases resources, and unregisters service from the runtime</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#serialEvent(org.myrobotlab.serial.SerialDeviceEvent)">serialEvent</a></strong>(<a href="../../../org/myrobotlab/serial/SerialDeviceEvent.html" title="class in org.myrobotlab.serial">SerialDeviceEvent</a>&nbsp;event)</code>
 <div class="block">If serialEvents are used - thread management is simplified for the
  consumer as it uses the underlying serial event management thread.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#setBlocking(boolean)">setBlocking</a></strong>(boolean&nbsp;b)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#stopRecording()">stopRecording</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#stopRXRecording()">stopRXRecording</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#stopService()">stopService</a></strong>()</code>
 <div class="block">Stops the service.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#stopTXRecording()">stopTXRecording</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#test()">test</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#write(byte[])">write</a></strong>(byte[]&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#write(int)">write</a></strong>(int&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#write(int[])">write</a></strong>(int[]&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#write(java.lang.String)">write</a></strong>(java.lang.String&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Serial.html#writeFile(java.lang.String)">writeFile</a></strong>(java.lang.String&nbsp;filename)</code>&nbsp;</td>
 </tr>
@@ -823,8 +828,8 @@ implements <a href="../../../org/myrobotlab/serial/SerialDeviceService.html" tit
 <pre>public&nbsp;int&nbsp;read()
          throws java.io.IOException</pre>
 <div class="block">FIXME - make like http://pyserial.sourceforge.net/pyserial_api.html with
- blocking & timeout  
- InputStream like interface - but regrettably InputStream IS NOT A F#(@!! INTERFACE !!!!
+ blocking & timeout InputStream like interface - but regrettably
+ InputStream IS NOT A F#(@!! INTERFACE !!!!
  
  WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer is
  ever bigger than the read and no end of stream has occurred it will block
@@ -1138,6 +1143,16 @@ implements <a href="../../../org/myrobotlab/serial/SerialDeviceService.html" tit
 <dl><dt><span class="strong">Throws:</span></dt>
 <dd><code>java.io.IOException</code></dd>
 <dd><code>java.lang.InterruptedException</code></dd></dl>
+</li>
+</ul>
+<a name="addRelay(java.lang.String, int)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addRelay</h4>
+<pre>public&nbsp;void&nbsp;addRelay(java.lang.String&nbsp;host,
+            int&nbsp;port)</pre>
 </li>
 </ul>
 <a name="onByte(java.lang.Integer)">
