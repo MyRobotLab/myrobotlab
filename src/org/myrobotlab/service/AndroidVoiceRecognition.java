@@ -29,7 +29,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 
 	private ClientHandler client;
 	private int port = 5684;
-	private final static String VERSION = "2014.12.31";
+	private final static String VERSION = "2015.01.01";
 
 	public AndroidVoiceRecognition(String n) {
 		super(n);
