@@ -14,6 +14,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.myrobotlab.logging.Logging;
+
 /**
  * source modified from:
  * http://bryanesmith.com/docs/drag-and-drop-java-5/DragAndDropPanelsDemo.java
@@ -195,18 +197,14 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 	 * @return
 	 */
 	public Object getTransferData(DataFlavor flavor) {
-
-		System.out
-				.println("Step 7 of 7: Returning the data from the Transferable object. In this case, the actual panel is now transfered!");
-
 		DataFlavor thisFlavor = null;
 
 		try {
 			thisFlavor = ServoOrchestratorGUI_middlemiddle_main
 					.getDragAndDropPanelDataFlavor();
 		} catch (Exception ex) {
-			System.err.println("Problem lazy loading: " + ex.getMessage());
-			ex.printStackTrace(System.err);
+			Logging.logException(ex);
+			Logging.stackToString(ex);
 			return null;
 		}
 
@@ -236,15 +234,12 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 
 		DataFlavor[] flavors = { null };
 
-		System.out
-				.println("Step 4 of 7: Querying for acceptable DataFlavors to determine what is available. Our example only supports our custom RandomDragAndDropPanel DataFlavor.");
-
 		try {
 			flavors[0] = ServoOrchestratorGUI_middlemiddle_main
 					.getDragAndDropPanelDataFlavor();
 		} catch (Exception ex) {
-			System.err.println("Problem lazy loading: " + ex.getMessage());
-			ex.printStackTrace(System.err);
+			Logging.logException(ex);
+			Logging.stackToString(ex);
 			return null;
 		}
 
@@ -264,17 +259,13 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 	 * @return True if DataFlavor is supported, otherwise false.
 	 */
 	public boolean isDataFlavorSupported(DataFlavor flavor) {
-
-		System.out
-				.println("Step 6 of 7: Verifying that DataFlavor is supported.  Our example only supports our custom RandomDragAndDropPanel DataFlavor.");
-
 		DataFlavor[] flavors = { null };
 		try {
 			flavors[0] = ServoOrchestratorGUI_middlemiddle_main
 					.getDragAndDropPanelDataFlavor();
 		} catch (Exception ex) {
-			System.err.println("Problem lazy loading: " + ex.getMessage());
-			ex.printStackTrace(System.err);
+			Logging.logException(ex);
+			Logging.stackToString(ex);
 			return false;
 		}
 
