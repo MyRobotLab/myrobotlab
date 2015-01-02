@@ -50,6 +50,9 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 		if (runningserver) {
 			runningserver = false;
 		}
+		if (client != null) {
+			client.finish();
+		}
 	}
 
 	@Override
