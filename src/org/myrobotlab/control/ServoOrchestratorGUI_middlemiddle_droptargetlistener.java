@@ -8,6 +8,8 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 
+import org.myrobotlab.logging.Logging;
+
 /**
  * source modified from:
  * http://bryanesmith.com/docs/drag-and-drop-java-5/DragAndDropPanelsDemo.java
@@ -70,10 +72,6 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 	 * @param dtde
 	 */
 	public void drop(DropTargetDropEvent dtde) {
-
-		System.out
-				.println("Step 5 of 7: The user dropped the panel. The drop(...) method will compare the drops location with other panels and reorder the panels accordingly.");
-
 		// Done with cursors, dropping
 		this.rootPanel.setCursor(Cursor.getDefaultCursor());
 
@@ -99,6 +97,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 			}
 
 		} catch (Exception ex) {
+			Logging.logException(ex);
 		}
 
 		// If didn't find an item, bail
