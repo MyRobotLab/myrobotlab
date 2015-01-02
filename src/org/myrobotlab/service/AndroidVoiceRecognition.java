@@ -30,6 +30,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 	private ClientHandler client;
 	private int port = 5684;
 	private final static String VERSION = "2015.01.01";
+	private boolean runningserver;
 
 	public AndroidVoiceRecognition(String n) {
 		super(n);
@@ -46,6 +47,9 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 	@Override
 	public void stopService() {
 		super.stopService();
+		if (runningserver) {
+			runningserver = false;
+		}
 	}
 
 	@Override
@@ -60,34 +64,34 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 	public void sendToClient(String mes) {
 		send("fromServer=" + mes);
 	}
-	
+
 	public void startRecognition() {
 		send("startrecognition");
 	}
 
 	// Server-start
 	private void startServer() {
+		runningserver = true;
 		try {
 			ServerSocket serverSock = new ServerSocket(port);
 			NewConnectionHandler nch = new NewConnectionHandler(serverSock);
 			nch.start();
 		} catch (IOException ex) {
-			System.out.println(ex);
+			Logging.logException(ex);
 		}
 	}
 
 	private void send(String mes) {
-
 		try {
 			client.getOut().writeObject(mes);
 		} catch (IOException ex) {
-			System.out.println(ex);
+			Logging.logException(ex);
 		}
 
 	}
 
 	private void process(String mes) {
-		System.out.println(mes);
+		log.debug("received message: " + mes);
 		if (mes.startsWith("version")) {
 			String[] split = mes.split("=");
 
@@ -125,20 +129,19 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 
 			if (versionneuer) {
 				send("serverversion=" + VERSION);
-				System.out.println("Client has an old version");
+				log.debug("Client has an old version");
 				client.finish();
 			} else {
 				send("accepted");
-				System.out.println("Client accepted");
+				log.debug("Client accepted");
 			}
 		} else if (mes.startsWith("recognized")) {
 			String[] split = mes.split("=");
-			//TODO - (Python) callback
-			invoke("recognized",split[1]);
+			log.debug("recognized: " + split[1]);
+			invoke("recognized", split[1]);
 		} else {
-			System.out.println("ERROR: " + mes);
+			log.error("ERROR: " + mes);
 		}
-		// sendToAll(mes);
 	}
 
 	private class NewConnectionHandler extends Thread {
@@ -151,7 +154,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 
 		@Override
 		public void run() {
-			while (true) {
+			while (runningserver) {
 				try {
 					Socket clientSocket = serverSock.accept();
 
@@ -159,11 +162,11 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 					client = ch;
 					ch.start();
 
-					System.out.println("Client connected");
+					log.debug("Client connected");
 					// Only accept one client
-					break;
+					runningserver = false;
 				} catch (IOException ex) {
-					System.out.println(ex);
+					Logging.logException(ex);
 				}
 			}
 		}
@@ -182,7 +185,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 				in = new ObjectInputStream(clientSocket.getInputStream());
 				out = new ObjectOutputStream(clientSocket.getOutputStream());
 			} catch (Exception ex) {
-				System.out.println(ex);
+				Logging.logException(ex);
 			}
 			running = true;
 		}
@@ -197,7 +200,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 				out.close();
 				clientSocket.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Logging.logException(e);
 			}
 			running = false;
 		}
@@ -207,12 +210,11 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 			try {
 				Object obj;
 				while (running && (obj = in.readObject()) != null) {
-					// System.out.println("got a message!");
 					String mes = (String) obj;
 					process(mes);
 				}
-			} catch (IOException | ClassNotFoundException ex) {
-				System.out.println(ex);
+			} catch (Exception ex) {
+				Logging.logException(ex);
 			}
 
 		}
@@ -238,7 +240,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 	public String publishText(String text) {
 		return text;
 	}
-	
+
 	public String recognized(String text) {
 		return text;
 	}
