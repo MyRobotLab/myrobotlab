@@ -14,8 +14,6 @@ import java.util.List;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -180,6 +178,7 @@ public class ServoOrchestrator extends Service {
 			}
 			bw.close();
 		} catch (IOException e) {
+			Logging.logException(e);
 		}
 	}
 
@@ -310,6 +309,7 @@ public class ServoOrchestrator extends Service {
 			}
 			br.close();
 		} catch (IOException e) {
+			Logging.logException(e);
 		}
 	}
 
@@ -666,9 +666,8 @@ public class ServoOrchestrator extends Service {
 			Clip clip = AudioSystem.getClip();
 			clip.open(audioInputStream);
 			clip.start();
-		} catch (LineUnavailableException | IOException
-				| UnsupportedAudioFileException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			Logging.logException(e);
 		}
 	}
 
@@ -723,6 +722,7 @@ public class ServoOrchestrator extends Service {
 					Thread.sleep(interval);
 				}
 			} catch (InterruptedException e) {
+				Logging.logException(e);
 				isClockRunning = false;
 			}
 		}
