@@ -40,6 +40,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -54,13 +55,11 @@ public class HTTPClient extends Service {
 	public final static Logger log = LoggerFactory.getLogger(HTTPClient.class.getCanonicalName());
 	private static final long serialVersionUID = 1L;
 
-	transient private DefaultHttpClient client = new DefaultHttpClient();
-
 	public HTTPClient(String n) {
 		super(n);
 	}
 
-	public static String parse(String in, String beginTag, String endTag) {
+	static public String parse(String in, String beginTag, String endTag) {
 		if (in == null) {
 			return null;
 		}
@@ -73,24 +72,23 @@ public class HTTPClient extends Service {
 
 	}
 
-	public byte[] post(String uri) {
+	static public byte[] post(String uri) {
 		return post(uri, null);
 	}
 
-	public byte[] post(String uri, HashMap<String, String> fields) {
+	static public byte[] post(String uri, HashMap<String, String> fields) {
+		DefaultHttpClient client = new DefaultHttpClient();
 		HttpPost post = new HttpPost(uri);
 		try {
 
-			if (fields != null){
+			if (fields != null) {
 				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(fields.size());
-				for (String name: fields.keySet())
-				{
+				for (String name : fields.keySet()) {
 					nameValuePairs.add(new BasicNameValuePair(name, fields.get(name)));
 					post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 				}
 			}
-			
-			
+
 			HttpResponse response = client.execute(post);
 
 			return getResponse(response);
@@ -101,7 +99,7 @@ public class HTTPClient extends Service {
 		return null;
 	}
 
-	public byte[] getResponse(HttpResponse response) {
+	static public byte[] getResponse(HttpResponse response) {
 		try {
 			InputStream is = response.getEntity().getContent();
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -124,9 +122,10 @@ public class HTTPClient extends Service {
 
 	}
 
-	public byte[] get(String uri) {
+	static public byte[] get(String uri) {
 
 		try {
+			DefaultHttpClient client = new DefaultHttpClient();
 			HttpGet request = new HttpGet(uri);
 			HttpResponse response = client.execute(request);
 			return getResponse(response);
@@ -143,21 +142,36 @@ public class HTTPClient extends Service {
 		return "an HTTP client, used to fetch information on the web";
 	}
 
+	public Status test() {
+		Status status = super.test();
+		try {
+
+			String google = new String(HTTPClient.get("http://www.google.com/"));
+			log.info(google);
+
+			//String ntest = new String(HTTPClient.get("nullTest"));
+			//log.info(ntest);
+
+			String script = new String(HTTPClient.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov2.full3.byGael.Langevin.1.py"));
+			log.info(script);
+
+			HashMap<String, String> params = new HashMap<String, String>();
+			params.put("p", "apple");
+			google = new String(HTTPClient.post("http://www.google.com", params));
+			log.info(google);
+			
+		} catch (Exception e) {
+			status.addError(e);
+		}
+		return status;
+	}
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		HTTPClient client = (HTTPClient) Runtime.createAndStart("client", "HTTPClient");
-
-		String google = new String(client.get("http://www.google.com/"));
-		log.info(google);
-		
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("p", "apple");
-		google = new String(client.post("http://www.google.com", params));
-		log.info(google);
-		
-		
+		HTTPClient http = (HTTPClient) Runtime.start("http", "HTTPClient");
+		http.test();
 	}
 
 }

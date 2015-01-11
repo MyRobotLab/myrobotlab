@@ -52,6 +52,11 @@ public class OpenNI extends Service // implements
 
 	public static final float PI = (float) Math.PI;
 	public static final float RAD_TO_DEG = 180.0f / PI;
+	
+
+	boolean enableDepth = true;
+	boolean enableRGB = true;
+	boolean enableIR = true;
 
 	// min max vars
 	/*
@@ -143,6 +148,10 @@ public class OpenNI extends Service // implements
 
 	public void add(VideoSink vs) {
 		sinks.add(vs);
+	}
+	
+	public void capture() {
+		startUserTracking();
 	}
 
 	public void remove(VideoSink vs) {
@@ -266,10 +275,6 @@ public class OpenNI extends Service // implements
 		}
 	}
 
-	boolean enableDepth = true;
-	boolean enableRGB = true;
-	boolean enableIR = true;
-
 	void getData() {
 
 		// a new container is used to preserved references in
@@ -297,6 +302,7 @@ public class OpenNI extends Service // implements
 		data.skeleton = skeleton;
 
 		++frameNumber;
+		data.frameNumber = frameNumber;
 		skeleton.frameNumber = frameNumber;
 
 		// FIXME REMOVE
@@ -558,6 +564,7 @@ public class OpenNI extends Service // implements
 
 			line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y);
 			
+			g2d.dispose();
 			
 		}
 
@@ -881,7 +888,7 @@ public class OpenNI extends Service // implements
 
 		OpenNI openni = (OpenNI) Runtime.createAndStart("openni", "OpenNI");
 		openni.startUserTracking();
-		openni.recordSingleFrame();
+		//openni.recordSingleFrame();
 		// openni.startHandTracking();
 	}
 

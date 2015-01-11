@@ -11,12 +11,14 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -209,37 +211,65 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
+		Adafruit16CServoDriver driver = (Adafruit16CServoDriver)Runtime.getService(getName());
+		driver.startService();
+		
+		//Runtime.start("gui", "GUIService");
+		
+		Serial virtual = (Serial)Runtime.start(String.format("%s.vserial", getName()), "Serial");
+		
+		VirtualNullModemCable cable = virtual.createNullModemCable("v0", "v1");
+		virtual.connect("v1");
+		virtual.record("test/Adafruit16CServoDriver/test");
+		driver.arduino.connect("v0");
+		
+		// FIXME - make virtual UART
+		
 
 		try {
-			setServo(0, SERVOMIN);
-			setServo(0, SERVOMAX);
-			setServo(0, SERVOMIN);
-			setServo(0, SERVOMAX);
-			setServo(0, SERVOMIN);
-			setServo(0, SERVOMAX);
-			setServo(0, SERVOMIN);
-			setServo(0, SERVOMAX);
-			setServo(0, SERVOMIN);
-			setServo(0, SERVOMAX);
-			setServo(0, SERVOMIN);
-			setServo(0, SERVOMAX);
+			driver.setServo(0, SERVOMIN);
+			driver.setServo(0, SERVOMAX);
+			driver.setServo(0, SERVOMIN);
+			driver.setServo(0, SERVOMAX);
+			driver.setServo(0, SERVOMIN);
+			driver.setServo(0, SERVOMAX);
+			driver.setServo(0, SERVOMIN);
+			driver.setServo(0, SERVOMAX);
+			driver.setServo(0, SERVOMIN);
+			driver.setServo(0, SERVOMAX);
+			driver.setServo(0, SERVOMIN);
+			driver.setServo(0, SERVOMAX);
 
 			// begin();
-			setPWMFreq(60);
+			driver.setPWMFreq(60);
 
 			for (int i = SERVOMIN; i < SERVOMAX; ++i) {
-				setPWM(0, 0, i);
+				driver.setPWM(0, 0, i);
 			}
 
-			setPWM(0, 0, 0);
+			driver.setPWM(0, 0, 0);
 
-			setPWM(0, 0, SERVOMIN);
-			setPWM(0, 0, SERVOMAX);
-			setPWM(0, 0, SERVOMIN);
-			setPWM(0, 0, SERVOMAX);
-			setPWM(0, 0, SERVOMIN);
-			setPWM(0, 0, SERVOMAX);
+			driver.setPWM(0, 0, SERVOMIN);
+			driver.setPWM(0, 0, SERVOMAX);
+			driver.setPWM(0, 0, SERVOMIN);
+			driver.setPWM(0, 0, SERVOMAX);
+			driver.setPWM(0, 0, SERVOMIN);
+			driver.setPWM(0, 0, SERVOMAX);
+			driver.setPWM(0, 0, SERVOMAX);
+			
+			// need to allow time :P
+			// to flush serial thread
+			//sleep(1000);
+			// disconnect / close arduino port
+			// flush cable
+			// stop recording
+			driver.arduino.disconnect();
+		    cable.flush();
+			//cable.close();
+			virtual.stopRecording();
 
+			FileIO.compareFiles("test/Adafruit16CServoDriver/test.rx", "test/Adafruit16CServoDriver/control/test.rx");
+			
 		} catch (Exception e) {
 			status.addError(e);
 		}
@@ -319,25 +349,20 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		return false;
 	}
 	
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		Runtime.createAndStart("python", "Python");
-		Adafruit16CServoDriver pwm = (Adafruit16CServoDriver) Runtime.createAndStart("pwm", "Adafruit16CServoDriver");
-		Runtime.createAndStart("servo1", "Servo");
-		Runtime.createAndStart("gui01", "GUIService");
-
-		pwm.connect("COM12");
-
-		pwm.test();
-
-	}
 
 	@Override
 	public void servoWriteMicroseconds(String name, Integer ms) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start("pwm", "Adafruit16CServoDriver");
+		driver.test();
+
 	}
 }

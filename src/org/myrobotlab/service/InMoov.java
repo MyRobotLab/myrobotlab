@@ -1309,33 +1309,40 @@ public class InMoov extends Service {
 	}
 	*/
 	
+	public boolean isMute() {
+		return mute;
+	}
+
+	public void setMute(boolean mute) {
+		this.mute = mute;
+	}
+	
 	public Status test(){
 		Status status = Status.info("starting InMoov test");
-		String rightPort = "COM8";
-		String leftPort = "COM7";
-		String rightUART = "UART51";
-		String leftUART = "UART52";
+		String rightPort = "COM7";
+		String leftPort = "COM20";
+		String rightUART = "COM7_UART";
+		String leftUART = "COM20_UART";
 		
 		VirtualNullModemCable vnm1 = VirtualSerialPort.createNullModemCable(rightPort, rightUART);
 		VirtualNullModemCable vnm2 = VirtualSerialPort.createNullModemCable(leftPort, leftUART);
 		
 		Serial luart = (Serial)Runtime.start(leftUART, "Serial");
 		Serial ruart = (Serial)Runtime.start(rightUART, "Serial");
+		
 		luart.record();
 		ruart.record();
 		
 		luart.connect(leftUART);
 		ruart.connect(rightUART);
 		
-		InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
-		
-		//i01.reserve(key, actualName, simpleTypeName, comment)
-		
 		GUIService gui = (GUIService)Runtime.start("gui", "GUIService");
 		
-		// TODO - run Gael's script
-		python = i01.getPython();
-		python.execResource("Python/examples/InMoov2.full3.byGael.Langevin.1.py");
+		// get online script
+		String script = new String(HTTPClient.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov2.full3.byGael.Langevin.1.py"));
+		log.info(script);
+		python = (Python)Runtime.start("python","Python");
+		python.exec(script);
 		
 		log.info("done");
 		//i01.startHead(leftPort);
@@ -1353,7 +1360,6 @@ public class InMoov extends Service {
 		
 	}
 	
-
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -1361,7 +1367,9 @@ public class InMoov extends Service {
 		Runtime.start("gui", "GUIService");
 		
 		InMoov i01 = (InMoov)Runtime.start("i01","InMoov");
-		i01.copyGesture(true);
+		i01.test();
+		
+		//i01.copyGesture(true);
 		
 		//i01.test();
 		
@@ -1433,12 +1441,5 @@ public class InMoov extends Service {
 
 	}
 
-	public boolean isMute() {
-		return mute;
-	}
-
-	public void setMute(boolean mute) {
-		this.mute = mute;
-	}
 
 }

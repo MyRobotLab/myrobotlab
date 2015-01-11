@@ -5,17 +5,15 @@ import java.util.TooManyListenersException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class VirtualSerialPort implements SerialDevice {
 	public String name;
 	public BlockingQueue<Integer> rx = new LinkedBlockingQueue<Integer>();
 	public BlockingQueue<Integer> tx = new LinkedBlockingQueue<Integer>();
-	
+
 	private boolean isOpen = false;
 
 	public final static Logger log = LoggerFactory.getLogger(VirtualSerialPort.class.getCanonicalName());
@@ -27,7 +25,7 @@ public class VirtualSerialPort implements SerialDevice {
 	public SerialDeviceEventListener listener;
 	RXThread rxthread;
 	private boolean notifyOnDataAvailable;
-	
+
 	// poison pill "real" bytes are from 0 to 255 ;)
 	static public final Integer SHUTDOWN = -1;
 
@@ -35,43 +33,30 @@ public class VirtualSerialPort implements SerialDevice {
 
 	// underlying serial event management thread
 	/*
-	class RXThread extends Thread {
+	 * class RXThread extends Thread {
+	 * 
+	 * int currentDataSize = 0; long pollingPause = 100;
+	 * 
+	 * public RXThread() { super(String.format("%s_virtual_rx", name)); }
+	 * 
+	 * 
+	 * public void run() { try { while (isOpen) { Integer b = rx.peek(); //
+	 * userRX.add(b); // TODO -generate only at // currentDataSize intervals if
+	 * (listener != null && notifyOnDataAvailable && b != null) {
+	 * SerialDeviceEvent sde = new SerialDeviceEvent(srcport,
+	 * SerialDeviceEvent.DATA_AVAILABLE, false, true);
+	 * listener.serialEvent(sde); }
+	 * 
+	 * Thread.sleep(pollingPause); }
+	 * 
+	 * } catch (Exception e) { if (e instanceof InterruptedException) {
+	 * log.info("shutting down rx thread on port"); } else {
+	 * Logging.logException(e); } } } }
+	 */
 
-		int currentDataSize = 0;
-		long pollingPause = 100;
-
-		public RXThread() {
-			super(String.format("%s_virtual_rx", name));
-		}
-
-		
-		public void run() {
-			try {
-				while (isOpen) {
-					Integer b = rx.peek(); // userRX.add(b); // TODO -generate only at
-								// currentDataSize intervals
-					if (listener != null && notifyOnDataAvailable && b != null) {
-						SerialDeviceEvent sde = new SerialDeviceEvent(srcport, SerialDeviceEvent.DATA_AVAILABLE, false, true);
-						listener.serialEvent(sde);
-					}
-					
-					Thread.sleep(pollingPause);
-				}
-
-			} catch (Exception e) {
-				if (e instanceof InterruptedException) {
-					log.info("shutting down rx thread on port");
-				} else {
-					Logging.logException(e);
-				}
-			}
-		}
-	}
-	*/
-	
 	/**
-	 * at some point this thread will be caught in the listener's while loop with a serial.read()
-	 * which will result in a blocking rx.take()
+	 * at some point this thread will be caught in the listener's while loop
+	 * with a serial.read() which will result in a blocking rx.take()
 	 * 
 	 * future - will need to interrupt when closing !!!
 	 * 
@@ -90,8 +75,9 @@ public class VirtualSerialPort implements SerialDevice {
 		public void run() {
 			try {
 				while (isOpen) {
-					//Integer b = rx.peek(); // userRX.add(b); // TODO -generate only at
-								// currentDataSize intervals
+					// Integer b = rx.peek(); // userRX.add(b); // TODO
+					// -generate only at
+					// currentDataSize intervals
 					if (listener != null && notifyOnDataAvailable) {
 						SerialDeviceEvent sde = new SerialDeviceEvent(srcport, SerialDeviceEvent.DATA_AVAILABLE, false, true);
 						// this does a blocking read in the Serial service
@@ -146,8 +132,8 @@ public class VirtualSerialPort implements SerialDevice {
 	@Override
 	public void close() {
 		isOpen = false;
-		
-		if (rxthread != null){
+
+		if (rxthread != null) {
 			rxthread.interrupt();
 		}
 		rxthread = null;
@@ -189,9 +175,10 @@ public class VirtualSerialPort implements SerialDevice {
 
 	@Override
 	public void write(int data) throws IOException {
-		//log.info(name);
+		// log.info(name);
 		tx.add(data);
-		// the read will activate this rx thread - which is blocked on the "listener's" read/rx.take()
+		// the read will activate this rx thread - which is blocked on the
+		// "listener's" read/rx.take()
 	}
 
 	@Override
@@ -204,10 +191,10 @@ public class VirtualSerialPort implements SerialDevice {
 	@Override
 	public int read() throws IOException {
 		try {
-			//log.info(name);
-			//tx.take();
-			//log.debug("rx.take() size {}", rx.size());
-			//rx.poll(100, unit);
+			// log.info(name);
+			// tx.take();
+			// log.debug("rx.take() size {}", rx.size());
+			// rx.poll(100, unit);
 			// Thread.sleep(5);
 			return rx.take();
 		} catch (InterruptedException e) {
@@ -222,7 +209,7 @@ public class VirtualSerialPort implements SerialDevice {
 		try {
 			int read = Math.min(rx.size(), data.length);
 			for (int i = 0; i < rx.size() && i < data.length; ++i) {
-				data[i] = (byte)(rx.take() & 0xff);
+				data[i] = (byte) (rx.take() & 0xff);
 			}
 			return read;
 		} catch (Exception e) {
@@ -230,7 +217,6 @@ public class VirtualSerialPort implements SerialDevice {
 		}
 		return -1;
 	}
-	
 
 	/**
 	 * virtual serial ports will be used in the future to connect to simulated
@@ -253,17 +239,17 @@ public class VirtualSerialPort implements SerialDevice {
 			// create 2 virtual ports
 			vp0 = new VirtualSerialPort(port0);
 			vp1 = new VirtualSerialPort(port1);
-			
+
 			// twist the cable
 			vp1.tx = vp0.rx;
 			vp1.rx = vp0.tx;
-			
+
 			// make each aware of the other so that
 			// when event listers are added the
 			// correct reference is used
 			vp0.nullModem = vp1;
 			vp1.nullModem = vp0;
-						
+
 			// add virtual ports to the serial device factory
 			SerialDeviceFactory.add(vp0);
 			SerialDeviceFactory.add(vp1);
@@ -274,9 +260,36 @@ public class VirtualSerialPort implements SerialDevice {
 			// vp1.rx.add(SHUTDOWN) SHUTDOWN = largest signed int value ??
 			// vp1.release();
 			// vp0.release();
+			flush();
 			vp0.close();
 			vp1.close();
 			log.info("releasing virtual null modem cable");
+		}
+
+		public void flush() {
+			boolean flushed = false;
+			while (!flushed) {
+				flushed = true;
+				if (vp0.rx.size() > 0) {
+					flushed &= false;
+				}
+				if (vp0.tx.size() > 0) {
+					flushed &= false;
+				}
+				if (vp1.rx.size() > 0) {
+					flushed &= false;
+				}
+				if (vp1.tx.size() > 0) {
+					flushed &= false;;
+				}
+				if (flushed){
+					break; // avoid the 30 ms wait :P
+				}
+				try {
+					Thread.sleep(30);
+				} catch (InterruptedException e) {
+				}
+			}
 		}
 
 	}
@@ -292,5 +305,4 @@ public class VirtualSerialPort implements SerialDevice {
 		return new VirtualNullModemCable(port0, port1);
 	}
 
-	
 }

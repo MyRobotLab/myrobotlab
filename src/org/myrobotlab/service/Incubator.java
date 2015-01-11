@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.fileLib.FileIO;
@@ -47,6 +48,8 @@ public class Incubator extends Service {
 
 	// TODO - subscribe to registered --> generates subscription to
 	// publishState() - filter on Errors
+	
+	// FIXME NEED TO AD SOME REPO MANAGEMENT ROUTINES TO RUNTIME - LIKE REMOVE REPO
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -99,6 +102,64 @@ public class Incubator extends Service {
 		}
 		return null;
 	}
+	
+	public Status serviceTest(){
+		
+		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
+
+		Status status = Status.info("serviceTest will test %d services", serviceTypeNames.length);
+
+		Set<Thread> originalThreads = Thread.getAllStackTraces().keySet();
+		
+		for (int i = 0; i < serviceTypeNames.length; ++i) {
+
+			ServiceInterface s = null;
+			String fullType = serviceTypeNames[i];
+
+			if ("org.myrobotlab.service.Incubator".equals(fullType) || "org.myrobotlab.service.Runtime".equals(fullType)) {
+				log.info("skipping Incubator & Runtime");
+				continue;
+			}
+			
+			try {
+
+				// install it
+				status.add(install(fullType));
+
+				// create it
+				log.info("creating {}", fullType);
+				s = Runtime.create(fullType, fullType);
+
+				if (s == null){
+					status.addError("could not create %s service", fullType);
+					continue;
+				}
+				
+				// start it
+				log.info("starting {}", fullType);
+				s.startService();
+				
+				log.info("starting {}", fullType);
+				Status result = s.test();
+				if (result != null && result.hasError()){
+					status.add(result);
+				}
+				
+				s.releaseService();
+				
+				if (s.hasPeers()){
+					s.releasePeers();
+				}
+
+			} catch (Exception e) {
+				status.addError("ERROR - %s", fullType);
+				status.addError(e);
+				continue;
+			}
+		}
+		return status;
+		
+	}
 
 	// FIXME - 2 sets of services - 1 by serviceData.xml & 1 by all files in
 	// org.myrobotlab.service
@@ -112,21 +173,19 @@ public class Incubator extends Service {
 
 		status.add(Status.info("will test %d services", serviceTypeNames.length));
 
-		int originalThrdCnt = Runtime.getThreads().length;
-		int runningDiffThrdTotal = 0;
-
+		Set<Thread> originalThreads = Thread.getAllStackTraces().keySet();
+		
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 
 			ServiceInterface s = null;
 			String fullType = serviceTypeNames[i];
 
-			int preStartThrdCnt = Runtime.getThreads().length;
-
 			if ("org.myrobotlab.service.Incubator".equals(fullType) || "org.myrobotlab.service.Runtime".equals(fullType)) {
+				log.info("skipping Incubator & Runtime");
 				continue;
 			}
-
-			// fullType = "org.myrobotlab.service.WebGUI";
+			
+			//fullType = "org.myrobotlab.service.JFugue";
 
 			try {
 
@@ -137,6 +196,11 @@ public class Incubator extends Service {
 				log.info("creating {}", fullType);
 				s = Runtime.create(fullType, fullType);
 
+				if (s == null){
+					status.addError("could not create %s service", fullType);
+					continue;
+				}
+				
 				// start it
 				log.info("starting {}", fullType);
 				s.startService();
@@ -162,20 +226,25 @@ public class Incubator extends Service {
 
 				log.info("releasing {}", fullType);
 
-				// int startedThreadCount = Runtime.getThreads().length;
-
 				if (s.hasPeers()) {
 					s.releasePeers();
 				}
 
 				s.releaseService();
-
 				sleep(300);
-
-				int addThreads = Runtime.getThreads().length - preStartThrdCnt;
-				if (addThreads > 0) {
-					runningDiffThrdTotal += addThreads;
-					status.addError("%s has added %d new threads", fullType, addThreads);
+				
+				Set<Thread> currentThreads = Thread.getAllStackTraces().keySet();
+				
+				if (currentThreads.size() > originalThreads.size()) {
+					for (Thread t : currentThreads) {
+						if (!originalThreads.contains(t)){
+							status.addError("%s has added thread %s but not cleanly removed it", fullType, t.getName());
+							
+							// resetting original thread count
+							originalThreads = currentThreads;
+						}
+					}
+					
 				}
 
 				log.info("released {}", fullType);
@@ -184,12 +253,6 @@ public class Incubator extends Service {
 				status.addError(ex);
 			}
 		} // end of loop
-
-		int finishedTrdCnt = Runtime.getThreads().length;
-
-		if (originalThrdCnt != finishedTrdCnt) {
-			status.add(Status.info("serializeTest excess threads %d running total %d", finishedTrdCnt - originalThrdCnt, runningDiffThrdTotal));
-		}
 
 		return status;
 	}
@@ -369,6 +432,11 @@ public class Incubator extends Service {
 
 		subscribe(sw.getName(), "publishError", "handleError");
 	}
+	
+	public void handleError(String msg){
+		// AHHHH! with just error (vs log.error) - goes in infinite loop
+		log.error(String.format("cool - all errors are caught here since we register for them - this error is - %s", msg));
+	}
 
 	public void handleError(Status status) {
 		// FIXME - remove - only add xmp if HandleError requires an error alert
@@ -404,7 +472,8 @@ public class Incubator extends Service {
 		Status status = Status.info("starting %s %s test", getName(), getType());
 
 		//status.add(subTest());
-		status.add(serializeTest());
+		//status.add(serializeTest());
+		status.add(serviceTest());
 
 		if (status.hasError()) {
 			handleError(status);

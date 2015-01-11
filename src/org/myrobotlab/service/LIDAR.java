@@ -64,7 +64,7 @@ public class LIDAR extends Service {
             // start LIDAR hardware initialization here
             // data coming back from the hardware will be in byteRecieved
             if (MODEL_SICK_LMS200.equals(model)) {
-                serial.write(new int[]{1, 38, 32, 43});
+                serial.write(new byte[]{1, 38, 32, 43});
             }
             state = STATE_INITIALIZATION_STAGE_1;
         } catch (Exception e) {
@@ -215,17 +215,17 @@ public class LIDAR extends Service {
          *  LMS replies: 06 02 81 03 00 A0 00 10 36 1A (success)
          */
         if (baudRate == 9600) {
-            serial.write(new int[]{0x02, 0x00, 0x02, 0x00, 0x20, 0x42, 0x52, 0x08});
+            serial.write(new byte[]{0x02, 0x00, 0x02, 0x00, 0x20, 0x42, 0x52, 0x08});
         } /* 19200
          *  PC sends : 02 00 02 00 20 41 51 08
          *  LMS replies: 06 02 81 03 00 A0 00 10 36 1A (success)
          */ else if (baudRate == 19200) {
-            serial.write(new int[]{0x02, 0x00, 0x02, 0x00, 0x20, 0x41, 0x52, 0x08});
+            serial.write(new byte[]{0x02, 0x00, 0x02, 0x00, 0x20, 0x41, 0x52, 0x08});
         } /* 38400
          *  PC sends : 02 00 02 00 20 41 51 08
          *  LMS replies: 06 02 81 03 00 A0 00 10 36 1A (success)
          */ else if (baudRate == 38400) {
-            serial.write(new int[]{0x02, 0x00, 0x02, 0x00, 0x20, 0x40, 0x52, 0x08});
+            serial.write(new byte[]{0x02, 0x00, 0x02, 0x00, 0x20, 0x40, 0x52, 0x08});
         } else {
             log.error("You've specified an unsupported baud rate");
         }
@@ -245,7 +245,7 @@ public class LIDAR extends Service {
 
     public void singleScan() throws IOException {
         state = STATE_SINGLE_SCAN;
-        serial.write(new int[]{0x02, 0x00, 0x02, 0x00, 0x30, 0x01, 0x31, 0x18});
+        serial.write(new byte[]{0x02, 0x00, 0x02, 0x00, 0x30, 0x01, 0x31, 0x18});
         index = 0;
         buffer.reset();
     }// end singleScan
@@ -256,17 +256,17 @@ public class LIDAR extends Service {
         index = 0;
         if (spread == 100) {
             if (angularResolution == 1) {
-                serial.write(new int[]{0x02, 0x00, 0x05, 0x00, 0x3B, 0x64, 0x00, 0x64, 0x00, 0x1D, 0x0F});
+                serial.write(new byte[]{0x02, 0x00, 0x05, 0x00, 0x3B, 0x64, 0x00, 0x64, 0x00, 0x1D, 0x0F});
                 // Start bytes and header = 8 bytes, 202 data bytes, 1 status
                 // and 2 bytes for checksum
                 dataMessageSize = 213;
             } else if (angularResolution == 0.5) {
-                serial.write(new int[]{0x02, 0x00, 0x05, 0x00, 0x3B, 0x64, 0x00, 0x32, 0x00, 0xb1, 0x59});
+                serial.write(new byte[]{0x02, 0x00, 0x05, 0x00, 0x3B, 0x64, 0x00, 0x32, 0x00, (byte)0xb1, 0x59});
                 // Start bytes and header = 8 bytes, 402 data bytes, 1 status
                 // and 2 bytes for checksum
                 dataMessageSize = 413;
             } else if (angularResolution == 0.25) {
-                serial.write(new int[]{0x02, 0x00, 0x05, 0x00, 0x3B, 0x64, 0x00, 0x19, 0x00, 0xe7, 0x72});
+                serial.write(new byte[]{0x02, 0x00, 0x05, 0x00, 0x3B, 0x64, 0x00, 0x19, 0x00, (byte)0xe7, 0x72});
                 // Start bytes and header = 8 bytes, 802 data bytes, 1 status
                 // and 2 bytes for checksum
                 dataMessageSize = 813;
@@ -276,12 +276,12 @@ public class LIDAR extends Service {
         }// end if spread = 100
         if (spread == 180) {
             if (angularResolution == 1) {
-                serial.write(new int[]{0x02, 0x00, 0x05, 0x00, 0x3B, 0xB4, 0x00, 0x64, 0x00, 0x97, 0x49});
+                serial.write(new byte[]{0x02, 0x00, 0x05, 0x00, 0x3B, (byte)0xB4, 0x00, 0x64, 0x00, (byte)0x97, 0x49});
                 // Start bytes and header = 8 bytes, 362 data bytes, 1 status
                 // and 2 bytes for checksum
                 dataMessageSize = 373;
             } else if (angularResolution == 0.5) {
-                serial.write(new int[]{0x02, 0x00, 0x05, 0x00, 0x3B, 0xB4, 0x00, 0x32, 0x00, 0x3B, 0x1F});
+                serial.write(new byte[]{0x02, 0x00, 0x05, 0x00, 0x3B, (byte)0xB4, 0x00, 0x32, 0x00, 0x3B, 0x1F});
                 // Start bytes and header = 8 bytes, 722 data bytes, 1 status
                 // and 2 bytes for checksum
                 dataMessageSize = 733;

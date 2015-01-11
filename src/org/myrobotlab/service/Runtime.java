@@ -79,6 +79,7 @@ import org.slf4j.Logger;
  * Thread.currentThread().getStackTrace(); final String mainClassName =
  * stackTrace[stackTrace.length - 1].getClassName();
  * 
+ * TODO - add check for 64 bit OS & 32 bit JVM :(
  * 
  */
 @Root
@@ -932,7 +933,7 @@ public class Runtime extends Service implements MessageListener {
 		ServiceEnvironment se = instances.get(sw.getInstanceId());
 		se.serviceDirectory.remove(name);
 		rt.invoke("released", sw);
-		log.warn("released{}", name);
+		log.warn("released {}", name);
 		return true;
 	}
 
@@ -2099,11 +2100,13 @@ public class Runtime extends Service implements MessageListener {
 
 	}
 
+	/*
 	static public Thread[] getThreads() {
 		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 		Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
 		return threadArray;
 	}
+	*/
 
 	/**
 	 * Main starting method of MyRobotLab Parses command line options
