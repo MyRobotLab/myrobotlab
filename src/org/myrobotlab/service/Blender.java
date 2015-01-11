@@ -207,35 +207,35 @@ public class Blender extends Service {
 			
 			blender.attach(arduino01);
 			sleep(3000);
-			Servo servo01 = (Servo) Runtime.start("i01.head.jaw", "Servo");
+			Servo neck = (Servo) Runtime.start("i01.head.neck", "Servo");
 			
-			Servo rothead = (Servo) Runtime.start("i01.head.rothead", "Servo");
+//			Servo rothead = (Servo) Runtime.start("i01.head.rothead", "Servo");
 			
-			servo01.attach(arduino01, 7);
-			rothead.attach(arduino01, 9);
+			neck.attach(arduino01, 7);
+//			rothead.attach(arduino01, 9);
 			
-			rothead.moveTo(90);
-			servo01.moveTo(90);
-			sleep(1000);
-			rothead.moveTo(120);
-			servo01.moveTo(120);
-			sleep(1000);
-			rothead.moveTo(0);
-			servo01.moveTo(0);
-			sleep(1000);
-			rothead.moveTo(90);
-			servo01.moveTo(90);
-			sleep(1000);
-			rothead.moveTo(120);
-			servo01.moveTo(120);
-			sleep(1000);
-			rothead.moveTo(0);
-			servo01.moveTo(0);
-			sleep(1000);
+	//		rothead.moveTo(90);
+			neck.moveTo(90);
+			sleep(100);
+		//	rothead.moveTo(120);
+			neck.moveTo(120);
+			sleep(100);
+			//rothead.moveTo(0);
+			neck.moveTo(0);
+			sleep(100);
+			//rothead.moveTo(90);
+			neck.moveTo(90);
+			sleep(100);
+			//rothead.moveTo(120);
+			neck.moveTo(120);
+			sleep(100);
+			//rothead.moveTo(0);
+			neck.moveTo(0);
+			sleep(100);
 			
 			//servo01.sweep();
 			//servo01.stop();
-			servo01.detach();
+			neck.detach();
 
 			blender.getVersion();
 			//blender.toJson();
@@ -254,10 +254,6 @@ public class Blender extends Service {
 		// let Blender know we are going
 		// to virtualize an Arduino
 		sendMsg("attach", service.getName(), service.getSimpleName());
-		// lets give a little time before we go
-		// assigning servos and such with serial commands
-		// to make sure we setup
-		//sleep(500);
 	}
 	
 	// call back from blender

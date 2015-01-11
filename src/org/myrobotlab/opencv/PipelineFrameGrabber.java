@@ -2,6 +2,7 @@ package org.myrobotlab.opencv;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -67,7 +68,9 @@ public class PipelineFrameGrabber extends FrameGrabber {
 	public IplImage grab() {
 	
 		try {
-			return blockingData.take();
+			// added non blocking allowing thread to terminate
+			IplImage image = blockingData.poll(1000, TimeUnit.MILLISECONDS);
+			return image;
 		} catch (InterruptedException e) {
 			Logging.logException(e);
 			return null;

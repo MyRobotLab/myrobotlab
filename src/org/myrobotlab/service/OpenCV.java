@@ -641,6 +641,10 @@ public class OpenCV extends VideoSource {
 		Status status = Status.info("starting %s %s test", getName(), getType());
 		
 		try {
+			// FIXME - each filter should have its own test !!!!
+			// 
+			
+			
 			// smart testing - determine what environment has
 			// do i have a camera ?
 			// do i have multiple cameras
@@ -833,67 +837,17 @@ public class OpenCV extends VideoSource {
 
 		OpenCV opencv = (OpenCV) Runtime.createAndStart("opencv", "OpenCV");
 		Runtime.createAndStart("gui", "GUIService");
+		//opencv.test();
+		/*
+		Runtime.createAndStart("gui", "GUIService");
 		RemoteAdapter remote = (RemoteAdapter) Runtime.start("ocvremote", "RemoteAdapter");
 		remote.connect("tcp://localhost:6767");
 		
 		opencv.capture();
-		//OpenCVFilterTranspose transpose = new OpenCVFilterTranspose("transpose");
-		//transpose.flipCode = 1;
-		
-		//OpenCVFilterLKOpticalTrack jj = new OpenCVFilterLKOpticalTrack("lk");
-		//opencv.addFilter(transpose);
-		
-		//opencv.test();
-		
 		boolean leaveNow = true;
 		if (leaveNow) return;
-		
-		// opencv.capture();
-
-		log.info("here");
-		/*
-		 * for (int i = 0; i < 100; ++i){ OpenCVData data =
-		 * opencv.getOpenCVData(); String name = data.getSelectedFilterName();
-		 * IplImage img = data.getImage(); int width = data.getWidth(); int
-		 * height = data.getHeight(); BufferedImage bi =
-		 * data.getBufferedImage(); log.info("{}",data.keySet());
-		 * //ArrayList<Rectangle> rect = data.getBoundingBoxArray(); }
-		 */
-		log.info("here");
-
-		/*
-		 * TopCodes topcodes = (TopCodes)Runtime.createAndStart("topcodes",
-		 * "TopCodes"); opencv.addFilter("PyramidDown1", "PyramidDown");
-		 * 
-		 * OpenCVData data = opencv.getOpenCVData(); BufferedImage img =
-		 * data.getBufferedImage("PyramidDown1.display");
-		 * 
-		 * 
-		 * topcodes.scan(img);
-		 */
-		// opencv.test();
-
-		// opencv.addFilter(new OpenCVFilterPyramidDown());
-
-		/*
-		 * opencv.capture();
-		 * 
-		 * 
-		 * // opencv.setMinDelay(1000); OpenCVFilterGoodFeaturesToTrack gf = new
-		 * OpenCVFilterGoodFeaturesToTrack(); opencv.addFilter(gf);
-		 * 
-		 * //Runtime.createAndStart("python", "Python");
-		 * Service.logTimeEnable(true); opencv.addFilter(new
-		 * OpenCVFilterPyramidDown()); opencv.addFilter(new OpenCVFilterGray());
-		 * //OpenCVFilterFlip flip = new OpenCVFilterFlip(); //flip.flipCode =
-		 * 0; // horizontal //opencv.addFilter(flip);
-		 * 
-		 * VideoStreamer vs = new VideoStreamer("streamer"); vs.startService();
-		 * 
-		 * vs.attach(opencv);
-		 */
-
-		// gf.qualityLevel = 0.0004;
+		*/
+	
 
 	}
 

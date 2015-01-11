@@ -404,7 +404,8 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	// FIXME - need interface for this
 	public synchronized boolean servoAttach(Servo servo, Integer pin) {
-		log.info(String.format("servoAttach %s pin %d", servo.getName(), pin));
+		String servoName = servo.getName();
+		log.info(String.format("servoAttach %s pin %d", servoName, pin));
 
 		if (serial == null) {
 			error("could not attach servo to pin %d serial is null - not initialized?", pin);
@@ -432,8 +433,27 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		// simplistic mapping where Java is in control seems best
 		int index = pin - 2;
 
+		// we need to send the servo ascii name - format of SERVO_ATTCH is
+		// SERVO_ATTACH (1 byte) | servo index (1 byte) | servo pin (1 byte) | size of name (1 byte) | ASCII name of servo (N - bytes)
+		// The name is not needed in MRLComm.ino - but it is needed in virtualized Blender servo
+		int payloadSize = 1 + 1 + 1 + servoName.length();
+		
+		int[] payload = new int[payloadSize];
+		
+		//payload[0] = SERVO_ATTACH;
+		payload[0] = index;
+		payload[1] = pin;
+		payload[2] = servoName.length();
+		
+		byte ascii[] = servoName.getBytes();
+		for (int i = 0; i < servoName.length(); ++i){
+			payload[i + 3] = 0xFF & ascii[i];
+		}
+
 		// attach index pin
-		sendMsg(SERVO_ATTACH, index, pin);
+		//sendMsg(SERVO_ATTACH, index, pin, servoName.length(), servoName.get);
+		//sendMsg(function, params)
+		sendMsg(SERVO_ATTACH, payload);
 
 		ServoData sd = new ServoData();
 		sd.pin = pin;

@@ -92,11 +92,16 @@ public class OpenNIGUI extends ServiceGUI implements ActionListener {
 
 	SerializableImage source = new SerializableImage(null, "kinect");
 	
+	String displayType = "display"; // display (composite of skeleton or anything OpenNI has written to "frame") | depth | rgb
+	
 	public void publishOpenNIData(OpenNIData data) {
-		if (data.rbgPImage != null) {
-			source.setImage(data.rbgPImage.getImage());
-		} else {
+		// TODO - display type based on config
+		if ("display".equals(displayType)){
 			source.setImage(data.depth);
+		} else if ("depth".equals(displayType)){
+			source.setImage(data.depth);
+		} else if ("rgb".equals(displayType)){
+			source.setImage(data.rbgPImage.getImage());
 		}
 		video.displayFrame(source);
 	}

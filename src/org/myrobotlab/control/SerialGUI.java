@@ -58,15 +58,14 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	public final static Logger log = LoggerFactory.getLogger(SerialGUI.class.getCanonicalName());
 
 	// menu
-	JComboBox<String> format = new JComboBox<String>(new String[] { Serial.FORMAT_DECIMAL, Serial.FORMAT_HEX, Serial.FORMAT_ASCII });
+	JComboBox<String> reqFormat = new JComboBox<String>(new String[] { Serial.DISPLAY_DECIMAL, Serial.DISPLAY_HEX, Serial.DISPLAY_RAW, Serial.DISPLAY_MRL });
 	JComboBox<String> ports = new JComboBox<String>();
 	JButton refresh = new JButton("refresh");
-	
+
 	JButton createVirtualUART = new JButton("create virtual uart");
 	JButton captureRX = new JButton();
 	JButton captureTX = new JButton();
-	//JButton sendTx = new JButton("send tx from file");
-	
+	// JButton sendTx = new JButton("send tx from file");
 
 	JLabel connectLight = new JLabel();
 
@@ -80,7 +79,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	int rxCount = 0;
 	int txCount = 0;
 
-	//JTextField sendData = new JTextField(40);
+	// JTextField sendData = new JTextField(40);
 	JTextArea sendData = new JTextArea(3, 40);
 	JButton send = new JButton("send");
 	JButton sendFile = new JButton("send file");
@@ -107,12 +106,12 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		north.add(refresh);
 		north.add(connectLight);
 		north.add(new JLabel(" "));
-		north.add(format);
+		north.add(reqFormat);
 		north.add(new JLabel("width "));
 		north.add(widthMenu);
 		north.add(createVirtualUART);
 		north.add(captureRX);
-		//north.add(sendTx);
+		// north.add(sendTx);
 
 		display.add(north, BorderLayout.NORTH);
 
@@ -138,6 +137,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		send.addActionListener(this);
 		sendFile.addActionListener(this);
 		captureRX.addActionListener(this);
+		reqFormat.addItemListener(this);
 		ports.addItemListener(this);
 		refresh.addActionListener(this);
 
@@ -157,16 +157,14 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 			public void run() {
 				mySerial = serial;
 				setPortStatus();
-				if (serial.isRXRecording()){
-					captureRX.setText(serial.getRXFileName());
-				} else {
+
+				if (!serial.isRecording()) {
+					// captureRX.setText(serial.getRXFileName()); } else {
 					captureRX.setText("capture rx to file");
+				} else {
+					captureRX.setText("stop recording");
 				}
-				/*
-				if (serial.isTXRecording()){
-					captureTX.setText(serial.getTXFileName());
-				}
-				*/
+
 			}
 		});
 	}
@@ -201,32 +199,27 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		});
 	}
 
-	public void publishByte(final Integer b) {
-
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				// FIXME - normalize with Serial.format
-				++rxCount;
-				String f = (String) format.getSelectedItem();
-				if (f.equals(Serial.FORMAT_DECIMAL)) {
-					rx.append(String.format("%03d%s", b, delimiter));
-				} else if (f.equals(Serial.FORMAT_HEX)) {
-					rx.append(String.format("%02x%s", (int) b & 0xff, delimiter));
-				} else if (f.equals(Serial.FORMAT_ASCII)) {
-					rx.append(String.format("%c%s", (int) b & 0xff, delimiter));
-				}
-				if (width != null && rxCount % width == 0) {
-					rx.append("\n");
-				}
-				rxTotal.setText(String.format("%d", rxCount));
-			}
-		});
-
+	/**
+	 * publishDisplay displays the "interpreted" byte it is interpreted by the
+	 * Serial's service selected "format"
+	 * 
+	 * FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as
+	 * 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
+	 * 
+	 * @param display
+	 */
+	public void publishDisplay(final String display) {
+		++rxCount;
+		rx.append(display);
+		if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width != null && rxCount % width == 0) {
+			rx.append("\n");
+		}
+		rxTotal.setText(String.format("%d", rxCount));
 	}
 
 	@Override
 	public void attachGUI() {
-		subscribe("publishByte", "publishByte", Integer.class);
+		subscribe("publishDisplay", "publishDisplay", String.class);
 		subscribe("publishState", "getState", Serial.class);
 		subscribe("getPortNames", "getPortNames", ArrayList.class);
 
@@ -236,7 +229,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishByte", "publishByte", Integer.class);
+		unsubscribe("publishDisplay", "publishDisplay", String.class);
 		unsubscribe("publishState", "getState", Serial.class);
 		unsubscribe("getPortNames", "getPortNames", ArrayList.class);
 	}
@@ -245,7 +238,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
 		if (o == captureRX) {
-			if (captureRX.getText().startsWith("capture")){
+			if (captureRX.getText().startsWith("capture")) {
 				send("recordRX");
 				send("broadcastState");
 			} else {
@@ -255,22 +248,22 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		}
 
 		if (o == captureTX) {
-			if (captureTX.getText().startsWith("capture")){
-			send("recordTX");
-			send("broadcastState");
+			if (captureTX.getText().startsWith("capture")) {
+				send("recordTX");
+				send("broadcastState");
 			} else {
 				send("stopTXRecording");
 			}
 		}
 
-		if (o == createVirtualUART){
+		if (o == createVirtualUART) {
 			send("createVirtualUART");
 		}
-		
-		if (o == refresh){
+
+		if (o == refresh) {
 			send("refresh");
 		}
-		
+
 		if (o == sendFile) {
 			JFileChooser fileChooser = new JFileChooser();
 			// set current directory
@@ -293,7 +286,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 				send("startPolling");
 			}
 		}
-		
+
 		if (o == send) {
 			String data = sendData.getText();
 			send("write", data.getBytes());
@@ -306,14 +299,19 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	@Override
 	public void itemStateChanged(ItemEvent event) {
 		Object o = event.getSource();
-		if (o == ports){
-			String port = (String)ports.getSelectedItem();
-			if (port != null && !port.equals(mySerial.getPortName()) && port.length() > 0){
+		if (o == ports) {
+			String port = (String) ports.getSelectedItem();
+			if (port != null && !port.equals(mySerial.getPortName()) && port.length() > 0) {
 				send("disconnect");
 				send("connect", port);
-			} else if (port.length() == 0){
+			} else if (port.length() == 0) {
 				send("disconnect");
 			}
+		}
+		
+		if (o == reqFormat){
+			String newFormat = (String) reqFormat.getSelectedItem();
+			send("setDisplayFormat", newFormat);
 		}
 	}
 

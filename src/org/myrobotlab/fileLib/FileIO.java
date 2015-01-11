@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.zip.ZipException;
 
+import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -52,7 +53,7 @@ import org.slf4j.Logger;
 
 public class FileIO {
 
-	public final static Logger log = LoggerFactory.getLogger(FileIO.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(FileIO.class);
 
 	/**
 	 * Single place to get configuration data directory - currently in
@@ -188,8 +189,6 @@ public class FileIO {
 
 	public static final byte[] resourceToByteArray(String resourceName) {
 		String filename = String.format("/resource/%s", resourceName);
-
-		URL resource = FileIO.class.getResource(filename);
 
 		log.info(String.format("looking for %s", filename));
 		InputStream isr = null;
@@ -531,6 +530,30 @@ public class FileIO {
 			
 		}
 		return null;
+	}
+	
+	public static class FileComparisonException extends Exception {	
+		private static final long serialVersionUID = 1L;
+		public FileComparisonException(String msg){
+			super(msg);
+		}
+	}
+	
+	public static void compareFiles(String filename1, String filename2) throws FileNotFoundException, FileComparisonException {
+		File file1 = new File(filename1);
+		File file2 = new File(filename2);
+		if(file1.length() != file2.length()){
+			throw new FileComparisonException(String.format("%s size is %d adn %s is size %d", filename1, file1.length(), filename2, file2.length()));
+		}
+			
+		byte[] a1 = fileToByteArray(new File(filename1));
+		byte[] a2 = fileToByteArray(new File(filename2));
+		
+		for (int i = 0; i < a1.length; ++i){
+			if (a1[i] != a2[i]){
+				throw new FileComparisonException(String.format("files differ at position %d", i));
+			}
+		}
 	}
 
 }

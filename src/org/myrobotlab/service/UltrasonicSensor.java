@@ -10,6 +10,7 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.serial.VirtualSerialPort;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.slf4j.Logger;
 
@@ -140,11 +141,13 @@ public class UltrasonicSensor extends Service implements RangeListener {
 		// FIXME - there has to be a properties method to configure localized
 		// testing
 		boolean useGUI = true;
-
+		boolean useVirtualPorts = true;
+		int triggerPin = 7;
+		int echoPin = 8;
+		
+		String port = "COM15";
+		
 		UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start(getName(), "UltrasonicSensor");
-		//Python python = (Python) Runtime.start("python", "Python");
-
-		// TODO - remove servo - after test
 		Servo servo = (Servo) Runtime.start("servo", "Servo");
 
 		// && depending on headless
@@ -152,9 +155,20 @@ public class UltrasonicSensor extends Service implements RangeListener {
 			Runtime.start("gui", "GUIService");
 		}
 
+		Serial uart = null;
+		if (useVirtualPorts) {
+			// virtual testing
+			VirtualSerialPort.createNullModemCable(port, "UART");
+			uart = (Serial) Runtime.start("uart", "Serial");
+			uart.connect("UART");
+			uart.setBinaryFileFormat(false);
+			// uart.record("test/Servo/servo.test.1");
+			uart.recordRX("test/Servo/servo.test.1.rx.dec");
+		}
+
 		// nice simple interface
 		
-		sr04.attach("COM15", 7, 8);
+		sr04.attach(port, triggerPin, echoPin);
 		//arduino.re
 		// TODO - VIRTUAL NULL MODEM WITH TEST DATA !!!!
 		// RECORD FROM ACTUAL SENSOR !!!
