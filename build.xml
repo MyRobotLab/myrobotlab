@@ -114,8 +114,16 @@
 	<property name="build.properties" location="build.properties" />
 	<tstamp />
 
+
+        <!-- Include the ant contrib task defs -->
+        <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+          <classpath>
+            <pathelement location="build-lib/ant-contrib-0.6.jar"/>
+          </classpath>
+        </taskdef>
+
 	<!-- ================ init begin ================= -->
-	<target name="init" depends="repoClone">
+	<target name="init" depends="clean,repoClone">
 
 		<echo message="compiling with ${ant.java.version}" />
 		<echoproperties/>
