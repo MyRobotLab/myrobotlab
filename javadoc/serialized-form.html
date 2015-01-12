@@ -1682,6 +1682,20 @@
 </ul>
 </li>
 <li class="blockList">
+<h2 title="Package">Package&nbsp;org.myrobotlab.fileLib</h2>
+<ul class="blockList">
+<li class="blockList"><a name="org.myrobotlab.fileLib.FileIO.FileComparisonException">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/fileLib/FileIO.FileComparisonException.html" title="class in org.myrobotlab.fileLib">org.myrobotlab.fileLib.FileIO.FileComparisonException</a> extends java.lang.Exception implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+</li>
+</ul>
+</li>
+<li class="blockList">
 <h2 title="Package">Package&nbsp;org.myrobotlab.framework</h2>
 <ul class="blockList">
 <li class="blockList"><a name="org.myrobotlab.framework.Errors">
@@ -2187,18 +2201,9 @@
 <h4>detail</h4>
 <pre>java.lang.String detail</pre>
 </li>
-<li class="blockList">
+<li class="blockListLast">
 <h4>statuses</h4>
 <pre>java.util.ArrayList&lt;E&gt; statuses</pre>
-<div class="block">list of sub status</div>
-</li>
-<li class="blockList">
-<h4>hasError</h4>
-<pre>boolean hasError</pre>
-</li>
-<li class="blockListLast">
-<h4>allowDebug</h4>
-<pre>boolean allowDebug</pre>
 </li>
 </ul>
 </li>
@@ -5754,6 +5759,36 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="org.myrobotlab.service.AndroidVoiceRecognition">
+<!--   -->
+</a>
+<h3>Class <a href="org/myrobotlab/service/AndroidVoiceRecognition.html" title="class in org.myrobotlab.service">org.myrobotlab.service.AndroidVoiceRecognition</a> extends <a href="org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>1L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList"><a name="serializedForm">
+<!--   -->
+</a>
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>client</h4>
+<pre>org.myrobotlab.service.AndroidVoiceRecognition.ClientHandler client</pre>
+</li>
+<li class="blockList">
+<h4>port</h4>
+<pre>int port</pre>
+</li>
+<li class="blockListLast">
+<h4>runningserver</h4>
+<pre>boolean runningserver</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="blockList"><a name="org.myrobotlab.service.Arduino">
 <!--   -->
 </a>
@@ -8142,6 +8177,18 @@
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockList">
+<h4>enableDepth</h4>
+<pre>boolean enableDepth</pre>
+</li>
+<li class="blockList">
+<h4>enableRGB</h4>
+<pre>boolean enableRGB</pre>
+</li>
+<li class="blockList">
+<h4>enableIR</h4>
+<pre>boolean enableIR</pre>
+</li>
+<li class="blockList">
 <h4>sinks</h4>
 <pre>java.util.ArrayList&lt;E&gt; sinks</pre>
 </li>
@@ -8184,18 +8231,6 @@
 <li class="blockList">
 <h4>createHeader</h4>
 <pre>boolean createHeader</pre>
-</li>
-<li class="blockList">
-<h4>enableDepth</h4>
-<pre>boolean enableDepth</pre>
-</li>
-<li class="blockList">
-<h4>enableRGB</h4>
-<pre>boolean enableRGB</pre>
-</li>
-<li class="blockList">
-<h4>enableIR</h4>
-<pre>boolean enableIR</pre>
 </li>
 <li class="blockList">
 <h4>x1</h4>
@@ -9451,16 +9486,18 @@
 <pre>java.util.ArrayList&lt;E&gt; portNames</pre>
 </li>
 <li class="blockList">
+<h4>displayFormat</h4>
+<pre>java.lang.String displayFormat</pre>
+</li>
+<li class="blockList">
+<h4>displayDelimiter</h4>
+<pre>java.lang.String displayDelimiter</pre>
+</li>
+<li class="blockList">
 <h4>format</h4>
 <pre>java.lang.String format</pre>
-</li>
-<li class="blockList">
-<h4>delimeter</h4>
-<pre>java.lang.String delimeter</pre>
-</li>
-<li class="blockList">
-<h4>blocking</h4>
-<pre>boolean blocking</pre>
+<div class="block">format can be either binary (default) or display (format which is
+ currently being displayed)</div>
 </li>
 <li class="blockList">
 <h4>connected</h4>
@@ -9475,34 +9512,12 @@
 <pre>int rate</pre>
 </li>
 <li class="blockList">
-<h4>rxFileName</h4>
-<pre>java.lang.String rxFileName</pre>
-<div class="block">FIXME FIXME FIXME FIXME use blocking only from lower level api
- InputStream !!! BUT ! - implement timeout similar to python serial</div>
+<h4>fileRX</h4>
+<pre>java.io.FileOutputStream fileRX</pre>
 </li>
 <li class="blockList">
-<h4>isRXRecording</h4>
-<pre>boolean isRXRecording</pre>
-</li>
-<li class="blockList">
-<h4>rxFileFormat</h4>
-<pre>java.lang.String rxFileFormat</pre>
-</li>
-<li class="blockList">
-<h4>txFileName</h4>
-<pre>java.lang.String txFileName</pre>
-</li>
-<li class="blockList">
-<h4>isTXRecording</h4>
-<pre>boolean isTXRecording</pre>
-</li>
-<li class="blockList">
-<h4>txFileFormat</h4>
-<pre>java.lang.String txFileFormat</pre>
-</li>
-<li class="blockList">
-<h4>display</h4>
-<pre>java.lang.StringBuffer display</pre>
+<h4>fileTX</h4>
+<pre>java.io.FileOutputStream fileTX</pre>
 </li>
 <li class="blockList">
 <h4>txCount</h4>
@@ -9512,9 +9527,18 @@
 <h4>rxCount</h4>
 <pre>int rxCount</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>relays</h4>
 <pre>java.util.ArrayList&lt;E&gt; relays</pre>
+</li>
+<li class="blockListLast">
+<h4>readFromPublishedByte</h4>
+<pre>java.util.ArrayList&lt;E&gt; readFromPublishedByte</pre>
+<div class="block">onByte is typically the functions clients of the Serial service use when
+ they want to consume serial data.
+ 
+ The serial service implements this function primarily so it can test
+ itself</div>
 </li>
 </ul>
 </li>
