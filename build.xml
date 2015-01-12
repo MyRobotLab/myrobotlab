@@ -436,7 +436,7 @@
 		</http>
 	</target>
 
-	<target name="dist" depends="jar" description="generate the distribution">
+	<target name="dist" depends="jar,test" description="generate the distribution">
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}.jar" />
 		<!-- backwards compat .. TODO: review this.. -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/lib/myrobotlab.jar" />
