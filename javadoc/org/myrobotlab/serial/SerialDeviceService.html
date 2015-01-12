@@ -114,10 +114,17 @@
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#addByteListener(org.myrobotlab.service.interfaces.SerialDataListener)">addByteListener</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/SerialDataListener.html" title="interface in org.myrobotlab.service.interfaces">SerialDataListener</a>&nbsp;service)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#available()">available</a></strong>()</code>
+<div class="block">Returns an estimate of the number of bytes that can be read (or skipped
+ over) from this input stream without blocking</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#connect(java.lang.String)">connect</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#connect(java.lang.String, int, int, int, int)">connect</a></strong>(java.lang.String&nbsp;name,
        int&nbsp;rate,
@@ -125,39 +132,35 @@
        int&nbsp;stopbits,
        int&nbsp;parity)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#disconnect()">disconnect</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.util.ArrayList&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#getPortNames()">getPortNames</a></strong>()</code>
 <div class="block">methods to return read-only information regarding a serialDevice</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#isConnected()">isConnected</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#read()">read</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#read(byte[])">read</a></strong>(byte[]&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#write(byte[])">write</a></strong>(byte[]&nbsp;data)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#write(int)">write</a></strong>(int&nbsp;data)</code>&nbsp;</td>
-</tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#write(int[])">write</a></strong>(int[]&nbsp;data)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/serial/SerialDeviceService.html#write(int)">write</a></strong>(int&nbsp;data)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
@@ -195,7 +198,7 @@
 <li class="blockList">
 <h4>connect</h4>
 <pre>boolean&nbsp;connect(java.lang.String&nbsp;name)</pre>
-<dl><dt><span class="strong">Returns:</span></dt><dd>a read-only copy of the SerialDevice if it has bee serialized
+<dl><dt><span class="strong">Returns:</span></dt><dd>a read-only copy of the SerialDevice if it has been serialized
          over the network - the InputStream & OutputStream are transient</dd></dl>
 </li>
 </ul>
@@ -257,18 +260,6 @@
 <dd><code>java.io.IOException</code></dd></dl>
 </li>
 </ul>
-<a name="write(int[])">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>write</h4>
-<pre>void&nbsp;write(int[]&nbsp;data)
-           throws java.io.IOException</pre>
-<dl><dt><span class="strong">Throws:</span></dt>
-<dd><code>java.io.IOException</code></dd></dl>
-</li>
-</ul>
 <a name="read(byte[])">
 <!--   -->
 </a>
@@ -305,10 +296,22 @@
 <a name="isConnected()">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>isConnected</h4>
 <pre>boolean&nbsp;isConnected()</pre>
+</li>
+</ul>
+<a name="available()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>available</h4>
+<pre>int&nbsp;available()</pre>
+<div class="block">Returns an estimate of the number of bytes that can be read (or skipped
+ over) from this input stream without blocking</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
 </li>

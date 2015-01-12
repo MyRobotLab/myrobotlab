@@ -101,8 +101,10 @@
 <pre>public class <span class="strong">Status</span>
 extends java.lang.Object
 implements java.io.Serializable</pre>
-<div class="block">WARNING - this class used to extend Exception - but the gson serializer would stack overflow
-  with self reference issue</div>
+<div class="block">WARNING !!! - this class used to extend Exception or Throwable - but the gson
+ serializer would stack overflow with self reference issue
+ 
+ TODO - allow radix tree searches for "keys" ???</div>
 <dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../serialized-form.html#org.myrobotlab.framework.Status">Serialized Form</a></dd></dl>
 </li>
 </ul>
@@ -179,7 +181,10 @@ implements java.io.Serializable</pre>
 <td class="colOne"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#Status(org.myrobotlab.framework.Status)">Status</a></strong>(<a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a>&nbsp;s)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#Status(java.lang.String)">Status</a></strong>(java.lang.String&nbsp;detail)</code>&nbsp;</td>
+<td class="colOne"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#Status(java.lang.String)">Status</a></strong>(java.lang.String&nbsp;detail)</code>
+<div class="block">for minimal amount of information 
+ error is assumed, and info is detail of an ERROR</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colOne"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#Status(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">Status</a></strong>(java.lang.String&nbsp;name,
@@ -226,59 +231,59 @@ implements java.io.Serializable</pre>
        java.lang.Object...&nbsp;args)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#allowDebug(boolean)">allowDebug</a></strong>(boolean&nbsp;b)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#debug(java.lang.String, java.lang.Object...)">debug</a></strong>(java.lang.String&nbsp;format,
      java.lang.Object...&nbsp;args)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#error(java.lang.Exception)">error</a></strong>(java.lang.Exception&nbsp;e)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#error(java.lang.String)">error</a></strong>(java.lang.String&nbsp;msg)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#error(java.lang.String, java.lang.Object...)">error</a></strong>(java.lang.String&nbsp;format,
      java.lang.Object...&nbsp;args)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.util.ArrayList&lt;<a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a>&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#flatten()">flatten</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#hasError()">hasError</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#info(java.lang.String)">info</a></strong>(java.lang.String&nbsp;msg)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#info(java.lang.String, java.lang.Object...)">info</a></strong>(java.lang.String&nbsp;format,
     java.lang.Object...&nbsp;args)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#isDebug()">isDebug</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#isError()">isError</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#isInfo()">isInfo</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#isWarn()">isWarn</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/framework/Status.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
@@ -431,6 +436,9 @@ implements java.io.Serializable</pre>
 <li class="blockList">
 <h4>Status</h4>
 <pre>public&nbsp;Status(java.lang.String&nbsp;detail)</pre>
+<div class="block">for minimal amount of information 
+ error is assumed, and info is detail of an ERROR</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>detail</code> - </dd></dl>
 </li>
 </ul>
 <a name="Status(java.lang.Exception)">
@@ -450,15 +458,6 @@ implements java.io.Serializable</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="allowDebug(boolean)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>allowDebug</h4>
-<pre>public&nbsp;void&nbsp;allowDebug(boolean&nbsp;b)</pre>
-</li>
-</ul>
 <a name="isDebug()">
 <!--   -->
 </a>
@@ -634,10 +633,24 @@ implements java.io.Serializable</pre>
 <a name="add(org.myrobotlab.framework.Status)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>add</h4>
 <pre>public&nbsp;void&nbsp;add(<a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a>&nbsp;status)</pre>
+</li>
+</ul>
+<a name="main(java.lang.String[])">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>main</h4>
+<pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;args)
+                 throws java.io.IOException,
+                        java.lang.InterruptedException</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.io.IOException</code></dd>
+<dd><code>java.lang.InterruptedException</code></dd></dl>
 </li>
 </ul>
 </li>

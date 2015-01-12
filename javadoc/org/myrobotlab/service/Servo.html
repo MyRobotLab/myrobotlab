@@ -220,7 +220,7 @@ implements <a href="../../../org/myrobotlab/service/interfaces/ServoControl.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Servo.html#attach(org.myrobotlab.service.Arduino, java.lang.Integer)">attach</a></strong>(<a href="../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a>&nbsp;controller,
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Servo.html#attach(org.myrobotlab.service.interfaces.ServoController, java.lang.Integer)">attach</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a>&nbsp;controller,
       java.lang.Integer&nbsp;pin)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
@@ -442,7 +442,13 @@ implements <a href="../../../org/myrobotlab/service/interfaces/ServoControl.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Servo.html#test()">test</a></strong>()</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Servo.html#test()">test</a></strong>()</code>
+<div class="block">test - test all aspects of the servo - save the commands which would go
+ over a serial line to a file and compare with "control" file
+ 
+ dependencies - Servo depends on a ServoController - most ServoControllers
+ depend on a hardware serial port.</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
@@ -589,13 +595,13 @@ implements <a href="../../../org/myrobotlab/service/interfaces/ServoControl.html
 </dl>
 </li>
 </ul>
-<a name="attach(org.myrobotlab.service.Arduino, java.lang.Integer)">
+<a name="attach(org.myrobotlab.service.interfaces.ServoController, java.lang.Integer)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>attach</h4>
-<pre>public&nbsp;boolean&nbsp;attach(<a href="../../../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a>&nbsp;controller,
+<pre>public&nbsp;boolean&nbsp;attach(<a href="../../../org/myrobotlab/service/interfaces/ServoController.html" title="interface in org.myrobotlab.service.interfaces">ServoController</a>&nbsp;controller,
              java.lang.Integer&nbsp;pin)</pre>
 </li>
 </ul>
@@ -1048,6 +1054,12 @@ implements <a href="../../../org/myrobotlab/service/interfaces/ServoControl.html
 <li class="blockList">
 <h4>test</h4>
 <pre>public&nbsp;<a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a>&nbsp;test()</pre>
+<div class="block">test - test all aspects of the servo - save the commands which would go
+ over a serial line to a file and compare with "control" file
+ 
+ dependencies - Servo depends on a ServoController - most ServoControllers
+ depend on a hardware serial port. We now have virtual serial ports so
+ we'll be using those.</div>
 <dl>
 <dt><strong>Specified by:</strong></dt>
 <dd><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html#test()">test</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></dd>
@@ -1065,22 +1077,10 @@ implements <a href="../../../org/myrobotlab/service/interfaces/ServoControl.html
 <pre>public&nbsp;void&nbsp;test2()</pre>
 </li>
 </ul>
-<a name="main(java.lang.String[])">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>main</h4>
-<pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;args)
-                 throws java.lang.InterruptedException</pre>
-<dl><dt><span class="strong">Throws:</span></dt>
-<dd><code>java.lang.InterruptedException</code></dd></dl>
-</li>
-</ul>
 <a name="moveStep(java.lang.Float)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>moveStep</h4>
 <pre>public&nbsp;void&nbsp;moveStep(java.lang.Float&nbsp;offset)</pre>
@@ -1094,6 +1094,18 @@ implements <a href="../../../org/myrobotlab/service/interfaces/ServoControl.html
 <dt><strong>Specified by:</strong></dt>
 <dd><code><a href="../../../org/myrobotlab/service/interfaces/ServoControl.html#moveStep(java.lang.Float)">moveStep</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/service/interfaces/ServoControl.html" title="interface in org.myrobotlab.service.interfaces">ServoControl</a></code></dd>
 <dt><span class="strong">Parameters:</span></dt><dd><code>offset</code> - - new offset</dd></dl>
+</li>
+</ul>
+<a name="main(java.lang.String[])">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>main</h4>
+<pre>public static&nbsp;void&nbsp;main(java.lang.String[]&nbsp;args)
+                 throws java.lang.InterruptedException</pre>
+<dl><dt><span class="strong">Throws:</span></dt>
+<dd><code>java.lang.InterruptedException</code></dd></dl>
 </li>
 </ul>
 </li>

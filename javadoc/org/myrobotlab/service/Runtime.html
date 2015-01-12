@@ -122,7 +122,9 @@ implements <a href="../../../org/myrobotlab/framework/MessageListener.html" titl
  
  final StackTraceElement[] stackTrace =
  Thread.currentThread().getStackTrace(); final String mainClassName =
- stackTrace[stackTrace.length - 1].getClassName();</div>
+ stackTrace[stackTrace.length - 1].getClassName();
+ 
+ TODO - add check for 64 bit OS & 32 bit JVM :(</div>
 <dl><dt><span class="strong">See Also:</span></dt><dd><a href="../../../serialized-form.html#org.myrobotlab.service.Runtime">Serialized Form</a></dd></dl>
 </li>
 </ul>
@@ -419,16 +421,12 @@ implements <a href="../../../org/myrobotlab/framework/MessageListener.html" titl
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static java.lang.Thread[]</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#getThreads()">getThreads</a></strong>()</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>static long</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#getTotalMemory()">getTotalMemory</a></strong>()</code>
 <div class="block">dorky pass-throughs to the real JVM Runtime</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static long</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#getUniqueID()">getUniqueID</a></strong>()</code>
 <div class="block">unique id's are need for sendBlocking - to uniquely identify the message
@@ -436,50 +434,50 @@ implements <a href="../../../org/myrobotlab/framework/MessageListener.html" titl
  accross processes</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#getUptime()">getUptime</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#getVersion()">getVersion</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#getVersion(java.net.URI)">getVersion</a></strong>(java.net.URI&nbsp;uri)</code>
 <div class="block">returns version string of MyRobotLab instance based on uri e.g : uri
  mrl://10.5.3.1:7777 may be a remote instance null uri is local</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#invokeCommands(org.myrobotlab.cmdline.CMDLine)">invokeCommands</a></strong>(<a href="../../../org/myrobotlab/cmdline/CMDLine.html" title="class in org.myrobotlab.cmdline">CMDLine</a>&nbsp;cmdline)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#isHeadless()">isHeadless</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#isLocal(java.lang.String)">isLocal</a></strong>(java.lang.String&nbsp;serviceName)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#isRuntime(org.myrobotlab.framework.Service)">isRuntime</a></strong>(<a href="../../../org/myrobotlab/framework/Service.html" title="class in org.myrobotlab.framework">Service</a>&nbsp;newService)</code>
 <div class="block">check if class is a Runtime class</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#loadAll()">loadAll</a></strong>()</code>
 <div class="block">load all configuration from all local services</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#loadLibrary(java.lang.String)">loadLibrary</a></strong>(java.lang.String&nbsp;filename)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#main(java.lang.String[])">main</a></strong>(java.lang.String[]&nbsp;args)</code>
 <div class="block">Main starting method of MyRobotLab Parses command line options
@@ -488,73 +486,73 @@ implements <a href="../../../org/myrobotlab/framework/MessageListener.html" titl
  -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#message(java.lang.String)">message</a></strong>(java.lang.String&nbsp;msg)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#needsRestart()">needsRestart</a></strong>()</code>
 <div class="block">needsRestart is set by the update process - or some othe method when a
  restart is needed.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#newArtifactsDownloaded(java.lang.String)">newArtifactsDownloaded</a></strong>(java.lang.String&nbsp;module)</code>
 <div class="block">event fired when a new artifact is download</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#noWorky()">noWorky</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/repo/ServiceData.html" title="class in org.myrobotlab.framework.repo">ServiceData</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#proposedUpdates(org.myrobotlab.framework.repo.ServiceData)">proposedUpdates</a></strong>(<a href="../../../org/myrobotlab/framework/repo/ServiceData.html" title="class in org.myrobotlab.framework.repo">ServiceData</a>&nbsp;si)</code>
 <div class="block">this method is an event notifier that there were updates found</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#publishMessage(java.lang.String)">publishMessage</a></strong>(java.lang.String&nbsp;msg)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/repo/Updates.html" title="class in org.myrobotlab.framework.repo">Updates</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#publishUpdates(org.myrobotlab.framework.repo.Updates)">publishUpdates</a></strong>(<a href="../../../org/myrobotlab/framework/repo/Updates.html" title="class in org.myrobotlab.framework.repo">Updates</a>&nbsp;updates)</code>
 <div class="block">publish the results of a query of updates - to be presented to the user
  for selections</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#receive(org.myrobotlab.framework.Message)">receive</a></strong>(<a href="../../../org/myrobotlab/framework/Message.html" title="class in org.myrobotlab.framework">Message</a>&nbsp;msg)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#register(org.myrobotlab.service.interfaces.ServiceInterface, java.net.URI)">register</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a>&nbsp;s,
         java.net.URI&nbsp;url)</code>
 <div class="block">FIXME - need Platform information (reference from within service ???</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#registered(org.myrobotlab.service.interfaces.ServiceInterface)">registered</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a>&nbsp;sw)</code>
 <div class="block">registration event</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#release(java.lang.String)">release</a></strong>(java.lang.String&nbsp;name)</code>
 <div class="block">releases a service - stops the service, its threads, releases its
  resources, and removes registry entries</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#release(java.net.URI)">release</a></strong>(java.net.URI&nbsp;url)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#releaseAll()">releaseAll</a></strong>()</code>
 <div class="block">This does not EXIT(1) !!! releasing just releases all services
@@ -563,39 +561,39 @@ implements <a href="../../../org/myrobotlab/framework/MessageListener.html" titl
  for last ..</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#releaseAllServicesExcept(java.util.HashSet)">releaseAllServicesExcept</a></strong>(java.util.HashSet&lt;java.lang.String&gt;&nbsp;saveMe)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#released(org.myrobotlab.service.interfaces.ServiceInterface)">released</a></strong>(<a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a>&nbsp;sw)</code>
 <div class="block">release event</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#releaseService(java.lang.String)">releaseService</a></strong>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#resolveBegin(java.lang.String)">resolveBegin</a></strong>(java.lang.String&nbsp;className)</code>
 <div class="block">published events</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#resolveEnd()">resolveEnd</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.util.List&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#resolveError(java.util.List)">resolveError</a></strong>(java.util.List&lt;java.lang.String&gt;&nbsp;errors)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#resolveSuccess(java.lang.String)">resolveSuccess</a></strong>(java.lang.String&nbsp;className)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#restart()">restart</a></strong>()</code>
 <div class="block">restart occurs after applying updates - user or config data needs to be
@@ -604,53 +602,53 @@ implements <a href="../../../org/myrobotlab/framework/MessageListener.html" titl
  its sequence to update myrobotlab.jar</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#restart(java.lang.Runnable)">restart</a></strong>(java.lang.Runnable&nbsp;runBeforeRestart)</code>
 <div class="block">should probably be deprecated - currently not used</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#saveAll()">saveAll</a></strong>()</code>
 <div class="block">save all configuration from all local services</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#setJSONPrettyPrinting(boolean)">setJSONPrettyPrinting</a></strong>(boolean&nbsp;b)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#setLogLevel(java.lang.String)">setLogLevel</a></strong>(java.lang.String&nbsp;level)</code>
 <div class="block">Runtime's setLogLevel will set the root log level if its called from a
  service - it will only set that Service type's log level</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#setRuntimeName(java.lang.String)">setRuntimeName</a></strong>(java.lang.String&nbsp;inName)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../org/myrobotlab/service/interfaces/ServiceInterface.html" title="interface in org.myrobotlab.service.interfaces">ServiceInterface</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#start(java.lang.String, java.lang.String)">start</a></strong>(java.lang.String&nbsp;name,
      java.lang.String&nbsp;type)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#startProcess(java.lang.String[])">startProcess</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#startShell(java.lang.String[])">startShell</a></strong>(java.lang.String[]&nbsp;args)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#stopService()">stopService</a></strong>()</code>
 <div class="block">Stops all service-related running items.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/repo/UpdateReport.html" title="class in org.myrobotlab.framework.repo">UpdateReport</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#update()">update</a></strong>()</code>
 <div class="block">command line update update myrobotlab.jar only no user interaction is
@@ -658,7 +656,7 @@ implements <a href="../../../org/myrobotlab/framework/MessageListener.html" titl
  getting -update param after update :P</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/repo/UpdateReport.html" title="class in org.myrobotlab.framework.repo">UpdateReport</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#update(java.lang.String)">update</a></strong>(java.lang.String&nbsp;fullServiceTypeName)</code>
 <div class="block">FIXME - if true - service data xml needs to be pulled from repo this
@@ -667,23 +665,23 @@ implements <a href="../../../org/myrobotlab/framework/MessageListener.html" titl
  that service</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/repo/UpdateReport.html" title="class in org.myrobotlab.framework.repo">UpdateReport</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#updateAll()">updateAll</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#updateProgress(org.myrobotlab.framework.Status)">updateProgress</a></strong>(<a href="../../../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a>&nbsp;status)</code>
 <div class="block">publishing the updates progress with a series of status messages.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../org/myrobotlab/framework/repo/Updates.html" title="class in org.myrobotlab.framework.repo">Updates</a></code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#updatesBegin(org.myrobotlab.framework.repo.Updates)">updatesBegin</a></strong>(<a href="../../../org/myrobotlab/framework/repo/Updates.html" title="class in org.myrobotlab.framework.repo">Updates</a>&nbsp;updates)</code>
 <div class="block">publishing event for the start of updates being applied</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.util.ArrayList&lt;org.apache.ivy.core.report.ResolveReport&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../org/myrobotlab/service/Runtime.html#updatesFinished(java.util.ArrayList)">updatesFinished</a></strong>(java.util.ArrayList&lt;org.apache.ivy.core.report.ResolveReport&gt;&nbsp;report)</code>
 <div class="block">publishing event for the end of updates being applied</div>
@@ -1791,15 +1789,6 @@ implements <a href="../../../org/myrobotlab/framework/MessageListener.html" titl
 <dt><strong>Specified by:</strong></dt>
 <dd><code><a href="../../../org/myrobotlab/framework/MessageListener.html#receive(org.myrobotlab.framework.Message)">receive</a></code>&nbsp;in interface&nbsp;<code><a href="../../../org/myrobotlab/framework/MessageListener.html" title="interface in org.myrobotlab.framework">MessageListener</a></code></dd>
 </dl>
-</li>
-</ul>
-<a name="getThreads()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getThreads</h4>
-<pre>public static&nbsp;java.lang.Thread[]&nbsp;getThreads()</pre>
 </li>
 </ul>
 <a name="main(java.lang.String[])">

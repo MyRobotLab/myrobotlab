@@ -115,6 +115,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/MagaBot.html#MagaBot(java.lang.String)">MagaBot(String)</a></span> - Constructor for class org.myrobotlab.service.<a href="../org/myrobotlab/service/MagaBot.html" title="class in org.myrobotlab.service">MagaBot</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="strong"><a href="../org/myrobotlab/arduino/MRLComm.html#MAGIC_NUMBER">MAGIC_NUMBER</a></span> - Static variable in class org.myrobotlab.arduino.<a href="../org/myrobotlab/arduino/MRLComm.html" title="class in org.myrobotlab.arduino">MRLComm</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Arduino.html#MAGIC_NUMBER">MAGIC_NUMBER</a></span> - Static variable in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Arduino2.html#MAGIC_NUMBER">MAGIC_NUMBER</a></span> - Static variable in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Arduino2.html" title="class in org.myrobotlab.service">Arduino2</a></dt>
@@ -166,6 +168,8 @@
 <dt><span class="strong"><a href="../org/myrobotlab/framework/repo/ServiceDataLoader.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.framework.repo.<a href="../org/myrobotlab/framework/repo/ServiceDataLoader.html" title="class in org.myrobotlab.framework.repo">ServiceDataLoader</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/framework/SOAP.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.framework.<a href="../org/myrobotlab/framework/SOAP.html" title="class in org.myrobotlab.framework">SOAP</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="strong"><a href="../org/myrobotlab/framework/Status.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.framework.<a href="../org/myrobotlab/framework/Status.html" title="class in org.myrobotlab.framework">Status</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/framework/StopWatch.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.framework.<a href="../org/myrobotlab/framework/StopWatch.html" title="class in org.myrobotlab.framework">StopWatch</a></dt>
 <dd>&nbsp;</dd>
@@ -220,6 +224,8 @@
 <dt><span class="strong"><a href="../org/myrobotlab/service/Agent.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Agent.html" title="class in org.myrobotlab.service">Agent</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Android.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Android.html" title="class in org.myrobotlab.service">Android</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="strong"><a href="../org/myrobotlab/service/AndroidVoiceRecognition.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.service.<a href="../org/myrobotlab/service/AndroidVoiceRecognition.html" title="class in org.myrobotlab.service">AndroidVoiceRecognition</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Arduino.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a></dt>
 <dd>&nbsp;</dd>
@@ -383,9 +389,7 @@
 <dt><span class="strong"><a href="../org/myrobotlab/service/SensorMonitor.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.service.<a href="../org/myrobotlab/service/SensorMonitor.html" title="class in org.myrobotlab.service">SensorMonitor</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Serial.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Serial.html" title="class in org.myrobotlab.service">Serial</a></dt>
-<dd>
-<div class="block">TODO - blocking at 0 ms does not block forever</div>
-</dd>
+<dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Servo.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Servo.html" title="class in org.myrobotlab.service">Servo</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/ServoOrchestrator.html#main(java.lang.String[])">main(String[])</a></span> - Static method in class org.myrobotlab.service.<a href="../org/myrobotlab/service/ServoOrchestrator.html" title="class in org.myrobotlab.service">ServoOrchestrator</a></dt>
@@ -1462,11 +1466,23 @@
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/control/MQTTGUI.html#MQTTGUI(java.lang.String, org.myrobotlab.service.GUIService, javax.swing.JTabbedPane)">MQTTGUI(String, GUIService, JTabbedPane)</a></span> - Constructor for class org.myrobotlab.control.<a href="../org/myrobotlab/control/MQTTGUI.html" title="class in org.myrobotlab.control">MQTTGUI</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="../org/myrobotlab/arduino/MRLComm.html" title="class in org.myrobotlab.arduino"><span class="strong">MRLComm</span></a> - Class in <a href="../org/myrobotlab/arduino/package-summary.html">org.myrobotlab.arduino</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="strong"><a href="../org/myrobotlab/arduino/MRLComm.html#MRLComm()">MRLComm()</a></span> - Constructor for class org.myrobotlab.arduino.<a href="../org/myrobotlab/arduino/MRLComm.html" title="class in org.myrobotlab.arduino">MRLComm</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="../org/myrobotlab/arduino/MRLComm.Method.html" title="class in org.myrobotlab.arduino"><span class="strong">MRLComm.Method</span></a> - Class in <a href="../org/myrobotlab/arduino/package-summary.html">org.myrobotlab.arduino</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="strong"><a href="../org/myrobotlab/arduino/MRLComm.Method.html#MRLComm.Method(int, java.lang.String, java.lang.Class...)">MRLComm.Method(int, String, Class&lt;?&gt;...)</a></span> - Constructor for class org.myrobotlab.arduino.<a href="../org/myrobotlab/arduino/MRLComm.Method.html" title="class in org.myrobotlab.arduino">MRLComm.Method</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Arduino.html#MRLCOMM_ERROR">MRLCOMM_ERROR</a></span> - Static variable in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Arduino2.html#MRLCOMM_ERROR">MRLCOMM_ERROR</a></span> - Static variable in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Arduino2.html" title="class in org.myrobotlab.service">Arduino2</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Propeller.html#MRLCOMM_ERROR">MRLCOMM_ERROR</a></span> - Static variable in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Propeller.html" title="class in org.myrobotlab.service">Propeller</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="strong"><a href="../org/myrobotlab/arduino/MRLComm.html#MRLCOMM_ERROR_CALLBACK">MRLCOMM_ERROR_CALLBACK</a></span> - Static variable in class org.myrobotlab.arduino.<a href="../org/myrobotlab/arduino/MRLComm.html" title="class in org.myrobotlab.arduino">MRLComm</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="strong"><a href="../org/myrobotlab/arduino/MRLComm.html#MRLCOMM_VERSION">MRLCOMM_VERSION</a></span> - Static variable in class org.myrobotlab.arduino.<a href="../org/myrobotlab/arduino/MRLComm.html" title="class in org.myrobotlab.arduino">MRLComm</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="strong"><a href="../org/myrobotlab/service/Arduino.html#MRLCOMM_VERSION">MRLCOMM_VERSION</a></span> - Static variable in class org.myrobotlab.service.<a href="../org/myrobotlab/service/Arduino.html" title="class in org.myrobotlab.service">Arduino</a></dt>
 <dd>&nbsp;</dd>

@@ -208,7 +208,13 @@ implements java.awt.event.ActionListener, java.awt.event.ItemListener</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#publishByte(java.lang.Integer)">publishByte</a></strong>(java.lang.Integer&nbsp;b)</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../org/myrobotlab/control/SerialGUI.html#publishDisplay(java.lang.String)">publishDisplay</a></strong>(java.lang.String&nbsp;display)</code>
+<div class="block">publishDisplay displays the "interpreted" byte it is interpreted by the
+ Serial's service selected "format"
+ 
+ FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as
+ 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
@@ -335,13 +341,19 @@ implements java.awt.event.ActionListener, java.awt.event.ItemListener</pre>
 <pre>public&nbsp;void&nbsp;getPortNames(java.util.ArrayList&lt;java.lang.String&gt;&nbsp;inPorts)</pre>
 </li>
 </ul>
-<a name="publishByte(java.lang.Integer)">
+<a name="publishDisplay(java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>publishByte</h4>
-<pre>public&nbsp;void&nbsp;publishByte(java.lang.Integer&nbsp;b)</pre>
+<h4>publishDisplay</h4>
+<pre>public&nbsp;void&nbsp;publishDisplay(java.lang.String&nbsp;display)</pre>
+<div class="block">publishDisplay displays the "interpreted" byte it is interpreted by the
+ Serial's service selected "format"
+ 
+ FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as
+ 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>display</code> - </dd></dl>
 </li>
 </ul>
 <a name="attachGUI()">
