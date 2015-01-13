@@ -223,6 +223,7 @@
 		<pathelement location="${repo}/org.junit/4.11/junit-4.11.jar" />
 		<pathelement location="${repo}/org.junit/4.11/hamcrest-core-1.3.jar" />
 		<path refid="compile.classpath" />
+		<pathelement location="${build}/classes" />
 	</path>
 
 	<!-- ================ init begin ================= -->
@@ -394,7 +395,7 @@
 		<javac srcdir="test" destdir="build/test" debug="true" includeantruntime="false">
 			<classpath>
 				<path refid="test.classpath" />
-				<pathelement location="build/classes" />
+				<pathelement location="${build}/classes" />
 			</classpath>
 		</javac>
 		<echo>compile tests end</echo>
@@ -455,6 +456,8 @@
 			<sysproperty key="java.awt.headless" value="true" />
 			<!-- any junit tests would fail running on jenkins with gui components -->
 			<classpath>
+				<pathelement location="${build}/classes" />
+				<pathelement location="${build}/test" />
 				<path refid="test.classpath" />
 			</classpath>
 			<formatter type="xml" />
