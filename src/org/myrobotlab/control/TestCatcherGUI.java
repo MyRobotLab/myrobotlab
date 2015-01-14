@@ -95,12 +95,6 @@ public class TestCatcherGUI extends ServiceGUI {
 
 	}
 	
-	public void getState(TestCatcher catcher)
-	{
-		log.info(catcher.data);
-		//SwingUtilities.invokeLater(new Runnable() {
-
-	}
 
 	@Override
 	public void attachGUI() {

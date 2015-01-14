@@ -10,8 +10,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
-import com.leapmotion.leap.Frame;	
-import com.leapmotion.leap.Gesture;
+import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Hand;
 
 
