@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -560,9 +561,32 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 * @throws InterruptedException
 	 */
 	String readString(int length, int timeoutMS) throws InterruptedException {
-		int[] bytes = new int[length];
-		read(bytes, timeoutMS);
-		return new String(intArrayToByteArray(bytes));
+		//int[] bytes = new int[length];
+		//int count = read(bytes, timeoutMS);
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		int count = 0;
+		Integer newByte = null;
+		while (count < length) {
+			if (timeoutMS < 1) {
+				newByte = blockingData.take();
+			} else {
+				newByte = blockingData.poll(timeoutMS, TimeUnit.MILLISECONDS);
+			}
+			if (newByte == null) {
+				if (count == 0){
+					error("got nothing!");
+					return null;
+				} else {
+					error("expecting %d bytes got %d", length, count);
+					break;
+				}
+			}
+			//data[count] = newByte;
+			bytes.write((byte)newByte.intValue());
+			++count;
+		}
+		//bytes.close();
+		return new String(bytes.toByteArray());
 	}
 
 	public static byte[] intArrayToByteArray(int[] src) {
@@ -668,7 +692,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		blockingData.clear();
 	}
 
-	public VirtualNullModemCable createNullModemCable(String port0, String port1) {
+	static public VirtualNullModemCable createNullModemCable(String port0, String port1) {
 		return VirtualSerialPort.createNullModemCable(port0, port1);
 	}
 

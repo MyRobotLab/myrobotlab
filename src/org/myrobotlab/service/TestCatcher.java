@@ -26,111 +26,89 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.framework.Peers;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.StopWatch;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
-public class TestCatcher extends Service {
+/**
+ * test catcher is a class to be used to exercise and verify publish, subscribe
+ * and other forms of message sending
+ * 
+ * @author GroG
+ *
+ */
+public class TestCatcher extends Service implements SerialDataListener {
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(TestCatcher.class.getCanonicalName());
-	public ArrayList<Integer> catchList = new ArrayList<Integer>();
-	public ArrayList<Integer> lowCatchList = new ArrayList<Integer>();
-	public ArrayList<String> stringCatchList = new ArrayList<String>();
-	public String data = null;
-	
-	// static in Java are not overloaded but overwritten - there is no polymorphism for statics
-	public static Peers getPeers(String name)
-	{
-		Peers peers = new Peers(name);
-		peers.put("testThrower", "TestThrower", "a test peer thrower");
-		return peers;
-	}
-	
-	
+
+	/**
+	 * data to hold the incoming messages
+	 */
+	// transient BlockingQueue<Object> blockingData = new
+	// LinkedBlockingQueue<Object>();
+	transient BlockingQueue<Message> data = new LinkedBlockingQueue<Message>();
+
 	public TestCatcher(String n) {
 		super(n);
 	}
 
-	public void catchNothing() {
-		data = "***CATCH*** catchNothing ";
-		log.info("***CATCH*** catchNothing ");
-		Integer c = 1;
-		synchronized (catchList) {
-			catchList.add(c);
-			catchList.notify();
+	/**
+	 * preProcessHook is used to intercept messages and process or route them
+	 * before being processed/invoked in the Service.
+	 * 
+	 * @throws
+	 * 
+	 * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.framework.Message)
+	 */
+	public boolean preProcessHook(Message msg) {
+		// let the messages for this service
+		// get processed normally
+		/*
+		 * if (methodSet.contains(msg.method)) { return true; }
+		 */
+		try {
+			data.put(msg);
+		} catch (Exception e) {
+			Logging.logException(e);
 		}
-		
-		broadcastState();
-
+		return false;
 	}
-
-	public Object returnNull() {
-		return null;
-	}
-
-	public Integer catchInteger(Integer count) {
-		log.info("***CATCH*** catchInteger " + count);
-		synchronized (catchList) {
-			catchList.add(count);
-			catchList.notify();
-		}
-		return count;
-	}
-
-	public Integer lowCatchInteger(Integer count) {
-		log.info("***CATCH*** lowCatchInteger " + count);
-		synchronized (lowCatchList) {
-			lowCatchList.add(count);
-			lowCatchList.notify();
-		}
-		return count;
-
-	}
-
-	public Integer bothHandsCatchInteger(Integer firstBall, Integer secondBall) {
-		log.info("***CATCH*** bothHandsCatchInteger " + firstBall + "," + secondBall);
-		log.info("catchList.size={}",catchList.size());
-
-		synchronized (catchList) {
-			catchList.add(firstBall);
-			catchList.add(secondBall);
-			catchList.notify();
-		}
-
-		log.info("bothHandsCatchInteger " + firstBall + "," + secondBall);
-		log.info("bothHandsCatchInteger size " + catchList.size());
-
-		return catchList.size();
-	}
-
-	public Integer twoHandedPrimitiveCatchInt(int firstBall, int secondBall) {
-		log.info("***CATCH*** twoHandedPrimitiveCatchInt " + firstBall + "," + secondBall);
-		synchronized (catchList) {
-			catchList.add(firstBall);
-			catchList.add(secondBall);
-			catchList.notify();
-		}
-		return lowCatchList.size();
-
-	}
-
-	public Integer throwBack(Integer count) {
-		log.info("throwBack " + count);
-		return count;
-	}
-
-	public String catchString(String data) {
-		log.info("***CATCH*** string " + data);
-		stringCatchList.add(data);
+	
+	public BlockingQueue<Message>  getData(){
 		return data;
 	}
+	
+	public Message getMsg(long timeout) throws InterruptedException {
+		Message msg = data.poll(timeout, TimeUnit.MILLISECONDS);
+		return msg;
+	}
+	
+	public ArrayList<Message> getMsgs(long timeout)throws InterruptedException {
+		ArrayList<Message> msgs = new ArrayList<Message>();
+		long start = System.currentTimeMillis();
+		boolean done = false;
+		while (!done){
+			Message msg = data.poll(timeout, TimeUnit.MILLISECONDS);
+			if (msg == null){
+				break;
+			} else {
+				msgs.add(msg);
+			}
+		}		
+		return msgs;
+	}
 
+	/*
 	public int waitForCatches(int numberOfCatches, int maxWaitTimeMilli) {
 		log.info(getName() + ".waitForCatches waiting for " + numberOfCatches + " currently " + catchList.size());
 
@@ -160,56 +138,11 @@ public class TestCatcher extends Service {
 		}
 		return catchList.size();
 	}
-
-	public int waitForStringCatches(int numberOfCatches, int maxWaitTimeMilli) {
-		log.info(getName() + ".waitForCatches waiting for " + numberOfCatches + " currently " + stringCatchList.size());
-
-		StopWatch stopwatch = new StopWatch();
-		synchronized (stringCatchList) {
-			if (stringCatchList.size() < numberOfCatches) {
-				try {
-					stopwatch.start(); // starting clock
-					while (stringCatchList.size() < numberOfCatches) {
-						stringCatchList.wait(maxWaitTimeMilli); // wait up to
-																// the max time
-						stopwatch.end(); // sample time -
-						if (stopwatch.elapsedMillis() > maxWaitTimeMilli) {
-							log.error("waited for " + maxWaitTimeMilli + "ms and still only " + stringCatchList.size() + " out of " + numberOfCatches);
-							return stringCatchList.size();
-						}
-					}
-
-					log.info("caught " + stringCatchList.size() + " out of " + numberOfCatches);
-					return numberOfCatches;
-
-				} catch (InterruptedException e) {
-					log.error("waitForCatches " + numberOfCatches + " interrupted");
-					// logException(e); - removed for Android
-				}
-			}
-		}
-		return stringCatchList.size();
-	}
-
-	public void waitForLowCatches(int numberOfCatches, int maxWaitTimeMilli) {
-		log.info(getName() + ".waitForLowCatches waiting for " + numberOfCatches + " currently " + lowCatchList.size());
-		synchronized (lowCatchList) {
-			while (lowCatchList.size() < numberOfCatches) {
-				try {
-					lowCatchList.wait(maxWaitTimeMilli);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					log.error("testObject1List " + numberOfCatches + " interrupted");
-					// logException(e);
-				}
-			}
-		}
-
-	}
-
+	*/
+	
 	@Override
 	public String getDescription() {
-		return "<html>service for junit tests</html>";
+		return "service for junit tests";
 	}
 
 	public static void main(String[] args) {
@@ -218,22 +151,25 @@ public class TestCatcher extends Service {
 
 		TestCatcher catcher01 = new TestCatcher("catcher01");
 		catcher01.startService();
-		
+
 		TestThrower thrower = new TestThrower("thrower");
 		thrower.startService();
-		
+
 		catcher01.subscribe("throwInteger", thrower.getName(), "catchInteger", Integer.class);
-		
-		for (int i = 0; i < 1000; ++i)
-		{
+
+		for (int i = 0; i < 1000; ++i) {
 			thrower.invoke("throwInteger", i);
-			if (i%100 == 0)
-			{
+			if (i % 100 == 0) {
 				thrower.sendBlocking(catcher01.getName(), "catchInteger");
 			}
 		}
-		
-		//thrower.throwInteger(count);
+
+		// thrower.throwInteger(count);
+
+	}
+
+	@Override
+	public void onByte(Integer b) {
 		
 	}
 }
