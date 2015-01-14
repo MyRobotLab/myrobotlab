@@ -453,6 +453,14 @@
 		<!-- run tests - Services will need to be loaded if they don't come 
 			 with the default mrl load ie. if they have dependencies on the repo -->
 		<junit printsummary="withOutAndErr" haltonfailure="yes">
+			<!--			
+			FIXME - OS NEEDS TO BE TAKEN OUT OF PATH !!!!!
+			So we can do this
+			<jvmarg value="-Djava.library.path=libraries/native"/>
+			and not this !!!
+			<jvmarg value="-Djava.library.path=libraries/native/x86.64.windows"/>
+			so we don't have to exclude SerialTest !
+			-->
 			<sysproperty key="java.awt.headless" value="true" />
 			<!-- any junit tests would fail running on jenkins with gui components -->
 			<classpath>
