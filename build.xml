@@ -452,7 +452,7 @@
 	<target name="test" depends="compiletests">
 		<!-- run tests - Services will need to be loaded if they don't come 
 			 with the default mrl load ie. if they have dependencies on the repo -->
-		<junit printsummary="yes" haltonfailure="yes">
+		<junit printsummary="withOutAndErr" haltonfailure="yes">
 			<sysproperty key="java.awt.headless" value="true" />
 			<!-- any junit tests would fail running on jenkins with gui components -->
 			<classpath>
