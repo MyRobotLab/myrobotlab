@@ -10,8 +10,16 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
+<<<<<<< HEAD
 import com.leapmotion.leap.Frame;
+=======
+import com.leapmotion.leap.Finger.Type;
+import com.leapmotion.leap.Frame;	
+import com.leapmotion.leap.Gesture;
+>>>>>>> adding the method getJointAngle( hand , type ) to leap motion 2. pass in "left" / "right" as the hand. and type is the finger Type.TYPE_THUMB for example
 import com.leapmotion.leap.Hand;
+import com.leapmotion.leap.Finger;
+import com.leapmotion.leap.Vector;
 
 
 public class LeapMotion2 extends Service {
@@ -47,6 +55,37 @@ public class LeapMotion2 extends Service {
 		return strength;
 	}
 
+	
+	/**
+	 * Return the angle of the finger for the hand specified
+	 * This computes the angle based on the dot product of
+	 * the palmNormal and the fingerDirection
+	 * Theta = arccos( (V1.V2) / ( |V1| * |V2| )
+	 * @param hand - "left" or "right"
+	 * @param type - Type.TYPE_THUMB / Type.TYPE_INDEX .. etc..
+	 * @return angle in degrees
+	 */
+	public double getJointAngle(String hand, Type type) {
+		Hand h = null;
+		if ("left".equalsIgnoreCase(hand)) {
+			// left hand
+			h = controller.frame().hands().leftmost();
+		} else { 			
+			// right hand
+			h = controller.frame().hands().rightmost();
+		}
+		// TODO: does this return the correct finger?
+		Finger f = h.finger(type.ordinal());
+		Vector palmNormal = h.palmNormal();
+		Vector fDir = f.direction();
+		// TODO: validate that this is what we actually want.
+		// otherwise we can directly compute the angleTo in java.
+		float angleInRadians = palmNormal.angleTo(fDir);
+		// convert to degrees so it's easy to pass to servos
+		double angle = Math.toDegrees(angleInRadians);
+		return angle;
+	}
+	
 	public Frame publishFrame(Frame frame) {
 		return frame;
 	}
