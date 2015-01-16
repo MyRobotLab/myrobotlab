@@ -453,6 +453,7 @@
 		<!-- run tests - Services will need to be loaded if they don't come 
 			 with the default mrl load ie. if they have dependencies on the repo -->
 		<junit printsummary="withOutAndErr" haltonfailure="yes">
+			<jvmarg value="-Djava.library.path=libraries/native"/>
 			<!--			
 			FIXME - OS NEEDS TO BE TAKEN OUT OF PATH !!!!!
 			So we can do this
@@ -473,7 +474,7 @@
 			<batchtest fork="yes" todir="${build}/report">
 				<fileset dir="${test}">
 					<include name="**/*Test.java" />
-					<exclude name="**/SerialTest.java" />
+					<!-- exclude name="**/SerialTest.java" / -->
 				</fileset>
 			</batchtest>
 
