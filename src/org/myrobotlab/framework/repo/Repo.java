@@ -54,6 +54,8 @@ public class Repo implements Serializable {
 	public HashSet<String> nativeFileExt = new HashSet<String>(Arrays.asList("dll", "so", "dylib", "jnilib"));
 	public final String REPO_BASE_URL = "https://raw.githubusercontent.com/MyRobotLab/repo/master";
 	public static final Filter NO_FILTER = NoFilter.INSTANCE;
+	
+	ArrayList<String> errors = new ArrayList<String>();
 
 	// FYI ! - non of these can be transient
 	// need this "local" repo from remote instances !!!
@@ -440,17 +442,19 @@ public class Repo implements Serializable {
 		ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs).setValidate(true).setResolveMode(null).setArtifactFilter(NO_FILTER);
 
 		ResolveReport report = ivy.resolve(ivyfile.toURI().toURL(), resolveOptions);
-		List<?> errors = report.getAllProblemMessages();
+		List<?> err = report.getAllProblemMessages();
 
-		if (errors.size() > 0) {
-			for (int i = 0; i < errors.size(); ++i) {
-				error(errors.get(i).toString());
+		if (err.size() > 0) {
+			for (int i = 0; i < err.size(); ++i) {
+				String errStr = err.get(i).toString();
+				error(errStr);
+				errors.add(errStr);
 			}
 		} else {
 			info("%s %s.%s for %s", (retrieve) ? "retrieved" : "resolved", org, revision, platform.getPlatformId());
 		}
 		// TODO - no error
-		if (retrieve && errors.size() == 0) {
+		if (retrieve && err.size() == 0) {
 
 			// TODO check on extension here - additional processing
 
@@ -487,7 +491,7 @@ public class Repo implements Serializable {
 				// FIXME - native move up one directory !!! - from denormalized
 				// back to normalized Yay!
 				// maybe look for PlatformId in path ?
-				// ret > 0 &&  <-- retrieved - 
+				// ret > 0 && <-- retrieved -
 				if ("zip".equalsIgnoreCase(artifact.getType())) {
 					String filename = String.format("libraries/zip/%s.zip", artifact.getName());
 					info("unzipping %s", filename);
@@ -536,6 +540,7 @@ public class Repo implements Serializable {
 						List<?> problems = report.getAllProblemMessages();
 						for (int j = 0; j < problems.size(); ++j) {
 							Object problem = problems.get(j);
+							
 							// error(problem.toString()); - already prints out
 							// when retrieved
 						}
@@ -575,10 +580,6 @@ public class Repo implements Serializable {
 		}
 
 		return reports;
-	}
-
-	public void cleanCache() {
-
 	}
 
 	public static void test() throws Exception {
@@ -655,6 +656,19 @@ public class Repo implements Serializable {
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+	}
+
+	public boolean hasErrors() {
+		return (errors.size() > 0)?true:false;
+	}
+
+	public String getErrors() {
+		StringBuffer sb = new StringBuffer();
+		for(String error : errors){
+			sb.append(error);
+		}
+		
+		return sb.toString();
 	}
 
 }

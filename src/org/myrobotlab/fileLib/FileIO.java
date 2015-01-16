@@ -539,6 +539,23 @@ public class FileIO {
 		}
 	}
 	
+	public static boolean rmDir(File directory) {
+	    if(directory.exists()){
+	        File[] files = directory.listFiles();
+	        if(null!=files){
+	            for(int i=0; i<files.length; i++) {
+	                if(files[i].isDirectory()) {
+	                	rmDir(files[i]);
+	                }
+	                else {
+	                    files[i].delete();
+	                }
+	            }
+	        }
+	    }
+	    return(directory.delete());
+	}
+	
 	public static void compareFiles(String filename1, String filename2) throws FileNotFoundException, FileComparisonException {
 		File file1 = new File(filename1);
 		File file2 = new File(filename2);

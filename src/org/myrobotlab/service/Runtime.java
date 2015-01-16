@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
@@ -87,7 +86,8 @@ public class Runtime extends Service implements MessageListener {
 	final static private long serialVersionUID = 1L;
 
 	/**
-	 * instances of MRL - keyed with an instance key URI format is mrl://gateway/(protocol key)
+	 * instances of MRL - keyed with an instance key URI format is
+	 * mrl://gateway/(protocol key)
 	 */
 	static private final HashMap<URI, ServiceEnvironment> instances = new HashMap<URI, ServiceEnvironment>();
 	static private final HashMap<String, ServiceInterface> registry = new HashMap<String, ServiceInterface>();
@@ -733,17 +733,15 @@ public class Runtime extends Service implements MessageListener {
 		}
 
 		if (s != null) {
-			// x-forward encoding begin FIXME - should be in Encoder 
+			// x-forward encoding begin FIXME - should be in Encoder
 			String name = s.getName();
 			/*
-			if (prefix != null){
-				name = String.format("%s%s", prefix, s.getName()); //< FIXME FYI - bug occured because I had %s.%s :P - not normalized !!!
-			} else {
-			 name = s.getName();
-			}
-			*/
-			// x-forward encoding end FIXME - should be in Encoder 
-			
+			 * if (prefix != null){ name = String.format("%s%s", prefix,
+			 * s.getName()); //< FIXME FYI - bug occured because I had %s.%s :P
+			 * - not normalized !!! } else { name = s.getName(); }
+			 */
+			// x-forward encoding end FIXME - should be in Encoder
+
 			if (se.serviceDirectory.containsKey(name)) {
 				log.info(String.format("attempting to register %1$s which is already registered in %2$s", name, url));
 				if (runtime != null) {
@@ -796,8 +794,8 @@ public class Runtime extends Service implements MessageListener {
 			// WARNING - SHOULDN'T THIS BE DONE FIRST AVOID DEADLOCK / RACE
 			// CONDITION ????
 			registry.put(name, s); // FIXME FIXME FIXME FIXME !!!!!!
-											// pre-pend
-											// URI if not NULL !!!
+									// pre-pend
+									// URI if not NULL !!!
 			if (runtime != null) {
 				runtime.invoke("registered", s);
 			}
@@ -808,7 +806,6 @@ public class Runtime extends Service implements MessageListener {
 		return null;
 	}
 
-	
 	/**
 	 * Gets the current total number of services registered services. This is
 	 * the number of services in all Service Environments
@@ -1186,7 +1183,7 @@ public class Runtime extends Service implements MessageListener {
 
 		return ret;
 	}
-	
+
 	/**
 	 * @param interfaceName
 	 * @return service names which match
@@ -1194,7 +1191,7 @@ public class Runtime extends Service implements MessageListener {
 	public static ArrayList<String> getServiceNamesFromInterface(Class<?> interfaze) {
 		ArrayList<String> ret = new ArrayList<String>();
 		ArrayList<ServiceInterface> services = getServicesFromInterface(interfaze);
-		for (int i = 0; i < services.size(); ++i){
+		for (int i = 0; i < services.size(); ++i) {
 			ret.add(services.get(i).getName());
 		}
 		return ret;
@@ -1512,11 +1509,10 @@ public class Runtime extends Service implements MessageListener {
 
 			// good check :)
 			/*
-			if ((se.accessURL != url) && (!url.equals(se.accessURL))) {
-				sb.append(" key not equal to data ").append(se.accessURL);
-			}
-			sb.append("\n");
-			*/
+			 * if ((se.accessURL != url) && (!url.equals(se.accessURL))) {
+			 * sb.append(" key not equal to data ").append(se.accessURL); }
+			 * sb.append("\n");
+			 */
 
 			// Service Environment
 			Map<String, ServiceInterface> sorted2 = new TreeMap<String, ServiceInterface>(se.serviceDirectory);
@@ -2100,13 +2096,45 @@ public class Runtime extends Service implements MessageListener {
 
 	}
 
-	/*
-	static public Thread[] getThreads() {
-		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-		Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
-		return threadArray;
+	/**
+	 * cleans the users local ivy cache
+	 * (local only)
+	 */
+	public static boolean cleanCache() {
+		String cacheDir = String.format("%s%s.repo", System.getProperty("user.home"), File.separator);
+		log.info(String.format("cleanCache [%s]", cacheDir));
+		
+		String serviceDataFileName = String.format("%s%sserviceData.xml", FileIO.getCfgDir(), File.separator);
+		File serviceData = new File(serviceDataFileName);
+		
+		if (serviceData.exists()){
+			// we must remove it
+			log.info(String.format("%s exists we need to remove it", serviceDataFileName));
+			if (!serviceData.delete()){
+				log.error(String.format("could not delete %s", serviceDataFileName));
+				return false;
+			}
+		}
+		
+		File cache = new File(cacheDir);
+		if (!cache.exists()){
+			log.info(String.format("cache %s does not exist - it's clean !", cacheDir));
+			return true;
+		}
+		boolean ret = FileIO.rmDir(new File(cacheDir));
+		if (!ret){
+			log.error(String.format("could not remove cache [%s]", cacheDir));
+			return false;
+		}
+		
+		return true;
 	}
-	*/
+
+	/*
+	 * static public Thread[] getThreads() { Set<Thread> threadSet =
+	 * Thread.getAllStackTraces().keySet(); Thread[] threadArray =
+	 * threadSet.toArray(new Thread[threadSet.size()]); return threadArray; }
+	 */
 
 	/**
 	 * Main starting method of MyRobotLab Parses command line options
