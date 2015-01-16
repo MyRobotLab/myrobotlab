@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.serial.SerialDevice;
 import org.myrobotlab.serial.SerialDeviceException;
 import org.myrobotlab.serial.SerialDeviceFactory;
@@ -49,6 +50,7 @@ public class SerialDeviceFactoryGNU implements SerialDeviceFrameworkFactory {
 	 */
 	private ArrayList<SerialDevice> getSerialDevices() {
 		ArrayList<SerialDevice> ret = new ArrayList<SerialDevice>();
+		try {
 		CommPortIdentifier portId;
 		Enumeration<?> portList = CommPortIdentifier.getPortIdentifiers();
 		while (portList.hasMoreElements()) {
@@ -65,6 +67,9 @@ public class SerialDeviceFactoryGNU implements SerialDeviceFrameworkFactory {
 					e.printStackTrace();
 				}
 			}
+		}
+		} catch(Exception e){
+			Logging.logException(e);
 		}
 		return ret;
 	}
