@@ -3,7 +3,9 @@
  */
 package org.myrobotlab.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,9 +17,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FileIO.FileComparisonException;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.logging.Level;
-import org.myrobotlab.framework.*;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
@@ -26,15 +29,22 @@ import org.slf4j.Logger;
 /**
  * @author GRPERRY
  *
+ *         FIXME - virtual serial should not need RXTXLib to function or to
+ *         .getPorts() ! FIXME - should be an easy way to report if JNI loaded
+ *         correctly
  */
 public class SerialTest {
 
 	public final static Logger log = LoggerFactory.getLogger(SerialTest.class);
 
-	VirtualNullModemCable cable = null;
-	Serial serial = null;
-	Serial uart = null;
-	TestCatcher catcher = null;
+	static VirtualNullModemCable cable = null;
+	static Serial serial = null;
+	static Serial uart = null;
+	static TestCatcher catcher = null;
+
+	static boolean cleanDepenencies = true;
+	static boolean installDependencies = true;
+	static boolean testHardware = false;
 
 	/**
 	 * @throws java.lang.Exception
@@ -43,8 +53,35 @@ public class SerialTest {
 	public static void setUpBeforeClass() throws Exception {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-		
+
 		log.info("setUpBeforeClass");
+
+		if (cleanDepenencies) {
+			log.info("cleaning cache");
+			if (!Runtime.cleanCache()){
+				throw new IOException("could not clean cache");
+			}
+		}
+
+		if (installDependencies) {
+			log.info("installing Serial");
+			Repo repo = new Repo("install");
+			repo.retrieveServiceType("org.myrobotlab.service.Serial");
+			
+			if (repo.hasErrors()){
+				throw new IOException(repo.getErrors());
+			}
+			
+		}
+		
+
+		// FIXME TODO clean repo before installing !!!!
+		serial = (Serial) Runtime.start("serial", "Serial");
+		uart = (Serial) Runtime.start("uart", "Serial");
+		cable = Serial.createNullModemCable("v0", "v1");
+		catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
+		
+		
 	}
 
 	/**
@@ -53,6 +90,11 @@ public class SerialTest {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		log.info("tearDownAfterClass");
+		// FIXME - check service and thread count
+		// Runtime should still exist - but any
+		// additional threads should not
+		serial.releaseService();
+		uart.releaseService();
 	}
 
 	/**
@@ -61,12 +103,6 @@ public class SerialTest {
 	@Before
 	public void setUp() throws Exception {
 		log.info("setUp");
-		
-		// FIXME TODO clean repo before installing !!!!
-		serial = (Serial) Runtime.start("serial", "Serial");
-		uart = (Serial) Runtime.start("uart", "Serial");
-		cable = Serial.createNullModemCable("v0", "v1");
-		catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
 	}
 
 	/**
@@ -74,13 +110,7 @@ public class SerialTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
-		log.info("tearDown");
-
-		// FIXME - check service and thread count
-		// Runtime should still exist - but any
-		// additional threads should not
-		serial.releaseService();
-		uart.releaseService();
+		//log.info("tearDown");
 	}
 
 	/**
@@ -94,9 +124,10 @@ public class SerialTest {
 
 	/**
 	 * Test method for {@link org.myrobotlab.service.Serial#test()}.
-	 * @throws IOException 
-	 * @throws InterruptedException 
-	 * @throws FileComparisonException 
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws FileComparisonException
 	 */
 	@Test
 	public final void testTest() throws IOException, InterruptedException, FileComparisonException {
@@ -116,162 +147,162 @@ public class SerialTest {
 		// utility methods - ascii
 		// FIXME - // test case write(-1) as display becomes -1 ! - file is
 		// different than gui !?!?!
-		
+
 		boolean noWorky = true;
-		if (noWorky)  return;
+		if (noWorky)
+			return;
 
-			int timeout = 500;// 500 ms serial timeout
+		int timeout = 500;// 500 ms serial timeout
 
-			//Runtime.start("gui", "GUIService");
-			// Runtime.start("webgui", "WebGUI");
-			
-			serial.connect(cable.vp0.getName());
-			uart.connect(cable.vp1.getName());
+		// Runtime.start("gui", "GUIService");
+		// Runtime.start("webgui", "WebGUI");
 
-			// get serial handle and creates a uart & abl= null modem cable
+		serial.connect(cable.vp0.getName());
+		uart.connect(cable.vp1.getName());
 
-			// verify the null modem cable is connected
-			if (!serial.isConnected()) {
-				throw new IOException(String.format("%s not connected", serial.getName()));
+		// get serial handle and creates a uart & abl= null modem cable
+
+		// verify the null modem cable is connected
+		if (!serial.isConnected()) {
+			throw new IOException(String.format("%s not connected", serial.getName()));
+		}
+
+		if (!uart.isConnected()) {
+			throw new IOException(String.format("%s not connected", uart.getName()));
+		}
+
+		serial.stopRecording();
+		uart.stopRecording();
+
+		// start binary recording
+		serial.record("test/Serial/serial.1");
+		uart.record("test/Serial/uart.1");
+
+		// test blocking on exact size
+		serial.write("VER\r");
+		uart.write("000D\r");
+		// read back
+		log.info(serial.readString(5));
+
+		// blocking read with timeout
+		uart.write("HELLO");
+		String helo = serial.readString(5, timeout);
+
+		assertEquals("HELLO", helo);
+
+		log.info("array write");
+		serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 127, (byte) 128, (byte) 254, (byte) 255 });
+
+		// FIXME !!! - bug - we wrote a big array to serial -
+		// then immediately cleared the uart buffer
+		// in fact we cleared it so fast - that the serial data ---going
+		// to----> uart
+		// has not reached uart (because there is some overhead in moving,
+		// reading and formatting the incoming data)
+		// then we start checking values in "test blocking" this by that
+		// time the serial data above has hit the
+		// uart
+
+		// with a virtual null modem cable I could "cheat" and flush() could
+		// look at the serial's tx buffer size
+		// and block until its cleared - but this would not be typical of
+		// "real" serial ports
+		// but it could stabilize the test
+
+		// in the real world we don't know when the sender to
+		// our receiver is done - so we'll Service.sleep here
+		Service.sleep(300);
+		log.info("clear buffers");
+		serial.clear();
+		uart.clear();
+
+		assertEquals(0, serial.available());
+
+		log.info("testing blocking");
+		for (int i = 257; i > -2; --i) {
+			serial.write(i);
+			int readBack = uart.read();
+			log.info(String.format("written %d read back %d", i, readBack));
+			if (i < 256 && i > -1) {
+				assertEquals(String.format("read back not the same as written for value %d %d !", i, readBack), readBack, i);
 			}
+		}
 
-			if (!uart.isConnected()) {
-				throw new IOException(String.format("%s not connected", uart.getName()));
-			}
+		// in the real world we don't know when the sender to
+		// our receiver is done - so we'll Service.sleep here
+		Service.sleep(300);
+		log.info("clear buffers");
+		serial.clear();
+		uart.clear();
 
-			serial.stopRecording();
-			uart.stopRecording();
-			
-			// start binary recording
-			serial.record("test/Serial/serial.1");
-			uart.record("test/Serial/uart.1");
+		// cleared - nothing should be in the buffer
+		assertNull(serial.readString(5, 100));
 
-			// test blocking on exact size
-			serial.write("VER\r");
-			uart.write("000D\r");
-			// read back
-			log.info(serial.readString(5));
+		// test publish/subscribe nonblocking
+		serial.addByteListener(catcher);
+		uart.write(64);
 
-			// blocking read with timeout
-			uart.write("HELLO");
-			String helo = serial.readString(5, timeout);
+		Message msg = catcher.getMsg(100);
+		assertEquals("onByte", msg.method);
+		assertEquals(1, msg.data.length);
+		assertEquals(64, msg.data[0]);
 
-			assertEquals("HELLO", helo);
+		uart.clear();
+		serial.clear();
 
-			log.info("array write");
-			serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 127, (byte) 128, (byte) 254, (byte) 255 });
+		serial.write(new String("MRL ROCKS!"));
 
-			// FIXME !!! - bug - we wrote a big array to serial -
-			// then immediately cleared the uart buffer
-			// in fact we cleared it so fast - that the serial data ---going
-			// to----> uart
-			// has not reached uart (because there is some overhead in moving,
-			// reading and formatting the incoming data)
-			// then we start checking values in "test blocking" this by that
-			// time the serial data above has hit the
-			// uart
+		// partial buffer filled
+		String back = uart.readString(15, 100);
+		assertEquals("MRL ROCKS!", back);
 
-			// with a virtual null modem cable I could "cheat" and flush() could
-			// look at the serial's tx buffer size
-			// and block until its cleared - but this would not be typical of
-			// "real" serial ports
-			// but it could stabilize the test
+		// publish test
+		uart.write(new String("MRL ROCKS!"));
+		ArrayList<Message> msgs = catcher.getMsgs(100);
 
-			// in the real world we don't know when the sender to
-			// our receiver is done - so we'll Service.sleep here
-			Service.sleep(300);
-			log.info("clear buffers");
-			serial.clear();
-			uart.clear();
+		FileIO.compareFiles("test/Serial/serial.1.rx.bin", "test/Serial/control/serial.1.rx.bin");
+		FileIO.compareFiles("test/Serial/serial.1.tx.bin", "test/Serial/control/serial.1.tx.bin");
+		FileIO.compareFiles("test/Serial/uart.1.rx.bin", "test/Serial/control/uart.1.rx.bin");
+		FileIO.compareFiles("test/Serial/uart.1.tx.bin", "test/Serial/control/uart.1.tx.bin");
 
-			assertEquals(0, serial.available());
-			
-			log.info("testing blocking");
-			for (int i = 257; i > -2; --i) {
-				serial.write(i);
-				int readBack = uart.read();
-				log.info(String.format("written %d read back %d", i, readBack));
-				if (i < 256 && i > -1) {
-						assertEquals(String.format("read back not the same as written for value %d %d !", i, readBack), readBack, i);
-				}
-			}
+		serial.stopRecording();
+		uart.stopRecording();
 
-			// in the real world we don't know when the sender to
-			// our receiver is done - so we'll Service.sleep here
-			Service.sleep(300);
-			log.info("clear buffers");
-			serial.clear();
-			uart.clear();
-			
-			// cleared - nothing should be in the buffer
-			assertNull(serial.readString(5, 100));
+		// FIXME compare binary files
 
-			// test publish/subscribe nonblocking
-			serial.addByteListener(catcher);
-			uart.write(64);
-			
-			Message msg = catcher.getMsg(100);
-			assertEquals("onByte", msg.method);
-			assertEquals(1, msg.data.length);
-			assertEquals(64, msg.data[0]);
-			
-			uart.clear();
-			serial.clear();
-			
-			serial.write(new String("MRL ROCKS!"));
-			
-			// partial buffer filled
-			String back = uart.readString(15, 100);
-			assertEquals("MRL ROCKS!", back);
-			
-			// publish test
-			uart.write(new String("MRL ROCKS!"));
-			ArrayList<Message> msgs = catcher.getMsgs(100);
-			
-			FileIO.compareFiles("test/Serial/serial.1.rx.bin", "test/Serial/control/serial.1.rx.bin");
-			FileIO.compareFiles("test/Serial/serial.1.tx.bin", "test/Serial/control/serial.1.tx.bin");
-			FileIO.compareFiles("test/Serial/uart.1.rx.bin", "test/Serial/control/uart.1.rx.bin");
-			FileIO.compareFiles("test/Serial/uart.1.tx.bin", "test/Serial/control/uart.1.tx.bin");
+		// FIXME - finish up test & compare tx & rx files in multiple formats
+		// ======= decimal format begin ===========
+		serial.setBinaryFileFormat(false);
+		uart.setBinaryFileFormat(false);
 
-			serial.stopRecording();
-			uart.stopRecording();
-			
-			
-			// FIXME compare binary files
+		// default non-binary format is ascii decimal
+		serial.record("test/Serial/serial.2");
+		// uart.record("test/Serial/uart.2");
+		serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
+		// we have to pause here momentarily
+		// so the data can be written and read from the virtual null modem
+		// cable (on different threads)
+		// before we close the file streams
+		Service.sleep(30);
+		// uart.stopRecording();
+		serial.stopRecording();
+		// ======= decimal format end ===========
 
-			// FIXME - finish up test & compare tx & rx files in multiple formats
-			// ======= decimal format begin ===========
-			serial.setBinaryFileFormat(false);
-			uart.setBinaryFileFormat(false);
+		// ======= hex format begin ===========
+		serial.setDisplayFormat(Serial.DISPLAY_HEX);
+		serial.record("test/Serial/serial.3");
+		// uart.record("test/Serial/uart.3");
+		serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
+		Service.sleep(30);
+		serial.stopRecording();
+		// uart.stopRecording();
+		// ======= hex format begin ===========
 
-			// default non-binary format is ascii decimal
-			serial.record("test/Serial/serial.2");
-			// uart.record("test/Serial/uart.2");
-			serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
-			// we have to pause here momentarily
-			// so the data can be written and read from the virtual null modem
-			// cable (on different threads)
-			// before we close the file streams
-			Service.sleep(30);
-			// uart.stopRecording();
-			serial.stopRecording();
-			// ======= decimal format end ===========
+		// parsing of files based on extension check
 
-			// ======= hex format begin ===========
-			serial.setDisplayFormat(Serial.DISPLAY_HEX);
-			serial.record("test/Serial/serial.3");
-			// uart.record("test/Serial/uart.3");
-			serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
-			Service.sleep(30);
-			serial.stopRecording();
-			// uart.stopRecording();
-			// ======= hex format begin ===========
-
-			// parsing of files based on extension check
-
-			// TODO flush & close tests ?
-//			serial.disconnect();
-//			uart.disconnect();
+		// TODO flush & close tests ?
+		// serial.disconnect();
+		// uart.disconnect();
 
 	}
 
@@ -421,16 +452,16 @@ public class SerialTest {
 		ArrayList<String> ports = serial.getPortNames();
 		boolean v0Found = false;
 		boolean v1Found = false;
-		for(int i = 0; i < ports.size(); ++i){
-			if (ports.get(i).equals("v0")){
+		for (int i = 0; i < ports.size(); ++i) {
+			if (ports.get(i).equals("v0")) {
 				v0Found = true;
 			}
-			if (ports.get(i).equals("v1")){
+			if (ports.get(i).equals("v1")) {
 				v1Found = true;
 			}
 		}
-		
-		if (!v0Found || ! v1Found){
+
+		if (!v0Found || !v1Found) {
 			fail("");
 		}
 	}
