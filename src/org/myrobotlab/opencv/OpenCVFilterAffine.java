@@ -1,0 +1,96 @@
+package org.myrobotlab.opencv;
+
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
+import com.googlecode.javacv.cpp.opencv_core.CvBox2D;
+import com.googlecode.javacv.cpp.opencv_core.CvMat;
+import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
+import com.googlecode.javacv.cpp.opencv_core.CvRect;
+import com.googlecode.javacv.cpp.opencv_core.CvScalar;
+
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+
+import static com.googlecode.javacv.cpp.opencv_core.CV_32FC1;
+import static com.googlecode.javacv.cpp.opencv_core.CV_32FC2;
+import static com.googlecode.javacv.cpp.opencv_core.cvCreateMat;
+import static com.googlecode.javacv.cpp.opencv_core.cvCloneImage;
+import static com.googlecode.javacv.cpp.opencv_core.cvSize2D32f;
+import static com.googlecode.javacv.cpp.opencv_core.cvScalarAll;
+import static com.googlecode.javacv.cpp.opencv_imgproc.cvBoxPoints;
+import static com.googlecode.javacv.cpp.opencv_imgproc.cvWarpAffine;
+import static com.googlecode.javacv.cpp.opencv_imgproc.cvBoundingRect;
+import static com.googlecode.javacv.cpp.opencv_imgproc.cv2DRotationMatrix;
+
+
+public class OpenCVFilterAffine extends OpenCVFilter {
+
+	
+	private static final long serialVersionUID = 1L;
+	
+	transient IplImage dst;
+	public int flipCode = 1;
+	private float angle;
+
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class.getCanonicalName());
+
+	public OpenCVFilterAffine() {
+		super();
+	}
+
+	public OpenCVFilterAffine(String name) {
+		super(name);
+	}
+
+	public OpenCVFilterAffine(String filterName, String sourceKey) {
+		super(filterName, sourceKey);
+	}
+
+	@Override
+	public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+		// TODO : Create the affine filter and return the new image
+		// Find the center of the image
+		
+		CvPoint2D32f center = new CvPoint2D32f(image.width() / 2.0F, image.height() / 2.0F);
+	    CvBox2D box = new CvBox2D(center, cvSize2D32f(image.width() - 1, image.height() - 1), angle);
+	    CvPoint2D32f points = new CvPoint2D32f(4);
+	    cvBoxPoints(box, points);
+	    CvMat pointMat = cvCreateMat(1, 4, CV_32FC2);
+	    pointMat.put(0, 0, 0, points.position(0).x());
+	    pointMat.put(0, 0, 1, points.position(0).y());
+	    pointMat.put(0, 1, 0, points.position(1).x());
+	    pointMat.put(0, 1, 1, points.position(1).y());
+	    pointMat.put(0, 2, 0, points.position(2).x());
+	    pointMat.put(0, 2, 1, points.position(2).y());
+	    pointMat.put(0, 3, 0, points.position(3).x());
+	    pointMat.put(0, 3, 1, points.position(3).y());
+	    CvRect boundingRect = cvBoundingRect(pointMat, 0);
+	    //CvMat dst = cvCreateMat(boundingRect.height(), boundingRect.width(), image.type());
+	    CvMat dst = cvCreateMat(boundingRect.height(), boundingRect.width(),  CV_32FC1);
+	    CvMat rotMat = cvCreateMat(2, 3, CV_32FC1);
+	    cv2DRotationMatrix(center, angle, 1, rotMat);
+
+	    double y_1 = ((boundingRect.width() - image.width()) / 2.0F) + rotMat.get(0, 2);
+	    double y_2 = ((boundingRect.height() - image.height()) / 2.0F + rotMat.get(1, 2));
+	    rotMat.put(0, 2, y_1);
+	    rotMat.put(1, 2, y_2);
+	    CvScalar fillval = cvScalarAll(0);
+	    IplImage dst_frame = cvCloneImage(image);
+	    cvWarpAffine(image, dst_frame, rotMat);
+	    return dst_frame;
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		dst =  IplImage.create(image.height(), image.width(), image.depth(), image.nChannels());
+	}
+
+	public float getAngle() {
+		return angle;
+	}
+
+	public void setAngle(float angle) {
+		this.angle = angle;
+	}
+
+}
