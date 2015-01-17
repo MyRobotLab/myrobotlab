@@ -130,7 +130,7 @@ public class OpenCV extends VideoSource {
 
 	transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
-	public static String VALID_FILTERS[] = { "And", "AverageColor", "Canny", "CreateHistogram", "ColorTrack", "Detector", "Dilate", "Erode", "FGBG", "FaceDetect", "Fauvist",
+	public static String VALID_FILTERS[] = { "Affine", "And", "AverageColor", "Canny", "CreateHistogram", "ColorTrack", "Detector", "Dilate", "Erode", "FGBG", "FaceDetect", "Fauvist",
 			"FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2", "HSV", "InRange", "KinectDepth", "KinectDepthMask",
 			"KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr",
 			"ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "Smooth", "Split", "Threshold", "Transpose" };
