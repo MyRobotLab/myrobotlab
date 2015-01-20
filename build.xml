@@ -440,7 +440,7 @@
 	<target name="dist" depends="jar,test" description="generate the distribution">
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}.jar" />
 		<!-- backwards compat .. TODO: review this.. -->
-		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/lib/myrobotlab.jar" />
+		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
 	</target>
 
 	<target name="clean" description="clean up">
