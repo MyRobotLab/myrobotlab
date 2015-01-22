@@ -56,10 +56,10 @@ public class LeapMotion2 extends Service {
 	 * the palmNormal and the fingerDirection
 	 * Theta = arccos( (V1.V2) / ( |V1| * |V2| )
 	 * @param hand - "left" or "right"
-	 * @param type - Type.TYPE_THUMB / Type.TYPE_INDEX .. etc..
+	 * @param tip - 0 (thumb) / 1 (index) .. etc..
 	 * @return angle in degrees
 	 */
-	public double getJointAngle(String hand, Type type) {
+	public double getJointAngle(String hand, Integer tip) {
 		Hand h = null;
 		if ("left".equalsIgnoreCase(hand)) {
 			// left hand
@@ -69,7 +69,7 @@ public class LeapMotion2 extends Service {
 			h = controller.frame().hands().rightmost();
 		}
 		// TODO: does this return the correct finger?
-		Finger f = h.finger(type.ordinal());
+		Finger f = h.fingers().get(tip);
 		Vector palmNormal = h.palmNormal();
 		Vector fDir = f.direction();
 		// TODO: validate that this is what we actually want.
@@ -123,7 +123,7 @@ public class LeapMotion2 extends Service {
 		leap.startTracking();
 
         // Have the sample listener receive events from the controller
-
+        
         // Keep this process running until Enter is pressed
         log.info("Press Enter to quit...");
         try {
