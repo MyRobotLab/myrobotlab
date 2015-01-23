@@ -33,6 +33,10 @@ public class CMDLine extends HashMap<String, CcmdParam> {
 	private static final long serialVersionUID = 1560723637806853945L;
 	private String[] args = null;
 
+	public CMDLine() {
+	}
+
+	
 	public CMDLine(String[] args) {
 		splitLine(args);
 	}
