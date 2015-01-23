@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Finger;
-import com.leapmotion.leap.Finger.Type;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Vector;
 
@@ -51,14 +50,14 @@ public LeapMotion2(String n) {
 	
 	public float getRightStrength(){
 		Frame frame = controller.frame();
-		Hand hand = frame.hands().rightmost();
+		com.leapmotion.leap.Hand hand = frame.hands().rightmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
 	
 	public float getLeftStrength(){
 		Frame frame = controller.frame();
-		Hand hand = frame.hands().leftmost();
+		com.leapmotion.leap.Hand hand = frame.hands().leftmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
@@ -74,7 +73,7 @@ public LeapMotion2(String n) {
 	 * @return angle in degrees
 	 */
 	public double getJointAngle(String hand, Integer tip) {
-		Hand h = null;
+		com.leapmotion.leap.Hand h = null;
 		if ("left".equalsIgnoreCase(hand)) {
 			// left hand
 			h = controller.frame().hands().leftmost();
