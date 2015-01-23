@@ -10,10 +10,9 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
-import com.leapmotion.leap.Frame;
-import com.leapmotion.leap.Finger.Type;
-import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Finger;
+import com.leapmotion.leap.Finger.Type;
+import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Vector;
 
 public class LeapMotion2 extends Service {
@@ -24,6 +23,21 @@ public class LeapMotion2 extends Service {
 	
 	LeapMotionListener listener = null;
 	Controller controller = new Controller();
+	
+	public static class LeapData {
+		public Frame frame;
+		public Hand leftHand;
+		public Hand rightHand;
+	}
+	
+	public static class Hand {
+		public String type;
+		public int thumb;
+		public int index;
+		public int middle;
+		public int ring;
+		public int pinky;
+	}
 	
 	public LeapMotion2(String n) {
 		super(n);
@@ -37,14 +51,14 @@ public class LeapMotion2 extends Service {
 	
 	public float getRightStrength(){
 		Frame frame = controller.frame();
-		Hand hand = frame.hands().rightmost();
+		com.leapmotion.leap.Hand hand = frame.hands().rightmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
 	
 	public float getLeftStrength(){
 		Frame frame = controller.frame();
-		Hand hand = frame.hands().leftmost();
+		com.leapmotion.leap.Hand hand = frame.hands().leftmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
@@ -60,7 +74,7 @@ public class LeapMotion2 extends Service {
 	 * @return angle in degrees
 	 */
 	public double getJointAngle(String hand, Type type) {
-		Hand h = null;
+		com.leapmotion.leap.Hand h = null;
 		if ("left".equalsIgnoreCase(hand)) {
 			// left hand
 			h = controller.frame().hands().leftmost();
