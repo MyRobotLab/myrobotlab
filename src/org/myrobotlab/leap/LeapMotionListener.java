@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Finger;
+import com.leapmotion.leap.FingerList;
 import com.leapmotion.leap.Gesture;
 import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Listener;
@@ -47,24 +48,65 @@ public class LeapMotionListener extends Listener {
 	}
 
 	public void onFrame(Controller controller) {
-		myService.invoke("publishFrame", controller.frame());
 		LeapData data = new LeapData();
+		// The old publishFrame method for those who want it.
+		data.frame = controller.frame();
+		myService.invoke("publishFrame", data.frame);
+		// grab left/right hands
 		Hand lh = controller.frame().hands().leftmost();
+		Hand rh = controller.frame().hands().rightmost();		
+		// map the data to the MRL Hand pojo
+		LeapMotion2.Hand mrlLHand = mapLeapHandData(lh);
+		LeapMotion2.Hand mrlRHand = mapLeapHandData(rh);
+		// set them to the LeapData obj
+		data.leftHand = mrlLHand;
+		data.rightHand = mrlRHand;		
+		// Grab the current frame
+		// Track the last valid data frame.
+		// TODO: test and make sure this is worky?
+		if (data.frame.isValid()) {
+			myService.lastLeapData = data;
+			// only publish valid frames ?
+			myService.invoke("publishLeapData", data);			
+		}
 		
-		Finger f = lh.fingers().get(0);
+	}
+
+	private LeapMotion2.Hand mapLeapHandData(Hand lh) {
+		LeapMotion2.Hand mrlHand = new LeapMotion2.Hand();
+		// process the normal
 		Vector palmNormal = lh.palmNormal();
+		mrlHand.palmNormalX = palmNormal.getX();
+		mrlHand.palmNormalY = palmNormal.getY();		
+		mrlHand.palmNormalZ = palmNormal.getZ();
+		
+		// handle the fingers.
+		for (Finger.Type t : Finger.Type.values()) {
+			Finger f = lh.fingers().get(t.ordinal());		
+			double angle = computeAngleDegrees(f, palmNormal);
+			if (t.equals(Finger.Type.TYPE_INDEX))
+				mrlHand.index = angle;
+			else if (t.equals(Finger.Type.TYPE_MIDDLE))
+				mrlHand.middle = angle;
+			else if (t.equals(Finger.Type.TYPE_RING))
+				mrlHand.ring = angle;
+			else if (t.equals(Finger.Type.TYPE_PINKY))
+				mrlHand.pinky = angle;
+			else if (t.equals(Finger.Type.TYPE_THUMB))
+				mrlHand.thumb = angle;
+			else 
+				log.warn("Unknown finger! eek..");
+		}
+		return mrlHand;
+	}
+
+	private double computeAngleDegrees(Finger f, Vector palmNormal) {
 		Vector fDir = f.direction();
 		// TODO: validate that this is what we actually want.
 		// otherwise we can directly compute the angleTo in java.
-		float angleInRadians = palmNormal.angleTo(fDir);
+		double angleInRadians = palmNormal.angleTo(fDir);
 		// convert to degrees so it's easy to pass to servos
-		int angle = (int)Math.toDegrees(angleInRadians);
-		
-		data.frame = controller.frame();
-		data.leftHand.thumb = angle;
-		
-		myService.lastLeapData = data;
-		
-		myService.invoke("publishLeapData", data);
+		double angle = Math.toDegrees(angleInRadians);
+		return angle;
 	}
 }

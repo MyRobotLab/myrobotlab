@@ -38,6 +38,9 @@ public class LeapMotion2 extends Service {
 		public double middle;
 		public double ring;
 		public double pinky;
+		public double palmNormalX;
+		public double palmNormalY;
+		public double palmNormalZ;
 	}
 	
 public LeapMotion2(String n) {
