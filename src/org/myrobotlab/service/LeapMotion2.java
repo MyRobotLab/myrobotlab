@@ -93,6 +93,10 @@ public LeapMotion2(String n) {
 		return angle;
 	}
 	
+	public LeapData publishLeapData(LeapData data){
+		return data;
+	}
+	
 	public Frame publishFrame(Frame frame) {
 		return frame;
 	}
