@@ -10,10 +10,9 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
-import com.leapmotion.leap.Frame;
-import com.leapmotion.leap.Finger.Type;
-import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Finger;
+import com.leapmotion.leap.Finger.Type;
+import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Vector;
 
 public class LeapMotion2 extends Service {
@@ -24,6 +23,21 @@ public class LeapMotion2 extends Service {
 	
 	LeapMotionListener listener = null;
 	Controller controller = new Controller();
+	
+	public static class LeapData {
+		public Frame frame;
+		public Hand leftHand;
+		public Hand rightHand;
+	}
+	
+	public static class Hand {
+		public String type;
+		public int thumb;
+		public int index;
+		public int middle;
+		public int ring;
+		public int pinky;
+	}
 	
 	public LeapMotion2(String n) {
 		super(n);
@@ -37,14 +51,14 @@ public class LeapMotion2 extends Service {
 	
 	public float getRightStrength(){
 		Frame frame = controller.frame();
-		Hand hand = frame.hands().rightmost();
+		com.leapmotion.leap.Hand hand = frame.hands().rightmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
 	
 	public float getLeftStrength(){
 		Frame frame = controller.frame();
-		Hand hand = frame.hands().leftmost();
+		com.leapmotion.leap.Hand hand = frame.hands().leftmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
@@ -56,11 +70,11 @@ public class LeapMotion2 extends Service {
 	 * the palmNormal and the fingerDirection
 	 * Theta = arccos( (V1.V2) / ( |V1| * |V2| )
 	 * @param hand - "left" or "right"
-	 * @param tip - 0 (thumb) / 1 (index) .. etc..
+	 * @param type - Type.TYPE_THUMB / Type.TYPE_INDEX .. etc..
 	 * @return angle in degrees
 	 */
-	public double getJointAngle(String hand, Integer tip) {
-		Hand h = null;
+	public double getJointAngle(String hand, Type type) {
+		com.leapmotion.leap.Hand h = null;
 		if ("left".equalsIgnoreCase(hand)) {
 			// left hand
 			h = controller.frame().hands().leftmost();
@@ -69,7 +83,7 @@ public class LeapMotion2 extends Service {
 			h = controller.frame().hands().rightmost();
 		}
 		// TODO: does this return the correct finger?
-		Finger f = h.fingers().get(tip);
+		Finger f = h.finger(type.ordinal());
 		Vector palmNormal = h.palmNormal();
 		Vector fDir = f.direction();
 		// TODO: validate that this is what we actually want.
@@ -123,7 +137,7 @@ public class LeapMotion2 extends Service {
 		leap.startTracking();
 
         // Have the sample listener receive events from the controller
-        
+
         // Keep this process running until Enter is pressed
         log.info("Press Enter to quit...");
         try {
