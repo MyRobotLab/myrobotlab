@@ -39,7 +39,7 @@ public class LeapMotion2 extends Service {
 		public int pinky;
 	}
 	
-	public LeapMotion2(String n) {
+public LeapMotion2(String n) {
 		super(n);
 		listener = new LeapMotionListener(this);
 	}
@@ -51,14 +51,14 @@ public class LeapMotion2 extends Service {
 	
 	public float getRightStrength(){
 		Frame frame = controller.frame();
-		com.leapmotion.leap.Hand hand = frame.hands().rightmost();
+		Hand hand = frame.hands().rightmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
 	
 	public float getLeftStrength(){
 		Frame frame = controller.frame();
-		com.leapmotion.leap.Hand hand = frame.hands().leftmost();
+		Hand hand = frame.hands().leftmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
@@ -70,11 +70,11 @@ public class LeapMotion2 extends Service {
 	 * the palmNormal and the fingerDirection
 	 * Theta = arccos( (V1.V2) / ( |V1| * |V2| )
 	 * @param hand - "left" or "right"
-	 * @param type - Type.TYPE_THUMB / Type.TYPE_INDEX .. etc..
+	 * @param tip - 0 (thumb) / 1 (index) .. etc..
 	 * @return angle in degrees
 	 */
-	public double getJointAngle(String hand, Type type) {
-		com.leapmotion.leap.Hand h = null;
+	public double getJointAngle(String hand, Integer tip) {
+		Hand h = null;
 		if ("left".equalsIgnoreCase(hand)) {
 			// left hand
 			h = controller.frame().hands().leftmost();
@@ -83,7 +83,7 @@ public class LeapMotion2 extends Service {
 			h = controller.frame().hands().rightmost();
 		}
 		// TODO: does this return the correct finger?
-		Finger f = h.finger(type.ordinal());
+		Finger f = h.fingers().get(tip);
 		Vector palmNormal = h.palmNormal();
 		Vector fDir = f.direction();
 		// TODO: validate that this is what we actually want.
@@ -137,7 +137,7 @@ public class LeapMotion2 extends Service {
 		leap.startTracking();
 
         // Have the sample listener receive events from the controller
-
+        
         // Keep this process running until Enter is pressed
         log.info("Press Enter to quit...");
         try {
