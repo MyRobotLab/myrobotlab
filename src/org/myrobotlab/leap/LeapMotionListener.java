@@ -62,6 +62,9 @@ public class LeapMotionListener extends Listener {
 		
 		data.frame = controller.frame();
 		data.leftHand.thumb = angle;
+		
+		myService.lastLeapData = data;
+		
 		myService.invoke("publishLeapData", data);
 	}
 }
