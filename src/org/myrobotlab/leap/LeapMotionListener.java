@@ -2,11 +2,15 @@ package org.myrobotlab.leap;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.LeapMotion2;
+import org.myrobotlab.service.LeapMotion2.LeapData;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
+import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.Gesture;
+import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Listener;
+import com.leapmotion.leap.Vector;
 
 public class LeapMotionListener extends Listener {
 
@@ -44,5 +48,20 @@ public class LeapMotionListener extends Listener {
 
 	public void onFrame(Controller controller) {
 		myService.invoke("publishFrame", controller.frame());
+		LeapData data = new LeapData();
+		Hand lh = controller.frame().hands().leftmost();
+		
+		Finger f = lh.fingers().get(0);
+		Vector palmNormal = lh.palmNormal();
+		Vector fDir = f.direction();
+		// TODO: validate that this is what we actually want.
+		// otherwise we can directly compute the angleTo in java.
+		float angleInRadians = palmNormal.angleTo(fDir);
+		// convert to degrees so it's easy to pass to servos
+		int angle = (int)Math.toDegrees(angleInRadians);
+		
+		data.frame = controller.frame();
+		data.leftHand.thumb = angle;
+		myService.invoke("publishLeapData", data);
 	}
 }
