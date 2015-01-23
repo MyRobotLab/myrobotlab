@@ -23,6 +23,8 @@ public class LeapMotion2 extends Service {
 	LeapMotionListener listener = null;
 	Controller controller = new Controller();
 	
+	public LeapData lastLeapData = null;
+	
 	public static class LeapData {
 		public Frame frame;
 		public Hand leftHand;
@@ -31,11 +33,11 @@ public class LeapMotion2 extends Service {
 	
 	public static class Hand {
 		public String type;
-		public int thumb;
-		public int index;
-		public int middle;
-		public int ring;
-		public int pinky;
+		public double thumb;
+		public double index;
+		public double middle;
+		public double ring;
+		public double pinky;
 	}
 	
 public LeapMotion2(String n) {
