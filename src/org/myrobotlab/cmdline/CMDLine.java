@@ -33,6 +33,10 @@ public class CMDLine extends HashMap<String, CcmdParam> {
 	private static final long serialVersionUID = 1560723637806853945L;
 	private String[] args = null;
 
+	public CMDLine(String[] args) {
+		splitLine(args);
+	}
+
 	public int splitLine(String[] args) {
 		// HashMap<String, CcmdParam> a = new HashMap<String, CcmdParam>();
 		// a.put(arg0, arg1)
@@ -164,8 +168,7 @@ public class CMDLine extends HashMap<String, CcmdParam> {
 
 	public static void main(String[] args) {
 
-		CMDLine cmdline = new CMDLine();
-		cmdline.splitLine(args);
+		CMDLine cmdline = new CMDLine(args);
 
 		if (cmdline.containsKey("-test")) {
 			String service = cmdline.getSafeArgument("-service", 0, "");
