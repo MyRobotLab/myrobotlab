@@ -28,6 +28,8 @@ import org.python.util.PythonInterpreter;
 import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
+import com.mysql.jdbc.StringUtils;
+
 /**
  * @author GroG
  * 
@@ -81,6 +83,12 @@ public class Python extends Service {
 
 		public Script(String name, String script) {
 			this.name = name;
+			// DOS2UNIX line endings.
+			// This seems to get triggered when people use editors that don't do the cr/lf thing very well..
+			// TODO:This will break python quoted text with the """ syntax in python.			 
+			if (!StringUtils.isEmptyOrWhitespaceOnly(script)) {
+				script = script.replaceAll("(\r)+\n", "\n");
+			}
 			this.code = script;
 		}
 
@@ -349,7 +357,7 @@ public class Python extends Service {
 	public void exec(String code, boolean replace) {
 		log.info(String.format("exec %s", code));
 
-		// code = code.replaceAll("\r\n", "\n"); // DOS2UNIX
+		// code = code.replaceAll("(\r)+\n", "\n"); // DOS2UNIX
 
 		if (interp == null) {
 			createPythonInterpreter();
