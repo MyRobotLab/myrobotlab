@@ -27,11 +27,14 @@ package org.myrobotlab.control.opencv;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -42,17 +45,20 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.service.GUIService;
 
-public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeListener {
+public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeListener, ActionListener {
 
 	SliderWithText angle = new SliderWithText(JSlider.HORIZONTAL, 0, 360, 0);
+	JTextField dX = new JTextField("dX", 10);
+	JTextField dY = new JTextField("dY", 10);
 	
-	public OpenCVFilterAffineGUI(String boundFilterName, String boundServiceName, GUIService myService) {
+  	public OpenCVFilterAffineGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
-
 		angle.addChangeListener(this);
-
-		GridBagConstraints gc2 = new GridBagConstraints();
-
+		dX.addActionListener(this);
+		dY.addActionListener(this);
+		
+		dX.setText("0.0");
+		dY.setText("0.0");
 		TitledBorder title;
 		JPanel j = new JPanel(new GridBagLayout());
 		title = BorderFactory.createTitledBorder("Affine Config");
@@ -60,15 +66,25 @@ public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeList
 
 		gc.gridx = 0;
 		gc.gridy = 0;
-		j.add(new JLabel("Angle"), gc);
-		++gc.gridx;
-		j.add(angle, gc);
-		++gc.gridx;
-		j.add(angle.value, gc);
-		++gc.gridy;
-		gc.gridx = 0;
-		display.add(j, gc);
+		j.add(new JLabel("Angle"));
+		//++gc.gridx;
+		j.add(angle);
+		//++gc.gridx;
+		j.add(angle.value);
+		display.add(j,gc);
+		
+		JPanel j2 = new JPanel(new GridBagLayout());
+		j2.add(new JLabel("Delta X"));
+		j2.add(dX);
 
+		j2.add(new JLabel("Delta Y"));
+		j2.add(dY);
+		
+		GridBagConstraints gc2 = new GridBagConstraints();
+		gc2.gridx = 0;
+		gc2.gridy = 1;
+		display.add(j2, gc2);
+		
 	}
 
 	// FIXME - update components :)
@@ -98,4 +114,17 @@ public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeList
 		
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		// TODO Auto-generated method stub
+		Object o = event.getSource();
+		OpenCVFilterAffine af = (OpenCVFilterAffine) boundFilter.filter;
+		if (o == dX) {
+			String val = ((JTextField)o).getText();
+			af.setDx(Double.valueOf(val));
+		} else if ( o == dY) {
+			String val = ((JTextField)o).getText();
+			af.setDy(Double.valueOf(val));
+		}		
+	}
 }

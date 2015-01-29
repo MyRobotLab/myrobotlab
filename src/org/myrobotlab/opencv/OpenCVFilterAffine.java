@@ -30,7 +30,13 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 	
 	transient IplImage dst;
 	public int flipCode = 1;
+
+	// angle of rotation
 	private float angle;
+    // translation along x axis (pixels)
+    private double dx = 0;
+    // tranlsation along y axis (pixels)
+    private double dy = 0;
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class.getCanonicalName());
 
@@ -69,7 +75,17 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 	    CvMat dst = cvCreateMat(boundingRect.height(), boundingRect.width(),  CV_32FC1);
 	    CvMat rotMat = cvCreateMat(2, 3, CV_32FC1);
 	    cv2DRotationMatrix(center, angle, 1, rotMat);
+	    
+	    // Add the transpose matrix
+	    double x = rotMat.get(0, 2) + dx;
+	    rotMat.put(0, 2, x);
 
+	    // Add the transpose matrix
+	    double y = rotMat.get(1, 2) + dy;
+	    rotMat.put(1, 2, y);
+	    
+	    // System.out.println(rotMat);
+	    
 	    double y_1 = ((boundingRect.width() - image.width()) / 2.0F) + rotMat.get(0, 2);
 	    double y_2 = ((boundingRect.height() - image.height()) / 2.0F + rotMat.get(1, 2));
 	    rotMat.put(0, 2, y_1);
@@ -91,6 +107,22 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 
 	public void setAngle(float angle) {
 		this.angle = angle;
+	}
+
+	public double getDx() {
+		return dx;
+	}
+
+	public void setDx(double dx) {
+		this.dx = dx;
+	}
+
+	public double getDy() {
+		return dy;
+	}
+
+	public void setDy(double dy) {
+		this.dy = dy;
 	}
 
 }
