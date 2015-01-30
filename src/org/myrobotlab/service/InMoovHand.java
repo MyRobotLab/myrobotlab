@@ -6,9 +6,11 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.LeapMotion2.LeapData;
+import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.slf4j.Logger;
 
-public class InMoovHand extends Service {
+public class InMoovHand extends Service implements LeapDataListener {
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(InMoovHand.class);
@@ -425,6 +427,19 @@ public class InMoovHand extends Service {
 		pinky.save();
 		wrist.save();
 		return true;
+	}
+
+	@Override
+	public LeapData onLeapData(LeapData data) {
+		//if (this.getSide() == "right") {
+		index.moveTo(data.rightHand.index);
+		thumb.moveTo(data.rightHand.thumb);
+		pinky.moveTo(data.rightHand.pinky);
+		ringFinger.moveTo(data.rightHand.ring);
+		majeure.moveTo(data.rightHand.middle);
+		//}
+		// 
+		return data;
 	}
 
 }
