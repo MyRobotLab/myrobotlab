@@ -7,6 +7,8 @@ import org.myrobotlab.leap.LeapMotionListener;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.LeapDataListener;
+import org.myrobotlab.service.interfaces.LeapDataPublisher;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
@@ -14,7 +16,7 @@ import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Vector;
 
-public class LeapMotion2 extends Service {
+public class LeapMotion2 extends Service implements LeapDataListener , LeapDataPublisher {
 
 	private static final long serialVersionUID = 1L;
 
@@ -98,7 +100,9 @@ public LeapMotion2(String n) {
 		return angle;
 	}
 	
-	public LeapData publishLeapData(LeapData data){
+	
+	public LeapData publishLeapData(LeapData data) {
+		// TODO Auto-generated method stub
 		return data;
 	}
 	
@@ -108,6 +112,10 @@ public LeapMotion2(String n) {
 	
 	public void addFrameListener(Service service){
 		addListener("publishFrame", service.getName(), "onFrame", Frame.class);
+	}
+	
+	public void addLeapDataListener(Service service){
+		addListener("publishLeapData", service.getName(), "onLeapData", Frame.class);
 	}
 	
 	public Controller publishInit(Controller controller) {
@@ -155,6 +163,15 @@ public LeapMotion2(String n) {
         }
 
         // Remove the sample listener when done
+	}
+
+
+	@Override
+	public LeapData onLeapData(LeapData data) {
+		
+		return data;
+		// TODO Auto-generated method stub
+		
 	}
 
 }
