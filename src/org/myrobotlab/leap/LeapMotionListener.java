@@ -3,6 +3,7 @@ package org.myrobotlab.leap;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.LeapMotion2;
 import org.myrobotlab.service.LeapMotion2.LeapData;
+import org.myrobotlab.service.interfaces.LeapDataPublisher;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
