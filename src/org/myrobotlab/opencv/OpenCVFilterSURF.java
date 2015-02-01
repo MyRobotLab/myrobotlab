@@ -42,6 +42,8 @@ import static com.googlecode.javacv.cpp.opencv_core.CvScalar;
 import static com.googlecode.javacv.cpp.opencv_core.cvLine;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
 import static com.googlecode.javacv.cpp.opencv_imgproc.CV_GRAY2BGR;
+import static com.googlecode.javacv.cpp.opencv_highgui.CV_LOAD_IMAGE_GRAYSCALE;
+import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImage;
 
 public class OpenCVFilterSURF extends OpenCVFilter {
 
@@ -67,6 +69,11 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 	 */
 	public void setObjectImage(IplImage image){
 		settings.setObjectImage(image);
+	}
+	
+	public void loadObjectImageFilename(String filename) {
+		 IplImage object = cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE);
+		 this.setObjectImage(object);
 	}
 	
 	@Override
