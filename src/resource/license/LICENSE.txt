@@ -1,0 +1,16 @@
+MyRobotLab is licensed under GNU GPL Version 2
+Loadable service modules may have their own 
+service modules which must be observed.
+
+The GNU General Public License (GPL-2.0)
+
+(http://myrobotlab.org/content/license)
+
+The following jars have been extracted and 
+their respective licenses have been included:
+gson-2.2.4.jar
+ivy-2.4.0-rc1.jar
+jgraphx-1.6.1.2.jar
+log4j-1.2.14.jar
+slf4j-api-1.6.1.jar
+slf4j-log4j12-1.6.1.jar
