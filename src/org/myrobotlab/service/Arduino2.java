@@ -31,7 +31,6 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.StepperControl;
 import org.myrobotlab.service.interfaces.StepperController;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 /**
@@ -54,7 +53,6 @@ import org.slf4j.Logger;
  * 
  */
 
-@Root
 public class Arduino2 extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, StepperController {
 
 	private static final long serialVersionUID = 1L;
@@ -593,8 +591,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	@Override
 	public String getDescription() {
-		return "<html>Arduino2 is a service which interfaces with an Arduino2 micro-controller.<br>" + "This interface can operate over radio, IR, or other communications,<br>"
-				+ "but and appropriate .PDE file must be loaded into the micro-controller.<br>" + "See http://myrobotlab.org/communication for details";
+		return "This service interfaces with an Arduino micro-controller.";
 	}
 
 	public void stopService() {

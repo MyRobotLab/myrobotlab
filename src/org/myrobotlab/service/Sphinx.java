@@ -63,10 +63,10 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Sphinx.class.getCanonicalName());
 
-	Microphone microphone = null;
-	ConfigurationManager cm = null;
+	transient Microphone microphone = null;
+	transient ConfigurationManager cm = null;
 	transient Recognizer recognizer = null;
-	DialogManager dialogManager = null;
+	transient DialogManager dialogManager = null;
 	transient SpeechProcessor speechProcessor = null;
 
 	private boolean isListening = false;

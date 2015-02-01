@@ -27,7 +27,7 @@ public class Blender extends Service {
 	public static final String SUCCESS = "SUCCESS";
 
 	Socket control = null;
-	ControlHandler controlHandler = null;
+	transient ControlHandler controlHandler = null;
 	String host = "localhost";
 	Integer controlPort = 8989;
 	Integer serialPort = 9191;
@@ -35,7 +35,7 @@ public class Blender extends Service {
 	String blenderVersion;
 	String expectedBlenderVersion = "0.9";
 	
-	HashMap<String, VirtualPort> virtualPorts = new HashMap<String, VirtualPort>();
+	transient HashMap<String, VirtualPort> virtualPorts = new HashMap<String, VirtualPort>();
 	
 	public class VirtualPort {
 		public Serial serial;

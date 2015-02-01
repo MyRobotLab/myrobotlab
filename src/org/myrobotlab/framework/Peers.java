@@ -1,6 +1,12 @@
 package org.myrobotlab.framework;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+
+import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class Peers {
@@ -25,6 +31,7 @@ public class Peers {
 	// put should only insert - and avoid any updates or replacements
 	// put in as static in Service
 	public void put(String peer, String actualName, String peerType, String comment) {
+		peerType = Encoder.getServiceType(peerType);
 		String fullKey = getPeerKey(peer);
 		if (actualName == null) {
 			actualName = fullKey;
@@ -87,6 +94,7 @@ public class Peers {
 	 */
 	public boolean suggestAs(String key, String actualName, String type, String comment) {
 
+		type = Encoder.getServiceType(type);
 		String fullkey = getPeerKey(key);
 		log.info(String.format("suggesting %s now as %s", fullkey, actualName));
 		put(key, getPeerKey(actualName), type, comment);
@@ -95,12 +103,50 @@ public class Peers {
 	}
 
 	public boolean suggestRootAs(String key, String actualName, String type, String comment) {
-
+		type = Encoder.getServiceType(type);
 		String fullkey = getPeerKey(key);
 		log.info(String.format("suggesting %s now as root %s", fullkey, actualName));
 		put(key, actualName, type, comment);
 
 		return true;
+	}
+	
+	
+	static public Peers getPeers(String type){
+		return getPeers("", type);
+	}
+	
+	static public Peers getPeers(String namePrefix, String inType){
+		String type = Encoder.getServiceType(inType);
+		try {
+			Class<?> theClass = Class.forName(type);
+			Method method = theClass.getMethod("getPeers", String.class);
+			Peers peers = (Peers)method.invoke(null, new Object[]{namePrefix});
+			return peers;
+		} catch(Exception e){ // dont care
+		}
+		return null;
+	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		
+		//Peers dna = Peers.getPeers("InMoov");
+		//Peers dna = Peers.getPeers("Plantoid");
+		
+		
+		Peers peers = Peers.getPeers("Plantoid");
+		ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
+		Repo r = new Repo("repo");
+		for (int i = 0; i < peerList.size(); ++i){
+			ServiceReservation sr = peerList.get(i);
+			
+		}
+		
+		//log.info(tdna.toString());
+		
+		Index<ServiceReservation> dna = Runtime.buildDNA("Plantoid");
+		log.info(dna.toString());
 	}
 
 }

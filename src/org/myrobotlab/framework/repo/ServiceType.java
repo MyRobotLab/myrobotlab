@@ -3,10 +3,7 @@ package org.myrobotlab.framework.repo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
-
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Root;
+import java.util.TreeMap;
 
 /**
  * list of relations from a Service type to a Dependency key the key is used to
@@ -19,7 +16,6 @@ import org.simpleframework.xml.Root;
  * hell)
  * 
  */
-@Root//(name = "serviceDescriptor")
 public class ServiceType implements Serializable, Comparator<ServiceType>  {
 	
 	private static final long serialVersionUID = 1L;
@@ -29,48 +25,40 @@ public class ServiceType implements Serializable, Comparator<ServiceType>  {
 		return o1.name.compareTo(o2.name);
 	}
 
-	@Attribute(required = true)
-	public String name;
-	
-	@Attribute(required = false)
+	public String name;	
 	public String state = null;
-
-	@Attribute(required = false)
 	public Integer workingLevel = null;
-
-	@Attribute(required = false)
 	public String description = null;
-
-	@ElementList(entry="org", required = false, name = "dependencies")
-	public ArrayList<String> dependencyList;
+	public ArrayList<String> dependencies;
+	public TreeMap<String, String> peers;
 
 	public ServiceType(){}
 	
 	public ServiceType(String name) {
 		this.name = name;
 	}
+	
+	public void addPeer(String name, String peerType){
+		if (peers == null){
+			peers = new TreeMap<String, String>();
+		}
+		peers.put(name, peerType);
+	}
 
 	public void addDependency(String org) {
-		if (dependencyList == null){
-			dependencyList = new ArrayList<String>();
+		if (dependencies == null){
+			dependencies = new ArrayList<String>();
 		}
-		dependencyList.add(org);
+		dependencies.add(org);
 	}
 
 	public int size() {
-		return dependencyList.size();
+		return dependencies.size();
 	}
 
 	public String get(int index) {
-		return dependencyList.get(index);
+		return dependencies.get(index);
 	}
-
-	/* NOT A GOOD METHOD - will add incomplete version info
-	 * to dependencies
-	public void add(Dependency dep) {
-		dependencyList.add(dep.getOrg());
-	}
-	*/
 
 	public String getName() {
 		return name;

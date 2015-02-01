@@ -9,8 +9,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.data.Pin;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 //import org.slf4j.LoggerFactory;
@@ -22,7 +20,6 @@ import org.slf4j.Logger;
  * 
  */
 
-@Root
 public class ThingSpeak extends Service {
 
 	private static final long serialVersionUID = 1L;
@@ -33,12 +30,12 @@ public class ThingSpeak extends Service {
 	// http://api.thingspeak.com/update?key=AO4DMKQZY4RLWNNU&field1=pin&field2=A0&field3=value&field4=345&status=boink6
 
 	String updateURL = "http://api.thingspeak.com/update";
-	@Element
+	
 	String writeKey = "";
 
 	long lastUpdate = 0;
 
-	@Element
+	
 	int intervalSeconds = 20;
 
 	public Integer getIntervalSeconds() {

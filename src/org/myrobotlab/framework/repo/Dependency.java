@@ -3,20 +3,11 @@ package org.myrobotlab.framework.repo;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import org.simpleframework.xml.Attribute;
-
 public class Dependency implements Serializable, Comparator<Dependency>  {
 	private static final long serialVersionUID = 1L;
-	@Attribute
 	private String org;
-	
-	@Attribute
 	private String revision;
-	
-	@Attribute
 	private boolean resolved = false;
-	
-	@Attribute
 	private boolean released = true;
 
 	public Dependency() {

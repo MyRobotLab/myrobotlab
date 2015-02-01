@@ -37,7 +37,7 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 	float rightMotorPower = 0.0f;
 	int timeout = 500;// 500 ms serial timeout
 
-	SensorPoller sensorPoller = null;
+	transient SensorPoller sensorPoller = null;
 
 	int sensorPollIntervalMS = 100; // 10 times a second
 

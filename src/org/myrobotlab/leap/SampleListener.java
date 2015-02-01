@@ -1,8 +1,20 @@
 package org.myrobotlab.leap;
-import java.io.IOException;
-import java.lang.Math;
-import com.leapmotion.leap.*;
+import com.leapmotion.leap.Arm;
+import com.leapmotion.leap.Bone;
+import com.leapmotion.leap.CircleGesture;
+import com.leapmotion.leap.Controller;
+import com.leapmotion.leap.Finger;
+import com.leapmotion.leap.Frame;
+import com.leapmotion.leap.Gesture;
 import com.leapmotion.leap.Gesture.State;
+import com.leapmotion.leap.GestureList;
+import com.leapmotion.leap.Hand;
+import com.leapmotion.leap.KeyTapGesture;
+import com.leapmotion.leap.Listener;
+import com.leapmotion.leap.ScreenTapGesture;
+import com.leapmotion.leap.SwipeGesture;
+import com.leapmotion.leap.Tool;
+import com.leapmotion.leap.Vector;
 
 public class SampleListener extends Listener {
 	

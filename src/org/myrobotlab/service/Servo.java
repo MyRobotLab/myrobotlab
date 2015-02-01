@@ -37,8 +37,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.VirtualSerialPort;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 /**
@@ -60,7 +58,7 @@ import org.slf4j.Logger;
  *         sent to the servo
  * 
  */
-@Root
+
 public class Servo extends Service implements ServoControl {
 
 	private static final long serialVersionUID = 1L;
@@ -72,22 +70,22 @@ public class Servo extends Service implements ServoControl {
 	private Float inputX;
 
 	// clipping
-	@Element
+	
 	private float outputYMin = 0;
-	@Element
+	
 	private float outputYMax = 180;
 
 	// range mapping
-	@Element
+	
 	private float minX = 0;
-	@Element
+	
 	private float maxX = 180;
-	@Element
+	
 	private float minY = 0;
-	@Element
+	
 	private float maxY = 180;
 
-	@Element
+	
 	private int rest = 90;
 
 	private long lastActivityTime = 0;

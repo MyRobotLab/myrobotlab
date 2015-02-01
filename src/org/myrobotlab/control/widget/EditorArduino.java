@@ -41,7 +41,6 @@ import javax.swing.JTabbedPane;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.myrobotlab.arduino.compiler.Target;
-import org.myrobotlab.control.ServiceGUI;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;

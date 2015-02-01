@@ -25,7 +25,6 @@ import org.python.core.PyString;
 import org.python.core.PySystemState;
 import org.python.modules.thread.thread;
 import org.python.util.PythonInterpreter;
-import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 /**
@@ -57,13 +56,9 @@ public class Python extends Service {
 		objectCache = new HashMap<String, PyObject>();
 	}
 
-	@Element(required=false)
 	String inputScript = null;
-	@Element(required=false)
 	String setupScript = null;
-	@Element(required=false)
 	String msgHandlerScript = null;
-	@Element(required=false)
 	private Script currentScript = new Script("untitled.py", "");
 	boolean pythonConsoleInitialized = false;
 	String initialServiceScript = "";

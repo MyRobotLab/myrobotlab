@@ -2,11 +2,9 @@ package org.myrobotlab.net;
 
 import java.io.Serializable;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.logging.Logging;
 
 /**
  * @author GroG

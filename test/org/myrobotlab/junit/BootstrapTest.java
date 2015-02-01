@@ -1,7 +1,5 @@
 package org.myrobotlab.junit;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 
 import org.junit.AfterClass;

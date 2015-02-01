@@ -41,12 +41,12 @@ public class WiiBot extends Service {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(WiiBot.class.getCanonicalName());
 
-	Arduino arduino = null;
-	Wii wii = new Wii("wii");
-	Servo servo = new Servo("servo");
-	OpenCV opencv = new OpenCV("opencv");
-	WiiDAR wiidar = new WiiDAR("wiidar");
-	GUIService gui = new GUIService("gui");
+	transient Arduino arduino = null;
+	transient Wii wii = new Wii("wii");
+	transient Servo servo = new Servo("servo");
+	transient OpenCV opencv = new OpenCV("opencv");
+	transient WiiDAR wiidar = new WiiDAR("wiidar");
+	transient GUIService gui = new GUIService("gui");
 
 	public WiiBot(String n) {
 		super(n);

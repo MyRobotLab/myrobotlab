@@ -44,7 +44,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.OpenCV;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 /**
@@ -55,7 +54,6 @@ import org.slf4j.Logger;
  *         between return types "should" cache the resultant type
  * 
  */
-@Root
 public class SerializableImage implements Serializable {
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCV.class.getCanonicalName());

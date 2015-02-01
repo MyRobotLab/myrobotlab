@@ -27,7 +27,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 	public final static Logger log = LoggerFactory
 			.getLogger(AndroidVoiceRecognition.class);
 
-	private ClientHandler client;
+	transient private ClientHandler client;
 	private int port = 5684;
 	private final static String VERSION = "2015.01.01";
 	private boolean runningserver;

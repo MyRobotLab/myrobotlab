@@ -22,8 +22,6 @@ import org.myrobotlab.net.http.Response;
 import org.myrobotlab.net.http.Response.Status;
 import org.myrobotlab.service.interfaces.HTTPProcessor;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
 
 // FIXME - normalize - make only ResourceProcessor (its twin) - move all this to Encoder !!!
@@ -36,8 +34,6 @@ public class SOAPProcessor implements HTTPProcessor {
 	private HashSet<String> uris = new HashSet<String>();
 
 	static private String templateResponse = null;
-
-	transient private Serializer serializer = new Persister();
 	
 	/**
 	 * a CodeBlock is an execution unit ready to be invoked with converted

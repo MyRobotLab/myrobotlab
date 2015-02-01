@@ -14,30 +14,30 @@ public class Houston extends Service {
 
 	// create service for Houston
 
-	Servo lshoulder;
-	Servo lbicep;
-	Servo lelbow;
+	transient Servo lshoulder;
+	transient Servo lbicep;
+	transient Servo lelbow;
 
-	Servo rshoulder;
-	Servo rbicep;
-	Servo relbow;
+	transient Servo rshoulder;
+	transient Servo rbicep;
+	transient Servo relbow;
 
 	// 4 motors
-	Motor lfmotor;
-	Motor rfmotor;
-	Motor lbmotor;
-	Motor rbmotor;
+	transient Motor lfmotor;
+	transient Motor rfmotor;
+	transient Motor lbmotor;
+	transient Motor rbmotor;
 
-	Sphinx ear;
-	Speech mouth;
+	transient Sphinx ear;
+	transient Speech mouth;
 
-	OpenCV eye;
+	transient OpenCV eye;
 
 	//PointCloud openni;
 
-	Arduino arduino;
+	transient Arduino arduino;
 
-	Tracking tracking;
+	transient Tracking tracking;
 	
 	public Houston(String n) {
 		super(n);

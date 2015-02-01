@@ -20,7 +20,6 @@ import org.myrobotlab.openni.PImage;
 import org.myrobotlab.openni.PVector;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.interfaces.VideoSink;
-import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 import SimpleOpenNI.SimpleOpenNI;
@@ -93,7 +92,7 @@ public class OpenNI extends Service // implements
 	transient FileOutputStream rubySketchUpFile = null;
 
 	// IMPORTANT - this single skeleton contains mapping information !
-	@Element
+	
 	public Skeleton skeleton = new Skeleton();
 
 	private boolean initialized = false;

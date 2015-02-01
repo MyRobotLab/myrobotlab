@@ -121,19 +121,19 @@ public class ArduinoBT extends Service implements //SerialPortEventListener,
 	
     BluetoothAdapter adapter = null;
     // Name of the connected device
-	@Element
+	
     String deviceName = null;
   
     private ConnectThread connectThread = null;
     private ConnectedThread connectedThread = null;
  
-	@Element
+	
 	int baudRate = 115200;
-	@Element
+	
 	int dataBits = 8;
-	@Element
+	
 	int parity = 0;
-	@Element
+	
 	int stopBits = 1;
 	
 	// FIXME imported Arduino constants FIXME - NORMLIZE / GLOBALIZE

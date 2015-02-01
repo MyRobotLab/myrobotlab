@@ -42,9 +42,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Set;
 import java.util.zip.ZipException;
 
-import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -539,21 +539,28 @@ public class FileIO {
 		}
 	}
 	
-	public static boolean rmDir(File directory) {
+	public static boolean rmDir(File directory, Set<File> exclude) {
 	    if(directory.exists()){
 	        File[] files = directory.listFiles();
 	        if(null!=files){
 	            for(int i=0; i<files.length; i++) {
 	                if(files[i].isDirectory()) {
-	                	rmDir(files[i]);
+	                	rmDir(files[i], exclude);
 	                }
 	                else {
-	                    files[i].delete();
+	                	if (exclude != null && exclude.contains(files[i])) {
+	                		log.info("skipping exluded file {}", files[i].getName());
+	                	} else {
+	                		log.info("removing file {}", files[i].getName());
+	                		files[i].delete();
+	                	}
 	                }
 	            }
 	        }
 	    }
-	    return(directory.delete());
+	    
+	    boolean ret = (exclude != null)?true:(directory.delete());
+	    return ret;
 	}
 	
 	public static void compareFiles(String filename1, String filename2) throws FileNotFoundException, FileComparisonException {

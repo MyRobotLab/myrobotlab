@@ -32,14 +32,9 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.roomba.RoombaComm;
 import org.myrobotlab.roomba.RoombaCommSerialDevice;
-import org.myrobotlab.serial.SerialDevice;
 import org.myrobotlab.serial.SerialDeviceFactory;
-import org.myrobotlab.serial.SerialDeviceService;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
-@Root
 public class Roomba extends Service {
 
 	private static final long serialVersionUID = 1L;
@@ -50,15 +45,15 @@ public class Roomba extends Service {
 	
 	private boolean isConnected = false;
 
-	@Element
+	
 	String portName = "";
-	@Element
+	
 	int baudRate = 57600;
-	@Element
+	
 	int dataBits = 8;
-	@Element
+	
 	int parity = 0;
-	@Element
+	
 	int stopBits = 1;
 
 	public Roomba(String n) {

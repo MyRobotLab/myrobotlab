@@ -22,8 +22,6 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.OpenCV;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 import com.googlecode.javacv.FrameGrabber;
@@ -34,7 +32,6 @@ import com.googlecode.javacv.cpp.opencv_core.CvFont;
 import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
-@Root
 public class VideoProcessor implements Runnable, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -45,25 +42,23 @@ public class VideoProcessor implements Runnable, Serializable {
 	public boolean capturing = false;
 
 	// GRABBER BEGIN --------------------------
-	@Element
+	
 	public String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
-	@Element
+	
 	public String grabberType = "com.googlecode.javacv.OpenCVFrameGrabber";
 
 	// OpenCVFilter displayFilter = null;
 
 	// grabber cfg
-	@Element(required = false)
 	public String format = null;
-	@Element
+	
 	public boolean getDepth = false;
-	@Element
+	
 	public int cameraIndex = 0;
-	@Element
+	
 	public String inputFile = "http://localhost/videostream.cgi";
-	@Element(required = false)
 	public String pipelineSelected = "";
-	@Element
+	
 	public boolean publishOpenCVData = true;
 	// GRABBER END --------------------------
 	// DEPRECATED - always use blocking queue

@@ -28,7 +28,7 @@ package org.myrobotlab.service;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -60,16 +60,17 @@ import wiiusej.wiiusejevents.wiiuseapievents.StatusEvent;
 public class Wii extends Service implements WiimoteListener, SerialPortEventListener, LineDriver {
 
 	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(Wii.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Wii.class);
 
-	Wiimote[] wiimotes = null;
-	Wiimote wiimote = null;
+	transient Wiimote[] wiimotes = null;
+	transient Wiimote wiimote = null;
 	int cnt = 0;
 	boolean serialInitialized = false;
 
-	public static class IRData {
+	public static class IRData implements Serializable {
+		private static final long serialVersionUID = 1L;
 		public long time;
-		public IREvent event;
+		transient public IREvent event;
 
 		public IRData(long t, int s) {
 			this.time = t;
@@ -207,9 +208,6 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 		wiimote.setLeds(l1, l2, l3, l4);
 	}
 
-	int pos = 0;
-
-	static ArrayList<IRData> t = new ArrayList<IRData>();
 
 	@Override
 	public void onClassicControllerInsertedEvent(ClassicControllerInsertedEvent arg0) {

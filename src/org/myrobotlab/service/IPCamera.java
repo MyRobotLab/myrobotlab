@@ -21,8 +21,8 @@ public class IPCamera extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	private IPCameraFrameGrabber grabber = null;
-	private Thread videoProcess = null;
+	transient private IPCameraFrameGrabber grabber = null;
+	transient private Thread videoProcess = null;
 
 	public String controlURL;
 

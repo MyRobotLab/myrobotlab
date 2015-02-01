@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import javax.vecmath.Color3f;
 import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -13,8 +12,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.mapper.gui.Simbad;
 import org.myrobotlab.mapper.sim.Agent;
-import org.myrobotlab.mapper.sim.Arch;
-import org.myrobotlab.mapper.sim.Box;
 import org.myrobotlab.mapper.sim.EnvironmentDescription;
 import org.myrobotlab.mapper.sim.Wall;
 import org.slf4j.Logger;

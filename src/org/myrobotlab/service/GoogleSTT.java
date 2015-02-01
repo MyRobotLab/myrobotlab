@@ -72,12 +72,12 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 
 	// microphone capture
 	boolean stopCapture = false;
-	ByteArrayOutputStream byteArrayOutputStream;
-	AudioFormat audioFormat;
-	TargetDataLine targetDataLine;
-	AudioInputStream audioInputStream;
-	SourceDataLine sourceDataLine;
-	CaptureThread captureThread = null;
+	transient ByteArrayOutputStream byteArrayOutputStream;
+	transient AudioFormat audioFormat;
+	transient TargetDataLine targetDataLine;
+	transient AudioInputStream audioInputStream;
+	transient SourceDataLine sourceDataLine;
+	transient CaptureThread captureThread = null;
 
 	String language = "en";
 	
@@ -103,12 +103,12 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 	// TODO - auto-gain adjustment
 	float rms;
 	float rmsThreshold = 0.0050f;
-	public byte[] rawBytes;
+	transient public byte[] rawBytes;
 	boolean isCapturing = false;
 	long captureStartTimeMS;
 	long captureTimeMinimumMS = 1200;
 	long captureTimeMS;
-	private FloatSampleBuffer buffer;
+	transient private FloatSampleBuffer buffer;
 	private int bufferSize = 512; // TODO - experiment with sampling size
 
 	public GoogleSTT(String n) {

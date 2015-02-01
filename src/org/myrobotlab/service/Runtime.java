@@ -2,9 +2,9 @@ package org.myrobotlab.service;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -24,20 +24,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.cmdline.CMDLine;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.BootstrapFactory;
+import org.myrobotlab.framework.Bootstrap;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MessageListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.PreLogger;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.Status;
@@ -50,16 +50,12 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
-import org.myrobotlab.service.interfaces.Bootstrap;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 /**
- * 
  * Runtime is responsible for the creation and removal of all Services and the
  * associated static registries It maintains state information regarding
  * possible & running local Services It maintains state information regarding
@@ -81,7 +77,6 @@ import org.slf4j.Logger;
  * TODO - add check for 64 bit OS & 32 bit JVM :(
  * 
  */
-@Root
 public class Runtime extends Service implements MessageListener {
 	final static private long serialVersionUID = 1L;
 
@@ -104,10 +99,9 @@ public class Runtime extends Service implements MessageListener {
 
 	static private Date startDate = new Date();
 
-	@Element
+	// DEPRECATED - use Service Timer
 	private boolean checkForUpdatesOnStart = true;
 
-	@Element
 	private boolean autoRestartAfterUpdate = false;
 
 	// FYI - can't be transient - "should" be preserved in
@@ -143,7 +137,12 @@ public class Runtime extends Service implements MessageListener {
 	private static String[] globalArgs;
 
 	public static String getVersion() {
-		return FileIO.resourceToString("version.txt");
+		String version = FileIO.resourceToString("version.txt");
+		if (version == null || version.length() == 0) {
+			SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
+			version = format.format(new Date());
+		}
+		return version;
 	}
 
 	public static String getUptime() {
@@ -188,8 +187,8 @@ public class Runtime extends Service implements MessageListener {
 		gmtf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		log.info("============== args begin ==============");
 		StringBuffer sb = new StringBuffer();
-		Bootstrap bootstrap = BootstrapFactory.getInstance();
-		jvmArgs = bootstrap.getJVMArgs();
+
+		jvmArgs = Bootstrap.getJVMArgs();
 		args = new ArrayList<String>();
 		if (globalArgs != null) {
 			for (int i = 0; i < globalArgs.length; ++i) {
@@ -203,28 +202,6 @@ public class Runtime extends Service implements MessageListener {
 		log.info(String.format("args %s", Arrays.toString(args.toArray())));
 
 		log.info("============== args end ==============");
-		log.info("============== prelog begin ==============");
-		try {
-			// when having issues next time just close the prelogger... duh
-			// can't use java.nio.file on Androi
-			// Path prelog = Paths.get(PreLogger.PRELOG_FILENAME);
-
-			File prelog = new File(PreLogger.PRELOG_FILENAME);
-
-			if (prelog.exists()) {
-				log.info(FileIO.fileToString(PreLogger.PRELOG_FILENAME));
-				log.info(String.format("deleting %s", PreLogger.PRELOG_FILENAME));
-				prelog.delete();
-				// Files.delete(prelog);
-				log.info(String.format("deleted %s", PreLogger.PRELOG_FILENAME));
-			} else {
-				log.info("prelog does not exist");
-			}
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		log.info("============== prelog end ==============");
 		log.info("============== env begin ==============");
 		Map<String, String> env = System.getenv();
 		for (Map.Entry<String, String> entry : env.entrySet()) {
@@ -237,12 +214,13 @@ public class Runtime extends Service implements MessageListener {
 		// Platform platform = Platform.getLocalInstance();
 		log.info("============== normalized ==============");
 		log.info("{} - GMT - {}", sdf.format(now), gmtf.format(now));
+		log.info("PID {}", getPID());
 		log.info(String.format("ivy [runtime,%s.%d.%s]", platform.getArch(), platform.getBitness(), platform.getOS()));
 		log.info(String.format("os.name [%s] getOS [%s]", System.getProperty("os.name"), platform.getOS()));
 		log.info(String.format("os.arch [%s] getArch [%s]", System.getProperty("os.arch"), platform.getArch()));
 		log.info(String.format("getBitness [%d]", platform.getBitness()));
 		log.info(String.format("java.vm.name [%s] getVMName [%s]", vmName, platform.getVMName()));
-		log.info(String.format("version [%s]", FileIO.resourceToString("version.txt")));
+		log.info(String.format("version [%s]", Runtime.getVersion()));
 		log.info(String.format("/resource [%s]", FileIO.getResouceLocation()));
 		log.info(String.format("jar path [%s]", FileIO.getResourceJarPath()));
 		log.info(String.format("sun.arch.data.model [%s]", System.getProperty("sun.arch.data.model")));
@@ -439,7 +417,7 @@ public class Runtime extends Service implements MessageListener {
 			intertoobTest = repo.getVersionFromRepo();
 			info("remote version %s", intertoobTest);
 		} catch (Exception e) {
-			error(String.format("if connection error - just bail and save us some time !", e.getMessage()));
+			error(String.format("connection error - proxy? -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80", e.getMessage()));
 			return null;
 		}
 
@@ -545,28 +523,10 @@ public class Runtime extends Service implements MessageListener {
 	 */
 	public void restart() {
 		try {
-
-			// final java.lang.Runtime r = java.lang.Runtime.getRuntime();
 			info("restarting");
 			// TODO - timeout release .releaseAll nice ? - check or re-implement
 			Runtime.releaseAll();
-
-			// create bootstrap.jar
-			Bootstrap bootstrap = BootstrapFactory.getInstance();
-			bootstrap.createBootstrapJar();
-
-			// WRONG - jvm args should be created and maintained in bootstrap
-			// FIXME - get jvm arguments and other original args
-			/*
-			 * ArrayList<String> restartArgs = new ArrayList<String>(); for (int
-			 * i = 0; i < jvmArgs.size(); ++i) {
-			 * restartArgs.add(jvmArgs.get(i)); }
-			 */
-			/*
-			 * for (int i = 0; i < args.size(); ++i) {
-			 * restartArgs.add(args.get(i)); }
-			 */
-			bootstrap.spawn(args);
+			Bootstrap.spawn(args.toArray(new String[args.size()]));
 			System.exit(0);
 
 			// shutdown / exit
@@ -1250,7 +1210,7 @@ public class Runtime extends Service implements MessageListener {
 	 * prints help to the console
 	 */
 	static void mainHelp() {
-		System.out.println(String.format("Runtime %s", FileIO.resourceToString("version.txt")));
+		System.out.println(String.format("Runtime %s", Runtime.getVersion()));
 		System.out.println("-h --help			                       # help ");
 		System.out.println("-v --version		                       # print version");
 		System.out.println("-update   			                       # update myrobotlab");
@@ -1458,7 +1418,9 @@ public class Runtime extends Service implements MessageListener {
 
 			if (log.isDebugEnabled()) {
 				// TODO - determine if there have been new classes added from
-				// ivy
+				// ivy --> Boot Classloader --> Ext ClassLoader --> System
+				// ClassLoader
+				// http://blog.jamesdbloom.com/JVMInternals.html
 				log.debug("ABOUT TO LOAD CLASS");
 				log.debug("loader for this class " + Runtime.class.getClassLoader().getClass().getCanonicalName());
 				log.debug("parent " + Runtime.class.getClassLoader().getParent().getClass().getCanonicalName());
@@ -1618,120 +1580,6 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	// ============== update events begin ==============
-
-	// References :
-	// http://java.dzone.com/articles/programmatically-restart-java
-	// better - http://java.dzone.com/articles/programmatically-restart-java
-	/*
-	 * static public void restart(String restartScript) {
-	 * log.info("restart - restart?"); Runtime.releaseAll(); try { Platform
-	 * platform = Platform.getLocalInstance(); if (restartScript == null) { if
-	 * (platform.isWindows()) {
-	 * java.lang.Runtime.getRuntime().exec("cmd /c start myrobotlab.bat"); }
-	 * else { java.lang.Runtime.getRuntime().exec("./myrobotlab.sh"); } } else {
-	 * if (platform.isWindows()) {
-	 * java.lang.Runtime.getRuntime().exec(String.format
-	 * ("cmd /c start scripts\\%s.cmd", restartScript)); } else { String command
-	 * = String.format("./scripts/%s.sh", restartScript); File exe = new
-	 * File(command); // FIXME - NORMALIZE !!!!! if (!exe.setExecutable(true)) {
-	 * log.error(String.format("could not set %s to executable permissions",
-	 * command)); } java.lang.Runtime.getRuntime().exec(command); } } } catch
-	 * (Exception ex) { Logging.logException(ex); } System.exit(0);
-	 * 
-	 * }
-	 */
-
-	// http://javafrustratzone.blogspot.com/2012/01/bash-shell-in-java-cannot-run-program.html
-	// http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html
-	// http://stackoverflow.com/questions/14165517/processbuilder-forwarding-stdout-and-stderr-of-started-processes-without-blocki
-	// http://stackoverflow.com/questions/10954194/start-cmd-by-using-processbuilder
-	// startShell(new String[]{"dir"});
-	public static int startShell(String[] args) throws IOException {
-		Platform platform = Platform.getLocalInstance();
-		String[] shellArgs;
-		if (platform.isWindows()) {
-			shellArgs = new String[args.length + 2];
-			shellArgs[0] = "cmd.exe";
-			shellArgs[1] = "/c"; // "start" ???
-			for (int i = 0; i < args.length; ++i) {
-				shellArgs[i + 2] = args[i];
-			}
-		} else {
-			shellArgs = new String[args.length + 2];
-			shellArgs[0] = "/bin/bash";
-			for (int i = 0; i < args.length; ++i) {
-				shellArgs[i + 1] = args[i];
-			}
-		}
-		// based on platform
-		return startProcess(shellArgs);
-	}
-
-	public static int startProcess(String[] args) throws IOException {
-		/*
-		 * 
-		 * ProcessBuilder testProcess = new ProcessBuilder(); Map environmentMap
-		 * = testProcess.environment(); System.out.println(environmentMap);
-		 * 
-		 * // usual way System.out.println(System.getenv());
-		 * 
-		 * ProcessBuilder dirProcess = new ProcessBuilder("cmd"); File commands
-		 * = new File("C:/process/commands.bat"); File dirOut = new
-		 * File("C:/process/out.txt"); File dirErr = new
-		 * File("C:/process/err.txt");
-		 * 
-		 * dirProcess.redirectInput(commands);
-		 * dirProcess.redirectOutput(dirOut); dirProcess.redirectError(dirErr);
-		 * 
-		 * ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
-		 * pb.redirectErrorStream(true); // use this to capture messages sent to
-		 * stderr Process shell = pb.start(); InputStream shellIn =
-		 * shell.getInputStream(); // this captures the output from the command
-		 * int shellExitStatus = shell.waitFor(); // wait for the shell to
-		 * finish and get the return code InputStreamReader reader = new
-		 * InputStreamReader(shellIn); BufferedReader buf = new
-		 * BufferedReader(reader); // Read lines using buf
-		 */
-
-		// SHOULD BE THREADED? PROLLY
-		// ANDROID DOES NOT SUPPORT inheritIO()
-		// Process p = new ProcessBuilder().inheritIO().command(args).start();
-		Process p = new ProcessBuilder().command(args).start();
-		// p.waitFor();
-		// int rc = p.exitValue();
-		return 0;
-	}
-
-	static class Move implements Runnable {
-
-		File src;
-		File dst;
-
-		Move(File src, File dst) throws FileNotFoundException {
-			this.src = src;
-			this.dst = dst;
-		}
-
-		Move(String src, String dst) throws FileNotFoundException {
-			this(new File(src), new File(dst));
-		}
-
-		@Override
-		public void run() {
-			try {
-				// Files.move(src.toPath(), dst.toPath(),
-				// StandardCopyOption.REPLACE_EXISTING);
-				// NO NIO ON ANDROID !!!
-				// Files.move(src.toPath(), dst.toPath(),
-				// StandardCopyOption.REPLACE_EXISTING);
-				FileIO.copy(src, dst);
-			} catch (IOException e) {
-				Logging.logException(e);
-			}
-		}
-
-	}
-
 	/**
 	 * 
 	 * should probably be deprecated - currently not used
@@ -1747,16 +1595,7 @@ public class Runtime extends Service implements MessageListener {
 		try {
 			// java binary
 			String java = System.getProperty("java.home") + "/bin/java";
-			// vm arguments
-			/*
-			 * getRuntimeMXBean scares me List<String> vmArguments =
-			 * ManagementFactory.getRuntimeMXBean().getInputArguments();
-			 * StringBuffer vmArgsOneLine = new StringBuffer(); for (String arg
-			 * : vmArguments) { // if it's the agent argument : we ignore it
-			 * otherwise the // address of the old application and the new one
-			 * will be in conflict if (!arg.contains("-agentlib")) {
-			 * vmArgsOneLine.append(arg); vmArgsOneLine.append(" "); } }
-			 */
+
 			// init the command to execute, add the vm args
 			final StringBuffer cmd = new StringBuffer("\"" + java + "\" ");
 
@@ -2097,44 +1936,81 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	/**
-	 * cleans the users local ivy cache
-	 * (local only)
+	 * cleans all files from local cache, serviceData.json, and libraries
 	 */
 	public static boolean cleanCache() {
+		return cleanCache(null);
+	}
+
+	/**
+	 * cleans local cache, serviceData.json, and libraries selectively cleans -
+	 * excludes will be preserved
+	 */
+	public static boolean cleanCache(Set<File> exclude) {
+
 		String cacheDir = String.format("%s%s.repo", System.getProperty("user.home"), File.separator);
 		log.info(String.format("cleanCache [%s]", cacheDir));
-		
-		String serviceDataFileName = String.format("%s%sserviceData.xml", FileIO.getCfgDir(), File.separator);
+
+		String serviceDataFileName = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
 		File serviceData = new File(serviceDataFileName);
-		
-		if (serviceData.exists()){
+
+		if (serviceData.exists()) {
 			// we must remove it
 			log.info(String.format("%s exists we need to remove it", serviceDataFileName));
-			if (!serviceData.delete()){
+			if (!serviceData.delete()) {
 				log.error(String.format("could not delete %s", serviceDataFileName));
 				return false;
 			}
 		}
-		
+
 		File cache = new File(cacheDir);
-		if (!cache.exists()){
+		if (cache.exists()) {
+			log.info(String.format("%s exists we need to remove it", cacheDir));
+			if (!FileIO.rmDir(new File(cacheDir), exclude)) {
+				log.error(String.format("could not remove cache [%s]", cacheDir));
+				return false;
+			}
+
+		} else {
 			log.info(String.format("cache %s does not exist - it's clean !", cacheDir));
-			return true;
 		}
-		boolean ret = FileIO.rmDir(new File(cacheDir));
-		if (!ret){
-			log.error(String.format("could not remove cache [%s]", cacheDir));
-			return false;
+
+		File libraries = new File("libraries");
+		if (libraries.exists()) {
+			if (!FileIO.rmDir(libraries, exclude)) {
+				log.error(String.format("could not remove %s", libraries.getAbsolutePath()));
+				return false;
+			}
+		} else {
+			log.info("libraries does not exist - its clean !");
 		}
-		
 		return true;
 	}
 
-	/*
-	 * static public Thread[] getThreads() { Set<Thread> threadSet =
-	 * Thread.getAllStackTraces().keySet(); Thread[] threadArray =
-	 * threadSet.toArray(new Thread[threadSet.size()]); return threadArray; }
-	 */
+	public static String getPID() {
+
+		SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		final String fallback = TSFormatter.format(new Date());
+
+		try {
+
+			// something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
+			final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+			final int index = jvmName.indexOf('@');
+
+			if (index < 1) {
+				// part before '@' empty (index = 0) / '@' not found (index =
+				// -1)
+				return fallback;
+			}
+
+			return Long.toString(Long.parseLong(jvmName.substring(0, index)));
+		} catch (Exception e) {
+
+		}
+
+		return fallback;
+	}
 
 	/**
 	 * Main starting method of MyRobotLab Parses command line options
@@ -2149,8 +2025,7 @@ public class Runtime extends Service implements MessageListener {
 		// global for this process
 		globalArgs = args;
 
-		CMDLine cmdline = new CMDLine();
-		cmdline.splitLine(args);
+		CMDLine cmdline = new CMDLine(args);
 
 		Logging logging = LoggingFactory.getInstance();
 
@@ -2162,7 +2037,7 @@ public class Runtime extends Service implements MessageListener {
 			}
 
 			if (cmdline.containsKey("-v") || cmdline.containsKey("--version")) {
-				System.out.print(FileIO.resourceToString("version.txt"));
+				System.out.print(Runtime.getVersion());
 				return;
 			}
 			if (cmdline.containsKey("-runtimeName")) {
@@ -2216,6 +2091,49 @@ public class Runtime extends Service implements MessageListener {
 
 			if (cmdline.containsKey("-service")) {
 				createAndStartServices(cmdline);
+			}
+
+			if (cmdline.containsKey("-test")) {
+
+				// check incoming state ..
+				// no additional params means -test Test || Test.test()
+				// Test.test will do its own Bootstrap call
+				// additional param means -test Service1 Service2 ???
+
+				// -test (no params) -> clean and bootstrap { -test Test }
+				// -test Test ->
+				// "I'm in loaded clean environment - ServiceInterface.test("test").test()
+
+				ArrayList<String> testArgs = cmdline.getArgumentList("-test");
+
+				if (testArgs.size() == 0) {
+
+					// No Args - I'm in dirty Environment
+					// need to clean Environment - prepare & respawn
+					Repo repo = new Repo("install");
+					cleanCache();
+					repo.retrieveServiceType("Test");
+
+					Bootstrap.spawn(new String[] { "-test", "Test", "-logToConsole" });
+					/**
+					 * the environment is clean
+					 */
+					// Test test = (Test) Runtime.start("test", "Test");
+					// test.test(cmdline.getArgumentList("-test"));
+					// test.test(cmdline);
+				} else {
+					// -test Test ..
+					// we are in clean environment
+					// get reference and call ServiceInterface test()
+					// 2nd invoke will start Test.test() after clean
+					for (int i = 0; i < testArgs.size(); ++i) {
+						String serviceType = testArgs.get(0);
+						ServiceInterface si = start(serviceType, serviceType);
+						si.test();
+					}
+				}
+
+				return;
 			}
 
 			if (cmdline.containsKey("-invoke")) {

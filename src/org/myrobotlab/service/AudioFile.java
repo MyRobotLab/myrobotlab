@@ -113,10 +113,12 @@ public class AudioFile extends Service {
 
 	public class AdvancedPlayerThread extends Thread {
 		AdvancedPlayer player = null;
+		String filename;
 
 		public AdvancedPlayerThread(String filename, BufferedInputStream bis) {
 			super(filename);
 			try {
+				this.filename = filename;
 				this.player = new AdvancedPlayer(bis);
 				player.setPlayBackListener(playbackListener);
 			} catch (Exception e) {
@@ -129,6 +131,7 @@ public class AudioFile extends Service {
 				invoke("started");
 				player.play();
 				invoke("stopped");
+				invoke("stoppedFile", filename);
 			} catch (Exception e) {
 				Logging.logException(e);
 			}
@@ -158,6 +161,7 @@ public class AudioFile extends Service {
 				player.setPlayBackListener(playbackListener);
 				player.play();
 				invoke("stopped");
+				invoke("stoppedFile", filename);
 			}
 
 		} catch (Exception e) {
@@ -175,6 +179,12 @@ public class AudioFile extends Service {
 	public void stopped() {
 		log.info("stopped");
 	}
+	
+	public String stoppedFile(String filename) {
+		log.info("stoppedFile {}",filename);
+		return filename;
+	}
+
 
 	/* BEGIN - TODO - reconcile - find how javazoom plays wave */
 

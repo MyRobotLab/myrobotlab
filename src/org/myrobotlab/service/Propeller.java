@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -54,13 +53,10 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.StepperControl;
 import org.myrobotlab.service.interfaces.StepperController;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 /**
@@ -83,7 +79,6 @@ import org.slf4j.Logger;
  * 
  */
 
-@Root
 public class Propeller extends Service implements SerialDeviceEventListener, SensorDataPublisher, ServoController, MotorController, StepperController, SerialDeviceService
 {
 
@@ -710,15 +705,15 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 
 	//StringBuffer dump = new StringBuffer();
 
-	@Element
+	
 	private String portName = "";
-	@Element
+	
 	private int rate = 57600;
-	@Element
+	
 	private int databits = 8;
-	@Element
+	
 	private int stopbits = 1;
-	@Element
+	
 	private int parity = 0;
 	private int error_arduino_to_mrl_rx_cnt;
 	private int error_mrl_to_arduino_rx_cnt;

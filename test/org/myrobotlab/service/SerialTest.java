@@ -19,7 +19,6 @@ import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FileIO.FileComparisonException;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -27,11 +26,16 @@ import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
 import org.slf4j.Logger;
 
 /**
- * @author GRPERRY
- *
- *         FIXME - virtual serial should not need RXTXLib to function or to
- *         .getPorts() ! FIXME - should be an easy way to report if JNI loaded
- *         correctly
+ * @author GroG
+ * 
+ *  This class is just responsible for testing the service
+ *  Assumptions :
+ *  	Service dependencies installed
+ *  	Environment classpath is set appropriately to those dependencies
+ *  	Environment java.library.path is set appropriately for the platform being tested
+ *  	Static compare and control files test.zip uncompressed into /test/...
+ *  
+ *  Use the Test service for easy fulfillment of those assumptions
  */
 public class SerialTest {
 
@@ -41,10 +45,6 @@ public class SerialTest {
 	static Serial serial = null;
 	static Serial uart = null;
 	static TestCatcher catcher = null;
-
-	static boolean cleanDepenencies = true;
-	static boolean installDependencies = true;
-	static boolean testHardware = false;
 
 	/**
 	 * @throws java.lang.Exception
@@ -56,6 +56,7 @@ public class SerialTest {
 
 		log.info("setUpBeforeClass");
 
+		/*
 		if (cleanDepenencies) {
 			log.info("cleaning cache");
 			if (!Runtime.cleanCache()){
@@ -73,15 +74,13 @@ public class SerialTest {
 			}
 			
 		}
+		*/
 		
-
 		// FIXME TODO clean repo before installing !!!!
 		serial = (Serial) Runtime.start("serial", "Serial");
 		uart = (Serial) Runtime.start("uart", "Serial");
 		cable = Serial.createNullModemCable("v0", "v1");
 		catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-		
-		
 	}
 
 	/**

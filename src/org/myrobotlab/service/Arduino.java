@@ -80,8 +80,6 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.StepperControl;
 import org.myrobotlab.service.interfaces.StepperController;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 /**
@@ -104,7 +102,6 @@ import org.slf4j.Logger;
  * 
  */
 
-@Root
 public class Arduino extends Service implements SerialDeviceEventListener, SensorDataPublisher, ServoController, MotorController, StepperController, SerialDeviceService,
 		MessageConsumer {
 
@@ -867,8 +864,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	@Override
 	public String getDescription() {
-		return "<html>Arduino is a service which interfaces with an Arduino micro-controller.<br>" + "This interface can operate over radio, IR, or other communications,<br>"
-				+ "but and appropriate .PDE file must be loaded into the micro-controller.<br>" + "See http://myrobotlab.org/communication for details";
+		return "This service interfaces with an Arduino micro-controller.";
 	}
 
 	public void stopService() {
@@ -889,15 +885,15 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 	//StringBuffer dump = new StringBuffer();
 
-	@Element(required=false)
+	
 	private String portName = "";
-	@Element(required=false)
+	
 	private int rate = 57600;
-	@Element(required=false)
+	
 	private int databits = 8;
-	@Element(required=false)
+	
 	private int stopbits = 1;
-	@Element(required=false)
+	
 	private int parity = 0;
 	private int error_arduino_to_mrl_rx_cnt;
 	private int error_mrl_to_arduino_rx_cnt;

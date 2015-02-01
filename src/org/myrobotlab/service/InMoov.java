@@ -15,7 +15,6 @@ import org.myrobotlab.serial.VirtualSerialPort;
 import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 public class InMoov extends Service {
@@ -48,11 +47,8 @@ public class InMoov extends Service {
 	// Dynamic reflective services such as WebGui & XMPP are to be left out of
 	// Peer definitions
 
-	@Element(required = false)
 	String defaultLeftPort; // FIXME - THIS IS A BUG GET RID OF IT - ALL ACCESS
 							// THROUGH MAP !!!
-
-	@Element(required = false)
 	String defaultRightPort; // FIXME - THIS IS A BUG GET RID OF IT - ALL ACCESS
 								// THROUGH MAP !!!
 

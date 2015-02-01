@@ -25,6 +25,7 @@
 
 package org.myrobotlab.service;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.myrobotlab.framework.Service;
@@ -40,12 +41,12 @@ import org.slf4j.Logger;
 public class WiiDAR extends Service {
 
 	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(WiiDAR.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(WiiDAR.class);
 
 	// TODO - possibly initialize - must contend with gui as well as arduino wii
 	// & servo
 	// public Wii wii = null;
-	public Servo servo = null;
+	transient  public Servo servo = null;
 
 	/*
 	 * // TODO remoe these service ----- DEBUG ONLY ------ BEGIN Wii wii = new
@@ -59,22 +60,26 @@ public class WiiDAR extends Service {
 	public static final int RIGHT = 1;
 	public static final int UNKNOWN = -1;
 
-	public IRData lastIRData = null;
-	public Pin lastEncoderData = null;
+	transient public IRData lastIRData = null;
+	transient public Pin lastEncoderData = null;
 
 	int servoRightMax = 0;
-	IRData irRightMax = null;
+	transient IRData irRightMax = null;
 	int servoLeftMax = 0;
-	IRData irLeftMax = null;
+	transient IRData irLeftMax = null;
 	boolean calibrating = true;
 
-	ArrayList<Point> points = new ArrayList<Point>();
-	ArrayList<Point> leftCalibrated = new ArrayList<Point>();
-	ArrayList<Point> rightCalibrated = new ArrayList<Point>();
-	ArrayList<ArrayList<Point>> left = new ArrayList<ArrayList<Point>>();
-	ArrayList<ArrayList<Point>> right = new ArrayList<ArrayList<Point>>();
+	transient ArrayList<Point> points = new ArrayList<Point>();
+	transient ArrayList<Point> leftCalibrated = new ArrayList<Point>();
+	transient ArrayList<Point> rightCalibrated = new ArrayList<Point>();
+	transient ArrayList<ArrayList<Point>> left = new ArrayList<ArrayList<Point>>();
+	transient ArrayList<ArrayList<Point>> right = new ArrayList<ArrayList<Point>>();
 
-	ArrayList<IRData> irdata = new ArrayList<IRData>();
+	transient ArrayList<IRData> irdata = new ArrayList<IRData>();
+	
+	transient Thread sweeperThread = null;
+	transient SweepMonolith sweep = null;
+
 
 	/*
 	 * WiiDar point represents a piece of data for ranging. It has a synced (by
@@ -85,11 +90,12 @@ public class WiiDAR extends Service {
 	 * appropriate IREvent.
 	 */
 
-	public final static class Point {
+	public final static class Point implements Serializable {
+		private static final long serialVersionUID = 1L;
 		public int id = 0;
 		public int type = 0;
 
-		public IRData ir = null;
+		transient public IRData ir = null;
 
 		public double z; // the computed z coordinate
 
@@ -362,9 +368,6 @@ public class WiiDAR extends Service {
 
 		return a;
 	}
-
-	Thread sweeperThread = null;
-	SweepMonolith sweep = null;
 
 	public void startSweep() {
 		if (sweep == null) {

@@ -65,7 +65,6 @@ import org.myrobotlab.net.TCPThread2;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 public class RemoteAdapter extends Service implements Gateway {
@@ -75,7 +74,6 @@ public class RemoteAdapter extends Service implements Gateway {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(RemoteAdapter.class);
 
-	@Element(required = false)
 	public String lastProtocolKey;
 
 	private String defaultPrefix = null;
@@ -87,9 +85,7 @@ public class RemoteAdapter extends Service implements Gateway {
 	transient TCPListener tcpListener = null;
 	transient UDPListener udpListener = null;
 
-	@Element(required = false)
 	private Integer udpPort;
-	@Element(required = false)
 	private Integer tcpPort;
 
 	boolean isListening = false;

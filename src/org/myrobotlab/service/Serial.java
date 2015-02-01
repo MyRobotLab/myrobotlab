@@ -63,25 +63,28 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 	 */
 	transient int BUFFER_SIZE = 1024;
 	transient BlockingQueue<Integer> blockingData = new LinkedBlockingQueue<Integer>();
+	
+	transient ArrayList<Relay> relays = null;
 
 	boolean connected = false;
 	String portName = null;
 	int rate = 57600;
 
 	// ====== recording file io begin ======
-	FileOutputStream fileRX = null;
-	FileOutputStream fileTX = null;
+	transient FileOutputStream fileRX = null;
+	transient FileOutputStream fileTX = null;
 
 	// gui has its own counters
 	int txCount = 0;
 	int rxCount = 0;
 
-	class Relay extends Thread {
-		Serial myService;
-		Socket socket;
-		OutputStream out;
-		InputStream in;
+	static class Relay extends Thread {
+		transient Serial myService;
+		transient Socket socket;
+		transient OutputStream out;
+		transient InputStream in;
 		boolean listening = false;
+
 
 		public Relay(Serial serial, Socket socket) throws IOException {
 			super(String.format("%s.%s", serial.getName(), socket.getRemoteSocketAddress().toString()));
@@ -116,7 +119,6 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 		}
 	}
 
-	ArrayList<Relay> relays = null;
 
 	public Serial(String n) {
 		super(n);
