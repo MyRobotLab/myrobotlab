@@ -18,7 +18,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -35,7 +34,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 	JButton noWorky = null;
 	JButton ok = null;
 	JFrame parent = null;
-	JLabel versionLabel = new JLabel(FileIO.resourceToString("version.txt"));
+	JLabel versionLabel = new JLabel(org.myrobotlab.service.Runtime.getVersion());
 	GUIService gui;
 
 	public AboutDialog(GUIService gui) {

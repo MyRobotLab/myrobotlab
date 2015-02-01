@@ -22,7 +22,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.data.Rectangle;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
@@ -70,7 +69,6 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
  * @author GroG
  * 
  */
-@Root
 public class OpenCVData implements Serializable {
 
 	private static final long serialVersionUID = 1L;

@@ -1,10 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
-
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;

@@ -16,7 +16,6 @@ import javax.swing.SwingUtilities;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.ProgramAB;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.slf4j.Logger;
 

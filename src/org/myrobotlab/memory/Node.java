@@ -1,18 +1,13 @@
 package org.myrobotlab.memory;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 
+import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementMap;
-import org.simpleframework.xml.Root;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
 
 /**
@@ -21,19 +16,17 @@ import org.slf4j.Logger;
  *         free-form associations
  * 
  */
-@Root
 public class Node implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Node.class.getCanonicalName());
 
 	private String name;
-	@Element
+	
 	public double feelingIndex = 0;
-	@Element
+	
 	public double timestamp = System.currentTimeMillis();
 
-	@ElementMap(entry = "data", key = "key", value = "data", attribute = true, inline = true, required = false)
 	private HashMap<String, Object> data = new HashMap<String, Object>();
 
 	/**
@@ -146,8 +139,6 @@ public class Node implements Serializable {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			Serializer serializer = new Persister();
-
 			Node root = new Node("root");
 			root.put("key1", "value1");
 			root.put("key2", "value2");
@@ -166,9 +157,8 @@ public class Node implements Serializable {
 
 			//SerializableImage img = new SerializableImage(ImageIO.read(new File("opencv.4084.jpg")), "myImage");
 			//node2.put("img", img);
-
-			File cfg = new File(String.format("node.xml"));
-			serializer.write(root, cfg);
+			
+			Encoder.toJsonFile(root, "node.json");
 			log.info("here");
 		} catch (Exception e) {
 			Logging.logException(e);

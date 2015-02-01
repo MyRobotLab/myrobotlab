@@ -33,7 +33,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.Incubator;
+import org.myrobotlab.service.Test;
 import org.slf4j.Logger;
 
 public class IncubatorGUI extends ServiceGUI implements ActionListener {
@@ -48,7 +48,7 @@ public class IncubatorGUI extends ServiceGUI implements ActionListener {
 	public void init() {
 	}
 
-	public void getState(Incubator template) {
+	public void getState(Test template) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 
@@ -58,13 +58,13 @@ public class IncubatorGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-		subscribe("publishState", "getState", Incubator.class);
+		subscribe("publishState", "getState", Test.class);
 		send("publishState");
 	}
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishState", "getState", Incubator.class);
+		unsubscribe("publishState", "getState", Test.class);
 	}
 
 	@Override

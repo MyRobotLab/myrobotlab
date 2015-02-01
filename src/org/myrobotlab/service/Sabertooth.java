@@ -13,9 +13,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.SerialDeviceService;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.MotorControl;
-import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 /**
@@ -47,13 +45,13 @@ public class Sabertooth extends Service {
 	private Integer address = 128;
 
 	// range mapping
-	@Element
+	
 	private float minX = 0;
-	@Element
+	
 	private float maxX = 180;
-	@Element
+	
 	private float minY = 0;
-	@Element
+	
 	private float maxY = 180;
 
 	public static final int INPUT = 0x0;

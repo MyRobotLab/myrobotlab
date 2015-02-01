@@ -35,12 +35,11 @@ public class LoggingLog4J extends Logging {
 
 		try {
 			if (clazz != null) {
-				Class<?> c = Class.forName(clazz);
 				logger = org.apache.log4j.Logger.getLogger(clazz);
 			}
 		} catch (Exception e) {
 		}
-		
+
 		if (logger == null) {
 			logger = org.apache.log4j.Logger.getRootLogger();
 		}

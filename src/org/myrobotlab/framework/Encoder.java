@@ -3,6 +3,8 @@ package org.myrobotlab.framework;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -351,6 +353,18 @@ public class Encoder {
 		os.writeObject(o);
 		os.flush();
 		return byteStream.toByteArray();
+	}
+
+	public static void toJsonFile(Object o, String filename) throws IOException {
+		FileOutputStream fos = new FileOutputStream(new File(filename));
+		fos.write(gson.toJson(o).getBytes());
+		fos.close();
+	}
+
+	public static String getServiceType(String inType) {
+		if (inType == null){ return null; }
+		if (inType.contains(".")){ return inType;}
+		return String.format("org.myrobotlab.service.%s", inType);
 	}
 
 }

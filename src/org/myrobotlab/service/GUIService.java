@@ -77,8 +77,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 import com.mxgraph.model.mxCell;
@@ -104,7 +102,6 @@ import com.mxgraph.view.mxGraph;
  * http://www.scribd.com/doc/13122112/Java6-Rules-Adding-Components-To-The-Tabs-On-JTabbedPaneI-Now-A-breeze
  */
 
-@Root
 public class GUIService extends Service implements WindowListener, ActionListener, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -115,7 +112,6 @@ public class GUIService extends Service implements WindowListener, ActionListene
 
 	public transient JFrame frame = null;
 
-	@Element(required = false)
 	public String lastTabVisited;
 
 	public transient JTabbedPane tabs = new JTabbedPane();

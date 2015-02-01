@@ -80,8 +80,8 @@ public class TweedleBot extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public Timer timer = new Timer();
-	private Object event = new Object();
+	transient public Timer timer = new Timer();
+	transient private Object event = new Object();
 
 	// cartesian
 	public float positionX = 0;
@@ -122,7 +122,7 @@ public class TweedleBot extends Service {
 	int startError;
 	int stopError;
 
-	public Arduino arduino;
+	transient public Arduino arduino;
 
 	public final static Logger log = LoggerFactory.getLogger(TweedleBot.class.getCanonicalName());
 

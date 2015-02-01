@@ -25,7 +25,6 @@
 	<classpathentry kind="lib" path="/repo/javazoom.jl.player/1.0.1/jl1.0.1.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.simbad/1.4/simbad-1.4.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar"/>
-	<classpathentry kind="lib" path="/repo/org.apache.log4j/1.2.14/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.op.chess/1.0.0/ChessBoard.jar"/>
 	<classpathentry kind="lib" path="/repo/org.python.core/2.5.2/jython.jar"/>
@@ -62,9 +61,7 @@
 	<classpathentry kind="lib" path="/repo/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
 	<classpathentry kind="lib" path="/repo/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.northwestern.topcodes/1.0/topcodes.jar"/>
-	<classpathentry kind="lib" path="/repo/org.simpleframework.xml/2.7/simple-xml-2.7.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/3.3.0/smack.jar"/>
-	<classpathentry kind="lib" path="/repo/com.google.gson/2.2.4/gson-2.2.4.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.javacv/0.6/javacpp.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.javacv/0.6/javacv-windows-x86_64.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.javacv/0.6/javacv.jar"/>
@@ -82,7 +79,6 @@
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-stream-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.simpleopenni/1.96/SimpleOpenNI.jar"/>
 	<classpathentry kind="lib" path="/repo/io.netty/4.0.19/netty-all-4.0.19.Final.jar"/>
-	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.3.2.4/jovr-0.3.2.4.jar"/>
 	<classpathentry kind="lib" path="/repo/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/repo/org.alicebot.ab/0.0.6.26/Ab.jar"/>
@@ -95,12 +91,8 @@
 	<classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/solr-solrj-4.10.2.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/commons-io-2.3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.paho/1.0/org.eclipse.paho.client.mqttv3_1.0.0.jar"/>
-	<classpathentry kind="lib" path="/repo/org.processing/unknown/controlP5.jar"/>
-	<classpathentry kind="lib" path="/repo/org.processing/unknown/application.windows64/lib/core.jar"/>
-	<classpathentry kind="lib" path="/repo/org.processing/unknown/application.windows64/lib/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="/repo/org.processing/unknown/application.windows64/lib/jogl.jar"/>
-	<classpathentry kind="lib" path="/repo/org.processing/unknown/application.windows64/lib/MultiWiiConf.jar"/>
-	<classpathentry kind="lib" path="/repo/org.processing/unknown/application.windows64/lib/opengl.jar"/>
-	<classpathentry kind="lib" path="/repo/org.processing/unknown/application.windows64/lib/serial.jar"/>
+	<classpathentry kind="lib" path="/repo/org.apache.log4j/1.2.14/log4j-1.2.14.jar"/>
+	<classpathentry kind="lib" path="/repo/com.google.gson/2.3.1/gson-2.3.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

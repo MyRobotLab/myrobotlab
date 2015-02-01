@@ -19,6 +19,8 @@ import org.slf4j.Logger;
 // video2 = NIR pilot cam
 
 public class Plantoid extends Service {
+	public final static Logger log = LoggerFactory.getLogger(Plantoid.class);
+
 	private static final long serialVersionUID = 1L;
 
 	transient private Arduino arduino;
@@ -35,11 +37,11 @@ public class Plantoid extends Service {
 	
 	// FIXME make part of ServoControl
 	
-	public Scanner scanner = null;
+	transient public Scanner scanner = null;
 	
 	int everyNHours = 8;
 	
-	HashMap<String, Object> p = new HashMap<String, Object>();
+	transient HashMap<String, Object> p = new HashMap<String, Object>();
 	
 	public String port = "/dev/ttyACM0";
 
@@ -54,7 +56,37 @@ public class Plantoid extends Service {
 
 	private int sampleRate = 8000;
 
-	public final static Logger log = LoggerFactory.getLogger(Plantoid.class.getCanonicalName());
+	
+	public static Peers getPeers(String name)
+	{
+		Peers peers = new Peers(name);
+		
+		// merge
+		/*
+		peers.suggestAs("tracking.x", "pan", "Servo", "shared x");
+		peers.suggestAs("tracking.y", "tilt", "Servo", "shared y");
+		peers.suggestAs("tracking.opencv", "opencv", "OpenCV", "shared opencv");
+		*/
+	
+		peers.put("arduino", "Arduino", "arduino service");
+		peers.put("audioFile", "AudioFile", "audio file service");
+		peers.put("jFugue", "JFugue", "jfugue service");
+		
+		peers.put("webgui", "WebGUI", "WebGUI service");
+		peers.put("xmpp", "XMPP", "xmpp service");
+		peers.put("leg1", "Servo", "leg1");
+		peers.put("leg2", "Servo", "leg2");
+		peers.put("leg3", "Servo", "leg3");
+		peers.put("leg4", "Servo", "leg4");
+		peers.put("pan",  "Servo", "pan");
+		peers.put("tilt", "Servo", "tilt");
+		peers.put("tracking", "Tracking", "tracking service");
+		peers.put("opencv", "OpenCV", "pilot camera");
+		peers.put("streamer", "VideoStreamer", "video streamer");
+		
+		return peers;
+	}
+
 	
 	class SendReport extends TimerTask {
 
@@ -175,33 +207,6 @@ public class Plantoid extends Service {
 		}
 	}
 	
-	public static Peers getPeers(String name)
-	{
-		Peers peers = new Peers(name);
-		
-		// merge
-		peers.suggestAs("tracking.x", "pan", "Servo", "shared x");
-		peers.suggestAs("tracking.y", "tilt", "Servo", "shared y");
-		peers.suggestAs("tracking.opencv", "opencv", "OpenCV", "shared opencv");
-	
-		peers.put("arduino", "Arduino", "arduino service");
-		peers.put("audioFile", "AudioFile", "audio file service");
-		peers.put("jFugue", "JFugue", "jfugue service");
-		
-		peers.put("webgui", "WebGUI", "WebGUI service");
-		peers.put("xmpp", "XMPP", "xmpp service");
-		peers.put("leg1", "Servo", "leg1");
-		peers.put("leg2", "Servo", "leg2");
-		peers.put("leg3", "Servo", "leg3");
-		peers.put("leg4", "Servo", "leg4");
-		peers.put("pan",  "Servo", "pan");
-		peers.put("tilt", "Servo", "tilt");
-		peers.put("tracking", "Tracking", "tracking service");
-		peers.put("opencv", "OpenCV", "pilot camera");
-		peers.put("streamer", "VideoStreamer", "video streamer");
-		
-		return peers;
-	}
 
 	/**
 	 * Plantoid Service - this service controls all peer services.  It is a OrbousMundus Genus and

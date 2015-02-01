@@ -1,6 +1,6 @@
 package org.myrobotlab.framework;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;

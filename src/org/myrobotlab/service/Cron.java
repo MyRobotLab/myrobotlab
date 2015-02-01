@@ -10,12 +10,8 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
-@Root
 public class Cron extends Service {
 
 	private static final long serialVersionUID = 1L;
@@ -31,10 +27,8 @@ public class Cron extends Service {
 	// 0 7 * * 1-5 |0 18 * * 1-5
 	
 
-	@ElementList(required = false)
 	public ArrayList<Task> tasks = new ArrayList<Task>();
 
-	@Default
 	public static class Task implements Serializable, Runnable {
 		private static final long serialVersionUID = 1L;
 		transient Cron myService;

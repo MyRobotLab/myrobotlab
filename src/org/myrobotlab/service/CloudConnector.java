@@ -24,9 +24,9 @@ public class CloudConnector extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(CloudConnector.class);
 	
-	//@Element
+	//
 	public String robotId;
-	//@Element
+	//
 	public String propertyId;
 	
 	class CloudMessage {

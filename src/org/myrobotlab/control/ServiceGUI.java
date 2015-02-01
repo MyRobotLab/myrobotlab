@@ -48,7 +48,6 @@ import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 /**
@@ -70,13 +69,13 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 
 	// undocked information -- begin --
 
-	@Element
+	
 	public int x;
-	@Element
+	
 	public int y;
-	@Element
+	
 	public int width = 600;
-	@Element
+	
 	public int height = 600;
 
 	transient private JFrame undocked;

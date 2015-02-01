@@ -70,9 +70,6 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
 
 /**
@@ -104,7 +101,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	private URI instanceId = null;
 	protected String prefix = null; // if foreign - this will be name prefix - set by Gateway
 
-	@Element
 	private final String name; // TODO - access directly
 	private String simpleName; // used in gson encoding for getSimpleName()
 	private String serviceClass;
@@ -116,24 +112,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	transient Inbox inbox = null;
 	transient Timer timer = null;
 
-	@Element
+	
 	protected boolean allowDisplay = true;
 
 	transient protected CommunicationInterface cm = null;
 
 	public final static String cfgDir = FileIO.getCfgDir();
 
-	protected Set<String> methodSet;
+	transient protected Set<String> methodSet;
 
-	transient private Serializer serializer = new Persister();
+	//transient private Serializer serializer = new Persister();
 
 	transient protected SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	transient protected Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
 
 	// recordings
 	static private boolean isRecording = false;
-	public final String MESSAGE_RECORDING_FORMAT_XML = "MESSAGE_RECORDING_FORMAT_XML";
-	public final String MESSAGE_RECORDING_FORMAT_BINARY = "MESSAGE_RECORDING_FORMAT_BINARY";
+	transient public final String MESSAGE_RECORDING_FORMAT_XML = "MESSAGE_RECORDING_FORMAT_XML";
+	transient public final String MESSAGE_RECORDING_FORMAT_BINARY = "MESSAGE_RECORDING_FORMAT_BINARY";
 
 	private transient ObjectOutputStream recording;
 	private transient ObjectInputStream playback;
@@ -486,6 +482,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return null;
 	}
 
+	/*
+	static public Set<String> getDependencies(String serviceClass) {
+		
+	}
+	*/
+	
+	static public Index<ServiceReservation> buildDNA(String serviceClass) {
+		return buildDNA("", serviceClass);
+	}
+	
 	static public Index<ServiceReservation> buildDNA(String myKey, String serviceClass) {
 		Index<ServiceReservation> myDNA = new Index<ServiceReservation>();
 		buildDNA(myDNA, myKey, serviceClass, null);
@@ -683,12 +689,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public boolean save() {
 
 		try {
-			File cfg = new File(String.format("%s%s%s.xml", cfgDir, File.separator, this.getName()));
-			serializer.write(this, cfg);
+			File cfg = new File(String.format("%s%s%s.json", cfgDir, File.separator, getName()));
+			//serializer.write(this, cfg);
+			info("serializing %s", getName());
+			String s = Encoder.gson.toJson(this);
+			FileOutputStream out = new FileOutputStream(cfg);
+			out.write(s.getBytes());
+			out.close();
 		} catch (Exception e) {
 			Logging.logException(e);
 			return false;
-		}
+		} 
 		return true;
 	}
 
@@ -702,7 +713,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 		try {
 			File cfg = new File(String.format("%s%s%s", cfgDir, File.separator, cfgFileName));
-			serializer.write(o, cfg);
+			String s = Encoder.gson.toJson(o);
+			FileOutputStream out = new FileOutputStream(cfg);
+			out.write(s.getBytes());
+			out.close();
 		} catch (Exception e) {
 			Logging.logException(e);
 			return false;
@@ -744,7 +758,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public boolean load(Object o, String inCfgFileName) {
 		String filename = null;
 		if (inCfgFileName == null) {
-			filename = String.format("%s%s%s.xml", cfgDir, File.separator, this.getName(), ".xml");
+			filename = String.format("%s%s%s.json", cfgDir, File.separator, this.getName(), ".xml");
 		} else {
 			filename = String.format("%s%s%s", cfgDir, File.separator, inCfgFileName);
 		}
@@ -755,7 +769,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		try {
 			File cfg = new File(filename);
 			if (cfg.exists()) {
-				serializer.read(o, cfg);
+				//serializer.read(o, cfg);
+				String json = FileIO.fileToString(filename);
+				o = Encoder.gson.fromJson(json, o.getClass());
+				
 				return true;
 			}
 			log.info(String.format("cfg file %s does not exist", filename));

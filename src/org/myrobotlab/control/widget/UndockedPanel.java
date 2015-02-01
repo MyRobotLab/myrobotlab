@@ -13,8 +13,6 @@ import javax.swing.JPanel;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 /**
@@ -22,18 +20,17 @@ import org.slf4j.Logger;
  * handles events of closing, saving position and dimensions of 
  *
  */
-@Root
 public class UndockedPanel implements Serializable {
 	public final static Logger log = LoggerFactory.getLogger(UndockedPanel.class.getCanonicalName());
 
 	private static final long serialVersionUID = 1L;
-	@Element
+	
 	public int x;
-	@Element
+	
 	public int y;
-	@Element
+	
 	public int width;
-	@Element
+	
 	public int height;
 	
 	private String label;

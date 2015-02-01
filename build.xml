@@ -90,9 +90,9 @@
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
 	<!-- First thing is load the local properties -->
-	<property file="local.properties"/>
+	<property file="local.properties" />
 	<!-- load default build properties  -->
-	<property file="build.properties"/>
+	<property file="build.properties" />
 	<!-- backfill with the environment variables -->
 	<property environment="env" />
 	<!-- set the tag, if not already set in a local properties file -->
@@ -101,6 +101,8 @@
 	<echo message="tag=${tag}" />
 
 	<!-- set global properties for this build -->
+
+	<property name="fs" location="${file.separator}" />
 	<!-- the source code for release -->
 	<property name="src" location="src" />
 	<!-- unit test source code -->
@@ -111,6 +113,7 @@
 	<property name="report" location="build/report" />
 	<!-- directory for the distrbituion to go into -->
 	<property name="dist" location="dist" />
+	<available file="${build}/classes/resource/license" property="license.present" />
 	<property name="repo" location="../repo" />
 	<property name="resource.root" location="${build}/resource/root" />
 	<tstamp />
@@ -119,7 +122,7 @@
 	<!-- Include the ant contrib task defs -->
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
 		<classpath>
-			<pathelement location="build-lib/ant-contrib-0.6.jar"/>
+			<pathelement location="build-lib/ant-contrib-0.6.jar" />
 		</classpath>
 	</taskdef>
 
@@ -208,28 +211,42 @@
 		<pathelement location="${repo}/io.netty/4.0.19/netty-all-4.0.19.Final.jar" />
 		<pathelement location="${repo}/org.saintandreas.jovr/0.3.2.4/jovr-0.3.2.4.jar" />
 		<pathelement location="${repo}/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar" />
-		<pathelement location="${repo}/org.alicebot.ab/0.0.6.26/Ab.jar"/>
-		<pathelement location="${repo}/com.leapmotion/2.1.3/LeapJava.jar"/>
-		<pathelement location="${repo}/se.comhem.chess/1.1.2/cuckoo112.jar"/>
-		<pathelement location="${repo}/javazoom.spi/1.9.5/mp3spi1.9.5.jar"/>
-		<pathelement location="${repo}/org.apache.solr/4.10.2/noggit-0.5.jar"/>
-		<pathelement location="${repo}/org.apache.solr/4.10.2/solr-solrj-4.10.2.jar"/>
-		<pathelement location="${repo}/org.apache.solr/4.10.2/commons-io-2.3.jar"/>
-		<pathelement location="${repo}/org.eclipse.paho/1.0/org.eclipse.paho.client.mqttv3_1.0.0.jar"/>
+		<pathelement location="${repo}/org.alicebot.ab/0.0.6.26/Ab.jar" />
+		<pathelement location="${repo}/com.leapmotion/2.1.3/LeapJava.jar" />
+		<pathelement location="${repo}/se.comhem.chess/1.1.2/cuckoo112.jar" />
+		<pathelement location="${repo}/javazoom.spi/1.9.5/mp3spi1.9.5.jar" />
+		<pathelement location="${repo}/org.apache.solr/4.10.2/noggit-0.5.jar" />
+		<pathelement location="${repo}/org.apache.solr/4.10.2/solr-solrj-4.10.2.jar" />
+		<pathelement location="${repo}/org.apache.solr/4.10.2/commons-io-2.3.jar" />
+		<pathelement location="${repo}/org.eclipse.paho/1.0/org.eclipse.paho.client.mqttv3_1.0.0.jar" />
+		<pathelement location="${repo}/org.junit/4.11/junit-4.11.jar" />
 	</path>
 
 	<!-- additional jars required to compile unit tests -->
 	<path id="test.classpath">
+		<pathelement location="${repo}/org.apache.log4j/1.2.14/log4j-1.2.14.jar" />
+		<pathelement location="${repo}/org.slf4j/1.6.1/slf4j-log4j12-1.6.1.jar" />
+		<pathelement location="${repo}/org.slf4j/1.6.1/slf4j-api-1.6.1.jar" />
 		<pathelement location="${repo}/org.junit/4.11/junit-4.11.jar" />
 		<pathelement location="${repo}/org.junit/4.11/hamcrest-core-1.3.jar" />
-		<path refid="compile.classpath" />
-		<pathelement location="${build}/classes" />
+		<!-- remove <path refid="compile.classpath" /> -->
+		<!-- remove <pathelement location="${build}/classes" /> -->
 	</path>
+
+
+	<condition property="foo.path" value="C:\Foo\Dir">
+		<os family="windows" />
+	</condition>
+	<condition property="foo.path" value="/home/foo/dir">
+		<os family="unix" />
+	</condition>
+
+	<fail unless="foo.path">No foo.path set for this OS!</fail>
 
 	<!-- ================ init begin ================= -->
 	<target name="init" depends="repoClone">
 		<echo message="compiling with ${ant.java.version}" />
-		<echoproperties/>
+		<echoproperties />
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
 		<!-- mail task properties -->
@@ -302,6 +319,7 @@
 	<!-- repo added if not already cloned - does update to head -->
 	<target name="repoCheck">
 		<available file="${repo}" property="repo.present" />
+
 		<!-- http://stackoverflow.com/questions/18097555/execute-ant-task-if-two-conditions-are-met -->
 		<condition property="git.pull">
 			<and>
@@ -317,6 +335,7 @@
 				</not>
 			</and>
 		</condition>
+
 	</target>
 	<target name="repoExists" depends="repoCheck" if="git.pull">
 		<echo message="git pull ${repo}" />
@@ -345,9 +364,23 @@
 		</exec>
 	</target>
 	<!-- =============== repo end  =============== -->
+	<!-- TODO - work on removing these 3rd party dependencies -->
+	<target name="unzip" unless="${license.present}">
+		<echo>unzipping dependencies</echo>
+		<echo message="${license.present}" />
+		<unzip dest="${build}/classes">
+			<file name="${repo}/com.google.gson/2.2.4/gson-2.2.4.jar" />
+			<file name="${repo}/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar" />
+			<file name="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar" />
+			<file name="${repo}/org.apache.log4j/1.2.14/log4j-1.2.14.jar" />
+			<file name="${repo}/org.slf4j/1.6.1/slf4j-log4j12-1.6.1.jar" />
+			<file name="${repo}/org.slf4j/1.6.1/slf4j-api-1.6.1.jar" />
+		</unzip>
+	</target>
 
 	<!-- Compile target, compile all myrobotlab src files -->
-	<target name="compile" depends="init" description="compile the source ">
+	<target name="compile" depends="init,unzip" description="compile the source ">
+
 		<echo>compile start</echo>
 		<!-- compile the java code from ${src} into ${build} -->
 		<javac srcdir="${src}" destdir="${build}/classes" debug="true" includeantruntime="false">
@@ -374,7 +407,7 @@
 		<jar jarfile="${build}/lib/myrobotlab.jar" basedir="${build}/classes">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
-				<attribute name="Main-Class" value="org.myrobotlab.framework.BootstrapHotSpot" />
+				<attribute name="Main-Class" value="org.myrobotlab.framework.Bootstrap" />
 				<attribute name="Built-By" value="${user.name}" />
 				<!-- section name="myrobotlab" -->
 				<section name="compile">
@@ -404,7 +437,7 @@
 	<!-- FYI - HTTP STATUS 422 - MEANS YOU ALREADY HAVE THAT RELEASE MADE !!! -->
 	<target name="createGitHubRelease" depends="init">
 		<echo message="token = ${github.token}" />
-		<echo message="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${tag}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}"/>
+		<echo message="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${tag}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}" />
 
 		<http method="POST" url="https://api.github.com/repos/MyRobotLab/myrobotlab/releases" expected="201" printresponseheaders="true" printrequestheaders="true" printresponse="true" entityProperty="release.response">
 			<headers>
@@ -436,49 +469,19 @@
 			<entity file="${dist}/myrobotlab.jar" binary="true" />
 		</http>
 	</target>
-        <!-- TODO: make this depend on test , gotta figure out why travis ci is failing on this now. -->
-	<target name="dist" depends="jar,test" description="generate the distribution">
+	<!-- TODO: make this depend on test , gotta figure out why travis ci is failing on this now. -->
+	<target name="dist" depends="jar" description="generate the distribution">
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}.jar" />
 		<!-- backwards compat .. TODO: review this.. -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
+		<!-- for convienence of debugging spawn -->
+		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
 	</target>
 
 	<target name="clean" description="clean up">
 		<!-- Delete the ${build} and ${temp} directory trees -->
 		<delete dir="${build}" />
 		<delete dir="${temp}" />
-	</target>
-
-	<target name="test" depends="compiletests">
-		<!-- run tests - Services will need to be loaded if they don't come 
-			 with the default mrl load ie. if they have dependencies on the repo -->
-		<junit printsummary="withOutAndErr" haltonfailure="yes">
-			<jvmarg value="-Djava.library.path=libraries/native"/>
-			<!--			
-			FIXME - OS NEEDS TO BE TAKEN OUT OF PATH !!!!!
-			So we can do this
-			<jvmarg value="-Djava.library.path=libraries/native"/>
-			and not this !!!
-			<jvmarg value="-Djava.library.path=libraries/native/x86.64.windows"/>
-			so we don't have to exclude SerialTest !
-			-->
-			<sysproperty key="java.awt.headless" value="true" />
-			<!-- any junit tests would fail running on jenkins with gui components -->
-			<classpath>
-				<pathelement location="${build}/classes" />
-				<pathelement location="${build}/test" />
-				<path refid="test.classpath" />
-			</classpath>
-			<formatter type="xml" />
-
-			<batchtest fork="yes" todir="${build}/report">
-				<fileset dir="${test}">
-					<include name="**/*Test.java" />
-					<exclude name="**/SerialTest.java" />
-				</fileset>
-			</batchtest>
-
-		</junit>
 	</target>
 
 	<target name="report" depends="test">
@@ -510,5 +513,77 @@
 	</target>
 
 	<!-- TODO - upload/publish javadoc -->
+
+	<target name="test" depends="compiletests">
+		<junit printsummary="withOutAndErr" fork="true" haltonfailure="yes">
+			<!--
+			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
+			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			
+			-->
+
+			<!--			
+			FIXME - OS NEEDS TO BE TAKEN OUT OF PATH !!!!!
+			So we can do this
+			<jvmarg value="-Djava.library.path=libraries/native"/>
+			and not this !!!
+			<jvmarg value="-Djava.library.path=libraries/native/x86.64.windows"/>
+			so we don't have to exclude SerialTest !
+			-->
+			<sysproperty key="java.awt.headless" value="true" />
+			<!-- any junit tests would fail running on jenkins with gui components -->
+			<classpath>
+				<!-- <pathelement location="${dist}/myrobotlab.jar" /> FIXME - it needs to be this -->
+				<pathelement location="${build}/classes" />
+				<pathelement location="${build}/test" />
+				<path refid="test.classpath" />
+				<path refid="compile.classpath" />
+				<!-- remove <path refid="compile.classpath" /> -->
+				<!-- remove <pathelement location="${build}/classes" /> -->
+			</classpath>
+			<formatter type="xml" />
+
+			<batchtest fork="yes" todir="${build}/report">
+				<fileset dir="${test}">
+					<include name="**/*Test.java" />
+					<exclude name="**/SerialTest.java" />
+				</fileset>
+			</batchtest>
+
+		</junit>
+	</target>
+
+	<!-- Incubator -->
+	<!-- In order to simulate a working deployment
+		the repo should be clean
+		dist/libraries/jar should only contain the minimal amount of jars
+		the load from the repo needs to occur BEFORE the test !!! - this means 2 execs are need
+		first one to clean and then deploy the Service's dependencies
+		second one to preform the test
+		
+		* clean repo - (includes serviceData.xml | .myrobotlab)
+		* clean libraries/* - with the exception of Bootstrap jars (copy over after full delete)
+		* request repo pull of dependencies for the service in question
+	-->
+
+	<target name="exec" depends="dist">
+		<!-- depends="dist"-->
+		<java classname="org.myrobotlab.service.Incubator" fork="true" failonerror="true">
+			<!-- it should be jar="${dist}/myrobotlab.jar" in all its complexity -->
+			<!-- <arg value="-h" /> -->
+			<jvmarg value="-Djava.library.path=${build}${fs}libraries${fs}native" />
+			<!-- <jvmarg value="-cp ${dist}/myrobotlab.jar;${dist}/libraries/jar/*;"/> -->
+			<env key="LD_LIBRARY_PATH" path="${build}${fs}libraries${fs}native" />
+			<classpath>
+				<fileset dir="${dist}/libraries/jar">
+					<include name="**/*.jar" />
+				</fileset>
+				<pathelement location="${dist}/myrobotlab.jar" />
+				<!-- FIXME - the jar should be executed - problem with 205 INFO terminating - good luck new bootstrap :) -->
+				<path refid="test.classpath" />
+				<!-- remove <path refid="compile.classpath" /> -->
+				<!-- remove <pathelement location="${build}/classes" /> -->
+			</classpath>
+		</java>
+	</target>
 
 </project>

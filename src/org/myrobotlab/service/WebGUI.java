@@ -18,7 +18,6 @@ import org.myrobotlab.security.BasicSecurity;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.webgui.WSServer;
 import org.myrobotlab.webgui.WSServer.WSMsg;
-import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 public class WebGUI extends Service implements AuthorizationProvider {
@@ -56,15 +55,15 @@ public class WebGUI extends Service implements AuthorizationProvider {
 
 	public final static Logger log = LoggerFactory.getLogger(WebGUI.class);
 
-	@Element
+	
 	public Integer port = 7777;
-	@Element
+	
 	boolean autoStartBrowser = true;
-	@Element
+	
 	boolean useLocalResources = true;
-	@Element
+	
 	public String startURL = "http://127.0.0.1:%d/index.html";
-	@Element
+	
 	public String root = "resource";
 
 	public int messages = 0;

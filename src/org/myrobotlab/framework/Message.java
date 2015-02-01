@@ -25,7 +25,6 @@
 
 package org.myrobotlab.framework;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,17 +32,11 @@ import java.util.HashSet;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementArray;
-import org.simpleframework.xml.Root;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
 
 /**
  * @author GroG
  * 
  */
-@Root
 public class Message implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public final static String BLOCKING = "B";
@@ -52,28 +45,28 @@ public class Message implements Serializable {
 	/**
 	 * unique identifier for this message - TODO remove
 	 */
-	@Element
+	
 	public long msgID;
 	/**
 	 * datetimestamp when message is created GMT - hashCode?
 	 */
-	@Element
+	
 	public long timeStamp;
 	/**
 	 * globally unique name of destination Service. This will be the Service
 	 * endpoint of this Message.
 	 */
-	@Element
+	
 	public String name;
 	/**
 	 * name of the sending Service which sent this Message
 	 */
-	@Element
+	
 	public String sender;
 	/**
 	 * originating source method which generated this Message
 	 */
-	@Element
+	
 	public String sendingMethod;
 	/**
 	 * history of the message, its routing stops and Services it passed through.
@@ -157,15 +150,15 @@ public class Message implements Serializable {
 	 * state it can be in is null | BLOCKING | RETURN FIXME - this should be
 	 * msgType not status
 	 */
-	@Element(required=false)
+	
 	public String status;
 	
-	@Element(required=false)
+	
 	public String msgType; // Broadcast|Blocking|Blocking Return - deprecated
 	/**
 	 * the method which will be invoked on the destination @see Service
 	 */
-	@Element
+	
 	public String method;
 
 	/**
@@ -173,7 +166,6 @@ public class Message implements Serializable {
 	 * invoking a service request this would be the parameter (list) - this
 	 * would the return type data if the message is outbound
 	 */
-	@ElementArray(required=false)
 	public Object[] data;
 
 	public Message() {
@@ -298,12 +290,9 @@ public class Message implements Serializable {
 		msg.sendingMethod = "publishImage";
 		msg.timeStamp = System.currentTimeMillis();
 		msg.data = new Object[]{"hello"};
-		
-		Serializer serializer = new Persister();
 
 		try {
-			File cfg = new File(String.format("msg.xml"));
-			serializer.write(msg, cfg);
+			Encoder.toJsonFile(msg, "msg.xml");
 		} catch (Exception e) {
 			Logging.logException(e);
 		}

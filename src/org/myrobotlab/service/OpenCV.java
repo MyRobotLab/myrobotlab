@@ -80,8 +80,6 @@ import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.interfaces.VideoSource;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 import org.slf4j.Logger;
 
 import com.googlecode.javacv.FrameGrabber;
@@ -90,7 +88,6 @@ import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
 import com.googlecode.javacv.cpp.opencv_core.CvRect;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
-@Root
 public class OpenCV extends VideoSource {
 
 	// FIXME - don't return BufferedImage return SerializableImage always !
@@ -138,7 +135,7 @@ public class OpenCV extends VideoSource {
 	// yep its public - cause a whole lotta data
 	// will get set on it before a setState
 	
-	@Element
+	
 	public VideoProcessor videoProcessor = new VideoProcessor();;
 
 	// mask for each named filter

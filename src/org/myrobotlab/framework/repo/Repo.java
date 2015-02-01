@@ -33,7 +33,9 @@ import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -54,7 +56,7 @@ public class Repo implements Serializable {
 	public HashSet<String> nativeFileExt = new HashSet<String>(Arrays.asList("dll", "so", "dylib", "jnilib"));
 	public final String REPO_BASE_URL = "https://raw.githubusercontent.com/MyRobotLab/repo/master";
 	public static final Filter NO_FILTER = NoFilter.INSTANCE;
-	
+
 	ArrayList<String> errors = new ArrayList<String>();
 
 	// FYI ! - non of these can be transient
@@ -156,7 +158,7 @@ public class Repo implements Serializable {
 
 		// all else fails - no local file - no remote - we will get
 		// the serviceData packaged with the jar
-		String sd = FileIO.resourceToString("framework/serviceData.xml");
+		String sd = FileIO.resourceToString("framework/serviceData.json");
 		log.info(sd);
 		if (sd == null) {
 			error("resource serviceData not found!");
@@ -170,12 +172,12 @@ public class Repo implements Serializable {
 	public ServiceData getServiceDataFromRepo() {
 		try {
 
-			remoteServiceData = ServiceData.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/master/serviceData.xml");
+			remoteServiceData = ServiceData.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/master/serviceData.json");
 			if (remoteServiceData == null) {
 				error("could not get remote service data");
 				return null;
 			}
-			String repoFileName = String.format("%s%sserviceData.xml", FileIO.getCfgDir(), File.separator);
+			String repoFileName = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
 			info("retrieved remote service data {}", repoFileName);
 			remoteServiceData.save(repoFileName);
 
@@ -232,7 +234,7 @@ public class Repo implements Serializable {
 	}
 
 	public String getServiceDataURL() {
-		return String.format("%s/serviceData.xml", REPO_BASE_URL);
+		return String.format("%s/serviceData.json", REPO_BASE_URL);
 	}
 
 	public boolean getLatestJar() {
@@ -323,9 +325,26 @@ public class Repo implements Serializable {
 				error("unknown service %s", fullTypeName);
 				return false;
 			}
-			if (st.dependencyList != null) {
-				for (int i = 0; i < st.dependencyList.size(); ++i) {
-					String d = st.dependencyList.get(i);
+
+			// FIXME !!! FIND PEERS !! - IF ALL PEERS ARE INSTALLED THEN
+			// CONTINUE
+			// ELSE FALSE - log peers..
+
+			Peers peers = Peers.getPeers(fullTypeName);
+			if (peers != null) {
+				ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
+				for (int i = 0; i < peerList.size(); ++i) {
+					ServiceReservation sr = peerList.get(i);
+					log.info("checking peer {} dependencies", sr.fullTypeName);
+					if (!isServiceTypeInstalled(sr.fullTypeName)){
+						return false;
+					}
+				}
+			}
+
+			if (st.dependencies != null) {
+				for (int i = 0; i < st.dependencies.size(); ++i) {
+					String d = st.dependencies.get(i);
 					if (!localServiceData.containsDependency(d)) {
 						error(String.format("service type %s does not have defined dependency %s", st.name, d));
 						return false;
@@ -468,7 +487,7 @@ public class Repo implements Serializable {
 
 			Dependency dependency = localServiceData.getDependency(org);
 			if (dependency == null) {
-				error("successfully resolved dependency - but it is not defined in local serviceData.xml");
+				error("successfully resolved dependency - but it is not defined in local serviceData.json");
 				return report;
 			}
 
@@ -508,11 +527,16 @@ public class Repo implements Serializable {
 		ServiceData sd = getServiceDataFile();
 		ArrayList<Dependency> deps = new ArrayList<Dependency>();
 		if (sd.containsServiceType(fullServiceName)) {
-			ArrayList<String> orgs = sd.getServiceType(fullServiceName).dependencyList;
+			ArrayList<String> orgs = sd.getServiceType(fullServiceName).dependencies;
 			if (orgs != null) {
 				// Dependency[] deps = new Dependency[orgs.size()];
 				for (int i = 0; i < orgs.size(); ++i) {
-					deps.add(sd.getDependency(orgs.get(i)));
+					Dependency d = sd.getDependency(orgs.get(i));
+					if (d != null) {
+						deps.add(d);
+					} else {
+						error("NO DEPENDENCY DEFINED FOR %s - %s", fullServiceName, orgs.get(i));
+					}
 				}
 				return deps;
 			}
@@ -523,6 +547,10 @@ public class Repo implements Serializable {
 	}
 
 	public ArrayList<ResolveReport> retrieveServiceType(String fullTypeName) throws ParseException, IOException {
+
+		if (!fullTypeName.contains(".")) {
+			fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
+		}
 
 		ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();
 		ArrayList<Dependency> deps = getDependencies(fullTypeName);
@@ -540,7 +568,7 @@ public class Repo implements Serializable {
 						List<?> problems = report.getAllProblemMessages();
 						for (int j = 0; j < problems.size(); ++j) {
 							Object problem = problems.get(j);
-							
+
 							// error(problem.toString()); - already prints out
 							// when retrieved
 						}
@@ -551,7 +579,7 @@ public class Repo implements Serializable {
 
 		} else {
 			// FIXME - fill reports with HAPPY ENTRY :D
-			log.info("%s is free of dependencies ", fullTypeName);
+			log.info("{} is free of dependencies ", fullTypeName);
 		}
 
 		return reports;
@@ -587,7 +615,7 @@ public class Repo implements Serializable {
 		/**
 		 * TODO - test with all directories missing test as "one jar"
 		 * 
-		 * Use Cases : jar / no jar serviceData.xml - none, local, remote (no
+		 * Use Cases : jar / no jar serviceData.json - none, local, remote (no
 		 * communication) / proxy / no proxy updateJar - no connection /
 		 * connection / preserve main args - jvm parameters update repo - no
 		 * connection / dependency affects others / single Service type / single
@@ -601,6 +629,14 @@ public class Repo implements Serializable {
 		// get local instance
 		Repo repo = new Repo("test");
 
+		
+		if (!repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")){
+			log.info("not installed");
+		} else {
+			log.info("is installed");
+		}
+		
+		
 		repo.retrieveServiceType("org.myrobotlab.service.Arduino");
 
 		Updates updates = repo.checkForUpdates();
@@ -615,7 +651,7 @@ public class Repo implements Serializable {
 		// repo.clear(org, revision) // whipes out cache for 1 dep
 		// repo.clear() // whipes out cache
 
-		// FIXME - no serviceData.xml = get from remote - will lose local cache
+		// FIXME - no serviceData.json = get from remote - will lose local cache
 		// info
 
 		// get service type names
@@ -646,6 +682,19 @@ public class Repo implements Serializable {
 
 	}
 
+	public boolean hasErrors() {
+		return (errors.size() > 0) ? true : false;
+	}
+
+	public String getErrors() {
+		StringBuffer sb = new StringBuffer();
+		for (String error : errors) {
+			sb.append(error);
+		}
+
+		return sb.toString();
+	}
+
 	public static void main(String[] args) {
 		try {
 			LoggingFactory.getInstance().configure();
@@ -656,19 +705,6 @@ public class Repo implements Serializable {
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
-	}
-
-	public boolean hasErrors() {
-		return (errors.size() > 0)?true:false;
-	}
-
-	public String getErrors() {
-		StringBuffer sb = new StringBuffer();
-		for(String error : errors){
-			sb.append(error);
-		}
-		
-		return sb.toString();
 	}
 
 }

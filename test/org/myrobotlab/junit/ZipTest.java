@@ -1,13 +1,10 @@
 package org.myrobotlab.junit;
 
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 

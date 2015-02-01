@@ -1,10 +1,10 @@
 package org.myrobotlab.service;
 
 //import java.awt.Rectangle;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
@@ -18,8 +18,6 @@ import org.myrobotlab.memory.Node;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.service.data.Rectangle;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
 
 /**
@@ -69,7 +67,9 @@ public class Cortex extends Service implements MemoryChangeListener {
 
 	public void stopService(){
 		super.stopService();
-		faceDetector.stopCapture();
+		if (faceDetector != null){
+			faceDetector.stopCapture();
+		}
 	}
 		
 	public void startService()
@@ -218,12 +218,7 @@ public class Cortex extends Service implements MemoryChangeListener {
 		}
 
 		try {
-			Serializer serializer = new Persister();
-
-			// SerializableImage img = new SerializableImage(ImageIO.read(new
-			// File("opencv.4084.jpg")), "myImage");
-			File xml = new File(filename);
-			serializer.write(memory, xml);
+			Encoder.toJsonFile(memory, filename);
 
 		} catch (Exception e) {
 			Logging.logException(e);

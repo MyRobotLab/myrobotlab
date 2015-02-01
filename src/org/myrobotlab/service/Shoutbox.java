@@ -49,10 +49,10 @@ public class Shoutbox extends Service {
 	transient ProgramAB chatbot;
 	transient XMPP xmpp;
 
-	ArrayList<String> xmppRelays = new ArrayList<String>();
-	ArrayList<String> chatbotNames = new ArrayList<String>();
+	transient ArrayList<String> xmppRelays = new ArrayList<String>();
+	transient ArrayList<String> chatbotNames = new ArrayList<String>();
 	
-	HashMap<String, String> aliases = new HashMap<String, String>();
+	transient HashMap<String, String> aliases = new HashMap<String, String>();
 
 	int imageDefaultHeight = 200;
 	int imageDefaultWidth = 200;
@@ -63,11 +63,11 @@ public class Shoutbox extends Service {
 
 	int maxShoutsInMemory = 200;
 	ArrayList<Shout> shouts = new ArrayList<Shout>();
-	Connections conns = new Connections();
+	transient Connections conns = new Connections();
 
 	int msgCount;
-	FileWriter fw = null;
-	BufferedWriter bw = null;
+	transient FileWriter fw = null;
+	transient BufferedWriter bw = null;
 
 	int maxArchiveRecordCount = 50;
 

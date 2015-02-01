@@ -10,7 +10,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.simpleframework.xml.Element;
 import org.slf4j.Logger;
 
 public class Drupal extends Service {
@@ -19,15 +18,15 @@ public class Drupal extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Drupal.class.getCanonicalName());
 
-	@Element
+	
 	String botName = "Cleverbot";
-	@Element
+	
 	boolean doneChatting = false;
-	@Element
+	
 	public String host;
-	@Element
+	
 	public String username;
-	@Element
+	
 	public String password;
 	public String chatResponseSearchString;
 	final public String cleverbotServiceName;

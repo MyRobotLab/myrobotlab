@@ -1,7 +1,5 @@
 package org.myrobotlab.junit;
 
-import static org.junit.Assert.fail;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
