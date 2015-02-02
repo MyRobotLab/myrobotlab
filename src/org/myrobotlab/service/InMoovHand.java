@@ -151,9 +151,26 @@ public class InMoovHand extends Service implements LeapDataListener {
 		if (leap == null) {
 			leap = (LeapMotion2) startPeer("leap");}
 		
-			leap.addLeapDataListener(this);
+			this.index.map(90,0,this.index.getMin(),this.index.getMax());
+			this.thumb.map(90,0,this.thumb.getMin(),this.thumb.getMax());
+			this.majeure.map(90,0,this.majeure.getMin(),this.majeure.getMax());
+			this.ringFinger.map(90,0,this.ringFinger.getMin(),this.ringFinger.getMax());
+			this.pinky.map(90,0,this.pinky.getMin(),this.pinky.getMax());
+		    leap.addLeapDataListener(this);
 			leap.startTracking();
 			return;
+	}
+	
+	public void stopLeapTracking() {
+		    leap.stopTracking();
+		    this.index.map(this.index.getMin(),this.index.getMax(),this.index.getMin(),this.index.getMax());
+			this.thumb.map(this.thumb.getMin(),this.thumb.getMax(),this.thumb.getMin(),this.thumb.getMax());
+			this.majeure.map(this.majeure.getMin(),this.majeure.getMax(),this.majeure.getMin(),this.majeure.getMax());
+			this.ringFinger.map(this.ringFinger.getMin(),this.ringFinger.getMax(),this.ringFinger.getMin(),this.ringFinger.getMax());
+			this.pinky.map(this.pinky.getMin(),this.pinky.getMax(),this.pinky.getMin(),this.pinky.getMax());
+			
+			this.rest();
+	        return;
 	}
 
 	@Override
@@ -443,13 +460,17 @@ public class InMoovHand extends Service implements LeapDataListener {
 	@Override
 	public LeapData onLeapData(LeapData data) {
 		//if (this.getSide() == "right") {
-		index.moveTo(data.rightHand.index);
-		thumb.moveTo(data.rightHand.thumb);
-		pinky.moveTo(data.rightHand.pinky);
-		ringFinger.moveTo(data.rightHand.ring);
-		majeure.moveTo(data.rightHand.middle);
+		//System.out.println(data.frame.hands().rightmost().isValid());
+		//System.out.println(data.frame.hands().rightmost().confidence());
+		if (data.frame.hands().rightmost().isValid() == true) {
+		
+			index.moveTo(data.rightHand.index);
+		    thumb.moveTo(data.rightHand.thumb);
+		    pinky.moveTo(data.rightHand.pinky);
+		    ringFinger.moveTo(data.rightHand.ring);
+		    majeure.moveTo(data.rightHand.middle);
 		//}
-		// 
+		}
 		return data;
 	}
 
