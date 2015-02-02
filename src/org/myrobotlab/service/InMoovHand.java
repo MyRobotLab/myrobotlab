@@ -152,7 +152,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 			leap = (LeapMotion2) startPeer("leap");}
 		
 			this.index.map(90,0,this.index.getMin(),this.index.getMax());
-			this.thumb.map(50,0,this.thumb.getMin(),this.thumb.getMax());
+			this.thumb.map(90,50,this.thumb.getMin(),this.thumb.getMax());
 			this.majeure.map(90,0,this.majeure.getMin(),this.majeure.getMax());
 			this.ringFinger.map(90,0,this.ringFinger.getMin(),this.ringFinger.getMax());
 			this.pinky.map(90,0,this.pinky.getMin(),this.pinky.getMax());
