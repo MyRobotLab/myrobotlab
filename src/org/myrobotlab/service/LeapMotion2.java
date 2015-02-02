@@ -173,5 +173,24 @@ public LeapMotion2(String n) {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public void activateVRMode() {
+		controller.setPolicyFlags(Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+		log.info("virtual reality mode active");
+		return;
+	}
+	
+	public void activateDefaultMode() {
+		controller.setPolicyFlags(Controller.PolicyFlag.POLICY_DEFAULT);
+		log.info("default mode active");
+		return;
+	}
+	
+	public void checkPolicy(){
+		log.info("controller.policyFlags()");
+	}
+	
+	
+		
 
 }
