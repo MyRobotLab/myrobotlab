@@ -6,6 +6,7 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.LeapMotion2.Hand;
 import org.myrobotlab.service.LeapMotion2.LeapData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.slf4j.Logger;
@@ -146,11 +147,10 @@ public class InMoovHand extends Service implements LeapDataListener {
 		wrist.attach();
 		return true;
 	}
-	
+
 	public void startLeapTracking() {
 		if (leap == null) {
 			leap = (LeapMotion2) startPeer("leap");}
-		
 			this.index.map(90,0,this.index.getMin(),this.index.getMax());
 			this.thumb.map(90,50,this.thumb.getMin(),this.thumb.getMax());
 			this.majeure.map(90,0,this.majeure.getMin(),this.majeure.getMax());
@@ -162,15 +162,14 @@ public class InMoovHand extends Service implements LeapDataListener {
 	}
 	
 	public void stopLeapTracking() {
-		    leap.stopTracking();
-		    this.index.map(this.index.getMin(),this.index.getMax(),this.index.getMin(),this.index.getMax());
-			this.thumb.map(this.thumb.getMin(),this.thumb.getMax(),this.thumb.getMin(),this.thumb.getMax());
-			this.majeure.map(this.majeure.getMin(),this.majeure.getMax(),this.majeure.getMin(),this.majeure.getMax());
-			this.ringFinger.map(this.ringFinger.getMin(),this.ringFinger.getMax(),this.ringFinger.getMin(),this.ringFinger.getMax());
-			this.pinky.map(this.pinky.getMin(),this.pinky.getMax(),this.pinky.getMin(),this.pinky.getMax());
-			
-			this.rest();
-	        return;
+		leap.stopTracking();
+		this.index.map(this.index.getMin(),this.index.getMax(),this.index.getMin(),this.index.getMax());
+		this.thumb.map(this.thumb.getMin(),this.thumb.getMax(),this.thumb.getMin(),this.thumb.getMax());
+		this.majeure.map(this.majeure.getMin(),this.majeure.getMax(),this.majeure.getMin(),this.majeure.getMax());
+		this.ringFinger.map(this.ringFinger.getMin(),this.ringFinger.getMax(),this.ringFinger.getMin(),this.ringFinger.getMax());
+		this.pinky.map(this.pinky.getMin(),this.pinky.getMax(),this.pinky.getMin(),this.pinky.getMax());
+		this.rest();
+		return;
 	}
 
 	@Override
@@ -399,14 +398,14 @@ public class InMoovHand extends Service implements LeapDataListener {
 	}
 
 	public long getLastActivityTime() {
-		
+
 		long lastActivityTime =  Math.max(index.getLastActivityTime(), thumb.getLastActivityTime());
 		lastActivityTime = Math.max(lastActivityTime, index.getLastActivityTime());
 		lastActivityTime = Math.max(lastActivityTime, majeure.getLastActivityTime());
 		lastActivityTime = Math.max(lastActivityTime, ringFinger.getLastActivityTime());
 		lastActivityTime = Math.max(lastActivityTime, pinky.getLastActivityTime());
 		lastActivityTime = Math.max(lastActivityTime, wrist.getLastActivityTime());
-		
+
 		return lastActivityTime;
 
 	}
@@ -421,7 +420,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 		attached |= wrist.isAttached();
 		return attached;
 	}
-	
+
 	public void setRest(int thumb, int index, int majeure, int ringFinger, int pinky){
 		setRest(thumb, index, majeure, ringFinger, pinky, null);
 	}
@@ -437,7 +436,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 			this.wrist.setRest(wrist);
 		}
 	}
-	
+
 	public void map(int minX, int maxX, int minY, int maxY){
 		thumb.map(minX, maxX, minY, maxY);
 		index.map(minX, maxX, minY, maxY);
@@ -445,7 +444,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 		ringFinger.map(minX, maxX, minY, maxY);
 		pinky.map(minX, maxX, minY, maxY);
 	}
-	
+
 	public boolean save(){
 		super.save();
 		thumb.save();
@@ -459,18 +458,52 @@ public class InMoovHand extends Service implements LeapDataListener {
 
 	@Override
 	public LeapData onLeapData(LeapData data) {
-		//if (this.getSide() == "right") {
-		//System.out.println(data.frame.hands().rightmost().isValid());
-		//System.out.println(data.frame.hands().rightmost().confidence());
-		if (data.frame.hands().rightmost().isValid() == true) {
-		
-			index.moveTo(data.rightHand.index);
-		    thumb.moveTo(data.rightHand.thumb);
-		    pinky.moveTo(data.rightHand.pinky);
-		    ringFinger.moveTo(data.rightHand.ring);
-		    majeure.moveTo(data.rightHand.middle);
-		//}
+
+		if (!data.frame.isValid()) {
+			// TODO: we could return void here? not sure 
+			// who wants the return value form this method. 
+			return data;
 		}
+		Hand h;
+		if ("right".equalsIgnoreCase(side)) {
+			h = data.rightHand;
+		} else if ("left".equalsIgnoreCase(side)){
+			h = data.leftHand;
+		} else {
+			// side could be null?
+			log.info("Unknown Side or side not set on hand (Side = {})", side);
+			// we can default to the right side?
+			// TODO: come up with a better default or at least document this behavior.
+			h = data.rightHand;
+		}
+
+		// move all fingers
+		if (index != null && index.isAttached()) {
+			index.moveTo(data.rightHand.index);
+		} else {
+			log.debug("Index finger isn't attached or is null.");
+		}
+		if (thumb != null && thumb.isAttached()) {
+			thumb.moveTo(data.rightHand.thumb);
+		} else {
+			log.debug("Thumb isn't attached or is null.");
+		}
+		if (pinky != null && pinky.isAttached()) { 
+			pinky.moveTo(data.rightHand.pinky);
+		} else {
+			log.debug("Pinky finger isn't attached or is null.");
+		}
+		if (ringFinger != null && ringFinger.isAttached()) {
+			ringFinger.moveTo(data.rightHand.ring);
+		} else {
+			log.debug("Ring finger isn't attached or is null.");
+		}
+		if (majeure != null && majeure.isAttached()) {
+			majeure.moveTo(data.rightHand.middle);
+		} else {
+			log.debug("Majeure finger isn't attached or is null.");
+		}
+
 		return data;
 	}
 
