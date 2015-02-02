@@ -18,6 +18,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 	/**
 	 * peer services
 	 */
+	transient public LeapMotion2 leap;
 	transient public Servo thumb;
 	transient public Servo index;
 	transient public Servo majeure;
@@ -38,6 +39,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 		peers.put("pinky", "Servo", "Pinky servo");
 		peers.put("wrist", "Servo", "Wrist servo");
 		peers.put("arduino", "Arduino", "Arduino controller for this arm");
+		peers.put("leap", "LeapMotion2", "Leap Motion Service");
 		// peers.put("keyboard", "Keyboard", "Keyboard control");
 		// peers.put("xmpp", "XMPP", "XMPP control");
 		return peers;
@@ -143,6 +145,15 @@ public class InMoovHand extends Service implements LeapDataListener {
 		sleep(InMoov.attachPauseMs);
 		wrist.attach();
 		return true;
+	}
+	
+	public void startLeapTracking() {
+		if (leap == null) {
+			leap = (LeapMotion2) startPeer("leap");}
+		
+			leap.addLeapDataListener(this);
+			leap.startTracking();
+			return;
 	}
 
 	@Override
