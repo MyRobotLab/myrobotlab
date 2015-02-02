@@ -92,7 +92,7 @@
 	<classpathentry kind="lib" path="/repo/org.apache.solr/4.10.2/commons-io-2.3.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.paho/1.0/org.eclipse.paho.client.mqttv3_1.0.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.log4j/1.2.14/log4j-1.2.14.jar"/>
-	<classpathentry kind="lib" path="/repo/com.google.gson/2.3.1/gson-2.3.1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="/repo/com.google.gson/2.2.4/gson-2.2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
