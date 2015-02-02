@@ -476,7 +476,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 			// TODO: come up with a better default or at least document this behavior.
 			h = data.rightHand;
 		}
-
+        if (data.frame.hands().rightmost().isValid() == true || data.frame.hands().leftmost().isValid() == true) {
 		// move all fingers
 		if (index != null && index.isAttached()) {
 			index.moveTo(h.index);
@@ -502,7 +502,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 			majeure.moveTo(h.middle);
 		} else {
 			log.debug("Middle(Majeure) finger isn't attached or is null.");
-		}
+		}}
 
 		return data;
 	}
