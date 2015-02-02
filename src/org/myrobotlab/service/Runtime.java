@@ -2094,12 +2094,12 @@ public class Runtime extends Service implements MessageListener {
 			}
 
 			if (cmdline.containsKey("-test")) {
-
+				// force console to be logged to when testing
+				logging.addAppender(Appender.CONSOLE);
 				// check incoming state ..
 				// no additional params means -test Test || Test.test()
 				// Test.test will do its own Bootstrap call
 				// additional param means -test Service1 Service2 ???
-
 				// -test (no params) -> clean and bootstrap { -test Test }
 				// -test Test ->
 				// "I'm in loaded clean environment - ServiceInterface.test("test").test()
@@ -2113,19 +2113,11 @@ public class Runtime extends Service implements MessageListener {
 					Repo repo = new Repo("install");
 					cleanCache();
 					repo.retrieveServiceType("Test");
-
-					Bootstrap.spawn(new String[] { "-test", "Test", "-logToConsole" });
-					/**
-					 * the environment is clean
-					 */
-					// Test test = (Test) Runtime.start("test", "Test");
-					// test.test(cmdline.getArgumentList("-test"));
-					// test.test(cmdline);
+					// start clean environment
+					Bootstrap.spawn(new String[] { "-test", "Test"});
+						
 				} else {
-					// -test Test ..
-					// we are in clean environment
-					// get reference and call ServiceInterface test()
-					// 2nd invoke will start Test.test() after clean
+					// clean environment - start the testing process
 					for (int i = 0; i < testArgs.size(); ++i) {
 						String serviceType = testArgs.get(0);
 						ServiceInterface si = start(serviceType, serviceType);

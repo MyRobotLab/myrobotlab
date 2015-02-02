@@ -309,10 +309,10 @@ public class Bootstrap {
 	 */
 	public static void main(String[] args) {
 		try {
-			System.out.println("starting bootstrap");
+			System.out.println("Bootstrap.main starting bootstrap");
 			Logging logging = LoggingFactory.getInstance();
 			// TODO send file name of logger depending on context
-			logging.addAppender(Appender.FILE);
+			//logging.addAppender(Appender.FILE);
 			logging.addAppender(Appender.CONSOLE);
 			Bootstrap.spawn(args);
 			System.out.println("leaving bootstrap");
@@ -320,7 +320,8 @@ public class Bootstrap {
 			e.printStackTrace(System.out);
 		} finally {
 			// big hammer
-			System.exit(0);
+			log.info("Bootstrap.main exiting");
+			//System.exit(0);
 		}
 	}
 

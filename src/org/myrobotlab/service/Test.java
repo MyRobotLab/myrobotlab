@@ -579,8 +579,9 @@ public class Test extends Service {
 	public Status test(){
 		// we are started so .. we'll use the big hammer at the end
 		Status status = Status.info("========TESTING=============");
-		log.info("INFO TESTING");
-		log.info(String.format("PID = %s", Runtime.getPID()));
+		log.info("===========INFO TESTING========");
+		log.info(String.format("TEST PID = %s", Runtime.getPID()));
+		// big hammer
 		System.exit(0);
 		return status;
 	}
