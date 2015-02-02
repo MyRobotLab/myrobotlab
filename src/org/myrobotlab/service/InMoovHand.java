@@ -462,13 +462,26 @@ public class InMoovHand extends Service implements LeapDataListener {
 		if (!data.frame.isValid()) {
 			// TODO: we could return void here? not sure 
 			// who wants the return value form this method. 
+			log.info("Leap data frame not valid.");
 			return data;
 		}
 		Hand h;
 		if ("right".equalsIgnoreCase(side)) {
-			h = data.rightHand;
+			if (data.frame.hands().rightmost().isValid()) { 
+				h = data.rightHand;
+			} else { 
+				log.info("Right hand frame not valid.");
+				// return this hand isn't valid
+				return data;
+			}
 		} else if ("left".equalsIgnoreCase(side)){
-			h = data.leftHand;
+			if (data.frame.hands().leftmost().isValid()) { 
+				h = data.leftHand;
+			} else {
+				log.info("Left hand frame not valid.");
+				// return this frame isn't valid.
+				return data;
+			}
 		} else {
 			// side could be null?
 			log.info("Unknown Side or side not set on hand (Side = {})", side);
@@ -476,7 +489,8 @@ public class InMoovHand extends Service implements LeapDataListener {
 			// TODO: come up with a better default or at least document this behavior.
 			h = data.rightHand;
 		}
-        if (data.frame.hands().rightmost().isValid() == true || data.frame.hands().leftmost().isValid() == true) {
+
+		// If the hand data came from a valid frame, update the finger postions.
 		// move all fingers
 		if (index != null && index.isAttached()) {
 			index.moveTo(h.index);
@@ -502,7 +516,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 			majeure.moveTo(h.middle);
 		} else {
 			log.debug("Middle(Majeure) finger isn't attached or is null.");
-		}}
+		}
 
 		return data;
 	}
