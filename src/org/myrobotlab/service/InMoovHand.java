@@ -487,7 +487,13 @@ public class InMoovHand extends Service implements LeapDataListener {
 			log.info("Unknown Side or side not set on hand (Side = {})", side);
 			// we can default to the right side?
 			// TODO: come up with a better default or at least document this behavior.
-			h = data.rightHand;
+			if (data.frame.hands().rightmost().isValid()) { 
+				h = data.rightHand;
+			} else { 
+				log.info("Right(unknown) hand frame not valid.");
+				// return this hand isn't valid
+				return data;
+			}
 		}
 
 		// If the hand data came from a valid frame, update the finger postions.
