@@ -188,6 +188,65 @@ public class Repo implements Serializable {
 		}
 		return null;
 	}
+	
+	static public String getLatestVersion(String[] versions){
+		
+		if (versions == null || versions.length == 0){
+			return null;
+		}
+		
+		int[][] ver = new int[versions.length][3];
+		
+		int major = 0;
+		int minor = 0;
+		int build = 0;
+		
+		int latestMajor = 0;
+		int latestMinor = 0;
+		int latestBuild = 0;
+		
+		int latestIndex = 0;
+		
+		for (int i = 0; i < versions.length; ++i){
+			try {
+				major = 0;
+				minor = 0;
+				build = 0;
+				
+				String [] parts = versions[i].split("\\.");
+				major = Integer.parseInt(parts[0]);
+				minor = Integer.parseInt(parts[1]);
+				build = Integer.parseInt(parts[2]);
+			} catch(Exception e){
+				log.error(e.getMessage());
+			}
+			
+			if (major > latestMajor){
+				latestMajor = major;
+				latestMinor = minor;
+				latestBuild = build;
+				latestIndex = i;
+			} else if (major == latestMajor){
+				// go deeper (minor)
+				if (minor >  latestMinor){
+					latestMajor = major;
+					latestMinor = minor;
+					latestBuild = build;
+					latestIndex = i;
+				} else if (minor == latestMinor){
+					// go deeper (build)
+					if ( build > latestBuild){
+						latestMajor = major;
+						latestMinor = minor;
+						latestBuild = build;
+						latestIndex = i;
+					}
+				}
+			}
+		}
+		
+		return versions[latestIndex];
+	}
 
 	public String getVersionFromRepo() throws IOException {
 
@@ -218,6 +277,7 @@ public class Repo implements Serializable {
 			r[i] = releases[i].tag_name;
 		}
 
+		/*
 		Arrays.sort(r);
 
 		info("finished parsing and sorting");
@@ -230,7 +290,9 @@ public class Repo implements Serializable {
 			error("could not get latest version information");
 			throw new IOException("could not get latest version information");
 		}
-
+		*/
+		String latest = getLatestVersion(r);
+		return latest;
 	}
 
 	public String getServiceDataURL() {
@@ -628,7 +690,14 @@ public class Repo implements Serializable {
 
 		// get local instance
 		Repo repo = new Repo("test");
-
+		
+		
+		String[] versions = {"1.0.100", "1.0.101", "1.0.102", "1.0.104", "1.0.105", "1.0.106", "1.0.107", "1.0.92", "1.0.93", "1.0.94", "1.0.95", "1.0.96", "1.0.97", "1.0.98", "1.0.99"};
+		
+		String latest = Repo.getLatestVersion(versions);
+		log.info(latest);
+		
+		// assert "1.0.107" == latest -> 
 		
 		if (!repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")){
 			log.info("not installed");
