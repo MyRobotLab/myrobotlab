@@ -112,18 +112,7 @@ public class Sweety extends Service {
 		reserveRootAs("sweety.leftTracker.arduino", "sweety.arduino"); 
 		reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
 		
-		leftTracker = (Tracking) startPeer("leftTracker");
-		rightTracker = (Tracking) startPeer("rightTracker");
 		chatBot = (ProgramAB) startPeer("chatBot");
-		
-		// TODO attach ultrasonicSensors to arduino
-		USfront = (UltrasonicSensor) startPeer("USfront");
-		USfrontRight = (UltrasonicSensor) startPeer("USfrontRight");
-		USfrontLeft = (UltrasonicSensor) startPeer("USfrontLeft");
-		USback = (UltrasonicSensor) startPeer("USback");
-		USbackRight = (UltrasonicSensor) startPeer("USbackRight");
-		USbackLeft = (UltrasonicSensor) startPeer("USbackLeft");
-		
 		
 		mouth = (Speech) startPeer("mouth");
 		mouth.setLanguage("fr");
@@ -157,6 +146,22 @@ public class Sweety extends Service {
 		rightWrist.setMinMax(0,180);
 		leftHand.setMinMax(80,150);
 		leftWrist.setMinMax(0,180);
+	}
+	
+	public void startUltraSonic(){
+		
+		// TODO attach ultrasonicSensors to arduino
+				USfront = (UltrasonicSensor) startPeer("USfront");
+				USfrontRight = (UltrasonicSensor) startPeer("USfrontRight");
+				USfrontLeft = (UltrasonicSensor) startPeer("USfrontLeft");
+				USback = (UltrasonicSensor) startPeer("USback");
+				USbackRight = (UltrasonicSensor) startPeer("USbackRight");
+				USbackLeft = (UltrasonicSensor) startPeer("USbackLeft");
+	}
+	
+	public void startTrack(){
+		leftTracker = (Tracking) startPeer("leftTracker");
+		rightTracker = (Tracking) startPeer("rightTracker");
 	}
 	
 	// TODO protect against self collision with  -> servoName.getPos()
