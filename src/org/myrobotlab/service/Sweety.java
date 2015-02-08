@@ -109,7 +109,7 @@ public class Sweety extends Service {
 		arduino = (Arduino) startPeer("arduino");
 		
 		// Share arduino service with others
-		reserveRootAs("sweety.eyes.arduino", "sweety.arduino"); 
+		reserveRootAs("sweety.eyesTracker.arduino", "sweety.arduino"); 
 		//reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
 		
 		chatBot = (ProgramAB) startPeer("chatBot");
@@ -176,6 +176,7 @@ public class Sweety extends Service {
 		 * Start the tracking services
 		 */
 		// TODO left eye must do the same move than right eye
+		// TODO connect to the arduino
 		eyesTracker = (Tracking) startPeer("eyesTracker");
 		// rightTracker = (Tracking) startPeer("rightTracker");
 		neck.detach();
