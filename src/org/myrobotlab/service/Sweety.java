@@ -17,8 +17,8 @@ public class Sweety extends Service {
 	transient public Arduino arduino;
 	transient public Sphinx ear;
 	transient public Speech mouth;
-	transient public Tracking leftTracker;
-	transient public Tracking rightTracker;
+	transient public Tracking eyesTracker;
+	// transient public Tracking rightTracker;
 	transient public ProgramAB chatBot;
 	
 	transient Servo leftForearm;
@@ -76,8 +76,8 @@ public class Sweety extends Service {
 		peers.put("mouth", "Speech", "sweetys mouth");
 		peers.put("ear", "Sphinx", "ear");
 		peers.put("chatBot", "ProgramAB", "chatBot");
-		peers.put("leftTracker", "Tracking", "leftTracker");
-		peers.put("rightTracker", "Tracking", "rightTracker");
+		// peers.put("leftTracker", "Tracking", "leftTracker");
+		peers.put("eyesTracker", "Tracking", "eyesTracker");
 		
 		peers.put("USfront", "UltrasonicSensor", "USfront");
 		peers.put("USfrontRight", "UltrasonicSensor", "USfrontRight");
@@ -108,9 +108,9 @@ public class Sweety extends Service {
 		
 		arduino = (Arduino) startPeer("arduino");
 		
-		// Share arduino service with trackers
-		reserveRootAs("sweety.leftTracker.arduino", "sweety.arduino"); 
-		reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
+		// Share arduino service with others
+		reserveRootAs("sweety.eyes.arduino", "sweety.arduino"); 
+		//reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
 		
 		chatBot = (ProgramAB) startPeer("chatBot");
 		
@@ -118,6 +118,8 @@ public class Sweety extends Service {
 		mouth.setLanguage("fr");
 		mouth.setBackendType("GOOGLE");
 		mouth.setGenderFemale();
+		
+		ear = (Sphinx) startPeer("ear");
 
 		leftForearm = (Servo) startPeer("leftForearm");
 		rightForearm = (Servo) startPeer("rightForearm");
@@ -149,23 +151,58 @@ public class Sweety extends Service {
 	}
 	
 	public void startUltraSonic(){
+		/**
+		 * Start the ultrasonic sensors services
+		 */
 		
-		// TODO attach ultrasonicSensors to arduino
+
 				USfront = (UltrasonicSensor) startPeer("USfront");
 				USfrontRight = (UltrasonicSensor) startPeer("USfrontRight");
 				USfrontLeft = (UltrasonicSensor) startPeer("USfrontLeft");
 				USback = (UltrasonicSensor) startPeer("USback");
 				USbackRight = (UltrasonicSensor) startPeer("USbackRight");
 				USbackLeft = (UltrasonicSensor) startPeer("USbackLeft");
+				
+				USfront.attach(arduino,arduino.getPortName(), frontUltrasonicTrig, frontUltrasonicEcho);
+				USfrontRight.attach(arduino,arduino.getPortName(), front_rightUltrasonicTrig, front_rightUltrasonicEcho);
+				USfrontLeft.attach(arduino,arduino.getPortName(), front_leftUltrasonicTrig, front_leftUltrasonicEcho);
+				USback.attach(arduino,arduino.getPortName(), backUltrasonicTrig, backUltrasonicEcho);
+				USbackRight.attach(arduino,arduino.getPortName(), back_rightUltrasonicTrig, back_rightUltrasonicEcho);
+				USbackLeft.attach(arduino,arduino.getPortName(), back_leftUltrasonicTrig, back_leftUltrasonicEcho);
 	}
 	
 	public void startTrack(){
-		leftTracker = (Tracking) startPeer("leftTracker");
-		rightTracker = (Tracking) startPeer("rightTracker");
+		/**
+		 * Start the tracking services
+		 */
+		// TODO left eye must do the same move than right eye
+		eyesTracker = (Tracking) startPeer("eyesTracker");
+		// rightTracker = (Tracking) startPeer("rightTracker");
+		neck.detach();
+		rightEye.detach();
+		leftEye.detach();
+		eyesTracker.y.setPin(39); // neck
+		eyesTracker.x.setPin(42); // right eye
+	}
+	
+	public void stopTrack(){
+		eyesTracker.releaseService();
+		neck.attach(arduino,39);
+		rightEye.attach(arduino,42);
+		leftEye.attach(arduino, 40);
 	}
 	
 	// TODO protect against self collision with  -> servoName.getPos()
 	public void leftArm(int shoulderAngle, int armAngle, int forearmAngle, int wristAngle, int handAngle){
+		/**
+		 * Move the left arm . Use : leftArm(shoulder angle, arm angle, forearm angle, wrist angle, hand angle) -1 mean "no change"
+		 */
+		if (shoulderAngle == -1){shoulderAngle = leftShoulder.getPos() ;}
+		if (armAngle == -1){armAngle = leftArm.getPos() ;}
+		if (forearmAngle == -1){forearmAngle = leftForearm.getPos() ;}
+		if (wristAngle == -1){wristAngle = leftWrist.getPos() ;}
+		if (handAngle == -1){handAngle = leftHand.getPos() ;}
+		
 		leftShoulder.moveTo(shoulderAngle);
 		leftArm.moveTo(armAngle);
 		leftForearm.moveTo(forearmAngle);
@@ -175,6 +212,15 @@ public class Sweety extends Service {
 	
 	// TODO protect against self collision
 	public void rightArm(int shoulderAngle, int armAngle, int forearmAngle, int wristAngle, int handAngle){
+		/**
+		 * Move the right arm . Use : leftArm(shoulder angle, arm angle, forearm angle, wrist angle, hand angle) -1 mean "no change"
+		 */
+		if (shoulderAngle == -1){shoulderAngle = rightShoulder.getPos() ;}
+		if (armAngle == -1){armAngle = rightArm.getPos() ;}
+		if (forearmAngle == -1){forearmAngle = rightForearm.getPos() ;}
+		if (wristAngle == -1){wristAngle = rightWrist.getPos() ;}
+		if (handAngle == -1){handAngle = rightHand.getPos() ;}
+		
 		rightShoulder.moveTo(shoulderAngle);
 		rightArm.moveTo(armAngle);
 		rightForearm.moveTo(forearmAngle);
@@ -183,6 +229,10 @@ public class Sweety extends Service {
 	}
 
 	public void startPosition(){
+		/**
+		 * Set the servo start
+		 */
+		
 		leftForearm.moveTo(136);
 		rightForearm.moveTo(5);
 		rightShoulder.moveTo(4);
@@ -198,6 +248,10 @@ public class Sweety extends Service {
 		leftWrist.moveTo(85);
 	}
 	private void myShiftOut(String value){
+		/**
+		 * Used to manage a shift register
+		 */
+		
 		arduino.digitalWrite(LATCH, 0);		// Stop the copy
 		for (int i = 0; i < 8; i++){  // Store the data
 			if (value.charAt(i) == '1') {
@@ -214,6 +268,10 @@ public class Sweety extends Service {
 	}
 	
 	public void mouthState(String value){
+		/**
+		 * Set the mouth attitude . choose : smile, notHappy, speechLess, empty.
+		 */
+		
 		if (value == "smile") {
 			myShiftOut("11011100");
 		}
@@ -230,12 +288,17 @@ public class Sweety extends Service {
 	}
 	
 	public void setdelays(Integer d1, Integer d2, Integer d3) {
+		
 		delaytime = d1;
 		delaytimestop = d2;
 		delaytimeletter = d3;
 	}
 	
 	public synchronized void saying(String text) { // Adapt mouth leds to words
+		/**
+		 * Say text and move mouth leds
+		 */
+		
 		log.info("Saying :" + text);
 		mouth.speak(text);
 		sleep(50);
@@ -284,11 +347,6 @@ public class Sweety extends Service {
 			}
 	}
 	
-	public int getPosition(Servo servo){
-		int answer = servo.getPos();
-		return answer;
-	}
-	
 	public Sweety publishState(){
 		super.publishState();
 		arduino.publishState();
@@ -310,10 +368,18 @@ public class Sweety extends Service {
 	
 	
 	public boolean connect(String port){
+		/**
+		 *  Connect the arduino to a COM port . Exemple : connect("COM8")
+		 */
+		
 		return arduino.connect(port);
 	}
 	
 	public void attach(){
+		/**
+		 * Attach the servos to arduino pins
+		 */
+		
 		rightForearm.attach(arduino.getName(),34);
 		leftForearm.attach(arduino.getName(),35);
 		rightShoulder.attach(arduino.getName(),36);
@@ -330,6 +396,10 @@ public class Sweety extends Service {
 	}
 	
 	public void detach(){
+		/**
+		 *  detach the servos to arduino pins
+		 */
+		
 		rightForearm.detach();
 		leftForearm.detach();
 		rightShoulder.detach();
@@ -351,6 +421,10 @@ public class Sweety extends Service {
 
 	@Override
 	public String getDescription() {
+		/**
+		 * Return information about the service
+		 */
+		
 		return "Service for the robot Sweety";
 	}
 	
