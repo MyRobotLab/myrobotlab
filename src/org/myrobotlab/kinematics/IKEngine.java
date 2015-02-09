@@ -1,4 +1,4 @@
-package org.myrobotlab.inverseKinematics;
+package org.myrobotlab.kinematics;
 /**
  * class IKEngine
  *
