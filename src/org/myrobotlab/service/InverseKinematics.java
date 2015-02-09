@@ -1,7 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.inverseKinematics.IKEngine;
+import org.myrobotlab.kinematics.IKEngine;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
