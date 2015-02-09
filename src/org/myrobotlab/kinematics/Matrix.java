@@ -1,5 +1,8 @@
 package org.myrobotlab.kinematics;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 
 /**
  * Encapsulates a 4x4 matrix
@@ -174,21 +177,21 @@ public class Matrix {
    * @return a new matrix which is equal to the product of this*m
    */
   public Matrix multiply (Matrix m) {
-    if(numCols!=m.numRows) {
-      System.out.println("dimensions bad in multiply()");
-      System.exit(1);
-    }
+	  if(numCols!=m.numRows) {
+		  System.out.println("dimensions bad in multiply()");
+		  System.exit(1);
+	  }
 
-    Matrix ret= new Matrix(numRows, m.numCols);
+	  Matrix ret= new Matrix(numRows, m.numCols);
 
-    for(int r=0; r<numRows; r++)
-      for(int c=0; c<m.numCols; c++) {
-	for(int k=0;k<numCols; k++) {
-          ret.elements[r][c] += this.elements[r][k] * m.elements[k][c];
-	}
-      }
+	  for(int r=0; r<numRows; r++)
+		  for(int c=0; c<m.numCols; c++) {
+			  for(int k=0;k<numCols; k++) {
+				  ret.elements[r][c] += this.elements[r][k] * m.elements[k][c];
+			  }
+		  }
 
-    return ret;
+	  return ret;
   }
 
   /**
@@ -309,15 +312,17 @@ public class Matrix {
    * @return a String representation of the matrix
    */
   public String toString() {
+	  // TODO: do this better.
+	NumberFormat formatter = new DecimalFormat("#0.000");
     StringBuffer buf= new StringBuffer();
-    buf.append("[ ");
+    buf.append("[\n");
     for(int r=0; r<numRows; r++) {
-      buf.append("[ ");
+      buf.append(" [ ");
       for(int c=0; c<numCols; c++) {
-        buf.append(elements[r][c]);
+        buf.append(formatter.format(elements[r][c]));
         buf.append(" ");
       }
-      buf.append("] ");
+      buf.append("]\n");
     }
     buf.append("]");
     return buf.toString();
