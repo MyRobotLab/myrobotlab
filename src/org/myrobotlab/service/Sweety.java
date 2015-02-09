@@ -494,7 +494,7 @@ public class Sweety extends Service {
 		return status;
 	}
 
-	static void main(String[] args) {
+	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
