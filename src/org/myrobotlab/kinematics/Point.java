@@ -1,5 +1,8 @@
 package org.myrobotlab.kinematics;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 /**
  * Represents a 3d point in space.
  * 
@@ -27,7 +30,9 @@ public class Point {
 		return z;
 	}
 	public String toString() {
-		return "(" + x + ", " + y + ", " + z + ")";  
+		// TODO: round this out
+		NumberFormat formatter = new DecimalFormat("#0.000");
+		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + ")";  
 	}
 	@Override
 	public int hashCode() {
