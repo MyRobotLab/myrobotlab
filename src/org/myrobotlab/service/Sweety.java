@@ -21,6 +21,9 @@ public class Sweety extends Service {
 	// transient public Tracking rightTracker;
 	transient public ProgramAB chatBot;
 	
+	transient public Motor rightMotor;
+	transient public Motor leftMotor;
+	
 	transient Servo leftForearm;
 	transient Servo rightForearm;
 	transient Servo rightShoulder;
@@ -100,6 +103,9 @@ public class Sweety extends Service {
 		peers.put("leftHand", "Servo", "servo");
 		peers.put("leftWrist", "Servo", "servo");
 		
+		peers.put("rightMotor", "Motor", "rightMotor");
+		peers.put("leftMotor", "Motor", "lefttMotor");
+		
 		return peers;
 	}
 
@@ -171,7 +177,7 @@ public class Sweety extends Service {
 				USbackLeft.attach(arduino,arduino.getPortName(), back_leftUltrasonicTrig, back_leftUltrasonicEcho);
 	}
 	
-	public void startTrack(){
+	public void startTrack(int cameraIndex){
 		/**
 		 * Start the tracking services
 		 */
@@ -183,7 +189,12 @@ public class Sweety extends Service {
 		rightEye.detach();
 		leftEye.detach();
 		eyesTracker.y.setPin(39); // neck
+		eyesTracker.y.setInverted(true);
 		eyesTracker.x.setPin(42); // right eye
+		eyesTracker.connect(arduino.getPortName());
+		eyesTracker.opencv.setCameraIndex(cameraIndex);
+		eyesTracker.opencv.capture();
+		saying("tracking activated.");
 	}
 	
 	public void stopTrack(){
@@ -191,6 +202,8 @@ public class Sweety extends Service {
 		neck.attach(arduino,39);
 		rightEye.attach(arduino,42);
 		leftEye.attach(arduino, 40);
+		eyesTracker.opencv.stopCapture();
+		saying("the tracking if stopped.");
 	}
 	
 	// TODO protect against self collision with  -> servoName.getPos()
@@ -231,7 +244,7 @@ public class Sweety extends Service {
 
 	public void startPosition(){
 		/**
-		 * Set the servo start
+		 * Set the servos to start position
 		 */
 		
 		leftForearm.moveTo(136);
@@ -248,6 +261,51 @@ public class Sweety extends Service {
 		leftHand.moveTo(150);
 		leftWrist.moveTo(85);
 	}
+	
+	
+	public void startMotors(){
+		/**
+		 * Start the motors services
+		 */
+		
+		rightMotor = (Motor) startPeer("rightMotor");
+		leftMotor = (Motor) startPeer("leftMotor");
+		rightMotor.setController(arduino);
+		leftMotor.setController(arduino);
+		rightMotor.setMinMax(0.5, 1.0);
+		leftMotor.setMinMax(0.5, 1.0);
+		rightMotor.dirPin = 2;
+		rightMotor.pwmPin = 3;
+		leftMotor.dirPin = 4;
+		leftMotor.pwmPin = 5;
+		
+	}
+	
+	public void moveRightMotor(String direction, float speed){
+		if (direction == "forward"){
+			rightMotor.setInverted(false);
+		}
+		else if (direction == "backward") {
+			rightMotor.setInverted(true);
+		}
+		rightMotor.move(speed);
+	}
+	
+	public void moveLeftMotor(String direction, float speed){
+		if (direction == "forward"){
+			leftMotor.setInverted(false);
+		}
+		else if (direction == "backward") {
+			leftMotor.setInverted(true);
+		}
+		leftMotor.move(speed);
+	}
+	
+	public void stopMotors(){
+		rightMotor.stop();leftMotor.stop();
+	}
+	
+	
 	private void myShiftOut(String value){
 		/**
 		 * Used to manage a shift register
