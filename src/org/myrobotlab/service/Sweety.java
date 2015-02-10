@@ -17,8 +17,8 @@ public class Sweety extends Service {
 	transient public Arduino arduino;
 	transient public Sphinx ear;
 	transient public Speech mouth;
-	transient public Tracking eyesTracker;
-	// transient public Tracking rightTracker;
+	transient public Tracking leftTracker;
+	transient public Tracking rightTracker;
 	transient public ProgramAB chatBot;
 	
 	transient public Motor rightMotor;
@@ -45,10 +45,10 @@ public class Sweety extends Service {
 	transient UltrasonicSensor USbackRight;
 	transient UltrasonicSensor USbackLeft;
 	
-	int rightMotorBackwardPin = 2;
-	int rightMotorForwardPin = 3;
-	int leftMotorForwardPin = 4;
-	int leftMotorBackwardPin = 5;
+	int rightMotorDirPin = 2;
+	int rightMotorPwmPin = 3;
+	int leftMotorDirPin = 4;
+	int leftMotorPwmPin = 5;
 
 	int backUltrasonicTrig = 22;
 	int backUltrasonicEcho = 23;
@@ -79,7 +79,7 @@ public class Sweety extends Service {
 		peers.put("mouth", "Speech", "sweetys mouth");
 		peers.put("ear", "Sphinx", "ear");
 		peers.put("chatBot", "ProgramAB", "chatBot");
-		// peers.put("leftTracker", "Tracking", "leftTracker");
+		peers.put("leftTracker", "Tracking", "leftTracker");
 		peers.put("eyesTracker", "Tracking", "eyesTracker");
 		
 		peers.put("USfront", "UltrasonicSensor", "USfront");
@@ -115,8 +115,8 @@ public class Sweety extends Service {
 		arduino = (Arduino) startPeer("arduino");
 		
 		// Share arduino service with others
-		reserveRootAs("sweety.eyesTracker.arduino", "sweety.arduino"); 
-		//reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
+		reserveRootAs("sweety.leftTracker.arduino", "sweety.arduino"); 
+		reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
 		
 		chatBot = (ProgramAB) startPeer("chatBot");
 		
@@ -177,32 +177,42 @@ public class Sweety extends Service {
 				USbackLeft.attach(arduino,arduino.getPortName(), back_leftUltrasonicTrig, back_leftUltrasonicEcho);
 	}
 	
-	public void startTrack(int cameraIndex){
+	public void startTrack(int leftCameraIndex, int rightCameraIndex){
 		/**
 		 * Start the tracking services
 		 */
-		// TODO left eye must do the same move than right eye
-		// TODO connect to the arduino
-		eyesTracker = (Tracking) startPeer("eyesTracker");
-		// rightTracker = (Tracking) startPeer("rightTracker");
+		// TODO understand why i cant' start the right Tracker
+		leftTracker = (Tracking) startPeer("leftTracker");
+		//rightTracker = (Tracking) startPeer("rightTracker");
 		neck.detach();
 		rightEye.detach();
 		leftEye.detach();
-		eyesTracker.y.setPin(39); // neck
-		eyesTracker.y.setInverted(true);
-		eyesTracker.x.setPin(42); // right eye
-		eyesTracker.connect(arduino.getPortName());
-		eyesTracker.opencv.setCameraIndex(cameraIndex);
-		eyesTracker.opencv.capture();
-		saying("tracking activated.");
+		
+		leftTracker.y.setPin(39); // neck
+		leftTracker.ypid.invert();
+		leftTracker.x.setPin(40); // right eye
+		leftTracker.connect(arduino.getPortName());
+		leftTracker.opencv.setCameraIndex(leftCameraIndex);
+		leftTracker.opencv.capture();
+		/*
+		rightTracker.y.setPin(51); // nothing
+		rightTracker.ypid.invert();
+		rightTracker.x.setPin(42); // right eye
+		rightTracker.connect(arduino.getPortName());
+		rightTracker.opencv.setCameraIndex(rightCameraIndex);
+		rightTracker.opencv.capture();
+		saying("tracking activated.");*/
 	}
 	
 	public void stopTrack(){
-		eyesTracker.releaseService();
+		leftTracker.opencv.stopCapture();
+		rightTracker.opencv.stopCapture();
+		leftTracker.releaseService();
+		rightTracker.releaseService();
 		neck.attach(arduino,39);
-		rightEye.attach(arduino,42);
 		leftEye.attach(arduino, 40);
-		eyesTracker.opencv.stopCapture();
+		rightEye.attach(arduino,42);
+		
 		saying("the tracking if stopped.");
 	}
 	
@@ -241,25 +251,68 @@ public class Sweety extends Service {
 		rightWrist.moveTo(wristAngle);
 		rightHand.moveTo(handAngle);
 	}
-
-	public void startPosition(){
+	
+	public void head(int neckAngle, int rightEyeAngle, int leftEyeAngle){
 		/**
-		 * Set the servos to start position
+		 * Move the right arm . Use : leftArm(shoulder angle, arm angle, forearm angle, wrist angle, hand angle) -1 mean "no change"
+		 */
+		if (neckAngle == -1){neckAngle = neck.getPos() ;}
+		if (rightEyeAngle == -1){rightEyeAngle = rightEye.getPos() ;}
+		if (leftEyeAngle == -1){leftEyeAngle = leftEye.getPos() ;}
+		
+		neck.moveTo(neckAngle);
+		rightEye.moveTo(rightEyeAngle);
+		leftEye.moveTo(leftEyeAngle);
+	}
+
+	public void posture(String pos){
+		/**
+		 * Move the servos to show asked posture
 		 */
 		
-		leftForearm.moveTo(136);
-		rightForearm.moveTo(5);
-		rightShoulder.moveTo(4);
-		leftShoulder.moveTo(145);
-		rightArm.moveTo(30);
-		leftArm.moveTo(108);
-		neck.moveTo(75);
-		leftEye.moveTo(75);
-		rightEye.moveTo(127);
-		rightHand.moveTo(10);
-		rightWrist.moveTo(116);
-		leftHand.moveTo(150);
-		leftWrist.moveTo(85);
+		if (pos == "neutral"){
+			leftArm(145, 108, 136, 85, 150);
+			rightArm(2, 35, 5, 116,10);
+			head(75, 127, 75);
+		}
+		/* Template
+		else if (pos == ""){
+			leftArm(, , , 85, 150);
+			rightArm(, , , 116, 10);
+			head(75, 127, 75);
+		}
+		*/
+		else if (pos == "yes"){
+			leftArm(0, 85, 136, 85, 150);
+			rightArm(155, 55, 5, 116, 10);
+			head(75, 127, 75);
+		}
+		else if (pos == "concentre"){
+			leftArm(37, 106, 85, 85, 150);
+			rightArm(109, 43, 54, 116, 10);
+			head(97, 127, 75);
+		}
+		else if (pos == "showLeft"){
+			leftArm(68, 53, 140, 85, 150);
+			rightArm(2, 76, 40, 116, 10);
+			head(85, 127, 75);
+		}
+		else if (pos == "showRight"){
+			leftArm(145, 69, 93, 85, 150);
+			rightArm(80, 110, 5, 116, 10);
+			head(75, 127, 75);
+		}
+		else if (pos == "handsUp"){
+			leftArm(0, 69, 93, 85, 150);
+			rightArm(155, 76, 40, 116, 10);
+			head(75, 127, 75);
+		}
+		else if (pos == "carryBags"){
+			leftArm(145, 69, 93, 85, 150);
+			rightArm(2, 76, 40, 116, 10);
+			head(75, 127, 75);
+		}
+
 	}
 	
 	
@@ -274,10 +327,10 @@ public class Sweety extends Service {
 		leftMotor.setController(arduino);
 		rightMotor.setMinMax(0.5, 1.0);
 		leftMotor.setMinMax(0.5, 1.0);
-		rightMotor.dirPin = 2;
-		rightMotor.pwmPin = 3;
-		leftMotor.dirPin = 4;
-		leftMotor.pwmPin = 5;
+		rightMotor.dirPin = rightMotorDirPin;
+		rightMotor.pwmPin = rightMotorPwmPin;
+		leftMotor.dirPin = leftMotorDirPin;
+		leftMotor.pwmPin = leftMotorPwmPin;
 		
 	}
 	
@@ -302,7 +355,8 @@ public class Sweety extends Service {
 	}
 	
 	public void stopMotors(){
-		rightMotor.stop();leftMotor.stop();
+		rightMotor.stop();
+		leftMotor.stop();
 	}
 	
 	
