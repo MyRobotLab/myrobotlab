@@ -22,13 +22,13 @@ public class LeapMotion2 extends Service implements LeapDataListener , LeapDataP
 
 	public final static Logger log = LoggerFactory.getLogger(LeapMotion2.class);
 	
-	LeapMotionListener listener = null;
-	Controller controller = new Controller();
+	transient LeapMotionListener listener = null;
+	transient Controller controller = new Controller();
 	
 	public LeapData lastLeapData = null;
 	
 	public static class LeapData {
-		public Frame frame;
+		transient public Frame frame;
 		public Hand leftHand;
 		public Hand rightHand;
 	}
