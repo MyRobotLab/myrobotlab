@@ -14,6 +14,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2200,7 +2201,8 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	// ---- resolve issues begin ----
-
+	
+	
 	static public CLI startCLI() {
 		// FIXME !!! - query registry by type
 		// we want 1 and only 1 CLI
@@ -2222,6 +2224,17 @@ public class Runtime extends Service implements MessageListener {
 
 	public static CLI getCLI() {
 		return cli;
+	}
+	
+	static public ArrayList<ResolveReport> install(String serviceType) throws ParseException, IOException{
+		String fullTypeName = null;
+		if (serviceType.indexOf(".") == -1) {
+			fullTypeName = String.format("org.myrobotlab.service.%s", serviceType);
+		} else {
+			fullTypeName = serviceType;
+		}
+		
+		return Runtime.getInstance().repo.retrieveServiceType(fullTypeName);
 	}
 
 }
