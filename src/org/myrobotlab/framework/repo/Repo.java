@@ -139,7 +139,7 @@ public class Repo implements Serializable {
 		try {
 			localServiceData = ServiceData.getLocal();
 			return localServiceData;
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			info("local service data file not found - fetching remote");
 			getRemoteRepo = true;
 		}
@@ -381,6 +381,10 @@ public class Repo implements Serializable {
 	// TODO - getLocalResolvedDependencies
 
 	public boolean isServiceTypeInstalled(String fullTypeName) {
+		if(fullTypeName.equals("org.myrobotlab.service.InMoov")){
+			log.info("here");
+		}
+		
 		if (localServiceData != null) {
 			ServiceType st = localServiceData.getServiceType(fullTypeName);
 			if (st == null) {
@@ -585,9 +589,25 @@ public class Repo implements Serializable {
 		return report;
 	}
 
-	public ArrayList<Dependency> getDependencies(String fullServiceName) {
+	public HashSet<Dependency> getDependencies(String fullServiceName) {
 		ServiceData sd = getServiceDataFile();
-		ArrayList<Dependency> deps = new ArrayList<Dependency>();
+		HashSet<Dependency> deps = new HashSet<Dependency>();
+		
+		// these are Peer dependencies !
+		Peers peers = Peers.getPeers(fullServiceName);
+		if (peers != null) {
+			ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
+			for (int i = 0; i < peerList.size(); ++i) {
+				ServiceReservation sr = peerList.get(i);
+				log.info("checking peer {} dependencies", sr.fullTypeName);
+				HashSet<Dependency> peerDeps =  getDependencies(sr.fullTypeName);
+				if (peerDeps != null){
+					deps.addAll(peerDeps);
+				}
+			}
+		}
+		
+		// these are immediate dependencies - not Peer
 		if (sd.containsServiceType(fullServiceName)) {
 			ArrayList<String> orgs = sd.getServiceType(fullServiceName).dependencies;
 			if (orgs != null) {
@@ -605,21 +625,24 @@ public class Repo implements Serializable {
 		} else {
 			error(String.format("getDepenencies %s not found", fullServiceName));
 		}
-		return null;
+		return deps;
+	}
+	
+	public ArrayList<ResolveReport> retrieveServiceType(String fullTypeName) throws ParseException, IOException {
+		return retrieveServiceType(fullTypeName, false);
 	}
 
-	public ArrayList<ResolveReport> retrieveServiceType(String fullTypeName) throws ParseException, IOException {
+	public ArrayList<ResolveReport> retrieveServiceType(String fullTypeName, boolean force) throws ParseException, IOException {
 
 		if (!fullTypeName.contains(".")) {
 			fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
 		}
 
 		ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();
-		ArrayList<Dependency> deps = getDependencies(fullTypeName);
+		HashSet<Dependency> deps = getDependencies(fullTypeName);
 		if (deps != null) {
-			for (int i = 0; i < deps.size(); ++i) {
-				Dependency dep = deps.get(i);
-				if (!dep.isResolved()) {
+			for (Dependency dep : deps) {
+				if (!dep.isResolved() || force) {
 					ResolveReport report = resolveArtifacts(dep.getOrg(), dep.getRevision(), true);
 					reports.add(report);
 

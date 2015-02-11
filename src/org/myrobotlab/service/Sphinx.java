@@ -45,6 +45,7 @@ import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -70,7 +71,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	transient SpeechProcessor speechProcessor = null;
 
 	private boolean isListening = false;
-	//private String lockPhrase = null;
+	// private String lockPhrase = null;
 	HashSet<String> lockPhrases = new HashSet<String>();
 
 	HashMap<String, Command> commands = null;
@@ -154,11 +155,16 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		}
 
 		simplexml = simplexml.replaceAll("name=\"grammarName\" value=\"simple\"", "name=\"grammarName\" value=\"" + grammarFileName + "\"");
-		FileIO.stringToFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "xml"), simplexml);
-		save("xml", simplexml);
+		try {
+			FileIO.stringToFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "xml"), simplexml);
+			save("xml", simplexml);
 
-		String gramdef = "#JSGF V1.0;\n" + "grammar " + grammarFileName + ";\n" + "public <greet> = (" + grammar + ");";
-		FileIO.stringToFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "gram"), gramdef);
+			String gramdef = "#JSGF V1.0;\n" + "grammar " + grammarFileName + ";\n" + "public <greet> = (" + grammar + ");";
+			FileIO.stringToFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "gram"), gramdef);
+		} catch (Exception e) {
+			Logging.logException(e);
+			return false;
+		}
 		// save("gram", gramdef);
 
 		return true;
@@ -190,11 +196,11 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	public void stopService() {
 		super.stopService();
 		stopListening();
-		if (recognizer != null){
+		if (recognizer != null) {
 			recognizer.deallocate();
 			recognizer = null;
 		}
-		if (microphone != null){
+		if (microphone != null) {
 			microphone.stopRecording();
 			microphone = null;
 		}
@@ -334,7 +340,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 								}
 							}
 
-							//publishRecognized(resultText);
+							// publishRecognized(resultText);
 							invoke("publishText", resultText);
 							invoke("recognized", resultText);
 						}
@@ -358,11 +364,10 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	}
 
 	/*
-	public void publishRecognized(String recognizedText) {
-		invoke("recognized", recognizedText);
-	}
-	*/
-	
+	 * public void publishRecognized(String recognizedText) {
+	 * invoke("recognized", recognizedText); }
+	 */
+
 	public void stopListening() {
 		isListening = false;
 		if (speechProcessor != null) {
@@ -488,10 +493,10 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		addListener("recognized", s.getName(), "heard", String.class);
 	}
 
-	public void addTextListener(TextListener service){
+	public void addTextListener(TextListener service) {
 		addListener("publishText", service.getName(), "onText", String.class);
 	}
-	
+
 	public void addBypass(String... txt) {
 		if (bypass == null) {
 			bypass = new HashMap<String, Command>();

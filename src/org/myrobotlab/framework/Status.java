@@ -149,6 +149,14 @@ public class Status implements Serializable {// extends Exception {
 		add(status);
 		return status;
 	}
+	
+	public Status addNamedInfo(String name, String format, Object... args) {
+		Status status = info(format, args);
+		log.info(String.format(format, args));
+		status.name = name;
+		add(status);
+		return status;
+	}
 
 	public Status addError(String format, Object... args) {
 		Status status = error(format, args);

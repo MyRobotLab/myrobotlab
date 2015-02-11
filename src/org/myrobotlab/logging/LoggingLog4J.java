@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.SimpleTimeZone;
 
 import org.apache.log4j.AppenderSkeleton;
@@ -17,6 +18,8 @@ import org.myrobotlab.framework.Service;
 public class LoggingLog4J extends Logging {
 
 	public final static Logger log = Logger.getLogger(Logging.class.getCanonicalName());
+	
+	private HashSet<String> appenders = new HashSet<String>();
 
 	@Override
 	public void configure() {
@@ -66,6 +69,8 @@ public class LoggingLog4J extends Logging {
 	public void addAppender(String type) {
 		addAppender(type, null, null);
 	}
+	
+	
 
 	/**
 	 * 
@@ -74,6 +79,10 @@ public class LoggingLog4J extends Logging {
 	 * @param port
 	 */
 	public void addAppender(String type, String hostOrMultiFile, String port) {
+		if (appenders.contains(type)){
+			log.warn(String.format("already have %s type of appender - disregarding", type));
+			return;
+		}
 		// same format as .configure()
 		PatternLayout layout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
 		org.apache.log4j.Appender appender = null;
@@ -84,9 +93,11 @@ public class LoggingLog4J extends Logging {
 			if (Appender.CONSOLE.equalsIgnoreCase(type)) {
 				appender = new ConsoleAppender(layout);
 				appender.setName(type);
+				appenders.add(Appender.CONSOLE);
 			} else if (Appender.REMOTE.equalsIgnoreCase(type)) {
 				appender = new SocketAppender(hostOrMultiFile, Integer.parseInt(port));
 				appender.setName(type);
+				appenders.add(Appender.REMOTE);
 			} else if (Appender.FILE.equalsIgnoreCase(type)) {
 				if (hostOrMultiFile != null) {
 					SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -102,6 +113,7 @@ public class LoggingLog4J extends Logging {
 
 				}
 
+				appenders.add(Appender.FILE);
 			} else {
 				log.error(String.format("attempting to add unkown type of Appender %1$s", type));
 				return;

@@ -55,13 +55,13 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
 	public final static Logger log = LoggerFactory.getLogger(KeyboardGUI.class.getCanonicalName());
 	static final long serialVersionUID = 1L;
 
-	JList currentPlayers;
-	JList currentLog;
+	JList<String> currentPlayers;
+	JList<String> currentLog;
 	JCheckBox sendStringsCheckBox;
 
 	public boolean sendStrings = false;
 
-	DefaultListModel logModel = new DefaultListModel();
+	DefaultListModel<String> logModel = new DefaultListModel<String>();
 
 	int msgCount = 0;
 	StringBuffer keyBuffer = new StringBuffer();

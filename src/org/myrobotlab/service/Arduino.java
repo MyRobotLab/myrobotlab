@@ -1730,7 +1730,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return sketch;
 	}
 
-	public String loadSketchFromFile(String filename) throws FileNotFoundException {
+	public String loadSketchFromFile(String filename) throws IOException {
 		sketch = FileIO.fileToString(filename);
 		return sketch;
 	}

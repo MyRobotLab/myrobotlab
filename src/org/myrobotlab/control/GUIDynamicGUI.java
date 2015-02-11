@@ -50,6 +50,7 @@ import org.myrobotlab.control.GUIServiceGraphVertex.Type;
 import org.myrobotlab.control.widget.Style;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -178,8 +179,12 @@ public class GUIDynamicGUI extends GUIServiceGUI {
 				}
 				rebuildGraph();
 			} else if (b == dumpButton) {
-				FileIO.stringToFile(String.format("serviceRegistry.%s.txt", Runtime.getInstance().getName()), Runtime.dump());
-				FileIO.stringToFile(String.format("notifyEntries.%s.xml", Runtime.getInstance().getName()), Runtime.dumpNotifyEntries());
+				try {
+					FileIO.stringToFile(String.format("serviceRegistry.%s.txt", Runtime.getInstance().getName()), Runtime.dump());
+					FileIO.stringToFile(String.format("notifyEntries.%s.xml", Runtime.getInstance().getName()), Runtime.dumpNotifyEntries());
+				} catch (Exception ex) {
+					Logging.logException(ex);
+				}
 			}
 		}
 	}
@@ -377,7 +382,6 @@ public class GUIDynamicGUI extends GUIServiceGUI {
 
 	}
 
-	
 	public void buildLocalServiceGraph() {
 
 		log.info("buildLocalServiceGraph-begin");

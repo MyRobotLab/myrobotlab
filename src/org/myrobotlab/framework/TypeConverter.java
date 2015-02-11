@@ -1,4 +1,4 @@
-package org.myrobotlab.webgui;
+package org.myrobotlab.framework;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -12,26 +12,18 @@ import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 
+/**
+ * JSON TypeConverter - used in general REST api to convert url JSON parameters appropriately to 
+ * hard types for method invoking
+ * used in WebGUI and CLI
+ * @author GroG
+ *
+ */
 public class TypeConverter {
 
 	public final static Logger log = LoggerFactory.getLogger(TypeConverter.class.getCanonicalName());
-
-	private static TypeConverter converterInstance;
 	private static Gson gson = new Gson();
 
-	private TypeConverter() {
-	}
-
-	public static synchronized TypeConverter getInstance() {
-		if (converterInstance == null) {
-			converterInstance = new TypeConverter();
-		}
-		return converterInstance;
-	}
-
-	// FIXME - not thread safe !!!
-	// Pointers to arrays of Typed paramters - necessary to get the correctly
-	// matched method
 	// Possible Optimization -> pointers to known method signatures -
 	// optimization so that once a
 	// method's signature is processed and
@@ -42,7 +34,6 @@ public class TypeConverter {
 	// static public HashMap<String, Method> conversions = new HashMap<String,
 	// Method>();
 
-	// FIXME - these possibly "should not" be static for thread safety
 	// -------- primitive boxed types conversion begin ------------
 	static public byte StringToByte(String in) {
 		return Byte.parseByte(in);
@@ -83,7 +74,7 @@ public class TypeConverter {
 	// -------- primitive boxed types conversion end ------------
 
 	/**
-	 * this method tries to get the appropriate 'Typed parameter arry for a
+	 * this method tries to get the appropriate 'Typed parameter array for a
 	 * specific method It "converts" parameters of strings into typed parameters
 	 * which can then be used to reflectively invoke the appropriate method
 	 * 
@@ -92,7 +83,7 @@ public class TypeConverter {
 	 * @param stringParams
 	 * @return
 	 */
-	static public Object[] getTypedParams(Class<?> clazz, String method, String[] stringParams) {
+	static public Object[] getTypedParamsFromJson(Class<?> clazz, String method, String[] stringParams) {
 
 		try {
 			
@@ -142,6 +133,7 @@ public class TypeConverter {
 
 	}
 
+	/*
 	static public Object[] convert(String[] stringParams, Method[] converter) {
 		try {
 			Object[] newTypedParams = new Object[stringParams.length];
@@ -157,13 +149,12 @@ public class TypeConverter {
 
 		return null;
 	}
-
+	*/
+	
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		TypeConverter.getInstance();
 
 		org.myrobotlab.service.Runtime.createAndStart("clock", "Clock");
 
@@ -173,13 +164,13 @@ public class TypeConverter {
 		String method = "digitalWrite";
 		Class<?> clazz = si.getClass();
 
-		Object[] params = getTypedParams(clazz, method, stringParams);
+		Object[] params = getTypedParamsFromJson(clazz, method, stringParams);
 
 		si.invoke(method, params);
 
 		log.info("here");
 
-		Object[] params2 = getTypedParams(clazz, method, stringParams);
+		Object[] params2 = getTypedParamsFromJson(clazz, method, stringParams);
 		log.info("here");
 	}
 

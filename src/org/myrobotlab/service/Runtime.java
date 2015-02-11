@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -31,12 +32,12 @@ import java.util.TreeMap;
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.cmdline.CMDLine;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Bootstrap;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MessageListener;
 import org.myrobotlab.framework.MethodEntry;
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
@@ -130,6 +131,14 @@ public class Runtime extends Service implements MessageListener {
 
 	private boolean shutdownAfterUpdate = false;
 
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		peers.put("cli", "CLI", "command line interpreter for this process");
+		return peers;
+	}
+
+	static transient CLI cli;
+
 	/**
 	 * global startingArgs - whatever came into main each runtime will have its
 	 * individual copy
@@ -188,7 +197,7 @@ public class Runtime extends Service implements MessageListener {
 		log.info("============== args begin ==============");
 		StringBuffer sb = new StringBuffer();
 
-		jvmArgs = Bootstrap.getJVMArgs();
+		jvmArgs = getJVMArgs();
 		args = new ArrayList<String>();
 		if (globalArgs != null) {
 			for (int i = 0; i < globalArgs.length; ++i) {
@@ -244,6 +253,7 @@ public class Runtime extends Service implements MessageListener {
 		log.info(String.format("user.home [%s]", userHome));
 		log.info(String.format("total mem [%d] Mb", Runtime.getTotalMemory() / 1048576));
 		log.info(String.format("total free [%d] Mb", Runtime.getFreeMemory() / 1048576));
+		log.info(String.format("total physical mem [%d] Mb", Runtime.getTotalPhysicalMemory() / 1048576));
 
 		log.info("getting local repo");
 		repo = new Repo(n);
@@ -516,6 +526,9 @@ public class Runtime extends Service implements MessageListener {
 	 */
 
 	/**
+	 * FIXME - need to extend - communication to Agent ??? process request
+	 * restart ???
+	 * 
 	 * restart occurs after applying updates - user or config data needs to be
 	 * examined and see if its an appropriate time to restart - if it is the
 	 * spawnBootstrap method will be called and bootstrap.jar will go through
@@ -526,7 +539,7 @@ public class Runtime extends Service implements MessageListener {
 			info("restarting");
 			// TODO - timeout release .releaseAll nice ? - check or re-implement
 			Runtime.releaseAll();
-			Bootstrap.spawn(args.toArray(new String[args.size()]));
+			// Bootstrap.spawn(args.toArray(new String[args.size()]));
 			System.exit(0);
 
 			// shutdown / exit
@@ -626,6 +639,23 @@ public class Runtime extends Service implements MessageListener {
 	 */
 	public static final long getFreeMemory() {
 		return java.lang.Runtime.getRuntime().freeMemory();
+	}
+
+	/**
+	 * attempt to get physical memory from the jvm not supported in all jvms..
+	 * 
+	 * @return
+	 */
+	static public long getTotalPhysicalMemory() {
+		try {
+
+			com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+			long physicalMemorySize = os.getTotalPhysicalMemorySize();
+			return physicalMemorySize;
+		} catch (Exception e) {
+			log.error("getTotalPhysicalMemory - threw");
+		}
+		return 0;
 	}
 
 	// Reference - cpu utilization
@@ -1063,8 +1093,12 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	public static void dumpToFile() {
-		FileIO.stringToFile(String.format("serviceRegistry.%s.txt", runtime.getName()), Runtime.dump());
-		FileIO.stringToFile(String.format("notifyEntries.%s.xml", runtime.getName()), Runtime.dumpNotifyEntries());
+		try {
+			FileIO.stringToFile(String.format("serviceRegistry.%s.txt", runtime.getName()), Runtime.dump());
+			FileIO.stringToFile(String.format("notifyEntries.%s.xml", runtime.getName()), Runtime.dumpNotifyEntries());
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
 	}
 
 	/**
@@ -1292,6 +1326,16 @@ public class Runtime extends Service implements MessageListener {
 	 */
 	public String[] getServiceTypeNames(String filter) {
 		return runtime.repo.getServiceDataFile().getServiceTypeNames(filter);
+	}
+
+	static public String[] getServiceNames() {
+		List<ServiceInterface> si = getServices();
+		String[] ret = new String[si.size()];
+		for (int i = 0; i < ret.length; ++i) {
+			ret[i] = si.get(i).getName();
+		}
+
+		return ret;
 	}
 
 	/**
@@ -2012,6 +2056,11 @@ public class Runtime extends Service implements MessageListener {
 		return fallback;
 	}
 
+	static public List<String> getJVMArgs() {
+		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+		return runtimeMxBean.getInputArguments();
+	}
+
 	/**
 	 * Main starting method of MyRobotLab Parses command line options
 	 * 
@@ -2024,6 +2073,8 @@ public class Runtime extends Service implements MessageListener {
 
 		// global for this process
 		globalArgs = args;
+
+		// sub-process if there is one
 
 		CMDLine cmdline = new CMDLine(args);
 
@@ -2056,6 +2107,13 @@ public class Runtime extends Service implements MessageListener {
 				} else {
 					logging.addAppender(Appender.FILE);
 				}
+			}
+
+			logging.addAppender(Appender.CONSOLE);
+
+			if (!cmdline.containsKey("-noCLI")) {
+				Runtime.getInstance();
+				startCLI();
 			}
 
 			logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
@@ -2093,40 +2151,42 @@ public class Runtime extends Service implements MessageListener {
 				createAndStartServices(cmdline);
 			}
 
-			if (cmdline.containsKey("-test")) {
-				// force console to be logged to when testing
-				logging.addAppender(Appender.CONSOLE);
-				// check incoming state ..
-				// no additional params means -test Test || Test.test()
-				// Test.test will do its own Bootstrap call
-				// additional param means -test Service1 Service2 ???
-				// -test (no params) -> clean and bootstrap { -test Test }
-				// -test Test ->
-				// "I'm in loaded clean environment - ServiceInterface.test("test").test()
+			/*
+			 * DEPRECATE - AGENT MUST PREPARE ENV if
+			 * (cmdline.containsKey("-test")) { // force console to be logged to
+			 * when testing logging.addAppender(Appender.CONSOLE); // check
+			 * incoming state .. // no additional params means -test Test ||
+			 * Test.test() // Test.test will do its own Bootstrap call //
+			 * additional param means -test Service1 Service2 ??? // -test (no
+			 * params) -> clean and bootstrap { -test Test } // -test Test -> //
+			 * "I'm in loaded clean environment - ServiceInterface.test("
+			 * test").test()
+			 * 
+			 * ArrayList<String> testArgs = cmdline.getArgumentList("-test");
+			 * 
+			 * if (testArgs.size() == 0) {
+			 * 
+			 * // No Args - I'm in dirty Environment // need to clean
+			 * Environment - prepare & respawn Repo repo = new Repo("install");
+			 * cleanCache(); repo.retrieveServiceType("Test"); // start clean
+			 * environment process = Bootstrap.spawn(new String[] { "-test",
+			 * "Test"});
+			 * 
+			 * } else { // clean environment - start the testing process for
+			 * (int i = 0; i < testArgs.size(); ++i) { String serviceType =
+			 * testArgs.get(0); ServiceInterface si = start(serviceType,
+			 * serviceType); si.test(); } } }
+			 */
 
-				ArrayList<String> testArgs = cmdline.getArgumentList("-test");
-
-				if (testArgs.size() == 0) {
-
-					// No Args - I'm in dirty Environment
-					// need to clean Environment - prepare & respawn
-					Repo repo = new Repo("install");
-					cleanCache();
-					repo.retrieveServiceType("Test");
-					// start clean environment
-					Bootstrap.spawn(new String[] { "-test", "Test"});
-						
-				} else {
-					// clean environment - start the testing process
-					for (int i = 0; i < testArgs.size(); ++i) {
-						String serviceType = testArgs.get(0);
-						ServiceInterface si = start(serviceType, serviceType);
-						si.test();
-					}
-				}
-
-				return;
-			}
+			/*
+			 * if (process != null){
+			 * 
+			 * CLI cli = (CLI)start("cli", "CLI"); cli.attach(process);
+			 * 
+			 * process.waitFor();
+			 * 
+			 * }
+			 */
 
 			if (cmdline.containsKey("-invoke")) {
 				invokeCommands(cmdline);
@@ -2137,6 +2197,31 @@ public class Runtime extends Service implements MessageListener {
 			System.out.print(Logging.stackToString(e));
 			Service.sleep(2000);
 		}
+	}
+
+	// ---- resolve issues begin ----
+
+	static public CLI startCLI() {
+		// FIXME !!! - query registry by type
+		// we want 1 and only 1 CLI
+		// peer start ?
+		if (cli == null) {
+			cli = (CLI) start("cli", "CLI");
+		} else {
+			log.error("one and only cli already created");
+		}
+
+		return cli;
+	}
+
+	static public void stopCLI() {
+		if (cli != null) {
+			release(cli.getName());
+		}
+	}
+
+	public static CLI getCLI() {
+		return cli;
 	}
 
 }

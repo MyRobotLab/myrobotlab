@@ -19,6 +19,7 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
@@ -42,10 +43,13 @@ public class Encoder {
 	// uri schemes
 	public final static String SCHEME_MRL = "mrl";
 	public final static String SCHEME_BASE64 = "base64";
+	
+	public final static String TYPE_JSON = "json";
+	public final static String TYPE_REST = "rest";
 
 	// disableHtmlEscaping to prevent encoding or "=" -
 	public transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-	public final static String API_REST_PREFIX = "/api";
+	public final static String API_REST_PREFIX = "api";
 
 	public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<Class<?>>(Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class,
 			Float.class, Double.class, Void.class));
@@ -104,61 +108,52 @@ public class Encoder {
 		log.info(String.format("   scheme %s", uri.getScheme())); // http
 		log.info(String.format(" userInfo %s", uri.getUserInfo())); // gperry:blahblah
 
-		Message msg = decodePathInfo(uri.getPath());
+		Message msg = decodePathInfo(uri.getPath(), API_REST_PREFIX, null);
 
 		return msg;
 	}
 
+	public static final Message decodePathInfo(String pathInfo) {
+		return decodePathInfo(pathInfo, API_REST_PREFIX, null);
+	}
 	// TODO optimization of HashSet combinations of supported encoding instead
 	// of parsing...
 	// e.g. HashMap<String> supportedEncoding.containsKey(
-	public static Message decodePathInfo(String pathInfo) {
-
+	public static final Message decodePathInfo(String pathInfo, String apiTag, String encodingTag) {
+		
+		// minimal /(api|tag)/name/method
+		// ret encoding /(api|tag)/encoding/name/method
+		
 		if (pathInfo == null) {
 			log.error("pathInfo is null");
 			return null;
 		}
 
-		if (!pathInfo.startsWith(API_REST_PREFIX)) {
-			log.error(String.format("pathInfo [%s] needs to start with [%s]", pathInfo, API_REST_PREFIX));
+		String[] parts = pathInfo.split("/");
+		
+		if (parts.length < 4){
+			log.error(String.format("%s - not enough parts - requires minimal 3", pathInfo));
 			return null;
 		}
-
-		int p0 = API_REST_PREFIX.length() + 1; // "/api/"
-		int p1 = pathInfo.indexOf("/", p0);
-
-		String responseEncoding = pathInfo.substring(p0, p1);
-
-		p0 = p1 + 1;
-		p1 = pathInfo.indexOf("/", p0);
-
-		String inputEncoding = pathInfo.substring(p0, p1);
-
-		p0 = p1 + 1;
-		p1 = pathInfo.indexOf("/", p0);
-
-		String serviceName = pathInfo.substring(p0, p1);
-
-		p0 = p1 + 1;
-		p1 = pathInfo.indexOf("/", p0);
-
-		String method = null;
-		String[] params = null;
-
-		if (p1 != -1) {
-			// there are parameters
-			method = pathInfo.substring(p0, p1);
-			params = pathInfo.substring(++p1).split("/");
-
-			// param conversion via inputEncoding
-		} else {
-			method = pathInfo.substring(p0, p1);
+		
+		// FIXME allow parts[x + offset] with apiTag == null
+		if (apiTag != null && !apiTag.equals(parts[1])){
+			log.error(String.format("apiTag %s specified but %s in ordinal", apiTag, parts[0]));
+			return null;
 		}
 
 		// FIXME INVOKING VS PUTTING A MESSAGE ON THE BUS
 		Message msg = new Message();
-		msg.name = serviceName;
-		msg.method = method;
+		msg.name = parts[2];
+		msg.method = parts[3];
+		
+		if (parts.length > 4) {
+			// FIXME - ALL STRINGS AT THE MOMENT !!!
+			String[] jsonParams = new String[parts.length - 4];
+			System.arraycopy(parts, 4, jsonParams, 0, parts.length - 4);
+			ServiceInterface si = org.myrobotlab.service.Runtime.getService(msg.name);
+			msg.data = TypeConverter.getTypedParamsFromJson(si.getClass(), msg.method, jsonParams);
+		}
 
 		return msg;
 	}

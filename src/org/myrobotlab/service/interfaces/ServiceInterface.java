@@ -1,5 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.ArrayList;
 
@@ -82,6 +83,13 @@ public interface ServiceInterface {
 	
 	public boolean hasPeers();
 	
+	public Method[] getMethods();
+	
+	public String[] getMethodNames();
+
+	public String[] getDeclaredMethodNames();
+
+	public Method[] getDeclaredMethods();
 	
 	/**
 	 * asked by the framework - to determine if the service needs to be secure

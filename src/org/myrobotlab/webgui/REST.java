@@ -11,6 +11,7 @@ import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -36,7 +37,6 @@ public class REST {
 		Iterator<Map.Entry<URI, ServiceEnvironment>> uriIt = Runtime.getServiceEnvironments().entrySet().iterator();
 		while (uriIt.hasNext()) {
 			Map.Entry<URI, ServiceEnvironment> pairs = uriIt.next();
-			//serviceContent.append(String.format("%s", pairs.getKey()));
 			Iterator<Map.Entry<String, ServiceInterface>> serviceIt = pairs.getValue().serviceDirectory.entrySet().iterator();
 			while (serviceIt.hasNext()) {
 				Map.Entry<String, ServiceInterface> servicePair = serviceIt.next();
@@ -44,8 +44,6 @@ public class REST {
 				
 				log.debug(String.format("building method signatures for %s", serviceName));
 				
-				//serviceContent.append(String.format("<tr><td></td><td>%s</td><td></td></tr>", servicePair.getKey()));
-				//System.out.println(pairs.getKey() + " = " + pairs.getValue());
 				ServiceInterface si = servicePair.getValue();
 				String serviceType = si.getClass().getSimpleName();
 				Method[] methods = si.getClass().getDeclaredMethods();// .getMethods(); FIXME - configurable MORE methods return
@@ -121,6 +119,7 @@ public class REST {
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		try {
 		
 		Runtime.createAndStart("servo01", "Servo");
 		Runtime.createAndStart("motor01", "Motor");
@@ -128,6 +127,9 @@ public class REST {
 		FileIO.stringToFile("rest.html", rest.getServices());
 		
 		Runtime.releaseAll();
+		} catch(Exception e){
+			Logging.logException(e);
+		}
 	}
 
 }

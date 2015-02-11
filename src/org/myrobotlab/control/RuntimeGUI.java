@@ -209,7 +209,8 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 				// correct
 				Repo repo = myRuntime.getRepo();
 				ServiceData serviceData = repo.getServiceDataFile();
-				if (serviceData.hasUnfulfilledDependencies(c.type)) {
+				//if (serviceData.hasUnfulfilledDependencies(c.type)) {
+				if (!repo.isServiceTypeInstalled(c.type)) {
 					// need to install it
 					installMenuItem.setVisible(true);
 					startMenuItem.setVisible(false);
@@ -591,8 +592,8 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			setEnabled(table == null || table.isEnabled());
 			ServiceEntry entry = (ServiceEntry) table.getValueAt(row, 0);
 
-			ServiceData serviceData = repo.getServiceDataFile();
-			boolean availableToInstall = !serviceData.hasUnfulfilledDependencies(entry.type);
+			repo.getServiceDataFile();
+			boolean availableToInstall = repo.isServiceTypeInstalled(entry.type);
 			boolean upgradeAvailable = false;
 
 			String upgradeString = "<html><h6>upgrade<br>";
@@ -716,7 +717,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 			ServiceEntry entry = ((ServiceEntry) possibleServices.getValueAt(selectedRow, 0));
 			Repo repo = myRuntime.getRepo();
 
-			if (repo.getServiceDataFile().hasUnfulfilledDependencies(entry.getType())) {
+			if (!repo.isServiceTypeInstalled(entry.getType())) {
 				// dependencies needed !!!
 				String msg = "<html>This Service has dependencies which are not yet loaded,<br>" + "do you wish to download them now?";
 				JOptionPane.setRootFrame(myService.getFrame());
