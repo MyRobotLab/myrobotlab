@@ -3,6 +3,7 @@ package org.myrobotlab.framework.repo;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -229,11 +230,11 @@ public class ServiceData implements Serializable {
 
 	}
 
-	static public ServiceData getLocal() throws FileNotFoundException {
+	static public ServiceData getLocal() throws IOException {
 		return getLocal(null);
 	}
 
-	static public ServiceData getLocal(String filename) throws FileNotFoundException {
+	static public ServiceData getLocal(String filename) throws IOException {
 
 		if (filename == null) {
 			filename = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
@@ -387,7 +388,7 @@ public class ServiceData implements Serializable {
 		categoryTypes.put(category.name, category);
 	}
 
-	public ServiceData loadLocal() throws FileNotFoundException {
+	public ServiceData loadLocal() throws IOException {
 		return getLocal(String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator));
 	}
 

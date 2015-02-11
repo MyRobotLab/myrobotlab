@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -459,9 +460,9 @@ public class Python extends Service {
 	 * 
 	 * @param filename
 	 *            the full path name of the python file to execute
-	 * @throws FileNotFoundException
+	 * @throws IOException 
 	 */
-	public void execFile(String filename) throws FileNotFoundException {
+	public void execFile(String filename) throws IOException {
 		String script = FileIO.fileToString(filename);
 		exec(script);
 	}
@@ -533,7 +534,7 @@ public class Python extends Service {
 		stop();// release the interpeter
 	}
 
-	public boolean loadAndExec(String filename) throws FileNotFoundException {
+	public boolean loadAndExec(String filename) throws IOException {
 		boolean ret = loadScript(filename);
 		exec();
 		return ret;
@@ -568,9 +569,9 @@ public class Python extends Service {
 	 * @param filename
 	 *            - name of file to load
 	 * @return - success if loaded
-	 * @throws FileNotFoundException
+	 * @throws IOException 
 	 */
-	public boolean loadScript(String filename) throws FileNotFoundException {
+	public boolean loadScript(String filename) throws IOException {
 		String newCode = FileIO.fileToString(filename);
 		if (newCode != null && !newCode.isEmpty()) {
 			log.info(String.format("replacing current script with %1s", filename));
@@ -593,9 +594,9 @@ public class Python extends Service {
 	 * 
 	 * @param filename
 	 * @return true if successfully loaded
-	 * @throws FileNotFoundException
+	 * @throws IOException 
 	 */
-	public boolean loadUserScript(String filename) throws FileNotFoundException {
+	public boolean loadUserScript(String filename) throws IOException {
 		String newCode = FileIO.fileToString(getCFGDir() + File.separator + filename);
 		if (newCode != null && !newCode.isEmpty()) {
 			log.info(String.format("replacing current script with %1s", filename));

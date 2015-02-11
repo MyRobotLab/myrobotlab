@@ -407,7 +407,7 @@
 		<jar jarfile="${build}/lib/myrobotlab.jar" basedir="${build}/classes">
 			<!-- excludes="org/myrobotlab/boot/" -->
 			<manifest>
-				<attribute name="Main-Class" value="org.myrobotlab.framework.Bootstrap" />
+				<attribute name="Main-Class" value="org.myrobotlab.service.Agent" />
 				<attribute name="Built-By" value="${user.name}" />
 				<!-- section name="myrobotlab" -->
 				<section name="compile">

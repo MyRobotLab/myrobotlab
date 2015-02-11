@@ -69,6 +69,7 @@ import org.myrobotlab.net.Heartbeat;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
+import org.myrobotlab.service.interfaces.Invoker;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -83,7 +84,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service implements Runnable, Serializable, ServiceInterface {
+public abstract class Service implements Runnable, Serializable, ServiceInterface, Invoker {
 
 	/**
 	 * a radix-tree of data -"DNA" Description of Neighboring Automata ;)
@@ -2053,6 +2054,28 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		log.info(String.format("loading %d non-sub-routable methods", methods.length));
 		for (int i = 0; i < methods.length; ++i) {
 			ret.add(methods[i].getName());
+		}
+		return ret;
+	}
+	
+	public String[] getMethodNames() {
+		Method[] methods = getMethods();
+		String[] ret = new String[methods.length];
+		
+		log.info(String.format("loading %d non-sub-routable methods", methods.length));
+		for (int i = 0; i < methods.length; ++i) {
+			ret[i] = methods[i].getName();
+		}
+		return ret;
+	}
+
+	public String[] getDeclaredMethodNames() {
+		Method[] methods = getDeclaredMethods();
+		String[] ret = new String[methods.length];
+		
+		log.info(String.format("loading %d non-sub-routable methods", methods.length));
+		for (int i = 0; i < methods.length; ++i) {
+			ret[i] = methods[i].getName();
 		}
 		return ret;
 	}

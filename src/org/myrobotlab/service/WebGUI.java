@@ -226,55 +226,6 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		}
 	}
 
-	// FIXME - take out of RESTProcessor - normalize
-	/**
-	 * Encodes MyRobotLab message into JSON so that it can be sent over
-	 * websockets to listening clients
-	 * 
-	 * @param msg
-	 *            message to be encoded
-	 * @return message encoded as JSON (gson) string
-	 */
-	public String toJson(Message msg) {
-		try {
-			// GsonBuilder().setDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz").create();
-
-			/*
-			 * Gson gson = new GsonBuilder() .registerTypeAdapter(Id.class, new
-			 * IdTypeAdapter()) .serializeNulls()
-			 * .setDateFormat(DateFormat.LONG)
-			 * .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
-			 * .setPrettyPrinting() .setVersion(1.0) .create();
-			 */
-			// http://google-gson.googlecode.com/svn/tags/1.2.3/docs/javadocs/com/google/gson/GsonBuilder.html#setDateFormat(int)
-			// PRETTY PRINTING IS AWESOME ! MAKE CONFIGURABLE - PRETTY PRINT
-			// ONLY WORKS IN TEXTMODE .setPrettyPrinting()
-			// .setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
-			// gson.setDateFormat(DateFormat.FULL);
-			/*
-			 * REMOVED RECENTLY out = new ByteArrayOutputStream(); // FIXME -
-			 * threadsafe? singleton? JsonWriter writer = new JsonWriter(new
-			 * OutputStreamWriter(out, "UTF-8")); // FIXME - threadsafe?
-			 * singleton? gson.toJson(msg, Message.class, writer);
-			 */
-			// writer.setIndent("  "); // TODO config driven - very cool !
-			// writer.beginArray();
-
-			String ret = Encoder.gson.toJson(msg, Message.class);
-			// log.info(ret);
-			// for (Message message : messages) {
-			// gson.toJson(message, Message.class, writer);
-			// }
-			// writer.endArray();
-
-			// writer.close();
-			return ret;
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		return null;
-	}
-
 	/**
 	 * sends JSON encoded MyRobotLab Message to all clients currently connected
 	 * through web sockets
@@ -284,7 +235,7 @@ public class WebGUI extends Service implements AuthorizationProvider {
 	 */
 	public void sendToAll(Message msg) {
 		++messages;
-		String json = toJson(msg);
+		String json = Encoder.gson.toJson(msg, Message.class); //toJson(msg);
 		log.debug(String.format("webgui ---to---> all clients [%s]", json));
 		if (messages % 500 == 0) {
 			info(String.format("sent %d messages to %d clients", messages, wss.connections().size())); // TODO

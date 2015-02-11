@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.framework.TypeConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.http.Response;
@@ -85,9 +86,7 @@ public class RESTProcessor implements HTTPProcessor {
 				// FIXME FIXME FIXME !!!!
 				// this is an input format decision !!! .. it "SHOULD" be
 				// determined based on inbound uri format
-
-				TypeConverter.getInstance();
-				typedParameters = TypeConverter.getTypedParams(si.getClass(), fn, stringParams);
+				typedParameters = TypeConverter.getTypedParamsFromJson(si.getClass(), fn, stringParams);
 			}
 
 			// TODO - handle return type -
@@ -245,8 +244,7 @@ public class RESTProcessor implements HTTPProcessor {
 				// this is an input format decision !!! .. it "SHOULD" be
 				// determined based on inbound uri format
 
-				TypeConverter.getInstance();
-				typedParameters = TypeConverter.getTypedParams(si.getClass(), fn, stringParams);
+				typedParameters = TypeConverter.getTypedParamsFromJson(si.getClass(), fn, stringParams);
 			}
 
 			// TODO - handle return type -

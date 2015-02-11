@@ -16,6 +16,7 @@ import javax.xml.soap.SOAPMessage;
 
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.framework.TypeConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.http.Response;
@@ -307,9 +308,7 @@ public class SOAPProcessor implements HTTPProcessor {
 				// FIXME FIXME FIXME !!!!
 				// this is an input format decision !!! .. it "SHOULD" be
 				// determined based on inbound uri format
-
-				TypeConverter.getInstance();
-				typedParameters = TypeConverter.getTypedParams(si.getClass(), fn, stringParams);
+				typedParameters = TypeConverter.getTypedParamsFromJson(si.getClass(), fn, stringParams);
 			}
 
 			// TODO - handle return type -

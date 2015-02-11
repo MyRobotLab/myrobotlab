@@ -51,23 +51,35 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * class of useful utility functions we do not use nio - for portability reasons
+ * e.g. Android
+ * 
+ * @author GroG
+ *
+ */
 public class FileIO {
 
 	public final static Logger log = LoggerFactory.getLogger(FileIO.class);
 
 	/**
-	 * Single place to get configuration data directory - currently in
-	 * cwd/.myrobotlab
+	 * general purpose stream closer for single line closing
+	 * 
+	 * @param is
+	 */
+	static final public void closeStream(InputStream is) {
+		try {
+			if (is != null) {
+				is.close();
+			}
+		} catch (Exception e) {
+		}
+	}
+
+	/**
+	 * get configuration directory
 	 * 
 	 * @return
-	 */
-
-	/*
-	 * MIN JAVA 7 :) import java.nio.file.Files; import java.nio.file.Paths;
-	 * import java.nio.file.Path;
-	 * 
-	 * Path path = Paths.get("path/to/file"); byte[] data =
-	 * Files.readAllBytes(path);
 	 */
 	static public String getCfgDir() {
 		try {
@@ -95,7 +107,7 @@ public class FileIO {
 	}
 
 	// --- string interface begin ---
-	public final static String fileToString(File file) throws FileNotFoundException {
+	public final static String fileToString(File file) throws IOException {
 		byte[] bytes = fileToByteArray(file);
 		if (bytes == null) {
 			return null;
@@ -103,7 +115,7 @@ public class FileIO {
 		return new String(bytes);
 	}
 
-	public final static String fileToString(String filename) throws FileNotFoundException {
+	public final static String fileToString(String filename) throws IOException {
 		return fileToString(new File(filename));
 	}
 
@@ -115,7 +127,7 @@ public class FileIO {
 		return new String(bytes);
 	}
 
-	public static void stringToFile(String filename, String data) {
+	public static void stringToFile(String filename, String data) throws IOException {
 		byteArrayToFile(filename, data.getBytes());
 	}
 
@@ -134,44 +146,32 @@ public class FileIO {
 		return null;
 	}
 
-	static public boolean byteArrayToFile(String filename, byte[] data) {
+	static public void byteArrayToFile(String filename, byte[] data) throws IOException {
 		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(filename);
-			fos.write(data);
-			return true;
-		} catch (Exception e) {
-			Logging.logException(e);
-		} finally {
-			try {
-				fos.close();
-			} catch (Exception e) {
-			}
-		}
-		return false;
+		fos = new FileOutputStream(filename);
+		fos.write(data);
+		fos.close();
+
 	}
 
-	public final static byte[] fileToByteArray(File file) throws FileNotFoundException {
+	public final static byte[] fileToByteArray(File file) throws IOException {
 
 		FileInputStream fis = null;
 		byte[] data = null;
-		try {
-			fis = new FileInputStream(file);
-			data = toByteArray(fis);
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (Exception e) {
-				}
-			}
-		}
+
+		fis = new FileInputStream(file);
+		data = toByteArray(fis);
+
+		fis.close();
+
 		return data;
 	}
 
 	public static final String getSource() {
 		try {
-			//return URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8");
+			// return
+			// URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),
+			// "UTF-8");
 			return FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 		} catch (Exception e) {
 			Logging.logException(e);
@@ -395,70 +395,19 @@ public class FileIO {
 	}
 
 	static public void copy(File src, File dst) throws IOException {
-	    InputStream in = new FileInputStream(src);
-	    OutputStream out = new FileOutputStream(dst);
+		InputStream in = new FileInputStream(src);
+		OutputStream out = new FileOutputStream(dst);
 
-	    // Transfer bytes from in to out
-	    byte[] buf = new byte[1024];
-	    int len;
-	    while ((len = in.read(buf)) > 0) {
-	        out.write(buf, 0, len);
-	    }
-	    in.close();
-	    out.close();
-	}
-	
-	/**
-	 *  NO NIO ON ANDROID !!!
-	private static FileSystem createZipFileSystem(String zipFilename, boolean create) throws IOException {
-		// convert the filename to a URI
-		final Path path = Paths.get(zipFilename);
-		final URI uri = URI.create("jar:file:" + path.toUri().getPath());
-
-		final Map<String, String> env = new HashMap<String, String>();
-		if (create) {
-			env.put("create", "true");
+		// Transfer bytes from in to out
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
 		}
-		return FileSystems.newFileSystem(uri, env);
+		in.close();
+		out.close();
 	}
 
-	public static void list(String zipFilename) throws IOException {
-
-		System.out.printf("Listing Archive:  %s\n", zipFilename);
-
-		FileSystem zipFileSystem = null;
-		try {
-			// create the file system
-			zipFileSystem = createZipFileSystem(zipFilename, false);
-
-			final Path root = zipFileSystem.getPath("/");
-
-			// walk the file tree and print out the directory and filenames
-			Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					print(file);
-					return FileVisitResult.CONTINUE;
-				}
-
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-					print(dir);
-					return FileVisitResult.CONTINUE;
-				}
-
-				
-				private void print(Path file) throws IOException {
-					final DateFormat df = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
-					final String modTime = df.format(new Date(Files.getLastModifiedTime(file).toMillis()));
-					System.out.printf("%d  %s  %s\n", Files.size(file), modTime, file);
-				}
-			});
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-*/
 	// jar pathing end ---------------
 	// -- os primitives begin -------
 
@@ -492,92 +441,167 @@ public class FileIO {
 		return false;
 	}
 
+	// FIXME - implement
+	static public byte[] getResource(String resoucePath) {
+		String path = String.format("resource/%s", resoucePath);
+		if (isJar()) {
+
+		} else {
+
+		}
+		return null;
+	}
+
+	public static class FileComparisonException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		public FileComparisonException(String msg) {
+			super(msg);
+		}
+	}
+
+	public static boolean rmDir(File directory, Set<File> exclude) {
+		if (directory.exists()) {
+			File[] files = directory.listFiles();
+			if (null != files) {
+				for (int i = 0; i < files.length; i++) {
+					if (files[i].isDirectory()) {
+						rmDir(files[i], exclude);
+					} else {
+						if (exclude != null && exclude.contains(files[i])) {
+							log.info("skipping exluded file {}", files[i].getName());
+						} else {
+							log.info("removing file {}", files[i].getName());
+							files[i].delete();
+						}
+					}
+				}
+			}
+		}
+
+		boolean ret = (exclude != null) ? true : (directory.delete());
+		return ret;
+	}
+
+	public static void compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
+		File file1 = new File(filename1);
+		File file2 = new File(filename2);
+		if (file1.length() != file2.length()) {
+			throw new FileComparisonException(String.format("%s size is %d adn %s is size %d", filename1, file1.length(), filename2, file2.length()));
+		}
+
+		byte[] a1 = fileToByteArray(new File(filename1));
+		byte[] a2 = fileToByteArray(new File(filename2));
+
+		for (int i = 0; i < a1.length; ++i) {
+			if (a1[i] != a2[i]) {
+				throw new FileComparisonException(String.format("files differ at position %d", i));
+			}
+		}
+	}
+
+	/**
+	 * for inter process file writting & locking ..
+	 * 
+	 * @param filename
+	 * @param data
+	 * @throws IOException
+	 */
+	static public void savePartFile(String filename, byte[] data) throws IOException {
+		// first delete any part or filename file currently there
+		File file = new File(filename);
+		if (file.exists()) {
+			if (!file.delete()) {
+				throw new IOException(String.format("%s exists but could not delete", filename));
+			}
+		}
+		String partFilename = String.format("%s.part", filename);
+		File partFile = new File(partFilename);
+		if (partFile.exists()) {
+			if (!partFile.delete()) {
+				throw new IOException(String.format("%s exists but could not delete", partFilename));
+			}
+		}
+
+		byteArrayToFile(partFilename, data);
+
+		if (!partFile.renameTo(new File(filename))) {
+			throw new IOException(String.format("could not rename %s to %s ..  don't know why.. :(", partFilename, filename));
+		}
+
+	}
+
+	/**
+	 * inter process file communication - default is to wait and attempt to load
+	 * a file in the next second - it comes from savePartFile - then the writing
+	 * of the file from a different process should be an atomic move regardless
+	 * of file size
+	 * 
+	 * @param filename
+	 * @throws IOException
+	 */
+	static public byte[] loadPartFile(String filename) throws IOException {
+		return loadPartFile(filename, 1000);
+	}
+
+	static public byte[] loadPartFile(String filename, long timeoutMs) throws IOException {
+		long startTs = System.currentTimeMillis();
+		try {
+			while (System.currentTimeMillis() - startTs < timeoutMs) {
+
+				File file = new File(filename);
+				if (file.exists()) {
+					return fileToByteArray(file);
+				}
+				Thread.sleep(30);
+			}
+
+		} catch (Exception e) {
+			new IOException("interrupted while waiting for file to arrive");
+		}
+		return null;
+	}
+
 	public static void main(String[] args) throws ZipException, IOException {
 
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		String data = resourceToString("version.txt");
-		data = resourceToString("framework/ivychain.xml");
-		data = resourceToString("framework/serviceData.xml");
-
-		byte[] ba = resourceToByteArray("version.txt");
-		ba = resourceToByteArray("framework/version.txt");
-		ba = resourceToByteArray("framework/serviceData.xml");
-
-		String hello = resourceToString("blah.txt");
-
-		copyResource("mrl_logo.jpg", "mrl_logo.jpg");
-
-		byte[] b = resourceToByteArray("mrl_logo.jpg");
-
-		File[] files = getPackageContent("");
-
-		log.info(getBinaryPath());
-
-		log.info("{}", b);
-
-		log.info("done");
-
-	}
-
-	// FIXME - implement
-	static public byte[] getResource(String resoucePath) {
-		String path = String.format("resource/%s", resoucePath);
-		if (isJar()){
-			
-		} else {
-			
-		}
-		return null;
-	}
-	
-	public static class FileComparisonException extends Exception {	
-		private static final long serialVersionUID = 1L;
-		public FileComparisonException(String msg){
-			super(msg);
-		}
-	}
-	
-	public static boolean rmDir(File directory, Set<File> exclude) {
-	    if(directory.exists()){
-	        File[] files = directory.listFiles();
-	        if(null!=files){
-	            for(int i=0; i<files.length; i++) {
-	                if(files[i].isDirectory()) {
-	                	rmDir(files[i], exclude);
-	                }
-	                else {
-	                	if (exclude != null && exclude.contains(files[i])) {
-	                		log.info("skipping exluded file {}", files[i].getName());
-	                	} else {
-	                		log.info("removing file {}", files[i].getName());
-	                		files[i].delete();
-	                	}
-	                }
-	            }
-	        }
-	    }
-	    
-	    boolean ret = (exclude != null)?true:(directory.delete());
-	    return ret;
-	}
-	
-	public static void compareFiles(String filename1, String filename2) throws FileNotFoundException, FileComparisonException {
-		File file1 = new File(filename1);
-		File file2 = new File(filename2);
-		if(file1.length() != file2.length()){
-			throw new FileComparisonException(String.format("%s size is %d adn %s is size %d", filename1, file1.length(), filename2, file2.length()));
-		}
-			
-		byte[] a1 = fileToByteArray(new File(filename1));
-		byte[] a2 = fileToByteArray(new File(filename2));
-		
-		for (int i = 0; i < a1.length; ++i){
-			if (a1[i] != a2[i]){
-				throw new FileComparisonException(String.format("files differ at position %d", i));
+		try {
+			String t = "this is a test";
+			FileIO.savePartFile("save.txt", t.getBytes());
+			byte[] data = FileIO.loadPartFile("save.txt", 10000);
+			if (data != null) {
+				log.info(new String(data));
 			}
+
+			/*
+			 * String data = resourceToString("version.txt"); data =
+			 * resourceToString("framework/ivychain.xml"); data =
+			 * resourceToString("framework/serviceData.xml");
+			 * 
+			 * byte[] ba = resourceToByteArray("version.txt"); ba =
+			 * resourceToByteArray("framework/version.txt"); ba =
+			 * resourceToByteArray("framework/serviceData.xml");
+			 * 
+			 * String hello = resourceToString("blah.txt");
+			 * 
+			 * copyResource("mrl_logo.jpg", "mrl_logo.jpg");
+			 * 
+			 * byte[] b = resourceToByteArray("mrl_logo.jpg");
+			 * 
+			 * File[] files = getPackageContent("");
+			 * 
+			 * log.info(getBinaryPath());
+			 * 
+			 * log.info("{}", b);
+			 * 
+			 * log.info("done");
+			 */
+		} catch (Exception e) {
+			Logging.logException(e);
 		}
+
 	}
 
 }
