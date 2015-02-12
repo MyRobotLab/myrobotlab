@@ -41,10 +41,10 @@ public class DHRobotArmTest {
 		// you want to know where the hand is.
 		//coord = arm.getPalmPosition();
 
-		//System.out.println(coord);
+		System.out.println(coord);
 		// assertEquals(coord.toString(),"(2.0, 1.0, 1.0)" );
-		assertEquals("(x=0.141, y=0.141, z=0.400)", coord.toString());
-
+		
+		assertEquals("(x=0.141421, y=0.141421, z=0.400000)", coord.toString());
 	}
 
 	@Test
