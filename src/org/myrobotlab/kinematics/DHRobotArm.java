@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class DHRobotArm {
 
 	private ArrayList<DHLink> links;
-	
+
 	public DHRobotArm() {
 		super();
 		links = new ArrayList<DHLink>();
@@ -15,7 +15,19 @@ public class DHRobotArm {
 		links.add(link);
 		return links;
 	}
-	
+
+	public DHLink getLink(int i) {
+		if (links.size() >= i) {
+			return links.get(i);
+		} else {
+			// TODO log a warning or something?
+			return null;
+		}
+	}
+	public int getNumLinks() {
+		return links.size();
+	}
+
 	public ArrayList<DHLink> getLinks() {
 		return links;
 	}
@@ -36,13 +48,13 @@ public class DHRobotArm {
 		m.elements[2][2] = 1;
 		m.elements[3][3] = 1;
 
-		
+
 		// initial frame orientated around z
-//		m.elements[0][2] = 1;
-//		m.elements[1][1] = 1;
-//		m.elements[2][0] = 1;
-//		m.elements[3][3] = 1;
-		
+		//		m.elements[0][2] = 1;
+		//		m.elements[1][1] = 1;
+		//		m.elements[2][0] = 1;
+		//		m.elements[3][3] = 1;
+
 		//System.out.println("-------------------------");
 		//System.out.println(m);
 		// TODO: validate this approach..
@@ -63,7 +75,89 @@ public class DHRobotArm {
 		Point palm = new Point(x,y,z);		
 		return palm;
 	}
-	
-	
-	
+
+	public Matrix getJInverse() {
+		// TODO Auto-generated method stub
+		// something small.
+		double delta = 0.000001;
+
+		int numLinks = this.getNumLinks();
+
+		// we need a jacobian matrix that is 6 x numLinks
+		// for now we'll only deal with x,y,z we can add rotation later.
+		// so only 3
+		Matrix jacobian = new Matrix(3, numLinks);
+
+		// this will be used to compute the gradient of x,y,z based on the joint movement.
+		Point basePosition = this.getPalmPosition();
+		//System.out.println("Base Position : " + basePosition);
+		// for each servo, we'll rotate it forward by delta (and back), and get the new positions
+		for (int j = 0 ; j < numLinks ; j++) {
+			this.getLink(j).incrRotate(delta);
+			Point palmPoint = this.getPalmPosition();
+			Point deltaPoint = palmPoint.subtract(basePosition);
+			this.getLink(j).incrRotate(-delta); 
+			// delta position / base position gives us the slope / rate of change
+			// this is an approx of the gradient of P
+			// UHoh,, what about divide by zero?!
+			// System.out.println("Delta Point" + deltaPoint);
+			double dXdj = deltaPoint.getX()/delta;
+			double dYdj = deltaPoint.getY()/delta;
+			double dZdj = deltaPoint.getZ()/delta;
+			jacobian.elements[0][j] = dXdj;
+			jacobian.elements[1][j] = dYdj;
+			jacobian.elements[2][j] = dZdj;			
+			// TODO: get orientation roll/pitch/yaw
+		}
+
+		// System.out.println("Jacobian(p)approx");
+		// System.out.println(jacobian);
+
+		// This is the MAGIC!  the pseudo inverse should map
+		// deltaTheta[i] to delta[x,y,z]
+		Matrix jInverse = jacobian.pseudoInverse();
+		// System.out.println("Pseudo inverse Jacobian(p)approx\n" + jInverse);
+		return jInverse;
+	}
+
+	void moveToGoal(Point goal) {
+		// we know where we are.. we know where we want to go.
+		int numSteps = 0;
+		double iterStep = 0.01;
+		double errorThreshold = 0.01;
+		// what's the current point
+		while (true) {
+			numSteps++;
+			// TODO: what if its unreachable!
+			Point currentPos = this.getPalmPosition();
+			System.out.println("Current Position " + currentPos);
+			// vector to destination
+			Point deltaPoint = goal.subtract(currentPos);
+			Matrix dP = new Matrix(3,1);
+			dP.elements[0][0] = deltaPoint.getX();
+			dP.elements[1][0] = deltaPoint.getY();
+			dP.elements[2][0] = deltaPoint.getZ();
+			// scale a vector towards the goal by the increment step.
+			dP = dP.multiply(iterStep);
+			
+			Matrix jInverse = this.getJInverse();			
+			// why is this zero?
+			Matrix dTheta = jInverse.multiply(dP);
+			System.out.println("delta Theta + " + dTheta);
+			for (int i = 0 ;i <  dTheta.getNumRows(); i++) {
+				// update joint positions!  move towards the goal!
+				double d = dTheta.elements[i][0];
+				this.getLink(i).incrRotate(d);
+			}
+			// delta point represents the direction we need to move in order to get there.
+			// we should figure out how to scale the steps.
+			if (deltaPoint.magnitude() < errorThreshold) {
+				System.out.println("We made it!  It took " + numSteps + " iterations to get there.");
+				break;
+			}
+		}
+
+	}
+
+
 }

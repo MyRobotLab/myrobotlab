@@ -31,7 +31,7 @@ public class Point {
 	}
 	public String toString() {
 		// TODO: round this out
-		NumberFormat formatter = new DecimalFormat("#0.000");
+		NumberFormat formatter = new DecimalFormat("#0.000000");
 		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + ")";  
 	}
 	@Override
@@ -63,5 +63,14 @@ public class Point {
 		if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
 			return false;
 		return true;
+	}
+	public Point subtract(Point p) {
+		// TODO Auto-generated method stub
+		Point newPoint = new Point(x-p.getX(), y-p.getY(), z-p.getZ());
+		return newPoint;
+	}
+	public double magnitude() {
+		// TODO Auto-generated method stub
+		return Math.sqrt(x*x + y*y + z*z);
 	}
 }

@@ -173,13 +173,13 @@ public class IKEngine {
 
     // set up the jacobian
     for(i=0; i<numLinks; i++) {
-      jacobian.elements[0][i]= jacobian.elements[1][i]= 0.0;
-      for(int j= i; j<numLinks; j++) {
-	jacobian.elements[0][i] += -lengths[j]*st[j];
-	jacobian.elements[1][i] += lengths[j]*ct[j];
-      }
+    	jacobian.elements[0][i]= jacobian.elements[1][i]= 0.0;
+    	for(int j= i; j<numLinks; j++) {
+    		jacobian.elements[0][i] += -lengths[j]*st[j];
+    		jacobian.elements[1][i] += lengths[j]*ct[j];
+    	}
     }
-    
+
     // dTheta= J^-1 * dX
     jInverse= jacobian.pseudoInverse();
     dTheta= jInverse.multiply(dX);
