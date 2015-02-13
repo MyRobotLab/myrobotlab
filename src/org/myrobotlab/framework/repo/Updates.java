@@ -11,12 +11,11 @@ public class Updates {
 	public List<String> serviceTypesToUpdate = new ArrayList<String>();
 	public ServiceData remoteServiceData;
 	public ServiceData localServiceData;
-	public final String runtimeName;
+	//public final String runtimeName;
 	public boolean isValid = false;
 	public String lastError;
 	
-	public Updates(String runtimeName){
-		this.runtimeName = runtimeName;
+	public Updates(){
 	}
 	
 	public boolean hasJarUpdate(){

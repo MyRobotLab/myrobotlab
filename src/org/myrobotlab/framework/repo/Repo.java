@@ -1,7 +1,6 @@
 package org.myrobotlab.framework.repo;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -11,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.module.descriptor.Artifact;
@@ -42,10 +42,17 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
-import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.service.interfaces.RepoUpdateListener;
 import org.slf4j.Logger;
 
 // FIXME - remove all references of Runtime - you must messages to an interface !
+// Update Listener
+
+// FIXME
+// clearRepo - whipes out all (calls other methods) <- not static
+// clearRepoCache - wipes out .repo <- static since it IS static - only 1 on machine
+// clearLibraries <- not static - this is per instance/installation
+// clearServiceData <- not static - this is per instance/installation 
 
 public class Repo implements Serializable {
 
@@ -67,14 +74,18 @@ public class Repo implements Serializable {
 	private ServiceData remoteServiceData = null;
 
 	private Platform platform;
-	transient Ivy ivy = null;
+	transient Ivy ivy = null; // we'll never use remote ivy only local
 
 	/**
 	 * the Runtime's name which this Repo is operating in behalf of. There is a
 	 * possiblity that this will be not a real name or null, in which case their
 	 * will be no Runtime running - but Repo requests are still desired.
 	 */
-	public final String runtimeName;
+
+	/**
+	 * call back notification of progress
+	 */
+	RepoUpdateListener listener = null;
 
 	private boolean getRemoteRepo = false;
 
@@ -85,8 +96,7 @@ public class Repo implements Serializable {
 	 * overwritten by the serialization process (hopefully) and reflect the
 	 * appropriate remote (peer) Repo info
 	 */
-	public Repo(String runtimeName) {
-		this.runtimeName = runtimeName;
+	public Repo() {
 
 		// get my local platform
 		platform = Platform.getLocalInstance();
@@ -94,25 +104,22 @@ public class Repo implements Serializable {
 		// load local file
 		localServiceData = getServiceDataFile();
 	}
+	
+	public void addRepoUpdateListener(RepoUpdateListener listener){
+		this.listener = listener;
+	}
 
 	// pulled in dependencies .. not sure if that is good
 	public void info(String format, Object... args) {
-		ServiceInterface si = org.myrobotlab.service.Runtime.getService(runtimeName);
-
-		if (si != null) {
-			si.invoke("updateProgress", Status.info(format, args));
-		} else {
-			log.info(String.format(format, args));
+		if (listener != null) {
+			listener.updateProgress(Status.info(format, args));
 		}
 	}
 
 	// pulled in dependencies .. not sure if that is good
 	public void error(String format, Object... args) {
-		ServiceInterface si = org.myrobotlab.service.Runtime.getService(runtimeName);
-		if (si != null) {
-			si.invoke("updateProgress", Status.error(format, args));
-		} else {
-			log.error(String.format(format, args));
+		if (listener != null) {
+			listener.updateProgress(Status.error(format, args));
 		}
 	}
 
@@ -188,54 +195,54 @@ public class Repo implements Serializable {
 		}
 		return null;
 	}
-	
-	static public String getLatestVersion(String[] versions){
-		
-		if (versions == null || versions.length == 0){
+
+	static public String getLatestVersion(String[] versions) {
+
+		if (versions == null || versions.length == 0) {
 			return null;
 		}
-		
+
 		int[][] ver = new int[versions.length][3];
-		
+
 		int major = 0;
 		int minor = 0;
 		int build = 0;
-		
+
 		int latestMajor = 0;
 		int latestMinor = 0;
 		int latestBuild = 0;
-		
+
 		int latestIndex = 0;
-		
-		for (int i = 0; i < versions.length; ++i){
+
+		for (int i = 0; i < versions.length; ++i) {
 			try {
 				major = 0;
 				minor = 0;
 				build = 0;
-				
-				String [] parts = versions[i].split("\\.");
+
+				String[] parts = versions[i].split("\\.");
 				major = Integer.parseInt(parts[0]);
 				minor = Integer.parseInt(parts[1]);
 				build = Integer.parseInt(parts[2]);
-			} catch(Exception e){
+			} catch (Exception e) {
 				log.error(e.getMessage());
 			}
-			
-			if (major > latestMajor){
+
+			if (major > latestMajor) {
 				latestMajor = major;
 				latestMinor = minor;
 				latestBuild = build;
 				latestIndex = i;
-			} else if (major == latestMajor){
+			} else if (major == latestMajor) {
 				// go deeper (minor)
-				if (minor >  latestMinor){
+				if (minor > latestMinor) {
 					latestMajor = major;
 					latestMinor = minor;
 					latestBuild = build;
 					latestIndex = i;
-				} else if (minor == latestMinor){
+				} else if (minor == latestMinor) {
 					// go deeper (build)
-					if ( build > latestBuild){
+					if (build > latestBuild) {
 						latestMajor = major;
 						latestMinor = minor;
 						latestBuild = build;
@@ -244,7 +251,7 @@ public class Repo implements Serializable {
 				}
 			}
 		}
-		
+
 		return versions[latestIndex];
 	}
 
@@ -278,19 +285,15 @@ public class Repo implements Serializable {
 		}
 
 		/*
-		Arrays.sort(r);
-
-		info("finished parsing and sorting");
-
-		if (r.length > 0) {
-			String repoVersion = r[r.length - 1];
-			info("returning release string %s", repoVersion);
-			return repoVersion;
-		} else {
-			error("could not get latest version information");
-			throw new IOException("could not get latest version information");
-		}
-		*/
+		 * Arrays.sort(r);
+		 * 
+		 * info("finished parsing and sorting");
+		 * 
+		 * if (r.length > 0) { String repoVersion = r[r.length - 1];
+		 * info("returning release string %s", repoVersion); return repoVersion;
+		 * } else { error("could not get latest version information"); throw new
+		 * IOException("could not get latest version information"); }
+		 */
 		String latest = getLatestVersion(r);
 		return latest;
 	}
@@ -344,7 +347,7 @@ public class Repo implements Serializable {
 	 * local repo to process updates
 	 */
 	public Updates checkForUpdates() {
-		Updates updates = new Updates(runtimeName);
+		Updates updates = new Updates();
 		try {
 			info("=== checking for updates begin ===");
 
@@ -381,10 +384,10 @@ public class Repo implements Serializable {
 	// TODO - getLocalResolvedDependencies
 
 	public boolean isServiceTypeInstalled(String fullTypeName) {
-		if(fullTypeName.equals("org.myrobotlab.service.InMoov")){
+		if (fullTypeName.equals("org.myrobotlab.service.InMoov")) {
 			log.info("here");
 		}
-		
+
 		if (localServiceData != null) {
 			ServiceType st = localServiceData.getServiceType(fullTypeName);
 			if (st == null) {
@@ -402,7 +405,7 @@ public class Repo implements Serializable {
 				for (int i = 0; i < peerList.size(); ++i) {
 					ServiceReservation sr = peerList.get(i);
 					log.info("checking peer {} dependencies", sr.fullTypeName);
-					if (!isServiceTypeInstalled(sr.fullTypeName)){
+					if (!isServiceTypeInstalled(sr.fullTypeName)) {
 						return false;
 					}
 				}
@@ -592,7 +595,7 @@ public class Repo implements Serializable {
 	public HashSet<Dependency> getDependencies(String fullServiceName) {
 		ServiceData sd = getServiceDataFile();
 		HashSet<Dependency> deps = new HashSet<Dependency>();
-		
+
 		// these are Peer dependencies !
 		Peers peers = Peers.getPeers(fullServiceName);
 		if (peers != null) {
@@ -600,13 +603,13 @@ public class Repo implements Serializable {
 			for (int i = 0; i < peerList.size(); ++i) {
 				ServiceReservation sr = peerList.get(i);
 				log.info("checking peer {} dependencies", sr.fullTypeName);
-				HashSet<Dependency> peerDeps =  getDependencies(sr.fullTypeName);
-				if (peerDeps != null){
+				HashSet<Dependency> peerDeps = getDependencies(sr.fullTypeName);
+				if (peerDeps != null) {
 					deps.addAll(peerDeps);
 				}
 			}
 		}
-		
+
 		// these are immediate dependencies - not Peer
 		if (sd.containsServiceType(fullServiceName)) {
 			ArrayList<String> orgs = sd.getServiceType(fullServiceName).dependencies;
@@ -627,12 +630,12 @@ public class Repo implements Serializable {
 		}
 		return deps;
 	}
-	
-	public ArrayList<ResolveReport> retrieveServiceType(String fullTypeName) throws ParseException, IOException {
-		return retrieveServiceType(fullTypeName, false);
+
+	public ArrayList<ResolveReport> install(String fullTypeName) throws ParseException, IOException {
+		return install(fullTypeName, false);
 	}
 
-	public ArrayList<ResolveReport> retrieveServiceType(String fullTypeName, boolean force) throws ParseException, IOException {
+	public ArrayList<ResolveReport> install(String fullTypeName, boolean force) throws ParseException, IOException {
 
 		if (!fullTypeName.contains(".")) {
 			fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
@@ -712,24 +715,23 @@ public class Repo implements Serializable {
 		// FIXME - sync serviceData with ivy cache & library
 
 		// get local instance
-		Repo repo = new Repo("test");
-		
-		
-		String[] versions = {"1.0.100", "1.0.101", "1.0.102", "1.0.104", "1.0.105", "1.0.106", "1.0.107", "1.0.92", "1.0.93", "1.0.94", "1.0.95", "1.0.96", "1.0.97", "1.0.98", "1.0.99"};
-		
+		Repo repo = new Repo();
+
+		String[] versions = { "1.0.100", "1.0.101", "1.0.102", "1.0.104", "1.0.105", "1.0.106", "1.0.107", "1.0.92", "1.0.93", "1.0.94", "1.0.95", "1.0.96", "1.0.97", "1.0.98",
+				"1.0.99" };
+
 		String latest = Repo.getLatestVersion(versions);
 		log.info(latest);
-		
-		// assert "1.0.107" == latest -> 
-		
-		if (!repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")){
+
+		// assert "1.0.107" == latest ->
+
+		if (!repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")) {
 			log.info("not installed");
 		} else {
 			log.info("is installed");
 		}
-		
-		
-		repo.retrieveServiceType("org.myrobotlab.service.Arduino");
+
+		repo.install("org.myrobotlab.service.Arduino");
 
 		Updates updates = repo.checkForUpdates();
 		log.info(String.format("updates %s", updates));
@@ -766,7 +768,7 @@ public class Repo implements Serializable {
 		// update jar
 
 		// resolving
-		repo.retrieveServiceType("org.myrobotlab.service.Arduino");
+		repo.install("org.myrobotlab.service.Arduino");
 
 		// repo.getAllDepenencies();
 
@@ -785,6 +787,90 @@ public class Repo implements Serializable {
 		}
 
 		return sb.toString();
+	}
+	
+
+	/**
+	 * clears all files from local cache, serviceData.json, and libraries
+	 */
+	public boolean clearRepo() {
+		boolean ret = true;
+		ret &= clearRepoCache(null);
+		ret &= clearLibraries(null);
+		ret &= clearServiceData();
+		return ret;
+	}
+
+	/**
+	 * clears local cache, serviceData.json, and libraries selectively cleans -
+	 * excludes will be preserved
+	 */
+	public boolean clearRepoCache(Set<File> exclude) {
+
+		boolean ret = true;
+		String cacheDir = String.format("%s%s.repo", System.getProperty("user.home"), File.separator);
+		log.info(String.format("cleanCache [%s]", cacheDir));
+
+		
+		File cache = new File(cacheDir);
+		if (cache.exists()) {
+			log.info(String.format("%s exists we need to remove it", cacheDir));
+			if (!FileIO.rmDir(new File(cacheDir), exclude)) {
+				log.error(String.format("could not remove cache [%s]", cacheDir));
+				return false;
+			}
+
+		} else {
+			log.info(String.format("cache %s does not exist - it's clean !", cacheDir));
+		}
+
+		ret &= clearLibraries(exclude);
+		return ret;
+	}
+	
+	/**
+	 * clears local service data json file and localServiceData memory 
+	 * so that subsequent calls to the repo force dependency resolution
+	 * from the local (.repo) .. 
+	 * 
+	 * used after clearLibraries - to clear local mrl instance files but
+	 * still use local (.repo) cache
+	 * 
+	 * @return
+	 */
+	public boolean clearServiceData(){
+		String serviceDataFileName = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
+		File serviceData = new File(serviceDataFileName);
+
+		if (serviceData.exists()) {
+			// we must remove it
+			log.info(String.format("%s exists we need to remove it", serviceDataFileName));
+			if (!serviceData.delete()) {
+				log.error(String.format("could not delete %s", serviceDataFileName));
+				return false;
+			}
+		}
+		
+		localServiceData = null;
+		
+		return true;
+	}
+	
+	public boolean clearLibraries() {
+		return clearLibraries(null);
+	}
+	
+	public boolean clearLibraries(Set<File> exclude){
+		File libraries = new File("libraries");
+		if (libraries.exists()) {
+			if (!FileIO.rmDir(libraries, exclude)) {
+				log.error(String.format("could not remove %s", libraries.getAbsolutePath()));
+				return false;
+			}
+		} else {
+			log.info("libraries does not exist - its clean !");
+		}
+		return true;
 	}
 
 	public static void main(String[] args) {

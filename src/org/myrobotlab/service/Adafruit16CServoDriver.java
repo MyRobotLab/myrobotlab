@@ -211,14 +211,10 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
-		Adafruit16CServoDriver driver = (Adafruit16CServoDriver)Runtime.getService(getName());
-		driver.startService();
-		
-		//Runtime.start("gui", "GUIService");
-		
+		Adafruit16CServoDriver driver = (Adafruit16CServoDriver)Runtime.start(getName(), "Adafruit16CServoDriver");
 		Serial virtual = (Serial)Runtime.start(String.format("%s.vserial", getName()), "Serial");
 		
-		VirtualNullModemCable cable = virtual.createNullModemCable("v0", "v1");
+		VirtualNullModemCable cable = Serial.createNullModemCable("v0", "v1");
 		virtual.connect("v1");
 		virtual.record("test/Adafruit16CServoDriver/test");
 		driver.arduino.connect("v0");

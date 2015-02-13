@@ -13,6 +13,7 @@ import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -38,25 +39,17 @@ public class Test extends Service {
 
 	public Test(String n) {
 		super(n);
-		//addRoutes(); - what does this do?
-	}
-
-	@Override
-	public void startService() {
-		super.startService();
 	}
 
 	// TODO - do all forms of serialization - binary json xml
 	public Status serializeTest(ServiceInterface s) {
-
+		log.info("serializeTest {}", s.getName(), s.getSimpleName());
 		String name = s.getName();
 
 		// multiple formats binary json xml
 		Status status = Status.info("serializeTest for %s", name);
 
 		try {
-
-			log.info("serializing {}", name);
 
 			// TODO put in encoder
 			ByteArrayOutputStream fos = null;
@@ -69,16 +62,16 @@ public class Test extends Service {
 
 			// json encoding
 			Encoder.gson.toJson(s);
-
-			// TODO xml
-
-			log.info("releasing {}", name);
+			
+			// TODO JAXB xml - since it comes with java 7
 
 		} catch (Exception ex) {
 			status.addError(ex);
+			return status;
 		}
 
-		return status;
+		// NO ERROR !!
+		return null;
 	}
 
 	@Override
@@ -186,15 +179,7 @@ public class Test extends Service {
 	// step 1 subscribe to runtimes registered event
 	// step 2 in any registered -
 	// step 3 - fix up - so that state is handled (not just "error")
-	public void addRoutes() {
-		// register with runtime for any new services
-		// their errors are routed to mouth
-		subscribe(this.getName(), "publishError", "handleError");
-
-		Runtime r = Runtime.getInstance();
-		r.addListener(getName(), "registered");
-	}
-
+	
 	public void registered(ServiceInterface sw) {
 
 		subscribe(sw.getName(), "publishError", "handleError");
@@ -245,7 +230,6 @@ public class Test extends Service {
 
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 			String fullName = serviceTypeNames[i];
-			String shortName = fullName.substring(fullName.lastIndexOf(".") + 1);
 			test(fullName);
 			// status.add(test(fullName)); cant accumulate with exit(status)
 		}
@@ -265,7 +249,7 @@ public class Test extends Service {
 
 		getState();
 
-	   status = Status.info("==== testing %s ====", serviceType);
+		status = Status.info("==== testing %s ====", serviceType);
 
 		try {
 
@@ -287,21 +271,21 @@ public class Test extends Service {
 				status.addError("could not create %s", serviceType);
 				exit(status);
 			}
-			
+
 			// add error route - for call backs
 			subscribe(s.getName(), "publishError", "handleError", String.class);
 
 			try {
 				s.startService();
 				// FIXME - s.waitForStart();
-				// Thread.sleep(500); 
+				// Thread.sleep(500);
 			} catch (Exception e) {
 				status.addError("startService %s", e);
 				exit(status);
 			}
 
 			status.add(serializeTest(s));
-			
+
 			status.add(s.test());
 
 			// assume installed - Agent's job
@@ -333,15 +317,14 @@ public class Test extends Service {
 
 		exit(status);
 	}
-	
+
 	Status status = null;
-	
+
 	/**
-	 * call-back from service under testing to route
-	 * errors to this service...
+	 * call-back from service under testing to route errors to this service...
 	 */
-	public void handleError(String errorMsg){
-		if (status != null){
+	public void handleError(String errorMsg) {
+		if (status != null) {
 			status.addError(errorMsg);
 		}
 	}
@@ -351,7 +334,7 @@ public class Test extends Service {
 			// check against current state for
 			// NOT NEEDED Regular save file - since Agent is process.waitFor
 			FileIO.savePartFile("test.json", Encoder.gson.toJson(status).getBytes());
-			Runtime.releaseAll();
+			//Runtime.releaseAll();
 			// TODO - should be all clean - if not someone left threads open -
 			// report them
 			// big hammer
@@ -371,18 +354,29 @@ public class Test extends Service {
 		return status;
 	}
 
+	// save / load test !
+	
 	// TODO - subscribe to registered --> generates subscription to
 	// publishState() - filter on Errors
 	// FIXME - FILE COMMUNICATION !!!!
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
 
-		// LoggingFactory.getInstance().addAppender(Appender.FILE);
-
-		Test test = (Test) Runtime.start("test", "Test");
-		test.getState();
-		test.test("org.myrobotlab.service.Clock");
+			String serviceType = "Joystick";
+			Repo repo = new Repo();
+			//repo.clearRepo();
+			// dirty clean :)
+			//repo.clearLibraries();
+			//repo.clearServiceData();
+			//repo.install(serviceType);
+			Test test = (Test) Runtime.start("test", "Test");
+			test.getState();
+			test.test(serviceType);
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
 
 	}
 

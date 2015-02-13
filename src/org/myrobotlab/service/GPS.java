@@ -20,15 +20,16 @@ public class GPS extends Service {
 
     private static final long serialVersionUID = 1L;
     public final static Logger log = LoggerFactory.getLogger(GPS.class.getCanonicalName());
-    public static final String MODEL = "FV_M8";
     
+    public static final String MODEL = "FV_M8";
     public static final String GEOID_SEPARATION_KEY = "GEOID_SEPARATION_KEY";
     
-    public ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    transient public ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     String model;
+    String messageString;
     
     // peers
-    public transient Serial serial;
+    transient public Serial serial;
 
     // publish gps data begin ---
     public static class GPSData {
@@ -99,7 +100,6 @@ public class GPS extends Service {
 
         }
     }
-    String messageString;
 
     public void byteReceived(Integer b) {
 
@@ -547,6 +547,7 @@ public class GPS extends Service {
     }
     
     // We need a point object to build a line or polygon
+    // FIXME - make common geometric POJOs !
     public class Point {
 
         private double lat;

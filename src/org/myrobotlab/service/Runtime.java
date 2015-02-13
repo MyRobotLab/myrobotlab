@@ -53,6 +53,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.RepoUpdateListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ import org.slf4j.Logger;
  * TODO - add check for 64 bit OS & 32 bit JVM :(
  * 
  */
-public class Runtime extends Service implements MessageListener {
+public class Runtime extends Service implements MessageListener, RepoUpdateListener {
 	final static private long serialVersionUID = 1L;
 
 	/**
@@ -257,7 +258,8 @@ public class Runtime extends Service implements MessageListener {
 		log.info(String.format("total physical mem [%d] Mb", Runtime.getTotalPhysicalMemory() / 1048576));
 
 		log.info("getting local repo");
-		repo = new Repo(n);
+		repo = new Repo();
+		repo.addRepoUpdateListener(this);
 
 		hideMethods.add("main");
 		hideMethods.add("loadDefaultConfiguration");
@@ -353,7 +355,7 @@ public class Runtime extends Service implements MessageListener {
 	public UpdateReport updateAll() {
 
 		UpdateReport report = new UpdateReport();
-		report.updates = new Updates(runtimeName);
+		report.updates = new Updates();
 		report.updates.isValid = true; // forcing since this is direct request
 		report.updates.serviceTypesToUpdate = Arrays.asList(getServiceTypeNames());
 
@@ -388,7 +390,7 @@ public class Runtime extends Service implements MessageListener {
 	 * @return
 	 */
 	public UpdateReport update(String fullServiceTypeName) {
-		Updates updates = new Updates(runtimeName);
+		Updates updates = new Updates();
 		updates.isValid = true; // forcing since this is direct request
 		updates.serviceTypesToUpdate.add(fullServiceTypeName);
 		return applyUpdates(updates);
@@ -438,7 +440,7 @@ public class Runtime extends Service implements MessageListener {
 
 		for (int i = 0; i < updates.serviceTypesToUpdate.size(); ++i) {
 			try {
-				ArrayList<ResolveReport> report = repo.retrieveServiceType(updates.serviceTypesToUpdate.get(i));
+				ArrayList<ResolveReport> report = repo.install(updates.serviceTypesToUpdate.get(i));
 				for (int j = 0; j < report.size(); ++j) {
 					reports.add(report.get(j));
 				}
@@ -568,6 +570,16 @@ public class Runtime extends Service implements MessageListener {
 		if (runtime == null) {
 			synchronized (instanceLockObject) {
 				if (runtime == null) {
+					Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+						@Override
+						public void uncaughtException(Thread t, Throwable e) {
+							//System.out.println(t.getName() + ": " + e);
+							log.error(String.format("============ WHOOP WHOOP WHOOP WHOOP WHOOP WHOOP Thread %s threw %s ============", t.getName(), e.getMessage()));
+							// MyWorker worker = new MyWorker();
+							// worker.start();
+						}
+					});
+
 					if (runtimeName == null) {
 						runtimeName = "runtime";
 					}
@@ -1980,58 +1992,6 @@ public class Runtime extends Service implements MessageListener {
 
 	}
 
-	/**
-	 * cleans all files from local cache, serviceData.json, and libraries
-	 */
-	public static boolean cleanCache() {
-		return cleanCache(null);
-	}
-
-	/**
-	 * cleans local cache, serviceData.json, and libraries selectively cleans -
-	 * excludes will be preserved
-	 */
-	public static boolean cleanCache(Set<File> exclude) {
-
-		String cacheDir = String.format("%s%s.repo", System.getProperty("user.home"), File.separator);
-		log.info(String.format("cleanCache [%s]", cacheDir));
-
-		String serviceDataFileName = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
-		File serviceData = new File(serviceDataFileName);
-
-		if (serviceData.exists()) {
-			// we must remove it
-			log.info(String.format("%s exists we need to remove it", serviceDataFileName));
-			if (!serviceData.delete()) {
-				log.error(String.format("could not delete %s", serviceDataFileName));
-				return false;
-			}
-		}
-
-		File cache = new File(cacheDir);
-		if (cache.exists()) {
-			log.info(String.format("%s exists we need to remove it", cacheDir));
-			if (!FileIO.rmDir(new File(cacheDir), exclude)) {
-				log.error(String.format("could not remove cache [%s]", cacheDir));
-				return false;
-			}
-
-		} else {
-			log.info(String.format("cache %s does not exist - it's clean !", cacheDir));
-		}
-
-		File libraries = new File("libraries");
-		if (libraries.exists()) {
-			if (!FileIO.rmDir(libraries, exclude)) {
-				log.error(String.format("could not remove %s", libraries.getAbsolutePath()));
-				return false;
-			}
-		} else {
-			log.info("libraries does not exist - its clean !");
-		}
-		return true;
-	}
-
 	public static String getPID() {
 
 		SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -2130,13 +2090,13 @@ public class Runtime extends Service implements MessageListener {
 			if (cmdline.containsKey("-install")) {
 				// force all updates
 				ArrayList<String> services = cmdline.getArgumentList("-install");
-				Repo repo = new Repo("install");
+				Repo repo = new Repo();
 				if (services.size() == 0) {
 					repo.retrieveAll();
 					return;
 				} else {
 					for (int i = 0; i < services.size(); ++i) {
-						repo.retrieveServiceType(services.get(i));
+						repo.install(services.get(i));
 					}
 				}
 			}
@@ -2201,8 +2161,7 @@ public class Runtime extends Service implements MessageListener {
 	}
 
 	// ---- resolve issues begin ----
-	
-	
+
 	static public CLI startCLI() {
 		// FIXME !!! - query registry by type
 		// we want 1 and only 1 CLI
@@ -2225,16 +2184,16 @@ public class Runtime extends Service implements MessageListener {
 	public static CLI getCLI() {
 		return cli;
 	}
-	
-	static public ArrayList<ResolveReport> install(String serviceType) throws ParseException, IOException{
+
+	static public ArrayList<ResolveReport> install(String serviceType) throws ParseException, IOException {
 		String fullTypeName = null;
 		if (serviceType.indexOf(".") == -1) {
 			fullTypeName = String.format("org.myrobotlab.service.%s", serviceType);
 		} else {
 			fullTypeName = serviceType;
 		}
-		
-		return Runtime.getInstance().repo.retrieveServiceType(fullTypeName);
+
+		return Runtime.getInstance().repo.install(fullTypeName);
 	}
 
 }

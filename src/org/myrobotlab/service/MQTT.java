@@ -38,7 +38,7 @@ public class MQTT extends Service implements MqttCallback {
 	
 	private static final long serialVersionUID = 1L;
 
-	MqttAsyncClient client;
+	transient MqttAsyncClient client;
 	boolean quietMode 	= false;
 	String action 		= "publish";
 	String message 		= "Message from async callback client";

@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.cmdline.CMDLine;
@@ -115,7 +116,10 @@ public class Agent extends Service {
 	public final static Logger log = LoggerFactory.getLogger(Agent.class);
 
 	private static HashMap<String, ProcessData> processes = new HashMap<String, ProcessData>();
-
+	
+	private Set<String> clientJVMArgs = new HashSet<String>();
+	private List<String> agentJVMArgs = new ArrayList<String>();
+	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		peers.put("cli", "CLI", "Command line processor");
@@ -125,8 +129,14 @@ public class Agent extends Service {
 	public Agent(String n) {
 		super(n);
 		log.info("Agent {} PID {} is alive", n, Runtime.getPID());
-		List<String> jvmArgs = Runtime.getJVMArgs();
-		log.info("jvmArgs {}", Arrays.toString(jvmArgs.toArray()));
+		agentJVMArgs = Runtime.getJVMArgs();
+		log.info("jvmArgs {}", Arrays.toString(agentJVMArgs.toArray()));
+		for(int i = 0; i < agentJVMArgs.size(); ++i){
+			String agentJVMArg = agentJVMArgs.get(i);
+			if (!agentJVMArg.startsWith("-agent") && !agentJVMArg.startsWith("-Dfile.encoding")){
+				clientJVMArgs.add(agentJVMArg);
+			}
+		}
 	}
 
 	static public String formatList(ArrayList<String> args) {
@@ -143,7 +153,12 @@ public class Agent extends Service {
 	 * @return
 	 */
 	public ProcessData[] getProcesses(){
-		return (ProcessData[])processes.values().toArray();
+		Object[] objs = processes.values().toArray();
+		ProcessData[] pd = new ProcessData[objs.length];
+		for (int i = 0; i < objs.length; ++i){
+			pd[i] = (ProcessData)objs[i];
+		}
+		return pd;
 	}
 
 	/**
@@ -209,6 +224,12 @@ public class Agent extends Service {
 		}
 
 		outArgs.add(javaPath);
+		
+		// jvm args relayed to clients
+		for (String jvmArg : clientJVMArgs) {
+			outArgs.add(jvmArg);
+		}
+		
 		outArgs.add(jniLibraryPath);
 		outArgs.add("-cp");
 		outArgs.add(classpath);
@@ -349,7 +370,6 @@ public class Agent extends Service {
 		Status status = Status.info("agent test begin");
 
 		try {
-			Runtime.cleanCache();
 			// JUnitCore junit = new JUnitCore();
 			// Result result = junit.run(testClasses);
 
@@ -406,10 +426,10 @@ public class Agent extends Service {
 	public static Status install(String fullType) {
 		Status status = Status.info("install %s", fullType);
 		try {
-			Repo repo = new Repo("test");
+			Repo repo = new Repo();
 
 			if (!repo.isServiceTypeInstalled(fullType)) {
-				repo.retrieveServiceType(fullType);
+				repo.install(fullType);
 				if (repo.hasErrors()) {
 					status.addError(repo.getErrors());
 				}
@@ -430,7 +450,9 @@ public class Agent extends Service {
 		HashSet<String> skipTest = new HashSet<String>();
 		skipTest.add("org.myrobotlab.service.Agent");
 		skipTest.add("org.myrobotlab.service.Runtime");
+		skipTest.add("org.myrobotlab.service.Incubator");
 		skipTest.add("org.myrobotlab.service.Test");
+		skipTest.add("org.myrobotlab.service.CLI"); // ?? No ?
 
 		Status status = Status.info("serviceTest will test %d services", serviceTypeNames.length);
 		long startTime = System.currentTimeMillis();
@@ -454,20 +476,28 @@ public class Agent extends Service {
 
 				// clean environment
 				// FIXME - optimize clean
-				Runtime.cleanCache();
+				
 				Repo repo = Runtime.getInstance().getRepo();
+				// SUPER CLEAN - force .repo to clear !!
+				//repo.clearRepo();
+				
+				// less clean but faster
+				//repo.clearLibraries();
+				//repo.clearServiceData();
+				
+				// comment all out for dirty
 
 				// install Test dependencies
 				boolean force = true;
 				long installStartTime = System.currentTimeMillis();
-				repo.retrieveServiceType("org.myrobotlab.service.Test", force);
-				repo.retrieveServiceType(serviceType, force);
+				repo.install("org.myrobotlab.service.Test", force);
+				repo.install(serviceType, force);
 				installTime += System.currentTimeMillis() - installStartTime;
 				// clean test.json part file
 
 				// spawn a test - attach to cli - test 1 service end to end
 				// ,"-invoke", "test","test","org.myrobotlab.service.Clock"
-				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-invoke", "test", "test", serviceType });
+				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-invoke", "test", "test", serviceType });
 				
 				process.waitFor();
 
@@ -524,12 +554,6 @@ public class Agent extends Service {
 				// List<String> list = runtimeArgs.getArgumentList("-agent");
 
 				String tmp = runtimeArgs.getArgument("-agent", 0);
-				if (tmp.startsWith("\"")) {
-					tmp = tmp.substring(1);
-				}
-				if (tmp.endsWith("\"")) {
-					tmp = tmp.substring(0, tmp.length() - 1);
-				}
 				agentArgs = tmp.split(" ");
 				/*
 				 * agentArgs = new String[list.size()]; for (int i = 0; i <

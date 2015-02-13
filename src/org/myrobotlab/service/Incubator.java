@@ -84,10 +84,10 @@ public class Incubator extends Service {
 		try {
 
 			// install everything...
-			Repo repo = new Repo("test");
+			Repo repo = new Repo();
 
 			if (!repo.isServiceTypeInstalled(fullType)) {
-				ArrayList<ResolveReport> reports = repo.retrieveServiceType(fullType);
+				ArrayList<ResolveReport> reports = repo.install(fullType);
 
 				for (int j = 0; j < reports.size(); ++j) {
 					ResolveReport report = reports.get(j);

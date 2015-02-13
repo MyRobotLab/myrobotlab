@@ -28,7 +28,6 @@ package org.myrobotlab.service;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -277,7 +276,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	private boolean connected = false;
 	private String boardType;
 
-	BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
+	transient BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
 	
 	StringBuilder debugTX = new StringBuilder();
 	StringBuilder debugRX = new StringBuilder();
@@ -2114,6 +2113,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		}
 		
 		arduino.disconnect();
+		
 		nullModem.close();
 		
 
@@ -2257,6 +2257,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			Runtime.start("gui", "GUIService");
+			arduino.test();
 			//arduino.test();
 			
 			/*
