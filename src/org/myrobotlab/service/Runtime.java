@@ -87,6 +87,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * instances of MRL - keyed with an instance key URI format is
 	 * mrl://gateway/(protocol key)
 	 */
+	// FIXME - someday this will be serializable - but currently have to not save() on exist
 	static private final HashMap<URI, ServiceEnvironment> instances = new HashMap<URI, ServiceEnvironment>();
 	static private final HashMap<String, ServiceInterface> registry = new HashMap<String, ServiceInterface>();
 
@@ -570,6 +571,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		if (runtime == null) {
 			synchronized (instanceLockObject) {
 				if (runtime == null) {
+					/* Well that didn't work the way I wanted it to... :P
 					Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 						@Override
 						public void uncaughtException(Thread t, Throwable e) {
@@ -579,6 +581,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 							// worker.start();
 						}
 					});
+					*/
 
 					if (runtimeName == null) {
 						runtimeName = "runtime";
@@ -2056,7 +2059,11 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 				runtimeName = cmdline.getSafeArgument("-runtimeName", 0, "MRL");
 			}
 
-			if (cmdline.containsKey("-logToConsole")) {
+			if (cmdline.containsKey("-isAgent")) {
+				logging.addAppender(Appender.IS_AGENT);
+			} else if (cmdline.containsKey("-fromAgent")) {
+				logging.addAppender(Appender.FROM_AGENT);
+			} else if (cmdline.containsKey("-logToConsole")) {
 				logging.addAppender(Appender.CONSOLE);
 			} else if (cmdline.containsKey("-logToRemote")) {
 				String host = cmdline.getSafeArgument("-logToRemote", 0, "localhost");
@@ -2070,7 +2077,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 				}
 			}
 
-			logging.addAppender(Appender.CONSOLE);
+			//logging.addAppender(Appender.CONSOLE); hopefully it still worky after removing this ! :)
 
 			if (!cmdline.containsKey("-noCLI")) {
 				Runtime.getInstance();
@@ -2194,6 +2201,15 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		}
 
 		return Runtime.getInstance().repo.install(fullTypeName);
+	}
+	
+	static public List<String> getThreadNames(){
+		Set<Thread> threads = Thread.getAllStackTraces().keySet();
+		ArrayList<String> names = new ArrayList<String>();
+		for (Thread t : threads){
+			names.add(t.getName());
+		}
+		return names;
 	}
 
 }

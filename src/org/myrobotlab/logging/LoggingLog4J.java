@@ -114,6 +114,22 @@ public class LoggingLog4J extends Logging {
 				}
 
 				appenders.add(Appender.FILE);
+			} else if (Appender.IS_AGENT.equalsIgnoreCase(type)) {
+				// FROM_AGENT has only console - Agent has both console & file appender
+				appender = new ConsoleAppender(layout);
+				appender = new RollingFileAppender(layout, String.format("%s%sagent.log", System.getProperty("user.dir"), File.separator), false);
+				appender.setName(type);
+				appenders.add(Appender.IS_AGENT);
+			} else if (Appender.FROM_AGENT.equalsIgnoreCase(type)) {
+				// only has console because the console is relayed to the Agent
+				// shorter layout than Agent - since everything will be prepended to Agent's log prefix
+				//layout = new PatternLayout("[%t] %-5p %c %x - %m%n");
+				// TODO - add PID or runtime Name ! process index ?
+				layout = new PatternLayout("[%t] %-5p %c %x - %m%n");
+				//appender = new RollingFileAppender(layout, String.format("%s%agent.log", System.getProperty("user.dir"), File.separator), false);
+				appender = new ConsoleAppender(layout);
+				appender.setName(type);
+				appenders.add(Appender.FROM_AGENT);
 			} else {
 				log.error(String.format("attempting to add unkown type of Appender %1$s", type));
 				return;

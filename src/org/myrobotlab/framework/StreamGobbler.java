@@ -37,6 +37,7 @@ public class StreamGobbler extends Thread {
 			BufferedReader br = new BufferedReader(in);
 			String line = null;
 			while ((line = br.readLine()) != null) {
+				// FIXME OutputStream Versus Log !!! based on - IS_AGENT || FROM_AGENT || 
 				//log.info(String.format("%s%s", tag, line));
 				//log.info(String.format("<<%s", line));
 				os.write(String.format("%s\n",line).getBytes());

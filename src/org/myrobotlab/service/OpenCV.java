@@ -58,6 +58,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
@@ -479,9 +480,13 @@ public class OpenCV extends VideoSource {
 		return boundingBox;
 
 	}
+	
+	public OpenCVData getOpenCVData() {
+		return getOpenCVData(500);
+	}
 
 	// FIXME - don't try catch - expose the Exceptions - performance enhancement
-	public OpenCVData getOpenCVData() {
+	public OpenCVData getOpenCVData(Integer timeout) {
 		OpenCVData data = null;
 		try {
 
@@ -493,7 +498,13 @@ public class OpenCV extends VideoSource {
 			videoProcessor.publishOpenCVData = true;
 			// videoProcessor.useBlockingData = true;
 			// timeout ? - change to polling
-			data = (OpenCVData) videoProcessor.blockingData.take();
+			
+			
+			if (timeout == null || timeout < 1){
+				data = (OpenCVData) videoProcessor.blockingData.take();
+			} else {
+				data = (OpenCVData) videoProcessor.blockingData.poll(timeout, TimeUnit.MILLISECONDS);
+			}
 			// value parameter
 			videoProcessor.publishOpenCVData = oldPublishOpenCVData;
 			// videoProcessor.useBlockingData = false;
@@ -833,7 +844,8 @@ public class OpenCV extends VideoSource {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		OpenCV opencv = (OpenCV) Runtime.createAndStart("opencv", "OpenCV");
-		Runtime.createAndStart("gui", "GUIService");
+		opencv.test();
+		//Runtime.createAndStart("gui", "GUIService");
 		//opencv.test();
 		/*
 		Runtime.createAndStart("gui", "GUIService");

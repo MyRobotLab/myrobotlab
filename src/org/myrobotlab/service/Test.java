@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,8 @@ import org.slf4j.Logger;
  * Minimal dependency service for rigorous testing
  * 
  * @author GroG
+ * 
+ * TODO - grab and report all missing Service Pages & all missing Python scripts !
  *
  */
 public class Test extends Service {
@@ -236,6 +239,18 @@ public class Test extends Service {
 
 		return status;
 	}
+	
+	public static void logThreadNames(){
+		
+		String[] t = Runtime.getThreadNames().toArray(new String[Runtime.getThreadNames().size()]);
+		Arrays.sort(t);
+		log.warn(Encoder.gson.toJson(t));
+		/*
+		for (int i = 0; i < t.length; ++i){
+			log.warn(t[i]);
+		}
+		*/
+	}
 
 	/**
 	 * The outer level of all tests on a per Service basis Environment is
@@ -248,8 +263,11 @@ public class Test extends Service {
 	public void test(String serviceType) {
 
 		getState();
+		logThreadNames();
 
+		log.warn(String.format("==== testing %s ====", serviceType));
 		status = Status.info("==== testing %s ====", serviceType);
+		
 
 		try {
 
@@ -287,6 +305,7 @@ public class Test extends Service {
 			status.add(serializeTest(s));
 
 			status.add(s.test());
+			logThreadNames();
 
 			// assume installed - Agent's job
 
@@ -333,6 +352,7 @@ public class Test extends Service {
 		try {
 			// check against current state for
 			// NOT NEEDED Regular save file - since Agent is process.waitFor
+			// FIXME - append states to file
 			FileIO.savePartFile("test.json", Encoder.gson.toJson(status).getBytes());
 			//Runtime.releaseAll();
 			// TODO - should be all clean - if not someone left threads open -
