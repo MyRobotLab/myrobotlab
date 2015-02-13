@@ -15,6 +15,7 @@ package org.myrobotlab.kinematics;
 public class DHLink {
 	private double d;
 	private double theta;
+	// rename this to a ?)
 	private double r;
 	private double alpha;
 	private DHLinkType type;
@@ -169,5 +170,9 @@ public class DHLink {
 	public String toString() {
 		return "DHLink [d=" + d + ", theta=" + theta + ", r=" + r + ", alpha="
 				+ alpha + "]";
+	}
+
+	public void incrRotate(double delta) {
+		this.theta += delta;
 	}
 }
