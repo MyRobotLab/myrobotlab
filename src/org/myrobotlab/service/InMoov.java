@@ -92,7 +92,7 @@ public class InMoov extends Service {
 	// transient public Security security;
 
 	boolean speakErrors = false;
-	String lastError = "";
+	String lastInMoovError = "";
 
 	//long lastActivityTime;
 
@@ -205,10 +205,10 @@ public class InMoov extends Service {
 
 	public void handleError(String msg) {
 		// lets try not to nag
-		if (!lastError.equals(msg) && speakErrors) {
+		if (!lastInMoovError.equals(msg) && speakErrors) {
 			speakBlocking(msg);
 		}
-		lastError = msg;
+		lastInMoovError = msg;
 	}
 
 	/************* STARTS BEGIN ************************/

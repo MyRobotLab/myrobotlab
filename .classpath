@@ -3,7 +3,6 @@
 	<classpathentry excluding="org/myrobotlab/service/Android.java|org/myrobotlab/service/ArduinoBT.java|processing/app/tools/format/src/|org/myrobotlab/service/LeapMotion.java|resource/Java/examples/LeapMotion.java|resource/Java/examples/|org/myrobotlab/leapmotion/LeapListener.java|org/myrobotlab/service/SEAR.java|org/myrobotlab/control/SEARGUI.java|org/myrobotlab/service/Tracking2.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/repo/com.centralnexus.joystick/0.7/Joystick.jar"/>
 	<classpathentry kind="lib" path="/repo/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.java3d/1.5.1/j3dcore.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.java3d/1.5.1/j3dutils.jar"/>
@@ -39,7 +38,6 @@
 	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/mailapi.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/pop3.jar"/>
 	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/smtp.jar"/>
-	<classpathentry kind="lib" path="/repo/net.java.games.jinput/20120914/jinput.jar"/>
 	<classpathentry kind="lib" path="/repo/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar"/>
 	<classpathentry kind="lib" path="/repo/org.fife.autocomplete/2.0.4/autocomplete.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.jssc/0.9.0/jssc.jar"/>
@@ -94,5 +92,6 @@
 	<classpathentry kind="lib" path="/repo/org.apache.log4j/1.2.14/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.gson/2.2.4/gson-2.2.4.jar"/>
+	<classpathentry kind="lib" path="/repo/net.java.games.jinput/20120914/jinput.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

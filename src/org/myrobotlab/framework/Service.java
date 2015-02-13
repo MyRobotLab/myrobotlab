@@ -100,7 +100,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * if host == null the service is local
 	 */
 	private URI instanceId = null;
-	protected String prefix = null; // if foreign - this will be name prefix - set by Gateway
+	protected String prefix = null; // if foreign - this will be name prefix -
+									// set by Gateway
 
 	private final String name; // TODO - access directly
 	private String simpleName; // used in gson encoding for getSimpleName()
@@ -113,7 +114,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	transient Inbox inbox = null;
 	transient Timer timer = null;
 
-	
 	protected boolean allowDisplay = true;
 
 	transient protected CommunicationInterface cm = null;
@@ -122,7 +122,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	transient protected Set<String> methodSet;
 
-	//transient private Serializer serializer = new Persister();
+	// transient private Serializer serializer = new Persister();
 
 	transient protected SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	transient protected Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
@@ -165,7 +165,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				timer.schedule(t, interval);
 			}
 		}
-		
+
 	}
 
 	public void addLocalTask(int interval, String method, Object... params) {
@@ -285,12 +285,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	public String getName() {
 		// prefix is set by Gateway
-		if (prefix == null){
+		if (prefix == null) {
 			return name;
 		} else {
 			return String.format("%s%s", prefix, name);
 		}
-	
+
 	}
 
 	public String getPeerKey(String key) {
@@ -484,15 +484,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	/*
-	static public Set<String> getDependencies(String serviceClass) {
-		
-	}
-	*/
-	
+	 * static public Set<String> getDependencies(String serviceClass) {
+	 * 
+	 * }
+	 */
+
 	static public Index<ServiceReservation> buildDNA(String serviceClass) {
 		return buildDNA("", serviceClass);
 	}
-	
+
 	static public Index<ServiceReservation> buildDNA(String myKey, String serviceClass) {
 		Index<ServiceReservation> myDNA = new Index<ServiceReservation>();
 		buildDNA(myDNA, myKey, serviceClass, null);
@@ -691,7 +691,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 		try {
 			File cfg = new File(String.format("%s%s%s.json", cfgDir, File.separator, getName()));
-			//serializer.write(this, cfg);
+			// serializer.write(this, cfg);
 			info("serializing %s", getName());
 			String s = Encoder.gson.toJson(this);
 			FileOutputStream out = new FileOutputStream(cfg);
@@ -700,7 +700,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		} catch (Exception e) {
 			Logging.logException(e);
 			return false;
-		} 
+		}
 		return true;
 	}
 
@@ -770,10 +770,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		try {
 			File cfg = new File(filename);
 			if (cfg.exists()) {
-				//serializer.read(o, cfg);
+				// serializer.read(o, cfg);
 				String json = FileIO.fileToString(filename);
 				o = Encoder.gson.fromJson(json, o.getClass());
-				
+
 				return true;
 			}
 			log.info(String.format("cfg file %s does not exist", filename));
@@ -806,7 +806,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			thisThread.interrupt();
 		}
 		thisThread = null;
-		
+
 		save();
 	}
 
@@ -817,10 +817,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		// note - if stopService is overwritten with extra
 		// threads - releaseService will need to be overwritten too
 		stopService();
-		
+
 		// recently added
 		releasePeers();
-		
+
 		Runtime.release(getName());
 	}
 
@@ -1063,8 +1063,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	/**
-	 * adds a MRL message listener to this service
-	 * this is the result of a "subscribe" from a different service
+	 * adds a MRL message listener to this service this is the result of a
+	 * "subscribe" from a different service
 	 * 
 	 * @param listener
 	 */
@@ -1266,23 +1266,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 */
 	final public Object invokeOn(Object obj, String method, Object... params) {
 
+		if (obj == null) {
+			log.error("invokeOn object is null");
+			return null;
+		}
+		
 		Object retobj = null;
-		Class<?> c;
-		c = obj.getClass();
-
+		Class<?> c = null;
 		Class<?>[] paramTypes = null;
-		if (params != null) {
-			paramTypes = new Class[params.length];
-			for (int i = 0; i < params.length; ++i) {
-				if (params[i] != null) {
-					paramTypes[i] = params[i].getClass();
-				} else {
-					paramTypes[i] = null;
+		
+		try {
+			c = obj.getClass();
+
+			if (params != null) {
+				paramTypes = new Class[params.length];
+				for (int i = 0; i < params.length; ++i) {
+					if (params[i] != null) {
+						paramTypes[i] = params[i].getClass();
+					} else {
+						paramTypes[i] = null;
+					}
 				}
 			}
-		}
-		Method meth = null;
-		try {
+			Method meth = null;
+
 			// TODO - method cache map
 			// can not auto-box or downcast with this method - getMethod will
 			// return a "specific & exact" match based
@@ -1957,7 +1964,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	private long lastInfo = 0;
 	private long lastWarn = 0;
-	//private long lastError = 0;
+	// private long lastError = 0;
 
 	public String lastErrorMsg;
 
@@ -1987,36 +1994,37 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		Logging.logException(e);
 		return error(e.getMessage());
 	}
-	
+
 	/*
-	static public setErrorEmail(String to, String host, String user, String password){
-		
-	}
-	*/
+	 * static public setErrorEmail(String to, String host, String user, String
+	 * password){
+	 * 
+	 * }
+	 */
 
 	public String error(String msg) {
 		lastErrorMsg = msg;
 		log.error(msg);
-		
+
 		// handle error
-		//email.sendEmail("greg.perry@daimler.com", "test", "test body");
-		
+		// email.sendEmail("greg.perry@daimler.com", "test", "test body");
+
 		// if (System.currentTimeMillis() - lastError > 300) {
 		invoke("publishStatus", "error", msg);
 		invoke("publishError", msg);
-		//lastError = System.currentTimeMillis();
+		// lastError = System.currentTimeMillis();
 		// }
 
 		return lastErrorMsg;
 	}
-	
+
 	private Status lastError = null;
 
 	public boolean hasError() {
 		return lastErrorMsg != null;
 	}
-	
-	public Status getLastError(){
+
+	public Status getLastError() {
 		return lastError;
 	}
 
@@ -2038,7 +2046,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	public Status publishStatus(String level, String msg) {
 		Status s = new Status(getName(), level, null, msg);
-		if (level.equals(Status.ERROR)){
+		if (level.equals(Status.ERROR)) {
 			lastError = s;
 		}
 		return s;
@@ -2057,11 +2065,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		}
 		return ret;
 	}
-	
+
 	public String[] getMethodNames() {
 		Method[] methods = getMethods();
 		String[] ret = new String[methods.length];
-		
+
 		log.info(String.format("loading %d non-sub-routable methods", methods.length));
 		for (int i = 0; i < methods.length; ++i) {
 			ret[i] = methods[i].getName();
@@ -2072,7 +2080,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public String[] getDeclaredMethodNames() {
 		Method[] methods = getDeclaredMethods();
 		String[] ret = new String[methods.length];
-		
+
 		log.info(String.format("loading %d non-sub-routable methods", methods.length));
 		for (int i = 0; i < methods.length; ++i) {
 			ret[i] = methods[i].getName();
@@ -2088,24 +2096,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return this.getClass().getDeclaredMethods();
 	}
 
-	public void close(Writer w){
-		if (w == null){
+	public void close(Writer w) {
+		if (w == null) {
 			return;
 		}
 		try {
 			w.flush();
-		} catch(Exception e){
+		} catch (Exception e) {
 			Logging.logException(e);
 		} finally {
 			try {
-			w.close();
-			} catch(Exception e){
+				w.close();
+			} catch (Exception e) {
 				// don't really care
 			}
 		}
-		
+
 	}
-	
+
 	public String help() {
 		return help("URL", "DECLARED");
 	}
@@ -2135,20 +2143,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		sb.append("\n");
 		return sb.toString();
 	}
-	
-	
-	public String getType(){
+
+	public String getType() {
 		return getClass().getCanonicalName();
 	}
-	
 
 	public String setLogLevel(String level) {
 		Logging logging = LoggingFactory.getInstance();
 		logging.setLevel(this.getClass().getCanonicalName(), level);
 		return level;
 	}
-	
-	public void setPrefix(String prefix){
+
+	public void setPrefix(String prefix) {
 		this.prefix = prefix;
 	}
 

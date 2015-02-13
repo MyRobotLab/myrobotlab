@@ -50,6 +50,7 @@ import org.slf4j.Logger;
  */
 
 public class RobotPlatform extends Service {
+	public final static Logger log = LoggerFactory.getLogger(RobotPlatform.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -65,18 +66,26 @@ public class RobotPlatform extends Service {
 	public int headingDelta = 0;
 	public int headingSpeed = 0;
 
-	Motor left = null;
-	Motor right = null;
+	transient Motor left = null;
+	transient Motor right = null;
 
+	/* I HATE ENUMS !
 	public enum Directions {
 		LEFT, STOPPED, RIGHT
 	}
+	
 
 	public Directions directionCurrent = Directions.STOPPED;
 	public Directions directionTarget = Directions.STOPPED;
+	*/
 
 	transient PIDThread pid = null;
 	Object pidLock = new Object();
+	String directionTarget = null;
+	
+	public static String DIRECTION_STOPPED = "DIRECTION_STOPPED";
+	public static String DIRECTION_RIGHT = "DIRECTION_RIGHT";
+	public static String DIRECTION_LEFT = "DIRECTION_LEFT";
 
 	// TODO - determine if control needs to be serialized
 	// Lock for "syncing" time vs read write contention - don't want a turning
@@ -151,7 +160,6 @@ public class RobotPlatform extends Service {
 	 * error being 1.5 second lag
 	 */
 
-	public final static Logger log = LoggerFactory.getLogger(RobotPlatform.class.getCanonicalName());
 
 	public RobotPlatform(String n) {
 		super(n);
@@ -189,6 +197,7 @@ public class RobotPlatform extends Service {
 
 	}
 
+	// FIXME - just use PID - remove this
 	class PIDThread extends Thread {
 		boolean isRunning = true;
 		int feedback = 0;
@@ -440,10 +449,10 @@ public class RobotPlatform extends Service {
 		if (((headingCurrent < at) && (at < headingTarget)) || ((at < headingTarget) && (headingTarget < headingCurrent))
 				|| ((headingTarget < headingCurrent) && (headingCurrent < at))) {
 			log.error("turn right");
-			directionTarget = Directions.RIGHT;
+			directionTarget = DIRECTION_RIGHT;
 		} else {
 			log.error("turn left");
-			directionTarget = Directions.LEFT;
+			directionTarget = DIRECTION_LEFT;
 		}
 
 		// TODO configurable publishing

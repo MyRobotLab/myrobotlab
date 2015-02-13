@@ -137,7 +137,7 @@ public class Peers {
 		
 		Peers peers = Peers.getPeers("Plantoid");
 		ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
-		Repo r = new Repo("repo");
+		Repo r = new Repo();
 		for (int i = 0; i < peerList.size(); ++i){
 			ServiceReservation sr = peerList.get(i);
 			

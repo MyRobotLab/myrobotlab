@@ -142,15 +142,24 @@ public class CMDLine extends HashMap<String, CcmdParam> {
 	}
 
 	public boolean isSwitch(final String pParam) {
-		if (pParam == null)
+		if (pParam == null){
 			return false;
-		if (pParam.length() <= 1)
+		}
+		if (pParam.length() <= 1){
 			return false;
-
+		}
+		
 		if (pParam.charAt(0) == '-') {
+			boolean ret = true;
+			
 			// allow negative numbers as arguments.
 			// ie., don't count them as switches
-			return (!Character.isDigit(pParam.charAt(1)));
+			ret &= !Character.isDigit(pParam.charAt(1));
+			
+			// if we have a space then the param was escaped
+			// if its escaped e.g. -agent "-test -logLevel WARN" then its not a flag
+			ret &= !pParam.contains(" ");
+			return ret;
 		} else {
 			return false;
 		}

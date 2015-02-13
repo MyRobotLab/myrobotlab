@@ -808,7 +808,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 			int timeout = 500;// 500 ms serial timeout
 
-			Runtime.start("gui", "GUIService");
+			// Runtime.start("gui", "GUIService");
 			// Runtime.start("webgui", "WebGUI");
 
 			// get serial handle and creates a uart & virtual null modem cable
@@ -835,10 +835,11 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 			log.info(serial.readString(5));
 
 			// blocking read with timeout
-			uart.write("HELO");
-			String helo = serial.readString(5, timeout);
+			String data = "HELLO";
+			uart.write(data);
+			String helo = serial.readString(data.length(), timeout);
 
-			if ("HELO".equals(helo)) {
+			if (!data.equals(helo)) {
 				status.addError("did not read back!");
 			}
 
@@ -944,8 +945,11 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 			// parsing of files based on extension check
 
 			// TODO flush & close tests ?
-//			serial.disconnect();
-//			uart.disconnect();
+			serial.disconnect();
+			uart.disconnect();
+			
+			serial.releaseService();
+			uart.releaseService();
 
 			if (status.hasError()) {
 				log.error("we have an error!");
@@ -1006,6 +1010,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 
 			// Runtime.start("gui", "GUIService");
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
+			
 			// serial.connect("COM15");
 			serial.test();
 		} catch (Exception e) {

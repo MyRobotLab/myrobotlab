@@ -26,41 +26,26 @@ public class VirtualSerialPort implements SerialDevice {
 	RXThread rxthread;
 	private boolean notifyOnDataAvailable;
 
+	// FIXME - use this for EOF
 	// poison pill "real" bytes are from 0 to 255 ;)
+	// this is what rxtxLib does - should follow design
 	static public final Integer SHUTDOWN = -1;
 
 	private VirtualSerialPort nullModem = null;
-
-	// underlying serial event management thread
-	/*
-	 * class RXThread extends Thread {
-	 * 
-	 * int currentDataSize = 0; long pollingPause = 100;
-	 * 
-	 * public RXThread() { super(String.format("%s_virtual_rx", name)); }
-	 * 
-	 * 
-	 * public void run() { try { while (isOpen) { Integer b = rx.peek(); //
-	 * userRX.add(b); // TODO -generate only at // currentDataSize intervals if
-	 * (listener != null && notifyOnDataAvailable && b != null) {
-	 * SerialDeviceEvent sde = new SerialDeviceEvent(srcport,
-	 * SerialDeviceEvent.DATA_AVAILABLE, false, true);
-	 * listener.serialEvent(sde); }
-	 * 
-	 * Thread.sleep(pollingPause); }
-	 * 
-	 * } catch (Exception e) { if (e instanceof InterruptedException) {
-	 * log.info("shutting down rx thread on port"); } else {
-	 * Logging.logException(e); } } } }
-	 */
 
 	/**
 	 * at some point this thread will be caught in the listener's while loop
 	 * with a serial.read() which will result in a blocking rx.take()
 	 * 
+	 * GNU Serial + Java InputStream design has a reader thread which generates an initial DATA_AVAILABLE
+	 * event - the event typically is caught in application code with a blocking 
+	 * while (serialDevice.isOpen() && (newInt = (serialDevice.read())) > -1) {
+	 * 
+	 * 
+	 * 
 	 * future - will need to interrupt when closing !!!
 	 * 
-	 * @author GRPERRY
+	 * @author GroG
 	 *
 	 */
 	class RXThread extends Thread {
@@ -131,12 +116,16 @@ public class VirtualSerialPort implements SerialDevice {
 
 	@Override
 	public void close() {
+		log.info(String.format("closing %s", name));
 		isOpen = false;
-
+		/*
 		if (rxthread != null) {
 			rxthread.interrupt();
-		}
+		}*/
+		// EOF - kill pill
+		rx.add(SHUTDOWN);
 		rxthread = null;
+		log.info(String.format("closed %s", name));
 	}
 
 	@Override
@@ -228,6 +217,7 @@ public class VirtualSerialPort implements SerialDevice {
 	public static VirtualSerialPort createVirtualSerialPort(String port) {
 		VirtualSerialPort vp0 = new VirtualSerialPort(port);
 		SerialDeviceFactory.add(vp0);
+
 		return vp0;
 	}
 
@@ -256,40 +246,21 @@ public class VirtualSerialPort implements SerialDevice {
 		}
 
 		public void close() {
-			// TODO Auto-generated method stub
-			// vp1.rx.add(SHUTDOWN) SHUTDOWN = largest signed int value ??
-			// vp1.release();
-			// vp0.release();
-			flush();
+			log.info("closing null modem cable");
 			vp0.close();
 			vp1.close();
 			log.info("releasing virtual null modem cable");
 		}
 
+		/**
+		 * no need to flush a virtual serial port
+		 * the write immediately puts data on the queue
+		 * .. the delay (and problem) would be with the 
+		 * RXThread in the while.read() - it "takes" some
+		 * time to read... and interpret ... 
+		 */
 		public void flush() {
-			boolean flushed = false;
-			while (!flushed) {
-				flushed = true;
-				if (vp0.rx.size() > 0) {
-					flushed &= false;
-				}
-				if (vp0.tx.size() > 0) {
-					flushed &= false;
-				}
-				if (vp1.rx.size() > 0) {
-					flushed &= false;
-				}
-				if (vp1.tx.size() > 0) {
-					flushed &= false;;
-				}
-				if (flushed){
-					break; // avoid the 30 ms wait :P
-				}
-				try {
-					Thread.sleep(30);
-				} catch (InterruptedException e) {
-				}
-			}
+			log.info("no need to flush virtual ports");
 		}
 
 	}
