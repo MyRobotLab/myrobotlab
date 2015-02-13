@@ -89,7 +89,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	/**
 	 * a radix-tree of data -"DNA" Description of Neighboring Automata ;)
 	 */
-	static public final Index<ServiceReservation> dna = new Index<ServiceReservation>();
+	transient static public final Index<ServiceReservation> dna = new Index<ServiceReservation>();
 
 	private static final long serialVersionUID = 1L;
 	transient public final static Logger log = LoggerFactory.getLogger(Service.class);
@@ -109,6 +109,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	private String lastRecordingFilename;
 	private boolean isRunning = false;
 	protected transient Thread thisThread = null;
+	
+	public String lastErrorMsg;
 
 	transient Outbox outbox = null;
 	transient Inbox inbox = null;
@@ -692,6 +694,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		try {
 			File cfg = new File(String.format("%s%s%s.json", cfgDir, File.separator, getName()));
 			// serializer.write(this, cfg);
+			if (this instanceof Runtime) {
+				info("we cant serialize runtime yet");
+				return false;
+			}
 			info("serializing %s", getName());
 			String s = Encoder.gson.toJson(this);
 			FileOutputStream out = new FileOutputStream(cfg);
@@ -1961,20 +1967,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * 
 	 * @param msg
 	 */
-
-	private long lastInfo = 0;
-	private long lastWarn = 0;
-	// private long lastError = 0;
-
-	public String lastErrorMsg;
-
+	
 	public void info(String msg) {
 		log.info(msg);
 
 		// can only read "so" fast
 		// if (System.currentTimeMillis() - lastInfo > 300) {
 		invoke("publishStatus", "info", msg);
-		lastInfo = System.currentTimeMillis();
+		//lastInfo = System.currentTimeMillis();
 		// }
 	}
 
@@ -2039,7 +2039,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		log.error(msg);
 		// if (System.currentTimeMillis() - lastWarn > 300) {
 		invoke("publishStatus", "warn", msg);
-		lastWarn = System.currentTimeMillis();
+		//lastWarn = System.currentTimeMillis();
 		// }
 		lastErrorMsg = msg;
 	}

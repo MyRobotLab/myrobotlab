@@ -40,7 +40,7 @@ public class Solr extends Service {
 
 	public String solrUrl = "http://localhost:8983/solr";
 	
-	private HttpSolrServer solrServer;
+	transient private HttpSolrServer solrServer;
 	
 	public Solr(String n) {
 		super(n);

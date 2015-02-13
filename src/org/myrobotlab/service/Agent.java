@@ -260,6 +260,9 @@ public class Agent extends Service {
 			outArgs.add("python");
 			outArgs.add("Python");
 		}
+		
+		// to get appropriate appenders and logging format
+		outArgs.add("-fromAgent");
 
 		// ProcessBuilder builder = new ProcessBuilder(path, "-Xmx1024m", "-cp",
 		// classpath, ReSpawner.class.getName());
@@ -450,7 +453,9 @@ public class Agent extends Service {
 		HashSet<String> skipTest = new HashSet<String>();
 		skipTest.add("org.myrobotlab.service.Agent");
 		skipTest.add("org.myrobotlab.service.Runtime");
+		skipTest.add("org.myrobotlab.service.OpenNI");
 		skipTest.add("org.myrobotlab.service.Incubator");
+		skipTest.add("org.myrobotlab.service.InMoov"); // just too big and complicated at the moment
 		skipTest.add("org.myrobotlab.service.Test");
 		skipTest.add("org.myrobotlab.service.CLI"); // ?? No ?
 
@@ -463,6 +468,8 @@ public class Agent extends Service {
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 
 			String serviceType = serviceTypeNames[i];
+			
+			//serviceType = "org.myrobotlab.service.OpenCV";
 
 			if (skipTest.contains(serviceType)) {
 				log.info("skipping %s", serviceType);
@@ -546,7 +553,8 @@ public class Agent extends Service {
 			System.out.println("Agent.main starting");
 
 			// split agent commands from runtime commands
-			String[] agentArgs = new String[0];
+			//String[] agentArgs = new String[0];
+			ArrayList<String> inArgs = new ArrayList<String>();
 			// -agent \"-params -service ... \" string encoded
 			CMDLine runtimeArgs = new CMDLine(args);
 			// -service for Runtime -process a b c d :)
@@ -554,16 +562,24 @@ public class Agent extends Service {
 				// List<String> list = runtimeArgs.getArgumentList("-agent");
 
 				String tmp = runtimeArgs.getArgument("-agent", 0);
-				agentArgs = tmp.split(" ");
+				String[] agentPassedArgs = tmp.split(" ");
+				for (int i = 0; i < agentPassedArgs.length; ++i){
+					inArgs.add(agentPassedArgs[i]);
+				}
 				/*
 				 * agentArgs = new String[list.size()]; for (int i = 0; i <
 				 * list.size(); ++i){ agentArgs[i] =
 				 * String.format("-%s",list.get(i)); }
 				 */
 			}
+			 
+			// default args passed to runtime from Agent
+			inArgs.add("-isAgent");
 
+			String[] agentArgs = inArgs.toArray(new String[inArgs.size()]);
 			CMDLine agentCmd = new CMDLine(agentArgs);
 
+			// FIXME -isAgent identifier sent -- default to setting log name to agent.log !!!
 			Runtime.setRuntimeName("smith");
 			Runtime.main(agentArgs);
 			Agent agent = (Agent) Runtime.start("agent", "Agent");
