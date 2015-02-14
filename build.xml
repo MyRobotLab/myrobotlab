@@ -371,6 +371,8 @@
 
 		<unzip src="${repo}/com.google.gson/2.2.4/gson-2.2.4.jar" dest="${build}/classes" />
 		<unzip src="${repo}/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar" dest="${build}/classes" />
+		<unzip src="${repo}/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar" dest="${build}/classes" />
+		<unzip src="${repo}/org.fife.autocomplete/2.0.4/autocomplete.jar" dest="${build}/classes" />
 		<unzip src="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar" dest="${build}/classes" />
 		<unzip src="${repo}/org.apache.log4j/1.2.14/log4j-1.2.14.jar" dest="${build}/classes" />
 		<unzip src="${repo}/org.slf4j/1.6.1/slf4j-log4j12-1.6.1.jar" dest="${build}/classes" />
