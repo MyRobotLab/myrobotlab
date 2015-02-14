@@ -495,7 +495,7 @@ public class Agent extends Service {
 				// comment all out for dirty
 
 				// install Test dependencies
-				boolean force = true;
+				boolean force = false;
 				long installStartTime = System.currentTimeMillis();
 				repo.install("org.myrobotlab.service.Test", force);
 				repo.install(serviceType, force);
@@ -504,7 +504,7 @@ public class Agent extends Service {
 
 				// spawn a test - attach to cli - test 1 service end to end
 				// ,"-invoke", "test","test","org.myrobotlab.service.Clock"
-				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-invoke", "test", "test", serviceType });
+				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-noEnv", "-invoke", "test", "test", serviceType });
 				
 				process.waitFor();
 

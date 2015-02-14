@@ -262,8 +262,8 @@ public class Test extends Service {
 	 */
 	public void test(String serviceType) {
 
-		getState();
-		logThreadNames();
+		//getState();
+		//logThreadNames();
 
 		log.warn(String.format("==== testing %s ====", serviceType));
 		status = Status.info("==== testing %s ====", serviceType);
@@ -305,7 +305,7 @@ public class Test extends Service {
 			status.add(serializeTest(s));
 
 			status.add(s.test());
-			logThreadNames();
+			//logThreadNames();
 
 			// assume installed - Agent's job
 
@@ -384,13 +384,13 @@ public class Test extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
 
-			String serviceType = "Joystick";
+			String serviceType = "Arduino";
 			Repo repo = new Repo();
 			//repo.clearRepo();
 			// dirty clean :)
 			//repo.clearLibraries();
 			//repo.clearServiceData();
-			//repo.install(serviceType);
+			repo.install(serviceType);
 			Test test = (Test) Runtime.start("test", "Test");
 			test.getState();
 			test.test(serviceType);

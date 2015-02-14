@@ -87,7 +87,8 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * instances of MRL - keyed with an instance key URI format is
 	 * mrl://gateway/(protocol key)
 	 */
-	// FIXME - someday this will be serializable - but currently have to not save() on exist
+	// FIXME - someday this will be serializable - but currently have to not
+	// save() on exist
 	static private final HashMap<URI, ServiceEnvironment> instances = new HashMap<URI, ServiceEnvironment>();
 	static private final HashMap<String, ServiceInterface> registry = new HashMap<String, ServiceInterface>();
 
@@ -146,7 +147,31 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * global startingArgs - whatever came into main each runtime will have its
 	 * individual copy
 	 */
-	private static String[] globalArgs;
+	static private String[] globalArgs;
+	static private CMDLine cmdline = null;
+
+	static public String[] getGlobalArgs() {
+		return globalArgs;
+	}
+
+	/**
+	 * tricky way of getting static data "static" assumes you talking about
+	 * "this" Runtime and no other transported/networked/serialized Runtime ..
+	 * and this way Runtime == this instance's runtime !
+	 * 
+	 * @return
+	 */
+	static public CMDLine getCMDLine() {
+		return cmdline;
+	}
+
+	static public boolean isAgent() {
+		return cmdline.containsKey("-isAgent");
+	}
+
+	static public boolean fromAgent() {
+		return cmdline.containsKey("-fromAgent");
+	}
 
 	public static String getVersion() {
 		String version = FileIO.resourceToString("version.txt");
@@ -214,14 +239,16 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		log.info(String.format("args %s", Arrays.toString(args.toArray())));
 
 		log.info("============== args end ==============");
-		log.info("============== env begin ==============");
-		Map<String, String> env = System.getenv();
-		for (Map.Entry<String, String> entry : env.entrySet()) {
-			String key = entry.getKey();
-			String value = entry.getValue();
-			log.info(String.format("%s=%s", key, value));
+		if (cmdline != null &&!cmdline.containsKey("-noEnv")) {
+			log.info("============== env begin ==============");
+			Map<String, String> env = System.getenv();
+			for (Map.Entry<String, String> entry : env.entrySet()) {
+				String key = entry.getKey();
+				String value = entry.getValue();
+				log.info(String.format("%s=%s", key, value));
+			}
+			log.info("============== env end ==============");
 		}
-		log.info("============== env end ==============");
 
 		// Platform platform = Platform.getLocalInstance();
 		log.info("============== normalized ==============");
@@ -571,17 +598,18 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		if (runtime == null) {
 			synchronized (instanceLockObject) {
 				if (runtime == null) {
-					/* Well that didn't work the way I wanted it to... :P
-					Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-						@Override
-						public void uncaughtException(Thread t, Throwable e) {
-							//System.out.println(t.getName() + ": " + e);
-							log.error(String.format("============ WHOOP WHOOP WHOOP WHOOP WHOOP WHOOP Thread %s threw %s ============", t.getName(), e.getMessage()));
-							// MyWorker worker = new MyWorker();
-							// worker.start();
-						}
-					});
-					*/
+					/*
+					 * Well that didn't work the way I wanted it to... :P
+					 * Thread.setDefaultUncaughtExceptionHandler(new
+					 * Thread.UncaughtExceptionHandler() {
+					 * 
+					 * @Override public void uncaughtException(Thread t,
+					 * Throwable e) { //System.out.println(t.getName() + ": " +
+					 * e); log.error(String.format(
+					 * "============ WHOOP WHOOP WHOOP WHOOP WHOOP WHOOP Thread %s threw %s ============"
+					 * , t.getName(), e.getMessage())); // MyWorker worker = new
+					 * MyWorker(); // worker.start(); } });
+					 */
 
 					if (runtimeName == null) {
 						runtimeName = "runtime";
@@ -2040,7 +2068,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 		// sub-process if there is one
 
-		CMDLine cmdline = new CMDLine(args);
+		cmdline = new CMDLine(args);
 
 		Logging logging = LoggingFactory.getInstance();
 
@@ -2077,7 +2105,8 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 				}
 			}
 
-			//logging.addAppender(Appender.CONSOLE); hopefully it still worky after removing this ! :)
+			// logging.addAppender(Appender.CONSOLE); hopefully it still worky
+			// after removing this ! :)
 
 			if (!cmdline.containsKey("-noCLI")) {
 				Runtime.getInstance();
@@ -2202,11 +2231,11 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 		return Runtime.getInstance().repo.install(fullTypeName);
 	}
-	
-	static public List<String> getThreadNames(){
+
+	static public List<String> getThreadNames() {
 		Set<Thread> threads = Thread.getAllStackTraces().keySet();
 		ArrayList<String> names = new ArrayList<String>();
-		for (Thread t : threads){
+		for (Thread t : threads) {
 			names.add(t.getName());
 		}
 		return names;
