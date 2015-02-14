@@ -231,7 +231,7 @@ public class GUIServiceGUI extends ServiceGUI {
 
 			Object parent = graph.getDefaultParent();
 			Object services[] = graph.getChildVertices(parent);
-			log.info("serviceCount " + services.length);
+			//log.info("serviceCount " + services.length);
 
 			for (int i = 0; i < services.length; ++i) {
 				// serviceCells

@@ -26,6 +26,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -296,7 +297,12 @@ public class Motor extends Service implements MotorControl {
 	public void setSpeed(double power) {
 		powerOutput = powerMap.calc(power);
 	}
+	
 
+	public Status test(){
+		Status status = super.test();
+		return status;
+	}
 	
 	public static void main(String[] args) {
 
