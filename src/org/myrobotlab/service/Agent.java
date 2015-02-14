@@ -109,6 +109,7 @@ import org.slf4j.Logger;
  *         TODO - on java -jar myrobotlab.jar | make a copy if agent.jar does not exist..
  *         if it does then spawn the Agent there ... it would make upgrading myrobotlab.jar "trivial" !!!
  * 
+ * 	TO TEST - -agent "-test -logLevel WARN"
  */
 public class Agent extends Service {
 

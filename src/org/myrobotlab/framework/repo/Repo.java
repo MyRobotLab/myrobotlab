@@ -404,7 +404,7 @@ public class Repo implements Serializable {
 				ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
 				for (int i = 0; i < peerList.size(); ++i) {
 					ServiceReservation sr = peerList.get(i);
-					log.info("checking peer {} dependencies", sr.fullTypeName);
+					//log.info("checking peer {} dependencies", sr.fullTypeName);
 					if (!isServiceTypeInstalled(sr.fullTypeName)) {
 						return false;
 					}
@@ -602,7 +602,7 @@ public class Repo implements Serializable {
 			ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
 			for (int i = 0; i < peerList.size(); ++i) {
 				ServiceReservation sr = peerList.get(i);
-				log.info("checking peer {} dependencies", sr.fullTypeName);
+				//log.info("checking peer {} dependencies", sr.fullTypeName);
 				HashSet<Dependency> peerDeps = getDependencies(sr.fullTypeName);
 				if (peerDeps != null) {
 					deps.addAll(peerDeps);
