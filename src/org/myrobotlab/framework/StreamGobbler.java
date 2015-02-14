@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -15,13 +16,13 @@ public class StreamGobbler extends Thread {
 	public final static Logger log = LoggerFactory.getLogger("");
 	
 	InputStream is;
-	OutputStream os;
+	ArrayList<OutputStream> os;
 	
 	String type;
 	String tag;
 	
 
-	public StreamGobbler(InputStream is, OutputStream os, String type) {
+	public StreamGobbler(InputStream is, ArrayList<OutputStream> os, String type) {
 		super(String.format("%s_%s", type, Runtime.getPID()));
 		//this.tag = String.format("%s_%s<<", type, Runtime.getPID());
 		this.tag ="";
@@ -40,7 +41,9 @@ public class StreamGobbler extends Thread {
 				// FIXME OutputStream Versus Log !!! based on - IS_AGENT || FROM_AGENT || 
 				//log.info(String.format("%s%s", tag, line));
 				//log.info(String.format("<<%s", line));
-				os.write(String.format("%s\n",line).getBytes());
+				for (int i = 0; i < os.size(); ++i){
+					os.get(i).write(String.format("%s\n",line).getBytes());
+				}
 			}
 		} catch (IOException e) {
 			log.error(tag + "leaving StreamGobbler");

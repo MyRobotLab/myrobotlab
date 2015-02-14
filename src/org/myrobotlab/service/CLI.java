@@ -2,12 +2,14 @@ package org.myrobotlab.service;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Encoder;
@@ -48,7 +50,8 @@ public class CLI extends Service {
 
 	// my "real" in & out
 	transient Decoder in;
-	transient OutputStream out;
+	transient OutputStream os;
+	transient FileOutputStream fos;
 
 	// active relay - could be list - but lets start simple
 	String attached = null;
@@ -60,8 +63,10 @@ public class CLI extends Service {
 	// FIXME - needs refactor / merge with StreamGobbler
 	// FIXME - THIS CONCEPT IS SOOOOOO IMPORTANT
 	// - its a Central Point Controller - where input (any InputStream) can send
-	// data to be decoded on a very common API  e.g. (proto scheme)(host)/api/inputEncoding/responseEncoding/instance/(method)/(params...)
-	// Agent + (RemoteAdapter/WebGUI/Netosphere) + CLI(command processor part with InStream/OutStream) - is most Big-Fu !
+	// data to be decoded on a very common API e.g. (proto
+	// scheme)(host)/api/inputEncoding/responseEncoding/instance/(method)/(params...)
+	// Agent + (RemoteAdapter/WebGUI/Netosphere) + CLI(command processor part
+	// with InStream/OutStream) - is most Big-Fu !
 	public class Decoder extends Thread {
 		public String apiTag = "/api";
 		public String cwd = "/";
@@ -88,16 +93,17 @@ public class CLI extends Service {
 				BufferedReader br = new BufferedReader(in); // < FIXME ? is
 															// Buffered
 															// Necessary?
-				out.write(String.format("\n[%s %s]%s", Runtime.getInstance().getName(), cwd, prompt).getBytes());
+				out(String.format("\n[%s %s]%s", Runtime.getInstance().getName(), cwd, prompt).getBytes());
 
 				String line = null;
-				
-				// FIXME FIXME FIXME - line.split(" ") - invoke(line[0], line) "One Handler to Rule them All !"
+
+				// FIXME FIXME FIXME - line.split(" ") - invoke(line[0], line)
+				// "One Handler to Rule them All !"
 				while ((line = br.readLine()) != null) {
 
 					line = line.trim();
-					
-					if (line.length() == 0){
+
+					if (line.length() == 0) {
 						writePrompt();
 						continue;
 					}
@@ -130,7 +136,7 @@ public class CLI extends Service {
 						}
 						cli.cd(path);
 					} else if (line.startsWith("pwd")) {
-						out.write(cwd.getBytes());
+						out(cwd.getBytes());
 					} else if (line.startsWith("ls")) {
 						String path = cwd; // <-- path =
 						if (line.length() > 3) {
@@ -141,10 +147,10 @@ public class CLI extends Service {
 						// absolute path always
 						cli.ls(path);
 					} else if (line.startsWith("lp")) {
-						
+
 						// cli.lp(path??);
 						// cli.lp();
-						
+
 					} else {
 
 						String path = null;
@@ -175,7 +181,7 @@ public class CLI extends Service {
 									// FIXME - make getInstance configurable
 									// Encoder
 									// reference !!!
-									out.write(Encoder.gson.toJson(ret).getBytes());
+									out(Encoder.gson.toJson(ret).getBytes());
 								}
 							}
 						} catch (Exception e) {
@@ -184,7 +190,8 @@ public class CLI extends Service {
 
 					}
 					writePrompt();
-				}
+				} // while read line
+
 			} catch (IOException e) {
 				log.error("leaving Decoder");
 				Logging.logException(e);
@@ -196,7 +203,7 @@ public class CLI extends Service {
 		}
 
 		public void writePrompt() throws IOException {
-			out.write(String.format("\n[%s %s]%s", Runtime.getInstance().getName(), cwd, prompt).getBytes());
+			out(String.format("\n[%s %s]%s", Runtime.getInstance().getName(), cwd, prompt).getBytes());
 		}
 
 	}
@@ -220,18 +227,33 @@ public class CLI extends Service {
 
 		if (path.equals("/")) {
 			// FIXME don't do this here !!!
-			out.write(Encoder.gson.toJson(Runtime.getServiceNames()).toString().getBytes());
+			out(Encoder.gson.toJson(Runtime.getServiceNames()).toString().getBytes());
 		} else if (parts.length == 2 && !path.endsWith("/")) {
 			// FIXME don't do this here !!!
-			out.write(Encoder.gson.toJson(Runtime.getService(parts[1])).toString().getBytes());
+			out(Encoder.gson.toJson(Runtime.getService(parts[1])).toString().getBytes());
 		} else if (parts.length == 2 && path.endsWith("/")) {
 			ServiceInterface si = Runtime.getService(parts[1]);
 			// FIXME don't do this here !!!
-			out.write(Encoder.gson.toJson(si.getDeclaredMethodNames()).toString().getBytes());
+			out(Encoder.gson.toJson(si.getDeclaredMethodNames()).toString().getBytes());
 		}
 
 		// if path == /serviceName - json return ? Cool !
 		// if path /serviceName/ - method return
+	}
+
+	public void out(String str) throws IOException {
+		out(str.getBytes());
+	}
+
+	public void out(byte[] data) throws IOException {
+
+		//if (Runtime.isAgent()) {
+			if (os != null)
+				os.write(data);
+			
+			if (fos != null)
+				fos.write(data);
+		//}
 	}
 
 	/**
@@ -267,7 +289,17 @@ public class CLI extends Service {
 		// need to fire up StreamGobbler
 		// (new Process) --- stdout --> (Agent Process) StreamGobbler --->
 		// stdout
-		attachedOut = new StreamGobbler(pipe.out, out, name);
+		ArrayList<OutputStream> outRelay = new ArrayList<OutputStream>();
+		
+		if (os != null) {
+			outRelay.add(os);
+		}
+		
+		if (fos != null){
+			outRelay.add(fos);
+		}
+		
+		attachedOut = new StreamGobbler(pipe.out, outRelay, name);
 		attachedOut.start();
 
 		// grab input output from foreign process
@@ -280,7 +312,7 @@ public class CLI extends Service {
 	}
 
 	private void detach() throws IOException {
-		out.write(String.format("detaching from %s", attached).getBytes());
+		out(String.format("detaching from %s", attached).getBytes());
 		attached = null;
 		attachedIn = null;
 		if (attachedOut != null) {
@@ -308,10 +340,46 @@ public class CLI extends Service {
 			log.info("stdin already attached");
 		}
 
-		if (out == null) {
-			out = System.out;
+		// if I'm not an agent then just writing to System.out is fine
+		// because all of it will be relayed to an Agent if I'm spawned
+		// from an Agent.. or
+		// If I'm without an Agent I'll just do the logging I was directed
+		// to on the command line
+		if (os == null) {
+			os = System.out;
 		} else {
 			log.info("stdout already attached");
+		}
+
+		try {
+			// if I'm an agent I'll do dual logging
+			if (fos == null && Runtime.isAgent()) {
+				fos = new FileOutputStream("agent.log");
+			}
+		} catch (Exception e) {
+			Logging.logException(e);
+		}
+	}
+
+	public void stopService() {
+		super.stopService();
+		try {
+			if (in != null) {
+				in.interrupt();
+			}
+
+			in = null;
+			if (os != null) {
+				os.close();
+			}
+			os = null;
+
+			if (fos != null) {
+				fos.close();
+			}
+			fos = null;
+		} catch (Exception e) {
+			Logging.logException(e);
 		}
 	}
 
@@ -320,12 +388,11 @@ public class CLI extends Service {
 			in.interrupt();
 		}
 	}
-	
+
 	/*
-	public ArrayList<ProcessData> lp(){
-		return Runtime.getAgent().getProcesses();
-	}
-	*/
+	 * public ArrayList<ProcessData> lp(){ return
+	 * Runtime.getAgent().getProcesses(); }
+	 */
 
 	public void startService() {
 		super.startService();
