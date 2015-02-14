@@ -80,7 +80,7 @@ public class Sweety extends Service {
 		peers.put("ear", "Sphinx", "ear");
 		peers.put("chatBot", "ProgramAB", "chatBot");
 		peers.put("leftTracker", "Tracking", "leftTracker");
-		peers.put("eyesTracker", "Tracking", "eyesTracker");
+		peers.put("rightTracker", "Tracking", "rightTracker");
 		
 		peers.put("USfront", "UltrasonicSensor", "USfront");
 		peers.put("USfrontRight", "UltrasonicSensor", "USfrontRight");
@@ -123,10 +123,12 @@ public class Sweety extends Service {
 		mouth = (Speech) startPeer("mouth");
 		mouth.setLanguage("fr");
 		mouth.setBackendType("GOOGLE");
-		mouth.setGenderFemale();
+		
 		
 		ear = (Sphinx) startPeer("ear");
 
+		
+		
 		leftForearm = (Servo) startPeer("leftForearm");
 		rightForearm = (Servo) startPeer("rightForearm");
 		rightShoulder = (Servo) startPeer("rightShoulder");
@@ -181,27 +183,27 @@ public class Sweety extends Service {
 		/**
 		 * Start the tracking services
 		 */
-		// TODO understand why i cant' start the right Tracker
-		leftTracker = (Tracking) startPeer("leftTracker");
-		//rightTracker = (Tracking) startPeer("rightTracker");
+		
 		neck.detach();
 		rightEye.detach();
 		leftEye.detach();
 		
+		leftTracker = (Tracking) startPeer("leftTracker");
 		leftTracker.y.setPin(39); // neck
 		leftTracker.ypid.invert();
 		leftTracker.x.setPin(40); // right eye
 		leftTracker.connect(arduino.getPortName());
 		leftTracker.opencv.setCameraIndex(leftCameraIndex);
 		leftTracker.opencv.capture();
-		/*
-		rightTracker.y.setPin(51); // nothing
+		
+		rightTracker = (Tracking) startPeer("rightTracker");
+		rightTracker.y.setPin(50); // nothing
 		rightTracker.ypid.invert();
 		rightTracker.x.setPin(42); // right eye
 		rightTracker.connect(arduino.getPortName());
 		rightTracker.opencv.setCameraIndex(rightCameraIndex);
 		rightTracker.opencv.capture();
-		saying("tracking activated.");*/
+		saying("tracking activated.");
 	}
 	
 	public void stopTrack(){
@@ -323,6 +325,10 @@ public class Sweety extends Service {
 		
 		rightMotor = (Motor) startPeer("rightMotor");
 		leftMotor = (Motor) startPeer("leftMotor");
+		/*
+		arduino.motorAttach("rightMotor", rightMotorPwmPin, rightMotorDirPin);
+		arduino.motorAttach("leftMotor", leftMotorPwmPin, leftMotorDirPin);
+			*/
 		rightMotor.setController(arduino);
 		leftMotor.setController(arduino);
 		rightMotor.setMinMax(0.5, 1.0);
@@ -331,6 +337,7 @@ public class Sweety extends Service {
 		rightMotor.pwmPin = rightMotorPwmPin;
 		leftMotor.dirPin = leftMotorDirPin;
 		leftMotor.pwmPin = leftMotorPwmPin;
+	
 		
 	}
 	
