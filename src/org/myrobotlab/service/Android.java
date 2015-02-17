@@ -3,11 +3,9 @@ package org.myrobotlab.service;
 import java.util.HashMap;
 
 import org.myrobotlab.logging.Level;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
-
 import org.myrobotlab.android.MRL;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
@@ -199,6 +197,11 @@ public class Android extends Service implements SensorEventListener {
 		
 		*/
 		
+	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sensor", "framework", "control"};
 	}
 	
 }

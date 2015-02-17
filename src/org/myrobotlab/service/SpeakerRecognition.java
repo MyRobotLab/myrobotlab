@@ -92,5 +92,11 @@ public class SpeakerRecognition extends Service {
 			Logging.logException(e);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"speech recognition", "control"};
+	}
+
 
 }

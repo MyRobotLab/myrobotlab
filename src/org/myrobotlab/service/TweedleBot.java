@@ -341,4 +341,8 @@ public class TweedleBot extends Service {
 		dee.start();
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
 }

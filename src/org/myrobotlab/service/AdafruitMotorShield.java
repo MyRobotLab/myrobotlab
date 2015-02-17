@@ -551,5 +551,9 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"shield","motor"};
+	}
 
 }

@@ -500,5 +500,10 @@ public class Incubator extends Service {
 		 */
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"testing"};
+	}
 
 }

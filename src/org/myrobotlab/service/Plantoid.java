@@ -587,4 +587,9 @@ public class Plantoid extends Service {
 		 */
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sensor", "display"};
+	}
+
 }

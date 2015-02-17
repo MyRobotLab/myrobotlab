@@ -890,5 +890,11 @@ public class OpenNI extends Service // implements
 		//openni.recordSingleFrame();
 		// openni.startHandTracking();
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video","sensor"};
+	}
+
 
 }

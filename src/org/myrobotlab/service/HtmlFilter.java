@@ -112,5 +112,10 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher  
 		HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
 		System.out.println(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"data","filter"};
+	}
 
 }

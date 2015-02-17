@@ -362,5 +362,10 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 	public String getDescription() {
 		return "<html>wrapper service for wiiusej</html>";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sensor"};
+	}
 
 }

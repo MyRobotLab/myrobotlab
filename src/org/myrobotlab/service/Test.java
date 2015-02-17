@@ -399,5 +399,10 @@ public class Test extends Service {
 		}
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"testing", "framework"};
+	}
 
 }

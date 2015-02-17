@@ -1615,4 +1615,8 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"microcontroller"};
+	}
 }

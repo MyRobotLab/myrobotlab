@@ -53,5 +53,11 @@ public class SLAM extends Service {
 	public String getDescription() {
 		return "<html>addendum of WiiDAR - SLAM (not implemented)</html>";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"simulator", "display"};
+	}
+
 
 }

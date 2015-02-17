@@ -99,5 +99,10 @@ public class OculusDIY extends Service implements OculusDataPublisher , OculusDa
 			Logging.logException(e);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video","control","sensor"};
+	}
 
 }

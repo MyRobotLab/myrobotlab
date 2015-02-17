@@ -601,6 +601,12 @@ public class Speech extends Service implements TextListener {
 	public void onText(String text) {
 		speak(text);
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"speech", "sound"};
+	}
+
 
 
 	// speak errors

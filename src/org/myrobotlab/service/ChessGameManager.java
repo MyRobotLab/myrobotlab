@@ -85,5 +85,10 @@ public class ChessGameManager extends Service {
 			Logging.logException(e);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"game"};
+	}
 
 }

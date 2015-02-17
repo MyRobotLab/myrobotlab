@@ -48,5 +48,9 @@ public class Hadoop extends Service {
 		 */
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"cloud"};
+	}
 
 }

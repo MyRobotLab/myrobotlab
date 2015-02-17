@@ -173,5 +173,10 @@ public class HTTPClient extends Service {
 		HTTPClient http = (HTTPClient) Runtime.start("http", "HTTPClient");
 		http.test();
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"connectivity"};
+	}
 
 }

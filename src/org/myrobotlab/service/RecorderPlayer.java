@@ -169,4 +169,9 @@ public class RecorderPlayer extends Service {
 		return "<html>service for recording and playing back messages (not fully implemented)</html>";
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"framework"};
+	}
+
 }

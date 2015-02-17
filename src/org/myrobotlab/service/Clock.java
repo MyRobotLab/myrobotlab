@@ -214,5 +214,10 @@ public class Clock extends Service {
 			// XMPP CONNECT WORKS END ---------------------------------
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"scheduling"};
+	}
 
 }

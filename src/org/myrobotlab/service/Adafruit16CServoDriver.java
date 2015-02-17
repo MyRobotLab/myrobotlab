@@ -352,6 +352,11 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		
 	}
 	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"shield","motor"};
+	}
+	
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
@@ -361,4 +366,6 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		driver.test();
 
 	}
+
+
 }

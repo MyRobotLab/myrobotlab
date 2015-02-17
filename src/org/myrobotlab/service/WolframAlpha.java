@@ -195,5 +195,10 @@ public class WolframAlpha extends Service {
 		 * 
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"data", "connectivity"};
+	}
 
 }

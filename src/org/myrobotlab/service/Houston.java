@@ -152,4 +152,8 @@ public class Houston extends Service {
 		 */
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
 }

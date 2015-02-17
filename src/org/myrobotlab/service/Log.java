@@ -87,5 +87,10 @@ public class Log extends Service {
 	public String getDescription() {
 		return "logging service";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"testing"};
+	}
 
 }

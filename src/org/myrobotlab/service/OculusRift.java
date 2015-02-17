@@ -151,8 +151,10 @@ public class OculusRift extends Service {
 	public void stopService() {
 		super.stopService();
 		// TODO: validate proper life cycle.
-		hmd.stopSensor();
-		hmd.destroy();
+		if (hmd != null){
+			hmd.stopSensor();
+			hmd.destroy();
+		}
 	}
 	
 	
@@ -222,6 +224,11 @@ public class OculusRift extends Service {
 		Runtime.createAndStart("python", "Python");
 		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 		rift.logOrientation();
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video","control","sensor"};
 	}
 
 }

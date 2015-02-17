@@ -58,4 +58,9 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 			Logging.logException(e);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"data", "filter"};
+	}
 }

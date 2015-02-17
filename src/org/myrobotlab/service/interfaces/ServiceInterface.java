@@ -100,4 +100,6 @@ public interface ServiceInterface {
 	public boolean isLocal();
 
 	public void setPrefix(String prefix);
+	
+	public String[] getCategories();
 }

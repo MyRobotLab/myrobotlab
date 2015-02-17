@@ -2306,6 +2306,9 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		return 0;
 	}
 
-
+	@Override
+	public String[] getCategories() {
+		return new String[] {"microcontroller"};
+	}
 
 }

@@ -208,5 +208,10 @@ public class Graphics extends Service {
 	public String getDescription() {
 		return "a graphics service encapsulating Java swing graphic methods";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"display"};
+	}
 
 }

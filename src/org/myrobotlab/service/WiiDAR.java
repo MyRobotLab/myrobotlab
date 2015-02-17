@@ -492,5 +492,10 @@ public class WiiDAR extends Service {
 	public String getDescription() {
 		return "<html>service used in conjection with a wii camera a laser for inexpensive WiiDAR, a LIDAR like system<br>" + "see http://myrobotlab.org/node/1";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sensor", "display"};
+	}
 
 }

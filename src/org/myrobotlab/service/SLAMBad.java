@@ -154,5 +154,11 @@ public class SLAMBad extends Service {
 		gui.startService();
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"simulator", "display"};
+	}
+
 
 }

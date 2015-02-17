@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.module.descriptor.Artifact;
@@ -33,9 +34,7 @@ import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Encoder;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -104,8 +103,8 @@ public class Repo implements Serializable {
 		// load local file
 		localServiceData = getServiceDataFile();
 	}
-	
-	public void addRepoUpdateListener(RepoUpdateListener listener){
+
+	public void addRepoUpdateListener(RepoUpdateListener listener) {
 		this.listener = listener;
 	}
 
@@ -381,9 +380,16 @@ public class Repo implements Serializable {
 		return platform.getVersion();
 	}
 
-	// TODO - getLocalResolvedDependencies
-
+	/**
+	 * searches through dependencies directly defined by the service
+	 * and all Peers - recursively searches for their dependencies 
+	 * if any are not found  - returns false
+	 * 
+	 * @param fullTypeName
+	 * @return
+	 */
 	public boolean isServiceTypeInstalled(String fullTypeName) {
+		boolean ret = true;
 		if (fullTypeName.equals("org.myrobotlab.service.InMoov")) {
 			log.info("here");
 		}
@@ -395,38 +401,14 @@ public class Repo implements Serializable {
 				return false;
 			}
 
-			// FIXME !!! FIND PEERS !! - IF ALL PEERS ARE INSTALLED THEN
-			// CONTINUE
-			// ELSE FALSE - log peers..
-
-			Peers peers = Peers.getPeers(fullTypeName);
-			if (peers != null) {
-				ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
-				for (int i = 0; i < peerList.size(); ++i) {
-					ServiceReservation sr = peerList.get(i);
-					//log.info("checking peer {} dependencies", sr.fullTypeName);
-					if (!isServiceTypeInstalled(sr.fullTypeName)) {
-						return false;
-					}
-				}
+			// get all dependencies of the service
+			HashSet<Dependency> deps = getDependencies(fullTypeName);
+			// see if all dependnecies have been installed
+			for (Dependency dependency : deps) {
+				ret &= dependency.isInstalled();
 			}
-
-			if (st.dependencies != null) {
-				for (int i = 0; i < st.dependencies.size(); ++i) {
-					String d = st.dependencies.get(i);
-					if (!localServiceData.containsDependency(d)) {
-						error(String.format("service type %s does not have defined dependency %s", st.name, d));
-						return false;
-					}
-
-					Dependency dep = localServiceData.getDependency(d);
-					if (!dep.isResolved()) {
-						// log.warn("service type %s has unresolved dependency %s",
-						// st.name, d);
-						return false;
-					}
-				}
-			}
+			
+			return ret;
 		}
 		return true;
 	}
@@ -539,7 +521,7 @@ public class Repo implements Serializable {
 				errors.add(errStr);
 			}
 		} else {
-			info("%s %s.%s for %s", (retrieve) ? "retrieved" : "resolved", org, revision, platform.getPlatformId());
+			info("%s %s.%s for %s", (retrieve) ? "retrieved" : "installed", org, revision, platform.getPlatformId());
 		}
 		// TODO - no error
 		if (retrieve && err.size() == 0) {
@@ -595,24 +577,10 @@ public class Repo implements Serializable {
 	public HashSet<Dependency> getDependencies(String fullServiceName) {
 		ServiceData sd = getServiceDataFile();
 		HashSet<Dependency> deps = new HashSet<Dependency>();
-
-		// these are Peer dependencies !
-		Peers peers = Peers.getPeers(fullServiceName);
-		if (peers != null) {
-			ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
-			for (int i = 0; i < peerList.size(); ++i) {
-				ServiceReservation sr = peerList.get(i);
-				//log.info("checking peer {} dependencies", sr.fullTypeName);
-				HashSet<Dependency> peerDeps = getDependencies(sr.fullTypeName);
-				if (peerDeps != null) {
-					deps.addAll(peerDeps);
-				}
-			}
-		}
-
 		// these are immediate dependencies - not Peer
 		if (sd.containsServiceType(fullServiceName)) {
-			ArrayList<String> orgs = sd.getServiceType(fullServiceName).dependencies;
+			ServiceType st = sd.getServiceType(fullServiceName);
+			ArrayList<String> orgs = st.dependencies;
 			if (orgs != null) {
 				// Dependency[] deps = new Dependency[orgs.size()];
 				for (int i = 0; i < orgs.size(); ++i) {
@@ -621,6 +589,14 @@ public class Repo implements Serializable {
 						deps.add(d);
 					} else {
 						error("NO DEPENDENCY DEFINED FOR %s - %s", fullServiceName, orgs.get(i));
+					}
+				}
+
+				// get all the dependencies of my peers
+				TreeMap<String, String> peers = st.peers;
+				if (peers != null) {
+					for (String peerType : peers.values()) {
+						deps.addAll(getDependencies(peerType));
 					}
 				}
 				return deps;
@@ -788,7 +764,6 @@ public class Repo implements Serializable {
 
 		return sb.toString();
 	}
-	
 
 	/**
 	 * clears all files from local cache, serviceData.json, and libraries
@@ -811,7 +786,6 @@ public class Repo implements Serializable {
 		String cacheDir = String.format("%s%s.repo", System.getProperty("user.home"), File.separator);
 		log.info(String.format("cleanCache [%s]", cacheDir));
 
-		
 		File cache = new File(cacheDir);
 		if (cache.exists()) {
 			log.info(String.format("%s exists we need to remove it", cacheDir));
@@ -827,18 +801,18 @@ public class Repo implements Serializable {
 		ret &= clearLibraries(exclude);
 		return ret;
 	}
-	
+
 	/**
-	 * clears local service data json file and localServiceData memory 
-	 * so that subsequent calls to the repo force dependency resolution
-	 * from the local (.repo) .. 
+	 * clears local service data json file and localServiceData memory so that
+	 * subsequent calls to the repo force dependency resolution from the local
+	 * (.repo) ..
 	 * 
-	 * used after clearLibraries - to clear local mrl instance files but
-	 * still use local (.repo) cache
+	 * used after clearLibraries - to clear local mrl instance files but still
+	 * use local (.repo) cache
 	 * 
 	 * @return
 	 */
-	public boolean clearServiceData(){
+	public boolean clearServiceData() {
 		String serviceDataFileName = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
 		File serviceData = new File(serviceDataFileName);
 
@@ -850,17 +824,17 @@ public class Repo implements Serializable {
 				return false;
 			}
 		}
-		
+
 		localServiceData = null;
-		
+
 		return true;
 	}
-	
+
 	public boolean clearLibraries() {
 		return clearLibraries(null);
 	}
-	
-	public boolean clearLibraries(Set<File> exclude){
+
+	public boolean clearLibraries(Set<File> exclude) {
 		File libraries = new File("libraries");
 		if (libraries.exists()) {
 			if (!FileIO.rmDir(libraries, exclude)) {
@@ -883,6 +857,10 @@ public class Repo implements Serializable {
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+	}
+
+	public ServiceData getServiceData() {
+		return localServiceData;
 	}
 
 }

@@ -893,5 +893,10 @@ public class Joystick extends Service {
 		joy.startPolling();
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"control"};
+	}
 
 }

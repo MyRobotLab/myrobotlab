@@ -569,4 +569,9 @@ public class Sweety extends Service {
 		}
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
+
 }

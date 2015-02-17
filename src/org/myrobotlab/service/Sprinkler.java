@@ -142,5 +142,10 @@ public class Sprinkler extends Service {
 		Sprinkler sprinkler = (Sprinkler) Runtime.start("sprinkler", "Sprinkler");
 		sprinkler.test();
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"control", "home automation"};
+	}
 
 }

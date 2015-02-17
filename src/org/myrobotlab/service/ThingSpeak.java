@@ -142,5 +142,10 @@ public class ThingSpeak extends Service {
 		 * 
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"data", "cloud"};
+	}
 
 }

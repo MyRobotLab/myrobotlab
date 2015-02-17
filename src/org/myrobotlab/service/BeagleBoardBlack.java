@@ -36,5 +36,9 @@ public class BeagleBoardBlack extends Service {
 		 */
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"microcontroller"};
+	}
 
 }

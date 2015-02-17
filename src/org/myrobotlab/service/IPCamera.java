@@ -239,5 +239,10 @@ public class IPCamera extends Service {
 	{
 		return new SerializableImage(img, source);
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video"};
+	}
 
 }

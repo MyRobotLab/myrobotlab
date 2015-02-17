@@ -357,5 +357,10 @@ public class Stepper extends Service implements StepperControl {
 		stepper.test();
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"motor", "control"};
+	}
 
 }

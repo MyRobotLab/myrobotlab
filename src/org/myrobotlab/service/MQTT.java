@@ -496,4 +496,8 @@ public class MQTT extends Service implements MqttCallback {
 
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"data", "cloud"};
+	}
 }

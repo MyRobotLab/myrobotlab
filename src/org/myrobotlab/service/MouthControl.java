@@ -155,5 +155,10 @@ public class MouthControl extends Service {
 		Runtime.createAndStart("gui", "GUIService");
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"control"};
+	}
 
 }

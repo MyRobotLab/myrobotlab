@@ -172,4 +172,9 @@ public class TestCatcher extends Service implements SerialDataListener {
 	public void onByte(Integer b) {
 		
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"testing", "framework"};
+	}
 }

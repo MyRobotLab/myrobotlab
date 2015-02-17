@@ -7,8 +7,7 @@ public class Dependency implements Serializable, Comparator<Dependency>  {
 	private static final long serialVersionUID = 1L;
 	private String org;
 	private String revision;
-	private boolean resolved = false;
-	private boolean released = true;
+	private boolean installed = false;
 
 	public Dependency() {
 		this(null, null, true);
@@ -17,7 +16,6 @@ public class Dependency implements Serializable, Comparator<Dependency>  {
 	public Dependency(String organisation, String version, boolean released) {
 		this.org = organisation;
 		this.revision = version;
-		this.released = released;
 	}
 	
 	public Dependency(String organisation, String version) {
@@ -30,6 +28,9 @@ public class Dependency implements Serializable, Comparator<Dependency>  {
 		return o1.getOrg().compareTo(o2.getOrg());
 	}
 	
+	public boolean isInstalled(){
+		return installed;
+	}
 	
 	public String getOrg(){
 		return org;
@@ -46,27 +47,19 @@ public class Dependency implements Serializable, Comparator<Dependency>  {
 			return org.substring(p + 1);
 		}
 	}
-	public boolean isReleased()
-	{
-		return released;
-	}	
 	
 	public boolean isResolved()
 	{
-		return resolved;
+		return installed;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s %s %b", org, revision, resolved);
+		return String.format("%s %s %b", org, revision, installed);
 	}
 
 	public void setResolved(boolean b) {
-		resolved = b;
-	}
-
-	public void setReleased(boolean b) {
-		released = b;
+		installed = b;
 	}
 
 	public String getRevision() {

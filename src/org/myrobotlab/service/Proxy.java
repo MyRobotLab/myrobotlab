@@ -65,5 +65,11 @@ public class Proxy extends Service {
 		Proxy template = new Proxy("proxy");
 		template.startService();
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"framework"};
+	}
+
 
 }

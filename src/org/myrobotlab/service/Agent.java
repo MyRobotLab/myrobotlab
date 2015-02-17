@@ -601,5 +601,10 @@ public class Agent extends Service {
 			// System.exit(0);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"framework"};
+	}
 
 }

@@ -776,5 +776,11 @@ public class Servo extends Service implements ServoControl {
 		}
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"motor", "control"};
+	}
+
 
 }

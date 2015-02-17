@@ -269,5 +269,10 @@ public class AudioCapture extends Service {
 		 * - offset); } } line.drain(); line.stop(); }
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sound"};
+	}
 
 }

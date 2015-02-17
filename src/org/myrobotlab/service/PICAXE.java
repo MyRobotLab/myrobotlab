@@ -250,5 +250,10 @@ public class PICAXE extends Service // implements SerialPortEventListener,
 	public String getDescription() {
 		return "(not implemented yet) used to interface PICAXE";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"microcontroller"};
+	}
 
 }

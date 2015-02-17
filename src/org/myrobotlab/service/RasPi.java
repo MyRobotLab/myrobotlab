@@ -273,5 +273,11 @@ public class RasPi extends Service {
 		// Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
 		Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"control", "i2c"};
+	}
+
 
 }

@@ -859,5 +859,12 @@ public class OpenCV extends VideoSource {
 	
 
 	}
+	
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video","sensor"};
+	}
+
 
 }

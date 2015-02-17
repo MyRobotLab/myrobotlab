@@ -357,5 +357,10 @@ public class Motor extends Service implements MotorControl {
 		*/
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"motor"};
+	}
 
 }

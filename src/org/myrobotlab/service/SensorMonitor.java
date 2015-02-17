@@ -196,4 +196,10 @@ public class SensorMonitor extends Service {
 		 * sm.in(msg); }
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sensor", "display"};
+	}
+
 }

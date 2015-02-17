@@ -79,5 +79,9 @@ public class InverseKinematics extends Service {
 		 */
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot", "control"};
+	}
 
 }

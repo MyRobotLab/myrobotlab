@@ -489,7 +489,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 
 	@Override
 	public String getDescription() {
-		return "<html>Service used to graphically display and control other services</html>";
+		return "Service used to graphically display and control other services";
 	}
 
 	public void pack() {
@@ -765,6 +765,11 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		GUIService gui2 = (GUIService) Runtime.createAndStart("gui1", "GUIService");
 		gui2.startService();
 
+	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"display"};
 	}
 
 }

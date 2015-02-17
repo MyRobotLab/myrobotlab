@@ -256,5 +256,9 @@ public class UltrasonicSensor extends Service implements RangeListener {
 		 */
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sensor"};
+	}
 
 }

@@ -124,5 +124,9 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 		
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"microcontroller"};
+	}
 
 }

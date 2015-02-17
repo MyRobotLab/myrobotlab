@@ -700,5 +700,9 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"control", "connectivity"};
+	}
 
 }
