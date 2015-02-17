@@ -614,6 +614,10 @@ public class ServiceData implements Serializable {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel("INFO");
 			LoggingFactory.getInstance().addAppender(Appender.FILE);
+			
+			Repo repo = new Repo();
+			log.info(String.format("%b",repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")));
+			
 
 			String json = FileIO.fileToString(new File("serviceData.generated.json"));
 			ServiceData sd = ServiceData.load(json);

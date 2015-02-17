@@ -591,15 +591,14 @@ public class Repo implements Serializable {
 						error("NO DEPENDENCY DEFINED FOR %s - %s", fullServiceName, orgs.get(i));
 					}
 				}
-
-				// get all the dependencies of my peers
-				TreeMap<String, String> peers = st.peers;
-				if (peers != null) {
-					for (String peerType : peers.values()) {
-						deps.addAll(getDependencies(peerType));
-					}
+			}
+			
+			// get all the dependencies of my peers
+			TreeMap<String, String> peers = st.peers;
+			if (peers != null) {
+				for (String peerType : peers.values()) {
+					deps.addAll(getDependencies(peerType));
 				}
-				return deps;
 			}
 		} else {
 			error(String.format("getDepenencies %s not found", fullServiceName));

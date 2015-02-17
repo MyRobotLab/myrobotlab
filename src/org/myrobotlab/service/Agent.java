@@ -448,6 +448,7 @@ public class Agent extends Service {
 	}
 
 	public Status serviceTest() {
+		// CLEAN FOR TEST METHOD
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 
