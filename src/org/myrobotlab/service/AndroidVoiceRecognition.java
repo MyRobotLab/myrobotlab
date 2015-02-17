@@ -247,4 +247,9 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 	public String recognized(String text) {
 		return text;
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"speech recognition"};
+	}
 }

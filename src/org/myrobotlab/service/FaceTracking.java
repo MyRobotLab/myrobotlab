@@ -260,5 +260,10 @@ public class FaceTracking extends Service {
 	public String getDescription() {
 		return "used for tracking";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"tracking"};
+	}
 
 }

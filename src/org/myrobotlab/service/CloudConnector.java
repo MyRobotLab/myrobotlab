@@ -116,6 +116,11 @@ public class CloudConnector extends Service {
 		return robotId;
 	}
 	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"cloud"};
+	}
+	
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();

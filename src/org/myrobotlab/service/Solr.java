@@ -255,6 +255,11 @@ public class Solr extends Service {
 		}
 	}
 	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"data", "search"};
+	}
+
 }
 
 

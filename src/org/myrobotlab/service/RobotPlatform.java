@@ -507,4 +507,10 @@ public class RobotPlatform extends Service {
 	 * DifferentialDrive("platform"); platform.startService();
 	 * gui.startService();  //platform.startRobot(); }
 	 */
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot", "control"};
+	}
+
 }

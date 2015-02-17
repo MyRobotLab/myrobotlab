@@ -29,6 +29,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType>  {
 	public String state = null;
 	public Integer workingLevel = null;
 	public String description = null;
+	public Boolean available = null;
 	public ArrayList<String> dependencies;
 	public TreeMap<String, String> peers;
 
@@ -76,6 +77,10 @@ public class ServiceType implements Serializable, Comparator<ServiceType>  {
 	
 	public String toString(){
 		return name;
+	}
+
+	public boolean isAvailable() {
+		return (available != null && available == true);
 	}
 
 }

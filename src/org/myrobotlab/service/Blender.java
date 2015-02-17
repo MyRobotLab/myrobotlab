@@ -296,5 +296,10 @@ public class Blender extends Service {
 			Logging.logException(e);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"display", "simulator"};
+	}
 
 }

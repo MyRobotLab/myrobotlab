@@ -511,6 +511,9 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 		
 	}
 	
-	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"microcontroller"};
+	}
 
 }

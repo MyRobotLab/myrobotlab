@@ -113,5 +113,11 @@ public class ParallelPort extends Service {
 	public String getDescription() {
 		return "<html>(not working yet) used to communicate to and from the parallel port<br>" + "wrapping the great project http://rxtx.qbang.org/ using LGPL v 2.1</html>";
 	}
+	
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sensor", "control"};
+	}
 
 }

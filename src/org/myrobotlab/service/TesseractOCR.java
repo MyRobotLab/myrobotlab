@@ -121,5 +121,10 @@ public class TesseractOCR extends Service {
 		 * 
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"ocr"};
+	}
 
 }

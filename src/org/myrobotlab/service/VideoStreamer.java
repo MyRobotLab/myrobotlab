@@ -146,4 +146,8 @@ public class VideoStreamer extends VideoSink {
 
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video", "sensor"};
+	}
 }

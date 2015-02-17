@@ -599,4 +599,8 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		return recognizedText;
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"speech recognition", "control"};
+	}
 }

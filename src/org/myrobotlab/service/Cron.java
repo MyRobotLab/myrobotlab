@@ -62,7 +62,7 @@ public class Cron extends Service {
 
 	@Override
 	public String getDescription() {
-		return "used as a general template";
+		return "A Cron like service capable of scheduling future actions";
 	}
 
 	public String addTask(String cron, String serviceName, String method) {
@@ -136,6 +136,11 @@ public class Cron extends Service {
 		/*
 		 * GUIService gui = new GUIService("gui"); gui.startService();
 		 */
+	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"scheduling"};
 	}
 
 }

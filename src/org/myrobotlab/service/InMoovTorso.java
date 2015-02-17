@@ -256,4 +256,9 @@ public class InMoovTorso extends Service {
 		torso.connect("COM4");
 		torso.test();
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
 }

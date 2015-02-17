@@ -1017,5 +1017,11 @@ public class Serial extends Service implements SerialDeviceService, SerialDevice
 			Logging.logException(e);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"control", "sensor", "microcontroller"};
+	}
+
 
 }

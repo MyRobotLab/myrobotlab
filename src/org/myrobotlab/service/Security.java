@@ -521,5 +521,11 @@ public class Security extends Service implements AuthorizationProvider {
 		System.out.println(encryptedPwd);
 		System.out.println(Security.decrypt(encryptedPwd, new File(KEY_FILE)));
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"framework", "security"};
+	}
+
 
 }

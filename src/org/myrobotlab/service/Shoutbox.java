@@ -952,4 +952,9 @@ public class Shoutbox extends Service {
 		}
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"connectivity"};
+	}
+
 }

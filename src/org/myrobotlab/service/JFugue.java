@@ -126,5 +126,10 @@ public class JFugue extends Service {
 	public String getDescription() {
 		return "service wrapping Jfugue - http://www.jfugue.org/ used for music and sound generation";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sound"};
+	}
 
 }

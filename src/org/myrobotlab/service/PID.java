@@ -361,5 +361,10 @@ public class PID extends Service {
 		}
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"control"};
+	}
 
 }

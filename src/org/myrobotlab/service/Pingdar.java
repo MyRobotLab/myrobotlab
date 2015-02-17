@@ -229,6 +229,11 @@ public class Pingdar extends Service {
 		
 		return status;
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sensor", "display"};
+	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();

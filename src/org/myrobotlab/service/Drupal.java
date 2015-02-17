@@ -301,5 +301,10 @@ public class Drupal extends Service {
 		drupal.startChatterBot();
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"cloud"};
+	}
 
 }

@@ -45,6 +45,7 @@ package org.myrobotlab.service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+
 import javaFlacEncoder.FLAC_FileEncoder;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -390,6 +391,11 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 	public void resumeListening() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"speech recognition"};
 	}
 
 }

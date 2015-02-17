@@ -32,5 +32,11 @@ public class Red5 extends Service {
 		 * 
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video"};
+	}
+
 
 }

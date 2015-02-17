@@ -68,5 +68,10 @@ public class MagaBot extends Service {
 		gui.startService();
 		
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
 
 }

@@ -759,4 +759,10 @@ public class ServoOrchestrator extends Service {
 		}
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"motor", "control", "display"};
+	}
+
 }

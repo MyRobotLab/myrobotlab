@@ -365,5 +365,10 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		// webgui.useLocalResources(true);
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"display", "control"};
+	}
 
 }

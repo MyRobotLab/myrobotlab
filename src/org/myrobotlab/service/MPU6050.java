@@ -200,4 +200,8 @@ public class MPU6050 extends Service {
 		}
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"microcontroller"};
+	}
 }

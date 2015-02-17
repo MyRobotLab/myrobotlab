@@ -16,23 +16,23 @@ import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Vector;
 
-public class LeapMotion2 extends Service implements LeapDataListener , LeapDataPublisher {
+public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPublisher {
 
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(LeapMotion2.class);
-	
+
 	transient LeapMotionListener listener = null;
 	transient Controller controller = new Controller();
-	
+
 	public LeapData lastLeapData = null;
-	
+
 	public static class LeapData {
 		transient public Frame frame;
 		public Hand leftHand;
 		public Hand rightHand;
 	}
-	
+
 	public static class Hand {
 		public String type;
 		public double thumb;
@@ -44,39 +44,39 @@ public class LeapMotion2 extends Service implements LeapDataListener , LeapDataP
 		public double palmNormalY;
 		public double palmNormalZ;
 	}
-	
-public LeapMotion2(String n) {
-		super(n);
-		listener = new LeapMotionListener(this);
+
+	public LeapMotion2(String n) {
+		super(n);		
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "used as a general template";
 	}
-	
-	public float getRightStrength(){
+
+	public float getRightStrength() {
 		Frame frame = controller.frame();
 		com.leapmotion.leap.Hand hand = frame.hands().rightmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
-	
-	public float getLeftStrength(){
+
+	public float getLeftStrength() {
 		Frame frame = controller.frame();
 		com.leapmotion.leap.Hand hand = frame.hands().leftmost();
 		float strength = hand.grabStrength();
 		return strength;
 	}
 
-	
 	/**
-	 * Return the angle of the finger for the hand specified
-	 * This computes the angle based on the dot product of
-	 * the palmNormal and the fingerDirection
+	 * Return the angle of the finger for the hand specified This computes the
+	 * angle based on the dot product of the palmNormal and the fingerDirection
 	 * Theta = arccos( (V1.V2) / ( |V1| * |V2| )
-	 * @param hand - "left" or "right"
-	 * @param tip - 0 (thumb) / 1 (index) .. etc..
+	 * 
+	 * @param hand
+	 *            - "left" or "right"
+	 * @param tip
+	 *            - 0 (thumb) / 1 (index) .. etc..
 	 * @return angle in degrees
 	 */
 	public double getJointAngle(String hand, Integer tip) {
@@ -84,7 +84,7 @@ public LeapMotion2(String n) {
 		if ("left".equalsIgnoreCase(hand)) {
 			// left hand
 			h = controller.frame().hands().leftmost();
-		} else { 			
+		} else {
 			// right hand
 			h = controller.frame().hands().rightmost();
 		}
@@ -99,25 +99,24 @@ public LeapMotion2(String n) {
 		double angle = Math.toDegrees(angleInRadians);
 		return angle;
 	}
-	
-	
+
 	public LeapData publishLeapData(LeapData data) {
 		// TODO Auto-generated method stub
 		return data;
 	}
-	
+
 	public Frame publishFrame(Frame frame) {
 		return frame;
 	}
-	
-	public void addFrameListener(Service service){
+
+	public void addFrameListener(Service service) {
 		addListener("publishFrame", service.getName(), "onFrame", Frame.class);
 	}
-	
-	public void addLeapDataListener(Service service){
+
+	public void addLeapDataListener(Service service) {
 		addListener("publishLeapData", service.getName(), "onLeapData", Frame.class);
 	}
-	
+
 	public Controller publishInit(Controller controller) {
 		return controller;
 	}
@@ -133,13 +132,18 @@ public LeapMotion2(String n) {
 	public Controller publishExit(Controller controller) {
 		return controller;
 	}
-	
-	public void startTracking(){
+
+	public void startTracking() {
 		controller.addListener(listener);
 	}
-	
-	public void stopTracking(){
+
+	public void stopTracking() {
 		controller.removeListener(listener);
+	}
+	
+	public void startService(){
+		super.startService();
+		listener = new LeapMotionListener(this);
 	}
 
 	public static void main(String[] args) {
@@ -148,49 +152,50 @@ public LeapMotion2(String n) {
 
 		LeapMotion2 leap = new LeapMotion2("leap");
 		leap.startService();
-			
+
 		Runtime.start("gui", "GUIService");
 		leap.startTracking();
 
-        // Have the sample listener receive events from the controller
-        
-        // Keep this process running until Enter is pressed
-        log.info("Press Enter to quit...");
-        try {
-            System.in.read();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		// Have the sample listener receive events from the controller
 
-        // Remove the sample listener when done
+		// Keep this process running until Enter is pressed
+		log.info("Press Enter to quit...");
+		try {
+			System.in.read();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// Remove the sample listener when done
 	}
-
 
 	@Override
 	public LeapData onLeapData(LeapData data) {
-		
+
 		return data;
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	public void activateVRMode() {
 		controller.setPolicyFlags(Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
 		log.info("virtual reality mode active");
 		return;
 	}
-	
+
 	public void activateDefaultMode() {
 		controller.setPolicyFlags(Controller.PolicyFlag.POLICY_DEFAULT);
 		log.info("default mode active");
 		return;
 	}
-	
-	public void checkPolicy(){
+
+	public void checkPolicy() {
 		log.info("controller.policyFlags()");
 	}
-	
-	
-		
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "sensor" };
+	}
 
 }

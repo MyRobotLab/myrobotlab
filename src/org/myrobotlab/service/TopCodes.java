@@ -75,5 +75,9 @@ public class TopCodes extends Service {
 		
 	}
 
-
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video", "sensor"};
+	}
+	
 }

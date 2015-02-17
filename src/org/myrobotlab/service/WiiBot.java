@@ -198,4 +198,8 @@ public class WiiBot extends Service {
 		return "(not implemented) - robot utilizing the wii mote and wiidar";
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot", "sensor"};
+	}
 }

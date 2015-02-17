@@ -909,5 +909,11 @@ public class RemoteAdapter extends Service implements Gateway {
 			Logging.logException(e);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"connectivity", "framework"};
+	}
+
 
 }

@@ -314,5 +314,9 @@ public class InMoovHead extends Service {
 	}
 	*/
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
 
 }

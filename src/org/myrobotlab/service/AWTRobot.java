@@ -135,26 +135,6 @@ public class AWTRobot extends Service {
 
 	public AWTRobot(String n) {
 		super(n);
-		videoSources =new VideoSources();
-		try {
-			robot = new Robot();
-		} catch (AWTException e) {
-			e.printStackTrace();
-		}
-		maxBounds = new Rectangle();
-		GraphicsEnvironment ge = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
-		GraphicsDevice[] gs = ge.getScreenDevices();
-		for (int j = 0; j < gs.length; j++) {
-			GraphicsDevice gd = gs[j];
-			GraphicsConfiguration[] gc = gd.getConfigurations();
-			for (int i = 0; i < gc.length; i++) {
-				maxBounds = maxBounds.union(gc[i].getBounds());
-			}
-		}
-		bounds = (Rectangle) maxBounds.clone();
-		resizedBounds = new Dimension(800, 600);
-		new MouseThread(this.getName());		
 	}
 
 	@Override
@@ -677,6 +657,29 @@ public class AWTRobot extends Service {
 		}
 		return new KeyData(c, press, shift ? KeyEvent.SHIFT_DOWN_MASK : 0);
 	}
+	
+	public void startService(){
+		videoSources =new VideoSources();
+		try {
+			robot = new Robot();
+		} catch (AWTException e) {
+			e.printStackTrace();
+		}
+		maxBounds = new Rectangle();
+		GraphicsEnvironment ge = GraphicsEnvironment
+				.getLocalGraphicsEnvironment();
+		GraphicsDevice[] gs = ge.getScreenDevices();
+		for (int j = 0; j < gs.length; j++) {
+			GraphicsDevice gd = gs[j];
+			GraphicsConfiguration[] gc = gd.getConfigurations();
+			for (int i = 0; i < gc.length; i++) {
+				maxBounds = maxBounds.union(gc[i].getBounds());
+			}
+		}
+		bounds = (Rectangle) maxBounds.clone();
+		resizedBounds = new Dimension(800, 600);
+		new MouseThread(this.getName());		
+	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -700,5 +703,10 @@ public class AWTRobot extends Service {
 		 * GUIService gui = new GUIService("gui"); gui.startService();
 		 * 
 		 */
+	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"display"};
 	}
 }

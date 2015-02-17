@@ -1371,7 +1371,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	public String[] getServiceTypeNames(String filter) {
 		return runtime.repo.getServiceDataFile().getServiceTypeNames(filter);
 	}
+	
 
+	/**
+	 * list of currently created services
+	 * @return
+	 */
 	static public String[] getServiceNames() {
 		List<ServiceInterface> si = getServices();
 		String[] ret = new String[si.size()];
@@ -2240,5 +2245,11 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		}
 		return names;
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"framework"};
+	}
+
 
 }

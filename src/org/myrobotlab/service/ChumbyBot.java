@@ -162,5 +162,10 @@ public class ChumbyBot extends Service {
 		chumbybot.startBot();
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
 
 }

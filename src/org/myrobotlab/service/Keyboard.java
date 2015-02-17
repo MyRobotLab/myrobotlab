@@ -153,5 +153,10 @@ public class Keyboard extends Service {
 		keyboard.test();
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"control"};
+	}
 
 }

@@ -766,5 +766,10 @@ public class Tracking extends Service {
 		}
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video", "tracking", "control"};
+	}
 
 }

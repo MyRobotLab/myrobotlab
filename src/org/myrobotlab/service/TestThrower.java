@@ -144,5 +144,12 @@ public class TestThrower extends Service {
 	public String getDescription() {
 		return "<html>service for junit tests</html>";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"framework", "testing"};
+	}
+	
+	
 
 }

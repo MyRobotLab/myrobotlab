@@ -468,5 +468,10 @@ public class AudioFile extends Service {
 		// player.play("hello my name is audery");
 		// player.playWAV("hello my name is momo");
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sound"};
+	}
 
 }

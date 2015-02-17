@@ -43,5 +43,10 @@ public class ChatBot extends Service {
 		 * 
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"intellegence"};
+	}
 
 }

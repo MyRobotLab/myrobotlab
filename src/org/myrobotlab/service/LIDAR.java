@@ -335,4 +335,9 @@ public class LIDAR extends Service {
             Logging.logException(e);
         }
     }
+    
+	@Override
+	public String[] getCategories() {
+		return new String[] {"sensor"};
+	}
 }

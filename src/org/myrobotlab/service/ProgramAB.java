@@ -521,6 +521,11 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		}
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"intellegence"};
+	}
+
 
 
 }

@@ -1671,5 +1671,11 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"microcontroller"};
+	}
+
 
 }

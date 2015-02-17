@@ -307,5 +307,11 @@ public class Sabertooth extends Service {
 		 * GUIService gui = new GUIService("gui"); gui.startService();
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"motor", "control"};
+	}
+
 
 }

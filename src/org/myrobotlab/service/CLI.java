@@ -425,5 +425,10 @@ public class CLI extends Service {
 			Logging.logException(e);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"framework"};
+	}
 
 }

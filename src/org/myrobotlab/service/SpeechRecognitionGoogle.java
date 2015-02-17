@@ -37,5 +37,10 @@ public class SpeechRecognitionGoogle extends Service {
 			Logging.logException(e);
 		}
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"speech", "sound", "speech recognition"};
+	}
 
 }

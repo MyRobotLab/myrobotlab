@@ -1,7 +1,6 @@
 package org.myrobotlab.framework.repo;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -9,6 +8,8 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,9 @@ import java.util.TreeMap;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -357,6 +360,52 @@ public class ServiceData implements Serializable {
 		return ret;
 	}
 
+	public ArrayList<ServiceType> getAvailableServiceTypes() {
+		ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
+		for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
+			if (o.getValue().isAvailable()) {
+				ret.add(o.getValue());
+			}
+		}
+		return ret;
+	}
+
+	/**
+	 * a category is available only if it references a service type which is
+	 * currently available
+	 * 
+	 * @return
+	 */
+	public ArrayList<Category> getAvailableCategories() {
+		ArrayList<Category> ret = new ArrayList<Category>();
+		for (Map.Entry<String, Category> o : categoryTypes.entrySet()) {
+			Category cat = o.getValue();
+			ArrayList<String> serviceNames = cat.serviceTypes;
+
+			boolean availableCat = false;
+			for (int i = 0; i < serviceNames.size(); ++i) {
+				ServiceType st = getServiceType(serviceNames.get(i));
+				if (st.available != null && st.available == true) {
+					availableCat = true;
+				}
+			}
+
+			if (availableCat) {
+				ret.add(cat);
+			}
+		}
+
+		Collections.sort(ret, new Comparator<Category>() {
+			@Override
+			public int compare(Category o1, Category o2) {
+				return o1.name.compareTo(o2.name);
+
+			}
+		});
+		// Collections.sort(ret);
+		return ret;
+	}
+
 	public void addCategory(String name, String[] serviceTypes) {
 		addCategory(name, null, serviceTypes);
 	}
@@ -435,8 +484,8 @@ public class ServiceData implements Serializable {
 
 			ServiceData sd = new ServiceData();
 
-			// give me all the first level directories
-
+			// get all third party libraries
+			// give me all the first level directories of the repo
 			List<File> dirs = FindFile.find(repoDir, "^[^.].*[^-_.]$", false, true);
 			log.info("found {} files", dirs.size());
 			for (int i = 0; i < dirs.size(); ++i) {
@@ -468,7 +517,8 @@ public class ServiceData implements Serializable {
 				}
 			}
 
-			// get services
+			// get all services
+			// all files from src
 			File spath = new File("src/org/myrobotlab/service");
 			List<File> services = FindFile.find(spath.getAbsolutePath(), ".*", false, false);
 			log.info("found {} services", services.size());
@@ -478,34 +528,61 @@ public class ServiceData implements Serializable {
 					String n = sf.getName();
 					String sname = n.substring(0, n.lastIndexOf("."));
 					String fullClassName = String.format("org.myrobotlab.service.%s", sname);
+					// fullClassName = "org.myrobotlab.service.OculusRift";
 					log.info("adding {}", sname);
 
 					// TODO - add Peer dependencies
 					ServiceType s = new ServiceType(fullClassName);
-					
 
 					try {
-						if (sname.equals("LeapMotion2") || sname.equals("Test")) {
-							continue;
-						}
+						/*
+						 * if (sname.equals("LeapMotion2") ||
+						 * sname.equals("Test")) { continue; }
+						 */
 						ServiceInterface si = (ServiceInterface) Service.getNewInstance(fullClassName, sname);
-						if (si == null || sname.equals("AWTRobot") || sname.equals("LeapMotion2")) {
-							log.error("could not get service interface for {}", sname);
-							continue;
-						}
+						/*
+						 * if (si == null || sname.equals("AWTRobot") ||
+						 * sname.equals("LeapMotion2")) {
+						 * log.error("could not get service interface for {}",
+						 * sname); continue; }
+						 */
 
 						s.description = si.getDescription();
+						String[] categories = si.getCategories();
+						for (int z = 0; z < categories.length; ++z) {
+							String newCat = categories[z];
+							if (!sd.categoryTypes.containsKey(newCat)) {
+								Category c = new Category();
+								c.name = newCat;
+								c.serviceTypes.add(si.getType());
+								// c.description =
+								// ArrayList<String>
+								sd.categoryTypes.put(c.name, c);
+							} else {
+								Category c = sd.categoryTypes.get(newCat);
+								c.serviceTypes.add(si.getType());
+							}
+						}
+
 						si.releaseService();
 						si.releasePeers();
 
 						// Class<?> theClass = Class.forName(fullClassName);
-						// TODO - add list of Peers (compile shapshot for documentation)
+						// TODO - add list of Peers (compile shapshot for
+						// documentation)
 						try {
 							Class<?> theClass = Class.forName(fullClassName);
 							Method method = theClass.getMethod("getPeers", String.class);
-							Object peers = method.invoke(si, new String[]{""});
-							if (peers != null){
-								log.info("here");
+							Peers peers = (Peers) method.invoke(si, new Object[] { "" });
+							if (peers != null) {
+								log.info("has peers");
+								ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
+								// Repo r = new Repo();
+								for (int j = 0; j < peerList.size(); ++j) {
+									ServiceReservation sr = peerList.get(j);
+									s.addPeer(sr.key, sr.fullTypeName);
+								}
+								// add peers to serviceData serviceType
 							}
 						} catch (Exception e) {
 							// dont care
@@ -537,16 +614,40 @@ public class ServiceData implements Serializable {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel("INFO");
 			LoggingFactory.getInstance().addAppender(Appender.FILE);
-			ServiceData sd = ServiceData.load(FileIO.fileToString(".myrobotlab/serviceData.json"));
-			//ServiceData sd = generate("../repo");
+
+			String json = FileIO.fileToString(new File("serviceData.generated.json"));
+			ServiceData sd = ServiceData.load(json);
+			FileOutputStream fos = new FileOutputStream(new File("serviceData.compare.json"));
+			fos.write(Encoder.gson.toJson(sd).getBytes());
+			fos.close();
+
 			/*
-			ServiceType st = sd.getServiceType("org.myrobotlab.service.Arduino");
-			st.addDependency("cc.arduino");
-			*/
-			sd.addCategory("actuators", "motion controllers", new String[]{"org.myrobotlab.service.Motor", "org.myrobotlab.service.Servo","org.myrobotlab.service.MouthControl","org.myrobotlab.service.PID"});
-			sd.addCategory("audio", "", new String[]{"org.myrobotlab.service.AudioCapture", "org.myrobotlab.service.AudioFile","org.myrobotlab.service.JFugue"});
-			// ServiceData sd = ServiceData.getLocal();// .loadLocal();
-			sd.save("generated.json");
+			 * ServiceData sd = generate("../repo"); json =
+			 * Encoder.gson.toJson(sd); FileOutputStream fos = new
+			 * FileOutputStream(new File("serviceData.generated.json"));
+			 * fos.write(json.getBytes()); fos.close();
+			 */
+
+			// ServiceData sd =
+			// ServiceData.load(FileIO.fileToString(".myrobotlab/serviceData.json"));
+			// ServiceData sd = generate("../repo");
+			/*
+			 * ServiceType st =
+			 * sd.getServiceType("org.myrobotlab.service.Arduino");
+			 * st.addDependency("cc.arduino");
+			 */
+			/*
+			 * sd.addCategory("actuators", "motion controllers", new
+			 * String[]{"org.myrobotlab.service.Motor",
+			 * "org.myrobotlab.service.Servo"
+			 * ,"org.myrobotlab.service.MouthControl"
+			 * ,"org.myrobotlab.service.PID"}); sd.addCategory("audio", "", new
+			 * String[]{"org.myrobotlab.service.AudioCapture",
+			 * "org.myrobotlab.service.AudioFile"
+			 * ,"org.myrobotlab.service.JFugue"}); // ServiceData sd =
+			 * ServiceData.getLocal();// .loadLocal();
+			 * sd.save("generated.json");
+			 */
 
 			/*
 			 * Serializer serializer = new Persister();
@@ -560,6 +661,16 @@ public class ServiceData implements Serializable {
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+	}
+
+	public Category getCategory(String filter) {
+		if (filter == null){
+			return null;
+		}
+		if (categoryTypes.containsKey(filter)){
+			return categoryTypes.get(filter);
+		}
+		return null;
 	}
 
 }

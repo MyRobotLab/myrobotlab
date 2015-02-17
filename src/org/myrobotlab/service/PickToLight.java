@@ -1157,5 +1157,10 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 		 */
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"industrial"};
+	}
 
 }

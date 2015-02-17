@@ -154,5 +154,10 @@ public class Twitter extends Service {
 		 * 
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"connectivity"};
+	}
 
 }

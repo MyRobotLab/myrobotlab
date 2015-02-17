@@ -103,7 +103,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	protected String prefix = null; // if foreign - this will be name prefix -
 									// set by Gateway
 
-	private final String name; // TODO - access directly
+	private final String name;
 	private String simpleName; // used in gson encoding for getSimpleName()
 	private String serviceClass;
 	private String lastRecordingFilename;
@@ -196,6 +196,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * Short description of the service
 	 */
 	abstract public String getDescription();
+	abstract public String[] getCategories();
 
 	static public void logTimeEnable(Boolean b) {
 		Logging.logTimeEnable(b);
@@ -216,6 +217,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public Status test() {
 		return Status.info("testing %s of type %s", getName(), getType());
 	}
+	
 
 	/**
 	 * framework interface for Services which can display themselves most will

@@ -32,5 +32,11 @@ public class ROS extends Service {
 		 * 
 		 */
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"bridge"};
+	}
+
 
 }

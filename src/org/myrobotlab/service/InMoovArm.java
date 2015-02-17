@@ -321,4 +321,8 @@ public class InMoovArm extends Service {
 		return true;
 	}
 	*/
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
 }

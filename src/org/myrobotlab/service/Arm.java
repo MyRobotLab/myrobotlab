@@ -67,4 +67,8 @@ public class Arm extends Service {
 		return null;
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
 }

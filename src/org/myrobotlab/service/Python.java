@@ -701,5 +701,11 @@ public class Python extends Service {
 		Runtime.createAndStart("gui", "GUIService");
 
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"programming", "control"};
+	}
+
 
 }

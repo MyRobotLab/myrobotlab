@@ -207,5 +207,10 @@ public class ChessGame extends Service {
 	public String getDescription() {
 		return "used to generate pulses";
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"game"};
+	}
 
 }

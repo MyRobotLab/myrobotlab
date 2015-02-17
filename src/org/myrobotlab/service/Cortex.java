@@ -292,5 +292,9 @@ public class Cortex extends Service implements MemoryChangeListener {
 
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"intellegence"};
+	}
 
 }

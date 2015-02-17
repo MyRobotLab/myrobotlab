@@ -526,5 +526,10 @@ public class InMoovHand extends Service implements LeapDataListener {
 
 		return data;
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"robot"};
+	}
 
 }
