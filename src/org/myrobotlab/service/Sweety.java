@@ -539,12 +539,11 @@ public class Sweety extends Service {
 		super(n);
 	}
 
+	/**
+	 * Return information about the service
+	 */
 	@Override
 	public String getDescription() {
-		/**
-		 * Return information about the service
-		 */
-		
 		return "Service for the robot Sweety";
 	}
 	
