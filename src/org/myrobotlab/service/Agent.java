@@ -461,6 +461,7 @@ public class Agent extends Service {
 		//String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 
 		HashSet<String> skipTest = new HashSet<String>();
+		/*
 		skipTest.add("org.myrobotlab.service.Agent");
 		skipTest.add("org.myrobotlab.service.Runtime");
 		skipTest.add("org.myrobotlab.service.OpenNI");
@@ -468,6 +469,7 @@ public class Agent extends Service {
 		skipTest.add("org.myrobotlab.service.InMoov"); // just too big and complicated at the moment
 		skipTest.add("org.myrobotlab.service.Test");
 		skipTest.add("org.myrobotlab.service.CLI"); // ?? No ?
+		*/
 
 		long installTime = 0;
 		Repo repo = Runtime.getInstance().getRepo();
@@ -477,8 +479,6 @@ public class Agent extends Service {
 		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
 		long startTime = System.currentTimeMillis();
 		status.addNamedInfo("startTime", "%d", startTime);
-
-		
 		
 		for (int i = 0; i < serviceTypes.size(); ++i) {
 
@@ -490,8 +490,8 @@ public class Agent extends Service {
 			}
 			//serviceType = "org.myrobotlab.service.OpenCV";
 
-			if (skipTest.contains(serviceType)) {
-				log.info("skipping %s", serviceType);
+			if (skipTest.contains(serviceType.getName())) {
+				log.info("skipping %s", serviceType.getName());
 				continue;
 			}
 
