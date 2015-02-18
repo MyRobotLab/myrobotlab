@@ -24,6 +24,8 @@ import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
+import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
@@ -215,6 +217,8 @@ public class Agent extends Service {
 		String javaPath = System.getProperty("java.home") + fs + "bin" + fs + javaExe;
 		// JNI
 		String jniLibraryPath = String.format("-Djava.library.path=libraries/native%slibraries/native/%s", ps, platformId);
+		
+		String jnaLibraryPath = "-Djna.library.path=libraries/native";
 
 		// String jvmMemory = "-Xmx2048m -Xms256m";
 		long totalMemory = Runtime.getTotalPhysicalMemory();
@@ -232,6 +236,7 @@ public class Agent extends Service {
 		}
 		
 		outArgs.add(jniLibraryPath);
+		outArgs.add(jnaLibraryPath);
 		outArgs.add("-cp");
 		outArgs.add(classpath);
 
@@ -450,7 +455,10 @@ public class Agent extends Service {
 	public Status serviceTest() {
 		// CLEAN FOR TEST METHOD
 
-		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
+		// FIXME DEPRECATE !!! 
+		// RUNTIME is responsible for running services
+		// REPO is responsible for possible services 
+		//String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 
 		HashSet<String> skipTest = new HashSet<String>();
 		skipTest.add("org.myrobotlab.service.Agent");
@@ -461,16 +469,25 @@ public class Agent extends Service {
 		skipTest.add("org.myrobotlab.service.Test");
 		skipTest.add("org.myrobotlab.service.CLI"); // ?? No ?
 
-		Status status = Status.info("serviceTest will test %d services", serviceTypeNames.length);
+		long installTime = 0;
+		Repo repo = Runtime.getInstance().getRepo();
+		ServiceData serviceData = repo.getServiceData();
+		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
+		
+		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
 		long startTime = System.currentTimeMillis();
 		status.addNamedInfo("startTime", "%d", startTime);
 
-		long installTime = 0;
 		
-		for (int i = 0; i < serviceTypeNames.length; ++i) {
+		
+		for (int i = 0; i < serviceTypes.size(); ++i) {
 
-			String serviceType = serviceTypeNames[i];
+			ServiceType serviceType = serviceTypes.get(i);
 			
+			// TODO - option to disable
+			if (!serviceType.isAvailable()){
+				continue;
+			}
 			//serviceType = "org.myrobotlab.service.OpenCV";
 
 			if (skipTest.contains(serviceType)) {
@@ -486,7 +503,7 @@ public class Agent extends Service {
 				// clean environment
 				// FIXME - optimize clean
 				
-				Repo repo = Runtime.getInstance().getRepo();
+				
 				// SUPER CLEAN - force .repo to clear !!
 				//repo.clearRepo();
 				
@@ -500,13 +517,13 @@ public class Agent extends Service {
 				boolean force = false;
 				long installStartTime = System.currentTimeMillis();
 				repo.install("org.myrobotlab.service.Test", force);
-				repo.install(serviceType, force);
+				repo.install(serviceType.getName(), force);
 				installTime += System.currentTimeMillis() - installStartTime;
 				// clean test.json part file
 
 				// spawn a test - attach to cli - test 1 service end to end
 				// ,"-invoke", "test","test","org.myrobotlab.service.Clock"
-				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-noEnv", "-invoke", "test", "test", serviceType });
+				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-noEnv", "-invoke", "test", "test", serviceType.getName() });
 				
 				process.waitFor();
 
@@ -542,6 +559,13 @@ public class Agent extends Service {
 
 		return status;
 	}
+	
+
+	@Override
+	public String[] getCategories() {
+		return new String[] {"framework"};
+	}
+
 
 	/**
 	 * First method JVM executes when myrobotlab.jar is in jar form.
@@ -565,8 +589,14 @@ public class Agent extends Service {
 
 				String tmp = runtimeArgs.getArgument("-agent", 0);
 				String[] agentPassedArgs = tmp.split(" ");
-				for (int i = 0; i < agentPassedArgs.length; ++i){
-					inArgs.add(agentPassedArgs[i]);
+				if (agentPassedArgs.length > 1){
+					for (int i = 0; i < agentPassedArgs.length; ++i){
+						inArgs.add(agentPassedArgs[i]);
+					}
+				} else {
+					if (tmp != null){
+						inArgs.add(tmp);
+					}
 				}
 				/*
 				 * agentArgs = new String[list.size()]; for (int i = 0; i <
@@ -603,9 +633,4 @@ public class Agent extends Service {
 		}
 	}
 	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"framework"};
-	}
-
 }

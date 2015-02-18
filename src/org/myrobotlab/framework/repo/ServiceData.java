@@ -278,7 +278,7 @@ public class ServiceData implements Serializable {
 		String[] unused = getUnusedDependencies();
 		if (unused.length > 0) {
 			for (int i = 0; i < unused.length; ++i) {
-				log.warn(String.format("repo library %s is unused", unused[i]));
+				//log.warn(String.format("repo library %s is unused", unused[i]));
 			}
 		}
 

@@ -404,7 +404,9 @@
 		</copy>
 		<echo file="${build}/classes/resource/version.txt">${tag}</echo>
 		<!-- copy the latest serviceData.xml into package -->
+		<!-- TODO deprecate the xml -->
 		<copy file="${repo}/serviceData.xml" todir="${build}/classes/resource/framework" />
+		<copy file="${repo}/serviceData.json" todir="${build}/classes/resource/framework" />
 
 		<jar jarfile="${build}/lib/myrobotlab.jar" basedir="${build}/classes">
 			<!-- excludes="org/myrobotlab/boot/" -->
