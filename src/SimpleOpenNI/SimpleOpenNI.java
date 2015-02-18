@@ -125,7 +125,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
 	public static String getLibraryPathMac() {
 		
-		File f = new File("libraries/native/x86.64.mac/");
+		File f = new File("libraries/native/");
 		return f.getAbsolutePath() + "/";
 	}
 
@@ -149,7 +149,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		 * return ""; } else return "";
 		 */
 		// FIXME - get a Platform.instance - to support 32 bit
-		File f = new File("libraries/native/x86.64.windows/");
+		File f = new File("libraries/native/");
 		return f.getAbsolutePath().replace("\\", "/") + "/";
 	}
 
