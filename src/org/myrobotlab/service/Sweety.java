@@ -21,9 +21,6 @@ public class Sweety extends Service {
 	transient public Tracking rightTracker;
 	transient public ProgramAB chatBot;
 	
-	transient public Motor rightMotor;
-	transient public Motor leftMotor;
-	
 	transient Servo leftForearm;
 	transient Servo rightForearm;
 	transient Servo rightShoulder;
@@ -103,8 +100,6 @@ public class Sweety extends Service {
 		peers.put("leftHand", "Servo", "servo");
 		peers.put("leftWrist", "Servo", "servo");
 		
-		peers.put("rightMotor", "Motor", "rightMotor");
-		peers.put("leftMotor", "Motor", "lefttMotor");
 		
 		return peers;
 	}
@@ -318,52 +313,101 @@ public class Sweety extends Service {
 	}
 	
 	
-	public void startMotors(){
+	public void moveMotors(int speed, int direction){
 		/**
-		 * Start the motors services
+		 * drive the motors . Speed > 0 go forward . Speed < 0 go backward . Direction > 0 go right . Direction < 0 go left
 		 */
 		
-		rightMotor = (Motor) startPeer("rightMotor");
-		leftMotor = (Motor) startPeer("leftMotor");
-		/*
-		arduino.motorAttach("rightMotor", rightMotorPwmPin, rightMotorDirPin);
-		arduino.motorAttach("leftMotor", leftMotorPwmPin, leftMotorDirPin);
-			*/
-		rightMotor.setController(arduino);
-		leftMotor.setController(arduino);
-		rightMotor.setMinMax(0.5, 1.0);
-		leftMotor.setMinMax(0.5, 1.0);
-		rightMotor.dirPin = rightMotorDirPin;
-		rightMotor.pwmPin = rightMotorPwmPin;
-		leftMotor.dirPin = leftMotorDirPin;
-		leftMotor.pwmPin = leftMotorPwmPin;
-	
+		int speedMin = 50; // min PWM needed for the motors
+		boolean isMoving = false;
+		int rightCurrentSpeed = 0;
+		int leftCurrentSpeed = 0;
+
 		
-	}
-	
-	public void moveRightMotor(String direction, float speed){
-		if (direction == "forward"){
-			rightMotor.setInverted(false);
+		if (speed < 0){ // Go backward
+			arduino.analogWrite(rightMotorDirPin, 0);
+			arduino.analogWrite(leftMotorDirPin, 0);
+			speed = speed * -1;
 		}
-		else if (direction == "backward") {
-			rightMotor.setInverted(true);
+		else {// Go forward
+			arduino.analogWrite(rightMotorDirPin, 255);
+			arduino.analogWrite(leftMotorDirPin, 255);
 		}
-		rightMotor.move(speed);
-	}
-	
-	public void moveLeftMotor(String direction, float speed){
-		if (direction == "forward"){
-			leftMotor.setInverted(false);
+
+		
+		if (direction > speedMin && speed > speedMin){// move and turn to the right
+			if (isMoving){
+			arduino.analogWrite(rightMotorPwmPin, direction);
+			arduino.analogWrite(leftMotorPwmPin, speed);
+			}
+			else{
+				rightCurrentSpeed = speedMin;
+				leftCurrentSpeed = speedMin;
+				while (rightCurrentSpeed < speed && leftCurrentSpeed < direction){
+					if (rightCurrentSpeed < direction){rightCurrentSpeed++;}
+					if (leftCurrentSpeed < speed){leftCurrentSpeed++;}
+					arduino.analogWrite(rightMotorPwmPin, rightCurrentSpeed);
+					arduino.analogWrite(leftMotorPwmPin, leftCurrentSpeed);
+					sleep(20);
+				}
+				isMoving = true;
+			}
 		}
-		else if (direction == "backward") {
-			leftMotor.setInverted(true);
+		else if (direction < (speedMin * -1) && speed > speedMin){// move and turn to the left
+			direction *= -1;
+			if (isMoving){
+			arduino.analogWrite(leftMotorPwmPin, direction);
+			arduino.analogWrite(rightMotorPwmPin, speed);
+			}
+			else{
+				rightCurrentSpeed = speedMin;
+				leftCurrentSpeed = speedMin;
+				while (rightCurrentSpeed < speed && leftCurrentSpeed < direction){
+					if (rightCurrentSpeed < speed){rightCurrentSpeed++;}
+					if (leftCurrentSpeed < direction){leftCurrentSpeed++;}
+					arduino.analogWrite(rightMotorPwmPin, rightCurrentSpeed);
+					arduino.analogWrite(leftMotorPwmPin, leftCurrentSpeed);
+					sleep(20);
+				}
+				isMoving = true;
+			}
 		}
-		leftMotor.move(speed);
-	}
-	
-	public void stopMotors(){
-		rightMotor.stop();
-		leftMotor.stop();
+		else if (speed > speedMin){ // Go strait
+			if (isMoving){
+			arduino.analogWrite(leftMotorPwmPin, speed);
+			arduino.analogWrite(rightMotorPwmPin, speed);
+			}
+			else{
+				int CurrentSpeed = speedMin;
+				while (CurrentSpeed < speed ){
+					CurrentSpeed++;
+					arduino.analogWrite(rightMotorPwmPin, CurrentSpeed);
+					arduino.analogWrite(leftMotorPwmPin, CurrentSpeed);
+					sleep(20);
+				}
+				isMoving = true;
+			}
+		}
+		else if (speed < speedMin && direction  < speedMin * -1){// turn left
+			arduino.analogWrite(rightMotorDirPin, 255);
+			arduino.analogWrite(leftMotorDirPin, 0);
+			arduino.analogWrite(leftMotorPwmPin, speedMin);
+			arduino.analogWrite(rightMotorPwmPin, speedMin);
+			
+		}
+
+		else if (speed < speedMin && direction > speedMin){// turn right
+			arduino.analogWrite(rightMotorDirPin, 0);
+			arduino.analogWrite(leftMotorDirPin, 255);
+			arduino.analogWrite(leftMotorPwmPin, speedMin);
+			arduino.analogWrite(rightMotorPwmPin, speedMin);
+		}
+		else {// stop
+			arduino.analogWrite(leftMotorPwmPin, 0);
+			arduino.analogWrite(rightMotorPwmPin, 0);
+			isMoving = false;
+		}
+
 	}
 	
 	
