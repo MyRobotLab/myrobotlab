@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 
 public class VirtualSerialPort implements SerialDevice {
 	public String name;
-	public BlockingQueue<Integer> rx = new LinkedBlockingQueue<Integer>();
-	public BlockingQueue<Integer> tx = new LinkedBlockingQueue<Integer>();
+	transient public BlockingQueue<Integer> rx = new LinkedBlockingQueue<Integer>();
+	transient public BlockingQueue<Integer> tx = new LinkedBlockingQueue<Integer>();
 
 	private boolean isOpen = false;
 

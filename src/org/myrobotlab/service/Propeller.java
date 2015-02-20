@@ -241,7 +241,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	private boolean connected = false;
 	private String boardType;
 
-	BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
+	transient BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
 	
 	// remove - for Serial Service
 	StringBuilder debugTX = new StringBuilder();

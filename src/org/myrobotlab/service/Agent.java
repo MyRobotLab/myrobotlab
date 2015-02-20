@@ -461,10 +461,12 @@ public class Agent extends Service {
 		//String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 
 		HashSet<String> skipTest = new HashSet<String>();
-		/*
-		skipTest.add("org.myrobotlab.service.Agent");
+		
 		skipTest.add("org.myrobotlab.service.Runtime");
 		skipTest.add("org.myrobotlab.service.OpenNI");
+		
+		/*
+		skipTest.add("org.myrobotlab.service.Agent");
 		skipTest.add("org.myrobotlab.service.Incubator");
 		skipTest.add("org.myrobotlab.service.InMoov"); // just too big and complicated at the moment
 		skipTest.add("org.myrobotlab.service.Test");

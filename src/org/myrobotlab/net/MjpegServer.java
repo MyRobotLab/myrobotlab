@@ -33,8 +33,8 @@ public class MjpegServer extends NanoHTTPD {
 
 	public final static Logger log = LoggerFactory.getLogger(MjpegServer.class.getCanonicalName());
 
-	public HashMap<String, BlockingQueue<SerializableImage>> videoFeeds = new HashMap<String, BlockingQueue<SerializableImage>>();
-	public HashMap<String, VideoWebClient> clients = new HashMap<String, VideoWebClient>();
+	transient public HashMap<String, BlockingQueue<SerializableImage>> videoFeeds = new HashMap<String, BlockingQueue<SerializableImage>>();
+	transient public HashMap<String, VideoWebClient> clients = new HashMap<String, VideoWebClient>();
 
 	public class Connection {
 		boolean initialized = false;

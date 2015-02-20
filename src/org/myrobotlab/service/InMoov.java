@@ -253,7 +253,7 @@ public class InMoov extends Service {
 			//openni.skeleton.leftShoulder
 
 			//openni.addListener("publishOpenNIData", this.getName(), "getSkeleton");
-			openni.addOpenNIData(this);
+			//openni.addOpenNIData(this);
 		}
 		return openni;
 	}

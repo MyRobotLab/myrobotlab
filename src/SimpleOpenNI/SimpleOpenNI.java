@@ -57,14 +57,15 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			if (sysStr.indexOf("win") >= 0) { // windows
 				if (archStr.indexOf("86") >= 0) { // 32bit
 					libName += "32.dll";
-					nativLibPath = getLibraryPathWin() + "/SimpleOpenNI/library/";
-					nativDepLibPath = nativLibPath + "win32/";
+					nativLibPath = getLibraryPathWin();// + "/SimpleOpenNI/library/"; recent change
+					nativDepLibPath = nativLibPath;// + "win32/"; recent change
 				} else if (archStr.indexOf("64") >= 0) {
 					libName += "64.dll";
 					// nativLibPath = getLibraryPathWin() +
 					// "/SimpleOpenNI/library/";
 					nativLibPath = getLibraryPathWin();
-					nativDepLibPath = nativLibPath + "win64/";
+					// nativDepLibPath = nativLibPath + "win64/"; GroG ... recent change
+					nativDepLibPath = nativLibPath;
 				}
 				// load dependencies
 				System.load(nativDepLibPath + "OpenNI2.dll");
