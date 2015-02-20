@@ -81,7 +81,7 @@ public class Stepper extends Service implements StepperControl {
 
 	private Integer stepperingStyle = SINGLE;
 
-	BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
+	transient BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
 
 	/**
 	 * number of steps for this stepper - common is 200

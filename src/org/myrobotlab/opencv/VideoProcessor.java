@@ -76,7 +76,7 @@ public class VideoProcessor implements Runnable, Serializable {
 	// FIXME - more than 1 type is being used on this in more than one context
 	// BEWARE !!!!
 	// FIXME - use for RECORDING & another one for Blocking for data !!!
-	public BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
+	transient public BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
 
 	/**
 	 * map of video sources - allows filters to process any named source

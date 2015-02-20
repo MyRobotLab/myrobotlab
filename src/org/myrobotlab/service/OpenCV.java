@@ -137,7 +137,7 @@ public class OpenCV extends VideoSource {
 	// will get set on it before a setState
 	
 	
-	public VideoProcessor videoProcessor = new VideoProcessor();;
+	transient public VideoProcessor videoProcessor = new VideoProcessor();
 
 	// mask for each named filter
 	transient public HashMap<String, IplImage> masks = new HashMap<String, IplImage>();
@@ -831,6 +831,11 @@ public class OpenCV extends VideoSource {
 	}
 	
 
+	@Override
+	public String[] getCategories() {
+		return new String[] {"video","sensor"};
+	}
+
 	public static void main(String[] args) throws Exception {
 
 		// TODO - Avoidance / Navigation Service
@@ -843,8 +848,16 @@ public class OpenCV extends VideoSource {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		OpenCV opencv = (OpenCV) Runtime.createAndStart("opencv", "OpenCV");
-		opencv.test();
+		Runtime.start("gui", "GUIService");
+		
+		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+		//opencv.test();
+		
+		opencv.setFrameGrabberType("org.myrobotlab.opencv.ImageFileFrameGrabber");
+		opencv.setInputSource(INPUT_SOURCE_IMAGE_FILE);
+		opencv.setInputFileName("600.3.jpg");
+		opencv.capture();
+		 
 		//Runtime.createAndStart("gui", "GUIService");
 		//opencv.test();
 		/*
@@ -856,15 +869,5 @@ public class OpenCV extends VideoSource {
 		boolean leaveNow = true;
 		if (leaveNow) return;
 		*/
-	
-
 	}
-	
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"video","sensor"};
-	}
-
-
 }

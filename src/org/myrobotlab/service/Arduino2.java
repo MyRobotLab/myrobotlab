@@ -208,7 +208,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	private boolean connected = false;
 	private String boardType;
 
-	BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
+	transient BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
 
 	StringBuilder debugTX = new StringBuilder();
 	StringBuilder debugRX = new StringBuilder();

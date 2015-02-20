@@ -321,7 +321,7 @@ public class Motor extends Service implements MotorControl {
 
 		Motor m1 = (Motor)Runtime.createAndStart("m1","Motor");
 		//arduino.motorAttach("m1", 8, 7, 54);
-		arduino.motorAttach("m1", 8, 7);
+		arduino.motorAttach("m1", 7, 6);
 		arduino.setSampleRate(8000);
 		m1.setSpeed(0.95);
 		m1.moveTo(600);
