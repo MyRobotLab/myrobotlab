@@ -1,6 +1,8 @@
 package org.myrobotlab.serial.jssc;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.EventListener;
 import java.util.TooManyListenersException;
 
@@ -251,5 +253,16 @@ public class SerialDeviceJSSC implements SerialDevice, SerialPortEventListener {
 	public int read(byte[] data) throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public OutputStream getOutputStream() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InputStream getInputStream() {
+		return null;
 	}
 }

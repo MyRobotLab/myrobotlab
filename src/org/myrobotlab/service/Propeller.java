@@ -951,7 +951,8 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	public boolean connect(String name, int rate, int databits, int stopbits, int parity) {
 		if (name == null || name.length() == 0) {
 			log.info("got emtpy connect name - disconnecting");
-			return disconnect();
+			disconnect();
+			return false;
 		}
 
 		if (isConnected()) {
@@ -1090,10 +1091,11 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	}
 
 	@Override
-	public boolean disconnect() {
+	public void disconnect() {
 		connected = false;
 		if (serialDevice == null) {
-			return false;
+			broadcastState();
+			return;
 		}
 
 		serialDevice.close();
@@ -1101,7 +1103,6 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 
 		info("disconnected");
 		broadcastState();
-		return true;
 	}
 
 	public String getPortName() {
@@ -1242,7 +1243,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	}
 
 	@Override
-	public void setSpeed(Integer speed) {
+	public void setStepperSpeed(Integer speed) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1253,11 +1254,6 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 		return false;
 	}
 
-	@Override
-	public Object[] getStepperData(String stepperName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	/**
 	 * connect to serial port with default parameters 57600 rate, 8 data bits, 1
@@ -1675,6 +1671,20 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	@Override
 	public String[] getCategories() {
 		return new String[] {"microcontroller"};
+	}
+
+
+	@Override
+	public boolean motorAttach(String motorName, String type, Integer pwrPin, Integer dirPin) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean motorAttach(String motorName, String type, Integer pwrPin, Integer dirPin, Integer encoderPin) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 

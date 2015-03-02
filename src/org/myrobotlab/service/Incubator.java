@@ -453,7 +453,7 @@ public class Incubator extends Service {
 
 		xmpp.addAuditor("Greg Perry");
 		// python.startService();
-		xmpp.sendMessage(Encoder.gson.toJson(status), "Greg Perry");
+		xmpp.sendMessage(Encoder.toJson(status), "Greg Perry");
 		// xmpp.releaseService();
 		// TODO email
 	}

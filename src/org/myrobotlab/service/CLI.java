@@ -181,7 +181,7 @@ public class CLI extends Service {
 									// FIXME - make getInstance configurable
 									// Encoder
 									// reference !!!
-									out(Encoder.gson.toJson(ret).getBytes());
+									out(Encoder.toJson(ret).getBytes());
 								}
 							}
 						} catch (Exception e) {
@@ -227,14 +227,14 @@ public class CLI extends Service {
 
 		if (path.equals("/")) {
 			// FIXME don't do this here !!!
-			out(Encoder.gson.toJson(Runtime.getServiceNames()).toString().getBytes());
+			out(Encoder.toJson(Runtime.getServiceNames()).toString().getBytes());
 		} else if (parts.length == 2 && !path.endsWith("/")) {
 			// FIXME don't do this here !!!
-			out(Encoder.gson.toJson(Runtime.getService(parts[1])).toString().getBytes());
+			out(Encoder.toJson(Runtime.getService(parts[1])).toString().getBytes());
 		} else if (parts.length == 2 && path.endsWith("/")) {
 			ServiceInterface si = Runtime.getService(parts[1]);
 			// FIXME don't do this here !!!
-			out(Encoder.gson.toJson(si.getDeclaredMethodNames()).toString().getBytes());
+			out(Encoder.toJson(si.getDeclaredMethodNames()).toString().getBytes());
 		}
 
 		// if path == /serviceName - json return ? Cool !

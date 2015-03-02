@@ -94,7 +94,7 @@ public class GPS extends Service {
         for (int i = 0; i < command.length; i++) {
             try {
                 serial.write(command[i]);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Logging.logException(e);
             }
 

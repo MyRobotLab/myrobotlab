@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.myrobotlab.codec.CodecException;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -135,12 +136,12 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 		joystick.addRYListener(getName(), "onRY");
 	}
 
-	public void onY(Float y) throws IOException {
+	public void onY(Float y) throws Exception {
 		rightMotorPower = y * -1;
 		go(rightMotorPower, leftMotorPower);
 	}
 
-	public void onRY(Float ry) throws IOException {
+	public void onRY(Float ry) throws Exception {
 		leftMotorPower = ry * -1;
 		go(rightMotorPower, leftMotorPower);
 	}
@@ -150,7 +151,7 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 		remote.startListening();
 	}
 
-	public boolean connect(String port) throws IOException {
+	public boolean connect(String port) throws Exception {
 		boolean ret = serial.connect(port, 115200, 8, 1, 0);
 		if (ret) {
 			stop();
@@ -158,68 +159,68 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 		return ret;
 	}
 
-	public void stop() throws IOException {
+	public void stop() throws Exception {
 		go(0.0f, 0.0f);
 	}
 
 	// read commands begin ---
-	public String getHwVersion() throws InterruptedException, IOException {
+	public String getHwVersion() throws Exception {
 		serial.write("HWVER\r");
 		String ret = serial.readString(5, timeout);
 		return ret;
 	}
 
-	public String getVersion() throws InterruptedException, IOException {
+	public String getVersion() throws Exception {
 		serial.write("VER\r");
 		String ret = serial.readString(5, timeout);
 		return ret;
 	}
 
-	public String getPingValues() throws InterruptedException, IOException {
+	public String getPingValues() throws Exception {
 		// depends
 		serial.write("PING\r");
 		String ret = serial.readString(5, timeout);
 		return ret;
 	}
 
-	public String getAnalogValues() throws InterruptedException, IOException {
+	public String getAnalogValues() throws Exception {
 		// serial.clear();
 		serial.write("ADC\r");
 		String ret = serial.readString(32, timeout);
 		return ret;
 	}
 
-	public String getGPIOInputs() throws InterruptedException, IOException {
+	public String getGPIOInputs() throws Exception {
 		serial.write("INS\r");
 		String ret = serial.readString(9, timeout);
 		return ret;
 	}
 
-	public String getGPIOOutputs() throws InterruptedException, IOException {
+	public String getGPIOOutputs() throws Exception {
 		serial.write("OUTS\r");
 		String ret = serial.readString(9, timeout);
 		return ret;
 	}
 
-	public String getGPIOLowValues() throws InterruptedException, IOException {
+	public String getGPIOLowValues() throws Exception {
 		serial.write("LOWS\r");
 		String ret = serial.readString(9, timeout);
 		return ret;
 	}
 
-	public String getGPIOHighValues() throws InterruptedException, IOException {
+	public String getGPIOHighValues() throws Exception {
 		serial.write("HIGHS\r");
 		String ret = serial.readString(9, timeout);
 		return ret;
 	}
 
-	public String read() throws InterruptedException, IOException {
+	public String read() throws Exception {
 		return sendCommand("READ");
 	}
 
 	// read commands end ---
 
-	public void onKey(String cmd) throws IOException {
+	public void onKey(String cmd) throws Exception {
 		if (cmd.equals("NumPad-7")) {
 			leftMotorPower += 0.01;
 			if (leftMotorPower > 1.0) {
@@ -317,7 +318,7 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 
 	}
 
-	public String sendCmd(String cmd, int expectedResponseLength) throws IOException, InterruptedException {
+	public String sendCmd(String cmd, int expectedResponseLength) throws Exception {
 		log.info(String.format("sendCommand %s", cmd));
 		String ret = null;
 
@@ -336,7 +337,7 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public String sendCommand(String cmd) throws InterruptedException, IOException {
+	public String sendCommand(String cmd) throws Exception {
 		log.info(String.format("sendCommand %s", cmd));
 		String ret = null;
 
@@ -348,7 +349,7 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 		return ret;
 	}
 
-	public void go(float left, float right) throws IOException {
+	public void go(float left, float right) throws Exception {
 		log.info(String.format("go %f %f", left, right));
 		int l = mapper.calcInt(left);
 		if (l > 127) {
@@ -492,28 +493,28 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 			Logging.logException(e);
 		}
 	}
-	
-	public void sayBatterLevel(Float buttonValue){
+
+	public void sayBatterLevel(Float buttonValue) {
 		Float bl = getBatteryLevel();
 		mouth.speak(String.format("current battery level is %d", bl.intValue()));
 	}
-	
-	public Float getBatteryLevel(){
+
+	public Float getBatteryLevel() {
 		startSensors();
 		sleep(1000);
 		stopSensors();
 		return lastSensorValues.get("BATTERY");
 	}
-	
+
 	@Override
 	public void onButton(Button button) throws Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public String[] getCategories() {
-		return new String[] {"microcontroller"};
+		return new String[] { "microcontroller" };
 	}
 
 }

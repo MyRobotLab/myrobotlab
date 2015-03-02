@@ -701,7 +701,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				return false;
 			}
 			info("serializing %s", getName());
-			String s = Encoder.gson.toJson(this);
+			String s = Encoder.toJson(this);
 			FileOutputStream out = new FileOutputStream(cfg);
 			out.write(s.getBytes());
 			out.close();
@@ -722,7 +722,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 		try {
 			File cfg = new File(String.format("%s%s%s", cfgDir, File.separator, cfgFileName));
-			String s = Encoder.gson.toJson(o);
+			String s = Encoder.toJson(o);
 			FileOutputStream out = new FileOutputStream(cfg);
 			out.write(s.getBytes());
 			out.close();
@@ -780,7 +780,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			if (cfg.exists()) {
 				// serializer.read(o, cfg);
 				String json = FileIO.fileToString(filename);
-				o = Encoder.gson.fromJson(json, o.getClass());
+				o = Encoder.fromJson(json, o.getClass());
 
 				return true;
 			}

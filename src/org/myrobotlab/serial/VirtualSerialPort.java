@@ -1,6 +1,8 @@
 package org.myrobotlab.serial;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.TooManyListenersException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -32,6 +34,43 @@ public class VirtualSerialPort implements SerialDevice {
 	static public final Integer SHUTDOWN = -1;
 
 	private VirtualSerialPort nullModem = null;
+	
+	/**
+	 * Because InputStream is an abstract class and not an interface
+	 * I had to make these silly classes
+	 * 
+	 * @author GroG
+	 *
+	 */
+	public static class VirtualInputStream extends InputStream{
+
+		VirtualSerialPort parent;
+		
+		public VirtualInputStream(VirtualSerialPort parent){
+			this.parent = parent;
+		}
+		
+		@Override
+		public int read() throws IOException {
+			return parent.read();
+		}
+		
+	}
+	
+	public static class VirtualOutputStream extends OutputStream{
+
+		VirtualSerialPort parent;
+		
+		public VirtualOutputStream(VirtualSerialPort parent){
+			this.parent = parent;
+		}
+		
+		@Override
+		public void write(int data) throws IOException {
+			parent.write(data);
+		}
+
+	}
 
 	/**
 	 * at some point this thread will be caught in the listener's while loop
@@ -274,6 +313,16 @@ public class VirtualSerialPort implements SerialDevice {
 	 */
 	public static VirtualNullModemCable createNullModemCable(String port0, String port1) {
 		return new VirtualNullModemCable(port0, port1);
+	}
+
+	@Override
+	public OutputStream getOutputStream() {
+		return new VirtualOutputStream(this);
+	}
+
+	@Override
+	public InputStream getInputStream() {
+		return new VirtualInputStream(this);
 	}
 
 }

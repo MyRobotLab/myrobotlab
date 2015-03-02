@@ -1064,7 +1064,7 @@ public class InMoov extends Service {
 			Arduino arduino = arduinos.get(port);
 			arduino.connect(port);
 			arduino.setSampleRate(8000);
-			arduino.digitalReadPollStart(pin);
+			arduino.digitalReadPollingStart(pin);
 			pirPin = pin;
 			arduino.addListener("publishPin", this.getName(), "publishPin");
 

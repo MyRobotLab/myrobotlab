@@ -500,7 +500,7 @@ public class Agent extends Service {
 			try {
 
 				// agent.serviceTest(); // WTF?
-				status.addInfo("perparing clean environment for %s", serviceType);
+				//status.addInfo("perparing clean environment for %s", serviceType);
 
 				// clean environment
 				// FIXME - optimize clean
@@ -531,12 +531,17 @@ public class Agent extends Service {
 
 				// destroy - start again next service
 				// wait for partFile report .. test.json
-				// NOT NEEDED - foriegn process has ended
+				// NOT NEEDED - foreign process has ended
 				byte[] data = FileIO.loadPartFile("test.json", 60000);
 				if (data != null) {
 					String test = new String(data);
-					Status testResult = Encoder.gson.fromJson(test, Status.class);
-					status.add(testResult);
+					Status testResult = Encoder.fromJson(test, Status.class);
+					if (testResult.hasError()){
+						status.add(testResult);
+					}
+				} else {
+					Status noInfo = new Status("could not get results");
+					status.add(noInfo);
 				}
 				// destroy env
 				terminate("testEnv");
@@ -554,7 +559,7 @@ public class Agent extends Service {
 		status.addNamedInfo("endTime", "%d", System.currentTimeMillis());
 
 		try {
-			FileIO.savePartFile("fullTest.json", Encoder.gson.toJson(status).getBytes());
+			FileIO.savePartFile("fullTest.json", Encoder.toJson(status).getBytes());
 		} catch (Exception e) {
 			Logging.logException(e);
 		}

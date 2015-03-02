@@ -27,13 +27,10 @@ package org.myrobotlab.service.data;
 
 import java.io.Serializable;
 
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
-
 
 public class Pin implements Serializable {
 	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(Pin.class);
+
 	public static final int DIGITAL_VALUE = 1; // normalized with data coming
 												// from
 												// Arduino.DIGITAL_READ_POLLING_START
@@ -42,9 +39,15 @@ public class Pin implements Serializable {
 												// from
 												// Adruino.ANALOG_READ_POLLING_START
 
+	// pin attributes
+	public static final int TYPE_DIGITAL_MASK = 1;
+	public static final int TYPE_PWM_MASK = 2;
+	public static final int TYPE_ANALOG_MASK = 4;
+	
 	public int pin;
 	public int type;
 	public int value;
+	public int pinType = 1;
 	public String source;
 
 	public Pin() {
@@ -55,6 +58,10 @@ public class Pin implements Serializable {
 		this.type = type;
 		this.value = value;
 		this.source = source;
+	}
+	
+	public void setAsDigital(){
+		pinType = pinType | TYPE_DIGITAL_MASK;
 	}
 
 	public String toString() {

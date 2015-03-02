@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.myrobotlab.codec.CodecException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -72,15 +73,10 @@ public class LIDAR extends Service {
         }
     }
 
-    public void write(byte[] command) {
+    public void write(byte[] command) throws IOException, CodecException {
         // iterate through the byte array sending each one to the serial port.
         for (int i = 0; i < command.length; i++) {
-            try {
                 serial.write(command[i]);
-            } catch (IOException e) {
-                Logging.logException(e);
-            }
-
         }
     }
 
@@ -201,7 +197,7 @@ public class LIDAR extends Service {
         return serial.isConnected();
     }
 
-    public void setBaud(int baudRate) throws IOException {
+    public void setBaud(int baudRate) throws Exception {
 
         state = STATE_SINGLE_SCAN;
 
@@ -243,14 +239,14 @@ public class LIDAR extends Service {
         model = m;
     }
 
-    public void singleScan() throws IOException {
+    public void singleScan() throws IOException, CodecException {
         state = STATE_SINGLE_SCAN;
         serial.write(new byte[]{0x02, 0x00, 0x02, 0x00, 0x30, 0x01, 0x31, 0x18});
         index = 0;
         buffer.reset();
     }// end singleScan
 
-    public void setScanMode(int spread, float angularResolution) throws IOException {
+    public void setScanMode(int spread, float angularResolution) throws IOException, CodecException {
         state = STATE_MODE_CHANGE;
         buffer.reset();
         index = 0;

@@ -33,9 +33,9 @@ public class Status implements Serializable {// extends Exception {
 	public String key;
 	public String detail;
 
-	private ArrayList<Status> statuses = new ArrayList<Status>();
+	private ArrayList<Status> statuses = null;
 
-	//private String allowLevel = null; pre filtering attempt .. aborted
+	// private String allowLevel = null; pre filtering attempt .. aborted
 
 	public Status(String name, String level, String key, String detail) {
 		this.name = name;
@@ -55,8 +55,9 @@ public class Status implements Serializable {// extends Exception {
 	}
 
 	/**
-	 * for minimal amount of information 
-	 * error is assumed, and info is detail of an ERROR
+	 * for minimal amount of information error is assumed, and info is detail of
+	 * an ERROR
+	 * 
 	 * @param detail
 	 */
 	public Status(String detail) {
@@ -79,10 +80,8 @@ public class Status implements Serializable {// extends Exception {
 	}
 
 	/*
-	public void allowDebug(String b) {
-		allowLevel = b;
-	}
-	*/
+	 * public void allowDebug(String b) { allowLevel = b; }
+	 */
 
 	public boolean isDebug() {
 		return DEBUG.equals(level);
@@ -149,7 +148,7 @@ public class Status implements Serializable {// extends Exception {
 		add(status);
 		return status;
 	}
-	
+
 	public Status addNamedInfo(String name, String format, Object... args) {
 		Status status = info(format, args);
 		log.info(String.format(format, args));
@@ -193,11 +192,11 @@ public class Status implements Serializable {// extends Exception {
 		// if my children have an error
 		// return the sum of that error
 		boolean b = false;
-		
-		if (statuses == null){
+
+		if (statuses == null) {
 			return b;
 		}
-		
+
 		for (int i = 0; i < statuses.size(); ++i) {
 			b |= statuses.get(i).hasError();
 		}
@@ -224,10 +223,10 @@ public class Status implements Serializable {// extends Exception {
 
 		sb.append(" ");
 
-		if (statuses != null){
-		for (int i = 0; i < statuses.size(); ++i) {
-			sb.append(statuses.get(i).toString());
-		}
+		if (statuses != null) {
+			for (int i = 0; i < statuses.size(); ++i) {
+				sb.append(statuses.get(i).toString());
+			}
 		}
 
 		return sb.toString();
@@ -236,21 +235,21 @@ public class Status implements Serializable {// extends Exception {
 	public ArrayList<Status> flatten() {
 		ArrayList<Status> ret = new ArrayList<Status>();
 
-		if (statuses != null){
-		for (int i = 0; i < statuses.size(); ++i) {
-			Status status = statuses.get(i);
-			ArrayList<Status> s = status.flatten();
-			for (int j = 0; j < s.size(); ++j) {
-				ret.add(s.get(j));
+		if (statuses != null) {
+			for (int i = 0; i < statuses.size(); ++i) {
+				Status status = statuses.get(i);
+				ArrayList<Status> s = status.flatten();
+				for (int j = 0; j < s.size(); ++j) {
+					ret.add(s.get(j));
+				}
 			}
-		}
 		}
 		return ret;
 	}
 
 	public void add(Status status) {
 		if (status != null) {
-			if (statuses == null){
+			if (statuses == null) {
 				statuses = new ArrayList<Status>();
 			}
 			statuses.add(status);
@@ -266,8 +265,8 @@ public class Status implements Serializable {// extends Exception {
 
 		test.add(subTest);
 
-		String json = Encoder.gson.toJson(test);
-		Status z = Encoder.gson.fromJson(json, Status.class);
+		String json = Encoder.toJson(test);
+		Status z = Encoder.fromJson(json, Status.class);
 		log.info(json);
 	}
 

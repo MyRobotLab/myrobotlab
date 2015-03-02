@@ -325,7 +325,7 @@ public class ServiceData implements Serializable {
 				log.warn("can not load serviceData - data is null");
 			}
 			log.info("loading serviceData");
-			ServiceData sd = Encoder.gson.fromJson(data, ServiceData.class);
+			ServiceData sd = Encoder.fromJson(data, ServiceData.class);
 			sd.isValid();
 
 			return sd;
@@ -453,7 +453,7 @@ public class ServiceData implements Serializable {
 			// Serializer serializer = new Persister();
 
 			FileOutputStream fos = new FileOutputStream(filename);
-			String json = Encoder.gson.toJson(this);
+			String json = Encoder.toJson(this);
 			fos.write(json.getBytes());
 			fos.close();
 
@@ -622,12 +622,12 @@ public class ServiceData implements Serializable {
 			String json = FileIO.fileToString(new File("serviceData.generated.json"));
 			ServiceData sd = ServiceData.load(json);
 			FileOutputStream fos = new FileOutputStream(new File("serviceData.compare.json"));
-			fos.write(Encoder.gson.toJson(sd).getBytes());
+			fos.write(Encoder.toJson(sd).getBytes());
 			fos.close();
 
 			/*
 			 * ServiceData sd = generate("../repo"); json =
-			 * Encoder.gson.toJson(sd); FileOutputStream fos = new
+			 * Encoder.toJson(sd); FileOutputStream fos = new
 			 * FileOutputStream(new File("serviceData.generated.json"));
 			 * fos.write(json.getBytes()); fos.close();
 			 */

@@ -70,7 +70,7 @@ public interface StepperController {
 	 */
 	public void stepperStep(String name, Integer steps, Integer style);
 	
-	public void setSpeed(Integer speed);
+	public void setStepperSpeed(Integer speed);
 	
 	
 	/**
@@ -90,7 +90,7 @@ public interface StepperController {
 	 * @param stepperName
 	 * @return
 	 */
-	public Object[] getStepperData(String stepperName);
+	//public Object[] getStepperData(String stepperName);
 
 	public void stepperReset(String stepper);
 

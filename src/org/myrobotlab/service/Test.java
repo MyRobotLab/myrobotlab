@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -15,6 +16,8 @@ import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
+import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -64,7 +67,7 @@ public class Test extends Service {
 			out.close();
 
 			// json encoding
-			Encoder.gson.toJson(s);
+			Encoder.toJson(s);
 			
 			// TODO JAXB xml - since it comes with java 7
 
@@ -244,7 +247,7 @@ public class Test extends Service {
 		
 		String[] t = Runtime.getThreadNames().toArray(new String[Runtime.getThreadNames().size()]);
 		Arrays.sort(t);
-		log.warn(Encoder.gson.toJson(t));
+		log.warn(Encoder.toJson(t));
 		/*
 		for (int i = 0; i < t.length; ++i){
 			log.warn(t[i]);
@@ -291,7 +294,7 @@ public class Test extends Service {
 			}
 
 			// add error route - for call backs
-			subscribe(s.getName(), "publishError", "handleError", String.class);
+			subscribe("publishError", s.getName(),  "handleError", String.class);
 
 			try {
 				s.startService();
@@ -353,7 +356,7 @@ public class Test extends Service {
 			// check against current state for
 			// NOT NEEDED Regular save file - since Agent is process.waitFor
 			// FIXME - append states to file
-			FileIO.savePartFile("test.json", Encoder.gson.toJson(status).getBytes());
+			FileIO.savePartFile("test.json", Encoder.toJson(status).getBytes());
 			//Runtime.releaseAll();
 			// TODO - should be all clean - if not someone left threads open -
 			// report them
@@ -362,6 +365,32 @@ public class Test extends Service {
 			Logging.logException(e);
 		}
 		System.exit(0);
+	}
+	
+	public Status verifyServicePageScripts(){
+		Repo repo = Runtime.getInstance().getRepo();
+		ServiceData serviceData = repo.getServiceData();
+		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
+		
+		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
+		long startTime = System.currentTimeMillis();
+		status.addNamedInfo("startTime", "%d", startTime);
+		
+		for (int i = 0; i < serviceTypes.size(); ++i) {
+			ServiceType serviceType = serviceTypes.get(i);
+			Status retStatus = verifyServicePageScript(serviceType.getName());
+			if (retStatus.hasError()){
+				status.add(retStatus);
+			}
+		}
+		
+		return  status;
+	}
+	
+	
+	public Status verifyServicePageScript(String serviceType){
+		Status status = new Status("starting");
+		return status;
 	}
 
 	public Status test() {
@@ -372,6 +401,11 @@ public class Test extends Service {
 		// big hammer
 		System.exit(0);
 		return status;
+	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] {"testing", "framework"};
 	}
 
 	// save / load test !
@@ -384,7 +418,7 @@ public class Test extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
 
-			String serviceType = "Arduino";
+			String serviceType = "InMoovHand";
 			Repo repo = new Repo();
 			//repo.clearRepo();
 			// dirty clean :)
@@ -400,9 +434,5 @@ public class Test extends Service {
 
 	}
 	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"testing", "framework"};
-	}
 
 }

@@ -628,7 +628,6 @@ public class Servo extends Service implements ServoControl {
 				VirtualSerialPort.createNullModemCable(port, "UART");
 				uart = (Serial) Runtime.start("uart", "Serial");
 				uart.connect("UART");
-				uart.setBinaryFileFormat(false);
 				// uart.record("test/Servo/servo.test.1");
 				uart.recordRX("test/Servo/servo.test.1.rx.dec");
 			}

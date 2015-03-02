@@ -126,7 +126,7 @@ public class Houston extends Service {
 		arduino.pinMode(lfaencoder, Arduino.OUTPUT);
 
 		// begin tracing the digital pin 13
-		arduino.digitalReadPollStart(lfaencoder);
+		arduino.digitalReadPollingStart(lfaencoder);
 
 		// turn off the trace
 		// arduino.digitalReadPollStop(lfaencoder)

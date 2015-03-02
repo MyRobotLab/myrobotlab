@@ -2078,6 +2078,9 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		Logging logging = LoggingFactory.getInstance();
 
 		try {
+			
+			logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
+			log.info(cmdline.toString());
 
 			if (cmdline.containsKey("-h") || cmdline.containsKey("--help")) {
 				mainHelp();
@@ -2117,9 +2120,6 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 				Runtime.getInstance();
 				startCLI();
 			}
-
-			logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
-			log.info(cmdline.toString());
 
 			// LINUX LD_LIBRARY_PATH MUST BE EXPORTED - NO OTHER SOLUTION FOUND
 			// hack to reconcile the different ways os handle and expect

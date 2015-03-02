@@ -48,7 +48,7 @@ public class Encoder {
 	public final static String TYPE_REST = "rest";
 
 	// disableHtmlEscaping to prevent encoding or "=" -
-	public transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 	public final static String API_REST_PREFIX = "api";
 
 	public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<Class<?>>(Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class,
@@ -70,7 +70,19 @@ public class Encoder {
 	final static HashMap<String, ArrayList<Method>> methodOrdinal = new HashMap<String, ArrayList<Method>>();
 
 	final static HashSet<String> objectsCached = new HashSet<String>();
+	
+	public final static String toJson(Object o){
+		return gson.toJson(o);
+	}
+	
+	public final static String toJson(Object o, Class<?> clazz){
+		return gson.toJson(o, clazz);
+	}
 
+	public final static <T extends Object> T fromJson(String json, Class<T> clazz){
+		return gson.fromJson(json, clazz);
+	}
+	
 	public static boolean isWrapper(Class<?> clazz) {
 		return WRAPPER_TYPES.contains(clazz);
 	}
@@ -356,10 +368,57 @@ public class Encoder {
 		fos.close();
 	}
 
-	public static String getServiceType(String inType) {
+	static public String getServiceType(String inType) {
 		if (inType == null){ return null; }
 		if (inType.contains(".")){ return inType;}
 		return String.format("org.myrobotlab.service.%s", inType);
 	}
+	
+	// === method signatures begin ===
+	
+	static public String toCamelCase(String s){
+		   String[] parts = s.split("_");
+		   String camelCaseString = "";
+		   for (String part : parts){
+		      camelCaseString = camelCaseString + toCCase(part);
+		   }
+		   return String.format("%s%s", camelCaseString.substring(0, 1).toLowerCase(), camelCaseString.substring(1));
+		}
 
+	static public String toCCase(String s) {
+		    return s.substring(0, 1).toUpperCase() +
+		               s.substring(1).toLowerCase();
+		}
+	
+	static public String toUnderScore(String camelCase){
+		return toUnderScore(camelCase, false);
+	}
+	static public String toUnderScore(String camelCase, Boolean toLowerCase){
+
+		byte[] a = camelCase.getBytes();
+		boolean lastLetterLower = false;
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < a.length; ++i) {
+			boolean currentCaseUpper = Character.isUpperCase(a[i]);
+
+			Character newChar = null;
+			if (toLowerCase != null){
+				if (toLowerCase){
+					newChar = (char) Character.toLowerCase(a[i]);
+				} else {
+					newChar = (char) Character.toUpperCase(a[i]);
+				}
+			} else {
+				newChar = (char)a[i];
+			}
+					
+			sb.append(String.format("%s%c", (lastLetterLower && currentCaseUpper) ? "_" : "", newChar));
+			lastLetterLower = !currentCaseUpper;
+		}
+		
+		return sb.toString();
+
+	}
+
+	// === method signatures end ===
 }
