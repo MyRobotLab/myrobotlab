@@ -15,6 +15,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.myrobotlab.codec.CodecException;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FileIO.FileComparisonException;
 import org.myrobotlab.framework.Message;
@@ -127,9 +128,13 @@ public class SerialTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 * @throws FileComparisonException
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 * @throws ClassNotFoundException 
+	 * @throws CodecException 
 	 */
 	@Test
-	public final void testTest() throws IOException, InterruptedException, FileComparisonException {
+	public final void testTest() throws Exception {
 		// non destructive tests
 		// TODO - test blocking / non blocking / time-out blocking / reading an
 		// array (or don't bother?) or do with length? num bytes to block or
@@ -147,7 +152,7 @@ public class SerialTest {
 		// FIXME - // test case write(-1) as display becomes -1 ! - file is
 		// different than gui !?!?!
 
-		boolean noWorky = true;
+		boolean noWorky = false;
 		if (noWorky)
 			return;
 
@@ -271,8 +276,8 @@ public class SerialTest {
 
 		// FIXME - finish up test & compare tx & rx files in multiple formats
 		// ======= decimal format begin ===========
-		serial.setBinaryFileFormat(false);
-		uart.setBinaryFileFormat(false);
+		//serial.setBinaryFileFormat(false);
+		//uart.setBinaryFileFormat(false);
 
 		// default non-binary format is ascii decimal
 		serial.record("test/Serial/serial.2");
@@ -288,7 +293,7 @@ public class SerialTest {
 		// ======= decimal format end ===========
 
 		// ======= hex format begin ===========
-		serial.setDisplayFormat(Serial.DISPLAY_HEX);
+		serial.setFormat("hex");
 		serial.record("test/Serial/serial.3");
 		// uart.record("test/Serial/uart.3");
 		serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
@@ -350,7 +355,7 @@ public class SerialTest {
 
 	/**
 	 * Test method for
-	 * {@link org.myrobotlab.service.Serial#bytesToLong(int[], int, int)}.
+	 * {@link org.myrobotlab.service.Serial#bytesToInt(int[], int, int)}.
 	 */
 	@Test
 	public final void testBytesToLong() {
