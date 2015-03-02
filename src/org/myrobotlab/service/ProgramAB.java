@@ -152,6 +152,13 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		String aimlIFPath = path + File.separator + "bots"+ File.separator + botName + File.separator + "aimlif";
 		log.info("AIML FILES:");
 		File folder = new File(aimlPath);
+		if (!folder.exists()) {
+			// TODO: what if the folder doesn't exist probably nothing to clean
+			// TODO: should we create the folder if we can?
+			// folder.mkdirs();
+			return;
+		}
+		
 		System.out.println(folder.getAbsolutePath());
 		HashMap<String, Long> modifiedDates = new HashMap<String, Long>();
 		for (File f : folder.listFiles()) {
