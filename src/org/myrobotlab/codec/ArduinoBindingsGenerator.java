@@ -122,8 +122,8 @@ public class ArduinoBindingsGenerator {
 
 		
 		// file template filtering
-		String ArduinoMsgCodec =  FileIO.fileToString("ArduinoMsgCodec.txt");
-		String MRLComm = FileIO.fileToString("MRLComm.txt");
+		String ArduinoMsgCodec =  FileIO.fileToString("/resource/Arduino2/ArduinoMsgCodec.txt");
+		String MRLComm = FileIO.fileToString("/resource/Arduino2/MRLComm.txt");
 		
 		for (String key : snr.keySet()){
 			ArduinoMsgCodec = ArduinoMsgCodec.replaceAll(key, snr.get(key));
