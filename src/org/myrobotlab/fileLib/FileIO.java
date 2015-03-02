@@ -454,16 +454,6 @@ public class FileIO {
 		return false;
 	}
 
-	// FIXME - implement
-	static public byte[] getResource(String resoucePath) {
-		String path = String.format("resource/%s", resoucePath);
-		if (isJar()) {
-
-		} else {
-
-		}
-		return null;
-	}
 
 	public static class FileComparisonException extends Exception {
 		private static final long serialVersionUID = 1L;
