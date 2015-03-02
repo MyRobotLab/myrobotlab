@@ -271,7 +271,7 @@ public class Repo implements Serializable {
 
 		info("parsing");
 
-		GitHubRelease[] releases = Encoder.gson.fromJson(s, GitHubRelease[].class);
+		GitHubRelease[] releases = Encoder.fromJson(s, GitHubRelease[].class);
 		if (releases == null) {
 			error("Are you connected to intertoobs?");
 			throw new IOException("Are you connected to intertoobs?");

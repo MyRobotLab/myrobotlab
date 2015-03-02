@@ -235,7 +235,8 @@ public class WebGUI extends Service implements AuthorizationProvider {
 	 */
 	public void sendToAll(Message msg) {
 		++messages;
-		String json = Encoder.gson.toJson(msg, Message.class); //toJson(msg);
+		//String json = Encoder.toJson(msg, Message.class); //toJson(msg); RECENTLY CHANGED
+		String json = Encoder.toJson(msg);
 		log.debug(String.format("webgui ---to---> all clients [%s]", json));
 		if (messages % 500 == 0) {
 			info(String.format("sent %d messages to %d clients", messages, wss.connections().size())); // TODO

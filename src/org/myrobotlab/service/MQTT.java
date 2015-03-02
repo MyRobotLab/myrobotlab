@@ -55,7 +55,7 @@ public class MQTT extends Service implements MqttCallback {
 	Throwable 			ex = null;
 	Object 				waiter = new Object();
 	boolean 			donext = false;
-	private MqttConnectOptions 	conOpt;
+	transient MqttConnectOptions 	conOpt;
 	String[] tokens;
 	
 	public final static Logger log = LoggerFactory.getLogger(MQTT.class);

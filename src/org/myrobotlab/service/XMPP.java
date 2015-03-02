@@ -383,7 +383,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		// (non-explicit) and pre-pended
 
 		if (o != null) {
-			broadcast(Encoder.gson.toJson(o, o.getClass()));
+			broadcast(Encoder.toJson(o, o.getClass()));
 			// broadcast(o.toString());
 		} else {
 			broadcast(null);

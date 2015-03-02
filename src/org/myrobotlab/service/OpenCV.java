@@ -333,16 +333,17 @@ public class OpenCV extends VideoSource {
 		masks.put(name, mask);
 	}
 
-	public void addFilter(OpenCVFilter filter) {
-
-		videoProcessor.addFilter(filter);
+	// FIXME should return filter
+	public OpenCVFilter addFilter(OpenCVFilter filter) {
 		broadcastState(); // let everyone know
+		return filter;
 	}
 
-	public void addFilter(String filterName) {
+	public OpenCVFilter addFilter(String filterName) {
 
-		videoProcessor.addFilter(filterName, filterName);
+		OpenCVFilter filter = videoProcessor.addFilter(filterName, filterName);
 		broadcastState(); // let everyone know
+		return filter;
 	}
 
 	public OpenCVFilter addFilter(String name, String newFilter) {

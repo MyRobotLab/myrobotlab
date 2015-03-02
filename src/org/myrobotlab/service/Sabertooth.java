@@ -100,11 +100,10 @@ public class Sabertooth extends Service {
 		return serial.connect(port, baud, data, stop, parity);
 	}
 
-	public boolean disconnect() {
+	public void disconnect() {
 		if (serial != null) {
-			return serial.disconnect();
+			serial.disconnect();
 		}
-		return true;
 	}
 
 	public void setAddress(Integer address) {

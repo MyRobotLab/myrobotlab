@@ -40,8 +40,9 @@ public interface MotorController {
 	 */
 	//public boolean motorAttach(String motorName, Object... motorData); 
 	
-	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin);
-	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin, Integer encoderPin);
+	public boolean motorAttach(String motorName, Integer pwmPin, Integer dirPin);
+	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin);
+	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin, Integer encoderPin);
 
 	/**
 	 * This is basic information to request from a Controller. A list of pins on

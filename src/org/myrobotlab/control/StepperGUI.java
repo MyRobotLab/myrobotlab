@@ -210,7 +210,7 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 			// !!!!! - This actually fires the (makes a new
 			// StepperControllerPanel) !!!!!
 			controllerSelect.setSelectedItem(stepper.getControllerName());
-			controllerTypePanel.setData(controller.getStepperData(boundServiceName));
+			//controllerTypePanel.setData(controller.getStepperData(boundServiceName));
 		}
 		controllerTypePanel.setAttached(stepper.isAttached());
 		

@@ -1,6 +1,5 @@
 package org.myrobotlab.serial;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.myrobotlab.service.interfaces.SerialDataListener;
@@ -27,18 +26,18 @@ public interface SerialDeviceService {
 
 	public void addByteListener(SerialDataListener service);
 
-	public void write(String data) throws IOException;
+	public void write(String data) throws Exception;
 
-	public void write(byte[] data) throws IOException;
+	public void write(byte[] data) throws Exception;
 
-	public void write(int data) throws IOException;
+	public void write(int data) throws Exception;
 
-	public int read(byte[] data) throws IOException;
+	public int read(byte[] data) throws Exception;
 
-	public int read() throws IOException;
+	public int read() throws Exception;
 
 	// symmetric with "connect" - assumes flush & close
-	public boolean disconnect();
+	public void disconnect();
 
 	public boolean isConnected();
 

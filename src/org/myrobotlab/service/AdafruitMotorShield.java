@@ -401,11 +401,11 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 
 	@Override
 	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin) {
-		return motorAttach(motorName, pwrPin, dirPin, null);
+		return motorAttach(motorName, Motor.TYPE_PWM_DIR, pwrPin, dirPin, null);
 	}
 	
 	@Override
-	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin, Integer encoderPin) {
+	public boolean motorAttach(String motorName, String type, Integer pwrPin, Integer dirPin, Integer encoderPin) {
 		ServiceInterface sw = Runtime.getService(motorName);
 		if (!sw.isLocal()) {
 			error("motor needs to be in same instance of mrl as controller");
@@ -457,7 +457,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	}
 
 	@Override
-	public void setSpeed(Integer speed) {
+	public void setStepperSpeed(Integer speed) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -468,11 +468,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		return false;
 	}
 
-	@Override
-	public Object[] getStepperData(String stepperName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public boolean stepperAttach(StepperControl stepperControl) {
@@ -555,5 +550,12 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	public String[] getCategories() {
 		return new String[] {"shield","motor"};
 	}
+
+	@Override
+	public boolean motorAttach(String motorName, String type, Integer pwrPin, Integer dirPin) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 
 }

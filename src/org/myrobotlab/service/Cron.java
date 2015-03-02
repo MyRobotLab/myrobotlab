@@ -122,7 +122,7 @@ public class Cron extends Service {
 		// cron.addScheduledEvent(EVERY_MINUTE, "log", "log");
 		// west wall | back | east wall
 
-		String json = Encoder.gson.toJson(cron.getTasks());
+		String json = Encoder.toJson(cron.getTasks());
 
 		log.info("here");
 

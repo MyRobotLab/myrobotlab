@@ -29,7 +29,6 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,6 +73,20 @@ public class FileIO {
 			}
 		} catch (Exception e) {
 		}
+	}
+	
+	static final public void close(OutputStream is) {
+		try {
+			if (is != null) {
+				is.close();
+			}
+		} catch (Exception e) {
+		}
+	}
+	
+	static final public void close(InputStream in, OutputStream out) {
+		closeStream(in);
+		close(out);		
 	}
 
 	/**

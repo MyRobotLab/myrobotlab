@@ -5,7 +5,6 @@ import java.io.DataInputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
 
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Message;
@@ -15,7 +14,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 public class Blender extends Service {
@@ -35,15 +34,28 @@ public class Blender extends Service {
 	String blenderVersion;
 	String expectedBlenderVersion = "0.9";
 	
+	/*
 	transient HashMap<String, VirtualPort> virtualPorts = new HashMap<String, VirtualPort>();
 	
 	public class VirtualPort {
 		public Serial serial;
 		public VirtualNullModemCable cable;
 	}
+	*/
 
 	// Socket serial = null; NO
 
+	/**
+	 * Control line - JSON over TCP/IP
+	 * This is the single control communication line over which 
+	 * virtual objects are created - and linked with Serial connections
+	 * 
+	 * Typically, a virtual object is created and if it has a serial line (like an Arduino)
+	 * a new TCP/IP connection is created which sends and receives the binary serial data
+	 * 
+	 * @author GroG
+	 *
+	 */
 	public class ControlHandler extends Thread {
 		Socket socket;
 		DataInputStream dis;		
@@ -66,7 +78,7 @@ public class Blender extends Service {
 					//JSONObject json = new JSONObject(in.readLine());
 					String json = in.readLine();
 					log.info(String.format("%s", json));
-					Message msg = Encoder.gson.fromJson(json, Message.class);
+					Message msg = Encoder.fromJson(json, Message.class);
 					log.info(String.format("msg %s", msg));
 					invoke(msg);
 
@@ -179,7 +191,7 @@ public class Blender extends Service {
 			try {
 				Message msg = createMessage("Blender.py", method, data);
 				OutputStream out = control.getOutputStream();
-				String json = Encoder.gson.toJson(msg);
+				String json = Encoder.toJson(msg);
 				info("sending p%s", json);
 				out.write(json.getBytes());
 			} catch (Exception e) {
@@ -203,7 +215,7 @@ public class Blender extends Service {
 
 			blender.getVersion();
 			
-			Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+			Arduino2 arduino01 = (Arduino2) Runtime.start("arduino01", "Arduino2");
 			
 			blender.attach(arduino01);
 			sleep(3000);
@@ -248,9 +260,7 @@ public class Blender extends Service {
 		return status;
 	}
 
-	public synchronized void attach(Arduino service) {
-		// BAH ! STOOPID HACK FOR BAD ARDUINO !!!
-		
+	public synchronized void attach(Arduino2 service) {
 		// let Blender know we are going
 		// to virtualize an Arduino
 		sendMsg("attach", service.getName(), service.getSimpleName());
@@ -258,25 +268,42 @@ public class Blender extends Service {
 	
 	// call back from blender
 	public String onAttach(String name){	
+		try {
 		info("onAttach - Blender is ready to attach serial device %s", name);
+		// FIXME - more general case determined by "Type"  
+		ServiceInterface si = Runtime.getService(name);
+		if ("Arduino".equals(si.getType())){
 		// FIXME - make more general - "any" Serial device !!!
-		Arduino arduino = (Arduino)Runtime.getService(name);
+		Arduino2 arduino = (Arduino2)Runtime.getService(name);
 		if (arduino != null){
 			
-			int vpn = virtualPorts.size();
+			// get handle to serial service of the Arduino
+			Serial serial = arduino.getSerial();
+			
+			// connecting over tcp ip
+			serial.connectTCP(host, serialPort);
+			
+			//int vpn = virtualPorts.size();
 
+			/* VIRTUAL PORT IS NOT NEEDED !!! - JUST A SERIAL OVER TCP/IP YAY !!!! :)
 			VirtualPort vp = new VirtualPort();
 			vp.serial = (Serial) Runtime.start(String.format("%s.UART.%d",arduino.getName(), vpn), "Serial");
-			vp.cable = vp.serial.createNullModemCable(String.format("MRL.%d", vpn), String.format("BLND.%d", vpn));
+			vp.cable = Serial.createNullModemCable(String.format("MRL.%d", vpn), String.format("BLND.%d", vpn));
 			virtualPorts.put(arduino.getName(), vp);
 			vp.serial.connect(String.format("BLND.%d", vpn));
-			vp.serial.addRelay(host, serialPort);
-			arduino.connect(String.format("MRL.%d", vpn));
+			*/
+			//vp.serial.addRelay(host, serialPort);
+			//arduino.connect(String.format("MRL.%d", vpn));
 			// add the tcp relay pipes
 			
 			
 		} else {
 			error("onAttach %s not found", name);
+		}
+		}
+		
+		} catch(Exception e){
+			Logging.logException(e);
 		}
 		return name;
 	}

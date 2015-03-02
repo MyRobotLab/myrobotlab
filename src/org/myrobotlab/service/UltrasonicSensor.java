@@ -161,7 +161,7 @@ public class UltrasonicSensor extends Service implements RangeListener {
 			VirtualSerialPort.createNullModemCable(port, "UART");
 			uart = (Serial) Runtime.start("uart", "Serial");
 			uart.connect("UART");
-			uart.setBinaryFileFormat(false);
+			//uart.setBinaryFileFormat(false);
 			// uart.record("test/Servo/servo.test.1");
 			uart.recordRX("test/Servo/servo.test.1.rx.dec");
 		}

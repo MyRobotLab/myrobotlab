@@ -138,7 +138,7 @@ public class Arduino2GUI extends ServiceGUI implements  ActionListener, TabContr
 	GridBagConstraints epgc = new GridBagConstraints();
 	Dimension size = new Dimension(620, 512);
 	Map<String, String> boardPreferences;
-	String boardName;
+	
 	// JCheckBoxMenuItem serialDevice;
 	SerialMenuListener serialMenuListener = new SerialMenuListener();
 
@@ -177,7 +177,7 @@ public class Arduino2GUI extends ServiceGUI implements  ActionListener, TabContr
 
 	public void getPinPanel() {
 
-		if (myArduino != null && boardName != null && boardName.contains("Mega")) {
+		if (myArduino != null && myArduino.getBoardType() != null && myArduino.getBoardType().contains("mega")) {
 			getMegaPanel();
 			return;
 		}
@@ -351,13 +351,13 @@ public class Arduino2GUI extends ServiceGUI implements  ActionListener, TabContr
 					// is now input
 					value = PinComponent.INPUT;
 					myService.send(boundServiceName, "pinMode", address, value);
-					myService.send(boundServiceName, "digitalReadPollStart", address);
+					myService.send(boundServiceName, "digitalReadPollingStart", address);
 					b.toggle();
 				} else if ("in".equals(cmd)) {
 					// is now output
 					value = PinComponent.OUTPUT;
 					myService.send(boundServiceName, "pinMode", address, value);
-					myService.send(boundServiceName, "digitalReadPollStop", address);
+					myService.send(boundServiceName, "digitalReadPollingStop", address);
 					b.toggle();
 				} else {
 					log.error(String.format("unknown digital pin cmd %s", cmd));
@@ -369,13 +369,13 @@ public class Arduino2GUI extends ServiceGUI implements  ActionListener, TabContr
 					if (!pin.inOut.isOn) { // pin is off turn it on
 						value = PinComponent.INPUT;
 						myService.send(boundServiceName, "pinMode", address, value);
-						myService.send(boundServiceName, "digitalReadPollStart", address);
+						myService.send(boundServiceName, "digitalReadPollingStart", address);
 						pin.inOut.setOn(); // in
 						b.setOn();
 					} else {
 						value = PinComponent.OUTPUT;
 						myService.send(boundServiceName, "pinMode", address, value);
-						myService.send(boundServiceName, "digitalReadPollStop", address);
+						myService.send(boundServiceName, "digitalReadPollingStop", address);
 						pin.inOut.setOff();// out
 						b.setOff();
 					}

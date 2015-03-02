@@ -182,7 +182,7 @@ public class Stepper extends Service implements StepperControl {
 
 	@Override
 	public void setSpeed(Integer rpm) {
-		controller.setSpeed(rpm);
+		controller.setStepperSpeed(rpm);
 	}
 
 	@Override

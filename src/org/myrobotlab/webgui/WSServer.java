@@ -139,7 +139,7 @@ public class WSServer extends WebSocketServer {
 	
 		log.info("webgui <---to--- client {}", message);
 
-		Message msg = Encoder.gson.fromJson(message, Message.class);
+		Message msg = Encoder.fromJson(message, Message.class);
 		msg.sender = conn.getRemoteSocketAddress().getAddress().getHostAddress();
 		
 		// FIXME - move to Security service

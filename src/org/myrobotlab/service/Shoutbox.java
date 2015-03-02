@@ -392,12 +392,12 @@ public class Shoutbox extends Service {
 				fw = new FileWriter(archive.getAbsoluteFile());
 				bw = new BufferedWriter(fw);
 
-				String d = String.format("%s", Encoder.gson.toJson(shout));
+				String d = String.format("%s", Encoder.toJson(shout));
 				bw.write(d);
 				return;
 			}
 
-			String d = String.format(",%s", Encoder.gson.toJson(shout));
+			String d = String.format(",%s", Encoder.toJson(shout));
 			bw.write(d);
 			bw.flush();
 
@@ -440,7 +440,7 @@ public class Shoutbox extends Service {
 
 			String json = String.format("[%s]", FileIO.fileToString(latest.getAbsoluteFile()));
 
-			Shout[] saved = Encoder.gson.fromJson(json, Shout[].class);
+			Shout[] saved = Encoder.fromJson(json, Shout[].class);
 
 			for (int i = 0; i < saved.length; ++i) {
 				shouts.add(saved[i]);
@@ -489,8 +489,8 @@ public class Shoutbox extends Service {
 
 			// set javascript user object for this connection
 			Connection conn = conns.addConnection(ws);
-			Message onConnect = createMessage("shoutclient", "onConnect", Encoder.gson.toJson(conn));
-			ws.send(Encoder.gson.toJson(onConnect));
+			Message onConnect = createMessage("shoutclient", "onConnect", Encoder.toJson(conn));
+			ws.send(Encoder.toJson(onConnect));
 
 			// BROADCAST ARRIVAL
 			// TODO - broadcast to others new connection of user - (this mean's
@@ -510,9 +510,9 @@ public class Shoutbox extends Service {
 			// UPDATE NEW CONNECTION'S DISPLAY
 			for (int i = 0; i < shouts.size(); ++i) {
 				Shout s = shouts.get(i);
-				String ss = Encoder.gson.toJson(s);
+				String ss = Encoder.toJson(s);
 				Message catchup = createMessage("shoutclient", "onShout", ss);
-				ws.send(Encoder.gson.toJson(catchup));
+				ws.send(Encoder.toJson(catchup));
 			}
 		} catch (Exception e) {
 			Logging.logException(e);
@@ -567,8 +567,8 @@ public class Shoutbox extends Service {
 	}
 
 	public void sendTo(String type, String key, Object data) {
-		Shout shout = createShout(TYPE_SYSTEM, Encoder.gson.toJson(data));
-		String msgString = Encoder.gson.toJson(shout);
+		Shout shout = createShout(TYPE_SYSTEM, Encoder.toJson(data));
+		String msgString = Encoder.toJson(shout);
 		Message sendTo = createMessage("shoutclient", "onShout", msgString);
 
 		Connection conn = conns.getConnection(key);
@@ -579,13 +579,13 @@ public class Shoutbox extends Service {
 
 		if (conn.ws != null) {
 			// specialized formatting here
-			conn.ws.send(Encoder.gson.toJson(sendTo));
+			conn.ws.send(Encoder.toJson(sendTo));
 		} else if (conn.xmpp != null) {
 			// specialized formatting here
 			xmpp.sendMessage(msgString, conn.xmpp);
 		}
 		// Message catchup = createMessage("shoutclient", "onShout",
-		// Encoder.gson.toJson(users.listConnections()));
+		// Encoder.toJson(users.listConnections()));
 
 	}
 
@@ -641,7 +641,7 @@ public class Shoutbox extends Service {
 
 		Shout shout = createShout(TYPE_USER, r);
 		shout.from = "mr.turing";
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 		onShout("mr.turing", out);
 		return response;
 	}
@@ -710,7 +710,7 @@ public class Shoutbox extends Service {
 		// shout.ip = m.sender;
 		Connection conn = conns.getConnection(key);
 
-		Shout shout = (Shout) Encoder.gson.fromJson(msg, Shout.class);
+		Shout shout = (Shout) Encoder.fromJson(msg, Shout.class);
 
 		if (conn == null) {
 			info("conn/User is null - better be a system msg");
@@ -826,7 +826,7 @@ public class Shoutbox extends Service {
 		}
 
 		shouts.add(shout);
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 		webgui.sendToAll(out);
 
 		if (xmpp != null && !TYPE_SYSTEM.equals(shout.type)) {
@@ -849,7 +849,7 @@ public class Shoutbox extends Service {
 	public void mimicTuring(String msg) {
 		Shout shout = createShout(TYPE_USER, msg);
 		shout.from = "mr.turing";
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 		onShout("mr.turing", out);
 	}
 
@@ -857,14 +857,14 @@ public class Shoutbox extends Service {
 		sendTo(TYPE_SYSTEM, connId, conns.listConnections());
 		Shout shout = createShout(TYPE_USER, Runtime.getVersion());
 		shout.from = "mr.turing";
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 		onShout("mr.turing", out);
 	}
 
 	public void getXMPPRelays() {
 		Shout shout = createShout(TYPE_USER, Arrays.toString(xmppRelays.toArray()));
 		shout.from = "mr.turing";
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 		onShout("mr.turing", out);
 	}
 
@@ -881,7 +881,7 @@ public class Shoutbox extends Service {
 		shout.from = user;
 
 		// shouts.add(shout);
-		Message out = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 
 		onShout(xmppMsg.msg.getFrom(), out);
 
@@ -890,7 +890,7 @@ public class Shoutbox extends Service {
 		 * user;
 		 * 
 		 * shouts.add(shout); Message out = createMessage("shoutclient",
-		 * "onShout", Encoder.gson.toJson(shout)); webgui.sendToAll(out); if
+		 * "onShout", Encoder.toJson(shout)); webgui.sendToAll(out); if
 		 * (xmpp != null){ for (int i = 0; i < xmppRelays.size(); ++i){
 		 * log.info(String.format("sending xmpp client %s %s",shout.user,
 		 * shout.msg)); xmpp.sendMessage(String.format("%s:%s", shout.user,
@@ -912,9 +912,9 @@ public class Shoutbox extends Service {
 
 	// fixme (from whom) ?? - websocket xmpp other ??
 	public void systemBroadcast(Object inData) {
-		String data = Encoder.gson.toJson(inData);
+		String data = Encoder.toJson(inData);
 		Shout shout = createShout(TYPE_SYSTEM, data);
-		Message onShout = createMessage("shoutclient", "onShout", Encoder.gson.toJson(shout));
+		Message onShout = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 		onShout(null, onShout);
 	}
 

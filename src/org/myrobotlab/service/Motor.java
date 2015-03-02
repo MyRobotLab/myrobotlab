@@ -29,6 +29,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -51,12 +52,35 @@ public class Motor extends Service implements MotorControl {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(Motor.class.toString());
 
+	/** 
+	 * TYPE_PWM_DIR is the type of motor controller which has a
+	 * digital direction pin.  If this pin is high the motor travels in one
+	 * direction if the pin is low the motor travels in the reverse direction
+	 * 
+	 */
+	public final static String TYPE_PWM_DIR = "TYPE_PWM_DIR";
+	
+	/**
+	 * TYPE_LPWM_RPWM - is a motor controller which one pin is pulsed to go one way
+	 * and the other pin is pulsed to go the other way .. both low or both high invalid?
+	 * Does one pin need to be held high or low while the other is pulsed.
+	 */
+	public final static String TYPE_LPWM_RPWM= "TYPE_LPWM_RPWM";
+	
 	// control
-	private MotorController controller = null; 
+	/** 
+	 * FIXME - move motor - pin driver logic into Motor (it is common across all micro-controllers)
+	 * for the 2 types of motor controller
+	 * 
+	 * Make "named" Peer versus direct controller reference
+	 */
+	transient private MotorController controller = null; 
 	boolean locked = false; 
 	private boolean isAttached = false;
 	public Integer pwmPin;
 	public Integer dirPin;
+	public Integer pwmLeft;
+	public Integer pwmRight;
 	public Integer encoderPin;
 	
 	// power
@@ -70,10 +94,8 @@ public class Motor extends Service implements MotorControl {
 	transient MotorEncoder encoder = null;
 	// FIXME - REMOVE !!! DEPRECATE - just a "type" of encoder 
 	transient EncoderTimer durationThread = null;
-	
-	public static final String MOTOR_TYPE_2BIT = "MOTOR_TYPE_2BIT";
-	
-	private String type = MOTOR_TYPE_2BIT;
+		
+	public String type = TYPE_PWM_DIR;
 		
 	public Motor(String n) {
 		super(n);
@@ -161,6 +183,9 @@ public class Motor extends Service implements MotorControl {
 	// destroying
 	transient Object lock = new Object();
 
+	/**
+	 * FIXME - REMOVE - do low level counting and encoder triggers on the micro-controller !!!
+	 */
 	class EncoderTimer extends Thread {
 		public double power = 0.0;
 		public double duration = 0;
@@ -199,12 +224,20 @@ public class Motor extends Service implements MotorControl {
 		}
 	}
 
+	/**
+	 * FIXME - deprecate - make a encoding type on the micro-controller - an alert, make it very
+	 * general - can be clicks from a "real" encoder .. or increments of an internal timer !!!
+	 */
 	@Override
 	public void moveFor(double power, double duration) {
 		// default is not to block
 		moveFor(power, duration, false);
 	}
 
+	/**
+	 * FIXME - deprecate - make a encoding type on the micro-controller - an alert, make it very
+	 * general - can be clicks from a "real" encoder .. or increments of an internal timer !!!
+	 */
 	@Override
 	public void moveFor(double power, double duration, Boolean block) {
 		// TODO - remove - Timer which implements SensorFeedback should be used
@@ -301,6 +334,12 @@ public class Motor extends Service implements MotorControl {
 
 	public Status test(){
 		Status status = super.test();
+		try {
+			
+		} catch(Exception e){
+			status.addError(e);
+			Logging.logException(e);
+		}
 		return status;
 	}
 	
@@ -317,6 +356,10 @@ public class Motor extends Service implements MotorControl {
 		arduino.connect(port);
 		arduino.broadcastState();
 		
+		
+		for (int i = 0; i < 100 ; ++i){
+			
+		}
 		//Runtime.createAndStart("python", "Python");
 
 		Motor m1 = (Motor)Runtime.createAndStart("m1","Motor");
@@ -324,7 +367,9 @@ public class Motor extends Service implements MotorControl {
 		arduino.motorAttach("m1", 7, 6);
 		arduino.setSampleRate(8000);
 		m1.setSpeed(0.95);
-		m1.moveTo(600);
+		
+		// with encoder
+		// m1.moveTo(600);
 		
 		m1.stop();
 		m1.move(0.94);

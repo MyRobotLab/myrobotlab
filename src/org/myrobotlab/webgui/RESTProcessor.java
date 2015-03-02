@@ -169,7 +169,7 @@ public class RESTProcessor implements HTTPProcessor {
 						encodedResponse = new String(out.toByteArray());
 						---------------hacked out ---- */
 						log.info(String.format("gson encoding [%s]", returnObject.getClass().getSimpleName()));
-						encodedResponse = Encoder.gson.toJson(returnObject);
+						encodedResponse = Encoder.toJson(returnObject);
 						log.info("done");
 
 					}

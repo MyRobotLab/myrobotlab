@@ -44,7 +44,7 @@ public class Memory {
 	}
 
 	public String toJSON() {
-		return Encoder.gson.toJson(this);
+		return Encoder.toJson(this);
 	}
 
 	public void toJSONFile(String string) {
