@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecException;
-import org.myrobotlab.codec.DecimalCodec;
 import org.myrobotlab.codec.CodecFactory;
+import org.myrobotlab.codec.DecimalCodec;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -34,10 +34,11 @@ import org.myrobotlab.serial.SerialDeviceFactory;
 import org.myrobotlab.serial.SerialDeviceService;
 import org.myrobotlab.serial.VirtualSerialPort;
 import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
+import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
-public class Serial extends Service implements SerialDeviceService, SerialDataListener {
+public class Serial extends Service implements QueueSource, SerialDeviceService, SerialDataListener {
 
 	static class Port implements Runnable, SerialDeviceEventListener {
 		String type; // serialDevice, socket, android bluetooth,
@@ -54,17 +55,17 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 		Integer stopbits;
 		Integer parity;
 
-		public Port(Serial serial, String portName, InputStream in, OutputStream out) throws IOException {
+		public Port(Serial serial, String portName, InputStream in, OutputStream out, String type) throws IOException {
 			this.portName = portName;
 			this.myService = serial;
 			this.out = out;
 			this.in = in;
-			listeningThread = new Thread(this, portName);
-			listeningThread.start();
+			this.type = type;
 		}
 
-		public Port(Serial serial, String name, InputStream inputStream, OutputStream outputStream, int rate, int databits, int stopbits, int parity) throws IOException {
-			this(serial, name, inputStream, outputStream);
+		public Port(Serial serial, String name, InputStream inputStream, OutputStream outputStream, int rate, int databits, int stopbits, int parity, String type)
+				throws IOException {
+			this(serial, name, inputStream, outputStream, type);
 			this.rate = rate;
 			this.databits = databits;
 			this.stopbits = stopbits;
@@ -88,26 +89,50 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 		 */
 		public void run() {
 			listening = true;
+			int newByte = -1;
 			try {
-				int newByte;
 				while (listening && ((newByte = in.read()) != -1)) {
 					myService.processRxByte(newByte);
+					log.info(String.format("%d",newByte));
 				}
+				log.info(String.format("%d", newByte));
 			} catch (Exception e) {
 				Logging.logException(e);
 			} finally {
-				close();
+				// because of the rxtxLib non-standard implementation
+				// we do not close when we get a -1
+				if (!"SerialDeviceGNU".equals(type)) {
+					close();
+				}
 			}
 		}
 
+		/**
+		 * The way rxtxLib currently works - is it will give a -1 on a read when
+		 * it has no data to give although in the specification this means end
+		 * of stream - for rxtxLib this is not necessarily the end of stream.
+		 * The implementation there - the thread is in rxtx - and will execute
+		 * serialEvent when serial data has arrived. This might have been a
+		 * design decision. The thread which calls this is in the rxtxlib - so
+		 * we have it call the run() method of a non-active thread class.
+		 * 
+		 */
 		@Override
 		public void serialEvent(SerialDeviceEvent ev) {
-			// TODO Auto-generated method stub
-
+			run();
 		}
 
 		public void write(int b) throws IOException {
 			out.write(b);
+		}
+
+		public void listen() {
+			if (listeningThread == null) {
+				listeningThread = new Thread(this, portName);
+				listeningThread.start();
+			} else {
+				log.info(String.format("%s already listening", portName));
+			}
 		}
 	}
 
@@ -230,6 +255,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 
 	/**
 	 * For the purpose of efficient testing only - it "catches" published bytes
+	 * TODO - blocking test method
 	 */
 	ArrayList<Integer> testOnByte = new ArrayList<Integer>();
 
@@ -295,28 +321,30 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 		// backwards compatibility - don't need to be explicit about the port
 		// your connected too
 		try {
-			/*
-			 * if (serialDevice != null && name.equals(portName) &&
-			 * isConnected()) { log.info(String.format(
-			 * "connect to already connected port - setting parameters rate=%d",
-			 * rate)); serialDevice.setParams(rate, databits, stopbits, parity);
-			 * save(); this.rate = rate; broadcastState(); return true; }
-			 */
 
+			Port port = null;
 			SerialDevice serialDevice = SerialDeviceFactory.getSerialDevice(name, rate, databits, stopbits, parity);
 			if (serialDevice != null) {
-				/*
-				 * if (!serialDevice.isOpen()) { serialDevice.open();
-				 * //serialDevice.addEventListener(this);
-				 * //serialDevice.notifyOnDataAvailable(true); sleep(500); //
-				 * changed from 1000 ms to 500 ms }
-				 */
+
+				if (!serialDevice.isOpen()) {
+					serialDevice.open();
+					serialDevice.setParams(rate, databits, stopbits, parity);
+					port = new Port(this, name, serialDevice.getInputStream(), serialDevice.getOutputStream(), rate, databits, stopbits, parity, serialDevice.getClass()
+							.getSimpleName());
+					serialDevice.addEventListener(port);
+					serialDevice.notifyOnDataAvailable(true);
+
+					// String version = null;
+
+				} else {
+					warn(String.format("\n%s is already open, close first before opening again\n", serialDevice.getName()));
+					return false;
+				}
 
 				// serialDevice.setParams(rate, databits, stopbits, parity);
 				// this.rate = rate;
 				// setting default port
 				portName = name; // ??? set to name :P
-				Port port = new Port(this, name, serialDevice.getInputStream(), serialDevice.getOutputStream(), rate, databits, stopbits, parity);
 				ports.put(name, port);
 				save(); // successfully bound to port - saving
 				broadcastState(); // state has changed let everyone know
@@ -363,10 +391,13 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 	 */
 	public void connectTCP(String host, int port) throws IOException {
 		info("connectTCP %s %d", host, port);
+		@SuppressWarnings("resource")
 		Socket socket = new Socket(host, port);
 		String portName = String.format("%s.%s", getName(), socket.getRemoteSocketAddress().toString());
-		ports.put(portName, new Port(this, portName, socket.getInputStream(), socket.getOutputStream()));
+		Port serialPort = new Port(this, portName, socket.getInputStream(), socket.getOutputStream(), "TCP");
+		ports.put(portName, serialPort);
 		this.portName = portName;
+		serialPort.listen();
 		broadcastState();
 	}
 
@@ -454,20 +485,20 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 	 */
 
 	/**
-	 * all possible ports - inclusive of the ones this serial
-	 * service has created
+	 * all possible ports - inclusive of the ones this serial service has
+	 * created
 	 */
 	@Override
 	public ArrayList<String> getPortNames() {
 		HashSet<String> sort = new HashSet<String>(ports.keySet());
 		ArrayList<String> hwports = SerialDeviceFactory.getSerialDeviceNames();
-		for (int i = 0; i < hwports.size(); ++i){
+		for (int i = 0; i < hwports.size(); ++i) {
 			sort.add(hwports.get(i));
 		}
-		
+
 		ArrayList<String> ret = new ArrayList<String>();
 		ret.addAll(sort);
-		
+
 		Collections.sort(ret);
 		return ret;
 	}
@@ -523,7 +554,7 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 	 * 
 	 * @param newByte
 	 * @throws IOException
-	 * @throws CodecException 
+	 * @throws CodecException
 	 */
 	public final void processRxByte(int newByte) throws IOException, CodecException {
 		newByte = newByte & 0xff;
@@ -579,24 +610,19 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 	 * 
 	 * pass through to the serial device
 	 * 
-	 * @param data
+	 * @param temp
 	 * @return
 	 * @throws IOException
 	 */
 
 	@Override
-	public int read() throws IOException {
-		try {
-			Integer newByte = blockingRX.take();
-			return newByte;
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		return -1; // EOF ??
+	public int read() throws IOException, InterruptedException {
+		Integer newByte = blockingRX.take();
+		return newByte;
 	}
 
 	@Override
-	public int read(byte[] data) throws IOException {
+	public int read(byte[] data) throws IOException, InterruptedException {
 		for (int i = 0; i < data.length; ++i) {
 			data[i] = (byte) read();
 		}
@@ -780,7 +806,23 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 	public void setTXFormatter(Codec formatter) {
 		txFormatter = formatter;
 	}
+	
+	public Codec getRXFormatter(){
+		return rxFormatter;
+	}
 
+	public Codec getTXFormatter(){
+		return txFormatter;
+	}
+	
+	public String getRXCodecKey(){
+		return rxFormatter.getKey();
+	}
+
+	public String getTXCodecKey(){
+		return txFormatter.getKey();
+	}
+	
 	public void stopRecording() {
 		FileIO.close(fileRX);
 		FileIO.close(fileTX);
@@ -979,9 +1021,17 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 	@Override
 	public void write(byte[] data) throws IOException, CodecException {
 		for (int i = 0; i < data.length; ++i) {
-			write(data[i] & 0xFF);
+			write(data[i]); // recently removed -  & 0xFF
 		}
 	}
+	
+	@Override
+	public void write(int[] data) throws IOException, CodecException {
+		for (int i = 0; i < data.length; ++i) {
+			write(data[i]); // recently removed -  & 0xFF
+		}
+	}
+	
 
 	@Override
 	public void write(int data) throws IOException, CodecException {
@@ -1035,6 +1085,11 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 		}
 	}
 
+	@Override
+	public BlockingQueue<?> getQueue() {
+		return blockingRX;
+	}
+
 	public static void main(String[] args) {
 		try {
 			LoggingFactory.getInstance().configure();
@@ -1044,10 +1099,10 @@ public class Serial extends Service implements SerialDeviceService, SerialDataLi
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
 			serial.setFormat("arduino");
 			serial.createVirtualUART();
-			//serial.connectTCP("localhost", 9090);
+			// serial.connectTCP("localhost", 9090);
 
 			// serial.connect("COM15");
-			//serial.test();
+			// serial.test();
 		} catch (Exception e) {
 			Logging.logException(e);
 		}

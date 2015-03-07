@@ -89,7 +89,7 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 	}
 
 	@Override
-	public void servoStop(String servoName) {
+	public void servoSweepStop(String servoName) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -107,7 +107,7 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 	}
 
 	@Override
-	public void servoSweep(String servoName, int min, int max, int step) {
+	public void servoSweepStart(String servoName, int min, int max, int step) {
 		// TODO Auto-generated method stub
 		
 	}

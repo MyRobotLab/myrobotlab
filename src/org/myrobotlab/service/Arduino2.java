@@ -2,13 +2,12 @@ package org.myrobotlab.service;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.codec.ArduinoMsgCodec;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -21,6 +20,7 @@ import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -55,9 +55,49 @@ import org.slf4j.Logger;
  * TODO - set trigger in combination of polling should be a universal
  * microcontroller function
  * 
+ * 
+ * // need a method to identify type of board //
+ * http://forum.arduino.cc/index.php?topic=100557.0
+ * 
+ * public static final int STEPPER_EVENT_STOP = 1; public static final int
+ * STEPPER_TYPE_POLOLU = 1; public static final int CUSTOM_MSG = 50;
+ * 
+ * 
  */
 
 public class Arduino2 extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, StepperController {
+
+	/**
+	 * reads data from a byte queue - directly connects
+	 * to Serial's queue for fast processing
+	 */
+	class ByteReader extends Thread {
+		SerialDataListener listener;
+		QueueSource source;
+		BlockingQueue<Integer> queue;
+		boolean listening = false;
+
+		@SuppressWarnings("unchecked")
+		public ByteReader(SerialDataListener listener, QueueSource source) {
+			super(String.format("%s<--%s reader", listener.getName(), source.getName()));
+			this.listener = listener;
+			this.source = source;
+			this.queue = (BlockingQueue<Integer>) source.getQueue();
+		}
+
+		public void run() {
+			try {
+				listening = true;
+				while (listening) {
+					Integer i = queue.take();
+					listener.onByte(i);
+				}
+			} catch (Exception e) {
+				Logging.logException(e);
+			}
+			log.info("finished reading %s", source.getName());
+		}
+	}
 
 	/**
 	 * MotorData is the combination of a Motor and any controller data needed to
@@ -94,6 +134,16 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		int servoIndex = -1;
 	}
 
+	/**
+	 * FIXME - implement ! :)
+	 */
+	class StepperData implements Serializable {
+		private static final long serialVersionUID = 1L;
+		transient ServoControl servo = null;
+		Integer pin = null;
+		int servoIndex = -1;
+	}
+
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 
@@ -101,115 +151,47 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		return peers;
 	}
 
+	ByteReader reader = null;
+	ArduinoMsgCodec codec = new ArduinoMsgCodec();
+
 	private static final long serialVersionUID = 1L;
 	public transient final static Logger log = LoggerFactory.getLogger(Arduino2.class);
-	static final HashMap<Integer, String> tx = new HashMap<Integer, String>();
-	static final HashMap<Integer, String> rx = new HashMap<Integer, String>();
-	// static final HashMap<Integer, String> parse = new HashMap<Integer,
-	// String>();
 
-	public static final int MRLCOMM_VERSION = 20;
+	public static final int MRLCOMM_VERSION = 21;
 	// serial protocol functions
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	// MRL ---> Arduino2 methods
-	public static final int DIGITAL_WRITE = 0;
+
 	public static final int DIGITAL_VALUE = 1; // normalized with PinData <---
-												// direction
-	public static final int ANALOG_WRITE = 2;
-	public static final int ANALOG_VALUE = 3; // normalized with PinData
-	public static final int PINMODE = 4;
-	public static final int PULSE_IN = 5;
-	public static final int SERVO_ATTACH = 6;
-	public static final int SERVO_WRITE = 7;
-	public static final int SERVO_DETACH = 9;
-	public static final int SET_PWM_FREQUENCY = 11;
-	public static final int SET_SERVO_SPEED = 12;
-	public static final int ANALOG_READ_POLLING_START = 13;
-	public static final int ANALOG_READ_POLLING_STOP = 14;
-	public static final int DIGITAL_READ_POLLING_START = 15;
-	public static final int DIGITAL_READ_POLLING_STOP = 16;
-	public static final int SET_ANALOG_TRIGGER = 17;
-	public static final int REMOVE_ANALOG_TRIGGER = 18;
-	public static final int SET_DIGITAL_TRIGGER = 19;
-	public static final int REMOVE_DIGITAL_TRIGGER = 20;
-
-	public static final int SET_DEBOUNCE = 21;
-
-	/*
-	 * public static final int DIGITAL_TRIGGER_ONLY_ON = 23; public static final
-	 * int DIGITAL_TRIGGER_ONLY_OFF = 24;
-	 */
-
-	public static final int DIGITAL_TRIGGER_ONLY = 23;
-
-	public static final int SET_SERIAL_RATE = 25;
-	public static final int GET_MRLCOMM_VERSION = 26;
-	public static final int SET_SAMPLE_RATE = 27;
-	public static final int SERVO_WRITE_MICROSECONDS = 28;
-
-	public static final int MRLCOMM_ERROR = 29;
-	public static final int PINGDAR_ATTACH = 30;
-
-	public static final int PINGDAR_START = 31;
-	public static final int PINGDAR_STOP = 32;
-
-	public static final int PINGDAR_DATA = 33;
-	public static final int SENSOR_ATTACH = 34;
-
-	public static final int SENSOR_POLLING_START = 35;
-	public static final int SENSOR_POLLING_STOP = 36;
-	public static final int SENSOR_DATA = 37;
-	public static final int SERVO_SWEEP_START = 38;
-
-	public static final int SERVO_SWEEP_STOP = 39;
-	// callback event - e.g. position arrived
-	// MSG MAGIC | SZ | SERVO-INDEX | POSITION
-	public static final int SERVO_EVENTS_ENABLE = 40;
-
-	public static final int SERVO_EVENT = 41;
-
-	public static final int SET_LOAD_TIMING_ENABLED = 42;
-
-	public static final int LOAD_TIMING_EVENT = 43;
-
-	public static final int STEPPER_ATTACH = 44;
-	public static final int STEPPER_MOVE = 45;
-
-	public static final int STEPPER_STOP = 46;
-	public static final int STEPPER_RESET = 47;
-
-	public static final int STEPPER_EVENT = 48;
-
-	// need a method to identify type of board
-	// http://forum.arduino.cc/index.php?topic=100557.0
-
-	public static final int STEPPER_EVENT_STOP = 1;
-	public static final int STEPPER_TYPE_POLOLU = 1;
-	public static final int CUSTOM_MSG = 50;
 
 	// ---------- MRLCOMM FUNCTION INTERFACE END -----------
 
+	// direction
+	public static final int ANALOG_VALUE = 3; // normalized with PinData
+
+	public static final int SENSOR_DATA = 37;
+
+	// SUBTYPES ...
 	public static final int ARDUINO_TYPE_INT = 16;
+
 	// servo event types
 	public static final int SERVO_EVENT_STOPPED = 1;
 
 	public static final int SERVO_EVENT_POSITION_UPDATE = 2;
-
 	// error types
 	public static final int ERROR_SERIAL = 1;
-
 	public static final int ERROR_UNKOWN_CMD = 2;
 	// sensor types
 	public static final int SENSOR_ULTRASONIC = 1;
 	public static final int COMMUNICATION_RESET = 252;
 	public static final int SOFT_RESET = 253;
+
 	public static final int NOP = 255;
 	public static final int TRUE = 1;
-
 	public static final int FALSE = 0;
-	public Integer mrlcommVersion = null;
-	public transient static final int REVISION = 100;
 
+	public Integer mrlcommVersion = null;
+
+	public transient static final int REVISION = 100;
 	public transient static final String BOARD_TYPE_UNO = "uno";
 
 	public transient static final String BOARD_TYPE_ATMEGA168 = "atmega168";
@@ -217,12 +199,12 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	public transient static final String BOARD_TYPE_ATMEGA2560 = "atmega2560";
 	public transient static final String BOARD_TYPE_ATMEGA1280 = "atmega1280";
-
 	public transient static final String BOARD_TYPE_ATMEGA32U4 = "atmega32u4";
+
 	// vendor specific pins start at 50
 	public static final String VENDOR_DEFINES_BEGIN = "// --VENDOR DEFINE SECTION BEGIN--";
-	public static final String VENDOR_SETUP_BEGIN = "// --VENDOR SETUP BEGIN--";
 
+	public static final String VENDOR_SETUP_BEGIN = "// --VENDOR SETUP BEGIN--";
 	public static final String VENDOR_CODE_BEGIN = "// --VENDOR CODE BEGIN--";
 
 	/**
@@ -243,8 +225,8 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	public static final int TCCR0B = 0x25; // register for pins 6,7
 
 	public static final int TCCR1B = 0x2E; // register for pins 9,10
-	public static final int TCCR2B = 0xA1; // register for pins 3,11
 
+	public static final int TCCR2B = 0xA1; // register for pins 3,11
 	// FIXME - more depending on board (mega)
 	// http://playground.arduino.cc/Code/MegaServo
 	// Servos[NBR_SERVOS] ; // max servos is 48 for mega, 12 for other boards
@@ -257,17 +239,20 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	public static final int LOW = 0x0;
 
 	public static final int INPUT = 0x0;
+
 	public static final int OUTPUT = 0x1;
 
 	public static final int MOTOR_FORWARD = 1;
 
 	public static final int MOTOR_BACKWARD = 0;
 
-	private boolean connected = false;
-
 	private String boardType;
+	/**
+	 * blocking queues to support blocking methods
+	 */
+	transient BlockingQueue<Integer> pulseQueue = new LinkedBlockingQueue<Integer>();
 
-	transient BlockingQueue<Integer> blockingData = new LinkedBlockingQueue<Integer>();
+	transient BlockingQueue<Integer> versionQueue = new LinkedBlockingQueue<Integer>();
 
 	StringBuilder debugTX = new StringBuilder();
 
@@ -291,12 +276,12 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	// peers
 	transient Serial serial;
 
+	// ----------ServoController begin-------------
+	// FIXME - is this re-entrant ???
+
 	int error_arduino_to_mrl_rx_cnt;
 
 	int error_mrl_to_arduino_rx_cnt;
-
-	// ----------ServoController begin-------------
-	// FIXME - is this re-entrant ???
 
 	int byteCount;
 
@@ -312,7 +297,8 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		// from connection? - good idea? or bad?)
 		load(); // config - last com port connected too - last rate
 
-		serial = (Serial) Runtime.create("serial", "Serial");
+		serial = (Serial) createPeer("serial");
+		
 		createPinList();
 		// invoke("getPortNames"); // FIXME - this could happen before gui
 		// initialized - don't do it - waste of time
@@ -322,26 +308,33 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		customEventListener = service;
 	}
 
-	// force an analog read - data will be published in a call-back
-	// TODO - make a serialSendBlocking
-	public void analogReadPollingStart(Integer pin) {
-		sendMsg(PINMODE, pin, INPUT);
-		sendMsg(ANALOG_READ_POLLING_START, pin, 0); // last param is not used
-	}
-
-	public void analogReadPollingStop(Integer pin) {
-		sendMsg(ANALOG_READ_POLLING_STOP, pin, 0); // last param is not used
-		// in read
-	}
-
 	// ---------------------------- ServoController End -----------------------
 	// ---------------------- Protocol Methods Begin ------------------
+
+	/**
+	 * start analog polling of selected pin
+	 * 
+	 * @param pin
+	 */
+	public void analogReadPollingStart(Integer pin) {
+		sendMsg(ArduinoMsgCodec.PIN_MODE, pin, INPUT);
+		sendMsg(ArduinoMsgCodec.ANALOG_READ_POLLING_START, pin);
+	}
+
+	/**
+	 * stop the selected pin from polling analog reads
+	 * 
+	 * @param pin
+	 */
+	public void analogReadPollingStop(Integer pin) {
+		sendMsg(ArduinoMsgCodec.ANALOG_READ_POLLING_STOP, pin, 0);
+	}
 
 	public void analogWrite(Integer address, Integer value) {
 		log.info(String.format("analogWrite(%d,%d) to %s", address, value, serial.getName()));
 		// FIXME
 		// if (pin.mode == INPUT) {sendMsg(PIN_MODE, OUTPUT)}
-		sendMsg(ANALOG_WRITE, address, value);
+		sendMsg(ArduinoMsgCodec.ANALOG_WRITE, address, value);
 	}
 
 	/**
@@ -351,7 +344,12 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	 * @return
 	 */
 	public boolean connect(String port) {
-		return serial.connect(port, 57600, 8, 1, 0);
+		boolean ret = serial.connect(port, 57600, 8, 1, 0);
+		if (ret) {
+			reader = new ByteReader(this, serial);
+			reader.start();
+		}
+		return ret;
 	}
 
 	public ArrayList<Pin> createPinList() {
@@ -389,47 +387,36 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	}
 
 	/**
-	 * Debounce ensures that only a single signal will be acted upon for a
-	 * single opening or closing of a contact. the delay is the min number of pc
-	 * cycles must occur before a reading is taken
-	 * 
-	 * Affects all reading of pins setting to 0 sets it off
-	 * 
-	 * @param delay
-	 */
-	public void setDebounce(int delay) {
-		if (delay < 0 || delay > 32767) {
-			error(String.format("%d debounce delay must be 0 < delay < 32767", delay));
-		}
-		int lsb = delay & 0xff;
-		int msb = (delay >> 8) & 0xff;
-		sendMsg(SET_DEBOUNCE, msb, lsb);
-
-	}
-
-	/**
+	 * start polling data from the selected pin
 	 * 
 	 * @param pin
 	 */
 	public void digitalReadPollingStart(Integer pin) {
-		sendMsg(PINMODE, pin, INPUT);
-		sendMsg(DIGITAL_READ_POLLING_START, pin, 0); // last param is not
-		// used in read
+		sendMsg(ArduinoMsgCodec.PIN_MODE, pin, INPUT);
+		sendMsg(ArduinoMsgCodec.DIGITAL_READ_POLLING_START, pin);
 	}
 
+	/**
+	 * stop polling the selected pin
+	 * 
+	 * @param pin
+	 */
 	public void digitalReadPollingStop(Integer pin) {
-		sendMsg(DIGITAL_READ_POLLING_STOP, pin, 0); // last param is not used
-		// in read
+		sendMsg(ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP, pin);
 	}
 
 	public void digitalWrite(Integer address, Integer value) {
 		info("digitalWrite (%d,%d) to %s", address, value, serial.getName());
-		sendMsg(DIGITAL_WRITE, address, value);
+		sendMsg(ArduinoMsgCodec.DIGITAL_WRITE, address, value);
 		pinList.get(address).value = value;
 	}
 
 	public void disconnect() {
 		serial.disconnect();
+		if (reader != null) {
+			reader.interrupt();
+			reader = null;
+		}
 	}
 
 	public String getBoardType() {
@@ -461,12 +448,19 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		return serial;
 	}
 
-	// FIXME - put in interface - use the last octet
+	/**
+	 * GOOD DESIGN !! - blocking version of getVersion - blocks on
+	 * publishVersion method returns null if 1 second timeout is reached.
+	 * 
+	 * This is a good pattern for future blocking methods.
+	 * 
+	 * @return
+	 */
 	public Integer getVersion() {
 		try {
-			blockingData.clear();
-			sendMsg(GET_MRLCOMM_VERSION, 0, 0);
-			mrlcommVersion = (Integer) blockingData.poll(1000, TimeUnit.MILLISECONDS);
+			versionQueue.clear();
+			sendMsg(ArduinoMsgCodec.GET_VERSION, 0, 0);
+			mrlcommVersion = (Integer) versionQueue.poll(1000, TimeUnit.MILLISECONDS);
 
 		} catch (Exception e) {
 			Logging.logException(e);
@@ -479,15 +473,11 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			info(String.format("connected %s responded version %s ... goodtimes...", serial.getName(), mrlcommVersion));
 		}
 
-		invoke("publishVersion", mrlcommVersion);
 		return mrlcommVersion;
 	}
 
 	public boolean isConnected() {
-		// I know not normalized
-		// but we have to do this - since
-		// the SerialDevice is transient
-		return connected;
+		return serial.isConnected();
 	}
 
 	@Override
@@ -521,13 +511,13 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		if (Motor.TYPE_LPWM_RPWM.equals(motor.type)) {
 			motor.pwmLeft = pwmPin;
 			motor.pwmRight = dirPin;
-			sendMsg(PINMODE, motor.pwmLeft, OUTPUT);
-			sendMsg(PINMODE, motor.pwmRight, OUTPUT);
+			sendMsg(ArduinoMsgCodec.PIN_MODE, motor.pwmLeft, OUTPUT);
+			sendMsg(ArduinoMsgCodec.PIN_MODE, motor.pwmRight, OUTPUT);
 		} else {
 			motor.pwmPin = pwmPin;
 			motor.dirPin = dirPin;
-			sendMsg(PINMODE, motor.pwmPin, OUTPUT);
-			sendMsg(PINMODE, motor.dirPin, OUTPUT);
+			sendMsg(ArduinoMsgCodec.PIN_MODE, motor.pwmPin, OUTPUT);
+			sendMsg(ArduinoMsgCodec.PIN_MODE, motor.dirPin, OUTPUT);
 		}
 
 		motor.broadcastState();
@@ -550,16 +540,16 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 		if (Motor.TYPE_LPWM_RPWM.equals(motor.type)) {
 			if (powerLevel < 0) {
-				sendMsg(ANALOG_WRITE, motor.pwmLeft, 0);
-				sendMsg(ANALOG_WRITE, motor.pwmRight, Math.abs((int) (powerLevel)));
+				sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmLeft, 0);
+				sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmRight, Math.abs((int) (powerLevel)));
 			} else {
-				sendMsg(ANALOG_WRITE, motor.pwmRight, 0);
-				sendMsg(ANALOG_WRITE, motor.pwmLeft, Math.abs((int) (powerLevel)));
+				sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmRight, 0);
+				sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmLeft, Math.abs((int) (powerLevel)));
 			}
 
 		} else {
-			sendMsg(DIGITAL_WRITE, motor.dirPin, (powerLevel < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
-			sendMsg(ANALOG_WRITE, motor.pwmPin, Math.abs((int) (powerLevel)));
+			sendMsg(ArduinoMsgCodec.DIGITAL_WRITE, motor.dirPin, (powerLevel < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
+			sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmPin, Math.abs((int) (powerLevel)));
 		}
 
 	}
@@ -570,47 +560,41 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	}
 
+	// ----------- motor controller api begin ----------------
+	// very old problem - how much logic in controller versus motor
+	// the concept of a 2 pin controller is pretty ubiquitous and probably
+	// should be in the motor
+
 	/**
-	 * callback for Serial service - local (not remote)
+	 * Callback for Serial service - local (not remote)
+	 * although a publish/subscribe could be created - this method is
+	 * called by a thread waiting on the Serial's RX BlockingQueue
 	 * 
-	 * FIXME - design problem of calling the function with a single byte
-	 * repeatedly is slow - best to have an "event" then read as many as
-	 * possible
+	 * Other services may use the same technique or subscribe to a Serial's
+	 * publishByte method
 	 * 
-	 * POLL vs Block ?
+	 * it might be worthwhile to look in optimizing reads into arrays
+	 * vs single byte processing .. but maybe there would be no gain
+	 * 
 	 */
 
 	@Override
 	public void onByte(Integer newByte) {
-		/*
-		 * switch (event.getEventType()) { case SerialDeviceEvent.BI: case
-		 * SerialDeviceEvent.OE: case SerialDeviceEvent.FE: case
-		 * SerialDeviceEvent.PE: case SerialDeviceEvent.CD: case
-		 * SerialDeviceEvent.CTS: case SerialDeviceEvent.DSR: case
-		 * SerialDeviceEvent.RI: case SerialDeviceEvent.OUTPUT_BUFFER_EMPTY:
-		 * break; case SerialDeviceEvent.DATA_AVAILABLE:
-		 */
 
-		// at this point we should have a complete message
-		// the msg contains only daat // METHOD | P0 | P1 ... | PN
-
-		// msg buffer
-		// msg[0] METHOD
-		// msg[1] P0
-		// msg[2] P1
-		// ...
-		// msg[N] PN+1
 		try {
 
-			/*
-			 * DON'T EVER MAKE THIS NON-MONOLITHIC ! - the overhead of going
-			 * into another method is high and will end up loss of data in
-			 * serial communications !
+			log.info("here");
+
+			/**
+			 * Archtype InputStream read - rxtxLib does not have this
+			 * straightforward design, but the details of how it behaves is is
+			 * handled in the Serial service and we are given a unified
+			 * interface
 			 * 
-			 * Optimize this as much as possible !
+			 * The "read()" is data taken from a blocking queue in the Serial
+			 * service. If we want to support blocking functions in Arduino then
+			 * we'll "publish" to our local queues
 			 */
-			// FIXME - DO NOT USE THIS - USE PUB / SUB !! its more effecient
-			// anyway
 			while (serial.isConnected() && (newByte = serial.read()) > -1) {
 
 				++byteCount;
@@ -651,29 +635,28 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 					// log.info(String.format("%d", msg[1]));
 					switch (function) {
 
-					case MRLCOMM_ERROR: {
+					case ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR: {
 						++error_mrl_to_arduino_rx_cnt;
 						error("MRL->Arduino2 rx %d type %d", error_mrl_to_arduino_rx_cnt, msg[1]);
 						break;
 					}
 
-					case GET_MRLCOMM_VERSION: {
+					case ArduinoMsgCodec.PUBLISH_VERSION: {
 						// TODO - get vendor version
 						// String version = String.format("%d", msg[1]);
-						blockingData.add((int) msg[1] & 0xff);
+						versionQueue.add((int) msg[1] & 0xff);
 						invoke("publishVersion", (int) msg[1] & 0xff);
 						break;
 					}
-					case PULSE_IN: {
+					// FIXME PUBLISH_PULSE_IN
+					case ArduinoMsgCodec.PUBLISH_PULSE: {
 						// extract signed Java long from byte array offset 1
 						// - length 4 :P
-						// FIXME dangerous - your re-using Version's
-						// blockingData :P
 						Integer pulse = Serial.bytesToInt(msg, 1, 4);
-						blockingData.add(pulse);
+						pulseQueue.add(pulse);
 						break;
 					}
-					case ANALOG_VALUE: {
+					case ArduinoMsgCodec.PUBLISH_PIN: {
 						// Pin p = new Pin(msg[1], msg[0], (((msg[2] & 0xFF)
 						// << 8) + (msg[3] & 0xFF)), getName());
 						// FIXME
@@ -682,25 +665,21 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 						invoke("publishPin", pin);
 						break;
 					}
-					case DIGITAL_VALUE: {
-						Pin pin = pinList.get(msg[1]);
-						pin.value = msg[2];
-						invoke("publishPin", pin);
-						break;
-					}
+					/*
+					 * case ArduinoMsgCodec.PUBLISH_DIGITAL_VALUE: { Pin pin =
+					 * pinList.get(msg[1]); pin.value = msg[2];
+					 * invoke("publishPin", pin); break; }
+					 */
 
-					case LOAD_TIMING_EVENT: {
+					case ArduinoMsgCodec.PUBLISH_LOAD_TIMING_EVENT: {
 
 						long microsPerLoop = Serial.bytesToInt(msg, 1, 4);
 						info("load %d us", microsPerLoop);
-						// log.info(String.format(" index %d type %d cur %d target %d",
-						// servoIndex, eventType, currentPos & 0xff,
-						// targetPos & 0xff));
 						// invoke("publishPin", pin);
 						break;
 					}
 
-					case SERVO_EVENT: {
+					case ArduinoMsgCodec.PUBLISH_SERVO_EVENT: {
 
 						int index = msg[1];
 						int eventType = msg[2];
@@ -716,22 +695,19 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 						break;
 					}
 
-					case SENSOR_DATA: {
-						int index = (int) msg[1];
-						SensorData sd = sensorsIndex.get(index);
-						sd.duration = Serial.bytesToInt(msg, 2, 4);
-						// HMM WAY TO GO - is NOT to invoke its own but
-						// invoke publishSensorData on Sensor
-						// since its its own service
-						// invoke("publishSensorData", sd);
-						// NICE !! - force sensor to have publishSensorData
-						// or publishRange in interface !!!
-						// sd.sensor.invoke("publishRange", sd);
-						sd.sensor.invoke("publishRange", sd.duration);
-						break;
-					}
+					/*
+					 * case ArduinoMsgCodec.PUBLISH_SENSOR_DATA: { int index =
+					 * (int) msg[1]; SensorData sd = sensorsIndex.get(index);
+					 * sd.duration = Serial.bytesToInt(msg, 2, 4); // HMM WAY TO
+					 * GO - is NOT to invoke its own but // invoke
+					 * publishSensorData on Sensor // since its its own service
+					 * // invoke("publishSensorData", sd); // NICE !! - force
+					 * sensor to have publishSensorData // or publishRange in
+					 * interface !!! // sd.sensor.invoke("publishRange", sd);
+					 * sd.sensor.invoke("publishRange", sd.duration); break; }
+					 */
 
-					case STEPPER_EVENT: {
+					case ArduinoMsgCodec.PUBLISH_STEPPER_EVENT: {
 
 						int eventType = msg[1];
 						int index = msg[2];
@@ -746,7 +722,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 						break;
 					}
 
-					case CUSTOM_MSG: {
+					case ArduinoMsgCodec.PUBLISH_CUSTOM_MSG: {
 
 						// msg or data is of size byteCount
 						int paramCnt = msg[1];
@@ -821,11 +797,6 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	}
 
-	// ----------- motor controller api begin ----------------
-	// very old problem - how much logic in controller versus motor
-	// the concept of a 2 pin controller is pretty ubiquitous and probably
-	// should be in the motor
-
 	public void onCustomMsg(Integer ax, Integer ay, Integer az) {
 		log.info("here");
 	}
@@ -840,7 +811,19 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	public void pinMode(Integer address, Integer value) {
 		log.info(String.format("pinMode(%d,%d) to %s", address, value, serial.getName()));
-		sendMsg(PINMODE, address, value);
+		sendMsg(ArduinoMsgCodec.PIN_MODE, address, value);
+	}
+
+	public Object[] publishCustomMsg(Object[] data) {
+		return data;
+	}
+
+	public Long publishLoadTimingEvent(Long us) {
+		return us;
+	}
+
+	public Integer publishMRLCommError(Integer code) {
+		return code;
 	}
 
 	/**
@@ -854,11 +837,43 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		return p;
 	}
 
-	public Integer publishVersion(Integer version) {
-		return version;
+	/**
+	 * GOOD ! - asynchronous call-back for a pulseIn, it can be subscribed to,
+	 * or with the blocking queue a different thread can use it as a blocking
+	 * call
+	 * 
+	 * Easy testing can be accomplished by using the blocking pulseIn which
+	 * utilizes the queue
+	 * 
+	 * @param data
+	 * @return
+	 */
+	public Integer publishPulse(Integer data) {
+		pulseQueue.add(data);
+		return data;
+	}
+
+	public int publishServoEvent(Integer pos) {
+		return pos;
+	}
+
+	public SensorData publishSesorData(SensorData data) {
+		return data;
 	}
 
 	// ----------- motor controller api end ----------------
+
+	public StepperData publishStepperEvent(StepperData data) {
+		return data;
+	}
+
+	public Pin publishTrigger(Pin pin) {
+		return pin;
+	}
+
+	public Integer publishVersion(Integer version) {
+		return version;
+	}
 
 	// often used as a ping echo pulse - timing is critical
 	// so it has to be done on the uC .. therefore
@@ -868,16 +883,30 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		return pulseIn(trigPin, echoPin, HIGH, 1000);
 	}
 
+	// ----------- MotorController API End ----------------
+
+	/**
+	 * The pulseIn - does not use the Arduino language "pulseIn" because that
+	 * method blocks. We don't want to be blocked inside of MRLComm ! But for
+	 * convenience the elves have created a blocking pulseIn which works with
+	 * the asynchronous event and non-blocking pulseIn in MRLComm
+	 * 
+	 * @param trigPin
+	 * @param echoPin
+	 * @param value
+	 * @param timeout
+	 * @return
+	 */
 	// FIXME - rather application specific - possible to add variable delays on
 	// trigger
 	// and echo
 	public int pulseIn(int trigPin, int echoPin, int value, int timeout) {
 		try {
 			if (serial != null) {
-				blockingData.clear();
-				sendMsg(PULSE_IN, trigPin, echoPin, value, timeout);
+				pulseQueue.clear();
+				sendMsg(ArduinoMsgCodec.PULSE_IN, trigPin, echoPin, value, timeout);
 				// downstream longer timeout than upstream
-				Integer pulse = (Integer) blockingData.poll(250 + timeout, TimeUnit.MILLISECONDS);
+				Integer pulse = (Integer) pulseQueue.poll(250 + timeout, TimeUnit.MILLISECONDS);
 				if (pulse == null) {
 					return 0;
 				}
@@ -900,8 +929,6 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		return pulseIn(trigPin, echoPin, value, timeout);
 	}
 
-	// ----------- MotorController API End ----------------
-
 	public long pulseIn(int trigPin, int echoPin, Integer timeout) {
 
 		if (timeout != null) {
@@ -918,6 +945,8 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		sleep(300);
 		disconnect();
 	}
+
+	// -- StepperController begin ----
 
 	/**
 	 * MRL protocol method
@@ -980,8 +1009,6 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		return sensorAttach(sensor);
 	}
 
-	// -- StepperController begin ----
-
 	public synchronized int sensorAttach(UltrasonicSensor sensor) {
 		String sensorName = sensor.getName();
 		log.info(String.format("sensorAttach %s", sensorName));
@@ -1009,7 +1036,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			sensorIndex = sensors.size();
 
 			// attach index pin
-			sendMsg(SENSOR_ATTACH, sensorIndex, SENSOR_ULTRASONIC, sensor.getTriggerPin(), sensor.getEchoPin());
+			sendMsg(ArduinoMsgCodec.SENSOR_ATTACH, sensorIndex, SENSOR_ULTRASONIC, sensor.getTriggerPin(), sensor.getEchoPin());
 
 			SensorData sd = new SensorData();
 			sd.sensor = sensor;
@@ -1031,7 +1058,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			return false;
 		}
 		int index = sensors.get(name).sensorIndex;
-		sendMsg(SENSOR_POLLING_START, index, timeoutMS);
+		sendMsg(ArduinoMsgCodec.SENSOR_POLLING_START, index, timeoutMS);
 		return true;
 	}
 
@@ -1042,7 +1069,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			return false;
 		}
 		int index = sensors.get(name).sensorIndex;
-		sendMsg(SENSOR_POLLING_STOP, index);
+		sendMsg(ArduinoMsgCodec.SENSOR_POLLING_STOP, index);
 		return true;
 	}
 
@@ -1096,10 +1123,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			payload[i + 3] = 0xFF & ascii[i];
 		}
 
-		// attach index pin
-		// sendMsg(SERVO_ATTACH, index, pin, servoName.length(), servoName.get);
-		// sendMsg(function, params)
-		sendMsg(SERVO_ATTACH, payload);
+		sendMsg(ArduinoMsgCodec.SERVO_ATTACH, payload);
 
 		ServoData sd = new ServoData();
 		sd.pin = pin;
@@ -1128,7 +1152,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 		if (servos.containsKey(servoName)) {
 			ServoData sd = servos.get(servoName);
-			sendMsg(SERVO_DETACH, sd.servoIndex, 0);
+			sendMsg(ArduinoMsgCodec.SERVO_DETACH, sd.servoIndex, 0);
 			// FIXME - simplify remove
 			// sd.servo.setController((ServoController)null);
 			// FIXME !!! - DON'T REMOVE !!!
@@ -1148,20 +1172,20 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	}
 
 	@Override
-	public void servoStop(String servoName) {
-		// FIXME DEPRECATE OR IMPLEMENT
-		// sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
-	}
-
-	@Override
-	public void servoSweep(String servoName, int min, int max, int step) {
+	public void servoSweepStart(String servoName, int min, int max, int step) {
 		if (!servos.containsKey(servoName)) {
 			warn("Servo %s not attached to %s", servoName, getName());
 			return;
 		}
 		int index = servos.get(servoName).servoIndex;
 		log.info(String.format("servoSweep %s index %d min %d max %d step %d", servoName, index, min, max, step));
-		sendMsg(SERVO_SWEEP_START, index, min, max, step);
+		sendMsg(ArduinoMsgCodec.SERVO_SWEEP_START, index, min, max, step);
+	}
+
+	@Override
+	public void servoSweepStop(String servoName) {
+		int index = servos.get(servoName).servoIndex;
+		sendMsg(ArduinoMsgCodec.SERVO_SWEEP_STOP, index);
 	}
 
 	@Override
@@ -1173,7 +1197,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 		int index = servos.get(servoName).servoIndex;
 		log.info(String.format("servoWrite %s %d index %d", servoName, newPos, index));
-		sendMsg(SERVO_WRITE, index, newPos);
+		sendMsg(ArduinoMsgCodec.SERVO_WRITE, index, newPos);
 	}
 
 	// FIXME - not "servo" .. just writeMicroseconds
@@ -1191,7 +1215,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 		log.info(String.format("writeMicroseconds %s %d index %d", servoName, newPos, index));
 
-		sendMsg(SERVO_WRITE_MICROSECONDS, index, newPos);
+		sendMsg(ArduinoMsgCodec.SERVO_WRITE_MICROSECONDS, index, newPos);
 
 	}
 
@@ -1202,11 +1226,30 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		return board;
 	}
 
+	/**
+	 * Debounce ensures that only a single signal will be acted upon for a
+	 * single opening or closing of a contact. the delay is the min number of pc
+	 * cycles must occur before a reading is taken
+	 * 
+	 * Affects all reading of pins setting to 0 sets it off
+	 * 
+	 * @param delay
+	 */
+	public void setDebounce(int delay) {
+		if (delay < 0 || delay > 32767) {
+			error(String.format("%d debounce delay must be 0 < delay < 32767", delay));
+		}
+		int lsb = delay & 0xff;
+		int msb = (delay >> 8) & 0xff;
+		sendMsg(ArduinoMsgCodec.SET_DEBOUNCE, msb, lsb);
+
+	}
+
 	public void setDigitalTriggerOnly(Boolean b) {
 		if (!b)
-			sendMsg(DIGITAL_TRIGGER_ONLY, FALSE);
+			sendMsg(ArduinoMsgCodec.SET_DIGITAL_TRIGGER_ONLY, FALSE);
 		else
-			sendMsg(DIGITAL_TRIGGER_ONLY, TRUE);
+			sendMsg(ArduinoMsgCodec.SET_DIGITAL_TRIGGER_ONLY, TRUE);
 
 	}
 
@@ -1214,9 +1257,9 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		log.info(String.format("setLoadTimingEnabled %b", enable));
 
 		if (enable) {
-			sendMsg(SET_LOAD_TIMING_ENABLED, TRUE);
+			sendMsg(ArduinoMsgCodec.SET_LOAD_TIMING_ENABLED, TRUE);
 		} else {
-			sendMsg(SET_LOAD_TIMING_ENABLED, FALSE);
+			sendMsg(ArduinoMsgCodec.SET_LOAD_TIMING_ENABLED, FALSE);
 		}
 
 		return enable;
@@ -1251,7 +1294,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			prescalarValue = 0x03;
 		}
 
-		sendMsg(SET_PWM_FREQUENCY, address, prescalarValue);
+		sendMsg(ArduinoMsgCodec.SET_PWMFREQUENCY, address, prescalarValue);
 	}
 
 	/**
@@ -1268,9 +1311,13 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		}
 		int lsb = rate & 0xff;
 		int msb = (rate >> 8) & 0xff;
-		sendMsg(SET_SAMPLE_RATE, msb, lsb);
+		sendMsg(Arduino.SET_SAMPLE_RATE, msb, lsb);
 
 		return rate;
+	}
+
+	public void setSerialRate(int rate) {
+		sendMsg(ArduinoMsgCodec.SET_SERIAL_RATE, rate);
 	}
 
 	public boolean setServoEventsEnabled(String servoName, boolean enable) {
@@ -1279,9 +1326,9 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			ServoData sd = servos.get(servoName);
 
 			if (enable) {
-				sendMsg(SERVO_EVENTS_ENABLE, sd.servoIndex, TRUE);
+				sendMsg(ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED, sd.servoIndex, TRUE);
 			} else {
-				sendMsg(SERVO_EVENTS_ENABLE, sd.servoIndex, FALSE);
+				sendMsg(ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED, sd.servoIndex, FALSE);
 			}
 
 			return true;
@@ -1290,18 +1337,13 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		return false;
 	}
 
-	// --- stepper begin ---
-	// FIXME - relatively clean interface BUT - ALL THIS LOGIC SHOULD BE IN
-	// STEPPER NOT ARDUINO !!!
-	// SO STEPPER MUST NEED TO KNOW ABOUT CONTROLLER TYPE
-
 	@Override
 	public void setServoSpeed(String servoName, Float speed) {
 		if (speed == null || speed < 0.0f || speed > 1.0f) {
 			error("speed %f out of bounds", speed);
 			return;
 		}
-		sendMsg(SET_SERVO_SPEED, servos.get(servoName).servoIndex, (int) (speed * 100));
+		sendMsg(ArduinoMsgCodec.SET_SERVO_SPEED, servos.get(servoName).servoIndex, (int) (speed * 100));
 	}
 
 	@Override
@@ -1310,26 +1352,67 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	}
 
+	/**
+	 * set a pin trigger where a value will be sampled and an event will be
+	 * signal when the pin turns into a different state.
+	 * 
+	 * @param pin
+	 * @param value
+	 * @return
+	 */
+	public int setTrigger(int pin, int value) {
+		return setTrigger(pin, value, 1);
+	}
+
+	/**
+	 * set a pin trigger where a value will be sampled and an event will be
+	 * signal when the pin turns into a different state.
+	 * 
+	 * @param pin
+	 * @param value
+	 * @param type
+	 * @return
+	 */
+	public int setTrigger(int pin, int value, int type) {
+		sendMsg(ArduinoMsgCodec.SET_TRIGGER, pin, type);
+		return pin;
+	}
+
+	/**
+	 * send a reset to Arduino - all polling is stopped and all other counters
+	 * are reset
+	 * 
+	 * TODO - reset servos ? motors ? etc. ?
+	 */
 	public void softReset() {
 		sendMsg(SOFT_RESET, 0, 0);
 	}
 
 	public void startService() {
 		super.startService();
-		serial.startService();
+		if (serial != null){
+			serial.startService();
+		}
+		// This "could" be done.
+		// but its not
+		// The Arduino & Serial have a very tight binding
+		// You can not have an Arduino without a Serial
+		// with addByteListener/publishRX & onByte(data) - you "could" have the
+		// arduino
+		// remote from the Serial.. the downside of this is, the Arduino's InBox
+		// get
+		// a very large amount of data - potentially crowding out
+		// "command & control" messages
+		// So we will do a "tighter" itegration - where Arduino reads data from
+		// Serial's blocking
+		// queue on a seperate thread
+		// serial.addByteListener(this);
 		try {
 			serial.setFormat("arduino");
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
 	}
-
-	/*
-	 * public void setDisplayFormatter(){ serial.setDisplayFormatter(new
-	 * ArduinoFormatter()); }
-	 */
-
-	// --- stepper end ---
 
 	public boolean stepperAttach(StepperControl stepper) {
 		String stepperName = stepper.getName();
@@ -1363,7 +1446,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			}
 
 			// attach index pin
-			sendMsg(STEPPER_ATTACH, index, type, pins[0], pins[1]);
+			sendMsg(ArduinoMsgCodec.STEPPER_ATTACH, index, type, pins[0], pins[1]);
 
 			stepper.setIndex(index);
 
@@ -1388,13 +1471,6 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		return stepperAttach(stepper);
 	}
 
-	// String functions to interface are important
-	// Interfaces should support both - "real" references and "String"
-	// references
-	// the String reference just "gets" the real reference - but this is
-	// important
-	// to support all protocols
-
 	@Override
 	public boolean stepperDetach(String name) {
 		// TODO Auto-generated method stub
@@ -1417,7 +1493,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		int lsb = newPos & 0xff;
 		int msb = (newPos >> 8) & 0xff;
 
-		sendMsg(STEPPER_MOVE, stepper.getIndex(), msb, lsb);
+		sendMsg(ArduinoMsgCodec.STEPPER_MOVE, stepper.getIndex(), msb, lsb);
 
 		// TODO - call back event - to say arrived ?
 
@@ -1428,7 +1504,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	@Override
 	public void stepperReset(String stepperName) {
 		StepperControl stepper = steppers.get(stepperName);
-		sendMsg(STEPPER_RESET, stepper.getIndex());
+		sendMsg(ArduinoMsgCodec.STEPPER_RESET, stepper.getIndex());
 	}
 
 	@Override
@@ -1445,16 +1521,12 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	public void stepperStop(String name) {
 		StepperControl stepper = steppers.get(name);
-		sendMsg(STEPPER_STOP, stepper.getIndex());
+		sendMsg(ArduinoMsgCodec.STEPPER_STOP, stepper.getIndex());
 	}
 
 	public void stopService() {
 		super.stopService();
-		serial.stopService();
-	}
-
-	public Integer publishMRLCommError(Integer code) {
-		return code;
+		disconnect();
 	}
 
 	public Status test() {
@@ -1527,23 +1599,68 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 	}
 
+
 	public static void main(String[] args) {
 		try {
+
+			// TODO - sniff & save
+			// JUnit - Arduino Codec control files saved
 
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Arduino2 arduino = (Arduino2) Runtime.start("arduino", "Arduino2");
-			// log.info(Encoder.toJson(arduino.getMessageSet()));
-			String[] m = arduino.getDeclaredMethodNames();
-			Arrays.sort(m);
-			log.info(Encoder.toJson(m));
-			Python python = (Python) Runtime.start("python", "Python");
 			Runtime.start("gui", "GUIService");
+
 			// arduino.addCustomMsgListener(python);
 			// arduino.customEventListener = python;
-			// arduino.connect("COM15");
+			Serial serial = arduino.getSerial();
+			arduino.connect("COM12");
+			/*
+			final Serial uart = serial.createVirtualUART();
+			uart.write(new int[] {244,244,225,244});
+			*/
+			
+			log.info(String.format("%d", arduino.getVersion()));
+			arduino.digitalWrite(13, 0);
+			log.info(String.format("%d", arduino.getVersion()));
+			arduino.digitalWrite(13, 1);
+			log.info(String.format("%d", arduino.getVersion()));
+			arduino.digitalWrite(13, 1);
+			log.info(String.format("%d", arduino.getVersion()));
+			arduino.digitalWrite(13, 1);
+			log.info(String.format("%d", arduino.getVersion()));
+			
 
+			arduino.digitalWrite(13, 0);
+			arduino.digitalWrite(13, 1);
+			arduino.digitalWrite(13, 0);
+			
+			/*
+
+			new Thread() {
+				public void run() {
+					try {
+						Service.sleep(900);
+						ArduinoMsgCodec msgf = new ArduinoMsgCodec();
+						uart.write(msgf.encode("publishVersion/21\n"));
+					} catch (Exception e) {
+						Logging.logException(e);
+					}
+				}
+			}.start();
+			
+			*/
+
+			log.info(String.format("%d", arduino.getVersion()));
+
+			log.info(String.format("%d", arduino.getVersion()));
+
+			log.info(String.format("%d", arduino.getVersion()));
+
+			arduino.analogReadPollingStart(11);
+
+			arduino.analogReadPollingStop(11);
 			// arduino.test("COM15");
 
 			// blocking examples
@@ -1574,58 +1691,6 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
-	}
-
-	public void setSerialRate(int rate) {
-		sendMsg(SET_SERIAL_RATE, rate);
-	}
-
-	static {
-
-		tx.put(DIGITAL_WRITE, "digitalWrite");
-		rx.put(DIGITAL_VALUE, "publishPin"); // rx
-		tx.put(ANALOG_WRITE, "analogWrite");
-		rx.put(ANALOG_VALUE, "publishPin"); // rx <-- bad? 2 mapped to one FIXME
-											// ??
-		tx.put(PINMODE, "setPinMode");
-		rx.put(PULSE_IN, "digitalWrite"); // rx - adds to blocking data - but
-											// does not publish FIXME !! - is
-											// this overloaded tx/rx too ?? :P
-		tx.put(SERVO_ATTACH, "servoAttach");
-		tx.put(SERVO_WRITE, "servoWrite");
-		tx.put(SERVO_DETACH, "servoDetaach");
-		tx.put(SET_PWM_FREQUENCY, "setPWMFrequency");
-		tx.put(SET_SERVO_SPEED, "setServoSpeed"); // TO SIGNATURE ????
-		tx.put(ANALOG_READ_POLLING_START, "analogReadPollingStart");
-		tx.put(ANALOG_READ_POLLING_STOP, "analogReadPollingStop");
-		tx.put(DIGITAL_READ_POLLING_START, "digitalReadPollingStart");
-		tx.put(DIGITAL_READ_POLLING_STOP, "digitalReadPollingStop");
-		tx.put(SET_ANALOG_TRIGGER, "setAnalogTrigger"); // FIXME - implement
-		tx.put(REMOVE_ANALOG_TRIGGER, "removeAnalogTrigger"); // FIXME -
-																// implement
-		tx.put(SET_DIGITAL_TRIGGER, "setDigitalTrigger"); // FIXME - implement
-		tx.put(REMOVE_DIGITAL_TRIGGER, "removeDigitalTrigger"); // FIXME -
-																// implement
-
-		tx.put(SET_DEBOUNCE, "setDebounce");
-		tx.put(DIGITAL_TRIGGER_ONLY, "setDigitalTriggerOnly");
-		tx.put(SET_SERIAL_RATE, "digitalWrite");
-
-		tx.put(GET_MRLCOMM_VERSION, "getVersion");
-		tx.put(SET_SAMPLE_RATE, "setSampleRate");
-		tx.put(SERVO_WRITE_MICROSECONDS, "servoWriteMicroseconds");
-
-		rx.put(MRLCOMM_ERROR, "error"); // rx
-
-		// FIXME !! - implement - video + script + service page BOOYA
-		tx.put(PINGDAR_ATTACH, "pingdarAttach"); // NOOP
-		tx.put(PINGDAR_START, "pingdarStart"); // NOOP
-		tx.put(PINGDAR_STOP, "pingdarStop"); // NOOP
-		tx.put(PINGDAR_DATA, "pingdarData"); // NOOP
-
-		tx.put(SENSOR_ATTACH, "digitalWrite");
-		tx.put(DIGITAL_WRITE, "digitalWrite");
-
 	}
 
 }

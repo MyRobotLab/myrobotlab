@@ -12,7 +12,6 @@ public class HexCodec implements Codec {
 		return String.format("%02x%s", data & 0xff, displayDelimiter);
 	}
 
-
 	public byte[] parse(byte[] data, String format) {
 		ArrayList<Byte> bytes = new ArrayList<Byte>();
 		if ("hex".equals(format)) {
@@ -48,6 +47,18 @@ public class HexCodec implements Codec {
 
 	@Override
 	public String getCodecExt() {
+		return getKey();
+	}
+
+
+	@Override
+	public String decode(int[] msgs) throws CodecException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getKey() {
 		return "hex";
 	}
 

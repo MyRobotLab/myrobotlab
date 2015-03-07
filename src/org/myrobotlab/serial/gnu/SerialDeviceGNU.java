@@ -35,7 +35,7 @@ import org.slf4j.Logger;
  */
 public class SerialDeviceGNU implements SerialDevice, SerialPortEventListener {
 
-	public final static Logger log = LoggerFactory.getLogger(SerialDeviceGNU.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(SerialDeviceGNU.class);
 
 	private gnu.io.RXTXPort port;
 

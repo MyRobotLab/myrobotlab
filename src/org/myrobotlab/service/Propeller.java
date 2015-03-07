@@ -549,7 +549,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	}
 
 	@Override
-	public void servoSweep(String servoName, int min, int max, int step) { // delay
+	public void servoSweepStart(String servoName, int min, int max, int step) { // delay
 																			// /
 																			// speed
 																			// ?
@@ -1284,7 +1284,7 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	}
 
 	@Override
-	public void servoStop(String servoName) {
+	public void servoSweepStop(String servoName) {
 		// FIXME DEPRECATE OR IMPLEMENT
 		//sendMsg(SERVO_STOP_AND_REPORT, servos.get(servoName).servoIndex);
 	}
@@ -1685,6 +1685,13 @@ public class Propeller extends Service implements SerialDeviceEventListener, Sen
 	public boolean motorAttach(String motorName, String type, Integer pwrPin, Integer dirPin, Integer encoderPin) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+
+	@Override
+	public void write(int[] data) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 

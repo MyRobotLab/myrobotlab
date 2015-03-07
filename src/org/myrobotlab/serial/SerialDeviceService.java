@@ -16,11 +16,8 @@ public interface SerialDeviceService {
 	 *         over the network - the InputStream & OutputStream are transient
 	 */
 
-	// FIXME - should probably throw general Exception - and allow
-	// implementation a specific exception
-	// FIXME - connect versus open ? why its just another char dev ?
-	public boolean connect(String name); // left to the service to determine
-											// parameters
+	// FIXME - why "connect" versus InputStrea/OutputStream open ? 
+	public boolean connect(String name); 
 
 	public boolean connect(String name, int rate, int databits, int stopbits, int parity);
 
@@ -35,6 +32,10 @@ public interface SerialDeviceService {
 	public int read(byte[] data) throws Exception;
 
 	public int read() throws Exception;
+	
+	// FYI - PREVIOUS METHODS SUPPORT THE PARTIALLY GOOFY OUTPUTSTREAM INTERFACE
+	// - THIS ONE IS NOT PART OF OUTPUTSTREAM
+	public void write(int[] data) throws Exception;
 
 	// symmetric with "connect" - assumes flush & close
 	public void disconnect();

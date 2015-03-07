@@ -707,7 +707,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	@Override
-	public void servoSweep(String servoName, int min, int max, int step) { 
+	public void servoSweepStart(String servoName, int min, int max, int step) { 
 		if (!servos.containsKey(servoName)) {
 			warn("Servo %s not attached to %s", servoName, getName());
 			return;
@@ -1815,7 +1815,7 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 	}
 
 	@Override
-	public void servoStop(String servoName) {
+	public void servoSweepStop(String servoName) {
 		// FIXME prolly should stop speed controlled movement as well as sweep
 		sendMsg(SERVO_SWEEP_STOP, servos.get(servoName).servoIndex);
 	}
@@ -2255,6 +2255,12 @@ public class Arduino extends Service implements SerialDeviceEventListener, Senso
 		} catch (Exception e) {
 			Logging.logException(e);
 		}
+	}
+
+	@Override
+	public void write(int[] data) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 

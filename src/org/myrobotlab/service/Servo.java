@@ -448,7 +448,7 @@ public class Servo extends Service implements ServoControl {
 	public void sweep(int min, int max, int delay, int step, boolean oneWay) {
 		// CONTROLLER TYPE SWITCH
 		if (speedControlOnUC) {
-			controller.servoSweep(getName(), min, max, step); // delay & step
+			controller.servoSweepStart(getName(), min, max, step); // delay & step
 																// implemented
 		} else {
 			if (isSweeping) {
@@ -538,7 +538,7 @@ public class Servo extends Service implements ServoControl {
 	public void stop() {
 		isSweeping = false;
 		sweeper = null;
-		controller.servoStop(getName());
+		controller.servoSweepStop(getName());
 	}
 
 	public int setRest(int i) {

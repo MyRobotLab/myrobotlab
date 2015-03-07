@@ -67,7 +67,7 @@ public interface ServoController {
 	 */
 	void servoWrite(String servoName, Integer newPos);
 	
-	void servoSweep(String servoName, int min, int max, int step);
+	void servoSweepStart(String servoName, int min, int max, int step);
 
 
 	/**
@@ -89,7 +89,7 @@ public interface ServoController {
 
 	public void setServoSpeed(String servoName, Float speed);
 	
-	public void servoStop(String servoName);
+	public void servoSweepStop(String servoName);
 
 	public boolean setServoEventsEnabled(String servoName, boolean b);
 
