@@ -17,7 +17,18 @@ public class AsciiCodec implements Codec {
 
 	@Override
 	public String getCodecExt() {
-		return "asc";
+		return getKey().substring(0, 3);
+	}
+
+	@Override
+	public String decode(int[] msgs) throws CodecException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getKey() {
+		return "ascii";
 	}
 
 }

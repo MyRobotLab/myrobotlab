@@ -19,12 +19,16 @@ import org.slf4j.Logger;
 public class ArduinoBindingsGenerator {
 
 	public transient final static Logger log = LoggerFactory.getLogger(ArduinoBindingsGenerator.class);
+	
+	static TreeMap<String, Method> sorted = new TreeMap<String, Method>();
+	static StringBuilder ino = new StringBuilder("///// INO GENERATED DEFINITION BEGIN //////\n");
+	static StringBuilder javaDefines = new StringBuilder("\t///// java ByteToMethod generated definition - DO NOT MODIFY - Begin //////\n");
+	static StringBuilder javaBindingsInit = new StringBuilder();
+
 
 	public static void generateDefinitions() throws IOException {
 
 		HashMap<String,String> snr = new HashMap<String,String>();
-		
-		TreeMap<String, Method> sorted = new TreeMap<String, Method>();
 
 		Arduino2 arduino = (Arduino2) Runtime.start("arduino", "Arduino2");
 		Method[] m = arduino.getDeclaredMethods();
@@ -78,42 +82,43 @@ public class ArduinoBindingsGenerator {
 		// additionally force getversion and publishMRLCommError
 		// so that mis-matches of version are quickly reported...
 		except.add("getVersion");
+		except.add("publishVersion");
+		except.add("publishMRLCommError");
 		//except.add("E");
 		
-		// Arrays.sort(m);
-		StringBuilder ino = new StringBuilder("///// INO GENERATED DEFINITION BEGIN //////\n");
-		StringBuilder javaBindingsInit = new StringBuilder("///// java ByteToMethod generated definition - DO NOT MODIFY - Begin //////\n");
+		// getter & setters
+		except.add("setRXFormatter");
+		except.add("setTXFormatter");
+		except.add("getRXFormatter");
+		except.add("getTXFormatter");
+		except.add("getRXCodecKey");
+		except.add("getTXCodecKey");
+			
 
-		int index = 2;
+		int index = 0;
+		
+		++index;
+		createBindingsFor("publishMRLCommError", index);
+		++index;
+		createBindingsFor("getVersion", index);
+		++index;
+		createBindingsFor("publishVersion", index);
+		++index;
 		
 		for (String key : sorted.keySet()) {
 			if (except.contains(key)){
 				continue;
 			}
-			Method method = sorted.get(key);
-			StringBuilder msb = new StringBuilder(method.getName());
-			Class<?>[] params = method.getParameterTypes();
-			for (int j = 0; j < params.length; ++j) {
-				msb.append(String.format(" %s", params[j].toString()));
-			}
-
-			String methodSignatureComment = String.format("// {%s} \n", msb.toString());
 			
-			ino.append(methodSignatureComment);
-			ino.append(String.format("#define %s\t\t%d\n\n", Encoder.toUnderScore(method.getName()), index));
-			
-			javaBindingsInit.append(String.format("\t%s", methodSignatureComment));
-			javaBindingsInit.append(String.format("\tbyteToMethod.put(%d,\"%s\");\n", index, method.getName()));
-			javaBindingsInit.append(String.format("\tmethodToByte.put(\"%s\",%d);\n\n", method.getName(), index));
-			//javaByteToMethod.append(String.format("\tmethodToByte.put(%d,\"%s\");\n\n", index, method.getName()));			
+			createBindingsFor(key, index);
 			
 			++index;
 			// log.info(); // hmmm "class someclass" :(
 		}
 		
 		ino.append("///// INO GENERATED DEFINITION END //////\n");
-		javaBindingsInit.append("///// java ByteToMethod generated definition - DO NOT MODIFY - End //////\n");
 
+		snr.put("<%=java.defines%>", javaDefines.toString());
 		snr.put("<%=java.bindings.init%>", javaBindingsInit.toString());
 		snr.put("<%=mrlcomm.defines%>", ino.toString());
 		
@@ -126,8 +131,10 @@ public class ArduinoBindingsGenerator {
 		String MRLComm = FileIO.resourceToString("Arduino2/MRLComm.txt");
 		
 		for (String key : snr.keySet()){
-			ArduinoMsgCodec = ArduinoMsgCodec.replaceAll(key, snr.get(key));
-			MRLComm = MRLComm.replaceAll(key, snr.get(key));
+			ArduinoMsgCodec = ArduinoMsgCodec.replace(key, snr.get(key));
+			log.info(snr.get(key));
+			MRLComm = MRLComm.replace(key, snr.get(key));
+			//MRLComm = MRLComm.replaceAll(key, snr.get(key));
 		}
 		
 		
@@ -139,6 +146,29 @@ public class ArduinoBindingsGenerator {
 		// to define (upper with underscore)
 		
 		Runtime.exit();
+	}
+
+	public static void createBindingsFor(String key, int index) {
+
+		Method method = sorted.get(key);
+		StringBuilder msb = new StringBuilder(method.getName());
+		Class<?>[] params = method.getParameterTypes();
+		for (int j = 0; j < params.length; ++j) {
+			msb.append(String.format(" %s", params[j].getSimpleName()/*.toString()*/));
+		}
+
+		String methodSignatureComment = String.format("// {%s} \n", msb.toString());
+		
+		ino.append(methodSignatureComment);
+		String underscore = Encoder.toUnderScore(method.getName());
+		ino.append(String.format("#define %s\t\t%d\n\n", underscore, index));
+		
+		javaDefines.append(String.format("\t%s", methodSignatureComment));
+		javaDefines.append(String.format("\tpublic final static int %s =\t\t%d;\n\n", underscore, index));
+		javaBindingsInit.append(String.format("\t\tbyteToMethod.put(%s,\"%s\");\n", underscore, method.getName()));
+		javaBindingsInit.append(String.format("\t\tmethodToByte.put(\"%s\",%s);\n\n", method.getName(), underscore));
+		//javaByteToMethod.append(String.format("\tmethodToByte.put(%d,\"%s\");\n\n", index, method.getName()));	
+		
 	}
 
 	public static void main(String[] args) {

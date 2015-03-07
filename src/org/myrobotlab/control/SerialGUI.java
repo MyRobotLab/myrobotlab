@@ -89,8 +89,14 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	JButton sendFile = new JButton("send file");
 
 	Serial mySerial = null;
+	final SerialGUI myself;
+
+	// gui's formatters
 	Codec rxFormatter = new DecimalCodec();
 	Codec txFormatter = new DecimalCodec();
+
+	// Codec rxFormatter = null;
+	// Codec txFormatter = null;
 
 	// TODO
 	// save data to file button
@@ -100,6 +106,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 
 	public SerialGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
+		myself = this;
 		mySerial = (Serial) Runtime.getService(boundServiceName);
 	}
 
@@ -164,14 +171,42 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 				mySerial = serial;
 				setPortStatus();
 
+				try {
+					
+					// prevent re-firing the event :P
+					reqFormat.removeItemListener(myself);
+					
+					// WARNING
+					// don't use the same output formatters as the serial service
+					// they might have a different state when they are writing
+					// out to a file...
+					String key = mySerial.getRXCodecKey();
+					if (key != null && !key.equals(rxFormatter.getKey())) {
+						// create new formatter from type key
+						rxFormatter = CodecFactory.getDecoder(key);
+						// TODO - set the reqTXFormat box .. too lazy :P - hopefully
+						reqFormat.setSelectedItem(key);
+					}
+					key = mySerial.getTXCodecKey();
+					if (key != null && !key.equals(txFormatter.getKey())) {
+						// create new formatter from type key
+						txFormatter = CodecFactory.getDecoder(key);
+					}
+					
+					reqFormat.addItemListener(myself);
+
+				} catch (Exception e) {
+					Logging.logException(e);
+				}
+
 				if (!serial.isRecording()) {
 					// captureRX.setText(serial.getRXFileName()); } else {
 					record.setText("record");
 				} else {
 					record.setText("stop recording");
 				}
-				
-				//if (mySerial.getRXFormatter())
+
+				// if (mySerial.getRXFormatter())
 			}
 		});
 	}
@@ -214,7 +249,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	 * 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
 	 * 
 	 * @param data
-	 * @throws CodecException 
+	 * @throws CodecException
 	 */
 	public final void publishRX(final Integer data) throws CodecException {
 		++rxCount;
@@ -223,9 +258,11 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width
 		 * != null && rxCount % width == 0) { rx.append("\n"); }
 		 */
+		/* FIXME FIXME FIXME THE CODEC SHOULD FORMAT !!!!! 
 		if (width != null && rxCount % width == 0) {
 			rx.append("\n");
 		}
+		*/
 		rxTotal.setText(String.format("%d", rxCount));
 	}
 
@@ -236,9 +273,11 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width
 		 * != null && txCount % width == 0) { tx.append("\n"); }
 		 */
+		/* FIXME FIXME FIXME THE CODEC SHOULD FORMAT !!!!! 
 		if (width != null && txCount % width == 0) {
 			tx.append("\n");
 		}
+		*/
 		txTotal.setText(String.format("%d", txCount));
 	}
 

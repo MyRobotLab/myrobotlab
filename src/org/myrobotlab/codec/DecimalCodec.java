@@ -19,7 +19,20 @@ public class DecimalCodec implements Codec {
 
 	@Override
 	public String getCodecExt() {
-		return "dec";
+		return getKey().substring(0, 3);
 	}
+
+	@Override
+	public String decode(int[] msgs) throws CodecException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getKey() {
+		// TODO Auto-generated method stub
+		return "decimal";
+	}
+
 
 }
