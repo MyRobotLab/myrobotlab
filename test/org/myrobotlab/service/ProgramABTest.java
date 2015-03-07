@@ -12,13 +12,21 @@ public class ProgramABTest {
 
 		String botName = "lloyd";
 		String session = "testUser";
-		String path = "C:/dev/workspace.kmw/myrobotlab/ProgramAB";
+		String path = "test/ProgramAB";
 		ProgramAB testService = new ProgramAB("lloyd");
 		testService.startService();
 		testService.startSession(path, session, botName);
-		Response resp = testService.getResponse(session, "Hello");
+		Response resp = testService.getResponse(session, "time test");
+		try {
+			Thread.sleep(61000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		resp = testService.getResponse(session, "BORING TIME");
 		System.out.println(resp.msg);
-		assertEquals("I have no answer for that.", resp.msg);
+		assertEquals("My Default Response 3.", resp.msg);
 		
 	}
 }

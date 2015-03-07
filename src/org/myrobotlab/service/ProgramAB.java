@@ -169,6 +169,12 @@ public class ProgramAB extends Service implements TextListener,TextPublisher {
 		}
 		log.info("AIMLIF FILES:");
 		folder = new File(aimlIFPath);
+		if (!folder.exists()) {
+			// TODO: throw an exception warn / log ?
+			log.info("aimlif directory missing,creating it. " + folder.getAbsolutePath());
+			folder.mkdirs();
+			return;
+		}
 		for (File f : folder.listFiles()) {
 			log.info(f.getAbsolutePath());
 			// TODO: better stripping of the file extension
