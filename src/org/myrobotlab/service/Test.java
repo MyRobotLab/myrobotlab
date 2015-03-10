@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
@@ -407,7 +409,24 @@ public class Test extends Service {
 	public String[] getCategories() {
 		return new String[] {"testing", "framework"};
 	}
+	
+	public Status arduinoTest(){
+		Status status = Status.info("testing arduino");
+		
+		Arduino2 arduino = (Arduino2)Runtime.start("arduino", "Arduino2");
+		
+		return status;
+	}
+	
+	BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
+	public Object subscribe(Object inData){
+		log.info("subscribe has received data");
+		log.info(String.format("Test.subscribed received %s", inData));
+		data.add(inData);
+		return inData;
+	}
+	
 	// save / load test !
 	
 	// TODO - subscribe to registered --> generates subscription to

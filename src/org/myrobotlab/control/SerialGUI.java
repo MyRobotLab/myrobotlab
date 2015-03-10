@@ -254,6 +254,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	public final void publishRX(final Integer data) throws CodecException {
 		++rxCount;
 		rx.append(rxFormatter.decode(data));
+		//rx.append(String.format("%s ", data));
 		/*
 		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width
 		 * != null && rxCount % width == 0) { rx.append("\n"); }

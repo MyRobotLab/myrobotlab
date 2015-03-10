@@ -25,10 +25,11 @@
 
 package org.myrobotlab.service.interfaces;
 
+
 public interface SerialDataListener {
 
 	// FIXME - Integer object because no method cache
-	public void onByte(Integer b);
+	public void onByte(Integer b) throws Exception;
 	public String getName();
 
 }

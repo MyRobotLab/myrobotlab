@@ -63,9 +63,9 @@ public class Serial extends Service implements QueueSource, SerialDeviceService,
 			this.type = type;
 		}
 
-		public Port(Serial serial, String name, InputStream inputStream, OutputStream outputStream, int rate, int databits, int stopbits, int parity, String type)
+		public Port(Serial serial, String name, InputStream in, OutputStream out, int rate, int databits, int stopbits, int parity, String type)
 				throws IOException {
-			this(serial, name, inputStream, outputStream, type);
+			this(serial, name, in, out, type);
 			this.rate = rate;
 			this.databits = databits;
 			this.stopbits = stopbits;
@@ -89,13 +89,13 @@ public class Serial extends Service implements QueueSource, SerialDeviceService,
 		 */
 		public void run() {
 			listening = true;
-			int newByte = -1;
+			Integer newByte = -1;
 			try {
 				while (listening && ((newByte = in.read()) != -1)) {
-					myService.processRxByte(newByte);
-					log.info(String.format("%d",newByte));
+					myService.onByte(newByte);
+					//log.info(String.format("%d",newByte));
 				}
-				log.info(String.format("%d", newByte));
+				log.info(String.format("Port %d", newByte));
 			} catch (Exception e) {
 				Logging.logException(e);
 			} finally {
@@ -302,13 +302,7 @@ public class Serial extends Service implements QueueSource, SerialDeviceService,
 	@Override
 	public boolean connect(String name, int rate, int databits, int stopbits, int parity) {
 		if (ports.containsKey(name)) {
-			error("%s already connected - disconnect first", name); // FIXME -
-																	// this is
-																	// contractual
-																	// - must
-																	// remove if
-																	// disconnect
-																	// then...
+			info("%s already connected - disconnect first", name); 
 			return true;
 		}
 
@@ -539,6 +533,7 @@ public class Serial extends Service implements QueueSource, SerialDeviceService,
 	 * 
 	 * readFromPublishedByte is a catch mechanism to verify tests
 	 */
+/* ---- RECENT REFACTOR - MERGING METHODS ---	
 	@Override
 	public void onByte(Integer b) {
 		log.info(String.format("%d", b));
@@ -547,6 +542,7 @@ public class Serial extends Service implements QueueSource, SerialDeviceService,
 			testOnByte.notify();
 		}
 	}
+-->	
 
 	/**
 	 * Process the incoming de-muxed byte from one of the input streams Possible
@@ -556,7 +552,7 @@ public class Serial extends Service implements QueueSource, SerialDeviceService,
 	 * @throws IOException
 	 * @throws CodecException
 	 */
-	public final void processRxByte(int newByte) throws IOException, CodecException {
+	public final void onByte(Integer newByte) throws IOException, CodecException {
 		newByte = newByte & 0xff;
 		++rxCount;
 

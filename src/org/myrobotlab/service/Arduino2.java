@@ -89,6 +89,8 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			try {
 				listening = true;
 				while (listening) {
+					// TODO - good general design - needs to be pulled out of Arduino2
+					// and generalized ???? - ByteQueueListener - heh back to rxtxLib thread model ? :P
 					Integer i = queue.take();
 					listener.onByte(i);
 				}
@@ -152,7 +154,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	}
 
 	ByteReader reader = null;
-	ArduinoMsgCodec codec = new ArduinoMsgCodec();
+	//ArduinoMsgCodec codec = new ArduinoMsgCodec();
 
 	private static final long serialVersionUID = 1L;
 	public transient final static Logger log = LoggerFactory.getLogger(Arduino2.class);
@@ -459,7 +461,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	public Integer getVersion() {
 		try {
 			versionQueue.clear();
-			sendMsg(ArduinoMsgCodec.GET_VERSION, 0, 0);
+			sendMsg(ArduinoMsgCodec.GET_VERSION);
 			mrlcommVersion = (Integer) versionQueue.poll(1000, TimeUnit.MILLISECONDS);
 
 		} catch (Exception e) {
@@ -583,7 +585,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 		try {
 
-			log.info("here");
+			log.info(String.format("onByte %d", newByte));
 
 			/**
 			 * Archtype InputStream read - rxtxLib does not have this
@@ -595,7 +597,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 			 * service. If we want to support blocking functions in Arduino then
 			 * we'll "publish" to our local queues
 			 */
-			while (serial.isConnected() && (newByte = serial.read()) > -1) {
+//			while (serial.isConnected() && (newByte = serial.read()) > -1) {
 
 				++byteCount;
 
@@ -606,14 +608,14 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 						warn(String.format("Arduino2->MRL error - bad magic number %d - %d rx errors", newByte, ++error_arduino_to_mrl_rx_cnt));
 						// dump.setLength(0);
 					}
-					continue;
+					return;
 				} else if (byteCount == 2) {
 					// get the size of message
 					if (newByte > 64) {
 						byteCount = 0;
 						msgSize = 0;
 						error(String.format("Arduino2->MRL error %d rx sz errors", ++error_arduino_to_mrl_rx_cnt));
-						continue;
+						return;
 					}
 					msgSize = (byte) newByte.intValue();
 					// dump.append(String.format("MSG|SZ %d", msgSize));
@@ -783,7 +785,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 					msgSize = 0;
 					byteCount = 0;
 				}
-			} // while (serial.isOpen() && (newByte =
+//			} // while (serial.isOpen() && (newByte =
 				// serial.read()) > -1
 
 		} catch (Exception e) {
@@ -819,6 +821,7 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 	}
 
 	public Long publishLoadTimingEvent(Long us) {
+		log.info(String.format("publishLoadTimingEvent - %d", us));
 		return us;
 	}
 
@@ -1611,15 +1614,22 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 			Arduino2 arduino = (Arduino2) Runtime.start("arduino", "Arduino2");
 			Runtime.start("gui", "GUIService");
-
+			
 			// arduino.addCustomMsgListener(python);
 			// arduino.customEventListener = python;
 			Serial serial = arduino.getSerial();
-			arduino.connect("COM12");
-			/*
-			final Serial uart = serial.createVirtualUART();
-			uart.write(new int[] {244,244,225,244});
-			*/
+			serial.connectTCP("localhost", 9191);
+			arduino.connect(serial.getPortName());
+			
+			//arduino.connect("COM12");
+			
+			
+			//arduino.setLoadTimingEnabled(true);
+			
+			//final Serial uart = serial.createVirtualUART();
+			//uart.write(new int[] {244,244,225,244});
+			
+			
 			
 			log.info(String.format("%d", arduino.getVersion()));
 			arduino.digitalWrite(13, 0);
@@ -1658,10 +1668,16 @@ public class Arduino2 extends Service implements SensorDataPublisher, SerialData
 
 			log.info(String.format("%d", arduino.getVersion()));
 
-			arduino.analogReadPollingStart(11);
+			arduino.analogReadPollingStart(15);
 
-			arduino.analogReadPollingStop(11);
 			// arduino.test("COM15");
+			
+			arduino.setSampleRate(500);
+			arduino.setSampleRate(1000);
+			arduino.setSampleRate(5000);
+			arduino.setSampleRate(10000);
+		
+			arduino.analogReadPollingStop(15);
 
 			// blocking examples
 

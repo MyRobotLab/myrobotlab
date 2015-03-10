@@ -434,6 +434,8 @@ public class Arduino2GUI extends ServiceGUI implements  ActionListener, TabContr
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 
+				//log.info(String.format("%s",pin.toString()));
+				
 				if (!traceData.containsKey(pin.pin)) {
 					TraceData td = new TraceData();
 					float gradient = 1.0f / pinComponentList.size();
