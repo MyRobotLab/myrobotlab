@@ -1,7 +1,10 @@
 package org.myrobotlab.codec;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.myrobotlab.logging.Level;
@@ -27,7 +30,8 @@ public class ArduinoMsgCodec implements Codec, Serializable {
 	transient static final HashMap<Integer, String> byteToMethod = new HashMap<Integer, String>();
 	transient static final HashMap<String, Integer> methodToByte = new HashMap<String, Integer>();
 	int byteCount = 0;
-	int dMsgSize = 0;
+	//int dMsgSize = 0;
+	int  decodeMsgSize = 0;
 	StringBuilder rest = new StringBuilder();
 	
 	/////// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
@@ -339,6 +343,21 @@ public class ArduinoMsgCodec implements Codec, Serializable {
 	}
 	///// JAVA GENERATED DEFINITION END - DO NOT MODIFY //////
 	
+	//static public int instanceCount = 0;
+	
+	
+	public ArduinoMsgCodec(){
+		//++instanceCount;
+		
+	}
+	
+	static public String byteToMethod(int m){
+		if (byteToMethod.containsKey(m)) {
+			return byteToMethod.get(m);
+		}
+		return null;
+	}
+	
 	public String decode(int[] msgs) throws CodecException {
 		if (msgs == null) {
 			return new String("");
@@ -362,19 +381,22 @@ public class ArduinoMsgCodec implements Codec, Serializable {
 	 */
 	@Override
 	public String decode(int newByte) throws CodecException {
-
+		
+		log.info(String.format("byteCount %d", byteCount));
 		++byteCount;
 		if (byteCount == 1 && newByte != Arduino2.MAGIC_NUMBER) {
 			// reset - try again
 			rest.setLength(0);
 			byteCount = 0;
+			decodeMsgSize = 0;
+			
 			throw new CodecException("bad magic number %d", newByte);
 		}
 
 		if (byteCount == 2) {
 			// get the size of message
 			// todo check msg < 64 (MAX_MSG_SIZE)
-			dMsgSize = newByte;
+			decodeMsgSize = newByte;
 		}
 
 		// set method
@@ -388,13 +410,14 @@ public class ArduinoMsgCodec implements Codec, Serializable {
 		}
 
 		// if received header + msg
-		if (byteCount == 2 + dMsgSize) {
+		if (byteCount == 2 + decodeMsgSize) {
 			// msg done
 			byteCount = 0;
 			rest.append("\n");
 			String ret = rest.toString();
 			rest.setLength(0);
 			byteCount = 0;
+			decodeMsgSize = 0;
 			return ret;
 		}
 
@@ -403,17 +426,24 @@ public class ArduinoMsgCodec implements Codec, Serializable {
 		return "";
 	}
 
-	int pos = 0;
-	int currentLine = 0;
-	int newLinePos = 0;
-	int slashPos = 0;
 
-	ArrayList<Integer> temp = new ArrayList<Integer>();
-	ArrayList<Integer> data = new ArrayList<Integer>();
 
 	// must maintain state - partial string
 	@Override
 	public int[] encode(String msgs) throws CodecException {
+		
+		// moved all member vars as local
+		// otherwise state information would explode
+		// cheap way of making threadsafe
+		// this variables
+		int pos = 0;
+		int newLinePos = 0;
+		int slashPos = 0;
+
+		ArrayList<Integer> temp = new ArrayList<Integer>();
+		ArrayList<Integer> data = new ArrayList<Integer>();
+		
+		// -- 
 
 		if (msgs == null) {
 			return new int[0];
@@ -445,7 +475,10 @@ public class ArduinoMsgCodec implements Codec, Serializable {
 					if (methodToByte.containsKey(method)) {
 						temp.add(methodToByte.get(method));
 					} else {
-						throw new CodecException("method [%s] at line %d is not defined for codec", method, currentLine);
+						CodecException error =  new CodecException("method [%s] at position %d is not defined for codec", method, pos);
+						pos = 0;
+						data.clear();
+						throw error;
 					}
 				} else {
 					// in data region
@@ -483,6 +516,9 @@ public class ArduinoMsgCodec implements Codec, Serializable {
 			ret[i] = data.get(i);
 		}
 
+		// FIXME - more cases  when pos is reset - or all vars reset?
+		pos = 0;
+		data.clear();
 		return ret;
 	}
 
@@ -496,8 +532,50 @@ public class ArduinoMsgCodec implements Codec, Serializable {
 		try {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
+			
+			
+			// begin ----
 
+			log.info("===setUpBeforeClass===");
+			// LoggingFactory.getInstance().setLevel(Level.INFO);
+			Runtime.start("gui", "GUIService");
+			Arduino2 arduino = (Arduino2) Runtime.start("arduino", "Arduino2");
+			Serial serial = arduino.getSerial();
+			serial.record("out");
+			serial.connectTCP("localhost", 9191);
+			arduino.connect(serial.getPortName());
+//			uart = serial.createVirtualUART();
+			// IMPORTANT CONCEPT - ARDUINO HAS ITS OWN CONNECT (you can't just
+			// connect serial underneath!!!)
+			
+			
+//			uart.setFormat("arduino");
+
+			serial.stopRecording();
+			log.info("here");
+			//Test test = (org.myrobotlab.service.Test) Runtime.start("test", "Test");
+
+			
+			/// end ---
+
+			/*
 			ArduinoMsgCodec codec = new ArduinoMsgCodec();
+			
+			FileOutputStream test = new FileOutputStream(new File("out.bin"));
+			
+			for (int j = 0; j < 4; ++j) {
+				for (int i = 0; i < 100; ++i) {
+					int[] data = codec.encode(String.format("publishPin/15/%d/%d\n", j, i));
+					for (int z = 0; z < data.length; ++z){
+						test.write(data[z]);
+					}
+				}
+			}
+			
+			 test.close();
+			*/
+			
+			 /*
 
 			// digitalWrite/9/1
 			StringBuilder sb = new StringBuilder();
@@ -525,6 +603,7 @@ public class ArduinoMsgCodec implements Codec, Serializable {
 			serial.processRxByte(7);
 			serial.processRxByte(9);
 			serial.processRxByte(1);
+			*/
 
 		} catch (Exception e) {
 			Logging.logException(e);
