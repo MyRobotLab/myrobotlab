@@ -75,7 +75,9 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
+import org.myrobotlab.opencv.OpenCVFilterCanny;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
@@ -333,9 +335,9 @@ public class OpenCV extends VideoSource {
 		masks.put(name, mask);
 	}
 
-	// FIXME should return filter
 	public OpenCVFilter addFilter(OpenCVFilter filter) {
-		broadcastState(); // let everyone know
+		videoProcessor.addFilter(filter);
+		broadcastState();
 		return filter;
 	}
 
@@ -346,11 +348,11 @@ public class OpenCV extends VideoSource {
 		return filter;
 	}
 
-	public OpenCVFilter addFilter(String name, String newFilter) {
+	public OpenCVFilter addFilter(String name, String filterType) {
 
-		OpenCVFilter f = videoProcessor.addFilter(name, newFilter);
+		OpenCVFilter filter = videoProcessor.addFilter(name, filterType);
 		broadcastState(); // let everyone know
-		return f;
+		return filter;
 	}
 
 	// FIXME - rename removeFilters
@@ -662,12 +664,27 @@ public class OpenCV extends VideoSource {
 			// FileIO.copyResource("OpenCV/testData", "OpenCV/testData");
 			
 			//FileIO.copyResource("OpenCV/testData/mask.png", "OpenCV/testData/mask.png");
+			OpenCV opencv = (OpenCV)Runtime.start(getName(), "OpenCV");
+			//OpenCVFilterCanny canny = new OpenCVFilterCanny();
+			
+			opencv.capture();
+			
+			OpenCVFilterAffine affine = new OpenCVFilterAffine();
+			opencv.addFilter(affine);
 
-			String filename = "shapes.png";
-			filename = "rob.jpg";
+			/*
+			OpenCVFilterCanny canny2 = new OpenCVFilterCanny("canny2");
+			opencv.addFilter(canny2);
+			opencv.capture();
+			*/
+			
+			String filename = "faces.jpg";
 			String testFilename = String.format("OpenCV/testData/%s", filename);
 			Runtime.createAndStart("gui", "GUIService");
-			captureFromResourceFile(testFilename);
+			
+			// resource !!! - it better be there !
+			// opencv.captureFromResourceFile(testFilename);
+			opencv.captureFromImageFile(testFilename);
 			
 			OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect("fd");
 			addFilter(fd);
@@ -852,7 +869,7 @@ public class OpenCV extends VideoSource {
 		Runtime.start("gui", "GUIService");
 		
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-		//opencv.test();
+		opencv.test();
 		
 		opencv.setFrameGrabberType("org.myrobotlab.opencv.ImageFileFrameGrabber");
 		opencv.setInputSource(INPUT_SOURCE_IMAGE_FILE);
