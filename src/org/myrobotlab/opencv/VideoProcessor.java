@@ -453,8 +453,8 @@ public class VideoProcessor implements Runnable, Serializable {
 	}
 
 	// ------- filter methods begin ------------------
-	public OpenCVFilter addFilter(String name, String newFilter) {
-		String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", newFilter);
+	public OpenCVFilter addFilter(String name, String filterType) {
+		String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
 		/*
 		 * Object[] params = new Object[1]; params[0] = name;
 		 */
