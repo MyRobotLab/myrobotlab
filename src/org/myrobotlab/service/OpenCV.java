@@ -30,12 +30,13 @@ package org.myrobotlab.service;
  new filters - http://idouglasamoore-javacv.googlecode.com/git-history/02385ce192fb82f1668386e55ff71ed8d6f88ae3/src/main/java/com/googlecode/javacv/ObjectFinder.java
 
  static wild card imports for quickly finding static functions in eclipse
-
- import static com.googlecode.javacv.cpp.opencv_calib3d.*;
- import static com.googlecode.javacv.cpp.opencv_contrib.*;
- import static com.googlecode.javacv.cpp.opencv_core.*;
- import static com.googlecode.javacv.cpp.opencv_features2d.*;
- import static com.googlecode.javacv.cpp.opencv_flann.*;
+ */
+ //import static com.googlecode.javacv.cpp.opencv_calib3d.*;
+ //import static com.googlecode.javacv.cpp.opencv_contrib.*;
+ //import static com.googlecode.javacv.cpp.opencv_core.*;
+ import static com.googlecode.javacv.cpp.opencv_features2d.SimpleBlobDetector;
+import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImageM;
+ /*import static com.googlecode.javacv.cpp.opencv_flann.*;
  import static com.googlecode.javacv.cpp.opencv_highgui.*;
  import static com.googlecode.javacv.cpp.opencv_imgproc.*;
  import static com.googlecode.javacv.cpp.opencv_legacy.*;
@@ -45,13 +46,17 @@ package org.myrobotlab.service;
  import static com.googlecode.javacv.cpp.opencv_photo.*;
  import static com.googlecode.javacv.cpp.opencv_stitching.*;
  import static com.googlecode.javacv.cpp.opencv_video.*;
- import static com.googlecode.javacv.cpp.opencv_videostab.*;
+ import static com.googlecode.javacv.cpp.opencv_videostab.*; */
 
  //import static com.googlecode.javacv.cpp.opencv_gpu.*;
  //import static com.googlecode.javacv.cpp.opencv_superres.*;
  //import static com.googlecode.javacv.cpp.opencv_ts.*;
 
- */
+
+
+
+
+
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -79,6 +84,7 @@ import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
 import org.myrobotlab.opencv.OpenCVFilterCanny;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterSimpleBlobDetector;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
@@ -86,10 +92,13 @@ import org.myrobotlab.service.interfaces.VideoSource;
 import org.slf4j.Logger;
 
 import com.googlecode.javacv.FrameGrabber;
+import com.googlecode.javacv.cpp.opencv_core.CvArr;
+import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
 import com.googlecode.javacv.cpp.opencv_core.CvRect;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import com.googlecode.javacv.cpp.opencv_features2d.KeyPoint;
 
 public class OpenCV extends VideoSource {
 
@@ -133,7 +142,7 @@ public class OpenCV extends VideoSource {
 	public static String VALID_FILTERS[] = { "Affine", "And", "AverageColor", "Canny", "CreateHistogram", "ColorTrack", "Detector", "Dilate", "Erode", "FGBG", "FaceDetect", "Fauvist",
 			"FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2", "HSV", "InRange", "KinectDepth", "KinectDepthMask",
 			"KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr",
-			"ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "Smooth", "Split", "Threshold", "Transpose" };
+			"ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split", "Threshold", "Transpose" };
 
 	// yep its public - cause a whole lotta data
 	// will get set on it before a setState
@@ -667,7 +676,7 @@ public class OpenCV extends VideoSource {
 			OpenCV opencv = (OpenCV)Runtime.start(getName(), "OpenCV");
 			//OpenCVFilterCanny canny = new OpenCVFilterCanny();
 			
-			opencv.capture();
+
 			
 			OpenCVFilterAffine affine = new OpenCVFilterAffine();
 			opencv.addFilter(affine);
@@ -681,6 +690,7 @@ public class OpenCV extends VideoSource {
 			String filename = "faces.jpg";
 			String testFilename = String.format("OpenCV/testData/%s", filename);
 			Runtime.createAndStart("gui", "GUIService");
+			
 			
 			// resource !!! - it better be there !
 			// opencv.captureFromResourceFile(testFilename);
@@ -869,11 +879,23 @@ public class OpenCV extends VideoSource {
 		Runtime.start("gui", "GUIService");
 		
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-		opencv.test();
 		
-		opencv.setFrameGrabberType("org.myrobotlab.opencv.ImageFileFrameGrabber");
-		opencv.setInputSource(INPUT_SOURCE_IMAGE_FILE);
-		opencv.setInputFileName("600.3.jpg");
+		
+//		opencv.setInputSource("file");
+//		opencv.setInputFileName("c:/test.avi");
+//		opencv.capture();
+		
+		//OpenCVFilterSimpleBlobDetector blobDet = new OpenCVFilterSimpleBlobDetector("blobber");
+		//opencv.addFilter(blobDet);
+		
+		//OpenCVFilterAffine affine = new OpenCVFilterAffine("left");
+		//affine.setAngle(45);
+		//opencv.addFilter(affine);
+//		opencv.test();
+//		
+//		opencv.setFrameGrabberType("org.myrobotlab.opencv.ImageFileFrameGrabber");
+//		opencv.setInputSource(INPUT_SOURCE_IMAGE_FILE);
+//		opencv.setInputFileName("600.3.jpg");
 		opencv.capture();
 		 
 		//Runtime.createAndStart("gui", "GUIService");
@@ -887,5 +909,16 @@ public class OpenCV extends VideoSource {
 		boolean leaveNow = true;
 		if (leaveNow) return;
 		*/
+		
+		
+//		final CvMat image1 = cvLoadImageM("C:/blob.jpg" , 0);
+//		
+//		SimpleBlobDetector o = new SimpleBlobDetector();
+//		KeyPoint point = new KeyPoint();
+//		o.detect(image1, point, null);
+//		
+//		System.out.println(point.toString());
+		
+		
 	}
 }
