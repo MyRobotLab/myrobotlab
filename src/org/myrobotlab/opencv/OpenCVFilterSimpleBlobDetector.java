@@ -40,7 +40,9 @@ import org.slf4j.Logger;
 import com.googlecode.javacv.cpp.opencv_core.CvFont;
 import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import com.googlecode.javacv.cpp.opencv_core.MatVector;
 import com.googlecode.javacv.cpp.opencv_features2d.KeyPoint;
+import com.googlecode.javacv.cpp.opencv_features2d.KeyPointVectorVector;
 import com.googlecode.javacv.cpp.opencv_features2d.SimpleBlobDetector;
 
 public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
@@ -71,12 +73,37 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 		// TODO: track an array of blobs , not just one.
 		SimpleBlobDetector o = new SimpleBlobDetector();
 		KeyPoint point = new KeyPoint();
+
+		// TODO: i'd like to detect all the points at once..  
+		// can i pass an array or something like that?  hmm.
 		o.detect(image, point, null);
-		System.out.println(point.toString());
+		
+		//System.out.println(point.toString());
 		float x = point.pt().x();
 		float y = point.pt().y();
-		pointsToPublish.clear();
-		pointsToPublish.add(new Point2Df(x, y));
+		if (x == 0 && y == 0) {
+			// ignore the zero / zero point
+			return image;
+		}
+		// pointsToPublish.clear();
+		// min distance to an existing point ?
+		// up to 25 pixels away?
+		double minDist = 10.0;
+		// Is this a new blob? or an old blob?
+		boolean dupPoint = false;
+		for (Point2Df p : pointsToPublish) {
+			double dist = Math.sqrt((p.x-x)*(p.x-x) + (p.y-y)*(p.y-y));
+			if (dist < minDist) {
+				// we already have this point ?
+				dupPoint = true;
+				break;
+			}
+		}
+
+		if (!dupPoint) {
+			pointsToPublish.add(new Point2Df(x, y));
+			System.out.println("There are " + pointsToPublish.size() + " blobs.");
+		}
 		return image;
 	}
 
