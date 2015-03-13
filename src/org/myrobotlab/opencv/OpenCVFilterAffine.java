@@ -72,28 +72,25 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 	    pointMat.put(0, 3, 1, points.position(3).y());
 	    CvRect boundingRect = cvBoundingRect(pointMat, 0);
 	    //CvMat dst = cvCreateMat(boundingRect.height(), boundingRect.width(), image.type());
-	    CvMat dst = cvCreateMat(boundingRect.height(), boundingRect.width(),  CV_32FC1);
+	    //CvMat dst = cvCreateMat(boundingRect.height(), boundingRect.width(),  CV_32FC1);
 	    CvMat rotMat = cvCreateMat(2, 3, CV_32FC1);
 	    cv2DRotationMatrix(center, angle, 1, rotMat);
-	    
 	    // Add the transpose matrix
 	    double x = rotMat.get(0, 2) + dx;
 	    rotMat.put(0, 2, x);
-
 	    // Add the transpose matrix
 	    double y = rotMat.get(1, 2) + dy;
 	    rotMat.put(1, 2, y);
-	    
 	    // System.out.println(rotMat);
-	    
 	    double y_1 = ((boundingRect.width() - image.width()) / 2.0F) + rotMat.get(0, 2);
 	    double y_2 = ((boundingRect.height() - image.height()) / 2.0F + rotMat.get(1, 2));
 	    rotMat.put(0, 2, y_1);
 	    rotMat.put(1, 2, y_2);
-	    CvScalar fillval = cvScalarAll(0);
-	    IplImage dst_frame = cvCloneImage(image);
-	    cvWarpAffine(image, dst_frame, rotMat);
-	    return dst_frame;
+  	    // CvScalar fillval = cvScalarAll(0);
+	    // IplImage dst_frame = cvCloneImage(image);
+	    // cvWarpAffine(image, dst_frame, rotMat);
+	    cvWarpAffine(image, image, rotMat);
+	    return image;
 	}
 
 	@Override
