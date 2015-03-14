@@ -2,7 +2,6 @@ package org.myrobotlab.control;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -80,5 +79,5 @@ public class OculusRiftGUI extends ServiceGUI implements VideoGUISource, ActionL
 		unsubscribe("publishState", "getState", OculusRift.class);
 		unsubscribe("publishRiftFrame","onRiftFrame", RiftFrame.class);
 	}
-
+	
 }

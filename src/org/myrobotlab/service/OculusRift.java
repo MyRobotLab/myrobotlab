@@ -5,6 +5,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.slf4j.Logger;
 
@@ -26,6 +27,7 @@ import com.oculusvr.capi.SensorState;
  * @author kwatters
  *
  */
+// TODO: implement publishOculusRiftData ... 
 public class OculusRift extends Service {
 
 	public static final String RIGHT_OPEN_CV = "rightOpenCV";
@@ -37,12 +39,20 @@ public class OculusRift extends Service {
 	private boolean initialized = false;
 	private RiftFrame lastRiftFrame = new RiftFrame();
 	
+	private OpenCVFilterAffine leftAffine = new OpenCVFilterAffine("left");
+	private OpenCVFilterAffine rightAffine = new OpenCVFilterAffine("right");
+	
+	private boolean calibrated = false;
 	// Two OpenCV services, one for the left eye, one for the right eye.
 	transient public OpenCV leftOpenCV;
 	transient public OpenCV rightOpenCV;
 	
+	// TODO: make these configurable...
+	private int leftCameraIndex = 0;
+	private int rightCameraIndex = 1;
+	
 	public static class RiftFrame{
-		public SerializableImage left;
+		public SerializableImage left;	
 		public SerializableImage right;	
 	}
 	
@@ -89,14 +99,15 @@ public class OculusRift extends Service {
 			initialized = true;
 			
 			// create and start the two open cv services..
-			leftOpenCV = new OpenCV(LEFT_OPEN_CV);
-			rightOpenCV = new OpenCV(RIGHT_OPEN_CV);
+			
+			leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
+			rightOpenCV = new OpenCV(getName() + "." + RIGHT_OPEN_CV);
 			
 			leftOpenCV.startService();
 			rightOpenCV.startService();
 			
-			leftOpenCV.setCameraIndex(0);
-			rightOpenCV.setCameraIndex(1);
+			leftOpenCV.setCameraIndex(leftCameraIndex);
+			rightOpenCV.setCameraIndex(rightCameraIndex);
 			
 			// create msg routes from opencv services
 			// a bit kludgy because OpenCV is old :P
@@ -108,35 +119,46 @@ public class OculusRift extends Service {
 			
 			// Add some filters to rotate the images (cameras are mounted on their sides.)
 			// TODO: use 1 filter per eye for the rotations.  (might not be exactly 90degree rotation)
-			OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1");
-			t1.flipCode = 1;
-			OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2");
-			t2.flipCode = 1;
-			OpenCVFilterTranspose t3 = new OpenCVFilterTranspose("left");
-			t3.flipCode = 1;
-			OpenCVFilterTranspose t4 = new OpenCVFilterTranspose("right");
-			t4.flipCode = 1;
-
-			//rotate 270
-			leftOpenCV.addFilter(t1);
-			leftOpenCV.addFilter(t2);
-			leftOpenCV.addFilter(t3);
+			// TODO: replace with Affine filter.
 			
+			
+			OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1"); 
+			t1.flipCode = 1; 
+			OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2"); 
+			t2.flipCode = 1; 
+			
+			
+			
+			float leftAngle = 180;
+			float rightAngle = 0;
+			//
+			leftAffine.setAngle(leftAngle);
+			rightAffine.setAngle(rightAngle);
+			//rotate 270
+			
+			leftOpenCV.addFilter(t1);
+			leftOpenCV.addFilter(leftAffine);
 			// rotate 90
-			rightOpenCV.addFilter(t4);
+			rightOpenCV.addFilter(t2);
+			rightOpenCV.addFilter(rightAffine);
+			
+			//leftOpenCV.setFilter("left");
+			// rightOpenCV.setFilter("right");
+			leftOpenCV.setDisplayFilter("left");
+			rightOpenCV.setDisplayFilter("right");
 			
 			// start the cameras.
 			leftOpenCV.capture();
 			rightOpenCV.capture();
 			// Now turn on the camras.
 			// set camera index
-			
 		} else {
 			log.info("Rift interface already initialized.");
 		}
 	}
 	
 	public void onPublishDisplay(SerializableImage frame){
+		
 		if ("left".equals(frame.getSource())){
 			lastRiftFrame.left = frame;
 		} else if ("right".equals(frame.getSource())){
@@ -144,6 +166,18 @@ public class OculusRift extends Service {
 		} else {
 			error("unknown source %s", frame.getSource());
 		}
+		
+		if (!calibrated) {
+			if (leftAffine.getLastClicked() != null && rightAffine.getLastClicked() != null) {
+				// calibrate!
+				double deltaY = (leftAffine.getLastClicked().getY() - rightAffine.getLastClicked().getY())/2.0;
+				leftAffine.setDy(-deltaY);
+				rightAffine.setDy(deltaY);
+				System.out.println("Delta Y calibrated " + deltaY);
+				calibrated=true;
+			}
+		}
+		
 		invoke("publishRiftFrame", lastRiftFrame);
 	}
 
@@ -229,6 +263,22 @@ public class OculusRift extends Service {
 	@Override
 	public String[] getCategories() {
 		return new String[] {"video","control","sensor"};
+	}
+
+	public int getLeftCameraIndex() {
+		return leftCameraIndex;
+	}
+
+	public void setLeftCameraIndex(int leftCameraIndex) {
+		this.leftCameraIndex = leftCameraIndex;
+	}
+
+	public int getRightCameraIndex() {
+		return rightCameraIndex;
+	}
+
+	public void setRightCameraIndex(int rightCameraIndex) {
+		this.rightCameraIndex = rightCameraIndex;
 	}
 
 }
