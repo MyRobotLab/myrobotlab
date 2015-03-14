@@ -155,5 +155,10 @@ public abstract class OpenCVFilter implements Serializable {
 		return image;
 	}
 	*/
+	
+	public void samplePoint(Integer x, Integer y) {
+		//
+		log.info("Sample point called " + x + " " + y);
+	}
 
 }

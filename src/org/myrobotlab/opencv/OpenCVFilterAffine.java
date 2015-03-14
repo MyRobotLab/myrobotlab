@@ -1,5 +1,6 @@
 package org.myrobotlab.opencv;
 
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -7,21 +8,16 @@ import com.googlecode.javacv.cpp.opencv_core.CvBox2D;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
 import com.googlecode.javacv.cpp.opencv_core.CvRect;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 import static com.googlecode.javacv.cpp.opencv_core.CV_32FC1;
 import static com.googlecode.javacv.cpp.opencv_core.CV_32FC2;
 import static com.googlecode.javacv.cpp.opencv_core.cvCreateMat;
-import static com.googlecode.javacv.cpp.opencv_core.cvCloneImage;
 import static com.googlecode.javacv.cpp.opencv_core.cvSize2D32f;
-import static com.googlecode.javacv.cpp.opencv_core.cvScalarAll;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvBoxPoints;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvWarpAffine;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvBoundingRect;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cv2DRotationMatrix;
-
 
 public class OpenCVFilterAffine extends OpenCVFilter {
 
@@ -39,6 +35,8 @@ public class OpenCVFilterAffine extends OpenCVFilter {
     private double dy = 0;
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class.getCanonicalName());
+
+	private Point lastClicked = null;
 
 	public OpenCVFilterAffine() {
 		super();
@@ -120,6 +118,17 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 
 	public void setDy(double dy) {
 		this.dy = dy;
+	}
+	
+	@Override
+	public void samplePoint(Integer x, Integer y) {
+		//
+		log.info("Affine clicked point called " + x + " " + y);
+		lastClicked = new Point(x, y, 0);
+	}
+
+	public Point getLastClicked() {
+		return lastClicked;
 	}
 
 }
