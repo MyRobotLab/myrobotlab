@@ -44,7 +44,8 @@
 #define REMOVE_ANALOG_TRIGGER			18
 #define SET_DIGITAL_TRIGGER				19
 #define REMOVE_DIGITAL_TRIGGER			20
-#define SET_DEBOUNCE					21
+#define DIGITAL_DEBOUNCE_ON				21
+#define DIGITAL_DEBOUNCE_OFF			22
 #define DIGITAL_TRIGGER_ONLY_ON			23
 #define DIGITAL_TRIGGER_ONLY_OFF		24
 #define SET_SERIAL_RATE					25
@@ -71,7 +72,7 @@
 #define SERVO_EVENTS_ENABLE				40
 #define SERVO_EVENT					41
 
-#define SET_LOAD_TIMING_ENABLED				42
+#define LOAD_TIMING_ENABLE				42
 #define LOAD_TIMING_EVENT				43
 
 #define STEPPER_ATTACH					44
@@ -543,7 +544,7 @@ void loop () {
 			break;
 		}
 
-		case SET_LOAD_TIMING_ENABLED:{
+		case LOAD_TIMING_ENABLE:{
 			loadTimingEnabled = ioCmd[1];
 			//loadTimingModulus = ioCmd[2];
 			loadTimingModulus = 1000;
@@ -616,15 +617,25 @@ void loop () {
 			break;
 		}
 
-		case SET_DEBOUNCE:{
-			// default debounceDelay = 50;
+		case DIGITAL_DEBOUNCE_ON:{
+			// debounceDelay = 50;
 			debounceDelay = ((ioCmd[1]<<8) + ioCmd[2]);
 			break;
 		}
 
-		case DIGITAL_TRIGGER_ONLY:{
-			digitalTriggerOnly = ioCmd[1];
+		case DIGITAL_DEBOUNCE_OFF:{
+			debounceDelay = 0;
 			break;
+		}
+
+		case DIGITAL_TRIGGER_ONLY_ON:{
+			digitalTriggerOnly = true;
+			break;
+
+		case DIGITAL_TRIGGER_ONLY_OFF:
+			digitalTriggerOnly = false;
+			break;
+		}
 
 		case SET_SERIAL_RATE:
 		{
