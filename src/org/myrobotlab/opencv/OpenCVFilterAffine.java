@@ -55,7 +55,8 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 		// TODO : Create the affine filter and return the new image
 		// Find the center of the image
 		
-		CvPoint2D32f center = new CvPoint2D32f(image.width() / 2.0F, image.height() / 2.0F);
+		CvPoint2D32f center = new CvPoint2D32f(image.width() / 2.0F , image.height() / 2.0F);
+
 	    CvBox2D box = new CvBox2D(center, cvSize2D32f(image.width() - 1, image.height() - 1), angle);
 	    CvPoint2D32f points = new CvPoint2D32f(4);
 	    cvBoxPoints(box, points);
@@ -79,14 +80,15 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 	    // Add the transpose matrix
 	    double y = rotMat.get(1, 2) + dy;
 	    rotMat.put(1, 2, y);
-	    // System.out.println(rotMat);
-	    double y_1 = ((boundingRect.width() - image.width()) / 2.0F) + rotMat.get(0, 2);
-	    double y_2 = ((boundingRect.height() - image.height()) / 2.0F + rotMat.get(1, 2));
-	    rotMat.put(0, 2, y_1);
-	    rotMat.put(1, 2, y_2);
+	    // double y_1 = ((boundingRect.width() - image.width()) / 2.0F) + rotMat.get(0, 2);
+	    // double y_2 = ((boundingRect.height() - image.height()) / 2.0F + rotMat.get(1, 2));
+	    // rotMat.put(0, 2, y_1);
+	    // rotMat.put(1, 2, y_2);
   	    // CvScalar fillval = cvScalarAll(0);
 	    // IplImage dst_frame = cvCloneImage(image);
 	    // cvWarpAffine(image, dst_frame, rotMat);
+	    
+	    // System.out.println(rotMat);
 	    cvWarpAffine(image, image, rotMat);
 	    return image;
 	}
