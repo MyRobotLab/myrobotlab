@@ -2,11 +2,15 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.headtracking.OculusHeadTracking;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
+import org.myrobotlab.opencv.VideoProcessor;
+import org.myrobotlab.service.data.OculusData;
+import org.myrobotlab.service.interfaces.OculusDataPublisher;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;
@@ -28,7 +32,7 @@ import com.oculusvr.capi.SensorState;
  *
  */
 // TODO: implement publishOculusRiftData ... 
-public class OculusRift extends Service {
+public class OculusRift extends Service implements OculusDataPublisher {
 
 	public static final String RIGHT_OPEN_CV = "rightOpenCV";
 	public static final String LEFT_OPEN_CV = "leftOpenCV";
@@ -50,6 +54,10 @@ public class OculusRift extends Service {
 	// TODO: make these configurable...
 	private int leftCameraIndex = 0;
 	private int rightCameraIndex = 1;
+	
+	
+	transient public OculusHeadTracking headTracker = null;
+	private OculusData lastData = null;
 	
 	public static class RiftFrame{
 		public SerializableImage left;	
@@ -98,6 +106,11 @@ public class OculusRift extends Service {
 		  	log.info("Created HMD Oculus Rift Sensor");
 			initialized = true;
 			
+			// now that we have the hmd. lets start up the polling thread.
+			headTracker = new OculusHeadTracking(hmd);
+			headTracker.oculus = this;
+			headTracker.start();
+			
 			// create and start the two open cv services..
 			
 			leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
@@ -126,8 +139,6 @@ public class OculusRift extends Service {
 			t1.flipCode = 1; 
 			OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2"); 
 			t2.flipCode = 1; 
-			
-			
 			
 			float leftAngle = 180;
 			float rightAngle = 0;
@@ -185,6 +196,11 @@ public class OculusRift extends Service {
 	public void stopService() {
 		super.stopService();
 		// TODO: validate proper life cycle.
+		if (headTracker != null) {
+			// TODO: ?
+			headTracker.stop();
+		}
+		
 		if (hmd != null){
 			hmd.stopSensor();
 			hmd.destroy();
@@ -257,6 +273,19 @@ public class OculusRift extends Service {
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
+		
+		while (true) {
+			float roll = rift.getRoll();
+			rift.leftAffine.setAngle(-roll+180);
+			rift.rightAffine.setAngle(-roll);
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				break;
+			}
+		}
 		rift.logOrientation();
 	}
 
@@ -279,6 +308,17 @@ public class OculusRift extends Service {
 
 	public void setRightCameraIndex(int rightCameraIndex) {
 		this.rightCameraIndex = rightCameraIndex;
+	}
+
+	@Override
+	public OculusData publishOculusData(OculusData data) {
+		// grab the last published data (if we need it somewhere)
+		//		if (data != null) {
+		//			System.out.println("Oculus Data: "  + data.toString());
+		//		}
+		lastData = data;
+		// return the data to the mrl framework to be published.
+		return data;
 	}
 
 }
