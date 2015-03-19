@@ -43,8 +43,8 @@ public class OculusDIY extends Service implements OculusDataPublisher , OculusDa
 		//Integer headingint = (Integer) data[0];
 		this.computeAngles(ax2,headingint);
 		OculusData oculus = new OculusData();
-		oculus.yaw = rothead;
-		oculus.pitch = head;
+		oculus.yaw = Double.valueOf(rothead);
+		oculus.pitch = Double.valueOf(head);
 		this.publishOculusData(oculus);
 		
 		System.out.println(head+","+rothead);
