@@ -8,7 +8,7 @@ import org.myrobotlab.service.ProgramAB.Response;
 public class ProgramABTest {
 
 	@Test
-	public void testProgramAB() {
+	public void testProgramAB() throws Exception {
 
 		String botName = "lloyd";
 		String session = "testUser";
@@ -17,16 +17,12 @@ public class ProgramABTest {
 		testService.startService();
 		testService.startSession(path, session, botName);
 		Response resp = testService.getResponse(session, "time test");
-		try {
-			Thread.sleep(61000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+
+		Thread.sleep(61000);
+
 		resp = testService.getResponse(session, "BORING TIME");
 		System.out.println(resp.msg);
 		assertEquals("My Default Response 3.", resp.msg);
-		
+
 	}
 }

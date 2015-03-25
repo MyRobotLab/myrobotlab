@@ -7,7 +7,7 @@ import org.junit.Test;
 public class RuntimeTest {
 
 	@Test
-	public void testRuntime() {
+	public void testRuntime() throws Exception {
 		System.out.println("This is a junit test... woot!");
 		Runtime testService = new Runtime("testruntime");
 		// try to start the service
