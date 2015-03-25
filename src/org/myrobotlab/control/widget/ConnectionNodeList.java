@@ -18,18 +18,6 @@ public class ConnectionNodeList extends JPanel {
 	public DefaultListModel model = new DefaultListModel();
 	public JList nodeList;
 
-	public ConnectionNodeList() {
-		setLayout(new BorderLayout());
-
-		model = new DefaultListModel();
-		nodeList = new JList(model);
-		nodeList.setCellRenderer(new ConnectionNodeRenderer());
-		nodeList.setVisibleRowCount(8);
-		JScrollPane pane = new JScrollPane(nodeList);
-		add(pane, BorderLayout.NORTH);
-		// add(button, BorderLayout.SOUTH);
-	}
-	
 	public static void main(String s[]) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
@@ -41,6 +29,18 @@ public class ConnectionNodeList extends JPanel {
 		frame.setContentPane(cl);
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	public ConnectionNodeList() {
+		setLayout(new BorderLayout());
+
+		model = new DefaultListModel();
+		nodeList = new JList(model);
+		nodeList.setCellRenderer(new ConnectionNodeRenderer());
+		nodeList.setVisibleRowCount(8);
+		JScrollPane pane = new JScrollPane(nodeList);
+		add(pane, BorderLayout.NORTH);
+		// add(button, BorderLayout.SOUTH);
 	}
 
 }

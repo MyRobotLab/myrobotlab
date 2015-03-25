@@ -12,31 +12,27 @@ public class Red5 extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Red5.class.getCanonicalName());
 
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		/*
+		 * GUIService gui = new GUIService("gui"); gui.startService();
+		 */
+	}
+
 	public Red5(String n) {
 		super(n);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "video" };
 	}
 
 	@Override
 	public String getDescription() {
 		return "Red5 video/audio streaming service";
 	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		Red5 template = new Red5("template");
-		template.startService();
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
-		 */
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"video"};
-	}
-
 
 }

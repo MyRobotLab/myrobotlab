@@ -55,11 +55,46 @@ import org.op.chess.ChessBoard;
 
 public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChangeListener, PropertyChangeListener {
 
-	static final long serialVersionUID = 1L;
+	final class Thinker extends Thread {
 
-	public ChessGameGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
+		private ChessGameGUI gui;
+
+		public Thinker(ChessGameGUI gui) {
+			this.gui = gui;
+		}
+
+		@Override
+		public void run() {
+			think();
+			if (searcher.isStopped())
+				return;
+			final HMove best = searcher.getBest();
+			if (best == null) {
+				System.out.println("(no legal moves)");
+				computerSide = EMPTY;
+				return;
+			}
+			board.makeMove(best);
+			searcher.board.makeMove(best);
+			// showStatus("Computer move: " + best.toString());
+			gui.myService.send(boundServiceName, "computerMoved", best.toString());
+
+			makeMove(best, true);
+			chessView.switchMoveMarkers(board.side == LIGHT);
+			isResult();
+			chessView.setMoving(false);
+			guessedMove = searcher.getBestNext();
+			if (guessedMove != null) {
+				searcher.board.makeMove(guessedMove);
+				searcher.setStopTime(Long.MAX_VALUE);
+				searcher.shiftPV();
+				thinkThread = new Thinker(gui);
+				thinkThread.start();
+			}
+		}
 	}
+
+	static final long serialVersionUID = 1L;
 
 	private Board board = new Board();
 	private Search searcher = new Search();
@@ -72,10 +107,71 @@ public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChang
 	private Thread thinkThread = null;
 	private HMove guessedMove = null;
 
-	public void showStatus(String msg) {
-		log.info(msg);
+	public static String cleanMove(String t) {
+		log.info("cleanMove " + t);
+
+		// remove piece descriptor
+		if (t.length() > 5) {
+			char check = t.charAt(t.length() - 1);
+			if (Character.isDigit(check)) {
+				t = t.substring(1);
+			} else {
+				t = t.substring(0, t.length() - 1);
+			}
+		}
+
+		// remove -
+		if (t.contains("-")) {
+			t = (t.substring(0, 2) + t.substring(3));
+		}
+
+		t = t.toLowerCase();
+
+		log.info("cleanedMove " + t);
+		return t;
 	}
 
+	public ChessGameGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
+	}
+
+	@Override
+	public void attachGUI() {
+		subscribe("inputMove", "inputMove", String.class);
+		subscribe("inputHMove", "inputHMove", HMove.class);
+	}
+
+	private void computerMove() {
+		searcher.stopThinking();
+		try {
+			if (thinkThread != null)
+				thinkThread.join();
+		} catch (InterruptedException ignore) {
+		}
+		searcher.restartThinking();
+		searcher.clearPV();
+		thinkThread = new Thinker(this);
+		thinkThread.start();
+		searcher.setStopTime(System.currentTimeMillis() + maxTime);
+		showStatus("Thinking...");
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("inputMove", "inputMove", String.class);
+		unsubscribe("inputHMove", "inputHMove", HMove.class);
+	}
+
+	private int getPos(String s) {
+		log.info("getPos " + s);
+		String temp1 = "";
+		temp1 += s.charAt(1);
+		int num = Integer.parseInt(temp1);
+		int pos = s.charAt(0) - 97 + ((8 - num) * 8);
+		return pos;
+	}
+
+	@Override
 	public void init() {
 
 		// showStatus ("Please Wait; Program Loading");
@@ -89,6 +185,7 @@ public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChang
 		// add (flipBox = new Checkbox("Flip Board"));
 		JButton resetButton = new JButton("New Game");
 		resetButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				playNewGame();
 			}
@@ -97,6 +194,7 @@ public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChang
 
 		JButton switchSidesButton = new JButton("Switch Sides");
 		switchSidesButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				computerSide = board.side;
 				guessedMove = null;
@@ -109,6 +207,7 @@ public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChang
 		JComboBox timeBox = new JComboBox(timeStrings);
 		timeBox.setSelectedIndex(2);
 		timeBox.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				JComboBox cb = (JComboBox) e.getSource();
 				int selection = cb.getSelectedIndex();
@@ -120,6 +219,7 @@ public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChang
 		JCheckBox showPV = new JCheckBox("Show thinking");
 		showPV.setSelected(true);
 		showPV.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				JCheckBox cb = (JCheckBox) e.getSource();
 				if (cb.isSelected())
@@ -149,12 +249,115 @@ public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChang
 
 	}
 
-	public void stop() {
-		searcher.stopThinking();
+	public HMove inputHMove(HMove m2) {
+		try {
+			youGotToMoveItMoveIt(null, m2, false);
+		} catch (PropertyVetoException e) {
+			// TODO Auto-generated catch block
+			Logging.logError(e);
+		}
+
+		return m2;
 	}
 
-	public void start() {
-		playNewGame();
+	public String inputMove(String m) {
+		log.info(m);
+		String s = cleanMove(m);
+		log.info(s);
+
+		log.info(m + " pfrom " + getPos(s) + " pto " + getPos(s.substring(2)));
+
+		org.op.chess.Move m2 = new org.op.chess.Move(getPos(s), getPos(s.substring(2)));
+		try {
+			youGotToMoveItMoveIt(null, m2, true); // last param is to publish or
+													// not
+		} catch (PropertyVetoException e) {
+			// TODO Auto-generated catch block
+			Logging.logError(e);
+		}
+
+		return s;
+	}
+
+	private boolean isResult() {
+		Collection<?> validMoves = board.gen();
+
+		Iterator<?> i = validMoves.iterator();
+		boolean found = false;
+		while (i.hasNext()) {
+			if (board.makeMove((HMove) i.next())) {
+				board.takeBack();
+				found = true;
+				break;
+			}
+		}
+		String message = null;
+		if (!found) {
+			if (board.inCheck(board.side)) {
+				if (board.side == LIGHT)
+					message = "0 - 1 Black mates";
+				else
+					message = "1 - 0 White mates";
+			} else
+				message = "0 - 0 Stalemate";
+		} else if (board.reps() == 3)
+			message = "1/2 - 1/2 Draw by repetition";
+		else if (board.fifty >= 100)
+			message = "1/2 - 1/2 Draw by fifty move rule";
+		if (message != null) {
+			// int choice = JOptionPane.showConfirmDialog(this, message +
+			// "\nPlay again?", "Play Again?", JOptionPane.YES_NO_OPTION);
+
+			// int choice = JOptionPane.showInternalConfirmDialog(this, message
+			// + "\nPlay again?", "Play Again?", JOptionPane.YES_NO_OPTION);
+			int choice = 1;
+			if (choice == JOptionPane.YES_OPTION) {
+				searcher.stopThinking();
+				playNewGame();
+			}
+			return true;
+		}
+		if (board.inCheck(board.side))
+			showStatus("Check!");
+		return false;
+	}
+
+	private void makeMove(HMove m, boolean publishEvent) {
+		int from = m.getFrom();
+		int to = m.getTo();
+		String s = cleanMove(m.toString());
+		log.info(m + "  from " + from + "  to " + to);
+		log.info(m + " pfrom " + getPos(s) + " pto " + getPos(s.substring(2)));
+
+		// log.info((int)s.charAt(0));
+		// log.info(testFrom);
+		// log.info(m + " from " + testFrom + " to " + to);
+		if (publishEvent) {
+			myService.send(boundServiceName, "makeMove", m, "n");
+			myService.send(boundServiceName, "makeHMove", m);
+		}
+
+		if (m.promote != 0) {
+			chessView.makeMoveWithPromote(m, m.promote, board.side != LIGHT);
+		} else {
+			if ((m.bits & 2) != 0) {
+				if (from == E1 && to == G1)
+					chessView.makeMove(new org.op.chess.Move(H1, F1));
+				else if (from == E1 && to == C1)
+					chessView.makeMove(new org.op.chess.Move(A1, D1));
+				else if (from == E8 && to == G8)
+					chessView.makeMove(new org.op.chess.Move(H8, F8));
+				else if (from == E8 && to == C8)
+					chessView.makeMove(new org.op.chess.Move(A8, D8));
+			} else if ((m.bits & 4) != 0) {
+				if (board.xside == LIGHT)
+					chessView.clear(m.getToRow() + 1, m.getToCol());
+				else
+					chessView.clear(m.getToRow() - 1, m.getToCol());
+			}
+
+			chessView.makeMove(m);
+		}
 	}
 
 	public void playNewGame() {
@@ -165,17 +368,36 @@ public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChang
 		chessView.setupBoard();
 	}
 
-	public void setPrincipalVariation(String s) {
-		principalVariation.setText("Thinking: " + s);
+	@Override
+	public void propertyChange(PropertyChangeEvent pce) {
 	}
 
 	public void setMaxTime(int millis) {
 		maxTime = millis;
 	}
 
-	public void propertyChange(PropertyChangeEvent pce) {
+	public void setPrincipalVariation(String s) {
+		principalVariation.setText("Thinking: " + s);
 	}
 
+	public void showStatus(String msg) {
+		log.info(msg);
+	}
+
+	public void start() {
+		playNewGame();
+	}
+
+	public void stop() {
+		searcher.stopThinking();
+	}
+
+	private void think() {
+		// searcher.think(this);
+		searcher.think();
+	}
+
+	@Override
 	public void vetoableChange(PropertyChangeEvent pce) throws PropertyVetoException {
 		youGotToMoveItMoveIt(pce, null, true);
 	}
@@ -261,221 +483,6 @@ public class ChessGameGUI extends ServiceGUI implements Constants, VetoableChang
 			}
 		}
 
-	}
-
-	private int getPos(String s) {
-		log.info("getPos " + s);
-		String temp1 = "";
-		temp1 += s.charAt(1);
-		int num = Integer.parseInt(temp1);
-		int pos = s.charAt(0) - 97 + ((8 - num) * 8);
-		return pos;
-	}
-
-	private void makeMove(HMove m, boolean publishEvent) {
-		int from = m.getFrom();
-		int to = m.getTo();
-		String s = cleanMove(m.toString());
-		log.info(m + "  from " + from + "  to " + to);
-		log.info(m + " pfrom " + getPos(s) + " pto " + getPos(s.substring(2)));
-
-		// log.info((int)s.charAt(0));
-		// log.info(testFrom);
-		// log.info(m + " from " + testFrom + " to " + to);
-		if (publishEvent) {
-			myService.send(boundServiceName, "makeMove", m, "n");
-			myService.send(boundServiceName, "makeHMove", m);
-		}
-
-		if (m.promote != 0) {
-			chessView.makeMoveWithPromote(m, m.promote, board.side != LIGHT);
-		} else {
-			if ((m.bits & 2) != 0) {
-				if (from == E1 && to == G1)
-					chessView.makeMove(new org.op.chess.Move(H1, F1));
-				else if (from == E1 && to == C1)
-					chessView.makeMove(new org.op.chess.Move(A1, D1));
-				else if (from == E8 && to == G8)
-					chessView.makeMove(new org.op.chess.Move(H8, F8));
-				else if (from == E8 && to == C8)
-					chessView.makeMove(new org.op.chess.Move(A8, D8));
-			} else if ((m.bits & 4) != 0) {
-				if (board.xside == LIGHT)
-					chessView.clear(m.getToRow() + 1, m.getToCol());
-				else
-					chessView.clear(m.getToRow() - 1, m.getToCol());
-			}
-
-			chessView.makeMove(m);
-		}
-	}
-
-	private void computerMove() {
-		searcher.stopThinking();
-		try {
-			if (thinkThread != null)
-				thinkThread.join();
-		} catch (InterruptedException ignore) {
-		}
-		searcher.restartThinking();
-		searcher.clearPV();
-		thinkThread = new Thinker(this);
-		thinkThread.start();
-		searcher.setStopTime(System.currentTimeMillis() + maxTime);
-		showStatus("Thinking...");
-	}
-
-	private boolean isResult() {
-		Collection<?> validMoves = board.gen();
-
-		Iterator<?> i = validMoves.iterator();
-		boolean found = false;
-		while (i.hasNext()) {
-			if (board.makeMove((HMove) i.next())) {
-				board.takeBack();
-				found = true;
-				break;
-			}
-		}
-		String message = null;
-		if (!found) {
-			if (board.inCheck(board.side)) {
-				if (board.side == LIGHT)
-					message = "0 - 1 Black mates";
-				else
-					message = "1 - 0 White mates";
-			} else
-				message = "0 - 0 Stalemate";
-		} else if (board.reps() == 3)
-			message = "1/2 - 1/2 Draw by repetition";
-		else if (board.fifty >= 100)
-			message = "1/2 - 1/2 Draw by fifty move rule";
-		if (message != null) {
-			// int choice = JOptionPane.showConfirmDialog(this, message +
-			// "\nPlay again?", "Play Again?", JOptionPane.YES_NO_OPTION);
-
-			// int choice = JOptionPane.showInternalConfirmDialog(this, message
-			// + "\nPlay again?", "Play Again?", JOptionPane.YES_NO_OPTION);
-			int choice = 1;
-			if (choice == JOptionPane.YES_OPTION) {
-				searcher.stopThinking();
-				playNewGame();
-			}
-			return true;
-		}
-		if (board.inCheck(board.side))
-			showStatus("Check!");
-		return false;
-	}
-
-	private void think() {
-		// searcher.think(this);
-		searcher.think();
-	}
-
-	final class Thinker extends Thread {
-		
-		private ChessGameGUI gui;
-		
-		public Thinker(ChessGameGUI gui)
-		{
-			this.gui = gui;
-		}
-		
-		public void run() {
-			think();
-			if (searcher.isStopped())
-				return;
-			final HMove best = searcher.getBest();
-			if (best == null) {
-				System.out.println("(no legal moves)");
-				computerSide = EMPTY;
-				return;
-			}
-			board.makeMove(best);
-			searcher.board.makeMove(best);
-			//showStatus("Computer move: " + best.toString());
-			gui.myService.send(boundServiceName, "computerMoved", best.toString());
-			
-			makeMove(best, true);
-			chessView.switchMoveMarkers(board.side == LIGHT);
-			isResult();
-			chessView.setMoving(false);
-			guessedMove = searcher.getBestNext();
-			if (guessedMove != null) {
-				searcher.board.makeMove(guessedMove);
-				searcher.setStopTime(Long.MAX_VALUE);
-				searcher.shiftPV();
-				thinkThread = new Thinker(gui);
-				thinkThread.start();
-			}
-		}
-	}
-
-	public HMove inputHMove(HMove m2) {
-		try {
-			youGotToMoveItMoveIt(null, m2, false);
-		} catch (PropertyVetoException e) {
-			// TODO Auto-generated catch block
-			Logging.logException(e);
-		}
-
-		return m2;
-	}
-
-	public String inputMove(String m) {
-		log.info(m);
-		String s = cleanMove(m);
-		log.info(s);
-
-		log.info(m + " pfrom " + getPos(s) + " pto " + getPos(s.substring(2)));
-
-		org.op.chess.Move m2 = new org.op.chess.Move(getPos(s), getPos(s.substring(2)));
-		try {
-			youGotToMoveItMoveIt(null, m2, true); // last param is to publish or
-													// not
-		} catch (PropertyVetoException e) {
-			// TODO Auto-generated catch block
-			Logging.logException(e);
-		}
-
-		return s;
-	}
-
-	public static String cleanMove(String t) {
-		log.info("cleanMove " + t);
-
-		// remove piece descriptor
-		if (t.length() > 5) {
-			char check = t.charAt(t.length() - 1);
-			if (Character.isDigit(check)) {
-				t = t.substring(1);
-			} else {
-				t = t.substring(0, t.length() - 1);
-			}
-		}
-
-		// remove -
-		if (t.contains("-")) {
-			t = (t.substring(0, 2) + t.substring(3));
-		}
-
-		t = t.toLowerCase();
-
-		log.info("cleanedMove " + t);
-		return t;
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("inputMove", "inputMove", String.class);
-		subscribe("inputHMove", "inputHMove", HMove.class);
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("inputMove", "inputMove", String.class);
-		unsubscribe("inputHMove", "inputHMove", HMove.class);
 	}
 
 }

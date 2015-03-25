@@ -119,6 +119,7 @@ public class KheperaRobot extends Agent {
 	}
 
 	/** Create 3D geometry. */
+	@Override
 	protected void create3D() {
 		Color3f color = new Color3f(0.3f, 0.8f, 0.8f);
 		Color3f color2 = new Color3f(1.0f, 0.0f, 0.0f);

@@ -49,7 +49,7 @@ public class OpenCVFilterInRange extends OpenCVFilter {
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterInRange.class.getCanonicalName());
 	// http://cgi.cse.unsw.edu.au/~cs4411/wiki/index.php?title=OpenCV_Guide#Calculating_color_histograms
-	
+
 	int useMask = 0;
 
 	public final static int HUE_MASK = 1;
@@ -67,7 +67,7 @@ public class OpenCVFilterInRange extends OpenCVFilter {
 	public boolean useSaturation = false;
 	public float saturationMinValue = 0.0f;
 	public float saturationMaxValue = 256.0f;
-	
+
 	transient IplImage hsv = null;
 
 	transient IplImage hue = null;
@@ -85,28 +85,26 @@ public class OpenCVFilterInRange extends OpenCVFilter {
 	transient IplImage ret = null;
 
 	transient BufferedImage frameBuffer = null;
-	
+
 	transient CvScalar hueMin = cvScalar(hueMinValue, 0.0, 0.0, 0.0);
 	transient CvScalar hueMax = cvScalar(hueMaxValue, 0.0, 0.0, 0.0);
 	transient CvScalar valueMin = cvScalar(valueMinValue, 0.0, 0.0, 0.0);
 	transient CvScalar valueMax = cvScalar(valueMaxValue, 0.0, 0.0, 0.0);
 	transient CvScalar saturationMin = cvScalar(saturationMinValue, 0.0, 0.0, 0.0);
 	transient CvScalar saturationMax = cvScalar(saturationMaxValue, 0.0, 0.0, 0.0);
-	
-	public OpenCVFilterInRange()  {
+
+	public OpenCVFilterInRange() {
 		super();
 	}
-	
-	public OpenCVFilterInRange(String name)  {
+
+	public OpenCVFilterInRange(String name) {
 		super(name);
 	}
 
-	public void samplePoint(Integer x, Integer y) {
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
 
-		frameBuffer = hsv.getBufferedImage();
-		int rgb = frameBuffer.getRGB(x, y);
-		Color c = new Color(rgb);
-		log.error(x + "," + y + " h " + c.getRed() + " s " + c.getGreen() + " v " + c.getBlue());
 	}
 
 	@Override
@@ -239,10 +237,12 @@ public class OpenCVFilterInRange extends OpenCVFilter {
 
 	}
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
+	public void samplePoint(Integer x, Integer y) {
+
+		frameBuffer = hsv.getBufferedImage();
+		int rgb = frameBuffer.getRGB(x, y);
+		Color c = new Color(rgb);
+		log.error(x + "," + y + " h " + c.getRed() + " s " + c.getGreen() + " v " + c.getBlue());
 	}
 
 }

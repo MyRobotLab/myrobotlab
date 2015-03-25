@@ -43,12 +43,17 @@ public class OpenCVFilterGray extends OpenCVFilter {
 
 	transient IplImage gray = null;
 
-	public OpenCVFilterGray()  {
+	public OpenCVFilterGray() {
 		super();
 	}
-	
-	public OpenCVFilterGray(String name)  {
+
+	public OpenCVFilterGray(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		gray = cvCreateImage(cvGetSize(image), 8, 1);
 	}
 
 	@Override
@@ -57,14 +62,9 @@ public class OpenCVFilterGray extends OpenCVFilter {
 		if (image.nChannels() == 3) {
 			cvCvtColor(image, gray, CV_BGR2GRAY);
 			return gray;
-		} 
-		
-		return image;
-	}
+		}
 
-	@Override
-	public void imageChanged(IplImage image) {
-		gray = cvCreateImage(cvGetSize(image), 8, 1);
+		return image;
 	}
 
 }

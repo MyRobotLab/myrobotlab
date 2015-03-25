@@ -40,7 +40,7 @@ public class OpenCVFilterDetectorGUI extends OpenCVFilterGUI implements ActionLi
 	String watchText = "watch foreground";
 	String learnText = "learn background";
 	JButton learn = new JButton(watchText);
-	
+
 	public OpenCVFilterDetectorGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
 
@@ -48,15 +48,31 @@ public class OpenCVFilterDetectorGUI extends OpenCVFilterGUI implements ActionLi
 		learn.addActionListener(this);
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		OpenCVFilterDetector bf = (OpenCVFilterDetector) boundFilter.filter;
+		if (o == learn) {
+			if (watchText.equals(learn.getText())) {
+				learn.setText(learnText);
+				bf.learningRate = 0;
+			} else {
+				learn.setText(watchText);
+				bf.learningRate = -1;
+			}
+		}
+
+	}
+
 	// FIXME - update components :)
 	@Override
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		boundFilter = filterWrapper;
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				OpenCVFilterDetector bf = (OpenCVFilterDetector)filterWrapper.filter;
-				if (bf.learningRate == -1)
-				{
+				OpenCVFilterDetector bf = (OpenCVFilterDetector) filterWrapper.filter;
+				if (bf.learningRate == -1) {
 					learn.setText(watchText);
 				} else {
 					learn.setText(learnText);
@@ -65,25 +81,5 @@ public class OpenCVFilterDetectorGUI extends OpenCVFilterGUI implements ActionLi
 		});
 
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		OpenCVFilterDetector bf = (OpenCVFilterDetector) boundFilter.filter;
-		if (o == learn)
-		{
-			if (watchText.equals(learn.getText()))
-			{
-				learn.setText(learnText);
-				bf.learningRate = 0;
-			} else {
-				learn.setText(watchText);
-				bf.learningRate = -1;
-			}
-		}
-		
-	}
-
-	
 
 }

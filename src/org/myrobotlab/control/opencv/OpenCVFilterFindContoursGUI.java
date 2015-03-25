@@ -35,6 +35,11 @@ public class OpenCVFilterFindContoursGUI extends OpenCVFilterGUI {
 
 	}
 
+	public void apply() {
+		log.debug("apply");
+
+	}
+
 	// @Override
 	public void attachGUI() {
 		log.debug("attachGUI");
@@ -44,11 +49,6 @@ public class OpenCVFilterFindContoursGUI extends OpenCVFilterGUI {
 	// @Override
 	public void detachGUI() {
 		log.debug("detachGUI");
-
-	}
-
-	public void apply() {
-		log.debug("apply");
 
 	}
 

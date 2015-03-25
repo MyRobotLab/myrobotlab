@@ -21,15 +21,21 @@ import org.slf4j.Logger;
 public class Status implements Serializable {// extends Exception {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(Status.class);
 
 	public final static String DEBUG = "debug";
+
 	public final static String INFO = "info";
+
 	public final static String WARN = "warn";
+
 	public final static String ERROR = "error";
 
 	public String name; // service name ???
+
 	public String level;
+
 	public String key;
 	public String detail;
 
@@ -37,11 +43,84 @@ public class Status implements Serializable {// extends Exception {
 
 	// private String allowLevel = null; pre filtering attempt .. aborted
 
-	public Status(String name, String level, String key, String detail) {
-		this.name = name;
-		this.level = level;
-		this.key = key;
-		this.detail = detail;
+	public static Status debug(String format, Object... args) {
+		Status status = new Status(String.format(format, args));
+		status.level = DEBUG;
+		return status;
+	}
+
+	public static Status error(Exception e) {
+		Status s = new Status(e);
+		s.level = ERROR;
+		return s;
+	}
+
+	public static Status error(String msg) {
+		Status s = new Status(msg);
+		s.level = ERROR;
+		return s;
+	}
+
+	public static Status error(String format, Object... args) {
+		Status status = new Status(String.format(format, args));
+		status.level = ERROR;
+		return status;
+	}
+
+	/*
+	 * public void allowDebug(String b) { allowLevel = b; }
+	 */
+
+	public static Status info(String msg) {
+		Status s = new Status(msg);
+		s.level = INFO;
+		return s;
+	}
+
+	public static Status info(String format, Object... args) {
+		Status status = new Status(String.format(format, args));
+		status.level = INFO;
+		return status;
+	}
+
+	public static void main(String[] args) throws IOException, InterruptedException {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		Status test = new Status("i am pessimistic");
+		Status subTest = new Status("i am sub pessimistic");
+
+		test.add(subTest);
+
+		String json = Encoder.toJson(test);
+		Status z = Encoder.fromJson(json, Status.class);
+		log.info(json);
+	}
+
+	public final static String stackToString(final Throwable e) {
+		StringWriter sw;
+		try {
+			sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+		} catch (Exception e2) {
+			return "bad stackToString";
+		}
+		return "------\r\n" + sw.toString() + "------\r\n";
+	}
+
+	public Status(Exception e) {
+		this.level = ERROR;
+		this.key = e.getClass().getSimpleName();
+		StringWriter sw;
+		try {
+			sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			detail = sw.toString();
+		} catch (Exception e2) {
+		}
+		this.key = e.getMessage();
 	}
 
 	public Status(Status s) {
@@ -65,79 +144,39 @@ public class Status implements Serializable {// extends Exception {
 		this.detail = detail;
 	}
 
-	public Status(Exception e) {
-		this.level = ERROR;
-		this.key = e.getClass().getSimpleName();
-		StringWriter sw;
-		try {
-			sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			detail = sw.toString();
-		} catch (Exception e2) {
+	public Status(String name, String level, String key, String detail) {
+		this.name = name;
+		this.level = level;
+		this.key = key;
+		this.detail = detail;
+	}
+
+	public void add(Status status) {
+		if (status != null) {
+			if (statuses == null) {
+				statuses = new ArrayList<Status>();
+			}
+			statuses.add(status);
 		}
-		this.key = e.getMessage();
-	}
-
-	/*
-	 * public void allowDebug(String b) { allowLevel = b; }
-	 */
-
-	public boolean isDebug() {
-		return DEBUG.equals(level);
-	}
-
-	public boolean isInfo() {
-		return INFO.equals(level);
-	}
-
-	public boolean isWarn() {
-		return WARN.equals(level);
-	}
-
-	public boolean isError() {
-		return ERROR.equals(level);
-	}
-
-	public static Status error(Exception e) {
-		Status s = new Status(e);
-		s.level = ERROR;
-		return s;
-	}
-
-	public static Status error(String msg) {
-		Status s = new Status(msg);
-		s.level = ERROR;
-		return s;
-	}
-
-	public static Status info(String msg) {
-		Status s = new Status(msg);
-		s.level = INFO;
-		return s;
-	}
-
-	public static Status debug(String format, Object... args) {
-		Status status = new Status(String.format(format, args));
-		status.level = DEBUG;
-		return status;
-	}
-
-	public static Status info(String format, Object... args) {
-		Status status = new Status(String.format(format, args));
-		status.level = INFO;
-		return status;
-	}
-
-	public static Status error(String format, Object... args) {
-		Status status = new Status(String.format(format, args));
-		status.level = ERROR;
-		return status;
 	}
 
 	public Status addDebug(String format, Object... args) {
 		Status status = debug(format, args);
 		log.debug(String.format(format, args));
+		add(status);
+		return status;
+	}
+
+	public Status addError(Exception e) {
+		Logging.logError(e);
+		Status status = error("%s %s", e.getMessage(), stackToString(e));
+		add(status);
+		return status;
+	}
+
+	public Status addError(String format, Object... args) {
+		Status status = error(format, args);
+		log.error(String.format(format, args));
 		add(status);
 		return status;
 	}
@@ -157,30 +196,19 @@ public class Status implements Serializable {// extends Exception {
 		return status;
 	}
 
-	public Status addError(String format, Object... args) {
-		Status status = error(format, args);
-		log.error(String.format(format, args));
-		add(status);
-		return status;
-	}
+	public ArrayList<Status> flatten() {
+		ArrayList<Status> ret = new ArrayList<Status>();
 
-	public final static String stackToString(final Throwable e) {
-		StringWriter sw;
-		try {
-			sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-		} catch (Exception e2) {
-			return "bad stackToString";
+		if (statuses != null) {
+			for (int i = 0; i < statuses.size(); ++i) {
+				Status status = statuses.get(i);
+				ArrayList<Status> s = status.flatten();
+				for (int j = 0; j < s.size(); ++j) {
+					ret.add(s.get(j));
+				}
+			}
 		}
-		return "------\r\n" + sw.toString() + "------\r\n";
-	}
-
-	public Status addError(Exception e) {
-		Logging.logException(e);
-		Status status = error("%s %s", e.getMessage(), stackToString(e));
-		add(status);
-		return status;
+		return ret;
 	}
 
 	public boolean hasError() {
@@ -203,6 +231,23 @@ public class Status implements Serializable {// extends Exception {
 		return b;
 	}
 
+	public boolean isDebug() {
+		return DEBUG.equals(level);
+	}
+
+	public boolean isError() {
+		return ERROR.equals(level);
+	}
+
+	public boolean isInfo() {
+		return INFO.equals(level);
+	}
+
+	public boolean isWarn() {
+		return WARN.equals(level);
+	}
+
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		if (name != null) {
@@ -230,44 +275,6 @@ public class Status implements Serializable {// extends Exception {
 		}
 
 		return sb.toString();
-	}
-
-	public ArrayList<Status> flatten() {
-		ArrayList<Status> ret = new ArrayList<Status>();
-
-		if (statuses != null) {
-			for (int i = 0; i < statuses.size(); ++i) {
-				Status status = statuses.get(i);
-				ArrayList<Status> s = status.flatten();
-				for (int j = 0; j < s.size(); ++j) {
-					ret.add(s.get(j));
-				}
-			}
-		}
-		return ret;
-	}
-
-	public void add(Status status) {
-		if (status != null) {
-			if (statuses == null) {
-				statuses = new ArrayList<Status>();
-			}
-			statuses.add(status);
-		}
-	}
-
-	public static void main(String[] args) throws IOException, InterruptedException {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		Status test = new Status("i am pessimistic");
-		Status subTest = new Status("i am sub pessimistic");
-
-		test.add(subTest);
-
-		String json = Encoder.toJson(test);
-		Status z = Encoder.fromJson(json, Status.class);
-		log.info(json);
 	}
 
 }

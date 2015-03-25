@@ -29,7 +29,6 @@ import java.io.Serializable;
 
 import org.myrobotlab.framework.Encoder;
 
-
 public class Pin implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -45,7 +44,7 @@ public class Pin implements Serializable {
 	public static final int TYPE_DIGITAL_MASK = 1;
 	public static final int TYPE_PWM_MASK = 2;
 	public static final int TYPE_ANALOG_MASK = 4;
-	
+
 	public int pin;
 	public int type;
 	public int value;
@@ -61,11 +60,12 @@ public class Pin implements Serializable {
 		this.value = value;
 		this.source = source;
 	}
-	
-	public void setAsDigital(){
+
+	public void setAsDigital() {
 		pinType = pinType | TYPE_DIGITAL_MASK;
 	}
 
+	@Override
 	public String toString() {
 		return Encoder.toJson(this);
 	}

@@ -30,6 +30,17 @@ public class ColouredTiles extends Shape3D {
 		createAppearance();
 	}
 
+	private void createAppearance() {
+		Appearance app = new Appearance();
+
+		PolygonAttributes pa = new PolygonAttributes();
+		pa.setCullFace(PolygonAttributes.CULL_NONE);
+		// so can see the ColouredTiles from both sides
+		app.setPolygonAttributes(pa);
+
+		setAppearance(app);
+	}
+
 	private void createGeometry(ArrayList<Point3f> coords, Color3f col) {
 		int numPoints = coords.size();
 
@@ -43,17 +54,6 @@ public class ColouredTiles extends Shape3D {
 		plane.setColors(0, cols);
 
 		setGeometry(plane);
-	}
-
-	private void createAppearance() {
-		Appearance app = new Appearance();
-
-		PolygonAttributes pa = new PolygonAttributes();
-		pa.setCullFace(PolygonAttributes.CULL_NONE);
-		// so can see the ColouredTiles from both sides
-		app.setPolygonAttributes(pa);
-
-		setAppearance(app);
 	}
 
 }

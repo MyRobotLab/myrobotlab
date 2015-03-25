@@ -54,29 +54,26 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
 	IplImage value = null;
 	IplImage saturation = null;
 	IplImage mask = null;
-	
+
 	CvScalar hsv_min = null;
 	CvScalar hsv_max = null;
 	CvScalar hsv_min2 = null;
 	CvScalar hsv_max2 = null;
-	
+
 	BufferedImage frameBuffer = null;
-	
-	public OpenCVFilterColorTrack()  {
+
+	public OpenCVFilterColorTrack() {
 		super();
 	}
-	
-	public OpenCVFilterColorTrack(String name)  {
+
+	public OpenCVFilterColorTrack(String name) {
 		super(name);
 	}
 
-	
-	public void samplePoint(Integer x, Integer y) {
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
 
-		frameBuffer = hsv.getBufferedImage();
-		int rgb = frameBuffer.getRGB(x, y);
-		Color c = new Color(rgb);
-		log.error(x + "," + y + " h " + c.getRed() + " s " + c.getGreen() + " v " + c.getBlue());
 	}
 
 	/*
@@ -144,10 +141,12 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
 
 	}
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
+	public void samplePoint(Integer x, Integer y) {
+
+		frameBuffer = hsv.getBufferedImage();
+		int rgb = frameBuffer.getRGB(x, y);
+		Color c = new Color(rgb);
+		log.error(x + "," + y + " h " + c.getRed() + " s " + c.getGreen() + " v " + c.getBlue());
 	}
 
 }

@@ -42,12 +42,18 @@ public class OpenCVFilterMask extends OpenCVFilter {
 	public String maskName = "";
 
 	// TODO - get list of masks for gui
-	public OpenCVFilterMask()  {
+	public OpenCVFilterMask() {
 		super();
 	}
-	
-	public OpenCVFilterMask(String name)  {
+
+	public OpenCVFilterMask(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -55,7 +61,7 @@ public class OpenCVFilterMask extends OpenCVFilter {
 
 		// INFO - This filter has 2 keys !!!
 		IplImage mask = vp.sources.get(String.format("%s.mask", vp.boundServiceName));
-		
+
 		maskName = "kd";
 		if (mask != null) {
 			if (dst == null || dst.width() != image.width() || image.nChannels() != image.nChannels()) {
@@ -66,12 +72,6 @@ public class OpenCVFilterMask extends OpenCVFilter {
 		}
 
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

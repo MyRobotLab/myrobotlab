@@ -44,7 +44,8 @@ public class Inbox implements Serializable {
 	boolean isRunning = false;
 	boolean bufferOverrun = false;
 	boolean blocking = false;
-	int maxQueue = 1024; // will need to adjust unit test if you change this value
+	int maxQueue = 1024; // will need to adjust unit test if you change this
+							// value
 
 	HashMap<Long, Object[]> blockingList = new HashMap<Long, Object[]>();
 
@@ -54,6 +55,59 @@ public class Inbox implements Serializable {
 
 	public Inbox(String name) {
 		this.name = name;
+	}
+
+	public void add(Message msg) {
+		if ((msg.historyList.contains(name))) {
+			log.error(String.format("* %s dumping duplicate message %s.%s msgid - %d %s", name, msg.name, msg.method, msg.msgID, msg.historyList));
+			return;
+		}
+
+		msg.historyList.add(name);
+
+		synchronized (msgBox) {
+			while (blocking && msgBox.size() == maxQueue) // queue "full"
+			{
+				try {
+					msgBox.wait();
+				} catch (InterruptedException ex) {
+					log.debug("inbox enque msg INTERRUPTED " + name);
+				}
+			}
+
+			if (msgBox.size() > maxQueue) {
+				bufferOverrun = true;
+				log.warn(String.format("%s inbox BUFFER OVERRUN dumping msg size %d - %s", name, msgBox.size(), msg.method));
+			} else {
+				msgBox.addFirst(msg);
+				// Logging.logTime(String.format("inbox - %s size %d", name,
+				// msgBox.size()));
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("%s.msgBox + 1 = %d", name, msgBox.size()));
+				}
+				msgBox.notifyAll(); // must own the lock
+			}
+		}
+
+	}
+
+	public void clear() {
+		msgBox.clear();
+	}
+
+	// FIXME - implement with HashSet or HashMap !!!!
+	// ******* TEST WITHOUT DUPE CHECKING *********
+	public boolean duplicateMsg(ArrayList<RoutingEntry> history) {
+
+		for (int i = 0; i < history.size(); ++i) {
+			if (history.get(i).name.equals(name)) {
+				log.error("dupe message {} {}", name, history);
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -77,7 +131,7 @@ public class Inbox implements Serializable {
 		Message msg = null;
 
 		synchronized (msgBox) {
-			
+
 			while (msg == null) { // while no messages && no messages that are
 									// blocking
 				if (msgBox.size() == 0) {
@@ -117,64 +171,12 @@ public class Inbox implements Serializable {
 		return msg;
 	}
 
-	// FIXME - implement with HashSet or HashMap !!!!
-	// ******* TEST WITHOUT DUPE CHECKING *********
-	public boolean duplicateMsg(ArrayList<RoutingEntry> history) {
-
-		for (int i = 0; i < history.size(); ++i) {
-			if (history.get(i).name.equals(name)) {
-				log.error("dupe message {} {}", name, history);
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public void add(Message msg) {
-		if ((msg.historyList.contains(name))) {
-			log.error(String.format("* %s dumping duplicate message %s.%s msgid - %d %s", name, msg.name, msg.method, msg.msgID, msg.historyList));
-			return;
-		}
-
-		msg.historyList.add(name);
-
-		synchronized (msgBox) {
-			while (blocking && msgBox.size() == maxQueue) // queue "full"
-			{
-				try {
-					msgBox.wait();
-				} catch (InterruptedException ex) {
-					log.debug("inbox enque msg INTERRUPTED " + name);
-				}
-			}
-
-			if (msgBox.size() > maxQueue) {
-				bufferOverrun = true;
-				log.warn(String.format("%s inbox BUFFER OVERRUN dumping msg size %d - %s", name , msgBox.size(), msg.method));
-			} else {
-				msgBox.addFirst(msg);
-				//Logging.logTime(String.format("inbox - %s size %d", name, msgBox.size()));
-				if (log.isDebugEnabled()){
-					log.debug(String.format("%s.msgBox + 1 = %d", name, msgBox.size()));
-				}
-				msgBox.notifyAll(); // must own the lock
-			}
-		}
-
+	public boolean isBufferOverrun() {
+		return bufferOverrun;
 	}
 
 	public void setBlocking(boolean toBlock) {
 		blocking = toBlock;
-	}
-
-	public void clear() {
-		msgBox.clear();
-	}
-
-	public boolean isBufferOverrun() {
-		return bufferOverrun;
 	}
 
 	public int size() {

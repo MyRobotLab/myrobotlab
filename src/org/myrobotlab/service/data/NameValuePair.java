@@ -30,7 +30,6 @@ import java.io.Serializable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-
 public class NameValuePair implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(NameValuePair.class);
@@ -41,20 +40,21 @@ public class NameValuePair implements Serializable {
 
 	// option constants
 
+	public NameValuePair(final NameValuePair other) {
+		this.name = other.name;
+		this.value = other.value;
+	}
+
 	// ctors begin ----
 	public NameValuePair(String name, String value) {
 		this.name = name;
 		this.value = value;
 	}
 
-	public NameValuePair(final NameValuePair other) {
-		this.name = other.name;
-		this.value = other.value;
-	}
-
 	/*
 	 * Default format was xml is now JSON TODO - make toStringStyler like spring
 	 */
+	@Override
 	public String toString() {
 		StringBuffer ret = new StringBuffer();
 		// ret.append("{<NameValuePair");

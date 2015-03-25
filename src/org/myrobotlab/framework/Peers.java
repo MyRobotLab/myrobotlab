@@ -14,12 +14,61 @@ public class Peers {
 	transient public final static Logger log = LoggerFactory.getLogger(Peers.class);
 
 	private final String name;
+
 	private Index<ServiceReservation> templateDNA = new Index<ServiceReservation>();
+
+	public static String getPeerKey(String name, String key) {
+		return String.format("%s.%s", name, key);
+	}
+
+	static public Peers getPeers(String type) {
+		return getPeers("", type);
+	}
+
+	static public Peers getPeers(String namePrefix, String inType) {
+		String type = Encoder.getServiceType(inType);
+		try {
+			Class<?> theClass = Class.forName(type);
+			Method method = theClass.getMethod("getPeers", String.class);
+			Peers peers = (Peers) method.invoke(null, new Object[] { namePrefix });
+			return peers;
+		} catch (Exception e) { // dont care
+		}
+		return null;
+	}
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+
+		// Peers dna = Peers.getPeers("InMoov");
+		// Peers dna = Peers.getPeers("Plantoid");
+
+		Peers peers = Peers.getPeers("Plantoid");
+		ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
+		Repo r = new Repo();
+		for (int i = 0; i < peerList.size(); ++i) {
+			ServiceReservation sr = peerList.get(i);
+
+		}
+
+		// log.info(tdna.toString());
+
+		Index<ServiceReservation> dna = Service.buildDNA("Plantoid");
+		log.info(dna.toString());
+	}
 
 	public Peers(String name) {
 		this.name = name;
 		// peers.put(getPeerKey(peer), new ServiceReservation(peer, peerType,
 		// comment)); ???
+	}
+
+	public Index<ServiceReservation> getDNA() {
+		return templateDNA;
+	}
+
+	public String getPeerKey(String key) {
+		return getPeerKey(name, key);
 	}
 
 	public void put(String key, String type, String comment) {
@@ -67,20 +116,8 @@ public class Peers {
 
 	}
 
-	public static String getPeerKey(String name, String key) {
-		return String.format("%s.%s", name, key);
-	}
-
-	public String getPeerKey(String key) {
-		return getPeerKey(name, key);
-	}
-
 	public String show() {
 		return templateDNA.getRootNode().toString();
-	}
-
-	public Index<ServiceReservation> getDNA() {
-		return templateDNA;
 	}
 
 	// suggestAs will insert only (no update) - but top level inserts bottom
@@ -109,44 +146,6 @@ public class Peers {
 		put(key, actualName, type, comment);
 
 		return true;
-	}
-	
-	
-	static public Peers getPeers(String type){
-		return getPeers("", type);
-	}
-	
-	static public Peers getPeers(String namePrefix, String inType){
-		String type = Encoder.getServiceType(inType);
-		try {
-			Class<?> theClass = Class.forName(type);
-			Method method = theClass.getMethod("getPeers", String.class);
-			Peers peers = (Peers)method.invoke(null, new Object[]{namePrefix});
-			return peers;
-		} catch(Exception e){ // dont care
-		}
-		return null;
-	}
-	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		
-		//Peers dna = Peers.getPeers("InMoov");
-		//Peers dna = Peers.getPeers("Plantoid");
-		
-		
-		Peers peers = Peers.getPeers("Plantoid");
-		ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
-		Repo r = new Repo();
-		for (int i = 0; i < peerList.size(); ++i){
-			ServiceReservation sr = peerList.get(i);
-			
-		}
-		
-		//log.info(tdna.toString());
-		
-		Index<ServiceReservation> dna = Runtime.buildDNA("Plantoid");
-		log.info(dna.toString());
 	}
 
 }

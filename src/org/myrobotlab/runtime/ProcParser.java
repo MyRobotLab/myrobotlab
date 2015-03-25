@@ -29,14 +29,18 @@ import org.slf4j.Logger;
 public class ProcParser {
 
 	static public final String CPU = "CPU";
+
 	static public final String MEMORY = "MEMORY";
+
 	static public final String DISK = "DISK";
+
 	static public final String NETWORK = "NETWORK";
 
 	/*
 	 * The pid of the process - not thread safe
 	 */
 	static private int processPid = -1;
+
 	/*
 	 * The line which the number of cpu cores is located in /proc/cpuinfo in
 	 * kernel 2.6.32-34-generic.
@@ -48,11 +52,17 @@ public class ProcParser {
 	 * Those with 'net' are in /proc/net/. Those without are directly in /proc/.
 	 */
 	public static final String pidStatmPath = "/proc/#/statm";
+
 	public static final String pidStatPath = "/proc/#/stat";
+
 	public static final String statPath = "/proc/stat";
+
 	public static final String cpuinfoPath = "/proc/cpuinfo";
+
 	public static final String meminfoPath = "/proc/meminfo";
+
 	public static final String netdevPath = "/proc/net/dev";
+
 	public static final String partitionsPath = "/proc/partitions";
 	public static final String diskstatsPath = "/proc/diskstats";
 	public static final String EMPTY = "";
@@ -63,32 +73,83 @@ public class ProcParser {
 
 	public final static Logger log = LoggerFactory.getLogger(ProcParser.class);
 
-	public int setPid(int pid) {
-		processPid = pid;
-		return pid;
+	public static Integer getArmInstructionVersion() {
+		String[] tempData = null;
+		String[] tempFile = null;
+
+		Integer ret = 6;
+
+		// Parse /proc/cpuinfo to obtain how many cores the CPU has.
+		String cpuInfo = getContents(cpuinfoPath);
+		if (cpuInfo != null) {
+			tempFile = cpuInfo.split(System.getProperty(LINE_SEPARATOR));
+
+			for (String line : tempFile) {
+				if (line.contains("Processor")) {
+					tempData = line.split(COLON);
+					break;
+				}
+			}
+			if (tempData == null) {
+				log.error("proc data not found - not a Linux system?");
+				return null;
+			}
+
+			if (tempData.length == 2) {
+				String idata = tempData[1];
+				int pos0 = idata.indexOf("ARMv");
+				if (pos0 > 0) {
+					String vdata = idata.substring(pos0 + 4, pos0 + 5);
+					try {
+						ret = Integer.parseInt(vdata);
+					} catch (Exception e) {
+						Logging.logError(e);
+					}
+				}
+
+			}
+		}
+
+		return ret;
 	}
 
 	/**
-	 * Gathers the usage statistic from the /proc file system for CPU, Memory,
-	 * Disk and Network
+	 * Fetch the entire contents of a text file, and return it in a String. This
+	 * style of implementation does not throw Exceptions to the caller.
+	 * 
+	 * @param path
+	 *            is a file which already exists and can be read.
+	 * @throws IOException
 	 */
-	static public ArrayList<String> getUsage(String uType) {
-		if ((uType == null) || (processPid < 0)) {
-			throw new IllegalArgumentException();
+	static private synchronized String getContents(String path) {
+		// ...checks on aFile are elided
+		StringBuilder contents = new StringBuilder();
+
+		try {
+			// use buffering, reading one line at a time
+			// FileReader always assumes default encoding is OK!
+			BufferedReader input = new BufferedReader(new FileReader(new File(path)));
+			try {
+				String line = null; // not declared within while loop
+				/*
+				 * readLine is a bit quirky : it returns the content of a line
+				 * MINUS the newline. it returns null only for the END of the
+				 * stream. it returns an empty String if two newlines appear in
+				 * a row.
+				 */
+				while ((line = input.readLine()) != null) {
+					contents.append(line);
+					contents.append(System.getProperty(LINE_SEPARATOR));
+				}
+			} finally {
+				input.close();
+
+			}
+		} catch (IOException e) {
+			Logging.logError(e);
 		}
-		ArrayList<String> usageData = null;
-		String type = uType.toUpperCase();
-		
-		if (type.equals("CPU")){
-			usageData = getCpuUsage();
-		} else if (type.equals("MEMORY")){
-			usageData = getMemoryUsage(processPid);
-		} else if (type.equals("DISK")){
-			usageData = getDiskUsage();
-		} else if (type.equals("NETWORK")){
-			usageData = getNetworkUsage();
-		}
-		return usageData;
+
+		return contents.toString();
 	}
 
 	/**
@@ -121,68 +182,38 @@ public class ProcParser {
 			}
 			br.close();
 		} catch (IOException e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return data;
 	}
 
 	/**
-	 * DEPRECATE - why do this? Java can do this?
+	 * 
+	 * @param _memberValues
 	 */
-	public static int getNumberofCores() throws FileNotFoundException, IOException, NumberFormatException {
+	public static ArrayList<String> getDiskUsage() {
+		ArrayList<String> partitionData = getPartitionUsage();
+		ArrayList<String> data = new ArrayList<String>();
 		String[] tempData = null;
 		String[] tempFile = null;
 
-		// Parse /proc/cpuinfo to obtain how many cores the CPU has.
-		tempFile = getContents(cpuinfoPath).split(System.getProperty(LINE_SEPARATOR));
+		tempFile = getContents(diskstatsPath).split(System.getProperty(LINE_SEPARATOR));
+		ArrayList<String> tempPart = getPartitionNames(partitionData);
+		// Parse /proc/diskstats to obtain disk statistics
+
 		for (String line : tempFile) {
-			if (line.contains("cpu cores")) {
-				tempData = line.split(COLON);
-				break;
-			}
-		}
-		return Integer.parseInt(tempData[1].trim());
-	}
-
-	public static Integer getArmInstructionVersion() {
-		String[] tempData = null;
-		String[] tempFile = null;
-
-		Integer ret = 6;
-
-		// Parse /proc/cpuinfo to obtain how many cores the CPU has.
-		String cpuInfo = getContents(cpuinfoPath);
-		if (cpuInfo != null) {
-			tempFile = cpuInfo.split(System.getProperty(LINE_SEPARATOR));
-
-			for (String line : tempFile) {
-				if (line.contains("Processor")) {
-					tempData = line.split(COLON);
-					break;
+			for (String partition : tempPart) {
+				if (line.contains(SPACE + partition + SPACE)) {
+					// split(SPACE);
+					tempData = line.split(SPACE);
+					// adds the rest of the disk statistics
+					data.addAll(Arrays.asList(tempData));
+					data.removeAll(Collections.singleton(EMPTY));
 				}
-			}
-			if (tempData == null)
-			{
-				log.error("proc data not found - not a Linux system?");
-				return null;
-			}
-			
-			if (tempData.length == 2) {
-				String idata = tempData[1];
-				int pos0 = idata.indexOf("ARMv");
-				if (pos0 > 0) {
-					String vdata = idata.substring(pos0 + 4, pos0 + 5);
-					try {
-						ret = Integer.parseInt(vdata);
-					} catch (Exception e) {
-						Logging.logException(e);
-					}
-				}
-
 			}
 		}
 
-		return ret;
+		return data;
 	}
 
 	/**
@@ -219,7 +250,7 @@ public class ProcParser {
 			}
 			br.close();
 		} catch (IOException e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return data;
 	}
@@ -247,23 +278,21 @@ public class ProcParser {
 	}
 
 	/**
-	 * 
-	 * @param _memberValues
+	 * DEPRECATE - why do this? Java can do this?
 	 */
-	public static ArrayList<String> getPartitionUsage() {
-		ArrayList<String> data = new ArrayList<String>();
+	public static int getNumberofCores() throws FileNotFoundException, IOException, NumberFormatException {
 		String[] tempData = null;
 		String[] tempFile = null;
 
-		tempFile = getContents(partitionsPath).split(System.getProperty(LINE_SEPARATOR));
-
-		// parse the disk partitions
-		for (int i = 2; i < tempFile.length; i++) {
-			tempData = tempFile[i].split(SPACE);
-			data.addAll(Arrays.asList(tempData));
-			data.removeAll(Collections.singleton(EMPTY));
+		// Parse /proc/cpuinfo to obtain how many cores the CPU has.
+		tempFile = getContents(cpuinfoPath).split(System.getProperty(LINE_SEPARATOR));
+		for (String line : tempFile) {
+			if (line.contains("cpu cores")) {
+				tempData = line.split(COLON);
+				break;
+			}
 		}
-		return data;
+		return Integer.parseInt(tempData[1].trim());
 	}
 
 	/*
@@ -285,68 +314,20 @@ public class ProcParser {
 	 * 
 	 * @param _memberValues
 	 */
-	public static ArrayList<String> getDiskUsage() {
-		ArrayList<String> partitionData = getPartitionUsage();
+	public static ArrayList<String> getPartitionUsage() {
 		ArrayList<String> data = new ArrayList<String>();
 		String[] tempData = null;
 		String[] tempFile = null;
 
-		tempFile = getContents(diskstatsPath).split(System.getProperty(LINE_SEPARATOR));
-		ArrayList<String> tempPart = getPartitionNames(partitionData);
-		// Parse /proc/diskstats to obtain disk statistics
+		tempFile = getContents(partitionsPath).split(System.getProperty(LINE_SEPARATOR));
 
-		for (String line : tempFile) {
-			for (String partition : tempPart) {
-				if (line.contains(SPACE + partition + SPACE)) {
-					// split(SPACE);
-					tempData = line.split(SPACE);
-					// adds the rest of the disk statistics
-					data.addAll(Arrays.asList(tempData));
-					data.removeAll(Collections.singleton(EMPTY));
-				}
-			}
+		// parse the disk partitions
+		for (int i = 2; i < tempFile.length; i++) {
+			tempData = tempFile[i].split(SPACE);
+			data.addAll(Arrays.asList(tempData));
+			data.removeAll(Collections.singleton(EMPTY));
 		}
-
 		return data;
-	}
-
-	/**
-	 * Fetch the entire contents of a text file, and return it in a String. This
-	 * style of implementation does not throw Exceptions to the caller.
-	 * 
-	 * @param path
-	 *            is a file which already exists and can be read.
-	 * @throws IOException
-	 */
-	static private synchronized String getContents(String path) {
-		// ...checks on aFile are elided
-		StringBuilder contents = new StringBuilder();
-
-		try {
-			// use buffering, reading one line at a time
-			// FileReader always assumes default encoding is OK!
-			BufferedReader input = new BufferedReader(new FileReader(new File(path)));
-			try {
-				String line = null; // not declared within while loop
-				/*
-				 * readLine is a bit quirky : it returns the content of a line
-				 * MINUS the newline. it returns null only for the END of the
-				 * stream. it returns an empty String if two newlines appear in
-				 * a row.
-				 */
-				while ((line = input.readLine()) != null) {
-					contents.append(line);
-					contents.append(System.getProperty(LINE_SEPARATOR));
-				}
-			} finally {
-				input.close();
-
-			}
-		} catch (IOException e) {
-			Logging.logException(e);
-		}
-
-		return contents.toString();
 	}
 
 	/**
@@ -366,9 +347,32 @@ public class ProcParser {
 			br = new BufferedReader(fileReader);
 
 		} catch (IOException e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return br;
+	}
+
+	/**
+	 * Gathers the usage statistic from the /proc file system for CPU, Memory,
+	 * Disk and Network
+	 */
+	static public ArrayList<String> getUsage(String uType) {
+		if ((uType == null) || (processPid < 0)) {
+			throw new IllegalArgumentException();
+		}
+		ArrayList<String> usageData = null;
+		String type = uType.toUpperCase();
+
+		if (type.equals("CPU")) {
+			usageData = getCpuUsage();
+		} else if (type.equals("MEMORY")) {
+			usageData = getMemoryUsage(processPid);
+		} else if (type.equals("DISK")) {
+			usageData = getDiskUsage();
+		} else if (type.equals("NETWORK")) {
+			usageData = getNetworkUsage();
+		}
+		return usageData;
 	}
 
 	public static void main(String[] args) {
@@ -378,5 +382,10 @@ public class ProcParser {
 		Integer v = ProcParser.getArmInstructionVersion();
 		log.info("{}", v);
 		log.info("{}", v);
+	}
+
+	public int setPid(int pid) {
+		processPid = pid;
+		return pid;
 	}
 }// end ProcInfoParser

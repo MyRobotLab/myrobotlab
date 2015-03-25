@@ -18,7 +18,7 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.serial.VirtualSerialPort.VirtualNullModemCable;
+import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -44,7 +44,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	// you
 	// have!
 	public final static int SERVOMIN = 150; // this is the 'minimum' pulse
-											// length count (out of 4096)
+	// length count (out of 4096)
 	public final static int SERVOMAX = 600; // this is the 'maximum' pulse
 											// length count (out of 4096)
 
@@ -59,63 +59,6 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	private boolean pwmFreqSet = false;
 
 	public transient final static Logger log = LoggerFactory.getLogger(Adafruit16CServoDriver.class.getCanonicalName());
-
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		// peers.suggestAs("tracking.x", "pan", "Servo", "shared x");
-		// peers.put("keyboard", "Keyboard", "Keyboard service");
-		peers.put("arduino", "Arduino", "our Arduino");
-		return peers;
-	}
-
-	public Adafruit16CServoDriver(String n) {
-		super(n);
-		arduino = (Arduino) createPeer("arduino");
-	}
-
-	public void startService() {
-		super.startService();
-		attach(arduino);
-		arduino.startService();
-		// TODO - request myArduino - re connect
-	}
-
-	// VENDOR SPECIFIC LIBRARY METHODS BEGIN /////
-	// ----------- AF16C API Begin --------------
-	public void begin() {
-		arduino.sendMsg(AF_BEGIN, 0, 0);
-	}
-
-	public void setPWMFreq(Integer hz) { // Analog servos run at ~60 Hz updates
-		arduino.sendMsg(AF_SET_PWM_FREQ, hz, 0);
-	}
-
-	// drive the servo
-	public void setPWM(Integer servoNum, Integer pulseWidthOn, Integer pulseWidthOff) {
-		if (!pwmFreqSet) {
-			setPWMFreq(60);
-		}
-		arduino.sendMsg(AF_SET_PWM, servoNum, pulseWidthOn, pulseWidthOff);
-	}
-
-	public void setServo(Integer servoNum, Integer pulseWidthOff) {
-		if (!pwmFreqSet) {
-			setPWMFreq(60);
-		}
-		// since pulseWidthOff can be larger than > 256 it needs to be
-		// sent as 2 bytes
-		arduino.sendMsg(AF_SET_SERVO, servoNum, pulseWidthOff >> 8, pulseWidthOff & 0xFF);
-	}
-
-	// ----------- AFMotor API End --------------
-
-	@Override
-	public String getDescription() {
-		return "Adafruit Motor Shield Service";
-	}
-
-	// public static final String ADAFRUIT_SCRIPT_TYPE = "#define SCRIPT_TYPE "
-	// TODO
 
 	public static final String ADAFRUIT_DEFINES = "\n#define AF_SET_PWM 52\n" + "#define AF_BEGIN 50\n" + "#define AF_SET_SERVO 53\n"
 			+ "#define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)\n"
@@ -132,6 +75,33 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 			+ "             pwm.begin(); \n" + "            break;} \n" + "            case AF_SET_SERVO:{ \n"
 			+ "            pwm.setPWM(ioCmd[1], 0, (ioCmd[2] << 8) + ioCmd[3]); \n" + "            break; }\n";
 
+	HashMap<String, Integer> servoNameToPinMap = new HashMap<String, Integer>();
+
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		// peers.suggestAs("tracking.x", "pan", "Servo", "shared x");
+		// peers.put("keyboard", "Keyboard", "Keyboard service");
+		peers.put("arduino", "Arduino", "our Arduino");
+		return peers;
+	}
+
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start("pwm", "Adafruit16CServoDriver");
+		driver.test();
+
+	}
+
+	public Adafruit16CServoDriver(String n) {
+		super(n);
+		arduino = (Arduino) createPeer("arduino");
+	}
+
+	// ----------- AFMotor API End --------------
+
 	// attachControllerBoard ??? FIXME FIXME FIXME - should "attach" call
 	// another's attach?
 	/**
@@ -142,6 +112,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	 * 
 	 * TODO - Program Version & Type injection - with feedback + query to load
 	 */
+	@Override
 	public boolean attach(Arduino arduino) {
 
 		if (arduino == null) {
@@ -151,9 +122,12 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 		this.arduino = arduino;
 
+		// FIXME - better way to do this might be custom messaging within the
+		// MRLComm protocol - or re-implementation of the library with MRLComm
+		// :(
 		// arduinoName; FIXME - get clear on diction Program Script or Sketch
 		StringBuffer newProgram = new StringBuffer();
-		newProgram.append(arduino.getSketch());
+		newProgram.append(arduino.getSketch().data);
 
 		// modify the program
 		int insertPoint = newProgram.indexOf(Arduino.VENDOR_DEFINES_BEGIN);
@@ -187,7 +161,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		}
 
 		// set the program
-		arduino.setSketch(newProgram.toString());
+		Sketch sketch = new Sketch(newProgram.toString());
+		arduino.setSketch(sketch);
 		// broadcast the arduino state - ArduinoGUI should subscribe to
 		// setProgram
 		broadcastState(); // state has changed let everyone know
@@ -199,30 +174,160 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		return true;
 	}
 
-	public boolean isAttached() {
-		return arduino != null;
+	// public static final String ADAFRUIT_SCRIPT_TYPE = "#define SCRIPT_TYPE "
+	// TODO
+
+	// FIXME - put in ServoController interface !!!
+	public boolean attach(Servo servo, Integer pinNumber) {
+		if (servo == null) {
+			error("trying to attach null servo");
+			return false;
+		}
+
+		servo.setController(this);
+		servoNameToPinMap.put(servo.getName(), pinNumber);
+		return true;
 	}
 
-	public void connect(String comPort) {
-		arduino.connect(comPort);
+	// VENDOR SPECIFIC LIBRARY METHODS BEGIN /////
+	// ----------- AF16C API Begin --------------
+	public void begin() {
+		arduino.sendMsg(AF_BEGIN, 0, 0);
+	}
+
+	public boolean connect(String comPort) {
+		return arduino.connect(comPort);
+	}
+
+	public Arduino getArduino() {
+		return arduino;
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "shield", "motor" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "Adafruit Motor Shield Service";
 	}
 
 	// motor controller api
 
+	@Override
+	public ArrayList<Pin> getPinList() {
+		ArrayList<Pin> ret = new ArrayList<Pin>();
+		for (int i = 0; i < 16; ++i) {
+			Pin p = new Pin();
+			p.pin = i;
+			p.type = Pin.PWM_VALUE;
+			ret.add(p);
+		}
+		return ret;
+	}
+
+	@Override
+	public boolean isAttached() {
+		return arduino != null;
+	}
+
+	@Override
+	// string based method calls typed method
+	public boolean servoAttach(String servoName, Integer pin) {
+		Servo servo = (Servo) Runtime.createAndStart(servoName, "Servo");
+		// FIXME ??? WRONG RIGHT?? DUNNO do I have an index ? prolly not :)
+		return attach(servo, pin);
+	}
+
+	@Override
+	public boolean servoDetach(String servoName) {
+		servoNameToPinMap.remove(servoName);
+		return true;
+	}
+
+	@Override
+	public void servoSweepStart(String servoName, int min, int max, int step) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void servoSweepStop(String servoName) {
+		super.stopService();
+		arduino.servoSweepStop(servoName);
+	}
+
+	@Override
+	public void servoWrite(String servoName, Integer newPos) {
+		// this library uses pulse widths versus "degree" positioning
+		// need to maintain the same interface
+		int pulseWidthOff = (SERVOMAX - SERVOMIN) * newPos / 180 + SERVOMIN;
+		arduino.sendMsg(AF_SET_SERVO, servoNameToPinMap.get(servoName), pulseWidthOff >> 8, pulseWidthOff & 0xFF);
+	}
+
+	@Override
+	public void servoWriteMicroseconds(String name, Integer ms) {
+		// TODO Auto-generated method stub
+
+	}
+
+	// drive the servo
+	public void setPWM(Integer servoNum, Integer pulseWidthOn, Integer pulseWidthOff) {
+		if (!pwmFreqSet) {
+			setPWMFreq(60);
+		}
+		arduino.sendMsg(AF_SET_PWM, servoNum, pulseWidthOn, pulseWidthOff);
+	}
+
+	public void setPWMFreq(Integer hz) { // Analog servos run at ~60 Hz updates
+		arduino.sendMsg(AF_SET_PWM_FREQ, hz, 0);
+	}
+
+	public void setServo(Integer servoNum, Integer pulseWidthOff) {
+		if (!pwmFreqSet) {
+			setPWMFreq(60);
+		}
+		// since pulseWidthOff can be larger than > 256 it needs to be
+		// sent as 2 bytes
+		arduino.sendMsg(AF_SET_SERVO, servoNum, pulseWidthOff >> 8, pulseWidthOff & 0xFF);
+	}
+
+	@Override
+	public boolean setServoEventsEnabled(String servoName, boolean b) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setServoSpeed(String servoName, Float speed) {
+		arduino.setServoSpeed(servoName, speed); // FIXME - is this correct?
+	}
+
+	@Override
+	public void startService() {
+		super.startService();
+		attach(arduino);
+		arduino.startService();
+		// TODO - request myArduino - re connect
+	}
+
+	@Override
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
-		Adafruit16CServoDriver driver = (Adafruit16CServoDriver)Runtime.start(getName(), "Adafruit16CServoDriver");
-		Serial virtual = (Serial)Runtime.start(String.format("%s.vserial", getName()), "Serial");
-		
-		VirtualNullModemCable cable = Serial.createNullModemCable("v0", "v1");
-		virtual.connect("v1");
-		virtual.record("test/Adafruit16CServoDriver/test");
-		driver.arduino.connect("v0");
-		
-		// FIXME - make virtual UART
-		
 
 		try {
+			Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start(getName(), "Adafruit16CServoDriver");
+			Arduino arduino = driver.getArduino();
+			Serial serial = arduino.getSerial();
+			Serial virtual = serial.createVirtualUART();
+
+			// FIXME - make virtual UART
+
+			virtual.connect("v1");
+			virtual.record("test/Adafruit16CServoDriver/test");
+			driver.arduino.connect("v0");
+
 			driver.setServo(0, SERVOMIN);
 			driver.setServo(0, SERVOMAX);
 			driver.setServo(0, SERVOMIN);
@@ -252,120 +357,24 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 			driver.setPWM(0, 0, SERVOMIN);
 			driver.setPWM(0, 0, SERVOMAX);
 			driver.setPWM(0, 0, SERVOMAX);
-			
+
 			// need to allow time :P
 			// to flush serial thread
-			//sleep(1000);
+			// sleep(1000);
 			// disconnect / close arduino port
 			// flush cable
 			// stop recording
 			driver.arduino.disconnect();
-		    cable.flush();
-			//cable.close();
+			// cable.close();
 			virtual.stopRecording();
 
 			FileIO.compareFiles("test/Adafruit16CServoDriver/test.rx", "test/Adafruit16CServoDriver/control/test.rx");
-			
+
 		} catch (Exception e) {
 			status.addError(e);
 		}
 
 		return status;
 	}
-
-	@Override
-	public ArrayList<Pin> getPinList() {
-		ArrayList<Pin> ret = new ArrayList<Pin>();
-		for (int i = 0; i < 16; ++i) {
-			Pin p = new Pin();
-			p.pin = i;
-			p.type = Pin.PWM_VALUE;
-			ret.add(p);
-		}
-		return ret;
-	}
-
-	HashMap<String, Integer> servoNameToPinMap = new HashMap<String, Integer>();
-
-	// FIXME - put in ServoController interface !!!
-	public boolean attach(Servo servo, Integer pinNumber) {
-		if (servo == null) {
-			error("trying to attach null servo");
-			return false;
-		}
-
-		servo.setController(this);
-		servoNameToPinMap.put(servo.getName(), pinNumber);
-		return true;
-	}
-
-	@Override
-	// string based method calls typed method
-	public boolean servoAttach(String servoName, Integer pin) {
-		Servo servo = (Servo) Runtime.createAndStart(servoName, "Servo");
-		// FIXME ??? WRONG RIGHT?? DUNNO do I have an index ? prolly not :)
-		return attach(servo, pin);
-	}
-
-	@Override
-	public void servoWrite(String servoName, Integer newPos) {
-		// this library uses pulse widths versus "degree" positioning
-		// need to maintain the same interface
-		int pulseWidthOff = (SERVOMAX - SERVOMIN) * newPos / 180 + SERVOMIN;
-		arduino.sendMsg(AF_SET_SERVO, servoNameToPinMap.get(servoName), pulseWidthOff >> 8, pulseWidthOff & 0xFF);
-	}
-
-	@Override
-	public boolean servoDetach(String servoName) {
-		servoNameToPinMap.remove(servoName);
-		return true;
-	}
-
-
-	@Override
-	public void setServoSpeed(String servoName, Float speed) {
-		arduino.setServoSpeed(servoName, speed); // FIXME - is this correct?
-	}
-
-	@Override
-	public void servoSweepStop(String servoName) {
-		super.stopService();
-		arduino.servoSweepStop(servoName);
-	}
-
-	@Override
-	public void servoSweepStart(String servoName, int min, int max, int step) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean setServoEventsEnabled(String servoName, boolean b) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-
-	@Override
-	public void servoWriteMicroseconds(String name, Integer ms) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"shield","motor"};
-	}
-	
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start("pwm", "Adafruit16CServoDriver");
-		driver.test();
-
-	}
-
 
 }

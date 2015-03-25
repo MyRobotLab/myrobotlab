@@ -29,16 +29,65 @@ import org.myrobotlab.chess.HMove;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class ChessGame extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(ChessGame.class.getCanonicalName());
+
 	private static final long serialVersionUID = 1L;
+
+	int state = 0;
+
+	int column;
+
+	int row;
+	int pressedAmount;
+	char columnLetter;
+	String hmoveMsg = "";
+
+	public static void main(String[] args) throws ClassNotFoundException {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		try {
+			Runtime.start("chessgame", "ChessGame");
+			Runtime.start("python", "Python");
+			Runtime.start("gui", "GUIService");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
 
 	public ChessGame(String n) {
 		super(n);
+	}
+
+	public String computerMoved(String move) {
+		log.info("computerMoved " + move);
+		return move;
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "game" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used to generate pulses";
+	}
+
+	public HMove inputHMove(HMove s) {
+		return s;
+	}
+
+	public String inputMove(String s) {
+		log.debug("inputMove " + s);
+		return s;
 	}
 
 	public HMove makeHMove(HMove m) {
@@ -46,12 +95,27 @@ public class ChessGame extends Service {
 		return m;
 	}
 
-	int state = 0;
-	int column;
-	int row;
-	int pressedAmount;
-	char columnLetter;
-	String hmoveMsg = "";
+	public String makeMove(HMove m, String code) {
+		String t = m.toString();
+		log.info(t);
+
+		if (t.length() == 6) {
+			t = t.substring(1);
+		}
+
+		t = (t.substring(0, 2) + t.substring(3));
+
+		t = "x" + t + code + "z";
+		t = t.toLowerCase();
+
+		log.info(t);
+
+		return t;
+	}
+
+	public void move(String move) {
+		invoke("inputMove", move);
+	}
 
 	public String parseOSC(String data) {
 		++pressedAmount;
@@ -151,66 +215,6 @@ public class ChessGame extends Service {
 		}
 
 		return hmoveMsg;
-	}
-
-	public String makeMove(HMove m, String code) {
-		String t = m.toString();
-		log.info(t);
-
-		if (t.length() == 6) {
-			t = t.substring(1);
-		}
-
-		t = (t.substring(0, 2) + t.substring(3));
-
-		t = "x" + t + code + "z";
-		t = t.toLowerCase();
-
-		log.info(t);
-
-		return t;
-	}
-
-	public HMove inputHMove(HMove s) {
-		return s;
-	}
-
-	public String inputMove(String s) {
-		log.debug("inputMove " + s);
-		return s;
-	}
-	
-	public void move(String move)
-	{
-		invoke("inputMove", move);
-	}
-	
-	public String computerMoved(String move)
-	{
-		log.info("computerMoved " + move);
-		return move;
-	}
-
-
-	public static void main(String[] args) throws ClassNotFoundException {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-
-		ChessGame chessgame = (ChessGame)Runtime.createAndStart("chessgame", "ChessGame");
-		Runtime.createAndStart("python", "Python");
-		Runtime.createAndStart("gui", "GUIService");
-	
-	}
-
-	@Override
-	public String getDescription() {
-		return "used to generate pulses";
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"game"};
 	}
 
 }

@@ -60,10 +60,47 @@ public class SLAMGUI extends ServiceGUI implements ListSelectionListener, VideoG
 
 	public Random rand = new Random();
 
+	int x;
+
+	int y;
+
 	public SLAMGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void attachGUI() {
+		video.attachGUI();
+		subscribe("publishIR", "publishIR", IREvent.class);
+		video.displayFrame(new SerializableImage(img, boundServiceName));
+	}
+
+	protected ImageIcon createImageIcon(String path, String description) {
+		java.net.URL imgURL = getClass().getResource(path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL, description);
+		} else {
+			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
+	}
+
+	@Override
+	public void detachGUI() {
+		video.detachGUI();
+		unsubscribe("publishIR", "publishIR", IREvent.class);
+	}
+
+	public void displayFrame(SerializableImage img) {
+		video.displayFrame(img);
+	}
+
+	@Override
+	public VideoWidget getLocalDisplay() {
+		return video;
+	}
+
+	@Override
 	public void init() {
 
 		img = new BufferedImage(width / 2, height / 2, BufferedImage.TYPE_INT_RGB);
@@ -82,40 +119,11 @@ public class SLAMGUI extends ServiceGUI implements ListSelectionListener, VideoG
 
 	}
 
-	protected ImageIcon createImageIcon(String path, String description) {
-		java.net.URL imgURL = getClass().getResource(path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL, description);
-		} else {
-			System.err.println("Couldn't find file: " + path);
-			return null;
-		}
-	}
-
-	public void displayFrame(SerializableImage img) {
-		video.displayFrame(img);
-	}
-
-	@Override
-	public void attachGUI() {
-		video.attachGUI();
-		subscribe("publishIR", "publishIR", IREvent.class);
-		video.displayFrame(new SerializableImage(img, boundServiceName));
-	}
-
-	int x;
-	int y;
-
-	@Override
-	public void detachGUI() {
-		video.detachGUI();
-		unsubscribe("publishIR", "publishIR", IREvent.class);
-	}
-
 	// TODO - encapsulate this
 	// MouseListener mouseListener = new MouseAdapter() {
 	public void setCurrentFilterMouseListener() {
 		MouseListener mouseListener = new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent mouseEvent) {
 				JList theList = (JList) mouseEvent.getSource();
 				if (mouseEvent.getClickCount() == 2) {
@@ -128,11 +136,6 @@ public class SLAMGUI extends ServiceGUI implements ListSelectionListener, VideoG
 			}
 		};
 
-	}
-
-	@Override
-	public VideoWidget getLocalDisplay() {
-		return video;
 	}
 
 	@Override

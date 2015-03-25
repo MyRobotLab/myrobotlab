@@ -20,37 +20,75 @@ import com.google.gson.Gson;
 
 public class CloudConnector extends Service {
 
+	class CloudMessage {
+
+		public String robotId;
+		public String propertyId;
+		public Message message;
+
+		public CloudMessage(String robotId, String propertyId, Message message) {
+			this.robotId = robotId;
+			this.propertyId = propertyId;
+			this.message = message;
+		}
+
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(CloudConnector.class);
-	
 	//
 	public String robotId;
+
 	//
 	public String propertyId;
-	
-	class CloudMessage {
-		 
-	    public String robotId;
-	    public String propertyId;
-	    public Message message;
-	    
-	    public CloudMessage(String robotId, String propertyId, Message message){
-	    	this.robotId = robotId;
-	    	this.propertyId = propertyId;
-	    	this.message = message;
-	    }
-	    
+
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		try {
+			Runtime.start("gui", "GUIService");
+			CloudConnector cloud = new CloudConnector("cloud");
+			cloud.startService();
+			cloud.setRobotId("incubator");
+
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			arduino.connect("COM12");
+			arduino.analogReadPollingStart(3);
+			arduino.addListener("publishPin", cloud.getName(), "publishPin", Pin.class);
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		// Runtime.createAndStart("gui", "GUIService");
+
+		/*
+		 * GUIService gui = new GUIService("gui"); gui.startService();
+		 */
+
 	}
 
 	public CloudConnector(String n) {
 		super(n);
-		//load();
+		// load();
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "cloud" };
 	}
 
 	@Override
 	public String getDescription() {
 		return "Cloud Connector";
+	}
+
+	@Override
+	public boolean preProcessHook(Message m) {
+		sendMessage(m);
+		return false;
 	}
 
 	public void sendMessage(Message message) {
@@ -64,7 +102,7 @@ public class CloudConnector extends Service {
 
 			urlParameters = URLEncoder.encode(gson.toJson(new CloudMessage(robotId, propertyId, message)), "UTF-8");
 
-			//String url = "https://selfsolve.apple.com/wcResults.do";
+			// String url = "https://selfsolve.apple.com/wcResults.do";
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
@@ -73,7 +111,7 @@ public class CloudConnector extends Service {
 			con.setRequestProperty("User-Agent", USER_AGENT);
 			con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
 
-			//urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
+			// urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
 
 			// Send post request
 			con.setDoOutput(true);
@@ -98,51 +136,16 @@ public class CloudConnector extends Service {
 
 			// print result
 			log.info(response.toString());
-			
+
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
 
-	public boolean preProcessHook(Message m) {
-		sendMessage(m);
-		return false;
-	}
-
-	
 	public String setRobotId(String robotId) {
 		this.robotId = robotId;
 		save();
 		return robotId;
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"cloud"};
-	}
-	
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		Runtime.start("gui", "GUIService");
-		CloudConnector cloud = new CloudConnector("cloud");
-		cloud.startService();
-		cloud.setRobotId("incubator");
-
-		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-		arduino.connect("COM12");
-		arduino.analogReadPollingStart(3);
-		arduino.addListener("publishPin", cloud.getName(), "publishPin", Pin.class);
-
-		// Runtime.createAndStart("gui", "GUIService");
-
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 */
-
-	}
-
 
 }

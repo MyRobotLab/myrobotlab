@@ -9,6 +9,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Environment.POSIX;
 import org.slf4j.Logger;
@@ -16,12 +17,7 @@ import org.slf4j.Logger;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 
-
 class Environment {
-	public interface WinLibC extends Library {
-		public int _putenv(String name);
-	}
-
 	public interface LinuxLibC extends Library {
 		public int setenv(String name, String value, int overwrite);
 
@@ -55,16 +51,36 @@ class Environment {
 		}
 	}
 
+	public interface WinLibC extends Library {
+		public int _putenv(String name);
+	}
+
 	static POSIX libc = new POSIX();
 }
-
 
 public class TesseractOCR extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(TesseractOCR.class
-			.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(TesseractOCR.class.getCanonicalName());
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		try {
+
+			TesseractOCR tesseract = new TesseractOCR("tesseract");
+			tesseract.startService();
+
+			Runtime.createAndStart("gui", "GUIService");
+			/*
+			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 */
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
 	public TesseractOCR(String n) {
 		super(n);
@@ -72,11 +88,16 @@ public class TesseractOCR extends Service {
 		String filed = file.getAbsolutePath();
 		POSIX e = new Environment.POSIX();
 		e.setenv("TESSDATA_PREFIX", filed.substring(0, filed.length() - 1), 1);
-//		for (Entry<String, String> g : System.getenv().entrySet()) {
-//			System.out.println(g.getKey() + "=" + g.getValue());
-//
-//		}
+		// for (Entry<String, String> g : System.getenv().entrySet()) {
+		// System.out.println(g.getKey() + "=" + g.getValue());
+		//
+		// }
 	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "ocr" };
+	};
 
 	@Override
 	public String getDescription() {
@@ -86,19 +107,14 @@ public class TesseractOCR extends Service {
 	public String OCR(SerializableImage image) {
 		try {
 			String hh = Tesseract.getInstance().doOCR(image.getImage());
-//			System.out.println(hh);
-			log.info("Read: "+hh);
+			// System.out.println(hh);
+			log.info("Read: " + hh);
 			return hh;
 		} catch (TesseractException e) {
 			e.printStackTrace();
 		}
 		return null;
 
-	};
-
-	@Override
-	public void stopService() {
-		super.stopService();
 	}
 
 	@Override
@@ -107,24 +123,9 @@ public class TesseractOCR extends Service {
 		super.releaseService();
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		TesseractOCR tesseract = new TesseractOCR("tesseract");
-		tesseract.startService();
-
-		Runtime.createAndStart("gui", "GUIService");
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
-		 * 
-		 */
-	}
-	
 	@Override
-	public String[] getCategories() {
-		return new String[] {"ocr"};
+	public void stopService() {
+		super.stopService();
 	}
 
 }

@@ -52,20 +52,74 @@ import org.slf4j.Logger;
 
 public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
 
+	public class CheckBoxChange implements ChangeListener {
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			JCheckBox t = (JCheckBox) e.getSource();
+			if (t.getModel().isSelected()) {
+				sendStrings = true;
+			} else {
+				sendStrings = false;
+			}
+		}
+	}
+
+	public class Keyboard implements KeyListener {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
+
+		@Override
+		public void keyPressed(KeyEvent keyEvent) {
+
+			int code = keyEvent.getKeyCode();
+			String text = KeyEvent.getKeyText(code);
+
+			if (sendStrings) {
+				// keyBuffer.append(b)
+				if (code == KeyEvent.VK_ENTER) {
+					myService.send(boundServiceName, "keyCommand", keyBuffer.toString());
+					addLogEntry(sdf.format(cal.getTime()) + " " + keyBuffer.toString());
+					keyBuffer.setLength(0);
+				} else {
+					keyBuffer.append(text);
+				}
+			} else {
+				myService.send(boundServiceName, "keyCommand", text);
+				addLogEntry(sdf.format(cal.getTime()) + " " + keyEvent.getKeyCode() + " " + KeyEvent.getKeyText(keyEvent.getKeyCode()));
+			}
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent keyEvent) {
+			// log.error("Released" + keyEvent);
+		}
+
+		@Override
+		public void keyTyped(KeyEvent keyEvent) {
+			// log.error("Typed" + keyEvent);
+		}
+
+	}
+
 	public final static Logger log = LoggerFactory.getLogger(KeyboardGUI.class.getCanonicalName());
 	static final long serialVersionUID = 1L;
-
 	JList<String> currentPlayers;
+
 	JList<String> currentLog;
+
 	JCheckBox sendStringsCheckBox;
 
 	public boolean sendStrings = false;
-
 	DefaultListModel<String> logModel = new DefaultListModel<String>();
-
 	int msgCount = 0;
+
 	StringBuffer keyBuffer = new StringBuffer();
+
 	Keyboard keyboard = null;
+
+	Calendar cal = Calendar.getInstance();
 
 	/**
 	 * @wbp.parser.entryPoint
@@ -74,6 +128,19 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
+	public void addLogEntry(String msg) {
+		logModel.add(0, msg);
+	};
+
+	@Override
+	public void attachGUI() {
+	}
+
+	@Override
+	public void detachGUI() {
+	}
+
+	@Override
 	public void init() {
 
 		keyboard = new Keyboard();
@@ -118,71 +185,10 @@ public class KeyboardGUI extends ServiceGUI implements ListSelectionListener {
 
 	}
 
-	public class CheckBoxChange implements ChangeListener {
-
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			JCheckBox t = (JCheckBox) e.getSource();
-			if (t.getModel().isSelected()) {
-				sendStrings = true;
-			} else {
-				sendStrings = false;
-			}
-		}
-	}
-	
-	Calendar cal = Calendar.getInstance();
-
-	public class Keyboard implements KeyListener {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
-
-		public void keyPressed(KeyEvent keyEvent) {
-
-			int code = keyEvent.getKeyCode();
-			String text = KeyEvent.getKeyText(code);
-
-			if (sendStrings) {
-				// keyBuffer.append(b)
-				if (code == KeyEvent.VK_ENTER) {
-					myService.send(boundServiceName, "keyCommand", keyBuffer.toString());
-					addLogEntry(sdf.format(cal.getTime()) + " " + keyBuffer.toString());
-					keyBuffer.setLength(0);
-				} else {
-					keyBuffer.append(text);
-				}
-			} else {
-				myService.send(boundServiceName, "keyCommand", text);
-				addLogEntry(sdf.format(cal.getTime()) + " " + keyEvent.getKeyCode() + " " + KeyEvent.getKeyText(keyEvent.getKeyCode()));
-			}
-
-		}
-
-		public void keyReleased(KeyEvent keyEvent) {
-			// log.error("Released" + keyEvent);
-		}
-
-		public void keyTyped(KeyEvent keyEvent) {
-			// log.error("Typed" + keyEvent);
-		}
-
-	};
-
-	public void attachGUI() {
-	}
-
-	@Override
-	public void detachGUI() {
-	}
-
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {
 		// TODO Auto-generated method stub
 
-	}
-
-	public void addLogEntry(String msg) {
-		logModel.add(0, msg);
 	}
 
 }

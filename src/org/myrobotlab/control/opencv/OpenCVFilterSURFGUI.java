@@ -25,7 +25,6 @@
 
 package org.myrobotlab.control.opencv;
 
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,24 +32,19 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-import org.myrobotlab.control.widget.SliderWithText;
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterSURF;
 import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterSURFGUI extends OpenCVFilterGUI implements ActionListener {
 
 	JTextField objectFilename = new JTextField("objectFilename", 200);
-	
-  	public OpenCVFilterSURFGUI(String boundFilterName, String boundServiceName, GUIService myService) {
+
+	public OpenCVFilterSURFGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
 		objectFilename.addActionListener(this);
 		TitledBorder title;
@@ -59,19 +53,7 @@ public class OpenCVFilterSURFGUI extends OpenCVFilterGUI implements ActionListen
 		j.setBorder(title);
 		j.add(new JLabel("Filename"));
 		j.add(objectFilename);
-		display.add(j,gc);
-	}
-
-	// FIXME - update components :)
-	@Override
-	public void getFilterState(final FilterWrapper filterWrapper) {
-		boundFilter = filterWrapper;
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				OpenCVFilterSURF af = (OpenCVFilterSURF)filterWrapper.filter;
-			}
-		});
-
+		display.add(j, gc);
 	}
 
 	@Override
@@ -80,10 +62,23 @@ public class OpenCVFilterSURFGUI extends OpenCVFilterGUI implements ActionListen
 		Object o = event.getSource();
 		OpenCVFilterSURF sf = (OpenCVFilterSURF) boundFilter.filter;
 		if (o == objectFilename) {
-			String val = ((JTextField)o).getText();
+			String val = ((JTextField) o).getText();
 			sf.loadObjectImageFilename(val);
 		} else {
 			log.warn("Inknown object invoked in surf filter ui");
-		}		
+		}
+	}
+
+	// FIXME - update components :)
+	@Override
+	public void getFilterState(final FilterWrapper filterWrapper) {
+		boundFilter = filterWrapper;
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				OpenCVFilterSURF af = (OpenCVFilterSURF) filterWrapper.filter;
+			}
+		});
+
 	}
 }

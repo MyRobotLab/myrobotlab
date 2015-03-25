@@ -5,12 +5,14 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class InMoovTorso extends Service {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(InMoovTorso.class);
 
 	transient public Servo topStom;
@@ -27,6 +29,18 @@ public class InMoovTorso extends Service {
 		peers.put("lowStom", "Servo", "Low Stomach servo");
 		peers.put("arduino", "Arduino", "Arduino controller for this arm");
 		return peers;
+	}
+
+	static public void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
+			InMoovTorso torso = (InMoovTorso) Runtime.createAndStart("torso", "InMoovTorso");
+			torso.connect("COM4");
+			torso.test();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 	public InMoovTorso(String n) {
@@ -56,16 +70,33 @@ public class InMoovTorso extends Service {
 		lowStom.setRest(90);
 	}
 
-	@Override
-	public void startService() {
-		super.startService();
-		topStom.startService();
-		midStom.startService();
-		lowStom.startService();
-		arduino.startService();
+	/**
+	 * attach all the servos - this must be re-entrant and accomplish the
+	 * re-attachment when servos are detached
+	 * 
+	 * @return
+	 */
+	public boolean attach() {
+		boolean result = true;
+		sleep(InMoov.attachPauseMs);
+		result &= topStom.attach();
+		sleep(InMoov.attachPauseMs);
+		result &= midStom.attach();
+		sleep(InMoov.attachPauseMs);
+		result &= lowStom.attach();
+		sleep(InMoov.attachPauseMs);
+		return result;
 	}
 
-	public boolean connect(String port) {
+	@Override
+	public void broadcastState() {
+		// notify the gui
+		topStom.broadcastState();
+		midStom.broadcastState();
+		lowStom.broadcastState();
+	}
+
+	public boolean connect(String port) throws Exception {
 		startService(); // NEEDED? I DONT THINK SO....
 
 		if (arduino == null) {
@@ -89,59 +120,6 @@ public class InMoovTorso extends Service {
 		return true;
 	}
 
-	/**
-	 * attach all the servos - this must be re-entrant and accomplish the
-	 * re-attachment when servos are detached
-	 * 
-	 * @return
-	 */
-	public boolean attach() {
-		boolean result = true;
-		sleep(InMoov.attachPauseMs);
-		result &= topStom.attach();
-		sleep(InMoov.attachPauseMs);
-		result &= midStom.attach();
-		sleep(InMoov.attachPauseMs);
-		result &= lowStom.attach();
-		sleep(InMoov.attachPauseMs);
-		return result;
-	}
-
-	@Override
-	public String getDescription() {
-		return "the InMoov Arm Service";
-	}
-
-	public void rest() {
-
-		setSpeed(1.0f, 1.0f, 1.0f);
-
-		topStom.rest();
-		midStom.rest();
-		lowStom.rest();
-	}
-
-	// ------------- added set pins
-	public void setpins(Integer topStom, Integer midStom, Integer lowStom) {
-		// createPeers();
-		this.topStom.setPin(topStom);
-		this.midStom.setPin(midStom);
-		this.lowStom.setPin(lowStom);
-	}
-
-	public void setLimits(int bicepMin, int bicepMax, int rotateMin, int rotateMax, int shoulderMin, int shoulderMax) {
-		topStom.setMinMax(bicepMin, bicepMax);
-		midStom.setMinMax(rotateMin, rotateMax);
-		lowStom.setMinMax(shoulderMin, shoulderMax);
-	}
-
-	public void broadcastState() {
-		// notify the gui
-		topStom.broadcastState();
-		midStom.broadcastState();
-		lowStom.broadcastState();
-	}
-
 	public void detach() {
 		topStom.detach();
 		sleep(InMoov.attachPauseMs);
@@ -149,6 +127,46 @@ public class InMoovTorso extends Service {
 		sleep(InMoov.attachPauseMs);
 		lowStom.detach();
 		sleep(InMoov.attachPauseMs);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "robot" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "the InMoov Arm Service";
+	}
+
+	public long getLastActivityTime() {
+		long minLastActivity = Math.max(topStom.getLastActivityTime(), midStom.getLastActivityTime());
+		minLastActivity = Math.max(minLastActivity, lowStom.getLastActivityTime());
+		return minLastActivity;
+	}
+
+	public String getScript(String inMoovServiceName) {
+		return String.format("%s.moveTorso(%d,%d,%d)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
+	}
+
+	public boolean isAttached() {
+		boolean attached = false;
+
+		attached |= topStom.isAttached();
+		attached |= midStom.isAttached();
+		attached |= lowStom.isAttached();
+
+		return attached;
+	}
+
+	public void moveTo(Integer topStom, Integer midStom, Integer lowStom) {
+		if (log.isDebugEnabled()) {
+			log.debug(String.format("%s moveTo %d %d %d", getName(), topStom, midStom, lowStom));
+		}
+		this.topStom.moveTo(topStom);
+		this.midStom.moveTo(midStom);
+		this.lowStom.moveTo(lowStom);
+
 	}
 
 	// FIXME - releasePeers()
@@ -168,26 +186,59 @@ public class InMoovTorso extends Service {
 		}
 	}
 
+	public void rest() {
+
+		setSpeed(1.0f, 1.0f, 1.0f);
+
+		topStom.rest();
+		midStom.rest();
+		lowStom.rest();
+	}
+
+	@Override
+	public boolean save() {
+		super.save();
+		topStom.save();
+		midStom.save();
+		lowStom.save();
+		return true;
+	}
+
+	public void setLimits(int bicepMin, int bicepMax, int rotateMin, int rotateMax, int shoulderMin, int shoulderMax) {
+		topStom.setMinMax(bicepMin, bicepMax);
+		midStom.setMinMax(rotateMin, rotateMax);
+		lowStom.setMinMax(shoulderMin, shoulderMax);
+	}
+
+	// ------------- added set pins
+	public void setpins(Integer topStom, Integer midStom, Integer lowStom) {
+		// createPeers();
+		this.topStom.setPin(topStom);
+		this.midStom.setPin(midStom);
+		this.lowStom.setPin(lowStom);
+	}
+
 	public void setSpeed(Float topStom, Float midStom, Float lowStom) {
 		this.topStom.setSpeed(topStom);
 		this.midStom.setSpeed(midStom);
 		this.lowStom.setSpeed(lowStom);
 	}
 
-	public String getScript(String inMoovServiceName) {
-		return String.format("%s.moveTorso(%d,%d,%d)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
+	/*
+	 * public boolean load() { super.load(); topStom.load(); midStom.load();
+	 * lowStom.load(); return true; }
+	 */
+
+	@Override
+	public void startService() {
+		super.startService();
+		topStom.startService();
+		midStom.startService();
+		lowStom.startService();
+		arduino.startService();
 	}
 
-	public void moveTo(Integer topStom, Integer midStom, Integer lowStom) {
-		if (log.isDebugEnabled()) {
-			log.debug(String.format("%s moveTo %d %d %d", getName(), topStom, midStom, lowStom));
-		}
-		this.topStom.moveTo(topStom);
-		this.midStom.moveTo(midStom);
-		this.lowStom.moveTo(lowStom);
-
-	}
-
+	@Override
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
 		try {
@@ -202,63 +253,16 @@ public class InMoovTorso extends Service {
 			topStom.moveTo(topStom.getPos() + 2);
 			midStom.moveTo(midStom.getPos() + 2);
 			lowStom.moveTo(lowStom.getPos() + 2);
-			
+
 			moveTo(35, 45, 55);
 			String move = getScript("i01");
 			log.info(move);
-		
+
 		} catch (Exception e) {
 			status.addError(e);
 		}
 
 		status.addInfo("test completed");
 		return status;
-	}
-
-	public long getLastActivityTime() {
-		long minLastActivity = Math.max(topStom.getLastActivityTime(), midStom.getLastActivityTime());
-		minLastActivity = Math.max(minLastActivity, lowStom.getLastActivityTime());
-		return minLastActivity;
-	}
-
-	public boolean isAttached() {
-		boolean attached = false;
-
-		attached |= topStom.isAttached();
-		attached |= midStom.isAttached();
-		attached |= lowStom.isAttached();
-
-		return attached;
-	}
-
-	public boolean save() {
-		super.save();
-		topStom.save();
-		midStom.save();
-		lowStom.save();
-		return true;
-	}
-
-	/*
-	public boolean load() {
-		super.load();
-		topStom.load();
-		midStom.load();
-		lowStom.load();
-		return true;
-	}
-	*/
-
-	static public void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-		InMoovTorso torso = (InMoovTorso) Runtime.createAndStart("torso", "InMoovTorso");
-		torso.connect("COM4");
-		torso.test();
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"robot"};
 	}
 }

@@ -13,15 +13,16 @@ import org.slf4j.Logger;
 import com.google.gson.Gson;
 
 /**
- * JSON TypeConverter - used in general REST api to convert url JSON parameters appropriately to 
- * hard types for method invoking
- * used in WebGUI and CLI
+ * JSON TypeConverter - used in general REST api to convert url JSON parameters
+ * appropriately to hard types for method invoking used in WebGUI and CLI
+ * 
  * @author GroG
  *
  */
 public class TypeConverter {
 
 	public final static Logger log = LoggerFactory.getLogger(TypeConverter.class.getCanonicalName());
+
 	private static Gson gson = new Gson();
 
 	// Possible Optimization -> pointers to known method signatures -
@@ -33,45 +34,6 @@ public class TypeConverter {
 	// pointers to conversion methods
 	// static public HashMap<String, Method> conversions = new HashMap<String,
 	// Method>();
-
-	// -------- primitive boxed types conversion begin ------------
-	static public byte StringToByte(String in) {
-		return Byte.parseByte(in);
-	}
-
-	static public short StringToShort(String in) {
-		return Short.parseShort(in);
-	}
-
-	static public int StringToInteger(String in) {
-		return Integer.parseInt(in);
-	}
-
-	static public long StringToLong(String in) {
-		return Long.parseLong(in);
-	}
-
-	static public float StringToFloat(String in) {
-		return Float.parseFloat(in);
-	}
-
-	static public double StringToDouble(String in) {
-		return Double.parseDouble(in);
-	}
-
-	static public boolean StringToBoolean(String in) {
-		return Boolean.parseBoolean(in);
-	}
-
-	static public char StringToChar(String in) {
-		return in.charAt(0);
-	}
-
-	static public String StringToString(String in) {
-		return in;
-	}
-
-	// -------- primitive boxed types conversion end ------------
 
 	/**
 	 * this method tries to get the appropriate 'Typed parameter array for a
@@ -86,24 +48,25 @@ public class TypeConverter {
 	static public Object[] getTypedParamsFromJson(Class<?> clazz, String method, String[] stringParams) {
 
 		try {
-			
+
 			Method[] methods = clazz.getMethods();
 			for (int i = 0; i < methods.length; ++i) {
 				Method m = methods[i];
 				Class<?>[] types = m.getParameterTypes();
-				// TODO optimize getting name ??? why didn't Java reflect api use a HashMap ???
-				if (method.equals(m.getName()) && stringParams.length == types.length) { 
+				// TODO optimize getting name ??? why didn't Java reflect api
+				// use a HashMap ???
+				if (method.equals(m.getName()) && stringParams.length == types.length) {
 					log.info("method with same ordinal of params found {}.{} - building new converter", method, stringParams.length);
 
 					try {
 						Object[] newGSONTypedParamters = new Object[stringParams.length];
-						
+
 						for (int j = 0; j < types.length; ++j) {
 							Class<?> pType = types[j];
 							String param = stringParams[j];
 
 							log.info(String.format("attempting conversion into %s from inbound data %s", pType.getSimpleName(), stringParams[j]));
-							if (pType == String.class){
+							if (pType == String.class) {
 								// escape quotes
 								param = param.replaceAll("\"", "\\\"");
 								// add quotes
@@ -111,46 +74,28 @@ public class TypeConverter {
 							}
 							newGSONTypedParamters[j] = gson.fromJson(param, pType);
 
-						} 
+						}
 
 						log.info("successfully converted all types");
 						return newGSONTypedParamters;
 
 					} catch (Exception e) {
-						//Logging.logException(e);
+						// Logging.logException(e);
 						log.warn("could not match type from inbound data");
 						continue;
 					}
 
-				} // if name and ordinal match			
+				} // if name and ordinal match
 			} // through each method
 			log.error(String.format("could not find or convert %s", method));
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 		return null;
 
 	}
 
-	/*
-	static public Object[] convert(String[] stringParams, Method[] converter) {
-		try {
-			Object[] newTypedParams = new Object[stringParams.length];
-			for (int i = 0; i < stringParams.length; ++i) {
-				// static calls on conversion - probably not thread safe
-				newTypedParams[0] = converter[i].invoke(null, stringParams[i]);
-			}
-
-			return newTypedParams;
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return null;
-	}
-	*/
-	
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
@@ -172,6 +117,57 @@ public class TypeConverter {
 
 		Object[] params2 = getTypedParamsFromJson(clazz, method, stringParams);
 		log.info("here");
+	}
+
+	static public boolean StringToBoolean(String in) {
+		return Boolean.parseBoolean(in);
+	}
+
+	// -------- primitive boxed types conversion begin ------------
+	static public byte StringToByte(String in) {
+		return Byte.parseByte(in);
+	}
+
+	static public char StringToChar(String in) {
+		return in.charAt(0);
+	}
+
+	static public double StringToDouble(String in) {
+		return Double.parseDouble(in);
+	}
+
+	static public float StringToFloat(String in) {
+		return Float.parseFloat(in);
+	}
+
+	static public int StringToInteger(String in) {
+		return Integer.parseInt(in);
+	}
+
+	static public long StringToLong(String in) {
+		return Long.parseLong(in);
+	}
+
+	// -------- primitive boxed types conversion end ------------
+
+	static public short StringToShort(String in) {
+		return Short.parseShort(in);
+	}
+
+	/*
+	 * static public Object[] convert(String[] stringParams, Method[] converter)
+	 * { try { Object[] newTypedParams = new Object[stringParams.length]; for
+	 * (int i = 0; i < stringParams.length; ++i) { // static calls on conversion
+	 * - probably not thread safe newTypedParams[0] = converter[i].invoke(null,
+	 * stringParams[i]); }
+	 * 
+	 * return newTypedParams; } catch (Exception e) { Logging.logException(e); }
+	 * 
+	 * return null; }
+	 */
+
+	static public String StringToString(String in) {
+		return in;
 	}
 
 }

@@ -43,10 +43,12 @@ public class KheperaDemo extends Demo {
 		}
 
 		/** Initialize Agent's Behavior */
+		@Override
 		public void initBehavior() {
 		}
 
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 			setWheelsVelocity(0.01, 0.01);
 			if (collisionDetected())

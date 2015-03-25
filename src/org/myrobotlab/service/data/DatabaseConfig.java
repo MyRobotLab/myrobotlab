@@ -25,16 +25,15 @@
 
 package org.myrobotlab.service.data;
 
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
 
 public class DatabaseConfig {
 	// @SuppressWarnings("serial")
 	private final static Logger log = LoggerFactory.getLogger(DatabaseConfig.class);
 
 	public int ID;
+
 	public String URL_; // The full URL for the JDBC connection
 	public String driverURL; // JDBC connection prefix
 	public String driverName; // Name of class for checking Class.forName
@@ -44,9 +43,9 @@ public class DatabaseConfig {
 	public String userName; // User Login ID
 	public String Password_; // Password
 	public String SelectMethod_; // SelectMethod Informs the driver to use
-									// server a side-cursor,which permits more
-									// than one active statement on a connection
-									// | should be option
+	// server a side-cursor,which permits more
+	// than one active statement on a connection
+	// | should be option
 	public String RDBMSType; // RDBMS Option
 
 	// option constants
@@ -56,6 +55,21 @@ public class DatabaseConfig {
 	public final static String DRIVERURL_JDBC_MYSQL = "jdbc:mysql://";
 	public final static String RDBMSTYPE_MSSQL = "MSSQL";
 	public final static String RDBMSTYPE_MYSQL = "MYSQL";
+
+	public static String name() {
+		if (log.isDebugEnabled()) {
+			StringBuilder logString = new StringBuilder("DatabaseConfig.getName()()");
+			log.debug("{}", logString);
+		} // if
+
+		String ret = new String("DatabaseConfig");
+		return ret;
+	}
+
+	public static String scope() {
+		String ret = new String("dbms");
+		return ret;
+	}
 
 	// ctors begin ----
 	public DatabaseConfig() {
@@ -85,10 +99,12 @@ public class DatabaseConfig {
 
 	}
 
+	// assignment end ---
+
 	public DatabaseConfig(final DatabaseConfig other) {
 		this();
 		set(other);
-	}
+	};
 
 	// ctors end ----
 	// assignment begin --- todo - look @ clone copy
@@ -105,26 +121,10 @@ public class DatabaseConfig {
 		SelectMethod_ = other.SelectMethod_;
 		RDBMSType = other.RDBMSType;
 
-	}
-
-	// assignment end ---
-
-	public static String scope() {
-		String ret = new String("dbms");
-		return ret;
-	};
-
-	public static String name() {
-		if (log.isDebugEnabled()) {
-			StringBuilder logString = new StringBuilder("DatabaseConfig.getName()()");
-			log.debug("{}",logString);
-		} // if
-
-		String ret = new String("DatabaseConfig");
-		return ret;
 	};
 
 	// todo format string interface more than one compact, ini, xml
+	@Override
 	public String toString() {
 		StringBuffer ret = new StringBuffer();
 		ret.append("<DatabaseConfig>");

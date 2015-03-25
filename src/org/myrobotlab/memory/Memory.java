@@ -20,16 +20,6 @@ public class Memory {
 	// ArrayList<MemoryChangeListener>();
 	MemoryChangeListener listener = null;
 
-	public Object get(String path) {
-		if (path == null || path == "") // TODO - test for .getNode(null) !!!
-		{
-			return root;
-		} else {
-			// return root.getNode(path);
-			return root.get(path);
-		}
-	}
-
 	public void addMemoryChangeListener(MemoryChangeListener listener) {
 		if (this.listener == null) {
 			this.listener = listener;
@@ -37,62 +27,6 @@ public class Memory {
 			log.error("too many listeners");
 			// bad form - shouldn't follow rxtx ;p
 		}
-	}
-
-	public Node getRoot() {
-		return root;
-	}
-
-	public String toJSON() {
-		return Encoder.toJson(this);
-	}
-
-	public void toJSONFile(String string) {
-		try {
-
-			Encoder.toJsonFile(this, string);
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
-	public Object put(String path, String key, Object value) {
-		Object o = root.get(path);
-		Class<?> c = o.getClass();
-		if (c == Node.class) {
-			Node node = (Node) o;
-			return node.put(key, value);
-		} else {
-			log.error("path {} is not to a Node", path);
-			return null;
-		}
-	}
-
-	/**
-	 * put gets the last node in path - and adds a key to the node's data with a
-	 * node with Node named with the second parameter
-	 * 
-	 * @param path
-	 * @param nodeName
-	 * @return
-	 */
-	public Object putNode(String path, String nodeName) {
-		Object o = root.get(path);
-		Class<?> c = o.getClass();
-		if (c == Node.class) {
-			Node newNode = new Node(nodeName);
-			Node node = (Node) o;
-			return node.put(newNode);
-		} else {
-			log.error("path {} is not to a Node", path);
-			return null;
-		}
-
-	}
-
-	public Node getNode(String path) {
-		return (Node) get(path);
 	}
 
 	// TODO - move these into Memory ???
@@ -120,6 +54,24 @@ public class Memory {
 				crawlAndPublish(newPath, node);
 			}
 		}
+	}
+
+	public Object get(String path) {
+		if (path == null || path == "") // TODO - test for .getNode(null) !!!
+		{
+			return root;
+		} else {
+			// return root.getNode(path);
+			return root.get(path);
+		}
+	}
+
+	public Node getNode(String path) {
+		return (Node) get(path);
+	}
+
+	public Node getRoot() {
+		return root;
 	}
 
 	// TODO - optimization put reference in of parents ???
@@ -165,6 +117,7 @@ public class Memory {
 		}
 		return ret;
 	}
+
 	/*
 	 * public static void main(String[] args) {
 	 * LoggingFactory.getInstance().configure();
@@ -195,5 +148,53 @@ public class Memory {
 	 * 
 	 * }
 	 */
+
+	public Object put(String path, String key, Object value) {
+		Object o = root.get(path);
+		Class<?> c = o.getClass();
+		if (c == Node.class) {
+			Node node = (Node) o;
+			return node.put(key, value);
+		} else {
+			log.error("path {} is not to a Node", path);
+			return null;
+		}
+	}
+
+	/**
+	 * put gets the last node in path - and adds a key to the node's data with a
+	 * node with Node named with the second parameter
+	 * 
+	 * @param path
+	 * @param nodeName
+	 * @return
+	 */
+	public Object putNode(String path, String nodeName) {
+		Object o = root.get(path);
+		Class<?> c = o.getClass();
+		if (c == Node.class) {
+			Node newNode = new Node(nodeName);
+			Node node = (Node) o;
+			return node.put(newNode);
+		} else {
+			log.error("path {} is not to a Node", path);
+			return null;
+		}
+
+	}
+
+	public String toJSON() {
+		return Encoder.toJson(this);
+	}
+
+	public void toJSONFile(String string) {
+		try {
+
+			Encoder.toJsonFile(this, string);
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
 }

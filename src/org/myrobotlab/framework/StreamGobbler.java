@@ -14,18 +14,17 @@ import org.slf4j.Logger;
 
 public class StreamGobbler extends Thread {
 	public final static Logger log = LoggerFactory.getLogger("");
-	
+
 	InputStream is;
 	ArrayList<OutputStream> os;
-	
+
 	String type;
 	String tag;
-	
 
 	public StreamGobbler(InputStream is, ArrayList<OutputStream> os, String type) {
 		super(String.format("%s_%s", type, Runtime.getPID()));
-		//this.tag = String.format("%s_%s<<", type, Runtime.getPID());
-		this.tag ="";
+		// this.tag = String.format("%s_%s<<", type, Runtime.getPID());
+		this.tag = "";
 		this.is = is;
 		this.os = os;
 		this.type = type;
@@ -38,27 +37,23 @@ public class StreamGobbler extends Thread {
 			BufferedReader br = new BufferedReader(in);
 			String line = null;
 			while ((line = br.readLine()) != null) {
-				// FIXME OutputStream Versus Log !!! based on - IS_AGENT || FROM_AGENT || 
-				//log.info(String.format("%s%s", tag, line));
-				//log.info(String.format("<<%s", line));
-				for (int i = 0; i < os.size(); ++i){
-					os.get(i).write(String.format("%s\n",line).getBytes());
+				// FIXME OutputStream Versus Log !!! based on - IS_AGENT ||
+				// FROM_AGENT ||
+				// log.info(String.format("%s%s", tag, line));
+				// log.info(String.format("<<%s", line));
+				for (int i = 0; i < os.size(); ++i) {
+					os.get(i).write(String.format("%s\n", line).getBytes());
 				}
 			}
 		} catch (IOException e) {
 			log.error(tag + "leaving StreamGobbler");
-			Logging.logException(e);
+			Logging.logError(e);
 		}
-		/* NO CLOSING !?!?!?!?
-		
-		finally {
-			try{
-				if (is != null){
-					is.close();
-				}
-			} catch(Exception ex){
-			}
-		}
-		*/
+		/*
+		 * NO CLOSING !?!?!?!?
+		 * 
+		 * finally { try{ if (is != null){ is.close(); } } catch(Exception ex){
+		 * } }
+		 */
 	}
 }

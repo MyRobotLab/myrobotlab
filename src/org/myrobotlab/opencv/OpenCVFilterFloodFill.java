@@ -43,24 +43,29 @@ public class OpenCVFilterFloodFill extends OpenCVFilter {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFloodFill.class.getCanonicalName());
 
 	IplImage buffer = null;
-	
+
 	CvPoint startPoint = new CvPoint(180, 120);
 	CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
 	CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0, 0.5, 1.0);
 	CvScalar up_diff = CV_RGB(20.0, 20.0, 20.0);
 
-	public OpenCVFilterFloodFill()  {
+	public OpenCVFilterFloodFill() {
 		super();
 	}
-	
-	public OpenCVFilterFloodFill(String name)  {
+
+	public OpenCVFilterFloodFill(String name) {
 		super(name);
 	}
 
 	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
-		if (startPoint == null)
-		{
+		if (startPoint == null) {
 			startPoint = new CvPoint(image.width() / 2, image.height() - 4);
 		}
 
@@ -79,12 +84,6 @@ public class OpenCVFilterFloodFill extends OpenCVFilter {
 		// cvDrawRect(image, startPoint, startPoint, fillColor, 2, 1, 0);
 		return image;
 
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

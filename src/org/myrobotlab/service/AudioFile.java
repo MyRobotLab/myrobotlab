@@ -61,56 +61,6 @@ import org.slf4j.Logger;
 
 public class AudioFile extends Service {
 
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(AudioFile.class.getCanonicalName());
-	transient AePlayWave wavPlayer = new AePlayWave();
-	int pausedOnFrame = 0;
-	
-	transient PlaybackListener playbackListener = new  PlaybackListener() {
-		 @Override
-		    public void playbackFinished(PlaybackEvent event) {
-		        pausedOnFrame = event.getFrame();
-		    }
-	};
-	// FIXME -
-	// http://alvinalexander.com/java/java-audio-example-java-au-play-sound - so
-	// much more simple
-	// http://stackoverflow.com/questions/198679/convert-audio-stream-to-wav-byte-array-in-java-without-temp-file
-	// REMOVE AePlayWave !!!
-
-	// public transient HashMap<String, AdvancedPlayerThread> players = new
-	// HashMap<String, AdvancedPlayerThread>();
-	public transient List<AdvancedPlayerThread> players = Collections.synchronizedList(new ArrayList<AdvancedPlayerThread>());
-
-	public AudioFile(String n) {
-		super(n);
-	}
-
-	// FIXME - bad assumptions
-	public void play(String name) {
-		playFile("audioFile/" + name + ".mp3", false);
-	}
-
-	public void playResource(String filename) {
-		playResource(filename, false);
-	}
-
-	public void playFileBlocking(String filename) {
-		playFile(filename, true);
-	}
-
-	public void playFile(String filename) {
-		playFile(filename, false);
-	}
-
-	public void playFile(String filename, Boolean isBlocking) {
-		playFile(filename, isBlocking, false);
-	}
-
-	public void playResource(String filename, Boolean isBlocking) {
-		playFile(filename, isBlocking, true);
-	}
-
 	public class AdvancedPlayerThread extends Thread {
 		AdvancedPlayer player = null;
 		String filename;
@@ -122,10 +72,11 @@ public class AudioFile extends Service {
 				this.player = new AdvancedPlayer(bis);
 				player.setPlayBackListener(playbackListener);
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 			}
 		}
 
+		@Override
 		public void run() {
 			try {
 				invoke("started");
@@ -133,78 +84,10 @@ public class AudioFile extends Service {
 				invoke("stopped");
 				invoke("stoppedFile", filename);
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 			}
 		}
 	}
-
-	public void playFile(String filename, Boolean isBlocking, Boolean isResource) {
-		try {
-
-			InputStream is;
-			if (isResource) {
-				is = AudioFile.class.getResourceAsStream(filename);
-			} else {
-				is = new FileInputStream(filename);
-			}
-
-			if (!isBlocking) {
-				BufferedInputStream bis = new BufferedInputStream(is);
-				AdvancedPlayerThread player = new AdvancedPlayerThread(filename, bis);
-				// players.put(filename, player);
-				players.add(player);
-				player.start();
-				
-			} else {
-				invoke("started");
-				AdvancedPlayer player = new AdvancedPlayer(is);
-				player.setPlayBackListener(playbackListener);
-				player.play();
-				invoke("stopped");
-				invoke("stoppedFile", filename);
-			}
-
-		} catch (Exception e) {
-			Logging.logException(e);
-			error("Problem playing file ", filename);
-			return;
-		}
-
-	}
-
-	public void started() {
-		log.info("started");
-	}
-
-	public void stopped() {
-		log.info("stopped");
-	}
-	
-	public String stoppedFile(String filename) {
-		log.info("stoppedFile {}",filename);
-		return filename;
-	}
-
-
-	/* BEGIN - TODO - reconcile - find how javazoom plays wave */
-
-	public void playWAV(String name) {
-		// new AePlayWave("audioFile/" + name + ".wav").start();
-		wavPlayer.playAeWavFile("audioFile/" + name + ".wav");
-	}
-
-	public void playWAVFile(String name) {
-		// new AePlayWave(name).start();
-		wavPlayer.playAeWavFile(name);
-	}
-
-	public void playBlockingWavFile(String filename) {
-		wavPlayer.playAeWavFile(filename);
-	}
-
-	enum Position {
-		LEFT, RIGHT, NORMAL
-	};
 
 	public class AePlayWave extends Thread {
 
@@ -301,58 +184,39 @@ public class AudioFile extends Service {
 		}
 
 		// for non-blocking use
+		@Override
 		public void run() {
 			playAeWavFile(filename, curPosition);
 		}
 	}
 
-	@Override
-	public String getDescription() {
-		return "Plays back audio file. Can block or multi-thread play";
+	enum Position {
+		LEFT, RIGHT, NORMAL
 	}
 
-	public void silence() {
-		Iterator<AdvancedPlayerThread> iter = players.iterator();
-		while (iter.hasNext()) {
-			try {
-				AdvancedPlayerThread player = iter.next();
-				player.player.close();
-				player.interrupt();
-			} catch (Exception e) {
-				Logging.logException(e);
-			}
-			iter.remove();
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(AudioFile.class.getCanonicalName());
+
+	transient AePlayWave wavPlayer = new AePlayWave();
+
+	int pausedOnFrame = 0;
+
+	transient PlaybackListener playbackListener = new PlaybackListener() {
+		@Override
+		public void playbackFinished(PlaybackEvent event) {
+			pausedOnFrame = event.getFrame();
 		}
-	}
+	};
+	// FIXME -
+	// http://alvinalexander.com/java/java-audio-example-java-au-play-sound - so
+	// much more simple
+	// http://stackoverflow.com/questions/198679/convert-audio-stream-to-wav-byte-array-in-java-without-temp-file
+	// REMOVE AePlayWave !!!
 
-	public void convert(String filename) {
-		try {
-			File soundFile = new File(filename);
-			FileInputStream fileStream = null;
-			if (!soundFile.exists()) {
-				System.err.println("Wave file not found: " + filename);
-				return;
-			}
-
-			AudioInputStream audioInputStream = null;
-
-			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
-			fileStream = new FileInputStream(soundFile);
-
-			AudioFormat format = audioInputStream.getFormat();
-
-			byte[] bytes = convert(FileIO.toByteArray(fileStream), format);
-
-			FileOutputStream fileOuputStream = new FileOutputStream("out.wav");
-			fileOuputStream.write(bytes);
-			fileOuputStream.close();
-
-		} catch (Exception e) {
-			Logging.logException(e);
-			return;
-		}
-
-	}
+	// public transient HashMap<String, AdvancedPlayerThread> players = new
+	// HashMap<String, AdvancedPlayerThread>();
+	public transient List<AdvancedPlayerThread> players = Collections.synchronizedList(new ArrayList<AdvancedPlayerThread>());
 
 	// http://stackoverflow.com/questions/14085199/mp3-to-wav-conversion-in-java
 	// TODO - great method .. although why pass in the audio format ???
@@ -388,7 +252,7 @@ public class AudioFile extends Service {
 			}
 			return baos.toByteArray();
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 			return null;
 		} finally {
 			if (baos != null) {
@@ -428,50 +292,195 @@ public class AudioFile extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
-		AudioFile af = (AudioFile) Runtime.createAndStart("audio", "AudioFile");
-		af.playFile("C:\\mrl3\\myrobotlab\\audioFile\\google\\en\\audrey\\test.mp3", false, false);
-		af.silence();
-		
-		af.convert("C:\\tools\\Tarsos-master\\test.wav");
+		try {
 
-		Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
-		Python python = (Python) Runtime.createAndStart("python", "Python");
-		AudioFile player = new AudioFile("player");
-		//player.playFile(filename, true);
-		player.startService();
-		GUIService gui = (GUIService) Runtime.createAndStart("gui", "GUIService");
+			AudioFile af = (AudioFile) Runtime.createAndStart("audio", "AudioFile");
+			af.playFile("C:\\mrl3\\myrobotlab\\audioFile\\google\\en\\audrey\\test.mp3", false, false);
+			af.silence();
 
-		joystick.setController(2);
-		joystick.broadcastState();
+			af.convert("C:\\tools\\Tarsos-master\\test.wav");
 
-		python.subscribe(joystick.getName(), "button1", "input");
+			Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
+			Python python = (Python) Runtime.createAndStart("python", "Python");
+			AudioFile player = new AudioFile("player");
+			// player.playFile(filename, true);
+			player.startService();
+			GUIService gui = (GUIService) Runtime.createAndStart("gui", "GUIService");
 
-		// BasicController control = (BasicController) player;
+			joystick.setController(2);
+			joystick.broadcastState();
 
-		player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-		player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-		player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-		player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\start.mp3");
-		player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\radio.chatter.4.mp3");
+			python.subscribe(joystick.getName(), "button1", "input");
 
-		player.silence();
+			// BasicController control = (BasicController) player;
 
-		// player.playResource("Clock/tick.mp3");
-		player.playResource("/resource/Clock/tick.mp3");
-		player.playResource("/resource/Clock/tick.mp3");
-		player.playResource("/resource/Clock/tick.mp3");
-		player.playResource("/resource/Clock/tick.mp3");
-		player.playResource("/resource/Clock/tick.mp3");
-		player.playResource("/resource/Clock/tick.mp3");
-		player.playResource("/resource/Clock/tick.mp3");
+			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
+			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
+			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
+			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\start.mp3");
+			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\radio.chatter.4.mp3");
+
+			player.silence();
+
+			// player.playResource("Clock/tick.mp3");
+			player.playResource("/resource/Clock/tick.mp3");
+			player.playResource("/resource/Clock/tick.mp3");
+			player.playResource("/resource/Clock/tick.mp3");
+			player.playResource("/resource/Clock/tick.mp3");
+			player.playResource("/resource/Clock/tick.mp3");
+			player.playResource("/resource/Clock/tick.mp3");
+			player.playResource("/resource/Clock/tick.mp3");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 		// player.playBlockingWavFile("I am ready.wav");
 		// player.play("hello my name is audery");
 		// player.playWAV("hello my name is momo");
 	}
-	
+
+	public AudioFile(String n) {
+		super(n);
+	}
+
+	public void convert(String filename) {
+		try {
+			File soundFile = new File(filename);
+			FileInputStream fileStream = null;
+			if (!soundFile.exists()) {
+				System.err.println("Wave file not found: " + filename);
+				return;
+			}
+
+			AudioInputStream audioInputStream = null;
+
+			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
+			fileStream = new FileInputStream(soundFile);
+
+			AudioFormat format = audioInputStream.getFormat();
+
+			byte[] bytes = convert(FileIO.toByteArray(fileStream), format);
+
+			FileOutputStream fileOuputStream = new FileOutputStream("out.wav");
+			fileOuputStream.write(bytes);
+			fileOuputStream.close();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+			return;
+		}
+
+	}
+
 	@Override
 	public String[] getCategories() {
-		return new String[] {"sound"};
+		return new String[] { "sound" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "Plays back audio file. Can block or multi-thread play";
+	}
+
+	// FIXME - bad assumptions
+	public void play(String name) {
+		playFile("audioFile/" + name + ".mp3", false);
+	}
+
+	public void playBlockingWavFile(String filename) {
+		wavPlayer.playAeWavFile(filename);
+	}
+
+	public void playFile(String filename) {
+		playFile(filename, false);
+	}
+
+	/* BEGIN - TODO - reconcile - find how javazoom plays wave */
+
+	public void playFile(String filename, Boolean isBlocking) {
+		playFile(filename, isBlocking, false);
+	}
+
+	public void playFile(String filename, Boolean isBlocking, Boolean isResource) {
+		try {
+
+			InputStream is;
+			if (isResource) {
+				is = AudioFile.class.getResourceAsStream(filename);
+			} else {
+				is = new FileInputStream(filename);
+			}
+
+			if (!isBlocking) {
+				BufferedInputStream bis = new BufferedInputStream(is);
+				AdvancedPlayerThread player = new AdvancedPlayerThread(filename, bis);
+				// players.put(filename, player);
+				players.add(player);
+				player.start();
+
+			} else {
+				invoke("started");
+				AdvancedPlayer player = new AdvancedPlayer(is);
+				player.setPlayBackListener(playbackListener);
+				player.play();
+				invoke("stopped");
+				invoke("stoppedFile", filename);
+			}
+
+		} catch (Exception e) {
+			Logging.logError(e);
+			error("Problem playing file ", filename);
+			return;
+		}
+
+	}
+
+	public void playFileBlocking(String filename) {
+		playFile(filename, true);
+	}
+
+	public void playResource(String filename) {
+		playResource(filename, false);
+	};
+
+	public void playResource(String filename, Boolean isBlocking) {
+		playFile(filename, isBlocking, true);
+	}
+
+	public void playWAV(String name) {
+		// new AePlayWave("audioFile/" + name + ".wav").start();
+		wavPlayer.playAeWavFile("audioFile/" + name + ".wav");
+	}
+
+	public void playWAVFile(String name) {
+		// new AePlayWave(name).start();
+		wavPlayer.playAeWavFile(name);
+	}
+
+	public void silence() {
+		Iterator<AdvancedPlayerThread> iter = players.iterator();
+		while (iter.hasNext()) {
+			try {
+				AdvancedPlayerThread player = iter.next();
+				player.player.close();
+				player.interrupt();
+			} catch (Exception e) {
+				Logging.logError(e);
+			}
+			iter.remove();
+		}
+	}
+
+	public void started() {
+		log.info("started");
+	}
+
+	public void stopped() {
+		log.info("stopped");
+	}
+
+	public String stoppedFile(String filename) {
+		log.info("stoppedFile {}", filename);
+		return filename;
 	}
 
 }

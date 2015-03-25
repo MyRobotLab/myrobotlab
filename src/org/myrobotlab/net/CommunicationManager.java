@@ -56,14 +56,29 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 	}
 
 	// FIXME - put in Runtime
+	@Override
 	public void addRemote(URI mrlHost, URI protocolKey) {
 		mrlToProtocol.put(mrlHost, protocolKey);
 	}
 
-	final public void send(final URI uri, final Message msg) {
-		getComm(uri).sendRemote(uri, msg); 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.myrobotlab.service.interfaces.CommunicationInterface#getComm(java
+	 * .net.URI)
+	 */
+	public Gateway getComm(URI uri) {
+		if (uri.getScheme().equals(Encoder.SCHEME_MRL)) {
+			Gateway gateway = (Gateway) Runtime.getService(uri.getHost());
+			return gateway;
+		} else {
+			log.error(String.format("%s not SCHEME_MRL", uri));
+			return null;
+		}
 	}
 
+	@Override
 	final public void send(final Message msg) {
 
 		ServiceInterface sw = Runtime.getService(msg.getName());
@@ -94,21 +109,9 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.myrobotlab.service.interfaces.CommunicationInterface#getComm(java
-	 * .net.URI)
-	 */
-	public Gateway getComm(URI uri) {
-		if (uri.getScheme().equals(Encoder.SCHEME_MRL)) {
-			Gateway gateway = (Gateway)Runtime.getService(uri.getHost());
-			return gateway;
-		} else {
-			log.error(String.format("%s not SCHEME_MRL", uri));
-			return null;
-		}
+	@Override
+	final public void send(final URI uri, final Message msg) {
+		getComm(uri).sendRemote(uri, msg);
 	}
 
 }

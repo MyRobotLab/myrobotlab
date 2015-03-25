@@ -49,14 +49,6 @@ public class TabControl2 extends JLabel implements ActionListener, MouseListener
 
 	JMenuItem hide;
 
-	public void dockPanel() {
-		handler.dockPanel();
-	}
-
-	public void undockPanel() {
-		handler.undockPanel();
-	}
-
 	public TabControl2(TabControlEventHandler handler, JTabbedPane tabs, Container myPanel, String label) {
 		super(label);
 		this.tabs = tabs;
@@ -97,60 +89,6 @@ public class TabControl2 extends JLabel implements ActionListener, MouseListener
 		// this(gui, parent, myPanel, boundServiceName, txt);
 	}
 
-	/**
-	 * important relay to keep JTabbedPane & TabControl working together
-	 * 
-	 * @param e
-	 */
-	private void dispatchMouseEvent(MouseEvent e) {
-		tabs.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, tabs));
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		dispatchMouseEvent(e);
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		log.debug("mouseReleased");
-
-		if (SwingUtilities.isRightMouseButton(e)) {
-			log.debug("mouseReleased - right");
-			popUpTrigger(e);
-		}
-		dispatchMouseEvent(e);
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		handler.mouseClicked(e, getText());
-		dispatchMouseEvent(e);
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		dispatchMouseEvent(e);
-	}
-
-	public void mouseMoved(MouseEvent e) {
-		dispatchMouseEvent(e);
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		dispatchMouseEvent(e);
-	}
-
-	public void popUpTrigger(MouseEvent e) {
-		popup.show(e.getComponent(), e.getX(), e.getY());
-	}
-
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		dispatchMouseEvent(e);
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String cmd = e.getActionCommand();
@@ -165,6 +103,69 @@ public class TabControl2 extends JLabel implements ActionListener, MouseListener
 		}
 		// routing swing events back down
 		handler.actionPerformed(e, getText());
+	}
+
+	/**
+	 * important relay to keep JTabbedPane & TabControl working together
+	 * 
+	 * @param e
+	 */
+	private void dispatchMouseEvent(MouseEvent e) {
+		tabs.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, tabs));
+	}
+
+	public void dockPanel() {
+		handler.dockPanel();
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		handler.mouseClicked(e, getText());
+		dispatchMouseEvent(e);
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		dispatchMouseEvent(e);
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		dispatchMouseEvent(e);
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		dispatchMouseEvent(e);
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		dispatchMouseEvent(e);
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		dispatchMouseEvent(e);
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		log.debug("mouseReleased");
+
+		if (SwingUtilities.isRightMouseButton(e)) {
+			log.debug("mouseReleased - right");
+			popUpTrigger(e);
+		}
+		dispatchMouseEvent(e);
+	}
+
+	public void popUpTrigger(MouseEvent e) {
+		popup.show(e.getComponent(), e.getX(), e.getY());
+	}
+
+	public void undockPanel() {
+		handler.undockPanel();
 	}
 
 }

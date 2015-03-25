@@ -71,35 +71,14 @@ public class RemoteAdapter extends Service implements Gateway {
 
 	// TODO - global address book of discovered connection
 
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(RemoteAdapter.class);
+	public static class CommOptions implements Serializable {
+		private static final long serialVersionUID = 1L;
+		Platform platform;
+		ArrayList<Gateway> gateways;
 
-	public String lastProtocolKey;
-
-	private String defaultPrefix = null;
-	private HashMap<String, String> prefixMap = new HashMap<String, String>();
-	private HashSet<URI> localProtocolKeys = new HashSet<URI>();
-
-	// types of listening threads - multiple could be managed
-	// when correct interfaces and base classes are done
-	transient TCPListener tcpListener = null;
-	transient UDPListener udpListener = null;
-
-	private Integer udpPort;
-	private Integer tcpPort;
-
-	boolean isListening = false;
-	boolean isScanning = false;
-	
-	// TODO - multiple scanners for parallel port/broadcast scanning
-	transient Scanner scanner;
-
-	transient private HashMap<URI, TCPThread2> tcpClientList = new HashMap<URI, TCPThread2>();
-	/**
-	 * used as a data interface to all the non-serializable network objects - it
-	 * will report stats and states
-	 */
-	private HashMap<URI, Connection> connections = new HashMap<URI, Connection>();
+		public CommOptions() {
+		}
+	}
 
 	static public class Scanner extends Thread {
 
@@ -130,14 +109,12 @@ public class RemoteAdapter extends Service implements Gateway {
 					DatagramPacket sendPacket;
 					// Try the 255.255.255.255 first
 					/*
-					try {
-						sendPacket = new DatagramPacket(msgBuf, msgBuf.length, InetAddress.getByName("255.255.255.255"), 6767);
-						dsocket.send(sendPacket);
-						myService.info(">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
-					} catch (Exception e) {
-						Logging.logException(e);
-					}
-					*/
+					 * try { sendPacket = new DatagramPacket(msgBuf,
+					 * msgBuf.length, InetAddress.getByName("255.255.255.255"),
+					 * 6767); dsocket.send(sendPacket); myService.info(
+					 * ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
+					 * } catch (Exception e) { Logging.logException(e); }
+					 */
 
 					// NEEDED ?? WE ALREADY DID BROADCAST // Broadcast the
 					// message over all the network interfaces
@@ -145,9 +122,10 @@ public class RemoteAdapter extends Service implements Gateway {
 					Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 					while (interfaces.hasMoreElements()) {
 						NetworkInterface ni = interfaces.nextElement();
-						//myService.info("examining interface %s %s", ni.getName(), ni.getInetAddresses().toString());
+						// myService.info("examining interface %s %s",
+						// ni.getName(), ni.getInetAddresses().toString());
 						log.info(String.format("examining interface %s %s", ni.getName(), ni.getDisplayName()));
-						//if (ni.isLoopback() || !ni.isUp()) {
+						// if (ni.isLoopback() || !ni.isUp()) {
 						if (!ni.isUp()) {
 							log.info(String.format("skipping %s", ni.getDisplayName()));
 							continue; // Don't want tobroadcast to the loopback
@@ -158,7 +136,7 @@ public class RemoteAdapter extends Service implements Gateway {
 							InetAddress broadcast = interfaceAddress.getBroadcast();
 							short x = interfaceAddress.getNetworkPrefixLength();
 							log.info("" + interfaceAddress.getAddress());
-							if (ni.getName().equals("net4")){
+							if (ni.getName().equals("net4")) {
 								log.info("net4");
 							}
 							if (broadcast == null) {
@@ -168,18 +146,21 @@ public class RemoteAdapter extends Service implements Gateway {
 							// Send the broadcast package!
 							try {
 								log.info(String.format("sending to %s %s %s", ni.getName(), broadcast.getHostAddress(), ni.getDisplayName()));
-								
-								if (interfaceAddress.getNetworkPrefixLength() == -1){
+
+								if (interfaceAddress.getNetworkPrefixLength() == -1) {
 									log.warn("jdk bug for interface %s network prefix length == -1", interfaceAddress.getAddress().getHostAddress());
 									String pre = interfaceAddress.getAddress().getHostAddress();
 									String b = pre.substring(0, pre.lastIndexOf(".")) + ".255";
 									log.warn("creating new broadcast address of %s", broadcast);
 									broadcast = InetAddress.getByName(b);
 								}
-								
+
 								sendPacket = new DatagramPacket(msgBuf, msgBuf.length, broadcast, 6767);
-								//sendPacket = new DatagramPacket(msgBuf, msgBuf.length, InetAddress.getByName("192.168.0.255"), 6767);
-								
+								// sendPacket = new DatagramPacket(msgBuf,
+								// msgBuf.length,
+								// InetAddress.getByName("192.168.0.255"),
+								// 6767);
+
 								dsocket.send(sendPacket);
 
 								myService.info(">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + ni.getDisplayName());
@@ -251,61 +232,6 @@ public class RemoteAdapter extends Service implements Gateway {
 		}
 	}
 
-	public RemoteAdapter(String n) {
-		super(n);
-		defaultPrefix = String.format("%s.", n);
-		// addLocalTask(5 * 1000, "broadcastHeartbeat");
-	}
-
-	public boolean isListening() {
-		return isListening;
-	}
-
-	public String setDefaultPrefix(String prefix) {
-		defaultPrefix = prefix;
-		return prefix;
-	}
-
-	public void setPrefix(String source, String prefix) {
-		prefixMap.put(source, prefix);
-	}
-
-	@Override
-	public boolean isReady() {
-		if (tcpListener.serverSocket != null) {
-			return tcpListener.serverSocket.isBound();
-		}
-		return false;
-	}
-
-	// FIXME - add to Gateway interfaceS
-	public HashMap<URI, Connection> broadcastHeartbeat() {
-		for (Map.Entry<URI, Connection> entry : connections.entrySet()) {
-			URI uri = entry.getKey();
-			Connection value = entry.getValue();
-
-			// roll through send a set of transactions off & start a
-			// IOCompletion like
-			// array of status ...
-			// if timeout is reached - write the rest with timeout (those that
-			// did not
-			// get an asynch response
-
-			if (uri.getScheme().equals("tcp")) {
-				TCPThread2 tcp = tcpClientList.get(uri);
-				log.info("" + tcp);
-				// check socket connectivity
-				// attempt to re-connect if disconnected
-				broadcastState();
-			}
-		}
-		return connections;
-	}
-
-	public Connection onHeartbeat(Connection data) {
-		return data;
-	}
-
 	class TCPListener extends Thread {
 		int rxCount = 0;
 		int txCount = 0;
@@ -321,17 +247,20 @@ public class RemoteAdapter extends Service implements Gateway {
 			myService = s;
 		}
 
-		public void shutdown() {
-			if ((serverSocket != null) && (!serverSocket.isClosed())) {
-				try {
-					serverSocket.close();
-				} catch (IOException e) {
-					logException(e);
-				}
+		public void addTCPClient(Socket clientSocket, RemoteAdapter myService) {
+			try {
+				String clientKey = String.format("tcp://%s:%d", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
+				URI uri = new URI(clientKey);
+				// HELP PROTOKEY VS MRL KEY ??
+				TCPThread2 tcp = new TCPThread2(myService, uri, clientSocket);
+				tcpClientList.put(uri, tcp);
+				connections.put(uri, tcp.data);
+			} catch (Exception e) {
+				Logging.logError(e);
 			}
-			serverSocket = null;
 		}
 
+		@Override
 		public void run() {
 			try {
 
@@ -356,17 +285,15 @@ public class RemoteAdapter extends Service implements Gateway {
 			}
 		}
 
-		public void addTCPClient(Socket clientSocket, RemoteAdapter myService) {
-			try {
-				String clientKey = String.format("tcp://%s:%d", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
-				URI uri = new URI(clientKey);
-				// HELP PROTOKEY VS MRL KEY ??
-				TCPThread2 tcp = new TCPThread2(myService, uri, clientSocket);
-				tcpClientList.put(uri, tcp);
-				connections.put(uri, tcp.data);
-			} catch (Exception e) {
-				Logging.logException(e);
+		public void shutdown() {
+			if ((serverSocket != null) && (!serverSocket.isClosed())) {
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
+					logException(e);
+				}
 			}
+			serverSocket = null;
 		}
 
 	}
@@ -384,16 +311,10 @@ public class RemoteAdapter extends Service implements Gateway {
 			myService = s;
 		}
 
-		public void shutdown() {
-			isRunning = false;
-			if ((socket != null) && (!socket.isClosed())) {
-				socket.close();
-			}
-		}
-
 		// FIXME FIXME FIXME - large amount of changes to tcp - application
 		// logic which handles the "Messaging" should be common to both
 		// tcp & udp & xmpp
+		@Override
 		public void run() {
 			isRunning = true;
 			try {
@@ -464,8 +385,9 @@ public class RemoteAdapter extends Service implements Gateway {
 							// if security ... msg within msg
 							// getOutbox().add(createMessage(Runtime.getInstance().getName(),
 							// "register", inboundMsg));
-							Runtime.register(si, mrlURI);// <-- not an INVOKE !!!
-														// // -
+							Runtime.register(si, mrlURI);// <-- not an INVOKE
+															// !!!
+															// // -
 							// no security ! :P
 
 							if (foreignProcess == null) {
@@ -518,89 +440,53 @@ public class RemoteAdapter extends Service implements Gateway {
 
 			} catch (SocketException se) {
 				error("UDPListener could not listen %s", se.getMessage());
-				Logging.logException(se);
+				Logging.logError(se);
 			} catch (Exception e) {
 				error("wtf error");
 				logException(e);
 			}
 		}
-	}
 
-	public HashMap<URI, Connection> getClients() {
-		return connections;
-	}
-
-	public void startListening() {
-		if (udpPort == null) {
-			udpPort = 6767;
-		}
-		if (tcpPort == null) {
-			tcpPort = 6767;
-		}
-		startListening(udpPort, tcpPort);
-		isListening = true;
-		broadcastState();
-	}
-
-	public void startListening(int udpPort, int tcpPort) {
-		startUDP(udpPort);
-		startTCP(tcpPort);
-	}
-
-	public void startUDP(Integer port) {
-		stopUDP();
-		if (port == null) {
-			port = 6767;
-		}
-		udpPort = port;
-		udpListener = new UDPListener(udpPort, this);
-		udpListener.start();
-	}
-
-	public void startTCP(Integer port) {
-		stopTCP();
-		if (port == null) {
-			port = 6767;
-		}
-		tcpPort = port;
-		tcpListener = new TCPListener(tcpPort, this);
-		tcpListener.start();
-
-	}
-
-	public void stopUDP() {
-		if (udpListener != null) {
-			udpListener.interrupt();
-			udpListener.shutdown();
-			udpListener = null;
+		public void shutdown() {
+			isRunning = false;
+			if ((socket != null) && (!socket.isClosed())) {
+				socket.close();
+			}
 		}
 	}
 
-	public void stopTCP() {
-		if (tcpListener != null) {
-			tcpListener.interrupt();
-			tcpListener.shutdown();
-			tcpListener = null;
-		}
-	}
+	private static final long serialVersionUID = 1L;
 
-	public void stopListening() {
-		stopUDP();
-		stopTCP();
-		isListening = false;
-		broadcastState();
-	}
+	public final static Logger log = LoggerFactory.getLogger(RemoteAdapter.class);
 
-	@Override
-	public void stopService() {
-		stopListening();
-		super.stopService();
-	}
+	public String lastProtocolKey;
+	private String defaultPrefix = null;
 
-	@Override
-	public String getDescription() {
-		return "allows remote communication between applets, or remote instances of myrobotlab";
-	}
+	private HashMap<String, String> prefixMap = new HashMap<String, String>();
+	private HashSet<URI> localProtocolKeys = new HashSet<URI>();
+
+	// types of listening threads - multiple could be managed
+	// when correct interfaces and base classes are done
+	transient TCPListener tcpListener = null;
+	transient UDPListener udpListener = null;
+
+	private Integer udpPort;
+
+	private Integer tcpPort;
+	boolean isListening = false;
+
+	boolean isScanning = false;
+
+	// TODO - multiple scanners for parallel port/broadcast scanning
+	transient Scanner scanner;
+
+	transient private HashMap<URI, TCPThread2> tcpClientList = new HashMap<URI, TCPThread2>();
+
+	/**
+	 * used as a data interface to all the non-serializable network objects - it
+	 * will report stats and states
+	 */
+	private HashMap<URI, Connection> connections = new HashMap<URI, Connection>();
 
 	static public ArrayList<InetAddress> getLocalAddresses() {
 		ArrayList<InetAddress> ret = new ArrayList<InetAddress>();
@@ -616,6 +502,255 @@ public class RemoteAdapter extends Service implements Gateway {
 			logException(e);
 		}
 		return ret;
+	}
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		try {
+
+			int i = 0;
+
+			// RemoteAdapter remote0 = (RemoteAdapter)
+			// Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
+			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
+			Runtime.start(String.format("gui%d", i), "GUIService");
+			// remote0.startUDP(6767);
+			remote1.startListening();
+			// remote1.startListening();
+
+			// remote1.startUDP(6767);
+			// remote1.scan();
+			/*
+			 * Runtime.main(new String[] { "-runtimeName", String.format("r%d",
+			 * i) }); RemoteAdapter remote = (RemoteAdapter)
+			 * Runtime.start(String.format("remote%d", i), "RemoteAdapter");
+			 * Runtime.start(String.format("clock%d", i), "Clock");
+			 * Runtime.start(String.format("gui%d", i), "GUIService");
+			 * 
+			 * // Security security = //
+			 * (Security)Runtime.start(String.format("security", i), //
+			 * "Security"); remote.startListening(); //
+			 * security.allowExportByName("laptop", true); //
+			 * security.allowExportByName("laptop.gui", false); //
+			 * remote.connect("tcp://192.168.0.92:6767"); //
+			 * Runtime.start(String.format("joystick%d", i), "Joystick"); //
+			 * Runtime.start(String.format("python%d", i), "Python");
+			 */
+			// what if null service is passed "register()" no parameters -
+			// I'm sending a registration of nothing?
+			// remote.broadcastState();
+
+			// remote.connect("tcp://127.0.0.1:6767");
+			/*
+			 * THIS WORKS Message msg = remote.createMessage("", "register",
+			 * remote); remote.sendRemote("tcp://127.0.0.1:6868", msg);
+			 */
+
+			// FIXME - sholdn't this be sendRemote ??? or at least
+			// in an interface
+			// remote.sendRemote(uri, msg);
+			// xmpp1.sendMessage("xmpp 2", "robot02 02");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
+	public RemoteAdapter(String n) {
+		super(n);
+		defaultPrefix = String.format("%s.", n);
+		// addLocalTask(5 * 1000, "broadcastHeartbeat");
+	}
+
+	@Override
+	public void addConnectionListener(String name) {
+		addListener("publishNewConnection", name, "onNewConnection", Connection.class);
+	}
+
+	// FIXME - add to Gateway interfaceS
+	public HashMap<URI, Connection> broadcastHeartbeat() {
+		for (Map.Entry<URI, Connection> entry : connections.entrySet()) {
+			URI uri = entry.getKey();
+			Connection value = entry.getValue();
+
+			// roll through send a set of transactions off & start a
+			// IOCompletion like
+			// array of status ...
+			// if timeout is reached - write the rest with timeout (those that
+			// did not
+			// get an asynch response
+
+			if (uri.getScheme().equals("tcp")) {
+				TCPThread2 tcp = tcpClientList.get(uri);
+				log.info("" + tcp);
+				// check socket connectivity
+				// attempt to re-connect if disconnected
+				broadcastState();
+			}
+		}
+		return connections;
+	}
+
+	@Override
+	// TODO refactor with boolean - lower level error(problem) to put into
+	// framework
+	public void connect(String uri) throws URISyntaxException {
+		Message msg = createMessage("", "register", null);
+		sendRemote(uri, msg);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "connectivity", "framework" };
+	}
+
+	@Override
+	public HashMap<URI, Connection> getClients() {
+		return connections;
+	}
+
+	/**
+	 * important initial communication function related to discovery a broadcast
+	 * goes out and replies must include details of communication so that a
+	 * viable connection can be created
+	 * 
+	 * @param client
+	 */
+	// global access keys (all gateways) - or just this gateway ???
+	// if it's all then this could be a function of runtime which is probably
+	// the best
+	@Override
+	public List<Connection> getConnections(URI clientKey) {
+		ArrayList<Connection> conns = new ArrayList<Connection>();
+
+		try {
+
+			// FIXME - dorky - probably fix with template method
+			// FIXME - do "global" next
+			ArrayList<ServiceInterface> services = Runtime.getServicesFromInterface(Gateway.class);
+			// ArrayList<Gateway> gateways = new ArrayList<Gateway>();
+
+			// if GLOBAL
+			for (int i = 0; i < services.size(); ++i) {
+				// Gateway
+				// gateways.add((Gateway) services.get(i));
+			}
+
+			// else LOCAL
+			// add (this) services connections
+			ArrayList<String> addr = Runtime.getLocalAddresses();
+			for (int i = 0; i < addr.size(); ++i) {
+				Connection tcpConn = new Connection();
+				// theoretically you could advertise udp too (and others)
+				// tcpConn.protocolKey = new
+				// URI(String.format("mrl://%s/tcp://%s:%d", getName(),
+				// addr.get(i), getTcpPort()));
+				tcpConn.protocolKey = new URI(String.format("tcp://%s:%d", addr.get(i), getTcpPort()));
+				// we dont fill in our own name
+				// FIXME FIXME FIXME - DO THE CORRECT WAY !!!
+				// / tcpConn.protocolKey = new URI(String.format("tcp://%s:%d",
+				// addr.get(i), getTcpPort()));
+				// tcpKey.prefix = suggestion
+				// tcpKey.prefix = prefix;
+				tcpConn.platform = Runtime.getInstance().getPlatform();
+				tcpConn.prefix = Runtime.getInstance().getName();// calls
+																	// getPrefix
+																	// under
+																	// hood
+				conns.add(tcpConn);
+			}
+
+			// ??
+
+			// tcpKey.uri =
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return conns;
+
+	}
+
+	@Override
+	public String getDescription() {
+		return "allows remote communication between applets, or remote instances of myrobotlab";
+	}
+
+	// @Override needs to be overriden - Gateway need implementation
+	public Platform getPlatform() {
+		return Runtime.getInstance().getPlatform();
+	}
+
+	//
+	@Override
+	public String getPrefix(URI protocolKey) {
+		if (defaultPrefix != null) {
+			return defaultPrefix;
+		} else {
+			return "";// important - return "" not null
+		}
+	}
+
+	public Integer getTcpPort() {
+		return tcpPort;
+	}
+
+	public Integer getUdpPort() {
+		return udpPort;
+	}
+
+	public boolean isListening() {
+		return isListening;
+	}
+
+	@Override
+	public boolean isReady() {
+		if (tcpListener.serverSocket != null) {
+			return tcpListener.serverSocket.isBound();
+		}
+		return false;
+	}
+
+	public boolean isScanning() {
+		return isScanning;
+	}
+
+	public Connection onHeartbeat(Connection data) {
+		return data;
+	}
+
+	/**
+	 * NOT USED - just left as an example of a consumer asynchronous return of
+	 * access key request
+	 * 
+	 * @param keys
+	 * @return
+	 */
+	public Connection onNewConnection(Connection conn) {
+		return conn;
+	}
+
+	// publishing point
+	@Override
+	public Connection publishNewConnection(Connection conn) {
+		if (!connections.containsKey(conn.protocolKey)) {
+			// uri will now become my uri
+			connections.put(conn.protocolKey, conn);
+			broadcastState();
+		} else {
+			info("%d scanning no new connections", System.currentTimeMillis());
+		}
+		return conn;
+	}
+
+	public void scan() {
+		if (scanner != null) {
+			stopScanning();
+		}
+		scanner = new Scanner(this);
+		scanner.start();
+		isScanning = true;
 	}
 
 	@Override
@@ -657,7 +792,7 @@ public class RemoteAdapter extends Service implements Gateway {
 			connections.get(uri).tx++;
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
 
@@ -678,38 +813,106 @@ public class RemoteAdapter extends Service implements Gateway {
 			// dgram.se
 			// TODO - send the damn packet???
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 	}
 
-	public Integer getUdpPort() {
-		return udpPort;
+	public String setDefaultPrefix(String prefix) {
+		defaultPrefix = prefix;
+		return prefix;
 	}
 
-	public void setUDPPort(Integer udpPort) {
-		this.udpPort = udpPort;
-	}
-
-	public Integer getTcpPort() {
-		return tcpPort;
+	public void setPrefix(String source, String prefix) {
+		prefixMap.put(source, prefix);
 	}
 
 	public void setTCPPort(Integer tcpPort) {
 		this.tcpPort = tcpPort;
 	}
 
+	public void setUDPPort(Integer udpPort) {
+		this.udpPort = udpPort;
+	}
+
+	public void startListening() {
+		if (udpPort == null) {
+			udpPort = 6767;
+		}
+		if (tcpPort == null) {
+			tcpPort = 6767;
+		}
+		startListening(udpPort, tcpPort);
+		isListening = true;
+		broadcastState();
+	}
+
+	public void startListening(int ports) {
+		startListening(ports, ports);
+	}
+
+	public void startListening(int udpPort, int tcpPort) {
+		startUDP(udpPort);
+		startTCP(tcpPort);
+	}
+
+	public void startTCP(Integer port) {
+		stopTCP();
+		if (port == null) {
+			port = 6767;
+		}
+		tcpPort = port;
+		tcpListener = new TCPListener(tcpPort, this);
+		tcpListener.start();
+
+	}
+
+	public void startUDP(Integer port) {
+		stopUDP();
+		if (port == null) {
+			port = 6767;
+		}
+		udpPort = port;
+		udpListener = new UDPListener(udpPort, this);
+		udpListener.start();
+	}
+
+	public void stopListening() {
+		stopUDP();
+		stopTCP();
+		isListening = false;
+		broadcastState();
+	}
+
+	public void stopScanning() {
+		scanner.isScanning = false;
+		isScanning = false;
+		scanner = null;
+	}
+
 	@Override
-	public void connect(String uri) throws URISyntaxException {
-		Message msg = createMessage("", "register", null);
-		sendRemote(uri, msg);
+	public void stopService() {
+		stopListening();
+		super.stopService();
 	}
 
-	// @Override needs to be overriden - Gateway need implementation
-	public Platform getPlatform() {
-		return Runtime.getInstance().getPlatform();
+	public void stopTCP() {
+		if (tcpListener != null) {
+			tcpListener.interrupt();
+			tcpListener.shutdown();
+			tcpListener = null;
+		}
 	}
 
+	public void stopUDP() {
+		if (udpListener != null) {
+			udpListener.interrupt();
+			udpListener.shutdown();
+			udpListener = null;
+		}
+	}
+
+	@Override
 	public Status test() {
 		Status status = super.test();
 		try {
@@ -731,189 +934,5 @@ public class RemoteAdapter extends Service implements Gateway {
 
 		return status;
 	}
-
-	public void startListening(int ports) {
-		startListening(ports, ports);
-	}
-
-	//
-	@Override
-	public String getPrefix(URI protocolKey) {
-		if (defaultPrefix != null) {
-			return defaultPrefix;
-		} else {
-			return "";// important - return "" not null
-		}
-	}
-
-	public static class CommOptions implements Serializable {
-		private static final long serialVersionUID = 1L;
-		Platform platform;
-		ArrayList<Gateway> gateways;
-
-		public CommOptions() {
-		}
-	}
-
-	public void scan() {
-		if (scanner != null){
-			stopScanning();
-		}
-		scanner = new Scanner(this);
-		scanner.start();
-		isScanning = true;
-	}
-
-	public void stopScanning(){
-		scanner.isScanning = false;
-		isScanning = false;
-		scanner = null;
-	}
-	/**
-	 * important initial communication function related to discovery a broadcast
-	 * goes out and replies must include details of communication so that a
-	 * viable connection can be created
-	 * 
-	 * @param client
-	 */
-	// global access keys (all gateways) - or just this gateway ???
-	// if it's all then this could be a function of runtime which is probably
-	// the best
-	public List<Connection> getConnections(URI clientKey) {
-		ArrayList<Connection> conns = new ArrayList<Connection>();
-		
-		try {
-
-			// FIXME - dorky - probably fix with template method
-			// FIXME - do "global" next
-			ArrayList<ServiceInterface> services = Runtime.getServicesFromInterface(Gateway.class);
-			// ArrayList<Gateway> gateways = new ArrayList<Gateway>();
-
-			// if GLOBAL
-			for (int i = 0; i < services.size(); ++i) {
-				// Gateway
-				// gateways.add((Gateway) services.get(i));
-			}
-			
-			// else LOCAL 
-			// add (this) services connections
-			ArrayList<String> addr = Runtime.getLocalAddresses();
-			for (int i = 0; i < addr.size(); ++i){
-				Connection tcpConn = new Connection();
-				// theoretically you could advertise udp too (and others)
-				//tcpConn.protocolKey = new URI(String.format("mrl://%s/tcp://%s:%d", getName(), addr.get(i), getTcpPort()));
-				tcpConn.protocolKey = new URI(String.format("tcp://%s:%d", addr.get(i), getTcpPort()));
-				// we dont fill in our own name
-// FIXME FIXME FIXME - DO THE CORRECT WAY !!!				
-///				tcpConn.protocolKey = new URI(String.format("tcp://%s:%d", addr.get(i), getTcpPort()));
-				// tcpKey.prefix = suggestion
-				// tcpKey.prefix = prefix;
-				tcpConn.platform = Runtime.getInstance().getPlatform();
-				tcpConn.prefix = Runtime.getInstance().getName();// calls getPrefix
-																	// under hood
-				conns.add(tcpConn);
-			}
-
-			// ??
-	
-			// tcpKey.uri =
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return conns;
-
-	}
-
-	/**
-	 * NOT USED - just left as an example of a consumer asynchronous return of
-	 * access key request
-	 * 
-	 * @param keys
-	 * @return
-	 */
-	public Connection onNewConnection(Connection conn) {
-		return conn;
-	}
-
-	// publishing point
-	@Override
-	public Connection publishNewConnection(Connection conn) {
-		if (!connections.containsKey(conn.protocolKey)) {
-			// uri will now become my uri
-			connections.put(conn.protocolKey, conn);
-			broadcastState();
-		} else {
-			info("%d scanning no new connections", System.currentTimeMillis());
-		}
-		return conn;
-	}
-
-	public void addConnectionListener(String name) {
-		addListener("publishNewConnection", name, "onNewConnection", Connection.class);
-	}
-
-
-	public boolean isScanning() {
-		return isScanning;
-	}
-	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		try {
-
-			int i = 0;
-
-			//RemoteAdapter remote0 = (RemoteAdapter) Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
-			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
-			Runtime.start(String.format("gui%d", i), "GUIService");
-			// remote0.startUDP(6767);
-			remote1.startListening();
-			// remote1.startListening();
-
-			// remote1.startUDP(6767);
-			//remote1.scan();
-			/*
-			 * Runtime.main(new String[] { "-runtimeName", String.format("r%d",
-			 * i) }); RemoteAdapter remote = (RemoteAdapter)
-			 * Runtime.start(String.format("remote%d", i), "RemoteAdapter");
-			 * Runtime.start(String.format("clock%d", i), "Clock");
-			 * Runtime.start(String.format("gui%d", i), "GUIService");
-			 * 
-			 * // Security security = //
-			 * (Security)Runtime.start(String.format("security", i), //
-			 * "Security"); remote.startListening(); //
-			 * security.allowExportByName("laptop", true); //
-			 * security.allowExportByName("laptop.gui", false); //
-			 * remote.connect("tcp://192.168.0.92:6767"); //
-			 * Runtime.start(String.format("joystick%d", i), "Joystick"); //
-			 * Runtime.start(String.format("python%d", i), "Python");
-			 */
-			// what if null service is passed "register()" no parameters -
-			// I'm sending a registration of nothing?
-			// remote.broadcastState();
-
-			// remote.connect("tcp://127.0.0.1:6767");
-			/*
-			 * THIS WORKS Message msg = remote.createMessage("", "register",
-			 * remote); remote.sendRemote("tcp://127.0.0.1:6868", msg);
-			 */
-
-			// FIXME - sholdn't this be sendRemote ??? or at least
-			// in an interface
-			// remote.sendRemote(uri, msg);
-			// xmpp1.sendMessage("xmpp 2", "robot02 02");
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"connectivity", "framework"};
-	}
-
 
 }

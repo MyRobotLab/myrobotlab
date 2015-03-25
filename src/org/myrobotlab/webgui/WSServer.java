@@ -37,47 +37,52 @@ import org.slf4j.Logger;
  */
 public class WSServer extends WebSocketServer {
 
-	public final static Logger log = LoggerFactory.getLogger(WSServer.class.getCanonicalName());
+	public static class WSMsg {
+		public WebSocket socket;
+		public Message msg;
 
+		public WSMsg(WebSocket conn, Message msg) {
+			this.socket = conn;
+			this.msg = msg;
+		}
+	}
+
+	public final static Logger log = LoggerFactory.getLogger(WSServer.class.getCanonicalName());
 	private static final String QUERY_STRING_PARAMETER = "NanoHttpd.QUERY_STRING";
 	private HashMap<String, HTTPProcessor> processors = new HashMap<String, HTTPProcessor>();
-	HTTPProcessor defaultProcessor;
 
+	HTTPProcessor defaultProcessor;
 	public static final String HTTP_OK = "200 OK";
 	public static final String HTTP_REDIRECT = "301 Moved Permanently";
+
 	// public static final String HTTP_NOT_AUTHORIZED = "401 Not Authorized";
 	public static final String HTTP_NOT_AUTHORIZED = "401 Access Denied";
-
 	public static final String HTTP_FORBIDDEN = "403 Forbidden";
 	public static final String HTTP_NOTFOUND = "404 Not Found";
 	public static final String HTTP_BADREQUEST = "400 Bad Request";
 	public static final String HTTP_INTERNALERROR = "500 Internal Server Error";
-	public static final String HTTP_NOTIMPLEMENTED = "501 Not Implemented";
 
+	public static final String HTTP_NOTIMPLEMENTED = "501 Not Implemented";
 	/**
 	 * Common mime types for dynamic content
 	 */
 	public static final String MIME_PLAINTEXT = "text/plain";
 	public static final String MIME_HTML = "text/html";
+
 	public static final String MIME_DEFAULT_BINARY = "application/octet-stream";
-	
+
 	/**
-	 * necessary for certain web displays and gui's
-	 * when javascript or anglular needs to send a message directly to a service
-	 * vs. have the service subscribe to a publishing point.
+	 * necessary for certain web displays and gui's when javascript or anglular
+	 * needs to send a message directly to a service vs. have the service
+	 * subscribe to a publishing point.
 	 */
 	private boolean allowDirectMessaging = true;
-
 	private Inbox inbox;
+
 	private WebGUI webgui;
-	
-	public static class WSMsg{
-		public WSMsg(WebSocket conn, Message msg) {
-			this.socket = conn;
-			this.msg = msg;
-		}
-		public WebSocket socket;
-		public Message msg;
+
+	public WSServer(InetSocketAddress address) {
+		super(address);
 	}
 
 	public WSServer(WebGUI webgui, int port) throws UnknownHostException {
@@ -92,7 +97,9 @@ public class WSServer extends WebSocketServer {
 		// processors.put("/api", new RESTProcessor());
 		// default uri map
 
-		//processors.put("/api/soap", new SOAPProcessor()); SOAP is stupid FIXME - refactor with jvm's JAXB default order - NO ANNOTATIONS !!! - no header? (that'd be good)
+		// processors.put("/api/soap", new SOAPProcessor()); SOAP is stupid
+		// FIXME - refactor with jvm's JAXB default order - NO ANNOTATIONS !!! -
+		// no header? (that'd be good)
 
 		processors.put("/services", new RESTProcessor());
 		defaultProcessor = new ResourceProcessor(webgui);
@@ -101,92 +108,20 @@ public class WSServer extends WebSocketServer {
 		this.inbox = webgui.getInbox();
 	}
 
-	public WSServer(InetSocketAddress address) {
-		super(address);
+	public boolean allowDirectMessaging(boolean b) {
+		allowDirectMessaging = b;
+		return b;
 	}
-	
-	public void allowREST(Boolean b){
-		if (b){
+
+	public void allowREST(Boolean b) {
+		if (b) {
 			processors.put("/services", new RESTProcessor());
 		} else {
-			if (processors.containsKey("/services")){
+			if (processors.containsKey("/services")) {
 				processors.remove("/services");
 			}
 		}
 	}
-
-	@Override
-	public void onOpen(WebSocket conn, ClientHandshake handshake) {
-		String clientkey = String.format("%s:%d", conn.getRemoteSocketAddress().getAddress().getHostAddress(), conn.getRemoteSocketAddress().getPort());
-		log.info(String.format("onOpen %s", clientkey));
-		log.info(String.format("onOpen %s", conn.getLocalSocketAddress().getHostName()));
-		log.info(String.format("onOpen %s", conn.getRemoteSocketAddress().getHostName()));
-		webgui.clients.put(clientkey, clientkey);
-		webgui.invoke("publishConnect", conn);
-	}
-
-	@Override
-	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-		String clientkey = String.format("%s:%d", conn.getRemoteSocketAddress().getAddress().getHostAddress(), conn.getRemoteSocketAddress().getPort());
-		webgui.clients.remove(clientkey);
-		webgui.invoke("publishDisconnect", conn);
-	}
-	
-	// FIXME - return aggregate of conn & MRL Message to publish
-	// keep authorization...
-	@Override
-	public void onMessage(WebSocket conn, String message) {
-	
-		log.info("webgui <---to--- client {}", message);
-
-		Message msg = Encoder.fromJson(message, Message.class);
-		msg.sender = conn.getRemoteSocketAddress().getAddress().getHostAddress();
-		
-		// FIXME - move to Security service
-		if (!webgui.isAuthorized(msg)){
-			webgui.error("unAuthorized message !!! %s.%s from sender %s",msg.name, msg.method, msg.sender);
-			return;
-		}
-
-		if (allowDirectMessaging){ // FIXME - this "could" be done at the inbox level ? check to see if you did it there
-			inbox.add(msg);
-		} 
-		
-		webgui.invoke("publishWSMsg", new WSMsg(conn, msg));
-		
-	}
-
-	@Override
-	public void onError(WebSocket conn, Exception ex) {
-		Logging.logException(ex);
-		if (conn != null) {
-			// some errors like port binding failed may not be assignable to a
-			// specific websocket
-		}
-	}
-
-	/**
-	 * Sends <var>text</var> to all currently connected WebSocket clients.
-	 * 
-	 * @param text
-	 *            The String to send across the network.
-	 * @throws InterruptedException
-	 *             When socket related I/O errors occur.
-	 */
-	// FIXME - on release all - this throws an exception and doesn't complete -
-	// but is it worth
-	// the overhead of a try???
-	public void sendToAll(String text) {
-		Collection<WebSocket> con = connections();
-		log.info("webgui ---to---> client ");
-		synchronized (con) {
-			for (WebSocket c : con) {
-				c.send(text);
-			}
-		}
-	} 
-
-	// ///////////////////// FROM NANOHTTPD ///////////////////////
 
 	/**
 	 * Decodes the sent headers and loads the data into Key/value pairs
@@ -253,51 +188,6 @@ public class WSServer extends WebSocketServer {
 	}
 
 	/**
-	 * Find byte index separating header from body. It must be the last byte of
-	 * the first two sequential new lines.
-	 */
-	private int findHeaderEnd(final byte[] buf, int rlen) {
-		int splitbyte = 0;
-		while (splitbyte + 3 < rlen) {
-			if (buf[splitbyte] == '\r' && buf[splitbyte + 1] == '\n' && buf[splitbyte + 2] == '\r' && buf[splitbyte + 3] == '\n') {
-				return splitbyte + 4;
-			}
-			splitbyte++;
-		}
-		return 0;
-	}
-
-	/**
-	 * Find the byte positions where multipart boundaries start.
-	 */
-	private int[] getBoundaryPositions(ByteBuffer b, byte[] boundary) {
-		int matchcount = 0;
-		int matchbyte = -1;
-		List<Integer> matchbytes = new ArrayList<Integer>();
-		for (int i = 0; i < b.limit(); i++) {
-			if (b.get(i) == boundary[matchcount]) {
-				if (matchcount == 0)
-					matchbyte = i;
-				matchcount++;
-				if (matchcount == boundary.length) {
-					matchbytes.add(matchbyte);
-					matchcount = 0;
-					matchbyte = -1;
-				}
-			} else {
-				i -= matchcount;
-				matchcount = 0;
-				matchbyte = -1;
-			}
-		}
-		int[] ret = new int[matchbytes.size()];
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = matchbytes.get(i);
-		}
-		return ret;
-	}
-
-	/**
 	 * Decodes parameters in percent-encoded URI-format ( e.g.
 	 * "name=Jack%20Daniels&pass=Single%20Malt" ) and adds them to given Map.
 	 * NOTE: this doesn't support multiple identical keys due to the simplicity
@@ -339,11 +229,109 @@ public class WSServer extends WebSocketServer {
 		return decoded;
 	}
 
+	/**
+	 * Find byte index separating header from body. It must be the last byte of
+	 * the first two sequential new lines.
+	 */
+	private int findHeaderEnd(final byte[] buf, int rlen) {
+		int splitbyte = 0;
+		while (splitbyte + 3 < rlen) {
+			if (buf[splitbyte] == '\r' && buf[splitbyte + 1] == '\n' && buf[splitbyte + 2] == '\r' && buf[splitbyte + 3] == '\n') {
+				return splitbyte + 4;
+			}
+			splitbyte++;
+		}
+		return 0;
+	}
+
+	// ///////////////////// FROM NANOHTTPD ///////////////////////
+
+	/**
+	 * Find the byte positions where multipart boundaries start.
+	 */
+	private int[] getBoundaryPositions(ByteBuffer b, byte[] boundary) {
+		int matchcount = 0;
+		int matchbyte = -1;
+		List<Integer> matchbytes = new ArrayList<Integer>();
+		for (int i = 0; i < b.limit(); i++) {
+			if (b.get(i) == boundary[matchcount]) {
+				if (matchcount == 0)
+					matchbyte = i;
+				matchcount++;
+				if (matchcount == boundary.length) {
+					matchbytes.add(matchbyte);
+					matchcount = 0;
+					matchbyte = -1;
+				}
+			} else {
+				i -= matchcount;
+				matchcount = 0;
+				matchbyte = -1;
+			}
+		}
+		int[] ret = new int[matchbytes.size()];
+		for (int i = 0; i < ret.length; i++) {
+			ret[i] = matchbytes.get(i);
+		}
+		return ret;
+	}
+
+	@Override
+	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+		String clientkey = String.format("%s:%d", conn.getRemoteSocketAddress().getAddress().getHostAddress(), conn.getRemoteSocketAddress().getPort());
+		webgui.clients.remove(clientkey);
+		webgui.invoke("publishDisconnect", conn);
+	}
+
+	@Override
+	public void onError(WebSocket conn, Exception ex) {
+		Logging.logError(ex);
+		if (conn != null) {
+			// some errors like port binding failed may not be assignable to a
+			// specific websocket
+		}
+	}
+
+	// FIXME - return aggregate of conn & MRL Message to publish
+	// keep authorization...
+	@Override
+	public void onMessage(WebSocket conn, String message) {
+
+		log.info("webgui <---to--- client {}", message);
+
+		Message msg = Encoder.fromJson(message, Message.class);
+		msg.sender = conn.getRemoteSocketAddress().getAddress().getHostAddress();
+
+		// FIXME - move to Security service
+		if (!webgui.isAuthorized(msg)) {
+			webgui.error("unAuthorized message !!! %s.%s from sender %s", msg.name, msg.method, msg.sender);
+			return;
+		}
+
+		if (allowDirectMessaging) { // FIXME - this "could" be done at the inbox
+									// level ? check to see if you did it there
+			inbox.add(msg);
+		}
+
+		webgui.invoke("publishWSMsg", new WSMsg(conn, msg));
+
+	}
+
+	@Override
+	public void onOpen(WebSocket conn, ClientHandshake handshake) {
+		String clientkey = String.format("%s:%d", conn.getRemoteSocketAddress().getAddress().getHostAddress(), conn.getRemoteSocketAddress().getPort());
+		log.info(String.format("onOpen %s", clientkey));
+		log.info(String.format("onOpen %s", conn.getLocalSocketAddress().getHostName()));
+		log.info(String.format("onOpen %s", conn.getRemoteSocketAddress().getHostName()));
+		webgui.clients.put(clientkey, clientkey);
+		webgui.invoke("publishConnect", conn);
+	}
+
 	@Override
 	public void onRawOpen(WebSocket conn, ByteBuffer d) {
 
 		try {
-			if (conn == null){
+			if (conn == null) {
 				log.error("conn is null");
 				return;
 			}
@@ -428,20 +416,36 @@ public class WSServer extends WebSocketServer {
 			byte[] ba = out.toByteArray();
 			log.info(String.format("sending %d bytes", ba.length));
 			conn.send(ba);
-			//conn.close();
+			// conn.close();
 
 		} catch (Exception e) {
 			// attempt a 500
-			Logging.logException(e);
+			Logging.logError(e);
 		} finally {
 			conn.close();
 		}
 
 	}
 
-	public boolean allowDirectMessaging(boolean b) {
-		allowDirectMessaging = b;
-		return b;
+	/**
+	 * Sends <var>text</var> to all currently connected WebSocket clients.
+	 * 
+	 * @param text
+	 *            The String to send across the network.
+	 * @throws InterruptedException
+	 *             When socket related I/O errors occur.
+	 */
+	// FIXME - on release all - this throws an exception and doesn't complete -
+	// but is it worth
+	// the overhead of a try???
+	public void sendToAll(String text) {
+		Collection<WebSocket> con = connections();
+		log.info("webgui ---to---> client ");
+		synchronized (con) {
+			for (WebSocket c : con) {
+				c.send(text);
+			}
+		}
 	}
 
 }

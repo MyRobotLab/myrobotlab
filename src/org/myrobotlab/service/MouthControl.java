@@ -4,6 +4,7 @@ import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -19,9 +20,9 @@ public class MouthControl extends Service {
 	public int delaytimestop = 200;
 	public int delaytimeletter = 60;
 
-	transient public Servo jaw;
-	transient public Arduino arduino;
-	transient public Speech mouth;
+	transient Servo jaw;
+	transient Arduino arduino;
+	transient Speech mouth;
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -30,6 +31,21 @@ public class MouthControl extends Service {
 		peers.put("mouth", "Speech", "shared Speech instance");
 
 		return peers;
+	}
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		try {
+			// LoggingFactory.getInstance().setLevel(Level.INFO);
+			MouthControl MouthControl = new MouthControl("MouthControl");
+			MouthControl.startService();
+
+			Runtime.createAndStart("gui", "GUIService");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 	public MouthControl(String n) {
@@ -43,33 +59,8 @@ public class MouthControl extends Service {
 		mouth.addListener(getName(), "saying");
 	}
 
-	public void setdelays(Integer d1, Integer d2, Integer d3) {
-		delaytime = d1;
-		delaytimestop = d2;
-		delaytimeletter = d3;
-	}
-
-	public void setmouth(Integer closed, Integer opened) {
-		//jaw.setMinMax(closed, opened);
-		moutClosedPos = closed;
-		mouthOpenedPos = opened;
-		
-		if (closed < opened){
-			jaw.setMinMax(closed, opened);
-		} else {
-			jaw.setMinMax(opened, closed);
-		}
-	}
-
-	public void startService() {
-		super.startService();
-		jaw.startService();
-		arduino.startService();
-		mouth.startService();
-	}
-
 	// FIXME make interface
-	public boolean connect(String port) {
+	public boolean connect(String port) throws Exception {
 		startService(); // NEEDED? I DONT THINK SO....
 
 		if (arduino == null) {
@@ -84,9 +75,23 @@ public class MouthControl extends Service {
 			return false;
 		}
 
-		//arduino.servoAttach(jaw);
+		// arduino.servoAttach(jaw);
 		jaw.attach();
 		return true;
+	}
+
+	public Arduino getArduino() {
+		return arduino;
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "control" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "mouth movements based on spoken text";
 	}
 
 	public synchronized void saying(String text) {
@@ -118,7 +123,7 @@ public class MouthControl extends Service {
 					if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y') && !ison) {
 
 						jaw.moveTo(mouthOpenedPos); // # move the servo to the
-												// open spot
+						// open spot
 						ison = true;
 						sleep(delaytime);
 						jaw.moveTo(moutClosedPos);// #// close the servo
@@ -140,25 +145,30 @@ public class MouthControl extends Service {
 		}
 	}
 
-	@Override
-	public String getDescription() {
-		return "mouth movements based on spoken text";
+	public void setdelays(Integer d1, Integer d2, Integer d3) {
+		delaytime = d1;
+		delaytimestop = d2;
+		delaytimeletter = d3;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		// LoggingFactory.getInstance().setLevel(Level.INFO);
-		MouthControl MouthControl = new MouthControl("MouthControl");
-		MouthControl.startService();
+	public void setmouth(Integer closed, Integer opened) {
+		// jaw.setMinMax(closed, opened);
+		moutClosedPos = closed;
+		mouthOpenedPos = opened;
 
-		Runtime.createAndStart("gui", "GUIService");
-
+		if (closed < opened) {
+			jaw.setMinMax(closed, opened);
+		} else {
+			jaw.setMinMax(opened, closed);
+		}
 	}
-	
+
 	@Override
-	public String[] getCategories() {
-		return new String[] {"control"};
+	public void startService() {
+		super.startService();
+		jaw.startService();
+		arduino.startService();
+		mouth.startService();
 	}
 
 }

@@ -12,15 +12,27 @@ import javax.swing.JFrame;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-
-
 public class FileUtil {
 
 	public final static Logger log = LoggerFactory.getLogger(FileUtil.class.getCanonicalName());
 
 	static private String lastFileOpened;
+
 	static private String lastFileSaved;
+
 	static private String lastStatus;
+
+	public static String getLastFileOpened() {
+		return lastFileOpened;
+	}
+
+	public static String getLastFileSaved() {
+		return lastFileSaved;
+	}
+
+	public static String getLastStatus() {
+		return lastStatus;
+	}
 
 	static public String open(JFrame frame, String filter) {
 		FileDialog file = new FileDialog(frame, "Open File", FileDialog.LOAD);
@@ -77,6 +89,18 @@ public class FileUtil {
 		return writeFile(data, filename);
 	}
 
+	public static void setLastFileOpened(String lastFileOpened) {
+		FileUtil.lastFileOpened = lastFileOpened;
+	}
+
+	public static void setLastFileSaved(String lastFileSaved) {
+		FileUtil.lastFileSaved = lastFileSaved;
+	}
+
+	public static void setLastStatus(String lastStatus) {
+		FileUtil.lastStatus = lastStatus;
+	}
+
 	static public boolean writeFile(String data, String filename) {
 		File f = new File(filename);
 		try {
@@ -91,29 +115,5 @@ public class FileUtil {
 		}
 
 		return true;
-	}
-
-	public static String getLastFileOpened() {
-		return lastFileOpened;
-	}
-
-	public static void setLastFileOpened(String lastFileOpened) {
-		FileUtil.lastFileOpened = lastFileOpened;
-	}
-
-	public static String getLastStatus() {
-		return lastStatus;
-	}
-
-	public static void setLastStatus(String lastStatus) {
-		FileUtil.lastStatus = lastStatus;
-	}
-
-	public static String getLastFileSaved() {
-		return lastFileSaved;
-	}
-
-	public static void setLastFileSaved(String lastFileSaved) {
-		FileUtil.lastFileSaved = lastFileSaved;
 	}
 }

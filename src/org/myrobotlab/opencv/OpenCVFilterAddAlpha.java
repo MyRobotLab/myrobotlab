@@ -43,14 +43,18 @@ public class OpenCVFilterAddAlpha extends OpenCVFilter {
 	transient IplImage dst = null;
 	transient IplImage negativeImage = null;
 
-	public OpenCVFilterAddAlpha()  {
+	public OpenCVFilterAddAlpha() {
 		super();
 	}
-	
-	public OpenCVFilterAddAlpha(String name)  {
+
+	public OpenCVFilterAddAlpha(String name) {
 		super(name);
 	}
 
+	@Override
+	public void imageChanged(IplImage image) {
+		dst = null;
+	}
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
@@ -73,11 +77,6 @@ public class OpenCVFilterAddAlpha extends OpenCVFilter {
 			return image;
 		}
 
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		dst = null;
 	}
 
 }

@@ -31,10 +31,99 @@ import java.util.HashMap;
 public class CMDLine extends HashMap<String, CcmdParam> {
 
 	private static final long serialVersionUID = 1560723637806853945L;
+
 	private String[] args = null;
-	
+
+	public static void main(String[] args) {
+
+		CMDLine cmdline = new CMDLine(args);
+
+		if (cmdline.containsKey("-test")) {
+			String service = cmdline.getSafeArgument("-service", 0, "");
+		}
+	}
+
 	public CMDLine(String[] args) {
 		splitLine(args);
+	}
+
+	public String getArgument(final String pSwitch, int iIdx) {
+		if (hasSwitch(pSwitch)) {
+			if (containsKey(pSwitch)) {
+				if (get(pSwitch).m_strings.size() > iIdx) {
+					return get(pSwitch).m_strings.get(iIdx);
+				}
+			}
+		}
+
+		// throw (int)0;
+
+		return "";
+
+	}
+
+	public int getArgumentCount(final String pSwitch) {
+		int iArgumentCount = -1;
+
+		if (hasSwitch(pSwitch)) {
+			if (containsKey(pSwitch)) {
+				iArgumentCount = get(pSwitch).m_strings.size();
+			}
+		}
+
+		return iArgumentCount;
+	}
+
+	public ArrayList<String> getArgumentList(final String pSwitch) {
+		return get(pSwitch).m_strings;
+	}
+
+	public String getSafeArgument(final String pSwitch, int iIdx, final String pDefault) {
+		String sRet = new String("");
+
+		if (pDefault != null) {
+			sRet = pDefault;
+		}
+
+		if (!hasSwitch(pSwitch))
+			return sRet;
+
+		String r = getArgument(pSwitch, iIdx);
+		if ((r == null || r.length() == 0) && (pDefault != null && pDefault.length() != 0)) {
+			return pDefault;
+		} else {
+			return r;
+		}
+	}
+
+	public boolean hasSwitch(final String pSwitch) {
+		return containsKey(pSwitch);
+	}
+
+	public boolean isSwitch(final String pParam) {
+		if (pParam == null) {
+			return false;
+		}
+		if (pParam.length() <= 1) {
+			return false;
+		}
+
+		if (pParam.charAt(0) == '-') {
+			boolean ret = true;
+
+			// allow negative numbers as arguments.
+			// ie., don't count them as switches
+			ret &= !Character.isDigit(pParam.charAt(1));
+
+			// if we have a space then the param was escaped
+			// if its escaped e.g. -agent "-test -logLevel WARN" then its not a
+			// flag
+			ret &= !pParam.contains(" ");
+			return ret;
+		} else {
+			return false;
+		}
+
 	}
 
 	public int splitLine(String[] args) {
@@ -88,84 +177,7 @@ public class CMDLine extends HashMap<String, CcmdParam> {
 
 	}
 
-	public boolean hasSwitch(final String pSwitch) {
-		return containsKey(pSwitch);
-	}
-
-	public String getSafeArgument(final String pSwitch, int iIdx, final String pDefault) {
-		String sRet = new String("");
-
-		if (pDefault != null) {
-			sRet = pDefault;
-		}
-
-		if (!hasSwitch(pSwitch))
-			return sRet;
-
-		String r = getArgument(pSwitch, iIdx);
-		if ((r == null || r.length() == 0) && (pDefault != null && pDefault.length() != 0)) {
-			return pDefault;
-		} else {
-			return r;
-		}
-	}
-
-	public String getArgument(final String pSwitch, int iIdx) {
-		if (hasSwitch(pSwitch)) {
-			if (containsKey(pSwitch)) {
-				if (get(pSwitch).m_strings.size() > iIdx) {
-					return get(pSwitch).m_strings.get(iIdx);
-				}
-			}
-		}
-
-		// throw (int)0;
-
-		return "";
-
-	}
-
-	public ArrayList<String> getArgumentList(final String pSwitch) {
-		return get(pSwitch).m_strings;
-	}
-
-	public int getArgumentCount(final String pSwitch) {
-		int iArgumentCount = -1;
-
-		if (hasSwitch(pSwitch)) {
-			if (containsKey(pSwitch)) {
-				iArgumentCount = get(pSwitch).m_strings.size();
-			}
-		}
-
-		return iArgumentCount;
-	}
-
-	public boolean isSwitch(final String pParam) {
-		if (pParam == null){
-			return false;
-		}
-		if (pParam.length() <= 1){
-			return false;
-		}
-		
-		if (pParam.charAt(0) == '-') {
-			boolean ret = true;
-			
-			// allow negative numbers as arguments.
-			// ie., don't count them as switches
-			ret &= !Character.isDigit(pParam.charAt(1));
-			
-			// if we have a space then the param was escaped
-			// if its escaped e.g. -agent "-test -logLevel WARN" then its not a flag
-			ret &= !pParam.contains(" ");
-			return ret;
-		} else {
-			return false;
-		}
-
-	}
-
+	@Override
 	public String toString() {
 		StringBuffer ret = new StringBuffer();
 		for (int i = 0; i < args.length; ++i) {
@@ -173,14 +185,5 @@ public class CMDLine extends HashMap<String, CcmdParam> {
 		}
 
 		return ret.toString();
-	}
-
-	public static void main(String[] args) {
-
-		CMDLine cmdline = new CMDLine(args);
-
-		if (cmdline.containsKey("-test")) {
-			String service = cmdline.getSafeArgument("-service", 0, "");
-		}
 	}
 }

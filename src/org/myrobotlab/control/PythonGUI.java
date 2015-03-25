@@ -57,6 +57,7 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.FileLocation;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.TextEditorPane;
+import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.myrobotlab.control.widget.Console;
 import org.myrobotlab.control.widget.FileUtil;
@@ -73,49 +74,11 @@ import org.myrobotlab.ui.autocomplete.MRLCompletionProvider;
  * Python GUIService
  * 
  * @author SwedaKonsult
- *  
- *  use - http://famfamfam.com/lab/icons/silk/previews/index_abc.png - SILK ICONS
+ * 
+ *         use - http://famfamfam.com/lab/icons/silk/previews/index_abc.png -
+ *         SILK ICONS
  */
 public class PythonGUI extends ServiceGUI implements ActionListener, MouseListener {
-
-	static final long serialVersionUID = 1L;
-	private final static int fileMenuMnemonic = KeyEvent.VK_F;
-	private static final int saveMenuMnemonic = KeyEvent.VK_S;
-	private static final int openMenuMnemonic = KeyEvent.VK_O;
-	private static final int examplesMenuMnemonic = KeyEvent.VK_X;
-
-	final JFrame top;
-
-	final JTabbedPane editorTabs;
-
-	JSplitPane splitPane;
-
-	final JLabel statusInfo;
-	JMenu examples;
-
-	HashMap<String, EditorPanel> scripts = new HashMap<String, EditorPanel>();
-
-	// TODO - check for outside modification with lastmoddate
-	String currentScriptName;
-
-	// button bar buttons
-	ImageButton executeButton;
-	ImageButton stopButton;
-
-	ImageButton openFileButton;
-	ImageButton saveFileButton;
-
-	// consoles
-	JTabbedPane consoleTabs;
-	final Console javaConsole;
-	final JTextArea pythonConsole;
-	final JScrollPane pythonScrollPane;
-
-	// auto-completion
-	static CompletionProvider provider;
-	static AutoCompletion ac;
-
-	int untitledCount = 1;
 
 	// FIXME - should be part of separate "Editor" class
 	static public class EditorPanel {
@@ -127,14 +90,29 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		public EditorPanel(Script script) {
 			try {
 				filename = script.getName();
-				editor = new TextEditorPane(editor.INSERT_MODE, false, FileLocation.create(new File(filename)));
+				editor = new TextEditorPane(RTextArea.INSERT_MODE, false, FileLocation.create(new File(filename)));
 				editor.setText(script.getCode());
 				editor.setCaretPosition(0);
 
 				panel = createEditorPane();
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 			}
+		}
+
+		private JScrollPane createEditorPane() {
+			// editor tweaks
+			editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
+			editor.setCodeFoldingEnabled(true);
+			editor.setAntiAliasingEnabled(true);
+
+			// auto-completion
+			if (ac != null) {
+				ac.install(editor);
+				ac.setShowDescWindow(true);
+			}
+
+			return new RTextScrollPane(editor);
 		}
 
 		public String getDisplayName() {
@@ -154,29 +132,54 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 			}
 		}
 
-		private JScrollPane createEditorPane() {
-			// editor tweaks
-			editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
-			editor.setCodeFoldingEnabled(true);
-			editor.setAntiAliasingEnabled(true);
-
-			// auto-completion
-			if (ac != null) {
-				ac.install(editor);
-				ac.setShowDescWindow(true);
-			}
-
-			return new RTextScrollPane(editor);
+		public TextEditorPane getEditor() {
+			return editor;
 		}
 
 		public String getFilename() {
 			return filename;
 		}
-
-		public TextEditorPane getEditor() {
-			return editor;
-		}
 	}
+
+	static final long serialVersionUID = 1L;
+	private final static int fileMenuMnemonic = KeyEvent.VK_F;
+	private static final int saveMenuMnemonic = KeyEvent.VK_S;
+	private static final int openMenuMnemonic = KeyEvent.VK_O;
+
+	private static final int examplesMenuMnemonic = KeyEvent.VK_X;
+
+	final JFrame top;
+
+	final JTabbedPane editorTabs;
+
+	JSplitPane splitPane;
+	final JLabel statusInfo;
+
+	JMenu examples;
+
+	HashMap<String, EditorPanel> scripts = new HashMap<String, EditorPanel>();
+
+	// TODO - check for outside modification with lastmoddate
+	String currentScriptName;
+	// button bar buttons
+	ImageButton executeButton;
+
+	ImageButton stopButton;
+	ImageButton openFileButton;
+
+	ImageButton saveFileButton;
+	// consoles
+	JTabbedPane consoleTabs;
+	final Console javaConsole;
+	final JTextArea pythonConsole;
+
+	final JScrollPane pythonScrollPane;
+	// auto-completion
+	static CompletionProvider provider;
+
+	static AutoCompletion ac;
+
+	int untitledCount = 1;
 
 	/**
 	 * Constructor
@@ -236,7 +239,7 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		JMenuItem m = (JMenuItem) o;
 		if (m.getText().equals("new")) {
 			++untitledCount;
-			Script s = new Script(String.format("%s%suntitled.%d.py", myService.getCFGDir(), File.separator, untitledCount), "");
+			Script s = new Script(String.format("%s%suntitled.%d.py", Service.getCFGDir(), File.separator, untitledCount), "");
 			addNewEditorPanel(s);
 		} else if (m.getText().equals("save")) {
 			saveFile();
@@ -247,14 +250,14 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		} else if (m.getText().equals("close")) {
 			closeFile();
 		} else if (m.getActionCommand().equals("examples")) {
-		//} else if (m.getActionCommand().equals("examples")) {
-			
-			//BareBonesBrowserLaunch.openURL("https://github.com/MyRobotLab/pyrobotlab");
+			// } else if (m.getActionCommand().equals("examples")) {
+
+			// BareBonesBrowserLaunch.openURL("https://github.com/MyRobotLab/pyrobotlab");
 			/*
-			String filename = String.format("Python/examples/%1$s", m.getText());
-			Script script = new Script(filename, FileIO.resourceToString(filename));
-			addNewEditorPanel(script);
-			*/
+			 * String filename = String.format("Python/examples/%1$s",
+			 * m.getText()); Script script = new Script(filename,
+			 * FileIO.resourceToString(filename)); addNewEditorPanel(script);
+			 */
 		}
 	}
 
@@ -262,16 +265,16 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		EditorPanel panel = new EditorPanel(script);
 		editorTabs.addTab(panel.getDisplayName(), panel.panel);
 		log.info(panel.getEditor().getFileFullPath());
-		GUIService gui = (GUIService) myService;// FIXME - bad bad bad ...
-		
+		GUIService gui = myService;// FIXME - bad bad bad ...
+
 		// -------- here ----------------
-		
-		//TabControl tc = new TabControl(gui, editorTabs, panel.panel, boundServiceName, panel.getDisplayName(), panel.getFilename());
+
+		// TabControl tc = new TabControl(gui, editorTabs, panel.panel,
+		// boundServiceName, panel.getDisplayName(), panel.getFilename());
 		TabControl2 tc = new TabControl2(self, editorTabs, panel.panel, panel.getFilename());
 		tc.addMouseListener(this);
 		editorTabs.setTabComponentAt(editorTabs.getTabCount() - 1, tc);
-		
-		
+
 		currentScriptName = script.getName();
 		scripts.put(script.getName(), panel);
 		return panel;
@@ -298,86 +301,35 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		// myService.send(boundServiceName, "broadcastState");
 	}
 
-	@Override
-	public void detachGUI() {
-		javaConsole.stopLogging();
-		unsubscribe("publishState", "getState", Python.class);
-		unsubscribe("finishedExecutingScript");
-		/** REMOVE IF FLAKEY BUGS APPEAR !! */
-		unsubscribe("publishStdOut", "getStdOut", String.class);
-		unsubscribe("appendScript", "appendScript", String.class);
-		unsubscribe("startRecording", "startRecording", String.class);
-	}
-
-	public void startRecording(String filename) {
-		addNewEditorPanel(new Script(filename, ""));
-	}
-
-	/**
-	 * 
-	 */
-	public void finishedExecutingScript() {
-		executeButton.deactivate();
-		stopButton.deactivate();
-	}
-
-	/**
-	 * 
-	 * @param j
-	 */
-	public void getState(Python j) {
-		// TODO set GUIService state debug from Service data
-
-	}
-
-	/**
-	 * 
-	 * @param data
-	 */
-	public void getStdOut(final String data) {
-		/** REMOVE IF FLAKEY BUGS APPEAR !! */
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				pythonConsole.append(data);
+	public void closeFile() {
+		if (scripts.containsKey(currentScriptName)) {
+			EditorPanel p = scripts.get(currentScriptName);
+			if (p.editor.isDirty()) {
+				saveAsFile();
 			}
-		});
+
+			p = scripts.get(currentScriptName);
+			scripts.remove(p);
+			editorTabs.remove(p.panel);
+
+		} else {
+			log.error(String.format("can't closeFile %s", currentScriptName));
+		}
 	}
 
 	/**
-	 * 
-	 */
-	public void init() {
-		display.setLayout(new BorderLayout());
-		display.setPreferredSize(new Dimension(800, 600));
-
-		// --------- text menu begin ------------------------
-		JPanel menuPanel = createMenuPanel();
-
-		display.add(menuPanel, BorderLayout.PAGE_START);
-
-		DefaultCaret caret = (DefaultCaret) pythonConsole.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-
-		splitPane = createMainPane();
-
-		display.add(splitPane, BorderLayout.CENTER);
-		display.add(statusInfo, BorderLayout.PAGE_END);
-	}
-
-	/**
-	 * Build the main portion of the view.
 	 * 
 	 * @return
 	 */
-	private JSplitPane createMainPane() {
-		JSplitPane pane = new JSplitPane();
+	private CompletionProvider createCompletionProvider() {
+		// TODO -> LanguageSupportFactory.get().register(editor);
 
-		consoleTabs = createTabsPane();
-
-		pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorTabs, consoleTabs);
-		pane.setDividerLocation(450);
-
-		return pane;
+		// A DefaultCompletionProvider is the simplest concrete implementation
+		// of CompletionProvider. This provider has no understanding of
+		// language semantics. It simply checks the text entered up to the
+		// caret position for a match against known completions. This is all
+		// that is needed in the majority of cases.
+		return new MRLCompletionProvider();
 	}
 
 	/**
@@ -440,18 +392,19 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 	}
 
 	/**
+	 * Build the main portion of the view.
 	 * 
 	 * @return
 	 */
-	private CompletionProvider createCompletionProvider() {
-		// TODO -> LanguageSupportFactory.get().register(editor);
+	private JSplitPane createMainPane() {
+		JSplitPane pane = new JSplitPane();
 
-		// A DefaultCompletionProvider is the simplest concrete implementation
-		// of CompletionProvider. This provider has no understanding of
-		// language semantics. It simply checks the text entered up to the
-		// caret position for a match against known completions. This is all
-		// that is needed in the majority of cases.
-		return new MRLCompletionProvider();
+		consoleTabs = createTabsPane();
+
+		pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorTabs, consoleTabs);
+		pane.setDividerLocation(450);
+
+		return pane;
 	}
 
 	/**
@@ -462,17 +415,6 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 	 */
 	private JMenuItem createMenuItem(String label) {
 		return createMenuItem(label, -1, null, null);
-	}
-
-	/**
-	 * Helper function to create a menu item.
-	 * 
-	 * @param label
-	 * @param actionCommand
-	 * @return
-	 */
-	private JMenuItem createMenuItem(String label, String actionCommand) {
-		return createMenuItem(label, -1, null, actionCommand);
 	}
 
 	/**
@@ -506,6 +448,17 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 	}
 
 	/**
+	 * Helper function to create a menu item.
+	 * 
+	 * @param label
+	 * @param actionCommand
+	 * @return
+	 */
+	private JMenuItem createMenuItem(String label, String actionCommand) {
+		return createMenuItem(label, -1, null, actionCommand);
+	}
+
+	/**
 	 * Build the top menu panel.
 	 * 
 	 * @return
@@ -529,13 +482,17 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 	private JTabbedPane createTabsPane() {
 		JTabbedPane pane = new JTabbedPane();
 		pane.addTab("java", javaConsole.getScrollPane());
-		
-		//pane.setTabComponentAt(pane.getTabCount() - 1, new TabControl(myService, pane, javaConsole.getScrollPane(), boundServiceName, "java"));
-		pane.setTabComponentAt(pane.getTabCount() - 1, new TabControl2(self, pane, javaConsole.getScrollPane(),"java"));
+
+		// pane.setTabComponentAt(pane.getTabCount() - 1, new
+		// TabControl(myService, pane, javaConsole.getScrollPane(),
+		// boundServiceName, "java"));
+		pane.setTabComponentAt(pane.getTabCount() - 1, new TabControl2(self, pane, javaConsole.getScrollPane(), "java"));
 
 		pane.addTab("python", pythonScrollPane);
-		//pane.setTabComponentAt(pane.getTabCount() - 1, new TabControl(myService, pane, pythonScrollPane, boundServiceName, "python"));
-		pane.setTabComponentAt(pane.getTabCount() - 1, new TabControl2(self, pane, pythonScrollPane,  "python"));
+		// pane.setTabComponentAt(pane.getTabCount() - 1, new
+		// TabControl(myService, pane, pythonScrollPane, boundServiceName,
+		// "python"));
+		pane.setTabComponentAt(pane.getTabCount() - 1, new TabControl2(self, pane, pythonScrollPane, "python"));
 
 		return pane;
 	}
@@ -576,12 +533,161 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		examples = new JMenu("examples");
 		menuBar.add(examples);
 		examples.setMnemonic(examplesMenuMnemonic);
-		//createExamplesMenu(examples);
-		//examples.addActionListener(this);
+		// createExamplesMenu(examples);
+		// examples.addActionListener(this);
 
 		examples.addMouseListener(this);
-		
+
 		return menuBar;
+	}
+
+	@Override
+	public void detachGUI() {
+		javaConsole.stopLogging();
+		unsubscribe("publishState", "getState", Python.class);
+		unsubscribe("finishedExecutingScript");
+		/** REMOVE IF FLAKEY BUGS APPEAR !! */
+		unsubscribe("publishStdOut", "getStdOut", String.class);
+		unsubscribe("appendScript", "appendScript", String.class);
+		unsubscribe("startRecording", "startRecording", String.class);
+	}
+
+	/**
+	 * 
+	 */
+	public void finishedExecutingScript() {
+		executeButton.deactivate();
+		stopButton.deactivate();
+	}
+
+	/**
+	 * 
+	 * @param j
+	 */
+	public void getState(final Python python) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				Script script = python.getScript();
+				//if (scripts.containsKey(arg0))
+				
+			}
+			});
+
+		}
+
+	/**
+	 * 
+	 * @param data
+	 */
+	public void getStdOut(final String data) {
+		/** REMOVE IF FLAKEY BUGS APPEAR !! */
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				pythonConsole.append(data);
+			}
+		});
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public void init() {
+		display.setLayout(new BorderLayout());
+		display.setPreferredSize(new Dimension(800, 600));
+
+		// --------- text menu begin ------------------------
+		JPanel menuPanel = createMenuPanel();
+
+		display.add(menuPanel, BorderLayout.PAGE_START);
+
+		DefaultCaret caret = (DefaultCaret) pythonConsole.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
+		splitPane = createMainPane();
+
+		display.add(splitPane, BorderLayout.CENTER);
+		display.add(statusInfo, BorderLayout.PAGE_END);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.myrobotlab.control.ServiceGUI#makeReadyForRelease() Shutting
+	 * down - check for dirty script and offer to save
+	 */
+	@Override
+	public void makeReadyForRelease() {
+
+		log.info("makeReadyForRelease");
+
+		// Iterator<String> it = scripts.keySet().iterator();
+		Iterator<Entry<String, EditorPanel>> it = scripts.entrySet().iterator();
+		while (it.hasNext()) {
+
+			Map.Entry pairs = it.next();
+
+			TextEditorPane e = ((EditorPanel) pairs.getValue()).getEditor();
+			log.info(String.format("checking script %s", e.getFileFullPath()));
+			if (e.isDirty()) {
+				try {
+					log.info(String.format("saving script / file %s", e.getFileFullPath()));
+					e.save();
+				} catch (Exception ex) {
+					Logging.logError(ex);
+				}
+				/*
+				 * FileLocation fl = FileLocation.create(e.getFileFullPath());
+				 * String filename =
+				 * JOptionPane.showInputDialog(myService.getFrame(),
+				 * "Save File?", name); if (filename != null) { fl =
+				 * FileLocation.create(filename); try { e.saveAs(fl); } catch
+				 * (IOException e1) { Logging.logException(e1); // TODO
+				 * Auto-generated catch block } }
+				 */
+			}
+		}
+
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent me) {
+		// TODO Auto-generated method stub
+		Object o = me.getSource();
+		if (o == examples) {
+			BareBonesBrowserLaunch.openURL("https://github.com/MyRobotLab/pyrobotlab");
+		}
+		if (o instanceof TabControl2) {
+			TabControl2 tc = (TabControl2) o;
+			currentScriptName = tc.getText();
+		}
+		// log.info(me);
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
 	}
 
 	/**
@@ -629,29 +735,11 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		myService.send(boundServiceName, "attachPythonConsole");
 	}
 
-	public void closeFile() {
-		if (scripts.containsKey(currentScriptName)) {
-			EditorPanel p = scripts.get(currentScriptName);
-			if (p.editor.isDirty()) {
-				saveAsFile();
-			}
-
-			p = scripts.get(currentScriptName);
-			scripts.remove(p);
-			editorTabs.remove(p.panel);
-
-		} else {
-			log.error(String.format("can't closeFile %s", currentScriptName));
-		}
-	}
-
-	
 	public void saveAsFile() {
 		if (scripts.containsKey(currentScriptName)) {
 			EditorPanel p = scripts.get(currentScriptName);
 			// FIXME - don't create if not necessary
-			if (FileUtil.saveAs(top, p.editor.getText(), currentScriptName)) 
-			{
+			if (FileUtil.saveAs(top, p.editor.getText(), currentScriptName)) {
 				currentScriptName = FileUtil.getLastFileSaved();
 				scripts.remove(p);
 				editorTabs.remove(p.panel);
@@ -670,8 +758,7 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 	public void saveFile() {
 		if (scripts.containsKey(currentScriptName)) {
 			EditorPanel p = scripts.get(currentScriptName);
-			if (FileUtil.save(top, p.editor.getText(), currentScriptName)) 
-			{
+			if (FileUtil.save(top, p.editor.getText(), currentScriptName)) {
 				currentScriptName = FileUtil.getLastFileSaved();
 				scripts.remove(p);
 				editorTabs.remove(p.panel);
@@ -688,81 +775,8 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.myrobotlab.control.ServiceGUI#makeReadyForRelease() Shutting
-	 * down - check for dirty script and offer to save
-	 */
-	public void makeReadyForRelease() {
-
-		log.info("makeReadyForRelease");
-
-		// Iterator<String> it = scripts.keySet().iterator();
-		Iterator<Entry<String, EditorPanel>> it = scripts.entrySet().iterator();
-		while (it.hasNext()) {
-
-			Map.Entry pairs = (Map.Entry) it.next();
-
-			TextEditorPane e = ((EditorPanel) pairs.getValue()).getEditor();
-			log.info(String.format("checking script %s", e.getFileFullPath()));
-			if (e.isDirty()) {
-				try {
-					log.info(String.format("saving script / file %s", e.getFileFullPath()));
-					e.save();
-				} catch (Exception ex) {
-					Logging.logException(ex);
-				}
-				/*
-				 * FileLocation fl = FileLocation.create(e.getFileFullPath());
-				 * String filename =
-				 * JOptionPane.showInputDialog(myService.getFrame(),
-				 * "Save File?", name); if (filename != null) { fl =
-				 * FileLocation.create(filename); try { e.saveAs(fl); } catch
-				 * (IOException e1) { Logging.logException(e1); // TODO
-				 * Auto-generated catch block } }
-				 */
-			}
-		}
-
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent me) {
-		// TODO Auto-generated method stub
-		Object o = me.getSource();
-		if (o == examples){
-			BareBonesBrowserLaunch.openURL("https://github.com/MyRobotLab/pyrobotlab");
-		}
-		if (o instanceof TabControl2) {
-			TabControl2 tc = (TabControl2) o;
-			currentScriptName = tc.getText();
-		}
-		// log.info(me);
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
+	public void startRecording(String filename) {
+		addNewEditorPanel(new Script(filename, ""));
 	}
 
 }

@@ -32,7 +32,13 @@ import javax.vecmath.Color3f;
  */
 public class BlockWorldObject extends StaticObject {
 
+	/** Rotates the object counter clockwise. */
+	public void rotate90(int ntimes) {
+		this.rotateY(ntimes * Math.PI / 2.0);
+	}
+
 	/** Set the object color */
+	@Override
 	public void setColor(Color3f color) {
 		Material mat = appearance.getMaterial();
 		Color3f ambient = new Color3f(color);
@@ -46,11 +52,6 @@ public class BlockWorldObject extends StaticObject {
 
 		mat.setShininess(1f);
 
-	}
-
-	/** Rotates the object counter clockwise. */
-	public void rotate90(int ntimes) {
-		this.rotateY(ntimes * Math.PI / 2.0);
 	}
 
 }

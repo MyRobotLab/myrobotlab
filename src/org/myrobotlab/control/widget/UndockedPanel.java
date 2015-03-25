@@ -16,41 +16,100 @@ import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
 /**
- * class or undocked display
- * handles events of closing, saving position and dimensions of 
+ * class or undocked display handles events of closing, saving position and
+ * dimensions of
  *
  */
 public class UndockedPanel implements Serializable {
-	public final static Logger log = LoggerFactory.getLogger(UndockedPanel.class.getCanonicalName());
-
-	private static final long serialVersionUID = 1L;
-	
-	public int x;
-	
-	public int y;
-	
-	public int width;
-	
-	public int height;
-	
-	private String label;
-	
-	transient private JPanel panel;
-
-	transient private JFrame frame;
-	
-	transient private GUIService gui;
-	
-	TabControlWindowAdapter windowAdapter = new TabControlWindowAdapter();
-
 	public class TabControlWindowAdapter extends WindowAdapter {
+		@Override
 		public void windowClosing(WindowEvent winEvt) {
 			gui.dockPanel(label);
 		}
 	}
-	
-	public UndockedPanel(GUIService gui){
+
+	public final static Logger log = LoggerFactory.getLogger(UndockedPanel.class.getCanonicalName());
+
+	private static final long serialVersionUID = 1L;
+
+	public int x;
+
+	public int y;
+
+	public int width;
+
+	public int height;
+
+	private String label;
+
+	transient private JPanel panel;
+
+	transient private JFrame frame;
+
+	transient private GUIService gui;
+
+	TabControlWindowAdapter windowAdapter = new TabControlWindowAdapter();
+
+	public UndockedPanel(GUIService gui) {
 		this.gui = gui;
+	}
+
+	public void close() {
+		savePosition();
+		if (frame != null) {
+			frame.dispose();
+			frame = null;
+		}
+	}
+
+	public JFrame createFrame(String label, JPanel panel) {
+		if (frame != null) {
+			log.warn("{} frame already created", label);
+			return frame;
+		}
+
+		this.label = label;
+		this.panel = panel;
+
+		frame = new JFrame(label);
+
+		frame.getContentPane().add(panel);
+
+		// icon
+		URL url = getClass().getResource("/resource/mrl_logo_36_36.png");
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		Image img = kit.createImage(url);
+		frame.setIconImage(img);
+
+		if (x != 0 || y != 0) {
+			frame.setLocation(x, y);
+		}
+
+		if (width != 0 || height != 0) {
+			frame.setSize(width, height);
+		}
+
+		frame.addWindowListener(windowAdapter);
+
+		frame.setVisible(true);
+		frame.pack();
+		return frame;
+	}
+
+	public JPanel getDisplay() {
+		return panel;
+	}
+
+	public void hide() {
+		if (frame != null) {
+			frame.setVisible(false);
+		} else {
+			log.error("{} frame is null", label);
+		}
+	}
+
+	public boolean isDocked() {
+		return frame == null;
 	}
 
 	public void savePosition() {
@@ -64,69 +123,9 @@ public class UndockedPanel implements Serializable {
 		width = frame.getWidth();
 		height = frame.getHeight();
 	}
-	
-	public boolean isDocked()
-	{
-		return frame == null;
-	}
-
-	public JFrame createFrame(String label, JPanel panel) {
-		if (frame != null){
-			log.warn("{} frame already created", label);
-			return frame;
-		}
-		
-		this.label = label;
-		this.panel = panel;
-		
-		frame = new JFrame(label);
-		
-		frame.getContentPane().add(panel);
-		
-		// icon
-		URL url = getClass().getResource("/resource/mrl_logo_36_36.png");
-		Toolkit kit = Toolkit.getDefaultToolkit();
-		Image img = kit.createImage(url);
-		frame.setIconImage(img);
-		
-		if (x != 0 || y != 0)
-		{
-			frame.setLocation(x, y);
-		}
-		
-		if(width != 0 || height != 0){
-			frame.setSize(width, height);
-		}
-		
-		frame.addWindowListener(windowAdapter);
-		
-		frame.setVisible(true);
-		frame.pack();
-		return frame;
-	}
-
-	public void close() {
-		savePosition();
-		if (frame != null){
-			frame.dispose();
-			frame = null;
-		}
-	}
-
-	public JPanel getDisplay() {
-		return panel;
-	}
-
-	public void hide() {
-		if (frame != null){
-			frame.setVisible(false);
-		} else {
-			log.error("{} frame is null", label);
-		}
-	}
 
 	public void unhide() {
-		if (frame != null){
+		if (frame != null) {
 			frame.setVisible(true);
 		} else {
 			log.error("{} frame is null", label);

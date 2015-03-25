@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
 /**
  * <p>
@@ -69,13 +70,14 @@ public class Console extends JInternalFrame implements Runnable {
 		jtextArea.setAutoscrolls(true);
 		jtextArea.setFont(new Font("Courier", Font.PLAIN, 10));
 		jscrollPane = new JScrollPane(jtextArea);
-		jscrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		jscrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		setContentPane(jscrollPane);
 		thread = new Thread(this);
 		thread.start();
 		setResizable(true);
 	}
 
+	@Override
 	public void run() {
 		while (true) {
 			try {

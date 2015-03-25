@@ -52,7 +52,8 @@ public class ClockGUI extends ServiceGUI implements ActionListener {
 	JPanel clockControlPanel = new JPanel();
 
 	JLabel clockDisplay = new JLabel("<html><p style=\"font-size:30px;\">00:00:00</p></html>");
-//	String displayFormat = "<html><p style=\"font-size:30px\">%02d:%02d:%02d</p></html>";
+	// String displayFormat =
+	// "<html><p style=\"font-size:30px\">%02d:%02d:%02d</p></html>";
 	String displayFormat = "<html><p style=\"font-size:30px\">%s</p></html>";
 	DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 	JLabel msgDisplay = new JLabel("");
@@ -64,6 +65,90 @@ public class ClockGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+
+		if (o == startClock) {
+			if (startClock.getText().compareTo("start clock") == 0) {
+
+				myService.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
+				// myService.send(boundServiceName, "setData", data.getText());
+				myService.send(boundServiceName, "startClock");
+
+			} else {
+				myService.send(boundServiceName, "stopClock");
+			}
+		}
+		myService.send(boundServiceName, "publishState");
+	}
+
+	public void addClockEvent(Date time, String name, String method, Object... data) {
+		myService.send(boundServiceName, "addClockEvent", time, name, method, data);
+	}
+
+	@Override
+	public void attachGUI() {
+		subscribe("countdown", "countdown", Long.class);
+		subscribe("publishState", "getState", Clock.class);
+		subscribe("pulse", "pulse");
+
+		myService.send(boundServiceName, "publishState");
+	}
+
+	public void countdown(Long amtRemaining, String pulseData) {
+
+		long sec = amtRemaining / 1000 % 60;
+		long min = amtRemaining / (60 * 1000) % 60;
+		long hrs = amtRemaining / (60 * 60 * 1000) % 12;
+
+		// clockControlPanel.setVisible(false);
+		// color:#2BFF00;
+		// msgDisplay.setText("<html><p style=\"font-size:10px;text-align:center;\">until core meltdown<br/>have a nice day !</p></html>");
+		msgDisplay.setText("");
+		clockDisplay.setOpaque(true);
+		msgDisplay.setOpaque(true);
+		clockDisplay.setBackground(new Color(0x2BFF00));
+		msgDisplay.setBackground(new Color(0x2BFF00));
+		msgDisplay.setText(pulseData);
+
+		clockDisplay.setText(String.format(displayFormat, hrs, min, sec));
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("countdown", "countdown", Long.class);
+		unsubscribe("publishState", "getState", Clock.class);
+		unsubscribe("pulse", "pulse");
+	}
+
+	public void getState(final Clock c) {
+		/*
+		 * setText is ThreadSafe - no need to invoke SwingUtilities
+		 * 
+		 * SwingUtilities.invokeLater(new Runnable() { public void run() {
+		 */
+
+		interval.setText((c.interval + ""));
+
+		if (c.isClockRunning) {
+			startClock.setText("stop clock");
+			data.setEnabled(false);
+			interval.setEnabled(false);
+		} else {
+			startClock.setText("start clock");
+			data.setEnabled(true);
+			interval.setEnabled(true);
+		}
+
+		/*
+		 * }
+		 * 
+		 * });
+		 */
+	}
+
+	@Override
 	public void init() {
 		display.setLayout(new BorderLayout());
 
@@ -83,94 +168,9 @@ public class ClockGUI extends ServiceGUI implements ActionListener {
 
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-
-		if (o == startClock) {
-			if (startClock.getText().compareTo("start clock") == 0) {
-				
-				myService.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
-				//myService.send(boundServiceName, "setData", data.getText());
-				myService.send(boundServiceName, "startClock");
-
-			} else {
-				myService.send(boundServiceName, "stopClock");
-			}
-		}
-		myService.send(boundServiceName, "publishState"); 
-	}
-
-	public void getState(final Clock c) {
-		/* setText is ThreadSafe - no need to invoke SwingUtilities
-		 * 
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-			*/
-
-			interval.setText((c.interval + ""));
-		
-			if (c.isClockRunning) {
-				startClock.setText("stop clock");
-				data.setEnabled(false);
-				interval.setEnabled(false);
-			} else {
-				startClock.setText("start clock");
-				data.setEnabled(true);
-				interval.setEnabled(true);
-			}
-			
-		/*
-		}
-			
-		});
-		*/
-	}
-
-
-	public void countdown(Long amtRemaining, String pulseData) {
-
-		long sec = amtRemaining / 1000 % 60;
-		long min = amtRemaining / (60 * 1000) % 60;
-		long hrs = amtRemaining / (60 * 60 * 1000) % 12;
-
-		//clockControlPanel.setVisible(false);
-		// color:#2BFF00;
-		//msgDisplay.setText("<html><p style=\"font-size:10px;text-align:center;\">until core meltdown<br/>have a nice day !</p></html>");
-		msgDisplay.setText("");
-		clockDisplay.setOpaque(true);
-		msgDisplay.setOpaque(true);
-		clockDisplay.setBackground(new Color(0x2BFF00));
-		msgDisplay.setBackground(new Color(0x2BFF00));
-		msgDisplay.setText(pulseData);
-
-		clockDisplay.setText(String.format(displayFormat, hrs, min, sec));
-	}
-
-	public void addClockEvent(Date time, String name, String method, Object... data) {
-		myService.send(boundServiceName, "addClockEvent", time, name, method, data);
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("countdown", "countdown", Long.class);
-		subscribe("publishState", "getState", Clock.class);
-		subscribe("pulse", "pulse");
-		
-		myService.send(boundServiceName, "publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("countdown", "countdown", Long.class);
-		unsubscribe("publishState", "getState", Clock.class);
-		unsubscribe("pulse", "pulse");
-	}
-	
-	public void pulse(Date date)
-	{
+	public void pulse(Date date) {
 		clockDisplay.setText(String.format(displayFormat, dateFormat.format(date)));
-		//countdown(System.currentTimeMillis(), date.);
+		// countdown(System.currentTimeMillis(), date.);
 	}
 
 }

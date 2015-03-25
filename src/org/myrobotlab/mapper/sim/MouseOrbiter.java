@@ -109,6 +109,71 @@ public class MouseOrbiter implements MouseInputListener {
 		integrateTransforms();
 	}
 
+	protected synchronized void integrateTransforms() {
+		// Check if the transform has been changed by another
+		// behavior
+		targetTG.getTransform(currentXfm);
+		if (!targetTransform.equals(currentXfm))
+			resetView();
+		longditudeTransform.rotY(longditude);
+		latitudeTransform.rotX(latitude);
+		rotateTransform.mul(rotateTransform, latitudeTransform);
+		rotateTransform.mul(rotateTransform, longditudeTransform);
+		distanceVector.z = distanceFromCenter - startDistanceFromCenter;
+		temp1.set(distanceVector);
+		temp1.mul(rotateTransform, temp1);
+		// want to look at rotationCenter
+		transVector.x = rotationCenter.x + xtrans;
+		transVector.y = rotationCenter.y + ytrans;
+		transVector.z = rotationCenter.z + ztrans;
+		translation.set(transVector);
+		targetTransform.mul(temp1, translation);
+		// handle rotationCenter
+		temp1.set(centerVector);
+		temp1.mul(targetTransform);
+		invertCenterVector.x = -centerVector.x;
+		invertCenterVector.y = -centerVector.y;
+		invertCenterVector.z = -centerVector.z;
+		temp2.set(invertCenterVector);
+		targetTransform.mul(temp1, temp2);
+		targetTG.setTransform(targetTransform);
+		// reset yaw and pitch angles
+		longditude = 0.0;
+		latitude = 0.0;
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent event) {
+		processMouseEvent(event);
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent event) {
+		processMouseEvent(event);
+	}
+
+	@Override
+	public void mousePressed(MouseEvent event) {
+		processMouseEvent(event);
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent event) {
+		processMouseEvent(event);
+	}
+
 	protected void processMouseEvent(final MouseEvent evt) {
 		if (evt.getID() == MouseEvent.MOUSE_PRESSED) {
 			mouseX = evt.getX();
@@ -181,39 +246,6 @@ public class MouseOrbiter implements MouseInputListener {
 		rotateTransform.set(rotMatrix);
 	}
 
-	protected synchronized void integrateTransforms() {
-		// Check if the transform has been changed by another
-		// behavior
-		targetTG.getTransform(currentXfm);
-		if (!targetTransform.equals(currentXfm))
-			resetView();
-		longditudeTransform.rotY(longditude);
-		latitudeTransform.rotX(latitude);
-		rotateTransform.mul(rotateTransform, latitudeTransform);
-		rotateTransform.mul(rotateTransform, longditudeTransform);
-		distanceVector.z = distanceFromCenter - startDistanceFromCenter;
-		temp1.set(distanceVector);
-		temp1.mul(rotateTransform, temp1);
-		// want to look at rotationCenter
-		transVector.x = rotationCenter.x + xtrans;
-		transVector.y = rotationCenter.y + ytrans;
-		transVector.z = rotationCenter.z + ztrans;
-		translation.set(transVector);
-		targetTransform.mul(temp1, translation);
-		// handle rotationCenter
-		temp1.set(centerVector);
-		temp1.mul(targetTransform);
-		invertCenterVector.x = -centerVector.x;
-		invertCenterVector.y = -centerVector.y;
-		invertCenterVector.z = -centerVector.z;
-		temp2.set(invertCenterVector);
-		targetTransform.mul(temp1, temp2);
-		targetTG.setTransform(targetTransform);
-		// reset yaw and pitch angles
-		longditude = 0.0;
-		latitude = 0.0;
-	}
-
 	/**
 	 * Sets the center around which the View rotates. The default is (0,0,0).
 	 * 
@@ -225,30 +257,5 @@ public class MouseOrbiter implements MouseInputListener {
 		rotationCenter.y = center.y;
 		rotationCenter.z = center.z;
 		centerVector.set(rotationCenter);
-	}
-
-	public void mouseClicked(MouseEvent arg0) {
-	}
-
-	public void mousePressed(MouseEvent event) {
-		processMouseEvent(event);
-	}
-
-	public void mouseReleased(MouseEvent event) {
-		processMouseEvent(event);
-	}
-
-	public void mouseEntered(MouseEvent arg0) {
-	}
-
-	public void mouseExited(MouseEvent arg0) {
-	}
-
-	public void mouseDragged(MouseEvent event) {
-		processMouseEvent(event);
-	}
-
-	public void mouseMoved(MouseEvent event) {
-		processMouseEvent(event);
 	}
 }

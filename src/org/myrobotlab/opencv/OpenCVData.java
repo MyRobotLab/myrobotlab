@@ -54,17 +54,17 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
  * 
  * internal keys - there are several expected keys - they are
  * 
- * input    IplImage image = [[servicename].input]
- * input    IplImage image = [[servicename].input].display
+ * input IplImage image = [[servicename].input] input IplImage image =
+ * [[servicename].input].display
  * 
- * filter   IplImage image = [[servicename].[filtername]]
- * display  IplImage image = [[servicename].[filtername]].display
+ * filter IplImage image = [[servicename].[filtername]] display IplImage image =
+ * [[servicename].[filtername]].display
  *
- * optional type keys
- * filter   IplImage image = [[servicename].[filtername]].bufferedImage
- * display  IplImage image = [[servicename].[filtername]].display.bufferedImage
- * filter   IplImage image = [[servicename].[filtername]].jpg.bytes
- * display  IplImage image = [[servicename].[filtername]].display.jpg.bytes
+ * optional type keys filter IplImage image =
+ * [[servicename].[filtername]].bufferedImage display IplImage image =
+ * [[servicename].[filtername]].display.bufferedImage filter IplImage image =
+ * [[servicename].[filtername]].jpg.bytes display IplImage image =
+ * [[servicename].[filtername]].display.jpg.bytes
  * 
  * @author GroG
  * 
@@ -72,11 +72,14 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 public class OpenCVData implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(OpenCVData.class);
 
-	//@ElementMap(entry = "data", key = "key", value = "data", attribute = true, inline = true, required = false)
-	
-	// THIS IS A COPY OF SOURCES !!! - which means this is a copy of the references of
+	// @ElementMap(entry = "data", key = "key", value = "data", attribute =
+	// true, inline = true, required = false)
+
+	// THIS IS A COPY OF SOURCES !!! - which means this is a copy of the
+	// references of
 	// SOURCES !!!
 	private HashMap<String, Object> data = new HashMap<String, Object>();
 
@@ -87,20 +90,20 @@ public class OpenCVData implements Serializable {
 	public static final String KEY_WIDTH = "width";
 	public static final String KEY_HEIGHT = "height";
 	public static final String KEY_BUFFERED_IMAGE = "bufferedImage";
-	
+
 	/**
 	 * return type - an ArrayList<Rectangles>
 	 */
 	public static final String KEY_BOUNDING_BOXES = "boundingBoxes";
 
 	/**
-	 * return type - IplImage - either references original filtername IplImage or a 
-	 * filter.display() processes IplImage
+	 * return type - IplImage - either references original filtername IplImage
+	 * or a filter.display() processes IplImage
 	 */
-	public static final String KEY_DISPLAY = "display"; 
+	public static final String KEY_DISPLAY = "display";
 	// public final static String DEPTH_KEY = "depth";
 	// Bytes
-	
+
 	private String serviceName;
 
 	/**
@@ -110,8 +113,15 @@ public class OpenCVData implements Serializable {
 	private String inputFilterName = INPUT_KEY;
 	private String selectedFilter = INPUT_KEY;
 	private String displayFilterName = INPUT_KEY;
- 	private long timestamp;
+	private long timestamp;
 	private int frameIndex;
+
+	static BufferedImage deepCopy(BufferedImage bi) {
+		ColorModel cm = bi.getColorModel();
+		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+		WritableRaster raster = bi.copyData(null);
+		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+	}
 
 	/**
 	 * constructed by the 'name'd service
@@ -128,127 +138,64 @@ public class OpenCVData implements Serializable {
 		this.frameIndex = frameIndex;
 	}
 
-	/**
-	 * sets the key - used to access the various data of a particular filter -
-	 * first set the filter name the access images, points, etc
-	 * 
-	 * @param name
-	 */
-	public void setSelectedFilterName(String name) {
-		this.selectedFilter = name;
+	public boolean containsAttribute(String name) {
+		return data.containsKey(String.format("%s.attribute.%s", selectedFilter, name));
 	}
 
-	/**
-	 * sets the selected filter name in the OpenCVData structure provisioned
-	 * later to save entire filter? or parts ?
-	 * 
-	 * @param inFilter
-	 */
-	public void setFilter(OpenCVFilter inFilter) {
-		this.selectedFilter = inFilter.name;
+	public boolean containsKey(String key) {
+		return data.containsKey(key);
 	}
 
-	public String getSelectedFilterName() {
-		return selectedFilter;
+	public Object getAttribute(String name) {
+		String key = makeKey(name);
+		if (data.containsKey(key)) {
+			return data.get(key);
+		}
+		return null;
 	}
 
-	public int getWidth() {
-		return getImage().width();
-	}
-
-	public int getHeight() {
-		return getImage().height();
+	public ArrayList<Rectangle> getBoundingBoxArray() {
+		String key = String.format("%s.%s.boundingboxes", serviceName, selectedFilter);
+		if (data.containsKey(key)) {
+			return (ArrayList<Rectangle>) data.get(key);
+		} else {
+			return null;
+		}
 	}
 
 	// -------- IplImage begin ----------------
 
-	/**
-	 * OpenCV VideoProcessor will set this data collection to the last
-	 * filtername - when asked for an "image" it will give the last filter's
-	 * 
-	 * @return the filter's IplImage
-	 */
-
-	public IplImage getImage(String filtername) {
-		String key = String.format("%s.%s", serviceName, filtername);
-		return ((IplImage) data.get(key));
-	}
-
-	/**
-	 * parameterless tries to retrieve image based on current filtername
-	 * 
-	 * @return
-	 */
-	public IplImage getImage() {
-		return getImage(selectedFilter);
-	}
-
-	/**
-	 * get the original "camera" image - or the image which started the pipeline
-	 * 
-	 * @return
-	 */
-	public IplImage getInputImage() {
-		return getImage(inputFilterName);
-	}
-
-	public IplImage getDepthImage() {
-		return getImage(String.format("%s.%s.%s", serviceName, selectedFilter, KEY_DEPTH));
-	}
-
-	/**
-	 * the main and typically first image data put into the OpenCVData object
-	 * 
-	 * @param key
-	 * @param image
-	 */
-	public void put(String fullkey, IplImage image) {
-		data.put(fullkey, image);
-	}
-
-	// -------- IplImage end ----------------
-
-	// -------- BufferedImage begin ----------------
-	
-	// ---------- BufferedImage begin ------------
-	public BufferedImage getDisplayBufferedImage() {
-		return getBufferedImage(displayFilterName, KEY_DISPLAY);
-	}
-	
-	public BufferedImage getInputBufferedImage() {
-		return getBufferedImage(inputFilterName, null);
-	}
-	
 	public BufferedImage getBufferedImage() {
 		return getBufferedImage(selectedFilter, null);
 	}
 
 	/**
-	 * FIXME (FIX OTHERS) NEEDS TO BE ONE AND ONLY ONE TYPE PROCESSOR LIKE THIS ONE !!!! 
-	 * WITH SAME SUBKEY SIGNATURE
-	 * lowest level - full key path always required 
+	 * FIXME (FIX OTHERS) NEEDS TO BE ONE AND ONLY ONE TYPE PROCESSOR LIKE THIS
+	 * ONE !!!! WITH SAME SUBKEY SIGNATURE lowest level - full key path always
+	 * required
+	 * 
 	 * @param filterName
 	 * @return
 	 */
 	public BufferedImage getBufferedImage(String filterName, String subkey) {
 		String bufferedImageKey;
-		if (subkey != null){
+		if (subkey != null) {
 			bufferedImageKey = String.format("%s.%s.%s.%s", serviceName, filterName, subkey, KEY_BUFFERED_IMAGE);
 		} else {
 			bufferedImageKey = String.format("%s.%s.%s", serviceName, filterName, KEY_BUFFERED_IMAGE);
 		}
-		
+
 		if (data.containsKey(bufferedImageKey)) {
 			return (BufferedImage) data.get(bufferedImageKey);
 		} else {
 			String imgKey;
-			
-			if (subkey != null){
+
+			if (subkey != null) {
 				imgKey = String.format("%s.%s.%s", serviceName, filterName, subkey);
 			} else {
 				imgKey = String.format("%s.%s", serviceName, filterName);
 			}
-			
+
 			IplImage img = (IplImage) data.get(imgKey);
 
 			BufferedImage image = img.getBufferedImage();
@@ -256,8 +203,6 @@ public class OpenCVData implements Serializable {
 			return image;
 		}
 	}
-	
-	// ---------- BufferedImage end ------------
 
 	// -------- ByteBuffer begin ----------------
 	public ByteBuffer getByteBufferImage(String filtername) {
@@ -265,73 +210,29 @@ public class OpenCVData implements Serializable {
 		return img.getByteBuffer();
 	}
 
-	// -------- ByteBuffer end ----------------
-
-	// -------- JPG to file begin ----------------
-	public String writeDisplay() {
-		return writeImage(selectedFilter, KEY_DISPLAY, null);
+	public IplImage getDepthImage() {
+		return getImage(String.format("%s.%s.%s", serviceName, selectedFilter, KEY_DEPTH));
 	}
 
-	public String writeInput() {
-		return writeImage(INPUT_KEY, null, null);
-	}
-
-	public String writeImage() {
-		return writeImage(selectedFilter, null, null);
-	}
-
-	public String writeImage(String filter, String subkey, String format) {
-		String filename = null;
-		if (format == null) {
-			format = "jpg";
-		}
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			BufferedImage bi = getBufferedImage(filter, subkey);
-			if (bi == null)
-				return null;
-			// FIXME OPTIMIZE - USE CONVERT & OPENCV !!!
-			ImageIO.write(bi, format, baos);
-			filename = String.format("%s.%s.%d.%s", serviceName, filter, frameIndex, format);
-			FileOutputStream fos = new FileOutputStream(filename);
-			fos.write(baos.toByteArray());
-			fos.close();
-
-		} catch (IOException e) {
-			Logging.logException(e);
-		}
-
-		return filename;
-	}
-
-	// FIXME FIXME FIXME - always push result back into data structure
-	public byte[] getJPGBytes(String filterName) {
-		String key = String.format("%s.%s.jpg.Bytes", serviceName, filterName);
+	public IplImage getDisplay() {
+		String key = String.format("%s.%s", serviceName, displayFilterName);
 		if (data.containsKey(key)) {
-			return (byte[]) data.get(key);
+			return (IplImage) data.get(key);
 		}
-
-		CvMat mat = getJPG(filterName);
-
-		ByteBuffer byteBuffer = mat.getByteBuffer();
-		byte[] barray = new byte[byteBuffer.remaining()];
-		byteBuffer.get(barray);
-		data.put(key, barray);
-		return barray;
+		return null;
 	}
 
-	public ByteBuffer getJPGByteBuffer(String filterName) {
-		CvMat mat = getJPG(filterName);
-		ByteBuffer byteBuffer = mat.getByteBuffer();
-		return byteBuffer;
+	// -------- IplImage end ----------------
+
+	// -------- BufferedImage begin ----------------
+
+	// ---------- BufferedImage begin ------------
+	public BufferedImage getDisplayBufferedImage() {
+		return getBufferedImage(displayFilterName, KEY_DISPLAY);
 	}
 
-	// WTF ??
-	public CvMat getJPG(String filterName) {
-		// FIXME FIXME FIXME - before doing ANY CONVERSION EVER - ALWAYS CHECK
-		// CACHE !!
-		CvMat mat = getEncoded(filterName, ".jpg");
-		return mat;
+	public String getDisplayFilterName() {
+		return displayFilterName;
 	}
 
 	public CvMat getEncoded(String filterName, String encoding) {
@@ -366,7 +267,7 @@ public class OpenCVData implements Serializable {
 				 */
 
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 			}
 
 			/*
@@ -385,18 +286,141 @@ public class OpenCVData implements Serializable {
 
 	}
 
+	/**
+	 * FIXME implement
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public OpenCVFilter getFilter(String name) {
+		return null;
+	}
+
+	// ---------- BufferedImage end ------------
+
+	public Point2Df getFirstPoint() {
+		ArrayList<Point2Df> points = (ArrayList<Point2Df>) data.get(String.format("%s.points", selectedFilter));
+		if (points != null && points.size() > 0)
+			return points.get(0);
+		return null;
+	}
+
+	// -------- ByteBuffer end ----------------
+
+	public int getHeight() {
+		return getImage().height();
+	}
+
+	/**
+	 * parameterless tries to retrieve image based on current filtername
+	 * 
+	 * @return
+	 */
+	public IplImage getImage() {
+		return getImage(selectedFilter);
+	}
+
+	/**
+	 * OpenCV VideoProcessor will set this data collection to the last
+	 * filtername - when asked for an "image" it will give the last filter's
+	 * 
+	 * @return the filter's IplImage
+	 */
+
+	public IplImage getImage(String filtername) {
+		String key = String.format("%s.%s", serviceName, filtername);
+		return ((IplImage) data.get(key));
+	}
+
+	public BufferedImage getInputBufferedImage() {
+		return getBufferedImage(inputFilterName, null);
+	}
+
+	/**
+	 * get the original "camera" image - or the image which started the pipeline
+	 * 
+	 * @return
+	 */
+	public IplImage getInputImage() {
+		return getImage(inputFilterName);
+	}
+
+	// WTF ??
+	public CvMat getJPG(String filterName) {
+		// FIXME FIXME FIXME - before doing ANY CONVERSION EVER - ALWAYS CHECK
+		// CACHE !!
+		CvMat mat = getEncoded(filterName, ".jpg");
+		return mat;
+	}
+
+	public ByteBuffer getJPGByteBuffer(String filterName) {
+		CvMat mat = getJPG(filterName);
+		ByteBuffer byteBuffer = mat.getByteBuffer();
+		return byteBuffer;
+	}
+
+	// FIXME FIXME FIXME - always push result back into data structure
+	public byte[] getJPGBytes(String filterName) {
+		String key = String.format("%s.%s.jpg.Bytes", serviceName, filterName);
+		if (data.containsKey(key)) {
+			return (byte[]) data.get(key);
+		}
+
+		CvMat mat = getJPG(filterName);
+
+		ByteBuffer byteBuffer = mat.getByteBuffer();
+		byte[] barray = new byte[byteBuffer.remaining()];
+		byteBuffer.get(barray);
+		data.put(key, barray);
+		return barray;
+	}
+
 	// -------- JPG to file end ----------------
 	// -------- HashMap begin ----------------
 
-	public boolean containsKey(String key) {
-		return data.containsKey(key);
+	public ArrayList<Point2Df> getPoints() {
+		return (ArrayList<Point2Df>) data.get(String.format("%s.points", selectedFilter));
+	}
+
+	public String getSelectedFilterName() {
+		return selectedFilter;
+	}
+
+	// -------- HashMap end ----------------
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public int getWidth() {
+		return getImage().width();
+	}
+
+	public Integer getX() {
+		return (Integer) data.get(String.format("%s.x", selectedFilter));
+	}
+
+	public Integer getY() {
+		return (Integer) data.get(String.format("%s.y", selectedFilter));
 	}
 
 	public Set<String> keySet() {
 		return data.keySet();
 	}
 
-	// -------- HashMap end ----------------
+	public void logKeySet() {
+		for (Map.Entry<String, Object> o : data.entrySet()) {
+			log.info(o.getKey());
+		}
+	}
+
+	public String makeKey(String attributeName) {
+		return String.format("%s.%s", selectedFilter, attributeName);
+	}
+
+	public void put(ArrayList<Rectangle> bb) {
+		data.put(String.format("%s.%s.boundingboxes", serviceName, selectedFilter), bb);
+	}
 
 	// // -----------continue------------------
 	@SuppressWarnings("unchecked")
@@ -416,60 +440,26 @@ public class OpenCVData implements Serializable {
 		list.add(boundingBox);
 	}
 
-	public ArrayList<Rectangle> getBoundingBoxArray() {
-		String key = String.format("%s.%s.boundingboxes", serviceName, selectedFilter);
-		if (data.containsKey(key)) {
-			return (ArrayList<Rectangle>) data.get(key);
-		} else {
-			return null;
-		}
+	/**
+	 * the main and typically first image data put into the OpenCVData object
+	 * 
+	 * @param key
+	 * @param image
+	 */
+	public void put(String fullkey, IplImage image) {
+		data.put(fullkey, image);
+	}
+
+	public void putAll(HashMap<String, Object> sources) {
+		data.putAll(sources);
 	}
 
 	public void set(ArrayList<Point2Df> pointsToPublish) {
 		data.put(String.format("%s.points", selectedFilter), pointsToPublish);
 	}
 
-	public ArrayList<Point2Df> getPoints() {
-		return (ArrayList<Point2Df>) data.get(String.format("%s.points", selectedFilter));
-	}
-
-	public Point2Df getFirstPoint() {
-		ArrayList<Point2Df> points = (ArrayList<Point2Df>) data.get(String.format("%s.points", selectedFilter));
-		if (points != null && points.size() > 0)
-			return points.get(0);
-		return null;
-	}
-
-	public boolean containsAttribute(String name) {
-		return data.containsKey(String.format("%s.attribute.%s", selectedFilter, name));
-	}
-
-	public void put(ArrayList<Rectangle> bb) {
-		data.put(String.format("%s.%s.boundingboxes", serviceName, selectedFilter), bb);
-	}
-
-	public Integer getX() {
-		return (Integer) data.get(String.format("%s.x", selectedFilter));
-	}
-
-	public void setX(int x) {
-		data.put(String.format("%s.x", selectedFilter), x);
-	}
-
-	public Integer getY() {
-		return (Integer) data.get(String.format("%s.y", selectedFilter));
-	}
-
-	public void setY(int y) {
-		data.put(String.format("%s.y", selectedFilter), y);
-	}
-
-	public long getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
+	public void setAttribute(String key, Object value) {
+		data.put(makeKey(key), value);
 	}
 
 	/*
@@ -497,11 +487,8 @@ public class OpenCVData implements Serializable {
 	 * sheight), filtername)); } } return ret; }
 	 */
 
-	static BufferedImage deepCopy(BufferedImage bi) {
-		ColorModel cm = bi.getColorModel();
-		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
-		WritableRaster raster = bi.copyData(null);
-		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+	public void setDisplayFilterName(String displayFilterName) {
+		this.displayFilterName = displayFilterName;
 	}
 
 	/*
@@ -541,58 +528,76 @@ public class OpenCVData implements Serializable {
 	 * }
 	 */
 
-	public String makeKey(String attributeName) {
-		return String.format("%s.%s", selectedFilter, attributeName);
-	}
-
-	public void setAttribute(String key, Object value) {
-		data.put(makeKey(key), value);
-	}
-
-	public Object getAttribute(String name) {
-		String key = makeKey(name);
-		if (data.containsKey(key)) {
-			return data.get(key);
-		}
-		return null;
-	}
-
-	public void setDisplayFilterName(String displayFilterName) {
-		this.displayFilterName = displayFilterName;
-	}
-
-	public IplImage getDisplay() {
-		String key = String.format("%s.%s", serviceName, displayFilterName);
-		if (data.containsKey(key)) {
-			return (IplImage) data.get(key);
-		}
-		return null;
-	}
-
-	public String getDisplayFilterName() {
-		return displayFilterName;
-	}
-
-	public void putAll(HashMap<String,Object> sources){
-		data.putAll(sources);
+	/**
+	 * sets the selected filter name in the OpenCVData structure provisioned
+	 * later to save entire filter? or parts ?
+	 * 
+	 * @param inFilter
+	 */
+	public void setFilter(OpenCVFilter inFilter) {
+		this.selectedFilter = inFilter.name;
 	}
 
 	public void setInputFilterName(String inputFilterName) {
 		this.inputFilterName = inputFilterName;
 	}
-	
+
 	/**
-	 * FIXME implement
+	 * sets the key - used to access the various data of a particular filter -
+	 * first set the filter name the access images, points, etc
+	 * 
 	 * @param name
-	 * @return
 	 */
-	public OpenCVFilter getFilter(String name){
-		return null;
+	public void setSelectedFilterName(String name) {
+		this.selectedFilter = name;
 	}
-	
-	public void logKeySet(){
-		for (Map.Entry<String, Object> o : data.entrySet()) {
-			log.info(o.getKey());
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public void setX(int x) {
+		data.put(String.format("%s.x", selectedFilter), x);
+	}
+
+	public void setY(int y) {
+		data.put(String.format("%s.y", selectedFilter), y);
+	}
+
+	// -------- JPG to file begin ----------------
+	public String writeDisplay() {
+		return writeImage(selectedFilter, KEY_DISPLAY, null);
+	}
+
+	public String writeImage() {
+		return writeImage(selectedFilter, null, null);
+	}
+
+	public String writeImage(String filter, String subkey, String format) {
+		String filename = null;
+		if (format == null) {
+			format = "jpg";
 		}
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			BufferedImage bi = getBufferedImage(filter, subkey);
+			if (bi == null)
+				return null;
+			// FIXME OPTIMIZE - USE CONVERT & OPENCV !!!
+			ImageIO.write(bi, format, baos);
+			filename = String.format("%s.%s.%d.%s", serviceName, filter, frameIndex, format);
+			FileOutputStream fos = new FileOutputStream(filename);
+			fos.write(baos.toByteArray());
+			fos.close();
+
+		} catch (IOException e) {
+			Logging.logError(e);
+		}
+
+		return filename;
+	}
+
+	public String writeInput() {
+		return writeImage(INPUT_KEY, null, null);
 	}
 }

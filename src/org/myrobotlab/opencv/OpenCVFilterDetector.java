@@ -36,37 +36,27 @@ import com.googlecode.javacv.cpp.opencv_video.BackgroundSubtractorMOG2;
 public class OpenCVFilterDetector extends OpenCVFilter {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	public double learningRate = -1; // 0 trigger || -1 learn and fade
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDetector.class.getCanonicalName());
- 
+
 	transient BackgroundSubtractorMOG2 mog;
 	IplImage foreground;
-		
+
 	public int history = 10;
 	public float threshold = 128f;
 	public boolean shadowDetection = false;
 
-	public void learn()
-	{
-		learningRate = -1;
-	}
-	
-	public void search()
-	{
-		learningRate = 0;
-	}
-
-	public OpenCVFilterDetector()  {
+	public OpenCVFilterDetector() {
 		super();
 	}
-	
-	public OpenCVFilterDetector(String name)  {
+
+	public OpenCVFilterDetector(String name) {
 		super(name);
 	}
-	
-	public OpenCVFilterDetector(String name, int history, float threshold, boolean shadowDetection)  {
+
+	public OpenCVFilterDetector(String name, int history, float threshold, boolean shadowDetection) {
 		super(name);
 		this.history = history;
 		this.threshold = threshold;
@@ -74,17 +64,25 @@ public class OpenCVFilterDetector extends OpenCVFilter {
 	}
 
 	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
-		mog.apply(image, foreground, learningRate); // 0 trigger || -1 learn and fade
-		return foreground;
+	public void imageChanged(IplImage image) {
+		foreground = IplImage.create(image.width(), image.height(), IPL_DEPTH_8U, 1);
+
+		mog = new BackgroundSubtractorMOG2(history, threshold, shadowDetection);
 	}
-	
+
+	public void learn() {
+		learningRate = -1;
+	}
 
 	@Override
-	public void imageChanged(IplImage image) {
-		foreground =  IplImage.create(image.width(), image.height(),IPL_DEPTH_8U, 1);
-		
-		mog = new BackgroundSubtractorMOG2(history, threshold, shadowDetection);
+	public IplImage process(IplImage image, OpenCVData data) {
+		mog.apply(image, foreground, learningRate); // 0 trigger || -1 learn and
+													// fade
+		return foreground;
+	}
+
+	public void search() {
+		learningRate = 0;
 	}
 
 }

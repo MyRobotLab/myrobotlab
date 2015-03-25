@@ -23,6 +23,29 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 	}
 
 	@Override
+	public IplImage grab() {
+
+		if (cache == null) {
+			cache = cvLoadImage(filename);
+		}
+
+		image = cache.clone();
+
+		++frameCounter;
+
+		if (frameCounter > 1) {
+			lastImage.release();
+		}
+
+		lastImage = image;
+		return image;
+	}
+
+	@Override
+	public void release() throws Exception {
+	}
+
+	@Override
 	public void start() {
 	}
 
@@ -32,29 +55,6 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 
 	@Override
 	public void trigger() throws Exception {
-	}
-
-	@Override
-	public IplImage grab() {
-		
-		if (cache == null) {
-			cache = cvLoadImage(filename);
-		} 
-		
-		image = cache.clone();
-		
-		++frameCounter;
-		
-		if (frameCounter > 1){
-			lastImage.release();
-		}
-		
-		lastImage = image;
-		return image;
-	}
-
-	@Override
-	public void release() throws Exception {
 	}
 
 }

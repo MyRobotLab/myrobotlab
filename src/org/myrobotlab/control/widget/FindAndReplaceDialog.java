@@ -42,6 +42,7 @@ public class FindAndReplaceDialog extends JDialog implements ActionListener {
 		nextButton.addActionListener(this);
 		toolBar.add(nextButton);
 		searchField.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				nextButton.doClick(0);
 			}
@@ -64,6 +65,7 @@ public class FindAndReplaceDialog extends JDialog implements ActionListener {
 		setVisible(true);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		// "FindNext" => search forward, "FindPrev" => search backward

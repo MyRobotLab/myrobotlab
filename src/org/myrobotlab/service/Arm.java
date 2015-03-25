@@ -25,9 +25,9 @@
 
 package org.myrobotlab.service;
 
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 public class Arm extends Service {
@@ -45,20 +45,26 @@ public class Arm extends Service {
 	int armLength = 0;
 	int formArmLength = 0;
 
+	// TODO - do in Service
+	public static void main(String[] args) {
+
+		try {
+			Arm arm = new Arm("arm");
+			arm.startService();
+			arm.startRobot();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 	public Arm(String n) {
 		super(n);
 	}
 
-	public void startRobot() {
-	}
-
-	// TODO - do in Service
-	public static void main(String[] args) {
-
-		Arm arm = new Arm("arm");
-		arm.startService();
-		arm.startRobot();
-
+	@Override
+	public String[] getCategories() {
+		return new String[] { "robot" };
 	}
 
 	@Override
@@ -67,8 +73,6 @@ public class Arm extends Service {
 		return null;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] {"robot"};
+	public void startRobot() {
 	}
 }

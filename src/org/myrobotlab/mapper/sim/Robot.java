@@ -44,10 +44,12 @@ public class Robot extends Agent {
 
 	}
 
+	@Override
 	public void initBehavior() {
 		// plan.reset();
 	}
 
+	@Override
 	public void performBehavior() {
 		if (collisionDetected()) {
 			// Change plan

@@ -45,15 +45,10 @@ public class InverseKinematicsGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-	}
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
 
-	public void getState(final InverseKinematics ik) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
 	}
 
 	@Override
@@ -67,11 +62,17 @@ public class InverseKinematicsGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("publishState", "getState", InverseKinematics.class);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+	public void getState(final InverseKinematics ik) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
+			}
+		});
 	}
-	
+
+	@Override
+	public void init() {
+	}
 
 }

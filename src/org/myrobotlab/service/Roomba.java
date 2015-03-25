@@ -23,16 +23,17 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.roomba.RoombaComm;
-import org.myrobotlab.roomba.RoombaCommSerialDevice;
-import org.myrobotlab.serial.SerialDeviceFactory;
+import org.myrobotlab.roomba.RoombaCommPort;
 import org.slf4j.Logger;
 
 public class Roomba extends Service {
@@ -41,402 +42,102 @@ public class Roomba extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Roomba.class.getCanonicalName());
 
-	transient RoombaCommSerialDevice roombacomm = null;
-	
-	private boolean isConnected = false;
+	transient RoombaCommPort roombacomm = null;
 
-	
 	String portName = "";
-	
+
 	int baudRate = 57600;
-	
+
 	int dataBits = 8;
-	
+
 	int parity = 0;
-	
+
 	int stopBits = 1;
+
+	transient Serial serial;
+
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+
+		peers.put("serial", "Serial", "serial");
+		return peers;
+	}
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		try {
+			Roomba roomba = new Roomba("roomba");
+			roomba.startService();
+			roomba.test();
+
+			/*
+			 * roomba.connect("COM6");
+			 * 
+			 * roomba.startup(); roomba.control();
+			 */
+			// roomba.pause(30);
+			/*
+			 * System.out.println("Checking for Roomba... "); if(
+			 * roomba.updateSensors() ) System.out.println("Roomba found!");
+			 * else System.out.println("No Roomba. :(  Is it turned on?");
+			 * 
+			 * //roomba.updateSensors();
+			 * 
+			 * System.out.println("Playing some notes"); roomba.playNote( 72, 10
+			 * ); // C roomba.pause( 200 ); roomba.playNote( 79, 10 ); // G
+			 * roomba.pause( 200 ); roomba.playNote( 76, 10 ); // E
+			 * roomba.pause( 200 );
+			 * 
+			 * System.out.println("Spinning left, then right");
+			 * roomba.spinLeft(); roomba.pause(1000); roomba.spinRight();
+			 * roomba.pause(1000); roomba.stop();
+			 * 
+			 * System.out.println("Going forward, then backward");
+			 * roomba.goForward(); roomba.pause(1000); roomba.goBackward();
+			 * roomba.pause(1000); roomba.stop();
+			 * 
+			 * 
+			 * System.out.println("Moving via send()"); byte cmd[] =
+			 * {(byte)RoombaComm.DRIVE, (byte)0x00,(byte)0xfa,
+			 * (byte)0x00,(byte)0x00}; roomba.send( cmd ) ; roomba.pause(1000);
+			 * roomba.stop(); cmd[1] = (byte)0xff; cmd[2] = (byte)0x05;
+			 * roomba.send( cmd ) ; roomba.pause(1000); roomba.stop();
+			 * 
+			 * System.out.println("Disconnecting"); roomba.disconnect();
+			 * 
+			 * System.out.println("Done");
+			 * 
+			 * roomba.setWaitForDSR(false);
+			 * 
+			 * roomba.setHardwareHandshake(false);
+			 */
+			GUIService gui = new GUIService("gui");
+			gui.startService();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
 
 	public Roomba(String n) {
 		super(n);
-		roombacomm = new RoombaCommSerialDevice();
+		roombacomm = new RoombaCommPort();
+		serial = (Serial) createPeer("serial");
 	}
 
-	@Override
-	public String getDescription() {
-		return "used as a general template";
+	public void bark() {
+		System.out.println("bark");
+		roombacomm.vacuum(true);
+		roombacomm.playNote(50, 5);
+		roombacomm.pause(150);
+		roombacomm.vacuum(false);
 	}
 
-	public ArrayList<String> getPortNames() {
-		return SerialDeviceFactory.getSerialDeviceNames();
-	}
-
-	public boolean connect(String name, int rate, int databits, int stopbits, int parity) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	/**
-	 * Connect to a serial port specified by portid doesn't guarantee connection
-	 * to Roomba, just to serial port
-	 * 
-	 * @param portid
-	 *            name of port, e.g. "/dev/cu.KeySerial1" or "COM3"
-	 * @return true if connect was successful, false otherwise
-	 */
-	public boolean connect(String portName) {
-		if (roombacomm.connect(portName)) {
-			this.portName = portName;
-			isConnected = true;
-			save();
-			return true;
-		}
-		return false;
-	}
-
-	// RoombaComm passthrough begin ----------------------
-
-	/**
-	 * Disconnect from serial portb
-	 */
-
-	public boolean disconnect() {
-		roombacomm.disconnect();
-		isConnected = false;
-		return true;
-	}
-
-	public boolean send(byte[] cmd) {
-		return roombacomm.send(cmd);
-	}
-
-	public void playNote(int i, int j) {
-		roombacomm.playNote(i, j);
-	}
-
-	public boolean updateSensors() {
-		return roombacomm.updateSensors();
-	}
-
-	public void control() {
-		roombacomm.control();
-	}
-
-	public void startup() {
-		roombacomm.startup();
-	}
-
-	// RoombaComm passthrough end ----------------------
-
-	public void setHardwareHandshake(boolean hardwareHandshake) {
-		setWaitForDSR(hardwareHandshake);
-	}
-
-	public void setWaitForDSR(boolean waitForDSR) {
-		roombacomm.setWaitForDSR(waitForDSR);
-	}
-
-	public String getProtocol() {
-		return roombacomm.getProtocol();
-	}
-
-	public void setProtocol(String protocol) {
-		roombacomm.setProtocol(protocol);
-	}
-
-	public boolean isWaitForDSR() {
-		return roombacomm.waitForDSR;
-	}
-
-	/**
-	 * This will handle both ints, bytes and chars transparently.
-	 */
-	public boolean send(int b) {
-		return roombacomm.send(b);
-	}
-
-	/**
-	 * toggles DD line via serial port DTR (if available)
-	 */
-	public void wakeup() {
-		roombacomm.wakeup();
-	}
-
-	/**
-	 * Update sensors. Block for up to 1000 ms waiting for update To use
-	 * non-blocking, call sensors() and then poll sensorsValid()
-	 */
-	public boolean updateSensors(int packetcode) {
-		return roombacomm.updateSensors(packetcode);
-	}
-
-	/**
-	 * called by serialEvent when we have enough bytes to make sensors valid
-	 */
-	public void computeSensors() {
-		roombacomm.computeSensors();
-	}
-
-	// --- from RoombaComm abstract class
-
-	public boolean connected() {
-		return roombacomm.connected();
-	}
-
-	/**
-	 * Turn all vacuum motors on or off according to state
-	 * 
-	 * @param state
-	 *            true to turn on vacuum function, false to turn it off
-	 */
-	public void vacuum(boolean state) {
-		roombacomm.vacuum(state);
-	}
-
-	/**
-	 * Turns on/off the various LEDs. Low-level command. FIXME: this is too
-	 * complex
-	 */
-	public void setLEDs(boolean status_green, boolean status_red, boolean spot, boolean clean, boolean max, boolean dirt, int power_color, int power_intensity) {
-		roombacomm.setLEDs(status_green, status_red, spot, clean, max, dirt, power_color, power_intensity);
-	}
-
-	public void setPortname(String p) {
-		roombacomm.setPortname(p);
-	}
-
-	//
-	// low-level movement and action
-	//
-
-	/**
-	 * Move the Roomba via the low-level velocity + radius method. See the
-	 * 'Drive' section of the Roomba ROI spec for more details. Low-level
-	 * command.
-	 * 
-	 * @param velocity
-	 *            speed in millimeters/second, positive forward, negative
-	 *            backward
-	 * @param radius
-	 *            radius of turn in millimeters
-	 */
-	public void drive(int velocity, int radius) {
-		roombacomm.drive(velocity, radius);
-	}
-
-	//
-	// higher-level functions
-	//
-
-	/** Set speed for movement commands */
-	public void setSpeed(int s) {
-		roombacomm.speed = Math.abs(s);
-	}
-
-	/** Get speed for movement commands */
-	public int getSpeed() {
-		return roombacomm.speed;
-	}
-
-	/**
-	 * Go straight at the current speed for a specified distance. Positive
-	 * distance moves forward, negative distance moves backward. This method
-	 * blocks until the action is finished.
-	 * 
-	 * @param distance
-	 *            distance in millimeters, positive or negative
-	 */
-	public void goStraight(int distance) {
-		roombacomm.goStraight(distance);
-	}
-
-	/**
-	 * @param distance
-	 *            distance in millimeters, positive
-	 */
-	public void goForward(int distance) {
-		roombacomm.goForward(distance);
-	}
-
-	/**
-	 * @param distance
-	 *            distance in millimeters, positive
-	 */
-	public void goBackward(int distance) {
-		roombacomm.goBackward(distance);
-	}
-
-	/**
- *
- */
-	public void turnLeft() {
-		roombacomm.turn(129);
-	}
-
-	public void turnRight() {
-		roombacomm.turn(-129);
-	}
-
-	public void turn(int radius) {
-		roombacomm.turn(radius);
-	}
-
-	/**
-	 * Spin right or spin left a particular number of degrees
-	 * 
-	 * @param angle
-	 *            angle in degrees, positive to spin left, negative to spin
-	 *            right
-	 */
-	public void spin(int angle) {
-		roombacomm.spin(angle);
-	}
-
-	/**
-	 * Spin right the current speed for a specified angle
-	 * 
-	 * @param angle
-	 *            angle in degrees, positive
-	 */
-	public void spinRight(int angle) {
-		roombacomm.spinRight(angle);
-	}
-
-	/**
-	 * Spin left a specified angle at a specified speed
-	 * 
-	 * @param angle
-	 *            angle in degrees, positive
-	 */
-	public void spinLeft(int angle) {
-		roombacomm.spinLeft(angle);
-	}
-
-	/**
-	 * Spin in place anti-clockwise, at the current speed
-	 */
-	public void spinLeft() {
-		roombacomm.spinLeft();
-	}
-
-	/**
-	 * Spin in place clockwise, at the current speed
-	 */
-	public void spinRight() {
-		roombacomm.spinRight();
-	}
-
-	/**
-	 * Spin in place anti-clockwise, at the current speed.
-	 * 
-	 * @param aspeed
-	 *            speed to spin at
-	 */
-	public void spinLeftAt(int aspeed) {
-		roombacomm.spinLeftAt(aspeed);
-	}
-
-	/**
-	 * Spin in place clockwise, at the current speed.
-	 * 
-	 * @param aspeed
-	 *            speed to spin at, positive
-	 */
-	public void spinRightAt(int aspeed) {
-		roombacomm.spinRightAt(aspeed);
-	}
-
-	//
-	// mid-level movement, no blocking, parameterized by speed, not distance
-	//
-
-	/**
-	 * Go straight at a specified speed. Positive is forward, negative is
-	 * backward
-	 * 
-	 * @param velocity
-	 *            velocity of motion in mm/sec
-	 */
-	public void goStraightAt(int velocity) {
-		roombacomm.goStraightAt(velocity);
-	}
-
-	/**
-	 * Go forward the current (positive) speed
-	 */
-	public void goForward() {
-		roombacomm.goForward();
-	}
-
-	/**
-	 * Go backward at the current (negative) speed
-	 */
-	public void goBackward() {
-		roombacomm.goBackward();
-	}
-
-	/**
-	 * Go forward at a specified speed
-	 */
-	public void goForwardAt(int aspeed) {
-		roombacomm.goForwardAt(aspeed);
-	}
-
-	/**
-	 * Go backward at a specified speed
-	 */
-	public void goBackwardAt(int aspeed) {
-		roombacomm.goBackwardAt(aspeed);
-	}
-
-	/**
-	 * Stop Rooomba's motion. Sends drive(0,0)
-	 */
-	public void stop() {
-		roombacomm.stop();
-	}
-
-	public void powerOff() {
-		roombacomm.powerOff();
-	}
-
-	public void clean() {
-		roombacomm.clean();
-	}
-
-	public void spot() {
-		roombacomm.spot();
-	}
-
-	public String sensorsAsString() {
-		return roombacomm.sensorsAsString();
-	}
-
-	public String[] listPorts() {
-		return roombacomm.listPorts();
-	}
-
-	public String getPortname() {
-		return roombacomm.getPortname();
-	}
-
-	/**
-	 * Make a square with a Roomba. Leaves Roomba in same place it began
-	 * (theoretically)
-	 * 
-	 * @param rc
-	 *            RoombaComm object connected to a Roomba
-	 * @param size
-	 *            size of square in mm
-	 */
-	public void square(RoombaComm rc, int size) {
-		roombacomm.goForward(size);
-		roombacomm.spinLeft(90);
-		roombacomm.goForward(size);
-		roombacomm.spinLeft(90);
-		roombacomm.goForward(size);
-		roombacomm.spinLeft(90);
-		roombacomm.goForward(size);
-		roombacomm.spinLeft(90);
+	public boolean bump() {
+		return roombacomm.bump();
 	}
 
 	/**
@@ -471,6 +172,218 @@ public class Roomba extends Service {
 		}
 	}
 
+	// RoombaComm passthrough begin ----------------------
+
+	public void clean() {
+		roombacomm.clean();
+	}
+
+	/**
+	 * called by serialEvent when we have enough bytes to make sensors valid
+	 */
+	public void computeSensors() {
+		roombacomm.computeSensors();
+	}
+
+	/**
+	 * Connect to a serial port specified by portid doesn't guarantee connection
+	 * to Roomba, just to serial port
+	 * 
+	 * @param portid
+	 *            name of port, e.g. "/dev/cu.KeySerial1" or "COM3"
+	 * @return true if connect was successful, false otherwise
+	 */
+	public boolean connect(String portName) {
+		if (roombacomm.connect(portName)) {
+			this.portName = portName;
+			save();
+			return true;
+		}
+		return false;
+	}
+
+	public boolean connect(String name, int rate, int databits, int stopbits, int parity) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public boolean connected() {
+		return roombacomm.connected();
+	}
+
+	public void control() {
+		roombacomm.control();
+	}
+
+	// RoombaComm passthrough end ----------------------
+
+	public void createTribblePurrSong() {
+		int song[] = { 68, 4, 67, 4, 66, 4, 65, 4, 64, 4, 63, 4, 62, 4, 61, 4, 60, 4, 59, 4, 60, 4, 61, 4, };
+		roombacomm.createSong(5, song);
+	}
+
+	/**
+	 * Disconnect from serial portb
+	 */
+
+	public boolean disconnect() {
+		roombacomm.disconnect();
+		return true;
+	}
+
+	/**
+	 * Move the Roomba via the low-level velocity + radius method. See the
+	 * 'Drive' section of the Roomba ROI spec for more details. Low-level
+	 * command.
+	 * 
+	 * @param velocity
+	 *            speed in millimeters/second, positive forward, negative
+	 *            backward
+	 * @param radius
+	 *            radius of turn in millimeters
+	 */
+	public void drive(int velocity, int radius) {
+		roombacomm.drive(velocity, radius);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "robot" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used as a general template";
+	}
+
+	public String getPortname() {
+		return roombacomm.getPortname();
+	}
+
+	public List<String> getPortNames() {
+		return serial.getPortNames();
+	}
+
+	public String getProtocol() {
+		return roombacomm.getProtocol();
+	}
+
+	/** Get speed for movement commands */
+	public int getSpeed() {
+		return roombacomm.speed;
+	}
+
+	// --- from RoombaComm abstract class
+
+	/**
+	 * Go backward at the current (negative) speed
+	 */
+	public void goBackward() {
+		roombacomm.goBackward();
+	}
+
+	/**
+	 * @param distance
+	 *            distance in millimeters, positive
+	 */
+	public void goBackward(int distance) {
+		roombacomm.goBackward(distance);
+	}
+
+	/**
+	 * Go backward at a specified speed
+	 */
+	public void goBackwardAt(int aspeed) {
+		roombacomm.goBackwardAt(aspeed);
+	}
+
+	/**
+	 * Go forward the current (positive) speed
+	 */
+	public void goForward() {
+		roombacomm.goForward();
+	}
+
+	//
+	// low-level movement and action
+	//
+
+	/**
+	 * @param distance
+	 *            distance in millimeters, positive
+	 */
+	public void goForward(int distance) {
+		roombacomm.goForward(distance);
+	}
+
+	//
+	// higher-level functions
+	//
+
+	/**
+	 * Go forward at a specified speed
+	 */
+	public void goForwardAt(int aspeed) {
+		roombacomm.goForwardAt(aspeed);
+	}
+
+	/**
+	 * Go straight at the current speed for a specified distance. Positive
+	 * distance moves forward, negative distance moves backward. This method
+	 * blocks until the action is finished.
+	 * 
+	 * @param distance
+	 *            distance in millimeters, positive or negative
+	 */
+	public void goStraight(int distance) {
+		roombacomm.goStraight(distance);
+	}
+
+	/**
+	 * Go straight at a specified speed. Positive is forward, negative is
+	 * backward
+	 * 
+	 * @param velocity
+	 *            velocity of motion in mm/sec
+	 */
+	public void goStraightAt(int velocity) {
+		roombacomm.goStraightAt(velocity);
+	}
+
+	public boolean isWaitForDSR() {
+		return roombacomm.waitForDSR;
+	}
+
+	public String[] listPorts() {
+		return roombacomm.listPorts();
+	}
+
+	public void playNote(int i, int j) {
+		roombacomm.playNote(i, j);
+	}
+
+	public void powerOff() {
+		roombacomm.powerOff();
+	}
+
+	public void printSensors() {
+		System.out.println(System.currentTimeMillis() + ":" + "bump:" + (roombacomm.bumpLeft() ? "l" : "_") + (roombacomm.bumpRight() ? "r" : "_") + " wheel:"
+				+ (roombacomm.wheelDropLeft() ? "l" : "_") + (roombacomm.wheelDropCenter() ? "c" : "_") + (roombacomm.wheelDropLeft() ? "r" : "_"));
+
+	}
+
+	public void purr() {
+		System.out.println("purr");
+		roombacomm.playSong(5);
+		for (int i = 0; i < 5; i++) {
+			roombacomm.spinLeftAt(75);
+			roombacomm.pause(100);
+			roombacomm.spinRightAt(75);
+			roombacomm.pause(100);
+			roombacomm.stop();
+		}
+	}
+
 	/**
 	 * Reset Roomba after a fault. This takes it out of whatever mode it was in
 	 * and puts it into safe mode. This command also syncs the object's sensor
@@ -481,6 +394,119 @@ public class Roomba extends Service {
 	 */
 	public void reset() {
 		roombacomm.reset();
+	}
+
+	public boolean send(byte[] cmd) {
+		return roombacomm.send(cmd);
+	}
+
+	/**
+	 * This will handle both ints, bytes and chars transparently.
+	 */
+	public boolean send(int b) {
+		return roombacomm.send(b);
+	}
+
+	public String sensorsAsString() {
+		return roombacomm.sensorsAsString();
+	}
+
+	public void setHardwareHandshake(boolean hardwareHandshake) {
+		setWaitForDSR(hardwareHandshake);
+	}
+
+	/**
+	 * Turns on/off the various LEDs. Low-level command. FIXME: this is too
+	 * complex
+	 */
+	public void setLEDs(boolean status_green, boolean status_red, boolean spot, boolean clean, boolean max, boolean dirt, int power_color, int power_intensity) {
+		roombacomm.setLEDs(status_green, status_red, spot, clean, max, dirt, power_color, power_intensity);
+	}
+
+	//
+	// mid-level movement, no blocking, parameterized by speed, not distance
+	//
+
+	public void setPortname(String p) {
+		roombacomm.setPortname(p);
+	}
+
+	public void setProtocol(String protocol) {
+		roombacomm.setProtocol(protocol);
+	}
+
+	/** Set speed for movement commands */
+	public void setSpeed(int s) {
+		roombacomm.speed = Math.abs(s);
+	}
+
+	public void setWaitForDSR(boolean waitForDSR) {
+		roombacomm.setWaitForDSR(waitForDSR);
+	}
+
+	/**
+	 * Spin right or spin left a particular number of degrees
+	 * 
+	 * @param angle
+	 *            angle in degrees, positive to spin left, negative to spin
+	 *            right
+	 */
+	public void spin(int angle) {
+		roombacomm.spin(angle);
+	}
+
+	/**
+	 * Spin in place anti-clockwise, at the current speed
+	 */
+	public void spinLeft() {
+		roombacomm.spinLeft();
+	}
+
+	/**
+	 * Spin left a specified angle at a specified speed
+	 * 
+	 * @param angle
+	 *            angle in degrees, positive
+	 */
+	public void spinLeft(int angle) {
+		roombacomm.spinLeft(angle);
+	}
+
+	/**
+	 * Spin in place anti-clockwise, at the current speed.
+	 * 
+	 * @param aspeed
+	 *            speed to spin at
+	 */
+	public void spinLeftAt(int aspeed) {
+		roombacomm.spinLeftAt(aspeed);
+	}
+
+	/**
+	 * Spin in place clockwise, at the current speed
+	 */
+	public void spinRight() {
+		roombacomm.spinRight();
+	}
+
+	/**
+	 * Spin right the current speed for a specified angle
+	 * 
+	 * @param angle
+	 *            angle in degrees, positive
+	 */
+	public void spinRight(int angle) {
+		roombacomm.spinRight(angle);
+	}
+
+	/**
+	 * Spin in place clockwise, at the current speed.
+	 * 
+	 * @param aspeed
+	 *            speed to spin at, positive
+	 */
+	public void spinRightAt(int aspeed) {
+		roombacomm.spinRightAt(aspeed);
 	}
 
 	/**
@@ -511,7 +537,7 @@ public class Roomba extends Service {
 		while (!done) {
 			roombacomm.drive(v, r);
 			roombacomm.pause(waittime);
-			roombacomm.drive(v, (int) r / Math.abs(dr));
+			roombacomm.drive(v, r / Math.abs(dr));
 			roombacomm.pause(waittime);
 			r += -10;
 			// done = keyIsPressed();
@@ -549,6 +575,10 @@ public class Roomba extends Service {
 
 			// done = keyIsPressed();
 		}
+	}
+
+	public void spot() {
+		roombacomm.spot();
 	}
 
 	/**
@@ -617,87 +647,77 @@ public class Roomba extends Service {
 		}
 	}
 
-	public void printSensors() {
-		System.out.println(System.currentTimeMillis() + ":" + "bump:" + (roombacomm.bumpLeft() ? "l" : "_") + (roombacomm.bumpRight() ? "r" : "_") + " wheel:"
-				+ (roombacomm.wheelDropLeft() ? "l" : "_") + (roombacomm.wheelDropCenter() ? "c" : "_") + (roombacomm.wheelDropLeft() ? "r" : "_"));
-
+	/**
+	 * Make a square with a Roomba. Leaves Roomba in same place it began
+	 * (theoretically)
+	 * 
+	 * @param rc
+	 *            RoombaComm object connected to a Roomba
+	 * @param size
+	 *            size of square in mm
+	 */
+	public void square(RoombaComm rc, int size) {
+		roombacomm.goForward(size);
+		roombacomm.spinLeft(90);
+		roombacomm.goForward(size);
+		roombacomm.spinLeft(90);
+		roombacomm.goForward(size);
+		roombacomm.spinLeft(90);
+		roombacomm.goForward(size);
+		roombacomm.spinLeft(90);
 	}
 
-	public boolean bump() {
-		return roombacomm.bump();
+	@Override
+	public void startService() {
+		serial = (Serial) startPeer("serial");
 	}
 
+	public void startup() {
+		roombacomm.startup();
+	}
+
+	/**
+	 * Stop Rooomba's motion. Sends drive(0,0)
+	 */
+	public void stop() {
+		roombacomm.stop();
+	}
+
+	@Override
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
-		/* FIXME - need to refactor so it can use virtual serial ports !!!
-		
-		try {
-			// must pause after every playNote to let to note sound
-			System.out.println("Playing some notes");
-			roombacomm.playNote(72, 10);
-			roombacomm.pause(200);
-			roombacomm.playNote(79, 10);
-			roombacomm.pause(200);
-			roombacomm.playNote(76, 10);
-			roombacomm.pause(200);
-
-			// test Logo-like functions (blocking)
-			// speed is in mm/s, go* is in mm, spin is in degrees
-			roombacomm.setSpeed(100); // can be positive or negative
-			roombacomm.goStraight(100); // can be positive or negative
-			roombacomm.goForward(100); // negative numbers not allowed
-			roombacomm.goBackward(200); // negative numbers not allowed
-
-			roombacomm.setSpeed(150);
-			roombacomm.spin(-360); // can be positive or negative
-			roombacomm.spinRight(360); // negative numbers not allowed
-			roombacomm.spinLeft(360); // negative numbers not allowed
-
-			// test non-blocking functions
-			roombacomm.goStraightAt(200); // speed argument
-			roombacomm.pause(1000);
-			roombacomm.goForwardAt(200); // speed argument
-			roombacomm.pause(1000);
-			roombacomm.goBackwardAt(400); // speed argument
-			roombacomm.pause(1000);
-
-			roombacomm.spinLeftAt(-15); // mm/s or degs/sec ?
-			roombacomm.pause(1000);
-			roombacomm.spinRightAt(15);
-			roombacomm.pause(1000);
-			
-		} catch (Exception e) {
-			status.addError(e);
-		}
-
-*/
+		/*
+		 * FIXME - need to refactor so it can use virtual serial ports !!!
+		 * 
+		 * try { // must pause after every playNote to let to note sound
+		 * System.out.println("Playing some notes"); roombacomm.playNote(72,
+		 * 10); roombacomm.pause(200); roombacomm.playNote(79, 10);
+		 * roombacomm.pause(200); roombacomm.playNote(76, 10);
+		 * roombacomm.pause(200);
+		 * 
+		 * // test Logo-like functions (blocking) // speed is in mm/s, go* is in
+		 * mm, spin is in degrees roombacomm.setSpeed(100); // can be positive
+		 * or negative roombacomm.goStraight(100); // can be positive or
+		 * negative roombacomm.goForward(100); // negative numbers not allowed
+		 * roombacomm.goBackward(200); // negative numbers not allowed
+		 * 
+		 * roombacomm.setSpeed(150); roombacomm.spin(-360); // can be positive
+		 * or negative roombacomm.spinRight(360); // negative numbers not
+		 * allowed roombacomm.spinLeft(360); // negative numbers not allowed
+		 * 
+		 * // test non-blocking functions roombacomm.goStraightAt(200); // speed
+		 * argument roombacomm.pause(1000); roombacomm.goForwardAt(200); //
+		 * speed argument roombacomm.pause(1000); roombacomm.goBackwardAt(400);
+		 * // speed argument roombacomm.pause(1000);
+		 * 
+		 * roombacomm.spinLeftAt(-15); // mm/s or degs/sec ?
+		 * roombacomm.pause(1000); roombacomm.spinRightAt(15);
+		 * roombacomm.pause(1000);
+		 * 
+		 * } catch (Exception e) { status.addError(e); }
+		 */
 		status.addInfo("test completed");
 		return status;
-	}
-
-	public void purr() {
-		System.out.println("purr");
-		roombacomm.playSong(5);
-		for (int i = 0; i < 5; i++) {
-			roombacomm.spinLeftAt(75);
-			roombacomm.pause(100);
-			roombacomm.spinRightAt(75);
-			roombacomm.pause(100);
-			roombacomm.stop();
-		}
-	}
-
-	public void createTribblePurrSong() {
-		int song[] = { 68, 4, 67, 4, 66, 4, 65, 4, 64, 4, 63, 4, 62, 4, 61, 4, 60, 4, 59, 4, 60, 4, 61, 4, };
-		roombacomm.createSong(5, song);
-	}
-
-	public void bark() {
-		System.out.println("bark");
-		roombacomm.vacuum(true);
-		roombacomm.playNote(50, 5);
-		roombacomm.pause(150);
-		roombacomm.vacuum(false);
 	}
 
 	public void tribble() {
@@ -718,6 +738,43 @@ public class Roomba extends Service {
 
 	}
 
+	public void turn(int radius) {
+		roombacomm.turn(radius);
+	}
+
+	/**
+ *
+ */
+	public void turnLeft() {
+		roombacomm.turn(129);
+	}
+
+	public void turnRight() {
+		roombacomm.turn(-129);
+	}
+
+	public boolean updateSensors() {
+		return roombacomm.updateSensors();
+	}
+
+	/**
+	 * Update sensors. Block for up to 1000 ms waiting for update To use
+	 * non-blocking, call sensors() and then poll sensorsValid()
+	 */
+	public boolean updateSensors(int packetcode) {
+		return roombacomm.updateSensors(packetcode);
+	}
+
+	/**
+	 * Turn all vacuum motors on or off according to state
+	 * 
+	 * @param state
+	 *            true to turn on vacuum function, false to turn it off
+	 */
+	public void vacuum(boolean state) {
+		roombacomm.vacuum(state);
+	}
+
 	public void waggle(int velocity, int radius, int waittime) {
 		for (int i = 0; i < 5; i++) {
 			roombacomm.drive(velocity, radius);
@@ -727,64 +784,11 @@ public class Roomba extends Service {
 		}
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		Roomba roomba = new Roomba("roomba");
-		roomba.startService();
-		roomba.test();
-		
-		/*
-		 * roomba.connect("COM6");
-		 * 
-		 * roomba.startup(); roomba.control();
-		 */
-		// roomba.pause(30);
-		/*
-		 * System.out.println("Checking for Roomba... "); if(
-		 * roomba.updateSensors() ) System.out.println("Roomba found!"); else
-		 * System.out.println("No Roomba. :(  Is it turned on?");
-		 * 
-		 * //roomba.updateSensors();
-		 * 
-		 * System.out.println("Playing some notes"); roomba.playNote( 72, 10 );
-		 * // C roomba.pause( 200 ); roomba.playNote( 79, 10 ); // G
-		 * roomba.pause( 200 ); roomba.playNote( 76, 10 ); // E roomba.pause(
-		 * 200 );
-		 * 
-		 * System.out.println("Spinning left, then right"); roomba.spinLeft();
-		 * roomba.pause(1000); roomba.spinRight(); roomba.pause(1000);
-		 * roomba.stop();
-		 * 
-		 * System.out.println("Going forward, then backward");
-		 * roomba.goForward(); roomba.pause(1000); roomba.goBackward();
-		 * roomba.pause(1000); roomba.stop();
-		 * 
-		 * 
-		 * System.out.println("Moving via send()"); byte cmd[] =
-		 * {(byte)RoombaComm.DRIVE, (byte)0x00,(byte)0xfa,
-		 * (byte)0x00,(byte)0x00}; roomba.send( cmd ) ; roomba.pause(1000);
-		 * roomba.stop(); cmd[1] = (byte)0xff; cmd[2] = (byte)0x05; roomba.send(
-		 * cmd ) ; roomba.pause(1000); roomba.stop();
-		 * 
-		 * System.out.println("Disconnecting"); roomba.disconnect();
-		 * 
-		 * System.out.println("Done");
-		 * 
-		 * roomba.setWaitForDSR(false);
-		 * 
-		 * roomba.setHardwareHandshake(false);
-		 */
-		GUIService gui = new GUIService("gui");
-		gui.startService();
-
-	}
-
-
-	@Override
-	public String[] getCategories() {
-		return new String[] {"robot"};
+	/**
+	 * toggles DD line via serial port DTR (if available)
+	 */
+	public void wakeup() {
+		roombacomm.wakeup();
 	}
 
 }

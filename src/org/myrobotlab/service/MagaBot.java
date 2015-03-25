@@ -1,38 +1,23 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.serial.SerialDevice;
-import org.myrobotlab.serial.SerialDeviceException;
-import org.myrobotlab.serial.SerialDeviceFactory;
 import org.slf4j.Logger;
 
+/**
+ * FIXME - Implement http://magabot.cc/ :)
+ * 
+ * @author GroG
+ *
+ */
 public class MagaBot extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(MagaBot.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(MagaBot.class);
 
 	public MagaBot(String n) {
 		super(n);
-	}
-
-	SerialDevice serialDevice = null;
-	private boolean isInitialized = false;
-
-	public void init(String serialPortName) {
-		if (!isInitialized) {
-			try {
-				serialDevice = SerialDeviceFactory.getSerialDevice(serialPortName, 9600, 8, 1, 0);
-				serialDevice.open();
-				isInitialized = true;
-			} catch (SerialDeviceException e) {
-				logException(e);
-			}
-		}
-
 	}
 
 	/*
@@ -43,35 +28,18 @@ public class MagaBot extends Service {
 	 * 'i' if the ir sensors are activated
 	 */
 	/*
-	public void sendOrder(String o) {
-		try {
-			serialDevice.write(o);
-		} catch (IOException e) {
-			logException(e);
-		}
+	 * public void sendOrder(String o) { try { serialDevice.write(o); } catch
+	 * (IOException e) { logException(e); } }
+	 */
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "robot" };
 	}
-	*/
 
 	@Override
 	public String getDescription() {
 		return "used as a general template";
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		MagaBot template = new MagaBot("template");
-		template.startService();
-
-		GUIService gui = new GUIService("gui");
-		gui.startService();
-		
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"robot"};
 	}
 
 }

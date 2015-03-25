@@ -28,32 +28,9 @@ public class Console extends AppenderSkeleton {
 	}
 
 	/**
-	 * to begin logging call this function Log must not begin before the GUIService
-	 * has finished drawing. For some reason, if log entries are written to a
-	 * JScrollPane before the gui has completed the whole gui will tank
-	 * 
-	 * by default logging is off
-	 */
-	public void startLogging() {
-		PatternLayout layout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
-		setLayout(layout);
-		setName("ConsoleGUI");
-		LoggingFactory.getInstance().addAppender(this);
-		logging = true;
-	}
-
-	public void stopLogging() {
-		LoggingFactory.getInstance().removeAppender(this);
-		logging = false;
-	}
-
-	public void append(String msg) {
-		textArea.append(msg);
-	}
-
-	/**
 	 * Format and then append the loggingEvent to the stored JTextArea.
 	 */
+	@Override
 	public void append(LoggingEvent loggingEvent) {
 		if (logging) {
 			final String message = this.layout.format(loggingEvent);
@@ -72,14 +49,13 @@ public class Console extends AppenderSkeleton {
 		}
 	}
 
-	@Override
-	public void close() {
-		LoggingFactory.getInstance().removeAppender(this);
+	public void append(String msg) {
+		textArea.append(msg);
 	}
 
 	@Override
-	public boolean requiresLayout() {
-		return true;
+	public void close() {
+		LoggingFactory.getInstance().removeAppender(this);
 	}
 
 	public JScrollPane getScrollPane() {
@@ -88,5 +64,31 @@ public class Console extends AppenderSkeleton {
 
 	public Component getTextArea() {
 		return textArea;
+	}
+
+	@Override
+	public boolean requiresLayout() {
+		return true;
+	}
+
+	/**
+	 * to begin logging call this function Log must not begin before the
+	 * GUIService has finished drawing. For some reason, if log entries are
+	 * written to a JScrollPane before the gui has completed the whole gui will
+	 * tank
+	 * 
+	 * by default logging is off
+	 */
+	public void startLogging() {
+		PatternLayout layout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
+		setLayout(layout);
+		setName("ConsoleGUI");
+		LoggingFactory.getInstance().addAppender(this);
+		logging = true;
+	}
+
+	public void stopLogging() {
+		LoggingFactory.getInstance().removeAppender(this);
+		logging = false;
 	}
 }

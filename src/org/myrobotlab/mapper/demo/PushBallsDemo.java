@@ -45,16 +45,18 @@ public class PushBallsDemo extends Demo {
 			// RobotFactory.addCameraSensor(this);
 		}
 
-		/** Initialize Agent's Behavior */
-		public void initBehavior() {
-			setTranslationalVelocity(0.5);
-		}
-
 		public void contactWith(SimpleAgent a) {
 			// System.out.println(getName()+" interacts with "+a.getName());
 		}
 
+		/** Initialize Agent's Behavior */
+		@Override
+		public void initBehavior() {
+			setTranslationalVelocity(0.5);
+		}
+
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 			// if (collisionDetected()&& (! interactionDetected()))
 			// moveToStartPosition();

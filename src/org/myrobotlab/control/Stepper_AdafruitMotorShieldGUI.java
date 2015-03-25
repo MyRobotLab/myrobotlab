@@ -63,15 +63,6 @@ public class Stepper_AdafruitMotorShieldGUI extends StepperControllerPanel imple
 
 	}
 
-	/**
-	 * method to update the GUIService from StepperController data
-	 */
-	@Override
-	public void setData(Object[] data) {
-		// TODO Auto-generated method stub
-		// stepperPort.setSelectedItem(data[0]);
-	}
-
 	@Override
 	void setAttached(boolean state) {
 		if (state) {
@@ -80,6 +71,15 @@ public class Stepper_AdafruitMotorShieldGUI extends StepperControllerPanel imple
 			attachButton.setText("attach");
 		}
 
+	}
+
+	/**
+	 * method to update the GUIService from StepperController data
+	 */
+	@Override
+	public void setData(Object[] data) {
+		// TODO Auto-generated method stub
+		// stepperPort.setSelectedItem(data[0]);
 	}
 
 }

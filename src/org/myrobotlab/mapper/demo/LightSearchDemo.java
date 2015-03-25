@@ -49,10 +49,12 @@ public class LightSearchDemo extends Demo {
 		}
 
 		/** Initialize Agent's Behavior */
+		@Override
 		public void initBehavior() {
 		}
 
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 
 			// progress at 0.5 m/s

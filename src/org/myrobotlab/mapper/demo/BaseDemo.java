@@ -54,11 +54,13 @@ public class BaseDemo extends Demo {
 		}
 
 		/** Initialize Agent's Behavior */
+		@Override
 		public void initBehavior() {
 			// nothing particular in this case
 		}
 
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 
 			// progress at 0.5 m/s

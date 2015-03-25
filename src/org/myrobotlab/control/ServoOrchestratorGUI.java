@@ -37,12 +37,10 @@ import org.slf4j.Logger;
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
-public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
-		ItemListener, ListSelectionListener {
+public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener, ItemListener, ListSelectionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory
-			.getLogger(ServoOrchestratorGUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(ServoOrchestratorGUI.class.getCanonicalName());
 
 	public int sizex;
 	public int sizey;
@@ -85,19 +83,104 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 
 	public JCheckBox bottomright_click_checkbox;
 
-	public ServoOrchestratorGUI(final String boundServiceName,
-			final GUIService myService, final JTabbedPane tabs) {
+	public ServoOrchestratorGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 
 		super(boundServiceName, myService, tabs);
-		myService.send(boundServiceName, "setsoguireference",
-				ServoOrchestratorGUI.this);
+		myService.send(boundServiceName, "setsoguireference", ServoOrchestratorGUI.this);
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent ae) {
+		Object o = ae.getSource();
+
+		// Button - Events
+		if (o == top_save_button) {
+			myService.send(boundServiceName, "top_save_button");
+		} else if (o == top_load_button) {
+			myService.send(boundServiceName, "top_load_button");
+		} else if (o == top_addservo_button) {
+			myService.send(boundServiceName, "top_addservo_button");
+		} else if (o == middleright_update_button) {
+			myService.send(boundServiceName, "middleright_update_button");
+		} else if (o == middleright_attach_button) {
+			myService.send(boundServiceName, "middleright_attach_button");
+		} else if (o == middleleft_timeunitadd_button) {
+			myService.send(boundServiceName, "middleleft_timeunitadd_button");
+		} else if (o == middleleft_timeunitremove_button) {
+			myService.send(boundServiceName, "middleleft_timeunitremove_button");
+		} else if (o == middleleft_channeladd_button) {
+			myService.send(boundServiceName, "middleleft_channeladd_button");
+		} else if (o == middleleft_channelremove_button) {
+			myService.send(boundServiceName, "middleleft_channelremove_button");
+		} else if (o == bottommiddleleft_update_button) {
+			// TODO - add functionality
+		} else if (o == bottommiddlerighttop_update_button) {
+			myService.send(boundServiceName, "bottommiddlerighttop_update_button");
+		} else if (o == bottommiddlerightbottom_button_1) {
+			myService.send(boundServiceName, "bottommiddlerightbottom_button_1");
+		} else if (o == bottommiddlerightbottom_button_2) {
+			myService.send(boundServiceName, "bottommiddlerightbottom_button_2");
+		} else if (o == bottommiddlerightbottom_button_3) {
+			myService.send(boundServiceName, "bottommiddlerightbottom_button_3");
+		} else if (o == bottommiddlerightbottom_button_4) {
+			myService.send(boundServiceName, "bottommiddlerightbottom_button_4");
+		} else if (o == bottommiddlerightbottom_button_5) {
+			myService.send(boundServiceName, "bottommiddlerightbottom_button_5");
+		} else if (o == bottommiddlerightbottom_button_6) {
+			myService.send(boundServiceName, "bottommiddlerightbottom_button_6");
+		} else if (o == bottommiddlerightbottom_button_7) {
+			myService.send(boundServiceName, "bottommiddlerightbottom_button_7");
+		} else if (o == bottommiddlerightbottom_button_8) {
+			myService.send(boundServiceName, "bottommiddlerightbottom_button_8");
+		}
+
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void attachGUI() {
+		// commented out subscription due to this class being used for
+		// un-defined gui's
+
+		// subscribe("publishState", "getState", _TemplateService.class);
+		// send("publishState");
+	}
+
+	@Override
+	public void detachGUI() {
+		// commented out subscription due to this class being used for
+		// un-defined gui's
+
+		// unsubscribe("publishState", "getState", _TemplateService.class);
+	}
+
+	public void externalcall_loadsettings(int pos) {
+		myService.send(boundServiceName, "externalcall_loadsettings", pos);
+	}
+
+	public void externalcall_servopanelchangeinfo(int x, int y) {
+		myService.send(boundServiceName, "externalcall_servopanelchangeinfo", x, y);
+	}
+
+	public void externalcall_servopanelsettostartpos(int x, int y, boolean withgoal) {
+		myService.send(boundServiceName, "externalcall_servopanelsettostartpos", x, y, withgoal);
+	}
+
+	public void getState(_TemplateService template) {
+		// I think I should do something with this ...
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		});
+	}
+
+	@Override
 	public void init() {
 		myService.send(boundServiceName, "setmiddlemiddlesize");
 
-		middlemiddle_ref = new ServoOrchestratorGUI_middlemiddle_main(
-				ServoOrchestratorGUI.this);
+		middlemiddle_ref = new ServoOrchestratorGUI_middlemiddle_main(ServoOrchestratorGUI.this);
 
 		JPanel top = new JPanel();
 		top.setLayout(new BoxLayout(top, BoxLayout.X_AXIS));
@@ -168,15 +251,11 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		middleright_arduino_list = new JList();
 		myService.send(boundServiceName, "set_middleright_arduino_list_items");
 		middleright_arduino_list.setVisibleRowCount(3);
-		middleright_arduino_list
-				.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		middleright_arduino_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		middleright_arduino_list.addListSelectionListener(this);
-		JScrollPane middleright_arduino_list_scrollpane = new JScrollPane(
-				middleright_arduino_list);
-		middleright_arduino_list_scrollpane
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		middleright_arduino_list_scrollpane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane middleright_arduino_list_scrollpane = new JScrollPane(middleright_arduino_list);
+		middleright_arduino_list_scrollpane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		middleright_arduino_list_scrollpane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		middleright.add(middleright_arduino_list_scrollpane);
 
 		middleright_pin_list = new JList();
@@ -189,15 +268,11 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		}
 		middleright_pin_list.setListData(middleright_pin_list_items);
 		middleright_pin_list.setVisibleRowCount(3);
-		middleright_pin_list
-				.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		middleright_pin_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		middleright_pin_list.addListSelectionListener(this);
-		JScrollPane middleright_pin_list_scrollpane = new JScrollPane(
-				middleright_pin_list);
-		middleright_pin_list_scrollpane
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		middleright_pin_list_scrollpane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane middleright_pin_list_scrollpane = new JScrollPane(middleright_pin_list);
+		middleright_pin_list_scrollpane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		middleright_pin_list_scrollpane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		middleright.add(middleright_pin_list_scrollpane);
 
 		middleright_attach_button = new JButton("Attach");
@@ -213,12 +288,9 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 
 		// TODO - don't define the panels size
 		JScrollPane middlemiddle_scrollpane = new JScrollPane(middlemiddle);
-		middlemiddle_scrollpane
-				.setPreferredSize(new Dimension(130 * 5, 80 * 5));
-		middlemiddle_scrollpane
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		middlemiddle_scrollpane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		middlemiddle_scrollpane.setPreferredSize(new Dimension(130 * 5, 80 * 5));
+		middlemiddle_scrollpane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		middlemiddle_scrollpane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 
 		JPanel middleleft = new JPanel();
 		middleleft.setLayout(new BoxLayout(middleleft, BoxLayout.Y_AXIS));
@@ -239,19 +311,14 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		middleleft.add(middleleft_channelremove_button);
 		middleleft_channelremove_button.addActionListener(this);
 
-		JSplitPane splitpane_middlemiddle_middleleft = new JSplitPane(
-				JSplitPane.HORIZONTAL_SPLIT, middlemiddle_scrollpane,
-				middleleft);
+		JSplitPane splitpane_middlemiddle_middleleft = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, middlemiddle_scrollpane, middleleft);
 		splitpane_middlemiddle_middleleft.setOneTouchExpandable(true);
 		// splitpane_middlemiddle_middleleft.setDividerLocation(700);
 
 		middlemiddlemiddleleft.add(splitpane_middlemiddle_middleleft);
 
-		JSplitPane splitpane_middleright_middlemiddlemiddleleft = new JSplitPane(
-				JSplitPane.HORIZONTAL_SPLIT, middleright,
-				middlemiddlemiddleleft);
-		splitpane_middleright_middlemiddlemiddleleft
-				.setOneTouchExpandable(true);
+		JSplitPane splitpane_middleright_middlemiddlemiddleleft = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, middleright, middlemiddlemiddleleft);
+		splitpane_middleright_middlemiddlemiddleleft.setOneTouchExpandable(true);
 		// splitpane_middleright_middlemiddlemiddleleft.setDividerLocation(100);
 
 		middle.add(splitpane_middleright_middlemiddlemiddleleft);
@@ -263,12 +330,9 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		JTextArea bottomleft_log_textarea = new JTextArea(5, 20);
 		bottomleft_log_textarea.setEditable(false);
 		bottomleft_log_textarea.setLineWrap(true);
-		JScrollPane bottomleft_log_scrollpane = new JScrollPane(
-				bottomleft_log_textarea);
-		bottomleft_log_scrollpane
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		bottomleft_log_scrollpane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane bottomleft_log_scrollpane = new JScrollPane(bottomleft_log_textarea);
+		bottomleft_log_scrollpane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		bottomleft_log_scrollpane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		bottomleft.add(bottomleft_log_scrollpane);
 
@@ -277,12 +341,10 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		JPanel bottommiddle = new JPanel();
 
 		JPanel bottommiddleleft = new JPanel();
-		bottommiddleleft.setLayout(new BoxLayout(bottommiddleleft,
-				BoxLayout.Y_AXIS));
+		bottommiddleleft.setLayout(new BoxLayout(bottommiddleleft, BoxLayout.Y_AXIS));
 
 		JPanel bottommiddlelefttop = new JPanel();
-		bottommiddlelefttop.setLayout(new BoxLayout(bottommiddlelefttop,
-				BoxLayout.X_AXIS));
+		bottommiddlelefttop.setLayout(new BoxLayout(bottommiddlelefttop, BoxLayout.X_AXIS));
 
 		JLabel bottommiddlelefttop_label_1 = new JLabel("L");
 		bottommiddlelefttop.add(bottommiddlelefttop_label_1);
@@ -305,8 +367,7 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		bottommiddleleft.add(bottommiddlelefttop);
 
 		JPanel bottommiddleleftbottom = new JPanel();
-		bottommiddleleftbottom.setLayout(new BoxLayout(bottommiddleleftbottom,
-				BoxLayout.X_AXIS));
+		bottommiddleleftbottom.setLayout(new BoxLayout(bottommiddleleftbottom, BoxLayout.X_AXIS));
 
 		JLabel bottommiddleleftbottom_label_1 = new JLabel("R");
 		bottommiddleleftbottom.add(bottommiddleleftbottom_label_1);
@@ -333,12 +394,10 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		bottommiddleleft_update_button.addActionListener(this);
 
 		JPanel bottommiddleright = new JPanel();
-		bottommiddleright.setLayout(new BoxLayout(bottommiddleright,
-				BoxLayout.Y_AXIS));
+		bottommiddleright.setLayout(new BoxLayout(bottommiddleright, BoxLayout.Y_AXIS));
 
 		JPanel bottommiddlerighttop = new JPanel();
-		bottommiddlerighttop.setLayout(new BoxLayout(bottommiddlerighttop,
-				BoxLayout.X_AXIS));
+		bottommiddlerighttop.setLayout(new BoxLayout(bottommiddlerighttop, BoxLayout.X_AXIS));
 
 		JLabel bottommiddlerighttop_label_1 = new JLabel("POS");
 		bottommiddlerighttop.add(bottommiddlerighttop_label_1);
@@ -365,52 +424,45 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		bottommiddleright.add(bottommiddlerighttop);
 
 		JPanel bottommiddlerightbottom = new JPanel();
-		bottommiddlerightbottom.setLayout(new BoxLayout(
-				bottommiddlerightbottom, BoxLayout.X_AXIS));
+		bottommiddlerightbottom.setLayout(new BoxLayout(bottommiddlerightbottom, BoxLayout.X_AXIS));
 
 		bottommiddlerightbottom_button_1 = new JButton();
-		bottommiddlerightbottom_button_1.setIcon(Util
-				.getImageIcon("ServoOrchestrator/1.png"));
+		bottommiddlerightbottom_button_1.setIcon(Util.getImageIcon("ServoOrchestrator/1.png"));
 		bottommiddlerightbottom_button_1.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_1.setBorder(null);
 		bottommiddlerightbottom_button_1.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_1);
 
 		bottommiddlerightbottom_button_2 = new JButton();
-		bottommiddlerightbottom_button_2.setIcon(Util
-				.getImageIcon("ServoOrchestrator/2.png"));
+		bottommiddlerightbottom_button_2.setIcon(Util.getImageIcon("ServoOrchestrator/2.png"));
 		bottommiddlerightbottom_button_2.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_2.setBorder(null);
 		bottommiddlerightbottom_button_2.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_2);
 
 		bottommiddlerightbottom_button_3 = new JButton();
-		bottommiddlerightbottom_button_3.setIcon(Util
-				.getImageIcon("ServoOrchestrator/3.png"));
+		bottommiddlerightbottom_button_3.setIcon(Util.getImageIcon("ServoOrchestrator/3.png"));
 		bottommiddlerightbottom_button_3.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_3.setBorder(null);
 		bottommiddlerightbottom_button_3.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_3);
 
 		bottommiddlerightbottom_button_4 = new JButton();
-		bottommiddlerightbottom_button_4.setIcon(Util
-				.getImageIcon("ServoOrchestrator/4.png"));
+		bottommiddlerightbottom_button_4.setIcon(Util.getImageIcon("ServoOrchestrator/4.png"));
 		bottommiddlerightbottom_button_4.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_4.setBorder(null);
 		bottommiddlerightbottom_button_4.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_4);
 
 		bottommiddlerightbottom_button_5 = new JButton();
-		bottommiddlerightbottom_button_5.setIcon(Util
-				.getImageIcon("ServoOrchestrator/5.png"));
+		bottommiddlerightbottom_button_5.setIcon(Util.getImageIcon("ServoOrchestrator/5.png"));
 		bottommiddlerightbottom_button_5.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_5.setBorder(null);
 		bottommiddlerightbottom_button_5.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_5);
 
 		bottommiddlerightbottom_button_6 = new JButton();
-		bottommiddlerightbottom_button_6.setIcon(Util
-				.getImageIcon("ServoOrchestrator/6.png"));
+		bottommiddlerightbottom_button_6.setIcon(Util.getImageIcon("ServoOrchestrator/6.png"));
 		bottommiddlerightbottom_button_6.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_6.setBorder(null);
 		bottommiddlerightbottom_button_6.addActionListener(this);
@@ -418,16 +470,14 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_6);
 
 		bottommiddlerightbottom_button_7 = new JButton();
-		bottommiddlerightbottom_button_7.setIcon(Util
-				.getImageIcon("ServoOrchestrator/7.png"));
+		bottommiddlerightbottom_button_7.setIcon(Util.getImageIcon("ServoOrchestrator/7.png"));
 		bottommiddlerightbottom_button_7.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_7.setBorder(null);
 		bottommiddlerightbottom_button_7.addActionListener(this);
 		bottommiddlerightbottom.add(bottommiddlerightbottom_button_7);
 
 		bottommiddlerightbottom_button_8 = new JButton();
-		bottommiddlerightbottom_button_8.setIcon(Util
-				.getImageIcon("ServoOrchestrator/8.png"));
+		bottommiddlerightbottom_button_8.setIcon(Util.getImageIcon("ServoOrchestrator/8.png"));
 		bottommiddlerightbottom_button_8.setMargin(new Insets(0, 0, 0, 0));
 		// bottommiddlerightbottom_button_8.setBorder(null);
 		bottommiddlerightbottom_button_8.addActionListener(this);
@@ -435,11 +485,8 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 
 		bottommiddleright.add(bottommiddlerightbottom);
 
-		JSplitPane splitpane_bottommiddleleft_bottommiddleright = new JSplitPane(
-				JSplitPane.HORIZONTAL_SPLIT, bottommiddleleft,
-				bottommiddleright);
-		splitpane_bottommiddleleft_bottommiddleright
-				.setOneTouchExpandable(true);
+		JSplitPane splitpane_bottommiddleleft_bottommiddleright = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bottommiddleleft, bottommiddleright);
+		splitpane_bottommiddleleft_bottommiddleright.setOneTouchExpandable(true);
 
 		bottommiddle.add(splitpane_bottommiddleleft_bottommiddleright);
 
@@ -451,118 +498,28 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		bottomright_click_checkbox.addItemListener(this);
 		bottomright.add(bottomright_click_checkbox);
 
-		JSplitPane splitpane_bottommiddle_bottomright = new JSplitPane(
-				JSplitPane.HORIZONTAL_SPLIT, bottommiddle, bottomright);
+		JSplitPane splitpane_bottommiddle_bottomright = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bottommiddle, bottomright);
 		splitpane_bottommiddle_bottomright.setOneTouchExpandable(true);
 
 		bottommiddlebottomright.add(splitpane_bottommiddle_bottomright);
 
-		JSplitPane splitpane_bottomleft_bottommiddlebottomright = new JSplitPane(
-				JSplitPane.HORIZONTAL_SPLIT, bottomleft,
-				bottommiddlebottomright);
-		splitpane_bottomleft_bottommiddlebottomright
-				.setOneTouchExpandable(true);
+		JSplitPane splitpane_bottomleft_bottommiddlebottomright = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bottomleft, bottommiddlebottomright);
+		splitpane_bottomleft_bottommiddlebottomright.setOneTouchExpandable(true);
 
 		bottom.add(splitpane_bottomleft_bottommiddlebottomright);
 
-		JSplitPane splitpane_middle_bottom = new JSplitPane(
-				JSplitPane.VERTICAL_SPLIT, middle, bottom);
+		JSplitPane splitpane_middle_bottom = new JSplitPane(JSplitPane.VERTICAL_SPLIT, middle, bottom);
 		splitpane_middle_bottom.setOneTouchExpandable(true);
 		// splitpane_middle_bottom.setDividerLocation(700);
 
 		middlebottom.add(splitpane_middle_bottom);
 
-		JSplitPane splitpane_top_middlebottom = new JSplitPane(
-				JSplitPane.VERTICAL_SPLIT, top, middlebottom);
+		JSplitPane splitpane_top_middlebottom = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, middlebottom);
 		splitpane_top_middlebottom.setOneTouchExpandable(true);
 		// splitpane_top_middlebottom.setDividerLocation(50);
 
 		// splitpane_top_middlebottom.pack();
 		display.add(splitpane_top_middlebottom);
-	}
-
-	public void getState(_TemplateService template) {
-		// I think I should do something with this ...
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
-	}
-
-	@Override
-	public void attachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
-
-		// subscribe("publishState", "getState", _TemplateService.class);
-		// send("publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
-
-		// unsubscribe("publishState", "getState", _TemplateService.class);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent ae) {
-		Object o = ae.getSource();
-
-		// Button - Events
-		if (o == top_save_button) {
-			myService.send(boundServiceName, "top_save_button");
-		} else if (o == top_load_button) {
-			myService.send(boundServiceName, "top_load_button");
-		} else if (o == top_addservo_button) {
-			myService.send(boundServiceName, "top_addservo_button");
-		} else if (o == middleright_update_button) {
-			myService.send(boundServiceName, "middleright_update_button");
-		} else if (o == middleright_attach_button) {
-			myService.send(boundServiceName, "middleright_attach_button");
-		} else if (o == middleleft_timeunitadd_button) {
-			myService.send(boundServiceName, "middleleft_timeunitadd_button");
-		} else if (o == middleleft_timeunitremove_button) {
-			myService
-					.send(boundServiceName, "middleleft_timeunitremove_button");
-		} else if (o == middleleft_channeladd_button) {
-			myService.send(boundServiceName, "middleleft_channeladd_button");
-		} else if (o == middleleft_channelremove_button) {
-			myService.send(boundServiceName, "middleleft_channelremove_button");
-		} else if (o == bottommiddleleft_update_button) {
-			// TODO - add functionality
-		} else if (o == bottommiddlerighttop_update_button) {
-			myService.send(boundServiceName,
-					"bottommiddlerighttop_update_button");
-		} else if (o == bottommiddlerightbottom_button_1) {
-			myService
-					.send(boundServiceName, "bottommiddlerightbottom_button_1");
-		} else if (o == bottommiddlerightbottom_button_2) {
-			myService
-					.send(boundServiceName, "bottommiddlerightbottom_button_2");
-		} else if (o == bottommiddlerightbottom_button_3) {
-			myService
-					.send(boundServiceName, "bottommiddlerightbottom_button_3");
-		} else if (o == bottommiddlerightbottom_button_4) {
-			myService
-					.send(boundServiceName, "bottommiddlerightbottom_button_4");
-		} else if (o == bottommiddlerightbottom_button_5) {
-			myService
-					.send(boundServiceName, "bottommiddlerightbottom_button_5");
-		} else if (o == bottommiddlerightbottom_button_6) {
-			myService
-					.send(boundServiceName, "bottommiddlerightbottom_button_6");
-		} else if (o == bottommiddlerightbottom_button_7) {
-			myService
-					.send(boundServiceName, "bottommiddlerightbottom_button_7");
-		} else if (o == bottommiddlerightbottom_button_8) {
-			myService
-					.send(boundServiceName, "bottommiddlerightbottom_button_8");
-		}
-
-		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
@@ -585,20 +542,5 @@ public class ServoOrchestratorGUI extends ServiceGUI implements ActionListener,
 		} else if (o == middleright_pin_list) {
 			// TODO - add functionality - Do I have to do this?
 		}
-	}
-
-	public void externalcall_loadsettings(int pos) {
-		myService.send(boundServiceName, "externalcall_loadsettings", pos);
-	}
-
-	public void externalcall_servopanelchangeinfo(int x, int y) {
-		myService.send(boundServiceName, "externalcall_servopanelchangeinfo",
-				x, y);
-	}
-
-	public void externalcall_servopanelsettostartpos(int x, int y,
-			boolean withgoal) {
-		myService.send(boundServiceName,
-				"externalcall_servopanelsettostartpos", x, y, withgoal);
 	}
 }

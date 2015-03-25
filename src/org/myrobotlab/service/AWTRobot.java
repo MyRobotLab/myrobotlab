@@ -29,35 +29,6 @@ import org.slf4j.Logger;
 
 public class AWTRobot extends Service {
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(AWTRobot.class
-			.getCanonicalName());
-	transient private Robot robot;
-	transient private Point mousePos;
-	transient private Point oldMousePos;
-	transient private Rectangle maxBounds;
-	transient private Rectangle bounds;
-	transient private Dimension resizedBounds;
-	transient private VideoSources videoSources;
-	transient public final static int BUTTON1_MASK = InputEvent.BUTTON1_MASK;
-	transient public final static int BUTTON2_MASK = InputEvent.BUTTON2_MASK;
-	transient public final static int BUTTON3_MASK = InputEvent.BUTTON3_MASK;
-	transient public final static int SHIFT_DOWN_MASK = KeyEvent.SHIFT_DOWN_MASK;
-	transient public final static int CTRL_DOWN_MASK = KeyEvent.CTRL_DOWN_MASK;
-	transient public final static int ALT_DOWN_MASK = KeyEvent.ALT_DOWN_MASK;
-
-	public class MouseData implements Serializable {
-		private static final long serialVersionUID = 1L;
-		float x = 0;
-		float y = 0;
-
-		public MouseData(float x, float y) {
-			this.x = x;
-			this.y = y;
-		}
-	}
-
 	public class KeyData implements Serializable {
 		private static final long serialVersionUID = 1L;
 		char c = 0;
@@ -71,33 +42,38 @@ public class AWTRobot extends Service {
 		}
 	}
 
+	public class MouseData implements Serializable {
+		private static final long serialVersionUID = 1L;
+		float x = 0;
+		float y = 0;
+
+		public MouseData(float x, float y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
+
 	public class MouseThread implements Runnable {
 		public Thread thread = null;
 		private boolean isRunning = true;
 		public String name;
 
 		MouseThread(String name) {
-			this.name=name;
+			this.name = name;
 			thread = new Thread(this, getName() + "_polling_thread");
 			thread.start();
 		}
 
+		@Override
 		public void run() {
 			try {
 				while (isRunning) {
 					mousePos = MouseInfo.getPointerInfo().getLocation();
 					if (!mousePos.equals(oldMousePos)) {
-						invoke("publishMouseX", new Float(
-								((float) mousePos.x / maxBounds.getWidth())));
-						invoke("publishMouseY", new Float(
-								((float) mousePos.y / maxBounds.getHeight())));
-						invoke("publishMouse",
-								new MouseData((float) mousePos.x
-										/ (float) maxBounds.getWidth(),
-										(float) mousePos.y
-												/ (float) maxBounds.getHeight()));
-						invoke("publishMouseRaw", new MouseData(
-								(float) mousePos.x, (float) mousePos.y));
+						invoke("publishMouseX", new Float((mousePos.x / maxBounds.getWidth())));
+						invoke("publishMouseY", new Float((mousePos.y / maxBounds.getHeight())));
+						invoke("publishMouse", new MouseData(mousePos.x / (float) maxBounds.getWidth(), mousePos.y / (float) maxBounds.getHeight()));
+						invoke("publishMouseRaw", new MouseData(mousePos.x, mousePos.y));
 					}
 					oldMousePos = mousePos;
 					BufferedImage bi = robot.createScreenCapture(bounds);
@@ -105,25 +81,19 @@ public class AWTRobot extends Service {
 					if (resizedBounds != null) {
 						// System.out.println(mousePos.,"+
 						// mousePos.y*normalizeBounds.height/bounds.height);
-						bi = AWTRobot.resize(bi, resizedBounds.width,
-								resizedBounds.height);
+						bi = AWTRobot.resize(bi, resizedBounds.width, resizedBounds.height);
 						java.awt.Graphics g = bi.getGraphics();
 						g.setColor(Color.blue);
-						g.fillOval(
-								((mousePos.x - (int) bounds.getMinX()) * resizedBounds.width)
-										/ bounds.width - 2,
-								((mousePos.y - (int) bounds.getMinY()) * resizedBounds.height)
-										/ bounds.height - 2, 5, 5);
+						g.fillOval(((mousePos.x - (int) bounds.getMinX()) * resizedBounds.width) / bounds.width - 2, ((mousePos.y - (int) bounds.getMinY()) * resizedBounds.height)
+								/ bounds.height - 2, 5, 5);
 					} else {
 						java.awt.Graphics g = bi.getGraphics();
 						g.setColor(Color.blue);
-						g.fillOval(mousePos.x - (int) bounds.getMinX() - 2,
-								mousePos.y - (int) bounds.getMinY() - 2, 5, 5);
+						g.fillOval(mousePos.x - (int) bounds.getMinX() - 2, mousePos.y - (int) bounds.getMinY() - 2, 5, 5);
 					}
-					SerializableImage si = new SerializableImage(bi,
-							"screenshot");
+					SerializableImage si = new SerializableImage(bi, "screenshot");
 					invoke("publishDisplay", si);
-					//videoSources.put(name, "input",si);
+					// videoSources.put(name, "input",si);
 					Thread.sleep(100);
 				}
 			} catch (InterruptedException e) {
@@ -133,111 +103,68 @@ public class AWTRobot extends Service {
 		}
 	}
 
-	public AWTRobot(String n) {
-		super(n);
-	}
+	private static final long serialVersionUID = 1L;
 
-	@Override
-	public String getDescription() {
-		return "based on Robot class,allows control of mouse/keyboard/screen capture";
-	}
+	public final static Logger log = LoggerFactory.getLogger(AWTRobot.class.getCanonicalName());
 
-	@Override
-	public void stopService() {
-		super.stopService();
-		robot = null;
-	}
+	transient private Robot robot;
+	transient private Point mousePos;
+	transient private Point oldMousePos;
+	transient private Rectangle maxBounds;
+	transient private Rectangle bounds;
+	transient private Dimension resizedBounds;
+	transient private VideoSources videoSources;
+	transient public final static int BUTTON1_MASK = InputEvent.BUTTON1_MASK;
+	transient public final static int BUTTON2_MASK = InputEvent.BUTTON2_MASK;
+	transient public final static int BUTTON3_MASK = InputEvent.BUTTON3_MASK;
 
-	@Override
-	public void releaseService() {
-		super.releaseService();
-		robot = null;
-	}
+	transient public final static int SHIFT_DOWN_MASK = KeyEvent.SHIFT_DOWN_MASK;
 
-	// publish methods -------------------------
-	public Float publishMouseX(Float value) {
-		return value;
-	}
+	transient public final static int CTRL_DOWN_MASK = KeyEvent.CTRL_DOWN_MASK;
 
-	public Float publishMouseY(Float value) {
-		return value;
-	}
+	transient public final static int ALT_DOWN_MASK = KeyEvent.ALT_DOWN_MASK;
 
-	public MouseData publishMouseRaw(MouseData value) {
-		return value;
-	}
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
 
-	public MouseData publishMouse(MouseData value) {
-		return value;
-	}
+		// Runtime.createAndStart("java", "Java");
+		Runtime.createAndStart("gui", "GUIService");
+		AWTRobot awt = (AWTRobot) Runtime.createAndStart("awt", "AWTRobot");
+		awt.setBounds(0, 0, 100, 100);
+		TesseractOCR tess = (TesseractOCR) Runtime.createAndStart("tess", "TesseractOCR");
+		tess.subscribe("publishDisplay", awt.getName(), "OCR");
+		// new TIFFImageWriteParam();
+		// mouse.setBounds(new Rectangle(500,500));
+		// VideoStreamer
+		// stream=(VideoStreamer)Runtime.createAndStart("stream","VideoStreamer");
+		// stream.subscribe("publishDisplay", mouse.getName(), "publishDisplay",
+		// SerializableImage.class);
 
-	public SerializableImage publishDisplay(SerializableImage value) {
-		return value;
+		/*
+		 * GUIService gui = new GUIService("gui"); gui.startService();
+		 */
 	}
-
-	// end publish methods-----------------------
 
 	private static BufferedImage resize(BufferedImage img, int newW, int newH) {
 		int w = img.getWidth();
 		int h = img.getHeight();
 		BufferedImage dimg = new BufferedImage(newW, newH, img.getType());
 		Graphics2D g = dimg.createGraphics();
-		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-				RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g.drawImage(img, 0, 0, newW, newH, 0, 0, w, h, null);
 		g.dispose();
 		return dimg;
 	}
 
-	public void setResize(Dimension bounds) {
-		resizedBounds = bounds;
-	}
-
-	public void setResize(int x, int y) {
-		resizedBounds = new Dimension(x, y);
-	}
-
-	public Dimension getResize() {
-		return resizedBounds;
-	}
-
-	public Rectangle getBounds() {
-		return bounds;
-	}
-
-	public Rectangle getMaxBounds() {
-		return maxBounds;
-	}
-
-	public void setBounds(Rectangle rect) {
-//		System.out.println("maxBounds="+maxBounds);
-		bounds = maxBounds.intersection(rect);
-	}
-
-	public void setBounds(int x, int y, int width, int height) {
-//		System.out.println("maxBounds="+maxBounds);
-		bounds = maxBounds.intersection(new Rectangle(x, y, width, height));
-	}
-
-	public void moveTo(MouseData value) {
-		robot.mouseMove((int) (value.x * (float) maxBounds.width),
-				(int) (value.y * (float) maxBounds.height));
-	}
-
-	// 0.0 - 1.0 scaled to full screen dimenstions
-	public void moveTo(float x1, float y1) {
-		robot.mouseMove((int) ((float) x1 * (float) maxBounds.width),
-				(int) (y1 * (float) maxBounds.height));
-	}
-
-	// pixel coordinates
-	public void moveTo(int x1, int y1) {
-		robot.mouseMove(x1, y1);
+	public AWTRobot(String n) {
+		super(n);
 	}
 
 	// buttons = use bit mask constants
 	public void click(final int buttons) {
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				robot.mousePress(buttons);
 				try {
@@ -251,78 +178,18 @@ public class AWTRobot extends Service {
 		}).start();
 	}
 
-	// type a real key
-	public void type(final char c) {
-		new Thread(new Runnable() {
-			public void run() {
-				KeyData cc = getKeyEventFromChar(c);
-				int keyCode = cc.keyCode;
-				if ((cc.keyCode & AWTRobot.SHIFT_DOWN_MASK) == AWTRobot.SHIFT_DOWN_MASK) {
-					robot.keyPress(KeyEvent.VK_SHIFT);
-				}
-				if ((cc.keyCode & AWTRobot.CTRL_DOWN_MASK) == AWTRobot.CTRL_DOWN_MASK) {
-					robot.keyPress(KeyEvent.VK_CONTROL);
-				}
-				if ((cc.keyCode & AWTRobot.ALT_DOWN_MASK) == AWTRobot.ALT_DOWN_MASK) {
-					robot.keyPress(KeyEvent.VK_ALT);
-				}
-				robot.keyPress(keyCode);
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				robot.keyRelease(keyCode);
-				if ((cc.keyCode & AWTRobot.SHIFT_DOWN_MASK) == AWTRobot.SHIFT_DOWN_MASK) {
-					robot.keyRelease(KeyEvent.VK_SHIFT);
-				}
-				if ((cc.keyCode & AWTRobot.CTRL_DOWN_MASK) == AWTRobot.CTRL_DOWN_MASK) {
-					robot.keyRelease(KeyEvent.VK_CONTROL);
-				}
-				if ((cc.keyCode & AWTRobot.ALT_DOWN_MASK) == AWTRobot.ALT_DOWN_MASK) {
-					robot.keyRelease(KeyEvent.VK_ALT);
-				}
-
-			}
-		}).start();
+	public Rectangle getBounds() {
+		return bounds;
 	}
 
-	// type a string
-	public void type(final String s) {
-		new Thread(new Runnable() {
-			public void run() {
-				for (char c : s.toCharArray()) {
-					KeyData cc = getKeyEventFromChar(c);
-					int bb = cc.keyCode;
-					int keyCode = cc.keyCode;
-					if ((cc.keyCode & AWTRobot.SHIFT_DOWN_MASK) == AWTRobot.SHIFT_DOWN_MASK) {
-						robot.keyPress(KeyEvent.VK_SHIFT);
-					}
-					if ((cc.keyCode & AWTRobot.CTRL_DOWN_MASK) == AWTRobot.CTRL_DOWN_MASK) {
-						robot.keyPress(KeyEvent.VK_CONTROL);
-					}
-					if ((cc.keyCode & AWTRobot.ALT_DOWN_MASK) == AWTRobot.ALT_DOWN_MASK) {
-						robot.keyPress(KeyEvent.VK_ALT);
-					}
-					robot.keyPress(bb);
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					robot.keyRelease(bb);
-					if ((cc.keyCode & AWTRobot.SHIFT_DOWN_MASK) == AWTRobot.SHIFT_DOWN_MASK) {
-						robot.keyRelease(KeyEvent.VK_SHIFT);
-					}
-					if ((cc.keyCode & AWTRobot.CTRL_DOWN_MASK) == AWTRobot.CTRL_DOWN_MASK) {
-						robot.keyRelease(KeyEvent.VK_CONTROL);
-					}
-					if ((cc.keyCode & AWTRobot.ALT_DOWN_MASK) == AWTRobot.ALT_DOWN_MASK) {
-						robot.keyRelease(KeyEvent.VK_ALT);
-					}
-				}
-			}
-		}).start();
+	@Override
+	public String[] getCategories() {
+		return new String[] { "display" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "based on Robot class,allows control of mouse/keyboard/screen capture";
 	}
 
 	private KeyData getKeyEventFromChar(final char c) {
@@ -655,19 +522,88 @@ public class AWTRobot extends Service {
 		default:
 			throw new IllegalArgumentException("Cannot type character " + c);
 		}
-		return new KeyData(c, press, shift ? KeyEvent.SHIFT_DOWN_MASK : 0);
+		return new KeyData(c, press, shift ? InputEvent.SHIFT_DOWN_MASK : 0);
 	}
-	
-	public void startService(){
-		videoSources =new VideoSources();
+
+	public Rectangle getMaxBounds() {
+		return maxBounds;
+	}
+
+	// end publish methods-----------------------
+
+	public Dimension getResize() {
+		return resizedBounds;
+	}
+
+	// 0.0 - 1.0 scaled to full screen dimenstions
+	public void moveTo(float x1, float y1) {
+		robot.mouseMove((int) (x1 * maxBounds.width), (int) (y1 * maxBounds.height));
+	}
+
+	// pixel coordinates
+	public void moveTo(int x1, int y1) {
+		robot.mouseMove(x1, y1);
+	}
+
+	public void moveTo(MouseData value) {
+		robot.mouseMove((int) (value.x * maxBounds.width), (int) (value.y * maxBounds.height));
+	}
+
+	public SerializableImage publishDisplay(SerializableImage value) {
+		return value;
+	}
+
+	public MouseData publishMouse(MouseData value) {
+		return value;
+	}
+
+	public MouseData publishMouseRaw(MouseData value) {
+		return value;
+	}
+
+	// publish methods -------------------------
+	public Float publishMouseX(Float value) {
+		return value;
+	}
+
+	public Float publishMouseY(Float value) {
+		return value;
+	}
+
+	@Override
+	public void releaseService() {
+		super.releaseService();
+		robot = null;
+	}
+
+	public void setBounds(int x, int y, int width, int height) {
+		// System.out.println("maxBounds="+maxBounds);
+		bounds = maxBounds.intersection(new Rectangle(x, y, width, height));
+	}
+
+	public void setBounds(Rectangle rect) {
+		// System.out.println("maxBounds="+maxBounds);
+		bounds = maxBounds.intersection(rect);
+	}
+
+	public void setResize(Dimension bounds) {
+		resizedBounds = bounds;
+	}
+
+	public void setResize(int x, int y) {
+		resizedBounds = new Dimension(x, y);
+	}
+
+	@Override
+	public void startService() {
+		videoSources = new VideoSources();
 		try {
 			robot = new Robot();
 		} catch (AWTException e) {
 			e.printStackTrace();
 		}
 		maxBounds = new Rectangle();
-		GraphicsEnvironment ge = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] gs = ge.getScreenDevices();
 		for (int j = 0; j < gs.length; j++) {
 			GraphicsDevice gd = gs[j];
@@ -678,35 +614,88 @@ public class AWTRobot extends Service {
 		}
 		bounds = (Rectangle) maxBounds.clone();
 		resizedBounds = new Dimension(800, 600);
-		new MouseThread(this.getName());		
+		new MouseThread(this.getName());
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		//Runtime.createAndStart("java", "Java");
-		Runtime.createAndStart("gui", "GUIService");
-		AWTRobot awt = (AWTRobot) Runtime.createAndStart("awt", "AWTRobot");
-		awt.setBounds(0, 0, 100, 100);
-		TesseractOCR tess = (TesseractOCR) Runtime.createAndStart("tess",
-				"TesseractOCR");
-		tess.subscribe("publishDisplay", awt.getName(), "OCR");
-		// new TIFFImageWriteParam();
-		// mouse.setBounds(new Rectangle(500,500));
-		// VideoStreamer
-		// stream=(VideoStreamer)Runtime.createAndStart("stream","VideoStreamer");
-		// stream.subscribe("publishDisplay", mouse.getName(), "publishDisplay",
-		// SerializableImage.class);
-
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
-		 */
-	}
-	
 	@Override
-	public String[] getCategories() {
-		return new String[] {"display"};
+	public void stopService() {
+		super.stopService();
+		robot = null;
+	}
+
+	// type a real key
+	public void type(final char c) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				KeyData cc = getKeyEventFromChar(c);
+				int keyCode = cc.keyCode;
+				if ((cc.keyCode & AWTRobot.SHIFT_DOWN_MASK) == AWTRobot.SHIFT_DOWN_MASK) {
+					robot.keyPress(KeyEvent.VK_SHIFT);
+				}
+				if ((cc.keyCode & AWTRobot.CTRL_DOWN_MASK) == AWTRobot.CTRL_DOWN_MASK) {
+					robot.keyPress(KeyEvent.VK_CONTROL);
+				}
+				if ((cc.keyCode & AWTRobot.ALT_DOWN_MASK) == AWTRobot.ALT_DOWN_MASK) {
+					robot.keyPress(KeyEvent.VK_ALT);
+				}
+				robot.keyPress(keyCode);
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				robot.keyRelease(keyCode);
+				if ((cc.keyCode & AWTRobot.SHIFT_DOWN_MASK) == AWTRobot.SHIFT_DOWN_MASK) {
+					robot.keyRelease(KeyEvent.VK_SHIFT);
+				}
+				if ((cc.keyCode & AWTRobot.CTRL_DOWN_MASK) == AWTRobot.CTRL_DOWN_MASK) {
+					robot.keyRelease(KeyEvent.VK_CONTROL);
+				}
+				if ((cc.keyCode & AWTRobot.ALT_DOWN_MASK) == AWTRobot.ALT_DOWN_MASK) {
+					robot.keyRelease(KeyEvent.VK_ALT);
+				}
+
+			}
+		}).start();
+	}
+
+	// type a string
+	public void type(final String s) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for (char c : s.toCharArray()) {
+					KeyData cc = getKeyEventFromChar(c);
+					int bb = cc.keyCode;
+					int keyCode = cc.keyCode;
+					if ((cc.keyCode & AWTRobot.SHIFT_DOWN_MASK) == AWTRobot.SHIFT_DOWN_MASK) {
+						robot.keyPress(KeyEvent.VK_SHIFT);
+					}
+					if ((cc.keyCode & AWTRobot.CTRL_DOWN_MASK) == AWTRobot.CTRL_DOWN_MASK) {
+						robot.keyPress(KeyEvent.VK_CONTROL);
+					}
+					if ((cc.keyCode & AWTRobot.ALT_DOWN_MASK) == AWTRobot.ALT_DOWN_MASK) {
+						robot.keyPress(KeyEvent.VK_ALT);
+					}
+					robot.keyPress(bb);
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					robot.keyRelease(bb);
+					if ((cc.keyCode & AWTRobot.SHIFT_DOWN_MASK) == AWTRobot.SHIFT_DOWN_MASK) {
+						robot.keyRelease(KeyEvent.VK_SHIFT);
+					}
+					if ((cc.keyCode & AWTRobot.CTRL_DOWN_MASK) == AWTRobot.CTRL_DOWN_MASK) {
+						robot.keyRelease(KeyEvent.VK_CONTROL);
+					}
+					if ((cc.keyCode & AWTRobot.ALT_DOWN_MASK) == AWTRobot.ALT_DOWN_MASK) {
+						robot.keyRelease(KeyEvent.VK_ALT);
+					}
+				}
+			}
+		}).start();
 	}
 }

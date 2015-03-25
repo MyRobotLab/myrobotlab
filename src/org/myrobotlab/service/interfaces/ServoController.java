@@ -57,6 +57,19 @@ public interface ServoController {
 	public boolean servoAttach(String servoName, Integer pin);
 
 	/**
+	 * servoDetach - detach the servo from a specific pin on the controller
+	 * 
+	 * @param name
+	 *            - name of the servo
+	 * @return boolean
+	 */
+	boolean servoDetach(String servoName);
+
+	void servoSweepStart(String servoName, int min, int max, int step);
+
+	public void servoSweepStop(String servoName);
+
+	/**
 	 * servoWrite - move the servo at an angle between 0 - 180
 	 * 
 	 * @param name
@@ -66,18 +79,10 @@ public interface ServoController {
 	 * @return void
 	 */
 	void servoWrite(String servoName, Integer newPos);
-	
-	void servoSweepStart(String servoName, int min, int max, int step);
 
+	public void servoWriteMicroseconds(String name, Integer ms);
 
-	/**
-	 * servoDetach - detach the servo from a specific pin on the controller
-	 * 
-	 * @param name
-	 *            - name of the servo
-	 * @return boolean
-	 */
-	boolean servoDetach(String servoName);
+	public boolean setServoEventsEnabled(String servoName, boolean b);
 
 	/**
 	 * return the current pin this servo is attached to
@@ -85,14 +90,8 @@ public interface ServoController {
 	 * @param servoName
 	 * @return
 	 */
-	//public Integer getServoPin(String servoName);
+	// public Integer getServoPin(String servoName);
 
 	public void setServoSpeed(String servoName, Float speed);
-	
-	public void servoSweepStop(String servoName);
-
-	public boolean setServoEventsEnabled(String servoName, boolean b);
-
-	public void servoWriteMicroseconds(String name, Integer ms);
 
 }

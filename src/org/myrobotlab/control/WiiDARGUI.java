@@ -74,53 +74,29 @@ public class WiiDARGUI extends ServiceGUI implements ListSelectionListener, Vide
 	public Random rand = new Random();
 	public IRData lastIRData = null;
 
+	final String leftstr = "left";
+
+	final String rightstr = "right";
+
+	boolean calibrating = true;
+
+	int servoRightMax = 0;
+
+	IRData irRightMax = null;
+
+	int servoLeftMax = 0;
+
+	IRData irLeftMax = null;
+	int vheight = height / xyScale;
+	int vwidth = width / xyScale;
+
+	ArrayList<Point> hist = new ArrayList<Point>();
+	boolean staticInfo = false;
+	DecimalFormat df = new DecimalFormat("#.##");
+	int cnt = 0;
+
 	public WiiDARGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
-	}
-
-	public void init() {
-		screen = new VideoWidget(boundServiceName, myService, tabs);
-		screen.init();
-
-		camImage = new BufferedImage(width / xyScale, height / xyScale, BufferedImage.TYPE_INT_RGB);
-		graphImage = new BufferedImage(width / xyScale, height / xyScale, BufferedImage.TYPE_INT_RGB);
-
-		cam = camImage.getGraphics();
-		graph = graphImage.getGraphics();
-
-		graph.setColor(Color.green);
-
-		screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
-
-		gc.gridx = 0;
-		gc.gridy = 0;
-		gc.gridheight = 4;
-		gc.gridwidth = 2;
-		display.add(screen.display, gc);
-
-		gc.gridx = 2;
-
-		gc.gridx = 0;
-		gc.gridheight = 1;
-		gc.gridwidth = 1;
-		gc.gridy = 5;
-
-		setCurrentFilterMouseListener();
-
-	}
-
-	protected ImageIcon createImageIcon(String path, String description) {
-		java.net.URL imgURL = getClass().getResource(path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL, description);
-		} else {
-			System.err.println("Couldn't find file: " + path);
-			return null;
-		}
-	}
-
-	public void displayFrame(SerializableImage camImage) {
-		screen.displayFrame(camImage);
 	}
 
 	@Override
@@ -135,6 +111,16 @@ public class WiiDARGUI extends ServiceGUI implements ListSelectionListener, Vide
 		subscribe("setCalibrating", "setCalibrating", Boolean.class);
 	}
 
+	protected ImageIcon createImageIcon(String path, String description) {
+		java.net.URL imgURL = getClass().getResource(path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL, description);
+		} else {
+			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
+	}
+
 	@Override
 	public void detachGUI() {
 		// unsubscribe("publishIR", "publishIR",
@@ -147,48 +133,9 @@ public class WiiDARGUI extends ServiceGUI implements ListSelectionListener, Vide
 		unsubscribe("setCalibrating", "setCalibrating", Boolean.class);
 	}
 
-	final String leftstr = "left";
-	final String rightstr = "right";
-	boolean calibrating = true;
-
-	int servoRightMax = 0;
-	IRData irRightMax = null;
-	int servoLeftMax = 0;
-	IRData irLeftMax = null;
-
-	// inbound from publish points
-	public Integer setServoLeftMax(Integer max) {
-		servoLeftMax = max;
-		return max;
+	public void displayFrame(SerializableImage camImage) {
+		screen.displayFrame(camImage);
 	}
-
-	public Integer setServoRightMax(Integer max) {
-		servoRightMax = max;
-		return max;
-	}
-
-	public IRData setIRLeftMax(IRData max) {
-		irLeftMax = max;
-		return max;
-	}
-
-	public IRData setIRRightMax(IRData max) {
-		irRightMax = max;
-		return max;
-	}
-
-	public Boolean setCalibrating(Boolean t) {
-		calibrating = t;
-		return t;
-	}
-
-	public ArrayList<Point> publishSweepData(ArrayList<Point> d) {
-		displaySweepData(d);
-		return d;
-	}
-
-	int vheight = height / xyScale;
-	int vwidth = width / xyScale;
 
 	// TODO - check for copy/ref of parameter moved locally
 	// TODO remove IREven
@@ -280,27 +227,6 @@ public class WiiDARGUI extends ServiceGUI implements ListSelectionListener, Vide
 
 	}
 
-	// TODO - encapsulate this
-	// MouseListener mouseListener = new MouseAdapter() {
-	public void setCurrentFilterMouseListener() {
-		MouseListener mouseListener = new MouseAdapter() {
-			public void mouseClicked(MouseEvent mouseEvent) {
-				JList theList = (JList) mouseEvent.getSource();
-				if (mouseEvent.getClickCount() == 2) {
-					int index = theList.locationToIndex(mouseEvent.getPoint());
-					if (index >= 0) {
-						Object o = theList.getModel().getElementAt(index);
-						System.out.println("Double-clicked on: " + o.toString());
-					}
-				}
-			}
-		};
-
-	}
-
-	ArrayList<Point> hist = new ArrayList<Point>();
-	boolean staticInfo = false;
-
 	public void drawStaticInfo() {
 		graph.setColor(Color.gray);
 
@@ -324,8 +250,42 @@ public class WiiDARGUI extends ServiceGUI implements ListSelectionListener, Vide
 		staticInfo = true;
 	}
 
-	DecimalFormat df = new DecimalFormat("#.##");
-	int cnt = 0;
+	@Override
+	public VideoWidget getLocalDisplay() {
+		return screen;
+	}
+
+	@Override
+	public void init() {
+		screen = new VideoWidget(boundServiceName, myService, tabs);
+		screen.init();
+
+		camImage = new BufferedImage(width / xyScale, height / xyScale, BufferedImage.TYPE_INT_RGB);
+		graphImage = new BufferedImage(width / xyScale, height / xyScale, BufferedImage.TYPE_INT_RGB);
+
+		cam = camImage.getGraphics();
+		graph = graphImage.getGraphics();
+
+		graph.setColor(Color.green);
+
+		screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
+
+		gc.gridx = 0;
+		gc.gridy = 0;
+		gc.gridheight = 4;
+		gc.gridwidth = 2;
+		display.add(screen.display, gc);
+
+		gc.gridx = 2;
+
+		gc.gridx = 0;
+		gc.gridheight = 1;
+		gc.gridwidth = 1;
+		gc.gridy = 5;
+
+		setCurrentFilterMouseListener();
+
+	}
 
 	public Point publishSinglePoint(Point p) {
 		int x;
@@ -430,9 +390,54 @@ public class WiiDARGUI extends ServiceGUI implements ListSelectionListener, Vide
 		return p;
 	}
 
-	@Override
-	public VideoWidget getLocalDisplay() {
-		return screen;
+	public ArrayList<Point> publishSweepData(ArrayList<Point> d) {
+		displaySweepData(d);
+		return d;
+	}
+
+	public Boolean setCalibrating(Boolean t) {
+		calibrating = t;
+		return t;
+	}
+
+	// TODO - encapsulate this
+	// MouseListener mouseListener = new MouseAdapter() {
+	public void setCurrentFilterMouseListener() {
+		MouseListener mouseListener = new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent mouseEvent) {
+				JList theList = (JList) mouseEvent.getSource();
+				if (mouseEvent.getClickCount() == 2) {
+					int index = theList.locationToIndex(mouseEvent.getPoint());
+					if (index >= 0) {
+						Object o = theList.getModel().getElementAt(index);
+						System.out.println("Double-clicked on: " + o.toString());
+					}
+				}
+			}
+		};
+
+	}
+
+	public IRData setIRLeftMax(IRData max) {
+		irLeftMax = max;
+		return max;
+	}
+
+	public IRData setIRRightMax(IRData max) {
+		irRightMax = max;
+		return max;
+	}
+
+	// inbound from publish points
+	public Integer setServoLeftMax(Integer max) {
+		servoLeftMax = max;
+		return max;
+	}
+
+	public Integer setServoRightMax(Integer max) {
+		servoRightMax = max;
+		return max;
 	}
 
 	@Override

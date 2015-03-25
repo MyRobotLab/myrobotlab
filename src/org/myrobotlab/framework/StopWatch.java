@@ -30,39 +30,9 @@ import java.util.TimeZone;
 
 public class StopWatch {
 	Calendar startCal;
+
 	Calendar endCal;
 	TimeZone tz = TimeZone.getTimeZone("PST");
-
-	/** Creates a new instance of StopWatch */
-	public StopWatch() {
-	}
-
-	public StopWatch(String tzoneStr) {
-		tz = TimeZone.getTimeZone(tzoneStr);
-	}
-
-	// Start the stopwatch
-	public void start() {
-		startCal = Calendar.getInstance(tz);
-	}
-
-	// Stop the stopwatch
-	public void end() {
-		endCal = Calendar.getInstance(tz);
-	}
-
-	// Measure the elapsed time in different units
-	public double elapsedSeconds() {
-		return (endCal.getTimeInMillis() - startCal.getTimeInMillis()) / 1000.0;
-	}
-
-	public long elapsedMillis() {
-		return endCal.getTimeInMillis() - startCal.getTimeInMillis();
-	}
-
-	public double elapsedMinutes() {
-		return (endCal.getTimeInMillis() - startCal.getTimeInMillis()) / (1000.0 * 60.0);
-	}
 
 	public static void main(String[] args) {
 		StopWatch sw = new StopWatch();
@@ -80,5 +50,36 @@ public class StopWatch {
 		System.out.println("Elapsed time in minutes: " + sw.elapsedMinutes());
 		System.out.println("Elapsed time in seconds: " + sw.elapsedSeconds());
 		System.out.println("Elapsed time in milliseconds: " + sw.elapsedMillis());
+	}
+
+	/** Creates a new instance of StopWatch */
+	public StopWatch() {
+	}
+
+	public StopWatch(String tzoneStr) {
+		tz = TimeZone.getTimeZone(tzoneStr);
+	}
+
+	public long elapsedMillis() {
+		return endCal.getTimeInMillis() - startCal.getTimeInMillis();
+	}
+
+	public double elapsedMinutes() {
+		return (endCal.getTimeInMillis() - startCal.getTimeInMillis()) / (1000.0 * 60.0);
+	}
+
+	// Measure the elapsed time in different units
+	public double elapsedSeconds() {
+		return (endCal.getTimeInMillis() - startCal.getTimeInMillis()) / 1000.0;
+	}
+
+	// Stop the stopwatch
+	public void end() {
+		endCal = Calendar.getInstance(tz);
+	}
+
+	// Start the stopwatch
+	public void start() {
+		startCal = Calendar.getInstance(tz);
 	}
 } // end of StopWatch class

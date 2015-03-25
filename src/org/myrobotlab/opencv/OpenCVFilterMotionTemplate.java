@@ -93,6 +93,35 @@ public class OpenCVFilterMotionTemplate extends OpenCVFilter {
 
 	IplImage motion = null;
 
+	public OpenCVFilterMotionTemplate() {
+		super();
+	}
+
+	public OpenCVFilterMotionTemplate(String name) {
+		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public IplImage process(IplImage image, OpenCVData data) {
+
+		// what can you expect? nothing? - if data != null then error?
+		if (motion == null) {
+			motion = cvCreateImage(cvSize(image.width(), image.height()), 8, 3);
+			cvZero(motion);
+			motion.origin(image.origin());
+		}
+
+		update_mhi(image, motion, 30);
+
+		return motion;
+	}
+
 	// parameters:
 	// img - input video frame
 	// dst - resultant motion picture
@@ -234,35 +263,6 @@ public class OpenCVFilterMotionTemplate extends OpenCVFilter {
 			cvLine(dst, center, cvPoint((int) (center.x() + magnitude * Math.cos(angle * Math.PI / 180)), (int) (center.y() - magnitude * Math.sin(angle * Math.PI / 180))), color,
 					3, CV_AA, 0);
 		}
-	}
-
-	public OpenCVFilterMotionTemplate()  {
-		super();
-	}
-	
-	public OpenCVFilterMotionTemplate(String name)  {
-		super(name);
-	}
-
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
-
-		// what can you expect? nothing? - if data != null then error?
-		if (motion == null) {
-			motion = cvCreateImage(cvSize(image.width(), image.height()), 8, 3);
-			cvZero(motion);
-			motion.origin(image.origin());
-		}
-
-		update_mhi(image, motion, 30);
-
-		return motion;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

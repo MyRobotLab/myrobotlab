@@ -46,6 +46,62 @@ import javax.swing.JInternalFrame;
  */
 public class Simulator {
 
+	private class SimulatorThread extends Thread {
+
+		private boolean stopped;
+
+		SimulatorThread() {
+			stopped = false;
+		}
+
+		public void requestStop() {
+			stopped = true;
+		}
+
+		@Override
+		public void run() {
+			setPriority(Thread.MAX_PRIORITY);
+			VirtualUniverse.setJ3DThreadPriority(Thread.MIN_PRIORITY);
+			int count = 0;
+			int rendererRate = 100000;
+			System.out.println("[SIM] Starting Background mode");
+			try {
+				// First wait a bit so J3d is settled ?
+				sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			world.stopRendering();
+			world.renderOnce();
+			// adjust fps update because we're running too fast to have precise
+			// measure
+			fps.setUpdateRate(rendererRate);
+			for (int i = 0; i < agents.size(); i++) {
+				SimpleAgent agent = (SimpleAgent) agents.get(i);
+				agent.reset();
+				if (agent instanceof Agent)
+					((Agent) agent).setFrameMeterRate(rendererRate);
+			}
+			initBehaviors();
+			// loop until flag change
+			while (!stopped) {
+				simulateOneStep();
+				count++;
+				if ((count % rendererRate) == 0) {
+					world.renderOnce();
+					// inspector update seems to cause memory leak (priority ?)
+					for (int i = 0; i < agents.size(); i++) {
+						Object o = agents.get(i);
+						if (o instanceof Agent)
+							((Agent) o).getAgentInspector().update();
+					}
+				}
+			}
+			System.out.println("[SIM] Stopping Background mode");
+			world.startRendering();
+		}
+	}
+
 	/**
 	 * Used for mutual exclusion. all methods accessing agents shoud use this
 	 * lock.
@@ -55,6 +111,7 @@ public class Simulator {
 	private JComponent applicationComponent;
 	World world; // link to associated world
 	FrameMeter fps; // for fps measurement
+
 	private Timer timer;
 
 	/** The list of all objects in the world. (static objects and agents). */
@@ -65,8 +122,8 @@ public class Simulator {
 
 	/** number of frames per virtual seconds - 20 is a good value */
 	private int framesPerSecond;
-
 	private float virtualTimeFactor;
+
 	/** Thread for the background mode */
 	private SimulatorThread simulatorThread;
 
@@ -76,11 +133,11 @@ public class Simulator {
 	/** Handles all algorithms and resources related to agent interactions. */
 	PhysicalEngine physicalEngine;
 
-	/** Count simulation steps. */
-	private long counter;
-
 	// /////////////////////////////////////////////////////
 	// CREATION / DESTRUCTION
+
+	/** Count simulation steps. */
+	private long counter;
 
 	/**
 	 * Constructs the simulator object
@@ -98,35 +155,6 @@ public class Simulator {
 		this.applicationComponent = applicationComponent;
 		lock = new Lock();
 		initialize(ed);
-	}
-
-	/** Initialize the simulator - only called once. */
-	private void initialize(EnvironmentDescription ed) {
-		counter = 0;
-		timer = null;
-		setFramesPerSecond(20);
-		setVirtualTimeFactor(1);
-		fps = new FrameMeter();
-		agents = new ArrayList();
-		objects = new ArrayList();
-		usePhysics = ed.usePhysics;
-		physicalEngine = new PhysicalEngine();
-
-		addMobileAndStaticObjects(ed);
-		createAgentsUI();
-	}
-
-	/** Dispose all ressources. only called once. */
-	public synchronized void dispose() {
-		stopSimulation();
-		// dirty - wait rendering end.
-		try {
-			Thread.sleep(500);
-		} catch (Exception e) {
-		}
-		for (int i = 0; i < agents.size(); i++)
-			((SimpleAgent) agents.get(i)).dispose();
-
 	}
 
 	/** Add all agents and objects. Only called once. */
@@ -179,8 +207,123 @@ public class Simulator {
 		}
 	}
 
+	/** Dispose all ressources. only called once. */
+	public synchronized void dispose() {
+		stopSimulation();
+		// dirty - wait rendering end.
+		try {
+			Thread.sleep(500);
+		} catch (Exception e) {
+		}
+		for (int i = 0; i < agents.size(); i++)
+			((SimpleAgent) agents.get(i)).dispose();
+
+	}
+
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// SIMULATION LOOP
+
+	public ArrayList getAgentList() {
+		return agents;
+	}
+
+	protected int getFramesPerSecond() {
+		return framesPerSecond;
+	}
+
+	/** Gets use physics indicator. */
+	protected boolean getUsePhysics() {
+		return usePhysics;
+	}
+
+	public float getVirtualTimeFactor() {
+		return virtualTimeFactor;
+	}
+
+	/** initialize the behavior of all agents. */
+	public synchronized void initBehaviors() {
+		lock();// start of critical section
+		// init behaviors
+		for (int i = 0; i < agents.size(); i++) {
+			SimpleAgent agent = ((SimpleAgent) agents.get(i));
+			agent.initPreBehavior();
+			agent.initBehavior();
+
+		}
+		unlock();// end of critical section
+	}
+
+	/** Initialize the simulator - only called once. */
+	private void initialize(EnvironmentDescription ed) {
+		counter = 0;
+		timer = null;
+		setFramesPerSecond(20);
+		setVirtualTimeFactor(1);
+		fps = new FrameMeter();
+		agents = new ArrayList();
+		objects = new ArrayList();
+		usePhysics = ed.usePhysics;
+		physicalEngine = new PhysicalEngine();
+
+		addMobileAndStaticObjects(ed);
+		createAgentsUI();
+	}
+
+	/** Obtain simulator critical resources. */
+	public void lock() {
+		lock.lock();
+	}
+
+	/** Perform a single step of simulation */
+	public synchronized void performSimulationStep() {
+		stopSimulation();
+		System.out.println("[SIM] Step ...");
+		simulateOneStep();
+	}
+
+	/** Reset the simulation. Resets any living agents. */
+	public synchronized void resetSimulation() {
+		stopSimulation();
+		lock();
+		for (int i = 0; i < agents.size(); i++) {
+			SimpleAgent agent = ((SimpleAgent) agents.get(i));
+			agent.reset();
+		}
+		unlock();
+		System.out.println("[SIM] reset ...");
+	}
+
+	/** Simulator control. */
+	public synchronized void restartSimulation() {
+		stopSimulation();
+		resetSimulation();
+		startSimulation();
+		System.out.println("[SIM] restart ...");
+	}
+
+	public void setApplicationComponent(JComponent component) {
+		applicationComponent = component;
+	}
+
+	protected void setFramesPerSecond(int fps) {
+		framesPerSecond = fps;
+	}
+
+	/** Sets use physics indicator. */
+	protected void setUsePhysics(boolean usePhysics) {
+		this.usePhysics = usePhysics;
+	}
+
+	/**
+	 * Set the time factor. Used to increase or decrease the simulation rate.
+	 * 
+	 * @param factor
+	 *            : typical value 1.0 (default) , 2.0 or 0.5
+	 */
+	public void setVirtualTimeFactor(float fact) {
+		System.out.println("[SIM] virtualTimeFactor = " + fact);
+		virtualTimeFactor = fact;
+	}
 
 	/**
 	 * The main simulator method. It is called cyclicaly or step by step. (see
@@ -257,122 +400,10 @@ public class Simulator {
 		unlock();
 	}
 
-	/** initialize the behavior of all agents. */
-	public synchronized void initBehaviors() {
-		lock();// start of critical section
-		// init behaviors
-		for (int i = 0; i < agents.size(); i++) {
-			SimpleAgent agent = ((SimpleAgent) agents.get(i));
-			agent.initPreBehavior();
-			agent.initBehavior();
-
-		}
-		unlock();// end of critical section
-	}
-
-	/** Starts the simulator loop. */
-	public synchronized void startSimulation() {
-		stopSimulation();
-		initBehaviors();
-		timer = new Timer();
-		System.out.println("[SIM] start ...");
-		timer.scheduleAtFixedRate(new TimerTask() {
-
-			public void run() {
-				simulateOneStep();
-			}
-		}, 0, (long) (1000 / (framesPerSecond * virtualTimeFactor)));
-	}
-
-	/** Stop (or pause) the simulator loop. */
-	public synchronized void stopSimulation() {
-		if (timer != null)
-			timer.cancel();
-		System.out.println("[SIM] stop ...");
-	}
-
-	/** Simulator control. */
-	public synchronized void restartSimulation() {
-		stopSimulation();
-		resetSimulation();
-		startSimulation();
-		System.out.println("[SIM] restart ...");
-	}
-
-	/** Reset the simulation. Resets any living agents. */
-	public synchronized void resetSimulation() {
-		stopSimulation();
-		lock();
-		for (int i = 0; i < agents.size(); i++) {
-			SimpleAgent agent = ((SimpleAgent) agents.get(i));
-			agent.reset();
-		}
-		unlock();
-		System.out.println("[SIM] reset ...");
-	}
-
-	/** Perform a single step of simulation */
-	public synchronized void performSimulationStep() {
-		stopSimulation();
-		System.out.println("[SIM] Step ...");
-		simulateOneStep();
-	}
-
-	public ArrayList getAgentList() {
-		return agents;
-	}
-
-	/** Sets use physics indicator. */
-	protected void setUsePhysics(boolean usePhysics) {
-		this.usePhysics = usePhysics;
-	}
-
-	/** Gets use physics indicator. */
-	protected boolean getUsePhysics() {
-		return usePhysics;
-	}
-
-	protected void setFramesPerSecond(int fps) {
-		framesPerSecond = fps;
-	}
-
-	protected int getFramesPerSecond() {
-		return framesPerSecond;
-	}
-
-	/**
-	 * Set the time factor. Used to increase or decrease the simulation rate.
-	 * 
-	 * @param factor
-	 *            : typical value 1.0 (default) , 2.0 or 0.5
-	 */
-	public void setVirtualTimeFactor(float fact) {
-		System.out.println("[SIM] virtualTimeFactor = " + fact);
-		virtualTimeFactor = fact;
-	}
-
-	public float getVirtualTimeFactor() {
-		return virtualTimeFactor;
-	}
-
-	public void setApplicationComponent(JComponent component) {
-		applicationComponent = component;
-	}
-
 	/**
 	 * This class runs the simulator in a background process. It is only used
 	 * for simulator background mode.
 	 */
-
-	/** Obtain simulator critical resources. */
-	public void lock() {
-		lock.lock();
-	}
-
-	/** Release simulator critical resources. */
-	public void unlock() {
-		lock.unlock();
-	}
 
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// BACKGROUND MODE THREAD
@@ -384,64 +415,36 @@ public class Simulator {
 		simulatorThread.start();
 	}
 
+	/** Starts the simulator loop. */
+	public synchronized void startSimulation() {
+		stopSimulation();
+		initBehaviors();
+		timer = new Timer();
+		System.out.println("[SIM] start ...");
+		timer.scheduleAtFixedRate(new TimerTask() {
+
+			@Override
+			public void run() {
+				simulateOneStep();
+			}
+		}, 0, (long) (1000 / (framesPerSecond * virtualTimeFactor)));
+	}
+
 	/** Stops special background mode */
 	public synchronized void stopBackgroundMode() {
 		if (simulatorThread != null)
 			simulatorThread.requestStop();
 	}
 
-	private class SimulatorThread extends Thread {
+	/** Stop (or pause) the simulator loop. */
+	public synchronized void stopSimulation() {
+		if (timer != null)
+			timer.cancel();
+		System.out.println("[SIM] stop ...");
+	}
 
-		private boolean stopped;
-
-		SimulatorThread() {
-			stopped = false;
-		}
-
-		public void requestStop() {
-			stopped = true;
-		}
-
-		public void run() {
-			setPriority(Thread.MAX_PRIORITY);
-			VirtualUniverse.setJ3DThreadPriority(Thread.MIN_PRIORITY);
-			int count = 0;
-			int rendererRate = 100000;
-			System.out.println("[SIM] Starting Background mode");
-			try {
-				// First wait a bit so J3d is settled ?
-				sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			world.stopRendering();
-			world.renderOnce();
-			// adjust fps update because we're running too fast to have precise
-			// measure
-			fps.setUpdateRate(rendererRate);
-			for (int i = 0; i < agents.size(); i++) {
-				SimpleAgent agent = (SimpleAgent) agents.get(i);
-				agent.reset();
-				if (agent instanceof Agent)
-					((Agent) agent).setFrameMeterRate(rendererRate);
-			}
-			initBehaviors();
-			// loop until flag change
-			while (!stopped) {
-				simulateOneStep();
-				count++;
-				if ((count % rendererRate) == 0) {
-					world.renderOnce();
-					// inspector update seems to cause memory leak (priority ?)
-					for (int i = 0; i < agents.size(); i++) {
-						Object o = agents.get(i);
-						if (o instanceof Agent)
-							((Agent) o).getAgentInspector().update();
-					}
-				}
-			}
-			System.out.println("[SIM] Stopping Background mode");
-			world.startRendering();
-		}
+	/** Release simulator critical resources. */
+	public void unlock() {
+		lock.unlock();
 	}
 }

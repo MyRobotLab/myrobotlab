@@ -38,10 +38,6 @@ public class AudioFileGUI extends ServiceGUI {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-		display.add(new JLabel("no gui"));
-	}
-
 	@Override
 	public void attachGUI() {
 		// TODO Auto-generated method stub
@@ -52,6 +48,11 @@ public class AudioFileGUI extends ServiceGUI {
 	public void detachGUI() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void init() {
+		display.add(new JLabel("no gui"));
 	}
 
 }

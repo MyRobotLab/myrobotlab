@@ -24,6 +24,7 @@
  * */
 
 package org.myrobotlab.opencv;
+
 import static com.googlecode.javacv.cpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
 import static com.googlecode.javacv.cpp.opencv_core.CV_TERMCRIT_EPS;
 import static com.googlecode.javacv.cpp.opencv_core.CV_TERMCRIT_ITER;
@@ -73,7 +74,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 	public int useHarris = 0;
 	// Free parameter of Harris detector; used only if useHarris != 0
 	public double k = 0.0;
-	
+
 	public boolean clearPoints = false;
 
 	public ArrayList<Point2Df> pointsToPublish = new ArrayList<Point2Df>();
@@ -87,7 +88,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 	private int[] count = { 0 };
 	byte[] status;
 	float[] error;
-	
+
 	private boolean addRemovePoint = false;
 
 	private Point2Df samplePoint = new Point2Df();
@@ -100,52 +101,15 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 	transient CvSize winSize;
 	transient IplImage preGrey, grey, eig, tmp, prePyramid, pyramid, swap, mask, image;
 	transient CvPoint2D32f prePoints, points, swapPoints;
-	
-	public OpenCVFilterLKOpticalTrack()  {
+
+	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
+
+	public OpenCVFilterLKOpticalTrack() {
 		super();
 	}
-	
-	public OpenCVFilterLKOpticalTrack(String name)  {
+
+	public OpenCVFilterLKOpticalTrack(String name) {
 		super(name);
-	}
-
-	
-	@Override
-	public void imageChanged(IplImage image) {
-
-		points = new CvPoint2D32f(MAX_POINT_COUNT);
-		prePoints = new CvPoint2D32f(MAX_POINT_COUNT);
-
-		eig = IplImage.create(imageSize, IPL_DEPTH_32F, 1);
-		tmp = IplImage.create(imageSize, IPL_DEPTH_32F, 1);
-
-		termCriteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
-
-		winSize = cvSize(windowSize, windowSize);
-		grey = IplImage.create(imageSize, 8, 1); 
-		preGrey = IplImage.create(imageSize, 8, 1);
-		cvCopy(grey, preGrey);
-		
-		// CvSize pyr_sz = cvSize(preGrey.width + 8, grey.height / 3);
-		// prePyramid = cvCreateImage(pyr_sz, IPL_DEPTH_32F, 1);
-		// pyramid = cvCreateImage(pyr_sz, IPL_DEPTH_32F, 1);
-
-		status = new byte[MAX_POINT_COUNT];
-		error = new float[MAX_POINT_COUNT];
-	}
-
-	public void samplePoint(Integer x, Integer y) {
-		if (count[0] < MAX_POINT_COUNT) {
-			samplePoint.x = x;
-			samplePoint.y = y;
-			addRemovePoint = true;
-		} else {
-			clearPoints();
-		}
-	}
-
-	public void samplePoint(Float x, Float y) {
-		samplePoint((int) (x * width), (int) (y * height));
 	}
 
 	public void clearPoints() {
@@ -153,8 +117,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 		clearPoints = false;
 	}
 
-	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
-	@Override	
+	@Override
 	public IplImage display(IplImage frame, OpenCVData data) {
 		float x, y;
 		int xPixel, yPixel;
@@ -173,11 +136,34 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 			}
 			cvCircle(frame, cvPoint(xPixel, yPixel), 1, CvScalar.GREEN, -1, 8, 0);
 		}
-		cvPutText(frame, String.format("valid %d", pointsToPublish.size()), cvPoint(10,10), font, CvScalar.GREEN);
+		cvPutText(frame, String.format("valid %d", pointsToPublish.size()), cvPoint(10, 10), font, CvScalar.GREEN);
 		return frame;
 	}
 
-	
+	@Override
+	public void imageChanged(IplImage image) {
+
+		points = new CvPoint2D32f(MAX_POINT_COUNT);
+		prePoints = new CvPoint2D32f(MAX_POINT_COUNT);
+
+		eig = IplImage.create(imageSize, IPL_DEPTH_32F, 1);
+		tmp = IplImage.create(imageSize, IPL_DEPTH_32F, 1);
+
+		termCriteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
+
+		winSize = cvSize(windowSize, windowSize);
+		grey = IplImage.create(imageSize, 8, 1);
+		preGrey = IplImage.create(imageSize, 8, 1);
+		cvCopy(grey, preGrey);
+
+		// CvSize pyr_sz = cvSize(preGrey.width + 8, grey.height / 3);
+		// prePyramid = cvCreateImage(pyr_sz, IPL_DEPTH_32F, 1);
+		// pyramid = cvCreateImage(pyr_sz, IPL_DEPTH_32F, 1);
+
+		status = new byte[MAX_POINT_COUNT];
+		error = new float[MAX_POINT_COUNT];
+	}
+
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 
@@ -186,9 +172,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 		} else {
 			grey = image;
 		}
-		
-		if (clearPoints)
-		{
+
+		if (clearPoints) {
 			clearPoints();
 			pointsToPublish.clear();
 		}
@@ -198,10 +183,12 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 			prePoints.position(count[0]).y(samplePoint.y);
 			count[0]++;
 			// why bother
-			//cvFindCornerSubPix(grey, features.position(count[0] - 1), 1, cvSize(win_size, win_size), cvSize(-1, -1), cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03));
+			// cvFindCornerSubPix(grey, features.position(count[0] - 1), 1,
+			// cvSize(win_size, win_size), cvSize(-1, -1),
+			// cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03));
 			addRemovePoint = false;
 		}
-		
+
 		if (preGrey != null) { // need at least 2 images to track
 
 			int win_size = 15;
@@ -226,8 +213,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 					error[i] = 0.0f;
 				}
 
-//				CvPoint2D32f points = new CvPoint2D32f(MAX_POINT_COUNT); // WTF?
-																			
+				// CvPoint2D32f points = new CvPoint2D32f(MAX_POINT_COUNT); //
+				// WTF?
 
 				cvCalcOpticalFlowPyrLK(preGrey, grey, null, null, prePoints, points, count[0], cvSize(win_size, win_size), 5, status, error,
 						cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3), 0);
@@ -248,7 +235,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 					++validPointCount;
 					prePoints.position(i);
 					points.position(i);
-	
+
 					x = points.x();
 					y = points.y();
 					log.debug(String.format("%d %s, %s", i, x, y));
@@ -266,18 +253,16 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 					// cvLine(imgC, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0);
 				}
 				count[0] = validPointCount;
-				
-				if (publishData)
-				{
+
+				if (publishData) {
 					data.set(pointsToPublish);
 				}
-				
-				//invoke("publish", pointsToPublish); 
+
+				// invoke("publish", pointsToPublish);
 
 			}
 
 		}
-
 
 		// swap
 		// TODO - release what preGrey pointed to?
@@ -285,6 +270,20 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 		// prePyramid = pyramid;
 
 		return image;
+	}
+
+	public void samplePoint(Float x, Float y) {
+		samplePoint((int) (x * width), (int) (y * height));
+	}
+
+	public void samplePoint(Integer x, Integer y) {
+		if (count[0] < MAX_POINT_COUNT) {
+			samplePoint.x = x;
+			samplePoint.y = y;
+			addRemovePoint = true;
+		} else {
+			clearPoints();
+		}
 	}
 
 }

@@ -42,15 +42,20 @@ public class OpenCVFilterPyramidDown extends OpenCVFilter {
 
 	final static int CV_GAUSSIAN_5X5 = 7;
 
-	transient IplImage dst = null;	
+	transient IplImage dst = null;
 
-
-	public OpenCVFilterPyramidDown()  {
+	public OpenCVFilterPyramidDown() {
 		super();
 	}
-	
-	public OpenCVFilterPyramidDown(String name)  {
+
+	public OpenCVFilterPyramidDown(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+
+		dst = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
 	}
 
 	@Override
@@ -58,12 +63,6 @@ public class OpenCVFilterPyramidDown extends OpenCVFilter {
 
 		cvPyrDown(image, dst, CV_GAUSSIAN_5X5);
 		return dst;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		
-		dst = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
 	}
 
 }

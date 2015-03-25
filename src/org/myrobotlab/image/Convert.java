@@ -43,24 +43,6 @@ import java.util.Hashtable;
  */
 public class Convert {
 
-	public static BufferedImage toImage(int w, int h, byte[] data) {
-		DataBuffer buffer = new DataBufferByte(data, w * h);
-
-		int pixelStride = 3; // assuming r, g, b, r, g, b,...
-		int scanlineStride = 3 * w; // no extra padding
-		int[] bandOffsets = { 0, 1, 2 }; // r, g, b
-		WritableRaster raster = Raster.createInterleavedRaster(buffer, w, h, scanlineStride, pixelStride, bandOffsets, null);
-
-		ColorSpace colorSpace = ColorSpace.getInstance(ColorSpace.CS_sRGB);
-		boolean hasAlpha = false;
-		boolean isAlphaPremultiplied = false;
-		int transparency = Transparency.OPAQUE;
-		int transferType = DataBuffer.TYPE_BYTE;
-		ColorModel colorModel = new ComponentColorModel(colorSpace, hasAlpha, isAlphaPremultiplied, transparency, transferType);
-
-		return new BufferedImage(colorModel, raster, isAlphaPremultiplied, null);
-	}
-
 	final static public BufferedImage convertRenderedImage(RenderedImage img) {
 		if (img instanceof BufferedImage) {
 			return (BufferedImage) img;
@@ -80,6 +62,24 @@ public class Convert {
 		BufferedImage result = new BufferedImage(cm, raster, isAlphaPremultiplied, properties);
 		img.copyData(raster);
 		return result;
+	}
+
+	public static BufferedImage toImage(int w, int h, byte[] data) {
+		DataBuffer buffer = new DataBufferByte(data, w * h);
+
+		int pixelStride = 3; // assuming r, g, b, r, g, b,...
+		int scanlineStride = 3 * w; // no extra padding
+		int[] bandOffsets = { 0, 1, 2 }; // r, g, b
+		WritableRaster raster = Raster.createInterleavedRaster(buffer, w, h, scanlineStride, pixelStride, bandOffsets, null);
+
+		ColorSpace colorSpace = ColorSpace.getInstance(ColorSpace.CS_sRGB);
+		boolean hasAlpha = false;
+		boolean isAlphaPremultiplied = false;
+		int transparency = Transparency.OPAQUE;
+		int transferType = DataBuffer.TYPE_BYTE;
+		ColorModel colorModel = new ComponentColorModel(colorSpace, hasAlpha, isAlphaPremultiplied, transparency, transferType);
+
+		return new BufferedImage(colorModel, raster, isAlphaPremultiplied, null);
 	}
 
 	/*

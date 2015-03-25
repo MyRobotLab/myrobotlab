@@ -50,10 +50,22 @@ import org.slf4j.Logger;
 
 public class AdafruitMotorShieldGUI extends ServiceGUI implements ListSelectionListener {
 
-	public final static Logger log = LoggerFactory.getLogger(AdafruitMotorShieldGUI.class.getCanonicalName());
-	static final long serialVersionUID = 1L;
+	class ButtonListener implements ActionListener {
+		ButtonListener() {
+		}
 
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			log.info(e.getActionCommand());
+			myService.send(boundServiceName, e.getActionCommand());
+		}
+	}
+
+	public final static Logger log = LoggerFactory.getLogger(AdafruitMotorShieldGUI.class.getCanonicalName());
+
+	static final long serialVersionUID = 1L;
 	private AdafruitMotorShield myAdafruitMotorShield = null;
+
 	JLayeredPane imageMap;
 
 	public AdafruitMotorShieldGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
@@ -61,20 +73,15 @@ public class AdafruitMotorShieldGUI extends ServiceGUI implements ListSelectionL
 		myAdafruitMotorShield = (AdafruitMotorShield) Runtime.getService(boundServiceName);
 	}
 
-	class ButtonListener implements ActionListener {
-		ButtonListener() {
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			log.info(e.getActionCommand());
-			myService.send(boundServiceName, e.getActionCommand());
-		}
+	@Override
+	public void attachGUI() {
+		subscribe("publishState", "getState", Arduino.class);
+		myService.send(boundServiceName, "publishState");
 	}
 
-	public void init() {
-
-		getAFPanel();
-		display.add(imageMap);
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishState", "getState", Arduino.class);
 	}
 
 	public void getAFPanel() {
@@ -100,14 +107,11 @@ public class AdafruitMotorShieldGUI extends ServiceGUI implements ListSelectionL
 
 	}
 
-	public void attachGUI() {
-		subscribe("publishState", "getState", Arduino.class);
-		myService.send(boundServiceName, "publishState");
-	}
-
 	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", Arduino.class);
+	public void init() {
+
+		getAFPanel();
+		display.add(imageMap);
 	}
 
 	@Override

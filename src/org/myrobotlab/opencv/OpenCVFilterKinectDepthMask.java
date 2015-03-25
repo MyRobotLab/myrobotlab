@@ -89,7 +89,6 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 	// public ArrayList<KinectImageNode> nodes = new
 	// ArrayList<KinectImageNode>();
 	public ArrayList<KinectImageNode> nodes = null;
-	
 
 	String imageKey = "kinectDepth";
 
@@ -108,7 +107,6 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 	boolean isMinArea = true;
 	boolean isMaxArea = true;
 
-
 	public boolean drawBoundingBoxes = false;
 	public boolean publishNodes = false;
 
@@ -117,19 +115,24 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 	// cvDrawRect has to have 2 points - no cvDrawRect can't draw a cvRect ???
 	// http://code.google.com/p/opencvx/ - apparently - I'm not the only one who
 	// thinks this is silly
-	// http://opencvx.googlecode.com/svn/trunk/cvdrawrectangle.h 
+	// http://opencvx.googlecode.com/svn/trunk/cvdrawrectangle.h
 	transient CvMemStorage cvStorage = null;
 
 	transient CvPoint p0 = new CvPoint(0, 0);
 	transient CvPoint p1 = new CvPoint(0, 0);
 
-	
-	public OpenCVFilterKinectDepthMask()  {
+	public OpenCVFilterKinectDepthMask() {
 		super();
 	}
-	
-	public OpenCVFilterKinectDepthMask(String name)  {
+
+	public OpenCVFilterKinectDepthMask(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -259,18 +262,20 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 						node.boundingBox = new Rectangle(rect.x(), rect.y(), rect.width(), rect.height());
 
 						// convert camera frame
-//FIXME						node.cameraFrame = OpenCV.publishFrame("", node.cvCameraFrame.getBufferedImage());
+						// FIXME node.cameraFrame = OpenCV.publishFrame("",
+						// node.cvCameraFrame.getBufferedImage());
 
 						// cropped
 						cvSetImageROI(node.cvCameraFrame, node.cvBoundingBox);
 						node.cvCropped = cvCreateImage(cvSize(node.cvBoundingBox.width(), node.cvBoundingBox.height()), 8, 3);
 						cvCopy(node.cvCameraFrame, node.cvCropped);
 						cvResetImageROI(node.cvCameraFrame);
-//FIXME						node.cropped = OpenCV.publishFrame("", node.cvCropped.getBufferedImage());
+						// FIXME node.cropped = OpenCV.publishFrame("",
+						// node.cvCropped.getBufferedImage());
 
-						log.error("{}",rect);
-						log.error("{}",node.cvBoundingBox);
-						log.error("{}",node.boundingBox);
+						log.error("{}", rect);
+						log.error("{}", node.cvBoundingBox);
+						log.error("{}", node.boundingBox);
 						nodes.add(node);
 
 						if (drawBoundingBoxes) {
@@ -302,12 +307,6 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 
 		return itemp2;
 
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

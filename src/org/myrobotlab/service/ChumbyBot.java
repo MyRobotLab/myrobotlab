@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.Trigger;
@@ -10,49 +11,8 @@ import org.slf4j.Logger;
 
 public class ChumbyBot extends Service {
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(ChumbyBot.class.getCanonicalName());
-
-	OpenCV camera = new OpenCV("camera");
-	Servo servo = new Servo("pan");
-	Arduino arduino = new Arduino("uBotino");
-	SensorMonitor sensors = new SensorMonitor("sensors");
-	RemoteAdapter remote = new RemoteAdapter("remote");
-	Speech speech = new Speech("speech");
-	Motor left = new Motor("left");
-	Motor right = new Motor("right");
-
-	transient Thread behavior = null;
-
-	private final Object lock = new Object();
-
 	public abstract class Behavior implements Runnable {
 
-	}
-
-	public void startBot() {
-		speech.startService();
-		// speech.cfg.set("isATT", true);
-		// speech.speak("I am about to start");
-		remote.startService();
-		camera.startService();
-		arduino.startService();
-		sensors.startService();
-		servo.startService();
-
-		arduino.connect("/dev/ttyUSB0", 57600, 8, 1, 0);
-
-		// arduino to sensor monitor
-		arduino.addListener("publishPin", sensors.getName(), "sensorInput", Pin.class);
-
-		// sensor monitor to chumbybot
-		sensors.addListener("publishPinAlert", this.getName(), "publishPinAlert", Trigger.class);
-
-		arduino.analogReadPollingStart(0);
-
-		behavior = new Thread(new ChumbyBot.Explore(), "behavior");
-		behavior.start();
 	}
 
 	public class Explore extends Behavior {
@@ -137,9 +97,34 @@ public class ChumbyBot extends Service {
 
 	}
 
-	public void publishPinAlert(Trigger alert) {
-		synchronized (lock) {
-			lock.notifyAll();
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(ChumbyBot.class.getCanonicalName());
+	OpenCV camera = new OpenCV("camera");
+	Servo servo = new Servo("pan");
+	Arduino arduino = new Arduino("uBotino");
+	SensorMonitor sensors = new SensorMonitor("sensors");
+	RemoteAdapter remote = new RemoteAdapter("remote");
+	Speech speech = new Speech("speech");
+
+	Motor left = new Motor("left");
+
+	Motor right = new Motor("right");
+
+	transient Thread behavior = null;
+
+	private final Object lock = new Object();
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		try {
+			ChumbyBot chumbybot = new ChumbyBot("chumbybot");
+			chumbybot.startService();
+			chumbybot.startBot();
+		} catch (Exception e) {
+			Logging.logError(e);
 		}
 
 	}
@@ -149,23 +134,44 @@ public class ChumbyBot extends Service {
 	}
 
 	@Override
+	public String[] getCategories() {
+		return new String[] { "robot" };
+	}
+
+	@Override
 	public String getDescription() {
 		return "used as a general template";
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		ChumbyBot chumbybot = new ChumbyBot("chumbybot");
-		chumbybot.startService();
-		chumbybot.startBot();
+	public void publishPinAlert(Trigger alert) {
+		synchronized (lock) {
+			lock.notifyAll();
+		}
 
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"robot"};
+
+	public void startBot() throws Exception {
+		speech.startService();
+		// speech.cfg.set("isATT", true);
+		// speech.speak("I am about to start");
+		remote.startService();
+		camera.startService();
+		arduino.startService();
+		sensors.startService();
+		servo.startService();
+
+		arduino.connect("/dev/ttyUSB0");
+
+		// arduino to sensor monitor
+		arduino.addListener("publishPin", sensors.getName(), "sensorInput", Pin.class);
+
+		// sensor monitor to chumbybot
+		sensors.addListener("publishPinAlert", this.getName(), "publishPinAlert", Trigger.class);
+
+		arduino.analogReadPollingStart(0);
+
+		behavior = new Thread(new ChumbyBot.Explore(), "behavior");
+		behavior.start();
 	}
 
 }

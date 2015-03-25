@@ -44,13 +44,10 @@ public class SLAMBadGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-		mySimbad = (SLAMBad) Runtime.getService(boundServiceName);
-	}
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
 
-	// FIXME - is get/set state interact with Runtime registry ???
-	// it probably should
-	public void getState(SLAMBad c) {
 	}
 
 	// FIXME sendNotifyStateRequest("publishState", "getState", String type); <-
@@ -66,10 +63,14 @@ public class SLAMBadGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("publishState", "getState", SLAMBad.class);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+	// FIXME - is get/set state interact with Runtime registry ???
+	// it probably should
+	public void getState(SLAMBad c) {
+	}
 
+	@Override
+	public void init() {
+		mySimbad = (SLAMBad) Runtime.getService(boundServiceName);
 	}
 
 }

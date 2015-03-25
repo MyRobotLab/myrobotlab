@@ -16,7 +16,6 @@ package org.myrobotlab.netty;
  * under the License.
  */
 
-
 import static io.netty.handler.codec.http.HttpHeaders.isKeepAlive;
 import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
@@ -58,6 +57,26 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
 	private WebSocketServerHandshaker handshaker;
 
+	private static String getWebSocketLocation(FullHttpRequest req) {
+		return "ws://" + req.headers().get(HOST) + WEBSOCKET_PATH;
+	}
+
+	private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
+		// Generate an error page if response getStatus code is not OK (200).
+		if (res.getStatus().code() != 200) {
+			ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
+			res.content().writeBytes(buf);
+			buf.release();
+			setContentLength(res, res.content().readableBytes());
+		}
+
+		// Send the response and close the connection if necessary.
+		ChannelFuture f = ctx.channel().writeAndFlush(res);
+		if (!isKeepAlive(req) || res.getStatus().code() != 200) {
+			f.addListener(ChannelFutureListener.CLOSE);
+		}
+	}
+
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
 		if (msg instanceof FullHttpRequest) {
@@ -70,6 +89,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
 		ctx.flush();
+	}
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		cause.printStackTrace();
+		ctx.close();
 	}
 
 	private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {
@@ -133,31 +158,5 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 			logger.fine(String.format("%s received %s", ctx.channel(), request));
 		}
 		ctx.channel().write(new TextWebSocketFrame(request.toUpperCase()));
-	}
-
-	private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
-		// Generate an error page if response getStatus code is not OK (200).
-		if (res.getStatus().code() != 200) {
-			ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
-			res.content().writeBytes(buf);
-			buf.release();
-			setContentLength(res, res.content().readableBytes());
-		}
-
-		// Send the response and close the connection if necessary.
-		ChannelFuture f = ctx.channel().writeAndFlush(res);
-		if (!isKeepAlive(req) || res.getStatus().code() != 200) {
-			f.addListener(ChannelFutureListener.CLOSE);
-		}
-	}
-
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		cause.printStackTrace();
-		ctx.close();
-	}
-
-	private static String getWebSocketLocation(FullHttpRequest req) {
-		return "ws://" + req.headers().get(HOST) + WEBSOCKET_PATH;
 	}
 }

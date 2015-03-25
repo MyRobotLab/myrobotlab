@@ -29,12 +29,14 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class Log extends Service {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(Log.class.getCanonicalName());
 
 	/*
@@ -42,8 +44,43 @@ public class Log extends Service {
 	 * disk etc
 	 */
 
+	// TODO - do in Service
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		try {
+
+			Log toy = new Log("logger");
+			toy.startService();
+
+			RemoteAdapter remote = new RemoteAdapter("remote");
+			remote.startService();
+
+			Runtime.createAndStart("rgui", "GUIService");
+
+			/*
+			 * GUIService gui = new GUIService("loggui"); gui.startService();
+			 */
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 	public Log(String n) {
 		super(n);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "testing" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "logging service";
 	}
 
 	public Message log(Message m) {
@@ -54,43 +91,13 @@ public class Log extends Service {
 		return m;
 	}
 
+	@Override
 	public boolean preProcessHook(Message m) {
 		if (m.method.equals("log")) {
 			invoke("log", m);
 			return false;
 		}
 		return true;
-	}
-
-	// TODO - do in Service
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		Log toy = new Log("logger");
-		toy.startService();
-
-		RemoteAdapter remote = new RemoteAdapter("remote");
-		remote.startService();
-		
-		Runtime.createAndStart("rgui", "GUIService");
-
-		/*
-		 * GUIService gui = new GUIService("loggui"); gui.startService();
-		 * 
-		 */
-
-	}
-
-	@Override
-	public String getDescription() {
-		return "logging service";
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"testing"};
 	}
 
 }

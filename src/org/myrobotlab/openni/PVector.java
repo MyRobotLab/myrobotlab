@@ -2,8 +2,6 @@ package org.myrobotlab.openni;
 
 import java.io.Serializable;
 
-
-
 /* -*- mode: java; c-basic-offset: 2; indent-tabs-mode: nil -*- */
 
 /*
@@ -60,6 +58,7 @@ public class PVector implements Serializable {
 	public float quality;
 
 	private float angleXY;
+
 	private float angleYZ;
 
 	/** Array so that this can be temporarily used in an array context */
@@ -67,145 +66,21 @@ public class PVector implements Serializable {
 
 	// range mapping - in XY plane
 	private float XYminX = 0;
+
 	private float XYmaxX = 180;
+
 	private float XYminY = 0;
+
 	private float XYmaxY = 180;
 
 	// range mapping in YZ plane
 	private float YZminY = 0;
+
 	private float YZmaxY = 180;
+
 	private float YZminZ = 0;
+
 	private float YZmaxZ = 180;
-	
-	/**
-	 * Constructor for an empty vector: x, y, and z are set to 0.
-	 */
-	public PVector() {
-	}
-
-
-	/**
-	 * Constructor for a 3D vector.
-	 * 
-	 * @param x
-	 *            the x coordinate.
-	 * @param y
-	 *            the y coordinate.
-	 * @param z
-	 *            the y coordinate.
-	 */
-	public PVector(float x, float y, float z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
-
-	/**
-	 * Constructor for a 2D vector: z coordinate is set to 0.
-	 * 
-	 * @param x
-	 *            the x coordinate.
-	 * @param y
-	 *            the y coordinate.
-	 */
-	public PVector(float x, float y) {
-		this.x = x;
-		this.y = y;
-		this.z = 0;
-	}
-
-	/**
-	 * Set x, y, and z coordinates.
-	 * 
-	 * @param x
-	 *            the x coordinate.
-	 * @param y
-	 *            the y coordinate.
-	 * @param z
-	 *            the z coordinate.
-	 */
-	public void set(float x, float y, float z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
-
-	/**
-	 * Set x, y, and z coordinates from a Vector3D object.
-	 * 
-	 * @param v
-	 *            the PVector object to be copied
-	 */
-	public void set(PVector v) {
-		x = v.x;
-		y = v.y;
-		z = v.z;
-	}
-
-	/**
-	 * Set the x, y (and maybe z) coordinates using a float[] array as the
-	 * source.
-	 * 
-	 * @param source
-	 *            array to copy from
-	 */
-	public void set(float[] source) {
-		if (source.length >= 2) {
-			x = source[0];
-			y = source[1];
-		}
-		if (source.length >= 3) {
-			z = source[2];
-		}
-	}
-
-	/**
-	 * Get a copy of this vector.
-	 */
-	public PVector get() {
-		return new PVector(x, y, z);
-	}
-
-	public float[] get(float[] target) {
-		if (target == null) {
-			return new float[] { x, y, z };
-		}
-		if (target.length >= 2) {
-			target[0] = x;
-			target[1] = y;
-		}
-		if (target.length >= 3) {
-			target[2] = z;
-		}
-		return target;
-	}
-
-	/**
-	 * Calculate the magnitude (length) of the vector
-	 * 
-	 * @return the magnitude of the vector
-	 */
-	public float mag() {
-		return (float) Math.sqrt(x * x + y * y + z * z);
-	}
-
-	/**
-	 * Add a vector to this vector
-	 * 
-	 * @param v
-	 *            the vector to be added
-	 */
-	public void add(PVector v) {
-		x += v.x;
-		y += v.y;
-		z += v.z;
-	}
-
-	public void add(float x, float y, float z) {
-		this.x += x;
-		this.y += y;
-		this.z += z;
-	}
 
 	/**
 	 * Add two vectors
@@ -241,55 +116,110 @@ public class PVector implements Serializable {
 	}
 
 	/**
-	 * Subtract a vector from this vector
-	 * 
-	 * @param v
-	 *            the vector to be subtracted
-	 */
-	public void sub(PVector v) {
-		x -= v.x;
-		y -= v.y;
-		z -= v.z;
-	}
-
-	public void sub(float x, float y, float z) {
-		this.x -= x;
-		this.y -= y;
-		this.z -= z;
-	}
-
-	/**
-	 * Subtract one vector from another
+	 * Calculate the angle between two vectors, using the dot product
 	 * 
 	 * @param v1
 	 *            a vector
 	 * @param v2
 	 *            another vector
-	 * @return a new vector that is v1 - v2
+	 * @return the angle between the vectors
 	 */
-	static public PVector sub(PVector v1, PVector v2) {
-		return sub(v1, v2, null);
+	static public float angleBetween(PVector v1, PVector v2) {
+		double dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+		double v1mag = Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
+		double v2mag = Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z);
+		return (float) Math.acos(dot / (v1mag * v2mag));
 	}
 
-	static public PVector sub(PVector v1, PVector v2, PVector target) {
+	static public float aSinangleBetween(PVector v1, PVector v2) {
+		double dot = v1.y * v2.y + v1.x * v2.x + v1.z * v2.z;
+		double v1mag = Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
+		double v2mag = Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z);
+		return (float) Math.acos(dot / (v1mag * v2mag));
+	}
+
+	static public PVector cross(PVector v1, PVector v2, PVector target) {
+		float crossX = v1.y * v2.z - v2.y * v1.z;
+		float crossY = v1.z * v2.x - v2.z * v1.x;
+		float crossZ = v1.x * v2.y - v2.x * v1.y;
+
 		if (target == null) {
-			target = new PVector(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+			target = new PVector(crossX, crossY, crossZ);
 		} else {
-			target.set(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+			target.set(crossX, crossY, crossZ);
 		}
 		return target;
 	}
 
 	/**
-	 * Multiply this vector by a scalar
+	 * Calculate the Euclidean distance between two points (considering a point
+	 * as a vector object)
 	 * 
-	 * @param n
-	 *            the value to multiply by
+	 * @param v1
+	 *            a vector
+	 * @param v2
+	 *            another vector
+	 * @return the Euclidean distance between v1 and v2
 	 */
-	public void mult(float n) {
-		x *= n;
-		y *= n;
-		z *= n;
+	static public float dist(PVector v1, PVector v2) {
+		float dx = v1.x - v2.x;
+		float dy = v1.y - v2.y;
+		float dz = v1.z - v2.z;
+		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+	}
+
+	/**
+	 * Divide a vector by a scalar and return the result in a new vector.
+	 * 
+	 * @param v
+	 *            a vector
+	 * @param n
+	 *            scalar
+	 * @return a new vector that is v1 / n
+	 */
+	static public PVector div(PVector v, float n) {
+		return div(v, n, null);
+	}
+
+	static public PVector div(PVector v, float n, PVector target) {
+		if (target == null) {
+			target = new PVector(v.x / n, v.y / n, v.z / n);
+		} else {
+			target.set(v.x / n, v.y / n, v.z / n);
+		}
+		return target;
+	}
+
+	/**
+	 * Multiply each element of one vector by the individual elements of another
+	 * vector, and return the result as a new PVector.
+	 */
+	static public PVector div(PVector v1, PVector v2) {
+		return div(v1, v2, null);
+	}
+
+	/**
+	 * Divide each element of one vector by the individual elements of another
+	 * vector, and write the result into a target vector.
+	 * 
+	 * @param v1
+	 *            the first vector
+	 * @param v2
+	 *            the second vector
+	 * @param target
+	 *            PVector to store the result
+	 */
+	static public PVector div(PVector v1, PVector v2, PVector target) {
+		if (target == null) {
+			target = new PVector(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
+		} else {
+			target.set(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
+		}
+		return target;
+	}
+
+	static public float dot(PVector v1, PVector v2) {
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 	}
 
 	/**
@@ -327,18 +257,6 @@ public class PVector implements Serializable {
 	}
 
 	/**
-	 * Multiply each element of one vector by the elements of another vector.
-	 * 
-	 * @param v
-	 *            the vector to multiply by
-	 */
-	public void mult(PVector v) {
-		x *= v.x;
-		y *= v.y;
-		z *= v.z;
-	}
-
-	/**
 	 * Multiply each element of one vector by the individual elements of another
 	 * vector, and return the result as a new PVector.
 	 */
@@ -367,123 +285,94 @@ public class PVector implements Serializable {
 	}
 
 	/**
-	 * Divide this vector by a scalar
-	 * 
-	 * @param n
-	 *            the value to divide by
-	 */
-	public void div(float n) {
-		x /= n;
-		y /= n;
-		z /= n;
-	}
-
-	/**
-	 * Divide a vector by a scalar and return the result in a new vector.
-	 * 
-	 * @param v
-	 *            a vector
-	 * @param n
-	 *            scalar
-	 * @return a new vector that is v1 / n
-	 */
-	static public PVector div(PVector v, float n) {
-		return div(v, n, null);
-	}
-
-	static public PVector div(PVector v, float n, PVector target) {
-		if (target == null) {
-			target = new PVector(v.x / n, v.y / n, v.z / n);
-		} else {
-			target.set(v.x / n, v.y / n, v.z / n);
-		}
-		return target;
-	}
-
-	/**
-	 * Divide each element of one vector by the elements of another vector.
-	 */
-	public void div(PVector v) {
-		x /= v.x;
-		y /= v.y;
-		z /= v.z;
-	}
-
-	/**
-	 * Multiply each element of one vector by the individual elements of another
-	 * vector, and return the result as a new PVector.
-	 */
-	static public PVector div(PVector v1, PVector v2) {
-		return div(v1, v2, null);
-	}
-
-	/**
-	 * Divide each element of one vector by the individual elements of another
-	 * vector, and write the result into a target vector.
-	 * 
-	 * @param v1
-	 *            the first vector
-	 * @param v2
-	 *            the second vector
-	 * @param target
-	 *            PVector to store the result
-	 */
-	static public PVector div(PVector v1, PVector v2, PVector target) {
-		if (target == null) {
-			target = new PVector(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
-		} else {
-			target.set(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
-		}
-		return target;
-	}
-
-	/**
-	 * Calculate the Euclidean distance between two points (considering a point
-	 * as a vector object)
-	 * 
-	 * @param v
-	 *            another vector
-	 * @return the Euclidean distance between
-	 */
-	public float dist(PVector v) {
-		float dx = x - v.x;
-		float dy = y - v.y;
-		float dz = z - v.z;
-		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-	}
-
-	/**
-	 * Calculate the Euclidean distance between two points (considering a point
-	 * as a vector object)
+	 * Subtract one vector from another
 	 * 
 	 * @param v1
 	 *            a vector
 	 * @param v2
 	 *            another vector
-	 * @return the Euclidean distance between v1 and v2
+	 * @return a new vector that is v1 - v2
 	 */
-	static public float dist(PVector v1, PVector v2) {
-		float dx = v1.x - v2.x;
-		float dy = v1.y - v2.y;
-		float dz = v1.z - v2.z;
-		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+	static public PVector sub(PVector v1, PVector v2) {
+		return sub(v1, v2, null);
+	}
+
+	static public PVector sub(PVector v1, PVector v2, PVector target) {
+		if (target == null) {
+			target = new PVector(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+		} else {
+			target.set(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+		}
+		return target;
 	}
 
 	/**
-	 * Calculate the dot product with another vector
-	 * 
-	 * @return the dot product
+	 * Constructor for an empty vector: x, y, and z are set to 0.
 	 */
-	public float dot(PVector v) {
-		return x * v.x + y * v.y + z * v.z;
+	public PVector() {
 	}
 
-	public float dot(float x, float y, float z) {
-		return this.x * x + this.y * y + this.z * z;
+	/**
+	 * Constructor for a 2D vector: z coordinate is set to 0.
+	 * 
+	 * @param x
+	 *            the x coordinate.
+	 * @param y
+	 *            the y coordinate.
+	 */
+	public PVector(float x, float y) {
+		this.x = x;
+		this.y = y;
+		this.z = 0;
 	}
 
-	static public float dot(PVector v1, PVector v2) {
-		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	/**
+	 * Constructor for a 3D vector.
+	 * 
+	 * @param x
+	 *            the x coordinate.
+	 * @param y
+	 *            the y coordinate.
+	 * @param z
+	 *            the y coordinate.
+	 */
+	public PVector(float x, float y, float z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	public void add(float x, float y, float z) {
+		this.x += x;
+		this.y += y;
+		this.z += z;
+	}
+
+	/**
+	 * Add a vector to this vector
+	 * 
+	 * @param v
+	 *            the vector to be added
+	 */
+	public void add(PVector v) {
+		x += v.x;
+		y += v.y;
+		z += v.z;
+	}
+
+	/**
+	 * Return a representation of this vector as a float array. This is only for
+	 * temporary use. If used in any other fashion, the contents should be
+	 * copied by using the get() command to copy into your own array.
+	 */
+	public float[] array() {
+		if (array == null) {
+			array = new float[3];
+		}
+		array[0] = x;
+		array[1] = y;
+		array[2] = z;
+		return array;
 	}
 
 	/**
@@ -510,17 +399,166 @@ public class PVector implements Serializable {
 		return target;
 	}
 
-	static public PVector cross(PVector v1, PVector v2, PVector target) {
-		float crossX = v1.y * v2.z - v2.y * v1.z;
-		float crossY = v1.z * v2.x - v2.z * v1.x;
-		float crossZ = v1.x * v2.y - v2.x * v1.y;
+	/**
+	 * Calculate the Euclidean distance between two points (considering a point
+	 * as a vector object)
+	 * 
+	 * @param v
+	 *            another vector
+	 * @return the Euclidean distance between
+	 */
+	public float dist(PVector v) {
+		float dx = x - v.x;
+		float dy = y - v.y;
+		float dz = z - v.z;
+		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+	}
 
+	/**
+	 * Divide this vector by a scalar
+	 * 
+	 * @param n
+	 *            the value to divide by
+	 */
+	public void div(float n) {
+		x /= n;
+		y /= n;
+		z /= n;
+	}
+
+	/**
+	 * Divide each element of one vector by the elements of another vector.
+	 */
+	public void div(PVector v) {
+		x /= v.x;
+		y /= v.y;
+		z /= v.z;
+	}
+
+	public float dot(float x, float y, float z) {
+		return this.x * x + this.y * y + this.z * z;
+	}
+
+	/**
+	 * Calculate the dot product with another vector
+	 * 
+	 * @return the dot product
+	 */
+	public float dot(PVector v) {
+		return x * v.x + y * v.y + z * v.z;
+	}
+
+	/**
+	 * Get a copy of this vector.
+	 */
+	public PVector get() {
+		return new PVector(x, y, z);
+	}
+
+	public float[] get(float[] target) {
 		if (target == null) {
-			target = new PVector(crossX, crossY, crossZ);
-		} else {
-			target.set(crossX, crossY, crossZ);
+			return new float[] { x, y, z };
+		}
+		if (target.length >= 2) {
+			target[0] = x;
+			target[1] = y;
+		}
+		if (target.length >= 3) {
+			target[2] = z;
 		}
 		return target;
+	}
+
+	public float getAngleXY() {
+		return angleXY;
+	}
+
+	public float getAngleYZ() {
+		return angleYZ;
+	}
+
+	/**
+	 * Calculate the angle of rotation for this vector (only 2D vectors)
+	 * 
+	 * @return the angle of rotation
+	 */
+	public float heading2D() {
+		float angle = (float) Math.atan2(-y, x);
+		return -1 * angle;
+	}
+
+	/**
+	 * Limit the magnitude of this vector
+	 * 
+	 * @param max
+	 *            the maximum length to limit this vector
+	 */
+	public void limit(float max) {
+		if (mag() > max) {
+			normalize();
+			mult(max);
+		}
+	}
+
+	/**
+	 * Calculate the magnitude (length) of the vector
+	 * 
+	 * @return the magnitude of the vector
+	 */
+	public float mag() {
+		return (float) Math.sqrt(x * x + y * y + z * z);
+	}
+
+	public void mapXY(float minX, float maxX, float minY, float maxY) {
+		this.XYminX = minX;
+		this.XYmaxX = maxX;
+		this.XYminY = minY;
+		this.XYmaxY = maxY;
+	}
+
+	public void mapXY(int minX, int maxX, int minY, int maxY) {
+		this.XYminX = minX;
+		this.XYmaxX = maxX;
+		this.XYminY = minY;
+		this.XYmaxY = maxY;
+	}
+
+	public void mapXZ(int minY, int maxY, int minZ, int maxZ) {
+		this.YZminY = minY;
+		this.YZmaxY = maxY;
+		this.YZminZ = minZ;
+		this.YZmaxZ = maxZ;
+	}
+
+	public void mapYZ(float minY, float maxY, float minZ, float maxZ) {
+		this.YZminY = minY;
+		this.YZmaxY = maxY;
+		this.YZminZ = minZ;
+		this.YZmaxZ = maxZ;
+	}
+
+	/**
+	 * Multiply this vector by a scalar
+	 * 
+	 * @param n
+	 *            the value to multiply by
+	 */
+	public void mult(float n) {
+		x *= n;
+		y *= n;
+		z *= n;
+	}
+
+	/**
+	 * Multiply each element of one vector by the elements of another vector.
+	 * 
+	 * @param v
+	 *            the vector to multiply by
+	 */
+	public void mult(PVector v) {
+		x *= v.x;
+		y *= v.y;
+		z *= v.z;
 	}
 
 	/**
@@ -554,114 +592,78 @@ public class PVector implements Serializable {
 	}
 
 	/**
-	 * Limit the magnitude of this vector
+	 * Set x, y, and z coordinates.
 	 * 
-	 * @param max
-	 *            the maximum length to limit this vector
+	 * @param x
+	 *            the x coordinate.
+	 * @param y
+	 *            the y coordinate.
+	 * @param z
+	 *            the z coordinate.
 	 */
-	public void limit(float max) {
-		if (mag() > max) {
-			normalize();
-			mult(max);
+	public void set(float x, float y, float z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	/**
+	 * Set the x, y (and maybe z) coordinates using a float[] array as the
+	 * source.
+	 * 
+	 * @param source
+	 *            array to copy from
+	 */
+	public void set(float[] source) {
+		if (source.length >= 2) {
+			x = source[0];
+			y = source[1];
+		}
+		if (source.length >= 3) {
+			z = source[2];
 		}
 	}
 
 	/**
-	 * Calculate the angle of rotation for this vector (only 2D vectors)
+	 * Set x, y, and z coordinates from a Vector3D object.
 	 * 
-	 * @return the angle of rotation
+	 * @param v
+	 *            the PVector object to be copied
 	 */
-	public float heading2D() {
-		float angle = (float) Math.atan2(-y, x);
-		return -1 * angle;
+	public void set(PVector v) {
+		x = v.x;
+		y = v.y;
+		z = v.z;
+	}
+
+	public void setAngleXY(float angle) {
+		this.angleXY = XYminY + ((angle - XYminX) * (XYmaxY - XYminY)) / (XYmaxX - XYminX);
+	}
+
+	public void setAngleYZ(float angle) {
+		this.angleYZ = YZminZ + ((angle - YZminY) * (YZmaxZ - YZminZ)) / (YZmaxY - YZminY);
+	}
+
+	public void sub(float x, float y, float z) {
+		this.x -= x;
+		this.y -= y;
+		this.z -= z;
 	}
 
 	/**
-	 * Calculate the angle between two vectors, using the dot product
+	 * Subtract a vector from this vector
 	 * 
-	 * @param v1
-	 *            a vector
-	 * @param v2
-	 *            another vector
-	 * @return the angle between the vectors
+	 * @param v
+	 *            the vector to be subtracted
 	 */
-	static public float angleBetween(PVector v1, PVector v2) {
-		double dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
-		double v1mag = Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
-		double v2mag = Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z);
-		return (float) Math.acos(dot / (v1mag * v2mag));
+	public void sub(PVector v) {
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
 	}
-	
-	static public float aSinangleBetween(PVector v1, PVector v2) {
-		double dot = v1.y * v2.y + v1.x * v2.x + v1.z * v2.z;
-		double v1mag = Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
-		double v2mag = Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z);
-		return (float) Math.acos(dot / (v1mag * v2mag));
-	}
-	
-	
 
+	@Override
 	public String toString() {
 		return "[ " + x + ", " + y + ", " + z + " ]";
-	}
-
-	/**
-	 * Return a representation of this vector as a float array. This is only for
-	 * temporary use. If used in any other fashion, the contents should be
-	 * copied by using the get() command to copy into your own array.
-	 */
-	public float[] array() {
-		if (array == null) {
-			array = new float[3];
-		}
-		array[0] = x;
-		array[1] = y;
-		array[2] = z;
-		return array;
-	}
-	
-	public void mapXY(float minX, float maxX, float minY, float maxY) {
-		this.XYminX = minX;
-		this.XYmaxX = maxX;
-		this.XYminY = minY;
-		this.XYmaxY = maxY;
-	}
-
-	public void mapXY(int minX, int maxX, int minY, int maxY) {
-		this.XYminX = minX;
-		this.XYmaxX = maxX;
-		this.XYminY = minY;
-		this.XYmaxY = maxY;
-	}
-	
-	public void mapYZ(float minY, float maxY, float minZ, float maxZ) {
-		this.YZminY = minY;
-		this.YZmaxY = maxY;
-		this.YZminZ = minZ;
-		this.YZmaxZ = maxZ;
-	}
-
-	public void mapXZ(int minY, int maxY, int minZ, int maxZ) {
-		this.YZminY = minY;
-		this.YZmaxY = maxY;
-		this.YZminZ = minZ;
-		this.YZmaxZ = maxZ;
-	}
-	
-	public void setAngleXY(float angle){
-		this.angleXY =  XYminY + ((angle - XYminX)*(XYmaxY - XYminY))/(XYmaxX - XYminX);
-	}
-	
-
-	public float getAngleXY(){
-		return  angleXY;
-	}
-	
-	public void setAngleYZ(float angle){
-		this.angleYZ =  YZminZ + ((angle - YZminY)*(YZmaxZ - YZminZ))/(YZmaxY - YZminY);
-	}
-	
-	public float getAngleYZ(){
-		return  angleYZ;
 	}
 }

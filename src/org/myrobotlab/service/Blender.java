@@ -19,63 +19,39 @@ import org.slf4j.Logger;
 
 public class Blender extends Service {
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(Blender.class);
-
-	public static final String SUCCESS = "SUCCESS";
-
-	Socket control = null;
-	transient ControlHandler controlHandler = null;
-	String host = "localhost";
-	Integer controlPort = 8989;
-	Integer serialPort = 9191;
-
-	String blenderVersion;
-	String expectedBlenderVersion = "0.9";
-	
-	/*
-	transient HashMap<String, VirtualPort> virtualPorts = new HashMap<String, VirtualPort>();
-	
-	public class VirtualPort {
-		public Serial serial;
-		public VirtualNullModemCable cable;
-	}
-	*/
-
-	// Socket serial = null; NO
-
 	/**
-	 * Control line - JSON over TCP/IP
-	 * This is the single control communication line over which 
-	 * virtual objects are created - and linked with Serial connections
+	 * Control line - JSON over TCP/IP This is the single control communication
+	 * line over which virtual objects are created - and linked with Serial
+	 * connections
 	 * 
-	 * Typically, a virtual object is created and if it has a serial line (like an Arduino)
-	 * a new TCP/IP connection is created which sends and receives the binary serial data
+	 * Typically, a virtual object is created and if it has a serial line (like
+	 * an Arduino) a new TCP/IP connection is created which sends and receives
+	 * the binary serial data
 	 * 
 	 * @author GroG
 	 *
 	 */
 	public class ControlHandler extends Thread {
 		Socket socket;
-		DataInputStream dis;		
+		DataInputStream dis;
 		boolean listening = false;
 
 		public ControlHandler(Socket socket) {
 			this.socket = socket;
 		}
 
+		@Override
 		public void run() {
 			BufferedReader in = null;
 			try {
 				listening = true;
-				//in = socket.getInputStream();
+				// in = socket.getInputStream();
 				dis = new DataInputStream(socket.getInputStream());
 				in = new BufferedReader(new InputStreamReader(dis));
 				while (listening) {
 					// handle inbound control messages
-					
-					//JSONObject json = new JSONObject(in.readLine());
+
+					// JSONObject json = new JSONObject(in.readLine());
 					String json = in.readLine();
 					log.info(String.format("%s", json));
 					Message msg = Encoder.fromJson(json, Message.class);
@@ -84,7 +60,7 @@ public class Blender extends Service {
 
 				}
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 			} finally {
 				try {
 					if (in != null)
@@ -95,23 +71,55 @@ public class Blender extends Service {
 		}
 	}
 
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(Blender.class);
+
+	public static final String SUCCESS = "SUCCESS";
+	Socket control = null;
+	transient ControlHandler controlHandler = null;
+	String host = "localhost";
+	Integer controlPort = 8989;
+
+	Integer serialPort = 9191;
+	String blenderVersion;
+
+	/*
+	 * transient HashMap<String, VirtualPort> virtualPorts = new HashMap<String,
+	 * VirtualPort>();
+	 * 
+	 * public class VirtualPort { public Serial serial; public
+	 * VirtualNullModemCable cable; }
+	 */
+
+	// Socket serial = null; NO
+
+	String expectedBlenderVersion = "0.9";
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+
+			Blender blender = (Blender) Runtime.start("blender", "Blender");
+			blender.test();
+
+			// Runtime.start("gui", "GUIService");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 	public Blender(String n) {
 		super(n);
 	}
 
-	boolean isConnected() {
-		return (control != null) && control.isConnected();
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general blender";
-	}
-
-	public boolean connect(String host, Integer port) {
-		this.host = host;
-		this.controlPort = port;
-		return connect();
+	public synchronized void attach(Arduino service) {
+		// let Blender know we are going
+		// to virtualize an Arduino
+		sendMsg("attach", service.getName(), service.getSimpleName());
 	}
 
 	public boolean connect() {
@@ -123,7 +131,7 @@ public class Blender extends Service {
 
 			info("connecting to Blender.py %s %d", host, controlPort);
 			control = new Socket(host, controlPort);
-			controlHandler = new ControlHandler(control);			
+			controlHandler = new ControlHandler(control);
 			controlHandler.start();
 
 			info("connected - goodtimes");
@@ -134,12 +142,18 @@ public class Blender extends Service {
 		return false;
 	}
 
+	public boolean connect(String host, Integer port) {
+		this.host = host;
+		this.controlPort = port;
+		return connect();
+	}
+
 	public boolean disconnect() {
 		try {
 			if (control != null) {
 				control.close();
 			}
-			if (controlHandler != null){
+			if (controlHandler != null) {
 				controlHandler.listening = false;
 				controlHandler = null;
 			}
@@ -151,29 +165,71 @@ public class Blender extends Service {
 		return false;
 	}
 
-	// -------- publish api begin --------
-	public void publishDisconnect() {
+	@Override
+	public String[] getCategories() {
+		return new String[] { "display", "simulator" };
 	}
 
-	public void publishConnect() {
+	@Override
+	public String getDescription() {
+		return "used as a general blender";
 	}
 
 	// -------- publish api end --------
-	
+
 	// -------- Blender.py --> callback api begin --------
 	public void getVersion() {
 		sendMsg("getVersion");
 	}
-	
-	public void toJson() {
-		sendMsg("toJson");
+
+	boolean isConnected() {
+		return (control != null) && control.isConnected();
 	}
-	
-	public String onGetVersion(String version) {
-		info("blender returned %s", version);
-		return version;
+
+	// call back from blender
+	public String onAttach(String name) {
+		try {
+			info("onAttach - Blender is ready to attach serial device %s", name);
+			// FIXME - more general case determined by "Type"
+			ServiceInterface si = Runtime.getService(name);
+			if ("Arduino".equals(si.getType())) {
+				// FIXME - make more general - "any" Serial device !!!
+				Arduino arduino = (Arduino) Runtime.getService(name);
+				if (arduino != null) {
+
+					// get handle to serial service of the Arduino
+					Serial serial = arduino.getSerial();
+
+					// connecting over tcp ip
+					serial.connectTCP(host, serialPort);
+
+					// int vpn = virtualPorts.size();
+
+					/*
+					 * VIRTUAL PORT IS NOT NEEDED !!! - JUST A SERIAL OVER
+					 * TCP/IP YAY !!!! :) VirtualPort vp = new VirtualPort();
+					 * vp.serial = (Serial)
+					 * Runtime.start(String.format("%s.UART.%d"
+					 * ,arduino.getName(), vpn), "Serial"); vp.cable =
+					 * Serial.createNullModemCable(String.format("MRL.%d", vpn),
+					 * String.format("BLND.%d", vpn));
+					 * virtualPorts.put(arduino.getName(), vp);
+					 * vp.serial.connect(String.format("BLND.%d", vpn));
+					 */
+					// vp.serial.addRelay(host, serialPort);
+					// arduino.connect(String.format("MRL.%d", vpn));
+					// add the tcp relay pipes
+
+				} else {
+					error("onAttach %s not found", name);
+				}
+			}
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		return name;
 	}
-	// -------- Blender.py --> callback api end --------
 
 	public String onBlenderVersion(String version) {
 		blenderVersion = version;
@@ -184,6 +240,20 @@ public class Blender extends Service {
 		}
 
 		return version;
+	}
+
+	public String onGetVersion(String version) {
+		info("blender returned %s", version);
+		return version;
+	}
+
+	// -------- Blender.py --> callback api end --------
+
+	public void publishConnect() {
+	}
+
+	// -------- publish api begin --------
+	public void publishDisconnect() {
 	}
 
 	public void sendMsg(String method, Object... data) {
@@ -214,44 +284,45 @@ public class Blender extends Service {
 			}
 
 			blender.getVersion();
-			
-			Arduino2 arduino01 = (Arduino2) Runtime.start("arduino01", "Arduino2");
-			
+
+			Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+
 			blender.attach(arduino01);
 			sleep(3000);
 			Servo neck = (Servo) Runtime.start("i01.head.neck", "Servo");
-			
-//			Servo rothead = (Servo) Runtime.start("i01.head.rothead", "Servo");
-			
+
+			// Servo rothead = (Servo) Runtime.start("i01.head.rothead",
+			// "Servo");
+
 			neck.attach(arduino01, 7);
-//			rothead.attach(arduino01, 9);
-			
-	//		rothead.moveTo(90);
+			// rothead.attach(arduino01, 9);
+
+			// rothead.moveTo(90);
 			neck.moveTo(90);
 			sleep(100);
-		//	rothead.moveTo(120);
+			// rothead.moveTo(120);
 			neck.moveTo(120);
 			sleep(100);
-			//rothead.moveTo(0);
+			// rothead.moveTo(0);
 			neck.moveTo(0);
 			sleep(100);
-			//rothead.moveTo(90);
+			// rothead.moveTo(90);
 			neck.moveTo(90);
 			sleep(100);
-			//rothead.moveTo(120);
+			// rothead.moveTo(120);
 			neck.moveTo(120);
 			sleep(100);
-			//rothead.moveTo(0);
+			// rothead.moveTo(0);
 			neck.moveTo(0);
 			sleep(100);
-			
-			//servo01.sweep();
-			//servo01.stop();
+
+			// servo01.sweep();
+			// servo01.stop();
 			neck.detach();
 
 			blender.getVersion();
-			//blender.toJson();
-			//blender.toJson();
+			// blender.toJson();
+			// blender.toJson();
 
 		} catch (Exception e) {
 			status.addError(e);
@@ -260,73 +331,8 @@ public class Blender extends Service {
 		return status;
 	}
 
-	public synchronized void attach(Arduino2 service) {
-		// let Blender know we are going
-		// to virtualize an Arduino
-		sendMsg("attach", service.getName(), service.getSimpleName());
-	}
-	
-	// call back from blender
-	public String onAttach(String name){	
-		try {
-		info("onAttach - Blender is ready to attach serial device %s", name);
-		// FIXME - more general case determined by "Type"  
-		ServiceInterface si = Runtime.getService(name);
-		if ("Arduino".equals(si.getType())){
-		// FIXME - make more general - "any" Serial device !!!
-		Arduino2 arduino = (Arduino2)Runtime.getService(name);
-		if (arduino != null){
-			
-			// get handle to serial service of the Arduino
-			Serial serial = arduino.getSerial();
-			
-			// connecting over tcp ip
-			serial.connectTCP(host, serialPort);
-			
-			//int vpn = virtualPorts.size();
-
-			/* VIRTUAL PORT IS NOT NEEDED !!! - JUST A SERIAL OVER TCP/IP YAY !!!! :)
-			VirtualPort vp = new VirtualPort();
-			vp.serial = (Serial) Runtime.start(String.format("%s.UART.%d",arduino.getName(), vpn), "Serial");
-			vp.cable = Serial.createNullModemCable(String.format("MRL.%d", vpn), String.format("BLND.%d", vpn));
-			virtualPorts.put(arduino.getName(), vp);
-			vp.serial.connect(String.format("BLND.%d", vpn));
-			*/
-			//vp.serial.addRelay(host, serialPort);
-			//arduino.connect(String.format("MRL.%d", vpn));
-			// add the tcp relay pipes
-			
-			
-		} else {
-			error("onAttach %s not found", name);
-		}
-		}
-		
-		} catch(Exception e){
-			Logging.logException(e);
-		}
-		return name;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-
-			Blender blender = (Blender) Runtime.start("blender", "Blender");
-			blender.test();
-
-			// Runtime.start("gui", "GUIService");
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"display", "simulator"};
+	public void toJson() {
+		sendMsg("toJson");
 	}
 
 }

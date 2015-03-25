@@ -40,26 +40,22 @@ public class OpenCVFilterThreshold extends OpenCVFilter {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterThreshold.class.getCanonicalName());
 	IplImage gray = null;
-	
+
 	public float lowThreshold = 0.0f;
 	public float highThreshold = 256.0f;
 
-	public OpenCVFilterThreshold()  {
+	public OpenCVFilterThreshold() {
 		super();
 	}
-	
-	public OpenCVFilterThreshold(String name)  {
+
+	public OpenCVFilterThreshold(String name) {
 		super(name);
 	}
 
-
-/*
-	@Override
-	public void loadDefaultConfiguration() {
-		cfg.set("lowThreshold", 130.0f);
-		cfg.set("highThreshold", 255.0f);
-	}
-*/
+	/*
+	 * @Override public void loadDefaultConfiguration() {
+	 * cfg.set("lowThreshold", 130.0f); cfg.set("highThreshold", 255.0f); }
+	 */
 	/*
 	 * Threshold Applies fixed-level threshold to array elements
 	 * 
@@ -93,6 +89,11 @@ public class OpenCVFilterThreshold extends OpenCVFilter {
 	 */
 
 	@Override
+	public void imageChanged(IplImage image) {
+		gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
+	}
+
+	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 
 		// CV_THRESH_BINARY
@@ -113,11 +114,6 @@ public class OpenCVFilterThreshold extends OpenCVFilter {
 		 * CV_THRESH_BINARY, 7,30);
 		 */
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
 	}
 
 }

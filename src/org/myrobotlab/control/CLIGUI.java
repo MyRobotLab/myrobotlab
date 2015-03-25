@@ -45,22 +45,16 @@ public class CLIGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-	}
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
 
-	public void getState(CLI cli) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
 	}
 
 	@Override
 	public void attachGUI() {
 		// commented out subscription due to this class being used for
-		// un-defined gui's 
-		
+		// un-defined gui's
+
 		// subscribe("publishState", "getState", _TemplateService.class);
 		// send("publishState");
 	}
@@ -68,14 +62,22 @@ public class CLIGUI extends ServiceGUI implements ActionListener {
 	@Override
 	public void detachGUI() {
 		// commented out subscription due to this class being used for
-		// un-defined gui's 
-				
+		// un-defined gui's
+
 		// unsubscribe("publishState", "getState", _TemplateService.class);
 	}
 
+	public void getState(CLI cli) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		});
+	}
+
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
-	
+	public void init() {
 	}
 
 }

@@ -34,37 +34,36 @@ import java.util.Random;
 @SuppressWarnings({ "JavaDoc" })
 public class ClientHttpRequest {
 	private URLConnection mConnection;
+
 	private OutputStream mOutput = null;
+
 	private Map mCookies = new HashMap();
 	private Map<String, Object> mParameters = new LinkedHashMap<String, Object>();
 	private String boundary;
 
-	private void write(char c) throws IOException {
-		mOutput.write(c);
-	}
-
-	private void write(String s) throws IOException {
-		mOutput.write(s.getBytes());
-	}
-
-	private void newline() throws IOException {
-		write("\r\n");
-	}
-
-	private void writeln(String s) throws IOException {
-		write(s);
-		newline();
-	}
-
 	private static Random random = new Random();
+
+	private static void pipe(InputStream in, OutputStream out) throws IOException {
+		byte[] buf = new byte[50000];
+		int nread;
+		while ((nread = in.read(buf, 0, buf.length)) >= 0) {
+			out.write(buf, 0, nread);
+		}
+		out.flush();
+	}
 
 	private static String randomString() {
 		return Long.toString(random.nextLong(), 36);
 	}
 
-	private void boundary() throws IOException {
-		write("--");
-		write(boundary);
+	/**
+	 * Creates a new multipart POST HTTP request for a specified URL
+	 * 
+	 * @param url
+	 *            the URL to send request to
+	 */
+	public ClientHttpRequest(URL url) throws IOException {
+		this(url.openConnection());
 	}
 
 	/**
@@ -82,14 +81,36 @@ public class ClientHttpRequest {
 		connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 	}
 
+	private void boundary() throws IOException {
+		write("--");
+		write(boundary);
+	}
+
+	private void newline() throws IOException {
+		write("\r\n");
+	}
+
 	/**
-	 * Creates a new multipart POST HTTP request for a specified URL
+	 * posts the requests to the server, with all the cookies and parameters
+	 * that were added
 	 * 
-	 * @param url
-	 *            the URL to send request to
+	 * @return input stream with the server response
 	 */
-	public ClientHttpRequest(URL url) throws IOException {
-		this(url.openConnection());
+	public HttpURLConnection post() throws IOException {
+		if (mOutput == null)
+			mOutput = mConnection.getOutputStream();
+		postCookies();
+		for (String key : mParameters.keySet()) {
+			Object value = mParameters.get(key);
+			if (value instanceof File)
+				writeParameter(key, (File) value);
+			else
+				writeParameter(key, value.toString());
+		}
+		boundary();
+		writeln("--");
+		mOutput.close();
+		return (HttpURLConnection) mConnection;
 	}
 
 	/**
@@ -116,13 +137,6 @@ public class ClientHttpRequest {
 		}
 	}
 
-	private void writeName(String name) throws IOException {
-		newline();
-		write("Content-Disposition: form-data; name=\"");
-		write(name);
-		write('"');
-	}
-
 	/**
 	 * adds a parameter to the request; if the parameter is a File, the file is
 	 * uploaded, otherwise the string value of the parameter is passed in the
@@ -139,6 +153,52 @@ public class ClientHttpRequest {
 	}
 
 	/**
+	 * adds parameters to the request
+	 * 
+	 * @param parameters
+	 *            "name-to-value" map of parameters; if a value is a file, the
+	 *            file is uploaded, otherwise it is stringified and sent in the
+	 *            request
+	 */
+	public void setParameters(Map parameters) {
+		if (parameters == null)
+			return;
+		mParameters.putAll(parameters);
+	}
+
+	private void write(char c) throws IOException {
+		mOutput.write(c);
+	}
+
+	private void write(String s) throws IOException {
+		mOutput.write(s.getBytes());
+	}
+
+	private void writeln(String s) throws IOException {
+		write(s);
+		newline();
+	}
+
+	private void writeName(String name) throws IOException {
+		newline();
+		write("Content-Disposition: form-data; name=\"");
+		write(name);
+		write('"');
+	}
+
+	/**
+	 * adds a file parameter to the request
+	 * 
+	 * @param name
+	 *            parameter name
+	 * @param file
+	 *            the file to upload
+	 */
+	private void writeParameter(String name, File file) throws IOException {
+		writeParameter(name, file.getPath(), new FileInputStream(file));
+	}
+
+	/**
 	 * adds a string parameter to the request
 	 * 
 	 * @param name
@@ -152,15 +212,6 @@ public class ClientHttpRequest {
 		newline();
 		newline();
 		writeln(value);
-	}
-
-	private static void pipe(InputStream in, OutputStream out) throws IOException {
-		byte[] buf = new byte[50000];
-		int nread;
-		while ((nread = in.read(buf, 0, buf.length)) >= 0) {
-			out.write(buf, 0, nread);
-		}
-		out.flush();
 	}
 
 	/**
@@ -188,54 +239,5 @@ public class ClientHttpRequest {
 		newline();
 		pipe(is, mOutput);
 		newline();
-	}
-
-	/**
-	 * adds a file parameter to the request
-	 * 
-	 * @param name
-	 *            parameter name
-	 * @param file
-	 *            the file to upload
-	 */
-	private void writeParameter(String name, File file) throws IOException {
-		writeParameter(name, file.getPath(), new FileInputStream(file));
-	}
-
-	/**
-	 * adds parameters to the request
-	 * 
-	 * @param parameters
-	 *            "name-to-value" map of parameters; if a value is a file, the
-	 *            file is uploaded, otherwise it is stringified and sent in the
-	 *            request
-	 */
-	public void setParameters(Map parameters) {
-		if (parameters == null)
-			return;
-		mParameters.putAll(parameters);
-	}
-
-	/**
-	 * posts the requests to the server, with all the cookies and parameters
-	 * that were added
-	 * 
-	 * @return input stream with the server response
-	 */
-	public HttpURLConnection post() throws IOException {
-		if (mOutput == null)
-			mOutput = mConnection.getOutputStream();
-		postCookies();
-		for (String key : mParameters.keySet()) {
-			Object value = mParameters.get(key);
-			if (value instanceof File)
-				writeParameter(key, (File) value);
-			else
-				writeParameter(key, value.toString());
-		}
-		boundary();
-		writeln("--");
-		mOutput.close();
-		return (HttpURLConnection) mConnection;
 	}
 }

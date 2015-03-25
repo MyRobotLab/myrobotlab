@@ -40,25 +40,25 @@ public class OpenCVFilterOutput extends OpenCVFilter {
 
 	// display related
 	Graphics2D graphics = null;
-	
-	public OpenCVFilterOutput()  {
+
+	public OpenCVFilterOutput() {
 		super();
 	}
-	
-	public OpenCVFilterOutput(String name)  {
+
+	public OpenCVFilterOutput(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

@@ -54,71 +54,15 @@ public class OpenNIGUI extends ServiceGUI implements ActionListener {
 
 	JPanel eastPanel = new JPanel();
 
+	SerializableImage source = new SerializableImage(null, "kinect");
+
+	String displayType = "display"; // display (composite of skeleton or
+									// anything OpenNI has written to "frame") |
+									// depth | rgb
+
 	public OpenNIGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		video = new VideoWidget(boundServiceName, myService, tabs);
-	}
-
-	public void init() {
-
-		video.init();
-
-		display.setLayout(new BorderLayout());
-		display.add(video.getDisplay(), BorderLayout.CENTER);
-
-		eastPanel.setLayout(new GridLayout(6, 1));
-		eastPanel.add(captureButton);
-		eastPanel.add(recordButton);
-		eastPanel.add(playbackButton);
-		eastPanel.add(depthCloudButton);
-		eastPanel.add(imageCloudButton);
-
-		display.add(eastPanel, BorderLayout.EAST);
-
-		captureButton.addActionListener(this);
-		recordButton.addActionListener(this);
-		playbackButton.addActionListener(this);
-
-	}
-
-	public void getState(OpenNI openni) {
-		// TODO - update state
-	}
-
-	
-	public void publishFrame(SerializableImage si) {
-		video.displayFrame(si);
-	}
-
-	SerializableImage source = new SerializableImage(null, "kinect");
-	
-	String displayType = "display"; // display (composite of skeleton or anything OpenNI has written to "frame") | depth | rgb
-	
-	public void publishOpenNIData(OpenNIData data) {
-		// TODO - display type based on config
-		if ("display".equals(displayType)){
-			source.setImage(data.depth);
-		} else if ("depth".equals(displayType)){
-			source.setImage(data.depth);
-		} else if ("rgb".equals(displayType)){
-			source.setImage(data.rbgPImage.getImage());
-		}
-		video.displayFrame(source);
-	}
-
-	
-	@Override
-	public void attachGUI() {
-		// subscribe & ask for the initial state of the service
-		subscribe("publishState", "getState", OpenNI.class);
-		subscribe("publishOpenNIData", "publishOpenNIData");
-		myService.send(boundServiceName, "publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", OpenNI.class);
-		unsubscribe("publishOpenNIData", "publishOpenNIData");
 	}
 
 	@Override
@@ -149,6 +93,63 @@ public class OpenNIGUI extends ServiceGUI implements ActionListener {
 				playbackButton.setText("playback");
 			}
 		}
+	}
+
+	@Override
+	public void attachGUI() {
+		// subscribe & ask for the initial state of the service
+		subscribe("publishState", "getState", OpenNI.class);
+		subscribe("publishOpenNIData", "publishOpenNIData");
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishState", "getState", OpenNI.class);
+		unsubscribe("publishOpenNIData", "publishOpenNIData");
+	}
+
+	public void getState(OpenNI openni) {
+		// TODO - update state
+	}
+
+	@Override
+	public void init() {
+
+		video.init();
+
+		display.setLayout(new BorderLayout());
+		display.add(video.getDisplay(), BorderLayout.CENTER);
+
+		eastPanel.setLayout(new GridLayout(6, 1));
+		eastPanel.add(captureButton);
+		eastPanel.add(recordButton);
+		eastPanel.add(playbackButton);
+		eastPanel.add(depthCloudButton);
+		eastPanel.add(imageCloudButton);
+
+		display.add(eastPanel, BorderLayout.EAST);
+
+		captureButton.addActionListener(this);
+		recordButton.addActionListener(this);
+		playbackButton.addActionListener(this);
+
+	}
+
+	public void publishFrame(SerializableImage si) {
+		video.displayFrame(si);
+	}
+
+	public void publishOpenNIData(OpenNIData data) {
+		// TODO - display type based on config
+		if ("display".equals(displayType)) {
+			source.setImage(data.depth);
+		} else if ("depth".equals(displayType)) {
+			source.setImage(data.depth);
+		} else if ("rgb".equals(displayType)) {
+			source.setImage(data.rbgPImage.getImage());
+		}
+		video.displayFrame(source);
 	}
 
 }

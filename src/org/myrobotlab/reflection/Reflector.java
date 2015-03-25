@@ -18,12 +18,12 @@ import org.slf4j.Logger;
  *
  */
 public class Reflector {
-	
-	private static HashMap<String, Method> cache = new  HashMap<String, Method>();
-	
+
+	private static HashMap<String, Method> cache = new HashMap<String, Method>();
+
 	static final Logger log = LoggerFactory.getLogger(Reflector.class);
-	
-	//final static String getSignature
+
+	// final static String getSignature
 
 	/**
 	 * Allow for checking if a boxed primitive is being used.
@@ -31,7 +31,7 @@ public class Reflector {
 	public final static HashSet<Class<?>> primitiveTypes;
 
 	static {
-		
+
 		primitiveTypes = new HashSet<Class<?>>(8);
 		primitiveTypes.add(Boolean.class);
 		primitiveTypes.add(Character.class);
@@ -41,27 +41,6 @@ public class Reflector {
 		primitiveTypes.add(Long.class);
 		primitiveTypes.add(Float.class);
 		primitiveTypes.add(Double.class);
-	}
-
-	/**
-	 * Create an instance of the classname.
-	 * 
-	 * @param classname
-	 * @param params
-	 * @return null if anything fails
-	 */
-	public static <T> T getNewInstance(String classname, Object... params) {
-		if (classname == null || classname.isEmpty()) {
-			return null;
-		}
-		try {
-			@SuppressWarnings("unchecked")
-			Class<? extends T> c = (Class<? extends T>) Class.forName(classname);
-			return Reflector.<T> getNewInstance(c, params);
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		return null;
 	}
 
 	/**
@@ -82,9 +61,54 @@ public class Reflector {
 			Constructor<?> mc = c.getConstructor(paramTypes);
 			return (T) mc.newInstance(params);
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return null;
+	}
+
+	/**
+	 * Create an instance of the classname.
+	 * 
+	 * @param classname
+	 * @param params
+	 * @return null if anything fails
+	 */
+	public static <T> T getNewInstance(String classname, Object... params) {
+		if (classname == null || classname.isEmpty()) {
+			return null;
+		}
+		try {
+			@SuppressWarnings("unchecked")
+			Class<? extends T> c = (Class<? extends T>) Class.forName(classname);
+			return Reflector.<T> getNewInstance(c, params);
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		return null;
+	}
+
+	/**
+	 * Parse the Class out of the passed-in objects. If an object is null, null
+	 * will be used.
+	 * 
+	 * @param params
+	 * @return
+	 */
+	private static Class<?>[] getParameterTypes(Object[] params) {
+		Class<?>[] paramTypes = null;
+		// Class<?>[] paramTypes = null;
+		if (params == null) {
+			return paramTypes;
+		}
+		paramTypes = new Class[params.length];
+		for (int i = 0; i < params.length; ++i) {
+			if (params[i] == null) {
+				paramTypes[i] = null;
+				continue;
+			}
+			paramTypes[i] = params[i].getClass();
+		}
+		return paramTypes;
 	}
 
 	/**
@@ -145,7 +169,7 @@ public class Reflector {
 			Method meth = c.getMethod(method, paramTypes);
 			return (T) meth.invoke(object, params);
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return null;
 	}
@@ -158,29 +182,5 @@ public class Reflector {
 	 */
 	public static boolean isPrimitive(Object item) {
 		return primitiveTypes.contains(item);
-	}
-
-	/**
-	 * Parse the Class out of the passed-in objects. If an object is null, null
-	 * will be used.
-	 * 
-	 * @param params
-	 * @return
-	 */
-	private static Class<?>[] getParameterTypes(Object[] params) {
-		Class<?>[] paramTypes = null;
-		// Class<?>[] paramTypes = null;
-		if (params == null) {
-			return paramTypes;
-		}
-		paramTypes = new Class[params.length];
-		for (int i = 0; i < params.length; ++i) {
-			if (params[i] == null) {
-				paramTypes[i] = null;
-				continue;
-			}
-			paramTypes[i] = params[i].getClass();
-		}
-		return paramTypes;
 	}
 }

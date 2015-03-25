@@ -44,6 +44,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	public final static Logger log = LoggerFactory.getLogger(SimpleOpenNI.class);
 
 	static String nativDepLibPath = "";
+
 	static String nativLibPath = "";
 
 	static { // load the nativ shared lib
@@ -57,14 +58,17 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			if (sysStr.indexOf("win") >= 0) { // windows
 				if (archStr.indexOf("86") >= 0) { // 32bit
 					libName += "32.dll";
-					nativLibPath = getLibraryPathWin();// + "/SimpleOpenNI/library/"; recent change
+					nativLibPath = getLibraryPathWin();// +
+														// "/SimpleOpenNI/library/";
+														// recent change
 					nativDepLibPath = nativLibPath;// + "win32/"; recent change
 				} else if (archStr.indexOf("64") >= 0) {
 					libName += "64.dll";
 					// nativLibPath = getLibraryPathWin() +
 					// "/SimpleOpenNI/library/";
 					nativLibPath = getLibraryPathWin();
-					// nativDepLibPath = nativLibPath + "win64/"; GroG ... recent change
+					// nativDepLibPath = nativLibPath + "win64/"; GroG ...
+					// recent change
 					nativDepLibPath = nativLibPath;
 				}
 				// load dependencies
@@ -85,7 +89,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			} else if (sysStr.indexOf("mac") >= 0) { // mac
 
 				libName = "lib" + libName + ".jnilib";
-				//nativLibPath = getLibraryPathLinux() + "/SimpleOpenNI/library/";
+				// nativLibPath = getLibraryPathLinux() +
+				// "/SimpleOpenNI/library/";
 				nativLibPath = getLibraryPathMac();
 				nativDepLibPath = nativLibPath + "osx/";
 
@@ -98,9 +103,86 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			log.error("Can't load SimpleOpenNI library (" + libName + ") : " + e);
 			log.error("Verify if you installed SimpleOpenNI correctly.\nhttp://code.google.com/p/simple-openni/wiki/Installation");
 		} catch (Exception ex) {
-			Logging.logException(ex);
+			Logging.logError(ex);
 		}
 
+	}
+
+	// /////////////////////////////////////////////////////////////////////////
+	// callback vars
+	protected Object _userCbObject;
+
+	protected Object _calibrationCbObject;
+
+	protected Object _poseCbObject;
+
+	protected Object _handCbObject;
+
+	protected Object _gestureCbObject;
+
+	protected Object _sessionCbObject;
+
+	protected Method _newUserMethod;
+	protected Method _lostUserMethod;
+	protected Method _outOfSceneUserMethod;
+	protected Method _visibleUserMethod;
+	// hands cb
+	protected Method _newHandMethod;
+	protected Method _trackedHandMethod;
+
+	protected Method _lostHandMethod;
+	// gesture cb
+	protected Method _newGestureMethod;
+	protected Method _inProgressGestureMethod;
+	protected Method _abortedGestureMethod;
+
+	protected Method _completedGestureMethod;
+	// nite session cb
+	protected Method _startSessionMethod;
+	protected Method _endSessionMethod;
+
+	protected Method _focusSessionMethod;
+	protected String _filename;
+	protected OpenNI _parent;
+	protected PImage _depthImage;
+
+	protected int[] _depthRaw;
+	protected PVector[] _depthMapRealWorld;
+	protected float[] _depthMapRealWorldXn;
+
+	// protected XnPoint3DArray _depthMapRealWorldArray;
+	protected PImage _rgbImage;
+	protected PImage _irImage;
+
+	protected PImage _sceneImage;
+	protected int[] _sceneRaw;
+	protected PImage _userImage;
+
+	protected int[] _userRaw;
+
+	// update flags
+	protected long _depthMapTimeStamp;
+
+	protected long _depthImageTimeStamp;
+
+	protected long _depthRealWorldTimeStamp;
+	protected long _rgbTimeStamp;
+
+	protected long _irImageTimeStamp;
+	protected long _userMapTimeStamp;
+
+	protected long _userImageTimeStamp;
+	protected float[] _tempVec = new float[3];
+	static protected boolean _initFlag = false;
+
+	public static int deviceCount() {
+		start();
+		return ContextWrapper.deviceCount();
+	}
+
+	public static int deviceNames(StrVector nodeNames) {
+		start();
+		return ContextWrapper.deviceNames(nodeNames);
 	}
 
 	public static String getLibraryPathLinux() {
@@ -123,14 +205,12 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		} else
 			return "";
 	}
-
 	public static String getLibraryPathMac() {
-		
+
 		File f = new File("libraries/native/");
 		return f.getAbsolutePath() + "/";
 	}
 
-	
 	public static String getLibraryPathWin() {
 		/*
 		 * FIXME -- need a different way URL url =
@@ -154,94 +234,52 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return f.getAbsolutePath().replace("\\", "/") + "/";
 	}
 
+	public static Method getMethodRef(Object obj, String methodName, Class[] paraList) {
+		Method ret = null;
+		try {
+			ret = obj.getClass().getMethod(methodName, paraList);
+		} catch (Exception e) { // no such method, or an error.. which is fine,
+								// just ignore
+		}
+		return ret;
+	}
+
+	public static int raySphereIntersection(PVector p, PVector dir, PVector sphereCenter, float sphereRadius, PVector hit1, PVector hit2) {
+		float[] hit1Ret = new float[3];
+		float[] hit2Ret = new float[3];
+
+		int ret = raySphereIntersection(p.array(), dir.array(), sphereCenter.array(), sphereRadius, hit1Ret, hit2Ret);
+
+		if (ret > 0) {
+			hit1.set(hit1Ret);
+
+			if (ret > 1)
+				hit2.set(hit2Ret);
+		}
+		return ret;
+	}
+
+	public static boolean rayTriangleIntersection(PVector p, PVector dir, PVector vec0, PVector vec1, PVector vec2, PVector hit) {
+		float[] hitRet = new float[3];
+		if (rayTriangleIntersection(p.array(), dir.array(), vec0.array(), vec1.array(), vec2.array(), hitRet)) {
+			hit.set(hitRet);
+			return true;
+		} else
+			return false;
+	}
+
 	public static void start() {
 		if (_initFlag)
 			return;
 
-		String curPath = SimpleOpenNI.getcwd();
-		SimpleOpenNI.chdir(new String(nativDepLibPath));
+		String curPath = ContextWrapper.getcwd();
+		ContextWrapper.chdir(new String(nativDepLibPath));
 
 		_initFlag = true;
 		initContext();
 
-		SimpleOpenNI.chdir(curPath);
+		ContextWrapper.chdir(curPath);
 	}
-
-	public static int deviceCount() {
-		start();
-		return ContextWrapper.deviceCount();
-	}
-
-	public static int deviceNames(StrVector nodeNames) {
-		start();
-		return ContextWrapper.deviceNames(nodeNames);
-	}
-
-	// /////////////////////////////////////////////////////////////////////////
-	// callback vars
-	protected Object _userCbObject;
-	protected Object _calibrationCbObject;
-	protected Object _poseCbObject;
-	protected Object _handCbObject;
-	protected Object _gestureCbObject;
-	protected Object _sessionCbObject;
-
-	protected Method _newUserMethod;
-	protected Method _lostUserMethod;
-	protected Method _outOfSceneUserMethod;
-	protected Method _visibleUserMethod;
-
-	// hands cb
-	protected Method _newHandMethod;
-	protected Method _trackedHandMethod;
-	protected Method _lostHandMethod;
-
-	// gesture cb
-	protected Method _newGestureMethod;
-	protected Method _inProgressGestureMethod;
-	protected Method _abortedGestureMethod;
-	protected Method _completedGestureMethod;
-
-	// nite session cb
-	protected Method _startSessionMethod;
-	protected Method _endSessionMethod;
-	protected Method _focusSessionMethod;
-
-	protected String _filename;
-	protected OpenNI _parent;
-
-	protected PImage _depthImage;
-	protected int[] _depthRaw;
-	protected PVector[] _depthMapRealWorld;
-
-	protected float[] _depthMapRealWorldXn;
-	// protected XnPoint3DArray _depthMapRealWorldArray;
-
-	protected PImage _rgbImage;
-
-	protected PImage _irImage;
-
-	protected PImage _sceneImage;
-	protected int[] _sceneRaw;
-
-	protected PImage _userImage;
-	protected int[] _userRaw;
-
-	// update flags
-	protected long _depthMapTimeStamp;
-	protected long _depthImageTimeStamp;
-	protected long _depthRealWorldTimeStamp;
-
-	protected long _rgbTimeStamp;
-
-	protected long _irImageTimeStamp;
-
-	protected long _userMapTimeStamp;
-	protected long _userImageTimeStamp;
-
-	protected float[] _tempVec = new float[3];
-
-	static protected boolean _initFlag = false;
 
 	/**
 	 * Creates the OpenNI context ands inits the modules
@@ -253,6 +291,39 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		initEnv(parent, RUN_MODE_SINGLE_THREADED, -1);
 	}
 
+	/**
+	 * Creates the OpenNI context ands inits the modules
+	 * 
+	 * @param parent
+	 *            OpenNI
+	 * @param recordPath
+	 *            String, path to the record file
+	 */
+	public SimpleOpenNI(OpenNI parent, String recordPath) {
+		String path = parent.dataPath(recordPath);
+
+		String curPath = ContextWrapper.getcwd();
+		ContextWrapper.chdir(new String(nativDepLibPath));
+
+		this._parent = parent;
+		parent.registerDispose(this);
+		initVars();
+
+		// setup the callbacks
+		setupCallbackFunc();
+
+		// start openni
+		this.init(path, RUN_MODE_DEFAULT);
+
+		if ((nodes() & NODE_DEPTH) > 0)
+			setupDepth();
+		if ((nodes() & NODE_IMAGE) > 0)
+			setupRGB();
+		if ((nodes() & NODE_IR) > 0)
+			setupIR();
+
+		ContextWrapper.chdir(curPath);
+	}
 
 	/**
 	 * Creates the OpenNI context ands inits the modules
@@ -269,8 +340,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	public SimpleOpenNI(OpenNI parent, String recordPath, int runMode) {
 		String path = parent.dataPath(recordPath);
 
-		String curPath = SimpleOpenNI.getcwd();
-		SimpleOpenNI.chdir(new String(nativDepLibPath));
+		String curPath = ContextWrapper.getcwd();
+		ContextWrapper.chdir(new String(nativDepLibPath));
 
 		this._parent = parent;
 		parent.registerDispose(this);
@@ -292,158 +363,106 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		if ((nodes() & NODE_IR) > 0)
 			setupIR();
 
-		SimpleOpenNI.chdir(curPath);
+		ContextWrapper.chdir(curPath);
 	}
 
 	/**
-	 * Creates the OpenNI context ands inits the modules
+	 * Applies only the rotation part of 'mat' to
 	 * 
-	 * @param parent
-	 *            OpenNI
-	 * @param recordPath
-	 *            String, path to the record file
+	 * @param mat
+	 *            PMatrix3D
 	 */
-	public SimpleOpenNI(OpenNI parent, String recordPath) {
-		String path = parent.dataPath(recordPath);
+	public void calcUserCoordsys(PMatrix3D mat) {
+		if (hasUserCoordsys() == false)
+			return;
 
-		String curPath = SimpleOpenNI.getcwd();
-		SimpleOpenNI.chdir(new String(nativDepLibPath));
+		float[] matRet = new float[9];
+		matRet[0] = mat.m00;
+		matRet[1] = mat.m01;
+		matRet[2] = mat.m02;
 
-		this._parent = parent;
-		parent.registerDispose(this);
-		initVars();
+		matRet[3] = mat.m10;
+		matRet[4] = mat.m11;
+		matRet[5] = mat.m12;
 
-		// setup the callbacks
-		setupCallbackFunc();
+		matRet[6] = mat.m20;
+		matRet[7] = mat.m21;
+		matRet[8] = mat.m22;
 
-		// start openni
-		this.init(path, RUN_MODE_DEFAULT);
+		calcUserCoordsys(matRet);
 
-		if ((nodes() & NODE_DEPTH) > 0)
-			setupDepth();
-		if ((nodes() & NODE_IMAGE) > 0)
-			setupRGB();
-		if ((nodes() & NODE_IR) > 0)
-			setupIR();
-
-		SimpleOpenNI.chdir(curPath);
-	}
-
-	protected void initEnv(OpenNI parent, int runMode, int deviceIndex) {
-		String curPath = SimpleOpenNI.getcwd();
-		SimpleOpenNI.chdir(new String(nativDepLibPath));
-
-		this._parent = parent;
-		parent.registerDispose(this);
-		initVars();
-
-		// setup the callbacks
-		setupCallbackFunc();
-
-		//
-		if (deviceIndex < 0)
-			this.init(runMode);
-		else
-			this.init(deviceIndex, runMode);
-
-		SimpleOpenNI.chdir(curPath);
-	}
-
-	protected void initVars() {
-		_depthMapTimeStamp = -1;
-		_depthImageTimeStamp = -1;
-		_depthRealWorldTimeStamp = -1;
-
-		_rgbTimeStamp = -1;
-
-		_irImageTimeStamp = -1;
-
-		_userMapTimeStamp = -1;
-		_userImageTimeStamp = -1;
-
-	}
-
-	protected void setupCallbackFunc() {
-		_userCbObject = _parent;
-		_handCbObject = _parent;
-		_gestureCbObject = _parent;
-
-		_calibrationCbObject = _parent;
-		_poseCbObject = _parent;
-		_sessionCbObject = _parent;
-
-		_newUserMethod = null;
-		_lostUserMethod = null;
-		_outOfSceneUserMethod = null;
-		_visibleUserMethod = null;
-
-		_newHandMethod = null;
-		_trackedHandMethod = null;
-		_lostHandMethod = null;
-
-		_newGestureMethod = null;
-		_inProgressGestureMethod = null;
-		_abortedGestureMethod = null;
-		_completedGestureMethod = null;
-
-		// user callbacks
-		setupUserCB(_parent);
-
-		// hands
-		setupHandCB(_parent);
-
-	}
-
-	protected Method getMethodRef(String methodName, Class[] paraList) {
-		Method ret = null;
-		try {
-			ret = _parent.getClass().getMethod(methodName, paraList);
-		} catch (Exception e) { // no such method, or an error.. which is fine,
-								// just ignore
-		}
-		return ret;
-	}
-
-	public static Method getMethodRef(Object obj, String methodName, Class[] paraList) {
-		Method ret = null;
-		try {
-			ret = obj.getClass().getMethod(methodName, paraList);
-		} catch (Exception e) { // no such method, or an error.. which is fine,
-								// just ignore
-		}
-		return ret;
+		mat.set(matRet[0], matRet[1], matRet[2], 0, matRet[3], matRet[4], matRet[5], 0, matRet[6], matRet[7], matRet[8], 0, 0, 0, 0, 1);
 	}
 
 	/**
-	* 
-	*/
-	public void dispose() {
-		close();
-	}
+	 * Calculates a point in the user defined coordinate system back to the 3d
+	 * system of the 3d camera
+	 * 
+	 * @param point
+	 *            PVector
+	 */
+	public void calcUserCoordsys(PVector point) {
+		if (hasUserCoordsys() == false)
+			return;
 
-	public void finalize() {
-		close();
-	}
-
-	private void setupDepth() {
-		_depthImage = new PImage(depthWidth(), depthHeight());
-		_depthRaw = new int[depthMapSize()];
-		_depthMapRealWorld = new PVector[depthMapSize()];
-		_depthMapRealWorldXn = new float[depthMapSize() * 3];
-
-		for (int i = 0; i < depthMapSize(); i++)
-			_depthMapRealWorld[i] = new PVector();
+		float[] p = new float[3];
+		calcUserCoordsys(p);
+		point.set(p[0], p[1], p[2]);
 	}
 
 	/**
-	 * Enable the depthMap data collection
+	 * Calculates a point in origninal 3d camera coordinate system to the
+	 * coordinate system defined by the user
+	 * 
+	 * @param mat
+	 *            PMatrix3D
 	 */
-	public boolean enableDepth() {
-		if (super.enableDepth()) { // setup the var for depth calc
-			setupDepth();
-			return true;
-		} else
-			return false;
+	public void calcUserCoordsysBack(PMatrix3D mat) {
+		if (hasUserCoordsys() == false)
+			return;
+
+		float[] matRet = new float[9];
+		matRet[0] = mat.m00;
+		matRet[1] = mat.m01;
+		matRet[2] = mat.m02;
+
+		matRet[3] = mat.m10;
+		matRet[4] = mat.m11;
+		matRet[5] = mat.m12;
+
+		matRet[6] = mat.m20;
+		matRet[7] = mat.m21;
+		matRet[8] = mat.m22;
+
+		calcUserCoordsysBack(matRet);
+
+		mat.set(matRet[0], matRet[1], matRet[2], 0, matRet[3], matRet[4], matRet[5], 0, matRet[6], matRet[7], matRet[8], 0, 0, 0, 0, 1);
+	}
+
+	/**
+	 * Calculates a point in origninal 3d camera coordinate system to the
+	 * coordinate system defined by the user
+	 * 
+	 * @param point
+	 *            PVector
+	 */
+	public void calcUserCoordsysBack(PVector point) {
+		if (hasUserCoordsys() == false)
+			return;
+
+		float[] p = new float[3];
+		calcUserCoordsysBack(p);
+		point.set(p[0], p[1], p[2]);
+	}
+
+	public void convertProjectiveToRealWorld(PVector proj, PVector world) {
+		convertProjectiveToRealWorld(proj.array(), _tempVec);
+		world.set(_tempVec);
+	}
+
+	public void convertRealWorldToProjective(PVector world, PVector proj) {
+		convertRealWorldToProjective(world.array(), _tempVec);
+		proj.set(_tempVec);
 	}
 
 	/**
@@ -478,54 +497,139 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return _depthMapRealWorld;
 	}
 
-	private void setupRGB() {
-		_rgbImage = new PImage(rgbWidth(), rgbHeight());
+	/**
+	* 
+	*/
+	public void dispose() {
+		close();
 	}
 
+	// /////////////////////////////////////////////////////////////////////////
+	// helper methods
 	/**
-	 * Enable the camera image collection
-	 */
-	public boolean enableRGB() {
-		if (super.enableRGB()) { // setup the var for depth calc
-			setupRGB();
-			return true;
-		} else
-			return false;
-	}
-
-	/**
-	 * Enable the camera image collection
+	 * Helper method that draw the 3d camera and the frustum of the camera
 	 * 
-	 * @param width
-	 *            int
-	 * @param height
-	 *            int
-	 * @param fps
-	 *            int
-	 * @return returns true if rgbMap generation was succesfull
 	 */
-	public boolean enableRGB(int width, int height, int fps) {
-		if (super.enableRGB(width, height, fps)) { // setup the var for depth
-													// calc
-			setupRGB();
+	public void drawCamFrustum() {
+		/*
+		 * _parent.g.pushStyle(); _parent.g.pushMatrix();
+		 * 
+		 * if(hasUserCoordsys()) { // move the camera to the real nullpoint
+		 * PMatrix3D mat = new PMatrix3D(); getUserCoordsys(mat);
+		 * _parent.g.applyMatrix(mat); }
+		 * 
+		 * // draw cam case _parent.stroke(200,200,0); _parent.noFill();
+		 * _parent.g.beginShape(); _parent.g.vertex(270 * .5f,40 * .5f,0.0f);
+		 * _parent.g.vertex(-270 * .5f,40 * .5f,0.0f); _parent.g.vertex(-270 *
+		 * .5f,-40 * .5f,0.0f); _parent.g.vertex(270 * .5f,-40 * .5f,0.0f);
+		 * _parent.g.endShape(PConstants.CLOSE);
+		 * 
+		 * _parent.g.beginShape(); _parent.g.vertex(220 * .5f,40 * .5f,-50.0f);
+		 * _parent.g.vertex(-220 * .5f,40 * .5f,-50.0f); _parent.g.vertex(-220 *
+		 * .5f,-40 * .5f,-50.0f); _parent.g.vertex(220 * .5f,-40 * .5f,-50.0f);
+		 * _parent.g.endShape(PConstants.CLOSE);
+		 * 
+		 * _parent.g.beginShape(PConstants.LINES); _parent.g.vertex(270 * .5f,40
+		 * * .5f,0.0f); _parent.g.vertex(220 * .5f,40 * .5f,-50.0f);
+		 * 
+		 * _parent.g.vertex(-270 * .5f,40 * .5f,0.0f); _parent.g.vertex(-220 *
+		 * .5f,40 * .5f,-50.0f);
+		 * 
+		 * _parent.g.vertex(-270 * .5f,-40 * .5f,0.0f); _parent.g.vertex(-220 *
+		 * .5f,-40 * .5f,-50.0f);
+		 * 
+		 * _parent.g.vertex(270 * .5f,-40 * .5f,0.0f); _parent.g.vertex(220 *
+		 * .5f,-40 * .5f,-50.0f); _parent.g.endShape();
+		 * 
+		 * // draw cam opening angles _parent.stroke(200,200,0,50);
+		 * _parent.g.line(0.0f,0.0f,0.0f, 0.0f,0.0f,1000.0f);
+		 * 
+		 * // calculate the angles of the cam, values are in radians, radius is
+		 * 10m float distDepth = 10000;
+		 * 
+		 * float valueH = distDepth * _parent.tan(hFieldOfView() * .5f); float
+		 * valueV = distDepth * _parent.tan(vFieldOfView() * .5f);
+		 * 
+		 * _parent.stroke(200,200,0,100); _parent.g.line(0.0f,0.0f,0.0f,
+		 * valueH,valueV,distDepth); _parent.g.line(0.0f,0.0f,0.0f,
+		 * -valueH,valueV,distDepth); _parent.g.line(0.0f,0.0f,0.0f,
+		 * valueH,-valueV,distDepth); _parent.g.line(0.0f,0.0f,0.0f,
+		 * -valueH,-valueV,distDepth); _parent.g.beginShape();
+		 * _parent.g.vertex(valueH,valueV,distDepth);
+		 * _parent.g.vertex(-valueH,valueV,distDepth);
+		 * _parent.g.vertex(-valueH,-valueV,distDepth);
+		 * _parent.g.vertex(valueH,-valueV,distDepth);
+		 * _parent.g.endShape(PConstants.CLOSE);
+		 * 
+		 * _parent.g.popMatrix(); _parent.g.popStyle();
+		 */
+	}
+
+	/**
+	 * Draws a limb from joint1 to joint2
+	 * 
+	 * @param userId
+	 *            int
+	 * @param joint1
+	 *            int
+	 * @param joint2
+	 *            int
+	 */
+	public void drawLimb(int userId, int joint1, int joint2) {
+
+		PVector joint1Pos = new PVector();
+		PVector joint2Pos = new PVector();
+
+		getJointPositionSkeleton(userId, joint1, joint1Pos);
+		getJointPositionSkeleton(userId, joint2, joint2Pos);
+
+		PVector joint1Pos2d = new PVector();
+		PVector joint2Pos2d = new PVector();
+
+		convertRealWorldToProjective(joint1Pos, joint1Pos2d);
+		convertRealWorldToProjective(joint2Pos, joint2Pos2d);
+
+		_parent.line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y, userId, joint1, joint2);
+	}
+
+	/**
+	 * Enable the depthMap data collection
+	 */
+	@Override
+	public boolean enableDepth() {
+		if (super.enableDepth()) { // setup the var for depth calc
+			setupDepth();
 			return true;
 		} else
 			return false;
 	}
 
-	public PImage rgbImage() {
-		updateImage();
-		return _rgbImage;
+	/**
+	 * Enable hands
+	 */
+	@Override
+	public boolean enableHand() {
+		return enableHand(_parent);
 	}
 
-	private void setupIR() {
-		_irImage = new PImage(irWidth(), irHeight());
+	/**
+	 * Enable hands
+	 */
+	public boolean enableHand(Object cbObject) {
+		_handCbObject = cbObject;
+
+		if (super.enableHand()) {
+			setupHandCB(_handCbObject);
+			return true;
+		} else
+			return false;
 	}
 
 	/**
 	 * Enable the irMap data collection ir is only available if there is no
 	 * rgbImage activated at the same time
 	 */
+	@Override
 	public boolean enableIR() {
 		if (super.enableIR()) { // setup the var for depth calc
 			setupIR();
@@ -546,6 +650,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	 *            int
 	 * @return returns true if irMap generation was succesfull
 	 */
+	@Override
 	public boolean enableIR(int width, int height, int fps) {
 		if (super.enableIR(width, height, fps)) { // setup the var for depth
 													// calc
@@ -553,11 +658,6 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			return true;
 		} else
 			return false;
-	}
-
-	public PImage irImage() {
-		updateIrImage();
-		return _irImage;
 	}
 
 	// private void setupScene()
@@ -624,21 +724,57 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	// normal.set(n.getX(),n.getY(),n.getZ());
 	// }
 
-	private void setupUserCB(Object obj) {
-		_newUserMethod = getMethodRef(obj, "onNewUser", new Class[] { SimpleOpenNI.class, int.class });
-		_lostUserMethod = getMethodRef(obj, "onLostUser", new Class[] { SimpleOpenNI.class, int.class });
-		_outOfSceneUserMethod = getMethodRef(obj, "onOutOfSceneUser", new Class[] { SimpleOpenNI.class, int.class });
-		_visibleUserMethod = getMethodRef(obj, "onVisibleUser", new Class[] { SimpleOpenNI.class, int.class });
+	/**
+	 * Enable recorder
+	 */
+	@Override
+	public boolean enableRecorder(String filePath) {
+		String path = _parent.dataPath(filePath);
+		_parent.createPath(path);
+
+		if (super.enableRecorder(path))
+			return true;
+		else
+			return false;
 	}
 
-	private void setupUser() {
-		_userRaw = new int[userWidth() * userHeight()];
-		_userImage = new PImage(userWidth(), userHeight());
+	/**
+	 * Enable the camera image collection
+	 */
+	@Override
+	public boolean enableRGB() {
+		if (super.enableRGB()) { // setup the var for depth calc
+			setupRGB();
+			return true;
+		} else
+			return false;
+	}
+
+	/**
+	 * Enable the camera image collection
+	 * 
+	 * @param width
+	 *            int
+	 * @param height
+	 *            int
+	 * @param fps
+	 *            int
+	 * @return returns true if rgbMap generation was succesfull
+	 */
+	@Override
+	public boolean enableRGB(int width, int height, int fps) {
+		if (super.enableRGB(width, height, fps)) { // setup the var for depth
+													// calc
+			setupRGB();
+			return true;
+		} else
+			return false;
 	}
 
 	/**
 	 * Enable user
 	 */
+	@Override
 	public boolean enableUser() {
 		return enableUser(_parent);
 	}
@@ -647,12 +783,12 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	 * Enable user
 	 */
 	public boolean enableUser(Object cbObject) {
-		String curPath = SimpleOpenNI.getcwd();
-		SimpleOpenNI.chdir(new String(nativDepLibPath));
+		String curPath = ContextWrapper.getcwd();
+		ContextWrapper.chdir(new String(nativDepLibPath));
 
 		boolean ret = super.enableUser();
 
-		SimpleOpenNI.chdir(curPath);
+		ContextWrapper.chdir(curPath);
 
 		if (ret) {
 			setupUserCB(cbObject);
@@ -662,33 +798,9 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			return false;
 	}
 
-	/*
-	 * public int[] getUsersPixels(int user) { int size = userWidth() *
-	 * userHeight(); if(size == 0) return _userRaw;
-	 * 
-	 * if(_userRaw.length != userWidth() * userHeight()) { // resize the array
-	 * _userRaw = new int[userWidth() * userHeight()]; }
-	 * 
-	 * super.getUserPixels(user,_userRaw); return _userRaw; }
-	 */
-	public PImage userImage() {
-		updateUserImage();
-		return _userImage;
-	}
-
-	public int[] userMap() {
-		updateUserRaw();
-		return _userRaw;
-	}
-
-	public boolean getCoM(int user, PVector com) {
-		boolean ret;
-		float[] vec = new float[3];
-
-		ret = super.getCoM(user, vec);
-		com.set(vec);
-
-		return ret;
+	@Override
+	public void finalize() {
+		close();
 	}
 
 	public boolean getBoundingBox(int user, PVector bbMin, PVector bbMax) {
@@ -702,51 +814,86 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return ret;
 	}
 
-	public int[] getUsers() {
-		IntVector intVec = new IntVector();
-		getUsers(intVec);
+	public boolean getCoM(int user, PVector com) {
+		boolean ret;
+		float[] vec = new float[3];
 
-		int[] userList = new int[(int) intVec.size()];
-		for (int i = 0; i < intVec.size(); i++)
-			userList[i] = intVec.get(i);
+		ret = super.getCoM(user, vec);
+		com.set(vec);
 
-		return userList;
-	}
-
-	private void setupHandCB(Object obj) {
-		_newHandMethod = getMethodRef(obj, "onNewHand", new Class[] { SimpleOpenNI.class, int.class, PVector.class });
-		_trackedHandMethod = getMethodRef(obj, "onTrackedHand", new Class[] { SimpleOpenNI.class, int.class, PVector.class });
-		_lostHandMethod = getMethodRef(obj, "onLostHand", new Class[] { SimpleOpenNI.class, int.class });
-
-		// gesture
-		_newGestureMethod = getMethodRef(obj, "onNewGesture", new Class[] { SimpleOpenNI.class, int.class });
-		_inProgressGestureMethod = getMethodRef(obj, "onProgressGesture", new Class[] { SimpleOpenNI.class, int.class });
-		_abortedGestureMethod = getMethodRef(obj, "onAbortedGesture", new Class[] { SimpleOpenNI.class, int.class });
-		_completedGestureMethod = getMethodRef(obj, "onCompletedGesture", new Class[] { SimpleOpenNI.class, int.class, PVector.class });
+		return ret;
 	}
 
 	/**
-	 * Enable hands
+	 * gets the orientation of a joint
+	 * 
+	 * @param userId
+	 *            int
+	 * @param joint
+	 *            int
+	 * @param jointOrientation
+	 *            PMatrix3D
+	 * @return The confidence of this joint float
 	 */
-	public boolean enableHand() {
-		return enableHand(_parent);
+	public float getJointOrientationSkeleton(int userId, int joint, PMatrix3D jointOrientation) {
+		float[] mat = new float[9];
+
+		float ret = getJointOrientationSkeleton(userId, joint, mat);
+
+		jointOrientation.set(mat[0], mat[1], mat[2], 0, mat[3], mat[4], mat[5], 0, mat[6], mat[7], mat[8], 0, 0, 0, 0, 1);
+
+		return ret;
 	}
 
 	/**
-	 * Enable hands
+	 * gets the coordinates of a joint
+	 * 
+	 * @param userId
+	 *            int
+	 * @param joint
+	 *            int
+	 * @param jointPos
+	 *            PVector
+	 * @return The confidence of this joint float
 	 */
-	public boolean enableHand(Object cbObject) {
-		_handCbObject = cbObject;
-
-		if (super.enableHand()) {
-			setupHandCB(_handCbObject);
-			return true;
-		} else
-			return false;
+	public float getJointPositionSkeleton(int userId, int joint, PVector jointPos) {
+		float ret = getJointPositionSkeleton(userId, joint, _tempVec);
+		jointPos.set(_tempVec);
+		jointPos.quality = ret;
+		return ret;
 	}
 
-	public int startTrackingHand(PVector pos) {
-		return super.startTrackingHand(pos.array());
+	protected Method getMethodRef(String methodName, Class[] paraList) {
+		Method ret = null;
+		try {
+			ret = _parent.getClass().getMethod(methodName, paraList);
+		} catch (Exception e) { // no such method, or an error.. which is fine,
+								// just ignore
+		}
+		return ret;
+	}
+
+	public void getUserCoordsys(PMatrix3D mat) {
+		if (hasUserCoordsys() == false)
+			return;
+
+		float matRet[] = new float[16];
+		getUserCoordsys(matRet);
+
+		mat.set(matRet[0], matRet[1], matRet[2], matRet[3], matRet[4], matRet[5], matRet[6], matRet[7], matRet[8], matRet[9], matRet[10], matRet[11], matRet[12], matRet[13],
+				matRet[14], matRet[15]);
+
+	}
+
+	public void getUserCoordsysBack(PMatrix3D mat) {
+		if (hasUserCoordsys() == false)
+			return;
+
+		float matRet[] = new float[16];
+		getUserCoordsysBack(matRet);
+
+		mat.set(matRet[0], matRet[1], matRet[2], matRet[3], matRet[4], matRet[5], matRet[6], matRet[7], matRet[8], matRet[9], matRet[10], matRet[11], matRet[12], matRet[13],
+				matRet[14], matRet[15]);
 	}
 
 	// private void setupGesture()
@@ -784,16 +931,21 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	// }
 
 	/**
-	 * Enable recorder
+	 * gets the transformation matrix of a user defined coordinatesystem
+	 * 
+	 * @param xformMat
+	 *            PMatrix3D
 	 */
-	public boolean enableRecorder(String filePath) {
-		String path = _parent.dataPath(filePath);
-		_parent.createPath(path);
+	public void getUserCoordsysTransMat(PMatrix3D xformMat) {
+		// xformMat.identity();
+		if (hasUserCoordsys() == false)
+			return;
 
-		if (super.enableRecorder(path))
-			return true;
-		else
-			return false;
+		float[] mat = new float[16];
+		getUserCoordsysTransMat(mat);
+
+		xformMat.set(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5], mat[6], mat[7], mat[8], mat[9], mat[10], mat[11], mat[12], mat[13], mat[14], mat[15]);
+
 	}
 
 	// /**
@@ -827,14 +979,256 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	// return false;
 	// }
 
-	protected void updateDepthRaw() {
-		if ((nodes() & NODE_DEPTH) == 0)
-			return;
-		if (_depthMapTimeStamp == updateTimeStamp())
-			return;
+	public int[] getUsers() {
+		IntVector intVec = new IntVector();
+		getUsers(intVec);
 
-		depthMap(_depthRaw);
-		_depthMapTimeStamp = updateTimeStamp();
+		int[] userList = new int[(int) intVec.size()];
+		for (int i = 0; i < intVec.size(); i++)
+			userList[i] = intVec.get(i);
+
+		return userList;
+	}
+
+	protected void initEnv(OpenNI parent, int runMode, int deviceIndex) {
+		String curPath = ContextWrapper.getcwd();
+		ContextWrapper.chdir(new String(nativDepLibPath));
+
+		this._parent = parent;
+		parent.registerDispose(this);
+		initVars();
+
+		// setup the callbacks
+		setupCallbackFunc();
+
+		//
+		if (deviceIndex < 0)
+			this.init(runMode);
+		else
+			this.init(deviceIndex, runMode);
+
+		ContextWrapper.chdir(curPath);
+	}
+
+	protected void initVars() {
+		_depthMapTimeStamp = -1;
+		_depthImageTimeStamp = -1;
+		_depthRealWorldTimeStamp = -1;
+
+		_rgbTimeStamp = -1;
+
+		_irImageTimeStamp = -1;
+
+		_userMapTimeStamp = -1;
+		_userImageTimeStamp = -1;
+
+	}
+
+	public PImage irImage() {
+		updateIrImage();
+		return _irImage;
+	}
+
+	@Override
+	protected void onAbortedGestureCb(int gestureId) {
+		log.info("onAbortedGestureCb");
+		try {
+			_abortedGestureMethod.invoke(_handCbObject, new Object[] { this, (int) gestureId });
+		} catch (Exception e) {
+		}
+	}
+
+	@Override
+	protected void onCompletedGestureCb(int gestureId, Vec3f pos) {
+		try {
+			_completedGestureMethod.invoke(_handCbObject, new Object[] { this, (int) gestureId, new PVector(pos.x(), pos.y(), pos.z()) });
+		} catch (Exception e) {
+		}
+	}
+
+	@Override
+	protected void onInProgressGestureCb(int gestureId) {
+		try {
+			_inProgressGestureMethod.invoke(_handCbObject, new Object[] { this, (int) gestureId });
+		} catch (Exception e) {
+		}
+	}
+
+	@Override
+	protected void onLostHandCb(int handId) {
+		try {
+			_lostHandMethod.invoke(_handCbObject, new Object[] { this, (int) handId });
+		} catch (Exception e) {
+		}
+	}
+
+	@Override
+	protected void onLostUserCb(int userId) {
+		try {
+			_lostUserMethod.invoke(_userCbObject, new Object[] { this, (int) userId });
+		} catch (Exception e) {
+		}
+	}
+
+	// gesture
+	@Override
+	protected void onNewGestureCb(int gestureId) {
+		try {
+			_newGestureMethod.invoke(_handCbObject, new Object[] { this, (int) gestureId });
+		} catch (Exception e) {
+		}
+	}
+
+	// hand
+	@Override
+	protected void onNewHandCb(int handId, Vec3f pos) {
+		try {
+			_newHandMethod.invoke(_handCbObject, new Object[] { this, (int) handId, new PVector(pos.x(), pos.y(), pos.z()) });
+		} catch (Exception e) {
+		}
+	}
+
+	// user
+	@Override
+	protected void onNewUserCb(int userId) {
+		try {
+			_newUserMethod.invoke(_userCbObject, new Object[] { this, (int) userId });
+		} catch (Exception e) {
+		}
+	}
+
+	// /*
+	// public void convertRealWorldToProjective(Vector3D worldArray, Vector3D
+	// projArray)
+	// {
+	// }
+	// */
+
+	@Override
+	protected void onOutOfSceneUserCb(int userId) {
+		try {
+			_outOfSceneUserMethod.invoke(_userCbObject, new Object[] { this, (int) userId });
+		} catch (Exception e) {
+		}
+	}
+
+	// /*
+	// public void convertProjectiveToRealWorld(Vector3D projArray, Vector3D
+	// worldArray)
+	// {
+	// }
+	// */
+
+	@Override
+	protected void onTrackedHandCb(int handId, Vec3f pos) {
+		try {
+			_trackedHandMethod.invoke(_handCbObject, new Object[] { this, (int) handId, new PVector(pos.x(), pos.y(), pos.z()) });
+		} catch (Exception e) {
+		}
+	}
+
+	@Override
+	protected void onVisibleUserCb(int userId) {
+		try {
+			_visibleUserMethod.invoke(_userCbObject, new Object[] { this, (int) userId });
+		} catch (Exception e) {
+		}
+	}
+
+	public PImage rgbImage() {
+		updateImage();
+		return _rgbImage;
+	}
+
+	protected void setupCallbackFunc() {
+		_userCbObject = _parent;
+		_handCbObject = _parent;
+		_gestureCbObject = _parent;
+
+		_calibrationCbObject = _parent;
+		_poseCbObject = _parent;
+		_sessionCbObject = _parent;
+
+		_newUserMethod = null;
+		_lostUserMethod = null;
+		_outOfSceneUserMethod = null;
+		_visibleUserMethod = null;
+
+		_newHandMethod = null;
+		_trackedHandMethod = null;
+		_lostHandMethod = null;
+
+		_newGestureMethod = null;
+		_inProgressGestureMethod = null;
+		_abortedGestureMethod = null;
+		_completedGestureMethod = null;
+
+		// user callbacks
+		setupUserCB(_parent);
+
+		// hands
+		setupHandCB(_parent);
+
+	}
+
+	private void setupDepth() {
+		_depthImage = new PImage(depthWidth(), depthHeight());
+		_depthRaw = new int[depthMapSize()];
+		_depthMapRealWorld = new PVector[depthMapSize()];
+		_depthMapRealWorldXn = new float[depthMapSize() * 3];
+
+		for (int i = 0; i < depthMapSize(); i++)
+			_depthMapRealWorld[i] = new PVector();
+	}
+
+	private void setupHandCB(Object obj) {
+		_newHandMethod = getMethodRef(obj, "onNewHand", new Class[] { SimpleOpenNI.class, int.class, PVector.class });
+		_trackedHandMethod = getMethodRef(obj, "onTrackedHand", new Class[] { SimpleOpenNI.class, int.class, PVector.class });
+		_lostHandMethod = getMethodRef(obj, "onLostHand", new Class[] { SimpleOpenNI.class, int.class });
+
+		// gesture
+		_newGestureMethod = getMethodRef(obj, "onNewGesture", new Class[] { SimpleOpenNI.class, int.class });
+		_inProgressGestureMethod = getMethodRef(obj, "onProgressGesture", new Class[] { SimpleOpenNI.class, int.class });
+		_abortedGestureMethod = getMethodRef(obj, "onAbortedGesture", new Class[] { SimpleOpenNI.class, int.class });
+		_completedGestureMethod = getMethodRef(obj, "onCompletedGesture", new Class[] { SimpleOpenNI.class, int.class, PVector.class });
+	}
+
+	private void setupIR() {
+		_irImage = new PImage(irWidth(), irHeight());
+	}
+
+	private void setupRGB() {
+		_rgbImage = new PImage(rgbWidth(), rgbHeight());
+	}
+
+	// /////////////////////////////////////////////////////////////////////////
+	// geometry helper functions
+
+	private void setupUser() {
+		_userRaw = new int[userWidth() * userHeight()];
+		_userImage = new PImage(userWidth(), userHeight());
+	}
+
+	private void setupUserCB(Object obj) {
+		_newUserMethod = getMethodRef(obj, "onNewUser", new Class[] { SimpleOpenNI.class, int.class });
+		_lostUserMethod = getMethodRef(obj, "onLostUser", new Class[] { SimpleOpenNI.class, int.class });
+		_outOfSceneUserMethod = getMethodRef(obj, "onOutOfSceneUser", new Class[] { SimpleOpenNI.class, int.class });
+		_visibleUserMethod = getMethodRef(obj, "onVisibleUser", new Class[] { SimpleOpenNI.class, int.class });
+	}
+
+	// /////////////////////////////////////////////////////////////////////////
+	// callbacks
+
+	public int startTrackingHand(PVector pos) {
+		return super.startTrackingHand(pos.array());
+	}
+
+	/**
+	 * Enable the user data collection
+	 */
+	@Override
+	public void update() {
+		super.update();
 	}
 
 	protected void updateDepthImage() {
@@ -847,6 +1241,16 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		depthImage(_depthImage.pixels);
 		_depthImage.updatePixels();
 		_depthImageTimeStamp = updateTimeStamp();
+	}
+
+	protected void updateDepthRaw() {
+		if ((nodes() & NODE_DEPTH) == 0)
+			return;
+		if (_depthMapTimeStamp == updateTimeStamp())
+			return;
+
+		depthMap(_depthRaw);
+		_depthMapTimeStamp = updateTimeStamp();
 	}
 
 	protected void updateDepthRealWorld() {
@@ -898,17 +1302,6 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		_irImageTimeStamp = updateTimeStamp();
 	}
 
-	protected void updateUserRaw() {
-		if ((nodes() & NODE_USER) == 0)
-			return;
-		if (_userImageTimeStamp == updateTimeStamp())
-			return;
-
-		userMap(_userRaw);
-
-		_userImageTimeStamp = updateTimeStamp();
-	}
-
 	protected void updateUserImage() {
 		if ((nodes() & NODE_USER) == 0)
 			return;
@@ -922,403 +1315,34 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		_userImageTimeStamp = updateTimeStamp();
 	}
 
-	/**
-	 * Enable the user data collection
-	 */
-	public void update() {
-		super.update();
-	}
-
-	/**
-	 * Draws a limb from joint1 to joint2
-	 * 
-	 * @param userId
-	 *            int
-	 * @param joint1
-	 *            int
-	 * @param joint2
-	 *            int
-	 */
-	public void drawLimb(int userId, int joint1, int joint2) {
-
-		PVector joint1Pos = new PVector();
-		PVector joint2Pos = new PVector();
-
-		getJointPositionSkeleton(userId, joint1, joint1Pos);
-		getJointPositionSkeleton(userId, joint2, joint2Pos);
-
-		PVector joint1Pos2d = new PVector();
-		PVector joint2Pos2d = new PVector();
-
-		convertRealWorldToProjective(joint1Pos, joint1Pos2d);
-		convertRealWorldToProjective(joint2Pos, joint2Pos2d);
-
-		_parent.line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y, userId, joint1, joint2);
-	}
-
-	/**
-	 * gets the coordinates of a joint
-	 * 
-	 * @param userId
-	 *            int
-	 * @param joint
-	 *            int
-	 * @param jointPos
-	 *            PVector
-	 * @return The confidence of this joint float
-	 */
-	public float getJointPositionSkeleton(int userId, int joint, PVector jointPos) {
-		float ret = getJointPositionSkeleton(userId, joint, _tempVec);
-		jointPos.set(_tempVec);
-		jointPos.quality = ret;
-		return ret;
-	}
-
-	/**
-	 * gets the orientation of a joint
-	 * 
-	 * @param userId
-	 *            int
-	 * @param joint
-	 *            int
-	 * @param jointOrientation
-	 *            PMatrix3D
-	 * @return The confidence of this joint float
-	 */
-	public float getJointOrientationSkeleton(int userId, int joint, PMatrix3D jointOrientation) {
-		float[] mat = new float[9];
-
-		float ret = getJointOrientationSkeleton(userId, joint, mat);
-
-		jointOrientation.set(mat[0], mat[1], mat[2], 0, mat[3], mat[4], mat[5], 0, mat[6], mat[7], mat[8], 0, 0, 0, 0, 1);
-
-		return ret;
-	}
-
-	public void convertRealWorldToProjective(PVector world, PVector proj) {
-		convertRealWorldToProjective(world.array(), _tempVec);
-		proj.set(_tempVec);
-	}
-
-	// /*
-	// public void convertRealWorldToProjective(Vector3D worldArray, Vector3D
-	// projArray)
-	// {
-	// }
-	// */
-
-	public void convertProjectiveToRealWorld(PVector proj, PVector world) {
-		convertProjectiveToRealWorld(proj.array(), _tempVec);
-		world.set(_tempVec);
-	}
-
-	// /*
-	// public void convertProjectiveToRealWorld(Vector3D projArray, Vector3D
-	// worldArray)
-	// {
-	// }
-	// */
-
-	/**
-	 * gets the transformation matrix of a user defined coordinatesystem
-	 * 
-	 * @param xformMat
-	 *            PMatrix3D
-	 */
-	public void getUserCoordsysTransMat(PMatrix3D xformMat) {
-		// xformMat.identity();
-		if (hasUserCoordsys() == false)
+	protected void updateUserRaw() {
+		if ((nodes() & NODE_USER) == 0)
+			return;
+		if (_userImageTimeStamp == updateTimeStamp())
 			return;
 
-		float[] mat = new float[16];
-		getUserCoordsysTransMat(mat);
+		userMap(_userRaw);
 
-		xformMat.set(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5], mat[6], mat[7], mat[8], mat[9], mat[10], mat[11], mat[12], mat[13], mat[14], mat[15]);
-
+		_userImageTimeStamp = updateTimeStamp();
 	}
 
-	/**
-	 * Calculates a point in the user defined coordinate system back to the 3d
-	 * system of the 3d camera
+	/*
+	 * public int[] getUsersPixels(int user) { int size = userWidth() *
+	 * userHeight(); if(size == 0) return _userRaw;
 	 * 
-	 * @param point
-	 *            PVector
-	 */
-	public void calcUserCoordsys(PVector point) {
-		if (hasUserCoordsys() == false)
-			return;
-
-		float[] p = new float[3];
-		calcUserCoordsys(p);
-		point.set(p[0], p[1], p[2]);
-	}
-
-	/**
-	 * Applies only the rotation part of 'mat' to
+	 * if(_userRaw.length != userWidth() * userHeight()) { // resize the array
+	 * _userRaw = new int[userWidth() * userHeight()]; }
 	 * 
-	 * @param mat
-	 *            PMatrix3D
+	 * super.getUserPixels(user,_userRaw); return _userRaw; }
 	 */
-	public void calcUserCoordsys(PMatrix3D mat) {
-		if (hasUserCoordsys() == false)
-			return;
-
-		float[] matRet = new float[9];
-		matRet[0] = mat.m00;
-		matRet[1] = mat.m01;
-		matRet[2] = mat.m02;
-
-		matRet[3] = mat.m10;
-		matRet[4] = mat.m11;
-		matRet[5] = mat.m12;
-
-		matRet[6] = mat.m20;
-		matRet[7] = mat.m21;
-		matRet[8] = mat.m22;
-
-		calcUserCoordsys(matRet);
-
-		mat.set(matRet[0], matRet[1], matRet[2], 0, matRet[3], matRet[4], matRet[5], 0, matRet[6], matRet[7], matRet[8], 0, 0, 0, 0, 1);
+	public PImage userImage() {
+		updateUserImage();
+		return _userImage;
 	}
 
-	/**
-	 * Calculates a point in origninal 3d camera coordinate system to the
-	 * coordinate system defined by the user
-	 * 
-	 * @param point
-	 *            PVector
-	 */
-	public void calcUserCoordsysBack(PVector point) {
-		if (hasUserCoordsys() == false)
-			return;
-
-		float[] p = new float[3];
-		calcUserCoordsysBack(p);
-		point.set(p[0], p[1], p[2]);
-	}
-
-	/**
-	 * Calculates a point in origninal 3d camera coordinate system to the
-	 * coordinate system defined by the user
-	 * 
-	 * @param mat
-	 *            PMatrix3D
-	 */
-	public void calcUserCoordsysBack(PMatrix3D mat) {
-		if (hasUserCoordsys() == false)
-			return;
-
-		float[] matRet = new float[9];
-		matRet[0] = mat.m00;
-		matRet[1] = mat.m01;
-		matRet[2] = mat.m02;
-
-		matRet[3] = mat.m10;
-		matRet[4] = mat.m11;
-		matRet[5] = mat.m12;
-
-		matRet[6] = mat.m20;
-		matRet[7] = mat.m21;
-		matRet[8] = mat.m22;
-
-		calcUserCoordsysBack(matRet);
-
-		mat.set(matRet[0], matRet[1], matRet[2], 0, matRet[3], matRet[4], matRet[5], 0, matRet[6], matRet[7], matRet[8], 0, 0, 0, 0, 1);
-	}
-
-	public void getUserCoordsys(PMatrix3D mat) {
-		if (hasUserCoordsys() == false)
-			return;
-
-		float matRet[] = new float[16];
-		getUserCoordsys(matRet);
-
-		mat.set(matRet[0], matRet[1], matRet[2], matRet[3], matRet[4], matRet[5], matRet[6], matRet[7], matRet[8], matRet[9], matRet[10], matRet[11], matRet[12], matRet[13],
-				matRet[14], matRet[15]);
-
-	}
-
-	public void getUserCoordsysBack(PMatrix3D mat) {
-		if (hasUserCoordsys() == false)
-			return;
-
-		float matRet[] = new float[16];
-		getUserCoordsysBack(matRet);
-
-		mat.set(matRet[0], matRet[1], matRet[2], matRet[3], matRet[4], matRet[5], matRet[6], matRet[7], matRet[8], matRet[9], matRet[10], matRet[11], matRet[12], matRet[13],
-				matRet[14], matRet[15]);
-	}
-
-	// /////////////////////////////////////////////////////////////////////////
-	// helper methods
-	/**
-	 * Helper method that draw the 3d camera and the frustum of the camera
-	 * 
-	 */
-	public void drawCamFrustum() {
-		/*
-		 * _parent.g.pushStyle(); _parent.g.pushMatrix();
-		 * 
-		 * if(hasUserCoordsys()) { // move the camera to the real nullpoint
-		 * PMatrix3D mat = new PMatrix3D(); getUserCoordsys(mat);
-		 * _parent.g.applyMatrix(mat); }
-		 * 
-		 * // draw cam case _parent.stroke(200,200,0); _parent.noFill();
-		 * _parent.g.beginShape(); _parent.g.vertex(270 * .5f,40 * .5f,0.0f);
-		 * _parent.g.vertex(-270 * .5f,40 * .5f,0.0f); _parent.g.vertex(-270 *
-		 * .5f,-40 * .5f,0.0f); _parent.g.vertex(270 * .5f,-40 * .5f,0.0f);
-		 * _parent.g.endShape(PConstants.CLOSE);
-		 * 
-		 * _parent.g.beginShape(); _parent.g.vertex(220 * .5f,40 * .5f,-50.0f);
-		 * _parent.g.vertex(-220 * .5f,40 * .5f,-50.0f); _parent.g.vertex(-220 *
-		 * .5f,-40 * .5f,-50.0f); _parent.g.vertex(220 * .5f,-40 * .5f,-50.0f);
-		 * _parent.g.endShape(PConstants.CLOSE);
-		 * 
-		 * _parent.g.beginShape(PConstants.LINES); _parent.g.vertex(270 * .5f,40
-		 * * .5f,0.0f); _parent.g.vertex(220 * .5f,40 * .5f,-50.0f);
-		 * 
-		 * _parent.g.vertex(-270 * .5f,40 * .5f,0.0f); _parent.g.vertex(-220 *
-		 * .5f,40 * .5f,-50.0f);
-		 * 
-		 * _parent.g.vertex(-270 * .5f,-40 * .5f,0.0f); _parent.g.vertex(-220 *
-		 * .5f,-40 * .5f,-50.0f);
-		 * 
-		 * _parent.g.vertex(270 * .5f,-40 * .5f,0.0f); _parent.g.vertex(220 *
-		 * .5f,-40 * .5f,-50.0f); _parent.g.endShape();
-		 * 
-		 * // draw cam opening angles _parent.stroke(200,200,0,50);
-		 * _parent.g.line(0.0f,0.0f,0.0f, 0.0f,0.0f,1000.0f);
-		 * 
-		 * // calculate the angles of the cam, values are in radians, radius is
-		 * 10m float distDepth = 10000;
-		 * 
-		 * float valueH = distDepth * _parent.tan(hFieldOfView() * .5f); float
-		 * valueV = distDepth * _parent.tan(vFieldOfView() * .5f);
-		 * 
-		 * _parent.stroke(200,200,0,100); _parent.g.line(0.0f,0.0f,0.0f,
-		 * valueH,valueV,distDepth); _parent.g.line(0.0f,0.0f,0.0f,
-		 * -valueH,valueV,distDepth); _parent.g.line(0.0f,0.0f,0.0f,
-		 * valueH,-valueV,distDepth); _parent.g.line(0.0f,0.0f,0.0f,
-		 * -valueH,-valueV,distDepth); _parent.g.beginShape();
-		 * _parent.g.vertex(valueH,valueV,distDepth);
-		 * _parent.g.vertex(-valueH,valueV,distDepth);
-		 * _parent.g.vertex(-valueH,-valueV,distDepth);
-		 * _parent.g.vertex(valueH,-valueV,distDepth);
-		 * _parent.g.endShape(PConstants.CLOSE);
-		 * 
-		 * _parent.g.popMatrix(); _parent.g.popStyle();
-		 */
-	}
-
-	// /////////////////////////////////////////////////////////////////////////
-	// geometry helper functions
-
-	public static boolean rayTriangleIntersection(PVector p, PVector dir, PVector vec0, PVector vec1, PVector vec2, PVector hit) {
-		float[] hitRet = new float[3];
-		if (rayTriangleIntersection(p.array(), dir.array(), vec0.array(), vec1.array(), vec2.array(), hitRet)) {
-			hit.set(hitRet);
-			return true;
-		} else
-			return false;
-	}
-
-	public static int raySphereIntersection(PVector p, PVector dir, PVector sphereCenter, float sphereRadius, PVector hit1, PVector hit2) {
-		float[] hit1Ret = new float[3];
-		float[] hit2Ret = new float[3];
-
-		int ret = raySphereIntersection(p.array(), dir.array(), sphereCenter.array(), sphereRadius, hit1Ret, hit2Ret);
-
-		if (ret > 0) {
-			hit1.set(hit1Ret);
-
-			if (ret > 1)
-				hit2.set(hit2Ret);
-		}
-		return ret;
-	}
-
-	// /////////////////////////////////////////////////////////////////////////
-	// callbacks
-
-	// user
-	protected void onNewUserCb(int userId) {
-		try {
-			_newUserMethod.invoke(_userCbObject, new Object[] { this, (int) userId });
-		} catch (Exception e) {
-		}
-	}
-
-	protected void onLostUserCb(int userId) {
-		try {
-			_lostUserMethod.invoke(_userCbObject, new Object[] { this, (int) userId });
-		} catch (Exception e) {
-		}
-	}
-
-	protected void onOutOfSceneUserCb(int userId) {
-		try {
-			_outOfSceneUserMethod.invoke(_userCbObject, new Object[] { this, (int) userId });
-		} catch (Exception e) {
-		}
-	}
-
-	protected void onVisibleUserCb(int userId) {
-		try {
-			_visibleUserMethod.invoke(_userCbObject, new Object[] { this, (int) userId });
-		} catch (Exception e) {
-		}
-	}
-
-	// hand
-	protected void onNewHandCb(int handId, Vec3f pos) {
-		try {
-			_newHandMethod.invoke(_handCbObject, new Object[] { this, (int) handId, new PVector(pos.x(), pos.y(), pos.z()) });
-		} catch (Exception e) {
-		}
-	}
-
-	protected void onLostHandCb(int handId) {
-		try {
-			_lostHandMethod.invoke(_handCbObject, new Object[] { this, (int) handId });
-		} catch (Exception e) {
-		}
-	}
-
-	protected void onTrackedHandCb(int handId, Vec3f pos) {
-		try {
-			_trackedHandMethod.invoke(_handCbObject, new Object[] { this, (int) handId, new PVector(pos.x(), pos.y(), pos.z()) });
-		} catch (Exception e) {
-		}
-	}
-
-	// gesture
-	protected void onNewGestureCb(int gestureId) {
-		try {
-			_newGestureMethod.invoke(_handCbObject, new Object[] { this, (int) gestureId });
-		} catch (Exception e) {
-		}
-	}
-
-	protected void onInProgressGestureCb(int gestureId) {
-		try {
-			_inProgressGestureMethod.invoke(_handCbObject, new Object[] { this, (int) gestureId });
-		} catch (Exception e) {
-		}
-	}
-
-	protected void onAbortedGestureCb(int gestureId) {
-		log.info("onAbortedGestureCb");
-		try {
-			_abortedGestureMethod.invoke(_handCbObject, new Object[] { this, (int) gestureId });
-		} catch (Exception e) {
-		}
-	}
-
-	protected void onCompletedGestureCb(int gestureId, Vec3f pos) {
-		try {
-			_completedGestureMethod.invoke(_handCbObject, new Object[] { this, (int) gestureId, new PVector(pos.x(), pos.y(), pos.z()) });
-		} catch (Exception e) {
-		}
+	public int[] userMap() {
+		updateUserRaw();
+		return _userRaw;
 	}
 
 	/*

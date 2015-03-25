@@ -107,40 +107,24 @@ import org.slf4j.Logger;
  *         -some-jar-exists-in-geturls RuntimeMXBean runtimeMxBean =
  *         ManagementFactory.getRuntimeMXBean(); List<String> arguments =
  *         runtimeMxBean.getInputArguments();
- *         
- *         TODO - on java -jar myrobotlab.jar | make a copy if agent.jar does not exist..
- *         if it does then spawn the Agent there ... it would make upgrading myrobotlab.jar "trivial" !!!
  * 
- * 	TO TEST - -agent "-test -logLevel WARN"
+ *         TODO - on java -jar myrobotlab.jar | make a copy if agent.jar does
+ *         not exist.. if it does then spawn the Agent there ... it would make
+ *         upgrading myrobotlab.jar "trivial" !!!
+ * 
+ *         TO TEST - -agent "-test -logLevel WARN"
  */
 public class Agent extends Service {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(Agent.class);
 
 	private static HashMap<String, ProcessData> processes = new HashMap<String, ProcessData>();
-	
-	private Set<String> clientJVMArgs = new HashSet<String>();
-	private List<String> agentJVMArgs = new ArrayList<String>();
-	
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("cli", "CLI", "Command line processor");
-		return peers;
-	}
 
-	public Agent(String n) {
-		super(n);
-		log.info("Agent {} PID {} is alive", n, Runtime.getPID());
-		agentJVMArgs = Runtime.getJVMArgs();
-		log.info("jvmArgs {}", Arrays.toString(agentJVMArgs.toArray()));
-		for(int i = 0; i < agentJVMArgs.size(); ++i){
-			String agentJVMArg = agentJVMArgs.get(i);
-			if (!agentJVMArg.startsWith("-agent") && !agentJVMArg.startsWith("-Dfile.encoding")){
-				clientJVMArgs.add(agentJVMArg);
-			}
-		}
-	}
+	private Set<String> clientJVMArgs = new HashSet<String>();
+
+	private List<String> agentJVMArgs = new ArrayList<String>();
 
 	static public String formatList(ArrayList<String> args) {
 		StringBuilder sb = new StringBuilder();
@@ -150,18 +134,258 @@ public class Agent extends Service {
 		}
 		return sb.toString();
 	}
-	
+
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		peers.put("cli", "CLI", "Command line processor");
+		return peers;
+	}
+
+	public static Status install(String fullType) {
+		Status status = Status.info("install %s", fullType);
+		try {
+			Repo repo = new Repo();
+
+			if (!repo.isServiceTypeInstalled(fullType)) {
+				repo.install(fullType);
+				if (repo.hasErrors()) {
+					status.addError(repo.getErrors());
+				}
+
+			} else {
+				log.info("installed {}", fullType);
+			}
+		} catch (Exception e) {
+			status.addError(e);
+		}
+		return status;
+	}
+
+	/**
+	 * First method JVM executes when myrobotlab.jar is in jar form.
+	 * 
+	 * -agent "-logLevel DEBUG -service webgui WebGUI"
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		try {
+			System.out.println("Agent.main starting");
+
+			// split agent commands from runtime commands
+			// String[] agentArgs = new String[0];
+			ArrayList<String> inArgs = new ArrayList<String>();
+			// -agent \"-params -service ... \" string encoded
+			CMDLine runtimeArgs = new CMDLine(args);
+			// -service for Runtime -process a b c d :)
+			if (runtimeArgs.containsKey("-agent")) {
+				// List<String> list = runtimeArgs.getArgumentList("-agent");
+
+				String tmp = runtimeArgs.getArgument("-agent", 0);
+				String[] agentPassedArgs = tmp.split(" ");
+				if (agentPassedArgs.length > 1) {
+					for (int i = 0; i < agentPassedArgs.length; ++i) {
+						inArgs.add(agentPassedArgs[i]);
+					}
+				} else {
+					if (tmp != null) {
+						inArgs.add(tmp);
+					}
+				}
+				/*
+				 * agentArgs = new String[list.size()]; for (int i = 0; i <
+				 * list.size(); ++i){ agentArgs[i] =
+				 * String.format("-%s",list.get(i)); }
+				 */
+			}
+
+			// default args passed to runtime from Agent
+			inArgs.add("-isAgent");
+
+			String[] agentArgs = inArgs.toArray(new String[inArgs.size()]);
+			CMDLine agentCmd = new CMDLine(agentArgs);
+
+			// FIXME -isAgent identifier sent -- default to setting log name to
+			// agent.log !!!
+			Runtime.setRuntimeName("smith");
+			Runtime.main(agentArgs);
+			Agent agent = (Agent) Runtime.start("agent", "Agent");
+
+			if (agentCmd.containsKey("-test")) {
+				agent.serviceTest();
+
+			} else {
+				agent.spawn(args); // <-- agent's is now in charge of first mrl
+									// instance
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		} finally {
+			// big hammer
+			System.out.println("Agent.main leaving");
+			// System.exit(0);
+		}
+	}
+
+	public Agent(String n) {
+		super(n);
+		log.info("Agent {} PID {} is alive", n, Runtime.getPID());
+		agentJVMArgs = Runtime.getJVMArgs();
+		log.info("jvmArgs {}", Arrays.toString(agentJVMArgs.toArray()));
+		for (int i = 0; i < agentJVMArgs.size(); ++i) {
+			String agentJVMArg = agentJVMArgs.get(i);
+			if (!agentJVMArg.startsWith("-agent") && !agentJVMArg.startsWith("-Dfile.encoding")) {
+				clientJVMArgs.add(agentJVMArg);
+			}
+		}
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "framework" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "Agent (Smith) - responsible for creating the environment and maintaining, tracking and terminating all processes";
+	}
+
 	/**
 	 * get a list of all the processes currently governed by this Agent
+	 * 
 	 * @return
 	 */
-	public ProcessData[] getProcesses(){
+	public ProcessData[] getProcesses() {
 		Object[] objs = processes.values().toArray();
 		ProcessData[] pd = new ProcessData[objs.length];
-		for (int i = 0; i < objs.length; ++i){
-			pd[i] = (ProcessData)objs[i];
+		for (int i = 0; i < objs.length; ++i) {
+			pd[i] = (ProcessData) objs[i];
 		}
 		return pd;
+	}
+
+	public String publishTerminated(String name) {
+		info("terminated %s", name);
+		return name;
+	}
+
+	public Status serviceTest() {
+		// CLEAN FOR TEST METHOD
+
+		// FIXME DEPRECATE !!!
+		// RUNTIME is responsible for running services
+		// REPO is responsible for possible services
+		// String[] serviceTypeNames =
+		// Runtime.getInstance().getServiceTypeNames();
+
+		HashSet<String> skipTest = new HashSet<String>();
+
+		skipTest.add("org.myrobotlab.service.Runtime");
+		skipTest.add("org.myrobotlab.service.OpenNI");
+
+		/*
+		 * skipTest.add("org.myrobotlab.service.Agent");
+		 * skipTest.add("org.myrobotlab.service.Incubator");
+		 * skipTest.add("org.myrobotlab.service.InMoov"); // just too big and
+		 * complicated at the moment
+		 * skipTest.add("org.myrobotlab.service.Test");
+		 * skipTest.add("org.myrobotlab.service.CLI"); // ?? No ?
+		 */
+
+		long installTime = 0;
+		Repo repo = Runtime.getInstance().getRepo();
+		ServiceData serviceData = repo.getServiceData();
+		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
+
+		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
+		long startTime = System.currentTimeMillis();
+		status.addNamedInfo("startTime", "%d", startTime);
+
+		for (int i = 0; i < serviceTypes.size(); ++i) {
+
+			ServiceType serviceType = serviceTypes.get(i);
+
+			// TODO - option to disable
+			if (!serviceType.isAvailable()) {
+				continue;
+			}
+			// serviceType = "org.myrobotlab.service.OpenCV";
+
+			if (skipTest.contains(serviceType.getName())) {
+				log.info("skipping %s", serviceType.getName());
+				continue;
+			}
+
+			try {
+
+				// agent.serviceTest(); // WTF?
+				// status.addInfo("perparing clean environment for %s",
+				// serviceType);
+
+				// clean environment
+				// FIXME - optimize clean
+
+				// SUPER CLEAN - force .repo to clear !!
+				// repo.clearRepo();
+
+				// less clean but faster
+				// repo.clearLibraries();
+				// repo.clearServiceData();
+
+				// comment all out for dirty
+
+				// install Test dependencies
+				boolean force = false;
+				long installStartTime = System.currentTimeMillis();
+				repo.install("org.myrobotlab.service.Test", force);
+				repo.install(serviceType.getName(), force);
+				installTime += System.currentTimeMillis() - installStartTime;
+				// clean test.json part file
+
+				// spawn a test - attach to cli - test 1 service end to end
+				// ,"-invoke", "test","test","org.myrobotlab.service.Clock"
+				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-noEnv", "-invoke", "test", "test",
+						serviceType.getName() });
+
+				process.waitFor();
+
+				// destroy - start again next service
+				// wait for partFile report .. test.json
+				// NOT NEEDED - foreign process has ended
+				byte[] data = FileIO.loadPartFile("test.json", 60000);
+				if (data != null) {
+					String test = new String(data);
+					Status testResult = Encoder.fromJson(test, Status.class);
+					if (testResult.hasError()) {
+						status.add(testResult);
+					}
+				} else {
+					Status noInfo = new Status("could not get results");
+					status.add(noInfo);
+				}
+				// destroy env
+				terminate("testEnv");
+
+			} catch (Exception e) {
+				status.addError("ERROR - %s", serviceType);
+				status.addError(e);
+				continue;
+			}
+		}
+
+		status.addNamedInfo("installTime", "%d", installTime);
+		status.addNamedInfo("testTimeMs", "%d", System.currentTimeMillis() - startTime);
+		status.addNamedInfo("testTimeMinutes", "%d", TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime));
+		status.addNamedInfo("endTime", "%d", System.currentTimeMillis());
+
+		try {
+			FileIO.savePartFile("fullTest.json", Encoder.toJson(status).getBytes());
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return status;
 	}
 
 	/**
@@ -217,7 +441,7 @@ public class Agent extends Service {
 		String javaPath = System.getProperty("java.home") + fs + "bin" + fs + javaExe;
 		// JNI
 		String jniLibraryPath = String.format("-Djava.library.path=libraries/native%slibraries/native/%s", ps, platformId);
-		
+
 		String jnaLibraryPath = "-Djna.library.path=libraries/native";
 
 		// String jvmMemory = "-Xmx2048m -Xms256m";
@@ -229,12 +453,12 @@ public class Agent extends Service {
 		}
 
 		outArgs.add(javaPath);
-		
+
 		// jvm args relayed to clients
 		for (String jvmArg : clientJVMArgs) {
 			outArgs.add(jvmArg);
 		}
-		
+
 		outArgs.add(jniLibraryPath);
 		outArgs.add(jnaLibraryPath);
 		outArgs.add("-cp");
@@ -266,7 +490,7 @@ public class Agent extends Service {
 			outArgs.add("python");
 			outArgs.add("Python");
 		}
-		
+
 		// to get appropriate appenders and logging format
 		outArgs.add("-fromAgent");
 
@@ -370,53 +594,10 @@ public class Agent extends Service {
 		return process;
 	}
 
-	public String publishTerminated(String name) {
-		info("terminated %s", name);
-		return name;
-	}
-
-	public Status test() {
-		Status status = Status.info("agent test begin");
-
-		try {
-			// JUnitCore junit = new JUnitCore();
-			// Result result = junit.run(testClasses);
-
-			/*
-			 * Bootstrap test = new BootstrapHotSpot(); // spawn mrl instance
-			 * Process process = test.spawn(new String[]{"-service", "test",
-			 * "Test"}); //Process process = test.spawn(new String[]{});
-			 */
-
-			// process.destroy();
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return status;
-	}
-
-	@Override
-	public String getDescription() {
-		return "Agent (Smith) - responsible for creating the environment and maintaining, tracking and terminating all processes";
-	}
-
 	public void terminate() {
 		terminateProcesses();
 		log.info("terminating self ... goodbye...");
 		System.exit(0);
-	}
-
-	public void terminateSelfOnly() {
-		log.info("goodbye .. cruel world");
-		System.exit(0);
-	}
-
-	public void terminateProcesses() {
-		for (String name : processes.keySet()) {
-			terminate(name);
-		}
-		log.info("no survivors sir...");
 	}
 
 	public String terminate(String name) {
@@ -432,212 +613,38 @@ public class Agent extends Service {
 		return null;
 	}
 
-	public static Status install(String fullType) {
-		Status status = Status.info("install %s", fullType);
-		try {
-			Repo repo = new Repo();
-
-			if (!repo.isServiceTypeInstalled(fullType)) {
-				repo.install(fullType);
-				if (repo.hasErrors()) {
-					status.addError(repo.getErrors());
-				}
-
-			} else {
-				log.info("installed {}", fullType);
-			}
-		} catch (Exception e) {
-			status.addError(e);
+	public void terminateProcesses() {
+		for (String name : processes.keySet()) {
+			terminate(name);
 		}
-		return status;
+		log.info("no survivors sir...");
 	}
 
-	public Status serviceTest() {
-		// CLEAN FOR TEST METHOD
-
-		// FIXME DEPRECATE !!! 
-		// RUNTIME is responsible for running services
-		// REPO is responsible for possible services 
-		//String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
-
-		HashSet<String> skipTest = new HashSet<String>();
-		
-		skipTest.add("org.myrobotlab.service.Runtime");
-		skipTest.add("org.myrobotlab.service.OpenNI");
-		
-		/*
-		skipTest.add("org.myrobotlab.service.Agent");
-		skipTest.add("org.myrobotlab.service.Incubator");
-		skipTest.add("org.myrobotlab.service.InMoov"); // just too big and complicated at the moment
-		skipTest.add("org.myrobotlab.service.Test");
-		skipTest.add("org.myrobotlab.service.CLI"); // ?? No ?
-		*/
-
-		long installTime = 0;
-		Repo repo = Runtime.getInstance().getRepo();
-		ServiceData serviceData = repo.getServiceData();
-		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
-		
-		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
-		long startTime = System.currentTimeMillis();
-		status.addNamedInfo("startTime", "%d", startTime);
-		
-		for (int i = 0; i < serviceTypes.size(); ++i) {
-
-			ServiceType serviceType = serviceTypes.get(i);
-			
-			// TODO - option to disable
-			if (!serviceType.isAvailable()){
-				continue;
-			}
-			//serviceType = "org.myrobotlab.service.OpenCV";
-
-			if (skipTest.contains(serviceType.getName())) {
-				log.info("skipping %s", serviceType.getName());
-				continue;
-			}
-
-			try {
-
-				// agent.serviceTest(); // WTF?
-				//status.addInfo("perparing clean environment for %s", serviceType);
-
-				// clean environment
-				// FIXME - optimize clean
-				
-				
-				// SUPER CLEAN - force .repo to clear !!
-				//repo.clearRepo();
-				
-				// less clean but faster
-				//repo.clearLibraries();
-				//repo.clearServiceData();
-				
-				// comment all out for dirty
-
-				// install Test dependencies
-				boolean force = false;
-				long installStartTime = System.currentTimeMillis();
-				repo.install("org.myrobotlab.service.Test", force);
-				repo.install(serviceType.getName(), force);
-				installTime += System.currentTimeMillis() - installStartTime;
-				// clean test.json part file
-
-				// spawn a test - attach to cli - test 1 service end to end
-				// ,"-invoke", "test","test","org.myrobotlab.service.Clock"
-				Process process = spawn(new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-noEnv", "-invoke", "test", "test", serviceType.getName() });
-				
-				process.waitFor();
-
-				// destroy - start again next service
-				// wait for partFile report .. test.json
-				// NOT NEEDED - foreign process has ended
-				byte[] data = FileIO.loadPartFile("test.json", 60000);
-				if (data != null) {
-					String test = new String(data);
-					Status testResult = Encoder.fromJson(test, Status.class);
-					if (testResult.hasError()){
-						status.add(testResult);
-					}
-				} else {
-					Status noInfo = new Status("could not get results");
-					status.add(noInfo);
-				}
-				// destroy env
-				terminate("testEnv");
-
-			} catch (Exception e) {
-				status.addError("ERROR - %s", serviceType);
-				status.addError(e);
-				continue;
-			}
-		}
-		
-		status.addNamedInfo("installTime", "%d", installTime);
-		status.addNamedInfo("testTimeMs", "%d", System.currentTimeMillis() - startTime);
-		status.addNamedInfo("testTimeMinutes", "%d", TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime));
-		status.addNamedInfo("endTime", "%d", System.currentTimeMillis());
-
-		try {
-			FileIO.savePartFile("fullTest.json", Encoder.toJson(status).getBytes());
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return status;
+	public void terminateSelfOnly() {
+		log.info("goodbye .. cruel world");
+		System.exit(0);
 	}
-	
 
 	@Override
-	public String[] getCategories() {
-		return new String[] {"framework"};
-	}
+	public Status test() {
+		Status status = Status.info("agent test begin");
 
-
-	/**
-	 * First method JVM executes when myrobotlab.jar is in jar form.
-	 * 
-	 * -agent "-logLevel DEBUG -service webgui WebGUI"
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
 		try {
-			System.out.println("Agent.main starting");
+			// JUnitCore junit = new JUnitCore();
+			// Result result = junit.run(testClasses);
 
-			// split agent commands from runtime commands
-			//String[] agentArgs = new String[0];
-			ArrayList<String> inArgs = new ArrayList<String>();
-			// -agent \"-params -service ... \" string encoded
-			CMDLine runtimeArgs = new CMDLine(args);
-			// -service for Runtime -process a b c d :)
-			if (runtimeArgs.containsKey("-agent")) {
-				// List<String> list = runtimeArgs.getArgumentList("-agent");
+			/*
+			 * Bootstrap test = new BootstrapHotSpot(); // spawn mrl instance
+			 * Process process = test.spawn(new String[]{"-service", "test",
+			 * "Test"}); //Process process = test.spawn(new String[]{});
+			 */
 
-				String tmp = runtimeArgs.getArgument("-agent", 0);
-				String[] agentPassedArgs = tmp.split(" ");
-				if (agentPassedArgs.length > 1){
-					for (int i = 0; i < agentPassedArgs.length; ++i){
-						inArgs.add(agentPassedArgs[i]);
-					}
-				} else {
-					if (tmp != null){
-						inArgs.add(tmp);
-					}
-				}
-				/*
-				 * agentArgs = new String[list.size()]; for (int i = 0; i <
-				 * list.size(); ++i){ agentArgs[i] =
-				 * String.format("-%s",list.get(i)); }
-				 */
-			}
-			 
-			// default args passed to runtime from Agent
-			inArgs.add("-isAgent");
-
-			String[] agentArgs = inArgs.toArray(new String[inArgs.size()]);
-			CMDLine agentCmd = new CMDLine(agentArgs);
-
-			// FIXME -isAgent identifier sent -- default to setting log name to agent.log !!!
-			Runtime.setRuntimeName("smith");
-			Runtime.main(agentArgs);
-			Agent agent = (Agent) Runtime.start("agent", "Agent");
-
-			if (agentCmd.containsKey("-test")) {
-				agent.serviceTest();
-
-			} else {
-				agent.spawn(args); // <-- agent's is now in charge of first mrl
-									// instance
-			}
-
+			// process.destroy();
 		} catch (Exception e) {
-			e.printStackTrace(System.out);
-		} finally {
-			// big hammer
-			System.out.println("Agent.main leaving");
-			// System.exit(0);
+			Logging.logError(e);
 		}
+
+		return status;
 	}
-	
+
 }

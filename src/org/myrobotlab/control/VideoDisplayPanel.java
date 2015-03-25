@@ -16,30 +16,6 @@ import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
 public class VideoDisplayPanel {
-	public final static Logger log = LoggerFactory.getLogger(VideoDisplayPanel.class.getCanonicalName());
-
-	VideoWidget parent;
-	String boundFilterName;
-
-	public final String boundServiceName;
-	final GUIService myService;
-
-	JPanel myDisplay = new JPanel();
-	JLabel screen = new JLabel();
-	JLabel mouseInfo = new JLabel("mouse x y");
-	JLabel resolutionInfo = new JLabel("width x height");
-	JLabel deltaTime = new JLabel("0");
-
-	JLabel sourceNameLabel = new JLabel("");
-	public JLabel extraDataLabel = new JLabel("");
-
-	public SerializableImage lastImage = null;
-	public ImageIcon lastIcon = new ImageIcon();
-	public ImageIcon myIcon = new ImageIcon();
-	public VideoMouseListener vml = new VideoMouseListener();
-
-	public int lastImageWidth = 0;
-
 	public class VideoMouseListener implements MouseListener {
 
 		@Override
@@ -75,6 +51,35 @@ public class VideoDisplayPanel {
 
 	}
 
+	public final static Logger log = LoggerFactory.getLogger(VideoDisplayPanel.class.getCanonicalName());
+	VideoWidget parent;
+
+	String boundFilterName;
+	public final String boundServiceName;
+
+	final GUIService myService;
+	JPanel myDisplay = new JPanel();
+	JLabel screen = new JLabel();
+	JLabel mouseInfo = new JLabel("mouse x y");
+	JLabel resolutionInfo = new JLabel("width x height");
+
+	JLabel deltaTime = new JLabel("0");
+	JLabel sourceNameLabel = new JLabel("");
+
+	public JLabel extraDataLabel = new JLabel("");
+	public SerializableImage lastImage = null;
+	public ImageIcon lastIcon = new ImageIcon();
+	public ImageIcon myIcon = new ImageIcon();
+
+	public VideoMouseListener vml = new VideoMouseListener();
+
+	public int lastImageWidth = 0;
+
+	// long frameCount = 0;
+	long displayModulus = 100;
+
+	long delta = 0;
+
 	VideoDisplayPanel(String boundFilterName, VideoWidget p, GUIService myService, String boundServiceName) {
 		this(boundFilterName, p, myService, boundServiceName, null);
 	}
@@ -107,10 +112,6 @@ public class VideoDisplayPanel {
 
 	}
 
-//	long frameCount = 0;
-	long displayModulus = 100;
-	long delta = 0;
-
 	public void displayFrame(SerializableImage img) {
 
 		/*
@@ -119,7 +120,7 @@ public class VideoDisplayPanel {
 		 * 
 		 * img.source is the name of the bound filter
 		 */
-//		++frameCount;
+		// ++frameCount;
 
 		String source = img.getSource();
 
@@ -135,7 +136,7 @@ public class VideoDisplayPanel {
 			myIcon.setImage(img.getImage().getScaledInstance(parent.normalizedSize.width, parent.normalizedSize.height, 0));
 		} else {
 			BufferedImage bi = img.getImage();
-			if (bi != null){
+			if (bi != null) {
 				myIcon.setImage(bi);
 			}
 		}

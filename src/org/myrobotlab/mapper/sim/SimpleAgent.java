@@ -149,152 +149,68 @@ public class SimpleAgent extends BaseObject {
 
 	}
 
-	protected void create3D() { /* Overide */
-	}
+	/**
+	 * Adds a actuator device to the agent.
+	 * 
+	 * @param num
+	 *            - the requested position in the sensor list.
+	 * @param sd
+	 *            - the device.
+	 * @param position
+	 *            - its position relative to agent's center.
+	 * @param angle
+	 *            - its angle in the XZ plane.
+	 * @return the num of the actuator
+	 */
+	protected int addActuatorDevice(ActuatorDevice ad, Vector3d position, double angle) {
 
-	/** Creation phase - called once by the simulator. */
-	protected void create() {
-		create3D();
-		// setup on the floor
-		startPosition.add(new Vector3d(0, height / 2.0, 0));
-	}
-
-	/** Resets agent variables and position */
-	protected void reset() {
-		veryNearAgent = null;
-		collisionRadius = radius;
-		counter = 0;
-		lifetime = 0;
-		odometer = 0;
-		linearVelocity.set(0, 0, 0);
-		resetPosition();
-		resetDevices();
-	}
-
-	protected void resetPosition() {
-		resetPositionAt(startPosition);
-	}
-
-	protected void resetPositionAt(Vector3d newPosition) {
-		// reattach to graph if necessary
-		if (detachedFromSceneGraph)
-			attach();
-		resetTransforms();
-		collisionDetected = false;
-		interactionDetected = false;
-		translateTo(newPosition);
-	}
-
-	/** Resets all devices */
-	protected void resetDevices() {
-		for (int i = 0; i < sensors.size(); i++) {
-			SensorDevice sd = (SensorDevice) sensors.get(i);
-			if (sd != null)
-				sd.reset();
-
-		}
-		for (int i = 0; i < actuators.size(); i++) {
-			ActuatorDevice ad = (ActuatorDevice) actuators.get(i);
-			if (ad != null)
-				ad.reset();
-		}
-
-	}
-
-	/** Update sensor phase - called on each simulation step. */
-	protected void updateSensors(double elapsedSecond, BranchGroup pickableSceneBranch) {
-
-		// don't want to sense its own body while picking (cause unnecessary
-		// intersections)
-		body.setPickable(false);
-		for (int i = 0; i < sensors.size(); i++) {
-			SensorDevice sd = (SensorDevice) sensors.get(i);
-			if (sd == null)
-				continue;
-			if (sd instanceof PickSensor) {
-				((PickSensor) sd).setPickableSceneBranch(pickableSceneBranch);
-			}
-			sd.update(elapsedSecond);
-		}
-		// we are pickable again.
-		body.setPickable(true);
-	}
-
-	/** Update actuators phase - called on each simulation step. */
-	protected void updateActuators(double elapsedSecond) {
-		for (int i = 0; i < actuators.size(); i++) {
-			ActuatorDevice ad = (ActuatorDevice) actuators.get(i);
-			if (ad == null)
-				continue;
-			ad.update(elapsedSecond);
-		}
-	}
-
-	/** set acceleration applied by motors . */
-	protected void setMotorsAcceleration(double dt) {
-		// no motor by default
-		linearAcceleration.set(0, 0, 0);
-		angularAcceleration.set(0, 0, 0);
-	};
-
-	/** Perform acceleration integration step . */
-	protected void integratesVelocities(double dt) {
-		v1.set(linearAcceleration);
-		v1.scale(dt);
-		linearVelocity.add(v1);
-		v1.set(angularAcceleration);
-		v1.scale(dt);
-		angularVelocity.add(v1);
-	}
-
-	/** Perform velocities integration step */
-	protected void integratesPositionChange(double dt) {
-
-		instantTranslation.set(linearVelocity);
-		instantTranslation.scale(dt);
-		instantRotation.set(angularVelocity);
-		instantRotation.scale(dt);
-	}
-
-	/** returns the distance from agent base to ground . */
-	protected double distanceToGround() {
-
-		translation.get(v1);
-		return (v1.y - this.height / 2);
+		actuators.add(ad);
+		ad.setOwner(this);
+		ad.translateTo(position);
+		ad.rotateY((float) angle);
+		addChild(ad);
+		return actuators.size() - 1;
 	}
 
 	/**
-	 * Update the agent's position with instantTranslation and instantRotation
+	 * Adds a sensor device to the agent.
+	 * 
+	 * @param num
+	 *            - the requested position in the sensor list.
+	 * @param sd
+	 *            - the device.
+	 * @param position
+	 *            - its position relative to agent's center.
+	 * @param angle
+	 *            - its angle in the XZ plane.
+	 * @return the num of the sensor
 	 */
-	protected void updatePosition() {
-		Transform3D t3d = t3d1;
+	protected int addSensorDevice(SensorDevice sd, Vector3d position, double angle) {
 
-		if (!collisionDetected) {
-			// clip vertical deplacement to avoid traversing the floor
-			translation.get(v1);
-			double dist = v1.y - height / 2;
-			if (instantTranslation.y < (-dist)) {
-				instantTranslation.y = -dist;
-			}
-			double delta;
-			// perform translation
-			t3d.setIdentity();
-			t3d.setTranslation(instantTranslation);
-			translation.mul(t3d);
-			translationGroup.setTransform(translation);
+		sensors.add(sd);
+		sd.setOwner(this);
+		sd.translateTo(position);
+		sd.rotateY((float) angle);
+		addChild(sd);
+		return sensors.size() - 1;
+	}
 
-			// perform rotation
-			t3d.setIdentity();
-			t3d.rotY(instantRotation.y);
-			rotation.mul(t3d1);
-			rotationGroup.setTransform(rotation);
+	/**
+	 * Returns true if this agent is in physical contact with an other
+	 * SimpleAgent.
+	 */
+	public boolean anOtherAgentIsVeryNear() {
+		return (veryNearAgent != null);
+	}
 
-			// add tranlation delta to odometer
-			delta = instantTranslation.length();
-			odometer += delta;
-			positionChanged = (delta != 0);
-
-		}
+	/**
+	 * Returns printable description of the agent. This may be multiline and
+	 * complex in subclasses.
+	 * 
+	 * @return agent description as string.
+	 */
+	public synchronized String asString() {
+		return name;
 	}
 
 	/**
@@ -348,26 +264,9 @@ public class SimpleAgent extends BaseObject {
 		body.setPickable(true);
 	}
 
-	/** Update all counters on each step. */
-	protected void updateCounters(double elapsedSecond) {
-		counter++;
-		lifetime += elapsedSecond;
-	}
-
-	/** called by simulator init */
-	protected void initPreBehavior() {
-	}
-
-	/** called by simulator init */
-	protected void initBehavior() {
-	}
-
-	/** called by simulator loop */
-	protected void performPreBehavior() {
-	}
-
-	/** called by simulator loop */
-	protected void performBehavior() {
+	/** called back by simulator to clear physical interaction other agent. */
+	protected void clearVeryNear() {
+		veryNearAgent = null;
 	}
 
 	/**
@@ -379,139 +278,39 @@ public class SimpleAgent extends BaseObject {
 		return collisionDetected;
 	}
 
-	/**
-	 * Returns true if an interaction has been detected.
-	 * 
-	 * @return interaction indicator.
-	 */
-	public boolean interactionDetected() {
-		return interactionDetected;
+	/** Creation phase - called once by the simulator. */
+	protected void create() {
+		create3D();
+		// setup on the floor
+		startPosition.add(new Vector3d(0, height / 2.0, 0));
 	}
 
-	/**
-	 * Go to the start position of the agent.
-	 */
-	public void moveToStartPosition() {
-
-		resetPosition();
-	}
-
-	/**
-	 * Go to given position. Caution : set y coords to agent.height/2 you want
-	 * the agent to touch the floor.
-	 * 
-	 * @param position
-	 *            - the new position.
-	 */
-	public void moveToPosition(Vector3d position) {
-
-		resetPositionAt(position);
-	}
-
-	/**
-	 * Go to given XZ position. Y coords is left unchanged.
-	 * 
-	 * @param position
-	 *            - the new position.
-	 */
-	public void moveToPosition(double x, double z) {
-
-		Vector3d position = new Vector3d(x, startPosition.y, z);
-		resetPositionAt(position);
-	}
-
-	/**
-	 * Adds a sensor device to the agent.
-	 * 
-	 * @param num
-	 *            - the requested position in the sensor list.
-	 * @param sd
-	 *            - the device.
-	 * @param position
-	 *            - its position relative to agent's center.
-	 * @param angle
-	 *            - its angle in the XZ plane.
-	 * @return the num of the sensor
-	 */
-	protected int addSensorDevice(SensorDevice sd, Vector3d position, double angle) {
-
-		sensors.add(sd);
-		sd.setOwner(this);
-		sd.translateTo(position);
-		sd.rotateY((float) angle);
-		addChild(sd);
-		return sensors.size() - 1;
-	}
-
-	/**
-	 * Adds a actuator device to the agent.
-	 * 
-	 * @param num
-	 *            - the requested position in the sensor list.
-	 * @param sd
-	 *            - the device.
-	 * @param position
-	 *            - its position relative to agent's center.
-	 * @param angle
-	 *            - its angle in the XZ plane.
-	 * @return the num of the actuator
-	 */
-	protected int addActuatorDevice(ActuatorDevice ad, Vector3d position, double angle) {
-
-		actuators.add(ad);
-		ad.setOwner(this);
-		ad.translateTo(position);
-		ad.rotateY((float) angle);
-		addChild(ad);
-		return actuators.size() - 1;
-	}
+	protected void create3D() { /* Overide */
+	};
 
 	/** Dispose all resources */
 	protected void dispose() {
 	}
 
+	/** returns the distance from agent base to ground . */
+	protected double distanceToGround() {
+
+		translation.get(v1);
+		return (v1.y - this.height / 2);
+	}
+
 	/**
-	 * Returns printable description of the agent. This may be multiline and
-	 * complex in subclasses.
+	 * Returns the actuator device designated by num. User will have to cast to
+	 * the appropriate class.
 	 * 
-	 * @return agent description as string.
+	 * @return a ActuatorDevice Object.
 	 */
-	public synchronized String asString() {
-		return name;
-	}
-
-	/** Sets the simulator in charge of this agent. */
-	protected void setSimulator(Simulator simulator) {
-		this.simulator = simulator;
-	}
-
-	// ////////////////////////////////////////////////////////////////////
-	// / Get methods.
-	public ArrayList getSensorList() {
-		return sensors;
+	public ActuatorDevice getActuatorDevice(int num) {
+		return (ActuatorDevice) actuators.get(num);
 	}
 
 	public ArrayList getActuatorList() {
 		return actuators;
-	}
-
-	/**
-	 * Returns the agent total lifetime since last reset (in seconds).
-	 * 
-	 * @return lifetime in seconds.
-	 */
-	public double getLifeTime() {
-		return lifetime;
-	}
-
-	/**
-	 * Returns the number of behavior step per second, ie the nummber of time
-	 * the performBehavior is called per second
-	 * 
-	 * @return an int
-	 */
-	public int getFramesPerSecond() {
-		return simulator.getFramesPerSecond();
 	}
 
 	/**
@@ -536,27 +335,13 @@ public class SimpleAgent extends BaseObject {
 	}
 
 	/**
-	 * Returns the agent's name.
+	 * Returns the number of behavior step per second, ie the nummber of time
+	 * the performBehavior is called per second
 	 * 
-	 * @return agent's name .
+	 * @return an int
 	 */
-	public String getName() {
-		return name;
-	}
-
-	/** Gets the agent's mass. */
-	public float getMass() {
-		return mass;
-
-	}
-
-	/**
-	 * Returns the agent's radius in meters.
-	 * 
-	 * @return the agent radius in meters.
-	 */
-	public float getRadius() {
-		return radius;
+	public int getFramesPerSecond() {
+		return simulator.getFramesPerSecond();
 	}
 
 	/**
@@ -569,6 +354,39 @@ public class SimpleAgent extends BaseObject {
 	}
 
 	/**
+	 * Returns the agent total lifetime since last reset (in seconds).
+	 * 
+	 * @return lifetime in seconds.
+	 */
+	public double getLifeTime() {
+		return lifetime;
+	}
+
+	/** Gets the agent's mass. */
+	public float getMass() {
+		return mass;
+
+	}
+
+	/**
+	 * Returns the agent's name.
+	 * 
+	 * @return agent's name .
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Returns the agent's radius in meters.
+	 * 
+	 * @return the agent radius in meters.
+	 */
+	public float getRadius() {
+		return radius;
+	}
+
+	/**
 	 * Returns the sensor device designated by num. User will have to cast to
 	 * the appropriate class.
 	 * 
@@ -578,22 +396,217 @@ public class SimpleAgent extends BaseObject {
 		return (SensorDevice) sensors.get(num);
 	}
 
+	// ////////////////////////////////////////////////////////////////////
+	// / Get methods.
+	public ArrayList getSensorList() {
+		return sensors;
+	}
+
+	/** Returns the currently touched agent - null if no agent near. */
+	public SimpleAgent getVeryNearAgent() {
+		return veryNearAgent;
+	}
+
+	/** called by simulator init */
+	protected void initBehavior() {
+	}
+
+	/** called by simulator init */
+	protected void initPreBehavior() {
+	}
+
+	/** Perform velocities integration step */
+	protected void integratesPositionChange(double dt) {
+
+		instantTranslation.set(linearVelocity);
+		instantTranslation.scale(dt);
+		instantRotation.set(angularVelocity);
+		instantRotation.scale(dt);
+	}
+
+	/** Perform acceleration integration step . */
+	protected void integratesVelocities(double dt) {
+		v1.set(linearAcceleration);
+		v1.scale(dt);
+		linearVelocity.add(v1);
+		v1.set(angularAcceleration);
+		v1.scale(dt);
+		angularVelocity.add(v1);
+	}
+
 	/**
-	 * Returns the actuator device designated by num. User will have to cast to
-	 * the appropriate class.
+	 * Returns true if an interaction has been detected.
 	 * 
-	 * @return a ActuatorDevice Object.
+	 * @return interaction indicator.
 	 */
-	public ActuatorDevice getActuatorDevice(int num) {
-		return (ActuatorDevice) actuators.get(num);
+	public boolean interactionDetected() {
+		return interactionDetected;
+	}
+
+	/**
+	 * Go to given XZ position. Y coords is left unchanged.
+	 * 
+	 * @param position
+	 *            - the new position.
+	 */
+	public void moveToPosition(double x, double z) {
+
+		Vector3d position = new Vector3d(x, startPosition.y, z);
+		resetPositionAt(position);
+	}
+
+	/**
+	 * Go to given position. Caution : set y coords to agent.height/2 you want
+	 * the agent to touch the floor.
+	 * 
+	 * @param position
+	 *            - the new position.
+	 */
+	public void moveToPosition(Vector3d position) {
+
+		resetPositionAt(position);
+	}
+
+	/**
+	 * Go to the start position of the agent.
+	 */
+	public void moveToStartPosition() {
+
+		resetPosition();
+	}
+
+	/** called by simulator loop */
+	protected void performBehavior() {
+	}
+
+	/** called by simulator loop */
+	protected void performPreBehavior() {
+	}
+
+	/** Resets agent variables and position */
+	protected void reset() {
+		veryNearAgent = null;
+		collisionRadius = radius;
+		counter = 0;
+		lifetime = 0;
+		odometer = 0;
+		linearVelocity.set(0, 0, 0);
+		resetPosition();
+		resetDevices();
+	}
+
+	/** Resets all devices */
+	protected void resetDevices() {
+		for (int i = 0; i < sensors.size(); i++) {
+			SensorDevice sd = (SensorDevice) sensors.get(i);
+			if (sd != null)
+				sd.reset();
+
+		}
+		for (int i = 0; i < actuators.size(); i++) {
+			ActuatorDevice ad = (ActuatorDevice) actuators.get(i);
+			if (ad != null)
+				ad.reset();
+		}
+
+	}
+
+	protected void resetPosition() {
+		resetPositionAt(startPosition);
+	}
+
+	protected void resetPositionAt(Vector3d newPosition) {
+		// reattach to graph if necessary
+		if (detachedFromSceneGraph)
+			attach();
+		resetTransforms();
+		collisionDetected = false;
+		interactionDetected = false;
+		translateTo(newPosition);
+	}
+
+	/** set acceleration applied by motors . */
+	protected void setMotorsAcceleration(double dt) {
+		// no motor by default
+		linearAcceleration.set(0, 0, 0);
+		angularAcceleration.set(0, 0, 0);
+	}
+
+	/** Sets the simulator in charge of this agent. */
+	protected void setSimulator(Simulator simulator) {
+		this.simulator = simulator;
+	}
+
+	/** Update actuators phase - called on each simulation step. */
+	protected void updateActuators(double elapsedSecond) {
+		for (int i = 0; i < actuators.size(); i++) {
+			ActuatorDevice ad = (ActuatorDevice) actuators.get(i);
+			if (ad == null)
+				continue;
+			ad.update(elapsedSecond);
+		}
 	}
 
 	// ////////////////////////////////////////////////////////////////////
 	// / Agent contact related methods
 
-	/** called back by simulator to clear physical interaction other agent. */
-	protected void clearVeryNear() {
-		veryNearAgent = null;
+	/** Update all counters on each step. */
+	protected void updateCounters(double elapsedSecond) {
+		counter++;
+		lifetime += elapsedSecond;
+	}
+
+	/**
+	 * Update the agent's position with instantTranslation and instantRotation
+	 */
+	protected void updatePosition() {
+		Transform3D t3d = t3d1;
+
+		if (!collisionDetected) {
+			// clip vertical deplacement to avoid traversing the floor
+			translation.get(v1);
+			double dist = v1.y - height / 2;
+			if (instantTranslation.y < (-dist)) {
+				instantTranslation.y = -dist;
+			}
+			double delta;
+			// perform translation
+			t3d.setIdentity();
+			t3d.setTranslation(instantTranslation);
+			translation.mul(t3d);
+			translationGroup.setTransform(translation);
+
+			// perform rotation
+			t3d.setIdentity();
+			t3d.rotY(instantRotation.y);
+			rotation.mul(t3d1);
+			rotationGroup.setTransform(rotation);
+
+			// add tranlation delta to odometer
+			delta = instantTranslation.length();
+			odometer += delta;
+			positionChanged = (delta != 0);
+
+		}
+	}
+
+	/** Update sensor phase - called on each simulation step. */
+	protected void updateSensors(double elapsedSecond, BranchGroup pickableSceneBranch) {
+
+		// don't want to sense its own body while picking (cause unnecessary
+		// intersections)
+		body.setPickable(false);
+		for (int i = 0; i < sensors.size(); i++) {
+			SensorDevice sd = (SensorDevice) sensors.get(i);
+			if (sd == null)
+				continue;
+			if (sd instanceof PickSensor) {
+				((PickSensor) sd).setPickableSceneBranch(pickableSceneBranch);
+			}
+			sd.update(elapsedSecond);
+		}
+		// we are pickable again.
+		body.setPickable(true);
 	}
 
 	/**
@@ -602,19 +615,6 @@ public class SimpleAgent extends BaseObject {
 	 */
 	protected void veryNear(SimpleAgent a) {
 		veryNearAgent = a;
-	}
-
-	/**
-	 * Returns true if this agent is in physical contact with an other
-	 * SimpleAgent.
-	 */
-	public boolean anOtherAgentIsVeryNear() {
-		return (veryNearAgent != null);
-	}
-
-	/** Returns the currently touched agent - null if no agent near. */
-	public SimpleAgent getVeryNearAgent() {
-		return veryNearAgent;
 	}
 
 }

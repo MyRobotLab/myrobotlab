@@ -39,35 +39,8 @@ import java.awt.image.WritableRaster;
 public class Algorithm {
 
 	public final static int INVERT = 0;
+
 	public final static int OUTLINE = 1;
-
-	public static BufferedImage average(BufferedImage[] images) {
-
-		int n = images.length;
-
-		// Assuming that all images have the same dimensions
-		int w = images[0].getWidth();
-		int h = images[0].getHeight();
-
-		BufferedImage average = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
-
-		WritableRaster raster = average.getRaster().createCompatibleWritableRaster();
-
-		for (int y = 0; y < h; ++y)
-			for (int x = 0; x < w; ++x) {
-
-				float sum = 0.0f;
-
-				for (int i = 0; i < n; ++i)
-					sum = sum + images[i].getRaster().getSample(x, y, 0);
-
-				raster.setSample(x, y, 0, Math.round(sum / n));
-			}
-
-		average.setData(raster);
-
-		return average;
-	}
 
 	public static Color average(BufferedImage image, Rectangle targetArea) {
 		return average(image, targetArea, 1);
@@ -100,6 +73,34 @@ public class Algorithm {
 		Color retColor = new Color(sumRed / cnt, sumGreen / cnt, sumBlue / cnt);
 
 		return retColor;
+	}
+
+	public static BufferedImage average(BufferedImage[] images) {
+
+		int n = images.length;
+
+		// Assuming that all images have the same dimensions
+		int w = images[0].getWidth();
+		int h = images[0].getHeight();
+
+		BufferedImage average = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+
+		WritableRaster raster = average.getRaster().createCompatibleWritableRaster();
+
+		for (int y = 0; y < h; ++y)
+			for (int x = 0; x < w; ++x) {
+
+				float sum = 0.0f;
+
+				for (int i = 0; i < n; ++i)
+					sum = sum + images[i].getRaster().getSample(x, y, 0);
+
+				raster.setSample(x, y, 0, Math.round(sum / n));
+			}
+
+		average.setData(raster);
+
+		return average;
 	}
 
 }

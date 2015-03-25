@@ -33,7 +33,7 @@ public class Stepper_ArduinoGUI extends StepperControllerPanel implements Action
 		this.myService = myService;
 		this.arduinoName = controllerName;
 		this.motorName = motorName;
-		Arduino o = (Arduino) myService.sendBlocking(controllerName, "publishState", (Object[])null);
+		Arduino o = (Arduino) myService.sendBlocking(controllerName, "publishState", (Object[]) null);
 		pinList = o.getPinList();
 
 		for (int i = 0; i < pinList.size(); ++i) {
@@ -79,14 +79,6 @@ public class Stepper_ArduinoGUI extends StepperControllerPanel implements Action
 	}
 
 	@Override
-	public void setData(Object[] data) {
-		if (data != null && data[0] != null && data[1] != null){
-		powerPin.setSelectedItem(data[0]);
-		directionPin.setSelectedItem(data[1]);
-		}
-	}
-
-	@Override
 	void setAttached(boolean state) {
 		if (state) {
 			attachButton.setText("detach");
@@ -94,6 +86,14 @@ public class Stepper_ArduinoGUI extends StepperControllerPanel implements Action
 			attachButton.setText("attach");
 		}
 
+	}
+
+	@Override
+	public void setData(Object[] data) {
+		if (data != null && data[0] != null && data[1] != null) {
+			powerPin.setSelectedItem(data[0]);
+			directionPin.setSelectedItem(data[1]);
+		}
 	}
 
 }

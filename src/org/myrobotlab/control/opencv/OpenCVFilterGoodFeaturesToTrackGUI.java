@@ -39,12 +39,6 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterGoodFeaturesToTrackGUI extends OpenCVFilterGUI {
 
-	SliderWithText maxPointCount = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 30);
-	SliderWithText minDistance = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 10);
-	SliderWithText qualityLevel = new SliderWithText(JSlider.HORIZONTAL, 0, 100, 0.05f);
-	SliderWithText blockSize = new SliderWithText(JSlider.HORIZONTAL, 1, 10, 3);
-	AdjustSlider change = new AdjustSlider();
-
 	public class AdjustSlider implements ChangeListener {
 
 		@Override
@@ -78,6 +72,13 @@ public class OpenCVFilterGoodFeaturesToTrackGUI extends OpenCVFilterGUI {
 
 		}
 	}
+
+	SliderWithText maxPointCount = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 30);
+	SliderWithText minDistance = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 10);
+	SliderWithText qualityLevel = new SliderWithText(JSlider.HORIZONTAL, 0, 100, 0.05f);
+	SliderWithText blockSize = new SliderWithText(JSlider.HORIZONTAL, 1, 10, 3);
+
+	AdjustSlider change = new AdjustSlider();
 
 	public OpenCVFilterGoodFeaturesToTrackGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
@@ -143,32 +144,34 @@ public class OpenCVFilterGoodFeaturesToTrackGUI extends OpenCVFilterGUI {
 		myService.send(boundServiceName, "publishFilterState", boundFilterName);
 	}
 
+	@Override
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				
-				OpenCVFilterGoodFeaturesToTrack bf = (OpenCVFilterGoodFeaturesToTrack)filterWrapper.filter;
-		
+
+				OpenCVFilterGoodFeaturesToTrack bf = (OpenCVFilterGoodFeaturesToTrack) filterWrapper.filter;
+
 				maxPointCount.setValueIsAdjusting(true);
 				minDistance.setValueIsAdjusting(true);
 				qualityLevel.setValueIsAdjusting(true);
 				blockSize.setValueIsAdjusting(true);
-		
+
 				maxPointCount.setValue(bf.maxPointCount);
-		
+
 				minDistance.setValue((int) bf.minDistance);
-		
+
 				qualityLevel.setValue((int) bf.qualityLevel * 100);
-				qualityLevel.value.setText(String.format("%f",bf.qualityLevel));
-		
-				blockSize.setValue((int) bf.blockSize);
-		
+				qualityLevel.value.setText(String.format("%f", bf.qualityLevel));
+
+				blockSize.setValue(bf.blockSize);
+
 				blockSize.setValueIsAdjusting(false);
 				qualityLevel.setValueIsAdjusting(false);
 				minDistance.setValueIsAdjusting(false);
 				maxPointCount.setValueIsAdjusting(false);
 			}
-		});	
+		});
 	}
 
 }

@@ -31,18 +31,7 @@ import org.myrobotlab.service.data.Pin;
 
 public interface MotorController {
 
-	/**
-	 * Remote attachment activation - used by services not in the same instance
-	 * to attach a Motor to a MotorController
-	 * 
-	 * @param motorName
-	 * @param motorData
-	 */
-	//public boolean motorAttach(String motorName, Object... motorData); 
-	
-	public boolean motorAttach(String motorName, Integer pwmPin, Integer dirPin);
-	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin);
-	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin, Integer encoderPin);
+	public String getName();
 
 	/**
 	 * This is basic information to request from a Controller. A list of pins on
@@ -54,16 +43,28 @@ public interface MotorController {
 	public ArrayList<Pin> getPinList();
 
 	/**
-	 * moveTo - move the Motor a relative amount the amount can be negative or
-	 * positive an integer value is expected
+	 * Remote attachment activation - used by services not in the same instance
+	 * to attach a Motor to a MotorController
+	 * 
+	 * @param motorName
+	 * @param motorData
+	 */
+	// public boolean motorAttach(String motorName, Object... motorData);
+
+	public boolean motorAttach(String motorName, Integer pwmPin, Integer dirPin);
+
+	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin);
+
+	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin, Integer encoderPin);
+
+	/**
+	 * MotorDetach - detach the Motor from a specific pin on the controller
 	 * 
 	 * @param name
 	 *            - name of the Motor
-	 * @param position
-	 *            - positive or negative absolute amount to move the Motor
 	 * @return void
 	 */
-	public void motorMoveTo(String name, double position);
+	public boolean motorDetach(String name);
 
 	/**
 	 * 
@@ -76,14 +77,15 @@ public interface MotorController {
 	public void motorMove(String name);
 
 	/**
-	 * MotorDetach - detach the Motor from a specific pin on the controller
+	 * moveTo - move the Motor a relative amount the amount can be negative or
+	 * positive an integer value is expected
 	 * 
 	 * @param name
 	 *            - name of the Motor
+	 * @param position
+	 *            - positive or negative absolute amount to move the Motor
 	 * @return void
 	 */
-	public boolean motorDetach(String name);
-
-	public String getName();
+	public void motorMoveTo(String name, double position);
 
 }

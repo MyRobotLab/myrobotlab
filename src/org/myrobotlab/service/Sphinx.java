@@ -61,26 +61,6 @@ import edu.cmu.sphinx.util.props.PropertyException;
 
 public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(Sphinx.class.getCanonicalName());
-
-	transient Microphone microphone = null;
-	transient ConfigurationManager cm = null;
-	transient Recognizer recognizer = null;
-	transient DialogManager dialogManager = null;
-	transient SpeechProcessor speechProcessor = null;
-
-	private boolean isListening = false;
-	// private String lockPhrase = null;
-	HashSet<String> lockPhrases = new HashSet<String>();
-
-	HashMap<String, Command> commands = null;
-	HashMap<String, Command> confirmations = null;
-	HashMap<String, Command> negations = null;
-	HashMap<String, Command> bypass = null;
-
-	Command currentCommand = null;
-
 	/**
 	 * Commands must be created "before" startListening startListening will
 	 * create a grammar file from the data
@@ -98,148 +78,6 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		}
 	}
 
-	public Sphinx(String n) {
-		super(n);
-	}
-
-	/**
-	 * The main output for this service.
-	 * 
-	 * @param word
-	 * @return the word
-	 */
-	public String recognized(String word) {
-		return word;
-	}
-
-	/**
-	 * Event is sent when the listening Service is actually listening. There is
-	 * some delay when it initially loads.
-	 */
-	public void listeningEvent() {
-		return;
-	}
-
-	/**
-	 * createGrammar must be called before the Service starts if a new grammar
-	 * is needed
-	 * 
-	 * example: Sphinx.createGrammar ("ear", "stop | go | left | right | back");
-	 * ear = Runtime.create("ear", "Sphinx")
-	 * 
-	 * @param filename
-	 *            - name of the Service which will be utilizing this grammar
-	 * @param grammar
-	 *            - grammar content
-	 * @return
-	 */
-	public boolean createGrammar(String grammar) {
-		log.info("creating grammar [{}]", grammar);
-		// FIXME - probably broken
-		// get base simple.xml file - and modify it to
-		// point to the correct .gram file
-		String simplexml = getServiceResourceFile("simple.xml");
-		// String grammarLocation = "file://" + cfgDir.replaceAll("\\\\", "/") +
-		// "/";
-		// simplexml = simplexml.replaceAll("resource:/resource/",
-		// cfgDir.replaceAll("\\\\", "/"));
-		simplexml = simplexml.replaceAll("resource:/resource/", ".myrobotlab");
-
-		// a filename like i01.ear.gram (without the gram extention of course
-		// because is sucks this out of the xml"
-		// and re-processes it to be as fragile as possible :P
-		String grammarFileName = getName();
-		grammarFileName = grammarFileName.replaceAll("\\.", "_");
-		if (grammarFileName.contains(".")) {
-			grammarFileName = grammarFileName.substring(0, grammarFileName.indexOf("."));
-		}
-
-		simplexml = simplexml.replaceAll("name=\"grammarName\" value=\"simple\"", "name=\"grammarName\" value=\"" + grammarFileName + "\"");
-		try {
-			FileIO.stringToFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "xml"), simplexml);
-			save("xml", simplexml);
-
-			String gramdef = "#JSGF V1.0;\n" + "grammar " + grammarFileName + ";\n" + "public <greet> = (" + grammar + ");";
-			FileIO.stringToFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "gram"), gramdef);
-		} catch (Exception e) {
-			Logging.logException(e);
-			return false;
-		}
-		// save("gram", gramdef);
-
-		return true;
-	}
-
-	/**
-	 * stopRecording - it does "work", however, the speech recognition part
-	 * seems to degrade when startRecording is called. I have worked around this
-	 * by not stopping the recording, but by not processing what was recognized
-	 */
-	public void stopMsgRecording() {
-		microphone.stopRecording();
-		microphone.clear();
-	}
-
-	public void startRecording() {
-		microphone.clear();
-		microphone.startRecording();
-	}
-
-	public boolean isRecording() {
-		return microphone.isRecording();
-	}
-
-	public void startService() {
-		super.startService();
-	}
-
-	public void stopService() {
-		super.stopService();
-		stopListening();
-		if (recognizer != null) {
-			recognizer.deallocate();
-			recognizer = null;
-		}
-		if (microphone != null) {
-			microphone.stopRecording();
-			microphone = null;
-		}
-	}
-
-	/**
-	 * FIXME - the trunk is broke - the configuration is horrible find a way to
-	 * make this work, despite Sphinx's chaos !
-	 * 
-	 * function to swap grammars to allow sphinx a little more capability
-	 * regarding "new words"
-	 * 
-	 * check http://cmusphinx.sourceforge.net/wiki/sphinx4:swappinggrammars
-	 * 
-	 * @param newGrammarName
-	 * @throws PropertyException
-	 * @throws InstantiationException
-	 * @throws IOException
-	 */
-	/*
-	 * FIXME SPHINX IS A MESS IT CAN"T DO THIS ALTHOUGH DOCUMENTATION SAYS IT
-	 * CAN void swapGrammar(String newGrammarName) throws PropertyException,
-	 * InstantiationException, IOException { log.debug("Swapping to grammar " +
-	 * newGrammarName); Linguist linguist = (Linguist)
-	 * cm.lookup("flatLinguist"); linguist.deallocate(); // TODO - bundle
-	 * sphinx4-1.0beta6 // cm.setProperty("jsgfGrammar", "grammarName",
-	 * newGrammarName);
-	 * 
-	 * linguist.allocate(); }
-	 */
-
-	public void lockOutAllGrammarExcept(String lockPhrase) {
-		this.lockPhrases.add(lockPhrase);
-	}
-
-	public void clearLock() {
-		lockPhrases.clear();
-	}
-
 	class SpeechProcessor extends Thread {
 		Sphinx myService = null;
 		public boolean isRunning = false;
@@ -249,6 +87,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 			this.myService = myService;
 		}
 
+		@Override
 		public void run() {
 
 			try {
@@ -363,20 +202,350 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
 	}
 
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(Sphinx.class.getCanonicalName());
+	transient Microphone microphone = null;
+	transient ConfigurationManager cm = null;
+	transient Recognizer recognizer = null;
+
+	transient DialogManager dialogManager = null;
+	transient SpeechProcessor speechProcessor = null;
+
+	private boolean isListening = false;
+	// private String lockPhrase = null;
+	HashSet<String> lockPhrases = new HashSet<String>();
+	HashMap<String, Command> commands = null;
+	HashMap<String, Command> confirmations = null;
+
+	HashMap<String, Command> negations = null;
+
+	HashMap<String, Command> bypass = null;
+
+	Command currentCommand = null;
+
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		try {
+			Sphinx ear = (Sphinx) Runtime.createAndStart("ear", "Sphinx");
+			Speech speech = new Speech("speech");
+			speech.startService();
+
+			// attache speech to ear -
+			// auto subscribes to "request confirmation"
+			// so that speech asks for confirmation
+			// TODO - put this in gui so state will be updated with text
+			// question
+			ear.attach(speech);
+
+			Log log = (Log) Runtime.createAndStart("log", "Log");
+			Clock clock = (Clock) Runtime.createAndStart("clock", "Clock");
+
+			// TODO - got to do this - it will be KICKASS !
+			// log.subscribe(outMethod, publisherName, inMethod, parameterType)
+			// new MRLListener("pulse", log.getName(), "log");
+
+			ear.addCommand("log", log.getName(), "log");
+			ear.addCommand("log subscribe to clock", log.getName(), "subscribe", new Object[] { "pulse", });
+
+			ear.addCommand("start clock", clock.getName(), "startClock");
+			ear.addCommand("stop clock", clock.getName(), "stopClock");
+			ear.addCommand("set clock interval to five seconds", clock.getName(), "setInterval", 5000);
+			ear.addCommand("set clock interval to ten seconds", clock.getName(), "setInterval", 10000);
+
+			ear.addComfirmations("yes", "correct", "right", "yeah", "ya");
+			ear.addNegations("no", "incorrect", "wrong", "nope", "nah");
+
+			ear.startListening();
+
+			// ear.startListening("camera on | camera off | arm left | arm right | hand left | hand right ");
+			// ear.startListening("yes | no");
+
+			// Sphinx ear = new Sphinx("ear");
+			// ear.createGrammar("hello | up | down | yes | no");
+			// ear.startService();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
+	public Sphinx(String n) {
+		super(n);
+	}
+
+	public void addBypass(String... txt) {
+		if (bypass == null) {
+			bypass = new HashMap<String, Command>();
+		}
+		Command bypassCommand = new Command(this.getName(), "bypass", null);
+
+		for (int i = 0; i < txt.length; ++i) {
+			bypass.put(txt[i], bypassCommand);
+		}
+	}
+
+	public void addComfirmations(String... txt) {
+		if (confirmations == null) {
+			confirmations = new HashMap<String, Command>();
+		}
+		Command confirmCommand = new Command(this.getName(), "confirmation", null);
+
+		for (int i = 0; i < txt.length; ++i) {
+			confirmations.put(txt[i], confirmCommand);
+		}
+	}
+
+	// TODO - should this be in Service ?????
+	public void addCommand(String actionPhrase, String name, String method, Object... params) {
+		if (commands == null) {
+			commands = new HashMap<String, Command>();
+		}
+		commands.put(actionPhrase, new Command(name, method, params));
+	}
+
+	public void addNegations(String... txt) {
+		if (negations == null) {
+			negations = new HashMap<String, Command>();
+		}
+		Command negationCommand = new Command(this.getName(), "negation", null);
+
+		for (int i = 0; i < txt.length; ++i) {
+			negations.put(txt[i], negationCommand);
+		}
+
+	}
+
+	public void addTextListener(TextListener service) {
+		addListener("publishText", service.getName(), "onText", String.class);
+	}
+
+	public void addVoiceRecognitionListener(Service s) {
+		// TODO - reflect on a public heard method - if doesn't exist error ?
+		addListener("recognized", s.getName(), "heard", String.class);
+	}
+
+	// TODO - make "Speech" interface if desired
+	public boolean attach(Speech mouth) {
+		if (mouth == null) {
+			warn("can not attach mouth is null");
+			return false;
+		}
+		// if I'm speaking - I shouldn't be listening
+		subscribe("isSpeaking", mouth.getName(), "isSpeaking", Boolean.class);
+		// TODO - make config drive whether confirmation is desired
+		mouth.subscribe("requestConfirmation", getName(), "requestConfirmation", String.class);
+		mouth.subscribe("confirmed", getName(), "speak", String.class);
+		mouth.subscribe("negated", getName(), "speak", String.class);
+		log.info(String.format("attached Speech service %s to Sphinx service %s with default message routes", mouth.getName(), getName()));
+		return true;
+	}
+
+	public void buildGrammar(StringBuffer sb, HashMap<String, Command> cmds) {
+		if (cmds != null) {
+			if (sb.length() > 0) {
+				sb.append("|");
+			}
+			int cnt = 0;
+			for (String key : cmds.keySet()) {
+				++cnt;
+				sb.append(key);
+				if (cnt < cmds.size()) {
+					sb.append("|");
+				}
+			}
+		}
+	}
+
 	/*
 	 * public void publishRecognized(String recognizedText) {
 	 * invoke("recognized", recognizedText); }
 	 */
 
-	public void stopListening() {
-		isListening = false;
-		if (speechProcessor != null) {
-			speechProcessor.isRunning = false;
+	public void clearLock() {
+		lockPhrases.clear();
+	}
+
+	public String confirmed(String txt) {
+		return txt;
+	}
+
+	/**
+	 * createGrammar must be called before the Service starts if a new grammar
+	 * is needed
+	 * 
+	 * example: Sphinx.createGrammar ("ear", "stop | go | left | right | back");
+	 * ear = Runtime.create("ear", "Sphinx")
+	 * 
+	 * @param filename
+	 *            - name of the Service which will be utilizing this grammar
+	 * @param grammar
+	 *            - grammar content
+	 * @return
+	 */
+	public boolean createGrammar(String grammar) {
+		log.info("creating grammar [{}]", grammar);
+		// FIXME - probably broken
+		// get base simple.xml file - and modify it to
+		// point to the correct .gram file
+		String simplexml = getServiceResourceFile("simple.xml");
+		// String grammarLocation = "file://" + cfgDir.replaceAll("\\\\", "/") +
+		// "/";
+		// simplexml = simplexml.replaceAll("resource:/resource/",
+		// cfgDir.replaceAll("\\\\", "/"));
+		simplexml = simplexml.replaceAll("resource:/resource/", ".myrobotlab");
+
+		// a filename like i01.ear.gram (without the gram extention of course
+		// because is sucks this out of the xml"
+		// and re-processes it to be as fragile as possible :P
+		String grammarFileName = getName();
+		grammarFileName = grammarFileName.replaceAll("\\.", "_");
+		if (grammarFileName.contains(".")) {
+			grammarFileName = grammarFileName.substring(0, grammarFileName.indexOf("."));
 		}
-		speechProcessor = null;
+
+		simplexml = simplexml.replaceAll("name=\"grammarName\" value=\"simple\"", "name=\"grammarName\" value=\"" + grammarFileName + "\"");
+		try {
+			FileIO.stringToFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "xml"), simplexml);
+			save("xml", simplexml);
+
+			String gramdef = "#JSGF V1.0;\n" + "grammar " + grammarFileName + ";\n" + "public <greet> = (" + grammar + ");";
+			FileIO.stringToFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "gram"), gramdef);
+		} catch (Exception e) {
+			Logging.logError(e);
+			return false;
+		}
+		// save("gram", gramdef);
+
+		return true;
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "speech recognition", "control" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "<html>speech recoginition service wrapping Sphinx 4</html>";
+	}
+
+	public boolean isRecording() {
+		return microphone.isRecording();
+	}
+
+	/**
+	 * an inbound port for Speaking Services (TTS) - which suppress listening
+	 * such that a system will not listen when its talking, otherwise a feedback
+	 * loop can occur
+	 * 
+	 * @param b
+	 * @return
+	 */
+	public synchronized boolean isSpeaking(Boolean talking) {
+		if (talking) {
+			isListening = false;
+			log.info("I'm talking so I'm not listening"); // Gawd, ain't that
+															// the truth !
+		} else {
+			isListening = true;
+			log.info("I'm not talking so I'm listening"); // mebbe
+		}
+		return talking;
+	}
+
+	/**
+	 * Event is sent when the listening Service is actually listening. There is
+	 * some delay when it initially loads.
+	 */
+	@Override
+	public void listeningEvent() {
+		return;
+	}
+
+	/**
+	 * FIXME - the trunk is broke - the configuration is horrible find a way to
+	 * make this work, despite Sphinx's chaos !
+	 * 
+	 * function to swap grammars to allow sphinx a little more capability
+	 * regarding "new words"
+	 * 
+	 * check http://cmusphinx.sourceforge.net/wiki/sphinx4:swappinggrammars
+	 * 
+	 * @param newGrammarName
+	 * @throws PropertyException
+	 * @throws InstantiationException
+	 * @throws IOException
+	 */
+	/*
+	 * FIXME SPHINX IS A MESS IT CAN"T DO THIS ALTHOUGH DOCUMENTATION SAYS IT
+	 * CAN void swapGrammar(String newGrammarName) throws PropertyException,
+	 * InstantiationException, IOException { log.debug("Swapping to grammar " +
+	 * newGrammarName); Linguist linguist = (Linguist)
+	 * cm.lookup("flatLinguist"); linguist.deallocate(); // TODO - bundle
+	 * sphinx4-1.0beta6 // cm.setProperty("jsgfGrammar", "grammarName",
+	 * newGrammarName);
+	 * 
+	 * linguist.allocate(); }
+	 */
+
+	public void lockOutAllGrammarExcept(String lockPhrase) {
+		this.lockPhrases.add(lockPhrase);
+	}
+
+	/*
+	 * deprecated public void onCommand(String command, String targetName,
+	 * String targetMethod, Object... data) { Message msg = new Message();
+	 * msg.name = targetName; msg.method = targetMethod; msg.data = data;
+	 * 
+	 * commandMap.put(command, msg); }
+	 */
+
+	public String negated(String txt) {
+		return txt;
+	}
+
+	/**
+	 * method to suppress recognition listening events This is important when
+	 * Sphinx is listening --> then Speaking, typically you don't want Sphinx to
+	 * listen to its own speech, it causes a feedback loop and with Sphinx not
+	 * really very accurate, it leads to weirdness -- additionally it does not
+	 * recreate the speech processor - so its not as heavy handed
+	 */
+	@Override
+	public void pauseListening() {
+		isListening = false;
+	}
+
+	@Override
+	public String publishText(String recognizedText) {
+		return recognizedText;
+	}
+
+	/**
+	 * The main output for this service.
+	 * 
+	 * @param word
+	 * @return the word
+	 */
+	@Override
+	public String recognized(String word) {
+		return word;
+	}
+
+	public String requestConfirmation(String txt) {
+		return txt;
+	}
+
+	@Override
+	public void resumeListening() {
+		isListening = true;
 	}
 
 	// FYI - grammar must be created BEFORE we start to listen
+	@Override
 	public void startListening() {
 		startListening(null); // use existing grammar
 	}
@@ -408,199 +577,43 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		speechProcessor.start();
 	}
 
-	public void buildGrammar(StringBuffer sb, HashMap<String, Command> cmds) {
-		if (cmds != null) {
-			if (sb.length() > 0) {
-				sb.append("|");
-			}
-			int cnt = 0;
-			for (String key : cmds.keySet()) {
-				++cnt;
-				sb.append(key);
-				if (cnt < cmds.size()) {
-					sb.append("|");
-				}
-			}
-		}
+	@Override
+	public void startRecording() {
+		microphone.clear();
+		microphone.startRecording();
 	}
 
-	/**
-	 * method to suppress recognition listening events This is important when
-	 * Sphinx is listening --> then Speaking, typically you don't want Sphinx to
-	 * listen to its own speech, it causes a feedback loop and with Sphinx not
-	 * really very accurate, it leads to weirdness -- additionally it does not
-	 * recreate the speech processor - so its not as heavy handed
-	 */
-	public void pauseListening() {
+	@Override
+	public void stopListening() {
 		isListening = false;
-	}
-
-	public void resumeListening() {
-		isListening = true;
-	}
-
-	@Override
-	public String getDescription() {
-		return "<html>speech recoginition service wrapping Sphinx 4</html>";
+		if (speechProcessor != null) {
+			speechProcessor.isRunning = false;
+		}
+		speechProcessor = null;
 	}
 
 	/**
-	 * an inbound port for Speaking Services (TTS) - which suppress listening
-	 * such that a system will not listen when its talking, otherwise a feedback
-	 * loop can occur
-	 * 
-	 * @param b
-	 * @return
+	 * stopRecording - it does "work", however, the speech recognition part
+	 * seems to degrade when startRecording is called. I have worked around this
+	 * by not stopping the recording, but by not processing what was recognized
 	 */
-	public synchronized boolean isSpeaking(Boolean talking) {
-		if (talking) {
-			isListening = false;
-			log.info("I'm talking so I'm not listening"); // Gawd, ain't that
-															// the truth !
-		} else {
-			isListening = true;
-			log.info("I'm not talking so I'm listening"); // mebbe
-		}
-		return talking;
-	}
-
-	// TODO - make "Speech" interface if desired
-	public boolean attach(Speech mouth) {
-		if (mouth == null) {
-			warn("can not attach mouth is null");
-			return false;
-		}
-		// if I'm speaking - I shouldn't be listening
-		subscribe("isSpeaking", mouth.getName(), "isSpeaking", Boolean.class);
-		// TODO - make config drive whether confirmation is desired
-		mouth.subscribe("requestConfirmation", getName(), "requestConfirmation", String.class);
-		mouth.subscribe("confirmed", getName(), "speak", String.class);
-		mouth.subscribe("negated", getName(), "speak", String.class);
-		log.info(String.format("attached Speech service %s to Sphinx service %s with default message routes", mouth.getName(), getName()));
-		return true;
-	}
-
-	/*
-	 * deprecated public void onCommand(String command, String targetName,
-	 * String targetMethod, Object... data) { Message msg = new Message();
-	 * msg.name = targetName; msg.method = targetMethod; msg.data = data;
-	 * 
-	 * commandMap.put(command, msg); }
-	 */
-
-	public void addVoiceRecognitionListener(Service s) {
-		// TODO - reflect on a public heard method - if doesn't exist error ?
-		addListener("recognized", s.getName(), "heard", String.class);
-	}
-
-	public void addTextListener(TextListener service) {
-		addListener("publishText", service.getName(), "onText", String.class);
-	}
-
-	public void addBypass(String... txt) {
-		if (bypass == null) {
-			bypass = new HashMap<String, Command>();
-		}
-		Command bypassCommand = new Command(this.getName(), "bypass", null);
-
-		for (int i = 0; i < txt.length; ++i) {
-			bypass.put(txt[i], bypassCommand);
-		}
-	}
-
-	public void addComfirmations(String... txt) {
-		if (confirmations == null) {
-			confirmations = new HashMap<String, Command>();
-		}
-		Command confirmCommand = new Command(this.getName(), "confirmation", null);
-
-		for (int i = 0; i < txt.length; ++i) {
-			confirmations.put(txt[i], confirmCommand);
-		}
-	}
-
-	public void addNegations(String... txt) {
-		if (negations == null) {
-			negations = new HashMap<String, Command>();
-		}
-		Command negationCommand = new Command(this.getName(), "negation", null);
-
-		for (int i = 0; i < txt.length; ++i) {
-			negations.put(txt[i], negationCommand);
-		}
-
-	}
-
-	public String negated(String txt) {
-		return txt;
-	}
-
-	public String confirmed(String txt) {
-		return txt;
-	}
-
-	// TODO - should this be in Service ?????
-	public void addCommand(String actionPhrase, String name, String method, Object... params) {
-		if (commands == null) {
-			commands = new HashMap<String, Command>();
-		}
-		commands.put(actionPhrase, new Command(name, method, params));
-	}
-
-	public String requestConfirmation(String txt) {
-		return txt;
-	}
-
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		Sphinx ear = (Sphinx) Runtime.createAndStart("ear", "Sphinx");
-		Speech speech = new Speech("speech");
-		speech.startService();
-
-		// attache speech to ear -
-		// auto subscribes to "request confirmation"
-		// so that speech asks for confirmation
-		// TODO - put this in gui so state will be updated with text question
-		ear.attach(speech);
-
-		Log log = (Log) Runtime.createAndStart("log", "Log");
-		Clock clock = (Clock) Runtime.createAndStart("clock", "Clock");
-
-		// TODO - got to do this - it will be KICKASS !
-		// log.subscribe(outMethod, publisherName, inMethod, parameterType)
-		// new MRLListener("pulse", log.getName(), "log");
-
-		ear.addCommand("log", log.getName(), "log");
-		ear.addCommand("log subscribe to clock", log.getName(), "subscribe", new Object[] { "pulse", });
-
-		ear.addCommand("start clock", clock.getName(), "startClock");
-		ear.addCommand("stop clock", clock.getName(), "stopClock");
-		ear.addCommand("set clock interval to five seconds", clock.getName(), "setInterval", 5000);
-		ear.addCommand("set clock interval to ten seconds", clock.getName(), "setInterval", 10000);
-
-		ear.addComfirmations("yes", "correct", "right", "yeah", "ya");
-		ear.addNegations("no", "incorrect", "wrong", "nope", "nah");
-
-		ear.startListening();
-
-		// ear.startListening("camera on | camera off | arm left | arm right | hand left | hand right ");
-		// ear.startListening("yes | no");
-
-		// Sphinx ear = new Sphinx("ear");
-		// ear.createGrammar("hello | up | down | yes | no");
-		// ear.startService();
-
+	@Override
+	public void stopMsgRecording() {
+		microphone.stopRecording();
+		microphone.clear();
 	}
 
 	@Override
-	public String publishText(String recognizedText) {
-		return recognizedText;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] {"speech recognition", "control"};
+	public void stopService() {
+		super.stopService();
+		stopListening();
+		if (recognizer != null) {
+			recognizer.deallocate();
+			recognizer = null;
+		}
+		if (microphone != null) {
+			microphone.stopRecording();
+			microphone = null;
+		}
 	}
 }

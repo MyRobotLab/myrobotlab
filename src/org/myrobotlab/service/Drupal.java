@@ -9,42 +9,45 @@ import java.util.TimerTask;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class Drupal extends Service {
 
+	public static class UserShout {
+		public String userName;
+		public String shout;
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(Drupal.class.getCanonicalName());
 
-	
 	String botName = "Cleverbot";
-	
+
 	boolean doneChatting = false;
-	
+
 	public String host;
-	
+
 	public String username;
-	
 	public String password;
 	public String chatResponseSearchString;
 	final public String cleverbotServiceName;
+
 	final public CleverBot cleverbot;
 
 	HTTPClient client = new HTTPClient("client");
-
 	HashMap<String, String> usedContexts = new HashMap<String, String>();
-	boolean useGreeting = true;
 
+	boolean useGreeting = true;
 	String usernameTagBegin = "class=\\\"shoutbox-user-name\\\"\\x3e";
 	String usernameTagEnd = "\\x3c";
 	String shoutTagBegin = "class=\\\"shoutbox-shout\\\"\\x3e\\x3cp\\x3e";
-	String shoutTagEnd = "\\x3c";
 
+	String shoutTagEnd = "\\x3c";
 	int timeoutMinutes = 4;
 	boolean inTimeout = false;
-	HashSet<String> timeoutWords = new HashSet<String>();
 
 	// letsmakerobots.com
 	/*
@@ -53,16 +56,27 @@ public class Drupal extends Service {
 	 * shoutTagEnd = "</span>";
 	 */
 
-	public Drupal(String n) {
-		super(n);
-		cleverbotServiceName = String.format("%s_cleverbot", getName());
-		cleverbot = new CleverBot(cleverbotServiceName);
-		timeoutWords.add("timeout");
-	}
+	HashSet<String> timeoutWords = new HashSet<String>();
 
-	@Override
-	public String getDescription() {
-		return "used as a general template";
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
+
+			// "Hello there.");
+			// String s = Drupal.getShoutBox("myrobotlab.org");
+
+			Drupal drupal = new Drupal("myrobotlab.org");
+			drupal.host = "myrobotlab.org";
+			// drupal.host = "letsmakerobots.com";
+			drupal.username = "mr.turing";
+			drupal.password = "gooby1";
+			drupal.chatResponseSearchString = "turing ";
+			drupal.startChatterBot();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 	// TODO post forum topic blog etc...
@@ -72,65 +86,33 @@ public class Drupal extends Service {
 	// chatterbox
 	// TODO remove static methods...
 
-	public void shout(String text) {
-		shout(host, username, password, text);
+	public Drupal(String n) {
+		super(n);
+		cleverbotServiceName = String.format("%s_cleverbot", getName());
+		cleverbot = new CleverBot(cleverbotServiceName);
+		timeoutWords.add("timeout");
 	}
 
-	public void shout(String host, String login, String password, String text) {
-		// authenticate
-		HashMap<String, String> fields = new HashMap<String, String>();
+	@Override
+	public String[] getCategories() {
+		return new String[] { "cloud" };
+	}
 
-		fields.put("openid_identifier", "");
-		fields.put("name", login);
-		fields.put("pass", password);
-		fields.put("op", "Log+in");
-		fields.put("form_id", "user_login_block");
-		fields.put("openid.return_to", "http%3A%2F%2F" + host + "%2Fopenid%2Fauthenticate%3Fdestination%3Dfrontpage%252Fpanel");
+	public String getCleverBotResponse(String inMsg) {
+		return null;
+	}
 
-		client.startService();
-		client.post("http://" + host + "/node?destination=frontpage%2Fpanel", fields);
-		// HTTPData data = HTTPClient.post("http://" + host +
-		// "/node?destination=frontpage%2Fpanel", fields);
-
-		// go to node page to get token
-		String data = new String(client.get("http://" + host + "/node"));
-		// HTTPClient.get("http://" + host + "/node", data);
-
-		// get shoutbox token
-		String form_token = null;
-
-		form_token = HTTPClient.parse(data, "<input type=\"hidden\" name=\"form_token\" id=\"edit-shoutbox-add-form-form-token\" value=\"", "\"  />");
-
-		// post comment
-		fields.clear();
-		fields.put("nick", login);
-		fields.put("message", text);
-		fields.put("ajax", "0");
-		fields.put("nextcolor", "0");
-		fields.put("op", "Shout");
-		fields.put("form_token", form_token);
-		fields.put("form_id", "shoutbox_add_form");
-
-		// HTTPClient.post("http://" + host + "/node", fields, data);
-		client.post("http://" + host + "/node", fields);
-
+	@Override
+	public String getDescription() {
+		return "used as a general template";
 	}
 
 	public String getShoutBox(String host) {
 
-		String shoutbox = new String(client.get(String.format("http://%s/shoutbox/js/view?%d", host, System.currentTimeMillis())));
+		String shoutbox = new String(HTTPClient.get(String.format("http://%s/shoutbox/js/view?%d", host, System.currentTimeMillis())));
 		log.info(shoutbox);
 		return shoutbox;
 
-	}
-
-	public String readLastShout(String host) {
-		return null;
-	}
-
-	public static class UserShout {
-		public String userName;
-		public String shout;
 	}
 
 	public ArrayList<UserShout> parseShoutBox(String s) {
@@ -171,7 +153,59 @@ public class Drupal extends Service {
 	// - its rude to respond
 	// although sometimes - random response to this would be ok
 
-	public void startChatterBot() {
+	public String readLastShout(String host) {
+		return null;
+	}
+
+	public void shout(String text) {
+		shout(host, username, password, text);
+	}
+
+	public void shout(String host, String login, String password, String text) {
+		// authenticate
+		try {
+			HashMap<String, String> fields = new HashMap<String, String>();
+
+			fields.put("openid_identifier", "");
+			fields.put("name", login);
+			fields.put("pass", password);
+			fields.put("op", "Log+in");
+			fields.put("form_id", "user_login_block");
+			fields.put("openid.return_to", "http%3A%2F%2F" + host + "%2Fopenid%2Fauthenticate%3Fdestination%3Dfrontpage%252Fpanel");
+
+			client.startService();
+			HTTPClient.post("http://" + host + "/node?destination=frontpage%2Fpanel", fields);
+			// HTTPData data = HTTPClient.post("http://" + host +
+			// "/node?destination=frontpage%2Fpanel", fields);
+
+			// go to node page to get token
+			String data = new String(HTTPClient.get("http://" + host + "/node"));
+			// HTTPClient.get("http://" + host + "/node", data);
+
+			// get shoutbox token
+			String form_token = null;
+
+			form_token = HTTPClient.parse(data, "<input type=\"hidden\" name=\"form_token\" id=\"edit-shoutbox-add-form-form-token\" value=\"", "\"  />");
+
+			// post comment
+			fields.clear();
+			fields.put("nick", login);
+			fields.put("message", text);
+			fields.put("ajax", "0");
+			fields.put("nextcolor", "0");
+			fields.put("op", "Shout");
+			fields.put("form_token", form_token);
+			fields.put("form_id", "shoutbox_add_form");
+
+			// HTTPClient.post("http://" + host + "/node", fields, data);
+			HTTPClient.post("http://" + host + "/node", fields);
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
+	public void startChatterBot() throws Exception {
 		boolean foundContext = false;
 
 		if (!cleverbot.isRunning()) {
@@ -276,35 +310,10 @@ public class Drupal extends Service {
 
 	}
 
+	@Override
 	public void startService() {
 		super.startService();
 		client.startService();
-	}
-
-	public String getCleverBotResponse(String inMsg) {
-		return null;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		// "Hello there.");
-		// String s = Drupal.getShoutBox("myrobotlab.org");
-
-		Drupal drupal = new Drupal("myrobotlab.org");
-		drupal.host = "myrobotlab.org";
-		// drupal.host = "letsmakerobots.com";
-		drupal.username = "mr.turing";
-		drupal.password = "gooby1";
-		drupal.chatResponseSearchString = "turing ";
-		drupal.startChatterBot();
-
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"cloud"};
 	}
 
 }

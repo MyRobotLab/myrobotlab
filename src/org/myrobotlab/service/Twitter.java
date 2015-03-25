@@ -24,8 +24,7 @@ public class Twitter extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Twitter.class
-			.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Twitter.class.getCanonicalName());
 
 	public String consumerKey;
 	public String consumerSecret;
@@ -34,8 +33,58 @@ public class Twitter extends Service {
 
 	twitter4j.Twitter twitter = null;
 
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		try {
+			Twitter twitter = new Twitter("twitter");
+
+			twitter.startService();
+
+			Runtime.createAndStart("gui", "GUIService");
+
+			twitter.setSecurity("xxx", "xxx", "xxx", "xxx");
+			twitter.configure();
+			twitter.tweet("Ciao from MyRobotLab");
+
+			// twitter.uploadPic("C:/Users/ALESSANDRO/Desktop/myrobotlab/opencv.jpg"
+			// , "here is the pic");
+
+			/*
+			 * OpenCV opencv = new OpenCV("opencv"); opencv.startService();
+			 * opencv.capture(); Service.sleep(4000);// wait for an image
+			 * SerializableImage img = opencv.getDisplay();
+			 * twitter.uploadImage(img, "ME TOO!");
+			 */
+			// twitter.subscribe("publishDisplay", opencv.getName(),
+			// "uploadImage",
+			// SerializableImage.class);
+
+			/*
+			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 */
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 	public Twitter(String n) {
 		super(n);
+	}
+
+	public void configure() {
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setDebugEnabled(true).setOAuthConsumerKey(consumerKey).setOAuthConsumerSecret(consumerSecret).setOAuthAccessToken(accessToken)
+				.setOAuthAccessTokenSecret(accessTokenSecret);
+		TwitterFactory tf = new TwitterFactory(cb.build());
+		twitter = tf.getInstance();
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "connectivity" };
 	}
 
 	@Override
@@ -44,13 +93,23 @@ public class Twitter extends Service {
 	}
 
 	@Override
-	public void stopService() {
-		super.stopService();
+	public void releaseService() {
+		super.releaseService();
+	}
+
+	public void setSecurity(String consumerKey, String consumerSecret, String accessToken, String accessTokenSecret) {
+
+		this.consumerKey = consumerKey;
+		this.consumerSecret = consumerSecret;
+		this.accessToken = accessToken;
+		this.accessTokenSecret = accessTokenSecret;
+
+		configure();
 	}
 
 	@Override
-	public void releaseService() {
-		super.releaseService();
+	public void stopService() {
+		super.stopService();
 	}
 
 	public void tweet(String msg) {
@@ -58,23 +117,13 @@ public class Twitter extends Service {
 			Status status = twitter.updateStatus(msg);
 		} catch (TwitterException e) {
 			error(e.getMessage());
-			Logging.logException(e);
+			Logging.logError(e);
 		}
-	}
-
-	public void setSecurity(String consumerKey, String consumerSecret,
-			String accessToken, String accessTokenSecret) {
-
-		this.consumerKey = consumerKey;
-		this.consumerSecret = consumerSecret;
-		this.accessToken = accessToken;
-		this.accessTokenSecret = accessTokenSecret;
-		
-		configure();
 	}
 
 	public void uploadImage(final SerializableImage image, final String message) {
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					StatusUpdate status = new StatusUpdate(message);
@@ -85,7 +134,7 @@ public class Twitter extends Service {
 					status.media("image", new ByteArrayInputStream(buffer));
 					twitter.updateStatus(status);
 				} catch (Exception e) {
-					Logging.logException(e);
+					Logging.logError(e);
 				}
 			}
 		}).start();
@@ -93,6 +142,7 @@ public class Twitter extends Service {
 
 	public void uploadImageFile(final String filePath, final String message) {
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					File file = new File(filePath);
@@ -100,64 +150,10 @@ public class Twitter extends Service {
 					status.setMedia(file);
 					twitter.updateStatus(status);
 				} catch (TwitterException e) {
-					Logging.logException(e);
+					Logging.logError(e);
 				}
 			}
 		}).start();
-	}
-
-	public void configure() {
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setDebugEnabled(true).setOAuthConsumerKey(consumerKey)
-				.setOAuthConsumerSecret(consumerSecret)
-				.setOAuthAccessToken(accessToken)
-				.setOAuthAccessTokenSecret(accessTokenSecret);
-		TwitterFactory tf = new TwitterFactory(cb.build());
-		twitter = tf.getInstance();
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-		
-		Twitter twitter = new Twitter("twitter");
-		
-		twitter.startService();
-		
-		Runtime.createAndStart("gui", "GUIService");
-		
-		
-		twitter.setSecurity("xxx",
-				"xxx",
-				"xxx",
-				"xxx");
-		twitter.configure();
-		twitter.tweet("Ciao from MyRobotLab");
-		
-		// twitter.uploadPic("C:/Users/ALESSANDRO/Desktop/myrobotlab/opencv.jpg"
-		// , "here is the pic");
-
-		/*
-		OpenCV opencv = new OpenCV("opencv");
-		opencv.startService();
-		opencv.capture();
-		Service.sleep(4000);// wait for an image
-		SerializableImage img = opencv.getDisplay();
-		twitter.uploadImage(img, "ME TOO!");
-		*/
-		// twitter.subscribe("publishDisplay", opencv.getName(), "uploadImage",
-		// SerializableImage.class);
-
-		
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
-		 */
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"connectivity"};
 	}
 
 }

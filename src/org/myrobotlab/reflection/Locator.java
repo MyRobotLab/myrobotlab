@@ -38,33 +38,6 @@ import java.util.List;
  */
 public class Locator {
 	/**
-	 * Scans all classes accessible from the context class loader which belong
-	 * to the given package and subpackages.
-	 * 
-	 * @param packageName
-	 *            The package to scan
-	 * @return Located Classes
-	 * @throws IOException
-	 *             if the path based on the packageName is not valid
-	 */
-	public static List<Class<?>> getClasses(String packageName) throws IOException {
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		assert classLoader != null;
-		String path = packageName.replace('.', '/');
-		Enumeration<URL> resources = classLoader.getResources(path);
-		List<File> dirs = new ArrayList<File>();
-		while (resources.hasMoreElements()) {
-			URL resource = resources.nextElement();
-			dirs.add(new File(resource.getFile()));
-		}
-		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
-		for (File directory : dirs) {
-			classes.addAll(findClasses(directory, packageName));
-		}
-		return classes;
-	}
-
-	/**
 	 * Recursive method used to find all classes in a given directory and
 	 * subdirs.
 	 * 
@@ -110,6 +83,33 @@ public class Locator {
 				continue;
 			}
 			classes.add(clazz);
+		}
+		return classes;
+	}
+
+	/**
+	 * Scans all classes accessible from the context class loader which belong
+	 * to the given package and subpackages.
+	 * 
+	 * @param packageName
+	 *            The package to scan
+	 * @return Located Classes
+	 * @throws IOException
+	 *             if the path based on the packageName is not valid
+	 */
+	public static List<Class<?>> getClasses(String packageName) throws IOException {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		assert classLoader != null;
+		String path = packageName.replace('.', '/');
+		Enumeration<URL> resources = classLoader.getResources(path);
+		List<File> dirs = new ArrayList<File>();
+		while (resources.hasMoreElements()) {
+			URL resource = resources.nextElement();
+			dirs.add(new File(resource.getFile()));
+		}
+		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+		for (File directory : dirs) {
+			classes.addAll(findClasses(directory, packageName));
 		}
 		return classes;
 	}

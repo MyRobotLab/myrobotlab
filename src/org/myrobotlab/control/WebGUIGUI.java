@@ -45,15 +45,10 @@ public class WebGUIGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-	}
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
 
-	public void getState(WebGUI template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
 	}
 
 	@Override
@@ -67,11 +62,17 @@ public class WebGUIGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("publishState", "getState", WebGUI.class);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+	public void getState(WebGUI template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
+			}
+		});
 	}
-	
+
+	@Override
+	public void init() {
+	}
 
 }

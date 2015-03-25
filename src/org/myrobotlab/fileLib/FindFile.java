@@ -15,7 +15,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-
 public final class FindFile { // implements FilenameFilter
 	/*
 	 * private String root = "."; // the starting point for the search; private
@@ -23,28 +22,32 @@ public final class FindFile { // implements FilenameFilter
 	 * private Pattern pattern = null;
 	 */
 
+	class RegexFilter implements FilenameFilter {
+		private Pattern pattern;
+
+		public RegexFilter(String regex) {
+			pattern = Pattern.compile(regex);
+		}
+
+		@Override
+		public boolean accept(File dir, String name) {
+			// Strip path information, search for regex:
+			return pattern.matcher(new File(name).getName()).matches();
+		}
+	}
+
 	public final static Logger log = LoggerFactory.getLogger(FindFile.class.getCanonicalName());
 
 	public static List<File> find() throws FileNotFoundException {
 		return find(null, null, true, false);
 	}
 
-	public static List<File> findByExtension(String extensions) throws FileNotFoundException {
-		//  "([^\\s]+(\\.(?i)(jpg|png|gif|bmp))$)"
-		return find(null,  "([^\\s]+(\\.(?i)("+ extensions +"))$)", true, false);
-	}
-
-	
 	public static List<File> find(String criteria) throws FileNotFoundException {
 		return find(null, criteria, true, false);
 	}
 
 	public static List<File> find(String root, String criteria) throws FileNotFoundException {
 		return find(root, criteria, true, false);
-	}
-	
-	public static List<File> findByExtension(String root, String extensions) throws FileNotFoundException {
-		return find(root,  "([^\\s]+(\\.(?i)("+ extensions +"))$)", true, false);
 	}
 
 	public static List<File> find(String root, String criteria, boolean recurse, boolean includeDirsInResult) throws FileNotFoundException {
@@ -61,6 +64,35 @@ public final class FindFile { // implements FilenameFilter
 		List<File> result = process(r, criteria, recurse, includeDirsInResult);
 		Collections.sort(result);
 		return result;
+	}
+
+	public static List<File> findByExtension(String extensions) throws FileNotFoundException {
+		// "([^\\s]+(\\.(?i)(jpg|png|gif|bmp))$)"
+		return find(null, "([^\\s]+(\\.(?i)(" + extensions + "))$)", true, false);
+	}
+
+	public static List<File> findByExtension(String root, String extensions) throws FileNotFoundException {
+		return find(root, "([^\\s]+(\\.(?i)(" + extensions + "))$)", true, false);
+	}
+
+	public static void main(String... aArgs) throws FileNotFoundException {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		// TODO - there was methods to do this already in java.io
+		List<File> files = FindFile.find(".ivy", "resolved.*\\.xml$");
+
+		// List<File> files = FindFile.find("\\.(?i:)(?:xml)$");
+		// List<File> files = FindFile.find(".*\\.java$");
+		// List<File> files = FindFile.find(".*\\.svn$");
+
+		// print out all file names, in the the order of File.compareTo()
+		for (File file : files) {
+			String name = file.getName();
+			name = name.substring(name.indexOf("-") + 1);
+			name = name.substring(0, name.indexOf("-"));
+			System.out.println(name);
+		}
 	}
 
 	// recursively go through ALL directories regardless of matching
@@ -113,39 +145,6 @@ public final class FindFile { // implements FilenameFilter
 		}
 		if (!aDirectory.canRead()) {
 			throw new IllegalArgumentException("Directory cannot be read: " + aDirectory);
-		}
-	}
-
-	public static void main(String... aArgs) throws FileNotFoundException {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		// TODO - there was methods to do this already in java.io
-		List<File> files = FindFile.find(".ivy", "resolved.*\\.xml$");
-
-		// List<File> files = FindFile.find("\\.(?i:)(?:xml)$");
-		// List<File> files = FindFile.find(".*\\.java$");
-		// List<File> files = FindFile.find(".*\\.svn$");
-
-		// print out all file names, in the the order of File.compareTo()
-		for (File file : files) {
-			String name = file.getName();
-			name = name.substring(name.indexOf("-") + 1);
-			name = name.substring(0, name.indexOf("-"));
-			System.out.println(name);
-		}
-	}
-
-	class RegexFilter implements FilenameFilter {
-		private Pattern pattern;
-
-		public RegexFilter(String regex) {
-			pattern = Pattern.compile(regex);
-		}
-
-		public boolean accept(File dir, String name) {
-			// Strip path information, search for regex:
-			return pattern.matcher(new File(name).getName()).matches();
 		}
 	}
 

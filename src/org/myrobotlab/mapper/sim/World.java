@@ -38,6 +38,7 @@ import javax.media.j3d.Canvas3D;
 import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.GraphicsConfigTemplate3D;
+import javax.media.j3d.Group;
 import javax.media.j3d.Light;
 import javax.media.j3d.LineArray;
 import javax.media.j3d.Locale;
@@ -124,138 +125,6 @@ public class World {
 	}
 
 	/**
-	 * Creates the world from the given environement Description. Used only in
-	 * the creation phase.
-	 * 
-	 * @param ed
-	 *            the environment description.
-	 */
-	private void create(EnvironmentDescription ed) {
-		worldSize = ed.worldSize;
-		createUniverse(ed);
-
-	}
-
-	/**
-	 * Creates the universe to attach the scenegraph. Used only in the creation
-	 * phase.
-	 * 
-	 * @param ed
-	 *            the environment description.
-	 */
-	private void createUniverse(EnvironmentDescription ed) {
-		System.out.println("create Universe");
-		// show infos
-		Map map = VirtualUniverse.getProperties();
-		System.out.println("----------------------------------------");
-		System.out.println("j3d.version = " + map.get("j3d.version"));
-		System.out.println("j3d.vendor = " + map.get("j3d.vendor"));
-		System.out.println("j3d.specification.version = " + map.get("j3d.specification.version"));
-		System.out.println("j3d.specification.vendor = " + map.get("j3d.specification.vendor"));
-		System.out.println("j3d.renderer = " + map.get("j3d.renderer"));
-		System.out.println("J3DThreadPriority = " + VirtualUniverse.getJ3DThreadPriority());
-		System.out.println("----------------------------------------");
-
-		createCanvas3D();
-		createSceneBranch(ed);
-
-		universe = new VirtualUniverse();
-
-		Locale locale = new Locale(universe);
-
-		// Create and add VIEW branch
-		// locale->viewBranch->viewTransformGroup->viewPlatform
-		viewBranch = new BranchGroup();
-		viewTransformGroup = new TransformGroup();
-		viewTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-		viewTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		Transform3D t3d = new Transform3D();
-		t3d.setIdentity();
-		viewTransformGroup.setTransform(t3d);
-		viewBranch.addChild(viewTransformGroup);
-
-		// Creates View and viewplatform
-		viewPlatform = new ViewPlatform();
-		viewPlatform.setViewAttachPolicy(View.NOMINAL_HEAD);
-		viewPlatform.setActivationRadius(100);
-		view = new View();
-		view.setProjectionPolicy(View.PERSPECTIVE_PROJECTION);
-
-		view.setViewPolicy(View.SCREEN_VIEW);
-		view.setVisibilityPolicy(View.VISIBILITY_DRAW_ALL);
-
-		view.setFrontClipDistance(0.02);
-
-		GraphicsConfigTemplate3D template = new GraphicsConfigTemplate3D();
-		template.setSceneAntialiasing(GraphicsConfigTemplate.REQUIRED);
-		template.setDoubleBuffer(GraphicsConfigTemplate.PREFERRED);
-		/*
-		 * GraphicsConfiguration config = GraphicsEnvironment
-		 * .getLocalGraphicsEnvironment().getDefaultScreenDevice()
-		 * .getBestConfiguration(template);
-		 */
-		// request antialiasing
-		view.setSceneAntialiasingEnable(true);
-
-		view.addCanvas3D(canvas3d);
-		PhysicalBody phyBody = new PhysicalBody();
-		PhysicalEnvironment phyEnv = new PhysicalEnvironment();
-		view.setPhysicalBody(phyBody);
-		view.setPhysicalEnvironment(phyEnv);
-		view.attachViewPlatform(viewPlatform);
-		viewTransformGroup.addChild(viewPlatform);
-
-		// Add both branch to the unique locale
-		locale.addBranchGraph(viewBranch);
-		locale.addBranchGraph(sceneBranch);
-
-		// Add mouse control in the canvas3d
-		mouseOrbiter = new MouseOrbiter(canvas3d, viewTransformGroup);
-
-		// sets initial viewpoint
-		changeViewPoint(ed.worldViewPoint, null);
-	}
-
-	/**
-	 * Creates the Canvas3D to visualize the 3D World. Used only in the creation
-	 * phase.
-	 */
-	private void createCanvas3D() {
-		GraphicsConfigTemplate3D template = new GraphicsConfigTemplate3D();
-		template.setSceneAntialiasing(GraphicsConfigTemplate.PREFERRED);
-		GraphicsConfiguration config = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getBestConfiguration(template);
-		// create canvas
-		canvas3d = new Canvas3D(config);
-		canvas3d.setDoubleBufferEnable(true);
-
-		// display j3d info
-		Map map = canvas3d.queryProperties();
-		System.out.println("doubleBufferAvailable = " + map.get("doubleBufferAvailable"));
-		System.out.println("sceneAntialiasingNumPasses = " + map.get("sceneAntialiasingNumPasses"));
-		System.out.println("sceneAntialiasingAvailable = " + map.get("sceneAntialiasingAvailable"));
-		System.out.println("texture3DAvailable = " + map.get("texture3DAvailable"));
-
-	}
-
-	/**
-	 * Adds a 3D object to the world. Used only in the creation phase.
-	 */
-	public void addObjectToPickableSceneBranch(BaseObject obj3d) {
-		obj3d.compile();
-		pickableSceneBranch.addChild(obj3d.getNode());
-	}
-
-	/** Detach a previously attached object from the scenegraph. */
-	public void detach(BaseObject obj3d) {
-		pickableSceneBranch.removeChild(obj3d.getNode());
-	}
-
-	/** attach a 3d object to the scenegraph. */
-	public void attach(BaseObject obj3d) {
-		pickableSceneBranch.addChild(obj3d.getNode());
-	}
-
-	/**
 	 * Add a light to the 3d world. Used only in the creation phase.
 	 */
 	Light addLight(Vector3d pos, Color3f color) {
@@ -286,155 +155,16 @@ public class World {
 	}
 
 	/**
-	 * Creates the branch for the visible content of the scenegraph. Used only
-	 * in the creation phase.
+	 * Adds a 3D object to the world. Used only in the creation phase.
 	 */
-	private void createSceneBranch(EnvironmentDescription wd) {
-
-		sceneBranch = new BranchGroup();
-		sceneRot = new TransformGroup();
-		sceneRot.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		sceneRot.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-		sceneRot.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
-		// add transform
-		sceneTrans = new TransformGroup();
-		// allow transform access
-		sceneTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		sceneTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-		sceneTrans.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
-		sceneBranch.addChild(sceneRot);
-		sceneRot.addChild(sceneTrans);
-
-		// bounds (lights,background, behaviors)
-		BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), worldSize * 3);
-
-		// background
-		Color3f bgColor = wd.backgroundColor;
-		Background bgNode = new Background(bgColor);
-		bgNode.setApplicationBounds(bounds);
-		sceneTrans.addChild(bgNode);
-
-		// ambient light
-		TransformGroup tga = new TransformGroup();
-		AmbientLight ambientLight = new AmbientLight(wd.ambientLightColor);
-		ambientLight.setInfluencingBounds(bounds);
-		tga.addChild(ambientLight);
-		sceneBranch.addChild(tga);
-
-		// directional lights
-		light1 = addLight(wd.light1Position, wd.light1Color);
-		light2 = addLight(wd.light2Position, wd.light2Color);
-		light1.setEnable(wd.light1IsOn);
-		light2.setEnable(wd.light2IsOn);
-
-		createFloor(wd);
-		if (wd.hasAxis)
-			createAxis();
-
-		pickableSceneBranch = new BranchGroup();
-		sceneTrans.addChild(pickableSceneBranch);
-		pickableSceneBranch.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
-		pickableSceneBranch.setCapability(BranchGroup.ALLOW_DETACH);
-		pickableSceneBranch.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
-
+	public void addObjectToPickableSceneBranch(BaseObject obj3d) {
+		obj3d.compile();
+		pickableSceneBranch.addChild(obj3d.getNode());
 	}
 
-	/**
-	 * Creates the floor of the 3d world. Used only in the creation phase.
-	 * 
-	 * @param ed
-	 *            the environment description.
-	 */
-	private void createFloor(EnvironmentDescription wd) {
-
-		float minx = -worldSize / 2, maxx = worldSize / 2;
-		float minz = -worldSize / 2, maxz = worldSize / 2;
-
-		Point3f[] floorCoords = { new Point3f(minx, 0.0f, minz), new Point3f(minx, 0.0f, maxz), new Point3f(maxx, 0.0f, maxz), new Point3f(maxx, 0.0f, minz) };
-		Vector3f[] floorNormals = { new Vector3f(-0.6f, 0.6f, -0.6f), new Vector3f(-0.6f, 0.6f, 0.6f), new Vector3f(0.6f, 0.6f, 0.6f), new Vector3f(0.6f, 0.6f, -0.6f) };
-		Vector3f[] floorNormalsSimple = { new Vector3f(0, 1, 0), new Vector3f(0, 1, 0), new Vector3f(0, 1, 0), new Vector3f(0, 1, 0) };
-
-		QuadArray floorQuads = null;
-		switch (wd.normalsStyle) {
-		case EnvironmentDescription.NORMALS_REALISTIC:
-			floorQuads = new QuadArray(floorCoords.length, GeometryArray.COORDINATES | GeometryArray.NORMALS);
-			floorQuads.setNormals(0, floorNormals);
-			break;
-		case EnvironmentDescription.NORMALS_SIMPLE:
-			floorQuads = new QuadArray(floorCoords.length, GeometryArray.COORDINATES | GeometryArray.NORMALS);
-			floorQuads.setNormals(0, floorNormalsSimple);
-			break;
-
-		}
-		floorQuads.setCoordinates(0, floorCoords);
-		Appearance floorAppear = new Appearance();
-
-		Material mat = new Material();
-		mat.setDiffuseColor(wd.floorColor);
-		Color3f specular = new Color3f(wd.floorColor);
-		specular.scale(1.1f);
-		specular.clampMax(0.8f);
-		mat.setSpecularColor(specular);
-		floorAppear.setMaterial(mat);
-		Shape3D floor = new Shape3D(floorQuads, floorAppear);
-		floor.setPickable(false);
-		floor.setCollidable(false);
-
-		sceneTrans.addChild(floor);
-	}
-
-	/**
-	 * Creates a representation of the 3 axis of the 3d world. Used only in the
-	 * creation phase.
-	 */
-	private void createAxis() {
-		Point3f[] axisCoords = {
-				// X axis arrow
-				new Point3f(0.0f, 0.001f, 0.0f), new Point3f(1, 0.001f, 0.0f), new Point3f(1, 0.001f, 0.0f),
-				new Point3f(0.95f, 0.001f, 0.05f),
-				new Point3f(1, 0.001f, 0.0f),
-				new Point3f(0.95f, 0.001f, -0.05f),
-
-				// a small X
-				new Point3f(1.0f, 0.001f, 0.1f), new Point3f(0.9f, 0.001f, 0.2f),
-				new Point3f(1.0f, 0.001f, 0.2f),
-				new Point3f(0.9f, 0.001f, 0.1f),
-				// Z axis arrow
-				new Point3f(0.0f, 0.001f, 0.0f), new Point3f(0, 0.001f, 1.0f), new Point3f(0, 0.001f, 1.0f), new Point3f(0.05f, 0.001f, 0.95f),
-				new Point3f(0, 0.001f, 1.0f),
-				new Point3f(-0.05f, 0.001f, 0.95f),
-
-				// a small Z
-				new Point3f(0.1f, 0.001f, 1.0f), new Point3f(0.2f, 0.001f, 1.0f), new Point3f(0.1f, 0.001f, 0.9f), new Point3f(0.2f, 0.001f, 0.9f),
-				new Point3f(0.1f, 0.001f, 1.0f), new Point3f(0.2f, 0.001f, 0.9f),
-				// Y axis arrow
-				new Point3f(0.0f, 0.001f, 0.0f), new Point3f(0, 1.0f, 0.0f), new Point3f(0, 1.0f, 0.0f), new Point3f(0.05f, 0.95f, 0f), new Point3f(0, 1f, 0f),
-				new Point3f(0.00f, 0.95f, 0.05f),
-
-				// a small Y
-				new Point3f(0.2f, 1f, 0.0f), new Point3f(0.1f, 0.9f, 0f), new Point3f(0.1f, 1.0f, 0.0f), new Point3f(0.15f, 0.95f, 0.0f)
-
-		};
-		// scale axis drawing to 5% of word size
-		for (int i = 0; i < axisCoords.length; i++) {
-			axisCoords[i].scale(worldSize * 0.05f);
-		}
-
-		LineArray axisLines = new LineArray(axisCoords.length, GeometryArray.COORDINATES);
-		axisLines.setCoordinates(0, axisCoords);
-
-		Appearance axisAppear = new Appearance();
-		ColoringAttributes ca = new ColoringAttributes();
-		ca.setColor(white);
-		axisAppear.setColoringAttributes(ca);
-		Material mat = new Material();
-		mat.setDiffuseColor(white);
-		axisAppear.setMaterial(mat);
-		Shape3D axis = new Shape3D(axisLines, axisAppear);
-		axis.setCollidable(false);
-		axis.setPickable(false);
-		sceneTrans.addChild(axis);
-
+	/** attach a 3d object to the scenegraph. */
+	public void attach(BaseObject obj3d) {
+		pickableSceneBranch.addChild(obj3d.getNode());
 	}
 
 	/**
@@ -519,27 +249,275 @@ public class World {
 		return false;
 	}
 
-	/** Stop rendering on main canvas 3D . Used for background mode. */
-	public void stopRendering() {
-		canvas3d.stopRenderer();
+	/**
+	 * Creates the world from the given environement Description. Used only in
+	 * the creation phase.
+	 * 
+	 * @param ed
+	 *            the environment description.
+	 */
+	private void create(EnvironmentDescription ed) {
+		worldSize = ed.worldSize;
+		createUniverse(ed);
+
 	}
 
-	/** Restart rendering on main canvas 3D . Used for background mode. */
-	public void startRendering() {
-		canvas3d.startRenderer();
-	}
+	/**
+	 * Creates a representation of the 3 axis of the 3d world. Used only in the
+	 * creation phase.
+	 */
+	private void createAxis() {
+		Point3f[] axisCoords = {
+				// X axis arrow
+				new Point3f(0.0f, 0.001f, 0.0f), new Point3f(1, 0.001f, 0.0f), new Point3f(1, 0.001f, 0.0f),
+				new Point3f(0.95f, 0.001f, 0.05f),
+				new Point3f(1, 0.001f, 0.0f),
+				new Point3f(0.95f, 0.001f, -0.05f),
 
-	/** Do one rendering on main canvas 3D . Used for background mode. */
-	public void renderOnce() {
-		canvas3d.startRenderer();
+				// a small X
+				new Point3f(1.0f, 0.001f, 0.1f), new Point3f(0.9f, 0.001f, 0.2f),
+				new Point3f(1.0f, 0.001f, 0.2f),
+				new Point3f(0.9f, 0.001f, 0.1f),
+				// Z axis arrow
+				new Point3f(0.0f, 0.001f, 0.0f), new Point3f(0, 0.001f, 1.0f), new Point3f(0, 0.001f, 1.0f), new Point3f(0.05f, 0.001f, 0.95f),
+				new Point3f(0, 0.001f, 1.0f),
+				new Point3f(-0.05f, 0.001f, 0.95f),
 
-		try {
-			Thread.sleep((int) (100));
-		} catch (InterruptedException e) {
+				// a small Z
+				new Point3f(0.1f, 0.001f, 1.0f), new Point3f(0.2f, 0.001f, 1.0f), new Point3f(0.1f, 0.001f, 0.9f), new Point3f(0.2f, 0.001f, 0.9f),
+				new Point3f(0.1f, 0.001f, 1.0f), new Point3f(0.2f, 0.001f, 0.9f),
+				// Y axis arrow
+				new Point3f(0.0f, 0.001f, 0.0f), new Point3f(0, 1.0f, 0.0f), new Point3f(0, 1.0f, 0.0f), new Point3f(0.05f, 0.95f, 0f), new Point3f(0, 1f, 0f),
+				new Point3f(0.00f, 0.95f, 0.05f),
 
-			e.printStackTrace();
+				// a small Y
+				new Point3f(0.2f, 1f, 0.0f), new Point3f(0.1f, 0.9f, 0f), new Point3f(0.1f, 1.0f, 0.0f), new Point3f(0.15f, 0.95f, 0.0f)
+
+		};
+		// scale axis drawing to 5% of word size
+		for (int i = 0; i < axisCoords.length; i++) {
+			axisCoords[i].scale(worldSize * 0.05f);
 		}
-		canvas3d.stopRenderer();
+
+		LineArray axisLines = new LineArray(axisCoords.length, GeometryArray.COORDINATES);
+		axisLines.setCoordinates(0, axisCoords);
+
+		Appearance axisAppear = new Appearance();
+		ColoringAttributes ca = new ColoringAttributes();
+		ca.setColor(white);
+		axisAppear.setColoringAttributes(ca);
+		Material mat = new Material();
+		mat.setDiffuseColor(white);
+		axisAppear.setMaterial(mat);
+		Shape3D axis = new Shape3D(axisLines, axisAppear);
+		axis.setCollidable(false);
+		axis.setPickable(false);
+		sceneTrans.addChild(axis);
+
+	}
+
+	/**
+	 * Creates the Canvas3D to visualize the 3D World. Used only in the creation
+	 * phase.
+	 */
+	private void createCanvas3D() {
+		GraphicsConfigTemplate3D template = new GraphicsConfigTemplate3D();
+		template.setSceneAntialiasing(GraphicsConfigTemplate.PREFERRED);
+		GraphicsConfiguration config = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getBestConfiguration(template);
+		// create canvas
+		canvas3d = new Canvas3D(config);
+		canvas3d.setDoubleBufferEnable(true);
+
+		// display j3d info
+		Map map = canvas3d.queryProperties();
+		System.out.println("doubleBufferAvailable = " + map.get("doubleBufferAvailable"));
+		System.out.println("sceneAntialiasingNumPasses = " + map.get("sceneAntialiasingNumPasses"));
+		System.out.println("sceneAntialiasingAvailable = " + map.get("sceneAntialiasingAvailable"));
+		System.out.println("texture3DAvailable = " + map.get("texture3DAvailable"));
+
+	}
+
+	/**
+	 * Creates the floor of the 3d world. Used only in the creation phase.
+	 * 
+	 * @param ed
+	 *            the environment description.
+	 */
+	private void createFloor(EnvironmentDescription wd) {
+
+		float minx = -worldSize / 2, maxx = worldSize / 2;
+		float minz = -worldSize / 2, maxz = worldSize / 2;
+
+		Point3f[] floorCoords = { new Point3f(minx, 0.0f, minz), new Point3f(minx, 0.0f, maxz), new Point3f(maxx, 0.0f, maxz), new Point3f(maxx, 0.0f, minz) };
+		Vector3f[] floorNormals = { new Vector3f(-0.6f, 0.6f, -0.6f), new Vector3f(-0.6f, 0.6f, 0.6f), new Vector3f(0.6f, 0.6f, 0.6f), new Vector3f(0.6f, 0.6f, -0.6f) };
+		Vector3f[] floorNormalsSimple = { new Vector3f(0, 1, 0), new Vector3f(0, 1, 0), new Vector3f(0, 1, 0), new Vector3f(0, 1, 0) };
+
+		QuadArray floorQuads = null;
+		switch (wd.normalsStyle) {
+		case EnvironmentDescription.NORMALS_REALISTIC:
+			floorQuads = new QuadArray(floorCoords.length, GeometryArray.COORDINATES | GeometryArray.NORMALS);
+			floorQuads.setNormals(0, floorNormals);
+			break;
+		case EnvironmentDescription.NORMALS_SIMPLE:
+			floorQuads = new QuadArray(floorCoords.length, GeometryArray.COORDINATES | GeometryArray.NORMALS);
+			floorQuads.setNormals(0, floorNormalsSimple);
+			break;
+
+		}
+		floorQuads.setCoordinates(0, floorCoords);
+		Appearance floorAppear = new Appearance();
+
+		Material mat = new Material();
+		mat.setDiffuseColor(wd.floorColor);
+		Color3f specular = new Color3f(wd.floorColor);
+		specular.scale(1.1f);
+		specular.clampMax(0.8f);
+		mat.setSpecularColor(specular);
+		floorAppear.setMaterial(mat);
+		Shape3D floor = new Shape3D(floorQuads, floorAppear);
+		floor.setPickable(false);
+		floor.setCollidable(false);
+
+		sceneTrans.addChild(floor);
+	}
+
+	/**
+	 * Creates the branch for the visible content of the scenegraph. Used only
+	 * in the creation phase.
+	 */
+	private void createSceneBranch(EnvironmentDescription wd) {
+
+		sceneBranch = new BranchGroup();
+		sceneRot = new TransformGroup();
+		sceneRot.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		sceneRot.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		sceneRot.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+		// add transform
+		sceneTrans = new TransformGroup();
+		// allow transform access
+		sceneTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		sceneTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		sceneTrans.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+		sceneBranch.addChild(sceneRot);
+		sceneRot.addChild(sceneTrans);
+
+		// bounds (lights,background, behaviors)
+		BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), worldSize * 3);
+
+		// background
+		Color3f bgColor = wd.backgroundColor;
+		Background bgNode = new Background(bgColor);
+		bgNode.setApplicationBounds(bounds);
+		sceneTrans.addChild(bgNode);
+
+		// ambient light
+		TransformGroup tga = new TransformGroup();
+		AmbientLight ambientLight = new AmbientLight(wd.ambientLightColor);
+		ambientLight.setInfluencingBounds(bounds);
+		tga.addChild(ambientLight);
+		sceneBranch.addChild(tga);
+
+		// directional lights
+		light1 = addLight(wd.light1Position, wd.light1Color);
+		light2 = addLight(wd.light2Position, wd.light2Color);
+		light1.setEnable(wd.light1IsOn);
+		light2.setEnable(wd.light2IsOn);
+
+		createFloor(wd);
+		if (wd.hasAxis)
+			createAxis();
+
+		pickableSceneBranch = new BranchGroup();
+		sceneTrans.addChild(pickableSceneBranch);
+		pickableSceneBranch.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+		pickableSceneBranch.setCapability(BranchGroup.ALLOW_DETACH);
+		pickableSceneBranch.setCapability(Group.ALLOW_CHILDREN_WRITE);
+
+	}
+
+	/**
+	 * Creates the universe to attach the scenegraph. Used only in the creation
+	 * phase.
+	 * 
+	 * @param ed
+	 *            the environment description.
+	 */
+	private void createUniverse(EnvironmentDescription ed) {
+		System.out.println("create Universe");
+		// show infos
+		Map map = VirtualUniverse.getProperties();
+		System.out.println("----------------------------------------");
+		System.out.println("j3d.version = " + map.get("j3d.version"));
+		System.out.println("j3d.vendor = " + map.get("j3d.vendor"));
+		System.out.println("j3d.specification.version = " + map.get("j3d.specification.version"));
+		System.out.println("j3d.specification.vendor = " + map.get("j3d.specification.vendor"));
+		System.out.println("j3d.renderer = " + map.get("j3d.renderer"));
+		System.out.println("J3DThreadPriority = " + VirtualUniverse.getJ3DThreadPriority());
+		System.out.println("----------------------------------------");
+
+		createCanvas3D();
+		createSceneBranch(ed);
+
+		universe = new VirtualUniverse();
+
+		Locale locale = new Locale(universe);
+
+		// Create and add VIEW branch
+		// locale->viewBranch->viewTransformGroup->viewPlatform
+		viewBranch = new BranchGroup();
+		viewTransformGroup = new TransformGroup();
+		viewTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		viewTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		Transform3D t3d = new Transform3D();
+		t3d.setIdentity();
+		viewTransformGroup.setTransform(t3d);
+		viewBranch.addChild(viewTransformGroup);
+
+		// Creates View and viewplatform
+		viewPlatform = new ViewPlatform();
+		viewPlatform.setViewAttachPolicy(View.NOMINAL_HEAD);
+		viewPlatform.setActivationRadius(100);
+		view = new View();
+		view.setProjectionPolicy(View.PERSPECTIVE_PROJECTION);
+
+		view.setViewPolicy(View.SCREEN_VIEW);
+		view.setVisibilityPolicy(View.VISIBILITY_DRAW_ALL);
+
+		view.setFrontClipDistance(0.02);
+
+		GraphicsConfigTemplate3D template = new GraphicsConfigTemplate3D();
+		template.setSceneAntialiasing(GraphicsConfigTemplate.REQUIRED);
+		template.setDoubleBuffer(GraphicsConfigTemplate.PREFERRED);
+		/*
+		 * GraphicsConfiguration config = GraphicsEnvironment
+		 * .getLocalGraphicsEnvironment().getDefaultScreenDevice()
+		 * .getBestConfiguration(template);
+		 */
+		// request antialiasing
+		view.setSceneAntialiasingEnable(true);
+
+		view.addCanvas3D(canvas3d);
+		PhysicalBody phyBody = new PhysicalBody();
+		PhysicalEnvironment phyEnv = new PhysicalEnvironment();
+		view.setPhysicalBody(phyBody);
+		view.setPhysicalEnvironment(phyEnv);
+		view.attachViewPlatform(viewPlatform);
+		viewTransformGroup.addChild(viewPlatform);
+
+		// Add both branch to the unique locale
+		locale.addBranchGraph(viewBranch);
+		locale.addBranchGraph(sceneBranch);
+
+		// Add mouse control in the canvas3d
+		mouseOrbiter = new MouseOrbiter(canvas3d, viewTransformGroup);
+
+		// sets initial viewpoint
+		changeViewPoint(ed.worldViewPoint, null);
+	}
+
+	/** Detach a previously attached object from the scenegraph. */
+	public void detach(BaseObject obj3d) {
+		pickableSceneBranch.removeChild(obj3d.getNode());
 	}
 
 	/** Destroy the java3d graph */
@@ -561,6 +539,29 @@ public class World {
 	 */
 	BranchGroup getPickableSceneBranch() {
 		return pickableSceneBranch;
+	}
+
+	/** Do one rendering on main canvas 3D . Used for background mode. */
+	public void renderOnce() {
+		canvas3d.startRenderer();
+
+		try {
+			Thread.sleep((100));
+		} catch (InterruptedException e) {
+
+			e.printStackTrace();
+		}
+		canvas3d.stopRenderer();
+	}
+
+	/** Restart rendering on main canvas 3D . Used for background mode. */
+	public void startRendering() {
+		canvas3d.startRenderer();
+	}
+
+	/** Stop rendering on main canvas 3D . Used for background mode. */
+	public void stopRendering() {
+		canvas3d.stopRenderer();
 	}
 
 }

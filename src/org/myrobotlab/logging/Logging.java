@@ -8,55 +8,16 @@ import org.slf4j.Logger;
 public abstract class Logging {
 
 	public final static Logger log = LoggerFactory.getLogger(Logging.class);
+
 	// performance timing
 	public static long startTimeMilliseconds = 0;
+
 	public static boolean performanceTiming = false;
 
 	// public static HashMap<String, Long> timerMap = null;
 
-	public abstract void configure(); // a basic configuration
-
-	public abstract void setLevel(String level);
-	
-	public abstract void setLevel(String clazz, String level);
-
-	public abstract void addAppender(Object type);
-
-	public abstract void addAppender(String type);
-
-	public abstract void addAppender(String type, String host, String port);
-
-	public abstract void removeAppender(String name);
-
-	public abstract void removeAllAppenders();
-
-	public abstract String getLevel();
-
-	public final static void logException(final Throwable e) {
+	public final static void logError(final Throwable e) {
 		log.error(stackToString(e));
-	}
-
-	public final static String stackToString(final Throwable e) {
-		StringWriter sw;
-		try {
-			sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-		} catch (Exception e2) {
-			return "bad stackToString";
-		}
-		return "------\r\n" + sw.toString() + "------\r\n";
-	}
-
-	public abstract void removeAppender(Object console);
-
-	static public Boolean logTimeEnable(Boolean b) {
-		performanceTiming = b;
-		return performanceTiming;
-	}
-
-	static public void logTimeStart() {
-		logTime("start");
 	}
 
 	/**
@@ -74,6 +35,47 @@ public abstract class Logging {
 		log.info(String.format("performance clock :%d ms %s", System.currentTimeMillis() - startTimeMilliseconds, tag));
 
 	}
+
+	static public Boolean logTimeEnable(Boolean b) {
+		performanceTiming = b;
+		return performanceTiming;
+	}
+
+	static public void logTimeStart() {
+		logTime("start");
+	}
+
+	public final static String stackToString(final Throwable e) {
+		StringWriter sw;
+		try {
+			sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+		} catch (Exception e2) {
+			return "bad stackToString";
+		}
+		return "------\r\n" + sw.toString() + "------\r\n";
+	}
+
+	public abstract void addAppender(Object type);
+
+	public abstract void addAppender(String type);
+
+	public abstract void addAppender(String type, String host, String port);
+
+	public abstract void configure(); // a basic configuration
+
+	public abstract String getLevel();
+
+	public abstract void removeAllAppenders();
+
+	public abstract void removeAppender(Object console);
+
+	public abstract void removeAppender(String name);
+
+	public abstract void setLevel(String level);
+
+	public abstract void setLevel(String clazz, String level);
 
 	/**
 	 * 

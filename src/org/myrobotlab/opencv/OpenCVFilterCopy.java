@@ -60,6 +60,12 @@ public class OpenCVFilterCopy extends OpenCVFilter {
 	 */
 
 	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public IplImage process(IplImage img, OpenCVData data) {
 
 		try {
@@ -72,15 +78,9 @@ public class OpenCVFilterCopy extends OpenCVFilter {
 			// cvResetImageROI(img);
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return img;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

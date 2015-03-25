@@ -50,27 +50,6 @@ public abstract class Device extends BaseObject {
 	}
 
 	/**
-	 * @return device's name .
-	 */
-	public String getName() {
-		return name;
-	}
-
-	protected void setName(String name) {
-		this.name = name;
-	}
-
-	/** Set the agent owner of this device */
-	protected void setOwner(SimpleAgent agent) {
-		this.owner = agent;
-	}
-
-	/** Get the agent owner of this device */
-	protected SimpleAgent getOwner() {
-		return this.owner;
-	}
-
-	/**
 	 * Creates the panel associated to the device. This panel can be inserted in
 	 * the inspector window for monitoring.
 	 * 
@@ -80,14 +59,16 @@ public abstract class Device extends BaseObject {
 		return null;
 	}
 
-	/** Sets the number of update per seconds for this sensor. */
-	public void setUpdatePerSecond(double ups) {
-		updatePerSecond = ups;
+	/**
+	 * @return device's name .
+	 */
+	public String getName() {
+		return name;
 	}
 
-	/** Sets if update happens on each frame . */
-	public void setUpdateOnEachFrame(boolean on) {
-		updateOnEachFrame = on;
+	/** Get the agent owner of this device */
+	protected SimpleAgent getOwner() {
+		return this.owner;
 	}
 
 	/**
@@ -100,11 +81,30 @@ public abstract class Device extends BaseObject {
 	}
 
 	/** to be overriden */
-	protected void update() {
+	protected void reset() {
+	}
+
+	protected void setName(String name) {
+		this.name = name;
+	}
+
+	/** Set the agent owner of this device */
+	protected void setOwner(SimpleAgent agent) {
+		this.owner = agent;
+	}
+
+	/** Sets if update happens on each frame . */
+	public void setUpdateOnEachFrame(boolean on) {
+		updateOnEachFrame = on;
+	}
+
+	/** Sets the number of update per seconds for this sensor. */
+	public void setUpdatePerSecond(double ups) {
+		updatePerSecond = ups;
 	}
 
 	/** to be overriden */
-	protected void reset() {
+	protected void update() {
 	}
 
 	/** Called by the simulator loop */

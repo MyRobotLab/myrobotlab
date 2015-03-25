@@ -6,6 +6,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.leap.LeapMotionListener;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.LeapDataPublisher;
@@ -17,21 +18,6 @@ import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Vector;
 
 public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPublisher {
-
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(LeapMotion2.class);
-
-	transient LeapMotionListener listener = null;
-	transient Controller controller = new Controller();
-
-	public LeapData lastLeapData = null;
-
-	public static class LeapData {
-		transient public Frame frame;
-		public Hand leftHand;
-		public Hand rightHand;
-	}
 
 	public static class Hand {
 		public String type;
@@ -45,27 +31,85 @@ public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPu
 		public double palmNormalZ;
 	}
 
+	public static class LeapData {
+		transient public Frame frame;
+		public Hand leftHand;
+		public Hand rightHand;
+	}
+
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(LeapMotion2.class);
+
+	transient LeapMotionListener listener = null;
+
+	transient Controller controller = new Controller();
+
+	public LeapData lastLeapData = null;
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
+
+			LeapMotion2 leap = new LeapMotion2("leap");
+			leap.startService();
+
+			Runtime.start("gui", "GUIService");
+			leap.startTracking();
+
+			// Have the sample listener receive events from the controller
+
+			// Keep this process running until Enter is pressed
+			log.info("Press Enter to quit...");
+			try {
+				System.in.read();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			// Remove the sample listener when done
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 	public LeapMotion2(String n) {
-		super(n);		
+		super(n);
+	}
+
+	public void activateDefaultMode() {
+		controller.setPolicyFlags(Controller.PolicyFlag.POLICY_DEFAULT);
+		log.info("default mode active");
+		return;
+	}
+
+	public void activateVRMode() {
+		controller.setPolicyFlags(Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+		log.info("virtual reality mode active");
+		return;
+	}
+
+	public void addFrameListener(Service service) {
+		addListener("publishFrame", service.getName(), "onFrame", Frame.class);
+	}
+
+	public void addLeapDataListener(Service service) {
+		addListener("publishLeapData", service.getName(), "onLeapData", Frame.class);
+	}
+
+	public void checkPolicy() {
+		log.info("controller.policyFlags()");
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "sensor" };
 	}
 
 	@Override
 	public String getDescription() {
 		return "used as a general template";
-	}
-
-	public float getRightStrength() {
-		Frame frame = controller.frame();
-		com.leapmotion.leap.Hand hand = frame.hands().rightmost();
-		float strength = hand.grabStrength();
-		return strength;
-	}
-
-	public float getLeftStrength() {
-		Frame frame = controller.frame();
-		com.leapmotion.leap.Hand hand = frame.hands().leftmost();
-		float strength = hand.grabStrength();
-		return strength;
 	}
 
 	/**
@@ -100,25 +144,26 @@ public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPu
 		return angle;
 	}
 
-	public LeapData publishLeapData(LeapData data) {
-		// TODO Auto-generated method stub
+	public float getLeftStrength() {
+		Frame frame = controller.frame();
+		com.leapmotion.leap.Hand hand = frame.hands().leftmost();
+		float strength = hand.grabStrength();
+		return strength;
+	}
+
+	public float getRightStrength() {
+		Frame frame = controller.frame();
+		com.leapmotion.leap.Hand hand = frame.hands().rightmost();
+		float strength = hand.grabStrength();
+		return strength;
+	}
+
+	@Override
+	public LeapData onLeapData(LeapData data) {
+
 		return data;
-	}
+		// TODO Auto-generated method stub
 
-	public Frame publishFrame(Frame frame) {
-		return frame;
-	}
-
-	public void addFrameListener(Service service) {
-		addListener("publishFrame", service.getName(), "onFrame", Frame.class);
-	}
-
-	public void addLeapDataListener(Service service) {
-		addListener("publishLeapData", service.getName(), "onLeapData", Frame.class);
-	}
-
-	public Controller publishInit(Controller controller) {
-		return controller;
 	}
 
 	public Controller publishConnect(Controller controller) {
@@ -133,69 +178,32 @@ public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPu
 		return controller;
 	}
 
+	public Frame publishFrame(Frame frame) {
+		return frame;
+	}
+
+	public Controller publishInit(Controller controller) {
+		return controller;
+	}
+
+	@Override
+	public LeapData publishLeapData(LeapData data) {
+		// TODO Auto-generated method stub
+		return data;
+	}
+
+	@Override
+	public void startService() {
+		super.startService();
+		listener = new LeapMotionListener(this);
+	}
+
 	public void startTracking() {
 		controller.addListener(listener);
 	}
 
 	public void stopTracking() {
 		controller.removeListener(listener);
-	}
-	
-	public void startService(){
-		super.startService();
-		listener = new LeapMotionListener(this);
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		LeapMotion2 leap = new LeapMotion2("leap");
-		leap.startService();
-
-		Runtime.start("gui", "GUIService");
-		leap.startTracking();
-
-		// Have the sample listener receive events from the controller
-
-		// Keep this process running until Enter is pressed
-		log.info("Press Enter to quit...");
-		try {
-			System.in.read();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		// Remove the sample listener when done
-	}
-
-	@Override
-	public LeapData onLeapData(LeapData data) {
-
-		return data;
-		// TODO Auto-generated method stub
-
-	}
-
-	public void activateVRMode() {
-		controller.setPolicyFlags(Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
-		log.info("virtual reality mode active");
-		return;
-	}
-
-	public void activateDefaultMode() {
-		controller.setPolicyFlags(Controller.PolicyFlag.POLICY_DEFAULT);
-		log.info("default mode active");
-		return;
-	}
-
-	public void checkPolicy() {
-		log.info("controller.policyFlags()");
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor" };
 	}
 
 }

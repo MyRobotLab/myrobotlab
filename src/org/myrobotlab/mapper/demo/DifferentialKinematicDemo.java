@@ -49,11 +49,13 @@ public class DifferentialKinematicDemo extends Demo {
 		}
 
 		/** Initialize Agent's Behavior */
+		@Override
 		public void initBehavior() {
 			state = 0;
 		}
 
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 
 			// here we do not use SetTranslationalVelocity and

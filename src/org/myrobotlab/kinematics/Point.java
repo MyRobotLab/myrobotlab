@@ -13,6 +13,7 @@ public class Point {
 	private final double x;
 	private final double y;
 	private final double z;
+
 	// TODO: consider rotation/orientation
 	public Point(double x, double y, double z) {
 		super();
@@ -20,33 +21,7 @@ public class Point {
 		this.y = y;
 		this.z = z;
 	}
-	public double getX() {
-		return x;
-	}
-	public double getY() {
-		return y;
-	}
-	public double getZ() {
-		return z;
-	}
-	public String toString() {
-		// TODO: round this out
-		NumberFormat formatter = new DecimalFormat("#0.000000");
-		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + ")";  
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(x);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(y);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(z);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
-	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -64,13 +39,48 @@ public class Point {
 			return false;
 		return true;
 	}
-	public Point subtract(Point p) {
-		// TODO Auto-generated method stub
-		Point newPoint = new Point(x-p.getX(), y-p.getY(), z-p.getZ());
-		return newPoint;
+
+	public double getX() {
+		return x;
 	}
+
+	public double getY() {
+		return y;
+	}
+
+	public double getZ() {
+		return z;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(x);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(y);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(z);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
 	public double magnitude() {
 		// TODO Auto-generated method stub
-		return Math.sqrt(x*x + y*y + z*z);
+		return Math.sqrt(x * x + y * y + z * z);
+	}
+
+	public Point subtract(Point p) {
+		// TODO Auto-generated method stub
+		Point newPoint = new Point(x - p.getX(), y - p.getY(), z - p.getZ());
+		return newPoint;
+	}
+
+	@Override
+	public String toString() {
+		// TODO: round this out
+		NumberFormat formatter = new DecimalFormat("#0.000000");
+		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + ")";
 	}
 }

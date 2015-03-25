@@ -44,17 +44,23 @@ public class OpenCVFilterFauvist extends OpenCVFilter {
 
 	IplImage gray = null;
 	IplImage inlines = null;
-	
+
 	double lowThreshold = 0.0;
 	double highThreshold = 50.0;
 	int apertureSize = 5;
 
-	public OpenCVFilterFauvist()  {
+	public OpenCVFilterFauvist() {
 		super();
 	}
-	
-	public OpenCVFilterFauvist(String name)  {
+
+	public OpenCVFilterFauvist(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -85,12 +91,6 @@ public class OpenCVFilterFauvist extends OpenCVFilter {
 		cvCanny(gray, inlines, lowThreshold, highThreshold, apertureSize);
 
 		return inlines;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

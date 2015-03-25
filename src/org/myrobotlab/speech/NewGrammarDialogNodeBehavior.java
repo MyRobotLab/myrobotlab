@@ -21,8 +21,19 @@ public class NewGrammarDialogNodeBehavior extends DialogNodeBehavior {
 	}
 
 	/**
+	 * Returns the name of the grammar. The name of the grammar is the same as
+	 * the name of the node
+	 * 
+	 * @return the grammar name
+	 */
+	public String getGrammarName() {
+		return getName();
+	}
+
+	/**
 	 * Called with the dialog manager enters this entry
 	 */
+	@Override
 	public void onEntry() throws IOException {
 		super.onEntry();
 		try {
@@ -34,15 +45,5 @@ public class NewGrammarDialogNodeBehavior extends DialogNodeBehavior {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Returns the name of the grammar. The name of the grammar is the same as
-	 * the name of the node
-	 * 
-	 * @return the grammar name
-	 */
-	public String getGrammarName() {
-		return getName();
 	}
 }

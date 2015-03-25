@@ -25,41 +25,21 @@ import org.slf4j.Logger;
 public class Zip {
 
 	final public static String RESOURCE = "RESOURCE";
+
 	final public static String FILE = "FILE";
+
 	static int BUFFER_SIZE = 2048;
+
 	public final static Logger log = LoggerFactory.getLogger(Zip.class);
 
-	static public void extractFromSelf() throws IOException {
-		extractFromSelf(".");
-	}
-
-	static public void extractFromSelf(String targetDirectory) throws IOException {
-		extractFromFile(".", targetDirectory, null);
-	}
-
-	static public void extractFromSelf(String targetDirectory, String filter) throws URISyntaxException, IOException {
-		// Logic to get currently executing JAR name
-		String filePath = Zip.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString();
-		filePath = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length());
-		filePath = "./" + filePath;
-		extractFromFile(filePath, targetDirectory, filter);
-	}
-
-	static public void extractFromFile(String filePath, String targetDirectory) throws IOException {
-		extractFromFile(filePath, targetDirectory, null);
-	}
-
-	// e.g. Zip.extractFromFile("./myrobotlab.jar", "./", "resource");
-	static public void extractFromFile(String resourcePath, String targetDirectory, String filter) throws IOException {
-		extract(resourcePath, targetDirectory, filter, FILE, false);
-	}
-
-	static public void extractFromResource(String resourcePath, String targetDirectory) throws IOException {
-		extract(resourcePath, targetDirectory, null, RESOURCE, false);
-	}
-
-	static public void extractFromResource(String resourcePath, String targetDirectory, String filter) throws IOException {
-		extract(resourcePath, targetDirectory, filter, RESOURCE, false);
+	public static int countOccurrences(String haystack, char needle) {
+		int count = 0;
+		for (int i = 0; i < haystack.length(); i++) {
+			if (haystack.charAt(i) == needle) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	static public void extract(String resourcePath, String targetDirectory, String filter, String resourceType, boolean overwrite) throws IOException {
@@ -87,19 +67,19 @@ public class Zip {
 
 			for (ZipEntry entry = in.getNextEntry(); entry != null; entry = in.getNextEntry()) {
 				log.info(entry.getName());
-				
+
 				if (filter == null || entry.getName().startsWith(filter)) {
-					
+
 					String filename = entry.getName().substring(filter.length());
-					//File file = new File(target, entry.getName());
+					// File file = new File(target, entry.getName());
 					File file = new File(target, filename);
-					
+
 					log.debug("Extracted Resource = " + entry.getName());
 					if (entry.isDirectory()) {
 						file.mkdirs();
 					} else {
 						file.getParentFile().mkdirs();
-						if (!file.exists() || overwrite){
+						if (!file.exists() || overwrite) {
 							OutputStream out = new FileOutputStream(file);
 							try {
 								int count;
@@ -115,61 +95,44 @@ public class Zip {
 				}
 			}
 		} catch (IOException e) {
-			Logging.logException(e);
+			Logging.logError(e);
 			throw e;
 		} finally {
 			in.close();
 		}
 	}
 
-	static public void unzip(String zipFile, String newPath) throws ZipException, IOException {
-		log.info(String.format("unzipping %s to %s", zipFile, newPath));
-		int BUFFER = 2048;
-		File file = new File(zipFile);
+	static public void extractFromFile(String filePath, String targetDirectory) throws IOException {
+		extractFromFile(filePath, targetDirectory, null);
+	}
 
-		ZipFile zip = new ZipFile(file);
-		// String newPath = zipFile.substring(0, zipFile.length() - 4);
+	// e.g. Zip.extractFromFile("./myrobotlab.jar", "./", "resource");
+	static public void extractFromFile(String resourcePath, String targetDirectory, String filter) throws IOException {
+		extract(resourcePath, targetDirectory, filter, FILE, false);
+	}
 
-		new File(newPath).mkdir();
-		Enumeration zipFileEntries = zip.entries();
+	static public void extractFromResource(String resourcePath, String targetDirectory) throws IOException {
+		extract(resourcePath, targetDirectory, null, RESOURCE, false);
+	}
 
-		// Process each entry
-		while (zipFileEntries.hasMoreElements()) {
-			// grab a zip file entry
-			ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
-			String currentEntry = entry.getName();
-			File destFile = new File(newPath, currentEntry);
-			// destFile = new File(newPath, destFile.getName());
-			File destinationParent = destFile.getParentFile();
+	static public void extractFromResource(String resourcePath, String targetDirectory, String filter) throws IOException {
+		extract(resourcePath, targetDirectory, filter, RESOURCE, false);
+	}
 
-			// create the parent directory structure if needed
-			destinationParent.mkdirs();
+	static public void extractFromSelf() throws IOException {
+		extractFromSelf(".");
+	}
 
-			if (!entry.isDirectory()) {
-				BufferedInputStream is = new BufferedInputStream(zip.getInputStream(entry));
-				int currentByte;
-				// establish buffer for writing file
-				byte data[] = new byte[BUFFER];
+	static public void extractFromSelf(String targetDirectory) throws IOException {
+		extractFromFile(".", targetDirectory, null);
+	}
 
-				// write the current file to disk
-				FileOutputStream fos = new FileOutputStream(destFile);
-				BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
-
-				// read and write until last byte is encountered
-				while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
-					dest.write(data, 0, currentByte);
-				}
-				dest.flush();
-				dest.close();
-				is.close();
-			} else {
-				destFile.mkdirs();
-			}
-			if (currentEntry.endsWith(".zip")) {
-				// found a zip file, try to open
-				unzip(destFile.getAbsolutePath(), "./");
-			}
-		}
+	static public void extractFromSelf(String targetDirectory, String filter) throws URISyntaxException, IOException {
+		// Logic to get currently executing JAR name
+		String filePath = Zip.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString();
+		filePath = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length());
+		filePath = "./" + filePath;
+		extractFromFile(filePath, targetDirectory, filter);
 	}
 
 	public static ArrayList<String> listDirectoryContents(String zipFile, String dir) throws ZipException, IOException {
@@ -222,16 +185,6 @@ public class Zip {
 
 	}
 
-	public static int countOccurrences(String haystack, char needle) {
-		int count = 0;
-		for (int i = 0; i < haystack.length(); i++) {
-			if (haystack.charAt(i) == needle) {
-				count++;
-			}
-		}
-		return count;
-	}
-
 	public static void main(String[] args) throws ZipException, IOException {
 
 		LoggingFactory.getInstance().configure();
@@ -242,6 +195,56 @@ public class Zip {
 			log.info(files.get(i));
 		}
 
+	}
+
+	static public void unzip(String zipFile, String newPath) throws ZipException, IOException {
+		log.info(String.format("unzipping %s to %s", zipFile, newPath));
+		int BUFFER = 2048;
+		File file = new File(zipFile);
+
+		ZipFile zip = new ZipFile(file);
+		// String newPath = zipFile.substring(0, zipFile.length() - 4);
+
+		new File(newPath).mkdir();
+		Enumeration zipFileEntries = zip.entries();
+
+		// Process each entry
+		while (zipFileEntries.hasMoreElements()) {
+			// grab a zip file entry
+			ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
+			String currentEntry = entry.getName();
+			File destFile = new File(newPath, currentEntry);
+			// destFile = new File(newPath, destFile.getName());
+			File destinationParent = destFile.getParentFile();
+
+			// create the parent directory structure if needed
+			destinationParent.mkdirs();
+
+			if (!entry.isDirectory()) {
+				BufferedInputStream is = new BufferedInputStream(zip.getInputStream(entry));
+				int currentByte;
+				// establish buffer for writing file
+				byte data[] = new byte[BUFFER];
+
+				// write the current file to disk
+				FileOutputStream fos = new FileOutputStream(destFile);
+				BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
+
+				// read and write until last byte is encountered
+				while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
+					dest.write(data, 0, currentByte);
+				}
+				dest.flush();
+				dest.close();
+				is.close();
+			} else {
+				destFile.mkdirs();
+			}
+			if (currentEntry.endsWith(".zip")) {
+				// found a zip file, try to open
+				unzip(destFile.getAbsolutePath(), "./");
+			}
+		}
 	}
 
 	// public static void main(String[] args) throws ZipException, IOException {

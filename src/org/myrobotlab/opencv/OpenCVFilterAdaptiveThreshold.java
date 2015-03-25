@@ -42,18 +42,16 @@ public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAdaptiveThreshold.class.getCanonicalName());
-	
-	
+
 	transient IplImage gray = null;
 
-	public OpenCVFilterAdaptiveThreshold()  {
+	public OpenCVFilterAdaptiveThreshold() {
 		super();
 	}
-	
-	public OpenCVFilterAdaptiveThreshold(String name)  {
+
+	public OpenCVFilterAdaptiveThreshold(String name) {
 		super(name);
 	}
-
 
 	/*
 	 * Threshold Applies fixed-level threshold to array elements
@@ -88,6 +86,11 @@ public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
 	 */
 
 	@Override
+	public void imageChanged(IplImage image) {
+		gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
+	}
+
+	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 
 		// CV_THRESH_BINARY
@@ -107,11 +110,6 @@ public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
 		cvAdaptiveThreshold(gray, gray, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 7, 30);
 
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
 	}
 
 }

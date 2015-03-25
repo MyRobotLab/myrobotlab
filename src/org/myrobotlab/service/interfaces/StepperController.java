@@ -35,11 +35,8 @@ public interface StepperController {
 	public final Integer STYLE_DOUBLE = 2;
 	public final Integer STYLE_INTERLEAVE = 3;
 	public final Integer STYLE_MICROSTEP = 4;
-	
-	
-	public boolean stepperAttach(String stepperName); 
-	
-	public boolean stepperAttach(StepperControl stepper);
+
+	public String getName();
 
 	/**
 	 * This is basic information to request from a Controller. A list of pins on
@@ -50,8 +47,33 @@ public interface StepperController {
 	 */
 	public ArrayList<Pin> getPinList();
 
+	public void setStepperSpeed(Integer speed);
+
+	public boolean stepperAttach(StepperControl stepper);
+
+	public boolean stepperAttach(String stepperName);
+
 	/**
-	 * stepperStep - move stepper an increment 
+	 * StepperDetach - detach the Stepper from a specific pin on the controller
+	 * 
+	 * @param name
+	 *            - name of the Stepper
+	 * @return void
+	 */
+	public boolean stepperDetach(String name);
+
+	/**
+	 * method to return stepper information
+	 * 
+	 * @param stepperName
+	 * @return
+	 */
+	// public Object[] getStepperData(String stepperName);
+
+	public void stepperReset(String stepper);
+
+	/**
+	 * stepperStep - move stepper an increment
 	 * 
 	 * @param name
 	 *            - name of the Stepper
@@ -62,36 +84,14 @@ public interface StepperController {
 	public void stepperStep(String name, Integer steps);
 
 	/**
-	 * stepperStep - move stepper an increment 
+	 * stepperStep - move stepper an increment
 	 * 
 	 * @param name
 	 * @param steps
-	 * @param style - style of stepping STYLE_SINGLE STYLE_DOUBLE STYLE_INTERLEAVE STYLE_MICROSTEP
+	 * @param style
+	 *            - style of stepping STYLE_SINGLE STYLE_DOUBLE STYLE_INTERLEAVE
+	 *            STYLE_MICROSTEP
 	 */
 	public void stepperStep(String name, Integer steps, Integer style);
-	
-	public void setStepperSpeed(Integer speed);
-	
-	
-	/**
-	 * StepperDetach - detach the Stepper from a specific pin on the controller
-	 * 
-	 * @param name
-	 *            - name of the Stepper
-	 * @return void
-	 */
-	public boolean stepperDetach(String name);
-
-	public String getName();
-
-	/**
-	 * method to return stepper information
-	 * 
-	 * @param stepperName
-	 * @return
-	 */
-	//public Object[] getStepperData(String stepperName);
-
-	public void stepperReset(String stepper);
 
 }

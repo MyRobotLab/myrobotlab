@@ -50,13 +50,13 @@ public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeList
 	SliderWithText angle = new SliderWithText(JSlider.HORIZONTAL, 0, 360, 0);
 	JTextField dX = new JTextField("dX", 10);
 	JTextField dY = new JTextField("dY", 10);
-	
-  	public OpenCVFilterAffineGUI(String boundFilterName, String boundServiceName, GUIService myService) {
+
+	public OpenCVFilterAffineGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
 		angle.addChangeListener(this);
 		dX.addActionListener(this);
 		dY.addActionListener(this);
-		
+
 		dX.setText("0.0");
 		dY.setText("0.0");
 		TitledBorder title;
@@ -67,24 +67,38 @@ public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeList
 		gc.gridx = 0;
 		gc.gridy = 0;
 		j.add(new JLabel("Angle"));
-		//++gc.gridx;
+		// ++gc.gridx;
 		j.add(angle);
-		//++gc.gridx;
+		// ++gc.gridx;
 		j.add(angle.value);
-		display.add(j,gc);
-		
+		display.add(j, gc);
+
 		JPanel j2 = new JPanel(new GridBagLayout());
 		j2.add(new JLabel("Delta X"));
 		j2.add(dX);
 
 		j2.add(new JLabel("Delta Y"));
 		j2.add(dY);
-		
+
 		GridBagConstraints gc2 = new GridBagConstraints();
 		gc2.gridx = 0;
 		gc2.gridy = 1;
 		display.add(j2, gc2);
-		
+
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		// TODO Auto-generated method stub
+		Object o = event.getSource();
+		OpenCVFilterAffine af = (OpenCVFilterAffine) boundFilter.filter;
+		if (o == dX) {
+			String val = ((JTextField) o).getText();
+			af.setDx(Double.valueOf(val));
+		} else if (o == dY) {
+			String val = ((JTextField) o).getText();
+			af.setDy(Double.valueOf(val));
+		}
 	}
 
 	// FIXME - update components :)
@@ -92,13 +106,13 @@ public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeList
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		boundFilter = filterWrapper;
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				OpenCVFilterAffine af = (OpenCVFilterAffine)filterWrapper.filter;
+				OpenCVFilterAffine af = (OpenCVFilterAffine) filterWrapper.filter;
 			}
 		});
 
 	}
-
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -111,20 +125,6 @@ public class OpenCVFilterAffineGUI extends OpenCVFilterGUI implements ChangeList
 			log.info("Unknown object in state change {}", o);
 		}
 		setFilterState(af);
-		
-	}
 
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		// TODO Auto-generated method stub
-		Object o = event.getSource();
-		OpenCVFilterAffine af = (OpenCVFilterAffine) boundFilter.filter;
-		if (o == dX) {
-			String val = ((JTextField)o).getText();
-			af.setDx(Double.valueOf(val));
-		} else if ( o == dY) {
-			String val = ((JTextField)o).getText();
-			af.setDy(Double.valueOf(val));
-		}		
 	}
 }

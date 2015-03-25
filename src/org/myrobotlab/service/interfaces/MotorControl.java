@@ -27,18 +27,6 @@ package org.myrobotlab.service.interfaces;
 
 public interface MotorControl {
 
-	public String getName();
-
-	/**
-	 * Attach a motor controller to the motor. The motor and motor controller
-	 * "should be in the same instance of MRL and this reference to another
-	 * service should be ok.
-	 * 
-	 * The motor controller uses this method to pass a reference of itself to
-	 * the motor, to be used directly
-	 */
-	public boolean setController(MotorController controller);
-
 	/**
 	 * detaches the motor from the motor controller
 	 * 
@@ -46,10 +34,32 @@ public interface MotorControl {
 	 */
 	public boolean detach();
 
+	public String getName();
+
+	/**
+	 * get the current power level of the motor
+	 * 
+	 * @return
+	 */
+	public double getPowerLevel();
+
 	/**
 	 * reports if a motor is attached to a motor controller
 	 */
 	public boolean isAttached();
+
+	/**
+	 * query the motor as to its inverted status
+	 * 
+	 * @return
+	 */
+	public boolean isInverted();
+
+	/**
+	 * locks the motor so no other commands will affect it until it becomes
+	 * unlocked
+	 */
+	public void lock();
 
 	/**
 	 * Move is the most common motor command. The command accepts a parameter of
@@ -62,14 +72,6 @@ public interface MotorControl {
 	 *            - new power level
 	 */
 	public void move(double power);
-
-	/**
-	 * moveTo moves the motor to a specific location. Typically, an encoder is
-	 * needed in order to provide feedback data
-	 * 
-	 * @param newPos
-	 */
-	public void moveTo(double newPos);
 
 	/**
 	 * moveFor move for a duration of time. Sub-second movement can be expressed
@@ -93,11 +95,22 @@ public interface MotorControl {
 	public void moveFor(double power, double duration, Boolean block);
 
 	/**
-	 * get the current power level of the motor
+	 * moveTo moves the motor to a specific location. Typically, an encoder is
+	 * needed in order to provide feedback data
 	 * 
-	 * @return
+	 * @param newPos
 	 */
-	public double getPowerLevel();
+	public void moveTo(double newPos);
+
+	/**
+	 * Attach a motor controller to the motor. The motor and motor controller
+	 * "should be in the same instance of MRL and this reference to another
+	 * service should be ok.
+	 * 
+	 * The motor controller uses this method to pass a reference of itself to
+	 * the motor, to be used directly
+	 */
+	public boolean setController(MotorController controller);
 
 	/**
 	 * change the motors direction such that negative power levels become
@@ -108,26 +121,13 @@ public interface MotorControl {
 	 */
 	public void setInverted(boolean invert);
 
-	/**
-	 * query the motor as to its inverted status
-	 * 
-	 * @return
-	 */
-	public boolean isInverted();
+	public void stop();
 
 	/**
 	 * a safety mechanism - stop and lock will stop and lock the motor no other
 	 * commands will affect the motor until it is "unlocked"
 	 */
 	public void stopAndLock();
-
-	public void stop();
-
-	/**
-	 * locks the motor so no other commands will affect it until it becomes
-	 * unlocked
-	 */
-	public void lock();
 
 	/**
 	 * unlocks the motor, so other commands can affect it
@@ -139,6 +139,6 @@ public interface MotorControl {
 	 * 
 	 * @param max
 	 */
-	//public void setMaxPower(float max);
+	// public void setMaxPower(float max);
 
 }

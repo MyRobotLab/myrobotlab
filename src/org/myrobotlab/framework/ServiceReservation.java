@@ -17,7 +17,8 @@ public class ServiceReservation {
 	final static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").create();
 
 	// FIXME MAKE KEY FINAL !
-	public final String key; // FIXME - remove completely - exists only in Index ???
+	public final String key; // FIXME - remove completely - exists only in Index
+								// ???
 	public String actualName;
 	public String fullTypeName;
 	public String comment;
@@ -37,15 +38,16 @@ public class ServiceReservation {
 	}
 
 	// FIXME - clean up data entry - so this doesnt need the logic !!
-	public String getSimpleName(){
-		if (fullTypeName != null && fullTypeName.contains(".") ){
-		return fullTypeName.substring(fullTypeName.lastIndexOf(".") + 1);
+	public String getSimpleName() {
+		if (fullTypeName != null && fullTypeName.contains(".")) {
+			return fullTypeName.substring(fullTypeName.lastIndexOf(".") + 1);
 		} else {
 			return fullTypeName;
 		}
-		
+
 	}
 
+	@Override
 	public String toString() {
 		// return gson.toJson(this);
 		StringBuffer sb = new StringBuffer();
@@ -56,16 +58,13 @@ public class ServiceReservation {
 		 */
 
 		/*
-		if (!key.equals(actualName)) {
-			sb.append("[");
-			sb.append(actualName);
-			sb.append("] ");
-		}
-		*/
+		 * if (!key.equals(actualName)) { sb.append("["); sb.append(actualName);
+		 * sb.append("] "); }
+		 */
 		sb.append("[");
 		sb.append(actualName);
 		sb.append("] ");
-		
+
 		sb.append(getSimpleName());
 		sb.append(" - ");
 		sb.append(comment);

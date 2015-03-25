@@ -18,8 +18,7 @@ import org.myrobotlab.logging.Logging;
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
-public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
-		DropTargetListener {
+public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements DropTargetListener {
 
 	private final ServoOrchestratorGUI_middlemiddle_rootpanel rootPanel;
 
@@ -36,31 +35,27 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 	 * this anyhow -- just to be complete.
 	 * </p>
 	 */
-	private static final Cursor droppableCursor = Cursor
-			.getPredefinedCursor(Cursor.HAND_CURSOR),
-			notDroppableCursor = Cursor
-					.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
+	private static final Cursor droppableCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), notDroppableCursor = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
 
-	public ServoOrchestratorGUI_middlemiddle_droptargetlistener(
-			ServoOrchestratorGUI_middlemiddle_rootpanel sheet) {
+	public ServoOrchestratorGUI_middlemiddle_droptargetlistener(ServoOrchestratorGUI_middlemiddle_rootpanel sheet) {
 		this.rootPanel = sheet;
 	}
 
 	// Could easily find uses for these, like cursor changes, etc.
+	@Override
 	public void dragEnter(DropTargetDragEvent dtde) {
 	}
 
+	@Override
+	public void dragExit(DropTargetEvent dte) {
+		this.rootPanel.setCursor(notDroppableCursor);
+	}
+
+	@Override
 	public void dragOver(DropTargetDragEvent dtde) {
 		if (!this.rootPanel.getCursor().equals(droppableCursor)) {
 			this.rootPanel.setCursor(droppableCursor);
 		}
-	}
-
-	public void dropActionChanged(DropTargetDragEvent dtde) {
-	}
-
-	public void dragExit(DropTargetEvent dte) {
-		this.rootPanel.setCursor(notDroppableCursor);
 	}
 
 	/**
@@ -71,6 +66,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 	 *
 	 * @param dtde
 	 */
+	@Override
 	public void drop(DropTargetDropEvent dtde) {
 		// Done with cursors, dropping
 		this.rootPanel.setCursor(Cursor.getDefaultCursor());
@@ -84,20 +80,18 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 
 		try {
 			// Grab expected flavor
-			dragAndDropPanelFlavor = ServoOrchestratorGUI_middlemiddle_main
-					.getDragAndDropPanelDataFlavor();
+			dragAndDropPanelFlavor = ServoOrchestratorGUI_middlemiddle_main.getDragAndDropPanelDataFlavor();
 
 			transferable = dtde.getTransferable();
 			// DropTargetContext c = dtde.getDropTargetContext();
 
 			// What does the Transferable support
 			if (transferable.isDataFlavorSupported(dragAndDropPanelFlavor)) {
-				transferableObj = dtde.getTransferable().getTransferData(
-						dragAndDropPanelFlavor);
+				transferableObj = dtde.getTransferable().getTransferData(dragAndDropPanelFlavor);
 			}
 
 		} catch (Exception ex) {
-			Logging.logException(ex);
+			Logging.logError(ex);
 		}
 
 		// If didn't find an item, bail
@@ -127,8 +121,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 		// Getting the ID of the panel
 		int dpid = droppedPanel.id;
 
-		int sizemax = rootPanel.getDragAndDropPanelMain().panels.length
-				+ rootPanel.getDragAndDropPanelMain().panels[0].length;
+		int sizemax = rootPanel.getDragAndDropPanelMain().panels.length + rootPanel.getDragAndDropPanelMain().panels[0].length;
 		if (dpid <= sizemax) {
 			return;
 		}
@@ -139,8 +132,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 		// searching for it's orign
 		for (int i1 = 0; i1 < rootPanel.getDragAndDropPanelMain().panels.length; i1++) {
 			for (int i2 = 0; i2 < rootPanel.getDragAndDropPanelMain().panels[i1].length; i2++) {
-				ServoOrchestratorGUI_middlemiddle_panel p = rootPanel
-						.getDragAndDropPanelMain().panels[i1][i2];
+				ServoOrchestratorGUI_middlemiddle_panel p = rootPanel.getDragAndDropPanelMain().panels[i1][i2];
 				if (p != null && dpid == p.id) {
 					f1 = i1;
 					f2 = i2;
@@ -153,8 +145,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 			rootPanel.getDragAndDropPanelMain().panels[f1][f2] = null;
 		} else {
 			// Move the panel
-			ServoOrchestratorGUI_middlemiddle_panel pold = rootPanel
-					.getDragAndDropPanelMain().panels[posx][posy];
+			ServoOrchestratorGUI_middlemiddle_panel pold = rootPanel.getDragAndDropPanelMain().panels[posx][posy];
 
 			rootPanel.getDragAndDropPanelMain().panels[posx][posy] = droppedPanel;
 
@@ -176,9 +167,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 				if (rootPanel.getDragAndDropPanelMain().panels[searchpos][posy] == null) {
 					searchpos--;
 				} else {
-					start = Integer
-							.parseInt(rootPanel.getDragAndDropPanelMain().panels[searchpos][posy].servo_goal
-									.getText());
+					start = Integer.parseInt(rootPanel.getDragAndDropPanelMain().panels[searchpos][posy].servo_goal.getText());
 					break;
 				}
 			}
@@ -193,9 +182,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 				if (rootPanel.getDragAndDropPanelMain().panels[searchpos][posy] == null) {
 					searchpos++;
 				} else {
-					int goal = Integer
-							.parseInt(rootPanel.getDragAndDropPanelMain().panels[searchpos][posy].servo_start
-									.getText());
+					int goal = Integer.parseInt(rootPanel.getDragAndDropPanelMain().panels[searchpos][posy].servo_start.getText());
 					droppedPanel.servo_goal.setText(goal + "");
 					break;
 				}
@@ -208,9 +195,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 				if (rootPanel.getDragAndDropPanelMain().panels[searchpos][f2] == null) {
 					searchpos--;
 				} else {
-					start2 = Integer
-							.parseInt(rootPanel.getDragAndDropPanelMain().panels[searchpos][f2].servo_goal
-									.getText());
+					start2 = Integer.parseInt(rootPanel.getDragAndDropPanelMain().panels[searchpos][f2].servo_goal.getText());
 					break;
 				}
 			}
@@ -220,8 +205,7 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 				if (rootPanel.getDragAndDropPanelMain().panels[searchpos][f2] == null) {
 					searchpos++;
 				} else {
-					rootPanel.getDragAndDropPanelMain().panels[searchpos][f2].servo_start
-							.setText(start2 + "");
+					rootPanel.getDragAndDropPanelMain().panels[searchpos][f2].servo_start.setText(start2 + "");
 					if (start2 == -1) {
 						later_externalcall_servopanelsettostartpos2 = true;
 						// it's the first panel in this row,
@@ -232,18 +216,18 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements
 				}
 			}
 
-			rootPanel.getDragAndDropPanelMain().so_ref
-					.externalcall_servopanelchangeinfo(posx, posy);
+			rootPanel.getDragAndDropPanelMain().so_ref.externalcall_servopanelchangeinfo(posx, posy);
 			if (later_externalcall_servopanelsettostartpos) {
-				rootPanel.getDragAndDropPanelMain().so_ref
-						.externalcall_servopanelsettostartpos(posx, posy, false);
+				rootPanel.getDragAndDropPanelMain().so_ref.externalcall_servopanelsettostartpos(posx, posy, false);
 			}
 			if (later_externalcall_servopanelsettostartpos2) {
-				rootPanel.getDragAndDropPanelMain().so_ref
-						.externalcall_servopanelsettostartpos(otherpanelx, f2,
-								false);
+				rootPanel.getDragAndDropPanelMain().so_ref.externalcall_servopanelsettostartpos(otherpanelx, f2, false);
 			}
 		}
 		this.rootPanel.getDragAndDropPanelMain().relayout();
+	}
+
+	@Override
+	public void dropActionChanged(DropTargetDragEvent dtde) {
 	}
 }

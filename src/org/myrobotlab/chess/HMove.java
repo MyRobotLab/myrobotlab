@@ -19,23 +19,6 @@ public final class HMove extends org.op.chess.Move implements Comparable, Consta
 		this.pieceLetter = pieceLetter;
 	}
 
-	int getScore() {
-		return score;
-	}
-
-	void setScore(int i) {
-		score = i;
-	}
-
-	public int hashCode() {
-		return from + (to << 8) + (promote << 16);
-	}
-
-	public boolean equals(Object o) {
-		HMove m = (HMove) o;
-		return (m.from == from && m.to == to && m.promote == promote);
-	}
-
 	/**
 	 * Compares this move to another move. The implementation is strictly
 	 * defective - it ought to do something other than throw a
@@ -44,12 +27,33 @@ public final class HMove extends org.op.chess.Move implements Comparable, Consta
 	 * incompatible with equals.
 	 */
 
+	@Override
 	public int compareTo(Object o) {
 		HMove m = (HMove) o;
 		int mScore = m.getScore();
 		return mScore - score; // Can't overflow so this should work.
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		HMove m = (HMove) o;
+		return (m.from == from && m.to == to && m.promote == promote);
+	}
+
+	int getScore() {
+		return score;
+	}
+
+	@Override
+	public int hashCode() {
+		return from + (to << 8) + (promote << 16);
+	}
+
+	void setScore(int i) {
+		score = i;
+	}
+
+	@Override
 	public String toString() {
 		char c;
 		StringBuffer sb = new StringBuffer();
@@ -77,7 +81,7 @@ public final class HMove extends org.op.chess.Move implements Comparable, Consta
 			sb.append(c);
 		} else {
 			if (pieceLetter != 'P')
-				sb.append((char) pieceLetter);
+				sb.append(pieceLetter);
 			sb.append((char) (getFromCol() + 'a'));
 			sb.append(8 - getFromRow());
 			sb.append("-");

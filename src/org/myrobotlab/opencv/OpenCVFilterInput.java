@@ -37,21 +37,21 @@ public class OpenCVFilterInput extends OpenCVFilter {
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterInput.class.getCanonicalName());
 
-	public OpenCVFilterInput()  {
+	public OpenCVFilterInput() {
 		super();
 	}
-	
-	public OpenCVFilterInput(String name)  {
+
+	public OpenCVFilterInput(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
 	}
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
 	}
 
 }

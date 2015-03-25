@@ -94,29 +94,23 @@ public abstract class BaseObject {
 
 	}
 
-	/** Translates (relative to current pos) the object to given position. */
-	public void translateTo(Vector3d t) {
-		Transform3D t3d = new Transform3D();
-		t3d.setTranslation(t);
-		translation.mul(t3d);
-		translationGroup.setTransform(translation);
-
+	protected void addChild(BaseObject object) {
+		group.addChild(object.getNode());
 	}
 
-	/** Rotates (relative to current rotation) the object about Y axis. */
-	public void rotateY(double angle) {
-		Transform3D t3d = new Transform3D();
-		t3d.rotY(angle);
-		rotation.mul(t3d);
-		rotationGroup.setTransform(rotation);
+	final void addChild(Node node) {
+		group.addChild(node);
 	}
 
-	/** Resets translation and rotation transforms. */
-	void resetTransforms() {
-		translation.setIdentity();
-		rotation.setIdentity();
-		translationGroup.setTransform(translation);
-		rotationGroup.setTransform(rotation);
+	/** Re-add object to the scenegraph. */
+	public void attach() {
+		world.attach(this);
+		detachedFromSceneGraph = false;
+	}
+
+	void compile() {
+		if (compilable)
+			branchGroup.compile();
 	}
 
 	/** Create the object geometry. */
@@ -125,7 +119,7 @@ public abstract class BaseObject {
 		// Transform Group->Group
 
 		branchGroup = new BranchGroup();
-		branchGroup.setCapability(BranchGroup.ALLOW_LOCAL_TO_VWORLD_READ);
+		branchGroup.setCapability(Node.ALLOW_LOCAL_TO_VWORLD_READ);
 		branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
 
 		translation = new Transform3D();
@@ -136,10 +130,10 @@ public abstract class BaseObject {
 		if (allowTransformReadWrite) {
 			translationGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 			translationGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-			translationGroup.setCapability(TransformGroup.ALLOW_LOCAL_TO_VWORLD_READ);
+			translationGroup.setCapability(Node.ALLOW_LOCAL_TO_VWORLD_READ);
 			translationGroup.setCapabilityIsFrequent(TransformGroup.ALLOW_TRANSFORM_WRITE);
 			translationGroup.setCapabilityIsFrequent(TransformGroup.ALLOW_TRANSFORM_READ);
-			translationGroup.setCapabilityIsFrequent(TransformGroup.ALLOW_LOCAL_TO_VWORLD_READ);
+			translationGroup.setCapabilityIsFrequent(Node.ALLOW_LOCAL_TO_VWORLD_READ);
 		}
 		// rotation transform
 		rotation = new Transform3D();
@@ -150,85 +144,20 @@ public abstract class BaseObject {
 		if (allowTransformReadWrite) {
 			rotationGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 			rotationGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-			rotationGroup.setCapability(TransformGroup.ALLOW_LOCAL_TO_VWORLD_READ);
+			rotationGroup.setCapability(Node.ALLOW_LOCAL_TO_VWORLD_READ);
 			rotationGroup.setCapabilityIsFrequent(TransformGroup.ALLOW_TRANSFORM_READ);
 			rotationGroup.setCapabilityIsFrequent(TransformGroup.ALLOW_TRANSFORM_WRITE);
-			rotationGroup.setCapabilityIsFrequent(TransformGroup.ALLOW_LOCAL_TO_VWORLD_READ);
+			rotationGroup.setCapabilityIsFrequent(Node.ALLOW_LOCAL_TO_VWORLD_READ);
 		}
 		// Create group to attach all gemotries
 		group = new Group();
-		group.setCapability(Group.ALLOW_LOCAL_TO_VWORLD_READ);
+		group.setCapability(Node.ALLOW_LOCAL_TO_VWORLD_READ);
 		// we want to setup the bounds manually
 		group.setBoundsAutoCompute(false);
 		// group.setCapability(Group.ALLOW_BOUNDS_READ); // No more needed, use
 		// localBounds
 		rotationGroup.addChild(group);
 
-	}
-
-	void compile() {
-		if (compilable)
-			branchGroup.compile();
-	}
-
-	final Node getNode() {
-		return branchGroup;
-	}
-
-	protected void addChild(BaseObject object) {
-		group.addChild(object.getNode());
-	}
-
-	final void addChild(Node node) {
-		group.addChild(node);
-	}
-
-	Vector3f getTranslation() {
-		Vector3f v = new Vector3f();
-		translation.get(v);
-		return v;
-	}
-
-	TransformGroup getRotationTransformGroup() {
-		return rotationGroup;
-	}
-
-	TransformGroup getTranslationTransform() {
-		return translationGroup;
-	}
-
-	Group getGroup() {
-		return group;
-	}
-
-	/** Sets the bounds object for collision/interaction detection */
-	void setBounds(Bounds bounds) {
-		localBounds = bounds;
-		group.setBounds(bounds);
-	}
-
-	Bounds getBounds() {
-		return localBounds;
-		// return group.getBounds();
-	}
-
-	/**
-	 * Obtain translation transform.
-	 */
-	public void getTranslationTransform(Transform3D t) {
-		t.set(translation);
-	}
-
-	/**
-	 * Obtain rotation transform.
-	 */
-	public void getRotationTransform(Transform3D t) {
-		t.set(rotation);
-	}
-
-	/** Sets the containing world. */
-	protected void setWorld(World world) {
-		this.world = world;
 	}
 
 	/** Removes object from the scenegraph. */
@@ -238,15 +167,9 @@ public abstract class BaseObject {
 		detachedFromSceneGraph = true;
 	}
 
-	/** Re-add object to the scenegraph. */
-	public void attach() {
-		world.attach(this);
-		detachedFromSceneGraph = false;
-	}
-
-	/** Sets the canBeTraversed Flag. */
-	public void setCanBeTraversed(boolean canbetraversed) {
-		this.canBeTraversed = canbetraversed;
+	Bounds getBounds() {
+		return localBounds;
+		// return group.getBounds();
 	}
 
 	/** Gets the canBeTraversed Flag. */
@@ -254,10 +177,87 @@ public abstract class BaseObject {
 		return canBeTraversed;
 	}
 
+	Group getGroup() {
+		return group;
+	}
+
+	final Node getNode() {
+		return branchGroup;
+	}
+
+	/**
+	 * Obtain rotation transform.
+	 */
+	public void getRotationTransform(Transform3D t) {
+		t.set(rotation);
+	}
+
+	TransformGroup getRotationTransformGroup() {
+		return rotationGroup;
+	}
+
+	Vector3f getTranslation() {
+		Vector3f v = new Vector3f();
+		translation.get(v);
+		return v;
+	}
+
+	TransformGroup getTranslationTransform() {
+		return translationGroup;
+	}
+
+	/**
+	 * Obtain translation transform.
+	 */
+	public void getTranslationTransform(Transform3D t) {
+		t.set(translation);
+	}
+
+	/** Resets translation and rotation transforms. */
+	void resetTransforms() {
+		translation.setIdentity();
+		rotation.setIdentity();
+		translationGroup.setTransform(translation);
+		rotationGroup.setTransform(rotation);
+	}
+
+	/** Rotates (relative to current rotation) the object about Y axis. */
+	public void rotateY(double angle) {
+		Transform3D t3d = new Transform3D();
+		t3d.rotY(angle);
+		rotation.mul(t3d);
+		rotationGroup.setTransform(rotation);
+	}
+
+	/** Sets the bounds object for collision/interaction detection */
+	void setBounds(Bounds bounds) {
+		localBounds = bounds;
+		group.setBounds(bounds);
+	}
+
+	/** Sets the canBeTraversed Flag. */
+	public void setCanBeTraversed(boolean canbetraversed) {
+		this.canBeTraversed = canbetraversed;
+	}
+
 	/** Change the color while the simulation is running. */
 	public void setColor(Color3f color) {
 		material.setDiffuseColor(color);
 		material.setAmbientColor(color);
+	}
+
+	/** Sets the containing world. */
+	protected void setWorld(World world) {
+		this.world = world;
+	}
+
+	/** Translates (relative to current pos) the object to given position. */
+	public void translateTo(Vector3d t) {
+		Transform3D t3d = new Transform3D();
+		t3d.setTranslation(t);
+		translation.mul(t3d);
+		translationGroup.setTransform(translation);
+
 	}
 
 }

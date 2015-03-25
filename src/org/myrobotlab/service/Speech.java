@@ -85,43 +85,47 @@ public class Speech extends Service implements TextListener {
 	 * http://www.codeproject.com/Articles/435434/Text-to-Speech-tts-for-the-Web
 	 * http://www.text2speech.org/ - another possible back-end
 	 */
-	
-	// FIXME - Speech doesn't need HTTPClient - could just use org.myrobotlab.net.HTTPRequest - and benefit from
+
+	// FIXME - Speech doesn't need HTTPClient - could just use
+	// org.myrobotlab.net.HTTPRequest - and benefit from
 	// 1 less dependency & proxy info
 
+	public static enum BackendType {
+		ATT, FREETTS, GOOGLE
+	}
+
+	public static enum FrontendType {
+		NORMAL, QUEUED, BLOCKING, MULTI
+	}
+
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(Speech.class.getCanonicalName());
+
 	// en_us en_gb en_au en_sa en_nz
-	//String language = "en";
-	// By using google's ".co.uk" translate site's GET request, you can generate British English. 
+	// String language = "en";
+	// By using google's ".co.uk" translate site's GET request, you can generate
+	// British English.
 	// http://translate.google.co.uk/translate_tts?q=Your+soundcard+works+perfectly&tl=en
 	// routing
 	// http://translate.google.com.mx/translate_tts?tl=en&q=hello+this+is+google
 	// http://translate.google.com/translate_tts?tl=zh_CN&q=%E4%BD%A0%E5%A5%BD%E3%80%82%E6%82%A8%E4%B9%9F%E5%8F%AF%E4%BB%A5%E8%AE%B2%E4%B8%AD%E6%96%87%E3%80%82
-	
 	String language = "en_gb";
-	private String googleURI = "http://translate.google.com/translate_tts?tl=%s&q=";
-	
-	static String filter = "[\\\\/:\\*\\?\"<>\\|]";
 
 	// TODO - seperate all of the var into appropriate parts - ie Global ATT
 	// Google FreeTTS
 
+	private String googleURI = "http://translate.google.com/translate_tts?tl=%s&q=";
+	static String filter = "[\\\\/:\\*\\?\"<>\\|]";
 	transient private Voice myVoice = null;
 	private boolean initialized = false;
-	public AudioFile audioFile = null;
-	transient private DefaultHttpClient client = new DefaultHttpClient();
 
-	public static enum FrontendType {
-		NORMAL, QUEUED, BLOCKING, MULTI
-	};
+	public AudioFile audioFile = null;;
 
-	public static enum BackendType {
-		ATT, FREETTS, GOOGLE
-	};
+	transient private DefaultHttpClient client = new DefaultHttpClient();;
 
 	public String voiceName = "audrey"; // both voice systems have a list of
-										// available voice names
+	// available voice names
 	public int volume = 100;
 
 	public FrontendType frontendType = FrontendType.NORMAL;
@@ -130,18 +134,72 @@ public class Speech extends Service implements TextListener {
 	boolean fileCacheInitialized = false;
 
 	private boolean isSpeaking = false;
-	private String isSaying ;
+	private String isSaying;
 
 	final public static HashMap<String, String> googleLanguageMap = new HashMap<String, String>();
-	
+
 	public String googleProxyHost = null;
 	public int googleProxyPort = 8080;
 	public int afterSpeechPause = 600;
-	
+
+	public final static String BACKEND_TYPE_ATT = "ATT";
+
+	public final static String BACKEND_TYPE_FREETTS = "FREETTS";
+
+	public final static String BACKEND_TYPE_GOOGLE = "GOOGLE";
+
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		peers.put("audioFile", "AudioFile", "plays tts files");
 		return peers;
+	}
+	// codes - http://code.google.com/apis/language/translate/v2/using_rest.html
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		try {
+			Speech mouth = (Speech) Runtime.start("mouth", "Speech");
+			mouth.test();
+
+			String test = " hello this is a test \\dev\\blah / blah : * ? \" blah \" blah > < <> bla | zod | zod2 ".replaceAll(filter, " ");
+
+			log.info(test);
+			Speech speech = new Speech("speech");
+			speech.startService();
+
+			speech.speakFreeTTS("hello");
+
+			speech.setBackendType(BACKEND_TYPE_FREETTS);
+
+			speech.speak("blah blah system check completed sir");
+			speech.speak("dood this is awesome");
+
+			speech.setGenderMale();
+
+			// speech.setBackendType(BACKEND_TYPE_GOOGLE);
+			// speech.setLanguage("fr");
+			speech.speakBlocking("this should work");
+			speech.speakBlocking("bork bork bork bork again more more");
+			speech.speak("did you say start clock");
+			speech.speak("hello it is a pleasure to meet you I am speaking.  I do love to speak. What should we talk about. I love to talk I love to talk");
+			speech.speak("goodby this is an attempt to generate inflection did it work");
+			speech.speak("blah there. this is a long and detailed message");
+			speech.speak("1 2 3 4 5 6 7 8 9 10, i know how to count");
+			speech.speak("the time is 12:30");
+			speech.speak("oink oink att is good but not so good");
+			speech.speak("num, num, num, num, num");
+			speech.speak("charging");
+			speech.speak("thank you");
+			speech.speak("good bye");
+			speech.speak("I believe I have bumped into something");
+			speech.speak("Ah, I have found a way out of this situation");
+			speech.speak("aaaaaaaaah, long vowels sound");
+
+			speech.setGoogleURI("http://tts-api.com/tts.mp3?q=");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 	}
 
 	public Speech(String n) {
@@ -155,52 +213,59 @@ public class Speech extends Service implements TextListener {
 		googleLanguageMap.put("french", "fr");
 		googleLanguageMap.put("japanese", "ja");
 		googleLanguageMap.put("portuguese", "pt");
-		
-		audioFile = (AudioFile)createPeer("audioFile");
+
+		audioFile = (AudioFile) createPeer("audioFile");
 	}
-	
-	public void startService(){
-		super.startService();
-		audioFile.startService();
+
+	private String cleanFilename(String toSpeak) {
+		// Strip all chars that are not valid to use in a filename
+		// windows list
+		// A filename cannot contain any of the following characters:
+		// \ / : * ? " < > |
+		// ; is forbidden on unix.. not sure what else we need
+		// get rid of parens also maybe?
+		// TODO: find a nice clean list / library to do this
+		String cleanSpeak = toSpeak.replaceAll("^[.\\\\/:;*?\"<>|]?[\\\\/:*?\"<>|\\(\\)]*", " ");
+		return cleanSpeak.trim().toLowerCase();
+	}
+
+	public byte[] getByteArrayFromResponse(HttpResponse response) {
+		try {
+			InputStream is = response.getEntity().getContent();
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ((nRead = is.read(data, 0, data.length)) != -1) {
+				buffer.write(data, 0, nRead);
+			}
+
+			buffer.flush();
+
+			return buffer.toByteArray();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return null;
+
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "speech", "sound" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "speech synthesis service";
 	}
 
 	public synchronized Boolean isSpeaking(Boolean b) {
 		log.info("isSpeaking " + b);
 		isSpeaking = b;
 		return isSpeaking;
-	}
-	public synchronized String saying(String t){
-		isSaying = t;
-	return isSaying;	 
- }
-	public void setFrontendType(String t) {
-		if ("NORMAL".equals(t)) {
-			frontendType = FrontendType.NORMAL;
-		} else if ("QUEUED".equals(t)) {
-			frontendType = FrontendType.QUEUED;
-		} else if ("BLOCKING".equals(t)) {
-			frontendType = FrontendType.BLOCKING;
-		} else if ("MULTI".equals(t)) {
-			frontendType = FrontendType.MULTI;
-		} else {
-			log.error("type " + t + " not supported");
-		}
-	}
-
-	public final static String BACKEND_TYPE_ATT = "ATT";
-	public final static String BACKEND_TYPE_FREETTS = "FREETTS";
-	public final static String BACKEND_TYPE_GOOGLE = "GOOGLE";
-
-	public void setBackendType(String t) {
-		if (BACKEND_TYPE_ATT.equals(t)) {
-			backendType = BackendType.ATT;
-		} else if (BACKEND_TYPE_FREETTS.equals(t)) {
-			backendType = BackendType.FREETTS;
-		} else if (BACKEND_TYPE_GOOGLE.equals(t)) {
-			backendType = BackendType.GOOGLE;
-		} else {
-			log.error("type " + t + " not supported");
-		}
 	}
 
 	// get list of voices from back-end
@@ -232,21 +297,98 @@ public class Speech extends Service implements TextListener {
 	}
 
 	@Override
-	public void stopService() {
-		if (myVoice != null && myVoice.isLoaded()) {
-			myVoice.deallocate();
+	public void onText(String text) {
+		speak(text);
+	}
+
+	// FIXME - WTF ARE YOU DOING THIS ????
+	public void queueSetLanguage(String l) {
+		fileCacheInitialized = false;
+		language = l;
+	}
+
+	/**
+	 * request confirmation of recognized text this typically comes from a
+	 * speech recognition service and is a verbal query - asking if they heard
+	 * the correct phrase
+	 * 
+	 * @param text
+	 */
+	public void requestConfirmation(String text) {
+		speak(String.format("did you say. %s", text));
+	}
+
+	public synchronized String saying(String t) {
+		isSaying = t;
+		return isSaying;
+	}
+
+	public void setBackendType(String t) {
+		if (BACKEND_TYPE_ATT.equals(t)) {
+			backendType = BackendType.ATT;
+		} else if (BACKEND_TYPE_FREETTS.equals(t)) {
+			backendType = BackendType.FREETTS;
+		} else if (BACKEND_TYPE_GOOGLE.equals(t)) {
+			backendType = BackendType.GOOGLE;
+		} else {
+			log.error("type " + t + " not supported");
 		}
-		if (audioFile != null) {
-			audioFile.stopService();
-			audioFile = null;
+	}
+
+	public void setFrontendType(String t) {
+		if ("NORMAL".equals(t)) {
+			frontendType = FrontendType.NORMAL;
+		} else if ("QUEUED".equals(t)) {
+			frontendType = FrontendType.QUEUED;
+		} else if ("BLOCKING".equals(t)) {
+			frontendType = FrontendType.BLOCKING;
+		} else if ("MULTI".equals(t)) {
+			frontendType = FrontendType.MULTI;
+		} else {
+			log.error("type " + t + " not supported");
 		}
-		super.stopService();
+	}
+
+	public void setGenderFemale() {
+		voiceName = "audrey";
+		googleProxyHost = null;
+	}
+
+	public void setGenderMale() {
+		voiceName = "jarvis";
+
+		googleProxyHost = "94.23.0.183";
+		googleProxyPort = 80;
+
+		googleProxyHost = "91.236.255.195";
+		googleProxyPort = 3128;
+
+		googleProxyHost = "94.23.29.189";
+		googleProxyPort = 8080;
+
+		googleProxyHost = "91.121.11.120";
+		googleProxyPort = 8080;
+
+	}
+
+	public void setGoogleProxy(String voiceName, String host, int port) {
+		this.voiceName = voiceName;
+		this.googleProxyHost = host;
+		this.googleProxyPort = port;
+	}
+
+	public void setGoogleURI(String uri) {
+		googleURI = uri;
+	}
+
+	public void setLanguage(String l) {
+		in(createMessage(getName(), "queueSetLanguage", l));
 	}
 
 	// front-end functions
 	public boolean speak(String toSpeak) {
 		toSpeak = toSpeak.replaceAll(filter, " ");
-		if (toSpeak == null || toSpeak.length() == 0){
+		if (toSpeak == null || toSpeak.length() == 0) {
 			return false;
 		}
 		if (frontendType == FrontendType.NORMAL) {
@@ -257,54 +399,54 @@ public class Speech extends Service implements TextListener {
 		return false;
 	}
 
-	public boolean speakNormal(String toSpeak) {
-		// idealy in "normal" speech our ideas are queued
-		// until we have time to actually say them
-
-		if (backendType == BackendType.ATT) {
-			// in(createMessage(name, "speakATT", toSpeak));
-			log.error("no longer supported as per the deathstar's liscense agreement");
-		} else if (backendType == BackendType.FREETTS) { // festival tts
-			// speakFreeTTS(toSpeak);
-			in(createMessage(getName(), "speakFreeTTS", toSpeak));
-		} else if (backendType == BackendType.GOOGLE) { // festival tts
-			in(createMessage(getName(), "speakGoogle", toSpeak));
-		} else {
-			log.error("back-end speech backendType " + backendType + " not supported ");
-			return false;
-		}
-
-		return true;
-
-	}
-
 	public boolean speakBlocking(String toSpeak) {
-		return speakBlocking(toSpeak, (Object[])null);
+		return speakBlocking(toSpeak, (Object[]) null);
 	}
-	
+
 	/**
 	 * main speak blocking function
+	 * 
 	 * @param speak
 	 * @param fdata
 	 * @return
 	 */
 	public boolean speakBlocking(String speak, Object... fdata) {
-		if (speak == null || speak.length() == 0){
+		if (speak == null || speak.length() == 0) {
 			return false;
 		}
-		
-		
+
 		String toSpeak = String.format(speak, fdata).replaceAll(filter, " ");
-		
+
 		if (backendType == BackendType.FREETTS) { // festival tts
 			speakFreeTTS(toSpeak);
 		} else if (backendType == BackendType.GOOGLE) { // google tts
-			speakGoogle(toSpeak); 
+			speakGoogle(toSpeak);
 		} else {
 			log.error("back-end speech backendType " + backendType + " not supported ");
 			return false;
 		}
 		return true;
+	}
+
+	public void speakErrors(boolean b) {
+		// register for Runtime registered (new services)
+
+		// get all current services
+		// register for their errors
+		List<ServiceInterface> services = Runtime.getServices();
+		if (b) {
+			for (int i = 0; i < services.size(); ++i) {
+				ServiceInterface sw = services.get(i);
+				subscribe(sw.getName(), "publishError", "speak");
+				// this.addListener(outMethod, namedInstance, inMethod);
+			}
+		} else {
+			for (int i = 0; i < services.size(); ++i) {
+				ServiceInterface sw = services.get(i);
+				unsubscribe(sw.getName(), "publishError", "speak");
+				// this.addListener(outMethod, namedInstance, inMethod);
+			}
+		}
 	}
 
 	public void speakFreeTTS(String toSpeak) {
@@ -333,7 +475,7 @@ public class Speech extends Service implements TextListener {
 			myVoice.allocate();
 			log.info("voice allocated");
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 		if (initialized) {
@@ -347,55 +489,7 @@ public class Speech extends Service implements TextListener {
 
 	}
 
-	public void setLanguage(String l) {
-		in(createMessage(getName(), "queueSetLanguage", l));
-	}
-
-	// FIXME - WTF ARE YOU DOING THIS ????
-	public void queueSetLanguage(String l) {
-		fileCacheInitialized = false;
-		language = l;
-	}
-
-	public void setGoogleURI(String uri) {
-		googleURI = uri;
-	}
-
-	public void setGenderFemale() {
-		voiceName = "audrey";
-		googleProxyHost = null;
-	}
-
-	public void setGenderMale() {
-		voiceName = "jarvis";
-		
-		googleProxyHost = "94.23.0.183";
-		googleProxyPort = 80;
-
-		googleProxyHost = "91.236.255.195";
-		googleProxyPort = 3128;
-
-		googleProxyHost = "94.23.29.189";
-		googleProxyPort = 8080;
-		
-		googleProxyHost = "91.121.11.120";
-		googleProxyPort = 8080;
-		
-	}
-	
-	public void setGoogleProxy(String voiceName, String host, int port)
-	{
-		this.voiceName = voiceName;
-		this.googleProxyHost = host;
-		this.googleProxyPort = port;
-	}
-
 	public void speakGoogle(String toSpeak) {
-		
-		if (audioFile == null) {
-			audioFile = new AudioFile("speechAudioFile");
-			audioFile.startService();
-		}
 
 		if (!fileCacheInitialized) {
 			boolean success = (new File("audioFile/google/" + language + "/" + voiceName)).mkdirs();
@@ -406,7 +500,6 @@ public class Speech extends Service implements TextListener {
 			}
 		}
 
-		
 		// Sanitize the filename so it can be properly cached.
 		toSpeak = cleanFilename(toSpeak);
 		String audioFileName = "audioFile/google/" + language + "/" + voiceName + "/" + toSpeak + ".mp3";
@@ -427,7 +520,7 @@ public class Speech extends Service implements TextListener {
 				// http://translate.google.com/translate_tts?tl=en&q=hello%20there%20my%20good%20friend
 
 				client = new DefaultHttpClient();
-				
+
 				if (googleProxyHost != null) {
 					HttpHost proxy = new HttpHost(googleProxyHost, googleProxyPort);
 					client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
@@ -454,7 +547,7 @@ public class Speech extends Service implements TextListener {
 				fos.write(data);
 
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 			}
 
 		}
@@ -466,148 +559,56 @@ public class Speech extends Service implements TextListener {
 		invoke("isSpeaking", false);
 	}
 
-	private String cleanFilename(String toSpeak) {
-		// Strip all chars that are not valid to use in a filename
-		// windows list 
-		// A filename cannot contain any of the following characters: 
-		//  \ / : * ? " < > |
-		// ; is forbidden on unix..  not sure what else we need 
-		// get rid of parens also maybe?
-		// TODO: find a nice clean list / library to do this
-		String cleanSpeak = toSpeak.replaceAll("^[.\\\\/:;*?\"<>|]?[\\\\/:*?\"<>|\\(\\)]*", " ");
-		return cleanSpeak.trim().toLowerCase();
-	}
+	public boolean speakNormal(String toSpeak) {
+		// idealy in "normal" speech our ideas are queued
+		// until we have time to actually say them
 
-	public byte[] getByteArrayFromResponse(HttpResponse response) {
-		try {
-			InputStream is = response.getEntity().getContent();
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-			int nRead;
-			byte[] data = new byte[16384];
-
-			while ((nRead = is.read(data, 0, data.length)) != -1) {
-				buffer.write(data, 0, nRead);
-			}
-
-			buffer.flush();
-
-			return buffer.toByteArray();
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return null;
-
-	}
-	
-	@Override
-	public String getDescription() {
-		return "speech synthesis service";
-	}
-	
-	public void speakErrors(boolean b)
-	{
-		// register for Runtime registered (new services)
-		
-		// get all current services
-		// register for their errors
-		List<ServiceInterface> services = Runtime.getServices();
-		if (b) {
-			for (int i = 0; i < services.size(); ++i) {
-				ServiceInterface sw = services.get(i);
-				subscribe(sw.getName(), "publishError", "speak");
-				// this.addListener(outMethod, namedInstance, inMethod);
-			}
+		if (backendType == BackendType.ATT) {
+			// in(createMessage(name, "speakATT", toSpeak));
+			log.error("no longer supported as per the deathstar's liscense agreement");
+		} else if (backendType == BackendType.FREETTS) { // festival tts
+			// speakFreeTTS(toSpeak);
+			in(createMessage(getName(), "speakFreeTTS", toSpeak));
+		} else if (backendType == BackendType.GOOGLE) { // festival tts
+			in(createMessage(getName(), "speakGoogle", toSpeak));
 		} else {
-			for (int i = 0; i < services.size(); ++i)
-			{
-				ServiceInterface sw = services.get(i);
-				unsubscribe(sw.getName(), "publishError", "speak");
-				//this.addListener(outMethod, namedInstance, inMethod);
-			}
+			log.error("back-end speech backendType " + backendType + " not supported ");
+			return false;
 		}
+
+		return true;
+
 	}
 
-	/**
-	 * request confirmation of recognized text this typically comes from a
-	 * speech recognition service and is a verbal query - asking if they heard
-	 * the correct phrase
-	 * 
-	 * @param text
-	 */
-	public void requestConfirmation(String text) {
-		speak(String.format("did you say. %s", text));
+	@Override
+	public void startService() {
+		super.startService();
+		startPeer("audioFile");
 	}
-	
-	public Status test(){
+
+	@Override
+	public void stopService() {
+		if (myVoice != null && myVoice.isLoaded()) {
+			myVoice.deallocate();
+		}
+		if (audioFile != null) {
+			audioFile.stopService();
+			audioFile = null;
+		}
+		super.stopService();
+	}
+
+	@Override
+	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
-		Speech mouth = (Speech)Runtime.start(getName(),"Speech");
+		Speech mouth = (Speech) Runtime.start(getName(), "Speech");
 		mouth.speak("I don't use appostrophes, or other punctuation, do you?");
 		mouth.speak("I'm done with this test");
-		
+
 		// TODO non-blocking - blocking google freetts
 		status.addInfo("done with test");
 		return status;
 	}
-
-	// codes - http://code.google.com/apis/language/translate/v2/using_rest.html
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		
-		Speech mouth = (Speech)Runtime.start("mouth", "Speech");
-		mouth.test();
-		
-		String test = " hello this is a test \\dev\\blah / blah : * ? \" blah \" blah > < <> bla | zod | zod2 ".replaceAll(filter, " ");
-	
-		log.info(test);
-		Speech speech = new Speech("speech");
-		speech.startService();
-		
-		speech.speakFreeTTS("hello");
-		
-		speech.setBackendType(BACKEND_TYPE_FREETTS);
-		
-		speech.speak("blah blah system check completed sir");
-		speech.speak("dood this is awesome");
-		
-		speech.setGenderMale();
-		
-		// speech.setBackendType(BACKEND_TYPE_GOOGLE);
-		// speech.setLanguage("fr");
-		speech.speakBlocking("this should work");
-		speech.speakBlocking("bork bork bork bork again more more");
-		speech.speak("did you say start clock");
-		speech.speak("hello it is a pleasure to meet you I am speaking.  I do love to speak. What should we talk about. I love to talk I love to talk");
-		speech.speak("goodby this is an attempt to generate inflection did it work");
-		speech.speak("blah there. this is a long and detailed message");
-		speech.speak("1 2 3 4 5 6 7 8 9 10, i know how to count");
-		speech.speak("the time is 12:30");
-		speech.speak("oink oink att is good but not so good");
-		speech.speak("num, num, num, num, num");
-		speech.speak("charging");
-		speech.speak("thank you");
-		speech.speak("good bye");
-		speech.speak("I believe I have bumped into something");
-		speech.speak("Ah, I have found a way out of this situation");
-		speech.speak("aaaaaaaaah, long vowels sound");
-		
-		speech.setGoogleURI("http://tts-api.com/tts.mp3?q=");
-
-	}
-
-	@Override
-	public void onText(String text) {
-		speak(text);
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"speech", "sound"};
-	}
-
-
 
 	// speak errors
 }

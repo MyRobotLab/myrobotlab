@@ -31,9 +31,9 @@ import java.util.ArrayList;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-
 public class IOSequence implements Serializable {
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(IOSequence.class);
 
 	public int ID;
@@ -42,15 +42,32 @@ public class IOSequence implements Serializable {
 
 	// option constants
 
+	public static String name() {
+		if (log.isDebugEnabled()) {
+			StringBuilder logString = new StringBuilder("IOSequence.getName()()");
+			log.debug("{}", logString);
+		} // if
+
+		String ret = new String("IOSequence");
+		return ret;
+	}
+
+	public static String scope() {
+		String ret = new String("myrobotlab");
+		return ret;
+	}
+
 	// ctors begin ----
 	public IOSequence() {
 		sequenceList = new ArrayList<IOSequenceEntry>();
 	}
 
+	// assignment end ---
+
 	public IOSequence(final IOSequence other) {
 		this();
 		set(other);
-	}
+	};
 
 	// ctors end ----
 	// assignment begin --- todo - look @ clone copy
@@ -58,28 +75,12 @@ public class IOSequence implements Serializable {
 		ID = other.ID;
 		sequenceList = other.sequenceList;
 
-	}
-
-	// assignment end ---
-
-	public static String scope() {
-		String ret = new String("myrobotlab");
-		return ret;
-	};
-
-	public static String name() {
-		if (log.isDebugEnabled()) {
-			StringBuilder logString = new StringBuilder("IOSequence.getName()()");
-			log.debug("{}",logString);
-		} // if
-
-		String ret = new String("IOSequence");
-		return ret;
 	};
 
 	/*
 	 * Default format was xml is now JSON TODO - make toStringStyler like spring
 	 */
+	@Override
 	public String toString() {
 		StringBuffer ret = new StringBuffer();
 		// ret.append("{<IOSequence");

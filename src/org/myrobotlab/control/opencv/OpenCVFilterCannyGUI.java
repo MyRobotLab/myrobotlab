@@ -46,7 +46,23 @@ public class OpenCVFilterCannyGUI extends OpenCVFilterGUI implements ChangeListe
 
 	SliderWithText lowThreshold = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 0);
 	SliderWithText highThreshold = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 256);
-	SliderWithText apertureSize = new SliderWithText(JSlider.HORIZONTAL, 1, 3, 1); // docs say 1 3 5 7 ... but 1 craches - will use 3 5 or 7
+	SliderWithText apertureSize = new SliderWithText(JSlider.HORIZONTAL, 1, 3, 1); // docs
+																					// say
+																					// 1
+																					// 3
+																					// 5
+																					// 7
+																					// ...
+																					// but
+																					// 1
+																					// craches
+																					// -
+																					// will
+																					// use
+																					// 3
+																					// 5
+																					// or
+																					// 7
 
 	public OpenCVFilterCannyGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
@@ -95,22 +111,21 @@ public class OpenCVFilterCannyGUI extends OpenCVFilterGUI implements ChangeListe
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		boundFilter = filterWrapper;
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				OpenCVFilterCanny bf = (OpenCVFilterCanny)filterWrapper.filter;
+				OpenCVFilterCanny bf = (OpenCVFilterCanny) filterWrapper.filter;
 			}
 		});
 
 	}
-
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
 
 		Object o = e.getSource();
 		OpenCVFilterCanny bf = (OpenCVFilterCanny) boundFilter.filter;
-		
-		if (o == apertureSize)
-		{
+
+		if (o == apertureSize) {
 			bf.apertureSize = apertureSize.getValue() * 2 + 1;
 			apertureSize.setText(bf.apertureSize);
 		} else if (o == highThreshold) {
@@ -120,9 +135,9 @@ public class OpenCVFilterCannyGUI extends OpenCVFilterGUI implements ChangeListe
 			bf.lowThreshold = lowThreshold.getValue();
 			lowThreshold.setText(lowThreshold.getValue());
 		}
-		
+
 		setFilterState(bf);
-		
+
 	}
 
 }

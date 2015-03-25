@@ -28,18 +28,18 @@ package org.myrobotlab.control;
 import java.io.Serializable;
 
 public class GUIServiceGraphVertex implements Serializable {
-	static final long serialVersionUID = 1L;
+	public static enum Type {
+		SERVICE, INPORT, OUTPORT
+	}
 
+	static final long serialVersionUID = 1L;
 	public String name;
 	public String toolTip;
 	public String canonicalName;
 	public String displayName;
 	public String status;
-	public Type type;
 
-	public static enum Type {
-		SERVICE, INPORT, OUTPORT
-	}
+	public Type type;
 
 	public GUIServiceGraphVertex() {
 	}
@@ -52,6 +52,7 @@ public class GUIServiceGraphVertex implements Serializable {
 		this.type = t;
 	}
 
+	@Override
 	public String toString() {
 		return displayName;
 	}

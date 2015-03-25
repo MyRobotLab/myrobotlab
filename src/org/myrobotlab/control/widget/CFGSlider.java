@@ -70,6 +70,7 @@ public class CFGSlider extends JPanel {
 		if (slider == null) {
 			slider = new JSlider(min, max, startValue);
 			slider.addChangeListener(new javax.swing.event.ChangeListener() {
+				@Override
 				public void stateChanged(javax.swing.event.ChangeEvent e) {
 					outputLabel.setText("" + slider.getValue());
 					NameValuePair nvp = new NameValuePair(CFGName, Integer.toString(slider.getValue()));

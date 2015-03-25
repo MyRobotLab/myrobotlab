@@ -40,12 +40,16 @@ public class OpenCVFilterDilate extends OpenCVFilter {
 
 	public int numberOfIterations = 1;
 
-	public OpenCVFilterDilate()  {
+	public OpenCVFilterDilate() {
 		super();
 	}
-	
-	public OpenCVFilterDilate(String name)  {
+
+	public OpenCVFilterDilate(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
 	}
 
 	@Override
@@ -53,10 +57,6 @@ public class OpenCVFilterDilate extends OpenCVFilter {
 
 		cvDilate(image, image, null, numberOfIterations);
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
 	}
 
 }

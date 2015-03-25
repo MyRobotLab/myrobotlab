@@ -50,7 +50,7 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSampleImage.class.getCanonicalName());
 
 	IplImage buffer = null;
-	
+
 	Image fileImage = null;
 	Graphics2D graphics = null;
 
@@ -66,14 +66,20 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
 	 * purple = HSV 128 255 150 128, 0, 0, 1 = blue = HSV 128 255 150 (navy)
 	 */
 
-	public OpenCVFilterSampleImage()  {
+	public OpenCVFilterSampleImage() {
 		super();
 	}
-	
-	public OpenCVFilterSampleImage(String name)  {
+
+	public OpenCVFilterSampleImage(String name) {
 		super(name);
 	}
-	
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
+	}
+
 	public void loadImage(String path) {
 		try {
 			URL url = new URL(path);
@@ -111,12 +117,6 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
 		 * CvPoint(20,200), new CvPoint(40,230), fillColor, 2, 1, 0);
 		 */
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

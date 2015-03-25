@@ -112,20 +112,29 @@ public class Agent extends SimpleAgent {
 
 	}
 
-	/** Resets agent variables */
-	protected void reset() {
-		super.reset();
-		frameMeter.reset();
+	/**
+	 * Returns printable description of the agent.
+	 * 
+	 * @return agent description as string.
+	 */
+	@Override
+	public String asString() {
 
-	}
-
-	/** Resets agent variables and position and kinematic */
-	protected void resetPosition() {
-		super.resetPosition();
-		kinematicModel.reset();
+		String s = new String();
+		Vector3d t = v1;
+		translation.get(t);
+		s = "class = " + this.getClass().getName() + "\n" + "name          \t= " + name + "\n" + "fps instant   \t= " + format.format(frameMeter.fps) + "\n" + "fps total     \t= "
+				+ format.format(frameMeter.fpsSinceStart) + "\n" + "counter       \t= " + getCounter() + "\n" + "lifetime      \t= " + format.format(getLifeTime()) + " s\n"
+				+ "collision     \t= " + this.collisionDetected + "\n"
+				+
+				// "interaction   \t= " + this.interactionDetected+ "\n" +
+				kinematicModel.toString(format) + "x             \t= " + format.format(t.x) + " m\n" + "y             \t= " + format.format(t.y) + " m\n" + "z             \t= "
+				+ format.format(t.z) + " m\n" + "odometer      \t= " + format.format(odometer) + " m\n";
+		return s;
 	}
 
 	/** Create 3D geometry. */
+	@Override
 	protected void create3D() {
 
 		Color3f color = new Color3f(0.0f, 0.8f, 0.0f);
@@ -179,45 +188,34 @@ public class Agent extends SimpleAgent {
 
 	}
 
-	/** set acceleration applied by motors . */
-	protected void setMotorsAcceleration(double dt) {
-
-		// TODO CHange this !!!
-		linearVelocity.set(0, 0, 0);
-		angularVelocity.set(0, 0, 0);
-
-		kinematicModel.update(dt, rotation, instantTranslation, instantRotation);
-		// derive two times displacement to obtain acceleration
-		double scale = 1.0 / (dt * dt);// dt non zero
-		motorsLinearAcceleration.set(instantTranslation);
-		motorsLinearAcceleration.scale(scale);
-		motorsAngularAcceleration.set(instantRotation);
-		motorsAngularAcceleration.scale(scale);
-
-		// contribute to general acceleration
-		linearAcceleration.set(motorsLinearAcceleration);
-		angularAcceleration.set(motorsAngularAcceleration);
-
+	/**
+	 * Creates the UI that may be associated to the agent. If the agent has set
+	 * a Panel with setUIPanel a window is created containing the panel.
+	 * */
+	JInternalFrame createUIWindow() {
+		JPanel panel = getUIPanel();
+		if (panel != null) {
+			window = new JInternalFrame("Output", false, false, false, false);
+			window.setContentPane(panel);
+			window.pack();
+		} else
+			window = null;
+		return window;
 	}
 
-	/** called by simulator. */
-	protected void initPreBehavior() {
-		// if there's a ui window show it
+	/** Dispose all resources */
+	@Override
+	protected void dispose() {
 		if (window != null)
-			window.toFront();
+			window.dispose();
 	}
 
-	/** called by simulator. */
-	protected void initBehavior() {
+	public AgentInspector getAgentInspector() {
+		return agentInspector;
 	}
 
-	/** called by simulator. */
-	protected void performPreBehavior() {
-		frameMeter.measurePoint(1);
-	}
-
-	/** called by simulator. */
-	protected void performBehavior() {
+	protected KinematicModel getKinematicModel() {
+		return kinematicModel;
 	}
 
 	/**
@@ -227,28 +225,6 @@ public class Agent extends SimpleAgent {
 	 */
 	public double getOdometer() {
 		return odometer;
-	}
-
-	/**
-	 * Sets rotational velocity in radians per second.
-	 */
-	public final void setRotationalVelocity(double rv) {
-		// because it's one of the default kinematic fucntions we provide it in
-		// the
-		// agent's api.
-		if (kinematicModel instanceof DefaultKinematic)
-			((DefaultKinematic) kinematicModel).setRotationalVelocity(rv);
-	}
-
-	/**
-	 * Sets translational velocity in meter per second.
-	 */
-	public final void setTranslationalVelocity(double tv) {
-		// because it's one of the default kinematic fucntions we provide it in
-		// the
-		// agent's api.
-		if (kinematicModel instanceof DefaultKinematic)
-			((DefaultKinematic) kinematicModel).setTranslationalVelocity(tv);
 	}
 
 	/**
@@ -275,17 +251,109 @@ public class Agent extends SimpleAgent {
 			return 0.0;
 	}
 
+	/**
+	 * Returns the UI panel previously set with <code>setUIPanel</code>
+	 * 
+	 * @return the panel
+	 */
+	public JPanel getUIPanel() {
+		return panel;
+	}
+
+	/** called by simulator. */
+	@Override
+	protected void initBehavior() {
+	}
+
+	/** called by simulator. */
+	@Override
+	protected void initPreBehavior() {
+		// if there's a ui window show it
+		if (window != null)
+			window.toFront();
+	}
+
+	/** called by simulator. */
+	@Override
+	protected void performBehavior() {
+	}
+
+	/** called by simulator. */
+	@Override
+	protected void performPreBehavior() {
+		frameMeter.measurePoint(1);
+	}
+
+	/** Resets agent variables */
+	@Override
+	protected void reset() {
+		super.reset();
+		frameMeter.reset();
+
+	}
+
+	/** Resets agent variables and position and kinematic */
+	@Override
+	protected void resetPosition() {
+		super.resetPosition();
+		kinematicModel.reset();
+	}
+
+	public void setAgentInspector(AgentInspector ai) {
+		agentInspector = ai;
+	}
+
+	protected void setFrameMeterRate(int rate) {
+		frameMeter.setUpdateRate(rate);
+	}
+
 	/** Sets the kinematic model for this agent */
 	protected void setKinematicModel(KinematicModel kinematicModel) {
 		this.kinematicModel = kinematicModel;
 	}
 
-	protected KinematicModel getKinematicModel() {
-		return kinematicModel;
+	/** set acceleration applied by motors . */
+	@Override
+	protected void setMotorsAcceleration(double dt) {
+
+		// TODO CHange this !!!
+		linearVelocity.set(0, 0, 0);
+		angularVelocity.set(0, 0, 0);
+
+		kinematicModel.update(dt, rotation, instantTranslation, instantRotation);
+		// derive two times displacement to obtain acceleration
+		double scale = 1.0 / (dt * dt);// dt non zero
+		motorsLinearAcceleration.set(instantTranslation);
+		motorsLinearAcceleration.scale(scale);
+		motorsAngularAcceleration.set(instantRotation);
+		motorsAngularAcceleration.scale(scale);
+
+		// contribute to general acceleration
+		linearAcceleration.set(motorsLinearAcceleration);
+		angularAcceleration.set(motorsAngularAcceleration);
+
 	}
 
-	protected void setFrameMeterRate(int rate) {
-		frameMeter.setUpdateRate(rate);
+	/**
+	 * Sets rotational velocity in radians per second.
+	 */
+	public final void setRotationalVelocity(double rv) {
+		// because it's one of the default kinematic fucntions we provide it in
+		// the
+		// agent's api.
+		if (kinematicModel instanceof DefaultKinematic)
+			((DefaultKinematic) kinematicModel).setRotationalVelocity(rv);
+	}
+
+	/**
+	 * Sets translational velocity in meter per second.
+	 */
+	public final void setTranslationalVelocity(double tv) {
+		// because it's one of the default kinematic fucntions we provide it in
+		// the
+		// agent's api.
+		if (kinematicModel instanceof DefaultKinematic)
+			((DefaultKinematic) kinematicModel).setTranslationalVelocity(tv);
 	}
 
 	/**
@@ -297,64 +365,6 @@ public class Agent extends SimpleAgent {
 	 */
 	public void setUIPanel(JPanel panel) {
 		this.panel = panel;
-	}
-
-	/**
-	 * Returns the UI panel previously set with <code>setUIPanel</code>
-	 * 
-	 * @return the panel
-	 */
-	public JPanel getUIPanel() {
-		return panel;
-	}
-
-	/**
-	 * Creates the UI that may be associated to the agent. If the agent has set
-	 * a Panel with setUIPanel a window is created containing the panel.
-	 * */
-	JInternalFrame createUIWindow() {
-		JPanel panel = getUIPanel();
-		if (panel != null) {
-			window = new JInternalFrame("Output", false, false, false, false);
-			window.setContentPane(panel);
-			window.pack();
-		} else
-			window = null;
-		return window;
-	}
-
-	public AgentInspector getAgentInspector() {
-		return agentInspector;
-	}
-
-	public void setAgentInspector(AgentInspector ai) {
-		agentInspector = ai;
-	}
-
-	/** Dispose all resources */
-	protected void dispose() {
-		if (window != null)
-			window.dispose();
-	}
-
-	/**
-	 * Returns printable description of the agent.
-	 * 
-	 * @return agent description as string.
-	 */
-	public String asString() {
-
-		String s = new String();
-		Vector3d t = v1;
-		translation.get(t);
-		s = "class = " + this.getClass().getName() + "\n" + "name          \t= " + name + "\n" + "fps instant   \t= " + format.format(frameMeter.fps) + "\n" + "fps total     \t= "
-				+ format.format(frameMeter.fpsSinceStart) + "\n" + "counter       \t= " + getCounter() + "\n" + "lifetime      \t= " + format.format(getLifeTime()) + " s\n"
-				+ "collision     \t= " + this.collisionDetected + "\n"
-				+
-				// "interaction   \t= " + this.interactionDetected+ "\n" +
-				kinematicModel.toString(format) + "x             \t= " + format.format(t.x) + " m\n" + "y             \t= " + format.format(t.y) + " m\n" + "z             \t= "
-				+ format.format(t.z) + " m\n" + "odometer      \t= " + format.format(odometer) + " m\n";
-		return s;
 	}
 
 }

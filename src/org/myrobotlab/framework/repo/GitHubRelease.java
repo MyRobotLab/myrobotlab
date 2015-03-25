@@ -1,7 +1,7 @@
 package org.myrobotlab.framework.repo;
 
 public class GitHubRelease {
-	
+
 	public String url;
 	public String upload_url;
 	public Integer id;

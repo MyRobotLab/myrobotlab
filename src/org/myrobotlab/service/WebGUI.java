@@ -55,26 +55,43 @@ public class WebGUI extends Service implements AuthorizationProvider {
 
 	public final static Logger log = LoggerFactory.getLogger(WebGUI.class);
 
-	
 	public Integer port = 7777;
-	
+
 	boolean autoStartBrowser = true;
-	
+
 	boolean useLocalResources = true;
-	
+
 	public String startURL = "http://127.0.0.1:%d/index.html";
-	
+
 	public String root = "resource";
 
 	public int messages = 0;
 
 	transient WSServer wss;
 
-	public void autoStartBrowser(boolean autoStartBrowser) {
-		this.autoStartBrowser = autoStartBrowser;
-	}
-
 	public HashMap<String, String> clients = new HashMap<String, String>();
+
+	private HashSet<String> allowMethods = new HashSet<String>();
+
+	private HashSet<String> excludeMethods = new HashSet<String>();
+
+	private HashSet<String> allowServices = new HashSet<String>();
+
+	private HashSet<String> excludeServices = new HashSet<String>();
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
+
+		webgui.test();
+		// webgui.useLocalResources(true);
+		// webgui.autoStartBrowser(false);
+		// Runtime.createAndStart("webgui", "WebGUI");
+		// webgui.useLocalResources(true);
+
+	}
 
 	public WebGUI(String n) {
 		super(n);
@@ -83,13 +100,141 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		subscribe(Runtime.getInstance().getIntanceName(), "getRegistry");
 	}
 
+	public void addConnectListener(Service service) {
+		addListener("publishConnect", service.getName(), "onConnect", WebSocket.class);
+	}
+
+	public void addDisconnectListener(Service service) {
+		addListener("publishDisconnect", service.getName(), "onDisconnect", WebSocket.class);
+	}
+
+	public boolean addUser(String username, String password) {
+		return BasicSecurity.addUser(username, password);
+	}
+
+	public void addWSMsgListener(Service service) {
+		addListener("publishWSMsg", service.getName(), "onWSMsg", WSMsg.class);
+	}
+
+	public boolean allowDirectMessaging(boolean b) {
+		wss.allowDirectMessaging(b);
+		return b;
+	}
+
+	@Override
+	public boolean allowExport(String serviceName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void allowMethod(String method) {
+		allowMethods.add(method);
+	}
+
+	public void allowREST(Boolean b) {
+		if (wss != null) {
+			wss.allowREST(b);
+		}
+	}
+
+	public void autoStartBrowser(boolean autoStartBrowser) {
+		this.autoStartBrowser = autoStartBrowser;
+	}
+
+	/**
+	 * expanding of all resource data from WebGUI onto the file system so that
+	 * it may be customized by the user
+	 */
+	public void customize() {
+		try {
+			Zip.extractFromFile("./myrobotlab.jar", "./resource", "resource");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "display", "control" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "The new web enabled GUIService 2.0 !";
+	}
+
 	public Integer getPort() {
 		return port;
 	}
 
-	public Integer setPort(Integer port) {
-		this.port = port;
-		return port;
+	@Override
+	public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isAuthorized(Message msg) {
+		String method = msg.method;
+		String service = msg.name;
+
+		if (allowMethods.size() > 0 && !allowMethods.contains(method)) {
+			return false;
+		}
+
+		if (excludeMethods.size() > 0 && excludeMethods.contains(method)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public void openURL(String url) {
+		BareBonesBrowserLaunch.openURL(url);
+	}
+
+	/**
+	 * called by the framework pre process of messages so that data can be
+	 * routed back to the correct subcomponent and control of the WebGUI can
+	 * still be maintained like a "regular" service
+	 * 
+	 */
+	@Override
+	public boolean preProcessHook(Message m) {
+		// FIXME - problem with collisions of this service's methods
+		// and dialog methods ?!?!?
+
+		// if the method name is == to a method in the GUIService
+		if (methodSet.contains(m.method)) {
+			// process the message like a regular service
+			return true;
+		}
+
+		// otherwise send the message to the dialog with the senders name
+		sendToAll(m);
+		return false;
+	}
+
+	public WebSocket publishConnect(WebSocket conn) {
+		return conn;
+	}
+
+	public WebSocket publishDisconnect(WebSocket conn) {
+		return conn;
+	}
+
+	// ============== security begin =========================
+	// FIXME - this will have to be keyed by the service name
+	// if the global datastructures are to be in Security
+
+	// specifically for a gateway
+	// this interface should be incorporated into Security Service
+
+	// interesting - regular expresion matching .. its a combined key !
+	// Service.method or perhaps sender.Service.method ?
+
+	public WSMsg publishWSMsg(WSMsg wsmsg) {
+		return wsmsg;
 	}
 
 	public void restart() {
@@ -98,22 +243,60 @@ public class WebGUI extends Service implements AuthorizationProvider {
 	}
 
 	/**
-	 * determines if references to JQuery JavaScript library are local or if the
-	 * library is linked to using content delivery network. Default (false) is
-	 * to use the CDN
+	 * sends JSON encoded MyRobotLab Message to all clients currently connected
+	 * through web sockets
 	 * 
-	 * @param b
+	 * @param msg
+	 *            message to broadcast
 	 */
-	public void useLocalResources(boolean b) {
-		useLocalResources = b;
+	public void sendToAll(Message msg) {
+		++messages;
+		// String json = Encoder.toJson(msg, Message.class); //toJson(msg);
+		// RECENTLY CHANGED
+		String json = Encoder.toJson(msg);
+		log.debug(String.format("webgui ---to---> all clients [%s]", json));
+		if (messages % 500 == 0) {
+			info(String.format("sent %d messages to %d clients", messages, wss.connections().size())); // TODO
+																										// modulus
+		}
+
+		if (json != null) {
+			wss.sendToAll(json);
+		} else {
+			log.error(String.format("toJson %s.%s is null", msg.name, msg.method));
+		}
+	}
+
+	public Integer setPort(Integer port) {
+		this.port = port;
+		return port;
 	}
 
 	/**
-	 * @return whether instance is using CDN for delivery of JavaScript
-	 *         libraries to browser
+	 * starts and web socket server, auto launches browser if
+	 * autoStartBrowser=true
+	 * 
+	 * @return true if both servers started
 	 */
-	public boolean useLocalResources() {
-		return useLocalResources;
+	public boolean start() {
+		// TODO - make sure re-entrant
+		boolean result = startWebSocketServer(port);
+		log.info("using local resources is {}", useLocalResources);
+		log.info("starting web socket server on port {} result is {}", port, result);
+		if (autoStartBrowser) {
+			log.info("auto starting default browser");
+			BareBonesBrowserLaunch.openURL(String.format(startURL, port));
+		}
+		if (!result) {
+			warn("could not start properly");
+		}
+		return result;
+	}
+
+	@Override
+	public void startService() {
+		super.startService();
+		start();
 	}
 
 	/**
@@ -134,34 +317,10 @@ public class WebGUI extends Service implements AuthorizationProvider {
 			wss.start();
 			return true;
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 		return false;
-	}
-
-	/**
-	 * starts and web socket server, auto launches browser if
-	 * autoStartBrowser=true
-	 * 
-	 * @return true if both servers started
-	 */
-	public boolean start() {
-		boolean result = startWebSocketServer(port);
-		log.info("using local resources is {}", useLocalResources);
-		log.info("starting web socket server on port {} result is {}", port, result);
-		if (autoStartBrowser) {
-			log.info("auto starting default browser");
-			BareBonesBrowserLaunch.openURL(String.format(startURL, port));
-		}
-		if (!result) {
-			warn("could not start properly");
-		}
-		return result;
-	}
-	
-	public void openURL(String url){
-		BareBonesBrowserLaunch.openURL(url);
 	}
 
 	public void stop() {
@@ -171,19 +330,7 @@ public class WebGUI extends Service implements AuthorizationProvider {
 				wss = null;
 			}
 		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
-	@Override
-	public String getDescription() {
-		return "The new web enabled GUIService 2.0 !";
-	}
-
-	public void startService() {
-		if (!isRunning()) {
-			super.startService();
-			start();
+			Logging.logError(e);
 		}
 	}
 
@@ -193,183 +340,41 @@ public class WebGUI extends Service implements AuthorizationProvider {
 		stop();
 	}
 
-	/**
-	 * called by the framework pre process of messages so that data can be
-	 * routed back to the correct subcomponent and control of the WebGUI can
-	 * still be maintained like a "regular" service
-	 * 
-	 */
-	public boolean preProcessHook(Message m) {
-		// FIXME - problem with collisions of this service's methods
-		// and dialog methods ?!?!?
-
-		// if the method name is == to a method in the GUIService
-		if (methodSet.contains(m.method)) {
-			// process the message like a regular service
-			return true;
-		}
-
-		// otherwise send the message to the dialog with the senders name
-		sendToAll(m);
-		return false;
-	}
-
-	/**
-	 * expanding of all resource data from WebGUI onto the file system so that
-	 * it may be customized by the user
-	 */
-	public void customize() {
-		try {
-			Zip.extractFromFile("./myrobotlab.jar", "./resource", "resource");
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
-	/**
-	 * sends JSON encoded MyRobotLab Message to all clients currently connected
-	 * through web sockets
-	 * 
-	 * @param msg
-	 *            message to broadcast
-	 */
-	public void sendToAll(Message msg) {
-		++messages;
-		//String json = Encoder.toJson(msg, Message.class); //toJson(msg); RECENTLY CHANGED
-		String json = Encoder.toJson(msg);
-		log.debug(String.format("webgui ---to---> all clients [%s]", json));
-		if (messages % 500 == 0) {
-			info(String.format("sent %d messages to %d clients", messages, wss.connections().size())); // TODO
-																										// modulus
-		}
-
-		if (json != null) {
-			wss.sendToAll(json);
-		} else {
-			log.error(String.format("toJson %s.%s is null", msg.name, msg.method));
-		}
-	}
-
-	public boolean addUser(String username, String password) {
-		return BasicSecurity.addUser(username, password);
-	}
-
-	public void addConnectListener(Service service) {
-		addListener("publishConnect", service.getName(), "onConnect", WebSocket.class);
-	}
-
-	public WebSocket publishConnect(WebSocket conn) {
-		return conn;
-	}
-
-	public void addWSMsgListener(Service service) {
-		addListener("publishWSMsg", service.getName(), "onWSMsg", WSMsg.class);
-	}
-
-	public WSMsg publishWSMsg(WSMsg wsmsg) {
-		return wsmsg;
-	}
-
-	public void addDisconnectListener(Service service) {
-		addListener("publishDisconnect", service.getName(), "onDisconnect", WebSocket.class);
-	}
-
-	public WebSocket publishDisconnect(WebSocket conn) {
-		return conn;
-	}
-
-	public boolean allowDirectMessaging(boolean b) {
-		wss.allowDirectMessaging(b);
-		return b;
-	}
-
-	// ============== security begin =========================
-	// FIXME - this will have to be keyed by the service name
-	// if the global datastructures are to be in Security
-
-	// specifically for a gateway
-	// this interface should be incorporated into Security Service
-
-	// interesting - regular expresion matching .. its a combined key !
-	// Service.method or perhaps sender.Service.method ?
-
-	private HashSet<String> allowMethods = new HashSet<String>();
-	private HashSet<String> excludeMethods = new HashSet<String>();
-
-	private HashSet<String> allowServices = new HashSet<String>();
-	private HashSet<String> excludeServices = new HashSet<String>();
-
-	@Override
-	public boolean isAuthorized(Message msg) {
-		String method = msg.method;
-		String service = msg.name;
-
-		if (allowMethods.size() > 0 && !allowMethods.contains(method)) {
-			return false;
-		}
-
-		if (excludeMethods.size() > 0 && excludeMethods.contains(method)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	public void allowREST(Boolean b) {
-		if (wss != null) {
-			wss.allowREST(b);
-		}
-	}
-
-	public void allowMethod(String method) {
-		allowMethods.add(method);
-	}
-
-	@Override
-	public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean allowExport(String serviceName) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	// ============== security end =========================
-	
-	public Status test(){
+
+	@Override
+	public Status test() {
 		Status status = super.test();
-		
+
 		try {
-			
+
 			// test re-entrant starting
-			WebGUI webgui = (WebGUI)Runtime.start(getName(),"WebGUI");
-			
-		} catch(Exception e){
+			WebGUI webgui = (WebGUI) Runtime.start(getName(), "WebGUI");
+
+		} catch (Exception e) {
 			status.addError(e);
 		}
-		
+
 		return status;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-	
-		WebGUI webgui = (WebGUI)Runtime.start("webgui","WebGUI");
-		
-		webgui.test();
-		// webgui.useLocalResources(true);
-		// webgui.autoStartBrowser(false);
-		// Runtime.createAndStart("webgui", "WebGUI");
-		// webgui.useLocalResources(true);
-
+	/**
+	 * @return whether instance is using CDN for delivery of JavaScript
+	 *         libraries to browser
+	 */
+	public boolean useLocalResources() {
+		return useLocalResources;
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"display", "control"};
+
+	/**
+	 * determines if references to JQuery JavaScript library are local or if the
+	 * library is linked to using content delivery network. Default (false) is
+	 * to use the CDN
+	 * 
+	 * @param b
+	 */
+	public void useLocalResources(boolean b) {
+		useLocalResources = b;
 	}
 
 }

@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service;
 
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -47,17 +46,14 @@ public class SLAM extends Service {
 		super(n);
 	}
 
-
+	@Override
+	public String[] getCategories() {
+		return new String[] { "simulator", "display" };
+	}
 
 	@Override
 	public String getDescription() {
 		return "<html>addendum of WiiDAR - SLAM (not implemented)</html>";
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"simulator", "display"};
-	}
-
 
 }

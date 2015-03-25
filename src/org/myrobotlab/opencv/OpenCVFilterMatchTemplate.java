@@ -64,7 +64,7 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 
 	double[] minVal = new double[1];
 	double[] maxVal = new double[1];
-	
+
 	transient public IplImage template = null;
 
 	transient IplImage res = null;
@@ -76,47 +76,32 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 
 	transient CvPoint centeroid = new CvPoint(0, 0);
 
-	public OpenCVFilterMatchTemplate()  {
-		super();
-	}
-	
-	public OpenCVFilterMatchTemplate(String name)  {
-		super(name);
-	}
-
 	int clickCount = 0;
+
 	int x0, y0, x1, y1;
+
 	public CvRect rect = new CvRect();
 	public boolean makeTemplate = false;
-
-	public void samplePoint(Float x, Float y) {
-		samplePoint((int) (x * width), (int) (y * height));
-	}
-	
-	public void samplePoint(Integer x, Integer y) {
-		// MouseEvent me = (MouseEvent)params[0];
-		// if (event.getButton() == 1) {
-		if (clickCount % 2 == 0) {
-			x0 = x;
-			y0 = y;
-		} else {
-			x1 = x;
-			y1 = y;
-			rect.x(x0);
-			rect.y(y0);
-			rect.width(Math.abs(x1 - x0));
-			rect.height(Math.abs(y1 - y0));
-			makeTemplate = true;
-		}
-		// }
-		++clickCount;
-	}
-
 	CvPoint textpt = new CvPoint(10, 20);
 	private CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
 
 	public int matchRatio = Integer.MAX_VALUE;
+
 	boolean isTracking = false;
+
+	public OpenCVFilterMatchTemplate() {
+		super();
+	}
+
+	public OpenCVFilterMatchTemplate(String name) {
+		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
@@ -153,9 +138,9 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 			cvResetImageROI(image);
 			invoke("publishTemplate", name, template.getBufferedImage(), 0);
 			invoke("publishIplImageTemplate", template); // FYI -
-																	// IplImage
-																	// is not
-																	// serializable
+															// IplImage
+															// is not
+															// serializable
 			res = cvCreateImage(cvSize(image.width() - template.width() + 1, image.height() - template.height() + 1), IPL_DEPTH_32F, 1);
 		}
 
@@ -195,10 +180,27 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 
 	}
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
+	public void samplePoint(Float x, Float y) {
+		samplePoint((int) (x * width), (int) (y * height));
+	}
+
+	public void samplePoint(Integer x, Integer y) {
+		// MouseEvent me = (MouseEvent)params[0];
+		// if (event.getButton() == 1) {
+		if (clickCount % 2 == 0) {
+			x0 = x;
+			y0 = y;
+		} else {
+			x1 = x;
+			y1 = y;
+			rect.x(x0);
+			rect.y(y0);
+			rect.width(Math.abs(x1 - x0));
+			rect.height(Math.abs(y1 - y0));
+			makeTemplate = true;
+		}
+		// }
+		++clickCount;
 	}
 
 }

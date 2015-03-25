@@ -15,8 +15,7 @@ import javax.swing.TransferHandler;
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
-public class ServoOrchestratorGUI_middlemiddle_transferhandler extends
-		TransferHandler implements DragSourceMotionListener {
+public class ServoOrchestratorGUI_middlemiddle_transferhandler extends TransferHandler implements DragSourceMotionListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -46,6 +45,7 @@ public class ServoOrchestratorGUI_middlemiddle_transferhandler extends
 		return null;
 	}
 
+	@Override
 	public void dragMouseMoved(DragSourceDragEvent dsde) {
 	}
 

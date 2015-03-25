@@ -55,32 +55,6 @@ import org.myrobotlab.service.interfaces.StepperController;
 
 public class StepperGUI extends ServiceGUI implements ActionListener, ChangeListener {
 
-	// controller
-	JPanel controllerPanel = new JPanel(new BorderLayout());
-	StepperControllerPanel controllerTypePanel = new Stepper_UnknownGUI();
-	JComboBox controllerSelect = new JComboBox();
-	StepperController controller = null;
-	JCheckBox invert = new JCheckBox("invert");
-
-	// power
-	JPanel powerPanel = new JPanel(new BorderLayout());
-	private FloatJSlider power = null;
-	private JLabel powerValue = new JLabel("0.00");
-	ImageButton stopButton;
-	ImageButton clockwiseButton;
-	ImageButton counterclockwiseButton;
-
-	// position
-	JPanel positionPanel = null;
-	private JLabel posValue = new JLabel("0.00");
-
-	// TODO - make StepperPanel - for 1 stepper - for shared embedded widget
-	// TODO - stop sign button for panic stop
-	// TODO - tighten up interfaces
-	// TODO - DIRECT calls ! - stepper & controller HAVE to be on the same
-	// computer
-	// TODO - cw ccw buttons enabled
-
 	public class FloatJSlider extends JSlider {
 
 		private static final long serialVersionUID = 1L;
@@ -105,10 +79,120 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 		}
 	}
 
+	// controller
+	JPanel controllerPanel = new JPanel(new BorderLayout());
+	StepperControllerPanel controllerTypePanel = new Stepper_UnknownGUI();
+	JComboBox controllerSelect = new JComboBox();
+	StepperController controller = null;
+
+	JCheckBox invert = new JCheckBox("invert");
+	// power
+	JPanel powerPanel = new JPanel(new BorderLayout());
+	private FloatJSlider power = null;
+	private JLabel powerValue = new JLabel("0.00");
+	ImageButton stopButton;
+	ImageButton clockwiseButton;
+
+	ImageButton counterclockwiseButton;
+	// position
+	JPanel positionPanel = null;
+
+	// TODO - make StepperPanel - for 1 stepper - for shared embedded widget
+	// TODO - stop sign button for panic stop
+	// TODO - tighten up interfaces
+	// TODO - DIRECT calls ! - stepper & controller HAVE to be on the same
+	// computer
+	// TODO - cw ccw buttons enabled
+
+	private JLabel posValue = new JLabel("0.00");
+
+	// FIXME put in sub gui
+	ArrayList<Pin> pinList = null;
+
 	public StepperGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object source = e.getSource();
+
+		if (source == controllerSelect) {
+
+			String newController = (String) controllerSelect.getSelectedItem();
+
+			if (newController != null && newController.length() > 0) {
+				// myService.send(boundServiceName, "setPort", newPort);
+				ServiceInterface sw = Runtime.getService(newController);
+				controller = (StepperController) Runtime.getService(newController);
+
+				String type = sw.getSimpleName();
+
+				// build gui for appropriate stepper controller type -
+				// the gui needs to be able to do a Stepper.attach(name, data)
+				// with appropriate data
+				String attachGUIName = String.format("org.myrobotlab.control.Stepper_%sGUI", type);
+
+				controllerPanel.remove(controllerTypePanel);
+				controllerTypePanel = Reflector.getNewInstance(attachGUIName, new Object[] { myService, boundServiceName, newController });
+				controllerPanel.add(controllerTypePanel, BorderLayout.CENTER);
+				// setEnabled(true);
+
+			} else {
+				controllerPanel.remove(controllerTypePanel);
+				controllerTypePanel = new Stepper_UnknownGUI();
+				controllerPanel.add(controllerTypePanel, BorderLayout.CENTER);
+				// setEnabled(false);
+			}
+
+			controllerTypePanel.setBorder(BorderFactory.createTitledBorder("type"));
+			controllerPanel.revalidate();
+
+		} else if (source == stopButton) {
+			power.setValue(0);
+		}
+	}
+
+	@Override
+	public void attachGUI() {
+		subscribe("publishState", "getState", Stepper.class);
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishState", "getState", Arduino.class);
+
+	}
+
+	public void getState(final Stepper stepper) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+				setEnabled(stepper.isAttached());
+				// FIXED - can't use a reference - because it changes mid-stream
+				// through
+				// this method
+				// StepperControllerPanel subpanel =
+				// ((StepperControllerPanel)controllerTypePanel);
+				if (stepper.isAttached() && stepper.getControllerName() != null) {
+					// !!!!! - This actually fires the (makes a new
+					// StepperControllerPanel) !!!!!
+					controllerSelect.setSelectedItem(stepper.getControllerName());
+					// controllerTypePanel.setData(controller.getStepperData(boundServiceName));
+				}
+				controllerTypePanel.setAttached(stepper.isAttached());
+
+			}
+		});
+	}
+
+	public void incrementPosition(Integer pos) {
+		posValue.setText(String.format("%d", pos));
+	}
+
+	@Override
 	public void init() {
 		// controllerPanel begin ------------------
 
@@ -164,7 +248,8 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 		controllerSelect.addActionListener(this);
 		power.addChangeListener(this);
 
-		// TODO - stepper could come into graphics already attached - handle it...
+		// TODO - stepper could come into graphics already attached - handle
+		// it...
 
 	}
 
@@ -176,86 +261,6 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 		invert.setEnabled(enable);
 		powerValue.setEnabled(enable);
 
-	}
-
-	public void incrementPosition(Integer pos) {
-		posValue.setText(String.format("%d", pos));
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", Stepper.class);
-		myService.send(boundServiceName, "publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", Arduino.class);
-
-	}
-
-	// FIXME put in sub gui
-	ArrayList<Pin> pinList = null;
-
-	public void getState(final Stepper stepper) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-			
-		setEnabled(stepper.isAttached());
-		// FIXED - can't use a reference - because it changes mid-stream through
-		// this method
-		// StepperControllerPanel subpanel =
-		// ((StepperControllerPanel)controllerTypePanel);
-		if (stepper.isAttached() && stepper.getControllerName() != null) {
-			// !!!!! - This actually fires the (makes a new
-			// StepperControllerPanel) !!!!!
-			controllerSelect.setSelectedItem(stepper.getControllerName());
-			//controllerTypePanel.setData(controller.getStepperData(boundServiceName));
-		}
-		controllerTypePanel.setAttached(stepper.isAttached());
-		
-			}
-		});
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object source = e.getSource();
-
-		if (source == controllerSelect) {
-
-			String newController = (String) controllerSelect.getSelectedItem();
-
-			if (newController != null && newController.length() > 0) {
-				// myService.send(boundServiceName, "setPort", newPort);
-				ServiceInterface sw = Runtime.getService(newController);
-				controller = (StepperController) Runtime.getService(newController);
-
-				String type = sw.getSimpleName();
-
-				// build gui for appropriate stepper controller type -
-				// the gui needs to be able to do a Stepper.attach(name, data)
-				// with appropriate data
-				String attachGUIName = String.format("org.myrobotlab.control.Stepper_%sGUI", type);
-
-				controllerPanel.remove(controllerTypePanel);
-				controllerTypePanel = Reflector.getNewInstance(attachGUIName, new Object[] { myService, boundServiceName, newController });
-				controllerPanel.add(controllerTypePanel, BorderLayout.CENTER);
-				// setEnabled(true);
-
-			} else {
-				controllerPanel.remove(controllerTypePanel);
-				controllerTypePanel = new Stepper_UnknownGUI();
-				controllerPanel.add(controllerTypePanel, BorderLayout.CENTER);
-				// setEnabled(false);
-			}
-
-			controllerTypePanel.setBorder(BorderFactory.createTitledBorder("type"));
-			controllerPanel.revalidate();
-
-		} else if (source == stopButton) {
-			power.setValue(0);
-		}
 	}
 
 	@Override

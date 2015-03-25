@@ -35,18 +35,23 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 public class OpenCVFilterErode extends OpenCVFilter {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	public int numberOfIterations = 1;
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterErode.class.getCanonicalName());
-	
 
-	public OpenCVFilterErode()  {
+	public OpenCVFilterErode() {
 		super();
 	}
-	
-	public OpenCVFilterErode(String name)  {
+
+	public OpenCVFilterErode(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -55,12 +60,6 @@ public class OpenCVFilterErode extends OpenCVFilter {
 		cvErode(image, image, null, numberOfIterations); // 3 iterations
 
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

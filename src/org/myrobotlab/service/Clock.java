@@ -41,18 +41,6 @@ import org.slf4j.Logger;
 
 public class Clock extends Service {
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(Clock.class.getCanonicalName());
-
-	public boolean isClockRunning;
-	public int interval = 1000;
-
-	public transient ClockThread myClock = null;
-
-	// FIXME
-	ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
-
 	public class ClockThread implements Runnable {
 		public Thread thread = null;
 
@@ -61,6 +49,7 @@ public class Clock extends Service {
 			thread.start();
 		}
 
+		@Override
 		public void run() {
 			try {
 				while (isClockRunning == true) {
@@ -85,68 +74,17 @@ public class Clock extends Service {
 		}
 	}
 
-	public Clock(String n) {
-		super(n);
-	}
+	private static final long serialVersionUID = 1L;
 
-	public void startClock() {
-		if (myClock == null) {
-			isClockRunning = true;
-			myClock = new ClockThread();
-			invoke("clockStarted");
-		} else {
-			log.warn("clock already started");
-		}
-	}
+	public final static Logger log = LoggerFactory.getLogger(Clock.class.getCanonicalName());
+	public boolean isClockRunning;
 
-	// clock started event
-	public void clockStarted() {
-	}
+	public int interval = 1000;
 
-	public void stopClock() {
+	public transient ClockThread myClock = null;
 
-		if (myClock != null) {
-			log.info("stopping " + getName() + " myClock");
-			isClockRunning = false;
-			myClock.thread.interrupt();
-			myClock.thread = null;
-			myClock = null;
-			// have requestors broadcast state !
-			// broadcastState();
-			invoke("clockStopped");
-		} else {
-			log.warn("clock already stopped");
-		}
-
-		isClockRunning = false;
-	}
-
-	public void clockStopped() {
-	}
-
-	public Date pulse(Date time) {
-		return time;
-	}
-
-	public void setInterval(Integer milliseconds) {
-		interval = milliseconds;
-	}
-
-	@Override
-	public void stopService() {
-		stopClock();
-		super.stopService();
-	}
-
-	@Override
-	public String getDescription() {
-		return "used to generate pulses";
-	}
-
-	public void addClockEvent(Date time, String name, String method, Object... data) {
-		ClockEvent event = new ClockEvent(time, name, method, data);
-		events.add(event);
-	}
+	// FIXME
+	ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
 
 	public static void main(String[] args) throws ClassNotFoundException, CloneNotSupportedException {
 		LoggingFactory.getInstance().configure();
@@ -183,7 +121,7 @@ public class Clock extends Service {
 				// xmpp1.sendMessage("xmpp 2", "robot02 02");
 				// }
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 			}
 			// TCP CONNECT WORKS END ---------------------------------
 
@@ -214,10 +152,73 @@ public class Clock extends Service {
 			// XMPP CONNECT WORKS END ---------------------------------
 		}
 	}
-	
+
+	public Clock(String n) {
+		super(n);
+	}
+
+	public void addClockEvent(Date time, String name, String method, Object... data) {
+		ClockEvent event = new ClockEvent(time, name, method, data);
+		events.add(event);
+	}
+
+	// clock started event
+	public void clockStarted() {
+	}
+
+	public void clockStopped() {
+	}
+
 	@Override
 	public String[] getCategories() {
-		return new String[] {"scheduling"};
+		return new String[] { "scheduling" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used to generate pulses";
+	}
+
+	public Date pulse(Date time) {
+		return time;
+	}
+
+	public void setInterval(Integer milliseconds) {
+		interval = milliseconds;
+	}
+
+	public void startClock() {
+		if (myClock == null) {
+			isClockRunning = true;
+			myClock = new ClockThread();
+			invoke("clockStarted");
+		} else {
+			log.warn("clock already started");
+		}
+	}
+
+	public void stopClock() {
+
+		if (myClock != null) {
+			log.info("stopping " + getName() + " myClock");
+			isClockRunning = false;
+			myClock.thread.interrupt();
+			myClock.thread = null;
+			myClock = null;
+			// have requestors broadcast state !
+			// broadcastState();
+			invoke("clockStopped");
+		} else {
+			log.warn("clock already stopped");
+		}
+
+		isClockRunning = false;
+	}
+
+	@Override
+	public void stopService() {
+		stopClock();
+		super.stopService();
 	}
 
 }

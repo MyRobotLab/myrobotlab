@@ -51,6 +51,15 @@ public class Welcome extends ServiceGUI {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void attachGUI() {
+	}
+
+	@Override
+	public void detachGUI() {
+	}
+
+	@Override
 	public void init() {
 
 		GridBagConstraints gc = new GridBagConstraints();
@@ -74,14 +83,6 @@ public class Welcome extends ServiceGUI {
 
 	public String setRemoteConnectionStatus(String state) {
 		return state;
-	}
-
-	@Override
-	public void attachGUI() {
-	}
-
-	@Override
-	public void detachGUI() {
 	}
 
 }

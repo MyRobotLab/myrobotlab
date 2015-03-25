@@ -45,15 +45,10 @@ public class SecurityGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-	}
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
 
-	public void getState(org.myrobotlab.service.Security security) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
 	}
 
 	@Override
@@ -67,10 +62,17 @@ public class SecurityGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("publishState", "getState", Security.class);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+	public void getState(org.myrobotlab.service.Security security) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
+			}
+		});
+	}
+
+	@Override
+	public void init() {
 	}
 
 }

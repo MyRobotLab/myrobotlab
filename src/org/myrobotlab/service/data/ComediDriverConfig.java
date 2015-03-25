@@ -31,9 +31,9 @@ import java.util.HashMap;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-
 public class ComediDriverConfig implements Serializable {
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(ComediDriverConfig.class);
 
 	public int ID;
@@ -44,15 +44,32 @@ public class ComediDriverConfig implements Serializable {
 
 	// option constants
 
+	public static String name() {
+		if (log.isDebugEnabled()) {
+			StringBuilder logString = new StringBuilder("ComediDriverConfig.getName()()");
+			log.debug("{}", logString);
+		} // if
+
+		String ret = new String("ComediDriverConfig");
+		return ret;
+	}
+
+	public static String scope() {
+		String ret = new String("myrobotlab");
+		return ret;
+	}
+
 	// ctors begin ----
 	public ComediDriverConfig() {
 		sequenceMap_ = new HashMap<String, IOSequence>();
 	}
 
+	// assignment end ---
+
 	public ComediDriverConfig(final ComediDriverConfig other) {
 		this();
 		set(other);
-	}
+	};
 
 	// ctors end ----
 	// assignment begin --- todo - look @ clone copy
@@ -60,28 +77,12 @@ public class ComediDriverConfig implements Serializable {
 		ID = other.ID;
 		sequenceMap_ = other.sequenceMap_;
 
-	}
-
-	// assignment end ---
-
-	public static String scope() {
-		String ret = new String("myrobotlab");
-		return ret;
-	};
-
-	public static String name() {
-		if (log.isDebugEnabled()) {
-			StringBuilder logString = new StringBuilder("ComediDriverConfig.getName()()");
-			log.debug("{}",logString);
-		} // if
-
-		String ret = new String("ComediDriverConfig");
-		return ret;
 	};
 
 	/*
 	 * Default format was xml is now JSON TODO - make toStringStyler like spring
 	 */
+	@Override
 	public String toString() {
 		StringBuffer ret = new StringBuffer();
 		// ret.append("{<ComediDriverConfig");

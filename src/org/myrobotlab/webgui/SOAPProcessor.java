@@ -1,6 +1,5 @@
 package org.myrobotlab.webgui;
 
-
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -28,14 +27,6 @@ import org.slf4j.Logger;
 // FIXME - normalize - make only ResourceProcessor (its twin) - move all this to Encoder !!!
 public class SOAPProcessor implements HTTPProcessor {
 
-	public final static Logger log = LoggerFactory.getLogger(SOAPProcessor.class.getCanonicalName());
-
-	MessageFactory factory = null;
-
-	private HashSet<String> uris = new HashSet<String>();
-
-	static private String templateResponse = null;
-	
 	/**
 	 * a CodeBlock is an execution unit ready to be invoked with converted
 	 * parameters and data
@@ -51,7 +42,53 @@ public class SOAPProcessor implements HTTPProcessor {
 		}
 	}
 
-	
+	static public class RESTException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		public RESTException(String format) {
+			super(format);
+		}
+	}
+
+	public final static Logger log = LoggerFactory.getLogger(SOAPProcessor.class.getCanonicalName());
+
+	MessageFactory factory = null;
+
+	private HashSet<String> uris = new HashSet<String>();
+
+	static private String templateResponse = null;
+
+	/**
+	 * Decodes the percent encoding scheme. <br/>
+	 * For example: "an+example%20string" -> "an example string"
+	 */
+	private static String decodePercent(String str, boolean decodeForwardSlash) {
+
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < str.length(); i++) {
+			char c = str.charAt(i);
+			switch (c) {
+			case '+':
+				sb.append(' ');
+				break;
+			case '%':
+				if ("2F".equalsIgnoreCase(str.substring(i + 1, i + 3)) && !decodeForwardSlash) {
+					log.info("found encoded / - leaving");
+					sb.append("%2F");
+				} else {
+					sb.append((char) Integer.parseInt(str.substring(i + 1, i + 3), 16));
+				}
+				i += 2;
+				break;
+			default:
+				sb.append(c);
+				break;
+			}
+		}
+		return new String(sb.toString().getBytes());
+
+	}
+
 	// TODO - this is a specific xml decode - e.g. Jaxb versus simplexml
 	static public CodeBlock getCodeBlockFromXML(String serviceType, String methodName, ArrayList<SOAPBodyElement> parms) {
 		ArrayList<Method> candidates = Encoder.getMethodCandidates(serviceType, methodName, parms.size());
@@ -99,11 +136,11 @@ public class SOAPProcessor implements HTTPProcessor {
 				} // for each parameter
 				converted = true;
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 				converted = false;
 			}
-			
-			if (converted){
+
+			if (converted) {
 				return new CodeBlock(m, params);
 			}
 
@@ -113,16 +150,80 @@ public class SOAPProcessor implements HTTPProcessor {
 		return null;
 	}
 
-	static public class RESTException extends Exception {
-		public RESTException(String format) {
-			super(format);
+	// TODO - encode
+	// FIXME - needs to be in .net or .framework
+	public static Object invoke(String uri) throws RESTException {
+		// String returnFormat = "gson";
+
+		// TODO top level is return format /html /text /soap /xml /gson /json a
+		// default could exist - start with SOAP response
+		// default is not specified but adds {/rest/xml} /services ...
+		// TODO - custom display /displays
+		// TODO - structured rest fault responses
+
+		String[] keys = uri.split("/");
+
+		// decode everything
+		for (int i = 0; i < keys.length; ++i) {
+			keys[i] = decodePercent(keys[i], true);
 		}
 
-		private static final long serialVersionUID = 1L;
+		// FIXME -
+		// /api/returnEncodingType/parameterEncoding/service/method/param0/param1....
+
+		if ("/services".equals(uri)) {
+			// get runtime list
+			log.info("services request");
+			REST rest = new REST();
+			String services = rest.getServices();
+
+			Response response = new Response(Status.OK, "text/html", services);
+			return response;
+
+		} else if (keys.length > 2) { // FIXME 3-1 ??? how to answer
+			// get a specific service instance - execute method --with
+			// parameters--
+			String serviceName = keys[1]; // FIXME how to handle
+			String fn = keys[2];
+			Object[] typedParameters = null;
+
+			ServiceInterface si = org.myrobotlab.service.Runtime.getService(serviceName);
+
+			// get parms
+			if (keys.length > 2) {
+				// copy paramater part of rest uri
+				String[] stringParams = new String[keys.length - 3];
+				for (int i = 0; i < keys.length - 3; ++i) {
+					stringParams[i] = keys[i + 3];
+				}
+
+				// FIXME FIXME FIXME !!!!
+				// this is an input format decision !!! .. it "SHOULD" be
+				// determined based on inbound uri format
+				typedParameters = TypeConverter.getTypedParamsFromJson(si.getClass(), fn, stringParams);
+			}
+
+			// TODO - handle return type -
+			// TODO top level is return format /html /text /soap /xml /gson
+			// /json /base16 a default could exist - start with SOAP response
+			Object returnObject = si.invoke(fn, typedParameters);
+			return returnObject;
+		} else {
+			throw new RESTException(String.format("invalid uri %s", uri));
+		}
 	}
 
 	public SOAPProcessor() {
 		templateResponse = FileIO.resourceToString("soap/response.xml");
+	}
+
+	public void addURI(String uri) {
+		uris.add(uri);
+	}
+
+	@Override
+	public HashSet<String> getURIs() {
+		return uris;
 	}
 
 	// FIXME - can't throw out - kills thread...
@@ -197,22 +298,23 @@ public class SOAPProcessor implements HTTPProcessor {
 				Response response = new Response(Status.OK, "text/plain", String.format("%s service not found", serviceName));
 				return response;
 			}
-			
+
 			Object responseObject = null;
 			CodeBlock cb = getCodeBlockFromXML(si.getClass().getCanonicalName(), fn, params);
-			if (cb != null){
+			if (cb != null) {
 				// FIXME FIXME FIXME FIXME FIXME FIXME !!!!
-				// optimize by an overloaded invoke which accepts the 
-				// Method I currently have in CodeBlock - which was pulled up by a HashMap and
+				// optimize by an overloaded invoke which accepts the
+				// Method I currently have in CodeBlock - which was pulled up by
+				// a HashMap and
 				// not reflected !!!!
 				// responseObject = si.invoke(cb.method.getName(), cb.params);
 				responseObject = si.invoke(fn, cb.params);
 			}
 
 			String xml = null;
-		
+
 			if ("xml".equals(returnFormat)) {
-				
+
 				/*
 				 * if (returnObject != null) { ByteArrayOutputStream out = new
 				 * ByteArrayOutputStream(); // if (returnObject) try {
@@ -236,7 +338,7 @@ public class SOAPProcessor implements HTTPProcessor {
 				 * String.format("<%sResponse />", fn); }
 				 */
 				xml = templateResponse.replaceAll("%methodName%", fn);
-				xml = xml.replaceAll("%responseObject%",(responseObject == null)?"":responseObject.toString());
+				xml = xml.replaceAll("%responseObject%", (responseObject == null) ? "" : responseObject.toString());
 				Response response = new Response(Status.OK, "text/xml", xml);
 				return response;
 
@@ -253,112 +355,9 @@ public class SOAPProcessor implements HTTPProcessor {
 			return response;
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return null;
-	}
-
-	// TODO - encode
-	// FIXME - needs to be in .net or .framework
-	public static Object invoke(String uri) throws RESTException {
-		// String returnFormat = "gson";
-
-		// TODO top level is return format /html /text /soap /xml /gson /json a
-		// default could exist - start with SOAP response
-		// default is not specified but adds {/rest/xml} /services ...
-		// TODO - custom display /displays
-		// TODO - structured rest fault responses
-
-		String[] keys = uri.split("/");
-
-		// decode everything
-		for (int i = 0; i < keys.length; ++i) {
-			keys[i] = decodePercent(keys[i], true);
-		}
-
-		// FIXME -
-		// /api/returnEncodingType/parameterEncoding/service/method/param0/param1....
-
-		if ("/services".equals(uri)) {
-			// get runtime list
-			log.info("services request");
-			REST rest = new REST();
-			String services = rest.getServices();
-
-			Response response = new Response(Status.OK, "text/html", services);
-			return response;
-
-		} else if (keys.length > 2) { // FIXME 3-1 ??? how to answer
-			// get a specific service instance - execute method --with
-			// parameters--
-			String serviceName = keys[1]; // FIXME how to handle
-			String fn = keys[2];
-			Object[] typedParameters = null;
-
-			ServiceInterface si = org.myrobotlab.service.Runtime.getService(serviceName);
-
-			// get parms
-			if (keys.length > 2) {
-				// copy paramater part of rest uri
-				String[] stringParams = new String[keys.length - 3];
-				for (int i = 0; i < keys.length - 3; ++i) {
-					stringParams[i] = keys[i + 3];
-				}
-
-				// FIXME FIXME FIXME !!!!
-				// this is an input format decision !!! .. it "SHOULD" be
-				// determined based on inbound uri format
-				typedParameters = TypeConverter.getTypedParamsFromJson(si.getClass(), fn, stringParams);
-			}
-
-			// TODO - handle return type -
-			// TODO top level is return format /html /text /soap /xml /gson
-			// /json /base16 a default could exist - start with SOAP response
-			Object returnObject = si.invoke(fn, typedParameters);
-			return returnObject;
-		} else {
-			throw new RESTException(String.format("invalid uri %s", uri));
-		}
-	}
-
-	@Override
-	public HashSet<String> getURIs() {
-		return uris;
-	}
-
-	public void addURI(String uri) {
-		uris.add(uri);
-	}
-
-	/**
-	 * Decodes the percent encoding scheme. <br/>
-	 * For example: "an+example%20string" -> "an example string"
-	 */
-	private static String decodePercent(String str, boolean decodeForwardSlash) {
-
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < str.length(); i++) {
-			char c = str.charAt(i);
-			switch (c) {
-			case '+':
-				sb.append(' ');
-				break;
-			case '%':
-				if ("2F".equalsIgnoreCase(str.substring(i + 1, i + 3)) && !decodeForwardSlash) {
-					log.info("found encoded / - leaving");
-					sb.append("%2F");
-				} else {
-					sb.append((char) Integer.parseInt(str.substring(i + 1, i + 3), 16));
-				}
-				i += 2;
-				break;
-			default:
-				sb.append(c);
-				break;
-			}
-		}
-		return new String(sb.toString().getBytes());
-
 	}
 
 }

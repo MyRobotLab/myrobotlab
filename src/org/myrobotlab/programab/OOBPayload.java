@@ -15,45 +15,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class OOBPayload {
 
 	private String serviceName;
+
 	private String methodName;
 	private ArrayList<String> params;
-
-	public OOBPayload() {
-		// TODO : anything?
-	}
-
-	public OOBPayload(String serviceName, String methodName,ArrayList<String> params) {
-		this.serviceName = serviceName;
-		this.methodName = methodName;
-		this.params = params;
-	}
-
-	public String getServiceName() {
-		return serviceName;
-	}
-
-	@XmlElement(name = "service")
-	public void setServiceName(String serviceName) {
-		this.serviceName = serviceName;
-	}
-
-	public String getMethodName() {
-		return methodName;
-	}
-
-	@XmlElement(name = "method")
-	public void setMethodName(String methodName) {
-		this.methodName = methodName;
-	}
-
-	@XmlElement(name = "param")
-	public ArrayList<String> getParams() {
-		return params;
-	}
-
-	public void setParams(ArrayList<String> params) {
-		this.params = params;
-	}
 
 	public static void main(String[] args) {
 
@@ -78,8 +42,43 @@ public class OOBPayload {
 			e.printStackTrace();
 		}
 
+	}
 
+	public OOBPayload() {
+		// TODO : anything?
+	}
 
+	public OOBPayload(String serviceName, String methodName, ArrayList<String> params) {
+		this.serviceName = serviceName;
+		this.methodName = methodName;
+		this.params = params;
+	}
+
+	public String getMethodName() {
+		return methodName;
+	}
+
+	@XmlElement(name = "param")
+	public ArrayList<String> getParams() {
+		return params;
+	}
+
+	public String getServiceName() {
+		return serviceName;
+	}
+
+	@XmlElement(name = "method")
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
+
+	public void setParams(ArrayList<String> params) {
+		this.params = params;
+	}
+
+	@XmlElement(name = "service")
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
 	}
 
 }

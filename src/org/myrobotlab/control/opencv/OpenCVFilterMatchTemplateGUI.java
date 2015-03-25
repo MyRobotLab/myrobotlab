@@ -33,22 +33,21 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterMatchTemplateGUI extends OpenCVFilterGUI {
 
-
 	public OpenCVFilterMatchTemplateGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
-		
+
 	}
-	
+
 	@Override
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		boundFilter = filterWrapper;
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				OpenCVFilterMatchTemplate bf = (OpenCVFilterMatchTemplate)filterWrapper.filter;
+				OpenCVFilterMatchTemplate bf = (OpenCVFilterMatchTemplate) filterWrapper.filter;
 			}
 		});
 
 	}
-
 
 }

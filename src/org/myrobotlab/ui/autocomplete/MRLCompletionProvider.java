@@ -48,22 +48,6 @@ public class MRLCompletionProvider extends JavaCompletionProvider {
 	public final static Logger log = LoggerFactory.getLogger(GUIService.class.getCanonicalName());
 
 	/**
-	 * Overriding base class declaration in order to load methods that should be
-	 * easy to find and use in Python. Still calls out the base class in order
-	 * to load the Java keywords.
-	 */
-	@Override
-	protected void loadCompletions() {
-		super.loadCompletions();
-
-		try {
-			loadInformationFromClasses(Locator.getClasses("org.myrobotlab.service"));
-		} catch (IOException e) {
-			log.error("Could not load MRLCompletions because of I/O issues.", e);
-		}
-	}
-
-	/**
 	 * Create the modifiers HTML string that will be used in the GUIService.
 	 * 
 	 * @param modifiers
@@ -209,6 +193,22 @@ public class MRLCompletionProvider extends JavaCompletionProvider {
 			}
 		}
 		completer = null;
+	}
+
+	/**
+	 * Overriding base class declaration in order to load methods that should be
+	 * easy to find and use in Python. Still calls out the base class in order
+	 * to load the Java keywords.
+	 */
+	@Override
+	protected void loadCompletions() {
+		super.loadCompletions();
+
+		try {
+			loadInformationFromClasses(Locator.getClasses("org.myrobotlab.service"));
+		} catch (IOException e) {
+			log.error("Could not load MRLCompletions because of I/O issues.", e);
+		}
 	}
 
 	/**

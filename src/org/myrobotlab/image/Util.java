@@ -62,179 +62,6 @@ import org.slf4j.Logger;
  */
 public class Util {
 
-	// get images & image icons - with defaults
-	public static Image getImage(String path) {
-		return getImage(path, "unknown.png");
-	}
-
-	public static Image getImage(String path, String defaultImage) {
-		Image icon = null;
-		java.net.URL imgURL = Util.class.getResource("/resource/" + path);
-		if (imgURL != null) {
-			try {
-				icon = ImageIO.read(imgURL);
-				return icon;
-			} catch (IOException e) {
-				Logging.logException(e);
-			}
-		}
-
-		// trying default image
-		imgURL = Util.class.getResource("/resource/" + defaultImage);
-		if (imgURL != null) {
-			try {
-				icon = ImageIO.read(imgURL);
-				return icon;
-			} catch (IOException e) {
-				Logging.logException(e);
-			}
-		}
-
-		log.error("Couldn't find file: " + path + " or default " + defaultImage);
-		return null;
-
-	}
-
-	public static ImageIcon getImageIcon(String path) {
-		ImageIcon icon = null;
-		String resourcePath = String.format("/resource/%s", path);
-		java.net.URL imgURL = Util.class.getResource(resourcePath);
-		if (imgURL != null) {
-			icon = new ImageIcon(imgURL);
-			return icon;
-		} else {
-			log.error(String.format("Couldn't find file: %s", resourcePath));
-			return null;
-		}
-	}
-
-	public static ImageIcon getScaledIcon(final Image image, final double scale) {
-		ImageIcon scaledIcon = new ImageIcon(image) {
-			private static final long serialVersionUID = 1L;
-
-			public int getIconWidth() {
-				return (int) (image.getWidth(null) * scale);
-			}
-
-			public int getIconHeight() {
-				return (int) (image.getHeight(null) * scale);
-			}
-
-			public void paintIcon(Component c, Graphics g, int x, int y) {
-				g.drawImage(image, x, y, getIconWidth(), getIconHeight(), c);
-			}
-		};
-		return scaledIcon;
-	}
-
-	public static BufferedImage loadBufferedImage(String path)
-
-	{
-		BufferedImage bi;
-		try {
-			bi = ImageIO.read(Util.class.getResource("/resource/" + path));
-		} catch (IOException e) {
-			log.error("could not find image " + path);
-			return null;
-		}
-		return bi;
-	}
-
-	public static ImageIcon getBrightenedIcon(final String path, final float amount) {
-		ImageIcon imageIcon = new ImageIcon(brighten(loadBufferedImage(path), amount));
-		return imageIcon;
-	}
-
-	public static BufferedImage brighten(BufferedImage bufferedImage, float amount) {
-		// brighten 30% = 1.3f darken by 10% = .9f
-		RescaleOp op = new RescaleOp(amount, 0, null);
-		bufferedImage = op.filter(bufferedImage, null);
-		return bufferedImage;
-	}
-
-	// graciously lifted from
-	// http://www.exampledepot.com/egs/java.awt.image/image2buf.html
-	public static BufferedImage ImageToBufferedImage(Image image) {
-		// This method returns a buffered image with the contents of an image
-		if (image instanceof BufferedImage) {
-			return (BufferedImage) image;
-		}
-
-		// This code ensures that all the pixels in the image are loaded
-		image = new ImageIcon(image).getImage();
-
-		// Determine if the image has transparent pixels; for this method's
-		// implementation, see Determining If an Image Has Transparent Pixels
-		boolean hasAlpha = hasAlpha(image);
-
-		// Create a buffered image with a format that's compatible with the
-		// screen
-		BufferedImage bimage = null;
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		try {
-			// Determine the type of transparency of the new buffered image
-			int transparency = Transparency.OPAQUE;
-			if (hasAlpha) {
-				transparency = Transparency.BITMASK;
-			}
-
-			// Create the buffered image
-			GraphicsDevice gs = ge.getDefaultScreenDevice();
-			GraphicsConfiguration gc = gs.getDefaultConfiguration();
-			bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
-		} catch (HeadlessException e) {
-			// The system does not have a screen
-		}
-
-		if (bimage == null) {
-			// Create a buffered image using the default color model
-			int type = BufferedImage.TYPE_INT_RGB;
-			if (hasAlpha) {
-				type = BufferedImage.TYPE_INT_ARGB;
-			}
-			bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
-		}
-
-		// Copy image to buffered image
-		Graphics g = bimage.createGraphics();
-
-		// Paint the image onto the buffered image
-		g.drawImage(image, 0, 0, null);
-		g.dispose();
-
-		return bimage;
-
-	}
-
-	// This method returns true if the specified image has transparent pixels
-	public static boolean hasAlpha(Image image) {
-		// If buffered image, the color model is readily available
-		if (image instanceof BufferedImage) {
-			BufferedImage bimage = (BufferedImage) image;
-			return bimage.getColorModel().hasAlpha();
-		}
-
-		// Use a pixel grabber to retrieve the image's color model;
-		// grabbing a single pixel is usually sufficient
-		PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
-		try {
-			pg.grabPixels();
-		} catch (InterruptedException e) {
-		}
-
-		// Get the image's color model
-		ColorModel cm = pg.getColorModel();
-		return cm.hasAlpha();
-	}
-
-	public static BufferedImage toGray(BufferedImage bufferedImage) {
-		ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-		ColorConvertOp op = new ColorConvertOp(cs, null);
-		bufferedImage = op.filter(bufferedImage, null);
-
-		return bufferedImage;
-	}
-
 	/*
 	 * Integer.toHexString( color.getRGB() & 0x00ffffff ) public String
 	 * printPixelARGB(int pixel) { int alpha = (pixel >> 24) & 0xff; int red =
@@ -256,6 +83,39 @@ public class Util {
 
 			{ { "red", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "lime", "y0", "z0" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "x0", "y0", "z0" },
 					{ "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "x0", "y0", "white" } } };
+
+	public static BufferedImage brighten(BufferedImage bufferedImage, float amount) {
+		// brighten 30% = 1.3f darken by 10% = .9f
+		RescaleOp op = new RescaleOp(amount, 0, null);
+		bufferedImage = op.filter(bufferedImage, null);
+		return bufferedImage;
+	}
+
+	/**
+	 * Produces a copy of the supplied image
+	 * 
+	 * @param image
+	 *            The original image
+	 * @return The new BufferedImage
+	 */
+	public static BufferedImage copyImage(BufferedImage image) {
+		return scaledImage(image, image.getWidth(), image.getHeight());
+	}
+
+	/**
+	 * Creates an image compatible with the current display
+	 * 
+	 * @return A BufferedImage with the appropriate color model
+	 */
+	public static BufferedImage createCompatibleImage(int width, int height) {
+		GraphicsConfiguration configuration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+		return configuration.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
+	}
+
+	public static ImageIcon getBrightenedIcon(final String path, final float amount) {
+		ImageIcon imageIcon = new ImageIcon(brighten(loadBufferedImage(path), amount));
+		return imageIcon;
+	}
 
 	static public String getColorString(Color c) {
 		// TODO - static this
@@ -322,31 +182,177 @@ public class Util {
 		return ret;
 	}
 
-	public Color getColor(String colorName) {
-		try {
-			// Find the field and value of colorName
-			Field field = Class.forName("java.awt.Color").getField(colorName);
-			return (Color) field.get(null);
-		} catch (Exception e) {
+	public static Color getGradient(int pos, int total) {
+		float gradient = 1.0f / total;
+		return new Color(Color.HSBtoRGB((pos * (gradient)), 0.8f, 0.7f));
+	}
+
+	// get images & image icons - with defaults
+	public static Image getImage(String path) {
+		return getImage(path, "unknown.png");
+	}
+
+	public static Image getImage(String path, String defaultImage) {
+		Image icon = null;
+		java.net.URL imgURL = Util.class.getResource("/resource/" + path);
+		if (imgURL != null) {
+			try {
+				icon = ImageIO.read(imgURL);
+				return icon;
+			} catch (IOException e) {
+				Logging.logError(e);
+			}
+		}
+
+		// trying default image
+		imgURL = Util.class.getResource("/resource/" + defaultImage);
+		if (imgURL != null) {
+			try {
+				icon = ImageIO.read(imgURL);
+				return icon;
+			} catch (IOException e) {
+				Logging.logError(e);
+			}
+		}
+
+		log.error("Couldn't find file: " + path + " or default " + defaultImage);
+		return null;
+
+	}
+
+	public static ImageIcon getImageIcon(String path) {
+		ImageIcon icon = null;
+		String resourcePath = String.format("/resource/%s", path);
+		java.net.URL imgURL = Util.class.getResource(resourcePath);
+		if (imgURL != null) {
+			icon = new ImageIcon(imgURL);
+			return icon;
+		} else {
+			log.error(String.format("Couldn't find file: %s", resourcePath));
 			return null;
 		}
 	}
 
-	public final static void writeBufferedImage(BufferedImage newImg, String filename) {
-		writeBufferedImage(newImg, filename, null);
+	public static final ImageIcon getResourceIcon(String path) {
+		ImageIcon icon = null;
+		java.net.URL imgURL = FileIO.class.getResource("/resource/" + path);
+		if (imgURL != null) {
+			icon = new ImageIcon(imgURL);
+			return icon;
+		} else {
+			log.error("Couldn't find file: " + path);
+			return null;
+		}
 	}
 
-	public final static void writeBufferedImage(BufferedImage newImg, String filename, String format) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			ImageIO.write(newImg, "jpg", baos);
-			FileOutputStream fos = new FileOutputStream(filename);
-			fos.write(baos.toByteArray());
-			fos.close();
-		} catch (IOException e) {
-			Logging.logException(e);
+	public static ImageIcon getScaledIcon(final Image image, final double scale) {
+		ImageIcon scaledIcon = new ImageIcon(image) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public int getIconHeight() {
+				return (int) (image.getHeight(null) * scale);
+			}
+
+			@Override
+			public int getIconWidth() {
+				return (int) (image.getWidth(null) * scale);
+			}
+
+			@Override
+			public void paintIcon(Component c, Graphics g, int x, int y) {
+				g.drawImage(image, x, y, getIconWidth(), getIconHeight(), c);
+			}
+		};
+		return scaledIcon;
+	}
+
+	// This method returns true if the specified image has transparent pixels
+	public static boolean hasAlpha(Image image) {
+		// If buffered image, the color model is readily available
+		if (image instanceof BufferedImage) {
+			BufferedImage bimage = (BufferedImage) image;
+			return bimage.getColorModel().hasAlpha();
 		}
 
+		// Use a pixel grabber to retrieve the image's color model;
+		// grabbing a single pixel is usually sufficient
+		PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
+		try {
+			pg.grabPixels();
+		} catch (InterruptedException e) {
+		}
+
+		// Get the image's color model
+		ColorModel cm = pg.getColorModel();
+		return cm.hasAlpha();
+	}
+
+	// graciously lifted from
+	// http://www.exampledepot.com/egs/java.awt.image/image2buf.html
+	public static BufferedImage ImageToBufferedImage(Image image) {
+		// This method returns a buffered image with the contents of an image
+		if (image instanceof BufferedImage) {
+			return (BufferedImage) image;
+		}
+
+		// This code ensures that all the pixels in the image are loaded
+		image = new ImageIcon(image).getImage();
+
+		// Determine if the image has transparent pixels; for this method's
+		// implementation, see Determining If an Image Has Transparent Pixels
+		boolean hasAlpha = hasAlpha(image);
+
+		// Create a buffered image with a format that's compatible with the
+		// screen
+		BufferedImage bimage = null;
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		try {
+			// Determine the type of transparency of the new buffered image
+			int transparency = Transparency.OPAQUE;
+			if (hasAlpha) {
+				transparency = Transparency.BITMASK;
+			}
+
+			// Create the buffered image
+			GraphicsDevice gs = ge.getDefaultScreenDevice();
+			GraphicsConfiguration gc = gs.getDefaultConfiguration();
+			bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
+		} catch (HeadlessException e) {
+			// The system does not have a screen
+		}
+
+		if (bimage == null) {
+			// Create a buffered image using the default color model
+			int type = BufferedImage.TYPE_INT_RGB;
+			if (hasAlpha) {
+				type = BufferedImage.TYPE_INT_ARGB;
+			}
+			bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
+		}
+
+		// Copy image to buffered image
+		Graphics g = bimage.createGraphics();
+
+		// Paint the image onto the buffered image
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
+
+		return bimage;
+
+	}
+
+	public static BufferedImage loadBufferedImage(String path)
+
+	{
+		BufferedImage bi;
+		try {
+			bi = ImageIO.read(Util.class.getResource("/resource/" + path));
+		} catch (IOException e) {
+			log.error("could not find image " + path);
+			return null;
+		}
+		return bi;
 	}
 
 	public final static BufferedImage readBufferedImage(String filename) {
@@ -357,17 +363,6 @@ public class Util {
 		} catch (IOException e) {
 			return null;
 		}
-	}
-
-	/**
-	 * Produces a copy of the supplied image
-	 * 
-	 * @param image
-	 *            The original image
-	 * @return The new BufferedImage
-	 */
-	public static BufferedImage copyImage(BufferedImage image) {
-		return scaledImage(image, image.getWidth(), image.getHeight());
 	}
 
 	/**
@@ -391,32 +386,39 @@ public class Util {
 		return newImage;
 	}
 
-	/**
-	 * Creates an image compatible with the current display
-	 * 
-	 * @return A BufferedImage with the appropriate color model
-	 */
-	public static BufferedImage createCompatibleImage(int width, int height) {
-		GraphicsConfiguration configuration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
-		return configuration.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
+	public static BufferedImage toGray(BufferedImage bufferedImage) {
+		ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
+		ColorConvertOp op = new ColorConvertOp(cs, null);
+		bufferedImage = op.filter(bufferedImage, null);
+
+		return bufferedImage;
 	}
 
-	public static final ImageIcon getResourceIcon(String path) {
-		ImageIcon icon = null;
-		java.net.URL imgURL = FileIO.class.getResource("/resource/" + path);
-		if (imgURL != null) {
-			icon = new ImageIcon(imgURL);
-			return icon;
-		} else {
-			log.error("Couldn't find file: " + path);
+	public final static void writeBufferedImage(BufferedImage newImg, String filename) {
+		writeBufferedImage(newImg, filename, null);
+	}
+
+	public final static void writeBufferedImage(BufferedImage newImg, String filename, String format) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			ImageIO.write(newImg, "jpg", baos);
+			FileOutputStream fos = new FileOutputStream(filename);
+			fos.write(baos.toByteArray());
+			fos.close();
+		} catch (IOException e) {
+			Logging.logError(e);
+		}
+
+	}
+
+	public Color getColor(String colorName) {
+		try {
+			// Find the field and value of colorName
+			Field field = Class.forName("java.awt.Color").getField(colorName);
+			return (Color) field.get(null);
+		} catch (Exception e) {
 			return null;
 		}
-	}
-	
-	public static Color getGradient (int pos, int total)
-	{
-		float gradient = 1.0f / total;
-		return new Color(Color.HSBtoRGB((pos * (gradient)), 0.8f, 0.7f));
 	}
 
 }

@@ -32,7 +32,8 @@ import org.slf4j.Logger;
  * 
  * @author GroG
  * 
- * TODO - grab and report all missing Service Pages & all missing Python scripts !
+ *         TODO - grab and report all missing Service Pages & all missing Python
+ *         scripts !
  *
  */
 public class Test extends Service {
@@ -45,46 +46,18 @@ public class Test extends Service {
 	transient Set<Thread> threads = null;
 	transient Set<File> files = new HashSet<File>();
 
-	public Test(String n) {
-		super(n);
-	}
+	Status status = null;
 
-	// TODO - do all forms of serialization - binary json xml
-	public Status serializeTest(ServiceInterface s) {
-		log.info("serializeTest {}", s.getName(), s.getSimpleName());
-		String name = s.getName();
+	BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
-		// multiple formats binary json xml
-		Status status = Status.info("serializeTest for %s", name);
+	public static void logThreadNames() {
 
-		try {
-
-			// TODO put in encoder
-			ByteArrayOutputStream fos = null;
-			ObjectOutputStream out = null;
-			fos = new ByteArrayOutputStream();
-			out = new ObjectOutputStream(fos);
-			out.writeObject(s);
-			fos.flush();
-			out.close();
-
-			// json encoding
-			Encoder.toJson(s);
-			
-			// TODO JAXB xml - since it comes with java 7
-
-		} catch (Exception ex) {
-			status.addError(ex);
-			return status;
-		}
-
-		// NO ERROR !!
-		return null;
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
+		String[] t = Runtime.getThreadNames().toArray(new String[Runtime.getThreadNames().size()]);
+		Arrays.sort(t);
+		log.warn(Encoder.toJson(t));
+		/*
+		 * for (int i = 0; i < t.length; ++i){ log.warn(t[i]); }
+		 */
 	}
 
 	/*
@@ -130,12 +103,28 @@ public class Test extends Service {
 	 * }
 	 */
 
-	public void testServiceScripts() {
-		// get download zip
+	// TODO - subscribe to registered --> generates subscription to
+	// publishState() - filter on Errors
+	// FIXME - FILE COMMUNICATION !!!!
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
 
-		// uncompress locally
+			String serviceType = "InMoovHand";
+			Repo repo = new Repo();
+			// repo.clearRepo();
+			// dirty clean :)
+			// repo.clearLibraries();
+			// repo.clearServiceData();
+			repo.install(serviceType);
+			Test test = (Test) Runtime.start("test", "Test");
+			test.getState();
+			test.test(serviceType);
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 
-		// test - instrumentation for
 	}
 
 	/*
@@ -187,10 +176,9 @@ public class Test extends Service {
 	// step 1 subscribe to runtimes registered event
 	// step 2 in any registered -
 	// step 3 - fix up - so that state is handled (not just "error")
-	
-	public void registered(ServiceInterface sw) {
 
-		subscribe(sw.getName(), "publishError", "handleError");
+	public Test(String n) {
+		super(n);
 	}
 
 	/*
@@ -208,6 +196,40 @@ public class Test extends Service {
 	 * }
 	 */
 
+	public Status arduinoTest() {
+		Status status = Status.info("testing arduino");
+
+		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+
+		return status;
+	}
+
+	public void exit(Status status) {
+		try {
+			// check against current state for
+			// NOT NEEDED Regular save file - since Agent is process.waitFor
+			// FIXME - append states to file
+			FileIO.savePartFile("test.json", Encoder.toJson(status).getBytes());
+			// Runtime.releaseAll();
+			// TODO - should be all clean - if not someone left threads open -
+			// report them
+			// big hammer
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		System.exit(0);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "testing", "framework" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used as a general template";
+	}
+
 	/**
 	 * used to get state of the current service and runtime - so that the
 	 * environment and final system can be cleaned to an original "base" state
@@ -220,41 +242,73 @@ public class Test extends Service {
 				files.add(f.get(i));
 			}
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
 
 	/**
-	 * this can not be used to test environment
-	 * 
-	 * @return
+	 * call-back from service under testing to route errors to this service...
 	 */
-	public Status testAll() {
-
-		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
-		Status status = Status.info("subTest");
-
-		status.add(Status.info("will test %d services", serviceTypeNames.length));
-
-		for (int i = 0; i < serviceTypeNames.length; ++i) {
-			String fullName = serviceTypeNames[i];
-			test(fullName);
-			// status.add(test(fullName)); cant accumulate with exit(status)
+	public void handleError(String errorMsg) {
+		if (status != null) {
+			status.addError(errorMsg);
 		}
-
-		return status;
 	}
-	
-	public static void logThreadNames(){
-		
-		String[] t = Runtime.getThreadNames().toArray(new String[Runtime.getThreadNames().size()]);
-		Arrays.sort(t);
-		log.warn(Encoder.toJson(t));
-		/*
-		for (int i = 0; i < t.length; ++i){
-			log.warn(t[i]);
+
+	public void registered(ServiceInterface sw) {
+
+		subscribe(sw.getName(), "publishError", "handleError");
+	}
+
+	// TODO - do all forms of serialization - binary json xml
+	public Status serializeTest(ServiceInterface s) {
+		log.info("serializeTest {}", s.getName(), s.getSimpleName());
+		String name = s.getName();
+
+		// multiple formats binary json xml
+		Status status = Status.info("serializeTest for %s", name);
+
+		try {
+
+			// TODO put in encoder
+			ByteArrayOutputStream fos = null;
+			ObjectOutputStream out = null;
+			fos = new ByteArrayOutputStream();
+			out = new ObjectOutputStream(fos);
+			out.writeObject(s);
+			fos.flush();
+			out.close();
+
+			// json encoding
+			Encoder.toJson(s);
+
+			// TODO JAXB xml - since it comes with java 7
+
+		} catch (Exception ex) {
+			status.addError(ex);
+			return status;
 		}
-		*/
+
+		// NO ERROR !!
+		return null;
+	}
+
+	public Object subscribe(Object inData) {
+		log.info("subscribe has received data");
+		log.info(String.format("Test.subscribed received %s", inData));
+		data.add(inData);
+		return inData;
+	}
+
+	@Override
+	public Status test() {
+		// we are started so .. we'll use the big hammer at the end
+		Status status = Status.info("========TESTING=============");
+		log.info("===========INFO TESTING========");
+		log.info(String.format("TEST PID = %s", Runtime.getPID()));
+		// big hammer
+		System.exit(0);
+		return status;
 	}
 
 	/**
@@ -267,12 +321,11 @@ public class Test extends Service {
 	 */
 	public void test(String serviceType) {
 
-		//getState();
-		//logThreadNames();
+		// getState();
+		// logThreadNames();
 
 		log.warn(String.format("==== testing %s ====", serviceType));
 		status = Status.info("==== testing %s ====", serviceType);
-		
 
 		try {
 
@@ -296,7 +349,7 @@ public class Test extends Service {
 			}
 
 			// add error route - for call backs
-			subscribe("publishError", s.getName(),  "handleError", String.class);
+			subscribe("publishError", s.getName(), "handleError", String.class);
 
 			try {
 				s.startService();
@@ -310,7 +363,7 @@ public class Test extends Service {
 			status.add(serializeTest(s));
 
 			status.add(s.test());
-			//logThreadNames();
+			// logThreadNames();
 
 			// assume installed - Agent's job
 
@@ -342,116 +395,60 @@ public class Test extends Service {
 		exit(status);
 	}
 
-	Status status = null;
-
 	/**
-	 * call-back from service under testing to route errors to this service...
+	 * this can not be used to test environment
+	 * 
+	 * @return
 	 */
-	public void handleError(String errorMsg) {
-		if (status != null) {
-			status.addError(errorMsg);
+	public Status testAll() {
+
+		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
+		Status status = Status.info("subTest");
+
+		status.add(Status.info("will test %d services", serviceTypeNames.length));
+
+		for (int i = 0; i < serviceTypeNames.length; ++i) {
+			String fullName = serviceTypeNames[i];
+			test(fullName);
+			// status.add(test(fullName)); cant accumulate with exit(status)
 		}
+
+		return status;
 	}
 
-	public void exit(Status status) {
-		try {
-			// check against current state for
-			// NOT NEEDED Regular save file - since Agent is process.waitFor
-			// FIXME - append states to file
-			FileIO.savePartFile("test.json", Encoder.toJson(status).getBytes());
-			//Runtime.releaseAll();
-			// TODO - should be all clean - if not someone left threads open -
-			// report them
-			// big hammer
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		System.exit(0);
+	public void testServiceScripts() {
+		// get download zip
+
+		// uncompress locally
+
+		// test - instrumentation for
 	}
-	
-	public Status verifyServicePageScripts(){
-		Repo repo = Runtime.getInstance().getRepo();
-		ServiceData serviceData = repo.getServiceData();
-		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
-		
-		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
-		long startTime = System.currentTimeMillis();
-		status.addNamedInfo("startTime", "%d", startTime);
-		
-		for (int i = 0; i < serviceTypes.size(); ++i) {
-			ServiceType serviceType = serviceTypes.get(i);
-			Status retStatus = verifyServicePageScript(serviceType.getName());
-			if (retStatus.hasError()){
-				status.add(retStatus);
-			}
-		}
-		
-		return  status;
-	}
-	
-	
-	public Status verifyServicePageScript(String serviceType){
+
+	public Status verifyServicePageScript(String serviceType) {
 		Status status = new Status("starting");
 		return status;
 	}
 
-	public Status test() {
-		// we are started so .. we'll use the big hammer at the end
-		Status status = Status.info("========TESTING=============");
-		log.info("===========INFO TESTING========");
-		log.info(String.format("TEST PID = %s", Runtime.getPID()));
-		// big hammer
-		System.exit(0);
-		return status;
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"testing", "framework"};
-	}
-	
-	public Status arduinoTest(){
-		Status status = Status.info("testing arduino");
-		
-		Arduino2 arduino = (Arduino2)Runtime.start("arduino", "Arduino2");
-		
-		return status;
-	}
-	
-	BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
-
-	public Object subscribe(Object inData){
-		log.info("subscribe has received data");
-		log.info(String.format("Test.subscribed received %s", inData));
-		data.add(inData);
-		return inData;
-	}
-	
 	// save / load test !
-	
-	// TODO - subscribe to registered --> generates subscription to
-	// publishState() - filter on Errors
-	// FIXME - FILE COMMUNICATION !!!!
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-		try {
 
-			String serviceType = "InMoovHand";
-			Repo repo = new Repo();
-			//repo.clearRepo();
-			// dirty clean :)
-			//repo.clearLibraries();
-			//repo.clearServiceData();
-			repo.install(serviceType);
-			Test test = (Test) Runtime.start("test", "Test");
-			test.getState();
-			test.test(serviceType);
-		} catch (Exception e) {
-			Logging.logException(e);
+	public Status verifyServicePageScripts() {
+		Repo repo = Runtime.getInstance().getRepo();
+		ServiceData serviceData = repo.getServiceData();
+		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
+
+		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
+		long startTime = System.currentTimeMillis();
+		status.addNamedInfo("startTime", "%d", startTime);
+
+		for (int i = 0; i < serviceTypes.size(); ++i) {
+			ServiceType serviceType = serviceTypes.get(i);
+			Status retStatus = verifyServicePageScript(serviceType.getName());
+			if (retStatus.hasError()) {
+				status.add(retStatus);
+			}
 		}
 
+		return status;
 	}
-	
 
 }

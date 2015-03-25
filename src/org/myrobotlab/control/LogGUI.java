@@ -24,6 +24,26 @@ public class LogGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent action) {
+		Object o = action.getSource();
+		if (o == clearButton) {
+			log.setText("");
+		}
+
+	}
+
+	@Override
+	public void attachGUI() {
+		subscribe("log", "log", Message.class);
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("log", "log", Message.class);
+	}
+
+	@Override
 	public void init() {
 		display.setLayout(new BorderLayout());
 
@@ -57,25 +77,6 @@ public class LogGUI extends ServiceGUI implements ActionListener {
 		log.setCaretPosition(log.getDocument().getLength()); // FIXME - do it
 																// the new Java
 																// 1.6 way
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("log", "log", Message.class);
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("log", "log", Message.class);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent action) {
-		Object o = action.getSource();
-		if (o == clearButton) {
-			log.setText("");
-		}
-
 	}
 
 }

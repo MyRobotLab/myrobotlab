@@ -29,6 +29,11 @@ public abstract class BaseCache implements ManagedCache {
 	 */
 	protected abstract void addToCache(String name, Object value);
 
+	@Override
+	public void clear() {
+		clearCache();
+	}
+
 	protected abstract void clearCache();
 
 	/**
@@ -40,39 +45,17 @@ public abstract class BaseCache implements ManagedCache {
 	 */
 	protected abstract boolean contains(String name);
 
-	protected abstract void expireItem(String name);
-
-	/**
-	 * Internal method for BaseCache to actually retrieve items from the
-	 * implementing cache.
-	 * 
-	 * @param name
-	 */
-	protected abstract Object getFromCache(String name);
-
-	/**
-	 * Internal method for BaseCache to actually remove items from the
-	 * implementing cache.
-	 * 
-	 * @param name
-	 */
-	protected abstract void removeFromCache(String name);
-
-	protected abstract void timeoutCache();
-
-	@Override
-	public void clear() {
-		clearCache();
-	}
-
 	/**
 	 * Expire an item in the cache.
 	 * 
 	 * @param name
 	 */
+	@Override
 	public void expire(String name) {
 		expireItem(name);
 	}
+
+	protected abstract void expireItem(String name);
 
 	/**
 	 * Get a value from the cache.
@@ -82,6 +65,7 @@ public abstract class BaseCache implements ManagedCache {
 	 * @return null if the name does not exist or if the type could not be cast
 	 *         to T
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T get(String name, Class<? extends T> cls) {
 		if (name == null || !contains(name)) {
@@ -212,19 +196,19 @@ public abstract class BaseCache implements ManagedCache {
 		}
 		if (value instanceof Float) {
 			float f = (Float) value;
-			return (double) f;
+			return f;
 		}
 		if (value instanceof Integer) {
 			int f = (Integer) value;
-			return (double) f;
+			return f;
 		}
 		if (value instanceof Byte) {
 			byte b = (Byte) value;
-			return (double) b;
+			return b;
 		}
 		if (value instanceof Short) {
 			short s = (Short) value;
-			return (double) s;
+			return s;
 		}
 		if (!(value instanceof String)) {
 			return DEFAULT_DOUBLE;
@@ -250,25 +234,33 @@ public abstract class BaseCache implements ManagedCache {
 		}
 		if (value instanceof Float) {
 			float f = (Float) value;
-			return (float) f;
+			return f;
 		}
 		if (value instanceof Byte) {
 			byte b = (Byte) value;
-			return (float) b;
+			return b;
 		}
 		if (value instanceof Integer) {
 			int b = (Integer) value;
-			return (float) b;
+			return b;
 		}
 		if (value instanceof Short) {
 			short s = (Short) value;
-			return (float) s;
+			return s;
 		}
 		if (!(value instanceof String)) {
 			return DEFAULT_FLOAT;
 		}
 		return parseWithDefault((String) value, DEFAULT_FLOAT);
 	}
+
+	/**
+	 * Internal method for BaseCache to actually retrieve items from the
+	 * implementing cache.
+	 * 
+	 * @param name
+	 */
+	protected abstract Object getFromCache(String name);
 
 	/**
 	 * Get an int primitive value from the cache. Tests for: Integer, Byte,
@@ -288,15 +280,15 @@ public abstract class BaseCache implements ManagedCache {
 		}
 		if (value instanceof Integer) {
 			int i = (Integer) value;
-			return (int) i;
+			return i;
 		}
 		if (value instanceof Byte) {
 			byte b = (Byte) value;
-			return (int) b;
+			return b;
 		}
 		if (value instanceof Short) {
 			short s = (Short) value;
-			return (int) s;
+			return s;
 		}
 		if (!(value instanceof String)) {
 			return DEFAULT_INT;
@@ -326,31 +318,12 @@ public abstract class BaseCache implements ManagedCache {
 		}
 		if (value instanceof Byte) {
 			byte b = (Byte) value;
-			return (short) b;
+			return b;
 		}
 		if (!(value instanceof String)) {
 			return DEFAULT_SHORT;
 		}
 		return parseWithDefault((String) value, DEFAULT_SHORT);
-	}
-
-	/**
-	 * Add a value to the cache.
-	 * 
-	 * @param name
-	 *            cannot be null or empty
-	 * @param value
-	 */
-	public void put(String name, Object value) {
-		if (name == null || name.isEmpty()) {
-			return;
-		}
-		addToCache(name, value);
-	}
-
-	@Override
-	public void timeout() {
-		timeoutCache();
 	}
 
 	/**
@@ -444,4 +417,34 @@ public abstract class BaseCache implements ManagedCache {
 		}
 		return defaultShort;
 	}
+
+	/**
+	 * Add a value to the cache.
+	 * 
+	 * @param name
+	 *            cannot be null or empty
+	 * @param value
+	 */
+	@Override
+	public void put(String name, Object value) {
+		if (name == null || name.isEmpty()) {
+			return;
+		}
+		addToCache(name, value);
+	}
+
+	/**
+	 * Internal method for BaseCache to actually remove items from the
+	 * implementing cache.
+	 * 
+	 * @param name
+	 */
+	protected abstract void removeFromCache(String name);
+
+	@Override
+	public void timeout() {
+		timeoutCache();
+	}
+
+	protected abstract void timeoutCache();
 }

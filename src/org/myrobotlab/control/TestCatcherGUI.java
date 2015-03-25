@@ -46,17 +46,9 @@ public class TestCatcherGUI extends ServiceGUI {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-
-		display.add(new JLabel("catchInteger : "), gc);
-		++gc.gridx;
-		display.add(catchInteger, gc);
-		++gc.gridx;
-		display.add(getBindCatchIntegerButton(), gc);
-	}
-
-	public void catchInteger(Integer i) {
-		catchInteger.setText(i.toString());
+	@Override
+	public void attachGUI() {
+		subscribe("publishState", "getState", TestCatcher.class);
 	}
 
 	// TODO - reflect and auto-bind (or pull info from the Service/Method
@@ -65,6 +57,15 @@ public class TestCatcherGUI extends ServiceGUI {
 	public void bindCatchInteger() {
 		MRLListener MRLListener = new MRLListener("catchInteger", myService.getName(), "catchInteger", new Class[] { Integer.class });
 		myService.send(boundServiceName, "addListener", MRLListener);
+	}
+
+	public void catchInteger(Integer i) {
+		catchInteger.setText(i.toString());
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishState", "getState", TestCatcher.class);
 	}
 
 	// TODO - generalize this and use it in reflection
@@ -77,14 +78,14 @@ public class TestCatcherGUI extends ServiceGUI {
 				public void actionPerformed(ActionEvent e) {
 					myService.send(boundServiceName, "catchNothing");
 					/*
-					if (bindCatchIntegerButton.getText().compareTo("connect") == 0) {
-						bindCatchIntegerButton.setText("disconnect");
-						subscribe("catchInteger", "catchInteger", SerializableImage.class);
-					} else {
-						bindCatchIntegerButton.setText("connect");
-						unsubscribe("catchInteger", "catchInteger", SerializableImage.class);
-					}
-					*/
+					 * if (bindCatchIntegerButton.getText().compareTo("connect")
+					 * == 0) { bindCatchIntegerButton.setText("disconnect");
+					 * subscribe("catchInteger", "catchInteger",
+					 * SerializableImage.class); } else {
+					 * bindCatchIntegerButton.setText("connect");
+					 * unsubscribe("catchInteger", "catchInteger",
+					 * SerializableImage.class); }
+					 */
 				}
 
 			});
@@ -94,16 +95,15 @@ public class TestCatcherGUI extends ServiceGUI {
 		return bindCatchIntegerButton;
 
 	}
-	
 
 	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", TestCatcher.class);
-	}
+	public void init() {
 
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", TestCatcher.class);
+		display.add(new JLabel("catchInteger : "), gc);
+		++gc.gridx;
+		display.add(catchInteger, gc);
+		++gc.gridx;
+		display.add(getBindCatchIntegerButton(), gc);
 	}
 
 }

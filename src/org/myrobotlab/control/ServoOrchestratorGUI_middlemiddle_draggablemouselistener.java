@@ -14,8 +14,7 @@ import javax.swing.TransferHandler;
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
-public class ServoOrchestratorGUI_middlemiddle_draggablemouselistener extends
-		MouseAdapter {
+public class ServoOrchestratorGUI_middlemiddle_draggablemouselistener extends MouseAdapter {
 
 	@Override()
 	public void mousePressed(MouseEvent e) {

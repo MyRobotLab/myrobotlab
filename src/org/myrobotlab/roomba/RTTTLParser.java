@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 public class RTTTLParser {
 
 	public static HashMap noteToNum;
+
 	static {
 		noteToNum = new HashMap();
 		noteToNum.put("c", new Integer(0));
@@ -26,6 +27,10 @@ public class RTTTLParser {
 		noteToNum.put("a#", new Integer(10));
 		noteToNum.put("b", new Integer(11));
 		noteToNum.put("h", new Integer(7));
+	}
+
+	public static int bpmToMillis(int bpm) {
+		return (60 * 1000) / bpm;
 	}
 
 	public static void main(String[] args) {
@@ -110,9 +115,5 @@ public class RTTTLParser {
 			}
 		}
 		return notelist;
-	}
-
-	public static int bpmToMillis(int bpm) {
-		return (60 * 1000) / bpm;
 	}
 }

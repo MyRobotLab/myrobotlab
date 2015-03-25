@@ -30,85 +30,13 @@ import java.awt.Dimension;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 
 public class FaceTracking extends Service {
-
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(FaceTracking.class.getCanonicalName());
-
-	/*
-	 * TODO - dead zone - scan / search
-	 */
-	Servo tilt = new Servo("tilt");
-	Servo pan = new Servo("pan");
-	OpenCV camera = (OpenCV) Runtime.create("camera", "OpenCV");
-
-	Arduino arduino = new Arduino("arduino");
-
-	Log logger = new Log("logger");
-
-	Speech speech = new Speech("speech");
-
-	transient PID xpid = new PID();
-	transient PID ypid = new PID();
-
-	String state = null;
-
-	public FaceTracking(String n) {
-		super(n);
-
-		speech.startService();
-		tilt.startService();
-		pan.startService();
-		camera.startService();
-		logger.startService();
-		arduino.startService();
-		// pan.attach(arduino.getName(), 13);
-
-		camera.addListener("publish", getName(), "input");
-		camera.addListener("isTracking", getName(), "isTracking", Boolean.class);
-		camera.addListener("sizeChange", getName(), "sizeChange", Dimension.class);
-		// addListener("pan", "logger", "log");
-		// addListener("tilt", "logger", "log");
-		addListener("pan", "pan", "move");
-		addListener("tilt", "tilt", "move");
-
-		xpid.SetTunings(0.05f, 0f, 0.6f);
-		xpid.Setpoint = 320;
-
-		ypid.SetTunings(0.05f, 0f, 0.6f);
-		ypid.Setpoint = 120;
-
-	}
-
-
-
-	public void startTracking() {
-	}
-
-	public void stopTracking() {
-	}
-
-	// TODO - put cfg
-	int width = 640;
-	int height = 480;
-	int centerX = width / 2;
-	int centerY = height / 2;
-	int errorX = 0;
-	int errorY = 0;
-
-	public void sizeChange(Dimension d) {
-		width = d.width;
-		height = d.height;
-		xpid.Setpoint = width / 2;
-		ypid.Setpoint = height / 2;
-
-	}
 
 	public class PID {
 
@@ -121,7 +49,7 @@ public class FaceTracking extends Service {
 		void Compute() {
 			/* How long since we last calculated */
 			long now = System.currentTimeMillis();
-			float timeChange = (float) (now - lastTime);
+			float timeChange = now - lastTime;
 
 			/* Compute all the working error variables */
 			float error = Setpoint - Input;
@@ -141,6 +69,81 @@ public class FaceTracking extends Service {
 			ki = Ki;
 			kd = Kd;
 		}
+	}
+
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(FaceTracking.class.getCanonicalName());
+	/*
+	 * TODO - dead zone - scan / search
+	 */
+	Servo tilt = new Servo("tilt");
+	Servo pan = new Servo("pan");
+
+	OpenCV camera = (OpenCV) Runtime.create("camera", "OpenCV");
+
+	Arduino arduino = new Arduino("arduino");
+
+	Log logger = new Log("logger");
+
+	Speech speech = new Speech("speech");
+	transient PID xpid = new PID();
+
+	transient PID ypid = new PID();
+
+	String state = null;
+
+	// TODO - put cfg
+	int width = 640;
+
+	int height = 480;
+
+	int centerX = width / 2;
+	int centerY = height / 2;
+	int errorX = 0;
+	int errorY = 0;
+	boolean canSpeak = true;
+	public static void main(String[] args) throws ClassNotFoundException {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.ERROR);
+
+		try {
+			FaceTracking ft = new FaceTracking("face tracker");
+			ft.startService();
+
+			ft.camera.addFilter("Gray", "Gray");
+			ft.camera.addFilter("PyramidDown2", "PyramidDown");
+			ft.camera.addFilter("MatchTemplate", "MatchTemplate");
+			// ft.camera.addFilter("PyramidDown2", "PyramidDown");
+			// ft.camera.useInput = "camera";
+			ft.camera.capture();
+
+			// ft.arduino.se - TODO setPort("/dev/ttyUSB0");
+
+			// ft.tilt.attach(ft.arduino.getName(), 12);
+			// ft.pan.attach(ft.arduino.getName(), 13);
+
+			GUIService gui = new GUIService("gui");
+			gui.startService();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
+	public FaceTracking(String n) {
+		super(n);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "tracking" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used for tracking";
 	}
 
 	public void input(CvPoint point) {
@@ -193,14 +196,9 @@ public class FaceTracking extends Service {
 		}
 	}
 
-	public void speak(String s) {
-		send("speechAudioFile", "playWAV", s);
-		if (canSpeak)
-			speech.speak(s); // TODO bury in framework so Speech Service
-								// variable maintains canSpeak
+	public Integer pan(Integer position) {
+		return position;
 	}
-
-	boolean canSpeak = true;
 
 	public void playingFile(Boolean b) {
 		if (b) {
@@ -209,18 +207,6 @@ public class FaceTracking extends Service {
 			canSpeak = true;
 		}
 	}
-
-	public Integer tilt(Integer position) {
-		return position;
-	}
-
-	public Integer pan(Integer position) {
-		return position;
-	}
-
-	/*
-	 * Un-needed public FaceTracking publishState() { return this; }
-	 */
 
 	// TODO - reflectively do it in Service? !?
 	// No - the overhead of a Service warrants a data only proxy - so to
@@ -231,39 +217,59 @@ public class FaceTracking extends Service {
 		return o;
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.ERROR);
-
-		FaceTracking ft = new FaceTracking("face tracker");
-		ft.startService();
-
-		ft.camera.addFilter("Gray", "Gray");
-		ft.camera.addFilter("PyramidDown2", "PyramidDown");
-		ft.camera.addFilter("MatchTemplate", "MatchTemplate");
-		// ft.camera.addFilter("PyramidDown2", "PyramidDown");
-		// ft.camera.useInput = "camera";
-		ft.camera.capture();
-
-		// ft.arduino.se - TODO setPort("/dev/ttyUSB0");
-
-		// ft.tilt.attach(ft.arduino.getName(), 12);
-		// ft.pan.attach(ft.arduino.getName(), 13);
-
-		GUIService gui = new GUIService("gui");
-		gui.startService();
-		
+	public void sizeChange(Dimension d) {
+		width = d.width;
+		height = d.height;
+		xpid.Setpoint = width / 2;
+		ypid.Setpoint = height / 2;
 
 	}
 
-	@Override
-	public String getDescription() {
-		return "used for tracking";
+	/*
+	 * Un-needed public FaceTracking publishState() { return this; }
+	 */
+
+	public void speak(String s) {
+		send("speechAudioFile", "playWAV", s);
+		if (canSpeak)
+			speech.speak(s); // TODO bury in framework so Speech Service
+								// variable maintains canSpeak
 	}
-	
+
 	@Override
-	public String[] getCategories() {
-		return new String[] {"tracking"};
+	public void startService() {
+		speech.startService();
+		tilt.startService();
+		pan.startService();
+		camera.startService();
+		logger.startService();
+		arduino.startService();
+		// pan.attach(arduino.getName(), 13);
+
+		camera.addListener("publish", getName(), "input");
+		camera.addListener("isTracking", getName(), "isTracking", Boolean.class);
+		camera.addListener("sizeChange", getName(), "sizeChange", Dimension.class);
+		// addListener("pan", "logger", "log");
+		// addListener("tilt", "logger", "log");
+		addListener("pan", "pan", "move");
+		addListener("tilt", "tilt", "move");
+
+		xpid.SetTunings(0.05f, 0f, 0.6f);
+		xpid.Setpoint = 320;
+
+		ypid.SetTunings(0.05f, 0f, 0.6f);
+		ypid.Setpoint = 120;
+
+	}
+
+	public void startTracking() {
+	}
+
+	public void stopTracking() {
+	}
+
+	public Integer tilt(Integer position) {
+		return position;
 	}
 
 }

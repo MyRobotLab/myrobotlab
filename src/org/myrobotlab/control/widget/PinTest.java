@@ -11,8 +11,13 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 
 public class PinTest extends JPanel {
+	static public void main(String[] args) {
+		PinTest pt = new PinTest();
+	}
+
 	public PinTest() {
 
 		JProgressBar progressBar = new JProgressBar();
@@ -41,7 +46,7 @@ public class PinTest extends JPanel {
 		String title = "e";
 		JFrame frame = new JFrame(title);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JSlider js4 = new JSlider(JSlider.VERTICAL);
+		JSlider js4 = new JSlider(SwingConstants.VERTICAL);
 		table = new Hashtable<Integer, JLabel>();
 		table.put(0, new JLabel("O"));
 		table.put(10, new JLabel("Ten"));
@@ -61,10 +66,6 @@ public class PinTest extends JPanel {
 		frame.setSize(300, 200);
 		frame.setVisible(true);
 
-	}
-
-	static public void main(String[] args) {
-		PinTest pt = new PinTest();
 	}
 
 }

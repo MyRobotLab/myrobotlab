@@ -51,12 +51,57 @@ import org.slf4j.Logger;
 
 public class GUIServiceOutMethodDialog extends JDialog implements ActionListener {
 
-	public final static Logger log = LoggerFactory.getLogger(GUIServiceOutMethodDialog.class.getCanonicalName());
+	class AnnotationComboBoxToolTipRenderer extends BasicComboBoxRenderer {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 1L;
+		@Override
+		@SuppressWarnings("unchecked")
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+			if (isSelected) {
+				setBackground(list.getSelectionBackground());
+				setForeground(list.getSelectionForeground());
+				if (-1 < index) {
+					// list.setToolTipText(tooltips[index]);
 
-	GUIService myService = null;
-	GUIServiceGraphVertex v = null; // vertex who generated this dialog
+					try {
+						MethodData md = data.get(index);
+						Class c = Class.forName(String.format("org.myrobotlab.service.%s", md.canonicalName));
+						Method m = null;
+						if (md.methodEntry.parameterTypes == null) {
+							log.info("paramterType is null");
+							m = c.getMethod(md.methodEntry.name);
+						} else {
+							m = c.getMethod(md.methodEntry.name, md.methodEntry.parameterTypes);
+						}
+						ToolTip anno = m.getAnnotation(ToolTip.class);
+						if (anno != null) {
+							list.setToolTipText(anno.value());
+						} else {
+							list.setToolTipText("annotation not available");
+						}
+						// System.out.println(anno.stringValue() + " " +
+						// anno.intValue());
+					} catch (Exception e) {
+						list.setToolTipText("method or class not available");
+						log.error("{}", e);
+					}
+
+					// list.setToolTipText(data.get(index).toString());
+					// list.setToolTipText(index + "");
+					// list.setToolTipText(value.toString());
+				}
+			} else {
+				setBackground(list.getBackground());
+				setForeground(list.getForeground());
+			}
+			setFont(list.getFont());
+			setText((value == null) ? "" : value.toString());
+			return this;
+		}
+	}
 
 	public class MethodData {
 		String canonicalName = null;
@@ -67,10 +112,18 @@ public class GUIServiceOutMethodDialog extends JDialog implements ActionListener
 			this.canonicalName = cn;
 		}
 
+		@Override
 		public String toString() {
 			return canonicalName + "." + methodEntry;
 		}
 	}
+
+	public final static Logger log = LoggerFactory.getLogger(GUIServiceOutMethodDialog.class.getCanonicalName());
+	private static final long serialVersionUID = 1L;
+
+	GUIService myService = null;
+
+	GUIServiceGraphVertex v = null; // vertex who generated this dialog
 
 	ArrayList<MethodData> data = new ArrayList<MethodData>();
 
@@ -109,16 +162,6 @@ public class GUIServiceOutMethodDialog extends JDialog implements ActionListener
 
 	}
 
-	public String formatOutMethod(MethodEntry me) {
-		if (me.returnType == null || me.returnType == void.class) {
-			return me.name;
-		} else {
-			String p = me.returnType.getCanonicalName();
-			String t[] = p.split("\\.");
-			return (me.name + " -> " + t[t.length - 1]);
-		}
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JComboBox cb = (JComboBox) e.getSource();
@@ -138,54 +181,13 @@ public class GUIServiceOutMethodDialog extends JDialog implements ActionListener
 		this.dispose();
 	}
 
-	class AnnotationComboBoxToolTipRenderer extends BasicComboBoxRenderer {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		@SuppressWarnings("unchecked")
-		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-			if (isSelected) {
-				setBackground(list.getSelectionBackground());
-				setForeground(list.getSelectionForeground());
-				if (-1 < index) {
-					// list.setToolTipText(tooltips[index]);
-
-					try {
-						MethodData md = data.get(index);
-						Class c = Class.forName(String.format("org.myrobotlab.service.%s",md.canonicalName));
-						Method m = null;
-						if (md.methodEntry.parameterTypes == null) {
-							log.info("paramterType is null");
-							m = c.getMethod(md.methodEntry.name);
-						} else {
-							m = c.getMethod(md.methodEntry.name, md.methodEntry.parameterTypes);
-						}
-						ToolTip anno = m.getAnnotation(ToolTip.class);
-						if (anno != null) {
-							list.setToolTipText(anno.value());
-						} else {
-							list.setToolTipText("annotation not available");
-						}
-						// System.out.println(anno.stringValue() + " " +
-						// anno.intValue());
-					} catch (Exception e) {
-						list.setToolTipText("method or class not available");
-						log.error("{}", e);
-					}
-
-					// list.setToolTipText(data.get(index).toString());
-					// list.setToolTipText(index + "");
-					// list.setToolTipText(value.toString());
-				}
-			} else {
-				setBackground(list.getBackground());
-				setForeground(list.getForeground());
-			}
-			setFont(list.getFont());
-			setText((value == null) ? "" : value.toString());
-			return this;
+	public String formatOutMethod(MethodEntry me) {
+		if (me.returnType == null || me.returnType == void.class) {
+			return me.name;
+		} else {
+			String p = me.returnType.getCanonicalName();
+			String t[] = p.split("\\.");
+			return (me.name + " -> " + t[t.length - 1]);
 		}
 	}
 

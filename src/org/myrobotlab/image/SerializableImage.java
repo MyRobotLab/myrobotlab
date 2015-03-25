@@ -77,6 +77,36 @@ public class SerializableImage implements Serializable {
 	private long timestamp;
 	public int frameIndex;
 
+	public static void main(String[] args) throws Exception {
+		try {
+			LoggingFactory.getInstance().configure();
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("object.data"));
+
+			ImageIO.write(null, "jpg", new MemoryCacheImageOutputStream(out));
+			log.info("here");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
+	public static void writeToFile(BufferedImage img, String filename) {
+		try {
+			FileOutputStream out = new FileOutputStream(new File(filename));
+			String extension = null;
+			int i = filename.lastIndexOf('.');
+			if (i > 0) {
+				extension = filename.substring(i + 1);
+			}
+
+			if (extension != null) {
+				ImageIO.write(img, extension, new MemoryCacheImageOutputStream(out));
+			}
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 	public SerializableImage(BufferedImage image, String source) {
 		this.source = source;
 		this.image = image;
@@ -90,6 +120,13 @@ public class SerializableImage implements Serializable {
 		this.timestamp = System.currentTimeMillis();
 	}
 
+	public SerializableImage(byte[] buffer, String source, int frameIndex) {
+		this.source = source;
+		this.bytes = buffer;
+		this.frameIndex = frameIndex;
+		this.timestamp = System.currentTimeMillis();
+	}
+
 	public SerializableImage(ByteBuffer buffer, String source, int frameIndex) {
 		this.source = source;
 		this.buffer = buffer;
@@ -97,11 +134,37 @@ public class SerializableImage implements Serializable {
 		this.timestamp = System.currentTimeMillis();
 	}
 
-	public SerializableImage(byte[] buffer, String source, int frameIndex) {
-		this.source = source;
-		this.bytes = buffer;
-		this.frameIndex = frameIndex;
-		this.timestamp = System.currentTimeMillis();
+	public ByteBuffer getByteBuffer() {
+		return buffer;
+	}
+
+	public byte[] getBytes() {
+		if (bytes != null) {
+			return bytes;
+		}
+
+		if (buffer != null) {
+			bytes = new byte[buffer.remaining()];
+			buffer.get(bytes);
+			return bytes;
+		}
+
+		if (image != null) {
+			try {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				ImageIO.write(image, "jpg", new MemoryCacheImageOutputStream(bos));
+				bytes = bos.toByteArray();
+				return bytes;
+			} catch (Exception e) {
+				Logging.logError(e);
+			}
+		}
+		// TODO image --to--> bytes
+		return null;
+	}
+
+	public int getHeight() {
+		return image.getHeight();
 	}
 
 	public BufferedImage getImage() {
@@ -124,47 +187,10 @@ public class SerializableImage implements Serializable {
 				image = ImageIO.read(inputStream);
 			}
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 		return null;
-	}
-
-	public byte[] getBytes() {
-		if (bytes != null) {
-			return bytes;
-		}
-
-		if (buffer != null) {
-			bytes = new byte[buffer.remaining()];
-			buffer.get(bytes);
-			return bytes;
-		}
-
-		if (image != null) {
-			try {
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				ImageIO.write(image, "jpg", new MemoryCacheImageOutputStream(bos));
-				bytes = bos.toByteArray();
-				return bytes;
-			} catch (Exception e) {
-				Logging.logException(e);
-			}
-		}
-		// TODO image --to--> bytes
-		return null;
-	}
-
-	public ByteBuffer getByteBuffer() {
-		return buffer;
-	}
-
-	public int getHeight() {
-		return image.getHeight();
-	}
-
-	public int getWidth() {
-		return image.getWidth();
 	}
 
 	public String getSource() {
@@ -174,27 +200,26 @@ public class SerializableImage implements Serializable {
 	public long getTimestamp() {
 		return timestamp;
 	}
-	
-	public void writeToFile(String filename){
-		writeToFile(image, filename);
+
+	public int getWidth() {
+		return image.getWidth();
 	}
-	
 
-	public static void writeToFile(BufferedImage img, String filename) {
-		try {
-			FileOutputStream out = new FileOutputStream(new File(filename));
-			String extension = null;
-			int i = filename.lastIndexOf('.');
-			if (i > 0) {
-				extension = filename.substring(i + 1);
-			}
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		image = (ImageIO.read(new MemoryCacheImageInputStream(in)));
+		Logging.logTime("readObject");
+	}
 
-			if (extension != null) {
-				ImageIO.write(img, extension, new MemoryCacheImageOutputStream(out));
-			}
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
+	public void setImage(BufferedImage image) {
+		this.image = image;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	// FIXME ??? use OpenCV cvEncode ???
@@ -204,34 +229,8 @@ public class SerializableImage implements Serializable {
 		Logging.logTime("writeObject");
 	}
 
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		image = (ImageIO.read(new MemoryCacheImageInputStream(in)));
-		Logging.logTime("readObject");
-	}
-
-	public void setSource(String source) {
-		this.source = source;
-	}
-
-	public void setImage(BufferedImage image) {
-		this.image = image;
-	}
-
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	public static void main(String[] args) throws Exception {
-		try {
-			LoggingFactory.getInstance().configure();
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("object.data"));
-
-			ImageIO.write(null, "jpg", new MemoryCacheImageOutputStream(out));
-			log.info("here");
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
+	public void writeToFile(String filename) {
+		writeToFile(image, filename);
 	}
 
 }

@@ -27,7 +27,6 @@ import com.googlecode.javacv.FrameGrabber;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
-
 public class IPCameraFrameGrabber extends FrameGrabber {
 
 	/*
@@ -37,8 +36,6 @@ public class IPCameraFrameGrabber extends FrameGrabber {
 	 * cam http://192.168.0.57:8080/videofeed
 	 */
 	public final static Logger log = LoggerFactory.getLogger(IPCameraFrameGrabber.class);
-	
-	
 
 	private URL url;
 	private URLConnection connection;
@@ -48,87 +45,46 @@ public class IPCameraFrameGrabber extends FrameGrabber {
 	private IplImage template = null;
 	private int width, height;
 
+	IplImage decoded = null;
+
 	public IPCameraFrameGrabber(String urlstr) {
 		try {
 			url = new URL(urlstr);
 		} catch (MalformedURLException e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
-
-	@Override
-	public void start() {
-
-		log.info("connecting to " + url);
-		try {
-			connection = url.openConnection();
-			headerfields = connection.getHeaderFields();
-			if (headerfields.containsKey("Content-Type")) {
-				List<String> ct = headerfields.get("Content-Type");
-				for (int i = 0; i < ct.size(); ++i) {
-					String key = ct.get(i);
-					int j = key.indexOf("boundary=");
-					if (j != -1) {
-						boundryKey = key.substring(j + 9); // FIXME << fragile
-					}
-				}
-			}
-			input = connection.getInputStream();
-		} catch (IOException e) {
-			Logging.logException(e);
-		}
-	}
-
-	@Override
-	public void stop() {
-		try {
-			input.close();
-			input = null;
-			connection = null;
-			url = null;
-		} catch (IOException e) {
-			Logging.logException(e);
-		}
-	}
-
-	@Override
-	public void trigger() throws Exception {
-	}
-	
-	IplImage decoded = null;
 
 	@Override
 	public IplImage grab() {
 		try {
-			
-			if (template == null)
-			{
+
+			if (template == null) {
 				// create the template for future frames
 				Logging.logTime("creating template");
 				template = IplImage.createFrom(grabBufferedImage());
 				Logging.logTime("created template");
 			}
-			
-			//  //  IplImage.create(template.width(), template.height(), template.depth(), template.nChannels());
-			
-			 byte[] b = readImage();
-			 CvMat mat = cvMat(1, b.length, CV_8UC1, new 
-					 BytePointer(b));
-			 
-			
-			 if (decoded != null){
-				 //decoded.release();
-				 cvReleaseImage(decoded);
-			 }
-			 
-			 decoded = cvDecodeImage(mat); 
-					    
+
+			// // IplImage.create(template.width(), template.height(),
+			// template.depth(), template.nChannels());
+
+			byte[] b = readImage();
+			CvMat mat = cvMat(1, b.length, CV_8UC1, new BytePointer(b));
+
+			if (decoded != null) {
+				// decoded.release();
+				cvReleaseImage(decoded);
+			}
+
+			decoded = cvDecodeImage(mat);
+
 			Logging.logTime("pre - IplImage.cvDecodeImage");
 			return decoded;
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		} catch (IOException e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return null;
 	}
@@ -137,9 +93,9 @@ public class IPCameraFrameGrabber extends FrameGrabber {
 		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(readImage()));
 		return bi;
 	}
-	
+
 	byte[] readImage() throws Exception, IOException {
-		
+
 		byte[] buffer = new byte[4096];// MTU or JPG Frame Size?
 		int n = -1;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -212,6 +168,45 @@ public class IPCameraFrameGrabber extends FrameGrabber {
 
 	@Override
 	public void release() throws Exception {
+	}
+
+	@Override
+	public void start() {
+
+		log.info("connecting to " + url);
+		try {
+			connection = url.openConnection();
+			headerfields = connection.getHeaderFields();
+			if (headerfields.containsKey("Content-Type")) {
+				List<String> ct = headerfields.get("Content-Type");
+				for (int i = 0; i < ct.size(); ++i) {
+					String key = ct.get(i);
+					int j = key.indexOf("boundary=");
+					if (j != -1) {
+						boundryKey = key.substring(j + 9); // FIXME << fragile
+					}
+				}
+			}
+			input = connection.getInputStream();
+		} catch (IOException e) {
+			Logging.logError(e);
+		}
+	}
+
+	@Override
+	public void stop() {
+		try {
+			input.close();
+			input = null;
+			connection = null;
+			url = null;
+		} catch (IOException e) {
+			Logging.logError(e);
+		}
+	}
+
+	@Override
+	public void trigger() throws Exception {
 	}
 
 }

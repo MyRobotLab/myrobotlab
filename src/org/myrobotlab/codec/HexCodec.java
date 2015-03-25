@@ -2,14 +2,40 @@ package org.myrobotlab.codec;
 
 import java.util.ArrayList;
 
+import org.myrobotlab.service.interfaces.LoggingSink;
 
-public class HexCodec implements Codec {
+public class HexCodec extends Codec {
 
-	String displayDelimiter =  " ";
+	String coloumnDelimiter = " ";
+	String rowDelimiter = "\n";
+	int byteCount = 0;
+	int width = 16;
 
 	@Override
 	final public String decode(int data) {
-		return String.format("%02x%s", data & 0xff, displayDelimiter);
+		return String.format("%02x%s%s", data & 0xff, coloumnDelimiter, ((byteCount%width == 0)?rowDelimiter:""));
+	}
+
+	@Override
+	public String decode(int[] msgs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] encode(String data) {
+		// TODO Auto-generated method stub
+		return new int[0];
+	}
+
+	@Override
+	public String getCodecExt() {
+		return getKey();
+	}
+
+	@Override
+	public String getKey() {
+		return "hex";
 	}
 
 	public byte[] parse(byte[] data, String format) {
@@ -35,31 +61,6 @@ public class HexCodec implements Codec {
 
 		// return bytes.toArray(byte[]);
 		return data;
-	}
-
-	
-	@Override
-	public int[] encode(String data) {
-		// TODO Auto-generated method stub
-		return new int[0];
-	}
-
-
-	@Override
-	public String getCodecExt() {
-		return getKey();
-	}
-
-
-	@Override
-	public String decode(int[] msgs) throws CodecException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getKey() {
-		return "hex";
 	}
 
 }

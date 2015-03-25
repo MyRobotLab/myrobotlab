@@ -38,52 +38,6 @@ import org.slf4j.Logger;
  * @author Sebastian Dietrich <sebastian.dietrich@anecon.com>
  */
 public class MethodCache {
-	
-
-	public final static Logger log = LoggerFactory.getLogger(MethodCache.class);
-
-	/**
-	 * The only instance of this class
-	 */
-	transient private static MethodCache instance;
-
-	/**
-	 * Cache for Methods In fact this is a map (with classes as keys) of a map
-	 * (with method-names as keys)
-	 */
-	transient private static ThreadLocal cache;
-
-	/**
-	 * The <i>private</i> constructor for this class. Use getInstance to get an
-	 * instance (the only one).
-	 */
-	private MethodCache() {
-		cache = new ThreadLocal();
-	}
-
-	/**
-	 * Gets the only instance of this class
-	 * 
-	 * @return the only instance of this class
-	 */
-	public static MethodCache getInstance() {
-		if (instance == null) {
-			instance = new MethodCache();
-		}
-		return instance;
-	}
-
-	/**
-	 * Returns the per thread hashmap (for method caching)
-	 */
-	private Map getMethodCache() {
-		Map map = (Map) cache.get();
-		if (map == null) {
-			map = new HashMap();
-			cache.set(map);
-		}
-		return map;
-	}
 
 	/**
 	 * Class used as the key for the method cache table.
@@ -108,11 +62,13 @@ public class MethodCache {
 			this.parameterTypes = parameterTypes;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			MethodKey that = (MethodKey) other;
 			return this.methodName.equals(that.methodName) && Arrays.equals(this.parameterTypes, that.parameterTypes);
 		}
 
+		@Override
 		public int hashCode() {
 			// allow overloaded methods to collide; we'll sort it out
 			// in equals(). Note that String's implementation of
@@ -122,8 +78,55 @@ public class MethodCache {
 		}
 	}
 
+	public final static Logger log = LoggerFactory.getLogger(MethodCache.class);
+
+	/**
+	 * The only instance of this class
+	 */
+	transient private static MethodCache instance;
+
+	/**
+	 * Cache for Methods In fact this is a map (with classes as keys) of a map
+	 * (with method-names as keys)
+	 */
+	transient private static ThreadLocal cache;
+
 	/** used to track methods we've sought but not found in the past */
 	private static final Object NULL_OBJECT = new Object();
+
+	/**
+	 * Gets the only instance of this class
+	 * 
+	 * @return the only instance of this class
+	 */
+	public static MethodCache getInstance() {
+		if (instance == null) {
+			instance = new MethodCache();
+		}
+		return instance;
+	}
+
+	public static void main(String[] args) throws IOException, InterruptedException {
+		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
+			MethodCache mc = MethodCache.getInstance();
+			Class[] paramsTypes = new Class[] { String.class, Double.class, Double.class, Double.class, Double.class };
+			Method method = mc.getMethod(Serial.class, "connect", paramsTypes);
+			log.info(method.getName());
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
+	/**
+	 * The <i>private</i> constructor for this class. Use getInstance to get an
+	 * instance (the only one).
+	 */
+	private MethodCache() {
+		cache = new ThreadLocal();
+	}
 
 	/**
 	 * Returns the specified method - if any.
@@ -221,18 +224,16 @@ public class MethodCache {
 		return method;
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		try {
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
-			MethodCache mc = MethodCache.getInstance();
-			Class[] paramsTypes = new Class[] { String.class, Double.class, Double.class, Double.class, Double.class };
-			Method method = mc.getMethod(Serial.class, "connect", paramsTypes);
-			log.info(method.getName());
-
-		} catch (Exception e) {
-			Logging.logException(e);
+	/**
+	 * Returns the per thread hashmap (for method caching)
+	 */
+	private Map getMethodCache() {
+		Map map = (Map) cache.get();
+		if (map == null) {
+			map = new HashMap();
+			cache.set(map);
 		}
+		return map;
 	}
 
 }

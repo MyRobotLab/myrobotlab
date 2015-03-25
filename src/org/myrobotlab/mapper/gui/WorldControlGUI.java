@@ -55,6 +55,36 @@ public class WorldControlGUI extends JPanel implements ActionListener {
 		agentFollower = new AgentFollower(world, (SimpleAgent) simulator.getAgentList().get(0));
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent actionEvent) {
+		String action = actionEvent.getActionCommand();
+		if (action.equals("topview")) {
+			agentFollower.suspend();
+			world.changeViewPoint(World.VIEW_FROM_TOP, null);
+		} else if (action.equals("eastview")) {
+			agentFollower.suspend();
+			world.changeViewPoint(World.VIEW_FROM_EAST, null);
+		} else if (action.equals("followfar")) {
+			agentFollower.setViewPointType(World.VIEW_ABOVE_AGENT);
+			agentFollower.resume();
+		} else if (action.equals("follownear")) {
+			agentFollower.setViewPointType(World.VIEW_ABOVE_AGENT_NEAR);
+			agentFollower.resume();
+		} else if (action.equals("followside")) {
+			agentFollower.setViewPointType(World.VIEW_AGENT_SIDE);
+			agentFollower.resume();
+		}
+	}
+
+	/** helper function */
+	private void createButton(Container container, String label, String action) {
+		JButton b = new JButton(label);
+		b.setFont(smallFont);
+		b.setActionCommand(action);
+		b.addActionListener(this);
+		container.add(b);
+	}
+
 	void createGUI() {
 		/*
 		 * setBorder(BorderFactory.createCompoundBorder(
@@ -85,34 +115,5 @@ public class WorldControlGUI extends JPanel implements ActionListener {
 		add(panel1);
 		add(panel2);
 
-	}
-
-	/** helper function */
-	private void createButton(Container container, String label, String action) {
-		JButton b = new JButton(label);
-		b.setFont(smallFont);
-		b.setActionCommand(action);
-		b.addActionListener(this);
-		container.add(b);
-	}
-
-	public void actionPerformed(ActionEvent actionEvent) {
-		String action = actionEvent.getActionCommand();
-		if (action.equals("topview")) {
-			agentFollower.suspend();
-			world.changeViewPoint(World.VIEW_FROM_TOP, null);
-		} else if (action.equals("eastview")) {
-			agentFollower.suspend();
-			world.changeViewPoint(World.VIEW_FROM_EAST, null);
-		} else if (action.equals("followfar")) {
-			agentFollower.setViewPointType(World.VIEW_ABOVE_AGENT);
-			agentFollower.resume();
-		} else if (action.equals("follownear")) {
-			agentFollower.setViewPointType(World.VIEW_ABOVE_AGENT_NEAR);
-			agentFollower.resume();
-		} else if (action.equals("followside")) {
-			agentFollower.setViewPointType(World.VIEW_AGENT_SIDE);
-			agentFollower.resume();
-		}
 	}
 }

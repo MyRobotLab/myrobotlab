@@ -70,37 +70,6 @@ public class PhysicalEngine {
 	}
 
 	/**
-	 * Compute all external force contributions on an agent before any impact.
-	 * 
-	 * @param dt
-	 *            virtual time elapsed since last call.
-	 */
-	protected void computeForces(double dt, SimpleAgent a) {
-		// Gravity
-		// apply F = mg pointing down .
-		if (a.distanceToGround() > 0) {
-
-			v1.set(0, -a.mass * g, 0);
-			a.linearAcceleration.add(v1);
-		}
-
-		// Friction
-		// apply friction reaction if velocity>0
-		if ((a.staticFrictionCoefficient > 0) && (a.linearVelocity.lengthSquared() > 0)) {
-			// Friction reaction is fx|N| - with N = mg
-			float reaction = a.mass * g * a.staticFrictionCoefficient;
-			// It is colinear to Velocity vector and in opposite direction.
-			// Obtain a unit vector oriented like velocity.
-			v1.set(a.linearVelocity);
-			v1.normalize();
-			// scale it to reaction
-			v1.scale(reaction);
-			a.linearAcceleration.sub(v1);
-		}
-
-	}
-
-	/**
 	 * Check all agents/agent pairs and verify physical interactions and/or
 	 * collision.
 	 * 
@@ -300,36 +269,6 @@ public class PhysicalEngine {
 
 	}
 
-	protected boolean intersect(BoundingSphere bs, StaticObject obj) {
-
-		return obj.intersect(bs);
-	}
-
-	/** */
-	protected boolean intersect(BoundingSphere bs, BoundingBox bb) {
-		return (bb.intersect(bs));
-
-		/*
-		 * double radiussq = bs.getRadius()*bs.getRadius(); bb.getLower(p1);
-		 * bb.getUpper(p2); bs.getCenter(p3); double xmin = Math.min(p1.x,p2.x);
-		 * double ymin = Math.min(p1.y,p2.y); double zmin = Math.min(p1.z,p2.z);
-		 * double xmax = Math.max(p1.x,p2.x); double ymax = Math.max(p1.y,p2.y);
-		 * double zmax = Math.max(p1.z,p2.z);
-		 * 
-		 * double dmin = 0; if (p3.x < xmin) dmin += (p3.x - xmin)*(p3.x -
-		 * xmin); else if (p3.x >xmax ) dmin += (p3.x - xmax)*(p3.x - xmax);
-		 * 
-		 * if (p3.y < ymin) dmin += (p3.y - ymin)*(p3.y - ymin); else if (p3.y
-		 * >ymax ) dmin += (p3.y - ymax)*(p3.y - ymax);
-		 * 
-		 * if (p3.z < zmin) dmin += (p3.z - zmin)*(p3.z - zmin); else if (p3.z
-		 * >zmax ) dmin += (p3.z - zmax)*(p3.z - zmax);
-		 * 
-		 * return ( dmin <= radiussq );
-		 */
-
-	}
-
 	protected void computeContactNormal(BoundingSphere bs, BoundingBox bb, Vector3d n) {
 
 		// NEEDS : BB is Axis Aligned !!!!!
@@ -370,6 +309,67 @@ public class PhysicalEngine {
 		 * p1.x,p1.y,p1.z, p2.x,p1.y,p2.z); if (p < min) { min = p; n.set(v3);}
 		 */
 
+	}
+
+	/**
+	 * Compute all external force contributions on an agent before any impact.
+	 * 
+	 * @param dt
+	 *            virtual time elapsed since last call.
+	 */
+	protected void computeForces(double dt, SimpleAgent a) {
+		// Gravity
+		// apply F = mg pointing down .
+		if (a.distanceToGround() > 0) {
+
+			v1.set(0, -a.mass * g, 0);
+			a.linearAcceleration.add(v1);
+		}
+
+		// Friction
+		// apply friction reaction if velocity>0
+		if ((a.staticFrictionCoefficient > 0) && (a.linearVelocity.lengthSquared() > 0)) {
+			// Friction reaction is fx|N| - with N = mg
+			float reaction = a.mass * g * a.staticFrictionCoefficient;
+			// It is colinear to Velocity vector and in opposite direction.
+			// Obtain a unit vector oriented like velocity.
+			v1.set(a.linearVelocity);
+			v1.normalize();
+			// scale it to reaction
+			v1.scale(reaction);
+			a.linearAcceleration.sub(v1);
+		}
+
+	}
+
+	/** */
+	protected boolean intersect(BoundingSphere bs, BoundingBox bb) {
+		return (bb.intersect(bs));
+
+		/*
+		 * double radiussq = bs.getRadius()*bs.getRadius(); bb.getLower(p1);
+		 * bb.getUpper(p2); bs.getCenter(p3); double xmin = Math.min(p1.x,p2.x);
+		 * double ymin = Math.min(p1.y,p2.y); double zmin = Math.min(p1.z,p2.z);
+		 * double xmax = Math.max(p1.x,p2.x); double ymax = Math.max(p1.y,p2.y);
+		 * double zmax = Math.max(p1.z,p2.z);
+		 * 
+		 * double dmin = 0; if (p3.x < xmin) dmin += (p3.x - xmin)*(p3.x -
+		 * xmin); else if (p3.x >xmax ) dmin += (p3.x - xmax)*(p3.x - xmax);
+		 * 
+		 * if (p3.y < ymin) dmin += (p3.y - ymin)*(p3.y - ymin); else if (p3.y
+		 * >ymax ) dmin += (p3.y - ymax)*(p3.y - ymax);
+		 * 
+		 * if (p3.z < zmin) dmin += (p3.z - zmin)*(p3.z - zmin); else if (p3.z
+		 * >zmax ) dmin += (p3.z - zmax)*(p3.z - zmax);
+		 * 
+		 * return ( dmin <= radiussq );
+		 */
+
+	}
+
+	protected boolean intersect(BoundingSphere bs, StaticObject obj) {
+
+		return obj.intersect(bs);
 	}
 
 	protected double projNormal(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3) {

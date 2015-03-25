@@ -59,7 +59,37 @@ import org.slf4j.Logger;
  */
 public class FileIO {
 
+	public static class FileComparisonException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		public FileComparisonException(String msg) {
+			super(msg);
+		}
+	}
+
 	public final static Logger log = LoggerFactory.getLogger(FileIO.class);
+
+	static public void byteArrayToFile(String filename, byte[] data) throws IOException {
+		FileOutputStream fos = null;
+		fos = new FileOutputStream(filename);
+		fos.write(data);
+		fos.close();
+
+	}
+
+	static final public void close(InputStream in, OutputStream out) {
+		closeStream(in);
+		close(out);
+	}
+
+	static final public void close(OutputStream is) {
+		try {
+			if (is != null) {
+				is.close();
+			}
+		} catch (Exception e) {
+		}
+	}
 
 	/**
 	 * general purpose stream closer for single line closing
@@ -74,19 +104,101 @@ public class FileIO {
 		} catch (Exception e) {
 		}
 	}
-	
-	static final public void close(OutputStream is) {
-		try {
-			if (is != null) {
-				is.close();
+
+	public static void compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
+		File file1 = new File(filename1);
+		File file2 = new File(filename2);
+		if (file1.length() != file2.length()) {
+			throw new FileComparisonException(String.format("%s size is %d adn %s is size %d", filename1, file1.length(), filename2, file2.length()));
+		}
+
+		byte[] a1 = fileToByteArray(new File(filename1));
+		byte[] a2 = fileToByteArray(new File(filename2));
+
+		for (int i = 0; i < a1.length; ++i) {
+			if (a1[i] != a2[i]) {
+				throw new FileComparisonException(String.format("files differ at position %d", i));
 			}
-		} catch (Exception e) {
 		}
 	}
-	
-	static final public void close(InputStream in, OutputStream out) {
-		closeStream(in);
-		close(out);		
+
+	static public void copy(File src, File dst) throws IOException {
+		InputStream in = new FileInputStream(src);
+		OutputStream out = new FileOutputStream(dst);
+
+		// Transfer bytes from in to out
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
+		}
+		in.close();
+		out.close();
+	}
+
+	static public boolean copy(String from, String to) {
+		try {
+			byte[] b = fileToByteArray(new File(from));
+			byteArrayToFile(to, b);
+			return true;
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		return false;
+	}
+
+	// --- string interface end --------------------
+
+	// --- byte[] interface begin ------------------
+	// rename getBytes getResourceBytes / String File InputStream
+
+	//
+	static public boolean copyResource(String fromFilename, String toFilename) {
+		try {
+			byte[] b = resourceToByteArray(fromFilename);
+			File f = new File(toFilename);
+			String path = f.getParent();
+			File dir = new File(path);
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
+
+			byteArrayToFile(toFilename, b);
+			return true;
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		return false;
+	}
+
+	public final static byte[] fileToByteArray(File file) throws IOException {
+
+		FileInputStream fis = null;
+		byte[] data = null;
+
+		fis = new FileInputStream(file);
+		data = toByteArray(fis);
+
+		fis.close();
+
+		return data;
+	}
+
+	// --- string interface begin ---
+	public final static String fileToString(File file) throws IOException {
+		byte[] bytes = fileToByteArray(file);
+		if (bytes == null) {
+			return null;
+		}
+		return new String(bytes);
+	}
+
+	public final static String fileToString(String filename) throws IOException {
+		return fileToString(new File(filename));
+	}
+
+	static public String getBinaryPath() {
+		return ClassLoader.getSystemClassLoader().getResource(".").getPath();
 	}
 
 	/**
@@ -114,190 +226,25 @@ public class FileIO {
 			return dirName;
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return null;
 	}
 
-	// --- string interface begin ---
-	public final static String fileToString(File file) throws IOException {
-		byte[] bytes = fileToByteArray(file);
-		if (bytes == null) {
-			return null;
-		}
-		return new String(bytes);
-	}
-
-	public final static String fileToString(String filename) throws IOException {
-		return fileToString(new File(filename));
-	}
-
-	public final static String resourceToString(String filename) {
-		byte[] bytes = resourceToByteArray(filename);
-		if (bytes == null) {
-			return null;
-		}
-		return new String(bytes);
-	}
-
-	public static void stringToFile(String filename, String data) throws IOException {
-		byteArrayToFile(filename, data.getBytes());
-	}
-
-	// --- string interface end --------------------
-
-	// --- byte[] interface begin ------------------
-	// rename getBytes getResourceBytes / String File InputStream
-
-	static public byte[] getURL(URL url) {
-		try {
-			URLConnection conn = url.openConnection();
-			return toByteArray(conn.getInputStream());
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		return null;
-	}
-
-	static public void byteArrayToFile(String filename, byte[] data) throws IOException {
-		FileOutputStream fos = null;
-		fos = new FileOutputStream(filename);
-		fos.write(data);
-		fos.close();
-
-	}
-
-	public final static byte[] fileToByteArray(File file) throws IOException {
-
-		FileInputStream fis = null;
-		byte[] data = null;
-
-		fis = new FileInputStream(file);
-		data = toByteArray(fis);
-
-		fis.close();
-
-		return data;
-	}
-
-	public static final String getSource() {
-		try {
-			// return
-			// URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),
-			// "UTF-8");
-			return FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-		} catch (Exception e) {
-			Logging.logException(e);
-			return null;
-		}
-	}
-
-	public static final boolean isJar() {
-		String source = getSource();
-		if (source != null) {
-			return source.endsWith(".jar");
-		}
-		return false;
-	}
-
-	public static final byte[] resourceToByteArray(String resourceName) {
-		String filename = String.format("/resource/%s", resourceName);
-
-		log.info(String.format("looking for %s", filename));
-		InputStream isr = null;
-		if (isJar()) {
-			isr = FileIO.class.getResourceAsStream(filename);
-		} else {
-			try {
-				isr = new FileInputStream(String.format("%sresource/%s", getSource(), resourceName));
-			} catch (Exception e) {
-				Logging.logException(e);
-				return null;
+	public static File[] getPackageContent(String packageName) throws IOException {
+		ArrayList<File> list = new ArrayList<File>();
+		Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(packageName);
+		while (urls.hasMoreElements()) {
+			URL url = urls.nextElement();
+			File dir = new File(url.getFile());
+			for (File f : dir.listFiles()) {
+				list.add(f);
 			}
 		}
-		byte[] data = null;
-		try {
-			if (isr == null) {
-				log.error(String.format("can not find resource [%s]", filename));
-				return null;
-			}
-			data = toByteArray(isr);
-		} finally {
-			try {
-				if (isr != null) {
-					isr.close();
-				}
-			} catch (Exception e) {
-
-			}
-		}
-		return data;
-	}
-
-	public static byte[] toByteArray(InputStream is) {
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		// DataInputStream input = new DataInputStream(isr);
-		try {
-
-			int nRead;
-			byte[] data = new byte[16384];
-
-			while ((nRead = is.read(data, 0, data.length)) != -1) {
-				baos.write(data, 0, nRead);
-			}
-
-			baos.flush();
-			baos.close();
-			return baos.toByteArray();
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return null;
+		return list.toArray(new File[] {});
 	}
 
 	// getBytes end ------------------
-
-	// --- object interface begin ------
-	public final static boolean writeBinary(String filename, Object toSave) {
-		try {
-			// use buffering
-			OutputStream file = new FileOutputStream(filename);
-			OutputStream buffer = new BufferedOutputStream(file);
-			ObjectOutput output = new ObjectOutputStream(buffer);
-			try {
-				output.writeObject(toSave);
-				output.flush();
-			} finally {
-				output.close();
-			}
-		} catch (IOException e) {
-			Logging.logException(e);
-			return false;
-		}
-		return true;
-	}
-
-	public final static Object readBinary(String filename) {
-		try {
-			InputStream file = new FileInputStream(filename);
-			InputStream buffer = new BufferedInputStream(file);
-			ObjectInput input = new ObjectInputStream(buffer);
-			try {
-				return (Object) input.readObject();
-			} finally {
-				input.close();
-			}
-		} catch (Exception e) {
-			Logging.logException(e);
-			return null;
-		}
-	}
-
-	// --- object interface end --------
-
-	// jar pathing begin ---------------
 
 	static public String getResouceLocation() {
 		URL url = File.class.getResource("/resource");
@@ -307,20 +254,6 @@ public class FileIO {
 			return null; // FIXME DALVIK issue
 		} else {
 			return url.toString();
-		}
-	}
-
-	static public String getRootLocation() {
-		URL url = File.class.getResource("/");
-		return url.toString();
-	}
-
-	static public boolean inJar() {
-		String location = getResouceLocation();
-		if (location != null) {
-			return getResouceLocation().startsWith("jar:");
-		} else {
-			return false;
 		}
 	}
 
@@ -336,8 +269,52 @@ public class FileIO {
 		return jarPath;
 	}
 
-	static public String getBinaryPath() {
-		return ClassLoader.getSystemClassLoader().getResource(".").getPath();
+	// --- object interface end --------
+
+	// jar pathing begin ---------------
+
+	static public String getRootLocation() {
+		URL url = File.class.getResource("/");
+		return url.toString();
+	}
+
+	public static final String getSource() {
+		try {
+			// return
+			// URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),
+			// "UTF-8");
+			return FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+		} catch (Exception e) {
+			Logging.logError(e);
+			return null;
+		}
+	}
+
+	static public byte[] getURL(URL url) {
+		try {
+			URLConnection conn = url.openConnection();
+			return toByteArray(conn.getInputStream());
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		return null;
+	}
+
+	static public boolean inJar() {
+		String location = getResouceLocation();
+		if (location != null) {
+			return getResouceLocation().startsWith("jar:");
+		} else {
+			return false;
+		}
+	}
+
+	public static final boolean isJar() {
+		String source = getSource();
+		if (source != null) {
+			return source.endsWith(".jar");
+		}
+		return false;
 	}
 
 	/**
@@ -394,146 +371,6 @@ public class FileIO {
 		return listInternalContents("/resource" + path);
 	}
 
-	public static File[] getPackageContent(String packageName) throws IOException {
-		ArrayList<File> list = new ArrayList<File>();
-		Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(packageName);
-		while (urls.hasMoreElements()) {
-			URL url = urls.nextElement();
-			File dir = new File(url.getFile());
-			for (File f : dir.listFiles()) {
-				list.add(f);
-			}
-		}
-		return list.toArray(new File[] {});
-	}
-
-	static public void copy(File src, File dst) throws IOException {
-		InputStream in = new FileInputStream(src);
-		OutputStream out = new FileOutputStream(dst);
-
-		// Transfer bytes from in to out
-		byte[] buf = new byte[1024];
-		int len;
-		while ((len = in.read(buf)) > 0) {
-			out.write(buf, 0, len);
-		}
-		in.close();
-		out.close();
-	}
-
-	// jar pathing end ---------------
-	// -- os primitives begin -------
-
-	//
-	static public boolean copyResource(String fromFilename, String toFilename) {
-		try {
-			byte[] b = resourceToByteArray(fromFilename);
-			File f = new File(toFilename);
-			String path = f.getParent();
-			File dir = new File(path);
-			if (!dir.exists()) {
-				dir.mkdirs();
-			}
-
-			byteArrayToFile(toFilename, b);
-			return true;
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		return false;
-	}
-
-	static public boolean copy(String from, String to) {
-		try {
-			byte[] b = fileToByteArray(new File(from));
-			byteArrayToFile(to, b);
-			return true;
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		return false;
-	}
-
-
-	public static class FileComparisonException extends Exception {
-		private static final long serialVersionUID = 1L;
-
-		public FileComparisonException(String msg) {
-			super(msg);
-		}
-	}
-
-	public static boolean rmDir(File directory, Set<File> exclude) {
-		if (directory.exists()) {
-			File[] files = directory.listFiles();
-			if (null != files) {
-				for (int i = 0; i < files.length; i++) {
-					if (files[i].isDirectory()) {
-						rmDir(files[i], exclude);
-					} else {
-						if (exclude != null && exclude.contains(files[i])) {
-							log.info("skipping exluded file {}", files[i].getName());
-						} else {
-							log.info("removing file {}", files[i].getName());
-							files[i].delete();
-						}
-					}
-				}
-			}
-		}
-
-		boolean ret = (exclude != null) ? true : (directory.delete());
-		return ret;
-	}
-
-	public static void compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
-		File file1 = new File(filename1);
-		File file2 = new File(filename2);
-		if (file1.length() != file2.length()) {
-			throw new FileComparisonException(String.format("%s size is %d adn %s is size %d", filename1, file1.length(), filename2, file2.length()));
-		}
-
-		byte[] a1 = fileToByteArray(new File(filename1));
-		byte[] a2 = fileToByteArray(new File(filename2));
-
-		for (int i = 0; i < a1.length; ++i) {
-			if (a1[i] != a2[i]) {
-				throw new FileComparisonException(String.format("files differ at position %d", i));
-			}
-		}
-	}
-
-	/**
-	 * for inter process file writting & locking ..
-	 * 
-	 * @param filename
-	 * @param data
-	 * @throws IOException
-	 */
-	static public void savePartFile(String filename, byte[] data) throws IOException {
-		// first delete any part or filename file currently there
-		File file = new File(filename);
-		if (file.exists()) {
-			if (!file.delete()) {
-				throw new IOException(String.format("%s exists but could not delete", filename));
-			}
-		}
-		String partFilename = String.format("%s.part", filename);
-		File partFile = new File(partFilename);
-		if (partFile.exists()) {
-			if (!partFile.delete()) {
-				throw new IOException(String.format("%s exists but could not delete", partFilename));
-			}
-		}
-
-		byteArrayToFile(partFilename, data);
-
-		if (!partFile.renameTo(new File(filename))) {
-			throw new IOException(String.format("could not rename %s to %s ..  don't know why.. :(", partFilename, filename));
-		}
-
-	}
-
 	/**
 	 * inter process file communication - default is to wait and attempt to load
 	 * a file in the next second - it comes from savePartFile - then the writing
@@ -564,6 +401,9 @@ public class FileIO {
 		}
 		return null;
 	}
+
+	// jar pathing end ---------------
+	// -- os primitives begin -------
 
 	public static void main(String[] args) throws ZipException, IOException {
 
@@ -602,9 +442,168 @@ public class FileIO {
 			 * log.info("done");
 			 */
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
+	}
+
+	public final static Object readBinary(String filename) {
+		try {
+			InputStream file = new FileInputStream(filename);
+			InputStream buffer = new BufferedInputStream(file);
+			ObjectInput input = new ObjectInputStream(buffer);
+			try {
+				return input.readObject();
+			} finally {
+				input.close();
+			}
+		} catch (Exception e) {
+			Logging.logError(e);
+			return null;
+		}
+	}
+
+	public static final byte[] resourceToByteArray(String resourceName) {
+		String filename = String.format("/resource/%s", resourceName);
+
+		log.info(String.format("looking for %s", filename));
+		InputStream isr = null;
+		if (isJar()) {
+			isr = FileIO.class.getResourceAsStream(filename);
+		} else {
+			try {
+				isr = new FileInputStream(String.format("%sresource/%s", getSource(), resourceName));
+			} catch (Exception e) {
+				Logging.logError(e);
+				return null;
+			}
+		}
+		byte[] data = null;
+		try {
+			if (isr == null) {
+				log.error(String.format("can not find resource [%s]", filename));
+				return null;
+			}
+			data = toByteArray(isr);
+		} finally {
+			try {
+				if (isr != null) {
+					isr.close();
+				}
+			} catch (Exception e) {
+
+			}
+		}
+		return data;
+	}
+
+	public final static String resourceToString(String filename) {
+		byte[] bytes = resourceToByteArray(filename);
+		if (bytes == null) {
+			return null;
+		}
+		return new String(bytes);
+	}
+
+	public static boolean rmDir(File directory, Set<File> exclude) {
+		if (directory.exists()) {
+			File[] files = directory.listFiles();
+			if (null != files) {
+				for (int i = 0; i < files.length; i++) {
+					if (files[i].isDirectory()) {
+						rmDir(files[i], exclude);
+					} else {
+						if (exclude != null && exclude.contains(files[i])) {
+							log.info("skipping exluded file {}", files[i].getName());
+						} else {
+							log.info("removing file {}", files[i].getName());
+							files[i].delete();
+						}
+					}
+				}
+			}
+		}
+
+		boolean ret = (exclude != null) ? true : (directory.delete());
+		return ret;
+	}
+
+	/**
+	 * for inter process file writting & locking ..
+	 * 
+	 * @param filename
+	 * @param data
+	 * @throws IOException
+	 */
+	static public void savePartFile(String filename, byte[] data) throws IOException {
+		// first delete any part or filename file currently there
+		File file = new File(filename);
+		if (file.exists()) {
+			if (!file.delete()) {
+				throw new IOException(String.format("%s exists but could not delete", filename));
+			}
+		}
+		String partFilename = String.format("%s.part", filename);
+		File partFile = new File(partFilename);
+		if (partFile.exists()) {
+			if (!partFile.delete()) {
+				throw new IOException(String.format("%s exists but could not delete", partFilename));
+			}
+		}
+
+		byteArrayToFile(partFilename, data);
+
+		if (!partFile.renameTo(new File(filename))) {
+			throw new IOException(String.format("could not rename %s to %s ..  don't know why.. :(", partFilename, filename));
+		}
+
+	}
+
+	public static void stringToFile(String filename, String data) throws IOException {
+		byteArrayToFile(filename, data.getBytes());
+	}
+
+	public static byte[] toByteArray(InputStream is) {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		// DataInputStream input = new DataInputStream(isr);
+		try {
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ((nRead = is.read(data, 0, data.length)) != -1) {
+				baos.write(data, 0, nRead);
+			}
+
+			baos.flush();
+			baos.close();
+			return baos.toByteArray();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return null;
+	}
+
+	// --- object interface begin ------
+	public final static boolean writeBinary(String filename, Object toSave) {
+		try {
+			// use buffering
+			OutputStream file = new FileOutputStream(filename);
+			OutputStream buffer = new BufferedOutputStream(file);
+			ObjectOutput output = new ObjectOutputStream(buffer);
+			try {
+				output.writeObject(toSave);
+				output.flush();
+			} finally {
+				output.close();
+			}
+		} catch (IOException e) {
+			Logging.logError(e);
+			return false;
+		}
+		return true;
 	}
 
 }

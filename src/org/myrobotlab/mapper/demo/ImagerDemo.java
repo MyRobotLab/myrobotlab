@@ -48,20 +48,11 @@ import org.myrobotlab.mapper.sim.Wall;
 public class ImagerDemo extends Demo {
 
 	class DemoRobotImager extends Agent {
-		double elapsed;
-
-		CameraSensor camera;
-
-		SensorMatrix luminanceMatrix;
-
-		JPanel panel;
-
-		JInternalFrame window;
-
 		class ImagerPanel extends JPanel {
 
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			protected void paintComponent(Graphics g) {
 				int width = luminanceMatrix.getWidth();
 				int height = luminanceMatrix.getHeight();
@@ -81,6 +72,16 @@ public class ImagerDemo extends Demo {
 			}
 		}
 
+		double elapsed;
+
+		CameraSensor camera;
+
+		SensorMatrix luminanceMatrix;
+
+		JPanel panel;
+
+		JInternalFrame window;
+
 		public DemoRobotImager(Vector3d position, String name) {
 			super(position, name);
 			camera = RobotFactory.addCameraSensor(this);
@@ -95,12 +96,14 @@ public class ImagerDemo extends Demo {
 		}
 
 		/** Initialize Agent's Behavior */
+		@Override
 		public void initBehavior() {
 			elapsed = getLifeTime();
 
 		}
 
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 
 			// progress at 0.5 m/s

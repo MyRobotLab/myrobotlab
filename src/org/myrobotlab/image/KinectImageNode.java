@@ -32,17 +32,17 @@ public class KinectImageNode implements Serializable {
 
 	public int lastGoodFitIndex = 0;
 
+	public void convertToSerializableTypes() {
+		cameraFrame = new SerializableImage(cvCameraFrame.getBufferedImage(), "camera");
+		mask = new SerializableImage(cvMask.getBufferedImage(), "frame");
+	}
+
 	public IplImage getTemplate() {
 		cvSetImageROI(cvMask, cvBoundingBox); // 615-8 = to remove right hand
 												// band
 		IplImage template = cvMask.clone(); //
 		cvResetImageROI(cvMask);
 		return template;
-	}
-
-	public void convertToSerializableTypes() {
-		cameraFrame = new SerializableImage(cvCameraFrame.getBufferedImage(), "camera");
-		mask = new SerializableImage(cvMask.getBufferedImage(), "frame");
 	}
 
 }

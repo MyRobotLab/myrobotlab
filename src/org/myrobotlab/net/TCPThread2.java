@@ -32,7 +32,7 @@ public class TCPThread2 extends Thread {
 	boolean isRunning = false;
 	URI protocolKey;
 	URI uri; // mrl uri
-	
+
 	public TCPThread2(RemoteAdapter service, URI uri, Socket socket) throws UnknownHostException, IOException {
 		super(String.format("%s_%s", service.getName(), uri));
 		this.myService = service;
@@ -45,6 +45,27 @@ public class TCPThread2 extends Thread {
 		out.flush();
 		in = new ObjectInputStream(socket.getInputStream());
 		this.start();
+	}
+
+	// FIXME - prepare for re-init / or completely de-init
+	// and have RA re-establish connection
+	public void releaseConnect() {
+		try {
+			data.state = Connection.DISCONNECTED;
+			String instanceID = String.format("mrl://%s/%s", myService.getName(), data.protocolKey);
+			log.error("removing {} from registry", instanceID);
+			// FIXME - not working - are you sure you want to do this?
+			// just because the connection is broken
+			Runtime.release(new URI(instanceID));
+			log.error("shutting down thread");
+			isRunning = false;
+			log.error("attempting to close streams");
+			in.close();
+			out.close();
+			log.error("attempting to close socket");
+			socket.close();
+		} catch (Exception dontCare) {
+		}
 	}
 
 	/**
@@ -68,25 +89,26 @@ public class TCPThread2 extends Thread {
 				data.rxName = msg.name;
 				data.rxMethod = msg.method;
 
-				
-				if (uri == null){
+				if (uri == null) {
 					protocolKey = new URI(String.format("tcp://%s:%d", socket.getInetAddress().getHostAddress(), socket.getPort()));
 					String mrlURI = String.format("mrl://%s/%s", myService.getName(), protocolKey.toString());
 					uri = new URI(mrlURI);
 				}
-				
+
 				// router x-forwarded inbound proxy begin
-				msg.sender = String.format("%s%s", myService.getPrefix(protocolKey),msg.sender);
+				msg.sender = String.format("%s%s", myService.getPrefix(protocolKey), msg.sender);
 				// router x-forwarded inbound proxy end
 
-				
-				// FIXME - SCARY !  - anywhere address (name) info is in the data payload you will get errors & bugs :(
-				// getName() would need to be there of couse... I can't imagine how many other places ..
+				// FIXME - SCARY ! - anywhere address (name) info is in the data
+				// payload you will get errors & bugs :(
+				// getName() would need to be there of couse... I can't imagine
+				// how many other places ..
 				// Not the best implementation - an Instance would
-				
+
 				// FIXME - HashSet of methods needed ?
-				// FIXME - if Encode.getMethodSignature("publishState", Service.class).equals(Encode.getMethodSignature(msg));
-				if ("publishState".equals(msg.method)){
+				// FIXME - if Encode.getMethodSignature("publishState",
+				// Service.class).equals(Encode.getMethodSignature(msg));
+				if ("publishState".equals(msg.method)) {
 					// FIXME - normalize
 					// router x-forwarded inbound proxy begin
 					Object[] msgData = msg.data;
@@ -99,12 +121,12 @@ public class TCPThread2 extends Thread {
 					}
 					// router x-forwarded inbound proxy end
 				}
-				
-				if ("addListener".equals(msg.method)){
-					MRLListener listener = (MRLListener)msg.data[0];
+
+				if ("addListener".equals(msg.method)) {
+					MRLListener listener = (MRLListener) msg.data[0];
 					listener.name = String.format("%s%s", myService.getPrefix(protocolKey), listener.name);
 				}
-				
+
 				// FIXME - THIS NEEDS TO BE NORMALIZED - WILL BE THE SAME IN
 				// XMPP & WEBGUI & REMOTEADAPTER
 				// FIXME - normalize to single method - check for data
@@ -113,7 +135,6 @@ public class TCPThread2 extends Thread {
 					// BEGIN ENCAPSULATION --- ENCODER BEGIN -------------
 					// IMPORTANT - (should be in Encoder) - create the key
 					// for foreign service environment
-					
 
 					// IMPORTANT - this is an optimization and probably
 					// should be in the Comm interface defintion
@@ -130,13 +151,14 @@ public class TCPThread2 extends Thread {
 					Object[] msgData = msg.data;
 					ServiceInterface si = null;
 
-					// ALLOWED TO BE NULL - establishes initial contact & a ServiceEnvironment
+					// ALLOWED TO BE NULL - establishes initial contact & a
+					// ServiceEnvironment
 					if (msgData != null) {
 						si = (ServiceInterface) msg.data[0];
 						si.setInstanceId(uri);
 						si.setPrefix(myService.getPrefix(protocolKey));
 					}
-					
+
 					// HMMM a vote for String vs URI here - since we need to
 					// catch syntax !!!
 
@@ -193,7 +215,7 @@ public class TCPThread2 extends Thread {
 		} catch (Exception e) {
 			isRunning = false;
 			socket = null;
-			Logging.logException(e);
+			Logging.logError(e);
 			data.state = Connection.DISCONNECTED;
 		}
 
@@ -203,51 +225,28 @@ public class TCPThread2 extends Thread {
 		// myService.invoke("connectionBroken", url); FIXME
 	}
 
-	// FIXME - prepare for re-init / or completely de-init
-	// and have RA re-establish connection
-	public void releaseConnect() {
-		try {
-			data.state = Connection.DISCONNECTED;
-			String instanceID = String.format("mrl://%s/%s", myService.getName(), data.protocolKey);
-			log.error("removing {} from registry", instanceID);
-			// FIXME - not working - are you sure you want to do this?
-			// just because the connection is broken
-			Runtime.release(new URI(instanceID));
-			log.error("shutting down thread");
-			isRunning = false;
-			log.error("attempting to close streams");
-			in.close();
-			out.close();
-			log.error("attempting to close socket");
-			socket.close();
-		} catch (Exception dontCare) {
-		}
-	}
-
 	// FIXME - merge with RemoteAdapter - this is just sendRemote
 	public synchronized void send(Message msg) {
 		try {
 
-			/* debugging logging
-			if (msg.data != null && msg.data[0] != null && msg.data[0] instanceof Service) {
-				String n = ((Service) msg.data[0]).getName();
-				log.info(String.format("serializing %s", n));
-				if (n.equals("r1")) {
-					log.info("here");
-					// return;
-				}
+			/*
+			 * debugging logging if (msg.data != null && msg.data[0] != null &&
+			 * msg.data[0] instanceof Service) { String n = ((Service)
+			 * msg.data[0]).getName(); log.info(String.format("serializing %s",
+			 * n)); if (n.equals("r1")) { log.info("here"); // return; }
+			 * 
+			 * }
+			 */
 
-			}
-			*/
-			
 			// router x-forwarded outbound proxy begin
-			// TODO - optimize - set once ! same with prefix .. +1 for the String.format("%s.", n) period !
-			if (!"".equals(msg.name)) // FIXME - broadcast "should" be null - 
+			// TODO - optimize - set once ! same with prefix .. +1 for the
+			// String.format("%s.", n) period !
+			if (!"".equals(msg.name)) // FIXME - broadcast "should" be null -
 			{
 				msg.name = msg.name.substring(myService.getPrefix(protocolKey).length());
 			}
 			// router x-forwarded outbound proxy end
-			
+
 			out.writeObject(msg);
 			out.flush();
 			out.reset(); // magic line OMG - that took WAY TO LONG TO FIGURE

@@ -48,17 +48,21 @@ public class OpenCVFilterCanny extends OpenCVFilter {
 	public double highThreshold = 50.0;
 
 	transient IplImage gray = null;
-	transient IplImage inlines = null; 
+	transient IplImage inlines = null;
 
-	public OpenCVFilterCanny()  {
+	public OpenCVFilterCanny() {
 		super();
 	}
-	
-	public OpenCVFilterCanny(String name)  {
+
+	public OpenCVFilterCanny(String name) {
 		super(name);
 	}
 
-	
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
@@ -85,16 +89,11 @@ public class OpenCVFilterCanny extends OpenCVFilter {
 		// lowThreshold = 90.0;
 		// highThreshold = 110.0;
 		// apertureSize = 3;
-		//log.warn(String.format("%f, %f, %d", lowThreshold, highThreshold, apertureSize));
+		// log.warn(String.format("%f, %f, %d", lowThreshold, highThreshold,
+		// apertureSize));
 		cvCanny(gray, inlines, lowThreshold, highThreshold, apertureSize);
 
 		return inlines;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

@@ -22,56 +22,50 @@ public class ControlSystem {
 	// private boolean isRunning = false;
 	private Servo x;
 	private Servo y;
-	
+
+	public int getMaxX() {
+		return x.getMax();
+	}
+
+	public int getMaxY() {
+		return y.getMax();
+	}
+
+	public int getMinX() {
+		return x.getMin();
+	}
+
+	public int getMinY() {
+		return y.getMin();
+	}
+
 	// externally defined servos
-	public void init(Servo x, Servo y)
-	{
+	public void init(Servo x, Servo y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	public void moveXTo(double pos) {
-		x.moveTo((int)Math.round(pos));
-	}
-
-	public void moveYTo(double pos) {
-		y.moveTo((int)Math.round(pos));
-	}
-
-	public void moveXTo(int pos) {
-		x.moveTo(pos);
-	}
-
-	public void moveYTo(int pos) {
-		y.moveTo(pos);
-	}
-	
-	public int getMinX()
-	{
-		return x.getMin();
-	}
-
-	public int getMaxX()
-	{
-		return x.getMax();
-	}
-
-	public int getMinY()
-	{
-		return y.getMin();
-	}
-
-	public int getMaxY()
-	{
-		return y.getMax();
-	}
-
-	
 	public boolean isReady() {
 		if (x != null && y != null && x.isAttached() && y.isAttached()) {
 			return true;
 		}
 
 		return false;
+	}
+
+	public void moveXTo(double pos) {
+		x.moveTo((int) Math.round(pos));
+	}
+
+	public void moveXTo(int pos) {
+		x.moveTo(pos);
+	}
+
+	public void moveYTo(double pos) {
+		y.moveTo((int) Math.round(pos));
+	}
+
+	public void moveYTo(int pos) {
+		y.moveTo(pos);
 	}
 }

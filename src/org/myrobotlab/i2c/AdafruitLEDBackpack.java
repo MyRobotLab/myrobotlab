@@ -55,6 +55,56 @@ import com.pi4j.io.i2c.I2CFactory;
  */
 public class AdafruitLEDBackpack implements I2CDevice {
 
+	public class BlinkThread extends Thread {
+		public int number = 5;
+		public int delay = 100;
+		public String value = "";
+		public boolean leaveOn = true;
+
+		@Override
+		public void run() {
+			int count = 0;
+			while (count < 5) {
+				display(value);
+				Service.sleep(delay);
+				display("   ");
+				Service.sleep(delay);
+				++count;
+			}
+
+			if (leaveOn) {
+				display(value);
+			}
+		}
+	}
+
+	public class CycleThread extends Thread {
+		public boolean isRunning = false;
+		int delay = 300;
+		String msg;
+
+		public CycleThread(String msg, int delay) {
+			this.msg = "    " + msg + "    ";
+			this.delay = delay;
+		}
+
+		@Override
+		public void run() {
+			isRunning = true;
+			try {
+				while (isRunning) {
+					// start with scroll on page
+					for (int i = 0; i < msg.length() - 3; ++i) {
+						display(msg.substring(i, i + 4));
+						sleep(delay);
+					}
+				}
+			} catch (InterruptedException e) {
+				isRunning = false;
+			}
+		}
+	}
+
 	public final static Logger log = LoggerFactory.getLogger(AdafruitLEDBackpack.class);
 
 	// public static final String NAME =
@@ -64,33 +114,18 @@ public class AdafruitLEDBackpack implements I2CDevice {
 	public static final int AdafruitLEDBackpack_0x70 = 0x20; // 000
 
 	static HashMap<String, Byte> translation = new HashMap<String, Byte>();
-	
-	CycleThread ct = null;
 
+	CycleThread ct = null;
 	private static boolean translationInitialized = false;
 
 	// TODO abtract out Pi4J
 	private com.pi4j.io.i2c.I2CBus i2cbus;
+
 	private com.pi4j.io.i2c.I2CDevice device;
 
-	String lastValue = null;
-
-	public AdafruitLEDBackpack(int bus, int address) throws IOException {
-
-		log.info(String.format("AdafruitLEDBackpack on %d %d", bus, address));
-
-		// create I2C communications bus instance
-		i2cbus = I2CFactory.getInstance(bus);
-
-		// create I2C device instance
-		device = i2cbus.getDevice(address);
-
-		init7SegmentDisplay();
-		initTranslation();
-
-	}
-
 	// ---------------------- refactored RasPi --------------------------------
+
+	String lastValue = null;
 
 	public static void initTranslation() {
 
@@ -155,12 +190,54 @@ public class AdafruitLEDBackpack implements I2CDevice {
 		return b;
 	}
 
-	public int displayDigit(int i) {
+	public AdafruitLEDBackpack(int bus, int address) throws IOException {
 
-		String data = String.format("%d", i);
-		display(data);
+		log.info(String.format("AdafruitLEDBackpack on %d %d", bus, address));
 
-		return i;
+		// create I2C communications bus instance
+		i2cbus = I2CFactory.getInstance(bus);
+
+		// create I2C device instance
+		device = i2cbus.getDevice(address);
+
+		init7SegmentDisplay();
+		initTranslation();
+
+	}
+
+	public void blinkOff(String value) {
+		BlinkThread b = new BlinkThread();
+		b.value = value;
+		b.leaveOn = false;
+		b.start();
+	}
+
+	public void blinkOn(String value) {
+		BlinkThread b = new BlinkThread();
+		b.value = value;
+		b.start();
+	}
+
+	public void cycle(String msg) {
+		if (ct != null) {
+			cycleStop();
+		}
+		ct = new CycleThread(msg, 300);
+		ct.start();
+	}
+
+	public void cycle(String msg, int delay) {
+		if (ct != null) {
+			cycleStop();
+		}
+		ct = new CycleThread(msg, delay);
+		ct.start();
+	}
+
+	public void cycleStop() {
+		if (ct != null) {
+			ct.isRunning = false;
+		}
 	}
 
 	public String display(String data) {
@@ -190,112 +267,25 @@ public class AdafruitLEDBackpack implements I2CDevice {
 
 		return data;
 	}
-	
-	public class BlinkThread extends Thread
-	{
-		public int number = 5;
-		public int delay = 100;
-		public String value = "";
-		public boolean leaveOn = true;
-				
-		public void run() {
-			int count = 0;
-			while(count < 5){
-				display(value);
-				Service.sleep(delay);
-				display("   ");
-				Service.sleep(delay);
-				++count;
-			}
-			
-			if (leaveOn){
-				display(value);
-			}
-		}
-	}
-	
-	public void blinkOn(String value)
-	{
-		BlinkThread b = new BlinkThread();
-		b.value = value;
-		b.start();
-	}
 
-	public void blinkOff(String value)
-	{
-		BlinkThread b = new BlinkThread();
-		b.value = value;
-		b.leaveOn = false;
-		b.start();
-	}
-	
-	public class CycleThread extends Thread
-	{
-		public boolean isRunning = false;
-		int delay = 300;
-		String msg;
-		
-		public CycleThread(String msg, int delay)
-		{
-			this.msg = "    " + msg + "    ";
-			this.delay = delay;
-		}
-		
-		public void run(){
-			isRunning = true;
-			try {
-			while(isRunning){
-				// start with scroll on page
-				for(int i = 0; i < msg.length()-3; ++i)
-				{
-					display(msg.substring(i, i+4));
-					sleep(delay);
-				}
-			}
-			} catch (InterruptedException e){
-				isRunning = false;
-			}
-		}
-	}
-	
-	
-	public void cycle(String msg, int delay){
-		if (ct != null)
-		{
-			cycleStop();
-		}
-		ct = new CycleThread(msg, delay);
-		ct.start();
-	}
-	
-	public void cycle(String msg){
-		if (ct != null)
-		{
-			cycleStop();
-		}
-		ct = new CycleThread(msg, 300);
-		ct.start();
-	}
-	
-	public void cycleStop(){
-		if (ct != null){
-			ct.isRunning = false;
-		}
-	}
-	
-	public byte[] writeDisplay(byte[] data) {
-		if (device == null) {
-			log.error("device is null");
-			return data;
-		}
-
+	public void displayClear() {
 		try {
-			device.write(0x00, data, 0, 16);
+			device.write(0x00, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 16);
+			device.write(0x00, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 16);
+			device.write(0x00, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 16);
+			device.write(0x00, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 16);
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
-		return data;
+	}
+
+	public int displayDigit(int i) {
+
+		String data = String.format("%d", i);
+		display(data);
+
+		return i;
 	}
 
 	public boolean init7SegmentDisplay() {
@@ -311,22 +301,30 @@ public class AdafruitLEDBackpack implements I2CDevice {
 			device.write(0x00, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 16);
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 		return true;
 	}
 
-	public void displayClear() {
-		try {
-			device.write(0x00, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 16);
-			device.write(0x00, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 16);
-			device.write(0x00, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 16);
-			device.write(0x00, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 16);
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
+	@Override
+	public int read() throws IOException {
+		return device.read();
+	}
 
+	@Override
+	public int read(byte[] buffer, int offset, int size) throws IOException {
+		return device.read(buffer, offset, size);
+	}
+
+	@Override
+	public int read(int address) throws IOException {
+		return device.read(address);
+	}
+
+	@Override
+	public int read(int address, byte[] buffer, int offset, int size) throws IOException {
+		return device.read(address, buffer, offset, size);
 	}
 
 	@Override
@@ -349,24 +347,19 @@ public class AdafruitLEDBackpack implements I2CDevice {
 		device.write(address, buffer, offset, size);
 	}
 
-	@Override
-	public int read() throws IOException {
-		return device.read();
-	}
+	public byte[] writeDisplay(byte[] data) {
+		if (device == null) {
+			log.error("device is null");
+			return data;
+		}
 
-	@Override
-	public int read(byte[] buffer, int offset, int size) throws IOException {
-		return device.read(buffer, offset, size);
-	}
+		try {
+			device.write(0x00, data, 0, 16);
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 
-	@Override
-	public int read(int address) throws IOException {
-		return device.read(address);
-	}
-
-	@Override
-	public int read(int address, byte[] buffer, int offset, int size) throws IOException {
-		return device.read(address, buffer, offset, size);
+		return data;
 	}
 
 }

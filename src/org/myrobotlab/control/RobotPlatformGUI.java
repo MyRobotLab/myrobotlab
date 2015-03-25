@@ -77,6 +77,54 @@ public class RobotPlatformGUI extends ServiceGUI {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void attachGUI() {
+		subscribe("publishState", "getState", RobotPlatform.class);
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishState", "getState", RobotPlatform.class);
+	}
+
+	// new state function begin ---------------
+	// binding function TODO - do reflectively with default components?
+	public void getState(RobotPlatform t) {
+		// dimensionX.setText(t.dimensionX.toString());
+		// dimensionY.setText(t.dimensionY.toString());
+		// dimensionZ.setText(t.dimensionZ.toString());
+
+		positionX.setText(Integer.toString(t.positionX));
+		positionY.setText(Integer.toString(t.positionY));
+
+		targetX.setText(Integer.toString(t.targetX));
+		targetY.setText(Integer.toString(t.targetY));
+
+		dhT.setText(Long.toString(t.updateHeadingTime - t.updateHeadingTimeLast));
+
+		// TODO separate left & right power or a ratio factor for unbalanced
+		// wheels/motors
+		// TODO - possibly let motor deal with it?
+		// power.setText(t.power.toString());
+
+		headingCurrent.setText(Integer.toString(t.headingCurrent));
+		headingTarget.setText(Integer.toString(t.headingTarget));
+		headingLast.setText(Integer.toString(t.headingLast));
+		headingDelta.setText(Integer.toString(t.headingDelta));
+		if (t.headingDelta < 0) {
+			directionTarget.setText("left");
+		} else if (t.headingDelta > 0) {
+			directionTarget.setText("right");
+		} else {
+			directionTarget.setText("locked");
+		}
+		headingSpeed.setText(Integer.toString(t.headingSpeed));
+
+		headingSpeed.setText(Integer.toString(t.headingSpeed));
+
+	}
+
+	@Override
 	public void init() {
 
 		// position
@@ -178,53 +226,6 @@ public class RobotPlatformGUI extends ServiceGUI {
 		display.add(p);
 
 		// targetY.setPreferredSize(new Dimension(d.width+60,d.height));;
-
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", RobotPlatform.class);
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", RobotPlatform.class);
-	}
-
-	// new state function begin ---------------
-	// binding function TODO - do reflectively with default components?
-	public void getState(RobotPlatform t) {
-		// dimensionX.setText(t.dimensionX.toString());
-		// dimensionY.setText(t.dimensionY.toString());
-		// dimensionZ.setText(t.dimensionZ.toString());
-
-		positionX.setText(Integer.toString(t.positionX));
-		positionY.setText(Integer.toString(t.positionY));
-
-		targetX.setText(Integer.toString(t.targetX));
-		targetY.setText(Integer.toString(t.targetY));
-
-		dhT.setText(Long.toString(t.updateHeadingTime - t.updateHeadingTimeLast));
-
-		// TODO separate left & right power or a ratio factor for unbalanced
-		// wheels/motors
-		// TODO - possibly let motor deal with it?
-		// power.setText(t.power.toString());
-
-		headingCurrent.setText(Integer.toString(t.headingCurrent));
-		headingTarget.setText(Integer.toString(t.headingTarget));
-		headingLast.setText(Integer.toString(t.headingLast));
-		headingDelta.setText(Integer.toString(t.headingDelta));
-		if (t.headingDelta < 0) {
-			directionTarget.setText("left");
-		} else if (t.headingDelta > 0) {
-			directionTarget.setText("right");
-		} else {
-			directionTarget.setText("locked");
-		}
-		headingSpeed.setText(Integer.toString(t.headingSpeed));
-
-		headingSpeed.setText(Integer.toString(t.headingSpeed));
 
 	}
 

@@ -45,12 +45,10 @@ public class MouthControlGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-		display.add(new JLabel("no gui"));
-	}
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
 
-	public void getState(MouthControl mouth) {
-	
 	}
 
 	@Override
@@ -60,14 +58,16 @@ public class MouthControlGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void detachGUI() {
-	
+
+	}
+
+	public void getState(MouthControl mouth) {
+
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-
+	public void init() {
+		display.add(new JLabel("no gui"));
 	}
-	
 
 }

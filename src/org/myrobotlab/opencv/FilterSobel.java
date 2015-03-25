@@ -38,8 +38,7 @@ public class FilterSobel {
 		// TODO Auto-generated constructor stub
 	}
 
-	public String getDescription() {
-		// TODO Auto-generated method stub
+	public BufferedImage display(IplImage image) {
 		return null;
 	}
 
@@ -48,6 +47,15 @@ public class FilterSobel {
 	 * 
 	 * return null; }
 	 */
+
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void loadDefaultConfiguration() {
+
+	}
 
 	public Object process(BufferedImage output, BufferedImage image) {
 
@@ -96,7 +104,7 @@ public class FilterSobel {
 					gc = (short) (sobscale * (hor + vert));
 					gc = (short) (gc + offsetval);
 
-					gc = (short) ((gc > 255) ? 255 : gc);
+					gc = (gc > 255) ? 255 : gc;
 
 					out_pixels.setSample(i, j, bnd, gc);
 
@@ -118,14 +126,6 @@ public class FilterSobel {
 
 	public IplImage process(IplImage image, Object[] data) {
 		return image;
-	}
-
-	public BufferedImage display(IplImage image) {
-		return null;
-	}
-
-	public void loadDefaultConfiguration() {
-
 	}
 
 }

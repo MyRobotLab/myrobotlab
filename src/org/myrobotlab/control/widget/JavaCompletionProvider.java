@@ -27,6 +27,7 @@ public class JavaCompletionProvider extends DefaultCompletionProvider {
 	 *            The character.
 	 * @return Whether the character is valid.
 	 */
+	@Override
 	protected boolean isValidChar(char ch) {
 		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.';
 	}

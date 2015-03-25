@@ -92,27 +92,6 @@ public class GUIServiceInMethodDialog extends JDialog implements ActionListener 
 
 	}
 
-	public String formatOutMethod(MethodEntry me) {
-		StringBuffer ret = new StringBuffer();
-		ret.append(me.name);
-		if (me.parameterTypes != null) {
-			ret.append(" (");
-			for (int i = 0; i < me.parameterTypes.length; ++i) {
-				String p = me.parameterTypes[i].getCanonicalName();
-				String t[] = p.split("\\.");
-				ret.append(t[t.length - 1]);
-				if (i < me.parameterTypes.length - 1) {
-					ret.append(","); // TODO - NOT POSSIBLE TO CONNECT IN GUIService -
-										// FILTER OUT?
-				}
-			}
-
-			ret.append(")");
-		}
-
-		return ret.toString();
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JComboBox cb = (JComboBox) e.getSource();
@@ -166,6 +145,28 @@ public class GUIServiceInMethodDialog extends JDialog implements ActionListener 
 
 			this.dispose();
 		}
+	}
+
+	public String formatOutMethod(MethodEntry me) {
+		StringBuffer ret = new StringBuffer();
+		ret.append(me.name);
+		if (me.parameterTypes != null) {
+			ret.append(" (");
+			for (int i = 0; i < me.parameterTypes.length; ++i) {
+				String p = me.parameterTypes[i].getCanonicalName();
+				String t[] = p.split("\\.");
+				ret.append(t[t.length - 1]);
+				if (i < me.parameterTypes.length - 1) {
+					ret.append(","); // TODO - NOT POSSIBLE TO CONNECT IN
+										// GUIService -
+										// FILTER OUT?
+				}
+			}
+
+			ret.append(")");
+		}
+
+		return ret.toString();
 	}
 
 }

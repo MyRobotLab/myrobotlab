@@ -25,7 +25,6 @@
 
 package org.myrobotlab.control.widget;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -58,6 +57,15 @@ public class Client extends JApplet {
 		super();
 	}
 
+	private JPanel getJContentPane() {
+		if (jContentPane == null) {
+			jContentPane = new JPanel();
+			jContentPane.add(guiService.tabs);
+		}
+		return jContentPane;
+	}
+
+	@Override
 	public void init() {
 		this.setSize(500, 600);
 		try {
@@ -112,21 +120,13 @@ public class Client extends JApplet {
 
 		} catch (UnknownHostException e) {
 			log.error("Couldn't get Internet appletAddress: Unknown appletHostAddress");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 		this.setContentPane(getJContentPane());
 
-	}
-
-	private JPanel getJContentPane() {
-		if (jContentPane == null) {
-			jContentPane = new JPanel();
-			jContentPane.add(guiService.tabs);
-		}
-		return jContentPane;
 	}
 
 }

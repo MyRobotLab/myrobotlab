@@ -45,7 +45,6 @@ package org.myrobotlab.service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-
 import javaFlacEncoder.FLAC_FileEncoder;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -68,97 +67,6 @@ import org.tritonus.share.sampled.FloatSampleBuffer;
 
 public class GoogleSTT extends Service implements SpeechRecognizer {
 
-	public final static Logger log = LoggerFactory.getLogger(GoogleSTT.class.getCanonicalName());
-	private static final long serialVersionUID = 1L;
-
-	// microphone capture
-	boolean stopCapture = false;
-	transient ByteArrayOutputStream byteArrayOutputStream;
-	transient AudioFormat audioFormat;
-	transient TargetDataLine targetDataLine;
-	transient AudioInputStream audioInputStream;
-	transient SourceDataLine sourceDataLine;
-	transient CaptureThread captureThread = null;
-
-	String language = "en";
-	
-	private Boolean isListening = true;
-
-	// audio format
-	float sampleRate = 8000.0F; // 8000,11025,16000,22050,44100
-	int sampleSizeInBits = 16; // 8,16
-	int channels = 1; // 1,2 TODO - check for 2 & triangulation
-	boolean signed = true; // true,false
-	boolean bigEndian = false;
-
-	// transcribing
-	public final static int SUCCESS = 1;
-	public final static int ERROR = 2;
-	public final static int TRANSCRIBING = 3;
-	transient TranscriptionThread transcription = null;
-
-	// encoding
-	transient FLAC_FileEncoder encoder; // TODO - memory encoder
-
-	// root mean square level detection and capture management
-	// TODO - auto-gain adjustment
-	float rms;
-	float rmsThreshold = 0.0050f;
-	transient public byte[] rawBytes;
-	boolean isCapturing = false;
-	long captureStartTimeMS;
-	long captureTimeMinimumMS = 1200;
-	long captureTimeMS;
-	transient private FloatSampleBuffer buffer;
-	private int bufferSize = 512; // TODO - experiment with sampling size
-
-	public GoogleSTT(String n) {
-		super(n);
-		encoder = new FLAC_FileEncoder();
-	}
-
-	private AudioFormat getAudioFormat() {
-		return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
-	}
-
-	public void captureAudio() {
-		try {
-			audioFormat = getAudioFormat();
-			log.info("sample rate         " + sampleRate);
-			log.info("channels            " + channels);
-			log.info("sample size in bits " + sampleSizeInBits);
-			log.info("signed              " + signed);
-			log.info("bigEndian           " + bigEndian);
-			log.info("data rate is " + sampleRate * sampleSizeInBits / 8 + " bytes per second");
-			// create a data line with parameters
-			DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
-			// attempt to find & get an input data line with those parameters
-			targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
-			targetDataLine.open(audioFormat);
-			targetDataLine.start();
-
-			// create buffer for root mean square level detection
-			buffer = new FloatSampleBuffer(targetDataLine.getFormat().getChannels(), bufferSize, targetDataLine.getFormat().getSampleRate());
-
-			// capture from microphone
-			captureThread = new CaptureThread(this);
-			captureThread.start();
-		} catch (Exception e) {
-			log.error(Service.stackToString(e));
-		}
-	}
-
-	public void stopAudioCapture() {
-		stopCapture = true;
-	}
-
-
-	public synchronized boolean setListening(boolean b) {
-		isListening = b;
-		isListening.notifyAll();
-		return b;
-	}
-
 	/**
 	 * @author grog Does the audio capturing, rms, and data copying. Should
 	 *         probably be refactored into an AudioCaptureThread which could be
@@ -176,6 +84,7 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 			myService = s;
 		}
 
+		@Override
 		public void run() {
 			boolean x = true;
 
@@ -249,68 +158,68 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 		} // run
 	} // CaptureThread
 
-	public float level(float[] samples) {
-		float level = 0;
-		for (int i = 0; i < samples.length; i++) {
-			level += (samples[i] * samples[i]);
-		}
-		level /= samples.length;
-		level = (float) Math.sqrt(level);
-		return level;
-	}
+	public final static Logger log = LoggerFactory.getLogger(GoogleSTT.class.getCanonicalName());
 
-	public static int toInt(byte[] bytes) {
-		int result = 0;
-		for (int i = 0; i < 4; i++) {
-			result = (result << 8) - Byte.MIN_VALUE + (int) bytes[i];
-		}
-		return result;
-	}
+	private static final long serialVersionUID = 1L;
 
-	private void transcribe(String path) {
-		// only interrupt if available
-		// transcription.interrupt();
+	// microphone capture
+	boolean stopCapture = false;
 
-		Logging.logTime("start");
-		Logging.logTime("pre new transcription " + path);
-		TranscriptionThread transcription = new TranscriptionThread(this, this.getName() + "_transcriber", language);
-		transcription.debug = true;
-		Logging.logTime("pre new thread start");
-		transcription.start();
-		Logging.logTime("pre transcription");
-		transcription.startTranscription(path);
-		Logging.logTime("post transcription");
+	transient ByteArrayOutputStream byteArrayOutputStream;
 
-		// threads.add(transcription);
-	}
-	
-	/**
-	 * Event is sent when the listening Service is actually listening. There is
-	 * some delay when it initially loads.
-	 */
-	public void listeningEvent() {
-		return;
-	}
+	transient AudioFormat audioFormat;
 
-	
-	public void publishRecognized(String recognizedText)
-	{
-		invoke("recognized", recognizedText);
-	}
+	transient TargetDataLine targetDataLine;
+	transient AudioInputStream audioInputStream;
+	transient SourceDataLine sourceDataLine;
 
-	public void startListening()
-	{
-		
-	}
-	public void stopListening()
-	{
-		
-	}
+	transient CaptureThread captureThread = null;
 
+	String language = "en";
+
+	private Boolean isListening = true;
+	// audio format
+	float sampleRate = 8000.0F; // 8000,11025,16000,22050,44100
+	int sampleSizeInBits = 16; // 8,16
+	int channels = 1; // 1,2 TODO - check for 2 & triangulation
+	boolean signed = true; // true,false
+
+	boolean bigEndian = false;
+	// transcribing
+	public final static int SUCCESS = 1;
+	public final static int ERROR = 2;
+	public final static int TRANSCRIBING = 3;
+
+	transient TranscriptionThread transcription = null;
+
+	// encoding
+	transient FLAC_FileEncoder encoder; // TODO - memory encoder
+	// root mean square level detection and capture management
+	// TODO - auto-gain adjustment
+	float rms;
+	float rmsThreshold = 0.0050f;
+	transient public byte[] rawBytes;
+	boolean isCapturing = false;
+	long captureStartTimeMS;
+	long captureTimeMinimumMS = 1200;
+	long captureTimeMS;
+	transient private FloatSampleBuffer buffer;
+
+	private int bufferSize = 512; // TODO - experiment with sampling size
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		GoogleSTT stt = new GoogleSTT("stt");
+		// stt.startService();
+		stt.captureAudio();
+		stt.stopAudioCapture();
+	}
 
 	public static void saveWavAsFile(byte[] byte_array, AudioFormat audioFormat, String file) {
 		try {
-			long length = (long) (byte_array.length / audioFormat.getFrameSize());
+			long length = byte_array.length / audioFormat.getFrameSize();
 			ByteArrayInputStream bais = new ByteArrayInputStream(byte_array);
 			AudioInputStream audioInputStreamTemp = new AudioInputStream(bais, audioFormat, length);
 			File fileOut = new File(file);
@@ -342,11 +251,60 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 		return Double.longBitsToDouble(toLong(data));
 	}
 
+	public static int toInt(byte[] bytes) {
+		int result = 0;
+		for (int i = 0; i < 4; i++) {
+			result = (result << 8) - Byte.MIN_VALUE + bytes[i];
+		}
+		return result;
+	}
+
 	public static long toLong(byte[] data) {
 		if (data == null || data.length != 8)
 			return 0x0;
-		return (long) ((long) (0xff & data[0]) << 56 | (long) (0xff & data[1]) << 48 | (long) (0xff & data[2]) << 40 | (long) (0xff & data[3]) << 32
-				| (long) (0xff & data[4]) << 24 | (long) (0xff & data[5]) << 16 | (long) (0xff & data[6]) << 8 | (long) (0xff & data[7]) << 0);
+		return (long) (0xff & data[0]) << 56 | (long) (0xff & data[1]) << 48 | (long) (0xff & data[2]) << 40 | (long) (0xff & data[3]) << 32
+				| (long) (0xff & data[4]) << 24 | (long) (0xff & data[5]) << 16 | (long) (0xff & data[6]) << 8 | (long) (0xff & data[7]) << 0;
+	}
+
+	public GoogleSTT(String n) {
+		super(n);
+		encoder = new FLAC_FileEncoder();
+	}
+
+	public void captureAudio() {
+		try {
+			audioFormat = getAudioFormat();
+			log.info("sample rate         " + sampleRate);
+			log.info("channels            " + channels);
+			log.info("sample size in bits " + sampleSizeInBits);
+			log.info("signed              " + signed);
+			log.info("bigEndian           " + bigEndian);
+			log.info("data rate is " + sampleRate * sampleSizeInBits / 8 + " bytes per second");
+			// create a data line with parameters
+			DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
+			// attempt to find & get an input data line with those parameters
+			targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
+			targetDataLine.open(audioFormat);
+			targetDataLine.start();
+
+			// create buffer for root mean square level detection
+			buffer = new FloatSampleBuffer(targetDataLine.getFormat().getChannels(), bufferSize, targetDataLine.getFormat().getSampleRate());
+
+			// capture from microphone
+			captureThread = new CaptureThread(this);
+			captureThread.start();
+		} catch (Exception e) {
+			log.error(Service.stackToString(e));
+		}
+	}
+
+	private AudioFormat getAudioFormat() {
+		return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "speech recognition" };
 	}
 
 	/*
@@ -359,14 +317,33 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 		return "Uses the Google Speech To Text service";
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+	public float level(float[] samples) {
+		float level = 0;
+		for (int i = 0; i < samples.length; i++) {
+			level += (samples[i] * samples[i]);
+		}
+		level /= samples.length;
+		level = (float) Math.sqrt(level);
+		return level;
+	}
 
-		GoogleSTT stt = new GoogleSTT("stt");
-		// stt.startService();
-		stt.captureAudio();
-		stt.stopAudioCapture();
+	/**
+	 * Event is sent when the listening Service is actually listening. There is
+	 * some delay when it initially loads.
+	 */
+	@Override
+	public void listeningEvent() {
+		return;
+	}
+
+	@Override
+	public void pauseListening() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void publishRecognized(String recognizedText) {
+		invoke("recognized", recognizedText);
 	}
 
 	@Override
@@ -374,28 +351,53 @@ public class GoogleSTT extends Service implements SpeechRecognizer {
 		return word;
 	}
 
-
-
 	@Override
-	public void pauseListening() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void releaseService(){
+	public void releaseService() {
 		super.releaseService();
 		stopAudioCapture();
 	}
-	
+
 	@Override
 	public void resumeListening() {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
+	public synchronized boolean setListening(boolean b) {
+		isListening = b;
+		isListening.notifyAll();
+		return b;
+	}
+
 	@Override
-	public String[] getCategories() {
-		return new String[] {"speech recognition"};
+	public void startListening() {
+
+	}
+
+	public void stopAudioCapture() {
+		stopCapture = true;
+	}
+
+	@Override
+	public void stopListening() {
+
+	}
+
+	private void transcribe(String path) {
+		// only interrupt if available
+		// transcription.interrupt();
+
+		Logging.logTime("start");
+		Logging.logTime("pre new transcription " + path);
+		TranscriptionThread transcription = new TranscriptionThread(this, this.getName() + "_transcriber", language);
+		transcription.debug = true;
+		Logging.logTime("pre new thread start");
+		transcription.start();
+		Logging.logTime("pre transcription");
+		transcription.startTranscription(path);
+		Logging.logTime("post transcription");
+
+		// threads.add(transcription);
 	}
 
 }

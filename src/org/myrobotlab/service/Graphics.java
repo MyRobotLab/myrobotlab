@@ -33,6 +33,7 @@ import java.util.Random;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
@@ -40,12 +41,46 @@ import org.slf4j.Logger;
 public class Graphics extends Service {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(Graphics.class.getCanonicalName());
 
 	public int width = 640;
 	public int height = 480;
 
 	public String guiServiceName = null;
+
+	HashMap<String, Color> plotColorMap = new HashMap<String, Color>();
+
+	HashMap<String, Integer> plotXValueMap = new HashMap<String, Integer>();
+
+	public Random rand = new Random();
+
+	int plotTextStart = 10;
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		try {
+			GUIService gui = new GUIService("gui");
+			Graphics graph = new Graphics("graph");
+			// OpenCV opencv = new OpenCV("opencv");
+			// manual intervention - clear screen
+
+			gui.startService();
+			graph.startService();
+
+			graph.attach(gui.getName());
+			graph.createGraph(640, 480);
+			graph.setColor(new Color(0x666666));
+			graph.drawGrid(10, 10);
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		// graph.draw
+
+	}
 
 	public Graphics(String n) {
 		super(n);
@@ -63,57 +98,12 @@ public class Graphics extends Service {
 		return true;
 	}
 
-	public void detach() {
-		this.guiServiceName = null;
-	}
-
-
-
-	public void createGraph() {
-		createGraph(width, height);
-	}
-
-	public void createGraph(Integer x, Integer y) {
-		send(guiServiceName, "createGraph", new Dimension(x, y));
-	}
-
-	// wrappers begin --------------------------
-	public void drawLine(Integer x1, Integer y1, Integer x2, Integer y2) {
-		send(guiServiceName, "drawLine", x1, y1, x2, y2);
-	}
-
-	public void drawString(String str, Integer x, Integer y) {
-		send(guiServiceName, "drawString", str, x, y);
-	}
-
-	public void drawGrid(Integer x, Integer y) {
-		send(guiServiceName, "drawGrid", x, y);
-	}
-
-	public void drawRect(Integer x, Integer y, Integer width, Integer height) {
-		send(guiServiceName, "drawRect", x, y, width, height);
-	}
-
-	public void fillOval(Integer x, Integer y, Integer width, Integer height) {
-		send(guiServiceName, "fillOval", x, y, width, height);
-	}
-
-	public void fillRect(Integer x, Integer y, Integer width, Integer height) {
-		send(guiServiceName, "fillRect", x, y, width, height);
-	}
-
 	public void clearRect(Integer x, Integer y, Integer width, Integer height) {
 		send(guiServiceName, "clearRect", x, y, width, height);
 	}
 
-	public void setColor(Color c) {
-		send(guiServiceName, "setColor", c);
-	}
-
-	// wrappers end --------------------------
-
-	public void refreshDisplay() {
-		send(guiServiceName, "refreshDisplay");
+	public void createGraph() {
+		createGraph(width, height);
 	}
 
 	/*
@@ -131,87 +121,85 @@ public class Graphics extends Service {
 		return d;
 	}
 
+	public void createGraph(Integer x, Integer y) {
+		send(guiServiceName, "createGraph", new Dimension(x, y));
+	}
+
+	public void detach() {
+		this.guiServiceName = null;
+	}
+
+	public void drawGrid(Integer x, Integer y) {
+		send(guiServiceName, "drawGrid", x, y);
+	}
+
+	// wrappers end --------------------------
+
+	// wrappers begin --------------------------
+	public void drawLine(Integer x1, Integer y1, Integer x2, Integer y2) {
+		send(guiServiceName, "drawLine", x1, y1, x2, y2);
+	}
+
+	public void drawRect(Integer x, Integer y, Integer width, Integer height) {
+		send(guiServiceName, "drawRect", x, y, width, height);
+	}
+
 	/*
 	 * publishing points end --------------------------------------------
 	 */
 
-	HashMap<String, Color> plotColorMap = new HashMap<String, Color>();
-	HashMap<String, Integer> plotXValueMap = new HashMap<String, Integer>();
+	public void drawString(String str, Integer x, Integer y) {
+		send(guiServiceName, "drawString", str, x, y);
+	}
 
-	public Random rand = new Random();
-	int plotTextStart = 10;
+	public void fillOval(Integer x, Integer y, Integer width, Integer height) {
+		send(guiServiceName, "fillOval", x, y, width, height);
+	}
+
+	public void fillRect(Integer x, Integer y, Integer width, Integer height) {
+		send(guiServiceName, "fillRect", x, y, width, height);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "display" };
+	}
 
 	/*
-	public void plot(Message msg) {
-		if (msg.data == null)
-
-			if (!plotColorMap.containsKey(msg.sender)) {
-				Color color = new Color(rand.nextInt(16777215));
-				plotColorMap.put(msg.sender, color);
-				setColor(plotColorMap.get(msg.sender));
-				drawString(msg.sender, 10, plotTextStart);
-				plotTextStart += 10;
-			}
-
-		if (!plotXValueMap.containsKey(msg.sender)) {
-			Integer x = new Integer(0);
-			plotXValueMap.put(msg.sender, x);
-		}
-
-		Integer value = cfg.getInt("height");
-		if (msg.data != null && msg.data.length > 0) {
-			value = (Integer) msg.data[0];
-		}
-
-		int x = plotXValueMap.get(msg.sender);
-		int y = cfg.getInt("height") - value % cfg.getInt("height");
-		setColor(plotColorMap.get(msg.sender));
-		drawLine(x, y, x, y);
-		if (x % cfg.getInt("width") == 0 || y % cfg.getInt("height") == 0) {
-			int textPos = 10;
-			Iterator<String> it = plotColorMap.keySet().iterator();
-			while (it.hasNext()) {
-				String name = it.next();
-				setColor(plotColorMap.get(name));
-				drawString(name, 10, textPos);
-				textPos += 10;
-			}
-		}
-		plotXValueMap.put(msg.getName(), ++x % cfg.getInt("width"));
-	}
-
-*/
-	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		GUIService gui = new GUIService("gui");
-		Graphics graph = new Graphics("graph");
-		// OpenCV opencv = new OpenCV("opencv");
-		// manual intervention - clear screen
-
-		gui.startService();
-		graph.startService();
-
-		
-		graph.attach(gui.getName());
-		graph.createGraph(640, 480);
-		graph.setColor(new Color(0x666666));
-		graph.drawGrid(10, 10);
-
-		// graph.draw
-
-	}
+	 * public void plot(Message msg) { if (msg.data == null)
+	 * 
+	 * if (!plotColorMap.containsKey(msg.sender)) { Color color = new
+	 * Color(rand.nextInt(16777215)); plotColorMap.put(msg.sender, color);
+	 * setColor(plotColorMap.get(msg.sender)); drawString(msg.sender, 10,
+	 * plotTextStart); plotTextStart += 10; }
+	 * 
+	 * if (!plotXValueMap.containsKey(msg.sender)) { Integer x = new Integer(0);
+	 * plotXValueMap.put(msg.sender, x); }
+	 * 
+	 * Integer value = cfg.getInt("height"); if (msg.data != null &&
+	 * msg.data.length > 0) { value = (Integer) msg.data[0]; }
+	 * 
+	 * int x = plotXValueMap.get(msg.sender); int y = cfg.getInt("height") -
+	 * value % cfg.getInt("height"); setColor(plotColorMap.get(msg.sender));
+	 * drawLine(x, y, x, y); if (x % cfg.getInt("width") == 0 || y %
+	 * cfg.getInt("height") == 0) { int textPos = 10; Iterator<String> it =
+	 * plotColorMap.keySet().iterator(); while (it.hasNext()) { String name =
+	 * it.next(); setColor(plotColorMap.get(name)); drawString(name, 10,
+	 * textPos); textPos += 10; } } plotXValueMap.put(msg.getName(), ++x %
+	 * cfg.getInt("width")); }
+	 */
 
 	@Override
 	public String getDescription() {
 		return "a graphics service encapsulating Java swing graphic methods";
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"display"};
+
+	public void refreshDisplay() {
+		send(guiServiceName, "refreshDisplay");
+	}
+
+	public void setColor(Color c) {
+		send(guiServiceName, "setColor", c);
 	}
 
 }

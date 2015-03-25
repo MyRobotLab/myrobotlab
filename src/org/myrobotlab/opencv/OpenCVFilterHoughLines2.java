@@ -54,7 +54,7 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterHoughLines2.class.getCanonicalName());
 
 	IplImage gray = null;
-	
+
 	double lowThreshold = 0.0;
 	double highThreshold = 50.0;
 	int apertureSize = 5;
@@ -62,19 +62,24 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 	IplImage inlines = null;
 
 	CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
-	
-	public OpenCVFilterHoughLines2()  {
+
+	CvPoint p0 = new CvPoint(0, 0);
+
+	CvPoint p1 = new CvPoint(0, 0);
+
+	public OpenCVFilterHoughLines2() {
 		super();
 	}
-	
-	public OpenCVFilterHoughLines2(String name)  {
+
+	public OpenCVFilterHoughLines2(String name) {
 		super(name);
 	}
 
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
 
-	
-	CvPoint p0 = new CvPoint(0, 0);
-	CvPoint p1 = new CvPoint(0, 0);
+	}
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
@@ -131,12 +136,6 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 		// cxcore.cvPutText(image, "x", cvPoint(10, 14), font, CvScalar.WHITE);
 
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

@@ -9,6 +9,7 @@ import javax.activation.FileDataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
@@ -39,33 +40,25 @@ public class Email {
 	Properties emailProperties;
 	Session mailSession;
 
-	public void setEmailServer(String host) {
-		// docs of all email properties
-		// https://javamail.java.net/nonav/docs/api/com/sun/mail/smtp/package-summary.html
-		emailProperties = System.getProperties();
-		emailProperties.put("mail.smtp.host", host);
-		emailProperties.put("mail.smtp.port", 25);
-		// emailProperties.put("mail.smtp.auth", "false");
-		// emailProperties.put("mail.smtp.starttls.enable", "true");
-	}
+	public static void main(String args[]) throws AddressException, MessagingException {
+		try {
 
-	public void setEmailServer(String host, Integer port) {
-		emailProperties = System.getProperties();
-		emailProperties.put("mail.smtp.host", host);
-		emailProperties.put("mail.smtp.port", port);
-		// emailProperties.put("mail.smtp.auth", "true");
-		// emailProperties.put("mail.smtp.starttls.enable", "true");
-	}
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.ERROR);
 
-	public void setGmailServer(String user, String password) {
-		emailProperties = System.getProperties();
-		// gmail's smtp port
-		emailProperties.put("mail.smtp.user", user);
-		emailProperties.put("mail.smtp.pass", password);
-		emailProperties.put("mail.smtp.host", "smtp.gmail.com");
-		emailProperties.put("mail.smtp.port", "587");
-		emailProperties.put("mail.smtp.auth", "true");
-		emailProperties.put("mail.smtp.starttls.enable", "true");
+			Email email = new Email();
+			// email.setGmailServer();
+			email.setEmailServer("mail.freightliner.com");
+			// email.createEmailMessage("greg.perry@daimler.com", "test",
+			// "test body");
+			email.sendEmail("greg.perry@daimler.com", "test", "test body");
+			// email.sendEmailWithImage("greg.perry@daimler.com", "test",
+			// "test body", "opencv.input.4.jpg");
+
+			log.info("done");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 	public MimeMessage createEmailMessage(String to, String subject, String body) throws AddressException, MessagingException {
@@ -96,17 +89,6 @@ public class Email {
 		return msg;
 	}
 
-	public void sendEmail(MimeMessage msg) throws AddressException, MessagingException {
-
-		Transport transport = mailSession.getTransport("smtp");
-
-		transport.connect();
-		// transport.connect(emailHost, fromUser, fromUserEmailPassword);
-		transport.sendMessage(msg, msg.getAllRecipients());
-		transport.close();
-		log.info("Email sent successfully.");
-	}
-
 	// TODO String[] of attachments - Derive mimeType from File - inline with
 	// img if is image
 	public MimeMessage createEmailMessageWithImage(String to, String subject, String body, String imgFileName) throws AddressException, MessagingException {
@@ -125,11 +107,22 @@ public class Email {
 		DataSource source = new FileDataSource(img);
 		messageBodyPart.setDataHandler(new DataHandler(source));
 		messageBodyPart.setFileName(imgFileName);
-		messageBodyPart.setDisposition(MimeBodyPart.INLINE);
+		messageBodyPart.setDisposition(Part.INLINE);
 		multipart.addBodyPart(messageBodyPart);
 
 		msg.setContent(multipart);
 		return msg;
+	}
+
+	public void sendEmail(MimeMessage msg) throws AddressException, MessagingException {
+
+		Transport transport = mailSession.getTransport("smtp");
+
+		transport.connect();
+		// transport.connect(emailHost, fromUser, fromUserEmailPassword);
+		transport.sendMessage(msg, msg.getAllRecipients());
+		transport.close();
+		log.info("Email sent successfully.");
 	}
 
 	public void sendEmail(String to, String subject, String body) throws AddressException, MessagingException {
@@ -142,6 +135,13 @@ public class Email {
 		transport.sendMessage(msg, msg.getAllRecipients());
 		transport.close();
 		log.info("Email sent successfully.");
+	}
+
+	public void sendEmail(String[] to, String subject, String body) throws AddressException, MessagingException {
+		for (int i = 0; i < to.length; ++i) {
+			sendEmail(to[i], subject, body);
+		}
+
 	}
 
 	// FIXME - needs work generalize to take a File[] and extract mime info
@@ -157,32 +157,33 @@ public class Email {
 		log.info("Email sent successfully.");
 	}
 
-	public static void main(String args[]) throws AddressException, MessagingException {
-		try {
-
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.ERROR);
-
-			Email email = new Email();
-			// email.setGmailServer();
-			email.setEmailServer("mail.freightliner.com");
-			// email.createEmailMessage("greg.perry@daimler.com", "test",
-			// "test body");
-			email.sendEmail("greg.perry@daimler.com", "test", "test body");
-			// email.sendEmailWithImage("greg.perry@daimler.com", "test",
-			// "test body", "opencv.input.4.jpg");
-
-			log.info("done");
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
+	public void setEmailServer(String host) {
+		// docs of all email properties
+		// https://javamail.java.net/nonav/docs/api/com/sun/mail/smtp/package-summary.html
+		emailProperties = System.getProperties();
+		emailProperties.put("mail.smtp.host", host);
+		emailProperties.put("mail.smtp.port", 25);
+		// emailProperties.put("mail.smtp.auth", "false");
+		// emailProperties.put("mail.smtp.starttls.enable", "true");
 	}
 
-	public void sendEmail(String[] to, String subject, String body) throws AddressException, MessagingException {
-		for (int i = 0; i < to.length; ++i){
-			sendEmail(to[i], subject, body);
-		}
-		
+	public void setEmailServer(String host, Integer port) {
+		emailProperties = System.getProperties();
+		emailProperties.put("mail.smtp.host", host);
+		emailProperties.put("mail.smtp.port", port);
+		// emailProperties.put("mail.smtp.auth", "true");
+		// emailProperties.put("mail.smtp.starttls.enable", "true");
+	}
+
+	public void setGmailServer(String user, String password) {
+		emailProperties = System.getProperties();
+		// gmail's smtp port
+		emailProperties.put("mail.smtp.user", user);
+		emailProperties.put("mail.smtp.pass", password);
+		emailProperties.put("mail.smtp.host", "smtp.gmail.com");
+		emailProperties.put("mail.smtp.port", "587");
+		emailProperties.put("mail.smtp.auth", "true");
+		emailProperties.put("mail.smtp.starttls.enable", "true");
 	}
 
 }
