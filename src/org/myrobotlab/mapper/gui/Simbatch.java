@@ -51,17 +51,6 @@ public class Simbatch {
 		simulator = new Simulator(null, world, ed);
 	}
 
-	/** Restart the simulation */
-	public void reset() {
-		simulator.resetSimulation();
-		simulator.initBehaviors();
-	}
-
-	/** perform one step - call it in your main loop */
-	public void step() {
-		simulator.simulateOneStep();
-	}
-
 	/** Dispose resource at end. **/
 	public void dispose() {
 
@@ -74,6 +63,17 @@ public class Simbatch {
 		frame.dispose();
 		System.runFinalization();
 		System.gc();
+	}
+
+	/** Restart the simulation */
+	public void reset() {
+		simulator.resetSimulation();
+		simulator.initBehaviors();
+	}
+
+	/** perform one step - call it in your main loop */
+	public void step() {
+		simulator.simulateOneStep();
 	}
 
 }

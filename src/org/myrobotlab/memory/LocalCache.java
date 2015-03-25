@@ -32,6 +32,20 @@ public class LocalCache extends BaseCache {
 	private final boolean useTimeout;
 
 	/**
+	 * Constructor. Default load factor (0.75) and concurrencyLevel (16).
+	 * Default timeout: 0 (never).
+	 * 
+	 * @param initialCapacity
+	 *            the initial capacity. The implementation performs internal
+	 *            sizing to accommodate this many elements.
+	 * @throws IllegalArgumentException
+	 *             if the initial capacity of elements is negative.
+	 */
+	public LocalCache(int initialCapacity) {
+		this(initialCapacity, DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL, 0);
+	}
+
+	/**
 	 * Constructor.
 	 * 
 	 * @param initialCapacity
@@ -57,20 +71,6 @@ public class LocalCache extends BaseCache {
 		this.timeout = timeout;
 		nextTimeout = 0l;
 		useTimeout = this.timeout > 0l;
-	}
-
-	/**
-	 * Constructor. Default load factor (0.75) and concurrencyLevel (16).
-	 * Default timeout: 0 (never).
-	 * 
-	 * @param initialCapacity
-	 *            the initial capacity. The implementation performs internal
-	 *            sizing to accommodate this many elements.
-	 * @throws IllegalArgumentException
-	 *             if the initial capacity of elements is negative.
-	 */
-	public LocalCache(int initialCapacity) {
-		this(initialCapacity, DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL, 0);
 	}
 
 	@Override

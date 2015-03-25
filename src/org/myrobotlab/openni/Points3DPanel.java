@@ -89,50 +89,6 @@ public class Points3DPanel extends JPanel
 		su.addBranchGraph(sceneBG);
 	} // end of Points3DPanel()
 
-	/**
-	 * initialize the scene
-	 * 
-	 * @param ptsShape
-	 */
-	private void createSceneGraph(PointsShape ptsShape) {
-		sceneBG = new BranchGroup(); // global?
-		bounds = new BoundingSphere(new Point3d(0, 0, 0), BOUNDSIZE);
-
-		lightScene(); // add the lights
-		addBackground(); // add the sky
-//		sceneBG.addChild(new CheckerFloor().getBG()); // add the floor
-
-		addPointsShape(ptsShape);
-		addKinectShape();
-
-		sceneBG.compile(); // fix the scene
-	}
-
-	private void lightScene()
-	/* One ambient light, 2 directional lights */
-	{
-		Color3f white = new Color3f(1.0f, 1.0f, 1.0f);
-
-		// Set up the ambient light
-		AmbientLight ambientLightNode = new AmbientLight(white);
-		ambientLightNode.setInfluencingBounds(bounds);
-		sceneBG.addChild(ambientLightNode);
-
-		// Set up the directional lights
-		Vector3f light1Direction = new Vector3f(-1.0f, -1.0f, -1.0f);
-		// left, down, backwards
-		Vector3f light2Direction = new Vector3f(1.0f, -1.0f, 1.0f);
-		// right, down, forwards
-
-		DirectionalLight light1 = new DirectionalLight(white, light1Direction);
-		light1.setInfluencingBounds(bounds);
-		sceneBG.addChild(light1);
-
-		DirectionalLight light2 = new DirectionalLight(white, light2Direction);
-		light2.setInfluencingBounds(bounds);
-		sceneBG.addChild(light2);
-	} // end of lightScene()
-
 	private void addBackground()
 	// A blue sky
 	{
@@ -142,54 +98,6 @@ public class Points3DPanel extends JPanel
 		back.setColor(0.0f, 0.0f, 0.0f); // sky colour
 		sceneBG.addChild(back);
 	} // end of addBackground()
-
-	/**
-	 * OrbitBehaviour allows the user to rotate around the scene, and to zoom in
-	 * and out.
-	 */
-	private void orbitControls(Canvas3D c) {
-		OrbitBehavior orbit = new OrbitBehavior(c, OrbitBehavior.REVERSE_ALL);
-		orbit.setSchedulingBounds(bounds);
-
-		ViewingPlatform vp = su.getViewingPlatform();
-		vp.setViewPlatformBehavior(orbit);
-	} // end of orbitControls()
-
-	private void initUserPosition()
-	// Set the user's initial viewpoint using lookAt()
-	{
-		ViewingPlatform vp = su.getViewingPlatform();
-		TransformGroup steerTG = vp.getViewPlatformTransform();
-
-		Transform3D t3d = new Transform3D();
-		steerTG.getTransform(t3d);
-
-		// args are: viewer posn, where looking, up direction
-		t3d.lookAt(USERPOSN, new Point3d(0, 0, 0), new Vector3d(0, 1, 0));
-		t3d.invert();
-
-		steerTG.setTransform(t3d);
-	} // end of initUserPosition()
-
-	/**
-	 * This is the only method different from the Checkers3D example in Chapter
-	 * 15 of "Killer Game Programming in Java"
-	 * (http://fivedots.coe.psu.ac.th/~ad/jg/ch8/).
-	 * 
-	 * All the hard work is done inside the PointsShape object. The transform
-	 * group is used to position (and perhaps scale) the points cloud.
-	 */
-	private void addPointsShape(PointsShape ptsShape) {
-		// scale and move start position to (-4,0,0) // change later
-		TransformGroup posnTG = new TransformGroup();
-		Transform3D t3d = new Transform3D();
-		// t3d.setScale(0.5);
-		// t3d.setTranslation(new Vector3d(-3.2f, 2.4f, 0.0f));// 6.40 / 2
-		t3d.setTranslation(new Vector3d(0f, 0f, 0.0f));// 6.40 / 2
-		posnTG.setTransform(t3d);
-		posnTG.addChild(ptsShape);
-		sceneBG.addChild(posnTG);
-	}
 
 	public void addKinectShape() {
 		// create an appearance
@@ -218,7 +126,7 @@ public class Points3DPanel extends JPanel
 		Point3f[] dotDashPts = new Point3f[2];
 		dotDashPts[0] = new Point3f(0.0f, 0.0f, 0.0f);
 		dotDashPts[1] = new Point3f(4.9f, 4.7f, -5.0f);
-		LineArray dotDash = new LineArray(2, LineArray.COORDINATES);
+		LineArray dotDash = new LineArray(2, GeometryArray.COORDINATES);
 		dotDash.setCoordinates(0, dotDashPts);
 		LineAttributes dotDashLa = new LineAttributes();
 		dotDashLa.setLineWidth(4.0f);
@@ -232,6 +140,26 @@ public class Points3DPanel extends JPanel
 		// Shape3D pyramid = createPyramid();
 		// posnTG.addChild(pyramid);
 
+		sceneBG.addChild(posnTG);
+	}
+
+	/**
+	 * This is the only method different from the Checkers3D example in Chapter
+	 * 15 of "Killer Game Programming in Java"
+	 * (http://fivedots.coe.psu.ac.th/~ad/jg/ch8/).
+	 * 
+	 * All the hard work is done inside the PointsShape object. The transform
+	 * group is used to position (and perhaps scale) the points cloud.
+	 */
+	private void addPointsShape(PointsShape ptsShape) {
+		// scale and move start position to (-4,0,0) // change later
+		TransformGroup posnTG = new TransformGroup();
+		Transform3D t3d = new Transform3D();
+		// t3d.setScale(0.5);
+		// t3d.setTranslation(new Vector3d(-3.2f, 2.4f, 0.0f));// 6.40 / 2
+		t3d.setTranslation(new Vector3d(0f, 0f, 0.0f));// 6.40 / 2
+		posnTG.setTransform(t3d);
+		posnTG.addChild(ptsShape);
 		sceneBG.addChild(posnTG);
 	}
 
@@ -267,5 +195,77 @@ public class Points3DPanel extends JPanel
 		Shape3D pyramid = new Shape3D(pyGeom);
 		return pyramid;
 	}
+
+	/**
+	 * initialize the scene
+	 * 
+	 * @param ptsShape
+	 */
+	private void createSceneGraph(PointsShape ptsShape) {
+		sceneBG = new BranchGroup(); // global?
+		bounds = new BoundingSphere(new Point3d(0, 0, 0), BOUNDSIZE);
+
+		lightScene(); // add the lights
+		addBackground(); // add the sky
+		// sceneBG.addChild(new CheckerFloor().getBG()); // add the floor
+
+		addPointsShape(ptsShape);
+		addKinectShape();
+
+		sceneBG.compile(); // fix the scene
+	}
+
+	private void initUserPosition()
+	// Set the user's initial viewpoint using lookAt()
+	{
+		ViewingPlatform vp = su.getViewingPlatform();
+		TransformGroup steerTG = vp.getViewPlatformTransform();
+
+		Transform3D t3d = new Transform3D();
+		steerTG.getTransform(t3d);
+
+		// args are: viewer posn, where looking, up direction
+		t3d.lookAt(USERPOSN, new Point3d(0, 0, 0), new Vector3d(0, 1, 0));
+		t3d.invert();
+
+		steerTG.setTransform(t3d);
+	} // end of initUserPosition()
+
+	private void lightScene()
+	/* One ambient light, 2 directional lights */
+	{
+		Color3f white = new Color3f(1.0f, 1.0f, 1.0f);
+
+		// Set up the ambient light
+		AmbientLight ambientLightNode = new AmbientLight(white);
+		ambientLightNode.setInfluencingBounds(bounds);
+		sceneBG.addChild(ambientLightNode);
+
+		// Set up the directional lights
+		Vector3f light1Direction = new Vector3f(-1.0f, -1.0f, -1.0f);
+		// left, down, backwards
+		Vector3f light2Direction = new Vector3f(1.0f, -1.0f, 1.0f);
+		// right, down, forwards
+
+		DirectionalLight light1 = new DirectionalLight(white, light1Direction);
+		light1.setInfluencingBounds(bounds);
+		sceneBG.addChild(light1);
+
+		DirectionalLight light2 = new DirectionalLight(white, light2Direction);
+		light2.setInfluencingBounds(bounds);
+		sceneBG.addChild(light2);
+	} // end of lightScene()
+
+	/**
+	 * OrbitBehaviour allows the user to rotate around the scene, and to zoom in
+	 * and out.
+	 */
+	private void orbitControls(Canvas3D c) {
+		OrbitBehavior orbit = new OrbitBehavior(c, OrbitBehavior.REVERSE_ALL);
+		orbit.setSchedulingBounds(bounds);
+
+		ViewingPlatform vp = su.getViewingPlatform();
+		vp.setViewPlatformBehavior(orbit);
+	} // end of orbitControls()
 
 } // end of Points3DPanel class

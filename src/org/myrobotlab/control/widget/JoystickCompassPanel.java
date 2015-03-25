@@ -16,7 +16,6 @@ import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-
 public class JoystickCompassPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final int PANEL_SIZE = 80;
@@ -59,16 +58,7 @@ public class JoystickCompassPanel extends JPanel {
 
 	} // end of CompassPanel()
 
-	public void setX(Float value) {
-		x = (int) (PANEL_SIZE / 2 * value + PANEL_SIZE / 2);
-		XLabel.setText(String.format("%.3f", value));
-	}
-
-	public void setY(Float value) {
-		y = (int) (PANEL_SIZE / 2 * value + PANEL_SIZE / 2);
-		YLabel.setText(String.format("%.3f", value));
-	}
-
+	@Override
 	public void paintComponent(Graphics g)
 	// draw the current compass position as a black circle
 	{
@@ -113,6 +103,16 @@ public class JoystickCompassPanel extends JPanel {
 			x = 0 + MARKER;
 			y = 0 + MARKER;
 		}
+	}
+
+	public void setX(Float value) {
+		x = (int) (PANEL_SIZE / 2 * value + PANEL_SIZE / 2);
+		XLabel.setText(String.format("%.3f", value));
+	}
+
+	public void setY(Float value) {
+		y = (int) (PANEL_SIZE / 2 * value + PANEL_SIZE / 2);
+		YLabel.setText(String.format("%.3f", value));
 	}
 
 } // end of CompassPanel class

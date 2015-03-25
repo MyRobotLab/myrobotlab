@@ -28,7 +28,7 @@ import org.slf4j.Logger;
  */
 public class ProgressDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 1L;
-	
+
 	public final static Logger log = LoggerFactory.getLogger(ProgressDialog.class);
 
 	// north
@@ -42,7 +42,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 	// south
 	JLabel buttonText = new JLabel("");
 	JButton okToUpdates = new JButton("ok");
-	//JButton ok_update = new JButton("ok");
+	// JButton ok_update = new JButton("ok");
 	JButton cancel = new JButton("cancel");
 	JButton restart = new JButton("restart");
 	JButton noWorky = new JButton("noWorky!");
@@ -96,11 +96,26 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		setSize(320, 300);
 	}
 
-	public void hideButtons() {
-		okToUpdates.setVisible(false);
-		cancel.setVisible(false);
-		restart.setVisible(false);
-		noWorky.setVisible(false);
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object source = event.getSource();
+		if (source == noWorky) {
+			parent.myService.noWorky();
+		} else if (source == restart) {
+			parent.restart();
+		} else if (source == cancel) {
+			setVisible(false);
+		} else if (source == okToUpdates) {
+			parent.myService.send(parent.myRuntime.getName(), "applyUpdates", lastUpdates);
+		} else {
+			log.error("unknown source");
+		}
+	}
+
+	public void addErrorInfo(String error) {
+		hasError = true;
+		spinner.setIcon(Util.getImageIcon("error.png"));
+		addInfo(error);
 	}
 
 	public void addInfo(String msg) {
@@ -110,30 +125,9 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		// reportArea.setText(data);
 	}
 
-	public void addErrorInfo(String error) {
-		hasError = true;
-		spinner.setIcon(Util.getImageIcon("error.png"));
-		addInfo(error);
-	}
-
-	public void finished() {
-		hideButtons();
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				if (!hasError) {
-					spinner.setIcon(Util.getImageIcon("success.png"));
-					restart.setVisible(true);
-				} else {
-					noWorky.setVisible(true);
-				}
-				actionText.setText("finished");
-			}
-		});
-	}
-
-
 	public void beginUpdates() {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				hideButtons();
 				hasError = false;
@@ -148,6 +142,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 
 	public void checkingForUpdates() {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				hideButtons();
 				hasError = false;
@@ -160,11 +155,35 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		});
 	}
 
+	public void finished() {
+		hideButtons();
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (!hasError) {
+					spinner.setIcon(Util.getImageIcon("success.png"));
+					restart.setVisible(true);
+				} else {
+					noWorky.setVisible(true);
+				}
+				actionText.setText("finished");
+			}
+		});
+	}
+
+	public void hideButtons() {
+		okToUpdates.setVisible(false);
+		cancel.setVisible(false);
+		restart.setVisible(false);
+		noWorky.setVisible(false);
+	}
+
 	public void publishUpdates(final Updates updates) {
 		lastUpdates = updates;
 		hideButtons();
 
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 
 				if (!updates.isValid) {
@@ -191,22 +210,5 @@ public class ProgressDialog extends JDialog implements ActionListener {
 			}
 		});
 	}
-	
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		Object source = event.getSource();
-		if (source == noWorky) {
-			parent.myService.noWorky();
-		} else if (source == restart) {
-			parent.restart();
-		} else if (source == cancel) {
-			setVisible(false);
-		} else if (source == okToUpdates) {
-			parent.myService.send(parent.myRuntime.getName(), "applyUpdates", lastUpdates);
-		} else {
-			log.error("unknown source");
-		}
-	}
-
 
 }

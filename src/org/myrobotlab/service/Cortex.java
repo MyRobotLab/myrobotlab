@@ -31,23 +31,22 @@ public class Cortex extends Service implements MemoryChangeListener {
 
 	public final static Logger log = LoggerFactory.getLogger(Cortex.class.getCanonicalName());
 
-
 	// ------- begin names --------------
 
 	// peer services
 	transient Tracking tracking;
 	transient OpenCV faceDetector;
-	
+
 	Node currentFace;
-	
+
 	public OpenCVFilterFaceDetect faceFilter = new OpenCVFilterFaceDetect();
 
 	// TODO - store all config in memory too?
 	transient private Memory memory = new Memory();
-	
+
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
-		
+
 		// put peer definitions in
 		peers.put("tracking", "Tracking", "tracking");
 		peers.put("faceDetector", "OpenCV", "face detector");
@@ -55,9 +54,90 @@ public class Cortex extends Service implements MemoryChangeListener {
 		return peers;
 	}
 
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		try {
+			Cortex cortex = (Cortex) Runtime.createAndStart("cortex", "Cortex");
+
+			cortex.tracking.trackPoint();
+
+			// Runtime.createAndStart("python", "Python");
+			// cortex.videoOff();
+
+			GUIService gui = new GUIService("gui");
+			gui.startService();
+
+			// cortex.add("root", new Node("background"));
+			// cortex.add("root", new Node("foreground"));
+
+			log.info("here");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
 
 	public Cortex(String n) {
 		super(n);
+	}
+
+	public void crawlAndPublish() {
+		memory.crawlAndPublish();
+	}
+
+	// FIXME - only publish when faces are actually found
+	public void foundFace(OpenCVData faces) {
+
+		ArrayList<Rectangle> bb = faces.getBoundingBoxArray();
+		if (bb != null) {
+			currentFace = memory.getNode("/present/faces/unknown/face1");
+			if (currentFace == null) {
+				currentFace = new Node("face1");
+				memory.put("/present/faces/unknown", currentFace);
+			}
+
+			ArrayList<SerializableImage> templates = (ArrayList<SerializableImage>) currentFace.get("templates");
+			if (templates == null) {
+				templates = new ArrayList<SerializableImage>();
+				currentFace.put("templates", templates);
+			}
+
+			// non machine build of template stack
+			if (templates.size() < 30) {
+				// templates.addAll(faces.cropBoundingBoxArray());
+			} else {
+				templates.remove(0);
+				// templates.add(faces.cropBoundingBoxArray().get(0));
+			}
+			log.error("{}", templates.size());
+			int width = faces.getWidth();
+			int height = faces.getHeight();
+
+			if (bb.size() > 0) {
+				Rectangle r = bb.get(0);
+				float foreheadX = (r.x + r.width / 2) / width;
+				float foreheadY = (r.y + r.height / 2) / height;
+				tracking.trackPoint(foreheadX, foreheadY);
+
+				// must determine if this is the "same" face by location !
+				// memory.put("/present/faces/unknown", new Node("face1",
+				// (Object)faces));
+
+			}
+		}
+	}
+
+	/*
+	 * public void releasePeers(){ super.releasePeers();
+	 * tracking.releaseService(); faceDetector.releaseService(); }
+	 */
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "intellegence" };
 	}
 
 	@Override
@@ -65,109 +145,22 @@ public class Cortex extends Service implements MemoryChangeListener {
 		return "used as a general template";
 	}
 
-	public void stopService(){
-		super.stopService();
-		if (faceDetector != null){
-			faceDetector.stopCapture();
-		}
+	public Memory getMemory() {
+		return memory;
 	}
-		
-	public void startService()
-	{
-		super.startService();
-		memory.addMemoryChangeListener(this);
 
-		memory.put("/", new Node("past"));
-		memory.put("/", new Node("present"));
-		memory.put("/", new Node("future")); // <- predictive
-		memory.put("/", new Node("locations"));
-
-		memory.put("/present", new Node("background"));
-		memory.put("/present", new Node("foreground"));
-		memory.put("/present", new Node("faces"));
-		memory.put("/present/faces", new Node("unknown"));
-		memory.put("/present/faces", new Node("known"));
-		memory.put("/present", new Node("objects"));
-
-		memory.put("/past", new Node("background"));
-		memory.put("/past", new Node("foreground"));		
-		
-		// FIXME - check if exists ! - IF EXISTS THEN COMES THE RESPONSIBLITY OF BEING TOTALLY CONFIGURED 
-		// EXTERNALLY
-		tracking = (Tracking) startPeer("tracking"); 
-//		tracking.opencvName = "cameraTracking";
-		tracking.connect("COM12");
-		tracking.startService();
-		tracking.trackPoint(); 
-		
-		faceDetector = (OpenCV) startPeer("faceDetector");;
-		faceDetector.setPipeline(String.format("%s.PyramidDown", tracking.opencv.getName()));// set key
-		faceDetector.addFilter(faceFilter);
-		faceDetector.setDisplayFilter(faceFilter.name);
-		faceDetector.startService();
-		faceDetector.capture();
-		subscribe("publishOpenCVData", faceDetector.getName(), "foundFace", OpenCVData.class);
-		faceDetector.broadcastState();
-
-		subscribe("toProcess", tracking.getName(), "process", OpenCVData.class);	
-		
-		
-		// FIXME - cascading broadcast !! in composites especially !!
-		tracking.broadcastState();
-		
+	public OpenCV getProcessor() {
+		return faceDetector;
 	}
-	
-	/*
-	public void releasePeers(){
-		super.releasePeers();
-		tracking.releaseService();
-		faceDetector.releaseService();
+
+	public Tracking getTracking() {
+		return tracking;
 	}
-	*/
-	
-	// FIXME - only publish when faces are actually found
-	public void foundFace(OpenCVData faces)
-	{
-		
-		ArrayList<Rectangle> bb = faces.getBoundingBoxArray();
-		if (bb != null)
-		{
-			currentFace = memory.getNode("/present/faces/unknown/face1");
-			if (currentFace == null)
-			{
-				currentFace = new Node("face1");
-				memory.put("/present/faces/unknown", currentFace);
-			}
-			
-			ArrayList<SerializableImage> templates = (ArrayList<SerializableImage>)currentFace.get("templates");
-			if (templates == null)
-			{
-				templates = new ArrayList<SerializableImage>();
-				currentFace.put("templates", templates);
-			}
-			
-			// non machine build of template stack
-			if (templates.size() < 30){
-				//templates.addAll(faces.cropBoundingBoxArray());
-			} else {
-				templates.remove(0);
-				//templates.add(faces.cropBoundingBoxArray().get(0));
-			}
-			log.error("{}",templates.size());
-			int width = faces.getWidth();
-			int height = faces.getHeight();
-			
-			if (bb.size()>0){
-				Rectangle r = bb.get(0);
-				float foreheadX = (float)(r.x + r.width/2)/width;
-				float foreheadY = (float)(r.y + r.height/2)/height;
-				tracking.trackPoint(foreheadX, foreheadY);
-				
-				// must determine if this is the "same" face by location !
-				//memory.put("/present/faces/unknown", new Node("face1", (Object)faces));
-				
-			}
-		}
+
+	// callback from memory tree - becomes a broadcast
+	@Override
+	public void onPut(String parentPath, Node node) {
+		invoke("putNode", parentPath, node);
 	}
 
 	public void process(String src, String dst) {
@@ -192,16 +185,37 @@ public class Cortex extends Service implements MemoryChangeListener {
 					// single output - assume filter is set to last
 					OpenCVData cv = faceDetector.add(data.getInputImage());
 					Node pnode = new Node(node.getName());
-					//pnode.put(MEMORY_OPENCV_DATA, cv);
-					if (cv.getBoundingBoxArray() != null)
-					{
+					// pnode.put(MEMORY_OPENCV_DATA, cv);
+					if (cv.getBoundingBoxArray() != null) {
 						log.info("found faces");
 						memory.put(dst, pnode);
 					}
-					
+
 				}
 			}
 		}
+	}
+
+	// ---------publish begin ----------
+	// publish means update if it already exists
+	@Override
+	public void publish(String path, Node node) {
+		invoke("publishNode", new Node.NodeContext(path, node));
+	}
+
+	// ---------publish end ----------
+
+	/*
+	 * public void videoOff() { tracking.opencv.publishOpenCVData(false); }
+	 */
+
+	public Node.NodeContext publishNode(Node.NodeContext nodeContext) {
+		return nodeContext;
+	}
+
+	// TODO - broadcast onAdd event - this will sync gui
+	public Node.NodeContext putNode(String parentPath, Node node) {
+		return new Node.NodeContext(parentPath, node);
 	}
 
 	public void saveMemory() {
@@ -221,80 +235,67 @@ public class Cortex extends Service implements MemoryChangeListener {
 			Encoder.toJsonFile(memory, filename);
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
 
-	// ---------publish begin ----------
-	// publish means update if it already exists
-	public void publish(String path, Node node) {
-		invoke("publishNode", new Node.NodeContext(path, node));
-	}
+	@Override
+	public void startService() {
+		super.startService();
+		try {
+			memory.addMemoryChangeListener(this);
 
-	public Node.NodeContext publishNode(Node.NodeContext nodeContext) {
-		return nodeContext;
-	}
+			memory.put("/", new Node("past"));
+			memory.put("/", new Node("present"));
+			memory.put("/", new Node("future")); // <- predictive
+			memory.put("/", new Node("locations"));
 
-	// callback from memory tree - becomes a broadcast
-	public void onPut(String parentPath, Node node) {
-		invoke("putNode", parentPath, node);
-	}
+			memory.put("/present", new Node("background"));
+			memory.put("/present", new Node("foreground"));
+			memory.put("/present", new Node("faces"));
+			memory.put("/present/faces", new Node("unknown"));
+			memory.put("/present/faces", new Node("known"));
+			memory.put("/present", new Node("objects"));
 
-	// TODO - broadcast onAdd event - this will sync gui
-	public Node.NodeContext putNode(String parentPath, Node node) {
-		return new Node.NodeContext(parentPath, node);
-	}
+			memory.put("/past", new Node("background"));
+			memory.put("/past", new Node("foreground"));
 
-	// ---------publish end ----------
+			// FIXME - check if exists ! - IF EXISTS THEN COMES THE
+			// RESPONSIBLITY OF
+			// BEING TOTALLY CONFIGURED
+			// EXTERNALLY
+			tracking = (Tracking) startPeer("tracking");
+			// tracking.opencvName = "cameraTracking";
+			tracking.connect("COM12");
+			tracking.startService();
+			tracking.trackPoint();
 
-	/*
-	public void videoOff() {
-		tracking.opencv.publishOpenCVData(false);
-	}
-	*/
-	
-	public void crawlAndPublish() {
-		memory.crawlAndPublish();
-	}
+			faceDetector = (OpenCV) startPeer("faceDetector");
+			faceDetector.setPipeline(String.format("%s.PyramidDown", tracking.opencv.getName()));// set
+																									// key
+			faceDetector.addFilter(faceFilter);
+			faceDetector.setDisplayFilter(faceFilter.name);
+			faceDetector.startService();
+			faceDetector.capture();
+			subscribe("publishOpenCVData", faceDetector.getName(), "foundFace", OpenCVData.class);
+			faceDetector.broadcastState();
 
+			subscribe("toProcess", tracking.getName(), "process", OpenCVData.class);
 
-	public OpenCV getProcessor() {
-		return faceDetector;
-	}
-
-	public Memory getMemory() {
-		return memory;
-	}
-
-	public Tracking getTracking() {
-		return tracking;
-	}
-	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		Cortex cortex = (Cortex) Runtime.createAndStart("cortex", "Cortex");
-		
-		cortex.tracking.trackPoint();
-		
-		//Runtime.createAndStart("python", "Python");
-		// cortex.videoOff();
-
-		GUIService gui = new GUIService("gui");
-		gui.startService();
-		
-
-		// cortex.add("root", new Node("background"));
-		// cortex.add("root", new Node("foreground"));
-
-		log.info("here");
+			// FIXME - cascading broadcast !! in composites especially !!
+			tracking.broadcastState();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 
 	}
 
 	@Override
-	public String[] getCategories() {
-		return new String[] {"intellegence"};
+	public void stopService() {
+		super.stopService();
+		if (faceDetector != null) {
+			faceDetector.stopCapture();
+		}
 	}
 
 }

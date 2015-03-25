@@ -25,9 +25,44 @@ public class CleverBot extends Service {
 	boolean initialized = false;
 	boolean continueToTalkToSelf = true;
 
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
+			CleverBot cleverbot = new CleverBot("cleverbot");
+			cleverbot.startService();
+			log.info(cleverbot.chat("Hi"));
+
+			log.info(cleverbot.chat("How are you?"));
+
+			log.info("here");
+			/*
+			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 */
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 	public CleverBot(String n) {
 		super(n);
 		init();
+	}
+
+	public String chat(String toSay) {
+
+		try {
+			return session.think(toSay);
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return null;
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "intellegence" };
 	}
 
 	@Override
@@ -35,26 +70,15 @@ public class CleverBot extends Service {
 		return "used as a general template";
 	}
 
-	public String chat(String toSay) {
-		
-		try {
-			return session.think(toSay);
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-		
-		return null;
-	}
-
 	public boolean init() {
 		try {
 			factory = new ChatterBotFactory();
-			//chatterbot = factory.create(type);
+			// chatterbot = factory.create(type);
 			chatterbot = factory.create(ChatterBotType.PANDORABOTS, "b0dafd24ee35a477");
-			//chatterbot = factory.create(ChatterBotType.CLEVERBOT);
+			// chatterbot = factory.create(ChatterBotType.CLEVERBOT);
 			session = chatterbot.createSession();
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return true;
 	}
@@ -80,32 +104,10 @@ public class CleverBot extends Service {
 				input = bot1session.think(input);
 			}
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 		return input;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		CleverBot cleverbot = new CleverBot("cleverbot");
-		cleverbot.startService();
-		log.info(cleverbot.chat("Hi"));
-
-		log.info(cleverbot.chat("How are you?"));
-		
-		log.info("here");
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
-		 */
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"intellegence"};
 	}
 
 }

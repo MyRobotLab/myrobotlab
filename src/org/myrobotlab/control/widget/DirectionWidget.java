@@ -15,8 +15,6 @@ import javax.swing.JPanel;
 
 public class DirectionWidget extends JPanel implements KeyListener {
 
-	ButtonActionListener bal = new ButtonActionListener();
-
 	public class ButtonActionListener implements ActionListener {
 		ActionListener chainedListener;
 
@@ -39,6 +37,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 		 */
 	}
 
+	ButtonActionListener bal = new ButtonActionListener();
+
 	public JButton btnNw;
 	public JButton btnN;
 	public JButton btnNe;
@@ -54,6 +54,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 	// TODO - config - 4 dir 8 dir - spin (other -> globe)
 	// TODO - forward driving turn left spin left - differential drive
 	// TODO - configurable key mapping
+
+	private static final long serialVersionUID = 1L;
 
 	public DirectionWidget() {
 		// setForeground(Color.GREEN);
@@ -72,7 +74,7 @@ public class DirectionWidget extends JPanel implements KeyListener {
 		setLayout(gridBagLayout);
 
 		btnNw = new JButton("");
-		btnNw.setBackground(new Color(173, 255, 47)); 
+		btnNw.setBackground(new Color(173, 255, 47));
 		btnNw.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_up_left_grey.png")));
 		btnNw.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_up_left_green.png")));
 		btnNw.addActionListener(bal);
@@ -202,8 +204,6 @@ public class DirectionWidget extends JPanel implements KeyListener {
 		// this.addKeyListener(this);
 		//
 	}
-
-	private static final long serialVersionUID = 1L;
 
 	@Override
 	public void keyPressed(KeyEvent keyEvent) {

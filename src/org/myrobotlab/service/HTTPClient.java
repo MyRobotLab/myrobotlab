@@ -53,10 +53,53 @@ import org.slf4j.Logger;
 public class HTTPClient extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(HTTPClient.class.getCanonicalName());
+
 	private static final long serialVersionUID = 1L;
 
-	public HTTPClient(String n) {
-		super(n);
+	static public byte[] get(String uri) {
+
+		try {
+			DefaultHttpClient client = new DefaultHttpClient();
+			HttpGet request = new HttpGet(uri);
+			HttpResponse response = client.execute(request);
+			return getResponse(response);
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return null;
+	}
+
+	static public byte[] getResponse(HttpResponse response) {
+		try {
+			InputStream is = response.getEntity().getContent();
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ((nRead = is.read(data, 0, data.length)) != -1) {
+				buffer.write(data, 0, nRead);
+			}
+
+			buffer.flush();
+
+			return buffer.toByteArray();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return null;
+
+	}
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		HTTPClient http = (HTTPClient) Runtime.start("http", "HTTPClient");
+		http.test();
 	}
 
 	static public String parse(String in, String beginTag, String endTag) {
@@ -99,42 +142,13 @@ public class HTTPClient extends Service {
 		return null;
 	}
 
-	static public byte[] getResponse(HttpResponse response) {
-		try {
-			InputStream is = response.getEntity().getContent();
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-			int nRead;
-			byte[] data = new byte[16384];
-
-			while ((nRead = is.read(data, 0, data.length)) != -1) {
-				buffer.write(data, 0, nRead);
-			}
-
-			buffer.flush();
-
-			return buffer.toByteArray();
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return null;
-
+	public HTTPClient(String n) {
+		super(n);
 	}
 
-	static public byte[] get(String uri) {
-
-		try {
-			DefaultHttpClient client = new DefaultHttpClient();
-			HttpGet request = new HttpGet(uri);
-			HttpResponse response = client.execute(request);
-			return getResponse(response);
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return null;
+	@Override
+	public String[] getCategories() {
+		return new String[] { "connectivity" };
 	}
 
 	@Override
@@ -142,6 +156,7 @@ public class HTTPClient extends Service {
 		return "an HTTP client, used to fetch information on the web";
 	}
 
+	@Override
 	public Status test() {
 		Status status = super.test();
 		try {
@@ -149,8 +164,8 @@ public class HTTPClient extends Service {
 			String google = new String(HTTPClient.get("http://www.google.com/"));
 			log.info(google);
 
-			//String ntest = new String(HTTPClient.get("nullTest"));
-			//log.info(ntest);
+			// String ntest = new String(HTTPClient.get("nullTest"));
+			// log.info(ntest);
 
 			String script = new String(HTTPClient.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov2.full3.byGael.Langevin.1.py"));
 			log.info(script);
@@ -159,24 +174,11 @@ public class HTTPClient extends Service {
 			params.put("p", "apple");
 			google = new String(HTTPClient.post("http://www.google.com", params));
 			log.info(google);
-			
+
 		} catch (Exception e) {
 			status.addError(e);
 		}
 		return status;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		HTTPClient http = (HTTPClient) Runtime.start("http", "HTTPClient");
-		http.test();
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"connectivity"};
 	}
 
 }

@@ -25,6 +25,8 @@
 
 package org.myrobotlab.control;
 
+import io.netty.handler.codec.CodecException;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -46,9 +48,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
 
 import org.myrobotlab.codec.Codec;
-import org.myrobotlab.codec.CodecException;
 import org.myrobotlab.codec.DecimalCodec;
-import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -92,11 +92,8 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	final SerialGUI myself;
 
 	// gui's formatters
-	Codec rxFormatter = new DecimalCodec();
-	Codec txFormatter = new DecimalCodec();
-
-	// Codec rxFormatter = null;
-	// Codec txFormatter = null;
+	Codec rxFormatter = new DecimalCodec(myService);
+	Codec txFormatter = new DecimalCodec(myService);
 
 	// TODO
 	// save data to file button
@@ -108,197 +105,6 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		super(boundServiceName, myService, tabs);
 		myself = this;
 		mySerial = (Serial) Runtime.getService(boundServiceName);
-	}
-
-	public void init() {
-		display.setLayout(new BorderLayout());
-
-		JPanel north = new JPanel();
-		north.add(new JLabel("port "));
-		north.add(ports);
-		north.add(refresh);
-		north.add(connectLight);
-		north.add(new JLabel(" "));
-		north.add(reqFormat);
-		north.add(new JLabel("width "));
-		north.add(widthMenu);
-		north.add(createVirtualUART);
-		north.add(record);
-		// north.add(sendTx);
-
-		display.add(north, BorderLayout.NORTH);
-
-		rx.setEditable(false);
-		JScrollPane scrollPane = new JScrollPane(rx);
-
-		autoScroll(true);
-
-		display.add(scrollPane, BorderLayout.CENTER);
-
-		JPanel south = new JPanel();
-
-		south.add(tx);
-		south.add(send);
-		south.add(sendFile);
-		south.add(new JLabel("rx"));
-		south.add(rxTotal);
-		south.add(new JLabel("tx"));
-		south.add(txTotal);
-		display.add(south, BorderLayout.SOUTH);
-
-		createVirtualUART.addActionListener(this);
-		send.addActionListener(this);
-		sendFile.addActionListener(this);
-		record.addActionListener(this);
-		reqFormat.addItemListener(this);
-		ports.addItemListener(this);
-		refresh.addActionListener(this);
-
-	}
-
-	public void autoScroll(boolean b) {
-		DefaultCaret caret = (DefaultCaret) rx.getCaret();
-		if (b) {
-			caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		} else {
-			caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-		}
-	}
-
-	public void getState(final Serial serial) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				mySerial = serial;
-				setPortStatus();
-
-				try {
-					
-					// prevent re-firing the event :P
-					reqFormat.removeItemListener(myself);
-					
-					// WARNING
-					// don't use the same output formatters as the serial service
-					// they might have a different state when they are writing
-					// out to a file...
-					String key = mySerial.getRXCodecKey();
-					if (key != null && !key.equals(rxFormatter.getKey())) {
-						// create new formatter from type key
-						rxFormatter = CodecFactory.getDecoder(key);
-						// TODO - set the reqTXFormat box .. too lazy :P - hopefully
-						reqFormat.setSelectedItem(key);
-					}
-					key = mySerial.getTXCodecKey();
-					if (key != null && !key.equals(txFormatter.getKey())) {
-						// create new formatter from type key
-						txFormatter = CodecFactory.getDecoder(key);
-					}
-					
-					reqFormat.addItemListener(myself);
-
-				} catch (Exception e) {
-					Logging.logException(e);
-				}
-
-				if (!serial.isRecording()) {
-					// captureRX.setText(serial.getRXFileName()); } else {
-					record.setText("record");
-				} else {
-					record.setText("stop recording");
-				}
-
-				// if (mySerial.getRXFormatter())
-			}
-		});
-	}
-
-	public void setPortStatus() {
-		ports.removeItemListener((ItemListener) self);
-		if (mySerial.isConnected()) {
-			connectLight.setIcon(Util.getImageIcon("green.png"));
-			log.info(String.format("displaying %s", mySerial.getPortName()));
-			ports.setSelectedItem(mySerial.getPortName());
-		} else {
-			connectLight.setIcon(Util.getImageIcon("red.png"));
-			ports.setSelectedItem("");
-		}
-		ports.addItemListener((ItemListener) self);
-	}
-
-	public void getPortNames(final ArrayList<String> inPorts) {
-
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-				ports.removeItemListener((ItemListener) self);
-				ports.removeAllItems();
-				ports.addItem("");
-				for (int i = 0; i < inPorts.size(); ++i) {
-					ports.addItem(inPorts.get(i));
-				}
-				ports.addItemListener((ItemListener) self);
-				setPortStatus();
-			}
-		});
-	}
-
-	/**
-	 * publishRX displays the "interpreted" byte it is interpreted by the
-	 * Serial's service selected "format"
-	 * 
-	 * FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as
-	 * 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
-	 * 
-	 * @param data
-	 * @throws CodecException
-	 */
-	public final void publishRX(final Integer data) throws CodecException {
-		++rxCount;
-		rx.append(rxFormatter.decode(data));
-		//rx.append(String.format("%s ", data));
-		/*
-		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width
-		 * != null && rxCount % width == 0) { rx.append("\n"); }
-		 */
-		/* FIXME FIXME FIXME THE CODEC SHOULD FORMAT !!!!! 
-		if (width != null && rxCount % width == 0) {
-			rx.append("\n");
-		}
-		*/
-		rxTotal.setText(String.format("%d", rxCount));
-	}
-
-	public final void publishTX(final Integer data) throws CodecException {
-		++txCount;
-		tx.append(txFormatter.decode(data));
-		/*
-		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width
-		 * != null && txCount % width == 0) { tx.append("\n"); }
-		 */
-		/* FIXME FIXME FIXME THE CODEC SHOULD FORMAT !!!!! 
-		if (width != null && txCount % width == 0) {
-			tx.append("\n");
-		}
-		*/
-		txTotal.setText(String.format("%d", txCount));
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("publishRX", "publishRX", Integer.class);
-		subscribe("publishTX", "publishTX", Integer.class);
-		subscribe("publishState", "getState", Serial.class);
-		subscribe("getPortNames", "getPortNames", ArrayList.class);
-
-		send("publishState");
-		send("getPortNames");
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishRX", "publishRX", String.class);
-		unsubscribe("publishTX", "publishTX", String.class);
-		unsubscribe("publishState", "getState", Serial.class);
-		unsubscribe("getPortNames", "getPortNames", ArrayList.class);
 	}
 
 	@Override
@@ -353,6 +159,148 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 
 	}
 
+	@Override
+	public void attachGUI() {
+		subscribe("publishRX", "publishRX", Integer.class);
+		subscribe("publishTX", "publishTX", Integer.class);
+		subscribe("publishState", "getState", Serial.class);
+		subscribe("getPortNames", "getPortNames", ArrayList.class);
+
+		send("publishState");
+		send("getPortNames");
+	}
+
+	public void autoScroll(boolean b) {
+		DefaultCaret caret = (DefaultCaret) rx.getCaret();
+		if (b) {
+			caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		} else {
+			caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+		}
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishRX", "publishRX", String.class);
+		unsubscribe("publishTX", "publishTX", String.class);
+		unsubscribe("publishState", "getState", Serial.class);
+		unsubscribe("getPortNames", "getPortNames", ArrayList.class);
+	}
+
+	public void getPortNames(final ArrayList<String> inPorts) {
+
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+				ports.removeItemListener((ItemListener) self);
+				ports.removeAllItems();
+				ports.addItem("");
+				for (int i = 0; i < inPorts.size(); ++i) {
+					ports.addItem(inPorts.get(i));
+				}
+				ports.addItemListener((ItemListener) self);
+				setPortStatus();
+			}
+		});
+	}
+
+	public void getState(final Serial serial) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				mySerial = serial;
+				setPortStatus();
+
+				try {
+
+					// prevent re-firing the event :P
+					reqFormat.removeItemListener(myself);
+
+					// WARNING
+					// don't use the same output formatters as the serial
+					// service
+					// they might have a different state when they are writing
+					// out to a file...
+					String key = mySerial.getRXCodecKey();
+					if (key != null && !key.equals(rxFormatter.getKey())) {
+						// create new formatter from type key
+						rxFormatter = Codec.getDecoder(key, myService);
+						// TODO - set the reqTXFormat box .. too lazy :P -
+						// hopefully
+						reqFormat.setSelectedItem(key);
+					}
+					key = mySerial.getTXCodecKey();
+					if (key != null && !key.equals(txFormatter.getKey())) {
+						// create new formatter from type key
+						txFormatter = Codec.getDecoder(key, myService);
+					}
+
+					reqFormat.addItemListener(myself);
+
+				} catch (Exception e) {
+					Logging.logError(e);
+				}
+
+				if (!serial.isRecording()) {
+					// captureRX.setText(serial.getRXFileName()); } else {
+					record.setText("record");
+				} else {
+					record.setText("stop recording");
+				}
+
+				// if (mySerial.getRXFormatter())
+			}
+		});
+	}
+
+	@Override
+	public void init() {
+		display.setLayout(new BorderLayout());
+
+		JPanel north = new JPanel();
+		north.add(new JLabel("port "));
+		north.add(ports);
+		north.add(refresh);
+		north.add(connectLight);
+		north.add(new JLabel(" "));
+		north.add(reqFormat);
+		north.add(new JLabel("width "));
+		north.add(widthMenu);
+		north.add(createVirtualUART);
+		north.add(record);
+		// north.add(sendTx);
+
+		display.add(north, BorderLayout.NORTH);
+
+		rx.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(rx);
+
+		autoScroll(true);
+
+		display.add(scrollPane, BorderLayout.CENTER);
+
+		JPanel south = new JPanel();
+
+		south.add(tx);
+		south.add(send);
+		south.add(sendFile);
+		south.add(new JLabel("rx"));
+		south.add(rxTotal);
+		south.add(new JLabel("tx"));
+		south.add(txTotal);
+		display.add(south, BorderLayout.SOUTH);
+
+		createVirtualUART.addActionListener(this);
+		send.addActionListener(this);
+		sendFile.addActionListener(this);
+		record.addActionListener(this);
+		reqFormat.addItemListener(this);
+		ports.addItemListener(this);
+		refresh.addActionListener(this);
+
+	}
+
 	// onChange of ports
 	@Override
 	public void itemStateChanged(ItemEvent event) {
@@ -371,13 +319,65 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 			String newFormat = (String) reqFormat.getSelectedItem();
 			// changing our display and the Service's format
 			try {
-				rxFormatter = CodecFactory.getDecoder(newFormat);
-				txFormatter = CodecFactory.getDecoder(newFormat);
+				rxFormatter = Codec.getDecoder(newFormat, myService);
+				txFormatter = Codec.getDecoder(newFormat, myService);
 				send("setFormat", newFormat);
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 			}
 		}
+	}
+
+	/**
+	 * publishRX displays the "interpreted" byte it is interpreted by the
+	 * Serial's service selected "format"
+	 * 
+	 * FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as
+	 * 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
+	 * 
+	 * @param data
+	 * @throws CodecException
+	 */
+	public final void publishRX(final Integer data) {
+		++rxCount;
+		rx.append(rxFormatter.decode(data));
+		// rx.append(String.format("%s ", data));
+		/*
+		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width
+		 * != null && rxCount % width == 0) { rx.append("\n"); }
+		 */
+		/*
+		 * FIXME FIXME FIXME THE CODEC SHOULD FORMAT !!!!! if (width != null &&
+		 * rxCount % width == 0) { rx.append("\n"); }
+		 */
+		rxTotal.setText(String.format("%d", rxCount));
+	}
+
+	public final void publishTX(final Integer data) throws CodecException {
+		++txCount;
+		tx.append(txFormatter.decode(data));
+		/*
+		 * if (!mySerial.getDisplayFormat().equals(Serial.DISPLAY_RAW) && width
+		 * != null && txCount % width == 0) { tx.append("\n"); }
+		 */
+		/*
+		 * FIXME FIXME FIXME THE CODEC SHOULD FORMAT !!!!! if (width != null &&
+		 * txCount % width == 0) { tx.append("\n"); }
+		 */
+		txTotal.setText(String.format("%d", txCount));
+	}
+
+	public void setPortStatus() {
+		ports.removeItemListener((ItemListener) self);
+		if (mySerial.isConnected()) {
+			connectLight.setIcon(Util.getImageIcon("green.png"));
+			log.info(String.format("displaying %s", mySerial.getPortName()));
+			ports.setSelectedItem(mySerial.getPortName());
+		} else {
+			connectLight.setIcon(Util.getImageIcon("red.png"));
+			ports.setSelectedItem("");
+		}
+		ports.addItemListener((ItemListener) self);
 	}
 
 }

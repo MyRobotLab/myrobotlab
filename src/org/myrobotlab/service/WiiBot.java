@@ -28,6 +28,7 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Wii.IRData;
 import org.myrobotlab.service.WiiDAR.Point;
@@ -39,6 +40,7 @@ import org.slf4j.Logger;
 public class WiiBot extends Service {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(WiiBot.class.getCanonicalName());
 
 	transient Arduino arduino = null;
@@ -48,67 +50,40 @@ public class WiiBot extends Service {
 	transient WiiDAR wiidar = new WiiDAR("wiidar");
 	transient GUIService gui = new GUIService("gui");
 
+	int speedRight = 0;
+
+	int speedLeft = 0;
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+		try {
+
+			WiiBot wiibot = new WiiBot("wiibot");
+			wiibot.startService();
+			wiibot.startRobot();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 	public WiiBot(String n) {
 		super(n);
 	}
 
-	public void startRobot() {
-		arduino = new Arduino("arduino");
+	// TODO - seperate left and right direction
 
-		// adding wiicom as an option
-		/*
-		 * Arduino.addPortName("wiicom", CommPortIdentifier.PORT_SERIAL,
-		 * (CommDriver) new WiiDriver(wii));
-		 */
-
-		//gui.startService();
-		wiidar.servo = servo;
-		// setting up servo
-		// servo.attach(arduino.getName(), 9);
-
-		// gui.start();
-		// 
-
-		// setting up wii
-		wii.getWiimotes();
-		wii.setSensorBarAboveScreen();
-		wii.activateIRTRacking();
-		wii.setIrSensitivity(5); // 1-5 (highest)
-		wii.activateListening();
-
-		arduino.startService();
-
-		wiidar.startService();
-
-		// starting services
-		servo.startService();
-		// opencv.start();
-		wii.startService();
-
-		// send data from the wii to wiidar
-		wii.addListener(wiidar.getName(), "publishIR", IRData.class);
-		// data from widar to the gui
-		wiidar.addListener("publishArrayofPoints", gui.getName(), "displaySweepData", Point.class);
-
-		// send the data from the wii to wiidar
-		// wii.addListener("publishIR", wiidar.getName(), "computeDepth",
-		// IRData.class);
-		// send the computed depth & data to the gui
-		// addListener("computeDepth", gui.getName(),"publishSinglePoint",
-		// Point.class);
-		wiidar.addListener("publishSinglePoint", gui.getName(), "publishSinglePoint", Point.class);
-		// gui.addListener("processImage", opencv.getName(),"input",
-		// BufferedImage.class);
-		// wii.addListener("publishPin", wiidar.getName(), "publishPin",
-		// IRData.class);
-		arduino.addListener(wiidar.getName(), "publishPin", Pin.class);
-		
+	@Override
+	public String[] getCategories() {
+		return new String[] { "robot", "sensor" };
 	}
 
-	int speedRight = 0;
-	int speedLeft = 0;
-
-	// TODO - seperate left and right direction
+	@Override
+	public String getDescription() {
+		return "(not implemented) - robot utilizing the wii mote and wiidar";
+	}
 
 	public void keyPressed(Integer i) {
 		log.warn("keyPressed " + i);
@@ -183,23 +158,56 @@ public class WiiBot extends Service {
 		}
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
+	public void startRobot() throws Exception {
+		arduino = new Arduino("arduino");
 
-		WiiBot wiibot = new WiiBot("wiibot");
-		wiibot.startService();
-		wiibot.startRobot();
+		// adding wiicom as an option
+		/*
+		 * Arduino.addPortName("wiicom", CommPortIdentifier.PORT_SERIAL,
+		 * (CommDriver) new WiiDriver(wii));
+		 */
 
-	}
+		// gui.startService();
+		wiidar.servo = servo;
+		// setting up servo
+		// servo.attach(arduino.getName(), 9);
 
-	@Override
-	public String getDescription() {
-		return "(not implemented) - robot utilizing the wii mote and wiidar";
-	}
+		// gui.start();
+		//
 
-	@Override
-	public String[] getCategories() {
-		return new String[] {"robot", "sensor"};
+		// setting up wii
+		wii.getWiimotes();
+		wii.setSensorBarAboveScreen();
+		wii.activateIRTRacking();
+		wii.setIrSensitivity(5); // 1-5 (highest)
+		wii.activateListening();
+
+		arduino.startService();
+
+		wiidar.startService();
+
+		// starting services
+		servo.startService();
+		// opencv.start();
+		wii.startService();
+
+		// send data from the wii to wiidar
+		wii.addListener(wiidar.getName(), "publishIR", IRData.class);
+		// data from widar to the gui
+		wiidar.addListener("publishArrayofPoints", gui.getName(), "displaySweepData", Point.class);
+
+		// send the data from the wii to wiidar
+		// wii.addListener("publishIR", wiidar.getName(), "computeDepth",
+		// IRData.class);
+		// send the computed depth & data to the gui
+		// addListener("computeDepth", gui.getName(),"publishSinglePoint",
+		// Point.class);
+		wiidar.addListener("publishSinglePoint", gui.getName(), "publishSinglePoint", Point.class);
+		// gui.addListener("processImage", opencv.getName(),"input",
+		// BufferedImage.class);
+		// wii.addListener("publishPin", wiidar.getName(), "publishPin",
+		// IRData.class);
+		arduino.addListener(wiidar.getName(), "publishPin", Pin.class);
+
 	}
 }

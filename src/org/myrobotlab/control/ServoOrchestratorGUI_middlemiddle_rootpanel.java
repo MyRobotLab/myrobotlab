@@ -18,8 +18,7 @@ public class ServoOrchestratorGUI_middlemiddle_rootpanel extends JPanel {
 
 	private final ServoOrchestratorGUI_middlemiddle_main demo;
 
-	ServoOrchestratorGUI_middlemiddle_rootpanel(
-			ServoOrchestratorGUI_middlemiddle_main demo) {
+	ServoOrchestratorGUI_middlemiddle_rootpanel(ServoOrchestratorGUI_middlemiddle_main demo) {
 		super();
 
 		// Need to keep reference so can later communicate with drop listener
@@ -29,10 +28,8 @@ public class ServoOrchestratorGUI_middlemiddle_rootpanel extends JPanel {
 		this.setTransferHandler(new ServoOrchestratorGUI_middlemiddle_transferhandler());
 
 		// Create the listener to do the work when dropping on this object!
-		this.setDropTarget(new DropTarget(
-				ServoOrchestratorGUI_middlemiddle_rootpanel.this,
-				new ServoOrchestratorGUI_middlemiddle_droptargetlistener(
-						ServoOrchestratorGUI_middlemiddle_rootpanel.this)));
+		this.setDropTarget(new DropTarget(ServoOrchestratorGUI_middlemiddle_rootpanel.this, new ServoOrchestratorGUI_middlemiddle_droptargetlistener(
+				ServoOrchestratorGUI_middlemiddle_rootpanel.this)));
 	}
 
 	public ServoOrchestratorGUI_middlemiddle_main getDragAndDropPanelMain() {

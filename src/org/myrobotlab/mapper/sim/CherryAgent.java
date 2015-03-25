@@ -58,6 +58,7 @@ public class CherryAgent extends SimpleAgent {
 	}
 
 	/** Create 3D geometry. */
+	@Override
 	protected void create3D() {
 		Appearance appear = new Appearance();
 

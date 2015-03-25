@@ -45,24 +45,8 @@ import org.slf4j.Logger;
  *   
  */
 public class PICAXE extends Service // implements SerialPortEventListener,
-									// DigitalIO, AnalogIO, ServoController
+// DigitalIO, AnalogIO, ServoController
 {
-
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(PICAXE.class.getCanonicalName());
-
-	// fields
-	public int interval = 1000;
-	public PulseDataType pulseDataType = PulseDataType.none;
-	public String pulseDataString = null;
-	public int pulseDataInteger;
-	public transient PICAXEThread myPICAXE = null;
-
-	// types
-	public enum PulseDataType {
-		none, integer, increment, string
-	};
 
 	public class PICAXEThread implements Runnable {
 		public Thread thread = null;
@@ -73,6 +57,7 @@ public class PICAXE extends Service // implements SerialPortEventListener,
 			thread.start();
 		}
 
+		@Override
 		public void run() {
 			try {
 				while (isRunning == true) {
@@ -96,31 +81,138 @@ public class PICAXE extends Service // implements SerialPortEventListener,
 		}
 	}
 
+	// types
+	public enum PulseDataType {
+		none, integer, increment, string
+	}
+
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(PICAXE.class.getCanonicalName());
+	// fields
+	public int interval = 1000;
+	public PulseDataType pulseDataType = PulseDataType.none;
+	public String pulseDataString = null;
+
+	public int pulseDataInteger;;
+
+	public transient PICAXEThread myPICAXE = null;
+
+	public static void main(String[] args) throws Exception {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		// RemoteAdapter remote = new RemoteAdapter("remote");
+		// remote.startService();
+		// test
+
+		PICAXE PICAXE = new PICAXE("PICAXE");
+		PICAXE.startService();
+
+		RemoteAdapter remote = new RemoteAdapter("remote");
+		remote.startService();
+
+		// PICAXE.addListener("pulse", "log", "log", Integer.class);
+
+		// GUIService gui = new GUIService("gui");
+		// gui.startService();
+		//
+
+		/*
+		 * FileOutputStream fos = null; ObjectOutputStream out = null; try {
+		 * 
+		 * fos = new FileOutputStream("test.backup"); out = new
+		 * ObjectOutputStream(fos); out.writeObject(remote);
+		 * out.writeObject(log); out.writeObject(PICAXE); out.writeObject(gui);
+		 * out.close();
+		 * 
+		 * 
+		 * log.startService();
+		 * 
+		 * PICAXE.startService(); PICAXE.startPICAXE();
+		 * 
+		 * gui.startService();
+		 * 
+		 * 
+		 * } catch (Exception e) { log.error(e.getMessage());
+		 * log.error(stackToString(e)); }
+		 */
+
+	}
+
 	public PICAXE(String n) {
 		super(n);
 	}
 
+	@Override
+	public String[] getCategories() {
+		return new String[] { "microcontroller" };
+	}
 
+	@Override
+	public String getDescription() {
+		return "(not implemented yet) used to interface PICAXE";
+	}
+
+	public PICAXE getState() {
+		return this;
+	}
+
+	// new state functions begin --------------------------
+	@Override
+	public PICAXE publishState() {
+		return this;
+	}
+
+	public void pulse() {
+	}
+
+	public Integer pulse(Integer count) {
+		log.info("pulse " + count);
+		return count;
+	}
+
+	public String pulse(String d) {
+		return d;
+	}
+
+	public void setInterval(Integer milliseconds) {
+		interval = milliseconds;
+	}
+
+	public Integer setPulseDataInteger(Integer s) {
+		pulseDataInteger = s;
+		return s;
+	}
+
+	public String setPulseDataString(String s) {
+		pulseDataString = s;
+		return s;
+	}
 
 	// TODO - how
 	public void setPulseDataType(PulseDataType t) {
 		pulseDataType = t;
 	}
 
-	public void startPICAXE() {
-		if (myPICAXE == null) {
-			myPICAXE = new PICAXEThread();
-		}
+	// TODO - reflectively do it in Service? !?
+	// No - the overhead of a Service warrants a data only proxy - so to
+	// a single container class "PICAXEData data = new PICAXEData()" could allow
+	// easy maintenance and extensibility - possibly even reflective sync if
+	// names are maintained
+	public PICAXE setState(PICAXE o) {
+		this.interval = o.interval;
+		this.pulseDataInteger = o.pulseDataInteger;
+		this.pulseDataString = o.pulseDataString;
+		// this.myPICAXE = o.myPICAXE;
+		this.pulseDataType = o.pulseDataType;
+		return o;
 	}
 
-	public void stopPICAXE() {
-		if (myPICAXE != null) {
-			log.info("stopping " + getName() + " myPICAXE");
-			myPICAXE.isRunning = false;
-			myPICAXE.thread.interrupt();
-			myPICAXE.thread = null;
-			myPICAXE = null;
-		}
+	// new state functions end ----------------------------
+
+	public void setType(PulseDataType t) {
+		pulseDataType = t;
 	}
 
 	// TODO - enum pretty unsuccessful as
@@ -142,118 +234,26 @@ public class PICAXE extends Service // implements SerialPortEventListener,
 		}
 	}
 
-	public void setType(PulseDataType t) {
-		pulseDataType = t;
+	public void startPICAXE() {
+		if (myPICAXE == null) {
+			myPICAXE = new PICAXEThread();
+		}
 	}
 
-	public void pulse() {
-	}
-
-	public Integer pulse(Integer count) {
-		log.info("pulse " + count);
-		return count;
-	}
-
-	public String pulse(String d) {
-		return d;
-	}
-
-	// new state functions begin --------------------------
-	public PICAXE publishState() {
-		return this;
-	}
-
-	// TODO - reflectively do it in Service? !?
-	// No - the overhead of a Service warrants a data only proxy - so to
-	// a single container class "PICAXEData data = new PICAXEData()" could allow
-	// easy maintenance and extensibility - possibly even reflective sync if
-	// names are maintained
-	public PICAXE setState(PICAXE o) {
-		this.interval = o.interval;
-		this.pulseDataInteger = o.pulseDataInteger;
-		this.pulseDataString = o.pulseDataString;
-		// this.myPICAXE = o.myPICAXE;
-		this.pulseDataType = o.pulseDataType;
-		return o;
-	}
-
-	public PICAXE getState() {
-		return this;
-	}
-
-	public String setPulseDataString(String s) {
-		pulseDataString = s;
-		return s;
-	}
-
-	public Integer setPulseDataInteger(Integer s) {
-		pulseDataInteger = s;
-		return s;
-	}
-
-	// new state functions end ----------------------------
-
-	public void setInterval(Integer milliseconds) {
-		interval = milliseconds;
-	}
-
-	public static void main(String[] args) throws ClassNotFoundException {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		// RemoteAdapter remote = new RemoteAdapter("remote");
-		// remote.startService();
-		// test
-
-		PICAXE PICAXE = new PICAXE("PICAXE");
-		PICAXE.startService();
-
-		RemoteAdapter remote = new RemoteAdapter("remote");
-		remote.startService();
-
-
-		// PICAXE.addListener("pulse", "log", "log", Integer.class);
-
-		// GUIService gui = new GUIService("gui");
-		// gui.startService();
-		// 
-
-		/*
-		 * FileOutputStream fos = null; ObjectOutputStream out = null; try {
-		 * 
-		 * fos = new FileOutputStream("test.backup"); out = new
-		 * ObjectOutputStream(fos); out.writeObject(remote);
-		 * out.writeObject(log); out.writeObject(PICAXE); out.writeObject(gui);
-		 * out.close();
-		 * 
-		 * 
-		 * log.startService();
-		 * 
-		 * PICAXE.startService(); PICAXE.startPICAXE();
-		 * 
-		 * gui.startService(); 
-		 * 
-		 * 
-		 * } catch (Exception e) { log.error(e.getMessage());
-		 * log.error(stackToString(e)); }
-		 */
-
+	public void stopPICAXE() {
+		if (myPICAXE != null) {
+			log.info("stopping " + getName() + " myPICAXE");
+			myPICAXE.isRunning = false;
+			myPICAXE.thread.interrupt();
+			myPICAXE.thread = null;
+			myPICAXE = null;
+		}
 	}
 
 	@Override
 	public void stopService() {
 		stopPICAXE();
 		super.stopService();
-	}
-
-	@Override
-	public String getDescription() {
-		return "(not implemented yet) used to interface PICAXE";
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"microcontroller"};
 	}
 
 }

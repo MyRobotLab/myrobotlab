@@ -58,6 +58,7 @@ public final class MRLListener implements Serializable {
 		return false;
 	}
 
+	@Override
 	final public int hashCode() {
 		if (_hashCode == 0) {
 			_hashCode = 37 + outMethod.hashCode() + name.hashCode() + inMethod.hashCode();
@@ -72,6 +73,7 @@ public final class MRLListener implements Serializable {
 	/*
 	 * Default format was xml is now JSON TODO - make toStringStyler like spring
 	 */
+	@Override
 	public String toString() {
 		return String.format("%s -will activate-> %s.%s", outMethod, name, inMethod);
 	}

@@ -13,34 +13,34 @@ public class SpeechRecognitionGoogle extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(SpeechRecognitionGoogle.class);
 
-	public SpeechRecognitionGoogle(String n) {
-		super(n);
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
-
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
 
-			SpeechRecognitionGoogle template = (SpeechRecognitionGoogle)Runtime.start("template", "_TemplateService");
+			SpeechRecognitionGoogle template = (SpeechRecognitionGoogle) Runtime.start("template", "_TemplateService");
 			template.test();
-			
+
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
-	
+
+	public SpeechRecognitionGoogle(String n) {
+		super(n);
+	}
+
 	@Override
 	public String[] getCategories() {
-		return new String[] {"speech", "sound", "speech recognition"};
+		return new String[] { "speech", "sound", "speech recognition" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used as a general template";
 	}
 
 }

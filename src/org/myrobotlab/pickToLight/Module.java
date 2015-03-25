@@ -30,28 +30,6 @@ import com.pi4j.io.i2c.I2CFactory;
 
 public class Module {
 
-	public final static Logger log = LoggerFactory.getLogger(Module.class);
-
-	transient private com.pi4j.io.i2c.I2CBus i2cbus;
-	transient private com.pi4j.io.i2c.I2CDevice device;
-
-	Address2 address = new Address2();
-	String type;
-	String version; // hardware version
-	String state;
-	int selector = 0x83; // IR selected - LED OFF
-
-	static public final int MASK_DISPLAY = 0x01;
-	static public final int MASK_LED = 0x02;
-	static public final int MASK_SENSOR = 0x80;
-
-	private String lastValue = "";
-
-	static private boolean translationInitialized = false;
-	transient static HashMap<String, Byte> translation = new HashMap<String, Byte>();
-
-	transient CycleThread ct = null;
-
 	public class BlinkThread extends Thread {
 		public int blinkNumber = 5;
 		public int blinkDelay = 100;
@@ -59,6 +37,7 @@ public class Module {
 		public boolean leaveDisplayOn = true;
 		public boolean leaveLEDOn = false;
 
+		@Override
 		public void run() {
 			int count = 0;
 			while (count < 5) {
@@ -87,6 +66,57 @@ public class Module {
 			}
 		}
 	}
+
+	public class CycleThread extends Thread {
+		public boolean isRunning = false;
+		int delay = 300;
+		String msg;
+
+		public CycleThread(String msg, int delay) {
+			this.msg = "    " + msg + "    ";
+			this.delay = delay;
+		}
+
+		@Override
+		public void run() {
+			isRunning = true;
+			try {
+				while (isRunning) {
+					// start with scroll on page
+					for (int i = 0; i < msg.length() - 3; ++i) {
+						display(msg.substring(i, i + 4));
+						sleep(delay);
+					}
+				}
+			} catch (InterruptedException e) {
+				isRunning = false;
+			}
+		}
+	}
+
+	public final static Logger log = LoggerFactory.getLogger(Module.class);
+
+	transient private com.pi4j.io.i2c.I2CBus i2cbus;
+
+	transient private com.pi4j.io.i2c.I2CDevice device;
+	Address2 address = new Address2();
+	String type;
+	String version; // hardware version
+
+	String state;
+	int selector = 0x83; // IR selected - LED OFF
+	static public final int MASK_DISPLAY = 0x01;
+
+	static public final int MASK_LED = 0x02;
+
+	static public final int MASK_SENSOR = 0x80;
+	private String lastValue = "";
+
+	static private boolean translationInitialized = false;
+
+	transient static HashMap<String, Byte> translation = new HashMap<String, Byte>();
+
+	transient CycleThread ct = null;
 
 	public static void initTranslation() {
 
@@ -150,52 +180,79 @@ public class Module {
 		return b;
 	}
 
-	public void logByteArray(byte[] data) {
-		logByteArray("", data);
-	}
-
-	public void logByteArray(String prefix, byte[] data) {
-
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < data.length; ++i) {
-			sb.append(data[i]);
-			if (i != data.length) {
-				sb.append(",");
-			}
-		}
-
-		log.info(String.format("%s %s", prefix, sb.toString()));
-	}
-
-	public byte[] writeDisplay(byte[] data) {
-		if (device == null) {
-			log.error("device is null");
-			return data;
-		}
-
+	public Module(int bus, int i2cAddress) {
 		try {
 
-			if(log.isDebugEnabled()){
-				logByteArray("writeDisplay", data);
+			address.setI2CBus(bus);
+			address.setI2CAddress(i2cAddress);
+
+			Platform platform = Platform.getLocalInstance();
+
+			if (platform.isArm()) {
+				// create I2C communications bus instance
+				i2cbus = I2CFactory.getInstance(bus);
+
+				// create I2C device instance
+				device = i2cbus.getDevice(i2cAddress);
 			}
 
-			// select display
-			device.write((byte) (selector &= ~MASK_DISPLAY)); // FIXME NOT
-																// CORRECT !
-
-			I2CDevice display = i2cbus.getDevice(0x38);
-			display.write(data, 0, data.length);
-
-			// de-select display
-			device.write((byte) (selector |= MASK_DISPLAY));// FIXME NOT CORRECT
-															// ! for LED
+			if (!translationInitialized) {
+				initTranslation();
+			}
 
 		} catch (Exception e) {
-			log.error(String.format("writeDisplay device %d error in writing", address.controller));
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
-		return data;
+	}
+
+	public void blinkOff(String msg, int blinkNumber, int blinkDelay) {
+		log.info(String.format("blinkOff %s", msg));
+		BlinkThread b = new BlinkThread();
+		b.blinkNumber = blinkNumber;
+		b.blinkDelay = blinkDelay;
+		b.value = msg;
+		b.leaveDisplayOn = false;
+		b.start();
+	}
+
+	public void blinkOn(String msg, int blinkNumber, int blinkDelay) {
+		BlinkThread b = new BlinkThread();
+		b.blinkNumber = blinkNumber;
+		b.blinkDelay = blinkDelay;
+		b.value = msg;
+		b.start();
+	}
+
+	public void clear() {
+		cycleStop();
+		selector |= MASK_LED;
+		display("");
+	}
+
+	public void cycle(String msg) {
+		if (ct != null) {
+			cycleStop();
+		}
+		ct = new CycleThread(msg, 300);
+		ct.start();
+	}
+
+	public void cycle(String msg, int delay) {
+		if (ct != null) {
+			cycleStop();
+		}
+		ct = new CycleThread(msg, delay);
+		ct.start();
+	}
+
+	public void cycleStop() {
+		if (ct != null) {
+			ct.isRunning = false;
+			ct.interrupt();
+			ct = null;
+			display("    ");
+		}
 	}
 
 	public String display(String str) {
@@ -231,79 +288,17 @@ public class Module {
 		return address.getI2CBus();
 	}
 
-	public void blinkOff(String msg, int blinkNumber, int blinkDelay) {
-		log.info(String.format("blinkOff %s", msg));
-		BlinkThread b = new BlinkThread();
-		b.blinkNumber = blinkNumber;
-		b.blinkDelay = blinkDelay;
-		b.value = msg;
-		b.leaveDisplayOn = false;
-		b.start();
-	}
-
-	public void blinkOn(String msg, int blinkNumber, int blinkDelay) {
-		BlinkThread b = new BlinkThread();
-		b.blinkNumber = blinkNumber;
-		b.blinkDelay = blinkDelay;
-		b.value = msg;
-		b.start();
-	}
-
-	public class CycleThread extends Thread {
-		public boolean isRunning = false;
-		int delay = 300;
-		String msg;
-
-		public CycleThread(String msg, int delay) {
-			this.msg = "    " + msg + "    ";
-			this.delay = delay;
+	public int ledOff() {
+		try {
+			selector |= MASK_LED;
+			log.info("ledOff {}", Integer.toHexString(selector));
+			device.write((byte) selector);
+		} catch (Exception e) {
+			log.error(String.format("ledOff device %d error in writing", address.controller));
+			Logging.logError(e);
 		}
 
-		public void run() {
-			isRunning = true;
-			try {
-				while (isRunning) {
-					// start with scroll on page
-					for (int i = 0; i < msg.length() - 3; ++i) {
-						display(msg.substring(i, i + 4));
-						sleep(delay);
-					}
-				}
-			} catch (InterruptedException e) {
-				isRunning = false;
-			}
-		}
-	}
-
-	public void cycle(String msg, int delay) {
-		if (ct != null) {
-			cycleStop();
-		}
-		ct = new CycleThread(msg, delay);
-		ct.start();
-	}
-
-	public void cycle(String msg) {
-		if (ct != null) {
-			cycleStop();
-		}
-		ct = new CycleThread(msg, 300);
-		ct.start();
-	}
-
-	public void cycleStop() {
-		if (ct != null) {
-			ct.isRunning = false;
-			ct.interrupt();
-			ct = null;
-			display("    ");
-		}
-	}
-
-	public void clear() {
-		cycleStop();
-		selector |= MASK_LED;
-		display("");
+		return selector;
 	}
 
 	// TODO - should only have to wrap the highest level transaction (WebGUI
@@ -316,22 +311,26 @@ public class Module {
 			device.write((byte) selector);
 		} catch (Exception e) {
 			log.error(String.format("ledOn device %d error in writing", address.controller));
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return selector;
 	}
 
-	public int ledOff() {
-		try {
-			selector |= MASK_LED;
-			log.info("ledOff {}", Integer.toHexString(selector));
-			device.write((byte) selector);
-		} catch (Exception e) {
-			log.error(String.format("ledOff device %d error in writing", address.controller));
-			Logging.logException(e);
+	public void logByteArray(byte[] data) {
+		logByteArray("", data);
+	}
+
+	public void logByteArray(String prefix, byte[] data) {
+
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < data.length; ++i) {
+			sb.append(data[i]);
+			if (i != data.length) {
+				sb.append(",");
+			}
 		}
 
-		return selector;
+		log.info(String.format("%s %s", prefix, sb.toString()));
 	}
 
 	public int readSensor() {
@@ -347,35 +346,40 @@ public class Module {
 			return device.read();
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return -1;
 	}
 
-	public Module(int bus, int i2cAddress) {
-		try {
-
-			address.setI2CBus(bus);
-			address.setI2CAddress(i2cAddress);
-			
-			Platform platform = Platform.getLocalInstance();
-
-			if (platform.isArm()) {
-				// create I2C communications bus instance
-				i2cbus = I2CFactory.getInstance(bus);
-
-				// create I2C device instance
-				device = i2cbus.getDevice(i2cAddress);
-			}
-
-			if (!translationInitialized) {
-				initTranslation();
-			}
-
-		} catch (Exception e) {
-			Logging.logException(e);
+	public byte[] writeDisplay(byte[] data) {
+		if (device == null) {
+			log.error("device is null");
+			return data;
 		}
 
+		try {
+
+			if (log.isDebugEnabled()) {
+				logByteArray("writeDisplay", data);
+			}
+
+			// select display
+			device.write((byte) (selector &= ~MASK_DISPLAY)); // FIXME NOT
+																// CORRECT !
+
+			I2CDevice display = i2cbus.getDevice(0x38);
+			display.write(data, 0, data.length);
+
+			// de-select display
+			device.write((byte) (selector |= MASK_DISPLAY));// FIXME NOT CORRECT
+															// ! for LED
+
+		} catch (Exception e) {
+			log.error(String.format("writeDisplay device %d error in writing", address.controller));
+			Logging.logError(e);
+		}
+
+		return data;
 	}
 
 }

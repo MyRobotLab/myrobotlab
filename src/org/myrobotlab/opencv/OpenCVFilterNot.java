@@ -40,12 +40,18 @@ public class OpenCVFilterNot extends OpenCVFilter {
 
 	IplImage buffer = null;
 
-	public OpenCVFilterNot()  {
+	public OpenCVFilterNot() {
 		super();
 	}
-	
-	public OpenCVFilterNot(String name)  {
+
+	public OpenCVFilterNot(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -53,12 +59,6 @@ public class OpenCVFilterNot extends OpenCVFilter {
 		buffer = image.clone(); // FIXME I think cvcopy is safer
 		cvNot(image, buffer);
 		return buffer;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

@@ -5,15 +5,15 @@
 // Generated on: 2014.01.04 at 10:45:35 PM EST 
 //
 
-
 package org.myrobotlab.pickToLight;
 
-
-
 /**
- * <p>Java class for AddressType complex type.
+ * <p>
+ * Java class for AddressType complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="AddressType">
@@ -31,64 +31,61 @@ package org.myrobotlab.pickToLight;
  */
 public class Address2 {
 
-    protected String controller;
-    protected int i2CBus;
-    protected int i2CAddress;
+	protected String controller;
+	protected int i2CBus;
+	protected int i2CAddress;
 
-    /**
-     * Gets the value of the controller property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getController() {
-        return controller;
-    }
+	/**
+	 * Gets the value of the controller property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getController() {
+		return controller;
+	}
 
-    /**
-     * Sets the value of the controller property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setController(String value) {
-        this.controller = value;
-    }
+	/**
+	 * Gets the value of the i2CAddress property.
+	 * 
+	 */
+	public int getI2CAddress() {
+		return i2CAddress;
+	}
 
-    /**
-     * Gets the value of the i2CBus property.
-     * 
-     */
-    public int getI2CBus() {
-        return i2CBus;
-    }
+	/**
+	 * Gets the value of the i2CBus property.
+	 * 
+	 */
+	public int getI2CBus() {
+		return i2CBus;
+	}
 
-    /**
-     * Sets the value of the i2CBus property.
-     * 
-     */
-    public void setI2CBus(int value) {
-        this.i2CBus = value;
-    }
+	/**
+	 * Sets the value of the controller property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setController(String value) {
+		this.controller = value;
+	}
 
-    /**
-     * Gets the value of the i2CAddress property.
-     * 
-     */
-    public int getI2CAddress() {
-        return i2CAddress;
-    }
+	/**
+	 * Sets the value of the i2CAddress property.
+	 * 
+	 */
+	public void setI2CAddress(int value) {
+		this.i2CAddress = value;
+	}
 
-    /**
-     * Sets the value of the i2CAddress property.
-     * 
-     */
-    public void setI2CAddress(int value) {
-        this.i2CAddress = value;
-    }
+	/**
+	 * Sets the value of the i2CBus property.
+	 * 
+	 */
+	public void setI2CBus(int value) {
+		this.i2CBus = value;
+	}
 
 }

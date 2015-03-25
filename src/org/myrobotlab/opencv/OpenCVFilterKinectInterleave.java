@@ -46,24 +46,24 @@ public class OpenCVFilterKinectInterleave extends OpenCVFilter {
 
 	transient IplImage dst = null;
 	transient IplImage src = null;
-	
+
 	int filter = 7;
 
-	public OpenCVFilterKinectInterleave(String name)  {
-		super(name);
-	}
-
 	int x = 0;
+
 	int y = 0;
 	int clickCounter = 0;
 	int frameCounter = 0;
 	Graphics g = null;
 	String lastHexValueOfPoint = "";
 
-	public void samplePoint(Integer inX, Integer inY) {
-		++clickCounter;
-		x = inX;
-		y = inY;
+	public OpenCVFilterKinectInterleave(String name) {
+		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
 
 	}
 
@@ -112,10 +112,11 @@ public class OpenCVFilterKinectInterleave extends OpenCVFilter {
 		return dst;
 	}
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
+	public void samplePoint(Integer inX, Integer inY) {
+		++clickCounter;
+		x = inX;
+		y = inY;
+
 	}
 
 }

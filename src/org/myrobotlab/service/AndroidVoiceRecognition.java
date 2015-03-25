@@ -23,14 +23,105 @@ import org.slf4j.Logger;
  */
 public class AndroidVoiceRecognition extends Service implements TextPublisher {
 
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory
-			.getLogger(AndroidVoiceRecognition.class);
+	private class ClientHandler extends Thread {
 
+		private boolean running;
+		private Socket clientSocket;
+		private ObjectInputStream in;
+		private ObjectOutputStream out;
+
+		public ClientHandler(Socket socket) {
+			try {
+				clientSocket = socket;
+				in = new ObjectInputStream(clientSocket.getInputStream());
+				out = new ObjectOutputStream(clientSocket.getOutputStream());
+			} catch (Exception ex) {
+				Logging.logError(ex);
+			}
+			running = true;
+		}
+
+		public void finish() {
+			try {
+				in.close();
+				out.close();
+				clientSocket.close();
+			} catch (IOException e) {
+				Logging.logError(e);
+			}
+			running = false;
+		}
+
+		public ObjectOutputStream getOut() {
+			return out;
+		}
+
+		@Override
+		public void run() {
+			try {
+				Object obj;
+				while (running && (obj = in.readObject()) != null) {
+					String mes = (String) obj;
+					process(mes);
+				}
+			} catch (Exception ex) {
+				Logging.logError(ex);
+			}
+
+		}
+	}
+
+	private class NewConnectionHandler extends Thread {
+
+		private final ServerSocket serverSock;
+
+		public NewConnectionHandler(ServerSocket ss) {
+			serverSock = ss;
+		}
+
+		@Override
+		public void run() {
+			while (runningserver) {
+				try {
+					Socket clientSocket = serverSock.accept();
+
+					ClientHandler ch = new ClientHandler(clientSocket);
+					client = ch;
+					ch.start();
+
+					log.debug("Client connected");
+					// Only accept one client
+					runningserver = false;
+				} catch (IOException ex) {
+					Logging.logError(ex);
+				}
+			}
+		}
+	}
+
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(AndroidVoiceRecognition.class);
 	transient private ClientHandler client;
 	private int port = 5684;
+
 	private final static String VERSION = "2015.01.01";
+
 	private boolean runningserver;
+
+	public static void main(String[] args) throws InterruptedException {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
+
+			Runtime.start("gui", "GUIService");
+			Runtime.start("avr", "AndroidVoiceRecognition");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
 	public AndroidVoiceRecognition(String n) {
 		super(n);
@@ -39,58 +130,13 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 	}
 
 	@Override
-	public void startService() {
-		super.startService();
-		startServer();
-	}
-
-	@Override
-	public void stopService() {
-		super.stopService();
-		if (runningserver) {
-			runningserver = false;
-		}
-		if (client != null) {
-			client.finish();
-		}
+	public String[] getCategories() {
+		return new String[] { "speech recognition" };
 	}
 
 	@Override
 	public String getDescription() {
 		return "utilizing Android's Voice Recognition";
-	}
-
-	public void setPort(int p) {
-		port = p;
-	}
-
-	public void sendToClient(String mes) {
-		send("fromServer=" + mes);
-	}
-
-	public void startRecognition() {
-		send("startrecognition");
-	}
-
-	// Server-start
-	private void startServer() {
-		runningserver = true;
-		try {
-			ServerSocket serverSock = new ServerSocket(port);
-			NewConnectionHandler nch = new NewConnectionHandler(serverSock);
-			nch.start();
-		} catch (IOException ex) {
-			Logging.logException(ex);
-		}
-	}
-
-	private void send(String mes) {
-		try {
-			client.getOut().writeObject(mes);
-		} catch (IOException ex) {
-			Logging.logException(ex);
-		}
-
 	}
 
 	private void process(String mes) {
@@ -147,98 +193,6 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 		}
 	}
 
-	private class NewConnectionHandler extends Thread {
-
-		private final ServerSocket serverSock;
-
-		public NewConnectionHandler(ServerSocket ss) {
-			serverSock = ss;
-		}
-
-		@Override
-		public void run() {
-			while (runningserver) {
-				try {
-					Socket clientSocket = serverSock.accept();
-
-					ClientHandler ch = new ClientHandler(clientSocket);
-					client = ch;
-					ch.start();
-
-					log.debug("Client connected");
-					// Only accept one client
-					runningserver = false;
-				} catch (IOException ex) {
-					Logging.logException(ex);
-				}
-			}
-		}
-	}
-
-	private class ClientHandler extends Thread {
-
-		private boolean running;
-		private Socket clientSocket;
-		private ObjectInputStream in;
-		private ObjectOutputStream out;
-
-		public ClientHandler(Socket socket) {
-			try {
-				clientSocket = socket;
-				in = new ObjectInputStream(clientSocket.getInputStream());
-				out = new ObjectOutputStream(clientSocket.getOutputStream());
-			} catch (Exception ex) {
-				Logging.logException(ex);
-			}
-			running = true;
-		}
-
-		public ObjectOutputStream getOut() {
-			return out;
-		}
-
-		public void finish() {
-			try {
-				in.close();
-				out.close();
-				clientSocket.close();
-			} catch (IOException e) {
-				Logging.logException(e);
-			}
-			running = false;
-		}
-
-		@Override
-		public void run() {
-			try {
-				Object obj;
-				while (running && (obj = in.readObject()) != null) {
-					String mes = (String) obj;
-					process(mes);
-				}
-			} catch (Exception ex) {
-				Logging.logException(ex);
-			}
-
-		}
-	}
-
-	// Server-end
-
-	public static void main(String[] args) throws InterruptedException {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-		try {
-
-			Runtime.start("gui", "GUIService");
-			Runtime.start("avr", "AndroidVoiceRecognition");
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
 	@Override
 	public String publishText(String text) {
 		return text;
@@ -247,9 +201,56 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 	public String recognized(String text) {
 		return text;
 	}
-	
+
+	private void send(String mes) {
+		try {
+			client.getOut().writeObject(mes);
+		} catch (IOException ex) {
+			Logging.logError(ex);
+		}
+
+	}
+
+	public void sendToClient(String mes) {
+		send("fromServer=" + mes);
+	}
+
+	public void setPort(int p) {
+		port = p;
+	}
+
+	// Server-end
+
+	public void startRecognition() {
+		send("startrecognition");
+	}
+
+	// Server-start
+	private void startServer() {
+		runningserver = true;
+		try {
+			ServerSocket serverSock = new ServerSocket(port);
+			NewConnectionHandler nch = new NewConnectionHandler(serverSock);
+			nch.start();
+		} catch (IOException ex) {
+			Logging.logError(ex);
+		}
+	}
+
 	@Override
-	public String[] getCategories() {
-		return new String[] {"speech recognition"};
+	public void startService() {
+		super.startService();
+		startServer();
+	}
+
+	@Override
+	public void stopService() {
+		super.stopService();
+		if (runningserver) {
+			runningserver = false;
+		}
+		if (client != null) {
+			client.finish();
+		}
 	}
 }

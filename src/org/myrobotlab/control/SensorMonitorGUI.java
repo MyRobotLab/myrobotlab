@@ -78,42 +78,97 @@ import org.slf4j.Logger;
  */
 public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListener, VideoGUISource {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(SensorMonitorGUI.class.toString());
+	class AddTraceListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
 
-	JList traces;
-	JList triggers;
+			JFrame frame = new JFrame();
+			frame.setTitle("add new filter");
+			String label = JOptionPane.showInputDialog(frame, "new trace name");
+			String controllerName = (String) traceController.getSelectedItem();
+			Color color = new Color(rand.nextInt(16777215));
 
-	VideoWidget video = null;
-	Thread sensorTraceThread = null;
+			traceListModel.addElement("<html><body><font color=\"" + Integer.toHexString(color.getRGB() & 0x00ffffff) + "\"> " + controllerName + " " + tracePin.getSelectedItem()
+					+ " " + label + " </font></body></html>");
 
-	// input
-	DefaultListModel traceListModel = new DefaultListModel();
-	DefaultListModel triggerListModel = new DefaultListModel();
+			// add the data to the array
+			TraceData t = new TraceData();
+			t.label = label;
+			t.color = color;
+			t.controllerName = controllerName;
+			t.pin = (Integer) tracePin.getSelectedItem();
+			traceData.put(SensorMonitor.makeKey(controllerName, t.pin), t);
 
-	JButton addTrace = new JButton("add");
-	JButton removeTrace = new JButton("remove");
+			MRLListener MRLListener = new MRLListener("publishPin", boundServiceName, "sensorInput", new Class[] { Pin.class });
 
-	JButton addTrigger = new JButton("add");
-	JButton removeTrigger = new JButton("remove");
+			myService.send(controllerName, "addListener", MRLListener);
 
-	JComboBox traceController = null;
-	JComboBox triggerController = null;
-	JComboBox tracePin = null;
-	JComboBox triggerPin = null;
+			// Notification SensorMonitor ------> GUIService
+			// subscribe("publishSensorData", "inputSensorData",
+			// PinData.class);// TODO-remove
+			// already
+			// in
+			// attachGUI
+			// this tells the Arduino to begin analog reads
+			myService.send(controllerName, "analogReadPollingStart", (Integer) tracePin.getSelectedItem());
 
-	BufferedImage sensorImage = null;
-	Graphics g = null;
+		}
 
-	final int DATA_WIDTH = 320;
-	final int DATA_HEIGHT = 512;
+	}
 
-	SensorMonitor myBoundService = null;
-	// trace data is owned by the GUIService
-	HashMap<String, TraceData> traceData = new HashMap<String, TraceData>();
-	// trigger data is owned by the Service
+	class AddTriggerListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			// TODO Auto-generated method stub
+			JFrame frame = new JFrame();
+			frame.setTitle("add new filter");
+			// String name = JOptionPane.showInputDialog(frame,
+			// "new alert name");
 
-	public Random rand = new Random();
+			TriggerDialog triggerDlg = new TriggerDialog();
+			if (triggerDlg.action.equals("add")) {
+				triggerListModel.addElement(triggerDlg.name.getText() + " " + triggerPin.getSelectedItem() + " " + triggerDlg.threshold.getInt());
+				// this has to be pushed to service
+				Trigger trigger = new Trigger();
+				trigger.name = triggerDlg.name.getText();
+				trigger.pinData = new Pin();
+				trigger.pinData.source = triggerController.getSelectedItem().toString();
+				trigger.pinData.pin = (Integer) triggerPin.getSelectedItem();
+				trigger.threshold = triggerDlg.threshold.getInt();
+				myService.send(boundServiceName, "addTrigger", trigger);
+				// add line ! with name ! & color !
+			}
+
+		}
+
+	}
+
+	public class RemoveTraceListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			String name = (String) traces.getSelectedValue();
+			// myService.send(boundServiceName, "removeFilter", name);
+			// TODO - block on response
+			traceListModel.removeElement(name);
+			String p[] = name.split(" ");
+			String controllerName = p[2];
+			Integer pin = Integer.parseInt(p[3]);
+			myService.send(controllerName, "analogReadPollingStop", pin);
+			traceData.remove(SensorMonitor.makeKey(controllerName, pin));
+		}
+
+	}
+
+	public class RemoveTriggerListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			String name = (String) triggers.getSelectedValue();
+			myService.send(boundServiceName, "removeTrigger", name);
+			// TODO - block on response
+			triggerListModel.removeElement(name);
+		}
+
+	}
 
 	class TraceData {
 		Color color = null;
@@ -130,14 +185,6 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 	}
 
 	class TriggerDialog extends JDialog {
-		private static final long serialVersionUID = 1L;
-		public JTextField name = new JTextField(15);
-		public JIntegerField threshold = new JIntegerField(15);
-		public JButton add = new JButton("add");
-		public JButton cancel = new JButton("cancel");
-
-		public String action = null;
-
 		class TriggerButtonListener implements ActionListener {
 			TriggerDialog myDialog = null;
 
@@ -145,11 +192,21 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 				myDialog = d;
 			}
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				action = e.getActionCommand();
 				myDialog.dispose();
 			}
 		}
+
+		private static final long serialVersionUID = 1L;
+		public JTextField name = new JTextField(15);
+		public JIntegerField threshold = new JIntegerField(15);
+		public JButton add = new JButton("add");
+
+		public JButton cancel = new JButton("cancel");
+
+		public String action = null;
 
 		TriggerDialog() {
 			super(myService.getFrame(), "Trigger Dialog", true);
@@ -192,10 +249,91 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 
 	}
 
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(SensorMonitorGUI.class.toString());
+
+	JList traces;
+	JList triggers;
+
+	VideoWidget video = null;
+	Thread sensorTraceThread = null;
+
+	// input
+	DefaultListModel traceListModel = new DefaultListModel();
+	DefaultListModel triggerListModel = new DefaultListModel();
+	JButton addTrace = new JButton("add");
+	JButton removeTrace = new JButton("remove");
+
+	JButton addTrigger = new JButton("add");
+	JButton removeTrigger = new JButton("remove");
+
+	JComboBox traceController = null;
+	JComboBox triggerController = null;
+
+	JComboBox tracePin = null;
+	JComboBox triggerPin = null;
+
+	BufferedImage sensorImage = null;
+
+	Graphics g = null;
+
+	final int DATA_WIDTH = 320;
+
+	final int DATA_HEIGHT = 512;
+
+	SensorMonitor myBoundService = null;
+
+	// trace data is owned by the GUIService
+	HashMap<String, TraceData> traceData = new HashMap<String, TraceData>();
+	// trigger data is owned by the Service
+
+	public Random rand = new Random();
+
 	public SensorMonitorGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
+	public Pin addTraceData(Pin pinData) {
+		// add the data to the array
+		TraceData t = new TraceData();
+		t.label = pinData.source;
+		t.color = new Color(rand.nextInt(16777215));
+		t.controllerName = pinData.source;
+		t.pin = pinData.pin;
+		traceData.put(SensorMonitor.makeKey(pinData.source, t.pin), t);
+		return pinData;
+	}
+
+	@Override
+	public void attachGUI() {
+		video.attachGUI();
+		subscribe("publishState", "getState", SensorMonitor.class);
+		subscribe("addTraceData", "addTraceData", Pin.class);
+		subscribe("publishSensorData", "inputSensorData", Pin.class);
+
+		// fire the update
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void detachGUI() {
+		video.detachGUI();
+		unsubscribe("publishState", "getState", SensorMonitor.class);
+		unsubscribe("addTraceData", "addTraceData", Pin.class);
+		unsubscribe("publishSensorData", "inputSensorData", Pin.class);
+	}
+
+	@Override
+	public VideoWidget getLocalDisplay() {
+		// TODO Auto-generated method stub
+		return video;
+	}
+
+	public void getState(SensorMonitor service) {
+		myBoundService = service;
+	}
+
+	@Override
 	public void init() {
 
 		video = new VideoWidget(boundServiceName, myService, tabs);
@@ -326,107 +464,6 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 
 	}
 
-	class AddTraceListener implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-
-			JFrame frame = new JFrame();
-			frame.setTitle("add new filter");
-			String label = JOptionPane.showInputDialog(frame, "new trace name");
-			String controllerName = (String) traceController.getSelectedItem();
-			Color color = new Color(rand.nextInt(16777215));
-
-			traceListModel.addElement("<html><body><font color=\"" + Integer.toHexString(color.getRGB() & 0x00ffffff) + "\"> " + controllerName + " " + tracePin.getSelectedItem()
-					+ " " + label + " </font></body></html>");
-
-			// add the data to the array
-			TraceData t = new TraceData();
-			t.label = label;
-			t.color = color;
-			t.controllerName = controllerName;
-			t.pin = (Integer) tracePin.getSelectedItem();
-			traceData.put(SensorMonitor.makeKey(controllerName, t.pin), t);
-
-			MRLListener MRLListener = new MRLListener("publishPin", boundServiceName, "sensorInput", new Class[] { Pin.class });
-
-			myService.send(controllerName, "addListener", MRLListener);
-
-			// Notification SensorMonitor ------> GUIService
-			// subscribe("publishSensorData", "inputSensorData",
-			// PinData.class);// TODO-remove
-			// already
-			// in
-			// attachGUI
-			// this tells the Arduino to begin analog reads
-			myService.send(controllerName, "analogReadPollingStart", (Integer) tracePin.getSelectedItem());
-
-		}
-
-	}
-
-	public Pin addTraceData(Pin pinData) {
-		// add the data to the array
-		TraceData t = new TraceData();
-		t.label = pinData.source;
-		t.color = new Color(rand.nextInt(16777215));
-		t.controllerName = pinData.source;
-		t.pin = pinData.pin;
-		traceData.put(SensorMonitor.makeKey(pinData.source, t.pin), t);
-		return pinData;
-	}
-
-	public class RemoveTraceListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			String name = (String) traces.getSelectedValue();
-			// myService.send(boundServiceName, "removeFilter", name);
-			// TODO - block on response
-			traceListModel.removeElement(name);
-			String p[] = name.split(" ");
-			String controllerName = p[2];
-			Integer pin = Integer.parseInt(p[3]);
-			myService.send(controllerName, "analogReadPollingStop", pin);
-			traceData.remove(SensorMonitor.makeKey(controllerName, pin));
-		}
-
-	}
-
-	class AddTriggerListener implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			// TODO Auto-generated method stub
-			JFrame frame = new JFrame();
-			frame.setTitle("add new filter");
-			// String name = JOptionPane.showInputDialog(frame,
-			// "new alert name");
-
-			TriggerDialog triggerDlg = new TriggerDialog();
-			if (triggerDlg.action.equals("add")) {
-				triggerListModel.addElement(triggerDlg.name.getText() + " " + triggerPin.getSelectedItem() + " " + triggerDlg.threshold.getInt());
-				// this has to be pushed to service
-				Trigger trigger = new Trigger();
-				trigger.name = triggerDlg.name.getText();
-				trigger.pinData = new Pin();
-				trigger.pinData.source = triggerController.getSelectedItem().toString();
-				trigger.pinData.pin = (Integer) triggerPin.getSelectedItem();
-				trigger.threshold = triggerDlg.threshold.getInt();
-				myService.send(boundServiceName, "addTrigger", trigger);
-				// add line ! with name ! & color !
-			}
-
-		}
-
-	}
-
-	public class RemoveTriggerListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			String name = (String) triggers.getSelectedValue();
-			myService.send(boundServiceName, "removeTrigger", name);
-			// TODO - block on response
-			triggerListModel.removeElement(name);
-		}
-
-	}
-
 	/**
 	 * method which displays the data published by the SensorMonitor on the
 	 * video widget
@@ -488,12 +525,9 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 		video.displayFrame(new SerializableImage(sensorImage, boundServiceName));
 	}
 
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
-	}
-
 	public void setCurrentFilterMouseListener() {
 		MouseListener mouseListener = new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent mouseEvent) {
 				JList theList = (JList) mouseEvent.getSource();
 				if (mouseEvent.getClickCount() == 2) {
@@ -510,32 +544,7 @@ public class SensorMonitorGUI extends ServiceGUI implements ListSelectionListene
 	}
 
 	@Override
-	public VideoWidget getLocalDisplay() {
-		// TODO Auto-generated method stub
-		return video;
-	}
-
-	@Override
-	public void attachGUI() {
-		video.attachGUI();
-		subscribe("publishState", "getState", SensorMonitor.class);
-		subscribe("addTraceData", "addTraceData", Pin.class);
-		subscribe("publishSensorData", "inputSensorData", Pin.class);
-
-		// fire the update
-		myService.send(boundServiceName, "publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		video.detachGUI();
-		unsubscribe("publishState", "getState", SensorMonitor.class);
-		unsubscribe("addTraceData", "addTraceData", Pin.class);
-		unsubscribe("publishSensorData", "inputSensorData", Pin.class);
-	}
-
-	public void getState(SensorMonitor service) {
-		myBoundService = service;
+	public void valueChanged(ListSelectionEvent e) {
 	}
 
 }

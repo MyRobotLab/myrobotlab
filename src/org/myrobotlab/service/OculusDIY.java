@@ -96,7 +96,7 @@ public class OculusDIY extends Service implements OculusDataPublisher , OculusDa
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
 	

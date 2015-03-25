@@ -35,6 +35,7 @@ import static org.myrobotlab.service.OpenCV.FILTER_LK_OPTICAL_TRACK;
 import static org.myrobotlab.service.OpenCV.FOREGROUND;
 import static org.myrobotlab.service.OpenCV.PART;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,8 +94,8 @@ public class Tracking extends Service {
 	transient public OpenCV opencv;
 	transient public Arduino arduino;
 	transient public Servo x, y;
-	// ------ PEER SERVICES END------
 
+	// ------ PEER SERVICES END------
 	// statistics
 	public int updateModulus = 20;
 	public long cnt = 0;
@@ -118,6 +119,37 @@ public class Tracking extends Service {
 	public String LKOpticalTrackFilterName;
 	public String FaceDetectFilterName;
 
+	double sizeIndexForBackgroundForegroundFlip = 0.10;
+
+	/**
+	 * call back of all video data video calls this whenever a frame is
+	 * processed
+	 * 
+	 * @param temp
+	 * @return
+	 */
+
+	int faceFoundFrameCount = 0;
+
+	int faceFoundFrameCountMin = 20;
+
+	int faceLostFrameCount = 0;
+
+	/*
+	 * public void releaseService() { x.releaseService(); y.releaseService();
+	 * xpid.releaseService(); ypid.releaseService(); arduino.releaseService();
+	 * opencv.releaseService(); }
+	 */
+
+	int faceLostFrameCountMin = 20;
+
+	// -------------- System Specific Initialization End --------------
+
+	boolean scan = false;
+
+	// ------------------- tracking & detecting methods begin
+	// ---------------------
+
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		peers.put("x", "Servo", "pan servo");
@@ -127,6 +159,36 @@ public class Tracking extends Service {
 		peers.put("opencv", "OpenCV", "shared OpenCV instance");
 		peers.put("arduino", "Arduino", "shared Arduino instance");
 		return peers;
+	}
+
+	public static void main(String[] args) {
+
+		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.ERROR);
+
+			// Speech speech = new Speech("speech");
+
+			// Y min max 79 - 127
+
+			Tracking tracker = new Tracking("tracker");
+			tracker.getY().setMinMax(79, 127);
+			tracker.getX().setPin(5);
+			tracker.getY().setPin(6);
+			tracker.getOpenCV().setCameraIndex(1);
+			tracker.connect("COM12");
+			// tracker.connect("COM4");
+			tracker.startService();
+			tracker.faceDetect();
+
+			GUIService gui = new GUIService("gui");
+			gui.startService();
+
+			// tracker.getGoodFeatures();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	// FIXME !! question remains does the act of creating peers update the
@@ -168,48 +230,26 @@ public class Tracking extends Service {
 		y.setController(arduino);
 	}
 
-	public String getState() {
-		return state;
+	public void addPreFilter(OpenCVFilter filter) {
+		preFilters.add(filter);
 	}
 
-	// DATA WHICH MUST BE SET BEFORE ATTACH METHODS !!!! - names must be set of
-	// course !
-	// com port
-	// IMPORTANT CONCEPT - the Typed function should have ALL THE BUSINESS LOGIC
-	// TO ATTACH
-	// NON ANYWHERE ELSE !!
-	public void startService() {
-		super.startService();
-		x.startService();
-		y.startService();
-		xpid.startService();
-		ypid.startService();
-		arduino.startService();
-		opencv.startService();
+	public void clearPreFilters() {
+		preFilters.clear();
 	}
 
-	/*
-	 * public void releaseService() { x.releaseService(); y.releaseService();
-	 * xpid.releaseService(); ypid.releaseService(); arduino.releaseService();
-	 * opencv.releaseService(); }
-	 */
+	// reset better ?
+	public void clearTrackingPoints() {
+		opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "clearPoints");
+		// reset position
+		rest();
+	}
 
 	// -------------- System Specific Initialization Begin --------------
 	// FIXME make interface
-	public boolean connect(String port) {
-		startService(); // NEEDED? I DONT THINK SO....
-
-		if (arduino == null) {
-			error("arduino is invalid");
-			return false;
-		}
+	public boolean connect(String port) throws IOException {
 
 		arduino.connect(port);
-
-		if (!arduino.isConnected()) {
-			error("arduino %s not connected", arduino.getName());
-			return false;
-		}
 
 		x.attach();
 		y.attach();
@@ -222,170 +262,43 @@ public class Tracking extends Service {
 		return true;
 	}
 
-	// -------------- System Specific Initialization End --------------
-
-	public void rest() {
-		log.info("rest");
-		x.rest();
-		y.rest();
-
-		lastXServoPos = x.getPosFloat();
-		lastYServoPos = y.getPosFloat();
-	}
-
-	// ------------------- tracking & detecting methods begin
-	// ---------------------
-
-	public void startLKTracking() {
-		log.info("startLKTracking");
-
+	public void faceDetect() {
+		// opencv.addFilter("Gray"); needed ?
 		opencv.removeFilters();
+
+		log.info("starting faceDetect");
 
 		for (int i = 0; i < preFilters.size(); ++i) {
 			opencv.addFilter(preFilters.get(i));
 		}
 
-		opencv.addFilter(FILTER_LK_OPTICAL_TRACK, FILTER_LK_OPTICAL_TRACK);
-		opencv.setDisplayFilter(FILTER_LK_OPTICAL_TRACK);
+		// TODO single string static
+		opencv.addFilter(FILTER_FACE_DETECT);
+		opencv.setDisplayFilter(FILTER_FACE_DETECT);
 
 		opencv.capture();
 		opencv.publishOpenCVData(true);
 
-		setState(STATE_LK_TRACKING_POINT);
+		// wrong state
+		setState(STATE_FACE_DETECT);
+
 	}
 
-	public boolean isIdle() {
-		return STATE_IDLE.equals(state);
+	public void findFace() {
+		scan = true;
 	}
 
-	public void stopTracking() {
-		opencv.removeFilters();
-		setState(STATE_IDLE);
+	public OpenCVData foundFace(OpenCVData data) {
+		return data;
 	}
 
-	public void trackPoint(float x, float y) {
-
-		if (!STATE_LK_TRACKING_POINT.equals(state)) {
-			startLKTracking();
-		}
-
-		opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "samplePoint", x, y);
+	public Arduino getArduino() {
+		return arduino;
 	}
 
-	// GAAAAAAH figure out if (int , int) is SUPPORTED WOULD YA !
-	public void trackPoint(int x, int y) {
-
-		if (!STATE_LK_TRACKING_POINT.equals(state)) {
-			startLKTracking();
-		}
-		opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "samplePoint", x, y);
-	}
-
-	public void reset() {
-		// TODO - reset pid values
-		// clear filters
-		opencv.removeFilters();
-		// reset position
-		rest();
-	}
-
-	// reset better ?
-	public void clearTrackingPoints() {
-		opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "clearPoints");
-		// reset position
-		rest();
-	}
-
-	public void setForegroundBackgroundFilter() {
-		opencv.removeFilters();
-		for (int i = 0; i < preFilters.size(); ++i) {
-			opencv.addFilter(preFilters.get(i));
-		}
-		opencv.addFilter(FILTER_DETECTOR);
-		opencv.addFilter(FILTER_ERODE);
-		opencv.addFilter(FILTER_DILATE);
-		opencv.addFilter(FILTER_FIND_CONTOURS);
-
-		((OpenCVFilterDetector) opencv.getFilter(FILTER_DETECTOR)).learn();
-
-		setState(STATE_LEARNING_BACKGROUND);
-	}
-
-	public void learnBackground() {
-
-		((OpenCVFilterDetector) opencv.getFilter(FILTER_DETECTOR)).learn();
-
-		setState(STATE_LEARNING_BACKGROUND);
-	}
-
-	public void searchForeground() {
-
-		((OpenCVFilterDetector) opencv.getFilter(FILTER_DETECTOR)).search();
-
-		setState(STATE_SEARCHING_FOREGROUND);
-	}
-
-	double sizeIndexForBackgroundForegroundFlip = 0.10;
-
-	public void waitForObjects(OpenCVData data) {
-		data.setSelectedFilterName(FILTER_FIND_CONTOURS);
-		ArrayList<Rectangle> objects = data.getBoundingBoxArray();
-		int numberOfNewObjects = (objects == null) ? 0 : objects.size();
-
-		// if I'm not currently learning the background and
-		// countour == background ??
-		// set state to learn background
-		if (!STATE_LEARNING_BACKGROUND.equals(state) && numberOfNewObjects == 1) {
-			SerializableImage img = new SerializableImage(data.getBufferedImage(), data.getSelectedFilterName());
-			double width = img.getWidth();
-			double height = img.getHeight();
-
-			Rectangle rect = objects.get(0);
-
-			// publish(data.getImages());
-
-			if ((width - rect.width) / width < sizeIndexForBackgroundForegroundFlip && (height - rect.height) / height < sizeIndexForBackgroundForegroundFlip) {
-				learnBackground();
-				info(String.format("%s - object found was nearly whole view - foreground background flip", state));
-			}
-
-		}
-
-		if (numberOfNewObjects != lastNumberOfObjects) {
-			info(String.format("%s - unstable change from %d to %d objects - reset clock - was stable for %d ms limit is %d ms", state, lastNumberOfObjects, numberOfNewObjects,
-					System.currentTimeMillis() - lastTimestamp, waitInterval));
-			lastTimestamp = System.currentTimeMillis();
-		}
-
-		if (waitInterval < System.currentTimeMillis() - lastTimestamp) {
-			// setLocation(data);
-			// number of objects have stated the same
-			if (STATE_LEARNING_BACKGROUND.equals(state)) {
-				if (numberOfNewObjects == 0) {
-					// process background
-					// data.putAttribute(BACKGROUND);
-					data.setAttribute(PART, BACKGROUND);
-					invoke("toProcess", data);
-					// ready to search foreground
-					searchForeground();
-				}
-			} else {
-
-				// stable state changes with # objects
-				// setState(STATE_STABILIZED);
-				// log.info("number of objects {}",numberOfNewObjects);
-				// TODO - SHOULD NOT PUT IN MEMORY -
-				// LET OTHER THREAD DO IT
-				if (numberOfNewObjects > 0) {
-					data.setAttribute(PART, FOREGROUND);
-					invoke("toProcess", data);
-				}// else TODO - processBackground(data) <- on a regular interval
-					// (addToSet) !!!!!!
-			}
-		}
-
-		lastNumberOfObjects = numberOfNewObjects;
-
+	@Override
+	public String[] getCategories() {
+		return new String[] { "video", "tracking", "control" };
 	}
 
 	// TODO - enhance with location - not just heading
@@ -399,22 +312,47 @@ public class Tracking extends Service {
 	// ------------------- tracking & detecting methods end
 	// ---------------------
 
-	public void setIdle() {
-		setState(STATE_IDLE);
+	@Override
+	public String getDescription() {
+		return "proportional control, tracking, and translation";
 	}
 
-	public void setState(String newState) {
-		state = newState;
-		info(state);
+	public OpenCV getOpenCV() {
+
+		return opencv;
 	}
 
-	// --------------- publish methods begin ----------------------------
-	public OpenCVData toProcess(OpenCVData data) {
-		return data;
+	public String getState() {
+		return state;
 	}
 
-	public SerializableImage publishFrame(SerializableImage image) {
-		return image;
+	public Servo getX() {
+		return x;
+	}
+
+	public PID getXPID() {
+		return xpid;
+	}
+
+	public Servo getY() {
+		return y;
+	}
+
+	public PID getYPID() {
+		return ypid;
+	}
+
+	// --------------- publish methods end ----------------------------
+
+	public boolean isIdle() {
+		return STATE_IDLE.equals(state);
+	}
+
+	public void learnBackground() {
+
+		((OpenCVFilterDetector) opencv.getFilter(FILTER_DETECTOR)).learn();
+
+		setState(STATE_LEARNING_BACKGROUND);
 	}
 
 	// ubermap !!!
@@ -432,114 +370,40 @@ public class Tracking extends Service {
 		invoke("publishFrame", image);
 	}
 
-	@Override
-	public String getDescription() {
-		return "proportional control, tracking, and translation";
-	}
-
-	// --------------- publish methods end ----------------------------
-
-	// FIXME - NEED A lost tracking event !!!!
-	// FIXME - this is WAY TO OPENCV specific !
-	// OpenCV should have a publishTrackingPoint method !
-	// This should be updateTrackingPoint(Point2Df) & perhaps Point3Df :)
-	final public void updateTrackingPoint(Point2Df targetPoint) {
-
-		++cnt;
-
-		// describe this time delta
-		latency = System.currentTimeMillis() - targetPoint.timestamp;
-		log.info(String.format("pt %s", targetPoint));
-
-		xpid.setInput(targetPoint.x);
-		ypid.setInput(targetPoint.y);
-		int currentXServoPos = x.getPos();
-		int currentYServoPos = y.getPos();
-
-		// TODO - work on removing currentX/YServoPos - and use the servo's
-		// directly ???
-		// if I'm at my min & and the target is further min - don't compute
-		// pid
-		if ((currentXServoPos <= x.getMin() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMax() && xSetpoint - targetPoint.x > 0)) {
-			if (currentXServoPos == (int) currentXServoPos) {
-				error(String.format("%d x limit out of range", (int) currentXServoPos));
-			} else {
-				error(String.format("%f x limit out of range", currentXServoPos));
-			}
-		} else {
-
-			if (xpid.compute()) {
-				currentXServoPos += (int) xpid.getOutput();
-				if (currentXServoPos != lastXServoPos) {
-					x.moveTo(currentXServoPos);
-					currentXServoPos = x.getPos();
-					lastXServoPos = currentXServoPos;
-				}
-				// TODO - canidate for "move(int)" ?
-
-			} else {
-				log.warn("x data under-run");
-			}
-		}
-
-		if ((currentYServoPos <= y.getMin() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMax() && ySetpoint - targetPoint.y > 0)) {
-			if (currentYServoPos == (int) currentYServoPos) {
-				error(String.format("%d x limit out of range", (int) currentYServoPos));
-			} else {
-				error(String.format("%f x limit out of range", currentYServoPos));
-			}
-		} else {
-			if (ypid.compute()) {
-				currentYServoPos += (int) ypid.getOutput();
-				if (currentYServoPos != lastYServoPos) {
-					y.moveTo(currentYServoPos);
-					currentYServoPos = y.getPos();
-					lastYServoPos = currentYServoPos;
-				}
-			} else {
-				log.warn("y data under-run");
-			}
-		}
-
-		lastPoint = targetPoint;
-
-		if (cnt % updateModulus == 0) {
-			broadcastState(); // update graphics ?
-			info(String.format("computeX %f computeY %f", xpid.getOutput(), xpid.getOutput()));
-		}
+	public SerializableImage publishFrame(SerializableImage image) {
+		return image;
 	}
 
 	public void removeFilters() {
 		opencv.removeFilters();
 	}
 
-	public void trackPoint() {
-		trackPoint(0.5f, 0.5f);
+	public void reset() {
+		// TODO - reset pid values
+		// clear filters
+		opencv.removeFilters();
+		// reset position
+		rest();
 	}
 
-	public void addPreFilter(OpenCVFilter filter) {
-		preFilters.add(filter);
-	}
+	public void rest() {
+		log.info("rest");
+		x.rest();
+		y.rest();
 
-	public void clearPreFilters() {
-		preFilters.clear();
+		lastXServoPos = x.getPosFloat();
+		lastYServoPos = y.getPosFloat();
 	}
 
 	public void scan() {
 
 	}
 
-	public Servo getX() {
-		return x;
-	}
+	public void searchForeground() {
 
-	public Servo getY() {
-		return y;
-	}
+		((OpenCVFilterDetector) opencv.getFilter(FILTER_DETECTOR)).search();
 
-	public OpenCV getOpenCV() {
-
-		return opencv;
+		setState(STATE_SEARCHING_FOREGROUND);
 	}
 
 	public void setDefaultPreFilters() {
@@ -551,19 +415,24 @@ public class Tracking extends Service {
 		}
 	}
 
-	/**
-	 * call back of all video data video calls this whenever a frame is
-	 * processed
-	 * 
-	 * @param temp
-	 * @return
-	 */
+	public void setForegroundBackgroundFilter() {
+		opencv.removeFilters();
+		for (int i = 0; i < preFilters.size(); ++i) {
+			opencv.addFilter(preFilters.get(i));
+		}
+		opencv.addFilter(FILTER_DETECTOR);
+		opencv.addFilter(FILTER_ERODE);
+		opencv.addFilter(FILTER_DILATE);
+		opencv.addFilter(FILTER_FIND_CONTOURS);
 
-	int faceFoundFrameCount = 0;
-	int faceFoundFrameCountMin = 20;
-	int faceLostFrameCount = 0;
-	int faceLostFrameCountMin = 20;
-	boolean scan = false;
+		((OpenCVFilterDetector) opencv.getFilter(FILTER_DETECTOR)).learn();
+
+		setState(STATE_LEARNING_BACKGROUND);
+	}
+
+	public void setIdle() {
+		setState(STATE_IDLE);
+	}
 
 	public OpenCVData setOpenCVData(OpenCVData data) {
 
@@ -668,52 +537,56 @@ public class Tracking extends Service {
 		return data;
 	}
 
-	public OpenCVData foundFace(OpenCVData data) {
-		return data;
+	public void setState(String newState) {
+		state = newState;
+		info(state);
 	}
 
-	public void faceDetect() {
-		// opencv.addFilter("Gray"); needed ?
-		opencv.removeFilters();
+	public void startLKTracking() {
+		log.info("startLKTracking");
 
-		log.info("starting faceDetect");
+		opencv.removeFilters();
 
 		for (int i = 0; i < preFilters.size(); ++i) {
 			opencv.addFilter(preFilters.get(i));
 		}
 
-		// TODO single string static
-		opencv.addFilter(FILTER_FACE_DETECT);
-		opencv.setDisplayFilter(FILTER_FACE_DETECT);
+		opencv.addFilter(FILTER_LK_OPTICAL_TRACK, FILTER_LK_OPTICAL_TRACK);
+		opencv.setDisplayFilter(FILTER_LK_OPTICAL_TRACK);
 
 		opencv.capture();
 		opencv.publishOpenCVData(true);
 
-		// wrong state
-		setState(STATE_FACE_DETECT);
-
+		setState(STATE_LK_TRACKING_POINT);
 	}
 
-	public Arduino getArduino() {
-		return arduino;
-	}
-
-	public PID getXPID() {
-		return xpid;
-	}
-
-	public PID getYPID() {
-		return ypid;
-	}
-
-	public void findFace() {
-		scan = true;
+	// DATA WHICH MUST BE SET BEFORE ATTACH METHODS !!!! - names must be set of
+	// course !
+	// com port
+	// IMPORTANT CONCEPT - the Typed function should have ALL THE BUSINESS LOGIC
+	// TO ATTACH
+	// NON ANYWHERE ELSE !!
+	@Override
+	public void startService() {
+		super.startService();
+		x.startService();
+		y.startService();
+		xpid.startService();
+		ypid.startService();
+		arduino.startService();
+		opencv.startService();
 	}
 
 	public void stopScan() {
 		scan = false;
 	}
 
+	public void stopTracking() {
+		opencv.removeFilters();
+		setState(STATE_IDLE);
+	}
+
+	@Override
 	public Status test() {
 		Status status = super.test();
 		Tracking track = (Tracking) Runtime.getService(getName());
@@ -737,39 +610,162 @@ public class Tracking extends Service {
 		return status;
 	}
 
-	public static void main(String[] args) {
+	// --------------- publish methods begin ----------------------------
+	public OpenCVData toProcess(OpenCVData data) {
+		return data;
+	}
 
-		try {
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.ERROR);
+	public void trackPoint() {
+		trackPoint(0.5f, 0.5f);
+	}
 
-			// Speech speech = new Speech("speech");
+	public void trackPoint(float x, float y) {
 
-			// Y min max 79 - 127
-
-			Tracking tracker = new Tracking("tracker");
-			tracker.getY().setMinMax(79, 127);
-			tracker.getX().setPin(5);
-			tracker.getY().setPin(6);
-			tracker.getOpenCV().setCameraIndex(1);
-			tracker.connect("COM12");
-			// tracker.connect("COM4");
-			tracker.startService();
-			tracker.faceDetect();
-
-			GUIService gui = new GUIService("gui");
-			gui.startService();
-
-			// tracker.getGoodFeatures();
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (!STATE_LK_TRACKING_POINT.equals(state)) {
+			startLKTracking();
 		}
 
+		opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "samplePoint", x, y);
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"video", "tracking", "control"};
+
+	// GAAAAAAH figure out if (int , int) is SUPPORTED WOULD YA !
+	public void trackPoint(int x, int y) {
+
+		if (!STATE_LK_TRACKING_POINT.equals(state)) {
+			startLKTracking();
+		}
+		opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "samplePoint", x, y);
+	}
+
+	// FIXME - NEED A lost tracking event !!!!
+	// FIXME - this is WAY TO OPENCV specific !
+	// OpenCV should have a publishTrackingPoint method !
+	// This should be updateTrackingPoint(Point2Df) & perhaps Point3Df :)
+	final public void updateTrackingPoint(Point2Df targetPoint) {
+
+		++cnt;
+
+		// describe this time delta
+		latency = System.currentTimeMillis() - targetPoint.timestamp;
+		log.info(String.format("pt %s", targetPoint));
+
+		xpid.setInput(targetPoint.x);
+		ypid.setInput(targetPoint.y);
+		int currentXServoPos = x.getPos();
+		int currentYServoPos = y.getPos();
+
+		// TODO - work on removing currentX/YServoPos - and use the servo's
+		// directly ???
+		// if I'm at my min & and the target is further min - don't compute
+		// pid
+		if ((currentXServoPos <= x.getMin() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMax() && xSetpoint - targetPoint.x > 0)) {
+			if (currentXServoPos == currentXServoPos) {
+				error(String.format("%d x limit out of range", currentXServoPos));
+			} else {
+				error(String.format("%f x limit out of range", currentXServoPos));
+			}
+		} else {
+
+			if (xpid.compute()) {
+				currentXServoPos += (int) xpid.getOutput();
+				if (currentXServoPos != lastXServoPos) {
+					x.moveTo(currentXServoPos);
+					currentXServoPos = x.getPos();
+					lastXServoPos = currentXServoPos;
+				}
+				// TODO - canidate for "move(int)" ?
+
+			} else {
+				log.warn("x data under-run");
+			}
+		}
+
+		if ((currentYServoPos <= y.getMin() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMax() && ySetpoint - targetPoint.y > 0)) {
+			if (currentYServoPos == currentYServoPos) {
+				error(String.format("%d x limit out of range", currentYServoPos));
+			} else {
+				error(String.format("%f x limit out of range", currentYServoPos));
+			}
+		} else {
+			if (ypid.compute()) {
+				currentYServoPos += (int) ypid.getOutput();
+				if (currentYServoPos != lastYServoPos) {
+					y.moveTo(currentYServoPos);
+					currentYServoPos = y.getPos();
+					lastYServoPos = currentYServoPos;
+				}
+			} else {
+				log.warn("y data under-run");
+			}
+		}
+
+		lastPoint = targetPoint;
+
+		if (cnt % updateModulus == 0) {
+			broadcastState(); // update graphics ?
+			info(String.format("computeX %f computeY %f", xpid.getOutput(), xpid.getOutput()));
+		}
+	}
+
+	public void waitForObjects(OpenCVData data) {
+		data.setSelectedFilterName(FILTER_FIND_CONTOURS);
+		ArrayList<Rectangle> objects = data.getBoundingBoxArray();
+		int numberOfNewObjects = (objects == null) ? 0 : objects.size();
+
+		// if I'm not currently learning the background and
+		// countour == background ??
+		// set state to learn background
+		if (!STATE_LEARNING_BACKGROUND.equals(state) && numberOfNewObjects == 1) {
+			SerializableImage img = new SerializableImage(data.getBufferedImage(), data.getSelectedFilterName());
+			double width = img.getWidth();
+			double height = img.getHeight();
+
+			Rectangle rect = objects.get(0);
+
+			// publish(data.getImages());
+
+			if ((width - rect.width) / width < sizeIndexForBackgroundForegroundFlip && (height - rect.height) / height < sizeIndexForBackgroundForegroundFlip) {
+				learnBackground();
+				info(String.format("%s - object found was nearly whole view - foreground background flip", state));
+			}
+
+		}
+
+		if (numberOfNewObjects != lastNumberOfObjects) {
+			info(String.format("%s - unstable change from %d to %d objects - reset clock - was stable for %d ms limit is %d ms", state, lastNumberOfObjects, numberOfNewObjects,
+					System.currentTimeMillis() - lastTimestamp, waitInterval));
+			lastTimestamp = System.currentTimeMillis();
+		}
+
+		if (waitInterval < System.currentTimeMillis() - lastTimestamp) {
+			// setLocation(data);
+			// number of objects have stated the same
+			if (STATE_LEARNING_BACKGROUND.equals(state)) {
+				if (numberOfNewObjects == 0) {
+					// process background
+					// data.putAttribute(BACKGROUND);
+					data.setAttribute(PART, BACKGROUND);
+					invoke("toProcess", data);
+					// ready to search foreground
+					searchForeground();
+				}
+			} else {
+
+				// stable state changes with # objects
+				// setState(STATE_STABILIZED);
+				// log.info("number of objects {}",numberOfNewObjects);
+				// TODO - SHOULD NOT PUT IN MEMORY -
+				// LET OTHER THREAD DO IT
+				if (numberOfNewObjects > 0) {
+					data.setAttribute(PART, FOREGROUND);
+					invoke("toProcess", data);
+				}// else TODO - processBackground(data) <- on a regular interval
+					// (addToSet) !!!!!!
+			}
+		}
+
+		lastNumberOfObjects = numberOfNewObjects;
+
 	}
 
 }

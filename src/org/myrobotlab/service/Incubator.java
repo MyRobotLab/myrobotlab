@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +24,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.serial.VirtualSerialPort;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -32,7 +32,7 @@ public class Incubator extends Service {
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(Incubator.class);
-	
+
 	Date now = new Date();
 
 	// transient public XMPP xmpp;
@@ -48,8 +48,9 @@ public class Incubator extends Service {
 
 	// TODO - subscribe to registered --> generates subscription to
 	// publishState() - filter on Errors
-	
-	// FIXME NEED TO AD SOME REPO MANAGEMENT ROUTINES TO RUNTIME - LIKE REMOVE REPO
+
+	// FIXME NEED TO AD SOME REPO MANAGEMENT ROUTINES TO RUNTIME - LIKE REMOVE
+	// REPO
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -64,20 +65,6 @@ public class Incubator extends Service {
 		// peers.put("python", "Python", "Python service");
 
 		return peers;
-	}
-	
-	public Incubator(){
-		this("incubator");
-	}
-
-	public Incubator(String n) {
-		super(n);
-		addRoutes();
-	}
-
-	@Override
-	public void startService() {
-		super.startService();
 	}
 
 	public static Status install(String fullType) {
@@ -102,63 +89,153 @@ public class Incubator extends Service {
 		}
 		return null;
 	}
-	
-	public Status serviceTest(){
-		
-		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 
-		Status status = Status.info("serviceTest will test %d services", serviceTypeNames.length);
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		LoggingFactory.getInstance().addAppender(Appender.FILE);
 
-		Set<Thread> originalThreads = Thread.getAllStackTraces().keySet();
-		
-		for (int i = 0; i < serviceTypeNames.length; ++i) {
+		Incubator incubator = (Incubator) Runtime.start("incubator", "Incubator");
+		incubator.test();
+		// incubator.servoArduinoOpenCVGUIService();
 
-			ServiceInterface s = null;
-			String fullType = serviceTypeNames[i];
+		/*
+		 * incubator.installAll(); // incubator.startTest();
+		 * 
+		 * incubator.testPythonScripts();
+		 * 
+		 * // Runtime.createAndStart("gui", "GUIService");
+		 */
 
-			if ("org.myrobotlab.service.Incubator".equals(fullType) || "org.myrobotlab.service.Runtime".equals(fullType)) {
-				log.info("skipping Incubator & Runtime");
-				continue;
-			}
-			
-			try {
+	}
 
-				// install it
-				status.add(install(fullType));
+	public Incubator() {
+		this("incubator");
+	}
 
-				// create it
-				log.info("creating {}", fullType);
-				s = Runtime.create(fullType, fullType);
+	public Incubator(String n) {
+		super(n);
+		addRoutes();
+	}
 
-				if (s == null){
-					status.addError("could not create %s service", fullType);
-					continue;
-				}
-				
-				// start it
-				log.info("starting {}", fullType);
-				s.startService();
-				
-				log.info("starting {}", fullType);
-				Status result = s.test();
-				if (result != null && result.hasError()){
-					status.add(result);
-				}
-				
-				s.releaseService();
-				
-				if (s.hasPeers()){
-					s.releasePeers();
-				}
+	// very good - dynamicly subscribing to other service's
+	// published errors
+	// step 1 subscribe to runtimes registered event
+	// step 2 in any registered -
+	// step 3 - fix up - so that state is handled (not just "error")
+	public void addRoutes() {
+		// register with runtime for any new services
+		// their errors are routed to mouth
+		subscribe(this.getName(), "publishError", "handleError");
 
-			} catch (Exception e) {
-				status.addError("ERROR - %s", fullType);
-				status.addError(e);
-				continue;
-			}
+		Runtime r = Runtime.getInstance();
+		r.addListener(getName(), "registered");
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "testing" };
+	}
+
+	/*
+	 * public IndexNode<Object> get(String robotName) { return
+	 * cache.getNode(robotName); }
+	 */
+
+	@Override
+	public String getDescription() {
+		return "used as a general template";
+	}
+
+	public void handleError(Status status) {
+		try {
+			// FIXME - remove - only add xmp if HandleError requires an error
+			// alert
+			XMPP xmpp = (XMPP) startPeer("xmpp");
+			// python = (Python) startPeer("python");
+			/*
+			 * webgui = (WebGUI) createPeer("webgui"); webgui.port = 4321;
+			 * webgui.startService();
+			 */
+			xmpp.startService();
+			// webgui.startService();
+
+			xmpp.login("incubator@myrobotlab.org", "hatchMe!");
+
+			xmpp.addAuditor("Greg Perry");
+			// python.startService();
+			xmpp.sendMessage(Encoder.toJson(status), "Greg Perry");
+			// xmpp.releaseService();
+			// TODO email
+		} catch (Exception e) {
+			Logging.logError(e);
 		}
-		return status;
-		
+
+	}
+
+	public void handleError(String msg) {
+		// AHHHH! with just error (vs log.error) - goes in infinite loop
+		log.error(String.format("cool - all errors are caught here since we register for them - this error is - %s", msg));
+	}
+
+	/**
+	 * install all service
+	 */
+	public void installAll() {
+
+		Runtime runtime = Runtime.getInstance();
+		UpdateReport report = runtime.updateAll();
+		log.info(report.toString());
+	}
+
+	public Status pythonTest() throws IOException {
+		Python python = (Python) Runtime.start("python", "Python");
+		Serial uart99 = (Serial) Runtime.start("uart99", "Serial");
+		// take inventory of currently running services
+		HashSet<String> keepMeRunning = new HashSet<String>();
+
+		List<ServiceInterface> list = Runtime.getServices();
+		for (int j = 0; j < list.size(); ++j) {
+			ServiceInterface si = list.get(j);
+			keepMeRunning.add(si.getName());
+		}
+
+		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
+		Status status = Status.info("subTest");
+
+		status.add(Status.info("will test %d services", serviceTypeNames.length));
+
+		for (int i = 0; i < serviceTypeNames.length; ++i) {
+			String fullName = serviceTypeNames[i];
+			String shortName = fullName.substring(fullName.lastIndexOf(".") + 1);
+
+			String py = FileIO.resourceToString(String.format("Python/examples/%s.py", shortName));
+
+			if (py == null || py.length() == 0) {
+				status.addError("%s.py does not exist", shortName);
+			} else {
+				//uart99.connect("UART99");
+				uart99.recordRX(String.format("%s.rx", shortName)); // FIXME
+																	// FILENAME
+																	// OVERLOAD
+				python.exec(py);
+				uart99.stopRecording();
+				// check rx file against saved data
+			}
+
+			// get python errors !
+
+			// clean services
+			Runtime.releaseAllServicesExcept(keepMeRunning);
+		}
+
+		return null;
+
+	}
+
+	public void registered(ServiceInterface sw) {
+
+		subscribe(sw.getName(), "publishError", "handleError");
 	}
 
 	// FIXME - 2 sets of services - 1 by serviceData.xml & 1 by all files in
@@ -174,7 +251,7 @@ public class Incubator extends Service {
 		status.add(Status.info("will test %d services", serviceTypeNames.length));
 
 		Set<Thread> originalThreads = Thread.getAllStackTraces().keySet();
-		
+
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 
 			ServiceInterface s = null;
@@ -184,8 +261,8 @@ public class Incubator extends Service {
 				log.info("skipping Incubator & Runtime");
 				continue;
 			}
-			
-			//fullType = "org.myrobotlab.service.JFugue";
+
+			// fullType = "org.myrobotlab.service.JFugue";
 
 			try {
 
@@ -196,11 +273,11 @@ public class Incubator extends Service {
 				log.info("creating {}", fullType);
 				s = Runtime.create(fullType, fullType);
 
-				if (s == null){
+				if (s == null) {
 					status.addError("could not create %s service", fullType);
 					continue;
 				}
-				
+
 				// start it
 				log.info("starting {}", fullType);
 				s.startService();
@@ -232,19 +309,19 @@ public class Incubator extends Service {
 
 				s.releaseService();
 				sleep(300);
-				
+
 				Set<Thread> currentThreads = Thread.getAllStackTraces().keySet();
-				
+
 				if (currentThreads.size() > originalThreads.size()) {
 					for (Thread t : currentThreads) {
-						if (!originalThreads.contains(t)){
+						if (!originalThreads.contains(t)) {
 							status.addError("%s has added thread %s but not cleanly removed it", fullType, t.getName());
-							
+
 							// resetting original thread count
 							originalThreads = currentThreads;
 						}
 					}
-					
+
 				}
 
 				log.info("released {}", fullType);
@@ -257,14 +334,67 @@ public class Incubator extends Service {
 		return status;
 	}
 
-	/*
-	 * public IndexNode<Object> get(String robotName) { return
-	 * cache.getNode(robotName); }
-	 */
+	public Status serviceTest() {
+
+		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
+
+		Status status = Status.info("serviceTest will test %d services", serviceTypeNames.length);
+
+		Set<Thread> originalThreads = Thread.getAllStackTraces().keySet();
+
+		for (int i = 0; i < serviceTypeNames.length; ++i) {
+
+			ServiceInterface s = null;
+			String fullType = serviceTypeNames[i];
+
+			if ("org.myrobotlab.service.Incubator".equals(fullType) || "org.myrobotlab.service.Runtime".equals(fullType)) {
+				log.info("skipping Incubator & Runtime");
+				continue;
+			}
+
+			try {
+
+				// install it
+				status.add(install(fullType));
+
+				// create it
+				log.info("creating {}", fullType);
+				s = Runtime.create(fullType, fullType);
+
+				if (s == null) {
+					status.addError("could not create %s service", fullType);
+					continue;
+				}
+
+				// start it
+				log.info("starting {}", fullType);
+				s.startService();
+
+				log.info("starting {}", fullType);
+				Status result = s.test();
+				if (result != null && result.hasError()) {
+					status.add(result);
+				}
+
+				s.releaseService();
+
+				if (s.hasPeers()) {
+					s.releasePeers();
+				}
+
+			} catch (Exception e) {
+				status.addError("ERROR - %s", fullType);
+				status.addError(e);
+				continue;
+			}
+		}
+		return status;
+
+	}
 
 	@Override
-	public String getDescription() {
-		return "used as a general template";
+	public void startService() {
+		super.startService();
 	}
 
 	public Status subTest() {
@@ -299,89 +429,19 @@ public class Incubator extends Service {
 
 	}
 
-	public Status pythonTest() {
-		Python python = (Python) Runtime.start("python", "Python");
-		Serial uart99 = (Serial) Runtime.start("uart99", "Serial");
-		// take inventory of currently running services
-		HashSet<String> keepMeRunning = new HashSet<String>();
+	@Override
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getType());
 
-		VirtualSerialPort.createNullModemCable("UART99", "COM12");
+		// status.add(subTest());
+		// status.add(serializeTest());
+		status.add(serviceTest());
 
-		List<ServiceInterface> list = Runtime.getServices();
-		for (int j = 0; j < list.size(); ++j) {
-			ServiceInterface si = list.get(j);
-			keepMeRunning.add(si.getName());
+		if (status.hasError()) {
+			handleError(status);
 		}
 
-		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
-		Status status = Status.info("subTest");
-
-		status.add(Status.info("will test %d services", serviceTypeNames.length));
-
-		for (int i = 0; i < serviceTypeNames.length; ++i) {
-			String fullName = serviceTypeNames[i];
-			String shortName = fullName.substring(fullName.lastIndexOf(".") + 1);
-
-			String py = FileIO.resourceToString(String.format("Python/examples/%s.py", shortName));
-
-			if (py == null || py.length() == 0) {
-				status.addError("%s.py does not exist", shortName);
-			} else {
-				uart99.connect("UART99");
-				uart99.recordRX(String.format("%s.rx", shortName)); // FIXME
-																	// FILENAME
-																	// OVERLOAD
-				python.exec(py);
-				uart99.stopRecording();
-				// check rx file against saved data
-			}
-
-			// get python errors !
-
-			// clean services
-			Runtime.releaseAllServicesExcept(keepMeRunning);
-		}
-
-		return null;
-
-	}
-	
-	public void testServiceScripts() {
-		// get download zip
-		
-		// uncompress locally
-		
-		// test - instrumentation for 
-	}
-
-	public void testPythonScripts() {
-		try {
-
-			Python python = (Python) Runtime.start("python", "Python");
-			// String script;
-			ArrayList<File> list = FileIO.listInternalContents("/resource/Python/examples");
-
-			Runtime.createAndStart("gui", "GUIService");
-			python = (Python) startPeer("python");
-			// InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
-
-			HashSet<String> keepMeRunning = new HashSet<String>(Arrays.asList("i01", "gui", "runtime", "python", getName()));
-
-			for (int i = 0; i < list.size(); ++i) {
-				String r = list.get(i).getName();
-				if (r.startsWith("InMoov2")) {
-					warn("testing script %s", r);
-					String script = FileIO.resourceToString(String.format("Python/examples/%s", r));
-					python.exec(script);
-					log.info("here");
-					// i01.detach();
-					Runtime.releaseAllServicesExcept(keepMeRunning);
-				}
-			}
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
+		return status;
 	}
 
 	public void testInMoovPythonScripts() {
@@ -410,100 +470,46 @@ public class Incubator extends Service {
 			}
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
 
-	// very good - dynamicly subscribing to other service's
-	// published errors
-	// step 1 subscribe to runtimes registered event
-	// step 2 in any registered -
-	// step 3 - fix up - so that state is handled (not just "error")
-	public void addRoutes() {
-		// register with runtime for any new services
-		// their errors are routed to mouth
-		subscribe(this.getName(), "publishError", "handleError");
+	public void testPythonScripts() {
+		try {
 
-		Runtime r = Runtime.getInstance();
-		r.addListener(getName(), "registered");
-	}
+			Python python = (Python) Runtime.start("python", "Python");
+			// String script;
+			ArrayList<File> list = FileIO.listInternalContents("/resource/Python/examples");
 
-	public void registered(ServiceInterface sw) {
+			Runtime.createAndStart("gui", "GUIService");
+			python = (Python) startPeer("python");
+			// InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
 
-		subscribe(sw.getName(), "publishError", "handleError");
-	}
-	
-	public void handleError(String msg){
-		// AHHHH! with just error (vs log.error) - goes in infinite loop
-		log.error(String.format("cool - all errors are caught here since we register for them - this error is - %s", msg));
-	}
+			HashSet<String> keepMeRunning = new HashSet<String>(Arrays.asList("i01", "gui", "runtime", "python", getName()));
 
-	public void handleError(Status status) {
-		// FIXME - remove - only add xmp if HandleError requires an error alert
-		XMPP xmpp = (XMPP) startPeer("xmpp");
-		// python = (Python) startPeer("python");
-		/*
-		 * webgui = (WebGUI) createPeer("webgui"); webgui.port = 4321;
-		 * webgui.startService();
-		 */
-		xmpp.startService();
-		// webgui.startService();
+			for (int i = 0; i < list.size(); ++i) {
+				String r = list.get(i).getName();
+				if (r.startsWith("InMoov2")) {
+					warn("testing script %s", r);
+					String script = FileIO.resourceToString(String.format("Python/examples/%s", r));
+					python.exec(script);
+					log.info("here");
+					// i01.detach();
+					Runtime.releaseAllServicesExcept(keepMeRunning);
+				}
+			}
 
-		xmpp.login("incubator@myrobotlab.org", "hatchMe!");
-
-		xmpp.addAuditor("Greg Perry");
-		// python.startService();
-		xmpp.sendMessage(Encoder.toJson(status), "Greg Perry");
-		// xmpp.releaseService();
-		// TODO email
-	}
-
-	/**
-	 * install all service
-	 */
-	public void installAll() {
-
-		Runtime runtime = Runtime.getInstance();
-		UpdateReport report = runtime.updateAll();
-		log.info(report.toString());
-	}
-
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-
-		//status.add(subTest());
-		//status.add(serializeTest());
-		status.add(serviceTest());
-
-		if (status.hasError()) {
-			handleError(status);
+		} catch (Exception e) {
+			Logging.logError(e);
 		}
-
-		return status;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-		LoggingFactory.getInstance().addAppender(Appender.FILE);
+	public void testServiceScripts() {
+		// get download zip
 
-		Incubator incubator = (Incubator) Runtime.start("incubator", "Incubator");
-		incubator.test();
-		// incubator.servoArduinoOpenCVGUIService();
+		// uncompress locally
 
-		/*
-		 * incubator.installAll(); // incubator.startTest();
-		 * 
-		 * incubator.testPythonScripts();
-		 * 
-		 * // Runtime.createAndStart("gui", "GUIService");
-		 */
-
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"testing"};
+		// test - instrumentation for
 	}
 
 }

@@ -2,6 +2,28 @@ package org.myrobotlab.string;
 
 public class StringUtil {
 
+	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+
+	public static String bytesToHex(byte[] bytes) {
+		char[] hexChars = new char[bytes.length * 2];
+		for (int j = 0; j < bytes.length; j++) {
+			int v = bytes[j] & 0xFF;
+			hexChars[j * 2] = hexArray[v >>> 4];
+			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+		}
+		return new String(hexChars);
+	}
+
+	public static void main(String[] args) throws ClassNotFoundException {
+
+		String methodName = StringUtil.StringToMethodName("hello all you freaks");
+		methodName = StringUtil.StringToMethodName("thisIsATest over here");
+		methodName = StringUtil.StringToMethodName("This would be a nifty method name");
+		methodName = StringUtil.StringToMethodName("I have whitespace");
+
+		methodName.toString();
+	}
+
 	public static String removeChar(String s, char c) {
 		StringBuffer r = new StringBuffer(s.length());
 		r.setLength(s.length());
@@ -46,28 +68,6 @@ public class StringUtil {
 		}
 
 		return methodName.toString();
-	}
-	
-	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
-
-	public static String bytesToHex(byte[] bytes) {
-		char[] hexChars = new char[bytes.length * 2];
-		for (int j = 0; j < bytes.length; j++) {
-			int v = bytes[j] & 0xFF;
-			hexChars[j * 2] = hexArray[v >>> 4];
-			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-		}
-		return new String(hexChars);
-	}
-
-	public static void main(String[] args) throws ClassNotFoundException {
-
-		String methodName = StringUtil.StringToMethodName("hello all you freaks");
-		methodName = StringUtil.StringToMethodName("thisIsATest over here");
-		methodName = StringUtil.StringToMethodName("This would be a nifty method name");
-		methodName = StringUtil.StringToMethodName("I have whitespace");
-
-		methodName.toString();
 	}
 
 }

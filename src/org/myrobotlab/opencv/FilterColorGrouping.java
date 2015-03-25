@@ -70,54 +70,6 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 public final class FilterColorGrouping {
 
-	public FilterColorGrouping(String CFGRoot, String name) {
-		// super(CFGRoot, name);
-	}
-
-	public final static Logger log = LoggerFactory.getLogger(FilterColorGrouping.class.getCanonicalName());
-
-	Rectangle target = null;
-	PointReference[][] grid = null;
-	ArrayList<Group> groupList = null;
-	int stepx = 0;
-	int stepy = 0;
-	int xTotal = 0;
-	int yTotal = 0;
-	int groupDelta = 0;
-
-	int colorInt = 0;
-	int red = 0;
-	int green = 0;
-	int blue = 0;
-
-	int lastColor = 0;
-
-	int ncolorInt = 0;
-	int nred = 0;
-	int ngreen = 0;
-	int nblue = 0;
-
-	int redGroupDelta = 40;
-	int greenGroupDelta = 40;
-	int blueGroupDelta = 40;
-
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void loadDefaultConfiguration() {
-
-		// initialization
-		for (int x = 0; x < xTotal; ++x) {
-			for (int y = 0; y < yTotal; ++y) {
-				grid[x][y] = new PointReference(x, y);
-			}
-		}
-
-		groupList = new ArrayList<Group>();
-	}
-
 	final public class Group {
 		public int number; // externally keyed or put into list - INDEX !!!
 		public Color avgColor = null;
@@ -137,6 +89,64 @@ public final class FilterColorGrouping {
 			this.x = x;
 			this.y = y;
 		}
+	}
+
+	public final static Logger log = LoggerFactory.getLogger(FilterColorGrouping.class.getCanonicalName());
+	Rectangle target = null;
+	PointReference[][] grid = null;
+	ArrayList<Group> groupList = null;
+	int stepx = 0;
+	int stepy = 0;
+	int xTotal = 0;
+	int yTotal = 0;
+
+	int groupDelta = 0;
+	int colorInt = 0;
+	int red = 0;
+	int green = 0;
+
+	int blue = 0;
+
+	int lastColor = 0;
+	int ncolorInt = 0;
+	int nred = 0;
+	int ngreen = 0;
+
+	int nblue = 0;
+	int redGroupDelta = 40;
+	int greenGroupDelta = 40;
+
+	int blueGroupDelta = 40;
+
+	public FilterColorGrouping(String CFGRoot, String name) {
+		// super(CFGRoot, name);
+	}
+
+	public BufferedImage display(IplImage image) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void init() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void loadDefaultConfiguration() {
+
+		// initialization
+		for (int x = 0; x < xTotal; ++x) {
+			for (int y = 0; y < yTotal; ++y) {
+				grid[x][y] = new PointReference(x, y);
+			}
+		}
+
+		groupList = new ArrayList<Group>();
 	}
 
 	public Object process(BufferedImage output, BufferedImage image) {
@@ -410,16 +420,6 @@ public final class FilterColorGrouping {
 	public IplImage process(IplImage image, Object[] data) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	public BufferedImage display(IplImage image) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void init() {
-		// TODO Auto-generated method stub
-
 	}
 
 }

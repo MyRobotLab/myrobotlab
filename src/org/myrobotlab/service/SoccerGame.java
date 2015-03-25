@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -17,21 +18,6 @@ import org.slf4j.Logger;
  */
 public class SoccerGame extends Service {
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(SoccerGame.class.getCanonicalName());
-
-	public HashMap<String, Object> session = new HashMap<String, Object>();
-
-	int maxPlayers = 6;
-	Date gameEndTime = null;
-	Date gameStartTime = null;
-	// clock thread
-	String team0 = "team0";
-	String team1 = "team1";
-
-	ArrayList<Player> players = new ArrayList<Player>();
-
 	public class Player {
 		int number;
 		int fouls;
@@ -39,6 +25,38 @@ public class SoccerGame extends Service {
 		String team;
 		String status;
 		Arduino arduino = null;
+	}
+
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(SoccerGame.class.getCanonicalName());
+
+	public HashMap<String, Object> session = new HashMap<String, Object>();
+	int maxPlayers = 6;
+	Date gameEndTime = null;
+	Date gameStartTime = null;
+	// clock thread
+	String team0 = "team0";
+
+	String team1 = "team1";
+
+	ArrayList<Player> players = new ArrayList<Player>();
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		try {
+			SoccerGame template = new SoccerGame("soccergame");
+			template.startService();
+
+			GUIService gui = new GUIService("gui");
+			gui.startService();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 	}
 
 	public SoccerGame(String n) {
@@ -54,9 +72,9 @@ public class SoccerGame extends Service {
 		}
 	}
 
-	// TODO - public exec (Message ? ) handler
-	public void logon(String name, String password) {
-		log.info("logon " + name + " password " + password);
+	@Override
+	public String[] getCategories() {
+		return new String[] { "game" };
 	}
 
 	@Override
@@ -64,23 +82,9 @@ public class SoccerGame extends Service {
 		return "used as a general template";
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		SoccerGame template = new SoccerGame("soccergame");
-		template.startService();
-
-		GUIService gui = new GUIService("gui");
-		gui.startService();
-		
-
+	// TODO - public exec (Message ? ) handler
+	public void logon(String name, String password) {
+		log.info("logon " + name + " password " + password);
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"game"};
-	}
-
 
 }

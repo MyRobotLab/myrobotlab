@@ -15,10 +15,30 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(TextTransform.class);
-	
-	
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+
+			TextTransform transform = (TextTransform) Runtime.start("transform", "TextTransform");
+			transform.test();
+
+			Runtime.start("gui", "GUIService");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 	public TextTransform(String n) {
 		super(n);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "data", "filter" };
 	}
 
 	@Override
@@ -27,40 +47,20 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 	}
 
 	@Override
+	public void onText(String text) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public String publishText(String text) {
 		return text;
 	}
 
 	@Override
-	public void onText(String text) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public Status test(){
+	public Status test() {
 		Status status = super.test();
-		
-		return  status;
-	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-
-			TextTransform transform = (TextTransform)Runtime.start("transform", "TextTransform");
-			transform.test();
-			
-			Runtime.start("gui", "GUIService");
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"data", "filter"};
+		return status;
 	}
 }

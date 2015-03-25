@@ -56,6 +56,7 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.FileLocation;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.TextEditorPane;
+import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.myrobotlab.control.widget.Console;
 import org.myrobotlab.control.widget.FileUtil;
@@ -72,48 +73,11 @@ import org.myrobotlab.ui.autocomplete.MRLCompletionProvider;
  * Python GUIService
  * 
  * @author SwedaKonsult
- *  
- *  use - http://famfamfam.com/lab/icons/silk/previews/index_abc.png - SILK ICONS
+ * 
+ *         use - http://famfamfam.com/lab/icons/silk/previews/index_abc.png -
+ *         SILK ICONS
  */
 public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener {
-
-	static final long serialVersionUID = 1L;
-	private final static int fileMenuMnemonic = KeyEvent.VK_F;
-	private static final int saveMenuMnemonic = KeyEvent.VK_S;
-	private static final int openMenuMnemonic = KeyEvent.VK_O;
-	private static final int examplesMenuMnemonic = KeyEvent.VK_X;
-
-	final JFrame top;
-
-	final JTabbedPane editorTabs;
-
-	JSplitPane splitPane;
-
-	final JLabel statusInfo;
-
-	HashMap<String, EditorPanel> scripts = new HashMap<String, EditorPanel>();
-
-	// TODO - check for outside modification with lastmoddate
-	String currentScriptName;
-
-	// button bar buttons
-	ImageButton executeButton;
-	ImageButton stopButton;
-
-	ImageButton openFileButton;
-	ImageButton saveFileButton;
-
-	// consoles
-	JTabbedPane consoleTabs;
-	final Console javaConsole;
-	final JTextArea pythonConsole;
-	final JScrollPane pythonScrollPane;
-
-	// auto-completion
-	static CompletionProvider provider;
-	static AutoCompletion ac;
-
-	int untitledCount = 1;
 
 	// FIXME - should be part of separate "Editor" class
 	static public class EditorPanel {
@@ -125,14 +89,29 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 		public EditorPanel(Script script) {
 			try {
 				filename = script.getName();
-				editor = new TextEditorPane(editor.INSERT_MODE, false, FileLocation.create(new File(filename)));
+				editor = new TextEditorPane(RTextArea.INSERT_MODE, false, FileLocation.create(new File(filename)));
 				editor.setText(script.getCode());
 				editor.setCaretPosition(0);
 
 				panel = createEditorPane();
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 			}
+		}
+
+		private JScrollPane createEditorPane() {
+			// editor tweaks
+			editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+			editor.setCodeFoldingEnabled(true);
+			editor.setAntiAliasingEnabled(true);
+
+			// auto-completion
+			if (ac != null) {
+				ac.install(editor);
+				ac.setShowDescWindow(true);
+			}
+
+			return new RTextScrollPane(editor);
 		}
 
 		public String getDisplayName() {
@@ -152,29 +131,53 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 			}
 		}
 
-		private JScrollPane createEditorPane() {
-			// editor tweaks
-			editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
-			editor.setCodeFoldingEnabled(true);
-			editor.setAntiAliasingEnabled(true);
-
-			// auto-completion
-			if (ac != null) {
-				ac.install(editor);
-				ac.setShowDescWindow(true);
-			}
-
-			return new RTextScrollPane(editor);
+		public TextEditorPane getEditor() {
+			return editor;
 		}
 
 		public String getFilename() {
 			return filename;
 		}
-
-		public TextEditorPane getEditor() {
-			return editor;
-		}
 	}
+
+	static final long serialVersionUID = 1L;
+	private final static int fileMenuMnemonic = KeyEvent.VK_F;
+	private static final int saveMenuMnemonic = KeyEvent.VK_S;
+	private static final int openMenuMnemonic = KeyEvent.VK_O;
+
+	private static final int examplesMenuMnemonic = KeyEvent.VK_X;
+
+	final JFrame top;
+
+	final JTabbedPane editorTabs;
+
+	JSplitPane splitPane;
+
+	final JLabel statusInfo;
+
+	HashMap<String, EditorPanel> scripts = new HashMap<String, EditorPanel>();
+
+	// TODO - check for outside modification with lastmoddate
+	String currentScriptName;
+	// button bar buttons
+	ImageButton executeButton;
+
+	ImageButton stopButton;
+	ImageButton openFileButton;
+
+	ImageButton saveFileButton;
+	// consoles
+	JTabbedPane consoleTabs;
+	final Console javaConsole;
+	final JTextArea pythonConsole;
+
+	final JScrollPane pythonScrollPane;
+	// auto-completion
+	static CompletionProvider provider;
+
+	static AutoCompletion ac;
+
+	int untitledCount = 1;
 
 	/**
 	 * Constructor
@@ -234,7 +237,7 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 		JMenuItem m = (JMenuItem) o;
 		if (m.getText().equals("new")) {
 			++untitledCount;
-			Script s = new Script(String.format("%s%suntitled.%d.java", myService.getCFGDir(), File.separator, untitledCount), "");
+			Script s = new Script(String.format("%s%suntitled.%d.java", Service.getCFGDir(), File.separator, untitledCount), "");
 			addNewEditorPanel(s);
 		} else if (m.getText().equals("save")) {
 			saveFile();
@@ -255,7 +258,7 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 		EditorPanel panel = new EditorPanel(script);
 		editorTabs.addTab(panel.getDisplayName(), panel.panel);
 		log.info(panel.getEditor().getFileFullPath());
-		GUIService gui = (GUIService) myService;// FIXME - bad bad bad ...
+		GUIService gui = myService;// FIXME - bad bad bad ...
 		TabControl2 tc = new TabControl2(self, editorTabs, panel.panel, panel.getFilename());
 		tc.addMouseListener(this);
 		editorTabs.setTabComponentAt(editorTabs.getTabCount() - 1, tc);
@@ -284,64 +287,94 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 		// myService.send(boundServiceName, "broadcastState");
 	}
 
-	@Override
-	public void detachGUI() {
-		javaConsole.stopLogging();
-		unsubscribe("publishState", "getState", Python.class);
-		unsubscribe("finishedExecutingScript");
-		unsubscribe("publishStdOut", "getStdOut", String.class);
-		unsubscribe("appendScript", "appendScript", String.class);
-		unsubscribe("startRecording", "startRecording", String.class);
-	}
+	public void closeFile() {
+		if (scripts.containsKey(currentScriptName)) {
+			EditorPanel p = scripts.get(currentScriptName);
+			if (p.editor.isDirty()) {
+				saveAsFile();
+			}
 
-	public void startRecording(String filename) {
-		addNewEditorPanel(new Script(filename, ""));
-	}
+			p = scripts.get(currentScriptName);
+			scripts.remove(p);
+			editorTabs.remove(p.panel);
 
-	/**
-	 * 
-	 */
-	public void finishedExecutingScript() {
-		executeButton.deactivate();
-		stopButton.deactivate();
+		} else {
+			log.error(String.format("can't closeFile %s", currentScriptName));
+		}
 	}
 
 	/**
 	 * 
-	 * @param j
+	 * @return
 	 */
-	public void getState(Python j) {
-		// TODO set GUIService state debug from Service data
+	private CompletionProvider createCompletionProvider() {
+		// TODO -> LanguageSupportFactory.get().register(editor);
 
+		// A DefaultCompletionProvider is the simplest concrete implementation
+		// of CompletionProvider. This provider has no understanding of
+		// language semantics. It simply checks the text entered up to the
+		// caret position for a match against known completions. This is all
+		// that is needed in the majority of cases.
+		return new MRLCompletionProvider();
 	}
 
 	/**
+	 * Fill up the examples menu with submenu items.
 	 * 
-	 * @param data
+	 * @param examples
 	 */
-	public void getStdOut(String data) {
-		pythonConsole.append(data);
+	private void createExamplesMenu(JMenu examples) {
+		// FIXME - dynamically build based on resources
+		// JMenu menu;
+		// menu = new JMenu("Arduino");
+		// menu.add(createMenuItem("arduinoInput.java", "examples"));
+		// menu.add(createMenuItem("arduinoOutput.java", "examples"));
+		// menu.add(createMenuItem("arduinoLoopback.java", "examples"));
+		// examples.add(menu);
+		//
+		// menu = new JMenu("Python");
+		// menu.add(createMenuItem("createAService.java", "examples"));
+		// menu.add(createMenuItem("basicPython.java", "examples"));
+		// menu.add(createMenuItem("panTilt.java", "examples"));
+		// examples.add(menu);
+		//
+		// menu = new JMenu("Services");
+		// menu.add(createMenuItem("createAService.java", "examples"));
+		//
+		// menu = new JMenu("Input");
+		// menu.add(createMenuItem("inputTest.java", "examples"));
+		// examples.add(menu);
+		//
+		// menu = new JMenu("Speech");
+		// menu.add(createMenuItem("sayThings.java", "examples"));
+		// menu.add(createMenuItem("talkBack.java", "examples"));
+		// examples.add(menu);
+		//
+		// menu = new JMenu("Robots");
+		// menu.add(createMenuItem("houston.java", "examples"));
+		// menu.add(createMenuItem("inMoovHandRobot.java", "examples"));
+		// menu.add(createMenuItem("inMoovTalkMovement.java", "examples"));
+		// examples.add(menu);
+		//
+		// menu = new JMenu("Vision");
+		// menu.add(createMenuItem("faceTracking.java", "examples"));
+		// menu.add(createMenuItem("colorTracking.java", "examples"));
+		// menu.add(createMenuItem("lkOpticalTrack.java", "examples"));
+		// examples.add(menu);
 	}
 
 	/**
+	 * Fill up the file menu with submenu items.
 	 * 
+	 * @param fileMenu
 	 */
-	public void init() {
-		display.setLayout(new BorderLayout());
-		display.setPreferredSize(new Dimension(800, 600));
-
-		// --------- text menu begin ------------------------
-		JPanel menuPanel = createMenuPanel();
-
-		display.add(menuPanel, BorderLayout.PAGE_START);
-
-		DefaultCaret caret = (DefaultCaret) pythonConsole.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-
-		splitPane = createMainPane();
-
-		display.add(splitPane, BorderLayout.CENTER);
-		display.add(statusInfo, BorderLayout.PAGE_END);
+	private void createFileMenu(JMenu fileMenu) {
+		fileMenu.add(createMenuItem("new"));
+		fileMenu.add(createMenuItem("save", saveMenuMnemonic, "control S", null));
+		fileMenu.add(createMenuItem("save as"));
+		fileMenu.add(createMenuItem("open", openMenuMnemonic, "control O", null));
+		fileMenu.add(createMenuItem("close"));
+		fileMenu.addSeparator();
 	}
 
 	/**
@@ -361,80 +394,6 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 	}
 
 	/**
-	 * Fill up the examples menu with submenu items.
-	 * 
-	 * @param examples
-	 */
-	private void createExamplesMenu(JMenu examples) {
-		// FIXME - dynamically build based on resources
-//		JMenu menu;
-//		menu = new JMenu("Arduino");
-//		menu.add(createMenuItem("arduinoInput.java", "examples"));
-//		menu.add(createMenuItem("arduinoOutput.java", "examples"));
-//		menu.add(createMenuItem("arduinoLoopback.java", "examples"));
-//		examples.add(menu);
-//
-//		menu = new JMenu("Python");
-//		menu.add(createMenuItem("createAService.java", "examples"));
-//		menu.add(createMenuItem("basicPython.java", "examples"));
-//		menu.add(createMenuItem("panTilt.java", "examples"));
-//		examples.add(menu);
-//
-//		menu = new JMenu("Services");
-//		menu.add(createMenuItem("createAService.java", "examples"));
-//
-//		menu = new JMenu("Input");
-//		menu.add(createMenuItem("inputTest.java", "examples"));
-//		examples.add(menu);
-//
-//		menu = new JMenu("Speech");
-//		menu.add(createMenuItem("sayThings.java", "examples"));
-//		menu.add(createMenuItem("talkBack.java", "examples"));
-//		examples.add(menu);
-//
-//		menu = new JMenu("Robots");
-//		menu.add(createMenuItem("houston.java", "examples"));
-//		menu.add(createMenuItem("inMoovHandRobot.java", "examples"));
-//		menu.add(createMenuItem("inMoovTalkMovement.java", "examples"));
-//		examples.add(menu);
-//
-//		menu = new JMenu("Vision");
-//		menu.add(createMenuItem("faceTracking.java", "examples"));
-//		menu.add(createMenuItem("colorTracking.java", "examples"));
-//		menu.add(createMenuItem("lkOpticalTrack.java", "examples"));
-//		examples.add(menu);
-	}
-
-	/**
-	 * Fill up the file menu with submenu items.
-	 * 
-	 * @param fileMenu
-	 */
-	private void createFileMenu(JMenu fileMenu) {
-		fileMenu.add(createMenuItem("new"));
-		fileMenu.add(createMenuItem("save", saveMenuMnemonic, "control S", null));
-		fileMenu.add(createMenuItem("save as"));
-		fileMenu.add(createMenuItem("open", openMenuMnemonic, "control O", null));
-		fileMenu.add(createMenuItem("close"));
-		fileMenu.addSeparator();
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private CompletionProvider createCompletionProvider() {
-		// TODO -> LanguageSupportFactory.get().register(editor);
-
-		// A DefaultCompletionProvider is the simplest concrete implementation
-		// of CompletionProvider. This provider has no understanding of
-		// language semantics. It simply checks the text entered up to the
-		// caret position for a match against known completions. This is all
-		// that is needed in the majority of cases.
-		return new MRLCompletionProvider();
-	}
-
-	/**
 	 * Helper function to create a menu item.
 	 * 
 	 * @param label
@@ -442,17 +401,6 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 	 */
 	private JMenuItem createMenuItem(String label) {
 		return createMenuItem(label, -1, null, null);
-	}
-
-	/**
-	 * Helper function to create a menu item.
-	 * 
-	 * @param label
-	 * @param actionCommand
-	 * @return
-	 */
-	private JMenuItem createMenuItem(String label, String actionCommand) {
-		return createMenuItem(label, -1, null, actionCommand);
 	}
 
 	/**
@@ -486,6 +434,17 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 	}
 
 	/**
+	 * Helper function to create a menu item.
+	 * 
+	 * @param label
+	 * @param actionCommand
+	 * @return
+	 */
+	private JMenuItem createMenuItem(String label, String actionCommand) {
+		return createMenuItem(label, -1, null, actionCommand);
+	}
+
+	/**
 	 * Build the top menu panel.
 	 * 
 	 * @return
@@ -509,12 +468,13 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 	private JTabbedPane createTabsPane() {
 		JTabbedPane pane = new JTabbedPane();
 		pane.addTab("java", javaConsole.getScrollPane());
-		GUIService gui = (GUIService) myService;// FIXME - bad bad bad ...
+		GUIService gui = myService;// FIXME - bad bad bad ...
 
 		pane.setTabComponentAt(pane.getTabCount() - 1, new TabControl2(self, pane, javaConsole.getScrollPane(), "java"));
 
-//		pane.addTab("python", pythonScrollPane);
-//		pane.setTabComponentAt(pane.getTabCount() - 1, new TabControl(gui, pane, pythonScrollPane, boundServiceName, "python"));
+		// pane.addTab("python", pythonScrollPane);
+		// pane.setTabComponentAt(pane.getTabCount() - 1, new TabControl(gui,
+		// pane, pythonScrollPane, boundServiceName, "python"));
 
 		return pane;
 	}
@@ -562,6 +522,138 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 		return menuBar;
 	}
 
+	@Override
+	public void detachGUI() {
+		javaConsole.stopLogging();
+		unsubscribe("publishState", "getState", Python.class);
+		unsubscribe("finishedExecutingScript");
+		unsubscribe("publishStdOut", "getStdOut", String.class);
+		unsubscribe("appendScript", "appendScript", String.class);
+		unsubscribe("startRecording", "startRecording", String.class);
+	}
+
+	/**
+	 * 
+	 */
+	public void finishedExecutingScript() {
+		executeButton.deactivate();
+		stopButton.deactivate();
+	}
+
+	/**
+	 * 
+	 * @param j
+	 */
+	public void getState(Python j) {
+		// TODO set GUIService state debug from Service data
+
+	}
+
+	/**
+	 * 
+	 * @param data
+	 */
+	public void getStdOut(String data) {
+		pythonConsole.append(data);
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public void init() {
+		display.setLayout(new BorderLayout());
+		display.setPreferredSize(new Dimension(800, 600));
+
+		// --------- text menu begin ------------------------
+		JPanel menuPanel = createMenuPanel();
+
+		display.add(menuPanel, BorderLayout.PAGE_START);
+
+		DefaultCaret caret = (DefaultCaret) pythonConsole.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
+		splitPane = createMainPane();
+
+		display.add(splitPane, BorderLayout.CENTER);
+		display.add(statusInfo, BorderLayout.PAGE_END);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.myrobotlab.control.ServiceGUI#makeReadyForRelease() Shutting
+	 * down - check for dirty script and offer to save
+	 */
+	@Override
+	public void makeReadyForRelease() {
+
+		log.info("makeReadyForRelease");
+
+		// Iterator<String> it = scripts.keySet().iterator();
+		Iterator<Entry<String, EditorPanel>> it = scripts.entrySet().iterator();
+		while (it.hasNext()) {
+
+			Map.Entry pairs = it.next();
+
+			TextEditorPane e = ((EditorPanel) pairs.getValue()).getEditor();
+			log.info(String.format("checking script %s", e.getFileFullPath()));
+			if (e.isDirty()) {
+				try {
+					log.info(String.format("saving script / file %s", e.getFileFullPath()));
+					e.save();
+				} catch (Exception ex) {
+					Logging.logError(ex);
+				}
+				/*
+				 * FileLocation fl = FileLocation.create(e.getFileFullPath());
+				 * String filename =
+				 * JOptionPane.showInputDialog(myService.getFrame(),
+				 * "Save File?", name); if (filename != null) { fl =
+				 * FileLocation.create(filename); try { e.saveAs(fl); } catch
+				 * (IOException e1) { Logging.logException(e1); // TODO
+				 * Auto-generated catch block } }
+				 */
+			}
+		}
+
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent me) {
+		// TODO Auto-generated method stub
+		Object o = me.getSource();
+		if (o instanceof TabControl2) {
+			TabControl2 tc = (TabControl2) o;
+			currentScriptName = tc.getText();
+		}
+		// log.info(me);
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
 	/**
 	 * 
 	 */
@@ -605,22 +697,6 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 		// executeButton.deactivate();
 		myService.send(boundServiceName, "stop");
 		myService.send(boundServiceName, "attachPythonConsole");
-	}
-
-	public void closeFile() {
-		if (scripts.containsKey(currentScriptName)) {
-			EditorPanel p = scripts.get(currentScriptName);
-			if (p.editor.isDirty()) {
-				saveAsFile();
-			}
-
-			p = scripts.get(currentScriptName);
-			scripts.remove(p);
-			editorTabs.remove(p.panel);
-
-		} else {
-			log.error(String.format("can't closeFile %s", currentScriptName));
-		}
 	}
 
 	/**
@@ -679,78 +755,8 @@ public class JavaGUI extends ServiceGUI implements ActionListener, MouseListener
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.myrobotlab.control.ServiceGUI#makeReadyForRelease() Shutting
-	 * down - check for dirty script and offer to save
-	 */
-	public void makeReadyForRelease() {
-
-		log.info("makeReadyForRelease");
-
-		// Iterator<String> it = scripts.keySet().iterator();
-		Iterator<Entry<String, EditorPanel>> it = scripts.entrySet().iterator();
-		while (it.hasNext()) {
-
-			Map.Entry pairs = (Map.Entry) it.next();
-
-			TextEditorPane e = ((EditorPanel) pairs.getValue()).getEditor();
-			log.info(String.format("checking script %s", e.getFileFullPath()));
-			if (e.isDirty()) {
-				try {
-					log.info(String.format("saving script / file %s", e.getFileFullPath()));
-					e.save();
-				} catch (Exception ex) {
-					Logging.logException(ex);
-				}
-				/*
-				 * FileLocation fl = FileLocation.create(e.getFileFullPath());
-				 * String filename =
-				 * JOptionPane.showInputDialog(myService.getFrame(),
-				 * "Save File?", name); if (filename != null) { fl =
-				 * FileLocation.create(filename); try { e.saveAs(fl); } catch
-				 * (IOException e1) { Logging.logException(e1); // TODO
-				 * Auto-generated catch block } }
-				 */
-			}
-		}
-
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent me) {
-		// TODO Auto-generated method stub
-		Object o = me.getSource();
-		if (o instanceof TabControl2) {
-			TabControl2 tc = (TabControl2) o;
-			currentScriptName = tc.getText();
-		}
-		// log.info(me);
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
+	public void startRecording(String filename) {
+		addNewEditorPanel(new Script(filename, ""));
 	}
 
 }

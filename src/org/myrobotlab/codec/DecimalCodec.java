@@ -1,20 +1,35 @@
 package org.myrobotlab.codec;
 
+import org.myrobotlab.service.interfaces.LoggingSink;
 
+public class DecimalCodec extends Codec {
 
-public class DecimalCodec implements Codec {
+	String columnDelimiter = " ";
+	String rowDelimiter = "\n";
+	int byteCount = 0;
+	int width = 16;
 
-	String displayDelimiter =  " ";
-
-	@Override
-	public int[] encode(String source) throws CodecException {
-		// TODO Auto-generated method stub
-		return new int[0];
+	public DecimalCodec(LoggingSink myService) {
+		super(myService);
 	}
 
 	@Override
-	public String decode(int newByte) throws CodecException {
-		return String.format("%03d%s", newByte, displayDelimiter);
+	public String decode(int newByte)  {
+		++byteCount;
+		String ret =  String.format("%03d%s%s", 0xff & newByte, columnDelimiter, ((byteCount%width == 0)?rowDelimiter:""));		
+		return ret;
+	}
+
+	@Override
+	public String decode(int[] msgs)  {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] encode(String source)  {
+		// TODO Auto-generated method stub
+		return new int[0];
 	}
 
 	@Override
@@ -23,16 +38,9 @@ public class DecimalCodec implements Codec {
 	}
 
 	@Override
-	public String decode(int[] msgs) throws CodecException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String getKey() {
 		// TODO Auto-generated method stub
 		return "decimal";
 	}
-
 
 }

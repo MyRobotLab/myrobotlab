@@ -6,10 +6,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class ObjectCloner {
-	// so that nobody can accidentally create an ObjectCloner object
-	private ObjectCloner() {
-	}
-
 	// returns a deep copy of an object
 	static public Object deepCopy(Object oldObj) throws Exception {
 		ObjectOutputStream oos = null;
@@ -31,6 +27,10 @@ public class ObjectCloner {
 			oos.close();
 			ois.close();
 		}
+	}
+
+	// so that nobody can accidentally create an ObjectCloner object
+	private ObjectCloner() {
 	}
 
 }

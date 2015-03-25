@@ -6,7 +6,7 @@ import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 
 public class I2CProxyBusImpl implements I2CBus {
-	
+
 	private int bus = -1;
 
 	@Override

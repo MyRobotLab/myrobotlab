@@ -70,6 +70,86 @@ import javax.vecmath.Vector3d;
  */
 public class RangeSensorBelt extends PickSensor {
 
+	/**
+	 * A JPanel Inner class for displaying the sensor belt rays in 2d.
+	 */
+	private class RangeSensorBeltJPanel extends JPanel {
+
+		private static final long serialVersionUID = 1L;
+		Font font;
+		int lineSize = 8;
+		DecimalFormat format;
+		final static int IMAGE_SIZEX = 200;
+		final static int IMAGE_SIZEY = 100;
+
+		public RangeSensorBeltJPanel() {
+			Dimension d = new Dimension(IMAGE_SIZEX, IMAGE_SIZEY);
+			setPreferredSize(d);
+			setMinimumSize(d);
+			font = new Font("Arial", Font.PLAIN, lineSize - 1);
+			// display format for numbers
+			format = new DecimalFormat();
+			format.setMaximumFractionDigits(3);
+			format.setMinimumFractionDigits(2);
+			format.setPositivePrefix("");
+			format.setMinimumIntegerDigits(1);
+		}
+
+		/** Caution not synchronised */
+
+		@Override
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.setFont(font);
+			// Color c;
+			g.setColor(Color.LIGHT_GRAY);
+			g.fillRect(0, 0, IMAGE_SIZEX, IMAGE_SIZEY);
+			g.setColor(Color.GRAY);
+			int x = IMAGE_SIZEX / 2;
+			int y = 0;
+			for (int i = 0; i < nbSensors; i++) {
+				y += lineSize;
+				if (y > IMAGE_SIZEY) {
+					y = lineSize;
+					x += 50;
+				}
+				if (type == TYPE_BUMPER)
+					g.drawString("[" + i + "] " + hits[i], x, y);
+				else
+					g.drawString("[" + i + "] " + format.format(measurements[i]), x, y);
+			}
+			int cx, cy;
+			cx = cy = IMAGE_SIZEX / 4;
+			// display factor
+			float f = cx / (maxRange + radius);
+			int r = (int) (radius * f);
+			g.setColor(Color.BLUE);
+			g.drawOval(cx - r, cy - r, 2 * r, 2 * r);
+			g.drawLine(cx, cy, cx + r, cy);
+			// draw each ray
+			for (int i = 0; i < nbSensors; i++) {
+
+				int x1 = (int) (positions[i].x * f);
+				int y1 = (int) (positions[i].z * f);
+				if (type == TYPE_BUMPER) {
+					g.setColor(Color.BLUE);
+					g.drawRect(cx + x1 - 1, cy + y1 - 1, 2, 2);
+				}
+				g.setColor(Color.RED);
+				if (hits[i]) {
+					double ratio = measurements[i] / directions[i].length();
+
+					int x2 = x1 + (int) (directions[i].x * ratio * f);
+					int y2 = y1 + (int) (directions[i].z * ratio * f);
+					if (type == TYPE_BUMPER) {
+						g.fillOval(cx + x1 - 1, cy + y1 - 1, 3, 3);
+					} else
+						g.drawLine(cx + x1, cy + y1, cx + x2, cy + y2);
+				}
+			}
+		}
+	}
+
 	private int type;
 	private float maxRange;
 	private float radius;
@@ -82,9 +162,9 @@ public class RangeSensorBelt extends PickSensor {
 	private double angles[];
 	/*** position of each sensor relative to center */
 	private Vector3d positions[];
+
 	/** direction vector of each sensor - relative to sensor position. */
 	private Vector3d directions[];
-
 	private Transform3D t3d;
 	// private Transform3D t3d_2;
 	private Point3d start;
@@ -95,13 +175,14 @@ public class RangeSensorBelt extends PickSensor {
 	private PickSegment pickSegment;
 	private Point3d cylinderStart;
 	private float cylinderRadius;
-	private Vector3d cylinderDirection;
 
+	private Vector3d cylinderDirection;
 	private int flags;
 	// constants
 	public final static int TYPE_SONAR = 0;
 	public final static int TYPE_IR = 1;
 	public final static int TYPE_LASER = 2;
+
 	public final static int TYPE_BUMPER = 3;
 
 	// FLAGS
@@ -135,7 +216,7 @@ public class RangeSensorBelt extends PickSensor {
 		angles = new double[nbsensors];
 		Transform3D transform = new Transform3D();
 		for (int i = 0; i < nbsensors; i++) {
-			angles[i] = i * 2 * Math.PI / (double) nbsensors;
+			angles[i] = i * 2 * Math.PI / nbsensors;
 			transform.setIdentity();
 			transform.rotY(angles[i]);
 			Vector3d pos = new Vector3d(frontPos);
@@ -187,39 +268,6 @@ public class RangeSensorBelt extends PickSensor {
 
 	}
 
-	private void initialize(float radius, float maxRange, int nbsensors, int type, int flags) {
-		this.flags = flags;
-		this.nbSensors = nbsensors;
-		this.maxRange = maxRange;
-		this.radius = radius;
-		this.type = type;
-		// reserve to avoid gc.
-		t3d = new Transform3D();
-		// t3d_2 = new Transform3D();
-		pickSegment = new PickSegment();
-		pickCylinder = new PickCylinderRay();
-		cylinderDirection = new Vector3d(0.0, 0.5, 0.0);
-		cylinderRadius = maxRange + radius;
-		cylinderStart = new Point3d(0f, 0f, 0.f);
-		start = new Point3d();
-		end = new Point3d();
-
-		if (type == TYPE_BUMPER)
-			color = new Color3f(1.0f, 0f, 0f);
-		else
-			color = new Color3f(1.0f, 0.5f, 0.25f);
-
-		measurements = new double[nbsensors];
-		hits = new boolean[nbsensors];
-		for (int i = 0; i < nbsensors; i++) {
-			measurements[i] = Double.POSITIVE_INFINITY;
-			hits[i] = false;
-		}
-		oneHasHit = false;
-		create3D();
-
-	}
-
 	private void create3D() {
 		super.create3D(true);
 		// construct sensor body - a line for each individual sensor ray.
@@ -253,6 +301,304 @@ public class RangeSensorBelt extends PickSensor {
 
 	}
 
+	@Override
+	public JPanel createInspectorPanel() {
+		return new RangeSensorBeltJPanel();
+	}
+
+	/**
+	 * Returns number of sensor hits in the back left quadrant: [PI/2,PI].
+	 * 
+	 * @return the number of hits.
+	 */
+	public int getBackLeftQuadrantHits() {
+		return getQuadrantHits(Math.PI / 2, Math.PI);
+	}
+
+	/**
+	 * Returns the averaged measure of the sensors situated in the bacck left
+	 * quadrant: [PI/2,PI].
+	 * 
+	 * @return the averaged measurment.
+	 */
+	public double getBackLeftQuadrantMeasurement() {
+		return getQuadrantMeasurement(Math.PI / 2, Math.PI);
+	}
+
+	/**
+	 * Returns number of sensor hits in the back quadrant: [3PI/4,5PI/4].
+	 * 
+	 * @return the number of hits.
+	 */
+	public int getBackQuadrantHits() {
+		return getQuadrantHits(3 * Math.PI / 4, 5 * Math.PI / 4);
+	}
+
+	/**
+	 * Returns the averaged measure of the sensors situated in the back
+	 * quadrant: [3PI/4,4*PI/4].
+	 * 
+	 * @return the averaged measurment.
+	 */
+	public double getBackQuadrantMeasurement() {
+		return getQuadrantMeasurement(3 * Math.PI / 4, 5 * Math.PI / 4);
+	}
+
+	/**
+	 * Returns number of sensor hits in the back right quadrant: [PI,3PI/2].
+	 * 
+	 * @return the number of hits.
+	 */
+	public int getBackRightQuadrantHits() {
+		return getQuadrantHits(Math.PI, 3 * Math.PI / 2);
+	}
+
+	/**
+	 * Returns the averaged measure of the sensors situated in the back right
+	 * quadrant: [PI,3*PI/2].
+	 * 
+	 * @return the averaged measurment.
+	 */
+	public double getBackRightQuadrantMeasurement() {
+		return getQuadrantMeasurement(Math.PI, 3 * Math.PI / 2);
+	}
+
+	/**
+	 * Returns number of sensor hits in the front left quadrant: [0,PI/4].
+	 * 
+	 * @return the number of hits.
+	 */
+	public int getFrontLeftQuadrantHits() {
+		return getQuadrantHits(0, Math.PI / 2);
+	}
+
+	/**
+	 * Returns the averaged measure of the sensors situated in the front left
+	 * quadrant: [0,PI/4].
+	 * 
+	 * @return the averaged measurment.
+	 */
+	public double getFrontLeftQuadrantMeasurement() {
+		return getQuadrantMeasurement(0, Math.PI / 2);
+	}
+
+	/**
+	 * Returns number of sensor hits in the front quadrant: [-PI/4,PI/4].
+	 * 
+	 * @return the number of hits.
+	 */
+	public int getFrontQuadrantHits() {
+		return (getQuadrantHits(0, Math.PI / 4) + getQuadrantHits(7 * Math.PI / 4, Math.PI * 2));
+	}
+
+	/**
+	 * Returns the averaged measure of the sensors situated in the front
+	 * quadrant: [-PI/4,PI/4].
+	 * 
+	 * @return the averaged measurment.
+	 */
+	public double getFrontQuadrantMeasurement() {
+		return (getQuadrantMeasurement(0, Math.PI / 4) + getQuadrantMeasurement(7 * Math.PI / 4, Math.PI * 2)) / 2.0;
+	}
+
+	/**
+	 * Returns number of sensor hits in the front right quadrant: [3PI/2,2*PI].
+	 * 
+	 * @return the number of hits.
+	 */
+	public int getFrontRightQuadrantHits() {
+		return getQuadrantHits(3 * Math.PI / 2.0, 2 * Math.PI);
+	}
+
+	/**
+	 * Returns the averaged measure of the sensors situated in the front right
+	 * quadrant: [3PI/2,2*PI].
+	 * 
+	 * @return the averaged measurment.
+	 */
+	public double getFrontRightQuadrantMeasurement() {
+		return getQuadrantMeasurement(3 * Math.PI / 2.0, 2 * Math.PI);
+	}
+
+	/**
+	 * Returns number of sensor hits in the left quadrant: [PI/4,PI*3/4].
+	 * 
+	 * @return the number of hits.
+	 */
+	public int getLeftQuadrantHits() {
+		return getQuadrantHits(Math.PI / 4, 3 * Math.PI / 4);
+	}
+
+	/**
+	 * Returns the averaged measure of the sensors situated in the left
+	 * quadrant: [PI/4,PI*3/4].
+	 * 
+	 * @return the averaged measurment.
+	 */
+	public double getLeftQuadrantMeasurement() {
+		return getQuadrantMeasurement(Math.PI / 4, 3 * Math.PI / 4);
+	}
+
+	/**
+	 * Returns the maximum sensing range in meters.
+	 * 
+	 * @return the maximum range.
+	 */
+	public float getMaxRange() {
+		return maxRange;
+	}
+
+	/**
+	 * Returns the last measure collected for the individual sensor. Measurement
+	 * is made from the circle perimeter.
+	 * 
+	 * @param sensorNum
+	 *            num of the sensor.
+	 * @return the range measurment.
+	 */
+	public double getMeasurement(int sensorNum) {
+		return measurements[sensorNum];
+	}
+
+	/**
+	 * Return the number of individual sensor in the belt.
+	 * 
+	 * @return the number of sensors.
+	 */
+	public int getNumSensors() {
+		return nbSensors;
+	}
+
+	/**
+	 * Returns number of hits in quadrant [minAngle,maxAngle].
+	 * 
+	 * @param minAngle
+	 *            in radians the right limit of the quadrant.
+	 * @param maxAngle
+	 *            in radians the left limit of the quadrant.
+	 * @return the number of hits.
+	 */
+	public int getQuadrantHits(double minAngle, double maxAngle) {
+		int n = 0;
+		for (int i = 0; i < nbSensors; i++) {
+			if ((angles[i] >= minAngle) && (angles[i] <= maxAngle)) {
+				if (hits[i])
+					n++;
+			}
+		}
+		return n;
+	}
+
+	/**
+	 * Returns the averaged measure of the sensors situated in quadrant
+	 * [minAngle,maxAngle].
+	 * 
+	 * @param minAngle
+	 *            in radians the right limit of the quadrant.
+	 * @param maxAngle
+	 *            in radians the left limit of the quadrant.
+	 * @return the averaged measurment.
+	 */
+	public double getQuadrantMeasurement(double minAngle, double maxAngle) {
+		double sum = 0.0, n = 0;
+		for (int i = 0; i < nbSensors; i++) {
+			if ((angles[i] >= minAngle) && (angles[i] <= maxAngle)) {
+				if (hits[i]) {
+					n += 1.0;
+					sum += measurements[i];
+				}
+			}
+		}
+		if (n == 0)
+			return Double.POSITIVE_INFINITY;
+		else
+			return sum / n;
+	}
+
+	/**
+	 * Returns number of sensor hits in the right quadrant: [5PI/4,7PI/4].
+	 * 
+	 * @return the number of hits.
+	 */
+	public int getRightQuadrantHits() {
+		return getQuadrantHits(5 * Math.PI / 4, 7 * Math.PI / 4);
+	}
+
+	/**
+	 * Returns the averaged measure of the sensors situated in the right
+	 * quadrant: [5*PI/4,7*PI/4].
+	 * 
+	 * @return the averaged measurment.
+	 */
+	public double getRightQuadrantMeasurement() {
+		return getQuadrantMeasurement(5 * Math.PI / 4, 7 * Math.PI / 4);
+	}
+
+	/**
+	 * Returns the angle of this sensor.
+	 * 
+	 * @param sensorNum
+	 *            - num of the sensor.
+	 * @return the angle in radians.
+	 */
+	public double getSensorAngle(int sensorNum) {
+		return angles[sensorNum];
+	}
+
+	/**
+	 * Returns the hit state of the sensor.
+	 * 
+	 * @param sensorNum
+	 *            num of the sensor.
+	 * @return true if the sensor ray has hit an obstacle
+	 */
+	public boolean hasHit(int sensorNum) {
+		return hits[sensorNum];
+	}
+
+	private void initialize(float radius, float maxRange, int nbsensors, int type, int flags) {
+		this.flags = flags;
+		this.nbSensors = nbsensors;
+		this.maxRange = maxRange;
+		this.radius = radius;
+		this.type = type;
+		// reserve to avoid gc.
+		t3d = new Transform3D();
+		// t3d_2 = new Transform3D();
+		pickSegment = new PickSegment();
+		pickCylinder = new PickCylinderRay();
+		cylinderDirection = new Vector3d(0.0, 0.5, 0.0);
+		cylinderRadius = maxRange + radius;
+		cylinderStart = new Point3d(0f, 0f, 0.f);
+		start = new Point3d();
+		end = new Point3d();
+
+		if (type == TYPE_BUMPER)
+			color = new Color3f(1.0f, 0f, 0f);
+		else
+			color = new Color3f(1.0f, 0.5f, 0.25f);
+
+		measurements = new double[nbsensors];
+		hits = new boolean[nbsensors];
+		for (int i = 0; i < nbsensors; i++) {
+			measurements[i] = Double.POSITIVE_INFINITY;
+			hits[i] = false;
+		}
+		oneHasHit = false;
+		create3D();
+
+	}
+
+	/**
+	 * Returns true if one of the sensors has hit.
+	 * 
+	 * @return true if one ray has hit an obstacle
+	 */
+	public boolean oneHasHit() {
+		return oneHasHit;
+	}
+
+	@Override
 	protected void update() {
 		oneHasHit = false;
 		for (int s = 0; s < nbSensors; s++) {
@@ -318,347 +664,5 @@ public class RangeSensorBelt extends PickSensor {
 			}
 		}
 
-	}
-
-	/**
-	 * Returns the last measure collected for the individual sensor. Measurement
-	 * is made from the circle perimeter.
-	 * 
-	 * @param sensorNum
-	 *            num of the sensor.
-	 * @return the range measurment.
-	 */
-	public double getMeasurement(int sensorNum) {
-		return measurements[sensorNum];
-	}
-
-	/**
-	 * Returns the averaged measure of the sensors situated in the front
-	 * quadrant: [-PI/4,PI/4].
-	 * 
-	 * @return the averaged measurment.
-	 */
-	public double getFrontQuadrantMeasurement() {
-		return (getQuadrantMeasurement(0, Math.PI / 4) + getQuadrantMeasurement(7 * Math.PI / 4, Math.PI * 2)) / 2.0;
-	}
-
-	/**
-	 * Returns the averaged measure of the sensors situated in the front left
-	 * quadrant: [0,PI/4].
-	 * 
-	 * @return the averaged measurment.
-	 */
-	public double getFrontLeftQuadrantMeasurement() {
-		return getQuadrantMeasurement(0, Math.PI / 2);
-	}
-
-	/**
-	 * Returns the averaged measure of the sensors situated in the front right
-	 * quadrant: [3PI/2,2*PI].
-	 * 
-	 * @return the averaged measurment.
-	 */
-	public double getFrontRightQuadrantMeasurement() {
-		return getQuadrantMeasurement(3 * Math.PI / 2.0, 2 * Math.PI);
-	}
-
-	/**
-	 * Returns the averaged measure of the sensors situated in the left
-	 * quadrant: [PI/4,PI*3/4].
-	 * 
-	 * @return the averaged measurment.
-	 */
-	public double getLeftQuadrantMeasurement() {
-		return getQuadrantMeasurement(Math.PI / 4, 3 * Math.PI / 4);
-	}
-
-	/**
-	 * Returns the averaged measure of the sensors situated in the bacck left
-	 * quadrant: [PI/2,PI].
-	 * 
-	 * @return the averaged measurment.
-	 */
-	public double getBackLeftQuadrantMeasurement() {
-		return getQuadrantMeasurement(Math.PI / 2, Math.PI);
-	}
-
-	/**
-	 * Returns the averaged measure of the sensors situated in the back
-	 * quadrant: [3PI/4,4*PI/4].
-	 * 
-	 * @return the averaged measurment.
-	 */
-	public double getBackQuadrantMeasurement() {
-		return getQuadrantMeasurement(3 * Math.PI / 4, 5 * Math.PI / 4);
-	}
-
-	/**
-	 * Returns the averaged measure of the sensors situated in the back right
-	 * quadrant: [PI,3*PI/2].
-	 * 
-	 * @return the averaged measurment.
-	 */
-	public double getBackRightQuadrantMeasurement() {
-		return getQuadrantMeasurement(Math.PI, 3 * Math.PI / 2);
-	}
-
-	/**
-	 * Returns the averaged measure of the sensors situated in the right
-	 * quadrant: [5*PI/4,7*PI/4].
-	 * 
-	 * @return the averaged measurment.
-	 */
-	public double getRightQuadrantMeasurement() {
-		return getQuadrantMeasurement(5 * Math.PI / 4, 7 * Math.PI / 4);
-	}
-
-	/**
-	 * Returns the averaged measure of the sensors situated in quadrant
-	 * [minAngle,maxAngle].
-	 * 
-	 * @param minAngle
-	 *            in radians the right limit of the quadrant.
-	 * @param maxAngle
-	 *            in radians the left limit of the quadrant.
-	 * @return the averaged measurment.
-	 */
-	public double getQuadrantMeasurement(double minAngle, double maxAngle) {
-		double sum = 0.0, n = 0;
-		for (int i = 0; i < nbSensors; i++) {
-			if ((angles[i] >= minAngle) && (angles[i] <= maxAngle)) {
-				if (hits[i]) {
-					n += 1.0;
-					sum += measurements[i];
-				}
-			}
-		}
-		if (n == 0)
-			return Double.POSITIVE_INFINITY;
-		else
-			return sum / n;
-	}
-
-	/**
-	 * Returns number of sensor hits in the front quadrant: [-PI/4,PI/4].
-	 * 
-	 * @return the number of hits.
-	 */
-	public int getFrontQuadrantHits() {
-		return (getQuadrantHits(0, Math.PI / 4) + getQuadrantHits(7 * Math.PI / 4, Math.PI * 2));
-	}
-
-	/**
-	 * Returns number of sensor hits in the front left quadrant: [0,PI/4].
-	 * 
-	 * @return the number of hits.
-	 */
-	public int getFrontLeftQuadrantHits() {
-		return getQuadrantHits(0, Math.PI / 2);
-	}
-
-	/**
-	 * Returns number of sensor hits in the front right quadrant: [3PI/2,2*PI].
-	 * 
-	 * @return the number of hits.
-	 */
-	public int getFrontRightQuadrantHits() {
-		return getQuadrantHits(3 * Math.PI / 2.0, 2 * Math.PI);
-	}
-
-	/**
-	 * Returns number of sensor hits in the left quadrant: [PI/4,PI*3/4].
-	 * 
-	 * @return the number of hits.
-	 */
-	public int getLeftQuadrantHits() {
-		return getQuadrantHits(Math.PI / 4, 3 * Math.PI / 4);
-	}
-
-	/**
-	 * Returns number of sensor hits in the back left quadrant: [PI/2,PI].
-	 * 
-	 * @return the number of hits.
-	 */
-	public int getBackLeftQuadrantHits() {
-		return getQuadrantHits(Math.PI / 2, Math.PI);
-	}
-
-	/**
-	 * Returns number of sensor hits in the back quadrant: [3PI/4,5PI/4].
-	 * 
-	 * @return the number of hits.
-	 */
-	public int getBackQuadrantHits() {
-		return getQuadrantHits(3 * Math.PI / 4, 5 * Math.PI / 4);
-	}
-
-	/**
-	 * Returns number of sensor hits in the back right quadrant: [PI,3PI/2].
-	 * 
-	 * @return the number of hits.
-	 */
-	public int getBackRightQuadrantHits() {
-		return getQuadrantHits(Math.PI, 3 * Math.PI / 2);
-	}
-
-	/**
-	 * Returns number of sensor hits in the right quadrant: [5PI/4,7PI/4].
-	 * 
-	 * @return the number of hits.
-	 */
-	public int getRightQuadrantHits() {
-		return getQuadrantHits(5 * Math.PI / 4, 7 * Math.PI / 4);
-	}
-
-	/**
-	 * Returns number of hits in quadrant [minAngle,maxAngle].
-	 * 
-	 * @param minAngle
-	 *            in radians the right limit of the quadrant.
-	 * @param maxAngle
-	 *            in radians the left limit of the quadrant.
-	 * @return the number of hits.
-	 */
-	public int getQuadrantHits(double minAngle, double maxAngle) {
-		int n = 0;
-		for (int i = 0; i < nbSensors; i++) {
-			if ((angles[i] >= minAngle) && (angles[i] <= maxAngle)) {
-				if (hits[i])
-					n++;
-			}
-		}
-		return n;
-	}
-
-	/**
-	 * Returns the hit state of the sensor.
-	 * 
-	 * @param sensorNum
-	 *            num of the sensor.
-	 * @return true if the sensor ray has hit an obstacle
-	 */
-	public boolean hasHit(int sensorNum) {
-		return hits[sensorNum];
-	}
-
-	/**
-	 * Returns true if one of the sensors has hit.
-	 * 
-	 * @return true if one ray has hit an obstacle
-	 */
-	public boolean oneHasHit() {
-		return oneHasHit;
-	}
-
-	/**
-	 * Return the number of individual sensor in the belt.
-	 * 
-	 * @return the number of sensors.
-	 */
-	public int getNumSensors() {
-		return nbSensors;
-	}
-
-	/**
-	 * Returns the angle of this sensor.
-	 * 
-	 * @param sensorNum
-	 *            - num of the sensor.
-	 * @return the angle in radians.
-	 */
-	public double getSensorAngle(int sensorNum) {
-		return angles[sensorNum];
-	}
-
-	/**
-	 * Returns the maximum sensing range in meters.
-	 * 
-	 * @return the maximum range.
-	 */
-	public float getMaxRange() {
-		return maxRange;
-	}
-
-	public JPanel createInspectorPanel() {
-		return new RangeSensorBeltJPanel();
-	}
-
-	/**
-	 * A JPanel Inner class for displaying the sensor belt rays in 2d.
-	 */
-	private class RangeSensorBeltJPanel extends JPanel {
-
-		private static final long serialVersionUID = 1L;
-		Font font;
-		int lineSize = 8;
-		DecimalFormat format;
-		final static int IMAGE_SIZEX = 200;
-		final static int IMAGE_SIZEY = 100;
-
-		public RangeSensorBeltJPanel() {
-			Dimension d = new Dimension(IMAGE_SIZEX, IMAGE_SIZEY);
-			setPreferredSize(d);
-			setMinimumSize(d);
-			font = new Font("Arial", Font.PLAIN, lineSize - 1);
-			// display format for numbers
-			format = new DecimalFormat();
-			format.setMaximumFractionDigits(3);
-			format.setMinimumFractionDigits(2);
-			format.setPositivePrefix("");
-			format.setMinimumIntegerDigits(1);
-		}
-
-		/** Caution not synchronised */
-
-		protected void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			g.setFont(font);
-			// Color c;
-			g.setColor(Color.LIGHT_GRAY);
-			g.fillRect(0, 0, IMAGE_SIZEX, IMAGE_SIZEY);
-			g.setColor(Color.GRAY);
-			int x = IMAGE_SIZEX / 2;
-			int y = 0;
-			for (int i = 0; i < nbSensors; i++) {
-				y += lineSize;
-				if (y > IMAGE_SIZEY) {
-					y = lineSize;
-					x += 50;
-				}
-				if (type == TYPE_BUMPER)
-					g.drawString("[" + i + "] " + hits[i], x, y);
-				else
-					g.drawString("[" + i + "] " + format.format(measurements[i]), x, y);
-			}
-			int cx, cy;
-			cx = cy = IMAGE_SIZEX / 4;
-			// display factor
-			float f = (float) cx / (float) (maxRange + radius);
-			int r = (int) (radius * f);
-			g.setColor(Color.BLUE);
-			g.drawOval(cx - r, cy - r, 2 * r, 2 * r);
-			g.drawLine(cx, cy, cx + r, cy);
-			// draw each ray
-			for (int i = 0; i < nbSensors; i++) {
-
-				int x1 = (int) (positions[i].x * f);
-				int y1 = (int) (positions[i].z * f);
-				if (type == TYPE_BUMPER) {
-					g.setColor(Color.BLUE);
-					g.drawRect(cx + x1 - 1, cy + y1 - 1, 2, 2);
-				}
-				g.setColor(Color.RED);
-				if (hits[i]) {
-					double ratio = measurements[i] / directions[i].length();
-
-					int x2 = x1 + (int) (directions[i].x * ratio * f);
-					int y2 = y1 + (int) (directions[i].z * ratio * f);
-					if (type == TYPE_BUMPER) {
-						g.fillOval(cx + x1 - 1, cy + y1 - 1, 3, 3);
-					} else
-						g.drawLine(cx + x1, cy + y1, cx + x2, cy + y2);
-				}
-			}
-		}
 	}
 }

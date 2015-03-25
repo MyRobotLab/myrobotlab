@@ -41,12 +41,18 @@ public class OpenCVFilterSmooth extends OpenCVFilter {
 
 	IplImage buffer = null;
 
-	public OpenCVFilterSmooth()  {
+	public OpenCVFilterSmooth() {
 		super();
 	}
-	
-	public OpenCVFilterSmooth(String name)  {
+
+	public OpenCVFilterSmooth(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -58,12 +64,6 @@ public class OpenCVFilterSmooth extends OpenCVFilter {
 
 		return image;
 
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

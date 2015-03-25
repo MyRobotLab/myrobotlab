@@ -47,6 +47,7 @@ public class RTTTLPlay {
 			+ "rttl string is a string of notes\n" + "[options] can be one or more of:\n" + " -debug       -- turn on debug output\n"
 			+ " -hwhandshake -- use hardware-handshaking, for Windows Bluetooth\n" + " -nohwhandshake -- don't use hardware-handshaking\n"
 			+ " -flush       -- flush on sends(), normally not needed\n" + "\n";
+
 	static boolean debug = false;
 	static boolean hwhandshake = false;
 	static boolean flush = false;
@@ -58,7 +59,7 @@ public class RTTTLPlay {
 		}
 
 		String portname = args[0]; // e.g. "/dev/cu.KeySerial1"
-		RoombaCommSerialDevice roombacomm = new RoombaCommSerialDevice();
+		RoombaCommPort roombacomm = new RoombaCommPort();
 		int argOffset = 0;
 		if (args[1].equals("SCI") || (args[1].equals("OI"))) {
 			roombacomm.setProtocol(args[1]);

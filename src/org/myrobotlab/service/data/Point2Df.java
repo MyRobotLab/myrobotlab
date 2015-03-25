@@ -2,7 +2,6 @@ package org.myrobotlab.service.data;
 
 import java.io.Serializable;
 
-
 public class Point2Df implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -35,7 +34,8 @@ public class Point2Df implements Serializable {
 		this.y = y;
 		this.value = value;
 	}
-	
+
+	@Override
 	public String toString() {
 		return String.format("(%f,%f)", x, y);
 	}

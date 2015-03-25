@@ -18,6 +18,7 @@ public class CacheManager {
 	 * Handle to myself as a singleton.
 	 */
 	private final static CacheManager me;
+
 	/**
 	 * All caches that we're currently managing.
 	 */
@@ -29,6 +30,15 @@ public class CacheManager {
 
 	static {
 		me = new CacheManager();
+	}
+
+	/**
+	 * Get a handle to this singleton.
+	 * 
+	 * @return
+	 */
+	public static CacheManager getInstance() {
+		return me;
 	}
 
 	/**
@@ -67,14 +77,5 @@ public class CacheManager {
 			return null;
 		}
 		return caches.get(name);
-	}
-
-	/**
-	 * Get a handle to this singleton.
-	 * 
-	 * @return
-	 */
-	public static CacheManager getInstance() {
-		return me;
 	}
 }

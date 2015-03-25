@@ -39,6 +39,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.control.widget.MemoryWidget;
@@ -53,85 +54,22 @@ import org.myrobotlab.service.Tracking;
 import org.myrobotlab.service.data.Rectangle;
 import org.myrobotlab.service.interfaces.MemoryDisplay;
 
-
 public class CortexGUI extends ServiceGUI implements MemoryDisplay {
 
 	static final long serialVersionUID = 1L;
-	
+
 	JList textDisplay = new JList();
 	DefaultListModel textModel = new DefaultListModel();
 	VideoWidget video0 = null;
 	JTextField status = new JTextField("", 20);
 	JPanel center = new JPanel(new BorderLayout());
-	JPanel thumbnails = new JPanel(new GridLayout(5,30));
-	
+	JPanel thumbnails = new JPanel(new GridLayout(5, 30));
+
 	MemoryWidget tree = new MemoryWidget(this);
 
 	public CortexGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
-
-	public void init() {
-		video0 = new VideoWidget(boundServiceName, myService, tabs, true);
-		video0.init();
-		//video0.setNormalizedSize(160, 120);
-		
-		textDisplay.setModel(textModel);
-		//textDisplay.setEnabled(false);
-		textModel.addElement("id 0");
-		textModel.addElement("Timestamp 0");
-		textModel.addElement("locationX 0");
-		textModel.addElement("locationY 0");
-		center.add(textDisplay, BorderLayout.NORTH);
-		//center.add(video0.getDisplay(), BorderLayout.CENTER);
-		center.add(thumbnails, BorderLayout.CENTER);
-
-		status.setEditable(false);
-
-		JPanel west = new JPanel();
-		west.add(tree.getDisplay());
-
-		display.setLayout(new BorderLayout());
-		display.add(center, BorderLayout.CENTER);
-		display.add(west, BorderLayout.WEST);
-		display.add(status, BorderLayout.SOUTH);
-	}
-
-	public void displayFrame(SerializableImage img) {
-		video0.displayFrame(img);
-	}
-
-	public void displayStatus(final Status newStatus) {
-		status.setText(newStatus.detail); 
-	}
-	
-	// FIXME !!!! SHOULD BE IN NodeGUI !!!!
-	// Add a Node to the GUIService - since a GUIService Tree 
-	// is constructed to model the memory Tree
-	// this is a merge between what the user is interested in
-	// and what is in memory
-	// memory will grow an update the parts which a user
-	// expand - perhaps configuration will allow auto-expand
-	// versus user controlled expand of nodes on tree
-	public void putNode(Node.NodeContext context)
-	{
-		NodeGUI guiNode = tree.put(context.parentPath, context.node);
-		/* new nodes replace null - so testing for null is not valid
-		if (guiNode == null)
-		{
-			log.error("could not put node {} to path {}", context.node.getName(), context.parentPath);
-		}
-		*/
-	}
-	
-	// TODO - most likely the body of this needs to go
-	// into MemoryWidget
-	public void publishNode(Node.NodeContext nodeContext)
-	{
-		tree.put(nodeContext.parentPath, nodeContext.node);
-	}
-
-	// TODO - need a refresh - which will publish a single node
 
 	@Override
 	public void attachGUI() {
@@ -146,6 +84,12 @@ public class CortexGUI extends ServiceGUI implements MemoryDisplay {
 	}
 
 	@Override
+	public void clear() {
+		textModel.removeAllElements();
+		video0.removeAllVideoDisplayPanels();
+	}
+
+	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", Tracking.class);
 		unsubscribe("publishStatus", "displayStatus", String.class);
@@ -156,6 +100,72 @@ public class CortexGUI extends ServiceGUI implements MemoryDisplay {
 
 	}
 
+	@Override
+	public void display(Node node) {
+		textModel.addElement(String.format("id=%d", node.hashCode()));
+		for (Map.Entry<String, ?> nodeData : node.getNodes().entrySet()) {
+			String key = nodeData.getKey();
+			Object object = nodeData.getValue();
+			log.info("{}{}", key, object);
+
+			// display based on type for all non-recursive memory
+			Class<?> clazz = object.getClass();
+			if (clazz != Node.class) {
+				if (clazz == OpenCVData.class) {
+					OpenCVData data = (OpenCVData) object;
+					SerializableImage lastImage = null;
+					video0.removeAllVideoDisplayPanels();
+					// for (Map.Entry<String,?> img :
+					// data.getImages().entrySet())
+					/*
+					 * SerializableImage img = data.getImage(); { lastImage =
+					 * img; video0.displayFrame(lastImage); }
+					 */
+					Graphics2D g2d = lastImage.getImage().createGraphics();
+					g2d.setColor(Color.RED);
+					ArrayList<Rectangle> bb = data.getBoundingBoxArray();
+					if (bb != null) {
+						for (int i = 0; i < bb.size(); ++i) {
+							Rectangle rect = bb.get(i);
+							g2d.drawRect((int) rect.x, (int) rect.y, (int) rect.width, (int) rect.height);
+						}
+					}
+				} else if (clazz == ArrayList.class) {
+					// test for contained type
+					// display.remove(center);
+					// display.add(thumbnails, BorderLayout.CENTER);
+					thumbnails.removeAll();
+
+					ArrayList list = (ArrayList) object;
+					for (int i = 0; i < list.size(); ++i) {
+						SerializableImage bimg = (SerializableImage) list.get(i);
+						ImageIcon icon = new ImageIcon();
+						icon.setImage(bimg.getImage());
+						JLabel l = new JLabel(icon, SwingConstants.LEFT);
+						icon.setImageObserver(l);
+						// l.setIcon(icon);
+						thumbnails.add(l);
+					}
+
+				} else {
+					textModel.addElement(String.format("%s=%s", key, object.toString()));
+				}
+			}
+		}
+
+	}
+
+	public void displayFrame(SerializableImage img) {
+		video0.displayFrame(img);
+	}
+
+	// TODO - need a refresh - which will publish a single node
+
+	@Override
+	public void displayStatus(final Status newStatus) {
+		status.setText(newStatus.detail);
+	}
+
 	public VideoWidget getLocalDisplay() {
 		// TODO Auto-generated method stub
 		return video0; // else return video1
@@ -163,80 +173,61 @@ public class CortexGUI extends ServiceGUI implements MemoryDisplay {
 
 	public void getState(final Cortex cortex) {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-	
+
 			}
 		});
 	}
-	
-	public void display(Node node)
-	{
-		textModel.addElement(String.format("id=%d", node.hashCode()));
-		for (Map.Entry<String,?> nodeData : node.getNodes().entrySet())
-		{
-			String key = nodeData.getKey();
-			Object object = nodeData.getValue();
-			log.info("{}{}", key, object);
-			
-			// display based on type for all non-recursive memory
-			Class<?> clazz = object.getClass();
-			if (clazz != Node.class)
-			{				
-				if (clazz == OpenCVData.class)
-				{
-					OpenCVData data = (OpenCVData)object;
-					SerializableImage lastImage = null;
-					video0.removeAllVideoDisplayPanels();
-					//for (Map.Entry<String,?> img : data.getImages().entrySet())
-					/*
-					SerializableImage img = data.getImage();
-					{
-						lastImage = img;
-						video0.displayFrame(lastImage);
-					}
-					*/
-					Graphics2D g2d = lastImage.getImage().createGraphics();
-					g2d.setColor(Color.RED);
-					ArrayList<Rectangle> bb = data.getBoundingBoxArray();
-					if (bb != null)
-					{
-						for (int i = 0; i < bb.size(); ++i)
-						{
-							Rectangle rect = bb.get(i);
-							g2d.drawRect((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
-						}
-					}
-				} else if (clazz == ArrayList.class) {
-					// test for contained type
-					//display.remove(center);
-					//display.add(thumbnails, BorderLayout.CENTER);
-					thumbnails.removeAll();
-					
-					ArrayList list = (ArrayList)object;
-					for (int i = 0; i < list.size(); ++i)
-					{
-						SerializableImage bimg = (SerializableImage)list.get(i);
-						ImageIcon icon = new ImageIcon();
-						icon.setImage(bimg.getImage());
-						JLabel l = new JLabel(icon ,JLabel.LEFT);
-						icon.setImageObserver(l);
-						//l.setIcon(icon);
-						thumbnails.add(l);
-					}
-					
-				} else {
-					textModel.addElement(String.format("%s=%s", key, object.toString()));
-				}
-			}
-		}
-
-		
-	}
 
 	@Override
-	public void clear() {
-		textModel.removeAllElements();
-		video0.removeAllVideoDisplayPanels();
+	public void init() {
+		video0 = new VideoWidget(boundServiceName, myService, tabs, true);
+		video0.init();
+		// video0.setNormalizedSize(160, 120);
+
+		textDisplay.setModel(textModel);
+		// textDisplay.setEnabled(false);
+		textModel.addElement("id 0");
+		textModel.addElement("Timestamp 0");
+		textModel.addElement("locationX 0");
+		textModel.addElement("locationY 0");
+		center.add(textDisplay, BorderLayout.NORTH);
+		// center.add(video0.getDisplay(), BorderLayout.CENTER);
+		center.add(thumbnails, BorderLayout.CENTER);
+
+		status.setEditable(false);
+
+		JPanel west = new JPanel();
+		west.add(tree.getDisplay());
+
+		display.setLayout(new BorderLayout());
+		display.add(center, BorderLayout.CENTER);
+		display.add(west, BorderLayout.WEST);
+		display.add(status, BorderLayout.SOUTH);
+	}
+
+	// TODO - most likely the body of this needs to go
+	// into MemoryWidget
+	public void publishNode(Node.NodeContext nodeContext) {
+		tree.put(nodeContext.parentPath, nodeContext.node);
+	}
+
+	// FIXME !!!! SHOULD BE IN NodeGUI !!!!
+	// Add a Node to the GUIService - since a GUIService Tree
+	// is constructed to model the memory Tree
+	// this is a merge between what the user is interested in
+	// and what is in memory
+	// memory will grow an update the parts which a user
+	// expand - perhaps configuration will allow auto-expand
+	// versus user controlled expand of nodes on tree
+	public void putNode(Node.NodeContext context) {
+		NodeGUI guiNode = tree.put(context.parentPath, context.node);
+		/*
+		 * new nodes replace null - so testing for null is not valid if (guiNode
+		 * == null) { log.error("could not put node {} to path {}",
+		 * context.node.getName(), context.parentPath); }
+		 */
 	}
 
 }

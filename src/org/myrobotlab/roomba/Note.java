@@ -12,11 +12,12 @@ public class Note {
 		duration = aduration;
 	}
 
-	public String toString() {
-		return "(" + notenum + "," + duration + ")";
-	}
-
 	public int toSec64ths() {
 		return duration * 64 / 1000;
+	}
+
+	@Override
+	public String toString() {
+		return "(" + notenum + "," + duration + ")";
 	}
 }

@@ -26,43 +26,6 @@ public class TopCodes extends Service {
 	public final static Logger log = LoggerFactory.getLogger(TopCodes.class.getCanonicalName());
 	transient Scanner scanner = new Scanner();
 
-	public TopCodes(String n) {
-		super(n);
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general topcodes";
-	}
-
-	public List<TopCode> scan(BufferedImage img) {
-		return scanner.scan(img);
-	}
-
-	public List<TopCode> scan(String filename) {
-		try {
-			BufferedImage img;
-			img = ImageIO.read(new File(filename));
-			return scanner.scan(img);
-		} catch (IOException e) {
-			error(e.getMessage());
-			Logging.logException(e);
-		}
-
-		return null;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "video", "sensor" };
-	}
-
-	public Status test() {
-		Status status = super.test();
-
-		return status;
-	}
-
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
@@ -86,7 +49,45 @@ public class TopCodes extends Service {
 			}
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
+	}
+
+	public TopCodes(String n) {
+		super(n);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "video", "sensor" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used as a general topcodes";
+	}
+
+	public List<TopCode> scan(BufferedImage img) {
+		return scanner.scan(img);
+	}
+
+	public List<TopCode> scan(String filename) {
+		try {
+			BufferedImage img;
+			img = ImageIO.read(new File(filename));
+			return scanner.scan(img);
+		} catch (IOException e) {
+			error(e.getMessage());
+			Logging.logError(e);
+		}
+
+		return null;
+	}
+
+	@Override
+	public Status test() {
+		Status status = super.test();
+
+		return status;
 	}
 }

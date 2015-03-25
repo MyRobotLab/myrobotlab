@@ -46,10 +46,10 @@ public class PIDGUI extends ServiceGUI implements ActionListener {
 	JTextField ki = new JTextField(10);
 	JTextField kd = new JTextField(10);
 	JButton setPID = new JButton("set");
-	
+
 	JButton direction = new JButton("invert");
 	JButton setPid = new JButton("set pid");
-	
+
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(PIDGUI.class.getCanonicalName());
 
@@ -57,45 +57,24 @@ public class PIDGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-		gc.gridx = 0;
-		gc.gridy = 0;
-		
-		direction.addActionListener(this);
-		setPID.addActionListener(this);
-		
-		JPanel flow = new JPanel();
-		
-		flow.add(new JLabel("Kp"));
-		flow.add(kp);
-		flow.add(new JLabel("Ki"));
-		flow.add(ki);
-		flow.add(new JLabel("Kd"));
-		flow.add(kd);
-		flow.add(setPID);
-		flow.add(direction);
-		
-		display.add(flow);
-	}
-
-	public void getState(final PID pid) {
-		log.info("here");
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				int dir = pid.getControllerDirection();
-				if (dir == PID.DIRECTION_REVERSE)
-				{
-					direction.setText("direct");
-				} else {
-					direction.setText("invert");
-				}
-				
-				ki.setText(String.format("%s", pid.getKi()));
-				kp.setText(String.format("%s", pid.getKp()));
-				kd.setText(String.format("%s", pid.getKd()));
-				
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object o = event.getSource();
+		if (o == direction) {
+			if (direction.getText().equals("invert")) {
+				myService.send(boundServiceName, "setControllerDirection", new Integer(PID.DIRECTION_REVERSE));
+				direction.setText("direct");
+			} else {
+				myService.send(boundServiceName, "setControllerDirection", new Integer(PID.DIRECTION_DIRECT));
+				direction.setText("invert");
 			}
-		});
+		} else if (o == setPID) {
+			Double Kp = Double.parseDouble(kp.getText());
+			Double Ki = Double.parseDouble(ki.getText());
+			Double Kd = Double.parseDouble(kd.getText());
+			myService.send(boundServiceName, "setPID", Kp, Ki, Kd);
+		}
+
 	}
 
 	@Override
@@ -109,27 +88,46 @@ public class PIDGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("publishState", "getState", PID.class);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		Object o = event.getSource();
-		if (o == direction)
-		{
-			if (direction.getText().equals("invert"))
-			{
-				myService.send(boundServiceName, "setControllerDirection", new Integer(PID.DIRECTION_REVERSE));
-				direction.setText("direct");
-			} else {
-				myService.send(boundServiceName, "setControllerDirection", new Integer(PID.DIRECTION_DIRECT));
-				direction.setText("invert");
-			}
-		} else if (o == setPID)
-		{
-			Double Kp = Double.parseDouble(kp.getText());
-			Double Ki = Double.parseDouble(ki.getText());
-			Double Kd = Double.parseDouble(kd.getText());
-			myService.send(boundServiceName, "setPID", Kp, Ki, Kd);
-		}
+	public void getState(final PID pid) {
+		log.info("here");
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				int dir = pid.getControllerDirection();
+				if (dir == PID.DIRECTION_REVERSE) {
+					direction.setText("direct");
+				} else {
+					direction.setText("invert");
+				}
 
+				ki.setText(String.format("%s", pid.getKi()));
+				kp.setText(String.format("%s", pid.getKp()));
+				kd.setText(String.format("%s", pid.getKd()));
+
+			}
+		});
+	}
+
+	@Override
+	public void init() {
+		gc.gridx = 0;
+		gc.gridy = 0;
+
+		direction.addActionListener(this);
+		setPID.addActionListener(this);
+
+		JPanel flow = new JPanel();
+
+		flow.add(new JLabel("Kp"));
+		flow.add(kp);
+		flow.add(new JLabel("Ki"));
+		flow.add(ki);
+		flow.add(new JLabel("Kd"));
+		flow.add(kd);
+		flow.add(setPID);
+		flow.add(direction);
+
+		display.add(flow);
 	}
 
 }

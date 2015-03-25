@@ -54,43 +54,6 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 public class OpenCVFilterMouse extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterMouse.class.getCanonicalName());
-
-	int stepSize = 1;
-	CvPoint startPoint = null;
-	
-
-	CvPoint mousePos = null;
-
-	final public int NONE = -1;
-	final public int NORTH = 1;
-	final public int NORTHWEST = 2;
-	final public int WEST = 3;
-	final public int SOUTHWEST = 4;
-	final public int SOUTH = 5;
-	final public int SOUTHEAST = 6;
-	final public int EAST = 7;
-	final public int NORTHEAST = 8;
-
-	int lastWallChecked = NONE;
-	int lastWall = NONE;
-
-	int width = 0;
-	int height = 0;
-
-
-	double BLACK = 0.0;
-	boolean doneMoving = false;
-	boolean doneSweeping = false;
-
-	double lowThreshold = 90.0;
-	double highThreshold = 210.0;
-	int apertureSize = 3;
-	IplImage gray = null;
-	IplImage src = null;
-	
 	public final class Node {
 		public int x;
 		public int y;
@@ -103,76 +66,59 @@ public class OpenCVFilterMouse extends OpenCVFilter {
 		}
 	}
 
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterMouse.class.getCanonicalName());
+	int stepSize = 1;
+
+	CvPoint startPoint = null;
+
+	CvPoint mousePos = null;
+	final public int NONE = -1;
+	final public int NORTH = 1;
+	final public int NORTHWEST = 2;
+	final public int WEST = 3;
+	final public int SOUTHWEST = 4;
+	final public int SOUTH = 5;
+	final public int SOUTHEAST = 6;
+	final public int EAST = 7;
+
+	final public int NORTHEAST = 8;
+	int lastWallChecked = NONE;
+
+	int lastWall = NONE;
+	int width = 0;
+
+	int height = 0;
+	double BLACK = 0.0;
+	boolean doneMoving = false;
+
+	boolean doneSweeping = false;
+	double lowThreshold = 90.0;
+	double highThreshold = 210.0;
+	int apertureSize = 3;
+	IplImage gray = null;
+
+	IplImage src = null;
+
 	ArrayList<CvPoint> path = new ArrayList<CvPoint>();
 	HashMap<String, CvPoint> unique = new HashMap<String, CvPoint>();
 
-	public OpenCVFilterMouse()  {
+	CvPoint p0 = new CvPoint(0, 0);
+
+	CvPoint p1 = new CvPoint(0, 0);
+
+	CvScalar pathColor = cvScalar(0.0, 255.0, 0.0, 1.0);
+
+	int nextDirection = 0;
+
+	public OpenCVFilterMouse() {
 		super();
 	}
-	
-	public OpenCVFilterMouse(String name)  {
+
+	public OpenCVFilterMouse(String name) {
 		super(name);
 	}
-	
-
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
-
-		if (image == null) {
-			log.error("image is null");
-		}
-
-		// path.clear();
-		// ArrayList<CvPoint> path = new ArrayList<CvPoint>();
-		lastWall = SOUTH;
-
-		if (startPoint == null) {
-			lastWall = SOUTH; // since we know the mousePos and startPoint are
-								// on the bottom perimeter
-			mousePos = new CvPoint(image.width() / 2, image.height() - 1);
-			startPoint = new CvPoint(image.width() / 2 - 1, image.height() - 1); // put
-																					// start
-																					// point
-																					// left
-																					// of
-																					// mousePos
-			width = image.width() - 1;
-			height = image.height() - 1;
-		}
-
-		if (gray == null) {
-			gray = cvCreateImage(cvGetSize(image), 8, 1);
-		}
-		if (src == null) {
-			src = cvCreateImage(cvGetSize(image), 8, 1);
-		}
-
-		if (image.nChannels() == 3) {
-			cvCvtColor(image, gray, CV_BGR2GRAY);
-		} else {
-			gray = image.clone();
-		}
-
-		cvCanny(gray, src, lowThreshold, highThreshold, apertureSize);
-		cvDilate(src, src, null, 2);
-
-		mousePos.x(startPoint.x());
-		mousePos.y(startPoint.y());
-
-		// fourFoldMouse();
-		eightFoldMouse();
-
-		drawPath(image);
-
-		invoke("publish", (Object) path);
-
-		log.error("{}", path.size());
-		return image;
-	}
-
-	CvPoint p0 = new CvPoint(0, 0);
-	CvPoint p1 = new CvPoint(0, 0);
-	CvScalar pathColor = cvScalar(0.0, 255.0, 0.0, 1.0);
 
 	public IplImage drawPath(IplImage image) {
 		for (int i = 0; i < path.size(); ++i) {
@@ -191,8 +137,6 @@ public class OpenCVFilterMouse extends OpenCVFilter {
 		 */
 		return image;
 	}
-
-	int nextDirection = 0;
 
 	public void eightFoldMouse() {
 
@@ -441,7 +385,62 @@ public class OpenCVFilterMouse extends OpenCVFilter {
 	@Override
 	public void imageChanged(IplImage image) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public IplImage process(IplImage image, OpenCVData data) {
+
+		if (image == null) {
+			log.error("image is null");
+		}
+
+		// path.clear();
+		// ArrayList<CvPoint> path = new ArrayList<CvPoint>();
+		lastWall = SOUTH;
+
+		if (startPoint == null) {
+			lastWall = SOUTH; // since we know the mousePos and startPoint are
+								// on the bottom perimeter
+			mousePos = new CvPoint(image.width() / 2, image.height() - 1);
+			startPoint = new CvPoint(image.width() / 2 - 1, image.height() - 1); // put
+																					// start
+																					// point
+																					// left
+																					// of
+																					// mousePos
+			width = image.width() - 1;
+			height = image.height() - 1;
+		}
+
+		if (gray == null) {
+			gray = cvCreateImage(cvGetSize(image), 8, 1);
+		}
+		if (src == null) {
+			src = cvCreateImage(cvGetSize(image), 8, 1);
+		}
+
+		if (image.nChannels() == 3) {
+			cvCvtColor(image, gray, CV_BGR2GRAY);
+		} else {
+			gray = image.clone();
+		}
+
+		cvCanny(gray, src, lowThreshold, highThreshold, apertureSize);
+		cvDilate(src, src, null, 2);
+
+		mousePos.x(startPoint.x());
+		mousePos.y(startPoint.y());
+
+		// fourFoldMouse();
+		eightFoldMouse();
+
+		drawPath(image);
+
+		invoke("publish", (Object) path);
+
+		log.error("{}", path.size());
+		return image;
 	}
 
 }

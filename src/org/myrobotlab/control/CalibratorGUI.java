@@ -40,18 +40,6 @@ public class CalibratorGUI extends ServiceGUI {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-		video = new VideoWidget(boundServiceName, myService, tabs);
-		video.init();
-		gc.gridx = 0;
-		gc.gridy = 0;
-		display.add(video.display, gc);
-	}
-
-	public void displayFrame(SerializableImage img) {
-		video.displayFrame(img);
-	}
-
 	@Override
 	public void attachGUI() {
 		video.attachGUI();
@@ -60,6 +48,19 @@ public class CalibratorGUI extends ServiceGUI {
 	@Override
 	public void detachGUI() {
 		video.detachGUI();
+	}
+
+	public void displayFrame(SerializableImage img) {
+		video.displayFrame(img);
+	}
+
+	@Override
+	public void init() {
+		video = new VideoWidget(boundServiceName, myService, tabs);
+		video.init();
+		gc.gridx = 0;
+		gc.gridy = 0;
+		display.add(video.display, gc);
 	}
 
 }

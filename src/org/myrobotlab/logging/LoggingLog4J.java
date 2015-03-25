@@ -18,59 +18,22 @@ import org.myrobotlab.framework.Service;
 public class LoggingLog4J extends Logging {
 
 	public final static Logger log = Logger.getLogger(Logging.class.getCanonicalName());
-	
+
 	private HashSet<String> appenders = new HashSet<String>();
 
 	@Override
-	public void configure() {
-		org.apache.log4j.BasicConfigurator.configure();
-	}
-
-	public void setLevel(String level) {
-		setLevel(null, level);
-	}
-
-	@Override
-	public void setLevel(String clazz, String level) {
-
-		Logger logger = null;
-		level = level.toUpperCase();
-
-		try {
-			if (clazz != null) {
-				logger = org.apache.log4j.Logger.getLogger(clazz);
-			}
-		} catch (Exception e) {
-		}
-
-		if (logger == null) {
-			logger = org.apache.log4j.Logger.getRootLogger();
-		}
-
-		if ("DEBUG".equalsIgnoreCase(level)) { // && log4j {
-			logger.setLevel(org.apache.log4j.Level.DEBUG);
-		} else if ("TRACE".equalsIgnoreCase(level)) { // && log4j {
-			logger.setLevel(org.apache.log4j.Level.TRACE);
-		} else if ("WARN".equalsIgnoreCase(level)) { // && log4j {
-			logger.setLevel(org.apache.log4j.Level.WARN);
-		} else if ("ERROR".equalsIgnoreCase(level)) { // && log4j {
-			logger.setLevel(org.apache.log4j.Level.ERROR);
-		} else if ("FATAL".equalsIgnoreCase(level)) { // && log4j {
-			logger.setLevel(org.apache.log4j.Level.FATAL);
-		} else { // && log4j {
-			logger.setLevel(org.apache.log4j.Level.INFO);
-		}
+	public void addAppender(Object console) {
+		Logger.getRootLogger().addAppender((AppenderSkeleton) console);
 	}
 
 	/**
 	 * 
 	 * @param type
 	 */
+	@Override
 	public void addAppender(String type) {
 		addAppender(type, null, null);
 	}
-	
-	
 
 	/**
 	 * 
@@ -78,8 +41,9 @@ public class LoggingLog4J extends Logging {
 	 * @param hostOrMultiFile
 	 * @param port
 	 */
+	@Override
 	public void addAppender(String type, String hostOrMultiFile, String port) {
-		if (appenders.contains(type)){
+		if (appenders.contains(type)) {
 			log.warn(String.format("already have %s type of appender - disregarding", type));
 			return;
 		}
@@ -115,18 +79,23 @@ public class LoggingLog4J extends Logging {
 
 				appenders.add(Appender.FILE);
 			} else if (Appender.IS_AGENT.equalsIgnoreCase(type)) {
-				// FROM_AGENT has only console - Agent has both console & file appender
+				// FROM_AGENT has only console - Agent has both console & file
+				// appender
 				appender = new ConsoleAppender(layout);
 				appender = new RollingFileAppender(layout, String.format("%s%sagent.1.log", System.getProperty("user.dir"), File.separator), false);
 				appender.setName(type);
 				appenders.add(Appender.IS_AGENT);
 			} else if (Appender.FROM_AGENT.equalsIgnoreCase(type)) {
 				// only has console because the console is relayed to the Agent
-				// shorter layout than Agent - since everything will be prepended to Agent's log prefix
-				//layout = new PatternLayout("[%t] %-5p %c %x - %m%n");
+				// shorter layout than Agent - since everything will be
+				// prepended to Agent's log prefix
+				// layout = new PatternLayout("[%t] %-5p %c %x - %m%n");
 				// TODO - add PID or runtime Name ! process index ?
-				// layout = new PatternLayout("[%t] %-5p %c %x - %m%n"); SHORT PATTERN ???
-				//appender = new RollingFileAppender(layout, String.format("%s%agent.log", System.getProperty("user.dir"), File.separator), false);
+				// layout = new PatternLayout("[%t] %-5p %c %x - %m%n"); SHORT
+				// PATTERN ???
+				// appender = new RollingFileAppender(layout,
+				// String.format("%s%agent.log", System.getProperty("user.dir"),
+				// File.separator), false);
 				appender = new ConsoleAppender(layout);
 				appender.setName(type);
 				appenders.add(Appender.FROM_AGENT);
@@ -148,16 +117,9 @@ public class LoggingLog4J extends Logging {
 
 	}
 
-	/**
-	 * 
-	 * @param name
-	 */
-	public void removeAppender(String name) {
-		Logger.getRootLogger().removeAppender(name);
-	}
-
-	public void removeAllAppenders() {
-		Logger.getRootLogger().removeAllAppenders();
+	@Override
+	public void configure() {
+		org.apache.log4j.BasicConfigurator.configure();
 	}
 
 	@Override
@@ -170,13 +132,59 @@ public class LoggingLog4J extends Logging {
 	}
 
 	@Override
-	public void addAppender(Object console) {
-		Logger.getRootLogger().addAppender((AppenderSkeleton) console);
+	public void removeAllAppenders() {
+		Logger.getRootLogger().removeAllAppenders();
 	}
 
 	@Override
 	public void removeAppender(Object console) {
 		Logger.getRootLogger().removeAppender((AppenderSkeleton) console);
+	}
+
+	/**
+	 * 
+	 * @param name
+	 */
+	@Override
+	public void removeAppender(String name) {
+		Logger.getRootLogger().removeAppender(name);
+	}
+
+	@Override
+	public void setLevel(String level) {
+		setLevel(null, level);
+	}
+
+	@Override
+	public void setLevel(String clazz, String level) {
+
+		Logger logger = null;
+		level = level.toUpperCase();
+
+		try {
+			if (clazz != null) {
+				logger = org.apache.log4j.Logger.getLogger(clazz);
+			}
+		} catch (Exception e) {
+		}
+
+		if (logger == null) {
+			logger = org.apache.log4j.Logger.getRootLogger();
+		}
+
+		if ("DEBUG".equalsIgnoreCase(level)) { // && log4j {
+			logger.setLevel(org.apache.log4j.Level.DEBUG);
+		} else if ("TRACE".equalsIgnoreCase(level)) { // && log4j {
+			logger.setLevel(org.apache.log4j.Level.TRACE);
+		} else if ("WARN".equalsIgnoreCase(level)) { // && log4j {
+			logger.setLevel(org.apache.log4j.Level.WARN);
+		} else if ("ERROR".equalsIgnoreCase(level)) { // && log4j {
+			logger.setLevel(org.apache.log4j.Level.ERROR);
+		} else if ("FATAL".equalsIgnoreCase(level)) { // && log4j {
+			logger.setLevel(org.apache.log4j.Level.FATAL);
+		} else { // && log4j {
+			logger.setLevel(org.apache.log4j.Level.INFO);
+		}
 	}
 
 }

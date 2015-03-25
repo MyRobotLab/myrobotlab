@@ -52,8 +52,43 @@ public class RecorderPlayer extends Service {
 
 	String format = FORMAT_MIN;
 
+	String targetServiceName;
+
 	public RecorderPlayer(String n) {
 		super(n);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "framework" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "<html>service for recording and playing back messages (not fully implemented)</html>";
+	}
+
+	public boolean loadFile(String name) {
+		return loadFromFile(name + ".msgs");
+	}
+
+	public boolean loadFromFile(String filename) {
+		boolean ret = false;
+		try {
+
+			FileReader infile = new FileReader(filename);
+			BufferedReader in = new BufferedReader(infile);
+
+			String s;
+			while ((s = in.readLine()) != null) {
+
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logException(e);
+		}
+
+		return ret;
 	}
 
 	public void play() {
@@ -78,6 +113,17 @@ public class RecorderPlayer extends Service {
 				logException(e);
 			}
 		}
+	}
+
+	@Override
+	public boolean preProcessHook(Message m) {
+		m.historyList.clear();
+		msgs.add(m);
+		return true;
+	}
+
+	public void record(String serviceName) {
+		targetServiceName = serviceName;
 	}
 
 	public void saveAs(String filename) {
@@ -127,51 +173,6 @@ public class RecorderPlayer extends Service {
 			logException(e);
 		}
 
-	}
-
-	public boolean loadFile(String name) {
-		return loadFromFile(name + ".msgs");
-	}
-
-	public boolean loadFromFile(String filename) {
-		boolean ret = false;
-		try {
-
-			FileReader infile = new FileReader(filename);
-			BufferedReader in = new BufferedReader(infile);
-
-			String s;
-			while ((s = in.readLine()) != null) {
-
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			logException(e);
-		}
-
-		return ret;
-	}
-
-	String targetServiceName;
-
-	public void record(String serviceName) {
-		targetServiceName = serviceName;
-	}
-
-	public boolean preProcessHook(Message m) {
-		m.historyList.clear();
-		msgs.add(m);
-		return true;
-	}
-
-	@Override
-	public String getDescription() {
-		return "<html>service for recording and playing back messages (not fully implemented)</html>";
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] {"framework"};
 	}
 
 }

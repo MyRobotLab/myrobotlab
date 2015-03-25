@@ -53,29 +53,59 @@ import org.slf4j.Logger;
 
 public class SoccerGameGUI extends ServiceGUI implements ListSelectionListener {
 
+	public class Keyboard implements KeyListener {
+		@Override
+		public void keyPressed(KeyEvent keyEvent) {
+
+			if (keyEvent.getKeyCode() == 84) {
+				announceValue.setVisible(true);
+				announceButton.setVisible(true);
+			}
+			myService.send(boundServiceName, "playerCommand", keyEvent.getKeyCode());
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent keyEvent) {
+			log.error("Released" + keyEvent);
+		}
+
+		@Override
+		public void keyTyped(KeyEvent keyEvent) {
+			log.error("Typed" + keyEvent);
+		}
+
+		private void printIt(String title, KeyEvent keyEvent) {
+			int keyCode = keyEvent.getKeyCode();
+			String keyText = KeyEvent.getKeyText(keyCode);
+			log.error(title + " : " + keyText + " / " + keyEvent.getKeyChar());
+		}
+	}
+
 	public final static Logger log = LoggerFactory.getLogger(SoccerGameGUI.class.getCanonicalName());
+
 	static final long serialVersionUID = 1L;
 
 	JLabel boundPos = null;
-
 	JLabel timeValue = new JLabel("20");
 	JLabel statusValue = new JLabel("connected");
 	JLabel typeValue = new JLabel("player");
 	JLabel teamValue = new JLabel("");
 	JLabel loginValue = new JLabel("");
+
 	JLabel msgCountValue = new JLabel("");
-
 	JTextField announceValue = new JTextField("hello", 15);
-	JButton announceButton = null;
 
+	JButton announceButton = null;
 	BasicArrowButton forward = new BasicArrowButton(BasicArrowButton.NORTH);
 	BasicArrowButton back = new BasicArrowButton(BasicArrowButton.SOUTH);
 	BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
-	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
+	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 	JList currentPlayers;
 	JList currentLog;
 	DefaultListModel rosterModel = new DefaultListModel();
+
 	DefaultListModel logModel = new DefaultListModel();
 
 	int msgCount = 0;
@@ -86,6 +116,46 @@ public class SoccerGameGUI extends ServiceGUI implements ListSelectionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
+	public void addLogEntry(String msg) {
+		logModel.add(0, msg);
+	}
+
+	@Override
+	public void attachGUI() {
+	};
+
+	/** Returns an ImageIcon, or null if the path was invalid. */
+	protected ImageIcon createImageIcon(String path, String description) {
+		java.net.URL imgURL = getClass().getResource("/resource/" + path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL, description);
+		} else {
+			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
+	}
+
+	@Override
+	public void detachGUI() {
+	}
+
+	public JButton getAnnounceButton() {
+		JButton button = new JButton("send");
+		// button.setVisible(false);
+		button.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				myService.send(boundServiceName, "announce", announceValue.getText());
+			}
+
+		});
+
+		return button;
+
+	}
+
+	@Override
 	public void init() {
 
 		keyboard = new Keyboard();
@@ -206,73 +276,6 @@ public class SoccerGameGUI extends ServiceGUI implements ListSelectionListener {
 
 	}
 
-	public JButton getAnnounceButton() {
-		JButton button = new JButton("send");
-		// button.setVisible(false);
-		button.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				myService.send(boundServiceName, "announce", announceValue.getText());
-			}
-
-		});
-
-		return button;
-
-	}
-
-	public class Keyboard implements KeyListener {
-		public void keyPressed(KeyEvent keyEvent) {
-
-			if (keyEvent.getKeyCode() == 84) {
-				announceValue.setVisible(true);
-				announceButton.setVisible(true);
-			}
-			myService.send(boundServiceName, "playerCommand", keyEvent.getKeyCode());
-
-		}
-
-		public void keyReleased(KeyEvent keyEvent) {
-			log.error("Released" + keyEvent);
-		}
-
-		public void keyTyped(KeyEvent keyEvent) {
-			log.error("Typed" + keyEvent);
-		}
-
-		private void printIt(String title, KeyEvent keyEvent) {
-			int keyCode = keyEvent.getKeyCode();
-			String keyText = KeyEvent.getKeyText(keyCode);
-			log.error(title + " : " + keyText + " / " + keyEvent.getKeyChar());
-		}
-	};
-
-	public void setTeam(String team) {
-		teamValue.setText(team);
-	}
-
-	public void setLogin(String login) {
-		loginValue.setText(login);
-	}
-
-	public void setType(String type) {
-		typeValue.setText(type);
-	}
-
-	public void attachGUI() {
-	}
-
-	@Override
-	public void detachGUI() {
-	}
-
-	@Override
-	public void valueChanged(ListSelectionEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
 	public void rosterUpdate(ArrayList<String> newRoster) {
 		rosterModel.clear();
 		for (int i = 0; i < newRoster.size(); ++i) {
@@ -280,19 +283,22 @@ public class SoccerGameGUI extends ServiceGUI implements ListSelectionListener {
 		}
 	}
 
-	public void addLogEntry(String msg) {
-		logModel.add(0, msg);
+	public void setLogin(String login) {
+		loginValue.setText(login);
 	}
 
-	/** Returns an ImageIcon, or null if the path was invalid. */
-	protected ImageIcon createImageIcon(String path, String description) {
-		java.net.URL imgURL = getClass().getResource("/resource/" + path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL, description);
-		} else {
-			System.err.println("Couldn't find file: " + path);
-			return null;
-		}
+	public void setTeam(String team) {
+		teamValue.setText(team);
+	}
+
+	public void setType(String type) {
+		typeValue.setText(type);
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent arg0) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

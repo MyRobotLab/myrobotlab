@@ -73,7 +73,7 @@ public class InMoovGUI extends ServiceGUI implements ActionListener {
 
 	String defaultLeftPort;
 	String defaultRightPort;
-	
+
 	VideoWidget opencv;
 
 	public InMoovGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
@@ -83,53 +83,23 @@ public class InMoovGUI extends ServiceGUI implements ActionListener {
 		templates.put("head", headTemplate);
 	}
 
-	public void init() {
-		display.setLayout(new BorderLayout());
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object o = event.getSource();
+		if (o == leftHand) {
+			processAction(leftHand, "left", "hand");
+		} else if (o == rightHand) {
+			processAction(rightHand, "right", "hand");
+		} else if (o == leftArm) {
+			processAction(leftArm, "left", "arm");
+		} else if (o == rightArm) {
+			processAction(rightArm, "right", "arm");
+		} else if (o == head) {
+			processAction(head, "left", "head");
+		} else {
+			log.error("unkown event");
+		}
 
-		opencv = new VideoWidget(String.format("%s.opencv", boundServiceName), myService, tabs);
-		opencv.init();
-		//opencv = new VideoWidget(boundServiceName, myService, tabs);
-		//opencv.
-		
-		/*
-		imageMap = new JLayeredPane();
-		imageMap.setPreferredSize(new Dimension(692, 688));
-	
-		
-		JLabel image = new JLabel();
-		ImageIcon dPic = Util.getImageIcon("InMoov/body.png");
-		image.setIcon(dPic);
-		Dimension s = image.getPreferredSize();
-		image.setBounds(0, 0, s.width, s.height);
-		imageMap.add(image, new Integer(1));
-		*/
-
-		JPanel controls = new JPanel(new GridLayout(6, 1));
-
-		controls.add(leftHand);
-		controls.add(leftArm);
-		controls.add(head);
-		controls.add(rightHand);
-		controls.add(rightArm);
-
-		display.add(controls, BorderLayout.EAST);
-		display.add(opencv.display, BorderLayout.CENTER);
-
-		leftHand.addActionListener(this);
-		leftArm.addActionListener(this);
-		rightHand.addActionListener(this);
-		rightArm.addActionListener(this);
-		head.addActionListener(this);
-	}
-
-	public void getState(final InMoov moov) {
-
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				
-
-			}
-		});
 	}
 
 	// FIXME sendNotifyStateRequest("publishState", "getState", String type); <-
@@ -169,6 +139,54 @@ public class InMoovGUI extends ServiceGUI implements ActionListener {
 		return null;
 	}
 
+	public void getState(final InMoov moov) {
+
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		});
+	}
+
+	@Override
+	public void init() {
+		display.setLayout(new BorderLayout());
+
+		opencv = new VideoWidget(String.format("%s.opencv", boundServiceName), myService, tabs);
+		opencv.init();
+		// opencv = new VideoWidget(boundServiceName, myService, tabs);
+		// opencv.
+
+		/*
+		 * imageMap = new JLayeredPane(); imageMap.setPreferredSize(new
+		 * Dimension(692, 688));
+		 * 
+		 * 
+		 * JLabel image = new JLabel(); ImageIcon dPic =
+		 * Util.getImageIcon("InMoov/body.png"); image.setIcon(dPic); Dimension
+		 * s = image.getPreferredSize(); image.setBounds(0, 0, s.width,
+		 * s.height); imageMap.add(image, new Integer(1));
+		 */
+
+		JPanel controls = new JPanel(new GridLayout(6, 1));
+
+		controls.add(leftHand);
+		controls.add(leftArm);
+		controls.add(head);
+		controls.add(rightHand);
+		controls.add(rightArm);
+
+		display.add(controls, BorderLayout.EAST);
+		display.add(opencv.display, BorderLayout.CENTER);
+
+		leftHand.addActionListener(this);
+		leftArm.addActionListener(this);
+		rightHand.addActionListener(this);
+		rightArm.addActionListener(this);
+		head.addActionListener(this);
+	}
+
 	public void processAction(JButton button, String side, String part) {
 		log.info(String.format("processAction [%s], %s %s", button.getText(), side, part));
 		if (String.format("start %s %s", side, part).equals(button.getText())) {
@@ -196,25 +214,6 @@ public class InMoovGUI extends ServiceGUI implements ActionListener {
 		} else {
 			log.error("can't process [{}]", button.getText());
 		}
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		Object o = event.getSource();
-		if (o == leftHand) {
-			processAction(leftHand, "left", "hand");
-		} else if (o == rightHand) {
-			processAction(rightHand, "right", "hand");
-		} else if (o == leftArm) {
-			processAction(leftArm, "left", "arm");
-		} else if (o == rightArm) {
-			processAction(rightArm, "right", "arm");
-		} else if (o == head) {
-			processAction(head, "left", "head");
-		} else {
-			log.error("unkown event");
-		}
-
 	}
 
 }

@@ -42,23 +42,23 @@ public class VideoProcessor implements Runnable, Serializable {
 	public boolean capturing = false;
 
 	// GRABBER BEGIN --------------------------
-	
+
 	public String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
-	
+
 	public String grabberType = "com.googlecode.javacv.OpenCVFrameGrabber";
 
 	// OpenCVFilter displayFilter = null;
 
 	// grabber cfg
 	public String format = null;
-	
+
 	public boolean getDepth = false;
-	
+
 	public int cameraIndex = 0;
-	
+
 	public String inputFile = "http://localhost/videostream.cgi";
 	public String pipelineSelected = "";
-	
+
 	public boolean publishOpenCVData = true;
 	// GRABBER END --------------------------
 	// DEPRECATED - always use blocking queue
@@ -130,8 +130,32 @@ public class VideoProcessor implements Runnable, Serializable {
 		// parameterless constructor for simple xml
 	}
 
-	public OpenCV getOpencv() {
-		return opencv;
+	public OpenCVFilter addFilter(OpenCVFilter filter) {
+		// important for filter to access parent data
+		// and call-backs
+		filter.setVideoProcessor(this);
+		synchronized (filters) {
+
+			for (int i = 0; i < filters.size(); ++i) {
+				if (filter.name.equals(filters.get(i).name)) {
+					log.warn("duplicate filter name {}", filter.name);
+					return filters.get(i);
+				}
+			}
+
+			if (filter.sourceKey == null) {
+				filter.sourceKey = String.format("%s.%s", boundServiceName, INPUT_KEY);
+				if (filters.size() > 0) {
+					OpenCVFilter f = filters.get(filters.size() - 1);
+					filter.sourceKey = String.format("%s.%s", boundServiceName, f.name);
+				}
+			}
+
+			filters.add(filter);
+			log.info(String.format("added new filter %s.%s, %s", boundServiceName, filter.name, filter.getClass().getCanonicalName()));
+		}
+
+		return filter;
 	}
 
 	/*
@@ -139,31 +163,127 @@ public class VideoProcessor implements Runnable, Serializable {
 	 * lastData; }
 	 */
 
-	// FIXME - cheesy initialization - put it all in the constructor or before
-	// I assume this was done because the load() is difficult to manage !!
-	public void setOpencv(OpenCV opencv) {
-		this.opencv = opencv;
-		this.boundServiceName = opencv.getName();
+	// ------- filter methods begin ------------------
+	public OpenCVFilter addFilter(String name, String filterType) {
+		String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
+		/*
+		 * Object[] params = new Object[1]; params[0] = name;
+		 */
+
+		OpenCVFilter filter = (OpenCVFilter) Service.getNewInstance(type, name);
+		// returns filter if added - or if dupe returns actual
+		return addFilter(filter);
 	}
 
-	public void start() {
-		log.info("starting capture");
-		sdf.setTimeZone(new SimpleTimeZone(0, "GMT"));
-		sdf.applyPattern("dd MMM yyyy HH:mm:ss z");
+	public OpenCVFilter getFilter(String name) {
 
-		if (videoThread != null) {
-			log.info("video processor already started");
-			return;
+		synchronized (filters) {
+			Iterator<OpenCVFilter> itr = filters.iterator();
+			while (itr.hasNext()) {
+				OpenCVFilter filter = itr.next();
+				if (filter.name.equals(name)) {
+					return filter;
+				}
+			}
 		}
-		videoThread = new Thread(this, String.format("%s_videoProcessor", opencv.getName()));
-		videoThread.start();
+		log.error(String.format("removeFilter could not find %s filter", name));
+		return null;
 	}
 
-	public void stop() {
-		log.debug("stopping capture");
-		capturing = false;
-		videoThread = null;
+	public ArrayList<OpenCVFilter> getFiltersCopy() {
+		synchronized (filters) {
+			return new ArrayList<OpenCVFilter>(filters);
+		}
 	}
+
+	public FrameGrabber getGrabber() {
+		return grabber;
+	}
+
+	public OpenCV getOpencv() {
+		return opencv;
+	}
+
+	/**
+	 * thread safe recording of avi
+	 * 
+	 * @param key
+	 *            - input, filter, or display
+	 * @param data
+	 */
+	public void record(OpenCVData data) {
+		try {
+
+			if (!outputFileStreams.containsKey(recordingSource)) {
+				// FFmpegFrameRecorder recorder = new FFmpegFrameRecorder
+				// (String.format("%s.avi",filename), frame.width(),
+				// frame.height());
+
+				FrameRecorder recorder = new OpenCVFrameRecorder(String.format("%s.avi", recordingSource), frame.width(), frame.height());
+				// recorder.setCodecID(CV_FOURCC('M','J','P','G'));
+				// TODO - set frame rate to framerate
+				recorder.setFrameRate(15);
+				recorder.setPixelFormat(1);
+				recorder.start();
+				outputFileStreams.put(recordingSource, recorder);
+			}
+
+			// TODO - add input, filter & display
+			outputFileStreams.get(recordingSource).record(data.getImage(recordingSource));
+
+			if (closeOutputs) {
+				OpenCVFrameRecorder output = (OpenCVFrameRecorder) outputFileStreams.get(recordingSource);
+				outputFileStreams.remove(output);
+				output.stop();
+				output.release();
+				recordOutput = false;
+				closeOutputs = false;
+			}
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
+	public void recordOutput(Boolean b) {
+
+		if (b) {
+			recordOutput = b;
+		} else {
+			closeOutputs = true;
+		}
+	}
+
+	public void removeFilter(OpenCVFilter inFilter) {
+		synchronized (filters) {
+			Iterator<OpenCVFilter> itr = filters.iterator();
+			while (itr.hasNext()) {
+				OpenCVFilter filter = itr.next();
+				if (filter == inFilter) {
+					itr.remove();
+					if (filters.size() - 1 > 0) {
+						displayFilterName = filters.get(filters.size() - 1).name;
+						log.info("remove and switch displayFilter to {}", displayFilterName);
+					}
+					return;
+				}
+			}
+		}
+
+		log.error(String.format("removeFilter could not find %s filter", inFilter.name));
+	}
+
+	public void removeFilters() {
+		synchronized (filters) {
+			filters.clear();
+		}
+	}
+
+	public LinkedBlockingQueue<IplImage> requestFork(String filterName, String myName) {
+		return null;
+	}
+
+	// ------- filter methods end ------------------
 
 	/**
 	 * main video processing loop sources is a globally accessible VideoSources
@@ -174,6 +294,7 @@ public class VideoProcessor implements Runnable, Serializable {
 	 * more importantly the references of data are synced with itself - so that
 	 * all references are from the same processing loop
 	 */
+	@Override
 	public void run() {
 
 		capturing = true;
@@ -236,7 +357,7 @@ public class VideoProcessor implements Runnable, Serializable {
 			Service.sleep(300);
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 			stop();
 		}
 		// TODO - utilize the size changing capabilites of the different
@@ -435,7 +556,7 @@ public class VideoProcessor implements Runnable, Serializable {
 				}
 
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 				log.error("stopping capture");
 				stop();
 			}
@@ -448,158 +569,19 @@ public class VideoProcessor implements Runnable, Serializable {
 			grabber.release();
 			grabber = null;
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
-	}
-
-	// ------- filter methods begin ------------------
-	public OpenCVFilter addFilter(String name, String filterType) {
-		String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
-		/*
-		 * Object[] params = new Object[1]; params[0] = name;
-		 */
-
-		OpenCVFilter filter = (OpenCVFilter) Service.getNewInstance(type, name);
-		// returns filter if added - or if dupe returns actual
-		return addFilter(filter);
-	}
-
-	public OpenCVFilter addFilter(OpenCVFilter filter) {
-		// important for filter to access parent data
-		// and call-backs
-		filter.setVideoProcessor(this);
-		synchronized (filters) {
-
-			for (int i = 0; i < filters.size(); ++i) {
-				if (filter.name.equals(filters.get(i).name)) {
-					log.warn("duplicate filter name {}", filter.name);
-					return filters.get(i);
-				}
-			}
-
-			if (filter.sourceKey == null) {
-				filter.sourceKey = String.format("%s.%s", boundServiceName, INPUT_KEY);
-				if (filters.size() > 0) {
-					OpenCVFilter f = filters.get(filters.size() - 1);
-					filter.sourceKey = String.format("%s.%s", boundServiceName, f.name);
-				}
-			}
-
-			filters.add(filter);
-			log.info(String.format("added new filter %s.%s, %s", boundServiceName, filter.name, filter.getClass().getCanonicalName()));
-		}
-
-		return filter;
-	}
-
-	public void removeFilters() {
-		synchronized (filters) {
-			filters.clear();
-		}
-	}
-
-	public void removeFilter(OpenCVFilter inFilter) {
-		synchronized (filters) {
-			Iterator<OpenCVFilter> itr = filters.iterator();
-			while (itr.hasNext()) {
-				OpenCVFilter filter = itr.next();
-				if (filter == inFilter) {
-					itr.remove();
-					if (filters.size() - 1 > 0) {
-						displayFilterName = filters.get(filters.size() - 1).name;
-						log.info("remove and switch displayFilter to {}", displayFilterName);
-					}
-					return;
-				}
-			}
-		}
-
-		log.error(String.format("removeFilter could not find %s filter", inFilter.name));
-	}
-
-	public ArrayList<OpenCVFilter> getFiltersCopy() {
-		synchronized (filters) {
-			return new ArrayList<OpenCVFilter>(filters);
-		}
-	}
-
-	public OpenCVFilter getFilter(String name) {
-
-		synchronized (filters) {
-			Iterator<OpenCVFilter> itr = filters.iterator();
-			while (itr.hasNext()) {
-				OpenCVFilter filter = itr.next();
-				if (filter.name.equals(name)) {
-					return filter;
-				}
-			}
-		}
-		log.error(String.format("removeFilter could not find %s filter", name));
-		return null;
-	}
-
-	// ------- filter methods end ------------------
-
-	/**
-	 * thread safe recording of avi
-	 * 
-	 * @param key
-	 *            - input, filter, or display
-	 * @param data
-	 */
-	public void record(OpenCVData data) {
-		try {
-
-			if (!outputFileStreams.containsKey(recordingSource)) {
-				// FFmpegFrameRecorder recorder = new FFmpegFrameRecorder
-				// (String.format("%s.avi",filename), frame.width(),
-				// frame.height());
-
-				FrameRecorder recorder = new OpenCVFrameRecorder(String.format("%s.avi", recordingSource), frame.width(), frame.height());
-				// recorder.setCodecID(CV_FOURCC('M','J','P','G'));
-				// TODO - set frame rate to framerate
-				recorder.setFrameRate(15);
-				recorder.setPixelFormat(1);
-				recorder.start();
-				outputFileStreams.put(recordingSource, recorder);
-			}
-
-			// TODO - add input, filter & display
-			outputFileStreams.get(recordingSource).record(data.getImage(recordingSource));
-
-			if (closeOutputs) {
-				OpenCVFrameRecorder output = (OpenCVFrameRecorder) outputFileStreams.get(recordingSource);
-				outputFileStreams.remove(output);
-				output.stop();
-				output.release();
-				recordOutput = false;
-				closeOutputs = false;
-			}
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
-	public void recordOutput(Boolean b) {
-
-		if (b) {
-			recordOutput = b;
-		} else {
-			closeOutputs = true;
-		}
-	}
-
-	public FrameGrabber getGrabber() {
-		return grabber;
-	}
-
-	public LinkedBlockingQueue<IplImage> requestFork(String filterName, String myName) {
-		return null;
 	}
 
 	public void setMinDelay(int minDelay) {
 		this.minDelay = minDelay;
+	}
+
+	// FIXME - cheesy initialization - put it all in the constructor or before
+	// I assume this was done because the load() is difficult to manage !!
+	public void setOpencv(OpenCV opencv) {
+		this.opencv = opencv;
+		this.boundServiceName = opencv.getName();
 	}
 
 	public void showFrameNumbers(boolean b) {
@@ -608,5 +590,24 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	public void showTimestamp(boolean b) {
 		showTimestamp = b;
+	}
+
+	public void start() {
+		log.info("starting capture");
+		sdf.setTimeZone(new SimpleTimeZone(0, "GMT"));
+		sdf.applyPattern("dd MMM yyyy HH:mm:ss z");
+
+		if (videoThread != null) {
+			log.info("video processor already started");
+			return;
+		}
+		videoThread = new Thread(this, String.format("%s_videoProcessor", opencv.getName()));
+		videoThread.start();
+	}
+
+	public void stop() {
+		log.debug("stopping capture");
+		capturing = false;
+		videoThread = null;
 	}
 }

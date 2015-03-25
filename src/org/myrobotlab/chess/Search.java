@@ -16,28 +16,32 @@ import java.util.Iterator;
 import java.util.List;
 
 final public class Search {
-	public HMove getBest() {
-		return pv[0][0];
-	}
+	final static int MAX_PLY = 32;
 
-	public HMove getBestNext() {
-		return pv[0][1];
-	}
+	public Board board = new Board();
 
-	public void stopThinking() {
-		stop = true;
-	}
+	private HMove pv[][] = new HMove[MAX_PLY][MAX_PLY];
 
-	public void restartThinking() {
-		stop = false;
-	}
+	private int pvLength[] = new int[MAX_PLY];
 
-	public boolean isStopped() {
-		return stop;
-	}
+	private boolean followPV;
 
-	public void setStopTime(long stop) {
-		stopTime = stop;
+	private int ply = 0;
+
+	private int nodes = 0;
+
+	private long stopTime = Long.MAX_VALUE;
+
+	private boolean stop = false;
+
+	void checkup() throws StopSearchingException {
+		/*
+		 * is the engine's time up? if so, longjmp back to the beginning of
+		 * think()
+		 */
+		if (System.currentTimeMillis() >= stopTime || stop) {
+			throw new StopSearchingException();
+		}
 	}
 
 	public void clearPV() {
@@ -46,49 +50,91 @@ final public class Search {
 				pv[i][j] = null;
 	}
 
-	public void shiftPV() {
-		pvLength[0] -= 2;
-		for (int i = 0; i < pvLength[0]; i++)
-			pv[0][i] = pv[0][i + 2];
+	/*
+	 * quiesce() is a recursive minimax search function with alpha-beta cutoffs.
+	 * In other words, negamax. It basically only searches capture sequences and
+	 * allows the evaluation function to cut the search off (and set alpha). The
+	 * idea is to find a position where there isn't a lot going on so the static
+	 * evaluation function will work.
+	 */
+
+	public HMove getBest() {
+		return pv[0][0];
 	}
 
-	public void think() {
-		think(null);
+	/*
+	 * sortPV() is called when the search function is following the PV
+	 * (Principal Variation). It looks through the current ply's move list to
+	 * see if the PV move is there. If so, it adds 10,000,000 to the move's
+	 * score so it's played first by the search function. If not, followPV
+	 * remains FALSE and search() stops calling sortPV().
+	 */
+
+	public HMove getBestNext() {
+		return pv[0][1];
 	}
 
-	void think(ChessApp app) {
-		stop = false;
-		try {
-			ply = 0;
-			nodes = 0;
-			for (int i = 0; i < 64; i++)
-				for (int j = 0; j < 64; j++)
-					board.history[i][j] = 0;
-			for (int i = 3; i <= MAX_PLY; ++i) {
-				followPV = true;
-				int x = search(-10000, 10000, i);
-				System.out.println(i + " " + nodes + " " + x);
-				StringBuffer sb = new StringBuffer("[");
-				sb.append(x);
-				sb.append("]");
-				for (int j = 0; j < pvLength[0]; ++j) {
-					sb.append(" ");
-					sb.append(pv[0][j].toString());
-				}
-				// app.setPrincipalVariation(sb.toString());
-				// log.info(sb.toString());
-				if (x > 9000 || x < -9000)
-					break;
-			}
-		} catch (StopSearchingException e) {
-			/* make sure to take back the line we were searching */
-			while (ply != 0) {
-				board.takeBack();
-				--ply;
+	/* checkup() is called once in a while during the search. */
+
+	public boolean isStopped() {
+		return stop;
+	}
+
+	int quiesce(int alpha, int beta) throws StopSearchingException {
+		pvLength[ply] = ply;
+
+		/* are we too deep? */
+		if (ply >= MAX_PLY - 1)
+			return board.eval();
+		/*
+		 * if (hply >= HIST_STACK - 1) return board.eval(); FIXME!! see above
+		 */
+		/* check with the evaluation function */
+		int x = board.eval();
+		if (x >= beta)
+			return beta;
+		if (x > alpha)
+			alpha = x;
+
+		List validCaptures = board.genCaps();
+		if (followPV) /* are we following the PV? */
+			sortPV(validCaptures);
+		Collections.sort(validCaptures);
+
+		/* loop through the moves */
+		Iterator i = validCaptures.iterator();
+		while (i.hasNext()) {
+			HMove m = (HMove) i.next();
+			if (!board.makeMove(m))
+				continue;
+			++ply;
+			++nodes;
+
+			/* do some housekeeping every 1024 nodes */
+			if ((nodes & 1023) == 0)
+				checkup();
+
+			x = -quiesce(-beta, -alpha);
+			board.takeBack();
+			--ply;
+
+			if (x > alpha) {
+				if (x >= beta)
+					return beta;
+				alpha = x;
+
+				/* update the PV */
+				pv[ply][ply] = m;
+				for (int j = ply + 1; j < pvLength[ply + 1]; ++j)
+					pv[ply][j] = pv[ply + 1][j];
+				pvLength[ply] = pvLength[ply + 1];
 			}
 		}
-		System.out.println("Nodes searched: " + nodes);
-		return;
+		return alpha;
+	}
+
+	public void restartThinking() {
+		stop = false;
 	}
 
 	/** search() does just that, in negascout fashion */
@@ -194,74 +240,15 @@ final public class Search {
 		return a;
 	}
 
-	/*
-	 * quiesce() is a recursive minimax search function with alpha-beta cutoffs.
-	 * In other words, negamax. It basically only searches capture sequences and
-	 * allows the evaluation function to cut the search off (and set alpha). The
-	 * idea is to find a position where there isn't a lot going on so the static
-	 * evaluation function will work.
-	 */
-
-	int quiesce(int alpha, int beta) throws StopSearchingException {
-		pvLength[ply] = ply;
-
-		/* are we too deep? */
-		if (ply >= MAX_PLY - 1)
-			return board.eval();
-		/*
-		 * if (hply >= HIST_STACK - 1) return board.eval(); FIXME!! see above
-		 */
-		/* check with the evaluation function */
-		int x = board.eval();
-		if (x >= beta)
-			return beta;
-		if (x > alpha)
-			alpha = x;
-
-		List validCaptures = board.genCaps();
-		if (followPV) /* are we following the PV? */
-			sortPV(validCaptures);
-		Collections.sort(validCaptures);
-
-		/* loop through the moves */
-		Iterator i = validCaptures.iterator();
-		while (i.hasNext()) {
-			HMove m = (HMove) i.next();
-			if (!board.makeMove(m))
-				continue;
-			++ply;
-			++nodes;
-
-			/* do some housekeeping every 1024 nodes */
-			if ((nodes & 1023) == 0)
-				checkup();
-
-			x = -quiesce(-beta, -alpha);
-			board.takeBack();
-			--ply;
-
-			if (x > alpha) {
-				if (x >= beta)
-					return beta;
-				alpha = x;
-
-				/* update the PV */
-				pv[ply][ply] = m;
-				for (int j = ply + 1; j < pvLength[ply + 1]; ++j)
-					pv[ply][j] = pv[ply + 1][j];
-				pvLength[ply] = pvLength[ply + 1];
-			}
-		}
-		return alpha;
+	public void setStopTime(long stop) {
+		stopTime = stop;
 	}
 
-	/*
-	 * sortPV() is called when the search function is following the PV
-	 * (Principal Variation). It looks through the current ply's move list to
-	 * see if the PV move is there. If so, it adds 10,000,000 to the move's
-	 * score so it's played first by the search function. If not, followPV
-	 * remains FALSE and search() stops calling sortPV().
-	 */
+	public void shiftPV() {
+		pvLength[0] -= 2;
+		for (int i = 0; i < pvLength[0]; i++)
+			pv[0][i] = pv[0][i + 2];
+	}
 
 	void sortPV(Collection moves) {
 		followPV = false;
@@ -278,26 +265,46 @@ final public class Search {
 		}
 	}
 
-	/* checkup() is called once in a while during the search. */
-
-	void checkup() throws StopSearchingException {
-		/*
-		 * is the engine's time up? if so, longjmp back to the beginning of
-		 * think()
-		 */
-		if (System.currentTimeMillis() >= stopTime || stop) {
-			throw new StopSearchingException();
-		}
+	public void stopThinking() {
+		stop = true;
 	}
 
-	final static int MAX_PLY = 32;
+	public void think() {
+		think(null);
+	}
 
-	public Board board = new Board();
-	private HMove pv[][] = new HMove[MAX_PLY][MAX_PLY];
-	private int pvLength[] = new int[MAX_PLY];
-	private boolean followPV;
-	private int ply = 0;
-	private int nodes = 0;
-	private long stopTime = Long.MAX_VALUE;
-	private boolean stop = false;
+	void think(ChessApp app) {
+		stop = false;
+		try {
+			ply = 0;
+			nodes = 0;
+			for (int i = 0; i < 64; i++)
+				for (int j = 0; j < 64; j++)
+					board.history[i][j] = 0;
+			for (int i = 3; i <= MAX_PLY; ++i) {
+				followPV = true;
+				int x = search(-10000, 10000, i);
+				System.out.println(i + " " + nodes + " " + x);
+				StringBuffer sb = new StringBuffer("[");
+				sb.append(x);
+				sb.append("]");
+				for (int j = 0; j < pvLength[0]; ++j) {
+					sb.append(" ");
+					sb.append(pv[0][j].toString());
+				}
+				// app.setPrincipalVariation(sb.toString());
+				// log.info(sb.toString());
+				if (x > 9000 || x < -9000)
+					break;
+			}
+		} catch (StopSearchingException e) {
+			/* make sure to take back the line we were searching */
+			while (ply != 0) {
+				board.takeBack();
+				--ply;
+			}
+		}
+		System.out.println("Nodes searched: " + nodes);
+		return;
+	}
 }

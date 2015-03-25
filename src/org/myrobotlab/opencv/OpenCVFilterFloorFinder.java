@@ -44,18 +44,24 @@ public class OpenCVFilterFloorFinder extends OpenCVFilter {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFloorFinder.class.getCanonicalName());
 
 	IplImage buffer = null;
-	
+
 	CvPoint startPoint = new CvPoint(180, 120);
 	CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
 	CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0, 0.5, 1.0);
 	CvScalar up_diff = CV_RGB(20.0, 20.0, 20.0);
 
-	public OpenCVFilterFloorFinder()  {
+	public OpenCVFilterFloorFinder() {
 		super();
 	}
-	
-	public OpenCVFilterFloorFinder(String name)  {
+
+	public OpenCVFilterFloorFinder(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -77,12 +83,6 @@ public class OpenCVFilterFloorFinder extends OpenCVFilter {
 
 		return image;
 
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

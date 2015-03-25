@@ -63,161 +63,7 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
-public class AWTRobotGUI extends ServiceGUI implements ActionListener,
-		MouseMotionListener, MouseListener, MouseWheelListener {
-
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(AWTRobotGUI.class
-			.getCanonicalName());
-
-	VideoWidget video0 = null;
-	JTextField status = new JTextField("", 20);
-	JLabel x = new JLabel("0");
-	JLabel y = new JLabel("0");
-	private JFrame window;
-	private MyCanvas canvas;
-
-	public AWTRobotGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
-
-	public void init() {
-		video0 = new VideoWidget(boundServiceName, myService, tabs, false);
-
-		video0.init();
-		// video0.setNormalizedSize(400,400);
-
-		video0.getDisplay().addMouseListener(this);
-
-		window = new JFrame("Translucent Window");
-		canvas = new MyCanvas(window);
-		// Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		Rectangle maxBounds = new Rectangle();
-		GraphicsEnvironment ge = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
-		GraphicsDevice[] gs = ge.getScreenDevices();
-		for (int j = 0; j < gs.length; j++) {
-			GraphicsDevice gd = gs[j];
-			GraphicsConfiguration[] gc = gd.getConfigurations();
-			for (int i = 0; i < gc.length; i++) {
-				maxBounds = maxBounds.union(gc[i].getBounds());
-			}
-		}
-		canvas.setPreferredSize(new Dimension(maxBounds.width, maxBounds.height));
-		window.setUndecorated(true);
-		window.setAlwaysOnTop(true);
-		canvas.addMouseListener(canvas);
-		canvas.addMouseMotionListener(canvas);
-		window.setBackground(new Color(0, 0, 0, .01f));
-		//window.setOpacity(1f); not visible
-		window.setBounds(maxBounds);
-		window.add(canvas);
-		window.pack();
-
-		display.setLayout(new BorderLayout());
-		display.add(video0.getDisplay(), BorderLayout.CENTER);
-
-		JButton butt = new JButton("Set Bounds (drag a rectangle around capture area)");
-		butt.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				window.setVisible(true);
-
-			}
-		});
-		JButton butt1 = new JButton("1:1 Image Resize");
-		butt1.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (canvas!=null){
-					Dimension screenDim = new Dimension(canvas.screenRect.width,
-							canvas.screenRect.height);
-					myService.send(boundServiceName, "setResize", screenDim);
-				}
-			}
-		});
-		display.add(butt1, BorderLayout.NORTH);
-		display.add(butt, BorderLayout.SOUTH);
-		// display.add(status, BorderLayout.SOUTH);
-	}
-
-	public void getState(_TemplateService template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
-	}
-
-	public void displayFrame(SerializableImage img) {
-		video0.displayFrame(img);
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", _TemplateService.class);
-		subscribe("publishDisplay", "displayFrame", SerializableImage.class);
-		video0.attachGUI(); // default attachment
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", _TemplateService.class);
-		unsubscribe("publishDisplay", "displayFrame", SerializableImage.class);
-		video0.detachGUI(); // default attachment
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseWheelMoved(MouseWheelEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseDragged(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseMoved(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
+public class AWTRobotGUI extends ServiceGUI implements ActionListener, MouseMotionListener, MouseListener, MouseWheelListener {
 
 	class MyCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
@@ -234,33 +80,39 @@ public class AWTRobotGUI extends ServiceGUI implements ActionListener,
 		}
 
 		@Override
-		public void paintComponent(Graphics g) {
-			g.setColor(Color.red);
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			g.drawRect(0, 0, screenSize.width - 1, screenSize.height - 1);
-			g.drawRect(1, 1, screenSize.width - 3, screenSize.height - 3);
-			((Graphics2D) g).setComposite(AlphaComposite.getInstance(
-					AlphaComposite.DST_IN, .7f));
-			Rectangle2D.Double rect = new Rectangle2D.Double(0, 0,
-					this.getWidth(), this.getHeight());
-			((Graphics2D) g).fill(rect);
-			// g.setColor(new Color(0,0,0,1f));
-			// g.fillRect(0, 0,this.getWidth(), this.getHeight());
-			// g.setColor(new Color(0,0,0,.01f));
-			// g.fillRect(0, 0,this.getWidth(), this.getHeight());
-
-			// if (capture!=null){g.drawImage(capture,100,100, null);
-			// g.drawRect(100, 100, capture.getWidth() - 1, capture.getHeight()
-			// -
-			// 1);}
-			// g.setColor(Color.blue);
-			// g.drawString("o", x, y);
-		}
-
-		@Override
 		public void mouseClicked(MouseEvent e) {
 			// TODO Auto-generated method stub
 
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			Graphics graphics = this.getGraphics();
+			graphics.setColor(new Color(1, 0, 0, 0.5f));
+			graphics.fillRect(x1, y1, e.getX() - x1, e.getY() - y1);
+			repaint();
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			Graphics graphics = this.getGraphics();
+			graphics.setColor(Color.blue);
+			graphics.drawOval(e.getX() - 2, e.getY() - 2, 5, 5);
+			// graphics.drawString("Drag a window to OCR", e.getX() + 5,
+			// e.getY() - 10);
+			repaint();
 		}
 
 		@Override
@@ -287,45 +139,188 @@ public class AWTRobotGUI extends ServiceGUI implements ActionListener,
 				y2 = y1;
 				y1 = y3;
 			}
-			Rectangle max = ((AWTRobot) Runtime.getService(boundServiceName))
-					.getMaxBounds();
-			screenRect = new Rectangle(x1 + max.x, y1 + max.y, x2
-					- x1, y2 - y1);
-			
-				myService.send(boundServiceName, "setBounds", screenRect);
+			Rectangle max = ((AWTRobot) Runtime.getService(boundServiceName)).getMaxBounds();
+			screenRect = new Rectangle(x1 + max.x, y1 + max.y, x2 - x1, y2 - y1);
+
+			myService.send(boundServiceName, "setBounds", screenRect);
 			window.setVisible(false);
 			// WindowReaderMain.capture(screenRect);
 		}
 
 		@Override
-		public void mouseEntered(MouseEvent e) {
-			// TODO Auto-generated method stub
+		public void paintComponent(Graphics g) {
+			g.setColor(Color.red);
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			g.drawRect(0, 0, screenSize.width - 1, screenSize.height - 1);
+			g.drawRect(1, 1, screenSize.width - 3, screenSize.height - 3);
+			((Graphics2D) g).setComposite(AlphaComposite.getInstance(AlphaComposite.DST_IN, .7f));
+			Rectangle2D.Double rect = new Rectangle2D.Double(0, 0, this.getWidth(), this.getHeight());
+			((Graphics2D) g).fill(rect);
+			// g.setColor(new Color(0,0,0,1f));
+			// g.fillRect(0, 0,this.getWidth(), this.getHeight());
+			// g.setColor(new Color(0,0,0,.01f));
+			// g.fillRect(0, 0,this.getWidth(), this.getHeight());
 
+			// if (capture!=null){g.drawImage(capture,100,100, null);
+			// g.drawRect(100, 100, capture.getWidth() - 1, capture.getHeight()
+			// -
+			// 1);}
+			// g.setColor(Color.blue);
+			// g.drawString("o", x, y);
 		}
 
-		@Override
-		public void mouseExited(MouseEvent e) {
-			// TODO Auto-generated method stub
+	}
 
-		}
+	static final long serialVersionUID = 1L;
 
-		@Override
-		public void mouseDragged(MouseEvent e) {
-			Graphics graphics = this.getGraphics();
-			graphics.setColor(new Color(1, 0, 0, 0.5f));
-			graphics.fillRect(x1, y1, e.getX() - x1, e.getY() - y1);
-			repaint();
-		}
+	public final static Logger log = LoggerFactory.getLogger(AWTRobotGUI.class.getCanonicalName());
+	VideoWidget video0 = null;
+	JTextField status = new JTextField("", 20);
+	JLabel x = new JLabel("0");
+	JLabel y = new JLabel("0");
+	private JFrame window;
 
-		@Override
-		public void mouseMoved(MouseEvent e) {
-			Graphics graphics = this.getGraphics();
-			graphics.setColor(Color.blue);
-			graphics.drawOval(e.getX() - 2, e.getY() - 2, 5, 5);
-			// graphics.drawString("Drag a window to OCR", e.getX() + 5,
-			// e.getY() - 10);
-			repaint();
+	private MyCanvas canvas;
+
+	public AWTRobotGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void attachGUI() {
+		subscribe("publishState", "getState", _TemplateService.class);
+		subscribe("publishDisplay", "displayFrame", SerializableImage.class);
+		video0.attachGUI(); // default attachment
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishState", "getState", _TemplateService.class);
+		unsubscribe("publishDisplay", "displayFrame", SerializableImage.class);
+		video0.detachGUI(); // default attachment
+	}
+
+	public void displayFrame(SerializableImage img) {
+		video0.displayFrame(img);
+	}
+
+	public void getState(_TemplateService template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		});
+	}
+
+	@Override
+	public void init() {
+		video0 = new VideoWidget(boundServiceName, myService, tabs, false);
+
+		video0.init();
+		// video0.setNormalizedSize(400,400);
+
+		video0.getDisplay().addMouseListener(this);
+
+		window = new JFrame("Translucent Window");
+		canvas = new MyCanvas(window);
+		// Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Rectangle maxBounds = new Rectangle();
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] gs = ge.getScreenDevices();
+		for (int j = 0; j < gs.length; j++) {
+			GraphicsDevice gd = gs[j];
+			GraphicsConfiguration[] gc = gd.getConfigurations();
+			for (int i = 0; i < gc.length; i++) {
+				maxBounds = maxBounds.union(gc[i].getBounds());
+			}
 		}
+		canvas.setPreferredSize(new Dimension(maxBounds.width, maxBounds.height));
+		window.setUndecorated(true);
+		window.setAlwaysOnTop(true);
+		canvas.addMouseListener(canvas);
+		canvas.addMouseMotionListener(canvas);
+		window.setBackground(new Color(0, 0, 0, .01f));
+		// window.setOpacity(1f); not visible
+		window.setBounds(maxBounds);
+		window.add(canvas);
+		window.pack();
+
+		display.setLayout(new BorderLayout());
+		display.add(video0.getDisplay(), BorderLayout.CENTER);
+
+		JButton butt = new JButton("Set Bounds (drag a rectangle around capture area)");
+		butt.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				window.setVisible(true);
+
+			}
+		});
+		JButton butt1 = new JButton("1:1 Image Resize");
+		butt1.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (canvas != null) {
+					Dimension screenDim = new Dimension(canvas.screenRect.width, canvas.screenRect.height);
+					myService.send(boundServiceName, "setResize", screenDim);
+				}
+			}
+		});
+		display.add(butt1, BorderLayout.NORTH);
+		display.add(butt, BorderLayout.SOUTH);
+		// display.add(status, BorderLayout.SOUTH);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent arg0) {
+		// TODO Auto-generated method stub
 
 	}
 

@@ -44,27 +44,28 @@ public class ProxyGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void attachGUI() {
+		// subscribe("publishState", "getState", _TemplateServiceGUI.class);
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void detachGUI() {
+		// unsubscribe("publishState", "getState", _TemplateServiceGUI.class);
 	}
 
 	public void getState(Proxy template) {
 	}
 
 	@Override
-	public void attachGUI() {
-		//subscribe("publishState", "getState", _TemplateServiceGUI.class);
-		myService.send(boundServiceName, "publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		//unsubscribe("publishState", "getState", _TemplateServiceGUI.class);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-
+	public void init() {
 	}
 
 }

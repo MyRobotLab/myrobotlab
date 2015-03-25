@@ -31,6 +31,10 @@ public class DigitalButton extends JButton {
 		this(parent, offText, offText, null, offBGColor, offFGColor, onText, onText, null, onBGColor, onFGColor, type);
 	}
 
+	public DigitalButton(Object parent, String offCMD, ImageIcon offIcon, String onCMD, ImageIcon onIcon, int type) {
+		this(parent, null, offCMD, offIcon, null, null, null, onCMD, onIcon, null, null, type);
+	}
+
 	public DigitalButton(Object parent, String offText, String offCMD, Color offBGColor, Color offFGColor, String onText, String onCMD, Color onBGColor, Color onFGColor, int type) {
 		this(parent, offText, offCMD, null, offBGColor, offFGColor, onText, onCMD, null, onBGColor, onFGColor, type);
 	}
@@ -65,20 +69,8 @@ public class DigitalButton extends JButton {
 		// setIcon(this.offIcon);
 	}
 
-	public DigitalButton(Object parent, String offCMD, ImageIcon offIcon, String onCMD, ImageIcon onIcon, int type) {
-		this(parent, null, offCMD, offIcon, null, null, null, onCMD, onIcon, null, null, type);
-	}
-
-	public void setOn() {
-		if (onIcon != null) {
-			setIcon(onIcon);
-		} else {
-			setBackground(onBGColor);
-			setForeground(onFGColor);
-			setText(onText);
-		}
-		setActionCommand(onCMD);
-		isOn = true;
+	public boolean isOn() {
+		return isOn;
 	}
 
 	public void setOff() {
@@ -93,16 +85,24 @@ public class DigitalButton extends JButton {
 		isOn = false;
 	}
 
+	public void setOn() {
+		if (onIcon != null) {
+			setIcon(onIcon);
+		} else {
+			setBackground(onBGColor);
+			setForeground(onFGColor);
+			setText(onText);
+		}
+		setActionCommand(onCMD);
+		isOn = true;
+	}
+
 	public void toggle() {
 		if (isOn) {
 			setOff();
 		} else {
 			setOn();
 		}
-	}
-
-	public boolean isOn() {
-		return isOn;
 	}
 
 }

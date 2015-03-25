@@ -15,16 +15,6 @@ import org.slf4j.Logger;
 
 public class Keyboard extends Service {
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(Keyboard.class);
-	// TODO - needs capability to re-map keys
-	// FIXME add to Service
-	HashMap<String, Command> commands = null;
-	HashMap<String, String> remap = new HashMap<String, String>();
-	transient BlockingQueue<String> blockingData = new LinkedBlockingQueue<String>();
-	boolean isBlocking = false;
-
 	public class Command {
 		public String name;
 		public String method;
@@ -37,8 +27,65 @@ public class Keyboard extends Service {
 		}
 	}
 
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(Keyboard.class);
+	// TODO - needs capability to re-map keys
+	// FIXME add to Service
+	HashMap<String, Command> commands = null;
+	HashMap<String, String> remap = new HashMap<String, String>();
+	transient BlockingQueue<String> blockingData = new LinkedBlockingQueue<String>();
+
+	boolean isBlocking = false;
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		Keyboard keyboard = (Keyboard) Runtime.start("keyboard", "Keyboard");
+		keyboard.test();
+
+	}
+
 	public Keyboard(String n) {
 		super(n);
+	}
+
+	// TODO - should this be in Service ?????
+	public void addCommand(String actionPhrase, String name, String method, Object... params) {
+		if (commands == null) {
+			commands = new HashMap<String, Command>();
+		}
+		commands.put(actionPhrase, new Command(name, method, params));
+	}
+
+	/**
+	 * this method is what other services would use to subscribe to keyboard
+	 * events
+	 * 
+	 * @param service
+	 */
+	public void addKeyListener(Service service) {
+		addListener("publishKey", service.getName(), "onKey", String.class);
+	}
+
+	public void addKeyListener(String serviceName) {
+		ServiceInterface s = Runtime.getService(serviceName);
+		addKeyListener((Service) s);
+	}
+
+	public void clearMappings() {
+		remap.clear();
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "control" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "keyboard";
 	}
 
 	/**
@@ -67,18 +114,14 @@ public class Keyboard extends Service {
 	}
 
 	/**
-	 * this method is what other services would use to subscribe to keyboard
-	 * events
+	 * a onKey event handler for testing purposes only
 	 * 
-	 * @param service
+	 * @param key
+	 * @return
 	 */
-	public void addKeyListener(Service service) {
-		addListener("publishKey", service.getName(), "onKey", String.class);
-	}
-
-	public void addKeyListener(String serviceName) {
-		ServiceInterface s = Runtime.getService(serviceName);
-		addKeyListener((Service) s);
+	public String onKey(String key) {
+		log.info(String.format("onKey [%s]", key));
+		return key;
 	}
 
 	/**
@@ -90,51 +133,24 @@ public class Keyboard extends Service {
 		return key;
 	}
 
-	/**
-	 * a onKey event handler for testing purposes only
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public String onKey(String key) {
-		log.info(String.format("onKey [%s]", key));
-		return key;
-	}
-
-	// TODO - should this be in Service ?????
-	public void addCommand(String actionPhrase, String name, String method, Object... params) {
-		if (commands == null) {
-			commands = new HashMap<String, Command>();
+	public String readKey() {
+		try {
+			isBlocking = true;
+			String ret = blockingData.take();
+			isBlocking = false;
+			return ret;
+		} catch (Exception e) {
+			Logging.logError(e);
 		}
-		commands.put(actionPhrase, new Command(name, method, params));
+		isBlocking = false;
+		return null;
 	}
 
 	public void reMap(String from, String to) {
 		remap.put(from, to);
 	}
 
-	public void clearMappings() {
-		remap.clear();
-	}
-
 	@Override
-	public String getDescription() {
-		return "keyboard";
-	}
-	
-	public String readKey(){
-		try {
-			isBlocking = true;
-			String ret = blockingData.take();
-			isBlocking = false;
-			return ret;
-		} catch(Exception e){
-			Logging.logException(e);
-		}
-		isBlocking = false;
-		return null;
-	}
-
 	public Status test() {
 		Status status = super.test();
 		Keyboard keyboard = (Keyboard) Runtime.start(getName(), "Keyboard");
@@ -143,20 +159,6 @@ public class Keyboard extends Service {
 		keyboard.addKeyListener(keyboard);
 
 		return status;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		Keyboard keyboard = (Keyboard) Runtime.start("keyboard", "Keyboard");
-		keyboard.test();
-
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"control"};
 	}
 
 }

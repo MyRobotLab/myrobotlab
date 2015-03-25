@@ -69,82 +69,9 @@ import com.mxgraph.view.mxGraph;
 
 public class GUIServiceGUI extends ServiceGUI {
 
-	static final long serialVersionUID = 1L;
-
-	final int PORT_DIAMETER = 20;
-	final int PORT_RADIUS = PORT_DIAMETER / 2;
-
-	// addListener structure begin -------------
-	public JLabel srcServiceName = new JLabel("             ");
-	public JLabel srcMethodName = new JLabel("             ");
-	public JLabel parameterList = new JLabel("             ");
-	public JLabel dstMethodName = new JLabel();
-	public JLabel dstServiceName = new JLabel();
-	public JLabel period0 = new JLabel(" ");
-	public JLabel period1 = new JLabel(" ");
-	public JLabel arrow0 = new JLabel(" ");
-	// public JLabel arrow1 = new JLabel(" ");o
-	// addListener structure end -------------
-
-	ButtonListener buttonListener = new ButtonListener();
-
-	boolean showRoutes = false; // DEPRICATE - ITS NOT NORMALIZED !!!!
-	boolean showRouteLabels = false;
-	boolean showAccessURLs = false;
-	public HashMap<String, mxCell> serviceCells = new HashMap<String, mxCell>();
-	public mxGraph graph = null;
-	mxCell currentlySelectedCell = null;
-	mxGraphComponent graphComponent = null;
-
-	JButton rebuildButton = new JButton("rebuild");
-	JButton hideRoutesButton = new JButton("show routes");
-	JButton accessURLButton = new JButton("show access URLs");
-	JButton showRouteLabelsButton = new JButton("show route labels");
-	JButton dumpButton = new JButton("dump");
-
-	public GUIServiceGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
-
-	public void init() {
-
-		display.setLayout(new BorderLayout());
-
-		JPanel top = new JPanel();
-		JPanel newRoute = new JPanel(new FlowLayout());
-		newRoute.setBorder(BorderFactory.createTitledBorder("new message route"));
-		newRoute.add(srcServiceName);
-		newRoute.add(period0);
-		newRoute.add(srcMethodName);
-		newRoute.add(arrow0);
-		newRoute.add(dstServiceName);
-		newRoute.add(period1);
-		newRoute.add(dstMethodName);
-
-		buildGraph();
-
-		// begin graph view buttons
-		JPanel filters = new JPanel();
-		filters.add(rebuildButton);
-		filters.add(hideRoutesButton);
-		filters.add(showRouteLabelsButton);
-		filters.add(accessURLButton);
-		filters.add(dumpButton);
-
-		top.add(newRoute);
-		top.add(filters);
-
-		display.add(top, BorderLayout.PAGE_START);
-
-		accessURLButton.addActionListener(buttonListener);
-		rebuildButton.addActionListener(buttonListener);
-		hideRoutesButton.addActionListener(buttonListener);
-		showRouteLabelsButton.addActionListener(buttonListener);
-		dumpButton.addActionListener(buttonListener);
-	}
-
 	class ButtonListener implements ActionListener {
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			JButton b = (JButton) e.getSource();
 			if (b == rebuildButton) {
@@ -182,14 +109,79 @@ public class GUIServiceGUI extends ServiceGUI {
 		}
 	}
 
-	public void clearGraph() {
-		graph.removeCells(graph.getChildCells(graph.getDefaultParent(), true, true));
-		buildGraph();
+	static final long serialVersionUID = 1L;
+
+	final int PORT_DIAMETER = 20;
+
+	final int PORT_RADIUS = PORT_DIAMETER / 2;
+	// addListener structure begin -------------
+	public JLabel srcServiceName = new JLabel("             ");
+	public JLabel srcMethodName = new JLabel("             ");
+	public JLabel parameterList = new JLabel("             ");
+	public JLabel dstMethodName = new JLabel();
+	public JLabel dstServiceName = new JLabel();
+	public JLabel period0 = new JLabel(" ");
+	public JLabel period1 = new JLabel(" ");
+
+	public JLabel arrow0 = new JLabel(" ");
+
+	// public JLabel arrow1 = new JLabel(" ");o
+	// addListener structure end -------------
+	ButtonListener buttonListener = new ButtonListener();
+	boolean showRoutes = false; // DEPRICATE - ITS NOT NORMALIZED !!!!
+	boolean showRouteLabels = false;
+	boolean showAccessURLs = false;
+	public HashMap<String, mxCell> serviceCells = new HashMap<String, mxCell>();
+	public mxGraph graph = null;
+	mxCell currentlySelectedCell = null;
+
+	mxGraphComponent graphComponent = null;
+	JButton rebuildButton = new JButton("rebuild");
+	JButton hideRoutesButton = new JButton("show routes");
+	JButton accessURLButton = new JButton("show access URLs");
+	JButton showRouteLabelsButton = new JButton("show route labels");
+
+	JButton dumpButton = new JButton("dump");
+
+	public static String formatMethodString(String out, Class<?>[] paramTypes, String in) {
+		// test if outmethod = in
+		String methodString = out;
+		// if (methodString != in) {
+		methodString += "->" + in;
+		// }
+
+		// TODO FYI - depricate MRLListener use MethodEntry
+		// These parameter types could always be considered "inbound" ? or
+		// returnType
+		// TODO - view either full named paths or shortnames
+
+		methodString += "(";
+
+		if (paramTypes != null) {
+			for (int j = 0; j < paramTypes.length; ++j) {
+				// methodString += paramTypes[j].getCanonicalName();
+				Class c = paramTypes[j];
+				String t[] = c.getCanonicalName().split("\\.");
+				methodString += t[t.length - 1];
+
+				if (j < paramTypes.length - 1) {
+					methodString += ",";
+				}
+			}
+		}
+
+		methodString += ")";
+
+		return methodString;
 	}
 
-	public void rebuildGraph() {
-		graph.removeCells(graph.getChildCells(graph.getDefaultParent(), true, true));
-		buildGraph();
+	public GUIServiceGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
+	}
+
+	// FIXME - should it hook to the Runtime ???
+	@Override
+	public void attachGUI() {
 	}
 
 	public void buildGraph() {
@@ -231,7 +223,7 @@ public class GUIServiceGUI extends ServiceGUI {
 
 			Object parent = graph.getDefaultParent();
 			Object services[] = graph.getChildVertices(parent);
-			//log.info("serviceCount " + services.length);
+			// log.info("serviceCount " + services.length);
 
 			for (int i = 0; i < services.length; ++i) {
 				// serviceCells
@@ -270,17 +262,17 @@ public class GUIServiceGUI extends ServiceGUI {
 			graphComponent.getGraphControl().addMouseMotionListener(new MouseMotionListener() {
 
 				@Override
-				public void mouseMoved(MouseEvent e) {
-					Object cell = graphComponent.getCellAt(e.getX(), e.getY());
-					// too chatty log.info("dragged - mouseMoved - cell " + cell
-					// + " " + e.getX() + "," + e.getY());
-				}
-
-				@Override
 				public void mouseDragged(MouseEvent e) {
 					Object cell = graphComponent.getCellAt(e.getX(), e.getY());
 					// too chatty log.info("dragged cell " + cell + " " +
 					// e.getX() + "," + e.getY());
+				}
+
+				@Override
+				public void mouseMoved(MouseEvent e) {
+					Object cell = graphComponent.getCellAt(e.getX(), e.getY());
+					// too chatty log.info("dragged - mouseMoved - cell " + cell
+					// + " " + e.getX() + "," + e.getY());
 				}
 			});
 
@@ -297,6 +289,7 @@ public class GUIServiceGUI extends ServiceGUI {
 				 * log.info(e.getX() + "," + e.getY()); }
 				 */
 
+				@Override
 				public void mouseReleased(MouseEvent e) {
 					Object cell = graphComponent.getCellAt(e.getX(), e.getY());
 					// too chatty log.info("cell " + e.getX() + "," + e.getY());
@@ -333,45 +326,6 @@ public class GUIServiceGUI extends ServiceGUI {
 
 	}
 
-	public mxGraph getNewMXGraph() {
-		mxGraph g = new mxGraph() {
-
-			// Ports are not used as terminals for edges, they are
-			// only used to compute the graphical connection point
-			public boolean isPort(Object cell) {
-				mxGeometry geo = getCellGeometry(cell);
-
-				return (geo != null) ? geo.isRelative() : false;
-			}
-
-			// Implements a tooltip that shows the actual
-			// source and target of an edge
-			public String getToolTipForCell(Object cell) {
-				if (model.isEdge(cell)) {
-					return convertValueToString(model.getTerminal(cell, true)) + " -> " + convertValueToString(model.getTerminal(cell, false));
-				}
-
-				mxCell m = (mxCell) cell;
-
-				GUIServiceGraphVertex sw = (GUIServiceGraphVertex) m.getValue();
-				if (sw != null) {
-					return sw.toolTip;
-				} else {
-					return "<html>port node<br>click to drag and drop static routes</html>";
-				}
-			}
-
-			// Removes the folding icon and disables any folding
-			public boolean isCellFoldable(Object cell, boolean collapse) {
-				// return true;
-				return false;
-			}
-		};
-
-		return g;
-	}
-
-	
 	public void buildLocalServiceGraph() {
 
 		log.info("buildLocalServiceGraph-begin");
@@ -494,45 +448,97 @@ public class GUIServiceGUI extends ServiceGUI {
 		}
 	}
 
-	public static String formatMethodString(String out, Class<?>[] paramTypes, String in) {
-		// test if outmethod = in
-		String methodString = out;
-		// if (methodString != in) {
-		methodString += "->" + in;
-		// }
-
-		// TODO FYI - depricate MRLListener use MethodEntry
-		// These parameter types could always be considered "inbound" ? or
-		// returnType
-		// TODO - view either full named paths or shortnames
-
-		methodString += "(";
-
-		if (paramTypes != null) {
-			for (int j = 0; j < paramTypes.length; ++j) {
-				// methodString += paramTypes[j].getCanonicalName();
-				Class c = paramTypes[j];
-				String t[] = c.getCanonicalName().split("\\.");
-				methodString += t[t.length - 1];
-
-				if (j < paramTypes.length - 1) {
-					methodString += ",";
-				}
-			}
-		}
-
-		methodString += ")";
-
-		return methodString;
-	}
-
-	// FIXME - should it hook to the Runtime ???
-	@Override
-	public void attachGUI() {
+	public void clearGraph() {
+		graph.removeCells(graph.getChildCells(graph.getDefaultParent(), true, true));
+		buildGraph();
 	}
 
 	@Override
 	public void detachGUI() {
+	}
+
+	public mxGraph getNewMXGraph() {
+		mxGraph g = new mxGraph() {
+
+			// Implements a tooltip that shows the actual
+			// source and target of an edge
+			@Override
+			public String getToolTipForCell(Object cell) {
+				if (model.isEdge(cell)) {
+					return convertValueToString(model.getTerminal(cell, true)) + " -> " + convertValueToString(model.getTerminal(cell, false));
+				}
+
+				mxCell m = (mxCell) cell;
+
+				GUIServiceGraphVertex sw = (GUIServiceGraphVertex) m.getValue();
+				if (sw != null) {
+					return sw.toolTip;
+				} else {
+					return "<html>port node<br>click to drag and drop static routes</html>";
+				}
+			}
+
+			// Removes the folding icon and disables any folding
+			@Override
+			public boolean isCellFoldable(Object cell, boolean collapse) {
+				// return true;
+				return false;
+			}
+
+			// Ports are not used as terminals for edges, they are
+			// only used to compute the graphical connection point
+			@Override
+			public boolean isPort(Object cell) {
+				mxGeometry geo = getCellGeometry(cell);
+
+				return (geo != null) ? geo.isRelative() : false;
+			}
+		};
+
+		return g;
+	}
+
+	@Override
+	public void init() {
+
+		display.setLayout(new BorderLayout());
+
+		JPanel top = new JPanel();
+		JPanel newRoute = new JPanel(new FlowLayout());
+		newRoute.setBorder(BorderFactory.createTitledBorder("new message route"));
+		newRoute.add(srcServiceName);
+		newRoute.add(period0);
+		newRoute.add(srcMethodName);
+		newRoute.add(arrow0);
+		newRoute.add(dstServiceName);
+		newRoute.add(period1);
+		newRoute.add(dstMethodName);
+
+		buildGraph();
+
+		// begin graph view buttons
+		JPanel filters = new JPanel();
+		filters.add(rebuildButton);
+		filters.add(hideRoutesButton);
+		filters.add(showRouteLabelsButton);
+		filters.add(accessURLButton);
+		filters.add(dumpButton);
+
+		top.add(newRoute);
+		top.add(filters);
+
+		display.add(top, BorderLayout.PAGE_START);
+
+		accessURLButton.addActionListener(buttonListener);
+		rebuildButton.addActionListener(buttonListener);
+		hideRoutesButton.addActionListener(buttonListener);
+		showRouteLabelsButton.addActionListener(buttonListener);
+		dumpButton.addActionListener(buttonListener);
+	}
+
+	public void rebuildGraph() {
+		graph.removeCells(graph.getChildCells(graph.getDefaultParent(), true, true));
+		buildGraph();
 	}
 
 }

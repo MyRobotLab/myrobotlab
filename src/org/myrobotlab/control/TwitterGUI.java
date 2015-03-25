@@ -48,20 +48,20 @@ public class TwitterGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(_TemplateServiceGUI.class.getCanonicalName());
-	
-	JPasswordField consumerKey = new JPasswordField("XXXXXX",20);
-	JPasswordField consumerSecret = new JPasswordField("XXXXXX",20);
-	JPasswordField accessToken = new JPasswordField("XXXXXX",20);
-	JPasswordField accessTokenSecret = new JPasswordField("XXXXXX",20);
+
+	JPasswordField consumerKey = new JPasswordField("XXXXXX", 20);
+	JPasswordField consumerSecret = new JPasswordField("XXXXXX", 20);
+	JPasswordField accessToken = new JPasswordField("XXXXXX", 20);
+	JPasswordField accessTokenSecret = new JPasswordField("XXXXXX", 20);
 	JButton setKeys = new JButton("set keys");
 	JTextField text = new JTextField(20);
 	JButton tweet = new JButton("tweet");
 	Twitter twitter = null;
-	
+
 	public TwitterGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		display.setLayout(new BorderLayout());
-		JPanel keyInfo = new JPanel(new GridLayout(5,2));
+		JPanel keyInfo = new JPanel(new GridLayout(5, 2));
 		keyInfo.add(new JLabel("consumer key"));
 		keyInfo.add(consumerKey);
 		keyInfo.add(new JLabel("consumer secret"));
@@ -74,38 +74,30 @@ public class TwitterGUI extends ServiceGUI implements ActionListener {
 		keyInfo.add(setKeys);
 		setKeys.addActionListener(this);
 		tweet.addActionListener(this);
-		//display.setLayout(new BorderLayout());
+		// display.setLayout(new BorderLayout());
 		display.add(keyInfo, BorderLayout.NORTH);
 		gc.gridx = 0;
-		JPanel tweetPanel = new JPanel(new GridLayout(2,1));
+		JPanel tweetPanel = new JPanel(new GridLayout(2, 1));
 		tweetPanel.add(text);
 		tweetPanel.add(tweet);
 		display.add(tweetPanel, BorderLayout.SOUTH);
 	}
 
-	public void init() {
-		
-	}
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object o = event.getSource();
+		if (o == setKeys) {
+			myService.send(boundServiceName, "setSecurity", new String(consumerKey.getPassword()), new String(consumerSecret.getPassword()), new String(accessToken.getPassword()),
+					new String(accessTokenSecret.getPassword()));
+		} else if (o == tweet) {
 
-	public void getState(final Twitter twitter) {
-		this.twitter = twitter;
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				consumerKey.setText(twitter.consumerKey);
-				consumerSecret.setText(twitter.consumerSecret);
-				accessToken.setText(twitter.accessToken);
-				accessTokenSecret.setText(twitter.accessTokenSecret);
-				text.setText("Your Text Here");
-				
-			}
-		});
+			myService.send(boundServiceName, "tweet", new String(text.getText()));
+
+		}
+
+		// TODO Auto-generated method stub
+
 	}
-	
-	public void setState()
-	{
-		myService.send(boundServiceName, "setState", twitter);
-	}
-	
 
 	@Override
 	public void attachGUI() {
@@ -118,20 +110,28 @@ public class TwitterGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("publishState", "getState", _TemplateService.class);
 	}
 
+	public void getState(final Twitter twitter) {
+		this.twitter = twitter;
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				consumerKey.setText(twitter.consumerKey);
+				consumerSecret.setText(twitter.consumerSecret);
+				accessToken.setText(twitter.accessToken);
+				accessTokenSecret.setText(twitter.accessTokenSecret);
+				text.setText("Your Text Here");
+
+			}
+		});
+	}
+
 	@Override
-	public void actionPerformed(ActionEvent event) {
-		Object o = event.getSource();
-		if (o == setKeys) {
-			myService.send(boundServiceName, "setSecurity", new String(consumerKey.getPassword()),  new String(consumerSecret.getPassword()), new String(accessToken.getPassword()), new String(accessTokenSecret.getPassword()));
-		} else if (o == tweet) {
-			
-			myService.send(boundServiceName, "tweet", new String(text.getText()));
-			
-		}
-		
-		// TODO Auto-generated method stub
+	public void init() {
 
 	}
-	
+
+	public void setState() {
+		myService.send(boundServiceName, "setState", twitter);
+	}
 
 }

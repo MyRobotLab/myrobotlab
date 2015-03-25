@@ -24,7 +24,7 @@ public class ChessGameManager extends Service {
 	transient WebGUI webgui;
 	transient Serial serial;
 	transient Speech speech;
-	
+
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 
@@ -35,22 +35,43 @@ public class ChessGameManager extends Service {
 		return peers;
 	}
 
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+
+			ChessGameManager template = (ChessGameManager) Runtime.start("chessgame", "ChessGameManager");
+			template.test();
+
+			Runtime.start("gui", "GUIService");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 	public ChessGameManager(String n) {
 		super(n);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "game" };
 	}
 
 	@Override
 	public String getDescription() {
 		return "used as a general template";
 	}
-	
 
+	@Override
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
 
 		ComputerPlayer white = new ComputerPlayer();
 		Game game2 = new Game(white, new ComputerPlayer());
-		
+
 		Game game = new Game(new HumanPlayer(), new HumanPlayer());
 		game.haveDrawOffer();
 		game.getGameState();
@@ -66,29 +87,8 @@ public class ChessGameManager extends Service {
 		res = game.processString("undo");
 		res = game.processString("redo");
 		res = game.processString("new");
-		
+
 		return status;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-
-			ChessGameManager template = (ChessGameManager) Runtime.start("chessgame", "ChessGameManager");
-			template.test();
-
-			Runtime.start("gui", "GUIService");
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"game"};
 	}
 
 }

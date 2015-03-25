@@ -26,6 +26,46 @@ public class DifferentialKinematic extends KinematicModel {
 		reset();
 	}
 
+	/** Gets the velocity of the left wheel in meter/s. */
+	public double getLeftVelocity() {
+		return leftWheelVelocity;
+	}
+
+	/** Gets the velocity of the right wheel in meter/s. */
+	public double getRightVelocity() {
+		return rightWheelVelocity;
+	}
+
+	/** Resets all control parameters to their initial values. */
+	@Override
+	protected void reset() {
+		leftWheelVelocity = 0;
+		rightWheelVelocity = 0;
+	}
+
+	/** Sets the velocity of the left wheel in meter/s. */
+	public void setLeftVelocity(double vel) {
+		leftWheelVelocity = vel;
+	}
+
+	/** Sets the velocity of the right wheel in meter/s. */
+	public void setRightVelocity(double vel) {
+		rightWheelVelocity = vel;
+	}
+
+	/** Sets the velocity of both wheels in meter/s. */
+	public void setWheelsVelocity(double vl, double vr) {
+		leftWheelVelocity = vl;
+		rightWheelVelocity = vr;
+	}
+
+	/** Resets all control parameters to their initial values. */
+	@Override
+	protected String toString(DecimalFormat format) {
+		return "kinematic \t= DifferentialKinematic\n" + "left velocity   \t= " + format.format(leftWheelVelocity) + " m/s\n" + "right velocity \t= "
+				+ format.format(rightWheelVelocity) + " m/s\n";
+	}
+
 	/**
 	 * Compute instant translation and rotation vectors .
 	 * 
@@ -39,6 +79,7 @@ public class DifferentialKinematic extends KinematicModel {
 	 *            to store rotation
 	 */
 
+	@Override
 	protected void update(double elapsedSecond, Transform3D rotation, Vector3d instantTranslation, Vector3d instantRotation) {
 		// perform translation - according to current position and orientation
 		// For details see :
@@ -80,43 +121,5 @@ public class DifferentialKinematic extends KinematicModel {
 
 		// perform rotation -
 		instantRotation.set(0, dtheta, 0);
-	}
-
-	/** Resets all control parameters to their initial values. */
-	protected void reset() {
-		leftWheelVelocity = 0;
-		rightWheelVelocity = 0;
-	}
-
-	/** Resets all control parameters to their initial values. */
-	protected String toString(DecimalFormat format) {
-		return "kinematic \t= DifferentialKinematic\n" + "left velocity   \t= " + format.format(leftWheelVelocity) + " m/s\n" + "right velocity \t= "
-				+ format.format(rightWheelVelocity) + " m/s\n";
-	}
-
-	/** Sets the velocity of the left wheel in meter/s. */
-	public void setLeftVelocity(double vel) {
-		leftWheelVelocity = vel;
-	}
-
-	/** Sets the velocity of the right wheel in meter/s. */
-	public void setRightVelocity(double vel) {
-		rightWheelVelocity = vel;
-	}
-
-	/** Sets the velocity of both wheels in meter/s. */
-	public void setWheelsVelocity(double vl, double vr) {
-		leftWheelVelocity = vl;
-		rightWheelVelocity = vr;
-	}
-
-	/** Gets the velocity of the left wheel in meter/s. */
-	public double getLeftVelocity() {
-		return leftWheelVelocity;
-	}
-
-	/** Gets the velocity of the right wheel in meter/s. */
-	public double getRightVelocity() {
-		return rightWheelVelocity;
 	}
 }

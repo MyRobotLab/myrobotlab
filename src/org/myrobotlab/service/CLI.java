@@ -31,35 +31,6 @@ import org.slf4j.Logger;
  */
 public class CLI extends Service {
 
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(CLI.class);
-
-	private HashMap<String, Pipe> pipes = new HashMap<String, Pipe>();
-
-	public class Pipe {
-		public String name;
-		public transient InputStream out;
-		public transient OutputStream in;
-
-		public Pipe(String name, InputStream out, OutputStream in) {
-			this.name = name;
-			this.out = out;
-			this.in = in;
-		}
-	}
-
-	// my "real" in & out
-	transient Decoder in;
-	transient OutputStream os;
-	transient FileOutputStream fos;
-
-	// active relay - could be list - but lets start simple
-	String attached = null;
-	// transient OutputStream attachedIn = null;
-
-	transient BufferedWriter attachedIn = null;
-	transient StreamGobbler attachedOut = null;
-
 	// FIXME - needs refactor / merge with StreamGobbler
 	// FIXME - THIS CONCEPT IS SOOOOOO IMPORTANT
 	// - its a Central Point Controller - where input (any InputStream) can send
@@ -185,7 +156,7 @@ public class CLI extends Service {
 								}
 							}
 						} catch (Exception e) {
-							Logging.logException(e);
+							Logging.logError(e);
 						}
 
 					}
@@ -194,7 +165,7 @@ public class CLI extends Service {
 
 			} catch (IOException e) {
 				log.error("leaving Decoder");
-				Logging.logException(e);
+				Logging.logError(e);
 			}
 			/*
 			 * DON'T CLOSE - WE MAY WANT TO RE-ATTACH finally {
@@ -208,9 +179,187 @@ public class CLI extends Service {
 
 	}
 
+	public class Pipe {
+		public String name;
+		public transient InputStream out;
+		public transient OutputStream in;
+
+		public Pipe(String name, InputStream out, OutputStream in) {
+			this.name = name;
+			this.out = out;
+			this.in = in;
+		}
+	}
+
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(CLI.class);
+
+	private HashMap<String, Pipe> pipes = new HashMap<String, Pipe>();
+	// my "real" in & out
+	transient Decoder in;
+	transient OutputStream os;
+
+	transient FileOutputStream fos;
+
+	// active relay - could be list - but lets start simple
+	String attached = null;
+	// transient OutputStream attachedIn = null;
+	transient BufferedWriter attachedIn = null;
+
+	transient StreamGobbler attachedOut = null;
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("ERROR");
+
+		try {
+
+			CLI cli = (CLI) Runtime.start("cli", "CLI");
+			/*
+			 * cli.ls("/"); cli.ls("/cli"); cli.ls("/cli/");
+			 */
+			// cli.test();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
+	/**
+	 * Command Line Interpreter - used for processing encoded (default RESTful)
+	 * commands from std in and returning results in (default JSON) encoded
+	 * return messages.
+	 * 
+	 * Has the ability to pipe to another process - if attached to another
+	 * process handle, and the ability to switch between many processes
+	 * 
+	 * @param n
+	 */
+	public CLI(String n) {
+		super(n);
+	}
+
+	/**
+	 * add an i/o pair to this cli for the possible purpose attaching
+	 * 
+	 * @param name
+	 * @param process
+	 * @return
+	 */
+	public void add(String name, InputStream out, OutputStream in) {
+		pipes.put(name, new Pipe(name, out, in));
+	}
+
+	/**
+	 * attach to another processes' CLI
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean attach(String name) {
+		if (!pipes.containsKey(name)) {
+			error("%s not found", name);
+			return false;
+		}
+
+		Pipe pipe = pipes.get(name);
+		attached = name;
+		// stdin will now be relayed and not interpreted
+		attachedIn = new BufferedWriter(new OutputStreamWriter(pipe.in));
+		// need to fire up StreamGobbler
+		// (new Process) --- stdout --> (Agent Process) StreamGobbler --->
+		// stdout
+		ArrayList<OutputStream> outRelay = new ArrayList<OutputStream>();
+
+		if (os != null) {
+			outRelay.add(os);
+		}
+
+		if (fos != null) {
+			outRelay.add(fos);
+		}
+
+		attachedOut = new StreamGobbler(pipe.out, outRelay, name);
+		attachedOut.start();
+
+		// grab input output from foreign process
+
+		// introduce - hello - get response check with
+		// timer - because if a CLI is not there
+		// we cant attach to it
+
+		return true;
+	}
+
+	public void attachStdIO() {
+		if (in == null) {
+			in = new Decoder(this, "stdin", System.in);
+			in.start();
+		} else {
+			log.info("stdin already attached");
+		}
+
+		// if I'm not an agent then just writing to System.out is fine
+		// because all of it will be relayed to an Agent if I'm spawned
+		// from an Agent.. or
+		// If I'm without an Agent I'll just do the logging I was directed
+		// to on the command line
+		if (os == null) {
+			os = System.out;
+		} else {
+			log.info("stdout already attached");
+		}
+
+		try {
+			// if I'm an agent I'll do dual logging
+			if (fos == null && Runtime.isAgent()) {
+				fos = new FileOutputStream("agent.log");
+			}
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
+	public String cd(String path) {
+		in.cwd = path;
+		return path;
+	}
+
+	private void detach() throws IOException {
+		out(String.format("detaching from %s", attached).getBytes());
+		attached = null;
+		attachedIn = null;
+		if (attachedOut != null) {
+			attachedOut.interrupt();
+		}
+		attachedOut = null;
+	}
+
+	public void detachStdIO() {
+		if (in != null) {
+			in.interrupt();
+		}
+	}
+
 	public String echo(String msg) {
 		return msg;
 	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "framework" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used as a general cli";
+	}
+
+	/*
+	 * public ArrayList<ProcessData> lp(){ return
+	 * Runtime.getAgent().getProcesses(); }
+	 */
 
 	/**
 	 * FIXME !!! return Object[] and let CLI command processor handle encoding
@@ -241,126 +390,28 @@ public class CLI extends Service {
 		// if path /serviceName/ - method return
 	}
 
+	public void out(byte[] data) throws IOException {
+
+		// if (Runtime.isAgent()) {
+		if (os != null)
+			os.write(data);
+
+		if (fos != null)
+			fos.write(data);
+		// }
+	}
+
 	public void out(String str) throws IOException {
 		out(str.getBytes());
 	}
 
-	public void out(byte[] data) throws IOException {
-
-		//if (Runtime.isAgent()) {
-			if (os != null)
-				os.write(data);
-			
-			if (fos != null)
-				fos.write(data);
-		//}
+	@Override
+	public void startService() {
+		super.startService();
+		attachStdIO();
 	}
 
-	/**
-	 * Command Line Interpreter - used for processing encoded (default RESTful)
-	 * commands from std in and returning results in (default JSON) encoded
-	 * return messages.
-	 * 
-	 * Has the ability to pipe to another process - if attached to another
-	 * process handle, and the ability to switch between many processes
-	 * 
-	 * @param n
-	 */
-	public CLI(String n) {
-		super(n);
-	}
-
-	/**
-	 * attach to another processes' CLI
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public boolean attach(String name) {
-		if (!pipes.containsKey(name)) {
-			error("%s not found", name);
-			return false;
-		}
-
-		Pipe pipe = pipes.get(name);
-		attached = name;
-		// stdin will now be relayed and not interpreted
-		attachedIn = new BufferedWriter(new OutputStreamWriter(pipe.in));
-		// need to fire up StreamGobbler
-		// (new Process) --- stdout --> (Agent Process) StreamGobbler --->
-		// stdout
-		ArrayList<OutputStream> outRelay = new ArrayList<OutputStream>();
-		
-		if (os != null) {
-			outRelay.add(os);
-		}
-		
-		if (fos != null){
-			outRelay.add(fos);
-		}
-		
-		attachedOut = new StreamGobbler(pipe.out, outRelay, name);
-		attachedOut.start();
-
-		// grab input output from foreign process
-
-		// introduce - hello - get response check with
-		// timer - because if a CLI is not there
-		// we cant attach to it
-
-		return true;
-	}
-
-	private void detach() throws IOException {
-		out(String.format("detaching from %s", attached).getBytes());
-		attached = null;
-		attachedIn = null;
-		if (attachedOut != null) {
-			attachedOut.interrupt();
-		}
-		attachedOut = null;
-	}
-
-	/**
-	 * add an i/o pair to this cli for the possible purpose attaching
-	 * 
-	 * @param name
-	 * @param process
-	 * @return
-	 */
-	public void add(String name, InputStream out, OutputStream in) {
-		pipes.put(name, new Pipe(name, out, in));
-	}
-
-	public void attachStdIO() {
-		if (in == null) {
-			in = new Decoder(this, "stdin", System.in);
-			in.start();
-		} else {
-			log.info("stdin already attached");
-		}
-
-		// if I'm not an agent then just writing to System.out is fine
-		// because all of it will be relayed to an Agent if I'm spawned
-		// from an Agent.. or
-		// If I'm without an Agent I'll just do the logging I was directed
-		// to on the command line
-		if (os == null) {
-			os = System.out;
-		} else {
-			log.info("stdout already attached");
-		}
-
-		try {
-			// if I'm an agent I'll do dual logging
-			if (fos == null && Runtime.isAgent()) {
-				fos = new FileOutputStream("agent.log");
-			}
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
+	@Override
 	public void stopService() {
 		super.stopService();
 		try {
@@ -379,56 +430,8 @@ public class CLI extends Service {
 			}
 			fos = null;
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
-	}
-
-	public void detachStdIO() {
-		if (in != null) {
-			in.interrupt();
-		}
-	}
-
-	/*
-	 * public ArrayList<ProcessData> lp(){ return
-	 * Runtime.getAgent().getProcesses(); }
-	 */
-
-	public void startService() {
-		super.startService();
-		attachStdIO();
-	}
-
-	public String cd(String path) {
-		in.cwd = path;
-		return path;
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general cli";
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("ERROR");
-
-		try {
-
-			CLI cli = (CLI) Runtime.start("cli", "CLI");
-			/*
-			 * cli.ls("/"); cli.ls("/cli"); cli.ls("/cli/");
-			 */
-			// cli.test();
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"framework"};
 	}
 
 }

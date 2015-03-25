@@ -63,29 +63,6 @@ public class GraphicsGUI extends ServiceGUI implements VideoGUISource {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-
-		JButton cg = new JButton("create graph");
-		cg.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				myService.send(boundServiceName, "createGraph");
-			}
-		});
-
-		video = new VideoWidget(boundServiceName, myService, tabs);
-		video.init();
-		display.add(cg);
-		display.add(video.display, gc);
-
-	}
-
-	// TODO - com....Sensor interface
-	public void displayFrame(SerializableImage img) {
-		video.displayFrame(img);
-	}
-
 	@Override
 	public void attachGUI() {
 		video.attachGUI();
@@ -93,10 +70,9 @@ public class GraphicsGUI extends ServiceGUI implements VideoGUISource {
 		myService.send(boundServiceName, "attach", (Object) myService.getName());
 	}
 
-	@Override
-	public void detachGUI() {
-		video.detachGUI();
-		myService.send(boundServiceName, "detach");
+	public void clearRect(Integer x, Integer y, Integer width, Integer height) {
+		g.clearRect(x, y, width, height);
+		// video.displayFrame(graph);
 	}
 
 	public void createGraph(Dimension d) {
@@ -105,21 +81,15 @@ public class GraphicsGUI extends ServiceGUI implements VideoGUISource {
 		video.displayFrame(new SerializableImage(graph, boundServiceName));
 	}
 
-	// wrappers begin --------------------------
-	public void drawLine(Integer x1, Integer y1, Integer x2, Integer y2) {
-		g.drawLine(x1, y1, x2, y2);
-		refreshDisplay();
-		// video.displayFrame(graph);
+	@Override
+	public void detachGUI() {
+		video.detachGUI();
+		myService.send(boundServiceName, "detach");
 	}
 
-	public void drawString(String str, Integer x, Integer y) {
-		g.drawString(str, x, y);
-		// video.displayFrame(graph);
-	}
-
-	public void drawRect(Integer x, Integer y, Integer width, Integer height) {
-		g.drawRect(x, y, width, height);
-		// video.displayFrame(graph);
+	// TODO - com....Sensor interface
+	public void displayFrame(SerializableImage img) {
+		video.displayFrame(img);
 	}
 
 	public void drawGrid(int width, int height) {
@@ -142,6 +112,23 @@ public class GraphicsGUI extends ServiceGUI implements VideoGUISource {
 		g.setColor(old);
 	}
 
+	// wrappers begin --------------------------
+	public void drawLine(Integer x1, Integer y1, Integer x2, Integer y2) {
+		g.drawLine(x1, y1, x2, y2);
+		refreshDisplay();
+		// video.displayFrame(graph);
+	}
+
+	public void drawRect(Integer x, Integer y, Integer width, Integer height) {
+		g.drawRect(x, y, width, height);
+		// video.displayFrame(graph);
+	}
+
+	public void drawString(String str, Integer x, Integer y) {
+		g.drawString(str, x, y);
+		// video.displayFrame(graph);
+	}
+
 	public void fillOval(Integer x, Integer y, Integer width, Integer height) {
 		g.fillOval(x, y, width, height);
 	}
@@ -150,14 +137,29 @@ public class GraphicsGUI extends ServiceGUI implements VideoGUISource {
 		g.fillRect(x, y, width, height);
 	}
 
-	public void clearRect(Integer x, Integer y, Integer width, Integer height) {
-		g.clearRect(x, y, width, height);
-		// video.displayFrame(graph);
+	@Override
+	public VideoWidget getLocalDisplay() {
+		// TODO Auto-generated method stub
+		return video;
 	}
 
-	public void setColor(Color c) {
-		g.setColor(c);
-		// video.displayFrame(graph);
+	@Override
+	public void init() {
+
+		JButton cg = new JButton("create graph");
+		cg.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				myService.send(boundServiceName, "createGraph");
+			}
+		});
+
+		video = new VideoWidget(boundServiceName, myService, tabs);
+		video.init();
+		display.add(cg);
+		display.add(video.display, gc);
+
 	}
 
 	// wrappers end --------------------------
@@ -167,10 +169,16 @@ public class GraphicsGUI extends ServiceGUI implements VideoGUISource {
 		video.displayFrame(new SerializableImage(graph, boundServiceName));
 	}
 
+	public void setColor(Color c) {
+		g.setColor(c);
+		// video.displayFrame(graph);
+	}
+
 	// TODO - encapsulate this
 	// MouseListener mouseListener = new MouseAdapter() {
 	public void setCurrentFilterMouseListener() {
 		MouseListener mouseListener = new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent mouseEvent) {
 				JList theList = (JList) mouseEvent.getSource();
 				if (mouseEvent.getClickCount() == 2) {
@@ -184,12 +192,6 @@ public class GraphicsGUI extends ServiceGUI implements VideoGUISource {
 		};
 
 		// traces.addMouseListener(mouseListener);
-	}
-
-	@Override
-	public VideoWidget getLocalDisplay() {
-		// TODO Auto-generated method stub
-		return video;
 	}
 
 }

@@ -52,23 +52,58 @@ import org.slf4j.Logger;
 
 public class MoMoGUI extends ServiceGUI implements ListSelectionListener {
 
+	public class Keyboard implements KeyListener {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
+
+		@Override
+		public void keyPressed(KeyEvent keyEvent) {
+
+			// myService.send(boundServiceName, "keyCommand",
+			// keyEvent.getKeyCode());
+			myService.send(boundServiceName, "keyCommand", KeyEvent.getKeyText(keyEvent.getKeyCode()));
+
+			Calendar cal = Calendar.getInstance();
+			addLogEntry(sdf.format(cal.getTime()) + " " + keyEvent.getKeyCode() + " " + KeyEvent.getKeyText(keyEvent.getKeyCode()));
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent keyEvent) {
+			// log.error("Released" + keyEvent);
+		}
+
+		@Override
+		public void keyTyped(KeyEvent keyEvent) {
+			// log.error("Typed" + keyEvent);
+		}
+
+		private void printIt(String title, KeyEvent keyEvent) {
+			int keyCode = keyEvent.getKeyCode();
+			String keyText = KeyEvent.getKeyText(keyCode);
+			// log.error(title + " : " + keyText + " / " +
+			// keyEvent.getKeyChar());
+		}
+	}
+
 	public final static Logger log = LoggerFactory.getLogger(MoMoGUI.class.getCanonicalName());
+
 	static final long serialVersionUID = 1L;
 
 	JLabel boundPos = null;
-
 	JLabel loginValue = new JLabel("");
+
 	JLabel msgCountValue = new JLabel("");
-
 	VideoWidget video0 = null;
-	VideoWidget video1 = null;
 
+	VideoWidget video1 = null;
 	BasicArrowButton forward = new BasicArrowButton(BasicArrowButton.NORTH);
 	BasicArrowButton back = new BasicArrowButton(BasicArrowButton.SOUTH);
 	BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
-	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
+	BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 	JList currentPlayers;
+
 	JList currentLog;
 
 	DefaultListModel logModel = new DefaultListModel();
@@ -81,6 +116,44 @@ public class MoMoGUI extends ServiceGUI implements ListSelectionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
+	/*
+	 * public void rosterUpdate(ArrayList<String> newRoster) {
+	 * rosterModel.clear(); for (int i = 0; i < newRoster.size(); ++i) {
+	 * rosterModel.add(i, newRoster.get(i)); } }
+	 */
+	public void addLogEntry(String msg) {
+		logModel.add(0, msg);
+	};
+
+	@Override
+	public void attachGUI() {
+		video0.attachGUI();
+		video1.attachGUI();
+	}
+
+	/** Returns an ImageIcon, or null if the path was invalid. */
+	protected ImageIcon createImageIcon(String path, String description) {
+		java.net.URL imgURL = getClass().getResource(path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL, description);
+		} else {
+			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
+	}
+
+	@Override
+	public void detachGUI() {
+		video0.detachGUI();
+		video1.detachGUI();
+	}
+
+	public void displayFrame(SerializableImage img) {
+
+		video0.displayFrame(img);
+	}
+
+	@Override
 	public void init() {
 
 		video0 = new VideoWidget(boundServiceName, myService, tabs);
@@ -146,81 +219,14 @@ public class MoMoGUI extends ServiceGUI implements ListSelectionListener {
 		gc.gridx = 1;
 	}
 
-	public class Keyboard implements KeyListener {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
-
-		public void keyPressed(KeyEvent keyEvent) {
-
-			// myService.send(boundServiceName, "keyCommand",
-			// keyEvent.getKeyCode());
-			myService.send(boundServiceName, "keyCommand", KeyEvent.getKeyText(keyEvent.getKeyCode()));
-
-			Calendar cal = Calendar.getInstance();
-			addLogEntry(sdf.format(cal.getTime()) + " " + keyEvent.getKeyCode() + " " + KeyEvent.getKeyText(keyEvent.getKeyCode()));
-
-		}
-
-		public void keyReleased(KeyEvent keyEvent) {
-			// log.error("Released" + keyEvent);
-		}
-
-		public void keyTyped(KeyEvent keyEvent) {
-			// log.error("Typed" + keyEvent);
-		}
-
-		private void printIt(String title, KeyEvent keyEvent) {
-			int keyCode = keyEvent.getKeyCode();
-			String keyText = KeyEvent.getKeyText(keyCode);
-			// log.error(title + " : " + keyText + " / " +
-			// keyEvent.getKeyChar());
-		}
-	};
-
 	public void setLogin(String login) {
 		loginValue.setText(login);
-	}
-
-	public void displayFrame(SerializableImage img) {
-
-		video0.displayFrame(img);
-	}
-
-	public void attachGUI() {
-		video0.attachGUI();
-		video1.attachGUI();
-	}
-
-	@Override
-	public void detachGUI() {
-		video0.detachGUI();
-		video1.detachGUI();
 	}
 
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {
 		// TODO Auto-generated method stub
 
-	}
-
-	/*
-	 * public void rosterUpdate(ArrayList<String> newRoster) {
-	 * rosterModel.clear(); for (int i = 0; i < newRoster.size(); ++i) {
-	 * rosterModel.add(i, newRoster.get(i)); } }
-	 */
-	public void addLogEntry(String msg) {
-		logModel.add(0, msg);
-	}
-
-	/** Returns an ImageIcon, or null if the path was invalid. */
-	protected ImageIcon createImageIcon(String path, String description) {
-		java.net.URL imgURL = getClass().getResource(path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL, description);
-		} else {
-			System.err.println("Couldn't find file: " + path);
-			return null;
-		}
 	}
 
 }

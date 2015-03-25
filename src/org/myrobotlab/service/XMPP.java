@@ -36,19 +36,6 @@ import org.slf4j.Logger;
 
 public class XMPP extends Service implements Gateway, MessageListener {
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(XMPP.class.getCanonicalName());
-	static final int packetReplyTimeout = 500; // millis
-	private String defaultPrefix;
-
-	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS
-	// FIXME - handle multiple user accounts
-
-	// not sure how to initialize requirements .. probably a register Security
-	// event
-	// thread safe ???
-
 	// GOOD ! - bundle message in single object for event return
 	public static class XMPPMsg {
 		public Chat chat;
@@ -59,6 +46,20 @@ public class XMPP extends Service implements Gateway, MessageListener {
 			this.msg = msg;
 		}
 	}
+
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(XMPP.class.getCanonicalName());
+	static final int packetReplyTimeout = 500; // millis
+
+	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS
+	// FIXME - handle multiple user accounts
+
+	// not sure how to initialize requirements .. probably a register Security
+	// event
+	// thread safe ???
+
+	private String defaultPrefix;
 
 	HashMap<String, String> xmppSecurity = new HashMap<String, String>();
 
@@ -87,40 +88,72 @@ public class XMPP extends Service implements Gateway, MessageListener {
 	HashSet<String> allowCommandsFrom = new HashSet<String>();
 	transient HashMap<String, Chat> chats = new HashMap<String, Chat>();
 
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+
+			int i = 1;
+			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
+			XMPP xmpp1 = (XMPP) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
+			Runtime.createAndStart(String.format("clock%d", i), "Clock");
+			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
+			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "xxxxxxx");
+			xmpp1.addAuditor("Ma. Vo.");
+			xmpp1.sendMessage("Ma. Vo. - xmpp test", "Ma. Vo.");
+			// xmpp1.send("Ma. Vo.", "xmpp test");
+			// xmpp1.sendMessage("hello from incubator by name " +
+			// System.currentTimeMillis(), "Greg Perry");
+			xmpp1.sendMessage("xmpp 2", "robot02 02");
+			if (true) {
+				return;
+			}
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 	public XMPP(String n) {
 		super(n);
-		//defaultPrefix = n;
+		// defaultPrefix = n;
 	}
 
+	public boolean addAuditor(String id) {
+		RosterEntry entry = getEntry(id);
+		if (entry == null) {
+			error("can not add auditor %s", id);
+			return false;
+		}
+		String jabberID = entry.getUser();
+		auditors.add(jabberID);
+		broadcast(String.format("added buddy %s", entry.getName()));
+		return true;
+	}
+
+	// FIXME normalize with all gateways?
 	@Override
-	public void stopService() {
-		super.stopService();
-		disconnect();
+	public void addConnectionListener(String name) {
+		// TODO Auto-generated method stub
+
 	}
 
-	@Override
-	public String getDescription() {
-		return "xmpp service to access the jabber network";
+	public void addXMPPMsgListener(Service service) {
+		addListener("publishXMPPMsg", service.getName(), "onXMPPMsg", XMPPMsg.class);
 	}
 
-	// FIXME - user name and password - default the host and port (duh)
-	public boolean connect(String user, String password) {
-		this.user = user;
-		this.password = password;
-		return connect(hostname, port, user, password);
-	}
-
-	public boolean connect(String host, int port, String user, String password) {
-		return connect(host, port, user, password, service);
-	}
-
-	public boolean connect(String host, int port, String user, String password, String service) {
-		this.hostname = host;
-		this.port = port;
-		this.user = user;
-		this.password = password;
-		this.service = service;
-		return connect();
+	/**
+	 * broadcast a chat message to all buddies in the relay
+	 * 
+	 * @param text
+	 *            - text to broadcast
+	 */
+	public void broadcast(String text) {
+		for (String buddy : auditors) {
+			sendMessage(text, buddy);
+		}
 	}
 
 	public boolean connect() {
@@ -163,10 +196,43 @@ public class XMPP extends Service implements Gateway, MessageListener {
 			return connection.isConnected();
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 		return false;
+	}
+
+	@Override
+	public void connect(String uri) throws URISyntaxException {
+		org.myrobotlab.framework.Message msg = createMessage("", "register", null);
+		sendRemote(uri, msg);
+	}
+
+	public boolean connect(String host, int port, String user, String password) {
+		return connect(host, port, user, password, service);
+	}
+
+	public boolean connect(String host, int port, String user, String password, String service) {
+		this.hostname = host;
+		this.port = port;
+		this.user = user;
+		this.password = password;
+		this.service = service;
+		return connect();
+	}
+
+	// FIXME - user name and password - default the host and port (duh)
+	public boolean connect(String user, String password) {
+		this.user = user;
+		this.password = password;
+		return connect(hostname, port, user, password);
+	}
+
+	public void createEntry(String user, String name) throws Exception {
+		log.info(String.format("Creating entry for buddy '%1$s' with name %2$s", user, name));
+		connect();
+		Roster roster = connection.getRoster();
+		roster.createEntry(user, name, null);
 	}
 
 	public void disconnect() {
@@ -181,42 +247,26 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		chats.clear();
 	}
 
-	public boolean login(String username, String password) {
-		log.info(String.format("login %s xxxxxxxx", username));
-		if (connection == null || !connection.isConnected()) {
-			return connect(hostname, port, username, password);
-		} else {
-			try {
-				connection.login(username, password);
-				// getRoster();
-			} catch (Exception e) {
-				Logging.logException(e);
-				return false;
-			}
-		}
-		return true;
-
+	@Override
+	public String[] getCategories() {
+		return new String[] { "control", "connectivity" };
 	}
 
-	public void setStatus(boolean available, String status) {
-		connect();
-		if (connection != null && connection.isConnected()) {
-			Presence.Type type = available ? Type.available : Type.unavailable;
-			Presence presence = new Presence(type);
-			presence.setStatus(status);
-			connection.sendPacket(presence);
-		} else {
-			log.error("setStatus not connected");
-		}
+	@Override
+	public HashMap<URI, Connection> getClients() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	public Roster getRoster() {
-		roster = connection.getRoster();
-		for (RosterEntry entry : roster.getEntries()) {
-			log.info(String.format("User: %s %s ", entry.getName(), entry.getUser()));
-			idToEntry.put(entry.getName(), entry);
-		}
-		return roster;
+	@Override
+	public List<Connection> getConnections(URI clientKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDescription() {
+		return "xmpp service to access the jabber network";
 	}
 
 	public RosterEntry getEntry(String userOrBuddyId) {
@@ -242,39 +292,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 
 	}
 
-	// TODO implement lower level messaging
-	public void sendMyRobotLabJSONMessage(org.myrobotlab.framework.Message msg) {
-
-	}
-
-	public void sendMyRobotLabRESTMessage(org.myrobotlab.framework.Message msg) {
-
-	}
-
-	public org.myrobotlab.framework.Message processMyRobotLabRESTMessage(Message msg) {
-
-		return null;
-	}
-
-	/**
-	 * broadcast a chat message to all buddies in the relay
-	 * 
-	 * @param text
-	 *            - text to broadcast
-	 */
-	public void broadcast(String text) {
-		for (String buddy : auditors) {
-			sendMessage(text, buddy);
-		}
-	}
-
-	// FIXME - create Resistrar interface sendMRLMessage(Message msg, URI/String
-	// key)
-	public void sendMRLMessage(org.myrobotlab.framework.Message msg, String id) {
-		// Base64.enc
-	}
-	
-	public String getJabberID(String id){
+	public String getJabberID(String id) {
 		RosterEntry entry = getEntry(id);
 		String jabberID;
 		if (entry == null) {
@@ -286,110 +304,31 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		return jabberID;
 	}
 
-	// FIXME synchronized not needed?
-	synchronized public void sendMessage(String text, String id) {
-		try {
-
-			connect();
-
-			String jabberID = getJabberID(id);
-
-			// FIXME FIXME FIXME !!! - if
-			// "just connected - ie just connected and this is the first chat of the connection then "create
-			// chat" otherwise use existing chat !"
-			Chat chat = null;
-			if (chats.containsKey(jabberID)) {
-				chat = chats.get(jabberID);
-			} else {
-				chat = chatManager.createChat(jabberID, this);
-				chats.put(jabberID, chat);
-			}
-			
-			log.info("chat threadid {} hashcode {}", chat.getThreadID(), chat.hashCode());
-
-			if (text == null) {
-				text = "null"; // dangerous converson?
-			}
-
-			// log.info(String.format("sending %s (%s) %s", entry.getName(),
-			// jabberID, text));
-			if (log.isDebugEnabled()) {
-				log.info(String.format("sending %s %s", jabberID, (text.length() > 32) ? String.format("%s...", text.substring(0, 32)) : text));
-			}
-			chat.sendMessage(text);
-
-		} catch (Exception e) {
-			// currentChats.remove(jabberID);
-			Logging.logException(e);
-		}
+	public CommOptions getOptions() {
+		return null;
 	}
 
-	public void createEntry(String user, String name) throws Exception {
-		log.info(String.format("Creating entry for buddy '%1$s' with name %2$s", user, name));
-		connect();
-		Roster roster = connection.getRoster();
-		roster.createEntry(user, name, null);
+	// @Override
+	public Platform getPlatform() {
+		return Runtime.getInstance().getPlatform();
 	}
 
-	// FIXME move to codec package
-	public Object processRESTChatMessage(Message msg) throws RESTException {
-		String body = msg.getBody();
-		log.info(String.format("processRESTChatMessage [%s]", body));
-
-		if (auditors.size() > 0) {
-			for (String auditor : auditors) {
-				RosterEntry re = getEntry(auditor);
-				sendMessage(String.format("%s %s", re.getName(), msg.getBody()), msg.getFrom());
-			}
-		}
-
-		if (body == null || body.length() < 1) {
-			log.info("invalid");
-			return null;
-		}
-
-		// TODO - allow to be in middle of message
-		// pre-processing begin --------
-		int pos0 = body.indexOf('/');
-		if (pos0 != 0) {
-			log.info("command must start with /");
-			return null;
-		}
-
-		int pos1 = body.indexOf("\n");
-		if (pos1 == -1) {
-			pos1 = body.length();
-		}
-
-		String uri = "";
-		if (pos1 > 0) {
-			uri = body.substring(pos0, pos1);
-		}
-
-		uri = uri.trim();
-
-		log.info(String.format("[%s]", uri));
-
-		// pre-processing end --------
-
-		Object o = RESTProcessor.invoke(uri);
-
-		// FIXME - encoding is that input uri before call ?
-		// or config ?
-		// FIXME - echo
-		// FIXME - choose type of encoding based on input ? part of the URI init
-		// call ?
-		// e.g. /api/gson/runtime/getLocalIPAdddresses [/api/gson/ .. is assumed
-		// (non-explicit) and pre-pended
-
-		if (o != null) {
-			broadcast(Encoder.toJson(o, o.getClass()));
-			// broadcast(o.toString());
+	@Override
+	public String getPrefix(URI protocolKey) {
+		if (defaultPrefix != null) {
+			return defaultPrefix;
 		} else {
-			broadcast(null);
+			return "";// important - return "" not null
 		}
+	}
 
-		return o;
+	public Roster getRoster() {
+		roster = connection.getRoster();
+		for (RosterEntry entry : roster.getEntries()) {
+			log.info(String.format("User: %s %s ", entry.getName(), entry.getUser()));
+			idToEntry.put(entry.getName(), entry);
+		}
+		return roster;
 	}
 
 	// FIXME - should be in runtime
@@ -403,17 +342,21 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		return sb.toString();
 	}
 
-	/**
-	 * MRL Interface to gateways .. onMsg(GatewayData d) addMsgListener(Service
-	 * s) publishMsg(Object..) returns gateway specific data
-	 */
+	public boolean login(String username, String password) {
+		log.info(String.format("login %s xxxxxxxx", username));
+		if (connection == null || !connection.isConnected()) {
+			return connect(hostname, port, username, password);
+		} else {
+			try {
+				connection.login(username, password);
+				// getRoster();
+			} catch (Exception e) {
+				Logging.logError(e);
+				return false;
+			}
+		}
+		return true;
 
-	public XMPPMsg publishXMPPMsg(Chat chat, Message msg) {
-		return new XMPPMsg(chat, msg);
-	}
-	
-	public void addXMPPMsgListener(Service service) {
-		addListener("publishXMPPMsg", service.getName(), "onXMPPMsg", XMPPMsg.class);
 	}
 
 	/**
@@ -524,7 +467,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 					// BEGIN ENCAPSULATION --- ENCODER END -------------
 
 				} catch (Exception e) {
-					Logging.logException(e);
+					Logging.logError(e);
 				}
 			} else {
 				// just route it
@@ -541,22 +484,24 @@ public class XMPP extends Service implements Gateway, MessageListener {
 				processRESTChatMessage(msg);
 			} catch (Exception e) {
 				broadcast(String.format("sorry sir, I do not understand your command %s", e.getMessage()));
-				Logging.logException(e);
+				Logging.logError(e);
 			}
-		} 
-		
-		/* CUSTOS SPECIFIC - REMOVE
-		else if (body != null && body.length() > 0 && body.charAt(0) != '/') {
-			broadcast("sorry sir, I do not understand! I await your orders but,\n they must start with / for more information go to http://myrobotlab.org/service/XMPP");
-			broadcast("*HAIL BEPSL!*");
-			broadcast(String.format("for a list of possible commands please type /%s/help", getName()));
-			broadcast(String.format("current roster of active units is as follows\n\n %s", listServices()));
-			broadcast(String.format("you may query any unit for help *HAIL BEPSL!*"));
-			// sendMessage(String.format("<b>hello</b>"),
-			// "supertick@gmail.com");
 		}
-		*/
-		
+
+		/*
+		 * CUSTOS SPECIFIC - REMOVE else if (body != null && body.length() > 0
+		 * && body.charAt(0) != '/') { broadcast(
+		 * "sorry sir, I do not understand! I await your orders but,\n they must start with / for more information go to http://myrobotlab.org/service/XMPP"
+		 * ); broadcast("*HAIL BEPSL!*"); broadcast(String.format(
+		 * "for a list of possible commands please type /%s/help", getName()));
+		 * broadcast
+		 * (String.format("current roster of active units is as follows\n\n %s",
+		 * listServices()));
+		 * broadcast(String.format("you may query any unit for help *HAIL BEPSL!*"
+		 * )); // sendMessage(String.format("<b>hello</b>"), //
+		 * "supertick@gmail.com"); }
+		 */
+
 		invoke("publishXMPPMsg", chat, msg);
 		//
 
@@ -565,16 +510,95 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		// invoke("publishMessage", chat, msg);
 	}
 
-	public boolean addAuditor(String id) {
-		RosterEntry entry = getEntry(id);
-		if (entry == null) {
-			error("can not add auditor %s", id);
-			return false;
+	public org.myrobotlab.framework.Message processMyRobotLabRESTMessage(Message msg) {
+
+		return null;
+	}
+
+	// FIXME move to codec package
+	public Object processRESTChatMessage(Message msg) throws RESTException {
+		String body = msg.getBody();
+		log.info(String.format("processRESTChatMessage [%s]", body));
+
+		if (auditors.size() > 0) {
+			for (String auditor : auditors) {
+				RosterEntry re = getEntry(auditor);
+				sendMessage(String.format("%s %s", re.getName(), msg.getBody()), msg.getFrom());
+			}
 		}
-		String jabberID = entry.getUser();
-		auditors.add(jabberID);
-		broadcast(String.format("added buddy %s", entry.getName()));
-		return true;
+
+		if (body == null || body.length() < 1) {
+			log.info("invalid");
+			return null;
+		}
+
+		// TODO - allow to be in middle of message
+		// pre-processing begin --------
+		int pos0 = body.indexOf('/');
+		if (pos0 != 0) {
+			log.info("command must start with /");
+			return null;
+		}
+
+		int pos1 = body.indexOf("\n");
+		if (pos1 == -1) {
+			pos1 = body.length();
+		}
+
+		String uri = "";
+		if (pos1 > 0) {
+			uri = body.substring(pos0, pos1);
+		}
+
+		uri = uri.trim();
+
+		log.info(String.format("[%s]", uri));
+
+		// pre-processing end --------
+
+		Object o = RESTProcessor.invoke(uri);
+
+		// FIXME - encoding is that input uri before call ?
+		// or config ?
+		// FIXME - echo
+		// FIXME - choose type of encoding based on input ? part of the URI init
+		// call ?
+		// e.g. /api/gson/runtime/getLocalIPAdddresses [/api/gson/ .. is assumed
+		// (non-explicit) and pre-pended
+
+		if (o != null) {
+			broadcast(Encoder.toJson(o, o.getClass()));
+			// broadcast(o.toString());
+		} else {
+			broadcast(null);
+		}
+
+		return o;
+	}
+
+	/**
+	 * publishing point for XMPP messages
+	 * 
+	 * @param message
+	 * @return
+	 */
+	public Message publishMessage(Chat chat, Message msg) {
+		log.info(String.format("%s sent msg %s", msg.getFrom(), msg.getBody()));
+		return msg;
+	}
+
+	@Override
+	public Connection publishNewConnection(Connection conn) {
+		return conn;
+	}
+
+	/**
+	 * MRL Interface to gateways .. onMsg(GatewayData d) addMsgListener(Service
+	 * s) publishMsg(Object..) returns gateway specific data
+	 */
+
+	public XMPPMsg publishXMPPMsg(Chat chat, Message msg) {
+		return new XMPPMsg(chat, msg);
 	}
 
 	public boolean removeAuditor(String id) {
@@ -588,22 +612,64 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		return true;
 	}
 
-	/**
-	 * publishing point for XMPP messages
-	 * 
-	 * @param message
-	 * @return
-	 */
-	public Message publishMessage(Chat chat, Message msg) {
-		log.info(String.format("%s sent msg %s", msg.getFrom(), msg.getBody()));
-		return msg;
+	// FIXME synchronized not needed?
+	synchronized public void sendMessage(String text, String id) {
+		try {
+
+			connect();
+
+			String jabberID = getJabberID(id);
+
+			// FIXME FIXME FIXME !!! - if
+			// "just connected - ie just connected and this is the first chat of the connection then "create
+			// chat" otherwise use existing chat !"
+			Chat chat = null;
+			if (chats.containsKey(jabberID)) {
+				chat = chats.get(jabberID);
+			} else {
+				chat = chatManager.createChat(jabberID, this);
+				chats.put(jabberID, chat);
+			}
+
+			log.info("chat threadid {} hashcode {}", chat.getThreadID(), chat.hashCode());
+
+			if (text == null) {
+				text = "null"; // dangerous converson?
+			}
+
+			// log.info(String.format("sending %s (%s) %s", entry.getName(),
+			// jabberID, text));
+			if (log.isDebugEnabled()) {
+				log.info(String.format("sending %s %s", jabberID, (text.length() > 32) ? String.format("%s...", text.substring(0, 32)) : text));
+			}
+			chat.sendMessage(text);
+
+		} catch (Exception e) {
+			// currentChats.remove(jabberID);
+			Logging.logError(e);
+		}
 	}
-	
+
+	// FIXME - create Resistrar interface sendMRLMessage(Message msg, URI/String
+	// key)
+	public void sendMRLMessage(org.myrobotlab.framework.Message msg, String id) {
+		// Base64.enc
+	}
+
+	// TODO implement lower level messaging
+	public void sendMyRobotLabJSONMessage(org.myrobotlab.framework.Message msg) {
+
+	}
+
+	public void sendMyRobotLabRESTMessage(org.myrobotlab.framework.Message msg) {
+
+	}
+
 	@Override
 	public void sendRemote(String uri, org.myrobotlab.framework.Message msg) throws URISyntaxException {
 		sendRemote(new URI(uri), msg);
 	}
-	
+
 	/**
 	 * sending remotely - need uri key data to send to client adds to history
 	 * list as a hop - to "hopefully" prevent infinite routing problems
@@ -624,85 +690,22 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		sendMessage(base64, remoteURI);
 	}
 
-	@Override
-	public HashMap<URI, Connection> getClients() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-
-			int i = 1;
-			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
-			XMPP xmpp1 = (XMPP) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
-			Runtime.createAndStart(String.format("clock%d", i), "Clock");
-			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
-			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "xxxxxxx");
-			xmpp1.addAuditor("Ma. Vo.");
-			xmpp1.sendMessage("Ma. Vo. - xmpp test", "Ma. Vo.");
-			//xmpp1.send("Ma. Vo.", "xmpp test");
-			// xmpp1.sendMessage("hello from incubator by name " +
-			// System.currentTimeMillis(), "Greg Perry");
-			xmpp1.sendMessage("xmpp 2", "robot02 02");
-			if (true) {
-				return;
-			}
-
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-	}
-
-	@Override
-	public void connect(String uri) throws URISyntaxException {
-		org.myrobotlab.framework.Message msg = createMessage("", "register", null);
-		sendRemote(uri, msg);
-	}
-
-	//@Override
-	public Platform getPlatform() {
-		return Runtime.getInstance().getPlatform();
-	}
-
-	@Override
-	public String getPrefix(URI protocolKey) {
-		if (defaultPrefix != null){
-			return defaultPrefix;
+	public void setStatus(boolean available, String status) {
+		connect();
+		if (connection != null && connection.isConnected()) {
+			Presence.Type type = available ? Type.available : Type.unavailable;
+			Presence presence = new Presence(type);
+			presence.setStatus(status);
+			connection.sendPacket(presence);
 		} else {
-			return "";// important - return "" not null
+			log.error("setStatus not connected");
 		}
 	}
-	
-	public CommOptions getOptions(){
-		return null;
-	}
 
 	@Override
-	public List<Connection> getConnections(URI clientKey) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Connection publishNewConnection(Connection conn) {
-		return conn;
-	}
-
-	// FIXME normalize with all gateways?
-	@Override
-	public void addConnectionListener(String name) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] {"control", "connectivity"};
+	public void stopService() {
+		super.stopService();
+		disconnect();
 	}
 
 }

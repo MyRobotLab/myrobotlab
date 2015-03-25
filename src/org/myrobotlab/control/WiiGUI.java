@@ -68,8 +68,77 @@ public class WiiGUI extends ServiceGUI implements ListSelectionListener, VideoGU
 	public Random rand = new Random();
 	public IRData lastIRData = null;
 
+	int x;
+
+	int y;
+
+	int cnt = 0;
+
+	int x0 = 0;
+
+	int y0 = 0;
+
+	int lastMin = width;
+	int lastMax = 0;
+
+	long timeStart = 0;
+
+	long timeEnd = 0;
+	int sweepTimeDelta = 0;
+	int deltaTime = 0;
+
 	public WiiGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
+	}
+
+	@Override
+	public void attachGUI() {
+		video0.attachGUI();
+		subscribe("publishIR", "publishIR", IRData.class);
+		video0.displayFrame(new SerializableImage(camImage, boundServiceName));
+	}
+
+	protected ImageIcon createImageIcon(String path, String description) {
+		java.net.URL imgURL = getClass().getResource(path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL, description);
+		} else {
+			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
+	}
+
+	@Override
+	public void detachGUI() {
+		video0.detachGUI();
+		unsubscribe("publishIR", "publishIR", IRData.class);
+	}
+
+	public void display(IRData ire, Color color) {
+		cam.setColor(color);
+		for (int i = 0; i < ire.event.getIRPoints().length; ++i) {
+			IRSource ir = ire.event.getIRPoints()[i];
+
+			if (ir != null) {
+				x = width / divisor - ir.getX() / divisor;
+				y = height / divisor - ir.getY() / divisor;
+				cam.fillArc(x, y, ir.getSize() * 3, ir.getSize() * 3, 0, 360);
+				// cam.drawString(ire.event.getWiimoteId() + " s" + ir.getSize()
+				// + " " + ir.getX() + "," + ir.getY(), x + 5, y);
+				cam.drawString(ire.event.getWiimoteId() + " " + ir.getX() + "," + ir.getY() + " s" + ir.getSize(), x - 30, y);
+			}
+
+		}
+
+	}
+
+	public void displayFrame(SerializableImage camImage) {
+		video0.displayFrame(camImage);
+	}
+
+	@Override
+	public VideoWidget getLocalDisplay() {
+		return video0;
 	}
 
 	@Override
@@ -106,58 +175,6 @@ public class WiiGUI extends ServiceGUI implements ListSelectionListener, VideoGU
 
 	}
 
-	protected ImageIcon createImageIcon(String path, String description) {
-		java.net.URL imgURL = getClass().getResource(path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL, description);
-		} else {
-			System.err.println("Couldn't find file: " + path);
-			return null;
-		}
-	}
-
-	public void displayFrame(SerializableImage camImage) {
-		video0.displayFrame(camImage);
-	}
-
-	@Override
-	public void attachGUI() {
-		video0.attachGUI();
-		subscribe("publishIR", "publishIR", IRData.class);
-		video0.displayFrame(new SerializableImage(camImage, boundServiceName));
-	}
-
-	int x;
-	int y;
-
-	public void display(IRData ire, Color color) {
-		cam.setColor(color);
-		for (int i = 0; i < ire.event.getIRPoints().length; ++i) {
-			IRSource ir = ire.event.getIRPoints()[i];
-
-			if (ir != null) {
-				x = width / divisor - ir.getX() / divisor;
-				y = height / divisor - ir.getY() / divisor;
-				cam.fillArc(x, y, ir.getSize() * 3, ir.getSize() * 3, 0, 360);
-				// cam.drawString(ire.event.getWiimoteId() + " s" + ir.getSize()
-				// + " " + ir.getX() + "," + ir.getY(), x + 5, y);
-				cam.drawString(ire.event.getWiimoteId() + " " + ir.getX() + "," + ir.getY() + " s" + ir.getSize(), x - 30, y);
-			}
-
-		}
-
-	}
-
-	int cnt = 0;
-	int x0 = 0;
-	int y0 = 0;
-	int lastMin = width;
-	int lastMax = 0;
-	long timeStart = 0;
-	long timeEnd = 0;
-	int sweepTimeDelta = 0;
-	int deltaTime = 0;
-
 	public void publishIR(IRData ire) {
 		++cnt;
 
@@ -175,16 +192,11 @@ public class WiiGUI extends ServiceGUI implements ListSelectionListener, VideoGU
 
 	}
 
-	@Override
-	public void detachGUI() {
-		video0.detachGUI();
-		unsubscribe("publishIR", "publishIR", IRData.class);
-	}
-
 	// TODO - encapsulate this
 	// MouseListener mouseListener = new MouseAdapter() {
 	public void setCurrentFilterMouseListener() {
 		MouseListener mouseListener = new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent mouseEvent) {
 				JList theList = (JList) mouseEvent.getSource();
 				if (mouseEvent.getClickCount() == 2) {
@@ -197,11 +209,6 @@ public class WiiGUI extends ServiceGUI implements ListSelectionListener, VideoGU
 			}
 		};
 
-	}
-
-	@Override
-	public VideoWidget getLocalDisplay() {
-		return video0;
 	}
 
 	@Override

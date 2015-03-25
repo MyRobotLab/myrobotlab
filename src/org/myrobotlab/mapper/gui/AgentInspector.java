@@ -77,10 +77,6 @@ public class AgentInspector extends JInternalFrame implements Runnable {
 		}
 	}
 
-	public void setFramesPerSecond(float fps) {
-		framesPerSecond = fps;
-	}
-
 	private void initialize() {
 		font = new Font("Arial", Font.PLAIN, 11);
 		JPanel panel = new JPanel();
@@ -144,6 +140,7 @@ public class AgentInspector extends JInternalFrame implements Runnable {
 	}
 
 	/** update loop */
+	@Override
 	public void run() {
 		while (true) {
 			try {
@@ -154,6 +151,10 @@ public class AgentInspector extends JInternalFrame implements Runnable {
 			}
 			update();
 		}
+	}
+
+	public void setFramesPerSecond(float fps) {
+		framesPerSecond = fps;
 	}
 
 	public void update() {

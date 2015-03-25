@@ -40,6 +40,45 @@ public class ResourceProcessor implements HTTPProcessor {
 		scan();
 	}
 
+	public byte[] filter(String filter, Map<String, String> header) {
+		String inHost = header.get("host");
+		String hostIP;
+		int pos0 = inHost.lastIndexOf(":");
+		if (pos0 > 0) {
+			hostIP = inHost.substring(0, pos0);
+		} else {
+			hostIP = inHost;
+		}
+		log.info("preforming the following substitutions for myrobotlab.html");
+		// log.info("from client @ {}", socket.getRemoteSocketAddress());
+		log.info("<%=getHostAddress%> --> {}", hostIP);
+		filter = filter.replace("<%=getHostAddress%>", hostIP);
+		log.info("<%=wsPort%> --> {}", webgui.port);
+		filter = filter.replace("<%=wsPort%>", webgui.port.toString());
+		log.info("<%=runtimeName%> --> {}", Runtime.getInstance().getName());
+		filter = filter.replace("<%=runtimeName%>", Runtime.getInstance().getName());
+		log.info("<%=webguiName%> --> {}", webgui.getName());
+		filter = filter.replace("<%=webguiName%>", webgui.getName());
+		log.info("<%=httpPort%> --> {}", webgui.port.toString());
+		filter = filter.replace("<%=httpPort%>", webgui.port.toString());
+		// filter.replace(, newChar);
+
+		if (webgui.useLocalResources()) {
+			filter = filter.replace("<%=mrl.script.location%>", "");
+		} else {
+			filter = filter.replace("<%=mrl.script.location%>", "http://github.com/MyRobotLab/myrobotlab/tree/master/src/resource/WebGUI/");
+		}
+		return filter.getBytes();
+
+	}
+
+	// FIXME - deprecate
+	@Override
+	public HashSet<String> getURIs() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public void scan() {
 		try {
 			List<File> files = FindFile.find(webgui.root, null);
@@ -60,19 +99,12 @@ public class ResourceProcessor implements HTTPProcessor {
 		return serveFile(uri, header, new File(webgui.root), true, scannedDirectories.contains(uri));
 	}
 
-	// FIXME - deprecate
-	@Override
-	public HashSet<String> getURIs() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	/**
 	 * Serves file from homeDir and its' subdirectories (only). Uses only URI,
 	 * ignores all headers and HTTP parameters.
 	 */
 	// FIXME - normalize further
-	public Response serveFile(String uri, Map<String,String> header, File homeDir, boolean allowDirectoryListing, boolean isCustomFile) {
+	public Response serveFile(String uri, Map<String, String> header, File homeDir, boolean allowDirectoryListing, boolean isCustomFile) {
 
 		String username;
 		String password;
@@ -99,7 +131,7 @@ public class ResourceProcessor implements HTTPProcessor {
 					String token = BasicSecurity.authenticate(username, password);
 
 					if (token != null) {
-						//authorized = true;
+						// authorized = true;
 					} else {
 						throw new Exception(String.format("no token for user %s", username));
 					}
@@ -109,7 +141,7 @@ public class ResourceProcessor implements HTTPProcessor {
 				}
 
 			} catch (Exception e) {
-				Logging.logException(e);
+				Logging.logError(e);
 				Response r = new Response(e.getMessage());
 				r.setStatus(Response.Status.FORBIDDEN);
 				r.addHeader("WWW-Authenticate", "Basic realm=\"MyRobotLab\"");
@@ -146,12 +178,13 @@ public class ResourceProcessor implements HTTPProcessor {
 					uri = documentIndex;
 				}
 			} else {
-				// FileIO.getResource(resoucePath); FIXME - got tired of trying to refactor
+				// FileIO.getResource(resoucePath); FIXME - got tired of trying
+				// to refactor
 				// FileIO.getSource();
 				fis = FileIO.class.getResourceAsStream(resoucePath);
 			}
 
-			if (fis == null){
+			if (fis == null) {
 				return new Response(Response.Status.NOT_FOUND, WSServer.MIME_PLAINTEXT, "Error 404, file not found.");
 			}
 
@@ -193,7 +226,7 @@ public class ResourceProcessor implements HTTPProcessor {
 
 				r.addHeader("Content-length", "" + content.length);
 				return r;
-			} catch (IOException ioe) { 
+			} catch (IOException ioe) {
 				return new Response(Response.Status.FORBIDDEN, WSServer.MIME_PLAINTEXT, "FORBIDDEN: Reading file failed.");
 			}
 			// ---- end resource -------------------
@@ -368,38 +401,6 @@ public class ResourceProcessor implements HTTPProcessor {
 		} catch (IOException ioe) {
 			return new Response(Response.Status.FORBIDDEN, WSServer.MIME_PLAINTEXT, "FORBIDDEN: Reading file failed.");
 		}
-	}
-
-	public byte[] filter(String filter, Map<String,String> header) {
-		String inHost = header.get("host");
-		String hostIP;
-		int pos0 = inHost.lastIndexOf(":");
-		if (pos0 > 0) {
-			hostIP = inHost.substring(0, pos0);
-		} else {
-			hostIP = inHost;
-		}
-		log.info("preforming the following substitutions for myrobotlab.html");
-		// log.info("from client @ {}", socket.getRemoteSocketAddress());
-		log.info("<%=getHostAddress%> --> {}", hostIP);
-		filter = filter.replace("<%=getHostAddress%>", hostIP);
-		log.info("<%=wsPort%> --> {}", webgui.port);
-		filter = filter.replace("<%=wsPort%>", webgui.port.toString());
-		log.info("<%=runtimeName%> --> {}", Runtime.getInstance().getName());
-		filter = filter.replace("<%=runtimeName%>", Runtime.getInstance().getName());
-		log.info("<%=webguiName%> --> {}", webgui.getName());
-		filter = filter.replace("<%=webguiName%>", webgui.getName());
-		log.info("<%=httpPort%> --> {}", webgui.port.toString());
-		filter = filter.replace("<%=httpPort%>", webgui.port.toString());
-		// filter.replace(, newChar);
-
-		if (webgui.useLocalResources()) {
-			filter = filter.replace("<%=mrl.script.location%>", "");
-		} else {
-			filter = filter.replace("<%=mrl.script.location%>", "http://github.com/MyRobotLab/myrobotlab/tree/master/src/resource/WebGUI/");
-		}
-		return filter.getBytes();
-
 	}
 
 }

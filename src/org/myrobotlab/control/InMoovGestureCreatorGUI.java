@@ -41,12 +41,10 @@ import org.slf4j.Logger;
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
-public class InMoovGestureCreatorGUI extends ServiceGUI implements
-		ActionListener, ItemListener {
+public class InMoovGestureCreatorGUI extends ServiceGUI implements ActionListener, ItemListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory
-			.getLogger(InMoovGestureCreatorGUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(InMoovGestureCreatorGUI.class.getCanonicalName());
 
 	boolean[] tabs_main_checkbox_states;
 
@@ -84,11 +82,122 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 	JList framelist;
 
-	public InMoovGestureCreatorGUI(final String boundServiceName,
-			final GUIService myService, final JTabbedPane tabs) {
+	public InMoovGestureCreatorGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent ae) {
+		Object o = ae.getSource();
+
+		// Button - Events
+		if (o == control_connect) {
+			myService.send(boundServiceName, "control_connect", control_connect);
+		} else if (o == control_loadscri) {
+			myService.send(boundServiceName, "control_loadscri", control_list);
+		} else if (o == control_savescri) {
+			myService.send(boundServiceName, "control_savescri");
+		} else if (o == control_loadgest) {
+			myService.send(boundServiceName, "control_loadgest", control_list, framelist, control_gestname, control_funcname);
+		} else if (o == control_addgest) {
+			myService.send(boundServiceName, "control_addgest", control_list, control_gestname, control_funcname);
+		} else if (o == control_updategest) {
+			myService.send(boundServiceName, "control_updategest", control_list, control_gestname, control_funcname);
+		} else if (o == control_removegest) {
+			myService.send(boundServiceName, "control_removegest", control_list);
+		} else if (o == control_testgest) {
+			myService.send(boundServiceName, "control_testgest");
+		} else if (o == frame_add) {
+			myService.send(boundServiceName, "frame_add", framelist, frame_add_textfield);
+		} else if (o == frame_addspeed) {
+			myService.send(boundServiceName, "frame_addspeed", framelist);
+		} else if (o == frame_addsleep) {
+			myService.send(boundServiceName, "frame_addsleep", framelist, frame_addsleep_textfield);
+		} else if (o == frame_addspeech) {
+			myService.send(boundServiceName, "frame_addspeech", framelist, frame_addspeech_textfield);
+		} else if (o == frame_importminresmax) {
+			myService.send(boundServiceName, "frame_importminresmax");
+		} else if (o == frame_remove) {
+			myService.send(boundServiceName, "frame_remove", framelist);
+		} else if (o == frame_load) {
+			myService.send(boundServiceName, "frame_load", framelist, frame_add_textfield, frame_addsleep_textfield, frame_addspeech_textfield);
+		} else if (o == frame_update) {
+			myService.send(boundServiceName, "frame_update", framelist, frame_add_textfield, frame_addsleep_textfield, frame_addspeech_textfield);
+		} else if (o == frame_copy) {
+			myService.send(boundServiceName, "frame_copy", framelist);
+		} else if (o == frame_up) {
+			myService.send(boundServiceName, "frame_up", framelist);
+		} else if (o == frame_down) {
+			myService.send(boundServiceName, "frame_down", framelist);
+		} else if (o == frame_test) {
+			myService.send(boundServiceName, "frame_test", framelist);
+		}
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void attachGUI() {
+		// commented out subscription due to this class being used for
+		// un-defined gui's
+
+		// subscribe("publishState", "getState", _TemplateService.class);
+		// send("publishState");
+	}
+
+	public void customizeslider(JSlider slider, final int t1, final int t2, int[] minresmaxpos11) {
+		// preset the slider
+		slider.setOrientation(SwingConstants.VERTICAL);
+		slider.setMinimum(minresmaxpos11[0]);
+		slider.setMaximum(minresmaxpos11[2]);
+		slider.setMajorTickSpacing(20);
+		slider.setMinorTickSpacing(1);
+		slider.createStandardLabels(1);
+		slider.setPaintTicks(true);
+		slider.setPaintLabels(true);
+		slider.setValue((minresmaxpos11[0] + minresmaxpos11[2]) / 2);
+
+		slider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent ce) {
+				myService.send(boundServiceName, "servoitemholder_slider_changed", t1, t2);
+			}
+		});
+	}
+
+	@Override
+	public void detachGUI() {
+		// commented out subscription due to this class being used for
+		// un-defined gui's
+
+		// unsubscribe("publishState", "getState", _TemplateService.class);
+	}
+
+	public void getState(_TemplateService template) {
+		// I think I should do something with this ...
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		});
+	}
+
+	public void gridbaglayout_addComponent(Container cont, GridBagLayout gbl, Component c, int x, int y, int width, int height, double weightx, double weighty) {
+		// function for easier gridbaglayout's
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.gridx = x;
+		gbc.gridy = y;
+		gbc.gridwidth = width;
+		gbc.gridheight = height;
+		gbc.weightx = weightx;
+		gbc.weighty = weighty;
+		gbl.setConstraints(c, gbc);
+		cont.add(c);
+	}
+
+	@Override
 	public void init() {
 
 		// display:
@@ -131,23 +240,15 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		// |----------|
 
 		// predefined min- / res- / max- positions
-		int[][][] minresmaxpos = {
-				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
-						{ 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } },
-				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
-						{ 0, 90, 180 } },
-				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
-						{ 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } },
-				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
-						{ 0, 90, 180 } },
-				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 },
-						{ 0, 90, 180 }, { 0, 90, 180 } },
+		int[][][] minresmaxpos = { { { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } },
+				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } },
+				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } },
+				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } }, { { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } },
 				{ { 0, 90, 180 }, { 0, 90, 180 }, { 0, 90, 180 } } };
 
 		JPanel top = new JPanel();
 
-		JTabbedPane top_tabs = new JTabbedPane(JTabbedPane.TOP,
-				JTabbedPane.WRAP_TAB_LAYOUT);
+		JTabbedPane top_tabs = new JTabbedPane(SwingConstants.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
 
 		// JPanels for the JTabbedPane
 		final JPanel mainpanel = new JPanel();
@@ -181,9 +282,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 				@Override
 				public void itemStateChanged(ItemEvent arg0) {
 					tabs_main_checkbox_states[fi] = checkbox.isSelected();
-					myService.send(boundServiceName,
-							"tabs_main_checkbox_states_changed",
-							tabs_main_checkbox_states);
+					myService.send(boundServiceName, "tabs_main_checkbox_states_changed", tabs_main_checkbox_states);
 				}
 
 			});
@@ -301,25 +400,17 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 				sih11.spe = new JTextField("1.00");
 
 				// x y w h wx wy
-				gridbaglayout_addComponent(con, gbl, sih11.fin, offset + i2, 0,
-						1, 1, 1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.min, offset + i2, 1,
-						1, 1, 1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.res, offset + i2, 2,
-						1, 1, 1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.max, offset + i2, 3,
-						1, 1, 1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.sli, offset + i2, 4,
-						1, 1, 1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.akt, offset + i2, 5,
-						1, 1, 1.0, 1.0);
-				gridbaglayout_addComponent(con, gbl, sih11.spe, offset + i2, 6,
-						1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.fin, offset + i2, 0, 1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.min, offset + i2, 1, 1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.res, offset + i2, 2, 1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.max, offset + i2, 3, 1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.sli, offset + i2, 4, 1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.akt, offset + i2, 5, 1, 1, 1.0, 1.0);
+				gridbaglayout_addComponent(con, gbl, sih11.spe, offset + i2, 6, 1, 1, 1.0, 1.0);
 
 				sih1[i2] = sih11;
 			}
-			myService.send(boundServiceName, "servoitemholder_set_sih1", i1,
-					sih1);
+			myService.send(boundServiceName, "servoitemholder_set_sih1", i1, sih1);
 		}
 
 		top_tabs.addTab("Main", mainpanel);
@@ -382,17 +473,14 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		bottom1.add(BorderLayout.EAST, bottom1right);
 
-		String[] te1 = { "                                                  ",
-				"T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10" };
+		String[] te1 = { "                                                  ", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10" };
 
 		control_list = new JList(te1);
 		control_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JScrollPane control_listscroller = new JScrollPane(control_list);
-		control_listscroller
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		control_listscroller
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		control_listscroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		control_listscroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		bottom1.add(BorderLayout.CENTER, control_listscroller);
 
@@ -484,113 +572,22 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 		framelist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JScrollPane framelistscroller = new JScrollPane(framelist);
-		framelistscroller
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		framelistscroller
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		framelistscroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		framelistscroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		bottom2.add(BorderLayout.CENTER, framelistscroller);
 
-		JSplitPane splitpanebottom1bottom2 = new JSplitPane(
-				JSplitPane.HORIZONTAL_SPLIT, bottom1, bottom2);
+		JSplitPane splitpanebottom1bottom2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bottom1, bottom2);
 		splitpanebottom1bottom2.setOneTouchExpandable(true);
 		// splitpanebottom1bottom2.setDividerLocation(200);
 
 		bottom.add(splitpanebottom1bottom2);
 
-		JSplitPane splitpanetopbottom = new JSplitPane(
-				JSplitPane.VERTICAL_SPLIT, top, bottom);
+		JSplitPane splitpanetopbottom = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
 		splitpanetopbottom.setOneTouchExpandable(true);
 		// splitpanetopbottom.setDividerLocation(300);
 
 		display.add(splitpanetopbottom);
-	}
-
-	public void getState(_TemplateService template) {
-		// I think I should do something with this ...
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
-	}
-
-	@Override
-	public void attachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
-
-		// subscribe("publishState", "getState", _TemplateService.class);
-		// send("publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
-
-		// unsubscribe("publishState", "getState", _TemplateService.class);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent ae) {
-		Object o = ae.getSource();
-
-		// Button - Events
-		if (o == control_connect) {
-			myService
-					.send(boundServiceName, "control_connect", control_connect);
-		} else if (o == control_loadscri) {
-			myService.send(boundServiceName, "control_loadscri", control_list);
-		} else if (o == control_savescri) {
-			myService.send(boundServiceName, "control_savescri");
-		} else if (o == control_loadgest) {
-			myService.send(boundServiceName, "control_loadgest", control_list,
-					framelist, control_gestname, control_funcname);
-		} else if (o == control_addgest) {
-			myService.send(boundServiceName, "control_addgest", control_list,
-					control_gestname, control_funcname);
-		} else if (o == control_updategest) {
-			myService.send(boundServiceName, "control_updategest",
-					control_list, control_gestname, control_funcname);
-		} else if (o == control_removegest) {
-			myService
-					.send(boundServiceName, "control_removegest", control_list);
-		} else if (o == control_testgest) {
-			myService.send(boundServiceName, "control_testgest");
-		} else if (o == frame_add) {
-			myService.send(boundServiceName, "frame_add", framelist,
-					frame_add_textfield);
-		} else if (o == frame_addspeed) {
-			myService.send(boundServiceName, "frame_addspeed", framelist);
-		} else if (o == frame_addsleep) {
-			myService.send(boundServiceName, "frame_addsleep", framelist,
-					frame_addsleep_textfield);
-		} else if (o == frame_addspeech) {
-			myService.send(boundServiceName, "frame_addspeech", framelist,
-					frame_addspeech_textfield);
-		} else if (o == frame_importminresmax) {
-			myService.send(boundServiceName, "frame_importminresmax");
-		} else if (o == frame_remove) {
-			myService.send(boundServiceName, "frame_remove", framelist);
-		} else if (o == frame_load) {
-			myService.send(boundServiceName, "frame_load", framelist,
-					frame_add_textfield, frame_addsleep_textfield,
-					frame_addspeech_textfield);
-		} else if (o == frame_update) {
-			myService.send(boundServiceName, "frame_update", framelist,
-					frame_add_textfield, frame_addsleep_textfield,
-					frame_addspeech_textfield);
-		} else if (o == frame_copy) {
-			myService.send(boundServiceName, "frame_copy", framelist);
-		} else if (o == frame_up) {
-			myService.send(boundServiceName, "frame_up", framelist);
-		} else if (o == frame_down) {
-			myService.send(boundServiceName, "frame_down", framelist);
-		} else if (o == frame_test) {
-			myService.send(boundServiceName, "frame_test", framelist);
-		}
-		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
@@ -599,47 +596,7 @@ public class InMoovGestureCreatorGUI extends ServiceGUI implements
 
 		// CheckBox - Events
 		if (o == frame_moverealtime) {
-			myService.send(boundServiceName, "frame_moverealtime",
-					frame_moverealtime);
+			myService.send(boundServiceName, "frame_moverealtime", frame_moverealtime);
 		}
-	}
-
-	public void gridbaglayout_addComponent(Container cont, GridBagLayout gbl,
-			Component c, int x, int y, int width, int height, double weightx,
-			double weighty) {
-		// function for easier gridbaglayout's
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.gridx = x;
-		gbc.gridy = y;
-		gbc.gridwidth = width;
-		gbc.gridheight = height;
-		gbc.weightx = weightx;
-		gbc.weighty = weighty;
-		gbl.setConstraints(c, gbc);
-		cont.add(c);
-	}
-
-	public void customizeslider(JSlider slider, final int t1, final int t2,
-			int[] minresmaxpos11) {
-		// preset the slider
-		slider.setOrientation(SwingConstants.VERTICAL);
-		slider.setMinimum(minresmaxpos11[0]);
-		slider.setMaximum(minresmaxpos11[2]);
-		slider.setMajorTickSpacing(20);
-		slider.setMinorTickSpacing(1);
-		slider.createStandardLabels(1);
-		slider.setPaintTicks(true);
-		slider.setPaintLabels(true);
-		slider.setValue((minresmaxpos11[0] + minresmaxpos11[2]) / 2);
-
-		slider.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent ce) {
-				myService.send(boundServiceName,
-						"servoitemholder_slider_changed", t1, t2);
-			}
-		});
 	}
 }

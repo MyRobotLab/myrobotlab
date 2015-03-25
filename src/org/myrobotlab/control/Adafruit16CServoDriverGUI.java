@@ -46,15 +46,10 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-	}
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
 
-	public void getState(final Adafruit16CServoDriver driver) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
 	}
 
 	@Override
@@ -68,11 +63,17 @@ public class Adafruit16CServoDriverGUI extends ServiceGUI implements ActionListe
 		unsubscribe("publishState", "getState", _TemplateService.class);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+	public void getState(final Adafruit16CServoDriver driver) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
+			}
+		});
 	}
-	
+
+	@Override
+	public void init() {
+	}
 
 }

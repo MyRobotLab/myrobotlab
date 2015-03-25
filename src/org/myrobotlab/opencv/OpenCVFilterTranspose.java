@@ -37,18 +37,24 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 public class OpenCVFilterTranspose extends OpenCVFilter {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	transient IplImage dst;
 	public int flipCode = 1;
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class.getCanonicalName());
 
-	public OpenCVFilterTranspose()  {
+	public OpenCVFilterTranspose() {
 		super();
 	}
-	
-	public OpenCVFilterTranspose(String name)  {
+
+	public OpenCVFilterTranspose(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		dst = IplImage.create(image.height(), image.width(), image.depth(), image.nChannels());
+		// dst = IplImage.createCompatible(image);
 	}
 
 	// http://stackoverflow.com/questions/7813376/rotate-cvmat-using-cvwarpaffine-offsets-destination-image
@@ -57,14 +63,8 @@ public class OpenCVFilterTranspose extends OpenCVFilter {
 
 		cvTranspose(image, dst);
 		cvFlip(dst, dst, flipCode);
-		
-		return dst;
-	}
 
-	@Override
-	public void imageChanged(IplImage image) {
-		dst =  IplImage.create(image.height(), image.width(), image.depth(), image.nChannels());
-		//dst =  IplImage.createCompatible(image);
+		return dst;
 	}
 
 }

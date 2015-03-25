@@ -51,6 +51,11 @@ public class StaticObject extends BaseObject {
 		localToVworld = new Transform3D();
 	}
 
+	/** Create the definitive local to global transform . */
+	protected void createLocalToVworld() {
+		group.getLocalToVworld(localToVworld);
+	}
+
 	/**
 	 * Create and pre Compute the transformed bound of the objects. Needs
 	 * localtoVWorld.
@@ -65,11 +70,6 @@ public class StaticObject extends BaseObject {
 	/** Gets the bound of the object taking account of its current position. */
 	protected Bounds getTransformedBounds() {
 		return transformedBounds;
-	}
-
-	/** Create the definitive local to global transform . */
-	protected void createLocalToVworld() {
-		group.getLocalToVworld(localToVworld);
 	}
 
 	/**

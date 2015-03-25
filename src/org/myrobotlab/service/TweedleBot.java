@@ -78,53 +78,89 @@ import org.slf4j.Logger;
 
 public class TweedleBot extends Service {
 
+	/**
+	 * a timed event task - used to block in dead reckoning
+	 * 
+	 */
+	class TimedTask extends TimerTask {
+		@Override
+		public void run() {
+			stop();
+			synchronized (event) {
+				event.notifyAll();
+			}
+		}
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	transient public Timer timer = new Timer();
-	transient private Object event = new Object();
 
+	transient private Object event = new Object();
 	// cartesian
 	public float positionX = 0;
-	public float positionY = 0;
 
+	public float positionY = 0;
 	// polar
 	public float theta = 0;
-	public float distance = 0;
 
+	public float distance = 0;
 	public int targetX = 0;
+
 	public int targetY = 0;
 
 	public int headingCurrent = 0;
-
 	int leftPin = 4;
 	int rightPin = 3;
+
 	int neckPin = 9;
-
 	int rightStopPos = 90;
-	int leftStopPos = 90;
 
+	int leftStopPos = 90;
 	transient public Servo left;
 	transient public Servo right;
 	transient public Servo neck;
-	transient public SensorMonitor sensors;
 
+	transient public SensorMonitor sensors;
 	/**
 	 * servos do not go both directions at the same speed - this will be a
 	 * constant to attempt to adjust for the mechanical/electrical differences
 	 */
 	int leftError;
-	int rightError;
 
+	int rightError;
 	/**
 	 * start & stops are not instantaneous - this adjustment is included as a
 	 * constant in maneuvers which include stops & starts
 	 */
 	int startError;
+
 	int stopError;
 
 	transient public Arduino arduino;
 
 	public final static Logger log = LoggerFactory.getLogger(TweedleBot.class.getCanonicalName());
+
+	// behavior - TODO - pre-pend
+	public final static String BEHAVIOR_IDLE = "i am idle";
+
+	public final static String BEHAVIOR_EXPLORE = "i am exploring";
+
+	// control functions begin -------------------
+
+	// sensor (in) states
+	public final static String ALERT_WALL = "ALERT_WALL";
+
+	String state = BEHAVIOR_IDLE;
+
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		TweedleBot dee = new TweedleBot("dee");
+		dee.start();
+	}
 
 	public TweedleBot(String n) {
 		this(n, null);
@@ -139,82 +175,38 @@ public class TweedleBot extends Service {
 		arduino = new Arduino(getName() + "BBB");
 		sensors = new SensorMonitor(getName() + "Sensors");
 
-		this.startService();
-		sensors.startService();
-		neck.startService();
-		right.startService();
-		left.startService();
-		arduino.startService();
-
 		neck.attach(arduino.getName(), neckPin);
 		right.attach(arduino.getName(), rightPin);
 		left.attach(arduino.getName(), leftPin);
 	}
 
+	public void explore() {
+		try {
 
-
-	public TweedleBot publishState(TweedleBot t) {
-		return t;
-	}
-
-	// control functions begin -------------------
-
-	// TODO spinLeft(int power, int time)
-	// TODO - possibly have uC be the timer
-	// TODO - bury any move or stop with attach & detach in the uC
-	// TODO - make continuous rotational Servo handle all this
-	public void moveUntil(int power, int time) {
-		// start timer;
-		timer.schedule(new TimedTask(), time);
-		// right.attach(); // FIXME - attach right & left in single uC call -
-		// Arduino platform API
-		// left.attach();
-		right.moveTo(power);
-		left.moveTo(-power);
-		waitForEvent(); // blocks
-	}
-
-	public void waitForEvent() {
-		synchronized (event) {
-			try {
-				event.wait();
-			} catch (InterruptedException e) {
+			for (int i = 0; i < 100; ++i) {
+				move(15);
+				Thread.sleep(2000);
+				stop();
 			}
+
+			log.info("here");
+
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			logException(e);
 		}
 
 	}
 
-	/**
-	 * a timed event task - used to block in dead reckoning
-	 * 
-	 */
-	class TimedTask extends TimerTask {
-		public void run() {
-			stop();
-			synchronized (event) {
-				event.notifyAll();
-			}
-		}
+	@Override
+	public String[] getCategories() {
+		return new String[] { "robot" };
 	}
 
-	// FIXME - is absolute - but needs to be incremental
-	public void stop() {
-		right.moveTo(rightStopPos);
-		left.moveTo(leftStopPos);
-		arduino.servoDetach("right");
-		arduino.servoDetach("left");
-		// right.detach();
-		// left.detach();
-	}
-
-	public void spinLeft(int power) {
-		right.moveTo(-power);
-		left.moveTo(power);
-	}
-
-	public void spinRight(int power) {
-		right.moveTo(power);
-		left.moveTo(-power);
+	@Override
+	public String getDescription() {
+		return "<html>used to encapsulate many of the functions and formulas regarding 2 motor platforms.<br>"
+				+ "encoders and other feedback mechanisms can be added to provide heading, location and other information</html>";
 	}
 
 	// TODO - is relative and incremental - change to absolute
@@ -242,6 +234,34 @@ public class TweedleBot extends Service {
 
 	}
 
+	// TODO spinLeft(int power, int time)
+	// TODO - possibly have uC be the timer
+	// TODO - bury any move or stop with attach & detach in the uC
+	// TODO - make continuous rotational Servo handle all this
+	public void moveUntil(int power, int time) {
+		// start timer;
+		timer.schedule(new TimedTask(), time);
+		// right.attach(); // FIXME - attach right & left in single uC call -
+		// Arduino platform API
+		// left.attach();
+		right.moveTo(power);
+		left.moveTo(-power);
+		waitForEvent(); // blocks
+	}
+
+	// turning related end --------------------------
+
+	public TweedleBot publishState(TweedleBot t) {
+		return t;
+	}
+
+	public void sensorAlert(Trigger alert) {
+		stop();
+		state = BEHAVIOR_IDLE;
+	}
+
+	// command (out) states
+
 	// command to change heading and/or position
 	public void setHeading(int value) // maintainHeading ?? if PID is operating
 	{
@@ -255,24 +275,15 @@ public class TweedleBot extends Service {
 		targetY = y;
 	}
 
-	@Override
-	public String getDescription() {
-		return "<html>used to encapsulate many of the functions and formulas regarding 2 motor platforms.<br>"
-				+ "encoders and other feedback mechanisms can be added to provide heading, location and other information</html>";
+	public void spinLeft(int power) {
+		right.moveTo(-power);
+		left.moveTo(power);
 	}
 
-	// turning related end --------------------------
-
-	// behavior - TODO - pre-pend
-	public final static String BEHAVIOR_IDLE = "i am idle";
-	public final static String BEHAVIOR_EXPLORE = "i am exploring";
-
-	// command (out) states
-
-	// sensor (in) states
-	public final static String ALERT_WALL = "ALERT_WALL";
-
-	String state = BEHAVIOR_IDLE;
+	public void spinRight(int power) {
+		right.moveTo(power);
+		left.moveTo(-power);
+	}
 
 	// fsm ------------------------------------
 	public void start() {
@@ -284,7 +295,6 @@ public class TweedleBot extends Service {
 
 		/*
 		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
 		 */
 
 		explore();
@@ -301,11 +311,6 @@ public class TweedleBot extends Service {
 
 	}
 
-	public void sensorAlert(Trigger alert) {
-		stop();
-		state = BEHAVIOR_IDLE;
-	}
-
 	// left > 101 backwards 101
 	// left < 83 forwards
 	// stop mid 92
@@ -314,35 +319,33 @@ public class TweedleBot extends Service {
 	// right > 99 forwards
 	// stop mid 91
 
-	public void explore() {
-		try {
+	@Override
+	public void startService() {
+		super.startService();
+		sensors.startService();
+		neck.startService();
+		right.startService();
+		left.startService();
+		arduino.startService();
+	}
 
-			for (int i = 0; i < 100; ++i) {
-				move(15);
-				Thread.sleep(2000);
-				stop();
+	// FIXME - is absolute - but needs to be incremental
+	public void stop() {
+		right.moveTo(rightStopPos);
+		left.moveTo(leftStopPos);
+		arduino.servoDetach("right");
+		arduino.servoDetach("left");
+		// right.detach();
+		// left.detach();
+	}
+
+	public void waitForEvent() {
+		synchronized (event) {
+			try {
+				event.wait();
+			} catch (InterruptedException e) {
 			}
-
-			log.info("here");
-
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			logException(e);
 		}
 
-	}
-
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		TweedleBot dee = new TweedleBot("dee");
-		dee.start();
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] {"robot"};
 	}
 }

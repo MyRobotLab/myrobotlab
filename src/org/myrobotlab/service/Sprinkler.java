@@ -35,6 +35,13 @@ public class Sprinkler extends Service {
 		return peers;
 	}
 
+	public static void main(String args[]) throws InterruptedException, IOException {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		Sprinkler sprinkler = (Sprinkler) Runtime.start("sprinkler", "Sprinkler");
+		sprinkler.test();
+	}
+
 	public Sprinkler(String n) {
 		super(n);
 	}
@@ -43,49 +50,27 @@ public class Sprinkler extends Service {
 		return arduino.connect(defaultPort);
 	}
 
-	public boolean connect(String port) {
+	public boolean connect(String port) throws IOException {
 		defaultPort = port;
 		return arduino.connect(defaultPort);
 	}
 
-	public void startService() {		
-		if (!isRunning()) {
-			arduino = (Arduino) startPeer("arduino");
-			if (!connect()) {
-				// FIXME !!!
-				// send mail error !!!
-				// send xmpp error !!
-			}
-			stop();
-			// FIXME - custom MRLComm.ino build to start with all digital pins =
-			// 1
-			// HIGH
-			// for the funky stinky nature of the relay board
-			cron = (Cron) startPeer("cron");
-			// FIXME - start schedule
-			cron.addTask("0 7 * * *", this.getName(), "onTimeToWater");
-			cron.addTask("30 7 * * *", this.getName(), "stop");
-
-			//cron.addTask("* * * * *", this.getName(), "onTimeToWater");
-			//cron.addTask("*/2 * * * *", this.getName(), "stop");
-
-			webgui = (WebGUI) startPeer("webgui");
-		}
-		super.startService();
-
+	@Override
+	public String[] getCategories() {
+		return new String[] { "control", "home automation" };
 	}
 
-	public void stop() {
-		log.info("stop");
-		history.add(String.format("stop %s", new Date().toString()));
-		arduino.digitalWrite(5, 1);
-		arduino.digitalWrite(6, 1);
-		arduino.digitalWrite(7, 1);
-		arduino.digitalWrite(8, 1);
-		arduino.digitalWrite(9, 1);
-		arduino.digitalWrite(10, 1);
-		arduino.digitalWrite(11, 1);
-		arduino.digitalWrite(12, 1);
+	@Override
+	public String getDescription() {
+		return "uber sprinkler system";
+	}
+
+	public ArrayList<String> getHistory() {
+		return history;
+	}
+
+	public ArrayList<org.myrobotlab.service.Cron.Task> getTasks() {
+		return cron.getTasks();
 	}
 
 	// TODO - fix add length of watering
@@ -102,14 +87,42 @@ public class Sprinkler extends Service {
 		arduino.digitalWrite(12, 1);
 	}
 
-	public ArrayList<String> getHistory() {
-		return history;
+	@Override
+	public void startService() {
+		super.startService();
+		arduino = (Arduino) startPeer("arduino");
+		connect();
+		stop();
+		// FIXME - custom MRLComm.ino build to start with all digital pins =
+		// 1
+		// HIGH
+		// for the funky stinky nature of the relay board
+		cron = (Cron) startPeer("cron");
+		// FIXME - start schedule
+		cron.addTask("0 7 * * *", this.getName(), "onTimeToWater");
+		cron.addTask("30 7 * * *", this.getName(), "stop");
+
+		// cron.addTask("* * * * *", this.getName(), "onTimeToWater");
+		// cron.addTask("*/2 * * * *", this.getName(), "stop");
+
+		webgui = (WebGUI) startPeer("webgui");
+
 	}
 
-	public ArrayList<org.myrobotlab.service.Cron.Task> getTasks() {
-		return cron.getTasks();
+	public void stop() {
+		log.info("stop");
+		history.add(String.format("stop %s", new Date().toString()));
+		arduino.digitalWrite(5, 1);
+		arduino.digitalWrite(6, 1);
+		arduino.digitalWrite(7, 1);
+		arduino.digitalWrite(8, 1);
+		arduino.digitalWrite(9, 1);
+		arduino.digitalWrite(10, 1);
+		arduino.digitalWrite(11, 1);
+		arduino.digitalWrite(12, 1);
 	}
 
+	@Override
 	public void stopService() {
 		if (arduino != null) {
 			arduino.disconnect();
@@ -118,10 +131,6 @@ public class Sprinkler extends Service {
 	}
 
 	@Override
-	public String getDescription() {
-		return "uber sprinkler system";
-	}
-
 	public Status test() {
 		Status status = null;
 		try {
@@ -134,18 +143,6 @@ public class Sprinkler extends Service {
 		}
 
 		return status;
-	}
-
-	public static void main(String args[]) throws InterruptedException, IOException {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		Sprinkler sprinkler = (Sprinkler) Runtime.start("sprinkler", "Sprinkler");
-		sprinkler.test();
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"control", "home automation"};
 	}
 
 }

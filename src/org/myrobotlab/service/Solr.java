@@ -18,14 +18,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * SolrService - MyRobotLab 
- * This is an integration of Solr into MyRobotLab. 
- * Solr is the popular, blazing-fast, 
- * open source enterprise search platform 
- * built on Apache Lucene.
+ * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr
+ * is the popular, blazing-fast, open source enterprise search platform built on
+ * Apache Lucene.
  * 
- * This service exposes a the solrj client to be able to 
- * add documents and query a solr server that is running.
+ * This service exposes a the solrj client to be able to add documents and query
+ * a solr server that is running.
  * 
  * For More info about Solr see http://lucene.apache.org/solr/
  * 
@@ -39,23 +37,8 @@ public class Solr extends Service {
 	public final static Logger log = LoggerFactory.getLogger(Solr.class);
 
 	public String solrUrl = "http://localhost:8983/solr";
-	
-	transient private HttpSolrServer solrServer;
-	
-	public Solr(String n) {
-		super(n);
-	}
 
-	@Override
-	public String getDescription() {
-		return "Solr Service - Open source search engine.";
-	}
-	
-	public Status test() {
-		// TODO: ?
-		return super.test();
-	}
-	
+	transient private HttpSolrServer solrServer;
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -63,26 +46,24 @@ public class Solr extends Service {
 
 		try {
 
-			Solr solr = (Solr)Runtime.start("solr", "Solr");
+			Solr solr = (Solr) Runtime.start("solr", "Solr");
 			Runtime.start("gui", "GUIService");
-			
-			// Create a test document 
+
+			// Create a test document
 			SolrInputDocument doc = new SolrInputDocument();
 			doc.setField("id", "Doc1");
 			doc.setField("title", "My title");
 			doc.setField("content", "This is the text field, for a sample document in myrobotlab.  ");
-			 
+
 			// add the document to the index
 			solr.addDocument(doc);
 			// commit the index
 			solr.commit();
-			
+
 			// search for the word myrobotlab
 			String queryString = "myrobotlab";
 			QueryResponse resp = solr.search(queryString);
 
-			
-			
 			for (int i = 0; i < resp.getResults().size(); i++) {
 				System.out.println("---------------------------------");
 				System.out.println("-- Printing Result number :" + i);
@@ -90,7 +71,7 @@ public class Solr extends Service {
 				SolrDocument d = resp.getResults().get(i);
 				// iterate over the fields on the returned document
 				for (String fieldName : d.getFieldNames()) {
-					
+
 					System.out.print(fieldName + "\t");
 					// fields can be multi-valued
 					for (Object value : d.getFieldValues(fieldName)) {
@@ -99,47 +80,35 @@ public class Solr extends Service {
 					}
 					System.out.println("");
 				}
-			}			
+			}
 			System.out.println("---------------------------------");
 			System.out.println("Done.");
-			
-			
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
 
-	@Override
-	public void startService() {
-		solrServer = new HttpSolrServer(solrUrl);
-		super.startService();
+	public Solr(String n) {
+		super(n);
 	}
-	
-	public void deleteDocument(String docId) {
-		try {
-			solrServer.deleteById(docId);
-		} catch (Exception e) {
-			// TODO better error handling/reporting?
-			log.warn("An exception occurred when deleting doc", e);
-		}
-	}
-	
+
 	public void addDocument(SolrInputDocument doc) {
 		try {
-			
+
 			solrServer.add(doc);
 		} catch (SolrServerException e) {
 			// TODO : retry?
 			log.warn("An exception occurred when trying to add document to the index.", e);
 		} catch (IOException e) {
 			// TODO : maybe retry?
-			log.warn("A network exception occurred when trying to add document to the index.", e);			
+			log.warn("A network exception occurred when trying to add document to the index.", e);
 		}
 	}
 
 	/**
 	 * Add a solr document to the index
+	 * 
 	 * @param docs
 	 */
 	public void addDocuments(Collection<SolrInputDocument> docs) {
@@ -148,12 +117,13 @@ public class Solr extends Service {
 		} catch (SolrServerException e) {
 			log.warn("An exception occurred when trying to add documents to the index.", e);
 		} catch (IOException e) {
-			log.warn("A network exception occurred when trying to add documents to the index.", e);			
+			log.warn("A network exception occurred when trying to add documents to the index.", e);
 		}
 	}
-	
-	/** 
-	 * Commit the solr index and make documents that have been submitted become searchable.
+
+	/**
+	 * Commit the solr index and make documents that have been submitted become
+	 * searchable.
 	 */
 	public void commit() {
 		try {
@@ -165,13 +135,43 @@ public class Solr extends Service {
 		}
 	}
 
+	public void deleteDocument(String docId) {
+		try {
+			solrServer.deleteById(docId);
+		} catch (Exception e) {
+			// TODO better error handling/reporting?
+			log.warn("An exception occurred when deleting doc", e);
+		}
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "data", "search" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "Solr Service - Open source search engine.";
+	}
+
 	/**
-	 * Optimize the index, if the index gets very fragmented, this helps optimize performance
-	 * and helps reclaim some disk space.
+	 * The url for the solr instance you wish to query. Defaults to
+	 * http://localhost:8983/solr
+	 * 
+	 * @return
+	 */
+
+	public String getSolrUrl() {
+		return solrUrl;
+	}
+
+	/**
+	 * Optimize the index, if the index gets very fragmented, this helps
+	 * optimize performance and helps reclaim some disk space.
 	 */
 	public void optimize() {
 		try {
-			// TODO: expose the num segements and stuff?  
+			// TODO: expose the num segements and stuff?
 			solrServer.optimize();
 		} catch (SolrServerException e) {
 			// TODO Auto-generated catch block
@@ -183,10 +183,27 @@ public class Solr extends Service {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
+	/**
+	 * Pass in custom solr query parameters and execute that query.
+	 * 
+	 * @param query
+	 * @return
+	 */
+	public QueryResponse search(SolrQuery query) {
+		QueryResponse resp = null;
+		try {
+			resp = solrServer.query(query);
+		} catch (SolrServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return resp;
+	}
+
 	/**
 	 * Default query to fetch the top 10 documents that match the query request.
+	 * 
 	 * @param queryString
 	 * @return
 	 */
@@ -194,9 +211,10 @@ public class Solr extends Service {
 		// default to 10 hits returned.
 		return search(queryString, 10, 0);
 	}
-	
+
 	/**
 	 * Default query to fetch the top 10 documents that match the query request.
+	 * 
 	 * @param queryString
 	 * @return
 	 */
@@ -213,53 +231,32 @@ public class Solr extends Service {
 		}
 		return resp;
 	}
-	
-	
-	/**
-	 * Pass in custom solr query parameters and execute that query.
-	 * @param query
-	 * @return
-	 */
-	public QueryResponse search(SolrQuery query) {
-		QueryResponse resp =null;
-		try {
-			resp = solrServer.query(query);
-		} catch (SolrServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return resp;
-	}
-
-	/**
-	 * The url for the solr instance you wish to query.
-	 * Defaults to http://localhost:8983/solr
-	 * @return
-	 */
-	
-	public String getSolrUrl() {
-		return solrUrl;
-	}
 
 	/**
 	 * Set the url for the solr instance to communicate with.
+	 * 
 	 * @param solrUrl
 	 */
 	public void setSolrUrl(String solrUrl) {
 		this.solrUrl = solrUrl;
-		// TODO: this isn't good to include behavior here but 
+		// TODO: this isn't good to include behavior here but
 		// if someone switches the url, we want to re-create the solr server.
 		// this breaks the bean pattern a bit..
 		if (solrServer != null) {
 			solrServer = new HttpSolrServer(solrUrl);
 		}
 	}
-	
+
 	@Override
-	public String[] getCategories() {
-		return new String[] {"data", "search"};
+	public void startService() {
+		super.startService();
+		solrServer = new HttpSolrServer(solrUrl);
+	}
+
+	@Override
+	public Status test() {
+		// TODO: ?
+		return super.test();
 	}
 
 }
-
-

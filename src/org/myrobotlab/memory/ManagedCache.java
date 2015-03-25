@@ -17,15 +17,16 @@ public interface ManagedCache extends Cache {
 	void clear();
 
 	/**
-	 * Clear out any values that should be timed out.
-	 */
-	void timeout();
-
-	/**
 	 * Update the timeout for name so that it is cleaned up the next time
 	 * timeout() is called.
 	 * 
 	 * @param name
 	 */
+	@Override
 	void expire(String name);
+
+	/**
+	 * Clear out any values that should be timed out.
+	 */
+	void timeout();
 }

@@ -62,6 +62,7 @@ public class RoutingEntry implements Serializable {
 	/*
 	 * Default format was xml is now JSON TODO - make toStringStyler like spring
 	 */
+	@Override
 	public String toString() {
 		StringBuffer ret = new StringBuffer();
 		// ret.append("{<RoutingEntry");

@@ -38,16 +38,27 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterDilateGUI extends OpenCVFilterGUI implements ActionListener {
 
-	
-	JComboBox iterations = new JComboBox(new Integer[]{1,2,3,4,5,6,7,8,9});
-	
+	JComboBox iterations = new JComboBox(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+
 	public OpenCVFilterDilateGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
-		
+
 		iterations.addActionListener(this);
 		display.add(new JLabel("iterations  "));
 		display.add(iterations);
 
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		OpenCVFilterDilate bf = (OpenCVFilterDilate) boundFilter.filter;
+
+		if (o == iterations) {
+			bf.numberOfIterations = (Integer) iterations.getSelectedItem();
+		}
+
+		setFilterState(bf);
 	}
 
 	// @Override
@@ -65,24 +76,12 @@ public class OpenCVFilterDilateGUI extends OpenCVFilterGUI implements ActionList
 	@Override
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				OpenCVFilterDilate bf = (OpenCVFilterDilate)filterWrapper.filter;
+				OpenCVFilterDilate bf = (OpenCVFilterDilate) filterWrapper.filter;
 				iterations.setSelectedItem(bf.numberOfIterations);
 			}
 		});
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		OpenCVFilterDilate bf = (OpenCVFilterDilate) boundFilter.filter;
-		
-		if (o == iterations)
-		{
-			bf.numberOfIterations = (Integer)iterations.getSelectedItem();
-		}
-		
-		setFilterState(bf);
 	}
 
 }

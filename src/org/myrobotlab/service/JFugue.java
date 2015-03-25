@@ -37,26 +37,43 @@ import org.slf4j.Logger;
 public class JFugue extends Service {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(JFugue.class.getCanonicalName());
 	transient public Player player = new Player();
 
 	// TODO - look at JavaSoundDemo - they have a synth & mixer there
 
-	public JFugue(String n) {		
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+	}
+
+	public JFugue(String n) {
 		super(n);
 	}
 
-	public void play(String s) {
-		player.play(s);
+	@Override
+	public String[] getCategories() {
+		return new String[] { "sound" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "service wrapping Jfugue - http://www.jfugue.org/ used for music and sound generation";
+	}
+
+	public void play(Integer i) { // play tone
+		// player.play("[A" + i + "]w");
+		player.play("[" + i + "]");
 	}
 
 	public void play(Rhythm rythm) {
 		player.play(rythm);
 	}
 
-	public void play(Integer i) { // play tone
-		// player.play("[A" + i + "]w");
-		player.play("[" + i + "]");
+	public void play(String s) {
+		player.play(s);
 	}
 
 	public void playRythm() {
@@ -69,18 +86,20 @@ public class JFugue extends Service {
 		rhythm.addSubstitution('.', "Ri");
 		play(rhythm);
 	}
-	
-	public void stopService(){
-		if (player.isPlaying()){
+
+	@Override
+	public void stopService() {
+		if (player.isPlaying()) {
 			player.stop();
 		}
 		player.close();
 	}
 
+	@Override
 	public Status test() {
 		Status status = super.test();
 
-		JFugue jfugue = (JFugue)Runtime.start(getName(), getSimpleName());
+		JFugue jfugue = (JFugue) Runtime.start(getName(), getSimpleName());
 		jfugue.play("C");
 		jfugue.play("C7h");
 		jfugue.play("C5maj7w");
@@ -114,22 +133,6 @@ public class JFugue extends Service {
 		jfugue.play(55);
 
 		return status;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-	}
-
-	@Override
-	public String getDescription() {
-		return "service wrapping Jfugue - http://www.jfugue.org/ used for music and sound generation";
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"sound"};
 	}
 
 }

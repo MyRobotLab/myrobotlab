@@ -42,12 +42,18 @@ public class OpenCVFilterRepetitiveAnd extends OpenCVFilter {
 	// IplImage out = null;
 	IplImage[] memory = new IplImage[5];
 
-	public OpenCVFilterRepetitiveAnd()  {
+	public OpenCVFilterRepetitiveAnd() {
 		super();
 	}
-	
-	public OpenCVFilterRepetitiveAnd(String name)  {
+
+	public OpenCVFilterRepetitiveAnd(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -60,12 +66,6 @@ public class OpenCVFilterRepetitiveAnd extends OpenCVFilter {
 		cvAnd(image, buffer, buffer, null);
 
 		return buffer;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

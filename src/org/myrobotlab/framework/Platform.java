@@ -36,9 +36,6 @@ public class Platform implements Serializable {
 
 	static Platform localInstance = getLocalInstance();
 
-	public Platform() {
-	}
-
 	// -------------pass through begin -------------------
 	public static Platform getLocalInstance() {
 		if (localInstance == null) {
@@ -72,11 +69,11 @@ public class Platform implements Serializable {
 
 			if ("arm".equals(arch)) {
 				// FIXME - procparser is unsafe and borked !!
-				//Integer armv = ProcParser.getArmInstructionVersion();
+				// Integer armv = ProcParser.getArmInstructionVersion();
 				Integer armv = 6;
 				if (armv != null) {
 					// FIXME - hacked for raspi = armv6.hfp
-					//platform.arch = String.format("armv%d", armv);
+					// platform.arch = String.format("armv%d", armv);
 				}
 				// arch = "armv6"; // assume its version 6 instruction set
 				// FIXME FIXME FIXME - hacked for raspi
@@ -96,21 +93,21 @@ public class Platform implements Serializable {
 
 			try {
 				BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/version.txt"), "UTF-8"));
-				for (int c = br.read(); c != -1; c = br.read()){
+				for (int c = br.read(); c != -1; c = br.read()) {
 					sb.append((char) c);
-					}
-				if (sb.length() > 0){
+				}
+				if (sb.length() > 0) {
 					platform.mrlVersion = sb.toString();
 				}
 			} catch (Exception e) {
 				// no logging silently die
 			}
-			
-			if (platform.mrlVersion == null){
+
+			if (platform.mrlVersion == null) {
 				SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
-				platform.mrlVersion = format.format(new Date()); 
+				platform.mrlVersion = format.format(new Date());
 			}
-			
+
 			// TODO - ProcParser
 
 			System.out.println(sb.toString());
@@ -121,24 +118,7 @@ public class Platform implements Serializable {
 		return localInstance;
 	}
 
-	public String getVersion() {
-		return mrlVersion;
-	}
-
-	public String getOS() {
-		return os;
-	}
-
-	public String getVMName() {
-		return vmName;
-	}
-
-	public boolean isDalvik() {
-		return VM_DALVIK.equals(vmName);
-	}
-
-	public int getBitness() {
-		return bitness;
+	public Platform() {
 	}
 
 	/**
@@ -152,16 +132,8 @@ public class Platform implements Serializable {
 		return arch;
 	}
 
-	public boolean isMac() {
-		return OS_MAC.equals(os);
-	}
-
-	public boolean isLinux() {
-		return OS_LINUX.equals(os);
-	}
-
-	public boolean isWindows() {
-		return OS_WINDOWS.equals(os);
+	public int getBitness() {
+		return bitness;
 	}
 
 	public String getClassPathSeperator() {
@@ -172,27 +144,57 @@ public class Platform implements Serializable {
 		}
 	}
 
-	public boolean isArm() {
-		return getArch().startsWith(ARCH_ARM);
+	public String getInstanceId() {
+		return instanceId;
 	}
 
-	public boolean isX86() {
-		return getArch().equals(ARCH_X86);
+	public void getInstanceId(String isntanceId) {
+		this.instanceId = isntanceId;
 	}
 
-	public String toString() {
-		return String.format("%s.%d.%s", arch, bitness, os);
+	public String getOS() {
+		return os;
 	}
 
 	public String getPlatformId() {
 		return String.format("%s.%s.%s", getArch(), getBitness(), getOS());
 	}
 
-	public void getInstanceId(String isntanceId){
-		this.instanceId = isntanceId;
+	public String getVersion() {
+		return mrlVersion;
 	}
-	public String getInstanceId(){
-		return instanceId;
+
+	public String getVMName() {
+		return vmName;
+	}
+
+	public boolean isArm() {
+		return getArch().startsWith(ARCH_ARM);
+	}
+
+	public boolean isDalvik() {
+		return VM_DALVIK.equals(vmName);
+	}
+
+	public boolean isLinux() {
+		return OS_LINUX.equals(os);
+	}
+
+	public boolean isMac() {
+		return OS_MAC.equals(os);
+	}
+
+	public boolean isWindows() {
+		return OS_WINDOWS.equals(os);
+	}
+
+	public boolean isX86() {
+		return getArch().equals(ARCH_X86);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s.%d.%s", arch, bitness, os);
 	}
 
 }

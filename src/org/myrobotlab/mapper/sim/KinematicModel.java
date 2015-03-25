@@ -38,6 +38,12 @@ import javax.vecmath.Vector3d;
  */
 public abstract class KinematicModel {
 
+	/** Resets all control parameters to their initial values. */
+	protected abstract void reset();
+
+	/** Returns string representation of the kinematicModel */
+	protected abstract String toString(DecimalFormat format);
+
 	/**
 	 * Compute instant translation and rotation vectors .
 	 * 
@@ -51,10 +57,4 @@ public abstract class KinematicModel {
 	 *            to store rotation
 	 */
 	protected abstract void update(double elapsedSecond, Transform3D rotation, Vector3d instantTranslation, Vector3d instantRotation);
-
-	/** Resets all control parameters to their initial values. */
-	protected abstract void reset();
-
-	/** Returns string representation of the kinematicModel */
-	protected abstract String toString(DecimalFormat format);
 }

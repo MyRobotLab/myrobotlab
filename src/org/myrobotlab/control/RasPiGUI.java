@@ -44,20 +44,14 @@ public class RasPiGUI extends ServiceGUI implements ActionListener, MemoryDispla
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(RasPiGUI.class.getCanonicalName());
 
-
 	public RasPiGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-	}
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
 
-	public void getState(RasPi raspi) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
 	}
 
 	@Override
@@ -69,34 +63,39 @@ public class RasPiGUI extends ServiceGUI implements ActionListener, MemoryDispla
 	}
 
 	@Override
+	public void clear() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", RasPi.class);
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
+	public void display(Node node) {
 		// TODO Auto-generated method stub
 
 	}
-	
 
 	@Override
 	public void displayStatus(Status status) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	public void getState(RasPi raspi) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		});
 	}
 
 	@Override
-	public void clear() {
-		// TODO Auto-generated method stub
-		
+	public void init() {
 	}
-
-	@Override
-	public void display(Node node) {
-		// TODO Auto-generated method stub
-		
-	}
-
 
 }

@@ -16,17 +16,20 @@ import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.slf4j.Logger;
 
 public class OpenCVListAdapter extends MouseAdapter implements ActionListener {
-	
-	public final static Logger log = LoggerFactory.getLogger(OpenCVListAdapter.class.getCanonicalName());
-	
-	JPopupMenu popup = new JPopupMenu();
-	JMenuItem infoMenuItem  = new JMenuItem("info");
-	JMenuItem addMenuItem  = new JMenuItem("add");
-	OpenCVGUI opencvgui;
-	//JList myList;
 
-	public OpenCVListAdapter(OpenCVGUI opencvgui)
-	{
+	public final static Logger log = LoggerFactory.getLogger(OpenCVListAdapter.class.getCanonicalName());
+
+	JPopupMenu popup = new JPopupMenu();
+	JMenuItem infoMenuItem = new JMenuItem("info");
+	JMenuItem addMenuItem = new JMenuItem("add");
+	OpenCVGUI opencvgui;
+	// JList myList;
+
+	JList mylist;
+
+	String mySelectedItem;
+
+	public OpenCVListAdapter(OpenCVGUI opencvgui) {
 		super();
 		this.opencvgui = opencvgui;
 		infoMenuItem.addActionListener(this);
@@ -36,8 +39,23 @@ public class OpenCVListAdapter extends MouseAdapter implements ActionListener {
 		popup.add(infoMenuItem);
 		popup.add(addMenuItem);
 	}
-	
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		// ServiceEntry c = (ServiceEntry)
+		// possibleServicesModel.getValueAt(popupRow, 0);
+		if (o == infoMenuItem) {
+			// String filterType = (String)mylist.getSelectedValue();
+			BareBonesBrowserLaunch.openURL(String.format("http://myrobotlab.org/service/OpenCV#%s", mySelectedItem));
+		} else if (o == addMenuItem) {
+			opencvgui.addFilter();
+		}
+
+	}
+
 	// isPopupTrigger over OSs - use masks
+	@Override
 	public void mouseReleased(MouseEvent e) {
 		log.debug("mouseReleased");
 
@@ -47,37 +65,22 @@ public class OpenCVListAdapter extends MouseAdapter implements ActionListener {
 		}
 	}
 
-	JList mylist;
-	String mySelectedItem;
 	public void popUpTrigger(MouseEvent e) {
 		log.info("******************popUpTrigger*********************");
 		JList list = (JList) e.getSource();
 		mylist = list;
-		mySelectedItem = (String)list.getSelectedValue();
+		mySelectedItem = (String) list.getSelectedValue();
 		infoMenuItem.setText(String.format("%s info", mySelectedItem));
 		int index = list.locationToIndex(e.getPoint());
 		if (index >= 0) {
-			//releasedTarget = (ServiceEntry) source.getModel().getElementAt(index);
-			//log.info(String.format("right click on running service %s", releasedTarget.name));
+			// releasedTarget = (ServiceEntry)
+			// source.getModel().getElementAt(index);
+			// log.info(String.format("right click on running service %s",
+			// releasedTarget.name));
 			infoMenuItem.setVisible(true);
 		}
 		popup.show(e.getComponent(), e.getX(), e.getY());
 
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		//ServiceEntry c = (ServiceEntry) possibleServicesModel.getValueAt(popupRow, 0);
-		if (o == infoMenuItem)
-		{
-			//String filterType = (String)mylist.getSelectedValue();
-			BareBonesBrowserLaunch.openURL(String.format("http://myrobotlab.org/service/OpenCV#%s",mySelectedItem));
-		} else if (o == addMenuItem) {
-			opencvgui.addFilter();
-		}
-		
-	}
-
 
 }

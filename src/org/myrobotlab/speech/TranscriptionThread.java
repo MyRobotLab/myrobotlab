@@ -49,17 +49,71 @@ public class TranscriptionThread extends Thread {
 	private String record;
 	private String lang;
 
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		TranscriptionThread t = new TranscriptionThread(null, "transcriber", "en-US");
+		t.transcribe("test2.flac");
+
+	}
+
 	public TranscriptionThread(SpeechRecognizer myService, String n, String lang) {
 		super(n);
 		this.lang = lang;
 		running = false;
 	}
 
-	public void startTranscription(String record) {
-		this.record = record;
-		running = true;
+	private String convertStreamToString(InputStream is) throws IOException {
+		if (is != null) {
+			Writer writer = new StringWriter();
+
+			char[] buffer = new char[1024];
+			try {
+				Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+				int n;
+				while ((n = reader.read(buffer)) != -1) {
+					writer.write(buffer, 0, n);
+				}
+			} finally {
+				is.close();
+			}
+			return writer.toString();
+		} else {
+			return "";
+		}
 	}
 
+	public float getConfidence() {
+		return this.confidence;
+	}
+
+	public int getStatus() {
+		return this.status;
+	}
+
+	private String getTime() {
+		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+		Date date = new Date();
+		return dateFormat.format(date);
+	}
+
+	public String getUtterance() {
+		return this.utterance;
+	}
+
+	/**
+	 * @return true if audio processing was successfull
+	 */
+	public boolean isAvailable() {
+		return this.available;
+	}
+
+	public boolean isRunning() {
+		return running;
+	}
+
+	@Override
 	public void run() {
 		// TODO - this thread will only transcribe one record
 		// if it is to do multiple records we need to do proper
@@ -73,8 +127,9 @@ public class TranscriptionThread extends Thread {
 		 */
 	}
 
-	public boolean isRunning() {
-		return running;
+	public void startTranscription(String record) {
+		this.record = record;
+		running = true;
 	}
 
 	/**
@@ -86,12 +141,11 @@ public class TranscriptionThread extends Thread {
 	public String transcribe(String path) {
 		this.available = false;
 
-		if (path == null)
-		{
+		if (path == null) {
 			log.error("null file path");
 			return null;
 		}
-		
+
 		File file = new File(path);
 
 		lang = "en-US";
@@ -171,60 +225,6 @@ public class TranscriptionThread extends Thread {
 			System.out.println(getTime() + " " + s);
 		}
 		return this.utterance;
-	}
-
-	private String convertStreamToString(InputStream is) throws IOException {
-		if (is != null) {
-			Writer writer = new StringWriter();
-
-			char[] buffer = new char[1024];
-			try {
-				Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-				int n;
-				while ((n = reader.read(buffer)) != -1) {
-					writer.write(buffer, 0, n);
-				}
-			} finally {
-				is.close();
-			}
-			return writer.toString();
-		} else {
-			return "";
-		}
-	}
-
-	public float getConfidence() {
-		return this.confidence;
-	}
-
-	public String getUtterance() {
-		return this.utterance;
-	}
-
-	public int getStatus() {
-		return this.status;
-	}
-
-	/**
-	 * @return true if audio processing was successfull
-	 */
-	public boolean isAvailable() {
-		return this.available;
-	}
-
-	private String getTime() {
-		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-		Date date = new Date();
-		return dateFormat.format(date);
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		TranscriptionThread t = new TranscriptionThread(null, "transcriber", "en-US");
-		t.transcribe("test2.flac");
-
 	}
 
 }

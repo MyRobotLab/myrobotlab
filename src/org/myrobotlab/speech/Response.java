@@ -6,12 +6,13 @@ package org.myrobotlab.speech;
  * @author Florian Schulz
  */
 public class Response {
-	int status;
-	String id;
-	Hypotheses[] hypotheses;
-
 	public class Hypotheses {
 		String utterance;
 		float confidence;
 	}
+
+	int status;
+	String id;
+
+	Hypotheses[] hypotheses;
 }

@@ -49,19 +49,19 @@ public abstract class OpenCVFilterGUI {
 	final String boundServiceName;
 	final GUIService myGUI;
 	final public GridBagConstraints gc = new GridBagConstraints();
-	
+
 	FilterWrapper boundFilter = null;
 
 	JComboBox sources = new JComboBox();
 	ComboBoxModel sourcesModel = new ComboBoxModel(this);
-	
+
 	public OpenCVFilterGUI(String boundFilterName, String boundServiceName, GUIService myGUI) {
 		name = boundFilterName;
 		this.boundServiceName = boundServiceName;
 		this.myGUI = myGUI;
 
 		sources.addActionListener(sourcesModel);
-		
+
 		// title
 		TitledBorder title;
 		title = BorderFactory.createTitledBorder(name);
@@ -76,30 +76,28 @@ public abstract class OpenCVFilterGUI {
 		main.add(display, BorderLayout.CENTER);
 
 	}
-	
-	public void initFilterState(OpenCVFilter filter)
-	{
-		boundFilter = new FilterWrapper(name, filter);
-		sources.setModel(sourcesModel);
-		sources.setSelectedItem(filter.sourceKey);
-	}
-	
-	public void setFilterState(OpenCVFilter filter)
-	{
-		myGUI.send(boundServiceName, "setFilterState", new FilterWrapper(name, filter));
-	}
-
-	/*
-	public abstract void attachGUI();
-	public abstract void detachGUI();
-	*/
-
-	public abstract void getFilterState(final FilterWrapper filterWrapper);
 
 	public JPanel getDisplay() {
 		return main;
 	}
 
+	public abstract void getFilterState(final FilterWrapper filterWrapper);
+
+	/*
+	 * public abstract void attachGUI(); public abstract void detachGUI();
+	 */
+
+	public void initFilterState(OpenCVFilter filter) {
+		boundFilter = new FilterWrapper(name, filter);
+		sources.setModel(sourcesModel);
+		sources.setSelectedItem(filter.sourceKey);
+	}
+
+	public void setFilterState(OpenCVFilter filter) {
+		myGUI.send(boundServiceName, "setFilterState", new FilterWrapper(name, filter));
+	}
+
+	@Override
 	public String toString() {
 		return name;
 	}

@@ -60,17 +60,6 @@ import com.sun.j3d.utils.geometry.Sphere;
  */
 public class Eye extends SensorDevice {
 
-	private ViewPlatform viewPlatform;
-	private View view;
-	private OffScreenCanvas3D offscreenCanvas3D;
-
-	protected int tempRGBABuffer[];
-	// the rendered offscreen image
-	BufferedImage visionImage;
-
-	protected int imageWidth;
-	protected int imageHeight;
-
 	/*
 	 * a JPanel for displaying the eye image in user interface windows.
 	 */
@@ -87,6 +76,7 @@ public class Eye extends SensorDevice {
 		}
 
 		/* should not be called too often */
+		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			copyVisionImage(bim);
@@ -107,10 +97,18 @@ public class Eye extends SensorDevice {
 		public OffScreenCanvas3D(GraphicsConfiguration gconfig) {
 			super(gconfig, true);
 			ImageComponent2D buffer = new ImageComponent2D(ImageComponent.FORMAT_RGB, visionImage);
-			buffer.setCapability(ImageComponent2D.ALLOW_IMAGE_READ);
+			buffer.setCapability(ImageComponent.ALLOW_IMAGE_READ);
 			setOffScreenBuffer(buffer);
 			rendering = false;
 
+		}
+
+		@Override
+		synchronized public void postSwap() {
+			// copy rendered image
+			BufferedImage bim = getOffScreenBuffer().getImage();
+			visionImage.setData(bim.getData());
+			rendering = false;
 		}
 
 		synchronized void render() {
@@ -124,14 +122,20 @@ public class Eye extends SensorDevice {
 			// }
 			// waitForOffScreenRendering();
 		}
-
-		synchronized public void postSwap() {
-			// copy rendered image
-			BufferedImage bim = getOffScreenBuffer().getImage();
-			visionImage.setData(bim.getData());
-			rendering = false;
-		}
 	}
+
+	private ViewPlatform viewPlatform;
+
+	private View view;
+	private OffScreenCanvas3D offscreenCanvas3D;
+
+	protected int tempRGBABuffer[];
+	// the rendered offscreen image
+	BufferedImage visionImage;
+
+	protected int imageWidth;
+
+	protected int imageHeight;
 
 	Eye(float radius, int imageWidth, int imageHeight) {
 		this.imageWidth = imageWidth;
@@ -142,6 +146,35 @@ public class Eye extends SensorDevice {
 		tempRGBABuffer = new int[imageWidth * imageHeight];
 		create3D(radius);
 		createViewPlatform();
+	}
+
+	/**
+	 * Request to fill a bufferedImage with last capture.
+	 * 
+	 * @param bim
+	 *            - buffered image to be filled.
+	 */
+	final public synchronized void copyVisionImage(BufferedImage bim) {
+		bim.setData(visionImage.getData());
+	}
+
+	/**
+	 * Request to fill a SensorMatrix with last capture.
+	 * 
+	 * @param matrix
+	 *            - to be filled
+	 */
+	final public synchronized void copyVisionImage(SensorMatrix matrix) {
+		visionImage.getRGB(0, 0, imageWidth, imageHeight, tempRGBABuffer, 0, imageWidth);
+		float array[] = matrix.getArray();
+		for (int i = 0; i < array.length; i++) {
+			int pix = tempRGBABuffer[i];
+			int r = (pix >> 16) & 0xff;
+			int g = (pix >> 8) & 0xff;
+			int b = (pix) & 0xff;
+			array[i] = (r + g + b) / (3.0f * 255.0f);
+		}
+
 	}
 
 	void create3D(float radius) {
@@ -156,6 +189,22 @@ public class Eye extends SensorDevice {
 			node.setPickable(false);
 			addChild(node);
 		}
+	}
+
+	/** for allocating a working copy of the vision image */
+	final public BufferedImage createCompatibleImage() {
+		return new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
+	}
+
+	/** for allocating a SensorMatrix compabtible with device dimensions */
+	final public SensorMatrix createCompatibleSensorMatrix() {
+		return new SensorMatrix(imageWidth, imageHeight);
+
+	}
+
+	@Override
+	public JPanel createInspectorPanel() {
+		return new EyeJPanel();
 	}
 
 	void createViewPlatform() {
@@ -196,53 +245,13 @@ public class Eye extends SensorDevice {
 		rotateY(-Math.PI / 2);
 	}
 
-	/** for allocating a working copy of the vision image */
-	final public BufferedImage createCompatibleImage() {
-		return new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
-	}
-
-	/** for allocating a SensorMatrix compabtible with device dimensions */
-	final public SensorMatrix createCompatibleSensorMatrix() {
-		return new SensorMatrix(imageWidth, imageHeight);
-
-	}
-
 	/**
-	 * Request to fill a bufferedImage with last capture.
+	 * Returns the height of captured image.
 	 * 
-	 * @param bim
-	 *            - buffered image to be filled.
+	 * @return height in pixels
 	 */
-	final public synchronized void copyVisionImage(BufferedImage bim) {
-		bim.setData(visionImage.getData());
-	}
-
-	/**
-	 * Request to fill a SensorMatrix with last capture.
-	 * 
-	 * @param matrix
-	 *            - to be filled
-	 */
-	final public synchronized void copyVisionImage(SensorMatrix matrix) {
-		visionImage.getRGB(0, 0, imageWidth, imageHeight, tempRGBABuffer, 0, imageWidth);
-		float array[] = matrix.getArray();
-		for (int i = 0; i < array.length; i++) {
-			int pix = tempRGBABuffer[i];
-			int r = (pix >> 16) & 0xff;
-			int g = (pix >> 8) & 0xff;
-			int b = (pix) & 0xff;
-			array[i] = (float) (r + g + b) / (3.0f * 255.0f);
-		}
-
-	}
-
-	/** Called by simulator to render a new vision image */
-	protected void update() {
-		this.offscreenCanvas3D.render();
-	}
-
-	public JPanel createInspectorPanel() {
-		return new EyeJPanel();
+	public int getImageHeight() {
+		return imageHeight;
 	}
 
 	/**
@@ -254,12 +263,9 @@ public class Eye extends SensorDevice {
 		return imageWidth;
 	}
 
-	/**
-	 * Returns the height of captured image.
-	 * 
-	 * @return height in pixels
-	 */
-	public int getImageHeight() {
-		return imageHeight;
+	/** Called by simulator to render a new vision image */
+	@Override
+	protected void update() {
+		this.offscreenCanvas3D.render();
 	}
 }

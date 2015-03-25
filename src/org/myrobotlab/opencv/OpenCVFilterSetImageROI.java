@@ -35,29 +35,29 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 public class OpenCVFilterSetImageROI extends OpenCVFilter {
 
 	private static final long serialVersionUID = 1L;
-	Rectangle r = new Rectangle(10,10, 100, 100);
+	Rectangle r = new Rectangle(10, 10, 100, 100);
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSetImageROI.class.getCanonicalName());
 
-	public OpenCVFilterSetImageROI()  {
+	public OpenCVFilterSetImageROI() {
 		super();
 	}
-	
-	public OpenCVFilterSetImageROI(String name)  {
+
+	public OpenCVFilterSetImageROI(String name) {
 		super(name);
-	}
-
-	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
-
-		//cvSetImageROI(image, cvRect(1.0,1.0,20));
-
-		return image; // TODO - src dst or image? consistency?
 	}
 
 	@Override
 	public void imageChanged(IplImage image) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public IplImage process(IplImage image, OpenCVData data) {
+
+		// cvSetImageROI(image, cvRect(1.0,1.0,20));
+
+		return image; // TODO - src dst or image? consistency?
 	}
 
 }

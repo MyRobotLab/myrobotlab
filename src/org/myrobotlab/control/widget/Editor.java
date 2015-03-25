@@ -133,7 +133,8 @@ public class Editor extends ServiceGUI implements ActionListener {
 		provider = createCompletionProvider();
 		ac = new AutoCompletion(provider);
 
-		// FYI - files are on the "Arduino" service not on the GUIService - these
+		// FYI - files are on the "Arduino" service not on the GUIService -
+		// these
 		// potentially are remote objects
 		currentFile = null;
 		currentFilename = null;
@@ -196,6 +197,12 @@ public class Editor extends ServiceGUI implements ActionListener {
 		 */
 	}
 
+	public ImageButton addImageButtonToButtonBar(String resourceDir, String name, ActionListener al) {
+		ImageButton ret = new ImageButton(resourceDir, name, al);
+		buttonBar.add(ret);
+		return ret;
+	}
+
 	@Override
 	public void attachGUI() {
 		subscribe("publishState", "getState", Python.class);
@@ -204,61 +211,30 @@ public class Editor extends ServiceGUI implements ActionListener {
 		// myService.send(boundServiceName, "broadcastState");
 	}
 
-	@Override
-	public void detachGUI() {
-		console.stopLogging();
-		unsubscribe("publishStdOut", "getStdOut", String.class);
-		unsubscribe("finishedExecutingScript");
-		unsubscribe("publishState", "getState", Python.class);
+	CompletionProvider createCompletionProvider() {
+		// TODO -> LanguageSupportFactory.get().register(editor);
+
+		// A DefaultCompletionProvider is the simplest concrete implementation
+		// of CompletionProvider. This provider has no understanding of
+		// language semantics. It simply checks the text entered up to the
+		// caret position for a match against known completions. This is all
+		// that is needed in the majority of cases.
+		return new JavaCompletionProvider();
 	}
 
-	public void finishedExecutingScript() {
-		executeButton.deactivate();
-	}
-
-	public void getState(Service j) {
-		// TODO set GUIService state debug from Service data
-
-	}
-
-	public void init() {
-		display.setLayout(new BorderLayout());
-		display.setPreferredSize(new Dimension(800, 600));
-
-		// default text based menu
-		display.add(menuPanel, BorderLayout.PAGE_START);
-
-		splitPane = createMainPane();
-
-		display.add(splitPane, BorderLayout.CENTER);
-
-		JPanel s = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		s.add(statusLabel);
-		s.add(status);
-		display.add(s, BorderLayout.PAGE_END);
-	}
-
-	/**
-	 * Build the main portion of the view.
-	 * 
-	 * @return
-	 */
-	JSplitPane createMainPane() {
-		JSplitPane pane = new JSplitPane();
-
-		JPanel lowerPanel = new JPanel();
-		lowerPanel.setLayout(new BorderLayout());
-
-		consoleTabs = createTabsPane();
-		lowerPanel.add(consoleTabs, BorderLayout.CENTER);
-		progress.setForeground(Color.green);
-		lowerPanel.add(progress, BorderLayout.SOUTH);
-		editorScrollPane = createEditorPane();
-
-		pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorScrollPane, lowerPanel);
-		pane.setDividerLocation(440);
-
-		return pane;
+	JMenu createEditMenu() {
+		editMenu = new JMenu("Edit");
+		editMenu.add(createMenuItem("Undo"));
+		editMenu.add(createMenuItem("Redo"));
+		editMenu.addSeparator();
+		editMenu.add(createMenuItem("Cut"));
+		editMenu.add(createMenuItem("Copy"));
+		// editMenu.add(createMenuItem("save", saveMenuMnemonic, "control S",
+		// null));
+		editMenu.addSeparator();
+		editMenu.add(createMenuItem("Find", openMenuMnemonic, "CTRL+F", "Find"));
+		// editMenu.add(createMenuItem("Format"));
+		return editMenu;
 	}
 
 	/**
@@ -289,40 +265,49 @@ public class Editor extends ServiceGUI implements ActionListener {
 		return menu;
 	}
 
-	JMenu createEditMenu() {
-		editMenu = new JMenu("Edit");
-		editMenu.add(createMenuItem("Undo"));
-		editMenu.add(createMenuItem("Redo"));
-		editMenu.addSeparator();
-		editMenu.add(createMenuItem("Cut"));
-		editMenu.add(createMenuItem("Copy"));
-		// editMenu.add(createMenuItem("save", saveMenuMnemonic, "control S",
-		// null));
-		editMenu.addSeparator();
-		editMenu.add(createMenuItem("Find", openMenuMnemonic, "CTRL+F", "Find"));
-		// editMenu.add(createMenuItem("Format"));
-		return editMenu;
-	}
-
-	JMenu createToolsMenu() {
-		toolsMenu = new JMenu("Tools");
-		return toolsMenu;
-	}
-
 	JMenu createHelpMenu() {
 		helpMenu = new JMenu("Help");
 		return helpMenu;
 	}
 
-	CompletionProvider createCompletionProvider() {
-		// TODO -> LanguageSupportFactory.get().register(editor);
+	/**
+	 * Build the main portion of the view.
+	 * 
+	 * @return
+	 */
+	JSplitPane createMainPane() {
+		JSplitPane pane = new JSplitPane();
 
-		// A DefaultCompletionProvider is the simplest concrete implementation
-		// of CompletionProvider. This provider has no understanding of
-		// language semantics. It simply checks the text entered up to the
-		// caret position for a match against known completions. This is all
-		// that is needed in the majority of cases.
-		return new JavaCompletionProvider();
+		JPanel lowerPanel = new JPanel();
+		lowerPanel.setLayout(new BorderLayout());
+
+		consoleTabs = createTabsPane();
+		lowerPanel.add(consoleTabs, BorderLayout.CENTER);
+		progress.setForeground(Color.green);
+		lowerPanel.add(progress, BorderLayout.SOUTH);
+		editorScrollPane = createEditorPane();
+
+		pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorScrollPane, lowerPanel);
+		pane.setDividerLocation(440);
+
+		return pane;
+	}
+
+	/**
+	 * Build up the top text menu bar.
+	 * 
+	 * @return the menu bar filled with the top-level options.
+	 */
+	JMenuBar createMenuBar() {
+		menuBar = new JMenuBar();
+
+		menuBar.add(fileMenu);
+		menuBar.add(editMenu);
+		menuBar.add(examplesMenu);
+		menuBar.add(toolsMenu);
+		menuBar.add(createHelpMenu());
+
+		return menuBar;
 	}
 
 	/**
@@ -333,17 +318,6 @@ public class Editor extends ServiceGUI implements ActionListener {
 	 */
 	JMenuItem createMenuItem(String label) {
 		return createMenuItem(label, -1, null, null);
-	}
-
-	/**
-	 * Helper function to create a menu item.
-	 * 
-	 * @param label
-	 * @param actionCommand
-	 * @return
-	 */
-	JMenuItem createMenuItem(String label, String actionCommand) {
-		return createMenuItem(label, -1, null, actionCommand);
 	}
 
 	/**
@@ -376,6 +350,17 @@ public class Editor extends ServiceGUI implements ActionListener {
 		return mi;
 	}
 
+	/**
+	 * Helper function to create a menu item.
+	 * 
+	 * @param label
+	 * @param actionCommand
+	 * @return
+	 */
+	JMenuItem createMenuItem(String label, String actionCommand) {
+		return createMenuItem(label, -1, null, actionCommand);
+	}
+
 	JPanel createMenuPanel() {
 
 		JPanel menuPanel = new JPanel(new BorderLayout());
@@ -393,21 +378,48 @@ public class Editor extends ServiceGUI implements ActionListener {
 		return pane;
 	}
 
-	/**
-	 * Build up the top text menu bar.
-	 * 
-	 * @return the menu bar filled with the top-level options.
-	 */
-	JMenuBar createMenuBar() {
-		menuBar = new JMenuBar();
+	JMenu createToolsMenu() {
+		toolsMenu = new JMenu("Tools");
+		return toolsMenu;
+	}
 
-		menuBar.add(fileMenu);
-		menuBar.add(editMenu);
-		menuBar.add(examplesMenu);
-		menuBar.add(toolsMenu);
-		menuBar.add(createHelpMenu());
+	@Override
+	public void detachGUI() {
+		console.stopLogging();
+		unsubscribe("publishStdOut", "getStdOut", String.class);
+		unsubscribe("finishedExecutingScript");
+		unsubscribe("publishState", "getState", Python.class);
+	}
 
-		return menuBar;
+	public void finishedExecutingScript() {
+		executeButton.deactivate();
+	}
+
+	public void getState(Service j) {
+		// TODO set GUIService state debug from Service data
+
+	}
+
+	public RSyntaxTextArea getTextArea() {
+		return textArea;
+	}
+
+	@Override
+	public void init() {
+		display.setLayout(new BorderLayout());
+		display.setPreferredSize(new Dimension(800, 600));
+
+		// default text based menu
+		display.add(menuPanel, BorderLayout.PAGE_START);
+
+		splitPane = createMainPane();
+
+		display.add(splitPane, BorderLayout.CENTER);
+
+		JPanel s = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		s.add(statusLabel);
+		s.add(status);
+		display.add(s, BorderLayout.PAGE_END);
 	}
 
 	/**
@@ -465,17 +477,7 @@ public class Editor extends ServiceGUI implements ActionListener {
 			currentFilename = FileUtil.getLastFileSaved();
 	}
 
-	public ImageButton addImageButtonToButtonBar(String resourceDir, String name, ActionListener al) {
-		ImageButton ret = new ImageButton(resourceDir, name, al);
-		buttonBar.add(ret);
-		return ret;
-	}
-
 	public void setStatus(String s) {
 		status.setText(s);
-	}
-
-	public RSyntaxTextArea getTextArea() {
-		return textArea;
 	}
 }

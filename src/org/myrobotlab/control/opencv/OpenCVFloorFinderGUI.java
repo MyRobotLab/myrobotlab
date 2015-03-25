@@ -41,21 +41,6 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFloorFinderGUI extends OpenCVFilterGUI {
 
-	JSlider2 lowThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 0);
-	JSlider2 highThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 256);
-	JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
-
-	public class JSlider2 extends JSlider {
-		private static final long serialVersionUID = 1L;
-		JLabel value = new JLabel();
-
-		public JSlider2(int vertical, int i, int j, int k) {
-			super(vertical, i, j, k);
-			value.setText("" + k);
-		}
-
-	}
-
 	public class AdjustSlider implements ChangeListener {
 
 		@Override
@@ -72,6 +57,23 @@ public class OpenCVFloorFinderGUI extends OpenCVFilterGUI {
 			slider.value.setText("" + slider.getValue());
 		}
 	}
+
+	public class JSlider2 extends JSlider {
+		private static final long serialVersionUID = 1L;
+		JLabel value = new JLabel();
+
+		public JSlider2(int vertical, int i, int j, int k) {
+			super(vertical, i, j, k);
+			value.setText("" + k);
+		}
+
+	}
+
+	JSlider2 lowThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 0);
+
+	JSlider2 highThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 256);
+
+	JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
 
 	AdjustSlider change = new AdjustSlider();
 
@@ -124,7 +126,7 @@ public class OpenCVFloorFinderGUI extends OpenCVFilterGUI {
 	@Override
 	public void getFilterState(FilterWrapper filterWrapper) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

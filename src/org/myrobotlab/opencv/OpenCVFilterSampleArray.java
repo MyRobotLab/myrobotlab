@@ -40,19 +40,24 @@ public class OpenCVFilterSampleArray extends OpenCVFilter {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSampleArray.class.getCanonicalName());
 
 	IplImage buffer = null;
-	
+
 	transient BufferedImage frameBuffer = null;
 
-	ColoredPoint points[] = new ColoredPoint[]{new ColoredPoint()};
+	ColoredPoint points[] = new ColoredPoint[] { new ColoredPoint() };
 
-	public OpenCVFilterSampleArray()  {
+	public OpenCVFilterSampleArray() {
 		super();
 	}
-	
-	public OpenCVFilterSampleArray(String name)  {
+
+	public OpenCVFilterSampleArray(String name) {
 		super(name);
 	}
 
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
@@ -71,12 +76,6 @@ public class OpenCVFilterSampleArray extends OpenCVFilter {
 
 		return image;
 
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

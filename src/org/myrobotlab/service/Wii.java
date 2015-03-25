@@ -33,8 +33,8 @@ import java.io.Serializable;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.serial.gnu.BinaryCommPort.LineDriver;
 import org.slf4j.Logger;
 
 import wiiusej.WiiUseApiManager;
@@ -57,15 +57,7 @@ import wiiusej.wiiusejevents.wiiuseapievents.StatusEvent;
 // http://procrastineering.blogspot.com/2008/09/working-with-pixart-camera-directly.html
 // http://www.bot-thoughts.com/2010/12/connecting-mbed-to-wiimote-ir-camera.html
 
-public class Wii extends Service implements WiimoteListener, SerialPortEventListener, LineDriver {
-
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(Wii.class);
-
-	transient Wiimote[] wiimotes = null;
-	transient Wiimote wiimote = null;
-	int cnt = 0;
-	boolean serialInitialized = false;
+public class Wii extends Service implements WiimoteListener, SerialPortEventListener {
 
 	public static class IRData implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -82,92 +74,84 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 		}
 	}
 
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(Wii.class);
+	transient Wiimote[] wiimotes = null;
+	transient Wiimote wiimote = null;
+	int cnt = 0;
+
+	boolean serialInitialized = false;
+
+	private long bitCount = 0;
+
+	private boolean strobeState = true;
+
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		try {
+
+			Wii wii = new Wii("wii");
+
+			// add the port as a possible option for the Arduino
+			/*
+			 * Arduino.addPortName("wiicom", CommPortIdentifier.PORT_SERIAL,
+			 * (CommDriver) new WiiDriver(wii));
+			 */
+			/*
+			 * try { portId = CommPortIdentifier.getPortIdentifier("wiicom"); }
+			 * catch (NoSuchPortException e1) { // TODO Auto-generated catch
+			 * block e1.printStackTrace(); }
+			 */
+			Arduino arduino = new Arduino("arduino");
+			arduino.startService();
+
+			Servo servo = new Servo("servo");
+			servo.startService();
+
+			// GUIService gui = new GUIService("gui");
+			// gui.startService();
+
+			wii.getWiimotes();
+			wii.initSerial();
+			wii.setSensorBarAboveScreen();
+			wii.activateIRTRacking();
+			wii.setIrSensitivity(5); // 1-5 (highest)
+			wii.activateListening();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 	public Wii(String n) {
 		super(n);
 	}
 
-
-
-	// TODO - support shutdown()
-	public void onButtonsEvent(WiimoteButtonsEvent arg0) {
-		log.debug("{}",arg0);
-		// if (arg0.isButtonAPressed()){
-		// WiiUseApiManager.shutdown();
-		// }
-
-		if (arg0.isButtonDownJustPressed()) {
-			invoke("onButtonDownJustPressed");
-		}
-
-		if (arg0.isButtonUpJustPressed()) {
-			invoke("onButtonUpJustPressed");
-		}
-
-		if (arg0.isButtonLeftJustPressed()) {
-			invoke("onButtonLeftJustPressed");
-		}
-
-		if (arg0.isButtonRightJustPressed()) {
-			invoke("onButtonRightJustPressed");
-		}
+	public void activateIRTRacking() {
+		wiimote.activateIRTRacking();
 	}
 
-	// button publishing/event hooks begin -------
-	public void onButtonDownJustPressed() {
-		log.info("buttonDownJustPressed");
-	}
-
-	public void onButtonUpJustPressed() {
-		log.info("onButtonUpJustPressed");
-	}
-
-	public void onButtonLeftJustPressed() {
-		log.info("onButtonLeftJustPressed");
-	}
-
-	public void onButtonRightJustPressed() {
-		log.info("onButtonRightJustPressed");
+	public void activateListening() {
+		wiimote.addWiiMoteEventListeners(this);
 	}
 
 	// button publishing/event hooks end -------
 
-	public void onIrEvent(IREvent arg0) {
-		// log.debug(arg0);
-		++cnt;
-		if (cnt % 100 == 0) {
-			log.error("cnt {}",cnt);
-		}
-		IRData ir = new IRData(System.currentTimeMillis(), arg0);
-		// t.add(ir);
-		invoke("publishIR", ir);
+	public void activateMotionSensing() {
+		wiimote.activateMotionSensing();
 	}
 
-	public IRData publishIR(IRData ir) {
-		return ir;
+	@Override
+	public String[] getCategories() {
+		return new String[] { "sensor" };
 	}
 
-	public void onMotionSensingEvent(MotionSensingEvent arg0) {
-		log.debug("motion sensing event {}",arg0);
-	}
-
-	public void onExpansionEvent(ExpansionEvent arg0) {
-		log.debug("expansion event {}",arg0);
-	}
-
-	public void onStatusEvent(StatusEvent arg0) {
-		log.debug("status event {}",arg0);
-	}
-
-	public void onDisconnectionEvent(DisconnectionEvent arg0) {
-		log.debug("disconnect event {}",arg0);
-	}
-
-	public void onNunchukInsertedEvent(NunchukInsertedEvent arg0) {
-		log.debug("NunchukInsertedEvent {}",arg0);
-	}
-
-	public void onNunchukRemovedEvent(NunchukRemovedEvent arg0) {
-		log.debug("NunchukRemovedEvent {}",arg0);
+	@Override
+	public String getDescription() {
+		return "<html>wrapper service for wiiusej</html>";
 	}
 
 	public Wiimote[] getWiimotes() {
@@ -179,62 +163,6 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 	public Wiimote[] getWiimotes(int n, boolean rumble) {
 		return WiiUseApiManager.getWiimotes(n, rumble);
 	}
-
-	public void activateListening() {
-		wiimote.addWiiMoteEventListeners(this);
-	}
-
-	public void activateIRTRacking() {
-		wiimote.activateIRTRacking();
-	}
-
-	public void activateMotionSensing() {
-		wiimote.activateMotionSensing();
-	}
-
-	public void setIrSensitivity(int level) {
-		wiimote.setIrSensitivity(level);
-	}
-
-	public void setSensorBarBelowScreen() {
-		wiimote.setSensorBarBelowScreen();
-	}
-
-	public void setSensorBarAboveScreen() {
-		wiimote.setSensorBarAboveScreen();
-	}
-
-	public void setLeds(boolean l1, boolean l2, boolean l3, boolean l4) {
-		wiimote.setLeds(l1, l2, l3, l4);
-	}
-
-
-	@Override
-	public void onClassicControllerInsertedEvent(ClassicControllerInsertedEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onClassicControllerRemovedEvent(ClassicControllerRemovedEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onGuitarHeroInsertedEvent(GuitarHeroInsertedEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onGuitarHeroRemovedEvent(GuitarHeroRemovedEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private long bitCount = 0;
-	private boolean strobeState = true;
 
 	public boolean initSerial() {
 
@@ -286,6 +214,118 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 		return true;
 	}
 
+	// button publishing/event hooks begin -------
+	public void onButtonDownJustPressed() {
+		log.info("buttonDownJustPressed");
+	}
+
+	public void onButtonLeftJustPressed() {
+		log.info("onButtonLeftJustPressed");
+	}
+
+	public void onButtonRightJustPressed() {
+		log.info("onButtonRightJustPressed");
+	}
+
+	// TODO - support shutdown()
+	@Override
+	public void onButtonsEvent(WiimoteButtonsEvent arg0) {
+		log.debug("{}", arg0);
+		// if (arg0.isButtonAPressed()){
+		// WiiUseApiManager.shutdown();
+		// }
+
+		if (arg0.isButtonDownJustPressed()) {
+			invoke("onButtonDownJustPressed");
+		}
+
+		if (arg0.isButtonUpJustPressed()) {
+			invoke("onButtonUpJustPressed");
+		}
+
+		if (arg0.isButtonLeftJustPressed()) {
+			invoke("onButtonLeftJustPressed");
+		}
+
+		if (arg0.isButtonRightJustPressed()) {
+			invoke("onButtonRightJustPressed");
+		}
+	}
+
+	public void onButtonUpJustPressed() {
+		log.info("onButtonUpJustPressed");
+	}
+
+	@Override
+	public void onClassicControllerInsertedEvent(ClassicControllerInsertedEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onClassicControllerRemovedEvent(ClassicControllerRemovedEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onDisconnectionEvent(DisconnectionEvent arg0) {
+		log.debug("disconnect event {}", arg0);
+	}
+
+	@Override
+	public void onExpansionEvent(ExpansionEvent arg0) {
+		log.debug("expansion event {}", arg0);
+	}
+
+	@Override
+	public void onGuitarHeroInsertedEvent(GuitarHeroInsertedEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onGuitarHeroRemovedEvent(GuitarHeroRemovedEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onIrEvent(IREvent arg0) {
+		// log.debug(arg0);
+		++cnt;
+		if (cnt % 100 == 0) {
+			log.error("cnt {}", cnt);
+		}
+		IRData ir = new IRData(System.currentTimeMillis(), arg0);
+		// t.add(ir);
+		invoke("publishIR", ir);
+	}
+
+	@Override
+	public void onMotionSensingEvent(MotionSensingEvent arg0) {
+		log.debug("motion sensing event {}", arg0);
+	}
+
+	@Override
+	public void onNunchukInsertedEvent(NunchukInsertedEvent arg0) {
+		log.debug("NunchukInsertedEvent {}", arg0);
+	}
+
+	@Override
+	public void onNunchukRemovedEvent(NunchukRemovedEvent arg0) {
+		log.debug("NunchukRemovedEvent {}", arg0);
+	}
+
+	@Override
+	public void onStatusEvent(StatusEvent arg0) {
+		log.debug("status event {}", arg0);
+	}
+
+	public IRData publishIR(IRData ir) {
+		return ir;
+	}
+
 	// NOT THREAD SAFE
 	// true = 0 | false = 1 - thats how the hardware works :P
 	public void sendSerial(int data) {
@@ -306,66 +346,26 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 
 	}
 
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		Wii wii = new Wii("wii");
-
-		// add the port as a possible option for the Arduino
-		/*
-		 * Arduino.addPortName("wiicom", CommPortIdentifier.PORT_SERIAL,
-		 * (CommDriver) new WiiDriver(wii));
-		 */
-		/*
-		 * try { portId = CommPortIdentifier.getPortIdentifier("wiicom"); }
-		 * catch (NoSuchPortException e1) { // TODO Auto-generated catch block
-		 * e1.printStackTrace(); }
-		 */
-		Arduino arduino = new Arduino("arduino");
-		arduino.startService();
-
-		Servo servo = new Servo("servo");
-		servo.startService();
-
-		//GUIService gui = new GUIService("gui");
-		//gui.startService();
-		
-
-		wii.getWiimotes();
-		wii.initSerial();
-		wii.setSensorBarAboveScreen();
-		wii.activateIRTRacking();
-		wii.setIrSensitivity(5); // 1-5 (highest)
-		wii.activateListening();
-
-	}
-
 	@Override
 	public void serialEvent(SerialPortEvent arg0) {
 		// TODO Auto-generated method stub
 		log.info("serialEvent - YAY!");
 	}
 
-	@Override
-	public void pulseDown() {
-		wiimote.setLeds(true, true, true, true);
+	public void setIrSensitivity(int level) {
+		wiimote.setIrSensitivity(level);
 	}
 
-	@Override
-	public void pulseUp() {
-		wiimote.setLeds(true, true, true, false);
+	public void setLeds(boolean l1, boolean l2, boolean l3, boolean l4) {
+		wiimote.setLeds(l1, l2, l3, l4);
 	}
 
-	@Override
-	public String getDescription() {
-		return "<html>wrapper service for wiiusej</html>";
+	public void setSensorBarAboveScreen() {
+		wiimote.setSensorBarAboveScreen();
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"sensor"};
+
+	public void setSensorBarBelowScreen() {
+		wiimote.setSensorBarBelowScreen();
 	}
 
 }

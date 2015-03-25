@@ -41,7 +41,7 @@ public class OpenCVFilterSmoothGUI extends OpenCVFilterGUI {
 		display.add(button);
 		display.add(kernel);
 	}
-	
+
 	@Override
 	public void getFilterState(FilterWrapper filter) {
 		// TODO Auto-generated method stub

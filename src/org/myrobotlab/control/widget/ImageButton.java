@@ -22,16 +22,6 @@ public class ImageButton extends JButton {
 	ImageIcon activatedIcon = null;
 	int type = -1;
 
-	public ImageButton(String serviceType, String name, ActionListener listener) {
-		this(name, Util.getImageIcon(serviceType + "/" + name + ".png"), Util.getImageIcon(serviceType + "/" + name + ".rollover.png"), Util.getImageIcon(serviceType + "/" + name
-				+ ".activated.png"), name, -1, listener);
-	}
-
-	public ImageButton(String serviceType, String name) {
-		this(name, Util.getImageIcon(serviceType + "/" + name + ".png"), Util.getImageIcon(serviceType + "/" + name + ".rollover.png"), Util.getImageIcon(serviceType + "/" + name
-				+ ".activated.png"), name, -1, null);
-	}
-
 	public ImageButton(Object parent, ImageIcon icon, ImageIcon rolloverIcon, ImageIcon activatedIcon, String tooltip, int type, ActionListener listener) {
 		super();
 
@@ -68,6 +58,16 @@ public class ImageButton extends JButton {
 		 */
 	}
 
+	public ImageButton(String serviceType, String name) {
+		this(name, Util.getImageIcon(serviceType + "/" + name + ".png"), Util.getImageIcon(serviceType + "/" + name + ".rollover.png"), Util.getImageIcon(serviceType + "/" + name
+				+ ".activated.png"), name, -1, null);
+	}
+
+	public ImageButton(String serviceType, String name, ActionListener listener) {
+		this(name, Util.getImageIcon(serviceType + "/" + name + ".png"), Util.getImageIcon(serviceType + "/" + name + ".rollover.png"), Util.getImageIcon(serviceType + "/" + name
+				+ ".activated.png"), name, -1, listener);
+	}
+
 	public void activate() {
 		setIcon(activatedIcon);
 	}
@@ -76,12 +76,12 @@ public class ImageButton extends JButton {
 		setIcon(icon);
 	}
 
-	public void press() {
-		// FIXME - implement SwingUtils.whatever
-	}
-
 	public boolean isActive() {
 		return getIcon() == activatedIcon;
+	}
+
+	public void press() {
+		// FIXME - implement SwingUtils.whatever
 	}
 
 }

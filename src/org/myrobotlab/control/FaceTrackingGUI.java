@@ -58,10 +58,6 @@ public class FaceTrackingGUI extends ServiceGUI implements ActionListener {
 	JTextField pulseDataString = new JTextField(10);
 	JIntegerField pulseDataInteger = new JIntegerField(10);
 
-	public FaceTrackingGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
-
 	ActionListener setType = new ActionListener() {
 
 		@Override
@@ -70,9 +66,100 @@ public class FaceTrackingGUI extends ServiceGUI implements ActionListener {
 		}
 	};
 
+	public FaceTrackingGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
+	}
+
 	// TODO - Object? can this be buried and managed reflectively?
 	// FaceTracking myBoundService = null;
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		myService.send(boundServiceName, "setType", e.getActionCommand());
+	}
+
+	@Override
+	public void attachGUI() {
+		subscribe("publishState", "getState", FaceTracking.class);
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishState", "getState", FaceTracking.class);
+	}
+
+	public JButton getstartFaceTrackingButton() {
+		if (startFaceTracking == null) {
+			startFaceTracking = new JButton("start FaceTracking");
+			startFaceTracking.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (startFaceTracking.getText().compareTo("start FaceTracking") == 0) {
+						startFaceTracking.setText("stop FaceTracking");
+
+						// TODO - design considerations
+						// myService.send(boundServiceName, "setState",
+						// myBoundService); // double set on local
+						// if (myBoundService != null)
+						{
+							// TODO - proxy data class like GWT?? - directly
+							// setting field wont work remotely
+							// myBoundService.pulseDataString =
+							// pulseDataString.getText();
+						}
+						// TODO - setting fields on a proxy class - vs accessors
+						// like these
+						// what about a helper funcion - hides boundServiceName
+						// - and the setting of fields on
+						// the Service side (buried in Service)
+						// setMethods can be bogus - and set removed then field
+						// actually set
+						// getMethods could block ?
+
+						// myService.send(boundServiceName, "setType", );
+
+						// myService.send(boundServiceName, "set",
+						// Integer.parseInt(interval.getText()));
+						myService.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
+						myService.send(boundServiceName, "startFaceTracking");
+						myService.send(boundServiceName, "setPulseDataString", pulseDataString.getText());
+						myService.send(boundServiceName, "setPulseDataInteger", Integer.parseInt(pulseDataInteger.getText()));
+
+					} else {
+						startFaceTracking.setText("start FaceTracking");
+						myService.send(boundServiceName, "stopFaceTracking");
+					}
+				}
+
+			});
+
+		}
+
+		return startFaceTracking;
+
+	}
+
+	/*
+	 * without a proxy class - this is kindof messy you could be
+	 * creating/setting a local FaceTracking when you want a Remote public void
+	 * setState() { // if (myBoundService != null) {
+	 * myService.send(boundServiceName, "setState", myBoundService); }
+	 * 
+	 * }
+	 */
+
+	// TODO - instead of actual FaceTracking - send data Proxy FaceTrackingData
+	// to set/get state !
+	public void getState(FaceTracking c) {
+
+		if (c != null) {
+		}
+
+	}
+
+	@Override
 	public void init() {
 
 		gc.gridx = 0;
@@ -134,92 +221,6 @@ public class FaceTrackingGUI extends ServiceGUI implements ActionListener {
 		gc.gridy = 2;
 		display.add(pulseData, gc);
 
-	}
-
-	public JButton getstartFaceTrackingButton() {
-		if (startFaceTracking == null) {
-			startFaceTracking = new JButton("start FaceTracking");
-			startFaceTracking.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (startFaceTracking.getText().compareTo("start FaceTracking") == 0) {
-						startFaceTracking.setText("stop FaceTracking");
-
-						// TODO - design considerations
-						// myService.send(boundServiceName, "setState",
-						// myBoundService); // double set on local
-						// if (myBoundService != null)
-						{
-							// TODO - proxy data class like GWT?? - directly
-							// setting field wont work remotely
-							// myBoundService.pulseDataString =
-							// pulseDataString.getText();
-						}
-						// TODO - setting fields on a proxy class - vs accessors
-						// like these
-						// what about a helper funcion - hides boundServiceName
-						// - and the setting of fields on
-						// the Service side (buried in Service)
-						// setMethods can be bogus - and set removed then field
-						// actually set
-						// getMethods could block ?
-
-						// myService.send(boundServiceName, "setType", );
-
-						// myService.send(boundServiceName, "set",
-						// Integer.parseInt(interval.getText()));
-						myService.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
-						myService.send(boundServiceName, "startFaceTracking");
-						myService.send(boundServiceName, "setPulseDataString", pulseDataString.getText());
-						myService.send(boundServiceName, "setPulseDataInteger", Integer.parseInt(pulseDataInteger.getText()));
-
-					} else {
-						startFaceTracking.setText("start FaceTracking");
-						myService.send(boundServiceName, "stopFaceTracking");
-					}
-				}
-
-			});
-
-		}
-
-		return startFaceTracking;
-
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		myService.send(boundServiceName, "setType", e.getActionCommand());
-	}
-
-	// TODO - instead of actual FaceTracking - send data Proxy FaceTrackingData
-	// to set/get state !
-	public void getState(FaceTracking c) {
-
-		if (c != null) {
-		}
-
-	}
-
-	/*
-	 * without a proxy class - this is kindof messy you could be
-	 * creating/setting a local FaceTracking when you want a Remote public void
-	 * setState() { // if (myBoundService != null) {
-	 * myService.send(boundServiceName, "setState", myBoundService); }
-	 * 
-	 * }
-	 */
-
-	@Override
-	public void attachGUI() {
-		subscribe("publishState", "getState", FaceTracking.class);
-		myService.send(boundServiceName, "publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishState", "getState", FaceTracking.class);
 	}
 
 }

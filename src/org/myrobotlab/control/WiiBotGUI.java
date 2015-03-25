@@ -43,7 +43,27 @@ import org.slf4j.Logger;
 
 public class WiiBotGUI extends ServiceGUI implements ListSelectionListener {
 
+	public class Keyboard implements KeyListener {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
+
+		@Override
+		public void keyPressed(KeyEvent keyEvent) {
+
+			myService.send(boundServiceName, "keyPressed", keyEvent.getKeyCode());
+		}
+
+		@Override
+		public void keyReleased(KeyEvent keyEvent) {
+		}
+
+		@Override
+		public void keyTyped(KeyEvent keyEvent) {
+		}
+	}
+
 	public final static Logger log = LoggerFactory.getLogger(WiiBotGUI.class.getCanonicalName());
+
 	static final long serialVersionUID = 1L;
 
 	Keyboard keyboard = new Keyboard();
@@ -52,6 +72,15 @@ public class WiiBotGUI extends ServiceGUI implements ListSelectionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void attachGUI() {
+	};
+
+	@Override
+	public void detachGUI() {
+	}
+
+	@Override
 	public void init() {
 
 		JButton keyboardButton = new JButton(
@@ -66,29 +95,6 @@ public class WiiBotGUI extends ServiceGUI implements ListSelectionListener {
 
 		display.add(logPanel, gc);
 
-	}
-
-	public class Keyboard implements KeyListener {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss:SSS");
-
-		public void keyPressed(KeyEvent keyEvent) {
-
-			myService.send(boundServiceName, "keyPressed", keyEvent.getKeyCode());
-		}
-
-		public void keyReleased(KeyEvent keyEvent) {
-		}
-
-		public void keyTyped(KeyEvent keyEvent) {
-		}
-	};
-
-	public void attachGUI() {
-	}
-
-	@Override
-	public void detachGUI() {
 	}
 
 	@Override

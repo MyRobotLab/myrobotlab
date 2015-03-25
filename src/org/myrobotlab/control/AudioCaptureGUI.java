@@ -46,9 +46,23 @@ public class AudioCaptureGUI extends ServiceGUI {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void attachGUI() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void detachGUI() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public void init() {
 		// Register anonymous listeners
 		captureBtn.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				captureBtn.setEnabled(false);
 				stopBtn.setEnabled(true);
@@ -63,6 +77,7 @@ public class AudioCaptureGUI extends ServiceGUI {
 		display.add(captureBtn);
 
 		stopBtn.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				captureBtn.setEnabled(true);
 				stopBtn.setEnabled(false);
@@ -77,6 +92,7 @@ public class AudioCaptureGUI extends ServiceGUI {
 		display.add(stopBtn);
 
 		playBtn.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				// Play back all of the data
 				// that was saved during
@@ -88,18 +104,6 @@ public class AudioCaptureGUI extends ServiceGUI {
 		display.add(playBtn);
 
 		display.setLayout(new FlowLayout());
-
-	}
-
-	@Override
-	public void attachGUI() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void detachGUI() {
-		// TODO Auto-generated method stub
 
 	}
 

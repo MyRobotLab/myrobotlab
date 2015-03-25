@@ -45,17 +45,26 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterThresholdGUI extends OpenCVFilterGUI {
 
-	JSlider2 lowThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 0);
-	JSlider2 highThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 256);
-	JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
+	public class AdjustSlider implements ChangeListener {
 
-	JComboBox type = new JComboBox(new String[] { "CV_THRESH_BINARY", "CV_THRESH_BINARY_INV", "CV_THRESH_TRUNC", "CV_THRESH_TOZERO", "CV_THRESH_TOZERO_INV" });
+		@Override
+		public void stateChanged(ChangeEvent e) {
 
-	// CV_THRESH_BINARY
-	// CV_THRESH_BINARY_INV
-	// CV_THRESH_TRUNC
-	// CV_THRESH_TOZERO
-	// CV_THRESH_TOZERO_INV
+			OpenCVFilterCanny bf = (OpenCVFilterCanny) boundFilter.filter;
+
+			JSlider2 slider = (JSlider2) e.getSource();
+
+			if (slider.getName().equals("lowThreshold")) {
+				bf.lowThreshold = slider.getValue();
+			} else if (slider.getName().equals("lowThreshold")) {
+				bf.highThreshold = slider.getValue();
+			}
+
+			slider.value.setText("" + slider.getValue());
+
+			setFilterState(bf);
+		}
+	}
 
 	public class JSlider2 extends JSlider {
 		private static final long serialVersionUID = 1L;
@@ -68,27 +77,19 @@ public class OpenCVFilterThresholdGUI extends OpenCVFilterGUI {
 
 	}
 
-	public class AdjustSlider implements ChangeListener {
+	JSlider2 lowThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 0);
 
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			
-			OpenCVFilterCanny bf = (OpenCVFilterCanny) boundFilter.filter;
-			
-			JSlider2 slider = (JSlider2) e.getSource();
-			
-			if (slider.getName().equals("lowThreshold"))
-			{
-				bf.lowThreshold = slider.getValue();
-			} else if (slider.getName().equals("lowThreshold")) {
-				bf.highThreshold = slider.getValue();
-			} 
-			
-			slider.value.setText("" + slider.getValue());
-			
-			setFilterState(bf);
-		}
-	}
+	JSlider2 highThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 256);
+
+	// CV_THRESH_BINARY
+	// CV_THRESH_BINARY_INV
+	// CV_THRESH_TRUNC
+	// CV_THRESH_TOZERO
+	// CV_THRESH_TOZERO_INV
+
+	JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
+
+	JComboBox type = new JComboBox(new String[] { "CV_THRESH_BINARY", "CV_THRESH_BINARY_INV", "CV_THRESH_TRUNC", "CV_THRESH_TOZERO", "CV_THRESH_TOZERO_INV" });
 
 	AdjustSlider change = new AdjustSlider();
 
@@ -137,19 +138,19 @@ public class OpenCVFilterThresholdGUI extends OpenCVFilterGUI {
 
 	}
 
-
 	@Override
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		boundFilter = filterWrapper;
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				OpenCVFilterThreshold bf = (OpenCVFilterThreshold)filterWrapper.filter;
+				OpenCVFilterThreshold bf = (OpenCVFilterThreshold) filterWrapper.filter;
 				lowThreshold.setValueIsAdjusting(true);
-				lowThreshold.setValue((int)bf.lowThreshold);
+				lowThreshold.setValue((int) bf.lowThreshold);
 				lowThreshold.setValueIsAdjusting(false);
 
 				highThreshold.setValueIsAdjusting(true);
-				highThreshold.setValue((int)bf.highThreshold);
+				highThreshold.setValue((int) bf.highThreshold);
 				highThreshold.setValueIsAdjusting(false);
 			}
 		});

@@ -9,15 +9,15 @@ public final class Mapper implements Serializable {
 	// input range
 	double minX;
 	double maxX;
-	
+
 	// output range
 	double minY;
 	double maxY;
-	
+
 	// clipping
 	double minOutput;
 	double maxOutput;
-	
+
 	boolean inverted = false;
 
 	public Mapper(double minX, double maxX, double minY, double maxY) {
@@ -25,52 +25,48 @@ public final class Mapper implements Serializable {
 		this.maxX = maxX;
 		this.minY = minY;
 		this.maxY = maxY;
-		
+
 		this.minOutput = minY;
 		this.maxOutput = maxY;
 	}
-	
-	public void setMin(double min){
-		minOutput = min;
-	}
 
-	public void setMax(double max){
-		maxOutput = max;
-	}
-	
-	public double getMinX(){
-		return minX;
-	}
-	
-	public double getMaxX(){
-		return maxX;
-	}
-	
-	public double getMinY(){
-		return minY;
-	}
-	
-	public double getMaxY(){
-		return maxY;
-	}
-	
 	final public double calc(double in) {
-		double c =  minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
-		if (c < minOutput){
+		double c = minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
+		if (c < minOutput) {
 			return minOutput;
 		}
-		if (c > maxOutput){
+		if (c > maxOutput) {
 			return maxOutput;
 		}
 		return c;
 	}
-	
+
 	final public int calcInt(double in) {
-		return (int)calc(in);
+		return (int) calc(in);
+	}
+
+	public double getMaxX() {
+		return maxX;
+	}
+
+	public double getMaxY() {
+		return maxY;
+	}
+
+	public double getMinX() {
+		return minX;
+	}
+
+	public double getMinY() {
+		return minY;
+	}
+
+	public boolean isInverted() {
+		return inverted;
 	}
 
 	public void setInverted(boolean invert) {
-		if (invert && !inverted){
+		if (invert && !inverted) {
 			double t = minX;
 			minX = maxX;
 			maxX = t;
@@ -79,9 +75,13 @@ public final class Mapper implements Serializable {
 			inverted = false;
 		}
 	}
-	
-	public boolean isInverted(){
-		return inverted;
+
+	public void setMax(double max) {
+		maxOutput = max;
 	}
-	
+
+	public void setMin(double min) {
+		minOutput = min;
+	}
+
 }

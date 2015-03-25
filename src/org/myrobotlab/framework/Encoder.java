@@ -42,13 +42,16 @@ public class Encoder {
 
 	// uri schemes
 	public final static String SCHEME_MRL = "mrl";
+
 	public final static String SCHEME_BASE64 = "base64";
-	
+
 	public final static String TYPE_JSON = "json";
+
 	public final static String TYPE_REST = "rest";
 
 	// disableHtmlEscaping to prevent encoding or "=" -
 	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+
 	public final static String API_REST_PREFIX = "api";
 
 	public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<Class<?>>(Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class,
@@ -70,45 +73,67 @@ public class Encoder {
 	final static HashMap<String, ArrayList<Method>> methodOrdinal = new HashMap<String, ArrayList<Method>>();
 
 	final static HashSet<String> objectsCached = new HashSet<String>();
-	
-	public final static String toJson(Object o){
-		return gson.toJson(o);
-	}
-	
-	public final static String toJson(Object o, Class<?> clazz){
-		return gson.toJson(o, clazz);
-	}
 
-	public final static <T extends Object> T fromJson(String json, Class<T> clazz){
-		return gson.fromJson(json, clazz);
-	}
-	
-	public static boolean isWrapper(Class<?> clazz) {
-		return WRAPPER_TYPES.contains(clazz);
-	}
-
-	public static boolean isWrapper(String className) {
-		return WRAPPER_TYPES_CANONICAL.contains(className);
-	}
-
-	public static boolean setJSONPrettyPrinting(boolean b) {
-		if (b) {
-			gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-		} else {
-			gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+	public static final Message base64ToMsg(String base64) {
+		String data = base64;
+		if (base64.startsWith(String.format("%s://", SCHEME_BASE64))) {
+			data = base64.substring(SCHEME_BASE64.length() + 3);
 		}
-		return b;
+		final ByteArrayInputStream dataStream = new ByteArrayInputStream(Base64.decodeBase64(data));
+		try {
+			final ObjectInputStream objectStream = new ObjectInputStream(dataStream);
+			Message msg = (Message) objectStream.readObject();
+			return msg;
+		} catch (Exception e) {
+			Logging.logError(e);
+			return null;
+		}
 	}
 
-	/**
-	 * most lossy protocols need conversion of parameters into correctly typed
-	 * elements this method is used to query a candidate method to see if a
-	 * simple conversion is possible
-	 * 
-	 * @return
-	 */
-	public static boolean isSimpleType(Class<?> clazz) {
-		return WRAPPER_TYPES.contains(clazz) || clazz == String.class;
+	public static final Message decodePathInfo(String pathInfo) {
+		return decodePathInfo(pathInfo, API_REST_PREFIX, null);
+	}
+
+	// TODO optimization of HashSet combinations of supported encoding instead
+	// of parsing...
+	// e.g. HashMap<String> supportedEncoding.containsKey(
+	public static final Message decodePathInfo(String pathInfo, String apiTag, String encodingTag) {
+
+		// minimal /(api|tag)/name/method
+		// ret encoding /(api|tag)/encoding/name/method
+
+		if (pathInfo == null) {
+			log.error("pathInfo is null");
+			return null;
+		}
+
+		String[] parts = pathInfo.split("/");
+
+		if (parts.length < 4) {
+			log.error(String.format("%s - not enough parts - requires minimal 3", pathInfo));
+			return null;
+		}
+
+		// FIXME allow parts[x + offset] with apiTag == null
+		if (apiTag != null && !apiTag.equals(parts[1])) {
+			log.error(String.format("apiTag %s specified but %s in ordinal", apiTag, parts[0]));
+			return null;
+		}
+
+		// FIXME INVOKING VS PUTTING A MESSAGE ON THE BUS
+		Message msg = new Message();
+		msg.name = parts[2];
+		msg.method = parts[3];
+
+		if (parts.length > 4) {
+			// FIXME - ALL STRINGS AT THE MOMENT !!!
+			String[] jsonParams = new String[parts.length - 4];
+			System.arraycopy(parts, 4, jsonParams, 0, parts.length - 4);
+			ServiceInterface si = org.myrobotlab.service.Runtime.getService(msg.name);
+			msg.data = TypeConverter.getTypedParamsFromJson(si.getClass(), msg.method, jsonParams);
+		}
+
+		return msg;
 	}
 
 	public static Message decodeURI(URI uri) {
@@ -125,97 +150,63 @@ public class Encoder {
 		return msg;
 	}
 
-	public static final Message decodePathInfo(String pathInfo) {
-		return decodePathInfo(pathInfo, API_REST_PREFIX, null);
+	public final static <T extends Object> T fromJson(String json, Class<T> clazz) {
+		return gson.fromJson(json, clazz);
 	}
-	// TODO optimization of HashSet combinations of supported encoding instead
-	// of parsing...
-	// e.g. HashMap<String> supportedEncoding.containsKey(
-	public static final Message decodePathInfo(String pathInfo, String apiTag, String encodingTag) {
-		
-		// minimal /(api|tag)/name/method
-		// ret encoding /(api|tag)/encoding/name/method
-		
-		if (pathInfo == null) {
-			log.error("pathInfo is null");
-			return null;
+
+	static public final byte[] getBytes(Object o) throws IOException {
+		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(5000);
+		ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(byteStream));
+		os.flush();
+		os.writeObject(o);
+		os.flush();
+		return byteStream.toByteArray();
+	}
+
+	static public final String getCallBack(String methodName) {
+		String callback = String.format("on%s%s", methodName.substring(0, 1).toUpperCase(), methodName.substring(1));
+		return callback;
+	}
+
+	// concentrator data coming from decoder
+	static public Method getMethod(String serviceType, String methodName, Object[] params) {
+		return getMethod("org.myrobotlab.service", serviceType, methodName, params);
+	}
+
+	// real encoded data ??? getMethodFromXML getMethodFromJson - all resolve to
+	// this getMethod with class form
+	// encoded data.. YA !
+	static public Method getMethod(String pkgName, String objectName, String methodName, Object[] params) {
+		String fullObjectName = String.format("%s.%s", pkgName, objectName);
+		return null;
+	}
+
+	static public ArrayList<Method> getMethodCandidates(String serviceType, String methodName, int paramCount) {
+		if (!objectsCached.contains(serviceType)) {
+			loadObjectCache(serviceType);
 		}
 
-		String[] parts = pathInfo.split("/");
-		
-		if (parts.length < 4){
-			log.error(String.format("%s - not enough parts - requires minimal 3", pathInfo));
+		String ordinalKey = makeMethodOrdinalKey(serviceType, methodName, paramCount);
+		if (!methodOrdinal.containsKey(ordinalKey)) {
+			log.error(String.format("cant find matching method candidate for %s.%s %d params", serviceType, methodName, paramCount));
 			return null;
 		}
-		
-		// FIXME allow parts[x + offset] with apiTag == null
-		if (apiTag != null && !apiTag.equals(parts[1])){
-			log.error(String.format("apiTag %s specified but %s in ordinal", apiTag, parts[0]));
-			return null;
-		}
-
-		// FIXME INVOKING VS PUTTING A MESSAGE ON THE BUS
-		Message msg = new Message();
-		msg.name = parts[2];
-		msg.method = parts[3];
-		
-		if (parts.length > 4) {
-			// FIXME - ALL STRINGS AT THE MOMENT !!!
-			String[] jsonParams = new String[parts.length - 4];
-			System.arraycopy(parts, 4, jsonParams, 0, parts.length - 4);
-			ServiceInterface si = org.myrobotlab.service.Runtime.getService(msg.name);
-			msg.data = TypeConverter.getTypedParamsFromJson(si.getClass(), msg.method, jsonParams);
-		}
-
-		return msg;
+		return methodOrdinal.get(ordinalKey);
 	}
 
 	// TODO
 	// public static Object encode(Object, encoding) - dispatches appropriately
 
-	public static String msgToGson(Message msg) {
-		return gson.toJson(msg, Message.class);
+	static final public String getMsgKey(Message msg){
+		return String.format("msg %s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, Encoder.getParameterSignature(msg.data), msg.msgID);
 	}
-
-	public static Message gsonToMsg(String gsonData) {
-		return (Message) gson.fromJson(gsonData, Message.class);
+	
+	static final public String getMsgTypeKey(Message msg){
+		return String.format("msg %s.%s --> %s.%s(%s)", msg.sender, msg.sendingMethod, msg.name, msg.method, Encoder.getParameterSignature(msg.data));
 	}
-
-	public static final Message base64ToMsg(String base64) {
-		String data = base64;
-		if (base64.startsWith(String.format("%s://", SCHEME_BASE64))) {
-			data = base64.substring(SCHEME_BASE64.length() + 3);
-		}
-		final ByteArrayInputStream dataStream = new ByteArrayInputStream(Base64.decodeBase64(data));
-		try {
-			final ObjectInputStream objectStream = new ObjectInputStream(dataStream);
-			Message msg = (Message) objectStream.readObject();
-			return msg;
-		} catch (Exception e) {
-			Logging.logException(e);
-			return null;
-		}
-	}
-
-	public static final String msgToBase64(Message msg) {
-		final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-		try {
-			final ObjectOutputStream objectStream = new ObjectOutputStream(dataStream);
-			objectStream.writeObject(msg);
-			objectStream.close();
-			dataStream.close();
-			String base64 = String.format("%s://%s", SCHEME_BASE64, new String(Base64.encodeBase64(dataStream.toByteArray())));
-			return base64;
-		} catch (Exception e) {
-			log.error(String.format("couldnt seralize %s", msg));
-			Logging.logException(e);
-			return null;
-		}
-	}
-
-	static final public String getParameterSignature(Object[] data) {
+	
+	static final public String getParameterSignature(final Object[] data) {
 		if (data == null) {
-			// return "null";
 			return "";
 		}
 
@@ -245,56 +236,37 @@ public class Encoder {
 
 	}
 
-	public static String type(String type) {
-		int pos0 = type.indexOf(".");
-		if (pos0 > 0) {
-			return type;
-		}
-		return String.format("org.myrobotlab.service.%s", type);
-	}
-
-	public static boolean tryParseInt(String string) {
-		try {
-			Integer.parseInt(string);
-			return true;
-		} catch (Exception e) {
-
-		}
-		return false;
-	}
-	
-	// FIXME !!! - encoding for Message ----> makeMethodKey(Message msg)
-
-	static public String makeMethodKey(String fullObjectName, String methodName, Class<?>[] paramTypes) {
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < paramTypes.length; ++i) {
-			sb.append("/");
-			sb.append(paramTypes[i].getCanonicalName());
-		}
-		return String.format("%s/%s%s", fullObjectName, methodName, sb.toString());
-	}
-
-	static public String makeMethodOrdinalKey(String fullObjectName, String methodName, int paramCount) {
-		return String.format("%s/%s/%d", fullObjectName, methodName, paramCount);
-	}
-
-	// LOSSY Encoding (e.g. xml & gson - which do not encode type information)
-	// can possibly
-	// give us the parameter count - from the parameter count we can grab method
-	// candidates
-	// @return is a arraylist of keys !!!
-
-	static public ArrayList<Method> getMethodCandidates(String serviceType, String methodName, int paramCount) {
-		if (!objectsCached.contains(serviceType)) {
-			loadObjectCache(serviceType);
-		}
-
-		String ordinalKey = makeMethodOrdinalKey(serviceType, methodName, paramCount);
-		if (!methodOrdinal.containsKey(ordinalKey)) {
-			log.error(String.format("cant find matching method candidate for %s.%s %d params", serviceType, methodName, paramCount));
+	static public String getServiceType(String inType) {
+		if (inType == null) {
 			return null;
 		}
-		return methodOrdinal.get(ordinalKey);
+		if (inType.contains(".")) {
+			return inType;
+		}
+		return String.format("org.myrobotlab.service.%s", inType);
+	}
+
+	public static Message gsonToMsg(String gsonData) {
+		return gson.fromJson(gsonData, Message.class);
+	}
+
+	/**
+	 * most lossy protocols need conversion of parameters into correctly typed
+	 * elements this method is used to query a candidate method to see if a
+	 * simple conversion is possible
+	 * 
+	 * @return
+	 */
+	public static boolean isSimpleType(Class<?> clazz) {
+		return WRAPPER_TYPES.contains(clazz) || clazz == String.class;
+	}
+
+	public static boolean isWrapper(Class<?> clazz) {
+		return WRAPPER_TYPES.contains(clazz);
+	}
+
+	public static boolean isWrapper(String className) {
+		return WRAPPER_TYPES_CANONICAL.contains(className);
 	}
 
 	// FIXME - axis's Method cache - loads only requested methods
@@ -326,13 +298,58 @@ public class Encoder {
 				methodCache.put(methodKey, m);
 			}
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	}
 
-	// concentrator data coming from decoder
-	static public Method getMethod(String serviceType, String methodName, Object[] params) {
-		return getMethod("org.myrobotlab.service", serviceType, methodName, params);
+	// FIXME !!! - encoding for Message ----> makeMethodKey(Message msg)
+
+	static public String makeMethodKey(String fullObjectName, String methodName, Class<?>[] paramTypes) {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < paramTypes.length; ++i) {
+			sb.append("/");
+			sb.append(paramTypes[i].getCanonicalName());
+		}
+		return String.format("%s/%s%s", fullObjectName, methodName, sb.toString());
+	}
+
+	static public String makeMethodOrdinalKey(String fullObjectName, String methodName, int paramCount) {
+		return String.format("%s/%s/%d", fullObjectName, methodName, paramCount);
+	}
+
+	// LOSSY Encoding (e.g. xml & gson - which do not encode type information)
+	// can possibly
+	// give us the parameter count - from the parameter count we can grab method
+	// candidates
+	// @return is a arraylist of keys !!!
+
+	public static final String msgToBase64(Message msg) {
+		final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+		try {
+			final ObjectOutputStream objectStream = new ObjectOutputStream(dataStream);
+			objectStream.writeObject(msg);
+			objectStream.close();
+			dataStream.close();
+			String base64 = String.format("%s://%s", SCHEME_BASE64, new String(Base64.encodeBase64(dataStream.toByteArray())));
+			return base64;
+		} catch (Exception e) {
+			log.error(String.format("couldnt seralize %s", msg));
+			Logging.logError(e);
+			return null;
+		}
+	}
+
+	public static String msgToGson(Message msg) {
+		return gson.toJson(msg, Message.class);
+	}
+
+	public static boolean setJSONPrettyPrinting(boolean b) {
+		if (b) {
+			gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+		} else {
+			gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+		}
+		return b;
 	}
 
 	// --- xml codec begin ------------------
@@ -340,26 +357,25 @@ public class Encoder {
 	// need to match
 	// ordinal first
 
-	// real encoded data ??? getMethodFromXML getMethodFromJson - all resolve to
-	// this getMethod with class form
-	// encoded data.. YA !
-	static public Method getMethod(String pkgName, String objectName, String methodName, Object[] params) {
-		String fullObjectName = String.format("%s.%s", pkgName, objectName);
-		return null;
-	}
-	
-	static public final String getCallBack(String methodName){
-		String callback = String.format("on%s%s", methodName.substring(0, 1).toUpperCase(), methodName.substring(1));
-		return callback;
+	static public String toCamelCase(String s) {
+		String[] parts = s.split("_");
+		String camelCaseString = "";
+		for (String part : parts) {
+			camelCaseString = camelCaseString + toCCase(part);
+		}
+		return String.format("%s%s", camelCaseString.substring(0, 1).toLowerCase(), camelCaseString.substring(1));
 	}
 
-	static public final byte[] getBytes(Object o) throws IOException {
-		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(5000);
-		ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(byteStream));
-		os.flush();
-		os.writeObject(o);
-		os.flush();
-		return byteStream.toByteArray();
+	static public String toCCase(String s) {
+		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+	}
+
+	public final static String toJson(Object o) {
+		return gson.toJson(o);
+	}
+
+	public final static String toJson(Object o, Class<?> clazz) {
+		return gson.toJson(o, clazz);
 	}
 
 	public static void toJsonFile(Object o, String filename) throws IOException {
@@ -368,32 +384,13 @@ public class Encoder {
 		fos.close();
 	}
 
-	static public String getServiceType(String inType) {
-		if (inType == null){ return null; }
-		if (inType.contains(".")){ return inType;}
-		return String.format("org.myrobotlab.service.%s", inType);
-	}
-	
 	// === method signatures begin ===
-	
-	static public String toCamelCase(String s){
-		   String[] parts = s.split("_");
-		   String camelCaseString = "";
-		   for (String part : parts){
-		      camelCaseString = camelCaseString + toCCase(part);
-		   }
-		   return String.format("%s%s", camelCaseString.substring(0, 1).toLowerCase(), camelCaseString.substring(1));
-		}
 
-	static public String toCCase(String s) {
-		    return s.substring(0, 1).toUpperCase() +
-		               s.substring(1).toLowerCase();
-		}
-	
-	static public String toUnderScore(String camelCase){
+	static public String toUnderScore(String camelCase) {
 		return toUnderScore(camelCase, false);
 	}
-	static public String toUnderScore(String camelCase, Boolean toLowerCase){
+
+	static public String toUnderScore(String camelCase, Boolean toLowerCase) {
 
 		byte[] a = camelCase.getBytes();
 		boolean lastLetterLower = false;
@@ -402,22 +399,39 @@ public class Encoder {
 			boolean currentCaseUpper = Character.isUpperCase(a[i]);
 
 			Character newChar = null;
-			if (toLowerCase != null){
-				if (toLowerCase){
+			if (toLowerCase != null) {
+				if (toLowerCase) {
 					newChar = (char) Character.toLowerCase(a[i]);
 				} else {
 					newChar = (char) Character.toUpperCase(a[i]);
 				}
 			} else {
-				newChar = (char)a[i];
+				newChar = (char) a[i];
 			}
-					
+
 			sb.append(String.format("%s%c", (lastLetterLower && currentCaseUpper) ? "_" : "", newChar));
 			lastLetterLower = !currentCaseUpper;
 		}
-		
+
 		return sb.toString();
 
+	}
+
+	public static boolean tryParseInt(String string) {
+		try {
+			Integer.parseInt(string);
+			return true;
+		} catch (Exception e) {
+
+		}
+		return false;
+	}
+	public static String type(String type) {
+		int pos0 = type.indexOf(".");
+		if (pos0 > 0) {
+			return type;
+		}
+		return String.format("org.myrobotlab.service.%s", type);
 	}
 
 	// === method signatures end ===

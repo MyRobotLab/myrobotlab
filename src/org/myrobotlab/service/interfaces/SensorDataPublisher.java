@@ -31,8 +31,8 @@ import org.myrobotlab.service.data.Pin;
 
 public interface SensorDataPublisher {
 
-	public Pin publishPin(Pin p);
-
 	public ArrayList<Pin> getPinList();
+
+	public Pin publishPin(Pin p);
 
 }

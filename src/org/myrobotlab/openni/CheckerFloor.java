@@ -66,20 +66,6 @@ public class CheckerFloor {
 		labelAxes();
 	} // end of CheckerFloor()
 
-	private void createCoords(int x, int z, ArrayList<Point3f> coords) {
-		// Coords for a single blue or green square,
-		// its left hand corner at (x,0,z)
-		// points created in counter-clockwise order
-		Point3f p1 = new Point3f(x, 0.0f, z + 1.0f);
-		Point3f p2 = new Point3f(x + 1.0f, 0.0f, z + 1.0f);
-		Point3f p3 = new Point3f(x + 1.0f, 0.0f, z);
-		Point3f p4 = new Point3f(x, 0.0f, z);
-		coords.add(p1);
-		coords.add(p2);
-		coords.add(p3);
-		coords.add(p4);
-	} // end of createCoords()
-
 	private void addOriginMarker()
 	// A red square centered at (0,0,0), of length 0.5
 	{ // points created counter-clockwise, a bit above the floor
@@ -95,6 +81,24 @@ public class CheckerFloor {
 		oCoords.add(p4);
 
 		floorBG.addChild(new ColouredTiles(oCoords, medRed));
+	}
+
+	private void createCoords(int x, int z, ArrayList<Point3f> coords) {
+		// Coords for a single blue or green square,
+		// its left hand corner at (x,0,z)
+		// points created in counter-clockwise order
+		Point3f p1 = new Point3f(x, 0.0f, z + 1.0f);
+		Point3f p2 = new Point3f(x + 1.0f, 0.0f, z + 1.0f);
+		Point3f p3 = new Point3f(x + 1.0f, 0.0f, z);
+		Point3f p4 = new Point3f(x, 0.0f, z);
+		coords.add(p1);
+		coords.add(p2);
+		coords.add(p3);
+		coords.add(p4);
+	} // end of createCoords()
+
+	public BranchGroup getBG() {
+		return floorBG;
 	}
 
 	// Place numbers along the X- and Z-axes at the integer positions
@@ -123,10 +127,6 @@ public class CheckerFloor {
 		tg.setTransform(t3d);
 		tg.addChild(message);
 		return tg;
-	}
-
-	public BranchGroup getBG() {
-		return floorBG;
 	}
 
 }

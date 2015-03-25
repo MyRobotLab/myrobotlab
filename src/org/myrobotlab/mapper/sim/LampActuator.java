@@ -40,6 +40,34 @@ import javax.vecmath.Color3f;
  */
 public class LampActuator extends ActuatorDevice {
 
+	/*
+	 * a JPanel for displaying the lamp state .
+	 */
+	public class LampActuatorJPanel extends JPanel {
+
+		private static final long serialVersionUID = 1L;
+		Color color;
+		Font font;
+		final static int HEIGHT = 12;
+
+		public LampActuatorJPanel() {
+			color = new Color(0, 0, 0);
+			Dimension d = new Dimension(50, HEIGHT);
+			setPreferredSize(d);
+			setMinimumSize(d);
+			font = new Font("Arial", Font.PLAIN, HEIGHT - 2);
+
+		}
+
+		@Override
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			g.setFont(font);
+			g.drawString("on :" + lampIsOn + " - blink : " + blinkIsOn, HEIGHT + 10, HEIGHT - 1);
+
+		}
+	}
+
 	private Material material;
 	private boolean lampIsOn;
 	private boolean blinkIsOn;
@@ -47,6 +75,7 @@ public class LampActuator extends ActuatorDevice {
 	private Color3f onColor;
 	private Color3f offColor;
 	private Color3f blinkColor;
+
 	private boolean changed;
 
 	/**
@@ -58,24 +87,6 @@ public class LampActuator extends ActuatorDevice {
 	public LampActuator(float size) {
 		changed = blink = false;
 		create3D(size);
-	}
-
-	protected void update() {
-		if (changed || blinkIsOn) {
-			if (blinkIsOn && blink) {
-				material.setDiffuseColor(blinkColor);
-				material.setAmbientColor(blinkColor);
-			} else if (lampIsOn) {
-				material.setDiffuseColor(onColor);
-				material.setAmbientColor(onColor);
-			} else {
-				material.setDiffuseColor(offColor);
-				material.setAmbientColor(offColor);
-			}
-			if (blinkIsOn)
-				blink = !blink;
-			changed = false;
-		}
 	}
 
 	void create3D(float size) {
@@ -98,15 +109,18 @@ public class LampActuator extends ActuatorDevice {
 		addChild(node);
 	}
 
+	@Override
+	public JPanel createInspectorPanel() {
+		return new LampActuatorJPanel();
+	}
+
 	/**
-	 * Sets the lamp state on or off.
+	 * Returns the lamp blink state .
 	 * 
-	 * @param on
-	 *            true is on.
+	 * @return true if on.
 	 */
-	public void setOn(boolean on) {
-		lampIsOn = on;
-		changed = true;
+	public boolean getBlink() {
+		return blinkIsOn;
 	}
 
 	/**
@@ -130,42 +144,32 @@ public class LampActuator extends ActuatorDevice {
 	}
 
 	/**
-	 * Returns the lamp blink state .
+	 * Sets the lamp state on or off.
 	 * 
-	 * @return true if on.
+	 * @param on
+	 *            true is on.
 	 */
-	public boolean getBlink() {
-		return blinkIsOn;
+	public void setOn(boolean on) {
+		lampIsOn = on;
+		changed = true;
 	}
 
-	public JPanel createInspectorPanel() {
-		return new LampActuatorJPanel();
-	}
-
-	/*
-	 * a JPanel for displaying the lamp state .
-	 */
-	public class LampActuatorJPanel extends JPanel {
-
-		private static final long serialVersionUID = 1L;
-		Color color;
-		Font font;
-		final static int HEIGHT = 12;
-
-		public LampActuatorJPanel() {
-			color = new Color(0, 0, 0);
-			Dimension d = new Dimension(50, HEIGHT);
-			setPreferredSize(d);
-			setMinimumSize(d);
-			font = new Font("Arial", Font.PLAIN, HEIGHT - 2);
-
-		}
-
-		protected void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			g.setFont(font);
-			g.drawString("on :" + lampIsOn + " - blink : " + blinkIsOn, HEIGHT + 10, HEIGHT - 1);
-
+	@Override
+	protected void update() {
+		if (changed || blinkIsOn) {
+			if (blinkIsOn && blink) {
+				material.setDiffuseColor(blinkColor);
+				material.setAmbientColor(blinkColor);
+			} else if (lampIsOn) {
+				material.setDiffuseColor(onColor);
+				material.setAmbientColor(onColor);
+			} else {
+				material.setDiffuseColor(offColor);
+				material.setAmbientColor(offColor);
+			}
+			if (blinkIsOn)
+				blink = !blink;
+			changed = false;
 		}
 	}
 

@@ -45,18 +45,16 @@ import com.googlecode.javacv.cpp.opencv_core.CvRect;
 import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
-
 public class OpenCVFilterAverageColor extends OpenCVFilter {
 
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAverageColor.class.getCanonicalName());
 
-	
 	String colorName = "";
 	String lastColorName = "";
 
-	transient IplImage buffer = null; 
+	transient IplImage buffer = null;
 
 	transient CvScalar fillColor = cvScalar(0.0, 0.0, 0.0, 1.0);
 
@@ -86,6 +84,32 @@ public class OpenCVFilterAverageColor extends OpenCVFilter {
 			{ { "maroon", "purple", "amethyst" }, { "olive", "gray", "sky blue" }, { "brown", "aquamarine", "pale blue" } },
 			{ { "red", "rose", "fushia" }, { "persimmon", "pink", "plum" }, { "yellow", "apricot", "white" } } };
 
+	CvScalar[][] colorGrid = null;
+
+	CvRect troi = null;
+
+	CvPoint poi = null;
+	static public String getColorName2(CvScalar color) {
+		int red = (int) color.red();
+		int green = (int) color.green();
+		int blue = (int) color.blue();
+
+		// 63 < divisor < 85
+		red = red / 64 - 1;
+		green = green / 64 - 1;
+		blue = blue / 64 - 1;
+
+		if (red < 1)
+			red = 0;
+		if (green < 1)
+			green = 0;
+		if (blue < 1)
+			blue = 0;
+
+		return colorNameCube[red][green][blue];
+
+	}
+
 	public static String getRGBColorName(CvScalar c) {
 		String ret = "";
 		int red = (int) c.red();
@@ -108,13 +132,14 @@ public class OpenCVFilterAverageColor extends OpenCVFilter {
 		return ret;
 	}
 
-	public OpenCVFilterAverageColor()  {
+	public OpenCVFilterAverageColor() {
 		super();
 	}
-	
-	public OpenCVFilterAverageColor(String name)  {
+
+	public OpenCVFilterAverageColor(String name) {
 		super(name);
 	}
+
 	@Override
 	public IplImage display(IplImage image, OpenCVData data) {
 		/*
@@ -158,9 +183,32 @@ public class OpenCVFilterAverageColor extends OpenCVFilter {
 		return image;
 	}
 
-	CvScalar[][] colorGrid = null;
-	CvRect troi = null;
-	CvPoint poi = null;
+	public String getColorName(CvScalar color) {
+		red = (int) color.red();
+		green = (int) color.green();
+		blue = (int) color.blue();
+
+		// 63 < divisor < 85
+		red = red / 64 - 1;
+		green = green / 64 - 1;
+		blue = blue / 64 - 1;
+
+		if (red < 1)
+			red = 0;
+		if (green < 1)
+			green = 0;
+		if (blue < 1)
+			blue = 0;
+
+		return colorNameCube[red][green][blue];
+
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
@@ -217,53 +265,5 @@ public class OpenCVFilterAverageColor extends OpenCVFilter {
 		}
 
 		return image;
-	}
-
-	static public String getColorName2(CvScalar color) {
-		int red = (int) color.red();
-		int green = (int) color.green();
-		int blue = (int) color.blue();
-
-		// 63 < divisor < 85
-		red = red / 64 - 1;
-		green = green / 64 - 1;
-		blue = blue / 64 - 1;
-
-		if (red < 1)
-			red = 0;
-		if (green < 1)
-			green = 0;
-		if (blue < 1)
-			blue = 0;
-
-		return colorNameCube[red][green][blue];
-
-	}
-
-	public String getColorName(CvScalar color) {
-		red = (int) color.red();
-		green = (int) color.green();
-		blue = (int) color.blue();
-
-		// 63 < divisor < 85
-		red = red / 64 - 1;
-		green = green / 64 - 1;
-		blue = blue / 64 - 1;
-
-		if (red < 1)
-			red = 0;
-		if (green < 1)
-			green = 0;
-		if (blue < 1)
-			blue = 0;
-
-		return colorNameCube[red][green][blue];
-
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 }

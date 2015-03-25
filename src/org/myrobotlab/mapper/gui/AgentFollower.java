@@ -50,6 +50,12 @@ class AgentFollower implements Runnable {
 		thread.start();
 	}
 
+	protected void resume() {
+		stopped = false;
+		changed = true;
+	}
+
+	@Override
 	public void run() {
 		while (true) {
 			changed = false;
@@ -76,11 +82,6 @@ class AgentFollower implements Runnable {
 
 	protected void suspend() {
 		stopped = true;
-		changed = true;
-	}
-
-	protected void resume() {
-		stopped = false;
 		changed = true;
 	}
 }

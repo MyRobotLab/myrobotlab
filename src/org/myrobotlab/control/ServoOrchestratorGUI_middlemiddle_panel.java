@@ -24,8 +24,7 @@ import org.myrobotlab.logging.Logging;
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
-public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
-		Transferable {
+public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements Transferable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -78,8 +77,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 		timesection_id = new JLabel("ID##");
 
 		// x y w h
-		timesection_panel.add(timesection_headline,
-				gridbaglayout_set(0, 0, 3, 1));
+		timesection_panel.add(timesection_headline, gridbaglayout_set(0, 0, 3, 1));
 		timesection_panel.add(timesection_id, gridbaglayout_set(1, 2, 1, 1));
 
 		this.add(timesection_panel);
@@ -196,14 +194,14 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 	 * @param flavor
 	 * @return
 	 */
+	@Override
 	public Object getTransferData(DataFlavor flavor) {
 		DataFlavor thisFlavor = null;
 
 		try {
-			thisFlavor = ServoOrchestratorGUI_middlemiddle_main
-					.getDragAndDropPanelDataFlavor();
+			thisFlavor = ServoOrchestratorGUI_middlemiddle_main.getDragAndDropPanelDataFlavor();
 		} catch (Exception ex) {
-			Logging.logException(ex);
+			Logging.logError(ex);
 			Logging.stackToString(ex);
 			return null;
 		}
@@ -230,52 +228,20 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 	 *
 	 * @return
 	 */
+	@Override
 	public DataFlavor[] getTransferDataFlavors() {
 
 		DataFlavor[] flavors = { null };
 
 		try {
-			flavors[0] = ServoOrchestratorGUI_middlemiddle_main
-					.getDragAndDropPanelDataFlavor();
+			flavors[0] = ServoOrchestratorGUI_middlemiddle_main.getDragAndDropPanelDataFlavor();
 		} catch (Exception ex) {
-			Logging.logException(ex);
+			Logging.logError(ex);
 			Logging.stackToString(ex);
 			return null;
 		}
 
 		return flavors;
-	}
-
-	/**
-	 * <p>
-	 * One of three methods defined by the Transferable interface.
-	 * </p>
-	 * <p>
-	 * Determines whether this object supports the DataFlavor. In this case,
-	 * only one is supported: for this object itself.
-	 * </p>
-	 *
-	 * @param flavor
-	 * @return True if DataFlavor is supported, otherwise false.
-	 */
-	public boolean isDataFlavorSupported(DataFlavor flavor) {
-		DataFlavor[] flavors = { null };
-		try {
-			flavors[0] = ServoOrchestratorGUI_middlemiddle_main
-					.getDragAndDropPanelDataFlavor();
-		} catch (Exception ex) {
-			Logging.logException(ex);
-			Logging.stackToString(ex);
-			return false;
-		}
-
-		for (DataFlavor f : flavors) {
-			if (f.equals(flavor)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	public GridBagConstraints gridbaglayout_set(int x, int y, int w, int h) {
@@ -293,5 +259,37 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements
 		gbc.gridheight = h;
 
 		return gbc;
+	}
+
+	/**
+	 * <p>
+	 * One of three methods defined by the Transferable interface.
+	 * </p>
+	 * <p>
+	 * Determines whether this object supports the DataFlavor. In this case,
+	 * only one is supported: for this object itself.
+	 * </p>
+	 *
+	 * @param flavor
+	 * @return True if DataFlavor is supported, otherwise false.
+	 */
+	@Override
+	public boolean isDataFlavorSupported(DataFlavor flavor) {
+		DataFlavor[] flavors = { null };
+		try {
+			flavors[0] = ServoOrchestratorGUI_middlemiddle_main.getDragAndDropPanelDataFlavor();
+		} catch (Exception ex) {
+			Logging.logError(ex);
+			Logging.stackToString(ex);
+			return false;
+		}
+
+		for (DataFlavor f : flavors) {
+			if (f.equals(flavor)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

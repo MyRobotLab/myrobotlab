@@ -101,6 +101,8 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
 	private String state = STATE_LOST_TRACKING;
 
+	int x0, y0, x1, y1;
+
 	public OpenCVFilterFaceDetect() {
 		super();
 	}
@@ -109,8 +111,6 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 		super(name);
 	}
 
-	int x0, y0, x1, y1;
-	
 	@Override
 	public IplImage display(IplImage image, OpenCVData data) {
 
@@ -121,16 +121,16 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 					Rectangle rect = bb.get(i);
 
 					if (useFloatValues) {
-						x0 = (int)(rect.x * width);
-						y0 = (int)(rect.y * height);
-						x1 = x0 + (int)(rect.width * width);
-						y1 = y0 + (int)(rect.height * height);
+						x0 = (int) (rect.x * width);
+						y0 = (int) (rect.y * height);
+						x1 = x0 + (int) (rect.width * width);
+						y1 = y0 + (int) (rect.height * height);
 						cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
 					} else {
-						x0 = (int)rect.x;
-						y0 = (int)rect.y;
-						x1 = x0 + (int)rect.width;
-						y1 = y0 + (int)rect.height;
+						x0 = (int) rect.x;
+						y0 = (int) rect.y;
+						x1 = x0 + (int) rect.width;
+						y1 = y0 + (int) rect.height;
 						cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
 					}
 				}
@@ -143,6 +143,28 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 	}
 
 	@Override
+	public void imageChanged(IplImage image) {
+		// Allocate the memory storage TODO make this globalData
+		if (storage == null) {
+			storage = cvCreateMemStorage(0);
+		}
+
+		if (cascade == null) {
+			// Preload the opencv_objdetect module to work around a known bug.
+			Loader.load(opencv_objdetect.class);
+
+			cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
+			// cascade = new
+			// CvHaarClassifierCascade(cvLoad("haarcascades/haarcascade_eye.xml"));
+
+			if (cascade == null) {
+				log.error("Could not load classifier cascade");
+			}
+		}
+
+	}
+
+	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 
 		// Clear the memory storage which was used before
@@ -151,13 +173,17 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 		// Find whether the cascade is loaded, to find the faces. If yes, then:
 		if (cascade != null) {
 
-			// CV_HAAR_DO_CANNY_PRUNING - causes flat regions (no lines) to be skipped
+			// CV_HAAR_DO_CANNY_PRUNING - causes flat regions (no lines) to be
+			// skipped
 			// CV_HAAR_SCALE_IMAGE
-			// CV_HAAR_FIND_BIGGEST_OBJECT - tells the detector to return the biggest - hence # of objects will be 1 or none
+			// CV_HAAR_FIND_BIGGEST_OBJECT - tells the detector to return the
+			// biggest - hence # of objects will be 1 or none
 			// CV_HAAR_DO_ROUGH_SEARCH
-			 
-			// faces = cvHaarDetectObjects(grayImage, classifier, storage, 1.1, 3, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
-		    // faces = cvHaarDetectObjects(grayImage, classifier_eyes, storage, 1.1, 3, CV_HAAR_DO_CANNY_PRUNING);
+
+			// faces = cvHaarDetectObjects(grayImage, classifier, storage, 1.1,
+			// 3, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
+			// faces = cvHaarDetectObjects(grayImage, classifier_eyes, storage,
+			// 1.1, 3, CV_HAAR_DO_CANNY_PRUNING);
 			CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT);
 
 			if (faces != null) {
@@ -182,9 +208,9 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 		} else {
 			cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
 		}
-		
-		// WOOHOO LOOK AT THAT A STRING SWITCH !!! 
-		// 16 years later ! :D 
+
+		// WOOHOO LOOK AT THAT A STRING SWITCH !!!
+		// 16 years later ! :D
 		// converted from compiler into 2 stage hash switch :) cool !
 		switch (state) {
 		case STATE_LOST_TRACKING:
@@ -197,7 +223,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 		case STATE_DETECTING_FACE:
 			if (faceCnt > 0 && frameIndex - firstFaceFrame > minFaceFrames) {
 				state = STATE_DETECTED_FACE;
-				//broadcastFilterState();
+				// broadcastFilterState();
 			} else if (faceCnt == 0) {
 				firstFaceFrame = frameIndex;
 			}
@@ -213,7 +239,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 		case STATE_LOSING_TRACKING:
 			if (faceCnt == 0 && frameIndex - firstEmptyFrame > minEmptyFrames) {
 				state = STATE_LOST_TRACKING;
-				//broadcastFilterState();
+				// broadcastFilterState();
 			} else if (faceCnt > 0) {
 				firstEmptyFrame = frameIndex;
 			}
@@ -231,28 +257,6 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
 		lastFaceCnt = faceCnt;
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// Allocate the memory storage TODO make this globalData
-		if (storage == null) {
-			storage = cvCreateMemStorage(0);
-		}
-
-		if (cascade == null) {
-			// Preload the opencv_objdetect module to work around a known bug.
-			Loader.load(opencv_objdetect.class);
-
-			cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
-			// cascade = new
-			// CvHaarClassifierCascade(cvLoad("haarcascades/haarcascade_eye.xml"));
-
-			if (cascade == null) {
-				log.error("Could not load classifier cascade");
-			}
-		}
-
 	}
 
 }

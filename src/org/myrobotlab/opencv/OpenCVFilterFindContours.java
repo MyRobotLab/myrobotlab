@@ -118,6 +118,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 	 * g.drawString("null", 10, 10); } } return frameBuffer; }
 	 */
 
+	@Override
 	public IplImage display(IplImage image, OpenCVData data) {
 		ArrayList<Rectangle> boxes = data.getBoundingBoxArray();
 		if (boxes != null) {
@@ -147,6 +148,17 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 		// CvScalar.WHITE);
 
 		return image;
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		if (cvStorage == null) {
+			cvStorage = cvCreateMemStorage(0);
+		}
+
+		grey = cvCreateImage(cvGetSize(image), 8, 1);
+		// display = cvCreateImage(cvGetSize(frame), 8, 3);
+
 	}
 
 	@Override
@@ -210,7 +222,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 						box.width = rect.width();
 						box.height = rect.height();
 					}
-					
+
 					list.add(box);
 
 					if (publishPolygon) {
@@ -274,17 +286,6 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 		// display(image, data);
 
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		if (cvStorage == null) {
-			cvStorage = cvCreateMemStorage(0);
-		}
-
-		grey = cvCreateImage(cvGetSize(image), 8, 1);
-		// display = cvCreateImage(cvGetSize(frame), 8, 3);
-
 	}
 
 }

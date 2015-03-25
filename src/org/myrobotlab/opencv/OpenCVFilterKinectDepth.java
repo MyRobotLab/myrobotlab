@@ -49,11 +49,10 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
 	int filter = 7;
 	boolean createMask = false;
-	
+
 	transient IplImage dst = null;
 	transient IplImage src = null;
 	transient IplImage mask = null;
-
 
 	int x = 0;
 	int y = 0;
@@ -62,23 +61,22 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 	Graphics g = null;
 	String lastHexValueOfPoint = "";
 
-	public OpenCVFilterKinectDepth()  {
+	public OpenCVFilterKinectDepth() {
 		super();
 	}
-	
-	public OpenCVFilterKinectDepth(String name)  {
+
+	public OpenCVFilterKinectDepth(String name) {
 		super(name);
-	}
-
-	public void samplePoint(Integer inX, Integer inY) {
-		++clickCounter;
-		x = inX;
-		y = inY;
-
 	}
 
 	public void createMask() {
 		createMask = true;
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -139,11 +137,11 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 		// return dst;
 	}
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void samplePoint(Integer inX, Integer inY) {
+		++clickCounter;
+		x = inX;
+		y = inY;
 
+	}
 
 }

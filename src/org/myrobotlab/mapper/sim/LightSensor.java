@@ -41,49 +41,6 @@ import javax.swing.JPanel;
  */
 public class LightSensor extends Eye {
 
-	float luminance;
-
-	public LightSensor() {
-		super(0.5f, 10, 10);
-		// super(0.5f, 50, 50);
-		luminance = 0;
-		rotateY(Math.PI);
-	}
-
-	/**
-	 * Returns the measured luminance.
-	 * 
-	 * @return 0.0 means no light , 1.0 f maximum enlightment
-	 */
-	public float getAverageLuminance() {
-		return luminance;
-	}
-
-	void create3D(float radius) {
-		// small body
-		super.create3D(0.05f);
-	}
-
-	/** Called by simulator */
-	protected void update() {
-		super.update();
-		visionImage.getRGB(0, 0, imageWidth, imageHeight, tempRGBABuffer, 0, imageWidth);
-		float sum = 0;
-		int n = tempRGBABuffer.length;
-		for (int i = 0; i < n; i++) {
-			int pix = tempRGBABuffer[i];
-			int r = (pix >> 16) & 0xff;
-			int g = (pix >> 8) & 0xff;
-			int b = (pix) & 0xff;
-			sum += ((float) r * 0.299f + 0.587f * (float) g + 0.114f * (float) b) / 255.0f;
-		}
-		luminance = sum / (float) n;
-	}
-
-	public JPanel createInspectorPanel() {
-		return new LigthSensorJPanel();
-	}
-
 	/*
 	 * a JPanel for displaying the eye image.
 	 */
@@ -111,6 +68,7 @@ public class LightSensor extends Eye {
 		}
 
 		/* should not be called too often */
+		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			g.setFont(font);
@@ -121,5 +79,51 @@ public class LightSensor extends Eye {
 			g.drawString("luminance=" + format.format(luminance), HEIGHT + 10, HEIGHT - 1);
 
 		}
+	}
+
+	float luminance;
+
+	public LightSensor() {
+		super(0.5f, 10, 10);
+		// super(0.5f, 50, 50);
+		luminance = 0;
+		rotateY(Math.PI);
+	}
+
+	@Override
+	void create3D(float radius) {
+		// small body
+		super.create3D(0.05f);
+	}
+
+	@Override
+	public JPanel createInspectorPanel() {
+		return new LigthSensorJPanel();
+	}
+
+	/**
+	 * Returns the measured luminance.
+	 * 
+	 * @return 0.0 means no light , 1.0 f maximum enlightment
+	 */
+	public float getAverageLuminance() {
+		return luminance;
+	}
+
+	/** Called by simulator */
+	@Override
+	protected void update() {
+		super.update();
+		visionImage.getRGB(0, 0, imageWidth, imageHeight, tempRGBABuffer, 0, imageWidth);
+		float sum = 0;
+		int n = tempRGBABuffer.length;
+		for (int i = 0; i < n; i++) {
+			int pix = tempRGBABuffer[i];
+			int r = (pix >> 16) & 0xff;
+			int g = (pix >> 8) & 0xff;
+			int b = (pix) & 0xff;
+			sum += (r * 0.299f + 0.587f * g + 0.114f * b) / 255.0f;
+		}
+		luminance = sum / n;
 	}
 }

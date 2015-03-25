@@ -30,6 +30,7 @@ import java.awt.Dimension;
 
 import javax.swing.JLabel;
 import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.control.widget.DigitalButton;
@@ -76,10 +77,6 @@ public class PinComponent {
 	public static final int OUTPUT = 0x1;
 	public static final int INPUT = 0x0;
 
-	public PinComponent(Service myService, String boundServiceName, Pin pin, boolean isVertical) {
-		this(myService, boundServiceName, pin.pin, pin.type == Pin.PWM_VALUE, pin.type == Pin.ANALOG_VALUE, isVertical);
-	}
-
 	public PinComponent(Service myService, String boundServiceName, int pinNumber, boolean isPWM, boolean isAnalog, boolean isVertical) {
 		this.boundServiceName = boundServiceName;
 		this.isAnalog = isAnalog;
@@ -120,13 +117,18 @@ public class PinComponent {
 
 	}
 
+	public PinComponent(Service myService, String boundServiceName, Pin pin, boolean isVertical) {
+		this(myService, boundServiceName, pin.pin, pin.type == Pin.PWM_VALUE, pin.type == Pin.ANALOG_VALUE, isVertical);
+	}
+
 	// TODO - remove
 	private JSlider getPWMSlider() {
 		if (pwmSlider == null) {
-			int orientation = (isVertical) ? JSlider.VERTICAL : JSlider.HORIZONTAL;
+			int orientation = (isVertical) ? SwingConstants.VERTICAL : SwingConstants.HORIZONTAL;
 			pwmSlider = new JSlider(orientation, 0, 255, 0);
 			pwmSlider.setOpaque(false);
 			pwmSlider.addChangeListener(new ChangeListener() {
+				@Override
 				public void stateChanged(javax.swing.event.ChangeEvent e) {
 					data.setText("" + pwmSlider.getValue());
 					if (myService != null) {

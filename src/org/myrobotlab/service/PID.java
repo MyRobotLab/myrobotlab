@@ -36,7 +36,6 @@
 
 package org.myrobotlab.service;
 
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -47,6 +46,7 @@ import org.slf4j.Logger;
 public class PID extends Service {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(PID.class.getCanonicalName());
 
 	// mode
@@ -58,7 +58,7 @@ public class PID extends Service {
 	static final public int DIRECTION_REVERSE = 1;
 
 	private double dispKp; // * we'll hold on to the tuning parameters in
-							// user-entered
+	// user-entered
 	private double dispKi; // format for display purposes
 	private double dispKd; //
 
@@ -69,22 +69,63 @@ public class PID extends Service {
 	private int controllerDirection;
 
 	private double input; // * Pointers to the Input, Output, and Setpoint
-							// variables
+	// variables
 	private double output; // This creates a hard link between the variables and
-							// the
+	// the
 	private double setpoint; // PID, freeing the user from having to constantly
-								// tell us
-	// what these values are. with pointers we'll just know.
 
+	// tell us
+	// what these values are. with pointers we'll just know.
 	private long lastTime;
-	private double ITerm, lastInput;
+								private double ITerm, lastInput;
 
 	private long sampleTime = 100; // default Controller Sample Time is 0.1
-									// seconds
+	// seconds
 	private double outMin, outMax;
 	private boolean inAuto;
 
 	private long sampleCount = 0;
+
+	public static void main(String[] args) throws Exception {
+		// Logger root =
+		// (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		Logging logging = LoggingFactory.getInstance();
+		logging.configure();
+		logging.setLevel(Level.INFO);
+		// LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		int test = 35;
+		log.info("{}", test);
+
+		log.debug("hello");
+		log.trace("trace");
+		log.error("error");
+		log.info("info");
+
+		PID pid = new PID("pid");
+		pid.startService();
+		pid.setPID(2.0, 5.0, 1.0);
+		log.info("{}", pid.getKp());
+		pid.setControllerDirection(DIRECTION_DIRECT);
+		pid.setMode(MODE_AUTOMATIC);
+		pid.setOutputRange(0, 255);
+		pid.setSetpoint(100);
+		pid.setSampleTime(40);
+
+		// GUIService gui = new GUIService("gui");
+		// gui.startService();
+
+		for (int i = 0; i < 200; ++i) {
+			pid.setInput(i);
+			Service.sleep(30);
+			if (pid.compute()) {
+				log.info(String.format("%d %f", i, pid.getOutput()));
+			} else {
+				log.warn("not ready");
+			}
+		}
+
+	}
 
 	public PID(String n) {
 		super(n);
@@ -132,52 +173,110 @@ public class PID extends Service {
 		} else
 			return false;
 	}
-	
+
+	public void direct() {
+		setControllerDirection(DIRECTION_DIRECT);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "control" };
+	}
+
+	public int getControllerDirection() {
+		return controllerDirection;
+	}
+
+	@Override
+	public String getDescription() {
+		return "<html>a PID control service from<br>" + "http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-introduction/</html>";
+	}
+
+	public double getKd() {
+		return dispKd;
+	}
+
+	public double getKi() {
+		return dispKi;
+	}
+
+	public double getKp() {
+		return dispKp;
+	}
+
+	public int getMode() {
+		return inAuto ? MODE_AUTOMATIC : MODE_MANUAL;
+	}
+
+	public double getOutput() {
+		return output;
+	}
+
+	public double getSetpoint() {
+		return setpoint;
+	}
+
 	/*
-	 * setPID(...)*************************************************************
-	 * This function allows the controller's dynamic performance to be adjusted.
-	 * it's called automatically from the constructor, but tunings can also be
-	 * adjusted on the fly during normal operation
-	 * *******************************
-	 * *********************************************
+	 * Initialize()**************************************************************
+	 * ** does all the things that need to happen to ensure a bumpless transfer
+	 * from manual to automatic mode.
+	 * ********************************************
+	 * ********************************
 	 */
-	public void setPID(Double Kp, Double Ki, Double Kd) {
-		if (Kp < 0 || Ki < 0 || Kd < 0)
-			return;
+	public void init() {
+		ITerm = output;
+		lastInput = input;
+		if (ITerm > outMax)
+			ITerm = outMax;
+		else if (ITerm < outMin)
+			ITerm = outMin;
 
-		dispKp = Kp;
-		dispKi = Ki;
-		dispKd = Kd;
+		lastTime = System.currentTimeMillis() - sampleTime; // FIXME - is this
+															// correct ??? (was
+															// in constructor)
+	}
 
-		double SampleTimeInSec = ((double) sampleTime) / 1000;
-		kp = Kp;
-		ki = Ki * SampleTimeInSec;
-		kd = Kd / SampleTimeInSec;
+	public void invert() {
+		setControllerDirection(DIRECTION_REVERSE);
+	}
 
-		if (controllerDirection == DIRECTION_REVERSE) {
+	/*
+	 * SetControllerDirection(...)***********************************************
+	 * ** The PID will either be connected to a DIRECT acting process (+Output
+	 * leads to +Input) or a REVERSE acting process(+Output leads to -Input.) we
+	 * need to know which one, because otherwise we may increase the output when
+	 * we should be decreasing. This is called from the constructor.
+	 * *************
+	 * ***************************************************************
+	 */
+	public void setControllerDirection(Integer direction) {
+		if (inAuto && direction != controllerDirection) {
 			kp = (0 - kp);
 			ki = (0 - ki);
 			kd = (0 - kd);
 		}
-		
+		controllerDirection = direction;
 		broadcastState();
 	}
 
+	public void setInput(double input) {
+		this.input = input;
+	}
+
 	/*
-	 * setSampleTime(...)
-	 * ********************************************************* sets the
-	 * period, in Milliseconds, at which the calculation is performed
-	 * ************
-	 * ****************************************************************
+	 * SetMode(...)**************************************************************
+	 * ** Allows the controller Mode to be set to manual (0) or Automatic
+	 * (non-zero) when the transition from manual to auto occurs, the controller
+	 * is automatically initialized
+	 * **********************************************
+	 * ******************************
 	 */
-	public void setSampleTime(int NewSampleTime) {
-		if (NewSampleTime > 0) {
-			double ratio = (double) NewSampleTime / (double) sampleTime;
-			ki *= ratio;
-			kd /= ratio;
-			sampleTime = (long) NewSampleTime;
+	public void setMode(int Mode) {
+		boolean newAuto = (Mode == MODE_AUTOMATIC);
+		if (newAuto == !inAuto) { /* we just went from manual to auto */
+			init();
 		}
-		
+		inAuto = newAuto;
 		broadcastState();
 	}
 
@@ -212,159 +311,55 @@ public class PID extends Service {
 	}
 
 	/*
-	 * SetMode(...)**************************************************************
-	 * ** Allows the controller Mode to be set to manual (0) or Automatic
-	 * (non-zero) when the transition from manual to auto occurs, the controller
-	 * is automatically initialized
-	 * **********************************************
-	 * ******************************
+	 * setPID(...)*************************************************************
+	 * This function allows the controller's dynamic performance to be adjusted.
+	 * it's called automatically from the constructor, but tunings can also be
+	 * adjusted on the fly during normal operation
+	 * *******************************
+	 * *********************************************
 	 */
-	public void setMode(int Mode) {
-		boolean newAuto = (Mode == MODE_AUTOMATIC);
-		if (newAuto == !inAuto) { /* we just went from manual to auto */
-			init();
-		}
-		inAuto = newAuto;
-		broadcastState();
-	}
+	public void setPID(Double Kp, Double Ki, Double Kd) {
+		if (Kp < 0 || Ki < 0 || Kd < 0)
+			return;
 
-	/*
-	 * Initialize()**************************************************************
-	 * ** does all the things that need to happen to ensure a bumpless transfer
-	 * from manual to automatic mode.
-	 * ********************************************
-	 * ********************************
-	 */
-	public void init() {
-		ITerm = output;
-		lastInput = input;
-		if (ITerm > outMax)
-			ITerm = outMax;
-		else if (ITerm < outMin)
-			ITerm = outMin;
+		dispKp = Kp;
+		dispKi = Ki;
+		dispKd = Kd;
 
-		lastTime = System.currentTimeMillis() - sampleTime; // FIXME - is this
-															// correct ??? (was
-															// in constructor)
-	}
+		double SampleTimeInSec = ((double) sampleTime) / 1000;
+		kp = Kp;
+		ki = Ki * SampleTimeInSec;
+		kd = Kd / SampleTimeInSec;
 
-	/*
-	 * SetControllerDirection(...)***********************************************
-	 * ** The PID will either be connected to a DIRECT acting process (+Output
-	 * leads to +Input) or a REVERSE acting process(+Output leads to -Input.) we
-	 * need to know which one, because otherwise we may increase the output when
-	 * we should be decreasing. This is called from the constructor.
-	 * *************
-	 * ***************************************************************
-	 */
-	public void setControllerDirection(Integer direction) {
-		if (inAuto && direction != controllerDirection) {
+		if (controllerDirection == DIRECTION_REVERSE) {
 			kp = (0 - kp);
 			ki = (0 - ki);
 			kd = (0 - kd);
 		}
-		controllerDirection = direction;
+
 		broadcastState();
 	}
-	
-	public void invert()
-	{
-		setControllerDirection(DIRECTION_REVERSE);
-	}
-	
-	public void direct()
-	{
-		setControllerDirection(DIRECTION_DIRECT);
-	}
 
-	@Override
-	public String getDescription() {
-		return "<html>a PID control service from<br>" + "http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-introduction/</html>";
-	}
+	/*
+	 * setSampleTime(...)
+	 * ********************************************************* sets the
+	 * period, in Milliseconds, at which the calculation is performed
+	 * ************
+	 * ****************************************************************
+	 */
+	public void setSampleTime(int NewSampleTime) {
+		if (NewSampleTime > 0) {
+			double ratio = (double) NewSampleTime / (double) sampleTime;
+			ki *= ratio;
+			kd /= ratio;
+			sampleTime = NewSampleTime;
+		}
 
-	public void setInput(double input) {
-		this.input = input;
-	}
-
-	public double getOutput() {
-		return output;
+		broadcastState();
 	}
 
 	public void setSetpoint(double setPoint) {
 		setpoint = setPoint;
-	}
-	
-	public double getSetpoint()
-	{
-		return setpoint;
-	}
-
-	public double getKp() {
-		return dispKp;
-	}
-
-	public double getKi() {
-		return dispKi;
-	}
-
-	public double getKd() {
-		return dispKd;
-	}
-
-	public int getMode() {
-		return inAuto ? MODE_AUTOMATIC : MODE_MANUAL;
-	}
-
-	public int getControllerDirection() {
-		return controllerDirection;
-	}
-
-	public static void main(String[] args) throws ClassNotFoundException {
-		//Logger root = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		Logging logging = LoggingFactory.getInstance();
-		logging.configure();
-		logging.setLevel(Level.INFO);
-		//LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		int test = 35;
-		log.info("{}",test);
-
-		
-		
-		log.debug("hello");
-		log.trace("trace");
-		log.error("error");
-		log.info("info");
-		
-		PID pid = new PID("pid");
-		pid.startService();
-		pid.setPID(2.0, 5.0, 1.0);
-		log.info("{}", pid.getKp());
-		pid.setControllerDirection(DIRECTION_DIRECT);
-		pid.setMode(MODE_AUTOMATIC);
-		pid.setOutputRange(0, 255);
-		pid.setSetpoint(100);
-		pid.setSampleTime(40);
-		
-		//GUIService gui = new GUIService("gui");
-		//gui.startService();
-		
-
-		for (int i = 0; i < 200; ++i) {
-			pid.setInput(i);
-			Service.sleep(30);
-			if (pid.compute()) {
-				log.info(String.format("%d %f", i, pid.getOutput()));
-			} else {
-				log.warn("not ready");
-			}
-		}
-
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"control"};
 	}
 
 }

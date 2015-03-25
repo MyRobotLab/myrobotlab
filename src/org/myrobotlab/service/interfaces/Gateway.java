@@ -35,6 +35,39 @@ import org.myrobotlab.net.Connection;
 
 public interface Gateway {
 
+	public void addConnectionListener(String name);
+
+	public void connect(String uri) throws URISyntaxException;
+
+	/**
+	 * retrieves endpoint data for which this gateway is responsible
+	 * 
+	 * @return
+	 */
+	// DEPRECATE?
+	public HashMap<URI, Connection> getClients();
+
+	/**
+	 * important initial communication function related to discovery a broadcast
+	 * goes out and replies must include details of communication so that a
+	 * viable connection can be created
+	 */
+	public List<Connection> getConnections(URI clientKey);
+
+	public String getPrefix(URI protocolKey);
+
+	// String getName();
+
+	/**
+	 * the publishing point
+	 * 
+	 * @param keys
+	 * @return
+	 */
+	public Connection publishNewConnection(Connection keys);
+
+	public void sendRemote(final String key, final Message msg) throws URISyntaxException;
+
 	/**
 	 * will send a message to the mrl key'ed uri the expectation is the uri is
 	 * directly from the hosts registry in runtime therefore it has the
@@ -51,38 +84,5 @@ public interface Gateway {
 	 * @param msg
 	 */
 	public void sendRemote(final URI key, final Message msg);
-
-	public void sendRemote(final String key, final Message msg) throws URISyntaxException;
-
-	/**
-	 * retrieves endpoint data for which this gateway is responsible
-	 * 
-	 * @return
-	 */
-	// DEPRECATE?
-	public HashMap<URI, Connection> getClients();
-
-	public void connect(String uri) throws URISyntaxException;
-	
-	public String getPrefix(URI protocolKey);
-	
-	// String getName();
-
-	/**
-	 * important initial communication function related to discovery
-	 * a broadcast goes out and replies must include details of communication so
-	 * that a viable connection can be created
-	 */
-	public List<Connection> getConnections(URI clientKey);
-	
-	/**
-	 * the publishing point
-	 * @param keys
-	 * @return
-	 */
-	public Connection publishNewConnection(Connection keys);
-	
-	public void addConnectionListener(String name);
-
 
 }

@@ -25,11 +25,19 @@
 
 package org.myrobotlab.service.interfaces;
 
+import java.io.IOException;
 
 public interface SerialDataListener {
 
-	// FIXME - Integer object because no method cache
-	public void onByte(Integer b) throws Exception;
 	public String getName();
 
+	// FIXME - Integer object because no method cache
+	public Integer onByte(Integer b) throws IOException;
+
+	// FIXME - add isRemote() <-- to determine how to send (abstract code sends
+	// remotely?
+	// FIXME - add invoke("onByte") <-- need invoke to force remote publish
+
+	public String onConnect(String portName);
+	public String onDisconnect(String portName);
 }

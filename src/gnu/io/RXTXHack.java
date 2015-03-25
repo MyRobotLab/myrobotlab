@@ -11,12 +11,12 @@ package gnu.io;
  */
 public final class RXTXHack {
 
-    private RXTXHack() {
-        
-    }
-    
-    public static void closeRxtxPort(RXTXPort port) {
-        port.IOLocked = 0;
-        port.close();
-    }
+	public static void closeRxtxPort(RXTXPort port) {
+		port.IOLocked = 0;
+		port.close();
+	}
+
+	private RXTXHack() {
+
+	}
 }

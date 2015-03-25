@@ -45,35 +45,25 @@ public class BlenderGUI extends ServiceGUI implements ActionListener {
 	public final static Logger log = LoggerFactory.getLogger(BlenderGUI.class.getCanonicalName());
 
 	JButton connect = new JButton("connect");
-	
+
 	public BlenderGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-		display.setLayout(new BorderLayout());
-		JPanel north = new JPanel();
-		north.add(connect);
-		connect.addActionListener(this);
-	}
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object o = event.getSource();
+		if (o == connect) {
+			send("connect");
+		}
 
-	public void getState(Blender template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
-	}
-	
-	public void onConnected(){
-		connect.setText("disconnect");
 	}
 
 	@Override
 	public void attachGUI() {
 		// commented out subscription due to this class being used for
-		// un-defined gui's 
-		
+		// un-defined gui's
+
 		subscribe("publishState", "getState", Blender.class);
 		subscribe("isConnected", "onConnected", Boolean.class);
 		send("publishState");
@@ -82,18 +72,30 @@ public class BlenderGUI extends ServiceGUI implements ActionListener {
 	@Override
 	public void detachGUI() {
 		// commented out subscription due to this class being used for
-		// un-defined gui's 
-				
+		// un-defined gui's
+
 		unsubscribe("publishState", "getState", Blender.class);
 	}
 
+	public void getState(Blender template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		});
+	}
+
 	@Override
-	public void actionPerformed(ActionEvent event) {
-		Object o = event.getSource();
-		if (o == connect){
-			send("connect");
-		}
-		
+	public void init() {
+		display.setLayout(new BorderLayout());
+		JPanel north = new JPanel();
+		north.add(connect);
+		connect.addActionListener(this);
+	}
+
+	public void onConnected() {
+		connect.setText("disconnect");
 	}
 
 }

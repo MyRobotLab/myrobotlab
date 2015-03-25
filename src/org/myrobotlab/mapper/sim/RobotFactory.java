@@ -37,60 +37,6 @@ import javax.vecmath.Vector3d;
 public class RobotFactory extends Factory {
 
 	/**
-	 * Adds a prebuild camera sensor to the agent. Image resolution is 100x100
-	 * pixels. Camera is situated on the top of the agent.
-	 * 
-	 * @param agent
-	 * @return the sensor object
-	 */
-	static public CameraSensor addCameraSensor(Agent agent) {
-		double agentHeight = agent.getHeight();
-		float cameraBodyRadius = 0.1f;
-		CameraSensor camera = new CameraSensor(cameraBodyRadius, 100, 100);
-		camera.setUpdatePerSecond(3);
-		camera.setName("Camera");
-		Vector3d pos = new Vector3d(0.0, (agentHeight / 2) + (cameraBodyRadius * 3) / 4, 0);
-		agent.addSensorDevice(camera, pos, 0);
-		return camera;
-	}
-
-	/**
-	 * Adds a prebuild belt of sonar sensor to the agent.
-	 * 
-	 * @param agent
-	 * @return the sensor object
-	 */
-	static public RangeSensorBelt addSonarBeltSensor(Agent agent) {
-		double agentHeight = agent.getHeight();
-		double agentRadius = agent.getRadius();
-		RangeSensorBelt sonarBelt = new RangeSensorBelt((float) agentRadius, 0f, 1.5f, 9, RangeSensorBelt.TYPE_SONAR, 0);
-		sonarBelt.setUpdatePerSecond(3);
-		sonarBelt.setName("sonars");
-		Vector3d pos = new Vector3d(0, agentHeight / 2, 0.0);
-		agent.addSensorDevice(sonarBelt, pos, 0);
-		return sonarBelt;
-	}
-
-	/**
-	 * Adds a prebuild belt of sonar sensor to the agent.
-	 * 
-	 * @param agent
-	 * @param nbSonars
-	 *            the number of sonars.
-	 * @return the sensor object
-	 */
-	static public RangeSensorBelt addSonarBeltSensor(Agent agent, int nbSonars) {
-		double agentHeight = agent.getHeight();
-		double agentRadius = agent.getRadius();
-		RangeSensorBelt sonarBelt = new RangeSensorBelt((float) agentRadius, 0f, 1.5f, nbSonars, RangeSensorBelt.TYPE_SONAR, 0);
-		sonarBelt.setUpdatePerSecond(3);
-		sonarBelt.setName("sonars");
-		Vector3d pos = new Vector3d(0, agentHeight / 2, 0.0);
-		agent.addSensorDevice(sonarBelt, pos, 0);
-		return sonarBelt;
-	}
-
-	/**
 	 * Adds a prebuild belt of bumpers sensor to the agent.
 	 * 
 	 * @param agent
@@ -124,6 +70,56 @@ public class RobotFactory extends Factory {
 		Vector3d pos = new Vector3d(0, 0, 0.0);
 		agent.addSensorDevice(bumperBelt, pos, 0);
 		return bumperBelt;
+	}
+
+	/**
+	 * Adds a prebuild camera sensor to the agent. Image resolution is 100x100
+	 * pixels. Camera is situated on the top of the agent.
+	 * 
+	 * @param agent
+	 * @return the sensor object
+	 */
+	static public CameraSensor addCameraSensor(Agent agent) {
+		double agentHeight = agent.getHeight();
+		float cameraBodyRadius = 0.1f;
+		CameraSensor camera = new CameraSensor(cameraBodyRadius, 100, 100);
+		camera.setUpdatePerSecond(3);
+		camera.setName("Camera");
+		Vector3d pos = new Vector3d(0.0, (agentHeight / 2) + (cameraBodyRadius * 3) / 4, 0);
+		agent.addSensorDevice(camera, pos, 0);
+		return camera;
+	}
+
+	/**
+	 * Adds a prebuild key input to the agent.
+	 * 
+	 * @param agent
+	 * @return the sensor object
+	 */
+	static public KeyInputSensor addKeyInputSensor(Agent agent) {
+		KeyInputSensor sensor = new KeyInputSensor();
+
+		sensor.setUpdatePerSecond(3);
+		sensor.setName("key input");
+		// position has no meaning in the case of that sensor.
+		Vector3d pos = new Vector3d(0, 0.0, 0.0);
+		agent.addSensorDevice(sensor, pos, 0);
+		return sensor;
+	}
+
+	/**
+	 * Adds a prebuild lamp actuator on the top of the agent .
+	 * 
+	 * @param agent
+	 * @return the actuator object
+	 */
+	static public LampActuator addLamp(Agent agent) {
+		LampActuator la = new LampActuator(0.15f);
+		la.setName("lamp");
+		la.setUpdatePerSecond(5f);
+		agent.addActuatorDevice(la, new Vector3d(0, agent.getHeight(), 0), 0);
+
+		return la;
 	}
 
 	/**
@@ -187,38 +183,42 @@ public class RobotFactory extends Factory {
 	}
 
 	/**
-	 * Adds a prebuild key input to the agent.
+	 * Adds a prebuild belt of sonar sensor to the agent.
 	 * 
 	 * @param agent
 	 * @return the sensor object
 	 */
-	static public KeyInputSensor addKeyInputSensor(Agent agent) {
-		KeyInputSensor sensor = new KeyInputSensor();
-
-		sensor.setUpdatePerSecond(3);
-		sensor.setName("key input");
-		// position has no meaning in the case of that sensor.
-		Vector3d pos = new Vector3d(0, 0.0, 0.0);
-		agent.addSensorDevice(sensor, pos, 0);
-		return sensor;
+	static public RangeSensorBelt addSonarBeltSensor(Agent agent) {
+		double agentHeight = agent.getHeight();
+		double agentRadius = agent.getRadius();
+		RangeSensorBelt sonarBelt = new RangeSensorBelt((float) agentRadius, 0f, 1.5f, 9, RangeSensorBelt.TYPE_SONAR, 0);
+		sonarBelt.setUpdatePerSecond(3);
+		sonarBelt.setName("sonars");
+		Vector3d pos = new Vector3d(0, agentHeight / 2, 0.0);
+		agent.addSensorDevice(sonarBelt, pos, 0);
+		return sonarBelt;
 	}
 
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Prebuild Actuators
 
 	/**
-	 * Adds a prebuild lamp actuator on the top of the agent .
+	 * Adds a prebuild belt of sonar sensor to the agent.
 	 * 
 	 * @param agent
-	 * @return the actuator object
+	 * @param nbSonars
+	 *            the number of sonars.
+	 * @return the sensor object
 	 */
-	static public LampActuator addLamp(Agent agent) {
-		LampActuator la = new LampActuator(0.15f);
-		la.setName("lamp");
-		la.setUpdatePerSecond(5f);
-		agent.addActuatorDevice(la, new Vector3d(0, agent.getHeight(), 0), 0);
-
-		return la;
+	static public RangeSensorBelt addSonarBeltSensor(Agent agent, int nbSonars) {
+		double agentHeight = agent.getHeight();
+		double agentRadius = agent.getRadius();
+		RangeSensorBelt sonarBelt = new RangeSensorBelt((float) agentRadius, 0f, 1.5f, nbSonars, RangeSensorBelt.TYPE_SONAR, 0);
+		sonarBelt.setUpdatePerSecond(3);
+		sonarBelt.setName("sonars");
+		Vector3d pos = new Vector3d(0, agentHeight / 2, 0.0);
+		agent.addSensorDevice(sonarBelt, pos, 0);
+		return sonarBelt;
 	}
 
 	// ///////////////////////////////////////////////////////////////////////////////////

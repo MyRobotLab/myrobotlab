@@ -40,7 +40,13 @@ public class BlockWorldCompositeObject extends BlockWorldObject {
 		components = new ArrayList();
 	}
 
+	protected void addComponent(BlockWorldObject o) {
+		components.add(o);
+		addChild(o);
+	}
+
 	/** Create and pre Compute the transformed bound of the objects. */
+	@Override
 	protected void createTransformedBounds() {
 		for (int i = 0; i < components.size(); i++) {
 			BlockWorldObject bo = (BlockWorldObject) components.get(i);
@@ -57,6 +63,7 @@ public class BlockWorldCompositeObject extends BlockWorldObject {
 	 * @param bs
 	 *            the boundingsphere to intersect with.
 	 */
+	@Override
 	protected boolean intersect(BoundingSphere bs) {
 		// If any component intersect
 		for (int i = 0; i < components.size(); i++) {
@@ -64,10 +71,5 @@ public class BlockWorldCompositeObject extends BlockWorldObject {
 				return true;
 		}
 		return false;
-	}
-
-	protected void addComponent(BlockWorldObject o) {
-		components.add(o);
-		addChild(o);
 	}
 }

@@ -45,32 +45,32 @@ public class OpenCVFilterSplit extends OpenCVFilter {
 
 	public final String splitKey = String.format("%s_SPLIT", name);;
 	public IplImage splitImage;
-	
-	public OpenCVFilterSplit()  {
+
+	public OpenCVFilterSplit() {
 		super();
 	}
-	
-	public OpenCVFilterSplit(String name)  {
+
+	public OpenCVFilterSplit(String name) {
 		super(name);
 	}
 
 	@Override
-	public IplImage process(IplImage image, OpenCVData data) {
-		cvCopy(image, splitImage);
-		return image;
+	public ArrayList<String> getPossibleSources() {
+		ArrayList<String> ret = new ArrayList<String>();
+		ret.add(name);
+		ret.add(splitKey);
+		return ret;
 	}
 
 	@Override
 	public void imageChanged(IplImage image) {
 		splitImage = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
 	}
-	
-	public ArrayList<String> getPossibleSources()
-	{
-		ArrayList<String> ret = new ArrayList<String>();
-		ret.add(name);
-		ret.add(splitKey);
-		return ret;
+
+	@Override
+	public IplImage process(IplImage image, OpenCVData data) {
+		cvCopy(image, splitImage);
+		return image;
 	}
 
 }

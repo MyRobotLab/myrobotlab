@@ -37,11 +37,18 @@ import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterDefaultGUI extends OpenCVFilterGUI implements ActionListener {
 
-		
 	public OpenCVFilterDefaultGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
-		
+
 		display.add(new JLabel("no available parameters"));
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		OpenCVFilter bf = boundFilter.filter;
+
+		setFilterState(bf);
 	}
 
 	// @Override
@@ -59,18 +66,11 @@ public class OpenCVFilterDefaultGUI extends OpenCVFilterGUI implements ActionLis
 	@Override
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				OpenCVFilter bf = filterWrapper.filter;
 			}
 		});
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		OpenCVFilter bf =  boundFilter.filter;
-		
-		setFilterState(bf);
 	}
 
 }

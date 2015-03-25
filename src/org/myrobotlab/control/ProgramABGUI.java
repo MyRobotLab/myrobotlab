@@ -50,64 +50,6 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 	}
 
 	@Override
-	public void init() {
-		//
-		scrollResponse.setAutoscrolls(true);
-		display.setLayout(new BorderLayout());
-
-		JPanel inputControl = new JPanel();
-
-		inputControl.add(text);
-		inputControl.add(askButton);
-
-		display.add(inputControl, BorderLayout.PAGE_START);
-
-		display.add(scrollResponse, BorderLayout.CENTER);
-
-		JPanel botControl = new JPanel();
-
-		botControl.add(progABPath);
-		botControl.add(botName);
-		botControl.add(startSessionButton);
-		botControl.add(saveAIML);
-		botControl.add(savePredicates);
-
-		display.add(botControl, BorderLayout.PAGE_END);
-
-		text.addActionListener(this);
-		askButton.addActionListener(this);
-
-		startSessionButton.addActionListener(this);
-
-		saveAIML.addActionListener(this);
-		savePredicates.addActionListener(this);
-
-	}
-
-	public void getState(final ProgramAB programab) {
-
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-
-			}
-		});
-
-	}
-
-	@Override
-	public void attachGUI() {
-		//
-		subscribe("publishState", "getState", ProgramAB.class);
-		myService.send(boundServiceName, "publishState");
-	}
-
-	@Override
-	public void detachGUI() {
-		//
-		unsubscribe("publishState", "getState", ProgramAB.class);
-	}
-
-	@Override
 	public void actionPerformed(ActionEvent event) {
 		Object o = event.getSource();
 		if (o == askButton || o == text) {
@@ -140,6 +82,65 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 			log.info("Unknown action!");
 		}
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void attachGUI() {
+		//
+		subscribe("publishState", "getState", ProgramAB.class);
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void detachGUI() {
+		//
+		unsubscribe("publishState", "getState", ProgramAB.class);
+	}
+
+	public void getState(final ProgramAB programab) {
+
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+			}
+		});
+
+	}
+
+	@Override
+	public void init() {
+		//
+		scrollResponse.setAutoscrolls(true);
+		display.setLayout(new BorderLayout());
+
+		JPanel inputControl = new JPanel();
+
+		inputControl.add(text);
+		inputControl.add(askButton);
+
+		display.add(inputControl, BorderLayout.PAGE_START);
+
+		display.add(scrollResponse, BorderLayout.CENTER);
+
+		JPanel botControl = new JPanel();
+
+		botControl.add(progABPath);
+		botControl.add(botName);
+		botControl.add(startSessionButton);
+		botControl.add(saveAIML);
+		botControl.add(savePredicates);
+
+		display.add(botControl, BorderLayout.PAGE_END);
+
+		text.addActionListener(this);
+		askButton.addActionListener(this);
+
+		startSessionButton.addActionListener(this);
+
+		saveAIML.addActionListener(this);
+		savePredicates.addActionListener(this);
+
 	}
 
 }

@@ -69,13 +69,12 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 
 	// undocked information -- begin --
 
-	
 	public int x;
-	
+
 	public int y;
-	
+
 	public int width = 600;
-	
+
 	public int height = 600;
 
 	transient private JFrame undocked;
@@ -90,9 +89,8 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 	// tab -- end --
 
 	protected ServiceGUI self;
-	boolean isHidden = false; // flipping visible on and off will ruin tab panels i think
-
-	public abstract void init();
+	boolean isHidden = false; // flipping visible on and off will ruin tab
+								// panels i think
 
 	public ServiceGUI(final String boundServiceName, final GUIService myService, JTabbedPane tabs) {
 		self = this;
@@ -103,7 +101,7 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 
 		tabs.addTab(boundServiceName, display);
 		tabs.setTabComponentAt(tabs.getTabCount() - 1, tabControl);
-		
+
 		gc.anchor = GridBagConstraints.FIRST_LINE_END;
 
 		// place menu
@@ -115,89 +113,46 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 
 	}
 
-	/**
-	 * hook for GUIService framework to query each panel before release checking
-	 * if any panel needs user input before shutdown
-	 * 
-	 * @return
-	 */
-	public boolean isReadyForRelease() {
-		return true;
-	}
+	@Override
+	public void actionPerformed(ActionEvent e, String tabName) {
+		String cmd = e.getActionCommand();
+		// parent.getSelectedComponent()
+		String label = tabName;
+		if (label.equals(tabName)) {
+			// Service Frame
+			ServiceInterface sw = Runtime.getService(tabName);
+			if ("info".equals(cmd)) {
+				BareBonesBrowserLaunch.openURL("http://myrobotlab.org/service/" + sw.getSimpleName());
 
-	public JPanel getDisplay() {
-		return display;
-	}
-
-	/*
-	 * Service functions
-	 */
-	public void subscribe(String inOutMethod) {
-		subscribe(inOutMethod, inOutMethod, (Class<?>[]) null);
-	}
-
-	public void subscribe(String inMethod, String outMethod) {
-		subscribe(inMethod, outMethod, (Class<?>[]) null);
-	}
-
-	public void subscribe(String outMethod, String inMethod, Class<?>... parameterType) {
-		MRLListener listener = null;
-		if (parameterType != null) {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod, parameterType);
+			} else if ("undock".equals(cmd)) {
+				undockPanel();
+			} else if ("release".equals(cmd)) {
+				myService.send(Runtime.getInstance().getName(), "releaseService", label);
+			} else if ("prevent export".equals(cmd)) {
+				myService.send(label, "allowExport", false);
+			} else if ("allow export".equals(cmd)) {
+				myService.send(label, "allowExport", true);
+			} else if ("hide".equals(cmd)) {
+				// myService.send(label, "hide", true);
+				// myService.hidePanel(label);
+				hidePanel();
+			}
 		} else {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod, null);
+			// Sub Tabbed sub pane
+			ServiceInterface sw = Runtime.getService(label);
+			if ("info".equals(cmd)) {
+				BareBonesBrowserLaunch.openURL("http://myrobotlab.org/service/" + sw.getSimpleName() + "#" + tabName);
+
+			} else if ("undock".equals(cmd)) {
+				undockPanel();
+			}
 		}
-
-		myService.send(boundServiceName, "addListener", listener);
-
-	}
-
-	public void send(String method) {
-		send(method, (Object[]) null);
-	}
-
-	public void send(String method, Object... params) {
-		myService.send(boundServiceName, method, params);
-	}
-
-	// TODO - more closely model java event system with addNotification or
-	// addListener
-	public void unsubscribe(String inOutMethod) {
-		unsubscribe(inOutMethod, inOutMethod, (Class<?>[]) null);
-	}
-
-	public void unsubscribe(String inMethod, String outMethod) {
-		unsubscribe(inMethod, outMethod, (Class<?>[]) null);
-	}
-
-	public void unsubscribe(String outMethod, String inMethod, Class<?>... parameterType) {
-
-		MRLListener listener = null;
-		if (parameterType != null) {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod, parameterType);
-		} else {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod, null);
-		}
-		myService.send(boundServiceName, "removeListener", listener);
 
 	}
 
 	public abstract void attachGUI();
 
 	public abstract void detachGUI();
-
-	public int test(int i, double d) {
-		int x = 0;
-		return x;
-	}
-
-	public void makeReadyForRelease() {
-
-	}
-
-	public Component getTabControl() {
-		return tabControl;
-	}
 
 	// -- TabControlEventHandler -- begin
 	@Override
@@ -208,6 +163,7 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 
 		SwingUtilities.invokeLater(new Runnable() {
 
+			@Override
 			public void run() {
 
 				// setting tabcontrol
@@ -235,8 +191,125 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 		});
 	}
 
+	public JPanel getDisplay() {
+		return display;
+	}
+
+	public Component getTabControl() {
+		return tabControl;
+	}
+
+	public void hidePanel() {
+		if (isHidden) {
+			log.info("{} panel is already hidden", tabControl.getText());
+			return;
+		}
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				log.info("hidePanel");
+				if (undocked != null) {
+					undocked.setVisible(false);
+				} else {
+					// YAY! - the way to do it !
+					int index = tabs.indexOfComponent(display);
+					// int index = tabs.indexOfTab(tabControl.getText());
+					if (index != -1) {
+						tabs.remove(index);
+					} else {
+						log.error("{} - has -1 index", tabControl.getText());
+					}
+				}
+
+				isHidden = true;
+
+			}
+		});
+	}
+
+	public abstract void init();
+
 	public boolean isDocked() {
 		return undocked == null;
+	}
+
+	public boolean isHidden() {
+		return isHidden;
+	}
+
+	/**
+	 * hook for GUIService framework to query each panel before release checking
+	 * if any panel needs user input before shutdown
+	 * 
+	 * @return
+	 */
+	public boolean isReadyForRelease() {
+		return true;
+	}
+
+	public void makeReadyForRelease() {
+
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent event, String tabName) {
+		if (myService != null) {
+			myService.lastTabVisited = tabName;
+		}
+	}
+
+	public void remove() {
+		detachGUI();
+		hidePanel();
+		if (undocked != null) {
+			undocked.dispose();
+		}
+	}
+
+	public void savePosition() {
+		if (undocked != null) {
+			Point point = undocked.getLocation();
+			x = point.x;
+			y = point.y;
+			width = undocked.getWidth();
+			height = undocked.getHeight();
+		}
+	}
+
+	public void send(String method) {
+		send(method, (Object[]) null);
+	}
+
+	public void send(String method, Object... params) {
+		myService.send(boundServiceName, method, params);
+	}
+
+	/*
+	 * Service functions
+	 */
+	public void subscribe(String inOutMethod) {
+		subscribe(inOutMethod, inOutMethod, (Class<?>[]) null);
+	}
+
+	public void subscribe(String inMethod, String outMethod) {
+		subscribe(inMethod, outMethod, (Class<?>[]) null);
+	}
+
+	public void subscribe(String outMethod, String inMethod, Class<?>... parameterType) {
+		MRLListener listener = null;
+		if (parameterType != null) {
+			listener = new MRLListener(outMethod, myService.getName(), inMethod, parameterType);
+		} else {
+			listener = new MRLListener(outMethod, myService.getName(), inMethod, null);
+		}
+
+		myService.send(boundServiceName, "addListener", listener);
+
+	}
+
+	public int test(int i, double d) {
+		int x = 0;
+		return x;
 	}
 
 	@Override
@@ -251,6 +324,7 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 	public void undockPanel() {
 
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 
 				tabs.remove(display);
@@ -288,83 +362,13 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 
 	}
 
-	@Override
-	public void mouseClicked(MouseEvent event, String tabName) {
-		if (myService != null) {
-			myService.lastTabVisited = tabName;
-		}
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e, String tabName) {
-		String cmd = e.getActionCommand();
-		// parent.getSelectedComponent()
-		String label = tabName;
-		if (label.equals(tabName)) {
-			// Service Frame
-			ServiceInterface sw = Runtime.getService(tabName);
-			if ("info".equals(cmd)) {
-				BareBonesBrowserLaunch.openURL("http://myrobotlab.org/service/" + sw.getSimpleName());
-
-			} else if ("undock".equals(cmd)) {
-				undockPanel();
-			} else if ("release".equals(cmd)) {
-				myService.send(Runtime.getInstance().getName(), "releaseService", label);
-			} else if ("prevent export".equals(cmd)) {
-				myService.send(label, "allowExport", false);
-			} else if ("allow export".equals(cmd)) {	
-				myService.send(label, "allowExport", true);
-			} else if ("hide".equals(cmd)) {
-				// myService.send(label, "hide", true);
-				//myService.hidePanel(label);
-				hidePanel();
-			}
-		} else {
-			// Sub Tabbed sub pane
-			ServiceInterface sw = Runtime.getService(label);
-			if ("info".equals(cmd)) {
-				BareBonesBrowserLaunch.openURL("http://myrobotlab.org/service/" + sw.getSimpleName() + "#" + tabName);
-
-			} else if ("undock".equals(cmd)) {
-				undockPanel();
-			}
-		}
-
-	}
-
-	public void hidePanel() {
-		if (isHidden){
-			log.info("{} panel is already hidden", tabControl.getText());
-			return;
-		}
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				log.info("hidePanel");
-				if (undocked != null) {
-					undocked.setVisible(false);
-				} else {
-					// YAY! - the way to do it !
-					int index = tabs.indexOfComponent(display);
-					//int index = tabs.indexOfTab(tabControl.getText());
-					if (index != -1) {
-						tabs.remove(index);
-					} else {
-						log.error("{} - has -1 index", tabControl.getText());
-					}
-				}
-				
-				isHidden = true;
-
-			}
-		});
-	}
-
 	public void unhidePanel() {
-		if (!isHidden){
+		if (!isHidden) {
 			log.info("{} panel is already un-hidden", tabControl.getText());
 			return;
 		}
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				log.info("unhidePanel {}", tabControl.getText());
 
@@ -372,52 +376,52 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 					undocked.setVisible(true);
 				} else {
 					display.setVisible(true);
-					//tabs.addTab(tabControl.getText(), tabControl);
-					
+					// tabs.addTab(tabControl.getText(), tabControl);
+
 					tabs.add(tabControl.getText(), display);
 					tabs.setTabComponentAt(tabs.getTabCount() - 1, tabControl);
-					
+
 				}
 
 				// FIXME don't know what i'm doing...
 				display.revalidate();
 				// getFrame().revalidate();
 				// getFrame().pack();
-				
+
 				isHidden = false;
 			}
-			
-			
+
 		});
 
 	}
-	
-	public void remove(){
-		detachGUI();
-		hidePanel();
-		if (undocked != null){
-			undocked.dispose();
+
+	// TODO - more closely model java event system with addNotification or
+	// addListener
+	public void unsubscribe(String inOutMethod) {
+		unsubscribe(inOutMethod, inOutMethod, (Class<?>[]) null);
+	}
+
+	public void unsubscribe(String inMethod, String outMethod) {
+		unsubscribe(inMethod, outMethod, (Class<?>[]) null);
+	}
+
+	public void unsubscribe(String outMethod, String inMethod, Class<?>... parameterType) {
+
+		MRLListener listener = null;
+		if (parameterType != null) {
+			listener = new MRLListener(outMethod, myService.getName(), inMethod, parameterType);
+		} else {
+			listener = new MRLListener(outMethod, myService.getName(), inMethod, null);
 		}
-	}
-	
-	public void windowClosing(WindowEvent winEvt) {
-		dockPanel();
-	}
-	
-	public boolean isHidden(){
-		return isHidden;
+		myService.send(boundServiceName, "removeListener", listener);
+
 	}
 
 	// -- TabControlEventHandler -- end
 
-	public void savePosition() {
-		if (undocked != null) {
-			Point point = undocked.getLocation();
-			x = point.x;
-			y = point.y;
-			width = undocked.getWidth();
-			height = undocked.getHeight();
-		}
+	@Override
+	public void windowClosing(WindowEvent winEvt) {
+		dockPanel();
 	}
 
 }

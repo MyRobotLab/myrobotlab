@@ -22,19 +22,28 @@ public class VideoSourceFrameGrabber extends FrameGrabber {
 
 	public final static Logger log = LoggerFactory.getLogger(VideoSourceFrameGrabber.class.getCanonicalName());
 
+	int maxQueue = 100;
+
 	public VideoSourceFrameGrabber(String name) {
 	}
 
-	@Override
-	public void start() {
-	}
+	public void add(SerializableImage image) {
 
-	@Override
-	public void stop() {
-	}
+		synchronized (imgq) {
+			if (imgq.size() > maxQueue) {
+				log.warn(String.format("Image Source BUFFER OVERRUN size %d dropping frames", imgq.size()));
+				try {
+					// FIXME ??? it's not nice to keep the inbound thread
+					// waiting No ???
+					imgq.wait();
+				} catch (InterruptedException e) {
+				}
+			} else {
+				imgq.addFirst(image);
+				imgq.notifyAll(); // must own the lock
+			}
+		}
 
-	@Override
-	public void trigger() throws Exception {
 	}
 
 	@Override
@@ -60,29 +69,20 @@ public class VideoSourceFrameGrabber extends FrameGrabber {
 		return image;
 	}
 
-	int maxQueue = 100;
-
-	public void add(SerializableImage image) {
-
-		synchronized (imgq) {
-			if (imgq.size() > maxQueue) {
-				log.warn(String.format("Image Source BUFFER OVERRUN size %d dropping frames", imgq.size()));
-				try {
-					// FIXME ??? it's not nice to keep the inbound thread
-					// waiting No ???
-					imgq.wait();
-				} catch (InterruptedException e) {
-				}
-			} else {
-				imgq.addFirst(image);
-				imgq.notifyAll(); // must own the lock
-			}
-		}
-
+	@Override
+	public void release() throws Exception {
 	}
 
 	@Override
-	public void release() throws Exception {
+	public void start() {
+	}
+
+	@Override
+	public void stop() {
+	}
+
+	@Override
+	public void trigger() throws Exception {
 	}
 
 }

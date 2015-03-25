@@ -43,12 +43,17 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 	transient IplImage dst = null;
 	transient IplImage negativeImage = null;
 
-	public OpenCVFilterAddMask()  {
+	public OpenCVFilterAddMask() {
 		super();
 	}
-	
-	public OpenCVFilterAddMask(String name)  {
+
+	public OpenCVFilterAddMask(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		dst = null;
 	}
 
 	@Override
@@ -72,11 +77,6 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 			return image;
 		}
 
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		dst = null;
 	}
 
 }

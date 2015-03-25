@@ -97,170 +97,12 @@ import org.slf4j.Logger;
  */
 public class NanoHTTPD {
 	/**
-	 * Some HTTP response status codes
-	 */
-	public static final String HTTP_OK = "200 OK";
-	public static final String HTTP_REDIRECT = "301 Moved Permanently";
-	//public static final String HTTP_NOT_AUTHORIZED = "401 Not Authorized";
-	public static final String HTTP_NOT_AUTHORIZED = "401 Access Denied";
-	
-	public static final String HTTP_FORBIDDEN = "403 Forbidden";
-	public static final String HTTP_NOTFOUND = "404 Not Found";
-	public static final String HTTP_BADREQUEST = "400 Bad Request";
-	public static final String HTTP_INTERNALERROR = "500 Internal Server Error";
-	public static final String HTTP_NOTIMPLEMENTED = "501 Not Implemented";
-
-	/**
-	 * Common mime types for dynamic content
-	 */
-	public static final String MIME_PLAINTEXT = "text/plain";
-	public static final String MIME_HTML = "text/html";
-	public static final String MIME_DEFAULT_BINARY = "application/octet-stream";
-
-	Thread thread;
-	ServerSocket serverSocket;
-
-	//
-	// API parts
-	//
-	public final static Logger log = LoggerFactory.getLogger(NanoHTTPD.class.getCanonicalName());
-
-	/**
-	 * Override this to customize the server.
-	 * <p>
-	 * 
-	 * (By default, this delegates to serveFile() and allows directory listing.)
-	 * 
-	 * @parm uri Percent-decoded URI without parameters, for example
-	 *       "/index.cgi"
-	 * @parm method "GET", "POST" etc.
-	 * @parm parms Parsed, percent decoded parameters from URI and, in case of
-	 *       POST, data.
-	 * @parm header Header entries, percent decoded
-	 * @return HTTP response, see class Response for details
-	 */
-	public Response serve(String uri, String method, Properties header, Properties parms, Socket socket) {
-		log.info(method + " '" + uri + "' ");
-
-		Enumeration e = header.propertyNames();
-		while (e.hasMoreElements()) {
-			String value = (String) e.nextElement();
-			log.info("  HDR: '" + value + "' = '" + header.getProperty(value) + "'");
-		}
-		e = parms.propertyNames();
-		while (e.hasMoreElements()) {
-			String value = (String) e.nextElement();
-			log.info("  PRM: '" + value + "' = '" + parms.getProperty(value) + "'");
-		}
-
-		return serveFile(uri, header, new File("."), true);
-	}
-
-	/**
-	 * HTTP response. Return one of these from serve().
-	 */
-	static public class Response {
-		/**
-		 * Default constructor: response = HTTP_OK, data = mime = 'null'
-		 */
-		public Response() {
-			this.status = HTTP_OK;
-		}
-
-		/**
-		 * Basic constructor.
-		 */
-		public Response(String status, String mimeType, InputStream data) {
-			this.status = status;
-			this.mimeType = mimeType;
-			this.data = data;
-		}
-
-		/**
-		 * Convenience method that makes an InputStream out of given text.
-		 */
-		public Response(String status, String mimeType, String txt) {
-			this.status = status;
-			this.mimeType = mimeType;
-			this.data = new ByteArrayInputStream(txt.getBytes());
-		}
-
-		/**
-		 * Adds given line to the header.
-		 */
-		public void addHeader(String name, String value) {
-			header.put(name, value);
-		}
-
-		/**
-		 * HTTP status code after processing, e.g. "200 OK", HTTP_OK
-		 */
-		public String status;
-
-		/**
-		 * MIME type of content, e.g. "text/html"
-		 */
-		public String mimeType;
-
-		/**
-		 * Data of the response, may be null.
-		 */
-		public InputStream data;
-
-		/**
-		 * Headers for the HTTP response. Use addHeader() to add lines.
-		 */
-		public Properties header = new Properties();
-	}
-
-	//
-	// Socket & server code
-	//
-
-	/**
-	 * Starts a HTTP server to given port.
-	 * <p>
-	 * Throws an IOException if the socket is already in use
-	 */
-	public NanoHTTPD(int port) {
-		myTcpPort = port;
-	}
-
-	public void start() throws IOException {
-		if (thread == null) {
-			serverSocket = new ServerSocket(myTcpPort);
-			thread = new Thread(new Runnable() {
-				public void run() {
-					try {
-						while (true) {
-							Socket clientSocket = serverSocket.accept();
-							new HTTPSession(clientSocket);
-							log.info("new client - {}:{}", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
-						}
-					} catch (IOException ioe) {
-					}
-				}
-			},"nanoHTTP_accept");
-			// t.setDaemon(true); daemons die if no user thread exist
-			thread.start();
-		} else {
-			log.warn("server already started");
-		}
-	}
-
-	public void stop() {
-		try {
-			serverSocket.close();
-		} catch (IOException e) {
-		}
-		thread = null;
-	}
-
-	/**
 	 * Handles one session, i.e. parses the HTTP request and returns the
 	 * response.
 	 */
 	private class HTTPSession implements Runnable {
+		private Socket socket;
+
 		public HTTPSession(Socket s) {
 			socket = s;
 			Thread t = new Thread(this);
@@ -268,6 +110,59 @@ public class NanoHTTPD {
 			t.start();
 		}
 
+		/**
+		 * Decodes parameters in percent-encoded URI-format ( e.g.
+		 * "name=Jack%20Daniels&pass=Single%20Malt" ) and adds them to given
+		 * Properties.
+		 */
+		private void decodeParms(String parms, Properties p) throws InterruptedException {
+			if (parms == null)
+				return;
+
+			StringTokenizer st = new StringTokenizer(parms, "&");
+			while (st.hasMoreTokens()) {
+				String e = st.nextToken();
+				int sep = e.indexOf('=');
+				if (sep >= 0)
+					p.put(decodePercent(e.substring(0, sep), false).trim(), decodePercent(e.substring(sep + 1), false));
+			}
+		}
+
+		/**
+		 * Decodes the percent encoding scheme. <br/>
+		 * For example: "an+example%20string" -> "an example string"
+		 */
+		private String decodePercent(String str, boolean decodeForwardSlash) throws InterruptedException {
+			try {
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < str.length(); i++) {
+					char c = str.charAt(i);
+					switch (c) {
+					case '+':
+						sb.append(' ');
+						break;
+					case '%':
+						if ("2F".equalsIgnoreCase(str.substring(i + 1, i + 3))) {
+							log.info("found encoded / - leaving");
+							sb.append("%2F");
+						} else {
+							sb.append((char) Integer.parseInt(str.substring(i + 1, i + 3), 16));
+						}
+						i += 2;
+						break;
+					default:
+						sb.append(c);
+						break;
+					}
+				}
+				return new String(sb.toString().getBytes());
+			} catch (Exception e) {
+				sendError(HTTP_BADREQUEST, "BAD REQUEST: Bad percent-encoding.");
+				return null;
+			}
+		}
+
+		@Override
 		public void run() {
 			try {
 				InputStream is = socket.getInputStream();
@@ -276,9 +171,8 @@ public class NanoHTTPD {
 				BufferedReader in = new BufferedReader(new InputStreamReader(is));
 
 				String line = in.readLine();
-				
-				if (line == null)
-				{
+
+				if (line == null) {
 					log.error("HTTPSession input stream is null");
 					return;
 				}
@@ -365,59 +259,6 @@ public class NanoHTTPD {
 		}
 
 		/**
-		 * Decodes the percent encoding scheme. <br/>
-		 * For example: "an+example%20string" -> "an example string"
-		 */
-		private String decodePercent(String str, boolean decodeForwardSlash) throws InterruptedException {
-			try {
-				StringBuffer sb = new StringBuffer();
-				for (int i = 0; i < str.length(); i++) {
-					char c = str.charAt(i);
-					switch (c) {
-					case '+':
-						sb.append(' ');
-						break;
-					case '%':
-						if ("2F".equalsIgnoreCase(str.substring(i + 1, i + 3)))
-						{
-							log.info("found encoded / - leaving");
-							sb.append("%2F");
-						} else {
-							sb.append((char) Integer.parseInt(str.substring(i + 1, i + 3), 16));
-						}
-						i += 2;
-						break;
-					default:
-						sb.append(c);
-						break;
-					}
-				}
-				return new String(sb.toString().getBytes());
-			} catch (Exception e) {
-				sendError(HTTP_BADREQUEST, "BAD REQUEST: Bad percent-encoding.");
-				return null;
-			}
-		}
-
-		/**
-		 * Decodes parameters in percent-encoded URI-format ( e.g.
-		 * "name=Jack%20Daniels&pass=Single%20Malt" ) and adds them to given
-		 * Properties.
-		 */
-		private void decodeParms(String parms, Properties p) throws InterruptedException {
-			if (parms == null)
-				return;
-
-			StringTokenizer st = new StringTokenizer(parms, "&");
-			while (st.hasMoreTokens()) {
-				String e = st.nextToken();
-				int sep = e.indexOf('=');
-				if (sep >= 0)
-					p.put(decodePercent(e.substring(0, sep), false).trim(), decodePercent(e.substring(sep + 1), false));
-			}
-		}
-
-		/**
 		 * Returns an error message as a HTTP response and throws
 		 * InterruptedException to stop furhter request processing.
 		 */
@@ -477,9 +318,147 @@ public class NanoHTTPD {
 				}
 			}
 		}
+	}
 
-		private Socket socket;
+	/**
+	 * HTTP response. Return one of these from serve().
+	 */
+	static public class Response {
+		/**
+		 * HTTP status code after processing, e.g. "200 OK", HTTP_OK
+		 */
+		public String status;
+
+		/**
+		 * MIME type of content, e.g. "text/html"
+		 */
+		public String mimeType;
+
+		/**
+		 * Data of the response, may be null.
+		 */
+		public InputStream data;
+
+		/**
+		 * Headers for the HTTP response. Use addHeader() to add lines.
+		 */
+		public Properties header = new Properties();
+
+		/**
+		 * Default constructor: response = HTTP_OK, data = mime = 'null'
+		 */
+		public Response() {
+			this.status = HTTP_OK;
+		}
+
+		/**
+		 * Basic constructor.
+		 */
+		public Response(String status, String mimeType, InputStream data) {
+			this.status = status;
+			this.mimeType = mimeType;
+			this.data = data;
+		}
+
+		/**
+		 * Convenience method that makes an InputStream out of given text.
+		 */
+		public Response(String status, String mimeType, String txt) {
+			this.status = status;
+			this.mimeType = mimeType;
+			this.data = new ByteArrayInputStream(txt.getBytes());
+		}
+
+		/**
+		 * Adds given line to the header.
+		 */
+		public void addHeader(String name, String value) {
+			header.put(name, value);
+		}
+	}
+
+	/**
+	 * Some HTTP response status codes
+	 */
+	public static final String HTTP_OK = "200 OK";
+
+	public static final String HTTP_REDIRECT = "301 Moved Permanently";
+
+	// public static final String HTTP_NOT_AUTHORIZED = "401 Not Authorized";
+	public static final String HTTP_NOT_AUTHORIZED = "401 Access Denied";
+	public static final String HTTP_FORBIDDEN = "403 Forbidden";
+	public static final String HTTP_NOTFOUND = "404 Not Found";
+	public static final String HTTP_BADREQUEST = "400 Bad Request";
+
+	public static final String HTTP_INTERNALERROR = "500 Internal Server Error";
+	public static final String HTTP_NOTIMPLEMENTED = "501 Not Implemented";
+	/**
+	 * Common mime types for dynamic content
+	 */
+	public static final String MIME_PLAINTEXT = "text/plain";
+
+	public static final String MIME_HTML = "text/html";
+	public static final String MIME_DEFAULT_BINARY = "application/octet-stream";
+
+	Thread thread;
+
+	ServerSocket serverSocket;
+
+	//
+	// API parts
+	//
+	public final static Logger log = LoggerFactory.getLogger(NanoHTTPD.class.getCanonicalName());
+
+	//
+	// Socket & server code
+	//
+
+	private int myTcpPort;
+
+	File myFileDir;
+
+	/**
+	 * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
+	 */
+	public static Hashtable theMimeTypes = new Hashtable();
+
+	static {
+		StringTokenizer st = new StringTokenizer("js    text/javascript " + "css    text/css " + "htm    text/html " + "html   text/html " + "txt    text/plain "
+				+ "asc    text/plain " + "gif    image/gif " + "jpg    image/jpeg " + "jpeg   image/jpeg " + "png    image/png " + "mp3    audio/mpeg " + "m3u    audio/mpeg-url "
+				+ "pdf    application/pdf " + "doc    application/msword " + "ogg    application/x-ogg " + "zip    application/octet-stream " + "exe    application/octet-stream "
+				+ "class    application/octet-stream " + "ico    image/x-icon ");
+		while (st.hasMoreTokens())
+			theMimeTypes.put(st.nextToken(), st.nextToken());
 	};
+
+	/**
+	 * GMT date formatter
+	 */
+	private static java.text.SimpleDateFormat gmtFrmt;
+
+	static {
+		gmtFrmt = new java.text.SimpleDateFormat("E, d MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+		gmtFrmt.setTimeZone(TimeZone.getTimeZone("GMT"));
+	}
+
+	/**
+	 * The distribution licence
+	 */
+	private static final String LICENCE = "Copyright (C) 2001,2005 by Jarno Elonen <elonen@iki.fi>\n" + "\n"
+			+ "Redistribution and use in source and binary forms, with or without\n" + "modification, are permitted provided that the following conditions\n" + "are met:\n" + "\n"
+			+ "Redistributions of source code must retain the above copyright notice,\n" + "this list of conditions and the following disclaimer. Redistributions in\n"
+			+ "binary form must reproduce the above copyright notice, this list of\n" + "conditions and the following disclaimer in the documentation and/or other\n"
+			+ "materials provided with the distribution. The name of the author may not\n" + "be used to endorse or promote products derived from this software without\n"
+			+ "specific prior written permission. \n" + " \n" + "THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR\n"
+			+ "IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES\n" + "OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.\n"
+			+ "IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,\n" + "INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT\n"
+			+ "NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n" + "DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n"
+			+ "THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n" + "(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
+			+ "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.";
+
+	//
+	// File server code
+	//
 
 	/**
 	 * URL-encodes everything between "/"-characters. Encodes spaces as '%20'
@@ -504,13 +483,87 @@ public class NanoHTTPD {
 		return newUri;
 	}
 
-	private int myTcpPort;
+	/**
+	 * Starts as a standalone file server and waits for Enter.
+	 */
+	public static void main(String[] args) {
+		log.info("NanoHTTPD 1.1 (C) 2001,2005-2007 Jarno Elonen\n" + "(Command line options: [port] [--license])\n");
 
-	File myFileDir;
+		// Show licence if requested
+		int lopt = -1;
+		for (int i = 0; i < args.length; ++i)
+			if (args[i].toLowerCase().endsWith("licence")) {
+				lopt = i;
+				log.info(LICENCE + "\n");
+			}
 
-	//
-	// File server code
-	//
+		// Change port if requested
+		int port = 80;
+		if (args.length > 0 && lopt != 0)
+			port = Integer.parseInt(args[0]);
+
+		if (args.length > 1 && args[1].toLowerCase().endsWith("licence"))
+			log.info(LICENCE + "\n");
+
+		NanoHTTPD nh = null;
+		nh = new NanoHTTPD(port);
+		try {
+			nh.start();
+		} catch (IOException ioe) {
+			System.err.println("Couldn't start server:\n" + ioe);
+			System.exit(-1);
+		}
+		nh.myFileDir = new File("");
+
+		log.info("Now serving files in port " + port + " from \"" + new File("").getAbsolutePath() + "\"");
+		log.info("Hit Enter to stop.\n");
+
+		try {
+			System.in.read();
+		} catch (Throwable t) {
+		}
+		;
+	}
+
+	/**
+	 * Starts a HTTP server to given port.
+	 * <p>
+	 * Throws an IOException if the socket is already in use
+	 */
+	public NanoHTTPD(int port) {
+		myTcpPort = port;
+	}
+
+	/**
+	 * Override this to customize the server.
+	 * <p>
+	 * 
+	 * (By default, this delegates to serveFile() and allows directory listing.)
+	 * 
+	 * @parm uri Percent-decoded URI without parameters, for example
+	 *       "/index.cgi"
+	 * @parm method "GET", "POST" etc.
+	 * @parm parms Parsed, percent decoded parameters from URI and, in case of
+	 *       POST, data.
+	 * @parm header Header entries, percent decoded
+	 * @return HTTP response, see class Response for details
+	 */
+	public Response serve(String uri, String method, Properties header, Properties parms, Socket socket) {
+		log.info(method + " '" + uri + "' ");
+
+		Enumeration e = header.propertyNames();
+		while (e.hasMoreElements()) {
+			String value = (String) e.nextElement();
+			log.info("  HDR: '" + value + "' = '" + header.getProperty(value) + "'");
+		}
+		e = parms.propertyNames();
+		while (e.hasMoreElements()) {
+			String value = (String) e.nextElement();
+			log.info("  PRM: '" + value + "' = '" + parms.getProperty(value) + "'");
+		}
+
+		return serveFile(uri, header, new File("."), true);
+	}
 
 	/**
 	 * Serves file from homeDir and its' subdirectories (only). Uses only URI,
@@ -632,83 +685,35 @@ public class NanoHTTPD {
 		}
 	}
 
-	/**
-	 * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
-	 */
-	public static Hashtable theMimeTypes = new Hashtable();
-	static {
-		StringTokenizer st = new StringTokenizer("js    text/javascript " + "css    text/css " + "htm    text/html " + "html   text/html " + "txt    text/plain " + "asc    text/plain " + "gif    image/gif "
-				+ "jpg    image/jpeg " + "jpeg   image/jpeg " + "png    image/png " + "mp3    audio/mpeg " + "m3u    audio/mpeg-url " + "pdf    application/pdf "
-				+ "doc    application/msword " + "ogg    application/x-ogg " + "zip    application/octet-stream " + "exe    application/octet-stream "
-				+ "class    application/octet-stream " + "ico    image/x-icon ");
-		while (st.hasMoreTokens())
-			theMimeTypes.put(st.nextToken(), st.nextToken());
+	public void start() throws IOException {
+		if (thread == null) {
+			serverSocket = new ServerSocket(myTcpPort);
+			thread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						while (true) {
+							Socket clientSocket = serverSocket.accept();
+							new HTTPSession(clientSocket);
+							log.info("new client - {}:{}", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
+						}
+					} catch (IOException ioe) {
+					}
+				}
+			}, "nanoHTTP_accept");
+			// t.setDaemon(true); daemons die if no user thread exist
+			thread.start();
+		} else {
+			log.warn("server already started");
+		}
 	}
 
-	/**
-	 * GMT date formatter
-	 */
-	private static java.text.SimpleDateFormat gmtFrmt;
-	static {
-		gmtFrmt = new java.text.SimpleDateFormat("E, d MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-		gmtFrmt.setTimeZone(TimeZone.getTimeZone("GMT"));
-	}
-
-	/**
-	 * The distribution licence
-	 */
-	private static final String LICENCE = "Copyright (C) 2001,2005 by Jarno Elonen <elonen@iki.fi>\n" + "\n"
-			+ "Redistribution and use in source and binary forms, with or without\n" + "modification, are permitted provided that the following conditions\n" + "are met:\n" + "\n"
-			+ "Redistributions of source code must retain the above copyright notice,\n" + "this list of conditions and the following disclaimer. Redistributions in\n"
-			+ "binary form must reproduce the above copyright notice, this list of\n" + "conditions and the following disclaimer in the documentation and/or other\n"
-			+ "materials provided with the distribution. The name of the author may not\n" + "be used to endorse or promote products derived from this software without\n"
-			+ "specific prior written permission. \n" + " \n" + "THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR\n"
-			+ "IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES\n" + "OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.\n"
-			+ "IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,\n" + "INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT\n"
-			+ "NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n" + "DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n"
-			+ "THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n" + "(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
-			+ "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.";
-
-	/**
-	 * Starts as a standalone file server and waits for Enter.
-	 */
-	public static void main(String[] args) {
-		log.info("NanoHTTPD 1.1 (C) 2001,2005-2007 Jarno Elonen\n" + "(Command line options: [port] [--license])\n");
-
-		// Show licence if requested
-		int lopt = -1;
-		for (int i = 0; i < args.length; ++i)
-			if (args[i].toLowerCase().endsWith("licence")) {
-				lopt = i;
-				log.info(LICENCE + "\n");
-			}
-
-		// Change port if requested
-		int port = 80;
-		if (args.length > 0 && lopt != 0)
-			port = Integer.parseInt(args[0]);
-
-		if (args.length > 1 && args[1].toLowerCase().endsWith("licence"))
-			log.info(LICENCE + "\n");
-
-		NanoHTTPD nh = null;
-		nh = new NanoHTTPD(port);
+	public void stop() {
 		try {
-			nh.start();
-		} catch (IOException ioe) {
-			System.err.println("Couldn't start server:\n" + ioe);
-			System.exit(-1);
+			serverSocket.close();
+		} catch (IOException e) {
 		}
-		nh.myFileDir = new File("");
-
-		log.info("Now serving files in port " + port + " from \"" + new File("").getAbsolutePath() + "\"");
-		log.info("Hit Enter to stop.\n");
-
-		try {
-			System.in.read();
-		} catch (Throwable t) {
-		}
-		;
+		thread = null;
 	}
 
 }

@@ -7,6 +7,25 @@ import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
 public class JIntegerField extends JTextField {
+	static class IntegerDocument extends PlainDocument {
+		/**
+	 * 
+	 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+			if (str != null) {
+				try {
+					Integer.decode(str);
+					super.insertString(offs, str, a);
+				} catch (NumberFormatException ex) {
+
+				}
+			}
+		}
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	public JIntegerField() {
@@ -15,6 +34,11 @@ public class JIntegerField extends JTextField {
 
 	public JIntegerField(int cols) {
 		super(cols);
+	}
+
+	@Override
+	protected Document createDefaultModel() {
+		return new IntegerDocument();
 	}
 
 	public int getInt() {
@@ -27,27 +51,5 @@ public class JIntegerField extends JTextField {
 
 	public void setInt(int value) {
 		setText(String.valueOf(value));
-	}
-
-	protected Document createDefaultModel() {
-		return new IntegerDocument();
-	}
-
-	static class IntegerDocument extends PlainDocument {
-		/**
-	 * 
-	 */
-		private static final long serialVersionUID = 1L;
-
-		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-			if (str != null) {
-				try {
-					Integer.decode(str);
-					super.insertString(offs, str, a);
-				} catch (NumberFormatException ex) {
-
-				}
-			}
-		}
 	}
 }

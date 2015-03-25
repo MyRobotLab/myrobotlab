@@ -58,7 +58,7 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 	SliderWithText valueMax = new SliderWithText(JSlider.VERTICAL, 0, 256, 256);
 
 	OpenCVFilterInRange myFilter = null;
-	
+
 	public OpenCVFilterInRangeGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
 		// myFilter = (OpenCVFilterInRange) myOpenCVFilter;
@@ -77,8 +77,8 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 
 		display.setLayout(new BorderLayout());
 		JPanel p = new JPanel();
-		//JPanel display = new JPanel();
-		
+		// JPanel display = new JPanel();
+
 		TitledBorder title;
 		JPanel j = new JPanel(new GridBagLayout());
 		title = BorderFactory.createTitledBorder("hue");
@@ -148,7 +148,7 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 		++gc.gridx;
 		j.add(valueMax.value, gc);
 		p.add(j);
-		
+
 		display.add(p, BorderLayout.CENTER);
 
 	}
@@ -157,8 +157,9 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		boundFilter = filterWrapper;
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				OpenCVFilterInRange bf = (OpenCVFilterInRange)filterWrapper.filter;
+				OpenCVFilterInRange bf = (OpenCVFilterInRange) filterWrapper.filter;
 			}
 		});
 	}
@@ -167,9 +168,8 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 	public void stateChanged(ChangeEvent e) {
 		Object o = e.getSource();
 		OpenCVFilterInRange bf = (OpenCVFilterInRange) boundFilter.filter;
-		
-		if (o == useHue)
-		{
+
+		if (o == useHue) {
 			bf.useHue = useHue.getModel().isSelected();
 		} else if (o == hueMin) {
 			bf.hueMinValue = hueMin.getValue();
@@ -178,9 +178,8 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 			bf.hueMaxValue = hueMax.getValue();
 			hueMax.setText(hueMax.getValue());
 		}
-		
-		if (o == useValue)
-		{
+
+		if (o == useValue) {
 			bf.useValue = useValue.getModel().isSelected();
 		} else if (o == valueMin) {
 			bf.valueMinValue = valueMin.getValue();
@@ -189,10 +188,8 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 			bf.valueMaxValue = valueMax.getValue();
 			valueMax.setText(valueMax.getValue());
 		}
-		
 
-		if (o == useSaturation)
-		{
+		if (o == useSaturation) {
 			bf.useSaturation = useSaturation.getModel().isSelected();
 		} else if (o == saturationMin) {
 			bf.saturationMinValue = saturationMin.getValue();
@@ -201,9 +198,8 @@ public class OpenCVFilterInRangeGUI extends OpenCVFilterGUI implements ChangeLis
 			bf.saturationMaxValue = saturationMax.getValue();
 			saturationMax.setText(saturationMax.getValue());
 		}
-		
+
 		setFilterState(bf);
 	}
-
 
 }

@@ -48,6 +48,7 @@ public class BumpersDemo extends Demo {
 		}
 
 		/** Initialize Agent's Behavior */
+		@Override
 		public void initBehavior() {
 			// nothing particular in this case
 		}
@@ -60,6 +61,7 @@ public class BumpersDemo extends Demo {
 		}
 
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 			backcount--;
 			if (backcount <= 0) {

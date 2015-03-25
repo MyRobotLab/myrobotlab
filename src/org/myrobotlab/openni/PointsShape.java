@@ -110,10 +110,40 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
 	private Semaphore sem;
 	private SensorData kinectData;
 
+	/**
+	 * This method is called by the system some (short) time after
+	 * pointParts.updateData(this) is called in updateDepthCoords(). An update
+	 * of the geometry is carried out: the z-coord is changed in coords[], and
+	 * the point's corresponding colour is updated
+	 * 
+	 * Understand there is a distinction between depth data - and the display
+	 * array the pure depth data is always 640 X 480 resolution - but display
+	 * area expands and the resolution per fixed area decreases as an inverse to
+	 * the distance from the sensor
+	 * 
+	 * References : http://openkinect.org/wiki/Imaging_Information depthInMeters
+	 * = 1.0 / (rawDepth * -0.0030711016 + 3.3309495161);
+	 */
+	int w = 640;
+
+	int h = 480;
+
+	int minDistance = -10;
+
+	float scaleFactor = 0.0021f;
+	final double fx_d = 1.0 / 5.9421434211923247e+02;
+	final double fy_d = 1.0 / 5.9104053696870778e+02;
+	final double cx_d = 3.3930780975300314e+02;
+
+	final double cy_d = 2.4273913761751615e+02;
+	int min = 100000;
+	int max = 0;
+	float displayScale = 0.001f;
+
 	public PointsShape() {
 		// BY_REFERENCE PointArray storing coordinates and colors
-		cloud = new PointArray(MAX_POINTS, PointArray.COORDINATES | PointArray.COLOR_3 | PointArray.BY_REFERENCE);
-		mesh = new TriangleArray(MAX_POINTS, GeometryArray.COORDINATES | PointArray.COLOR_3 | TriangleArray.BY_REFERENCE);
+		cloud = new PointArray(MAX_POINTS, GeometryArray.COORDINATES | GeometryArray.COLOR_3 | GeometryArray.BY_REFERENCE);
+		mesh = new TriangleArray(MAX_POINTS, GeometryArray.COORDINATES | GeometryArray.COLOR_3 | GeometryArray.BY_REFERENCE);
 
 		TransparencyAttributes ta = new TransparencyAttributes();
 		ta.setTransparencyMode(TransparencyAttributes.NICEST);
@@ -141,6 +171,16 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
 		createAppearance();
 		// setAppearance(a);
 	}
+
+	private void createAppearance() {
+		Appearance app = new Appearance();
+
+		PointAttributes pa = new PointAttributes();
+		pa.setPointSize(POINT_SIZE); // fix point size
+		app.setPointAttributes(pa);
+
+		setAppearance(app);
+	} // end of createAppearance()
 
 	/**
 	 * Create and initialize coords and colors arrays for the depth points. Only
@@ -191,45 +231,36 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
 		// setGeometry(mesh);
 	} // end of createGeometry()
 
-	private void createAppearance() {
-		Appearance app = new Appearance();
-
-		PointAttributes pa = new PointAttributes();
-		pa.setPointSize(POINT_SIZE); // fix point size
-		app.setPointAttributes(pa);
-
-		setAppearance(app);
-	} // end of createAppearance()
+	private void printCoord(float[] coords, int xIdx) {
+		System.out.println("" + xIdx + ". depth coord (x,y,z): (" + coords[xIdx] + ", " + coords[xIdx + 1] + ", " + coords[xIdx + 2] + ")");
+	}
 
 	/**
-	 * This method is called by the system some (short) time after
-	 * pointParts.updateData(this) is called in updateDepthCoords(). An update
-	 * of the geometry is carried out: the z-coord is changed in coords[], and
-	 * the point's corresponding colour is updated
-	 * 
-	 * Understand there is a distinction between depth data - and the display
-	 * array the pure depth data is always 640 X 480 resolution - but display
-	 * area expands and the resolution per fixed area decreases as an inverse to
-	 * the distance from the sensor
-	 * 
-	 * References : http://openkinect.org/wiki/Imaging_Information depthInMeters
-	 * = 1.0 / (rawDepth * -0.0030711016 + 3.3309495161);
+	 * map z-coord to colormap key between 0 and 255, and store its color as the
+	 * point's new color; similar to the depth coloring in version 5 of the
+	 * ViewerPanel example: red in forground (and for no depth), changing to
+	 * violet in the background
 	 */
-	int w = 640;
-	int h = 480;
-	int minDistance = -10;
-	float scaleFactor = 0.0021f;
+	private void updateColour(int xCoordIdx, float zCoord) {
 
-	final double fx_d = 1.0 / 5.9421434211923247e+02;
-	final double fy_d = 1.0 / 5.9104053696870778e+02;
-	final double cx_d = 3.3930780975300314e+02;
-	final double cy_d = 2.4273913761751615e+02;
+		Color col = new Color(Color.HSBtoRGB((zCoord * (0.5f)), 0.9f, 0.7f)); // TODO
+																				// -
+																				// calculate
+																				// color
+																				// range
+																				// based
+																				// on
+																				// max
+																				// depth
 
-	int min = 100000;
-	int max = 0;
+		// assign colormap color to the point as a float between 0-1.0f
+		colors[xCoordIdx] = col.getRed() / 255.0f;
+		colors[xCoordIdx + 1] = col.getGreen() / 255.0f;
+		colors[xCoordIdx + 2] = col.getBlue() / 255.0f;
+		colors[xCoordIdx + 3] = 1.0f;
+	} // end of updateColour()
 
-	float displayScale = 0.001f;
-
+	@Override
 	public void updateData(Geometry geo) {
 
 		PrintWriter out = null;
@@ -321,35 +352,6 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
 	} // end of updateData()
 
 	/**
-	 * map z-coord to colormap key between 0 and 255, and store its color as the
-	 * point's new color; similar to the depth coloring in version 5 of the
-	 * ViewerPanel example: red in forground (and for no depth), changing to
-	 * violet in the background
-	 */
-	private void updateColour(int xCoordIdx, float zCoord) {
-
-		Color col = new Color(Color.HSBtoRGB((zCoord * (0.5f)), 0.9f, 0.7f)); // TODO
-																				// -
-																				// calculate
-																				// color
-																				// range
-																				// based
-																				// on
-																				// max
-																				// depth
-
-		// assign colormap color to the point as a float between 0-1.0f
-		colors[xCoordIdx] = col.getRed() / 255.0f;
-		colors[xCoordIdx + 1] = col.getGreen() / 255.0f;
-		colors[xCoordIdx + 2] = col.getBlue() / 255.0f;
-		colors[xCoordIdx + 3] = 1.0f;
-	} // end of updateColour()
-
-	private void printCoord(float[] coords, int xIdx) {
-		System.out.println("" + xIdx + ". depth coord (x,y,z): (" + coords[xIdx] + ", " + coords[xIdx + 1] + ", " + coords[xIdx + 2] + ")");
-	}
-
-	/**
 	 * Use new depth buffer data to update the PointsArray inside the Java 3D
 	 * scene. This method is repeatedly called by DepthReader as the depth
 	 * buffer changes. This method will not return until the 3D scene has been
@@ -364,7 +366,7 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
 		try {
 			sem.acquire(); // wait for update to finish in updateData()
 		} catch (InterruptedException e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 	} // end of updateDepthCoords()
 

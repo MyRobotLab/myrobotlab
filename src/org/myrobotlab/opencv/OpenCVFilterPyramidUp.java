@@ -41,15 +41,21 @@ public class OpenCVFilterPyramidUp extends OpenCVFilter {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidUp.class.getCanonicalName());
 
 	IplImage dst = null;
-	
+
 	int filter = 7;
-	
-	public OpenCVFilterPyramidUp()  {
+
+	public OpenCVFilterPyramidUp() {
 		super();
 	}
-	
-	public OpenCVFilterPyramidUp(String name)  {
+
+	public OpenCVFilterPyramidUp(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -66,12 +72,6 @@ public class OpenCVFilterPyramidUp extends OpenCVFilter {
 		cvPyrUp(image, dst, filter);
 
 		return dst;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

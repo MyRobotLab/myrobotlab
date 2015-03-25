@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -33,17 +34,43 @@ public class Houston extends Service {
 
 	transient OpenCV eye;
 
-	//PointCloud openni;
+	// PointCloud openni;
 
 	transient Arduino arduino;
 
 	transient Tracking tracking;
-	
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+		try {
+
+			Houston houston = new Houston("houston");
+			houston.startService();
+			/*
+			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 */
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 	public Houston(String n) {
 		super(n);
 	}
 
-	public void initialize(String boardType, String comPort) {
+	@Override
+	public String[] getCategories() {
+		return new String[] { "robot" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used as a general template";
+	}
+
+	public void initialize(String boardType, String comPort) throws Exception {
 		lshoulder = (Servo) Runtime.createAndStart("lshoulder", "Servo");
 		lbicep = (Servo) Runtime.createAndStart("lbicep", "Servo");
 		lelbow = (Servo) Runtime.createAndStart("lelbow", "Servo");
@@ -66,14 +93,15 @@ public class Houston extends Service {
 
 		eye = (OpenCV) Runtime.createAndStart("eye", "OpenCV");// right back
 
-		//openni = (PointCloud) Runtime.createAndStart("openni", "OpenNI");// right
-																			// back
+		// openni = (PointCloud) Runtime.createAndStart("openni", "OpenNI");//
+		// right
+		// back
 
 		arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
 
 		// set config for the services
 		arduino.setBoard(boardType); // atmega168 | mega2560 | etc;
-		arduino.connect(comPort, 57600, 8, 1, 0);
+		arduino.connect(comPort);
 		sleep(1); // give it a second for the serial device to get ready;
 
 		// attach Servos & Motors to arduino;
@@ -83,14 +111,14 @@ public class Houston extends Service {
 		rshoulder.setController(arduino);
 		rbicep.setController(arduino);
 		relbow.setController(arduino);
-		
+
 		lshoulder.setPin(46);
 		lshoulder.setPin(47);
 		lshoulder.setPin(48);
 		lshoulder.setPin(50);
 		lshoulder.setPin(51);
 		lshoulder.setPin(52);
-		
+
 		arduino.motorAttach(lfmotor.getName(), 4, 30);
 		arduino.motorAttach(rfmotor.getName(), 5, 31);
 		arduino.motorAttach(lbmotor.getName(), 6, 32);
@@ -133,27 +161,5 @@ public class Houston extends Service {
 		// turn off the analog sampling
 		// arduino.analogReadPollingStop(analogSensorPin)
 
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		Houston houston = new Houston("houston");
-		houston.startService();
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
-		 */
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] {"robot"};
 	}
 }

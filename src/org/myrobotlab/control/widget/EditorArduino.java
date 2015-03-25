@@ -28,19 +28,15 @@ package org.myrobotlab.control.widget;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
 
-import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.myrobotlab.arduino.compiler.Target;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
@@ -73,7 +69,7 @@ public class EditorArduino extends Editor implements ActionListener {
 	JCheckBoxMenuItem digitalTriggerOnly = new JCheckBoxMenuItem("Digital Trigger Only");
 
 	public EditorArduino(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService,  tabs,  SyntaxConstants.SYNTAX_STYLE_C);
+		super(boundServiceName, myService, tabs, SyntaxConstants.SYNTAX_STYLE_C);
 		ServiceInterface sw = Runtime.getService(boundServiceName);
 		myArduino = (Arduino) sw;
 		examplesMenu.add(createExamplesMenu());
@@ -108,6 +104,16 @@ public class EditorArduino extends Editor implements ActionListener {
 		}
 	}
 
+	private JMenu createExamplesMenu() {
+		// FIXME - dynamically build based on resources
+		JMenu menu;
+		menu = new JMenu("Communication");
+		menu.add(createMenuItem("MRLComm.ino", "examples"));
+
+		return menu;
+	}
+
+	@Override
 	public void init() {
 		super.init();
 		// NOTE !!! - must be lowercase to match image names
@@ -129,7 +135,7 @@ public class EditorArduino extends Editor implements ActionListener {
 		monitorButton.setVisible(false);
 
 		buttonBar.setBackground(new Color(0, 100, 104));
-		//buttonBar.setForeground(new Color(255, 255, 255));
+		// buttonBar.setForeground(new Color(255, 255, 255));
 		sketchName.setForeground(new Color(255, 255, 255));
 		buttonBar.add(sketchName);
 
@@ -162,6 +168,10 @@ public class EditorArduino extends Editor implements ActionListener {
 
 	}
 
+	public void loadCommunicationFile() {
+		loadResourceFile("MRLComm.ino");
+	}
+
 	public void loadResourceFile(String filename) {
 		String resourcePath = String.format("Arduino/%s/%s", filename.substring(0, filename.indexOf(".")), filename);
 		log.info(String.format("loadResourceFile %s", resourcePath));
@@ -169,44 +179,27 @@ public class EditorArduino extends Editor implements ActionListener {
 		textArea.setText(sketch);
 	}
 
-	public void loadCommunicationFile() {
-		loadResourceFile("MRLComm.ino");
-	}
-
 	public void rebuildBoardsMenu(JMenu menu) {
 		menu.removeAll();
 		ButtonGroup group = new ButtonGroup();
 
-		HashMap<String, Target> t = myArduino.targetsTable;
-		t.values(); // FIXME - t is null
-
-		for (Target target : myArduino.targetsTable.values()) {
-			for (String board : target.getBoards().keySet()) {
-				AbstractAction action = new AbstractAction(target.getBoards().get(board).get("name")) {
-					public void actionPerformed(ActionEvent actionevent) {
-						log.info(String.format("switching to %s:%s", (String) getValue("target"), (String) getValue("board")));
-						myService.send(boundServiceName, "setBoard", (String) getValue("board"));
-					}
-				};
-				action.putValue("target", target.getName());
-				action.putValue("board", board);
-				JMenuItem item = new JRadioButtonMenuItem(action);
-				if (target.getName().equals(myArduino.preferences.get("target")) && board.equals(myArduino.preferences.get("board"))) {
-					item.setSelected(true);
-				}
-				group.add(item);
-				menu.add(item);
-			}
-		}
-	}
-
-	private JMenu createExamplesMenu() {
-		// FIXME - dynamically build based on resources
-		JMenu menu;
-		menu = new JMenu("Communication");
-		menu.add(createMenuItem("MRLComm.ino", "examples"));
-
-		return menu;
+		/*
+		 * HashMap<String, Target> t = myArduino.targetsTable; t.values(); //
+		 * FIXME - t is null
+		 * 
+		 * for (Target target : myArduino.targetsTable.values()) { for (String
+		 * board : target.getBoards().keySet()) { AbstractAction action = new
+		 * AbstractAction(target.getBoards().get(board).get("name")) { public
+		 * void actionPerformed(ActionEvent actionevent) {
+		 * log.info(String.format("switching to %s:%s", (String)
+		 * getValue("target"), (String) getValue("board")));
+		 * myService.send(boundServiceName, "setBoard", (String)
+		 * getValue("board")); } }; action.putValue("target", target.getName());
+		 * action.putValue("board", board); JMenuItem item = new
+		 * JRadioButtonMenuItem(action); if
+		 * (target.getName().equals(myArduino.)) { item.setSelected(true); }
+		 * group.add(item); menu.add(item); } }
+		 */
 	}
 
 }

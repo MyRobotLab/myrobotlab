@@ -44,10 +44,9 @@ public class HoustonGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
-	}
-
-	public void getState(Houston houston) {
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
 
 	}
 
@@ -64,10 +63,12 @@ public class HoustonGUI extends ServiceGUI implements ActionListener {
 		unsubscribe("publishState", "getState", HoustonGUI.class);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+	public void getState(Houston houston) {
 
+	}
+
+	@Override
+	public void init() {
 	}
 
 }

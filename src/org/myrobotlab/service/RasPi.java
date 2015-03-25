@@ -26,26 +26,56 @@ import com.pi4j.wiringpi.SoftPwm;
 
 public class RasPi extends Service {
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(RasPi.class.getCanonicalName());
-
-	// the 2 pins for I2C on the raspberry
-	GpioController gpio; 	  
-	
-	// FIXME - do a 
-	GpioPinDigitalOutput gpio01;
-	GpioPinDigitalOutput gpio03;
-
-	HashMap<String, Device> devices = new HashMap<String, Device>();
-
 	public static class Device {
 		public I2CBus bus;
 		public I2CDevice device;
 		public String type;
 	}
-	
-	
+
+	private static final long serialVersionUID = 1L;
+
+	public final static Logger log = LoggerFactory.getLogger(RasPi.class.getCanonicalName());
+
+	// the 2 pins for I2C on the raspberry
+	GpioController gpio;
+	// FIXME - do a
+	GpioPinDigitalOutput gpio01;
+
+	GpioPinDigitalOutput gpio03;
+
+	HashMap<String, Device> devices = new HashMap<String, Device>();
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		/*
+		 * RasPi.displayString(1, 70, "1");
+		 * 
+		 * RasPi.displayString(1, 70, "abcd");
+		 * 
+		 * RasPi.displayString(1, 70, "1234");
+		 * 
+		 * 
+		 * //RasPi raspi = new RasPi("raspi");
+		 */
+
+		// raspi.writeDisplay(busAddress, deviceAddress, data)
+
+		int i = 0;
+
+		Runtime.createAndStart(String.format("ras%d", i), "Runtime");
+		Runtime.createAndStart(String.format("rasPi%d", i), "RasPi");
+		Runtime.createAndStart(String.format("rasGUI%d", i), "GUIService");
+		Runtime.createAndStart(String.format("rasPython%d", i), "Python");
+		// Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
+		Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");
+	}
+
+	/*
+	 * FIXME - make these methods createDigitalAndPwmPin public
+	 * GpioPinDigitalOutput provisionDigitalOutputPin
+	 */
 
 	public RasPi(String n) {
 		super(n);
@@ -63,99 +93,6 @@ public class RasPi extends Service {
 			log.error("architecture is not arm");
 		}
 
-	}
-	
-	/* FIXME - make these methods
-	createDigitalAndPwmPin
-	public GpioPinDigitalOutput  provisionDigitalOutputPin
-	*/
-
-	@Override
-	public String getDescription() {
-		return "Raspberry Pi service used for accessing specific RasPi hardware such as I2C";
-	}
-
-	public void writeRaw(int busAddress, int deviceAddress, byte d0, byte d1, byte d2, byte d3, byte d4, byte d5, byte d6, byte d7, byte d8, byte d9, byte d10, byte d11, byte d12,
-			byte d13, byte d14, byte d15) {
-		try {
-			log.info("--------writeRaw begin -------------");
-
-			log.info(String.format("test %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15));
-			I2CDevice device = getDevice(busAddress, deviceAddress);
-			device.write(0x00, new byte[] { d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15 }, 0, 16);
-
-			log.info("--------writeRaw end-------------");
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-	}
-
-	public I2CDevice getDevice(int busAddress, int deviceAddress) {
-		try {
-			String key = String.format("%d.%d", busAddress, deviceAddress);
-			if (!devices.containsKey(key)) {
-				// FIXME -- remove put in createDevice
-				I2CBus bus = I2CFactory.getInstance(busAddress);
-				log.info(String.format("getDevice %d", deviceAddress));
-				I2CDevice device = bus.getDevice(deviceAddress);
-
-				Device d = new Device();
-				d.bus = bus;
-				d.device = device;
-				d.type = "display";
-
-				devices.put(key, d);
-				return d.device;
-
-			} else {
-				return devices.get(key).device;
-			}
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		return null;
-	}
-
-	// FIXME - test by reading? writing ?
-	// FIXME - return array
-	public Integer[] scanI2CDevices(int busAddress) {
-		log.info("scanning through I2C devices");
-		ArrayList<Integer> list = new ArrayList<Integer>();
-		try {
-			/*
-			 * From its name we can easily deduce that it provides a
-			 * communication link between ICs (integrated circuits). I2C is
-			 * multimaster and can support a maximum of 112 devices on the bus.
-			 * The specification declares that 128 devices can be connected to
-			 * the I2C bus, but it also defines 16 reserved addresses.
-			 */
-			I2CBus bus = I2CFactory.getInstance(busAddress);
-			
-
-			for (int i = 0; i < 128; ++i) {
-				I2CDevice device = bus.getDevice(i);
-				if (device != null) {
-					try {
-						device.read();
-						list.add(i);
-						/*
-						sb.append(i);
-						sb.append(" ");
-						*/
-						log.info(String.format("found device on address %d", i));
-					} catch (Exception e) {
-						log.warn(String.format("bad read on address %d", i));
-					}
-
-				}
-			}
-		} catch (Exception e) {
-			Logging.logException(e);
-		}
-
-		Integer[] ret = list.toArray(new Integer[list.size()]);
-		return ret;
 	}
 
 	// FIXME - create low level I2CDevice
@@ -189,7 +126,44 @@ public class RasPi extends Service {
 			}
 
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
+		}
+
+		return null;
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "control", "i2c" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "Raspberry Pi service used for accessing specific RasPi hardware such as I2C";
+	}
+
+	public I2CDevice getDevice(int busAddress, int deviceAddress) {
+		try {
+			String key = String.format("%d.%d", busAddress, deviceAddress);
+			if (!devices.containsKey(key)) {
+				// FIXME -- remove put in createDevice
+				I2CBus bus = I2CFactory.getInstance(busAddress);
+				log.info(String.format("getDevice %d", deviceAddress));
+				I2CDevice device = bus.getDevice(deviceAddress);
+
+				Device d = new Device();
+				d.bus = bus;
+				d.device = device;
+				d.type = "display";
+
+				devices.put(key, d);
+				return d.device;
+
+			} else {
+				return devices.get(key).device;
+			}
+		} catch (Exception e) {
+			Logging.logError(e);
 		}
 
 		return null;
@@ -208,76 +182,96 @@ public class RasPi extends Service {
 			device.write(value);
 			return value;
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return -1;
 	}
-	
-	
-	public void testGPIOOutput(){
+
+	// FIXME - test by reading? writing ?
+	// FIXME - return array
+	public Integer[] scanI2CDevices(int busAddress) {
+		log.info("scanning through I2C devices");
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		try {
+			/*
+			 * From its name we can easily deduce that it provides a
+			 * communication link between ICs (integrated circuits). I2C is
+			 * multimaster and can support a maximum of 112 devices on the bus.
+			 * The specification declares that 128 devices can be connected to
+			 * the I2C bus, but it also defines 16 reserved addresses.
+			 */
+			I2CBus bus = I2CFactory.getInstance(busAddress);
+
+			for (int i = 0; i < 128; ++i) {
+				I2CDevice device = bus.getDevice(i);
+				if (device != null) {
+					try {
+						device.read();
+						list.add(i);
+						/*
+						 * sb.append(i); sb.append(" ");
+						 */
+						log.info(String.format("found device on address %d", i));
+					} catch (Exception e) {
+						log.warn(String.format("bad read on address %d", i));
+					}
+
+				}
+			}
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		Integer[] ret = list.toArray(new Integer[list.size()]);
+		return ret;
+	}
+
+	public void testGPIOOutput() {
 		GpioPinDigitalMultipurpose pin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_DOWN);
 
 	}
-	
-	public void testPWM(){
+
+	public void testPWM() {
 		try {
-		
-		 // initialize wiringPi library
-        com.pi4j.wiringpi.Gpio.wiringPiSetup();
 
-        // create soft-pwm pins (min=0 ; max=100)
-        SoftPwm.softPwmCreate(1, 0, 100);
+			// initialize wiringPi library
+			com.pi4j.wiringpi.Gpio.wiringPiSetup();
 
-        // continuous loop
-        while (true) {            
-            // fade LED to fully ON
-            for (int i = 0; i <= 100; i++) {
-                SoftPwm.softPwmWrite(1, i);
-                Thread.sleep(100);
-            }
+			// create soft-pwm pins (min=0 ; max=100)
+			SoftPwm.softPwmCreate(1, 0, 100);
 
-            // fade LED to fully OFF
-            for (int i = 100; i >= 0; i--) {
-                SoftPwm.softPwmWrite(1, i);
-                Thread.sleep(100);
-            }
-        }
+			// continuous loop
+			while (true) {
+				// fade LED to fully ON
+				for (int i = 0; i <= 100; i++) {
+					SoftPwm.softPwmWrite(1, i);
+					Thread.sleep(100);
+				}
+
+				// fade LED to fully OFF
+				for (int i = 100; i >= 0; i--) {
+					SoftPwm.softPwmWrite(1, i);
+					Thread.sleep(100);
+				}
+			}
 		} catch (Exception e) {
-			
+
 		}
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+	public void writeRaw(int busAddress, int deviceAddress, byte d0, byte d1, byte d2, byte d3, byte d4, byte d5, byte d6, byte d7, byte d8, byte d9, byte d10, byte d11, byte d12,
+			byte d13, byte d14, byte d15) {
+		try {
+			log.info("--------writeRaw begin -------------");
 
-		/*
-		 * RasPi.displayString(1, 70, "1");
-		 * 
-		 * RasPi.displayString(1, 70, "abcd");
-		 * 
-		 * RasPi.displayString(1, 70, "1234");
-		 * 
-		 * 
-		 * //RasPi raspi = new RasPi("raspi");
-		 */
+			log.info(String.format("test %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15));
+			I2CDevice device = getDevice(busAddress, deviceAddress);
+			device.write(0x00, new byte[] { d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15 }, 0, 16);
 
-		// raspi.writeDisplay(busAddress, deviceAddress, data)
-
-		int i = 0;
-
-		Runtime.createAndStart(String.format("ras%d", i), "Runtime");
-		Runtime.createAndStart(String.format("rasPi%d", i), "RasPi");
-		Runtime.createAndStart(String.format("rasGUI%d", i), "GUIService");
-		Runtime.createAndStart(String.format("rasPython%d", i), "Python");
-		// Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
-		Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");
+			log.info("--------writeRaw end-------------");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"control", "i2c"};
-	}
-
 
 }

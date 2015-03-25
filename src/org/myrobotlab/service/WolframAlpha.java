@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -20,12 +21,35 @@ import com.wolfram.alpha.WASubpod;
 public class WolframAlpha extends Service {
 
 	private static final long serialVersionUID = 1L;
+
 	private static String AppID = "W6VGAJ-P4RA2HKTTH";
-	public final static Logger log = LoggerFactory.getLogger(WolframAlpha.class
-			.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(WolframAlpha.class.getCanonicalName());
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		try {
+
+			WolframAlpha template = new WolframAlpha("wolfram");
+			template.startService();
+
+			Runtime.createAndStart("gui", "GUIService");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		/*
+		 * GUIService gui = new GUIService("gui"); gui.startService();
+		 */
+	}
 
 	public WolframAlpha(String n) {
 		super(n);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "data", "connectivity" };
 	}
 
 	@Override
@@ -33,15 +57,10 @@ public class WolframAlpha extends Service {
 		return "Wolfram Alpha Service";
 	}
 
-	public void setAppID(String id) {
-		AppID = id;
-	}
-
 	public WAQueryResult getQueryResult(String query) {
 		String url;
 		try {
-			url = "http://www.wolframalpha.com/input/?i="
-					+ URLEncoder.encode(query, "UTF-8");
+			url = "http://www.wolframalpha.com/input/?i=" + URLEncoder.encode(query, "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
 		}
 		// openUrl(url);
@@ -82,6 +101,71 @@ public class WolframAlpha extends Service {
 		return null;
 	}
 
+	private String[] parseString(String get) {
+		if (get == null)
+			return new String[0];
+		get = get.replaceAll(" ", "");
+		String[] ret = get.split("[=;,]");
+		return ret;
+	}
+
+	public void setAppID(String id) {
+		AppID = id;
+	}
+
+	/**
+	 * Query Wolfram Alpha for an answer
+	 * 
+	 * @param query
+	 * @return
+	 */
+	public String wolframAlpha(String query) {
+		return wolframAlpha(query, false);
+	}
+
+	public String wolframAlpha(String query, boolean html) {
+
+		WAQueryResult queryResult = getQueryResult(query);
+		String full = html ? "<html><body>" : "";
+
+		if (queryResult.isError()) {
+			return "Query error (" + query + "( " + query + ")" + (html ? "<br>" : "\n") + "Error code: " + queryResult.getErrorCode() + (html ? "<br>" : "\n") + "Error message: "
+					+ queryResult.getErrorMessage();
+
+		} else if (!queryResult.isSuccess()) {
+			return ("Query (" + query + ") was not understood; no results available.");
+		} else {
+			// Got a result.
+
+			for (WAPod pod : queryResult.getPods()) {
+				if (!pod.isError()) {
+					full += (html ? "<br><b>" : "") + pod.getTitle() + (html ? "</b><br>" : "");
+					// try {
+					// pod.acquireImages();
+					// } catch (WAException e) {
+					// // TODO Auto-generated catch block
+					// }
+					for (WASubpod subpod : pod.getSubpods()) {
+						for (Object element : subpod.getContents()) {
+							// System.out.println(element.getClass());
+							if (html && element instanceof WAPlainText) {
+								System.out.println(pod.getTitle() + " " + ((WAPlainText) element).getText());
+							}
+							if (!html && element instanceof WAPlainText) {
+								full += ((WAPlainText) element).getText() + (html ? "<br>" : "\n");
+							}
+							if (html && element instanceof WAImage) {
+								full += "<img src=\"" + ((WAImage) element).getURL() + "\">" + (html ? "<br>" : "\n");
+							}
+						}
+					}
+				}
+			}
+			return full + (html ? "</body><html>" : "");
+		}
+
+	}
+
 	// pod is the Category string you want returned
 	public String wolframAlpha(String query, String pod) {
 		WAQueryResult queryResult = getQueryResult(query);
@@ -90,8 +174,7 @@ public class WolframAlpha extends Service {
 			if (!ppod.isError()) {
 				for (WASubpod subpod : ppod.getSubpods()) {
 					for (Object element : subpod.getContents()) {
-						if (ppod.getTitle().toLowerCase().equals(pod.toLowerCase())
-								&& element instanceof WAPlainText) {
+						if (ppod.getTitle().toLowerCase().equals(pod.toLowerCase()) && element instanceof WAPlainText) {
 							if (acc != null)
 								acc += " ; ";
 							else
@@ -113,92 +196,6 @@ public class WolframAlpha extends Service {
 	public String[] wolframAlphaSolution(String query, String pod) {
 		String get = wolframAlpha(query, pod);
 		return parseString(get);
-	}
-
-	private String[] parseString(String get) {
-		if (get==null)return new String[0];
-		get = get.replaceAll(" ", "");
-		String[] ret = get.split("[=;,]");
-		return ret;
-	}
-
-	/**
-	 * Query Wolfram Alpha for an answer
-	 * 
-	 * @param query
-	 * @return
-	 */
-	public String wolframAlpha(String query) {
-		return wolframAlpha(query, false);
-	}
-
-	public String wolframAlpha(String query, boolean html) {
-
-		WAQueryResult queryResult = getQueryResult(query);
-		String full = html ? "<html><body>" : "";
-
-		if (queryResult.isError()) {
-			return "Query error (" + query + "( " + query + ")"
-					+ (html ? "<br>" : "\n") + "Error code: "
-					+ queryResult.getErrorCode() + (html ? "<br>" : "\n")
-					+ "Error message: " + queryResult.getErrorMessage();
-
-		} else if (!queryResult.isSuccess()) {
-			return ("Query (" + query + ") was not understood; no results available.");
-		} else {
-			// Got a result.
-
-			for (WAPod pod : queryResult.getPods()) {
-				if (!pod.isError()) {
-					full += (html ? "<br><b>" : "") + pod.getTitle()
-							+ (html ? "</b><br>" : "");
-					// try {
-					// pod.acquireImages();
-					// } catch (WAException e) {
-					// // TODO Auto-generated catch block
-					// }
-					for (WASubpod subpod : pod.getSubpods()) {
-						for (Object element : subpod.getContents()) {
-							// System.out.println(element.getClass());
-							if (html && element instanceof WAPlainText) {
-								System.out.println(pod.getTitle() + " "
-										+ ((WAPlainText) element).getText());
-							}
-							if (!html && element instanceof WAPlainText) {
-								full += ((WAPlainText) element).getText()
-										+ (html ? "<br>" : "\n");
-							}
-							if (html && element instanceof WAImage) {
-								full += "<img src=\""
-										+ ((WAImage) element).getURL() + "\">"
-										+ (html ? "<br>" : "\n");
-							}
-						}
-					}
-				}
-			}
-			return full + (html ? "</body><html>" : "");
-		}
-
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		WolframAlpha template = new WolframAlpha("wolfram");
-		template.startService();
-
-		Runtime.createAndStart("gui", "GUIService");
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
-		 */
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"data", "connectivity"};
 	}
 
 }

@@ -35,14 +35,6 @@ import javax.swing.JPanel;
 
 public class RadarWidget extends JPanel implements Runnable {
 
-	private static final long serialVersionUID = 1L;
-	Vector<PolarPoint> points;
-	double sensorAngle = 0;
-	double minAngle = 0;
-	double maxAngle = 180;
-	double maxRange = 80;
-	int state, gotostate;
-
 	public class PolarPoint {
 		public double theta;
 		public double distance;
@@ -54,6 +46,15 @@ public class RadarWidget extends JPanel implements Runnable {
 		}
 
 	}
+
+	private static final long serialVersionUID = 1L;
+	Vector<PolarPoint> points;
+	double sensorAngle = 0;
+	double minAngle = 0;
+	double maxAngle = 180;
+	double maxRange = 80;
+
+	int state, gotostate;
 
 	public RadarWidget() {
 		// setSize(160, 160);
@@ -70,6 +71,7 @@ public class RadarWidget extends JPanel implements Runnable {
 
 	}
 
+	@Override
 	public void paint(Graphics g1) {
 		PolarPoint curDot;
 		double curAngle;
@@ -93,7 +95,7 @@ public class RadarWidget extends JPanel implements Runnable {
 		g.drawLine(sensorCenter.x, sensorCenter.y, sensorCenter.x - (int) ((maxRange / zoom) * Math.cos(rad)), sensorCenter.y - (int) ((maxRange / zoom) * Math.sin(rad)));
 
 		for (int x = 0; x < points.size(); x++) {
-			curDot = (PolarPoint) points.elementAt(x);
+			curDot = points.elementAt(x);
 			curAngle = curDot.theta;
 			curDist = curDot.distance;
 
@@ -112,20 +114,6 @@ public class RadarWidget extends JPanel implements Runnable {
 		// 408-(int)(570*Math.sin(rad)));
 		// if (isDead == 1)
 		// points.removeElementAt(0);
-	}
-
-	public void setData(PolarPoint p) {
-		setData(p.theta, p.distance);
-	}
-
-	public void setData(double theta, double distance) {
-		/*
-		 * if (distance < maxRange) {
-		 * 
-		 * }
-		 */
-		sensorAngle = theta;
-		repaint();
 	}
 
 	@Override
@@ -156,6 +144,20 @@ public class RadarWidget extends JPanel implements Runnable {
 			}
 		}
 
+	}
+
+	public void setData(double theta, double distance) {
+		/*
+		 * if (distance < maxRange) {
+		 * 
+		 * }
+		 */
+		sensorAngle = theta;
+		repaint();
+	}
+
+	public void setData(PolarPoint p) {
+		setData(p.theta, p.distance);
 	}
 
 }

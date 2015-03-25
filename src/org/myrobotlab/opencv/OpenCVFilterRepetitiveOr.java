@@ -42,13 +42,18 @@ public class OpenCVFilterRepetitiveOr extends OpenCVFilter {
 	// IplImage out = null;
 	IplImage[] memory = new IplImage[5];
 
-
-	public OpenCVFilterRepetitiveOr()  {
+	public OpenCVFilterRepetitiveOr() {
 		super();
 	}
-	
-	public OpenCVFilterRepetitiveOr(String name)  {
+
+	public OpenCVFilterRepetitiveOr(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -67,12 +72,6 @@ public class OpenCVFilterRepetitiveOr extends OpenCVFilter {
 		cvOr(image, buffer, buffer, null);
 
 		return buffer;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

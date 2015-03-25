@@ -14,6 +14,7 @@ public class DrupalNameProvider implements NameProvider {
 	public static final Logger log = LoggerFactory.getLogger(DrupalNameProvider.class);
 	private Connection conn = null;
 
+	@Override
 	public String getName(String ip) {
 		log.info(String.format("==DrupalNameProvider.getName(%s)==", ip));
 		try {
@@ -26,8 +27,7 @@ public class DrupalNameProvider implements NameProvider {
 					return ip;
 				}
 			}
-			String sql = String.format("SELECT users.name, sessions.uid, sessions.hostname FROM myrobotlab.users " + 
-						" INNER JOIN myrobotlab.sessions ON sessions.uid=users.uid "
+			String sql = String.format("SELECT users.name, sessions.uid, sessions.hostname FROM myrobotlab.users " + " INNER JOIN myrobotlab.sessions ON sessions.uid=users.uid "
 					+ " WHERE sessions.hostname = '%s' " + " ORDER BY sessions.uid DESC", ip);
 
 			Statement statement = this.conn.createStatement();
@@ -40,7 +40,7 @@ public class DrupalNameProvider implements NameProvider {
 				log.info(String.format("found [%s] for ip %s", user, ip));
 				if ((user == null) || (user.trim().length() == 0 || user.trim().equals(""))) {
 					log.info("user null or blank skipping");
-					continue;					
+					continue;
 				} else {
 					log.info(String.format("found user [%s]", user));
 					return user;
@@ -49,7 +49,7 @@ public class DrupalNameProvider implements NameProvider {
 			log.info(String.format("no not blank records found returning ip [%s]", ip));
 			return ip;
 		} catch (Exception e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 		return ip;
 	}

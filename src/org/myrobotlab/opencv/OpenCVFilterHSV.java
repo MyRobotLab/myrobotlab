@@ -68,22 +68,14 @@ public class OpenCVFilterHSV extends OpenCVFilter {
 	Graphics g = null;
 	String lastHexValueOfPoint = "";
 
-	
 	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
-		
-	public OpenCVFilterHSV()  {
+
+	public OpenCVFilterHSV() {
 		super();
 	}
-	
-	public OpenCVFilterHSV(String name)  {
+
+	public OpenCVFilterHSV(String name) {
 		super(name);
-	}
-
-	public void samplePoint(Integer inX, Integer inY) {
-		++clickCounter;
-		x = inX;
-		y = inY;
-
 	}
 
 	@Override
@@ -93,19 +85,26 @@ public class OpenCVFilterHSV extends OpenCVFilter {
 		if (x != 0 && clickCounter % 2 == 0) {
 
 			if (frameCounter % 10 == 0) {
-				//frameBuffer = hsv.getBufferedImage(); // TODO - ran out of memory here
+				// frameBuffer = hsv.getBufferedImage(); // TODO - ran out of
+				// memory here
 				ByteBuffer buffer = image.getByteBuffer();
 				int index = y * image.widthStep() + x * image.nChannels();
-				 // Used to read the pixel value - the 0xFF is needed to cast from
-		        // an unsigned byte to an int.
-		        int value = buffer.get(index) & 0xFF;
+				// Used to read the pixel value - the 0xFF is needed to cast
+				// from
+				// an unsigned byte to an int.
+				int value = buffer.get(index) & 0xFF;
 				lastHexValueOfPoint = Integer.toHexString(value & 0x00ffffff);
 			}
-			
-			cvPutText(image, lastHexValueOfPoint, cvPoint(x,y), font, CvScalar.BLACK);
+
+			cvPutText(image, lastHexValueOfPoint, cvPoint(x, y), font, CvScalar.BLACK);
 		}
 
 		return image;
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		hsv = IplImage.createCompatible(image);
 	}
 
 	@Override
@@ -128,9 +127,11 @@ public class OpenCVFilterHSV extends OpenCVFilter {
 
 	}
 
-		@Override
-		public void imageChanged(IplImage image) {
-			hsv = IplImage.createCompatible(image);
-		}
+	public void samplePoint(Integer inX, Integer inY) {
+		++clickCounter;
+		x = inX;
+		y = inY;
+
+	}
 
 }

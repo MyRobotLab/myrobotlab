@@ -32,20 +32,20 @@ public class CacheFactory {
 	private final ConcurrentMap<String, Cache> caches;
 
 	/**
-	 * Private constructor.
-	 */
-	private CacheFactory() {
-		// TODO need to load configuration about caches
-		caches = new ConcurrentHashMap<String, Cache>();
-	}
-
-	/**
 	 * Get a handle to this factory.
 	 * 
 	 * @return
 	 */
 	public static CacheFactory getFactory() {
 		return me;
+	}
+
+	/**
+	 * Private constructor.
+	 */
+	private CacheFactory() {
+		// TODO need to load configuration about caches
+		caches = new ConcurrentHashMap<String, Cache>();
 	}
 
 	/**

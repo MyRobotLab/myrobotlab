@@ -45,47 +45,13 @@ public class VideoWidget extends ServiceGUI {
 	int videoDisplayXPos = 0;
 	int videoDisplayYPos = 0;
 
-	public VideoWidget(final String boundFilterName, final GUIService myService, final JTabbedPane tabs, boolean allowFork) {
-		this(boundFilterName, myService, tabs);
-		this.allowFork = allowFork;
-	}
-
 	public VideoWidget(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void setNormalizedSize(int x, int y)
-	{
-		normalizedSize = new Dimension(x, y);
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("publishDisplay", "displayFrame", SerializableImage.class);
-	}
-
-	public void attachGUI(String srcMethod, String dstMethod, Class<?> c) {
-		subscribe(srcMethod, dstMethod, c);
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishDisplay", "displayFrame", SerializableImage.class);
-	}
-
-
-	@Override
-	// FIXME - do in constructor for krikey sakes !
-	public void init() {
-		init(null);
-	}
-
-	public void init(ImageIcon icon) {
-		TitledBorder title;
-		title = BorderFactory.createTitledBorder(boundServiceName + " " + " video widget");
-		display.setBorder(title);
-
-		addVideoDisplayPanel("output");
+	public VideoWidget(final String boundFilterName, final GUIService myService, final JTabbedPane tabs, boolean allowFork) {
+		this(boundFilterName, myService, tabs);
+		this.allowFork = allowFork;
 	}
 
 	public VideoDisplayPanel addVideoDisplayPanel(String source) {
@@ -118,16 +84,54 @@ public class VideoWidget extends ServiceGUI {
 		return vp;
 	}
 
-	public void removeVideoDisplayPanel(String source) {
-		if (!displays.containsKey(source)) {
-			log.error("cannot remove VideoDisplayPanel " + source);
-			return;
-		}
+	@Override
+	public void attachGUI() {
+		subscribe("publishDisplay", "displayFrame", SerializableImage.class);
+	}
 
-		VideoDisplayPanel vdp = displays.remove(source);
-		display.remove(vdp.myDisplay);
-		display.invalidate();
-		myService.pack();
+	public void attachGUI(String srcMethod, String dstMethod, Class<?> c) {
+		subscribe(srcMethod, dstMethod, c);
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishDisplay", "displayFrame", SerializableImage.class);
+	}
+
+	// multiplex images if desired
+	public void displayFrame(SerializableImage img) {
+
+		// FIXME not quite right
+
+		String source = img.getSource();
+		if (displays.containsKey(source)) {
+			displays.get(source).displayFrame(img);
+		} else if (allowFork) {
+			VideoDisplayPanel vdp = addVideoDisplayPanel(img.getSource());
+			vdp.displayFrame(img);
+		} else {
+			displays.get("output").displayFrame(img); // FIXME - kludgy !!!
+		}
+		/*
+		 * else if (displays.size() == 0) { VideoDisplayPanel vdp =
+		 * addVideoDisplayPanel(img.getSource()); vdp.displayFrame(img); } else
+		 * { displays.get("output").displayFrame(img); // catchall }
+		 */
+
+	}
+
+	@Override
+	// FIXME - do in constructor for krikey sakes !
+	public void init() {
+		init(null);
+	}
+
+	public void init(ImageIcon icon) {
+		TitledBorder title;
+		title = BorderFactory.createTitledBorder(boundServiceName + " " + " video widget");
+		display.setBorder(title);
+
+		addVideoDisplayPanel("output");
 	}
 
 	public void removeAllVideoDisplayPanels() {
@@ -143,35 +147,25 @@ public class VideoWidget extends ServiceGUI {
 		videoDisplayXPos = 0;
 		videoDisplayYPos = 0;
 	}
+
 	/*
-	public void displayFrame(OpenCVData data) {
-		IplImage img = data.getImage();
-		displayFrame(img);
+	 * public void displayFrame(OpenCVData data) { IplImage img =
+	 * data.getImage(); displayFrame(img); }
+	 */
+
+	public void removeVideoDisplayPanel(String source) {
+		if (!displays.containsKey(source)) {
+			log.error("cannot remove VideoDisplayPanel " + source);
+			return;
+		}
+
+		VideoDisplayPanel vdp = displays.remove(source);
+		display.remove(vdp.myDisplay);
+		display.invalidate();
+		myService.pack();
 	}
-	*/
-	
-	// multiplex images if desired
-	public void displayFrame(SerializableImage img) {
 
-		 // FIXME not quite right
-		
-		String source = img.getSource();
-		if (displays.containsKey(source)) {
-			displays.get(source).displayFrame(img);
-		} else if (allowFork) {
-			VideoDisplayPanel vdp = addVideoDisplayPanel(img.getSource());
-			vdp.displayFrame(img);
-		} else {
-			displays.get("output").displayFrame(img); // FIXME - kludgy !!!
-		}
-		/*
-		else if (displays.size() == 0) {
-			VideoDisplayPanel vdp = addVideoDisplayPanel(img.getSource());
-			vdp.displayFrame(img);
-		} else {
-			displays.get("output").displayFrame(img); // catchall
-		}
-		*/
-
+	public void setNormalizedSize(int x, int y) {
+		normalizedSize = new Dimension(x, y);
 	}
 }

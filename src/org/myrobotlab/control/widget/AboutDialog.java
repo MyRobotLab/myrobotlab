@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 public class AboutDialog extends JDialog implements ActionListener, MouseListener {
 
 	private static final long serialVersionUID = 1L;
+
 	public final static Logger log = LoggerFactory.getLogger(AboutDialog.class);
 
 	JButton noWorky = null;
@@ -37,9 +38,38 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 	JLabel versionLabel = new JLabel(org.myrobotlab.service.Runtime.getVersion());
 	GUIService gui;
 
+	public static void main(String[] args) throws Exception {
+		LoggingFactory.getInstance().configure();
+
+		log.info("[{}]", "1060M.20130227.0733".compareTo("1059M.20130227.0722"));
+		log.info("[{}]", "1059M.20130227.0722".compareTo("1060M.20130227.0733"));
+
+		// HTTPRequest logPoster = new HTTPRequest(new
+		// URL("http://myrobotlab.org/myrobotlab_log/postLogFile.php"));
+		HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File("myrobotlab.log"));
+		// logPoster.setParameter("file", "myrobotlab.log", new
+		// FileInputStream(new File("myrobotlab.log")));
+		// logPoster.setParameter("file", new File("myrobotlab.log"));
+		// logPoster.setc
+		/*
+		 * InputStream in = logPoster.post().getInputStream(); //read it with
+		 * BufferedReader BufferedReader br = new BufferedReader( new
+		 * InputStreamReader(in));
+		 * 
+		 * StringBuilder sb = new StringBuilder();
+		 * 
+		 * String line; while ((line = br.readLine()) != null) {
+		 * sb.append(line); }
+		 * 
+		 * System.out.println(sb.toString());
+		 * 
+		 * br.close();
+		 */
+	}
+
 	public AboutDialog(GUIService gui) {
 		super(gui.getFrame(), "about", true);
-		this.gui = gui;	
+		this.gui = gui;
 		this.parent = gui.getFrame();
 		if (parent != null) {
 			Dimension parentSize = parent.getSize();
@@ -131,35 +161,6 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		BareBonesBrowserLaunch.openURL("http://myrobotlab.org");
-	}
-
-	public static void main(String[] args) throws Exception {
-		LoggingFactory.getInstance().configure();
-
-		log.info("[{}]","1060M.20130227.0733".compareTo("1059M.20130227.0722"));
-		log.info("[{}]","1059M.20130227.0722".compareTo("1060M.20130227.0733"));
-		
-		// HTTPRequest logPoster = new HTTPRequest(new
-		// URL("http://myrobotlab.org/myrobotlab_log/postLogFile.php"));
-		HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "GroG", "file", new File("myrobotlab.log"));
-		// logPoster.setParameter("file", "myrobotlab.log", new
-		// FileInputStream(new File("myrobotlab.log")));
-		// logPoster.setParameter("file", new File("myrobotlab.log"));
-		// logPoster.setc
-		/*
-		 * InputStream in = logPoster.post().getInputStream(); //read it with
-		 * BufferedReader BufferedReader br = new BufferedReader( new
-		 * InputStreamReader(in));
-		 * 
-		 * StringBuilder sb = new StringBuilder();
-		 * 
-		 * String line; while ((line = br.readLine()) != null) {
-		 * sb.append(line); }
-		 * 
-		 * System.out.println(sb.toString());
-		 * 
-		 * br.close();
-		 */
 	}
 
 }

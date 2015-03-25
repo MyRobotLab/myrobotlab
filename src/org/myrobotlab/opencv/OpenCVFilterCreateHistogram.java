@@ -37,16 +37,19 @@ public class OpenCVFilterCreateHistogram extends OpenCVFilter {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCreateHistogram.class.getCanonicalName());
 
 	IplImage buffer = null;
-	
-	
-	
 
-	public OpenCVFilterCreateHistogram()  {
+	public OpenCVFilterCreateHistogram() {
 		super();
 	}
-	
-	public OpenCVFilterCreateHistogram(String name)  {
+
+	public OpenCVFilterCreateHistogram(String name) {
 		super(name);
+	}
+
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -55,12 +58,6 @@ public class OpenCVFilterCreateHistogram extends OpenCVFilter {
 		// what can you expect? nothing? - if data != null then error?
 
 		return image;
-	}
-
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

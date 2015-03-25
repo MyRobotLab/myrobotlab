@@ -30,7 +30,6 @@ import java.io.Serializable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-
 public class IPAndPort implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(IPAndPort.class);
@@ -42,14 +41,14 @@ public class IPAndPort implements Serializable {
 	public IPAndPort() {
 	}
 
-	public IPAndPort(final String IPAddress, final int port) {
-		this.IPAddress = IPAddress;
-		this.port = port;
-	}
-
 	public IPAndPort(final IPAndPort other) {
 		this();
 		set(other);
+	}
+
+	public IPAndPort(final String IPAddress, final int port) {
+		this.IPAddress = IPAddress;
+		this.port = port;
 	}
 
 	// ctors end ----
@@ -65,6 +64,7 @@ public class IPAndPort implements Serializable {
 	/*
 	 * Default format was xml is now JSON TODO - make toStringStyler like spring
 	 */
+	@Override
 	public String toString() {
 		StringBuffer ret = new StringBuffer();
 		// ret.append("{<PinData");

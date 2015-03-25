@@ -53,16 +53,40 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 	 */
 	private static DataFlavor dragAndDropPanelDataFlavor = null;
 
-	public ServoOrchestratorGUI_middlemiddle_main(
-			final ServoOrchestratorGUI so_reft) {
+	/**
+	 * <p>
+	 * Returns (creating, if necessary) the DataFlavor representing
+	 * ServoOrchestratorGUI_middlemiddle_panel
+	 * </p>
+	 *
+	 * @return
+	 */
+	public static DataFlavor getDragAndDropPanelDataFlavor() throws Exception {
+		// the commented (first one) is original and first it wotrked, then not
+		// (???)
+		// the second (uncommented) is my repair - don't know (???)
+		// FIXME - maybe (???)
+		// TODO - maybe a fix (???)
+
+		// Lazy load/create the flavor
+		if (dragAndDropPanelDataFlavor == null) {
+			// dragAndDropPanelDataFlavor = new
+			// DataFlavor(DataFlavor.javaJVMLocalObjectMimeType +
+			// ";class=RandomDragAndDropPanel");
+			dragAndDropPanelDataFlavor = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType);
+		}
+
+		return dragAndDropPanelDataFlavor;
+	}
+
+	public ServoOrchestratorGUI_middlemiddle_main(final ServoOrchestratorGUI so_reft) {
 
 		so_ref = so_reft;
 
 		middlemiddle = new JPanel();
 
 		// Create the root panel and add to the main panel
-		rootPanel = new ServoOrchestratorGUI_middlemiddle_rootpanel(
-				ServoOrchestratorGUI_middlemiddle_main.this);
+		rootPanel = new ServoOrchestratorGUI_middlemiddle_rootpanel(ServoOrchestratorGUI_middlemiddle_main.this);
 		rootPanel.setLayout(new GridBagLayout());
 		middlemiddle.add(rootPanel);
 
@@ -72,30 +96,25 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		panels = new ServoOrchestratorGUI_middlemiddle_panel[so_ref.sizex][so_ref.sizey];
 
 		// "border"-panels
-		prep = new ServoOrchestratorGUI_middlemiddle_panel[panels.length
-				+ panels[0].length];
+		prep = new ServoOrchestratorGUI_middlemiddle_panel[panels.length + panels[0].length];
 		for (int i = 0; i < prep.length; i++) {
 			if (i < panels[0].length) {
 				final int fi = i;
 				panel_counter++;
-				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
-						"channel", panel_counter);
+				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel("channel", panel_counter);
 				prep[i].channel_id.setText(prep[i].id + "");
 				prep[i].channel_name.setText("Channel " + (i + 1));
-				prep[i].channel_settings
-						.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent ae) {
-								so_ref.externalcall_loadsettings(fi);
-							}
-						});
+				prep[i].channel_settings.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent ae) {
+						so_ref.externalcall_loadsettings(fi);
+					}
+				});
 			} else {
 				panel_counter++;
-				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
-						"timesection", panel_counter);
+				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel("timesection", panel_counter);
 				prep[i].timesection_id.setText(prep[i].id + "");
-				prep[i].timesection_headline.setText("TIMEUNIT "
-						+ (i - panels[0].length + 1));
+				prep[i].timesection_headline.setText("TIMEUNIT " + (i - panels[0].length + 1));
 			}
 		}
 		prep[panels[0].length].setBackground(Color.red);
@@ -119,8 +138,7 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 				}
 				if (panels[i1][i2] == null) {
 					panel_counter++;
-					ServoOrchestratorGUI_middlemiddle_panel p = new ServoOrchestratorGUI_middlemiddle_panel(
-							"servo", panel_counter);
+					ServoOrchestratorGUI_middlemiddle_panel p = new ServoOrchestratorGUI_middlemiddle_panel("servo", panel_counter);
 					panels[i1][i2] = p;
 
 					boolean later_externalcall_servopanelsettostartpos = false;
@@ -136,9 +154,7 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 						if (panels[searchpos][i2] == null) {
 							searchpos--;
 						} else {
-							start = Integer
-									.parseInt(panels[searchpos][i2].servo_goal
-											.getText());
+							start = Integer.parseInt(panels[searchpos][i2].servo_goal.getText());
 							break;
 						}
 					}
@@ -156,9 +172,7 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 						if (panels[searchpos][i2] == null) {
 							searchpos++;
 						} else {
-							goal = Integer
-									.parseInt(panels[searchpos][i2].servo_start
-											.getText());
+							goal = Integer.parseInt(panels[searchpos][i2].servo_start.getText());
 							break;
 						}
 					}
@@ -179,48 +193,44 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 					final int fi1 = i1;
 					final int fi2 = i2;
 					final ServoOrchestratorGUI_middlemiddle_panel fp = p;
-					p.servo_goal.getDocument().addDocumentListener(
-							new DocumentListener() {
-								@Override
-								public void insertUpdate(DocumentEvent e) {
-									adjust();
-
+					p.servo_goal.getDocument().addDocumentListener(new DocumentListener() {
+						public void adjust() {
+							int i1 = fi1;
+							int i2 = fi2;
+							ServoOrchestratorGUI_middlemiddle_panel p = fp;
+							int searchpos = i1 + 1;
+							while (searchpos < panels.length) {
+								if (panels[searchpos][i2] == null) {
+									searchpos++;
+								} else {
+									panels[searchpos][i2].servo_start.setText(p.servo_goal.getText() + "");
+									break;
 								}
+							}
+						}
 
-								@Override
-								public void removeUpdate(DocumentEvent e) {
-									adjust();
+						@Override
+						public void changedUpdate(DocumentEvent e) {
+							adjust();
 
-								}
+						}
 
-								@Override
-								public void changedUpdate(DocumentEvent e) {
-									adjust();
+						@Override
+						public void insertUpdate(DocumentEvent e) {
+							adjust();
 
-								}
+						}
 
-								public void adjust() {
-									int i1 = fi1;
-									int i2 = fi2;
-									ServoOrchestratorGUI_middlemiddle_panel p = fp;
-									int searchpos = i1 + 1;
-									while (searchpos < panels.length) {
-										if (panels[searchpos][i2] == null) {
-											searchpos++;
-										} else {
-											panels[searchpos][i2].servo_start
-													.setText(p.servo_goal
-															.getText() + "");
-											break;
-										}
-									}
-								}
-							});
+						@Override
+						public void removeUpdate(DocumentEvent e) {
+							adjust();
+
+						}
+					});
 
 					so_ref.externalcall_servopanelchangeinfo(i1, i2);
 					if (later_externalcall_servopanelsettostartpos) {
-						so_ref.externalcall_servopanelsettostartpos(i1, i2,
-								withgoal);
+						so_ref.externalcall_servopanelsettostartpos(i1, i2, withgoal);
 					}
 				}
 			}
@@ -260,31 +270,26 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 		}
 
 		// "border"-panels
-		prep = new ServoOrchestratorGUI_middlemiddle_panel[panels.length
-				+ panels[0].length];
+		prep = new ServoOrchestratorGUI_middlemiddle_panel[panels.length + panels[0].length];
 		for (int i = 0; i < prep.length; i++) {
 			if (i < panels[0].length) {
 				final int fi = i;
 				panel_counter++;
-				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
-						"channel", panel_counter);
+				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel("channel", panel_counter);
 				prep[i].channel_id.setText(prep[i].id + "");
 				prep[i].channel_name.setText("Channel " + (i + 1));
-				prep[i].channel_settings
-						.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent ae) {
-								so_ref.externalcall_loadsettings(fi);
-							}
-						});
+				prep[i].channel_settings.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent ae) {
+						so_ref.externalcall_loadsettings(fi);
+					}
+				});
 				prep[i].setBackground(Color.green);
 			} else {
 				panel_counter++;
-				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel(
-						"timesection", panel_counter);
+				prep[i] = new ServoOrchestratorGUI_middlemiddle_panel("timesection", panel_counter);
 				prep[i].timesection_id.setText(prep[i].id + "");
-				prep[i].timesection_headline.setText("TIMEUNIT "
-						+ (i - panels[0].length + 1));
+				prep[i].timesection_headline.setText("TIMEUNIT " + (i - panels[0].length + 1));
 				prep[i].setBackground(Color.green);
 			}
 		}
@@ -355,32 +360,5 @@ public class ServoOrchestratorGUI_middlemiddle_main {
 
 		middlemiddle.validate();
 		middlemiddle.repaint();
-	}
-
-	/**
-	 * <p>
-	 * Returns (creating, if necessary) the DataFlavor representing
-	 * ServoOrchestratorGUI_middlemiddle_panel
-	 * </p>
-	 *
-	 * @return
-	 */
-	public static DataFlavor getDragAndDropPanelDataFlavor() throws Exception {
-		// the commented (first one) is original and first it wotrked, then not
-		// (???)
-		// the second (uncommented) is my repair - don't know (???)
-		// FIXME - maybe (???)
-		// TODO - maybe a fix (???)
-
-		// Lazy load/create the flavor
-		if (dragAndDropPanelDataFlavor == null) {
-			// dragAndDropPanelDataFlavor = new
-			// DataFlavor(DataFlavor.javaJVMLocalObjectMimeType +
-			// ";class=RandomDragAndDropPanel");
-			dragAndDropPanelDataFlavor = new DataFlavor(
-					DataFlavor.javaJVMLocalObjectMimeType);
-		}
-
-		return dragAndDropPanelDataFlavor;
 	}
 }

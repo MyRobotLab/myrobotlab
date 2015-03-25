@@ -45,11 +45,26 @@ public class VideoStreamerGUI extends ServiceGUI implements ActionListener {
 		super(boundServiceName, myService, tabs);
 	}
 
-	public void init() {
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void attachGUI() {
+		// subscribe("publishState", "getState", VideoStreamer.class);
+		myService.send(boundServiceName, "publishState");
+	}
+
+	@Override
+	public void detachGUI() {
+		// unsubscribe("publishState", "getState", VideoStreamer.class);
 	}
 
 	public void getState(VideoStreamer streamer) {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 
 			}
@@ -57,21 +72,7 @@ public class VideoStreamerGUI extends ServiceGUI implements ActionListener {
 	}
 
 	@Override
-	public void attachGUI() {
-		//subscribe("publishState", "getState", VideoStreamer.class);
-		myService.send(boundServiceName, "publishState");
+	public void init() {
 	}
-
-	@Override
-	public void detachGUI() {
-		//unsubscribe("publishState", "getState", VideoStreamer.class);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
 
 }

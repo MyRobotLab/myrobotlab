@@ -16,7 +16,8 @@ public class ServiceEnvironment implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public URI accessURL;
-	public HashMap<String, ServiceInterface> serviceDirectory; // TODO make public
+	public HashMap<String, ServiceInterface> serviceDirectory; // TODO make
+																// public
 																// & concurrent
 	/**
 	 * platform of the environment - this can be used to implement proxy rules

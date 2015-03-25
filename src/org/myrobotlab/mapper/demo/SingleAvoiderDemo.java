@@ -53,11 +53,13 @@ public class SingleAvoiderDemo extends Demo {
 		}
 
 		/** Initialize Agent's Behavior */
+		@Override
 		public void initBehavior() {
 			// nothing particular in this case
 		}
 
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 
 			if (!stop) {

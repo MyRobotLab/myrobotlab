@@ -46,6 +46,7 @@ public class SelectingToggle {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JToggleButton toggleButton = new JToggleButton("Selected");
 		ActionListener actionListener = new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				AbstractButton abstractButton = (AbstractButton) actionEvent.getSource();
 				boolean selected = abstractButton.getModel().isSelected();
@@ -53,6 +54,7 @@ public class SelectingToggle {
 			}
 		};
 		ChangeListener changeListener = new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent changeEvent) {
 				AbstractButton abstractButton = (AbstractButton) changeEvent.getSource();
 				ButtonModel buttonModel = abstractButton.getModel();
@@ -63,6 +65,7 @@ public class SelectingToggle {
 			}
 		};
 		ItemListener itemListener = new ItemListener() {
+			@Override
 			public void itemStateChanged(ItemEvent itemEvent) {
 				int state = itemEvent.getStateChange();
 				if (state == ItemEvent.SELECTED) {

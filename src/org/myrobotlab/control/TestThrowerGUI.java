@@ -54,6 +54,19 @@ public class TestThrowerGUI extends ServiceGUI {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void attachGUI() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void detachGUI() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public void init() {
 		display.setSize(400, 200);
 		display.setLayout(new GridBagLayout());
@@ -150,24 +163,12 @@ public class TestThrowerGUI extends ServiceGUI {
 		throwIntegerLabel.setText(count.toString());
 	}
 
-	public void throwVideo(Integer count) {
-		throwVideoLabel.setText(count.toString());
-	}
-
 	public void throwSerial(Integer count) {
 		throwSerialLabel.setText(count.toString());
 	}
 
-	@Override
-	public void attachGUI() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void detachGUI() {
-		// TODO Auto-generated method stub
-
+	public void throwVideo(Integer count) {
+		throwVideoLabel.setText(count.toString());
 	}
 
 }

@@ -52,10 +52,12 @@ public class BlinkingLampDemo extends Demo {
 		}
 
 		/** Initialize Agent's Behavior */
+		@Override
 		public void initBehavior() {
 		}
 
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 			// turn lamp On or Off depending on sonars
 			lamp.setBlink(false);

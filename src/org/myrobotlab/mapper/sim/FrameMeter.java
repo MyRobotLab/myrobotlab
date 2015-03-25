@@ -42,6 +42,10 @@ final class FrameMeter {
 		reset();
 	}
 
+	public int getUpdateRate() {
+		return updateRate;
+	}
+
 	/*
 	 * Method to be called at the measure point
 	 */
@@ -52,20 +56,11 @@ final class FrameMeter {
 			long currTime = System.currentTimeMillis();
 			long dt = (currTime - lastTime);
 			if (dt != 0)
-				fps = (1000f * count) / (float) dt;
-			fpsSinceStart = (1000f * totalCount) / (float) (currTime - startTime);
+				fps = (1000f * count) / dt;
+			fpsSinceStart = (1000f * totalCount) / (currTime - startTime);
 			lastTime = currTime;
 			count = 0;
 		}
-	}
-
-	public int getUpdateRate() {
-		return updateRate;
-	}
-
-	public void setUpdateRate(int rate) {
-		updateRate = rate;
-		reset();
 	}
 
 	/* Resets the measure */
@@ -75,5 +70,10 @@ final class FrameMeter {
 		count = 0;
 		fps = 0;
 		fpsSinceStart = 0;
+	}
+
+	public void setUpdateRate(int rate) {
+		updateRate = rate;
+		reset();
 	}
 }

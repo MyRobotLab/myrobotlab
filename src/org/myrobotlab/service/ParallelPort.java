@@ -37,23 +37,16 @@ import org.myrobotlab.framework.Service;
 public class ParallelPort extends Service {
 
 	private static OutputStream outputStream;;
+
 	private static gnu.io.ParallelPort parallelPort;
 	private static CommPortIdentifier port;
 
-
 	private static final long serialVersionUID = 1L;
-
-	public ParallelPort(String n) {
-		super(n);
-	}
 
 	// CONSTANTS
 	public static final String PARALLEL_PORT = "LPT1";
 
 	public static final String[] PORT_TYPE = { "Serial Port", "Parallel Port" };
-
-	// these commands are specific for my printer around the text
-	// private static String printerCodes = "<n>HelloWorld!<p>";
 
 	public static void main(String[] args) {
 
@@ -109,15 +102,21 @@ public class ParallelPort extends Service {
 		}
 	}
 
+	// these commands are specific for my printer around the text
+	// private static String printerCodes = "<n>HelloWorld!<p>";
+
+	public ParallelPort(String n) {
+		super(n);
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "sensor", "control" };
+	}
+
 	@Override
 	public String getDescription() {
 		return "<html>(not working yet) used to communicate to and from the parallel port<br>" + "wrapping the great project http://rxtx.qbang.org/ using LGPL v 2.1</html>";
-	}
-	
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"sensor", "control"};
 	}
 
 }

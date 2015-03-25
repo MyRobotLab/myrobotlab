@@ -31,11 +31,6 @@ import org.slf4j.Logger;
  */
 public class MjpegServer extends NanoHTTPD {
 
-	public final static Logger log = LoggerFactory.getLogger(MjpegServer.class.getCanonicalName());
-
-	transient public HashMap<String, BlockingQueue<SerializableImage>> videoFeeds = new HashMap<String, BlockingQueue<SerializableImage>>();
-	transient public HashMap<String, VideoWebClient> clients = new HashMap<String, VideoWebClient>();
-
 	public class Connection {
 		boolean initialized = false;
 		Socket socket;
@@ -61,7 +56,8 @@ public class MjpegServer extends NanoHTTPD {
 		BlockingQueue<SerializableImage> videoFeed;
 
 		VideoWebClient(BlockingQueue<SerializableImage> videoFeed, String feed, Socket socket) throws IOException {
-			//super(String.format("stream_%s:%s", socket.getInetAddress().getHostAddress(), socket.getPort()));
+			// super(String.format("stream_%s:%s",
+			// socket.getInetAddress().getHostAddress(), socket.getPort()));
 			super(String.format("stream_%s", feed));
 			this.videoFeed = videoFeed;
 			this.feed = feed;
@@ -69,12 +65,13 @@ public class MjpegServer extends NanoHTTPD {
 		}
 
 		// TODO - look into buffered output stream
+		@Override
 		public void run() {
 			try {
 				while (true) {
 					SerializableImage frame = videoFeed.take();
-					//++frameIndex;
-					//log.info("frame {}", frameIndex);
+					// ++frameIndex;
+					// log.info("frame {}", frameIndex);
 					Logging.logTime(String.format("Mjpeg frameIndex %d %d", frame.frameIndex, System.currentTimeMillis()));
 					for (Iterator<Connection> iterator = connections.iterator(); iterator.hasNext();) {
 						Connection c = iterator.next();
@@ -89,25 +86,20 @@ public class MjpegServer extends NanoHTTPD {
 							}
 
 							byte[] bytes = frame.getBytes();
-							
+
 							// begin jpg
-							c.os.write((
-							        "--BoundaryString\r\n" +
-							                "Content-type: image/jpg\r\n" +
-							                "Content-Length: " +
-							                bytes.length +
-							                "\r\n\r\n").getBytes());
+							c.os.write(("--BoundaryString\r\n" + "Content-type: image/jpg\r\n" + "Content-Length: " + bytes.length + "\r\n\r\n").getBytes());
 							// write the jpg
 							c.os.write(bytes);
 
 							// end
 							c.os.write("\r\n\r\n".getBytes());
-							
+
 							// flush or not to flush that is the question
 							c.os.flush();
 							Logging.logTime(String.format("Mjpeg frameIndex %d %d SENT", frame.frameIndex, System.currentTimeMillis()));
 						} catch (Exception e) {
-							Logging.logException(e);
+							Logging.logError(e);
 							log.info("removing socket");
 							iterator.remove();
 							c.close();
@@ -117,16 +109,40 @@ public class MjpegServer extends NanoHTTPD {
 				}
 			} catch (Exception e) {
 				// FIXME remove socket from list - continue to run
-				Logging.logException(e);
+				Logging.logError(e);
 			}
 
 		}
+	}
+
+	public final static Logger log = LoggerFactory.getLogger(MjpegServer.class.getCanonicalName());
+
+	transient public HashMap<String, BlockingQueue<SerializableImage>> videoFeeds = new HashMap<String, BlockingQueue<SerializableImage>>();
+
+	transient public HashMap<String, VideoWebClient> clients = new HashMap<String, VideoWebClient>();
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
+			MjpegServer server = new MjpegServer(9090);
+			server.start();
+			log.info("here");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	public MjpegServer(int port) {
 		super(port);
 	}
 
+	@Override
 	public Response serve(String uri, String method, Properties header, Properties parms, Socket socket) {
 		log.info(method + " '" + uri + "' ");
 
@@ -162,8 +178,7 @@ public class MjpegServer extends NanoHTTPD {
 				response.append(String.format("<img src=\"%s\" /><br/>%s<br/>", o.getKey(), o.getKey()));
 				log.info(o.getKey());
 			}
-			if (videoFeeds.size() == 0)
-			{
+			if (videoFeeds.size() == 0) {
 				response.append("no video feed exist - try attaching a VideoSource to the VideoStreamer");
 			}
 			response.append("</body></html>");
@@ -174,30 +189,13 @@ public class MjpegServer extends NanoHTTPD {
 				client.start();
 				clients.put(feed, client);
 			} catch (IOException e1) {
-				Logging.logException(e1);
+				Logging.logError(e1);
 			}
 		}
 		// new Response(HTTP_OK, MIME_HTML, "<html><body>Redirected: <a href=\""
 		// + uri + "\">" + uri + "</a></body></html>");
 
 		return null; // serveFile(uri, header, new File("."), true);
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		try {
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
-			MjpegServer server = new MjpegServer(9090);
-			server.start();
-			log.info("here");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 	}
 
 }

@@ -25,6 +25,7 @@
 
 package org.myrobotlab.service;
 
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -59,8 +60,8 @@ public class Stepper extends Service implements StepperControl {
 	private boolean isAttached = false;
 	private int rpm = 0;
 	private boolean locked = false; // for locking the motor in a stopped
-									// position
 
+	// position
 	/**
 	 * controller index for events & controllers to dumb to have dynamic string
 	 * based containers
@@ -69,7 +70,7 @@ public class Stepper extends Service implements StepperControl {
 
 	// Constants that the user passes in to the motor calls
 	public static final Integer FORWARD = 1;
-	public static final Integer BACKWARD = 2;
+									public static final Integer BACKWARD = 2;
 	public static final Integer BRAKE = 3;
 	public static final Integer RELEASE = 4;
 
@@ -110,6 +111,8 @@ public class Stepper extends Service implements StepperControl {
 	// TODO - generalize
 	private transient Arduino arduino;
 
+	private boolean isBlockingOnStop = false;
+
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 
@@ -119,33 +122,68 @@ public class Stepper extends Service implements StepperControl {
 		return peers;
 	}
 
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		Stepper stepper = (Stepper) Runtime.start("stepper", "Stepper");
+		stepper.test();
+
+	}
+
 	public Stepper(String n) {
 		super(n);
 	}
 
-	@Override
-	public void unlock() {
-		log.info("unLock");
-		locked = false;
+	// Uber good - .. although this is "chained" versus star routing
+	// Star routing would be routing from the Arduino directly to the Listener
+	// The "chained" version takes 2 thread contexts :( .. but it has the
+	// benefit
+	// of the "publishRange" method being affected by the Sensor service e.g.
+	// change units, sample rate, etc
+	public void addPublishStepperEventListener(Service service) {
+		addListener("publishStepperEvent", service.getName(), "publishStepperEvent", Integer.class);
+	}
+
+	public boolean attach(Arduino arduino, String port, String type, Integer... pins) throws IOException {
+		this.arduino = arduino;
+		this.type = type;
+		this.pins = pins;
+
+		this.arduino.connect(port);
+		return arduino.stepperAttach(this);
+	}
+
+	public boolean attach(String port, Integer... pins) throws IOException {
+		return attach((String) null, port, pins);
+	}
+
+	public boolean attach(String arduino, String port, Integer... pins) throws IOException {
+		return attach(this.arduino, port, STEPPER_TYPE_POLOLU, pins);
+	}
+
+	private void attached(boolean isAttached) {
+		this.isAttached = isAttached;
+		broadcastState();
+	}
+
+	boolean connect(String port) {
+		return arduino.connect(port);
 	}
 
 	@Override
-	public void lock() {
-		log.info("lock");
-		locked = true;
-	}
-
-	@Override
-	public void stopAndLock() {
-		log.info("stopAndLock");
-		lock();
-	}
-
-	@Override
-	public boolean setController(StepperController controller) {
-		this.controller = controller;
-		attached(true);
+	public boolean detach() {
+		if (controller == null) {
+			return false;
+		}
+		controller.stepperDetach(getName());
 		return true;
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "motor", "control" };
 	}
 
 	public String getControllerName() {
@@ -161,9 +199,24 @@ public class Stepper extends Service implements StepperControl {
 		return "general motor service";
 	}
 
-	private void attached(boolean isAttached) {
-		this.isAttached = isAttached;
-		broadcastState();
+	@Override
+	public Integer getIndex() {
+		return index;
+	}
+
+	@Override
+	public Integer[] getPins() {
+		return pins;
+	}
+
+	@Override
+	public String getStepperType() {
+		return type;
+	}
+
+	@Override
+	public int getSteps() {
+		return steps;
 	}
 
 	@Override
@@ -172,17 +225,69 @@ public class Stepper extends Service implements StepperControl {
 	}
 
 	@Override
-	public boolean detach() {
-		if (controller == null) {
-			return false;
+	public void lock() {
+		log.info("lock");
+		locked = true;
+	}
+
+	public void move(int newPos) {
+		this.arduino.stepperMove(getName(), newPos);
+	}
+
+	public Integer moveToBlocking(Integer newPos) {
+		try {
+
+			isBlockingOnStop = true;
+			blockingData.clear();
+
+			move(newPos);
+			Integer gotTo = (Integer) blockingData.poll(10000, TimeUnit.MILLISECONDS);
+			return gotTo;
+		} catch (Exception e) {
+			Logging.logError(e);
+			return null;
 		}
-		controller.stepperDetach(getName());
+	}
+
+	// excellent pattern - put in interface
+	public Integer publishStepperEvent(Integer currentPos) {
+		log.info(String.format("publishStepperEvent %s %d", getName(), currentPos));
+		this.currentPos = currentPos;
+		if (isBlockingOnStop) {
+			blockingData.add(currentPos);
+		}
+		return currentPos;
+	}
+
+	public void reset() {
+		controller.stepperReset(getName());
+	}
+
+	@Override
+	public boolean setController(StepperController controller) {
+		this.controller = controller;
+		attached(true);
 		return true;
+	}
+
+	@Override
+	public void setIndex(Integer index) {
+		this.index = index;
+	}
+
+	public void setNumSteps(Integer steps) {
+		this.steps = steps;
 	}
 
 	@Override
 	public void setSpeed(Integer rpm) {
 		controller.setStepperSpeed(rpm);
+	}
+
+	@Override
+	public void startService() {
+		super.startService();
+		arduino = (Arduino) startPeer("arduino");
 	}
 
 	@Override
@@ -196,171 +301,71 @@ public class Stepper extends Service implements StepperControl {
 		controller.stepperStep(getName(), steps, style);
 	}
 
-	public void move(int newPos) {
-		this.arduino.stepperMove(getName(), newPos);
-	}
-
 	@Override
 	public void stop() {
 		this.arduino.stepperStop(getName());
 	}
 
-	public void setNumSteps(Integer steps) {
-		this.steps = steps;
-	}
-
-	public void reset() {
-		controller.stepperReset(getName());
-	}
-
-	public boolean attach(String port, Integer... pins) {
-		return attach((String) null, port, pins);
-	}
-
-	public boolean attach(String arduino, String port, Integer... pins) {
-		if (arduino == null && this.arduino == null) {
-			this.arduino = (Arduino) startPeer("arduino");
-		}
-		return attach(this.arduino, port, STEPPER_TYPE_POLOLU, pins);
-	}
-
-	public boolean attach(Arduino arduino, String port, String type, Integer... pins) {
-		this.arduino = arduino;
-		this.type = type;
-		this.pins = pins;
-
-		if (!this.arduino.connect(port)) {
-			error("could not connect port %s", port);
-			return false;
-		}
-
-		return arduino.stepperAttach(this);
-	}
-
-	public Integer getIndex() {
-		return index;
-	}
-
-	public void setIndex(Integer index) {
-		this.index = index;
-	}
-
-	public void startService() {
-		super.startService();
-		arduino = (Arduino) startPeer("arduino");
-	}
-
-	boolean connect(String port) {
-		return arduino.connect(port);
-	}
-
-	public Integer[] getPins() {
-		return pins;
-	}
-
-	public String getStepperType() {
-		return type;
-	}
-
-	// excellent pattern - put in interface
-	public Integer publishStepperEvent(Integer currentPos) {
-		log.info(String.format("publishStepperEvent %s %d", getName(), currentPos));
-		this.currentPos = currentPos;
-		if (isBlockingOnStop) {
-			blockingData.add(currentPos);
-		}
-		return currentPos;
+	@Override
+	public void stopAndLock() {
+		log.info("stopAndLock");
+		lock();
 	}
 
 	@Override
-	public int getSteps() {
-		return steps;
-	}
-
-	private boolean isBlockingOnStop = false;
-
-	public Integer moveToBlocking(Integer newPos) {
-		try {
-
-			isBlockingOnStop = true;
-			blockingData.clear();
-
-			move(newPos);
-			Integer gotTo = (Integer) blockingData.poll(10000, TimeUnit.MILLISECONDS);
-			return gotTo;
-		} catch (Exception e) {
-			Logging.logException(e);
-			return null;
-		}
-	}
-
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
-		// FIXME - there has to be a properties method to configure localized
-		// testing
-		boolean useGUI = true;
+		try {
+			// FIXME - there has to be a properties method to configure
+			// localized
+			// testing
+			boolean useGUI = true;
 
-		Stepper stepper = (Stepper) Runtime.start(getName(), "Stepper");
-		// Python python = (Python) Runtime.start("python", "Python");
+			Stepper stepper = (Stepper) Runtime.start(getName(), "Stepper");
+			// Python python = (Python) Runtime.start("python", "Python");
 
-		// && depending on headless
-		if (useGUI) {
-			Runtime.start("gui", "GUIService");
+			// && depending on headless
+			if (useGUI) {
+				Runtime.start("gui", "GUIService");
+			}
+
+			int dirPin = 34;
+			int stepPin = 38;
+			// nice simple interface
+			// stepper.connect("COM15");
+			stepper.attach("COM12", dirPin, stepPin);
+
+			// stepper.moveToBlocking(77777);
+
+			stepper.move(81100);
+
+			stepper.stop();
+			// stepper.reset();
+
+			stepper.move(100);
+
+			// TODO - blocking call
+
+			log.info("here");
+
+			stepper.move(1);
+			stepper.reset();
+			stepper.move(2);
+
+			log.info("here");
+			stepper.move(-1);
+			log.info("here");
+			stepper.move(-300);
+		} catch (Exception e) {
+			Logging.logError(e);
 		}
-
-		int dirPin = 34;
-		int stepPin = 38;
-		// nice simple interface
-		// stepper.connect("COM15");
-		stepper.attach("COM12", dirPin, stepPin);
-
-		//stepper.moveToBlocking(77777);
-
-		stepper.move(81100);
-
-		stepper.stop();
-		// stepper.reset();
-
-		stepper.move(100);
-
-		// TODO - blocking call
-
-		log.info("here");
-
-		stepper.move(1);
-		stepper.reset();
-		stepper.move(2);
-
-		log.info("here");
-		stepper.move(-1);
-		log.info("here");
-		stepper.move(-300);
 		return status;
 	}
-	
-	// Uber good - .. although this is "chained" versus star routing
-	// Star routing would be routing from the Arduino directly to the Listener
-	// The "chained" version takes 2 thread contexts :( .. but it has the benefit
-	// of the "publishRange" method being affected by the Sensor service e.g.
-	// change units, sample rate, etc
-	public void addPublishStepperEventListener(Service service) {
-		addListener("publishStepperEvent", service.getName(), "publishStepperEvent", Integer.class);
-	}
 
-
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		Stepper stepper = (Stepper) Runtime.start("stepper", "Stepper");
-		stepper.test();
-
-	}
-	
 	@Override
-	public String[] getCategories() {
-		return new String[] {"motor", "control"};
+	public void unlock() {
+		log.info("unLock");
+		locked = false;
 	}
 
 }

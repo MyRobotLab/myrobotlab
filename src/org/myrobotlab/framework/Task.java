@@ -3,21 +3,10 @@ package org.myrobotlab.framework;
 import java.util.TimerTask;
 
 public class Task extends TimerTask {
-	
+
 	Message msg;
 	int interval = 0;
 	Service myService;
-	
-	public Task (Service myService, String toService, String method, Object...params)
-	{
-		this.myService = myService;
-		msg = myService.createMessage(toService, method, params);
-	}
-
-	public Task(Task s) {
-		this.msg = s.msg;
-		this.interval = s.interval;
-	}
 
 	public Task(int interval, String name, String method) {
 		this(interval, name, method, (Object[]) null);
@@ -26,6 +15,16 @@ public class Task extends TimerTask {
 	public Task(int interval, String name, String method, Object... data) {
 		this.msg = myService.createMessage(name, method, data);
 		this.interval = interval;
+	}
+
+	public Task(Service myService, String toService, String method, Object... params) {
+		this.myService = myService;
+		msg = myService.createMessage(toService, method, params);
+	}
+
+	public Task(Task s) {
+		this.msg = s.msg;
+		this.interval = s.interval;
 	}
 
 	@Override
@@ -40,6 +39,5 @@ public class Task extends TimerTask {
 			myService.timer.schedule(t, interval);
 		}
 	}
-	
 
 }

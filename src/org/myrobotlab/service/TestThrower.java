@@ -33,59 +33,6 @@ import org.slf4j.Logger;
 
 public class TestThrower extends Service {
 
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(TestThrower.class.getCanonicalName());
-	public int cnt = 0;
-	public int pulseLimit = 20;
-	public int pitchCnt = 0;
-	public int throwInterval = 100;
-	public String throwType = "throwInteger";
-	public ArrayList<Integer> catcher = new ArrayList<Integer>();
-	public ArrayList<Integer> catchList = new ArrayList<Integer>();
-
-	public ArrayList<RapidThrower> pitchers = new ArrayList<RapidThrower>();
-
-	// TODO bury this in Service??
-	public TestThrower(String n) {
-		super(n);
-	}
-
-	public Integer catchInteger(Integer count) {
-		log.info("***THROWER CATCH*** catchInteger " + count);
-		synchronized (catchList) {
-			catchList.add(count);
-			catchList.notify();
-		}
-		return count;
-	}
-
-	public void throwNothing() {
-		log.info("throwNothing");
-	}
-
-	public Integer throwInteger(Integer count) {
-		log.info("throwInteger " + count);
-		return count;
-	}
-
-	public Integer highPitchInteger(Integer count) {
-		++pitchCnt;
-		log.info("highPitchInteger " + pitchCnt);
-		return count;
-	}
-
-	public Integer lowPitchInteger(Integer count) {
-		++pitchCnt;
-		log.info("lowPitchInteger " + pitchCnt);
-		return count;
-	}
-
-	public Integer noPitchInteger(Integer count) {
-		++pitchCnt;
-		log.info("noPitchInteger null ");
-		return 0;
-	}
-
 	public class RapidThrower implements Runnable {
 		Service myService = null;
 		public boolean running = false;
@@ -113,9 +60,59 @@ public class TestThrower extends Service {
 		}
 	}
 
-	public String throwString(String nameOfTargetService, String nameOfMethod, String data) {
-		send(nameOfTargetService, nameOfMethod, data);
-		return data;
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(TestThrower.class.getCanonicalName());
+	public int cnt = 0;
+	public int pulseLimit = 20;
+	public int pitchCnt = 0;
+	public int throwInterval = 100;
+	public String throwType = "throwInteger";
+	public ArrayList<Integer> catcher = new ArrayList<Integer>();
+
+	public ArrayList<Integer> catchList = new ArrayList<Integer>();
+
+	public ArrayList<RapidThrower> pitchers = new ArrayList<RapidThrower>();
+
+	// TODO bury this in Service??
+	public TestThrower(String n) {
+		super(n);
+	}
+
+	public Integer catchInteger(Integer count) {
+		log.info("***THROWER CATCH*** catchInteger " + count);
+		synchronized (catchList) {
+			catchList.add(count);
+			catchList.notify();
+		}
+		return count;
+	}
+
+	@Override
+	public String[] getCategories() {
+		return new String[] { "framework", "testing" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "<html>service for junit tests</html>";
+	}
+
+	public Integer highPitchInteger(Integer count) {
+		++pitchCnt;
+		log.info("highPitchInteger " + pitchCnt);
+		return count;
+	}
+
+	public Integer lowPitchInteger(Integer count) {
+		++pitchCnt;
+		log.info("lowPitchInteger " + pitchCnt);
+		return count;
+	}
+
+	public Integer noPitchInteger(Integer count) {
+		++pitchCnt;
+		log.info("noPitchInteger null ");
+		return 0;
 	}
 
 	/**
@@ -140,16 +137,18 @@ public class TestThrower extends Service {
 		}
 	}
 
-	@Override
-	public String getDescription() {
-		return "<html>service for junit tests</html>";
+	public Integer throwInteger(Integer count) {
+		log.info("throwInteger " + count);
+		return count;
 	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"framework", "testing"};
+
+	public void throwNothing() {
+		log.info("throwNothing");
 	}
-	
-	
+
+	public String throwString(String nameOfTargetService, String nameOfMethod, String data) {
+		send(nameOfTargetService, nameOfMethod, data);
+		return data;
+	}
 
 }

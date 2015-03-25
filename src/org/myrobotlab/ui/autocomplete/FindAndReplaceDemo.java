@@ -41,6 +41,23 @@ public class FindAndReplaceDemo extends JFrame implements ActionListener {
 	private JCheckBox regexCB;
 	private JCheckBox matchCaseCB;
 
+	public static void main(String[] args) {
+		// Start all Swing applications on the EDT.
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					String laf = UIManager.getSystemLookAndFeelClassName();
+					UIManager.setLookAndFeel(laf);
+				} catch (Exception e) { /* never happens */
+				}
+				FindAndReplaceDemo demo = new FindAndReplaceDemo();
+				demo.setVisible(true);
+				demo.textArea.requestFocusInWindow();
+			}
+		});
+	}
+
 	public FindAndReplaceDemo() {
 
 		JPanel cp = new JPanel(new BorderLayout());
@@ -62,6 +79,7 @@ public class FindAndReplaceDemo extends JFrame implements ActionListener {
 		nextButton.addActionListener(this);
 		toolBar.add(nextButton);
 		searchField.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				nextButton.doClick(0);
 			}
@@ -84,6 +102,7 @@ public class FindAndReplaceDemo extends JFrame implements ActionListener {
 
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		// "FindNext" => search forward, "FindPrev" => search backward
@@ -107,22 +126,6 @@ public class FindAndReplaceDemo extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(this, "Text not found");
 		}
 
-	}
-
-	public static void main(String[] args) {
-		// Start all Swing applications on the EDT.
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					String laf = UIManager.getSystemLookAndFeelClassName();
-					UIManager.setLookAndFeel(laf);
-				} catch (Exception e) { /* never happens */
-				}
-				FindAndReplaceDemo demo = new FindAndReplaceDemo();
-				demo.setVisible(true);
-				demo.textArea.requestFocusInWindow();
-			}
-		});
 	}
 
 }

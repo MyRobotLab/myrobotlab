@@ -64,10 +64,51 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 
 	ArrayList<Point> hist = new ArrayList<Point>();
 
+	DecimalFormat df = new DecimalFormat("#.##");
+
+	int cnt = 0;
+
 	public PingdarGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
+	@Override
+	public void attachGUI() {
+		subscribe("publishPingdar", "onSinglePoint", Point.class);
+		// subscribe("publishSweepData", "publishSweepData", ArrayList.class);
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishPingdar", "onSinglePoint", Point.class);
+		// unsubscribe("publishSweepData", "publishSweepData", ArrayList.class);
+	}
+
+	public void displayFrame(SerializableImage camImage) {
+		screen.displayFrame(camImage);
+	}
+
+	public void drawStaticInfo() {
+		graph.setColor(Color.gray);
+
+		int inches = 0;
+
+		int r = 160;
+
+		for (r = 160; r < vheight * 2; r += 160) {
+			inches += 10;
+			graph.drawArc(vwidth / 2 - r / 2, vheight - r / 2, r, r, 0, 180);
+			graph.drawString("" + inches, vwidth / 2 + r / 2, vheight - 10);
+		}
+
+	}
+
+	@Override
+	public VideoWidget getLocalDisplay() {
+		return screen;
+	}
+
+	@Override
 	public void init() {
 		screen = new VideoWidget(boundServiceName, myService, tabs);
 		screen.init();
@@ -95,40 +136,6 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 		gc.gridy = 5;
 	}
 
-	public void displayFrame(SerializableImage camImage) {
-		screen.displayFrame(camImage);
-	}
-
-	@Override
-	public void attachGUI() {
-		subscribe("publishPingdar", "onSinglePoint", Point.class);
-		//subscribe("publishSweepData", "publishSweepData", ArrayList.class);
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishPingdar", "onSinglePoint", Point.class);
-		//unsubscribe("publishSweepData", "publishSweepData", ArrayList.class);
-	}
-
-	public void drawStaticInfo() {
-		graph.setColor(Color.gray);
-
-		int inches = 0;
-
-		int r = 160;
-
-		for (r = 160; r < vheight * 2; r += 160) {
-			inches += 10;
-			graph.drawArc(vwidth / 2 - r / 2, vheight - r / 2, r, r, 0, 180);
-			graph.drawString("" + inches, vwidth / 2 + r / 2, vheight - 10);
-		}
-
-	}
-
-	DecimalFormat df = new DecimalFormat("#.##");
-	int cnt = 0;
-
 	public Point onSinglePoint(Point p) {
 		int x;
 		int y;
@@ -141,18 +148,18 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 		if (cnt % 180 == 0) {
 			drawStaticInfo();
 		}
-		
-		if (p.r < 8){
+
+		if (p.r < 8) {
 			return p;
 		}
 
 		// calculate xy for p
 		x = ((int) (p.r * Math.cos(Math.toRadians(p.theta)) * zScale) + xOffset);
 		y = vheight - ((int) (p.r * Math.sin(Math.toRadians(p.theta)) * zScale));
-		//log.info(String.format(" x y %d %d", x, y));
+		// log.info(String.format(" x y %d %d", x, y));
 
 		// take care of history
-		
+
 		if (hist.size() > 0) {
 			// get historical coordinates
 			Point h = hist.get(hist.size() - 1);
@@ -169,8 +176,8 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 			graph.setColor(Color.green);
 			// draw line if under min distance from previous point
 			if (distance < 40) {
-			graph.drawLine(x, y, x0, y0);
-			 }
+				graph.drawLine(x, y, x0, y0);
+			}
 
 			// black historical lidar vector
 			graph.setColor(Color.black);
@@ -197,7 +204,7 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 		}
 
 		// draw the point & info
-		
+
 		if (p.r > 0) {
 			// draw point
 			graph.setColor(Color.green);
@@ -225,11 +232,6 @@ public class PingdarGUI extends ServiceGUI implements ListSelectionListener, Vid
 		// screen image
 		screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
 		return p;
-	}
-
-	@Override
-	public VideoWidget getLocalDisplay() {
-		return screen;
 	}
 
 	@Override

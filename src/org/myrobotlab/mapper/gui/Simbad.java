@@ -56,6 +56,7 @@ public class Simbad extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	static final String version = "1.4";
+
 	static int SIZEX = 800;
 	static int SIZEY = 700;
 	JMenuBar menubar;
@@ -69,6 +70,34 @@ public class Simbad extends JFrame implements ActionListener {
 	boolean backgroundMode;
 
 	static Simbad simbadInstance = null;
+
+	// ///////////////////////
+	// Class methods
+	public static Simbad getSimbadInstance() {
+		return simbadInstance;
+	}
+
+	/** The simbad main. Process command line arguments and launch simbad. */
+	public static void main(String[] args) {
+		// process options
+		boolean backgroundMode = false;
+		for (int i = 0; i < args.length; i++) {
+			if ("-bg".compareTo(args[i]) == 0)
+				backgroundMode = true;
+		}
+		// Check java3d presence
+		try {
+			Class.forName("javax.media.j3d.VirtualUniverse");
+		} catch (ClassNotFoundException e1) {
+			JOptionPane.showMessageDialog(null, "Simbad requires Java 3D", "Simbad 3D", JOptionPane.ERROR_MESSAGE);
+			System.exit(-1);
+		}
+
+		// request antialising
+		System.setProperty("j3d.implicitAntialiasing", "true");
+
+		new Simbad(new org.myrobotlab.mapper.demo.BaseDemo(), backgroundMode);
+	}
 
 	/** Construct Simbad application with the given environement description */
 	public Simbad(EnvironmentDescription ed, boolean backgroundMode) {
@@ -84,6 +113,34 @@ public class Simbad extends JFrame implements ActionListener {
 
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		if (event.getActionCommand() == "demo") {
+			releaseRessources();
+			start(DemoManager.getDemoFromActionEvent(event));
+		}
+	}
+
+	public void attach(BaseObject obj3d) {
+		world.attach(obj3d);
+	}
+
+	/**
+	 * creates agent inspector window
+	 */
+	private AgentInspector createAgentInspector(Simulator simulator, int x, int y) {
+		ArrayList agents = simulator.getAgentList();
+		SimpleAgent a = ((SimpleAgent) agents.get(0));
+		if (a instanceof Agent) {
+			AgentInspector ai = new AgentInspector((Agent) a, !backgroundMode, simulator);
+			desktop.add(ai);
+			ai.show();
+			ai.setLocation(x, y);
+			return ai;
+		} else
+			return null;
+	}
+
 	/** Create the main GUIService. Only called once. */
 	private void createGUI() {
 		desktop.setFocusable(true);
@@ -91,24 +148,6 @@ public class Simbad extends JFrame implements ActionListener {
 		menubar = new JMenuBar();
 		menubar.add(DemoManager.createMenu(this));
 		setJMenuBar(menubar);
-	}
-
-	/** Starts (or Restarts after releaseRessources) the world and simulator. */
-	private void start(EnvironmentDescription ed) {
-		System.out.println("Starting environmentDescription: " + ed.getClass().getName());
-		world = new World(ed);
-		simulator = new Simulator(desktop, world, ed);
-		createInternalFrames();
-		if (backgroundMode) {
-			runBackgroundMode();
-		}
-	}
-
-	/** Release all ressources. */
-	private void releaseRessources() {
-		simulator.dispose();
-		world.dispose();
-		disposeInternalFrames();
 	}
 
 	/**
@@ -141,27 +180,15 @@ public class Simbad extends JFrame implements ActionListener {
 		}
 	}
 
-	/**
-	 * creates agent inspector window
-	 */
-	private AgentInspector createAgentInspector(Simulator simulator, int x, int y) {
-		ArrayList agents = simulator.getAgentList();
-		SimpleAgent a = ((SimpleAgent) agents.get(0));
-		if (a instanceof Agent) {
-			AgentInspector ai = new AgentInspector((Agent) a, !backgroundMode, simulator);
-			desktop.add(ai);
-			ai.show();
-			ai.setLocation(x, y);
-			return ai;
-		} else
-			return null;
+	public JDesktopPane getDesktopPane() {
+		return desktop;
 	}
 
-	public void actionPerformed(ActionEvent event) {
-		if (event.getActionCommand() == "demo") {
-			releaseRessources();
-			start(DemoManager.getDemoFromActionEvent(event));
-		}
+	/** Release all ressources. */
+	private void releaseRessources() {
+		simulator.dispose();
+		world.dispose();
+		disposeInternalFrames();
 	}
 
 	/**
@@ -192,40 +219,15 @@ public class Simbad extends JFrame implements ActionListener {
 		simulator.startBackgroundMode();
 	}
 
-	/** The simbad main. Process command line arguments and launch simbad. */
-	public static void main(String[] args) {
-		// process options
-		boolean backgroundMode = false;
-		for (int i = 0; i < args.length; i++) {
-			if ("-bg".compareTo(args[i]) == 0)
-				backgroundMode = true;
+	/** Starts (or Restarts after releaseRessources) the world and simulator. */
+	private void start(EnvironmentDescription ed) {
+		System.out.println("Starting environmentDescription: " + ed.getClass().getName());
+		world = new World(ed);
+		simulator = new Simulator(desktop, world, ed);
+		createInternalFrames();
+		if (backgroundMode) {
+			runBackgroundMode();
 		}
-		// Check java3d presence
-		try {
-			Class.forName("javax.media.j3d.VirtualUniverse");
-		} catch (ClassNotFoundException e1) {
-			JOptionPane.showMessageDialog(null, "Simbad requires Java 3D", "Simbad 3D", JOptionPane.ERROR_MESSAGE);
-			System.exit(-1);
-		}
-
-		// request antialising
-		System.setProperty("j3d.implicitAntialiasing", "true");
-
-		new Simbad(new org.myrobotlab.mapper.demo.BaseDemo(), backgroundMode);
-	}
-
-	public JDesktopPane getDesktopPane() {
-		return desktop;
-	}
-
-	// ///////////////////////
-	// Class methods
-	public static Simbad getSimbadInstance() {
-		return simbadInstance;
-	}
-
-	public void attach(BaseObject obj3d) {
-		world.attach(obj3d);
 	}
 
 }

@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service;
 
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -50,153 +49,6 @@ import org.slf4j.Logger;
  */
 
 public class RobotPlatform extends Service {
-	public final static Logger log = LoggerFactory.getLogger(RobotPlatform.class);
-
-	private static final long serialVersionUID = 1L;
-
-	public int positionX = 0;
-	public int positionY = 0;
-
-	public int targetX = 0;
-	public int targetY = 0;
-
-	public int headingCurrent = 0;
-	public int headingTarget = 0;
-	public int headingLast = 0;
-	public int headingDelta = 0;
-	public int headingSpeed = 0;
-
-	transient Motor left = null;
-	transient Motor right = null;
-
-	/* I HATE ENUMS !
-	public enum Directions {
-		LEFT, STOPPED, RIGHT
-	}
-	
-
-	public Directions directionCurrent = Directions.STOPPED;
-	public Directions directionTarget = Directions.STOPPED;
-	*/
-
-	transient PIDThread pid = null;
-	Object pidLock = new Object();
-	String directionTarget = null;
-	
-	public static String DIRECTION_STOPPED = "DIRECTION_STOPPED";
-	public static String DIRECTION_RIGHT = "DIRECTION_RIGHT";
-	public static String DIRECTION_LEFT = "DIRECTION_LEFT";
-
-	// TODO - determine if control needs to be serialized
-	// Lock for "syncing" time vs read write contention - don't want a turning
-	// thread spinning too tightly
-	private final Object lock = new Object();
-
-	boolean isTurning = false;
-
-	// calibration / tuning
-	// min power start - this can change as battery dies
-	public Float minPowerToStartRight = new Float(0);
-	public Float minPowerToStartLeft = new Float(0);
-
-	public Float MotorPowerToTurnRatioRight = new Float(0); // forwards/backwards
-															// ?
-	public Float MotorPowerToTurnRatioLeft = new Float(0);
-	public Float MotorPowerToTurnRatioBoth = new Float(0);
-
-	public Float currentTurnRate = new Float(0); // signed for directionCurrent?
-
-	// lag
-	public Float feedbackLagTime = new Float(0);
-	public Float controlbackLagTime = new Float(0);
-	// drift overshoot?
-
-	public Float speed = new Float(0);
-
-	// TODO - fault Timer
-	public long updateHeadingTime = 0;
-	public long updateHeadingTimeLast = 0;
-	public long updatePositionTime = 0;
-	public long updatePositionTimeLast = 0;
-
-	public long beginMotion = 0;
-	public long endMotion = 0;
-
-	public boolean inMotion = false;
-
-	/*
-	 * This is a (first) attempt of making a PID (PD) (P) controller for
-	 * turning. This article
-	 * (http://www.inpharmix.com/jps/PID_Controller_For_Lego_Mindstorms_Robots
-	 * .html) was EXTREMELY helpful for someone (like me) who has never
-	 * implemented a PID controller.
-	 * 
-	 * The added complexity for Video Tracking feed back is the HUGE delay in
-	 * the feedback stream (up to 1.5 seconds) TODO - encapsulate into a utility
-	 * - generalize for all to use PIDUtil PIDThread Reference :
-	 * http://www.arduino.cc/playground/Code/PIDLibrary - Arduino's library,
-	 * would be helpful on local PID applications
-	 * http://brettbeauregard.com/blog
-	 * /2011/04/improving-the-beginners-pid-introduction/ - quick and excellent
-	 * explanation http://en.wikipedia.org/wiki/Lead-lag_compensator - for
-	 * lead/lag compensation
-	 * http://brettbeauregard.com/blog/2011/04/improving-the
-	 * -beginners-pid-introduction/ - REALLY NICE FORMULA/CODE SNIPPET
-	 * 
-	 * startHeadingPID startDistancePID ... or one PID two errors?
-	 * 
-	 * deltaHeading ~= error
-	 * 
-	 * offset already done will need a max power value - don't want it going at
-	 * 100% power to get to anywhere (i think)
-	 * 
-	 * turn = Kp * deltaHeading | Turn = Kp*(error)
-	 * 
-	 * Tp = tunable parameter (base power)
-	 * 
-	 * rightPower = Tp - turn leftPower = TP + turn
-	 * 
-	 * Turn = Kp*(error) + Ki*(integral) + Kd*(derivative) + the complexity of
-	 * error being 1.5 second lag
-	 */
-
-
-	public RobotPlatform(String n) {
-		super(n);
-	}
-
-	public void attach(Motor left, Motor right) {
-		this.left = left;
-		this.right = right;
-	}
-
-	// new state function
-	public RobotPlatform publishState(RobotPlatform t) {
-		return t;
-	}
-
-	// absolute / relative functions end -------------------
-
-	// control functions begin -------------------
-	public void spinLeft(float power) {
-		right.move(-power);
-		left.move(power);
-	}
-
-	public void spinRight(float power) {
-		right.move(power);
-		left.move(-power);
-	}
-
-	public void move(float power) {
-		right.move(power);
-		left.move(power);
-	}
-
-	public void moveTo(float distance) {
-
-	}
-
 	// FIXME - just use PID - remove this
 	class PIDThread extends Thread {
 		boolean isRunning = true;
@@ -209,6 +61,7 @@ public class RobotPlatform extends Service {
 			super("pid");
 		}
 
+		@Override
 		public void run() {
 
 			while (isRunning) {
@@ -264,12 +117,124 @@ public class RobotPlatform extends Service {
 		}
 	}
 
-	public void startPID() {
-		if (pid == null) {
-			pid = new PIDThread();
-			pid.start();
-		}
+	public final static Logger log = LoggerFactory.getLogger(RobotPlatform.class);
+
+	private static final long serialVersionUID = 1L;
+	public int positionX = 0;
+
+	public int positionY = 0;
+	public int targetX = 0;
+
+	public int targetY = 0;
+	public int headingCurrent = 0;
+	public int headingTarget = 0;
+	public int headingLast = 0;
+	public int headingDelta = 0;
+
+	public int headingSpeed = 0;
+	transient Motor left = null;
+
+	/*
+	 * I HATE ENUMS ! public enum Directions { LEFT, STOPPED, RIGHT }
+	 * 
+	 * 
+	 * public Directions directionCurrent = Directions.STOPPED; public
+	 * Directions directionTarget = Directions.STOPPED;
+	 */
+
+	transient Motor right = null;
+	transient PIDThread pid = null;
+	Object pidLock = new Object();
+
+	String directionTarget = null;
+	public static String DIRECTION_STOPPED = "DIRECTION_STOPPED";
+	public static String DIRECTION_RIGHT = "DIRECTION_RIGHT";
+
+	public static String DIRECTION_LEFT = "DIRECTION_LEFT";
+
+	// TODO - determine if control needs to be serialized
+	// Lock for "syncing" time vs read write contention - don't want a turning
+	// thread spinning too tightly
+	private final Object lock = new Object();
+
+	boolean isTurning = false;
+	// calibration / tuning
+	// min power start - this can change as battery dies
+	public Float minPowerToStartRight = new Float(0);
+
+	public Float minPowerToStartLeft = new Float(0);
+	public Float MotorPowerToTurnRatioRight = new Float(0); // forwards/backwards
+	// ?
+	public Float MotorPowerToTurnRatioLeft = new Float(0);
+
+	public Float MotorPowerToTurnRatioBoth = new Float(0);
+
+	public Float currentTurnRate = new Float(0); // signed for directionCurrent?
+	// lag
+	public Float feedbackLagTime = new Float(0);
+
+	public Float controlbackLagTime = new Float(0);
+	// drift overshoot?
+
+	public Float speed = new Float(0);
+	// TODO - fault Timer
+	public long updateHeadingTime = 0;
+	public long updateHeadingTimeLast = 0;
+	public long updatePositionTime = 0;
+
+	public long updatePositionTimeLast = 0;
+	public long beginMotion = 0;
+
+	public long endMotion = 0;
+
+	/*
+	 * This is a (first) attempt of making a PID (PD) (P) controller for
+	 * turning. This article
+	 * (http://www.inpharmix.com/jps/PID_Controller_For_Lego_Mindstorms_Robots
+	 * .html) was EXTREMELY helpful for someone (like me) who has never
+	 * implemented a PID controller.
+	 * 
+	 * The added complexity for Video Tracking feed back is the HUGE delay in
+	 * the feedback stream (up to 1.5 seconds) TODO - encapsulate into a utility
+	 * - generalize for all to use PIDUtil PIDThread Reference :
+	 * http://www.arduino.cc/playground/Code/PIDLibrary - Arduino's library,
+	 * would be helpful on local PID applications
+	 * http://brettbeauregard.com/blog
+	 * /2011/04/improving-the-beginners-pid-introduction/ - quick and excellent
+	 * explanation http://en.wikipedia.org/wiki/Lead-lag_compensator - for
+	 * lead/lag compensation
+	 * http://brettbeauregard.com/blog/2011/04/improving-the
+	 * -beginners-pid-introduction/ - REALLY NICE FORMULA/CODE SNIPPET
+	 * 
+	 * startHeadingPID startDistancePID ... or one PID two errors?
+	 * 
+	 * deltaHeading ~= error
+	 * 
+	 * offset already done will need a max power value - don't want it going at
+	 * 100% power to get to anywhere (i think)
+	 * 
+	 * turn = Kp * deltaHeading | Turn = Kp*(error)
+	 * 
+	 * Tp = tunable parameter (base power)
+	 * 
+	 * rightPower = Tp - turn leftPower = TP + turn
+	 * 
+	 * Turn = Kp*(error) + Ki*(integral) + Kd*(derivative) + the complexity of
+	 * error being 1.5 second lag
+	 */
+
+	public boolean inMotion = false;
+
+	public RobotPlatform(String n) {
+		super(n);
 	}
+
+	public void attach(Motor left, Motor right) {
+		this.left = left;
+		this.right = right;
+	}
+
+	// absolute / relative functions end -------------------
 
 	public void calibrate() {
 		// check for feedback devices
@@ -359,33 +324,16 @@ public class RobotPlatform extends Service {
 
 	}
 
-	// from motor interface begin-------
-	public void stop() {
-		if (pid != null) {
-			pid.isRunning = false;
-			pid.interrupt();
-			pid = null;
-		}
-
-		right.stop();
-		left.stop();
+	@Override
+	public String[] getCategories() {
+		return new String[] { "robot", "control" };
 	}
 
-	public void stopAndLock() {
-		right.stopAndLock();
-		left.stopAndLock();
+	@Override
+	public String getDescription() {
+		return "<html>used to encapsulate many of the functions and formulas regarding 2 motor platforms.<br>"
+				+ "encoders and other feedback mechanisms can be added to provide heading, location and other information</html>";
 	}
-
-	// incrementMotor must be more descriptive
-	public void incrementRightPower(float power) {
-		// right.incrementPower(power);
-	}
-
-	public void incrementLeftPower(float power) {
-		// left.incrementPower(power);
-	}
-
-	// control functions end -------------------
 
 	// getters setters begin -------------------
 	public Motor getLeftMotor() {
@@ -397,29 +345,28 @@ public class RobotPlatform extends Service {
 		return right;
 	}
 
-	public void setLeftMotor(Motor left) {
-		this.left = left;
+	public void incrementLeftPower(float power) {
+		// left.incrementPower(power);
 	}
 
-	public void setRightMotor(Motor right) {
-		this.right = right;
+	// incrementMotor must be more descriptive
+	public void incrementRightPower(float power) {
+		// right.incrementPower(power);
 	}
 
-	// command to change heading and/or position
-	public void setTargetHeading(int value) // maintainHeading ?? if PID is
-											// operating
-	{
-		headingTarget = value;
-		setHeading(headingCurrent);// HACK? - a way to get all of the
-									// recalculations publish
+	public void move(float power) {
+		right.move(power);
+		left.move(power);
 	}
 
-	public void setTargetPosition(int x, int y) {
-		targetX = x;
-		targetY = y;
+	public void moveTo(float distance) {
+
 	}
 
-	// getters setters end --------------------------
+	// new state function
+	public RobotPlatform publishState(RobotPlatform t) {
+		return t;
+	}
 
 	// FEEDBACK related begin ------------------------
 	/*
@@ -459,6 +406,12 @@ public class RobotPlatform extends Service {
 		invoke("publishState", this);
 	}
 
+	// control functions end -------------------
+
+	public void setLeftMotor(Motor left) {
+		this.left = left;
+	}
+
 	public void setPosition(int x, int y) {
 		// set times of feedback
 		updatePositionTimeLast = updatePositionTime;
@@ -475,6 +428,73 @@ public class RobotPlatform extends Service {
 
 	}
 
+	public void setRightMotor(Motor right) {
+		this.right = right;
+	}
+
+	// command to change heading and/or position
+	public void setTargetHeading(int value) // maintainHeading ?? if PID is
+											// operating
+	{
+		headingTarget = value;
+		setHeading(headingCurrent);// HACK? - a way to get all of the
+									// recalculations publish
+	}
+
+	public void setTargetPosition(int x, int y) {
+		targetX = x;
+		targetY = y;
+	}
+
+	// control functions begin -------------------
+	public void spinLeft(float power) {
+		right.move(-power);
+		left.move(power);
+	}
+
+	// getters setters end --------------------------
+
+	public void spinRight(float power) {
+		right.move(power);
+		left.move(-power);
+	}
+
+	public void startPID() {
+		if (pid == null) {
+			pid = new PIDThread();
+			pid.start();
+		}
+	}
+
+	// from motor interface begin-------
+	public void stop() {
+		if (pid != null) {
+			pid.isRunning = false;
+			pid.interrupt();
+			pid = null;
+		}
+
+		right.stop();
+		left.stop();
+	}
+
+	public void stopAndLock() {
+		right.stopAndLock();
+		left.stopAndLock();
+	}
+
+	// turning related end --------------------------
+	/*
+	 * public static void main(String[] args) {
+	 * 
+	 * LoggingFactory.getInstance().configure();
+	 * LoggingFactory.getInstance().setLevel(Level.WARN);
+	 * 
+	 * GUIService gui = new GUIService("gui"); DifferentialDrive platform = new
+	 * DifferentialDrive("platform"); platform.startService();
+	 * gui.startService(); //platform.startRobot(); }
+	 */
+
 	// waitForHeadingChange will block and wait for heading change
 	public final int waitForHeadingChange() {
 		synchronized (lock) {
@@ -488,29 +508,6 @@ public class RobotPlatform extends Service {
 
 		return headingCurrent;
 
-	}
-
-	@Override
-	public String getDescription() {
-		return "<html>used to encapsulate many of the functions and formulas regarding 2 motor platforms.<br>"
-				+ "encoders and other feedback mechanisms can be added to provide heading, location and other information</html>";
-	}
-
-	// turning related end --------------------------
-	/*
-	 * public static void main(String[] args) {
-	 * 
-	 * LoggingFactory.getInstance().configure();
-	 * LoggingFactory.getInstance().setLevel(Level.WARN);
-	 * 
-	 * GUIService gui = new GUIService("gui"); DifferentialDrive platform = new
-	 * DifferentialDrive("platform"); platform.startService();
-	 * gui.startService();  //platform.startRobot(); }
-	 */
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"robot", "control"};
 	}
 
 }

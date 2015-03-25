@@ -43,22 +43,12 @@ public class SensorMatrix extends SensorData {
 	public SensorMatrix(SensorMatrix lm) {
 		this.width = lm.width;
 		this.height = lm.height;
-		this.array = (float[]) lm.array.clone();
+		this.array = lm.array.clone();
 	}
 
-	/** Return the matrix height in pixels. */
-	public int getHeight() {
-		return height;
-	}
-
-	/** Return the matrix width in pixels. */
-	public int getWidth() {
-		return width;
-	}
-
-	/** Access matrix element. */
-	public float get(int x, int y) {
-		return array[x + y * width];
+	@Override
+	public Object clone() {
+		return new SensorMatrix(this);
 	}
 
 	/**
@@ -74,12 +64,23 @@ public class SensorMatrix extends SensorData {
 		return array[(int) (xf * width) + (int) (yf * height) * width];
 	}
 
+	/** Access matrix element. */
+	public float get(int x, int y) {
+		return array[x + y * width];
+	}
+
 	public float[] getArray() {
 		return array;
 	}
 
-	public Object clone() {
-		return new SensorMatrix(this);
+	/** Return the matrix height in pixels. */
+	public int getHeight() {
+		return height;
+	}
+
+	/** Return the matrix width in pixels. */
+	public int getWidth() {
+		return width;
 	}
 
 }

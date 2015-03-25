@@ -30,28 +30,41 @@ public class ThingSpeak extends Service {
 	// http://api.thingspeak.com/update?key=AO4DMKQZY4RLWNNU&field1=pin&field2=A0&field3=value&field4=345&status=boink6
 
 	String updateURL = "http://api.thingspeak.com/update";
-	
+
 	String writeKey = "";
 
 	long lastUpdate = 0;
 
-	
 	int intervalSeconds = 20;
 
-	public Integer getIntervalSeconds() {
-		return intervalSeconds;
-	}
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
-	public void setIntervalSeconds(int intervalSeconds) {
-		this.intervalSeconds = intervalSeconds;
+		try {
+			// BasicConfigurator.
+
+			log.info("hello");
+
+			ThingSpeak thingSpeak = new ThingSpeak("thingSpeak");
+			thingSpeak.update(33);
+			thingSpeak.startService();
+
+			/*
+			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 */
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 	public ThingSpeak(String n) {
 		super(n);
 	}
 
-	public void saveConfig() {
-		save();
+	@Override
+	public String[] getCategories() {
+		return new String[] { "data", "cloud" };
 	}
 
 	@Override
@@ -59,7 +72,39 @@ public class ThingSpeak extends Service {
 		return "used as a general template";
 	}
 
+	public Integer getIntervalSeconds() {
+		return intervalSeconds;
+	}
+
 	// TODO - add averaging & timing info
+
+	public long getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public String getWriteKey() {
+		return writeKey;
+	}
+
+	public void saveConfig() {
+		save();
+	}
+
+	public void setIntervalSeconds(int intervalSeconds) {
+		this.intervalSeconds = intervalSeconds;
+	}
+
+	public void setLastUpdate(long lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
+	public void setWriteKey(String writeKey) {
+		this.writeKey = writeKey;
+	}
+
+	public Integer update(Integer data) {
+		return update(new Object[] { data });
+	}
 
 	public Integer update(Object[] data) {
 		String result = "0";
@@ -87,7 +132,7 @@ public class ThingSpeak extends Service {
 			log.info(String.format("ThingSpeak returned %s", result));
 
 		} catch (IOException e) {
-			Logging.logException(e);
+			Logging.logError(e);
 		}
 
 		Integer ret = Integer.parseInt(result);
@@ -97,55 +142,12 @@ public class ThingSpeak extends Service {
 		return ret;
 	}
 
-	public Integer update(Integer data) {
-		return update(new Object[] { data });
-	}
-
-	public Integer update(String data) {
-		return update(new Object[] { data });
-	}
-
 	public Integer update(Pin pin) {
 		return update(new Object[] { pin.pin, pin.value });
 	}
 
-	public String getWriteKey() {
-		return writeKey;
-	}
-
-	public void setWriteKey(String writeKey) {
-		this.writeKey = writeKey;
-	}
-
-	public long getLastUpdate() {
-		return lastUpdate;
-	}
-
-	public void setLastUpdate(long lastUpdate) {
-		this.lastUpdate = lastUpdate;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		// BasicConfigurator.
-
-		log.info("hello");
-
-		ThingSpeak thingSpeak = new ThingSpeak("thingSpeak");
-		thingSpeak.update(33);
-		thingSpeak.startService();
-
-		/*
-		 * GUIService gui = new GUIService("gui"); gui.startService();
-		 * 
-		 */
-	}
-	
-	@Override
-	public String[] getCategories() {
-		return new String[] {"data", "cloud"};
+	public Integer update(String data) {
+		return update(new Object[] { data });
 	}
 
 }

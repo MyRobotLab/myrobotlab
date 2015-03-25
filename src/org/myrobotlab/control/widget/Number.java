@@ -29,6 +29,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 public class Number {
 
@@ -46,12 +47,8 @@ public class Number {
 	String name = "";
 	String description = "";
 
-	public Number(String name, int init, int min, int max, String description) {
-		this(name, (double) init, (double) min, (double) max, description, false);
-	}
-
 	public Number(String name, double init, double min, double max, String description) {
-		this(name, (double) init, (double) min, (double) max, description, true);
+		this(name, init, min, max, description, true);
 	}
 
 	public Number(String name, double init, double min, double max, String description, boolean isReal) {
@@ -63,7 +60,7 @@ public class Number {
 		this.description = description;
 		this.isReal = isReal;
 
-		valueField.setHorizontalAlignment(JTextField.RIGHT);
+		valueField.setHorizontalAlignment(SwingConstants.RIGHT);
 
 		if (isReal) {
 			valueField.setText(init + "");
@@ -78,6 +75,10 @@ public class Number {
 		display.add(nameLabel);
 		display.add(valueField);
 		display.add(descriptionLabel);
+	}
+
+	public Number(String name, int init, int min, int max, String description) {
+		this(name, init, min, max, description, false);
 	}
 
 	public JComponent getDisplay() {

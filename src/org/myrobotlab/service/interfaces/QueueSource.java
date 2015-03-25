@@ -4,5 +4,6 @@ import java.util.concurrent.BlockingQueue;
 
 public interface QueueSource {
 	String getName();
+
 	BlockingQueue<?> getQueue();
 }

@@ -4,8 +4,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Motor;
 import org.slf4j.Logger;
 
-
-
 public class Motor_UnknownGUI extends MotorControllerPanel {
 
 	private static final long serialVersionUID = 1L;

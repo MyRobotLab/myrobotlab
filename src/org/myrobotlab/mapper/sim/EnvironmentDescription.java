@@ -84,6 +84,28 @@ public class EnvironmentDescription {
 		defaultSettings();
 	}
 
+	/** Add a object (Agent or BlockWorldObject). */
+	public void add(Object object) {
+
+		objects.add(object);
+	}
+
+	public void addMap(String[] map) {
+
+		int sx = map[0].length();
+		int sy = map.length;
+		int cx = sx / 2;
+		int cy = sy / 2;
+		for (int y = 0; y < sy; y++) {
+			for (int x = 0; x < map[y].length(); x++) {
+				if (map[y].charAt(x) == '#') {
+					add(new Box(new Vector3d(x - cx, 0, y - cy), new Vector3f(1, 1, 1), this));
+				}
+			}
+		}
+
+	}
+
 	void defaultSettings() {
 		light1IsOn = true;
 		light2IsOn = false;
@@ -102,12 +124,6 @@ public class EnvironmentDescription {
 
 	}
 
-	/** Add a object (Agent or BlockWorldObject). */
-	public void add(Object object) {
-
-		objects.add(object);
-	}
-
 	public void light1SetPosition(double x, double y, double z) {
 		light1Position.set(x, y, z);
 	}
@@ -121,11 +137,6 @@ public class EnvironmentDescription {
 		usePhysics = use;
 	}
 
-	/** Shows or hide the X,Y and Z axis. */
-	public void showAxis(boolean show) {
-		hasAxis = show;
-	}
-
 	/**
 	 * Sets the size of the world.
 	 * 
@@ -136,19 +147,8 @@ public class EnvironmentDescription {
 		worldSize = size;
 	}
 
-	public void addMap(String[] map) {
-
-		int sx = map[0].length();
-		int sy = map.length;
-		int cx = sx / 2;
-		int cy = sy / 2;
-		for (int y = 0; y < sy; y++) {
-			for (int x = 0; x < map[y].length(); x++) {
-				if (map[y].charAt(x) == '#') {
-					add(new Box(new Vector3d(x - cx, 0, y - cy), new Vector3f(1, 1, 1), this));
-				}
-			}
-		}
-
+	/** Shows or hide the X,Y and Z axis. */
+	public void showAxis(boolean show) {
+		hasAxis = show;
 	}
 }

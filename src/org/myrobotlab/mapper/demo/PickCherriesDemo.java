@@ -31,11 +31,13 @@ public class PickCherriesDemo extends Demo {
 		}
 
 		/** Initialize Agent's Behavior */
+		@Override
 		public void initBehavior() {
 			setTranslationalVelocity(0.5);
 		}
 
 		/** Perform one step of Agent's Behavior */
+		@Override
 		public void performBehavior() {
 			if (collisionDetected())
 				moveToStartPosition();

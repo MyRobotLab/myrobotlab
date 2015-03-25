@@ -35,12 +35,19 @@ import org.myrobotlab.opencv.OpenCVFilterAddMask;
 import org.myrobotlab.service.GUIService;
 
 public class OpenCVFilterAddMaskGUI extends OpenCVFilterGUI implements ActionListener {
-	
+
 	public OpenCVFilterAddMaskGUI(String boundFilterName, String boundServiceName, GUIService myService) {
-		super(boundFilterName, boundServiceName, myService);	
-		
+		super(boundFilterName, boundServiceName, myService);
+
 		ComboBoxModel list = new ComboBoxModel(this);
 
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		OpenCVFilterAddMask bf = (OpenCVFilterAddMask) boundFilter.filter;
+		setFilterState(bf);
 	}
 
 	// @Override
@@ -57,18 +64,12 @@ public class OpenCVFilterAddMaskGUI extends OpenCVFilterGUI implements ActionLis
 	@Override
 	public void getFilterState(final FilterWrapper filterWrapper) {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				OpenCVFilterAddMask bf = (OpenCVFilterAddMask)filterWrapper.filter;
+				OpenCVFilterAddMask bf = (OpenCVFilterAddMask) filterWrapper.filter;
 				sources.setSelectedItem(bf.sourceName);
 			}
 		});
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		OpenCVFilterAddMask bf = (OpenCVFilterAddMask) boundFilter.filter;
-		setFilterState(bf);
 	}
 
 }

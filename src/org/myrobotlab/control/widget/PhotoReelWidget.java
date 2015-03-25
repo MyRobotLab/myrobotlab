@@ -44,26 +44,6 @@ import org.myrobotlab.service.GUIService;
 
 public class PhotoReelWidget extends ServiceGUI {
 
-	private static final long serialVersionUID = 1L;
-	JLabel screen = new JLabel();
-	JLabel mouseInfo = new JLabel("mouse x y");
-	JLabel resolutionInfo = new JLabel("width x height");
-	JLabel deltaTime = new JLabel("0");
-
-	HashMap<String, JLabel> screens = new HashMap<String, JLabel>();
-
-	public SerializableImage lastImage = null;
-	public ImageIcon lastIcon = new ImageIcon();
-	public ImageIcon myIcon = new ImageIcon();
-	public VideoMouseListener vml = new VideoMouseListener();
-	public String boundFilterName = "";
-
-	public int lastImageWidth = 0;
-
-	public PhotoReelWidget(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
-		super(boundServiceName, myService, tabs);
-	}
-
 	public class VideoMouseListener implements MouseListener {
 
 		@Override
@@ -108,32 +88,66 @@ public class PhotoReelWidget extends ServiceGUI {
 
 	}
 
+	private static final long serialVersionUID = 1L;
+	JLabel screen = new JLabel();
+	JLabel mouseInfo = new JLabel("mouse x y");
+	JLabel resolutionInfo = new JLabel("width x height");
+
+	JLabel deltaTime = new JLabel("0");
+
+	HashMap<String, JLabel> screens = new HashMap<String, JLabel>();
+	public SerializableImage lastImage = null;
+	public ImageIcon lastIcon = new ImageIcon();
+	public ImageIcon myIcon = new ImageIcon();
+	public VideoMouseListener vml = new VideoMouseListener();
+
+	public String boundFilterName = "";
+
+	public int lastImageWidth = 0;
+
+	public PhotoReelWidget(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+		super(boundServiceName, myService, tabs);
+	}
+
+	@Override
+	public void attachGUI() {
+		subscribe("publishTemplate", "publishTemplate", SerializableImage.class);
+	}
+
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishTemplate", "publishTemplate", SerializableImage.class);
+	}
+
 	public JComboBox getServices(JComboBox cb) {
 		if (cb == null) {
 			cb = new JComboBox();
 		}
 
 		/*
-		HashMap<String, ServiceEntry> services = myService.getHostCFG().getServiceMap();
-		Map<String, ServiceEntry> sortedMap = null;
-		sortedMap = new TreeMap<String, ServiceEntry>(services);
-		Iterator<String> it = sortedMap.keySet().iterator();
-
-		// String [] namesAndClasses = new String[sortedMap.size()];
-		int i = 0;
-		while (it.hasNext()) {
-			String serviceName = it.next();
-			cb.addItem(serviceName);
-			// ServiceEntry se = services.get(serviceName);
-			// String shortClassName =
-			// se.serviceClass.substring(se.serviceClass.lastIndexOf(".") + 1);
-			// namesAndClasses[i] = serviceName + " - " + shortClassName;
-			++i;
-		}
-*/
+		 * HashMap<String, ServiceEntry> services =
+		 * myService.getHostCFG().getServiceMap(); Map<String, ServiceEntry>
+		 * sortedMap = null; sortedMap = new TreeMap<String,
+		 * ServiceEntry>(services); Iterator<String> it =
+		 * sortedMap.keySet().iterator();
+		 * 
+		 * // String [] namesAndClasses = new String[sortedMap.size()]; int i =
+		 * 0; while (it.hasNext()) { String serviceName = it.next();
+		 * cb.addItem(serviceName); // ServiceEntry se =
+		 * services.get(serviceName); // String shortClassName = //
+		 * se.serviceClass.substring(se.serviceClass.lastIndexOf(".") + 1); //
+		 * namesAndClasses[i] = serviceName + " - " + shortClassName; ++i; }
+		 */
 		return cb;
 	}
 
+	/*
+	 * MAKE NOTE - BECAUSE THERE WERE 2 - (1 called from SensorMonitorGUI) - I
+	 * got one bug that was fixed in Serialized - (width/pack performance issue)
+	 * !
+	 */
+
+	@Override
 	public void init() {
 
 		ImageIcon icon = Util.getResourceIcon("photoreel.1.png");
@@ -163,43 +177,6 @@ public class PhotoReelWidget extends ServiceGUI {
 		++gc.gridy;
 		display.add(deltaTime, gc);
 	}
-
-	// TODO - need an explanation of why there are two and why one does
-	// not call the other
-	public void publishTemplate(String filterName, SerializableImage img) {
-		if (!screens.containsKey(filterName)) {
-			screens.put(filterName, new JLabel());
-		}
-
-		if (lastImage != null) {
-			screen.setIcon(lastIcon);
-		}
-		boundFilterName = img.getSource();
-		myIcon.setImage(img.getImage());
-		screen.setIcon(myIcon);
-		if (lastImage != null) {
-				deltaTime.setText("" + (img.getTimestamp() - lastImage.getTimestamp()));
-		}
-		lastImage = img;
-		lastIcon.setImage(img.getImage());
-
-		// resize gui if necessary
-		if (lastImageWidth != img.getImage().getWidth()) {
-			screen.invalidate();
-			myService.pack();
-			lastImageWidth = img.getImage().getWidth();
-			resolutionInfo.setText(" " + lastImageWidth + " x " + img.getImage().getHeight());
-		}
-
-		img = null;
-
-	}
-
-	/*
-	 * MAKE NOTE - BECAUSE THERE WERE 2 - (1 called from SensorMonitorGUI) - I
-	 * got one bug that was fixed in Serialized - (width/pack performance issue)
-	 * !
-	 */
 
 	public void publishTemplate(BufferedImage img) {
 		if (lastImage != null) {
@@ -236,14 +213,35 @@ public class PhotoReelWidget extends ServiceGUI {
 		}
 	}
 
-	@Override
-	public void attachGUI() {
-		subscribe("publishTemplate", "publishTemplate", SerializableImage.class);
-	}
+	// TODO - need an explanation of why there are two and why one does
+	// not call the other
+	public void publishTemplate(String filterName, SerializableImage img) {
+		if (!screens.containsKey(filterName)) {
+			screens.put(filterName, new JLabel());
+		}
 
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishTemplate", "publishTemplate", SerializableImage.class);
+		if (lastImage != null) {
+			screen.setIcon(lastIcon);
+		}
+		boundFilterName = img.getSource();
+		myIcon.setImage(img.getImage());
+		screen.setIcon(myIcon);
+		if (lastImage != null) {
+			deltaTime.setText("" + (img.getTimestamp() - lastImage.getTimestamp()));
+		}
+		lastImage = img;
+		lastIcon.setImage(img.getImage());
+
+		// resize gui if necessary
+		if (lastImageWidth != img.getImage().getWidth()) {
+			screen.invalidate();
+			myService.pack();
+			lastImageWidth = img.getImage().getWidth();
+			resolutionInfo.setText(" " + lastImageWidth + " x " + img.getImage().getHeight());
+		}
+
+		img = null;
+
 	}
 
 }
