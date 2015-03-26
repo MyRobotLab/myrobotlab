@@ -2,8 +2,6 @@ package org.myrobotlab.codec;
 
 import java.util.ArrayList;
 
-import org.myrobotlab.service.interfaces.LoggingSink;
-
 public class HexCodec extends Codec {
 
 	String coloumnDelimiter = " ";
@@ -12,7 +10,7 @@ public class HexCodec extends Codec {
 	int width = 16;
 
 	@Override
-	final public String decode(int data) {
+	final public String decodeImpl(int data) {
 		return String.format("%02x%s%s", data & 0xff, coloumnDelimiter, ((byteCount%width == 0)?rowDelimiter:""));
 	}
 

@@ -456,7 +456,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	 * @throws CodecException
 	 */
 	@Override
-	public String decode(int newByte){
+	public String decodeImpl(int newByte){
 
 		// log.info(String.format("byteCount %d", byteCount));
 		++byteCount;

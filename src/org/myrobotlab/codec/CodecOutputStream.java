@@ -23,35 +23,19 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class BlockingDecoderOutputStream extends OutputStream {
+public class CodecOutputStream extends OutputStream {
 
-	public final static Logger log = LoggerFactory.getLogger(BlockingDecoderOutputStream.class);
+	public final static Logger log = LoggerFactory.getLogger(CodecOutputStream.class);
 
-	// Integer timeout = null;
-	Integer timeout = 1000;
-	int maxQueue = 1024;
-	BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 	Codec codec;
 	LoggingSink sink;
 	OutputStream out;
 	String prefix;
 
-	public BlockingDecoderOutputStream(String prefix, LoggingSink sink) {
+	public CodecOutputStream(String prefix, LoggingSink sink) {
 		this.sink = sink;
 		codec = new DecimalCodec(sink);
 		this.prefix = prefix;
-	}
-
-	public String decode() {
-		try {
-			if (timeout != null) {
-				return queue.poll(timeout, TimeUnit.MILLISECONDS);
-			}
-			return queue.take();
-		} catch (Exception e) {
-			// don't care
-		}
-		return null;
 	}
 
 	public Codec getCodec() {
@@ -73,20 +57,8 @@ public class BlockingDecoderOutputStream extends OutputStream {
 		}
 	}
 
-	public int getMaxQueue() {
-		return maxQueue;
-	}
-
 	public OutputStream getOut() {
 		return out;
-	}
-
-	public BlockingQueue<String> getQueue() {
-		return queue;
-	}
-
-	public Integer getTimeout() {
-		return timeout;
 	}
 
 	public boolean isRecording() {
@@ -105,39 +77,16 @@ public class BlockingDecoderOutputStream extends OutputStream {
 		}
 	}
 
-	public void setMaxQueue(int maxQueue) {
-		this.maxQueue = maxQueue;
-	}
-
 	public void setOut(OutputStream out) {
 		this.out = out;
-	}
-
-	public void setQueue(BlockingQueue<String> queue) {
-		this.queue = queue;
-	}
-
-	public Integer setTimeout(Integer timeout) {
-		this.timeout = timeout;
-		return timeout;
 	}
 
 	@Override
 	public void write(int b) throws IOException {
 		if (codec != null) {
 			String decoded = codec.decode(b);
-			if (decoded != null) {
-				if (maxQueue > queue.size()) {
-					queue.add(decoded);
-				} else {
-					/*
-					 * meh - what do I care ? if (sink != null) {
-					 * sink.info("%s buffer overrun", sink.getName()); }
-					 */
-				}
-				if (out != null) {
-					out.write(decoded.getBytes());
-				}
+			if (decoded != null && out != null) {
+				out.write(decoded.getBytes());
 			}
 		} else {
 			if (out != null) {
