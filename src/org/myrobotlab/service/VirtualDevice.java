@@ -93,7 +93,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
 	public String createVirtualArduino(String portName) throws IOException {
 		createVirtualPort(portName);
 		logic.loadScriptFromResource("Arduino.py");
-		logic.exec();
+		logic.execAndWait();
 		return portName;
 	}
 

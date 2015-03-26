@@ -297,6 +297,7 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		subscribe("publishStdOut", "getStdOut", String.class);
 		subscribe("appendScript", "appendScript", String.class);
 		subscribe("startRecording", "startRecording", String.class);
+		subscribe("publishLoadedScript", "addNewEditorPanel", Script.class);
 		myService.send(boundServiceName, "attachPythonConsole");
 		// myService.send(boundServiceName, "broadcastState");
 	}
@@ -332,50 +333,6 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		return new MRLCompletionProvider();
 	}
 
-	/**
-	 * Fill up the examples menu with submenu items.
-	 * 
-	 * @param examples
-	 */
-	private void createExamplesMenu(JMenu examples) {
-		// FIXME - dynamically build based on resources
-		JMenu menu;
-		menu = new JMenu("Arduino");
-		menu.add(createMenuItem("arduinoInput.py", "examples"));
-		menu.add(createMenuItem("arduinoOutput.py", "examples"));
-		menu.add(createMenuItem("arduinoLoopback.py", "examples"));
-		examples.add(menu);
-
-		menu = new JMenu("Python");
-		menu.add(createMenuItem("createAService.py", "examples"));
-		menu.add(createMenuItem("basicPython.py", "examples"));
-		menu.add(createMenuItem("panTilt.py", "examples"));
-		examples.add(menu);
-
-		menu = new JMenu("Services");
-		menu.add(createMenuItem("createAService.py", "examples"));
-
-		menu = new JMenu("Input");
-		menu.add(createMenuItem("inputTest.py", "examples"));
-		examples.add(menu);
-
-		menu = new JMenu("Speech");
-		menu.add(createMenuItem("sayThings.py", "examples"));
-		menu.add(createMenuItem("talkBack.py", "examples"));
-		examples.add(menu);
-
-		menu = new JMenu("Robots");
-		menu.add(createMenuItem("houston.py", "examples"));
-		menu.add(createMenuItem("inMoovHandRobot.py", "examples"));
-		menu.add(createMenuItem("inMoovTalkMovement.py", "examples"));
-		examples.add(menu);
-
-		menu = new JMenu("Vision");
-		menu.add(createMenuItem("faceTracking.py", "examples"));
-		menu.add(createMenuItem("colorTracking.py", "examples"));
-		menu.add(createMenuItem("lkOpticalTrack.py", "examples"));
-		examples.add(menu);
-	}
 
 	/**
 	 * Fill up the file menu with submenu items.

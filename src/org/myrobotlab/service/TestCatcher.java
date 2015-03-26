@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -58,6 +59,8 @@ public class TestCatcher extends Service implements SerialDataListener {
 	 */
 	transient BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
 	transient BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
+	
+	ArrayList<Status> errorList = new ArrayList<Status>();
 
 	boolean isLocal = true;
 
@@ -97,6 +100,11 @@ public class TestCatcher extends Service implements SerialDataListener {
 
 	}
 
+	public Status onError(Status error){
+		errorList.add(error);
+		return error;
+	}
+	
 	public TestCatcher(String n) {
 		super(n);
 	}
