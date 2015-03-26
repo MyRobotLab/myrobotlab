@@ -35,7 +35,7 @@ public class SerialTest {
 
 		log.info("setUpBeforeClass");
 
-		//Runtime.start("gui", "GUIService");
+		Runtime.start("gui", "GUIService");
 		serial = (Serial) Runtime.start("serial", "Serial");
 		catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
 		virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
@@ -188,6 +188,7 @@ public class SerialTest {
 		serial.disconnect();
 		
 		serial.write(255);
+		log.info("testing timeout");
 		try {
 			// timeout makes it throw
 			uart.read();
