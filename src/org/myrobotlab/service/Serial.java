@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import io.netty.handler.codec.CodecException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,8 +16,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.codec.BlockingDecoderOutputStream;
 import org.myrobotlab.codec.Codec;
+import org.myrobotlab.codec.CodecOutputStream;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -82,13 +80,12 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * blocking queue for blocking rx read requests
 	 */
 	transient BlockingQueue<Integer> blockingRX = new LinkedBlockingQueue<Integer>();
-	
 
 	/**
-	 * our set of ports we have access to. This is a shared
-	 * resource between ALL serial services. It should be possible
-	 * simply to iterate through this list to get all (cached) names ..
-	 * operating system ports may have changed and need re-querying
+	 * our set of ports we have access to. This is a shared resource between ALL
+	 * serial services. It should be possible simply to iterate through this
+	 * list to get all (cached) names .. operating system ports may have changed
+	 * and need re-querying
 	 * 
 	 * it also might be worthwhile to keep a "static" list for remote and
 	 * virtual ports so that remote and other services can have access to that
@@ -100,12 +97,11 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * portNames
 	 */
 	static transient HashMap<String, Port> ports = new HashMap<String, Port>();
-	
+
 	/**
-	 * all the ports we are currently connected to
-	 * typically there is 0 to 1 connected ports - however
-	 * the serial service has the ability to "fork" ports where it is connected
-	 * to 2 or more ports simultaneously
+	 * all the ports we are currently connected to typically there is 0 to 1
+	 * connected ports - however the serial service has the ability to "fork"
+	 * ports where it is connected to 2 or more ports simultaneously
 	 */
 	transient HashMap<String, Port> connectedPorts = new HashMap<String, Port>();
 
@@ -134,12 +130,12 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	/**
 	 * rx files saved to an output stream
 	 */
-	transient BlockingDecoderOutputStream outRX = new BlockingDecoderOutputStream("rx", this);
+	transient CodecOutputStream outRX = new CodecOutputStream("rx", this);
 
 	/**
-	 * tx bytes saved to an output stream 
+	 * tx bytes saved to an output stream
 	 */
-	transient BlockingDecoderOutputStream outTX = new BlockingDecoderOutputStream("tx", this);
+	transient CodecOutputStream outTX = new CodecOutputStream("tx", this);
 
 	/**
 	 * number of tx bytes
@@ -187,8 +183,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * @param length
 	 * @return
 	 */
-	public static int bytesToInt(int[] bytes, int offset, int length){
-		return (int)bytesToLong(bytes, offset, length);
+	public static int bytesToInt(int[] bytes, int offset, int length) {
+		return (int) bytesToLong(bytes, offset, length);
 	}
 
 	/**
@@ -226,37 +222,34 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return ret;
 	}
 
-
 	public static void main(String[] args) {
 		try {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Runtime.start("gui", "GUIService");
-			//Serial serial = (Serial) Runtime.start("serial", "Serial");
-			//serial.test();
-			
+			// Serial serial = (Serial) Runtime.start("serial", "Serial");
+			// serial.test();
+
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			Serial uart = arduino.connectVirtualUART();
 			/*
-			Serial serial = arduino.getSerial();
-			
-			Serial uart = serial.createVirtualUART();
-			arduino.connect(serial.getName());
-			*/
-			//uart.write(39);
-			
-			
-			
-			if (!uart.isConnected()){
+			 * Serial serial = arduino.getSerial();
+			 * 
+			 * Serial uart = serial.createVirtualUART();
+			 * arduino.connect(serial.getName());
+			 */
+			// uart.write(39);
+
+			if (!uart.isConnected()) {
 				throw new IOException("not connected!");
 			}
-			
+
 			// USE CASES
-			
+
 			// connect again
 			uart.connect(uart.getPortName());
-			
+
 			/*
 			 * serial.setFormat("arduino"); serial.connectVirtualUART();
 			 */
@@ -275,7 +268,34 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		listeners.put(n, this);
 	}
 
+	public void addByteListener(SerialDataListener listener) {
+		addByteListener(listener.getName());
+	}
 
+	/**
+	 * awesome method - which either sets up the pub/sub remote or assigns a
+	 * local reference from the publishing thread
+	 * 
+	 * good pattern in that all logic is in this method which uses a string
+	 * "name" parameter - addByteListener(SerialDataListener listener) will call
+	 * this method too rather than implementing its own local logic
+	 * 
+	 * @param name
+	 */
+	public void addByteListener(String name) {
+		ServiceInterface si = Runtime.getService(name);
+
+		// if (si instanceof SerialDataListener && si.isLocal()){
+		if (SerialDataListener.class.isAssignableFrom(si.getClass()) && si.isLocal()) {
+			// direct callback
+			listeners.put(si.getName(), (SerialDataListener) si);
+		} else {
+			// pub sub
+			addListener("publishRX", si.getName(), "onByte", Integer.class);
+			addListener("publishConnect", si.getName(), "onConnect", String.class);
+			addListener("publishDisconnect", si.getName(), "onDisconnect", String.class);
+		}
+	}
 
 	/**
 	 * method similar to InputStream's
@@ -291,7 +311,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 */
 	public void clear() {
 		blockingRX.clear();
-		
+
 	}
 
 	public boolean connect(String name) {
@@ -324,9 +344,11 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			this.stopbits = stopbits;
 			this.parity = parity;
 
-			// two possible logics to see if we are connected - look at the state of the port
-			// on the static resource - or just check to see if its on the "connectedPort" set
-			
+			// two possible logics to see if we are connected - look at the
+			// state of the port
+			// on the static resource - or just check to see if its on the
+			// "connectedPort" set
+
 			// #1 check to see if were already connected to the port
 			if (this.portName != null && this.portName.equals(portName) && ports.containsKey(portName)) {
 				Port port = ports.get(portName);
@@ -392,20 +414,20 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		ports.put(port.getName(), port);
 		portNames.add(port.getName());
 		invoke("getPortNames");
-		
+
 		if (listener != null) {
 			listeners.put(listener.getName(), listener);
 		}
 		port.listen(listeners);
 		port.open();
 		connectedPorts.put(portName, newPort);
-		
+
 		// invoking remote & local onConnect
 		invoke("publishConnect", port.getName());
 		for (String key : listeners.keySet()) {
 			listeners.get(key).onConnect(portName);
 		}
-		
+
 		save(); // successfully bound to port - saving
 		broadcastState();
 		return port;
@@ -418,27 +440,28 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	/**
-	 * for a virtual UART to create a unopened port available for connection.
-	 * it will connect itself to one end of the twisted buffer pair
+	 * for a virtual UART to create a unopened port available for connection. it
+	 * will connect itself to one end of the twisted buffer pair
+	 * 
 	 * @param portName
 	 * @param myPort
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public String connectVirtualNullModem(String newPortName) throws IOException {
-		
+
 		BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
 		BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
-		
+
 		// create other end of null modem cable
 		// which MRL Services can connect to
 		Port newPort = new PortQueue(newPortName, right, left);
 		ports.put(newPortName, newPort);
-		
+
 		// add our virtual port
 		String uartPortName = String.format("%s_uart", newPortName);
-		PortQueue vPort = new PortQueue(uartPortName, left, right);		
+		PortQueue vPort = new PortQueue(uartPortName, left, right);
 		connectPort(vPort, this);
-			
+
 		info(String.format("created virtual null modem cable %s <--> %s", newPortName, uartPortName));
 		return newPortName;
 	}
@@ -459,33 +482,32 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	public Serial connectVirtualUART(String myPort, String uartPort) throws IOException {
 
 		// get port names
-		if (myPort == null){
+		if (myPort == null) {
 			myPort = getName();
 		}
-		
-		if (uartPort == null){
+
+		if (uartPort == null) {
 			uartPort = String.format("%s_uart", myPort);
 		}
-		
+
 		BlockingQueue<Integer> left = new LinkedBlockingQueue<Integer>();
 		BlockingQueue<Integer> right = new LinkedBlockingQueue<Integer>();
 
 		/*
-		if (listener != null) {
-			listeners.put(listener.getName(), listener);
-		}
-		*/
+		 * if (listener != null) { listeners.put(listener.getName(), listener);
+		 * }
+		 */
 
 		// add our virtual port
 		PortQueue vPort = new PortQueue(myPort, left, right);
 		ports.put(myPort, vPort);
-		//connectPort(vPort, this);
-		
+		// connectPort(vPort, this);
+
 		// create & connect virtual uart
 		Serial uart = (Serial) Runtime.start(uartPort, "Serial");
 		PortQueue uPort = new PortQueue(uartPort, right, left);
 		uart.connectPort(uPort, uart);
-		
+
 		log.info(String.format("connectToVirtualUART - creating uart %s <--> %s", myPort, uartPort));
 		return uart;
 	}
@@ -509,7 +531,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			hardwareLibrary = getHardwareLibrary();
 
 			Class<?> c = Class.forName(hardwareLibrary);
-			Constructor<?> constructor = c.getConstructor(new Class<?>[] {String.class, int.class, int.class, int.class, int.class });
+			Constructor<?> constructor = c.getConstructor(new Class<?>[] { String.class, int.class, int.class, int.class, int.class });
 			Port hardwarePort = (Port) constructor.newInstance(name, rate, databits, stopbits, parity);
 
 			info("created  port %s %d|%d|%d|%d - goodtimes", name, rate, databits, stopbits, parity);
@@ -547,7 +569,22 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	/**
-	 *  disconnect = close + remove listeners all ports on serial network
+	 * decode relies on the rx codec decode method which will block a thread
+	 * until the out rx stream data buffer decodes a message which can be
+	 * returned
+	 * 
+	 * @return
+	 */
+	public String decode() {
+		Codec codec = outRX.getCodec();
+		if (codec != null) {
+			return codec.decode();
+		}
+		return null;
+	}
+
+	/**
+	 * disconnect = close + remove listeners all ports on serial network
 	 */
 	public void disconnect() {
 		if (!connectedPorts.containsKey(portName)) {
@@ -566,7 +603,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		for (String key : listeners.keySet()) {
 			listeners.get(key).onDisconnect(portName);
 		}
-					
+
 		info("disconnecting all ports");
 		// forked ports
 		for (String portName : connectedPorts.keySet()) {
@@ -625,29 +662,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	/**
-	 * force refreshing ports
-	 * @return
-	 */
-	public List<String> refresPorts(){
-		
-		// all current ports
-		portNames.addAll(ports.keySet());
-
-		// plus hardware ports
-		PortSource portSource = getPortSource();
-		if (portSource != null) {
-			List<String> osPortNames = portSource.getPortNames();
-			for (int i = 0; i < osPortNames.size(); ++i) {
-				portNames.add(osPortNames.get(i));
-			}
-		}
-
-		return new ArrayList<String>(portNames);
-	}
-	
-	/**
-	 * "all" currently known ports - if something is missing
-	 * refresh ports should be called to force hardware search
+	 * "all" currently known ports - if something is missing refresh ports
+	 * should be called to force hardware search
 	 * 
 	 * @throws ClassNotFoundException
 	 */
@@ -715,9 +731,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * 
 	 * readFromPublishedByte is a catch mechanism to verify tests
 	 * 
-	 * @throws CodecException
 	 * @throws IOException
-	*/
+	 */
 	@Override
 	public final Integer onByte(Integer newByte) throws IOException {
 		newByte = newByte & 0xff;
@@ -963,6 +978,47 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		outTX.record(filename);
 	}
 
+	/**
+	 * force refreshing ports
+	 * 
+	 * @return
+	 */
+	public List<String> refresPorts() {
+
+		// all current ports
+		portNames.addAll(ports.keySet());
+
+		// plus hardware ports
+		PortSource portSource = getPortSource();
+		if (portSource != null) {
+			List<String> osPortNames = portSource.getPortNames();
+			for (int i = 0; i < osPortNames.size(); ++i) {
+				portNames.add(osPortNames.get(i));
+			}
+		}
+
+		return new ArrayList<String>(portNames);
+	}
+
+	public void removeByteListener(SerialDataListener listener) {
+		removeByteListener(listener.getName());
+	}
+
+	public void removeByteListener(String name) {
+		ServiceInterface si = Runtime.getService(name);
+
+		// if (si instanceof SerialDataListener && si.isLocal()){
+		if (SerialDataListener.class.isAssignableFrom(si.getClass()) && si.isLocal()) {
+			// direct callback
+			listeners.remove(si.getName());
+		} else {
+			// pub sub
+			removeListener("publishRX", si.getName(), "onByte", Integer.class);
+			removeListener("publishConnect", si.getName(), "onConnect", String.class);
+			removeListener("publishDisconnect", si.getName(), "onDisconnect", String.class);
+		}
+	}
+
 	public void reset() {
 		clear();
 		setTimeout(null);
@@ -982,16 +1038,18 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * @throws ClassNotFoundException
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
 	 */
-	public void setCodec(String key) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
+	public void setCodec(String key) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException,
+			IllegalArgumentException, InvocationTargetException {
 		outRX.setCodec(key);
 		outTX.setCodec(key);
 		broadcastState();
 	}
+	
 
 	public void setDTR(boolean state) {
 		port.setDTR(state);
@@ -1239,7 +1297,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	@Override
-	public String toString(){
+	public String toString() {
 		return String.format("%s->%s", getName(), portName);
 	}
 
@@ -1254,10 +1312,10 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	public void write(int b) throws IOException {
 		// int newByte = data & 0xFF;
 
-		if (connectedPorts.size() == 0){
+		if (connectedPorts.size() == 0) {
 			error("can not write to a closed port!");
 		}
-		
+
 		for (String portName : connectedPorts.keySet()) {
 			Port writePort = connectedPorts.get(portName);
 			writePort.write(b);
@@ -1276,7 +1334,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			write(data[i]); // recently removed - & 0xFF
 		}
 	}
-	
+
 	// ============= write methods begin ====================
 	// write(String data) not in OutputStream
 	public void write(String data) throws IOException {
@@ -1290,75 +1348,20 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 
 			byte[] fileData = FileIO.fileToByteArray(new File(filename));
 
-			/* TODO - ENCODING !!!
-			if (txCodec != null) {
-				// FIXME parse the incoming file
-				for (int i = 0; i < fileData.length; ++i) {
-					// FIXME - determine what is needed / expected to parse
-					// write(txFormatter.parse(fileData[i]));
-				}
-			} else {
-			*/
-				for (int i = 0; i < fileData.length; ++i) {
-					write(fileData[i]);
-				}
-			//}
+			/*
+			 * TODO - ENCODING !!! if (txCodec != null) { // FIXME parse the
+			 * incoming file for (int i = 0; i < fileData.length; ++i) { //
+			 * FIXME - determine what is needed / expected to parse //
+			 * write(txFormatter.parse(fileData[i])); } } else {
+			 */
+			for (int i = 0; i < fileData.length; ++i) {
+				write(fileData[i]);
+			}
+			// }
 
 		} catch (Exception e) {
 			error(e);
 		}
-	}
-
-	public void removeByteListener(SerialDataListener listener) {
-		removeByteListener(listener.getName());
-	}
-	
-	public void removeByteListener(String name) {
-		ServiceInterface si = Runtime.getService(name);
-		
-		// if (si instanceof SerialDataListener && si.isLocal()){
-		if (SerialDataListener.class.isAssignableFrom(si.getClass()) && si.isLocal()) {
-			// direct callback
-			listeners.remove(si.getName());
-		} else {
-			// pub sub
-			removeListener("publishRX", si.getName(), "onByte", Integer.class);
-			removeListener("publishConnect", si.getName(), "onConnect", String.class);
-			removeListener("publishDisconnect", si.getName(), "onDisconnect", String.class);
-		}
-	}
-	
-	public void addByteListener(SerialDataListener listener) {
-		addByteListener(listener.getName());
-	}
-
-	/**
-	 * awesome method - which either sets up the pub/sub remote or assigns a
-	 * local reference from the publishing thread
-	 * 
-	 * good pattern in that all logic is in this method which uses a string "name" 
-	 * parameter - addByteListener(SerialDataListener listener) will call this method
-	 * too rather than implementing its own local logic 
-	 * 
-	 * @param name
-	 */
-	public void addByteListener(String name) {
-		ServiceInterface si = Runtime.getService(name);
-		
-		// if (si instanceof SerialDataListener && si.isLocal()){
-		if (SerialDataListener.class.isAssignableFrom(si.getClass()) && si.isLocal()) {
-			// direct callback
-			listeners.put(si.getName(), (SerialDataListener)si);
-		} else {
-			// pub sub
-			addListener("publishRX", si.getName(), "onByte", Integer.class);
-			addListener("publishConnect", si.getName(), "onConnect", String.class);
-			addListener("publishDisconnect", si.getName(), "onDisconnect", String.class);
-		}
-	}
-
-	public String decode() {
-		return outRX.decode();
 	}
 
 }

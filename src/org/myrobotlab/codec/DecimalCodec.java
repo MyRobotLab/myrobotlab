@@ -14,7 +14,7 @@ public class DecimalCodec extends Codec {
 	}
 
 	@Override
-	public String decode(int newByte)  {
+	public String decodeImpl(int newByte)  {
 		++byteCount;
 		String ret =  String.format("%03d%s%s", 0xff & newByte, columnDelimiter, ((byteCount%width == 0)?rowDelimiter:""));		
 		return ret;

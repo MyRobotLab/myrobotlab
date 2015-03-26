@@ -3,7 +3,7 @@ package org.myrobotlab.codec;
 public class AsciiCodec extends Codec {
 
 	@Override
-	final public String decode(int data) {
+	final public String decodeImpl(int data) {
 		return String.format("%c", data & 0xff);
 	}
 
