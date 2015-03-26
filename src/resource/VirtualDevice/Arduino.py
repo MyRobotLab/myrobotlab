@@ -7,9 +7,9 @@
 import threading
 from org.myrobotlab.codec import ArduinoMsgCodec
 
-analogThread = None
+worker = None
 
-def worker():
+def work():
     """thread worker function"""
     print 'Worker'
     return
@@ -29,14 +29,22 @@ logic.subscribe(uart, "publishDisconnect", "onDisconnect")
 
 
 def onByte(b):
+  global worker
   print("onByte", b)
   command = codec.decode(b)
-  if len(command) > 0 :
+  if command != None and len(command) > 0 :
     print("decoded", command)
     if command == "getVersion\n":
       uart.write(codec.encode("publishVersion/21\n"))
     elif command.startswith("analogReadPollingStart"):
       print("analogReadPollingStart")
+      # if worker == None:
+      uart.write(codec.encode("publishPin/64/1/10\n"))
+      uart.write(codec.encode("publishPin/64/0/20\n"))
+      uart.write(codec.encode("publishPin/64/1/30\n"))
+      uart.write(codec.encode("publishPin/64/0/40\n"))
+        
+        
 
 
 def onConnect(portName):

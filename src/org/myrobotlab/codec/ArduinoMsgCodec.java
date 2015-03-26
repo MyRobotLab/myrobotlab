@@ -499,7 +499,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 		// not ready yet
 		// no msg :P should be null ???
-		return "";
+		return null;
 	}
 
 	@Override

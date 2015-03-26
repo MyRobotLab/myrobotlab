@@ -422,6 +422,15 @@ public class Python extends Service {
 	public void exec(String code) {
 		exec(code, true);
 	}
+	
+	/**
+	 * non blocking exec
+	 * @param code
+	 * @param replace
+	 */
+	public void exec(String code, boolean replace){
+		exec(code, replace, false);
+	}
 
 	/**
 	 * replaces and executes current Python script if replace = false - will not
@@ -433,7 +442,7 @@ public class Python extends Service {
 	 * @param replace
 	 *            replace the current script with code
 	 */
-	public void exec(String code, boolean replace) {
+	public void exec(String code, boolean replace, boolean blocking) {
 		log.info(String.format("exec(String) \n%s\n", code));
 
 		// code = code.replaceAll("(\r)+\n", "\n"); // DOS2UNIX
@@ -445,16 +454,26 @@ public class Python extends Service {
 			currentScript.setCode(code);
 		}
 		try {
-			interpThread = new PIThread(String.format("%s.interpreter.%d",getName(), ++interpreterThreadCount),code);
-			interpThread.start();
-
-			// interp.exec(code);
+			if (!blocking){
+				interpThread = new PIThread(String.format("%s.interpreter.%d",getName(), ++interpreterThreadCount),code);
+				interpThread.start();
+			} else {
+				interp.exec(code);
+			}
 
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 	}
 
+	
+	public void execAndWait(String code){
+		exec(code, true, true);
+	}
+	
+	public void execAndWait(){
+		exec(currentScript.code, true, true);
+	}
 	/**
 	 * executes an external Python file
 	 * 
@@ -588,12 +607,17 @@ public class Python extends Service {
 			// tell other listeners we have changed
 			// our current script
 			// invoke("getScript");
+			invoke("publishLoadedScript", currentScript);
 			broadcastState();
 			return true;
 		} else {
 			warn(String.format("%1s a not valid script", scriptName));
 			return false;
 		}
+	}
+	
+	public Script publishLoadedScript(Script script){
+		return script;
 	}
 
 	// FIXME - need to replace "script" with Hashmap<filename, script> to

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
@@ -19,6 +20,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.myrobotlab.codec.BlockingDecoderOutputStream;
 import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.DecimalCodec;
 import org.myrobotlab.fileLib.FileIO;
@@ -73,18 +75,6 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	static HashSet<String> portNames = new HashSet<String>();
 
 	/**
-	 * rx data format - to be written to file - a null formatter writes raw
-	 * binary
-	 */
-	transient Codec rxCodec = new DecimalCodec(this);
-
-	/**
-	 * tx data forrmat - to be written to file - a null formatter writes raw
-	 * binary
-	 */
-	transient Codec txCodec = new DecimalCodec(this);
-
-	/**
 	 * blocking and non-blocking publish/subscribe reading is possible at the
 	 * same time. If blocking is not used then the internal buffer will fill to
 	 * the BUFFER_SIZE and just be left - overrun data will be lost
@@ -95,6 +85,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * blocking queue for blocking rx read requests
 	 */
 	transient BlockingQueue<Integer> blockingRX = new LinkedBlockingQueue<Integer>();
+	
 
 	/**
 	 * our set of ports we have access to. This is a shared
@@ -144,16 +135,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	String hardwareLibrary = null;
 
 	/**
-	 * rx files aved to a file - TODO - might need to change this for a unified
-	 * file saver
+	 * rx files saved to an output stream
 	 */
-	transient FileOutputStream fileRX = null;
+	transient BlockingDecoderOutputStream outRX = new BlockingDecoderOutputStream("rx", this);
 
 	/**
-	 * tx bytes saved to file - TODO - might need to change this for a unified
-	 * file saver
+	 * tx bytes saved to an output stream 
 	 */
-	transient FileOutputStream fileTX = null;
+	transient BlockingDecoderOutputStream outTX = new BlockingDecoderOutputStream("tx", this);
 
 	/**
 	 * number of tx bytes
@@ -564,11 +553,11 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 */
 	public void disconnect() {
 		if (!connectedPorts.containsKey(portName)) {
-			error("disconnect unknown port %s", portName);
+			info("disconnect unknown port %s", portName);
 		}
 
 		if (portName == null) {
-			log.info("already disconnected");
+			info("already disconnected");
 			return;
 		}
 
@@ -688,11 +677,11 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public Codec getRXCodec() {
-		return rxCodec;
+		return outRX.getCodec();
 	}
 
 	public String getRXCodecKey() {
-		return rxCodec.getKey();
+		return outRX.getKey();
 	}
 
 	public int getRXCount() {
@@ -704,11 +693,11 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public Codec getTXCodec() {
-		return txCodec;
+		return outTX.getCodec();
 	}
 
 	public String getTXCodecKey() {
-		return txCodec.getKey();
+		return outTX.getKey();
 	}
 
 	public boolean isConnected() {
@@ -716,7 +705,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public boolean isRecording() {
-		return (fileRX != null || fileTX != null);
+		return (outRX != null || outTX != null);
 	}
 
 	/**
@@ -744,13 +733,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		}
 
 		// FILE I/O
-		if (fileRX != null) {
-			if (rxCodec != null) {
-				fileRX.write(rxCodec.decode(newByte).getBytes());
-			} else {
-				fileRX.write(newByte);
-			}
-		}
+		outRX.write(newByte);
 
 		return newByte;
 	}
@@ -970,40 +953,16 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public void record(String filename) throws FileNotFoundException {
-		recordTX(String.format("%s.tx.%s", filename, txCodec.getCodecExt()));
-		recordRX(String.format("%s.rx.%s", filename, rxCodec.getCodecExt()));
+		recordTX(String.format("%s.tx.%s", filename, outTX.getCodecExt()));
+		recordRX(String.format("%s.rx.%s", filename, outRX.getCodecExt()));
 	}
 
 	public void recordRX(String filename) throws FileNotFoundException {
-
-		info(String.format("record RX %s", filename));
-
-		if (fileRX != null) {
-			log.info("already recording");
-			return;
-		}
-
-		if (filename == null) {
-			filename = String.format("rx.%s.%d.data", getName(), System.currentTimeMillis());
-		}
-
-		fileRX = new FileOutputStream(filename);
+		outRX.record(filename);
 	}
 
 	public void recordTX(String filename) throws FileNotFoundException {
-
-		info(String.format("record TX %s", filename));
-
-		if (fileTX != null) {
-			log.info("already recording");
-			return;
-		}
-
-		if (filename == null) {
-			filename = String.format("tx.%s.%d.data", getName(), System.currentTimeMillis());
-		}
-
-		fileTX = new FileOutputStream(filename);
+		outTX.record(filename);
 	}
 
 	public void reset() {
@@ -1031,8 +990,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * @throws NoSuchMethodException 
 	 */
 	public void setCodec(String key) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
-		setRXFormatter(Codec.getDecoder(key, this));
-		setTXFormatter(Codec.getDecoder(key, this));
+		outRX.setCodec(key);
+		outTX.setCodec(key);
 		broadcastState();
 	}
 
@@ -1045,8 +1004,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return hardwareLibrary;
 	}
 
-	public void setRXFormatter(Codec formatter) {
-		rxCodec = formatter;
+	public void setRXCodec(Codec codec) {
+		outRX.setCodec(codec);
 	}
 
 	/**
@@ -1062,15 +1021,15 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return timeout;
 	}
 
-	public void setTXFormatter(Codec formatter) {
-		txCodec = formatter;
+	public void setTXCodec(Codec codec) {
+		outTX.setCodec(codec);
 	}
 
 	public void stopRecording() {
-		FileIO.close(fileRX);
-		FileIO.close(fileTX);
-		fileRX = null;
-		fileTX = null;
+		FileIO.close(outRX);
+		FileIO.close(outTX);
+		outRX = null;
+		outTX = null;
 		broadcastState();
 	}
 
@@ -1081,6 +1040,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		stopRecording();
 	}
 
+	// FIXME !!! - move to Junit !!!
 	@Override
 	public Status test() {
 
@@ -1293,7 +1253,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	// write(int b) IOException
-	public void write(int data) throws IOException {
+	public void write(int b) throws IOException {
 		// int newByte = data & 0xFF;
 
 		if (connectedPorts.size() == 0){
@@ -1302,20 +1262,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		
 		for (String portName : connectedPorts.keySet()) {
 			Port writePort = connectedPorts.get(portName);
-			writePort.write(data);
+			writePort.write(b);
 		}
 
 		// main line TX
-		invoke("publishTX", data);
+		invoke("publishTX", b);
 
 		++txCount;
-		if (fileTX != null) {
-			if (txCodec != null) {
-				fileTX.write(txCodec.decode(data).getBytes());
-			} else {
-				fileTX.write(data);
-			}
-		}
+		outTX.write(b);
 	}
 
 	// write(int[] data) throws IOException - not in OutputStream
@@ -1331,13 +1285,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		write(data.getBytes());
 	}
 
-	// FIXME - changer Formatters based on file extension !!!
+	// FIXME - change Codec based on file extension !!!
 	// file (formatter/parser) --to--> tx
 	public void writeFile(String filename) {
 		try {
 
 			byte[] fileData = FileIO.fileToByteArray(new File(filename));
 
+			/* TODO - ENCODING !!!
 			if (txCodec != null) {
 				// FIXME parse the incoming file
 				for (int i = 0; i < fileData.length; ++i) {
@@ -1345,10 +1300,11 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 					// write(txFormatter.parse(fileData[i]));
 				}
 			} else {
+			*/
 				for (int i = 0; i < fileData.length; ++i) {
 					write(fileData[i]);
 				}
-			}
+			//}
 
 		} catch (Exception e) {
 			error(e);
@@ -1401,6 +1357,10 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			addListener("publishConnect", si.getName(), "onConnect", String.class);
 			addListener("publishDisconnect", si.getName(), "onDisconnect", String.class);
 		}
+	}
+
+	public String decode() {
+		return outRX.decode();
 	}
 
 }

@@ -1245,9 +1245,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * @param msg
 	 */
 
-	public void info(String msg) {
+	public String info(String msg) {
 		log.info(msg);
 		invoke("publishStatus", "info", msg);
+		return msg;
 	}
 
 	/*
@@ -1256,8 +1257,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 */
 
 	@Override
-	public void info(String format, Object... args) {
-		info(String.format(format, args));
+	public String info(String format, Object... args) {
+		return info(String.format(format, args));
 	}
 
 	// BOXING - BEGIN --------------------------------------
@@ -2189,18 +2190,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		unsubscribe(si.getName(), outMethod, inMethod);
 	}
 
-	public void warn(String msg) {
+	public String warn(String msg) {
 		log.error(msg);
 		// if (System.currentTimeMillis() - lastWarn > 300) {
 		invoke("publishStatus", "warn", msg);
 		// lastWarn = System.currentTimeMillis();
 		// }
 		lastErrorMsg = msg;
+		return msg;
 	}
 
 	@Override
-	public void warn(String format, Object... args) {
-		warn(String.format(format, args));
+	public String warn(String format, Object... args) {
+		return warn(String.format(format, args));
 	}
 	
 	@Override
