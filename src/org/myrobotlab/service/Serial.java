@@ -5,9 +5,7 @@ import io.netty.handler.codec.CodecException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
@@ -22,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.BlockingDecoderOutputStream;
 import org.myrobotlab.codec.Codec;
-import org.myrobotlab.codec.DecimalCodec;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -294,6 +291,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 */
 	public void clear() {
 		blockingRX.clear();
+		
 	}
 
 	public boolean connect(String name) {
