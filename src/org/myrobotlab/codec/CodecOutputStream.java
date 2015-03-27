@@ -111,4 +111,10 @@ public class CodecOutputStream extends OutputStream {
 		out = new FileOutputStream(filename);
 	}
 
+	public void clear() {
+		if (codec != null){
+			codec.clear();
+		}
+	}
+
 }

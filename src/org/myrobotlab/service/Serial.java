@@ -311,7 +311,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 */
 	public void clear() {
 		blockingRX.clear();
-
+		outRX.clear();
+		outTX.clear();
 	}
 
 	public boolean connect(String name) {

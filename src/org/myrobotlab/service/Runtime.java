@@ -2279,4 +2279,35 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return report;
 	}
 
+	public static void clearErrors() {
+		ServiceEnvironment se = getLocalServices();
+		for (String name : se.serviceDirectory.keySet()){
+			se.serviceDirectory.get(name).clearLastError();
+		}
+	}
+	
+	public static boolean hasErrors() {
+		ServiceEnvironment se = getLocalServices();
+
+		for (String name : se.serviceDirectory.keySet()){
+			if(se.serviceDirectory.get(name).hasError()){
+				return true;
+			}
+		}	
+		return false;
+	}
+	
+	public static ArrayList<Status> getErrors() {
+		ArrayList<Status> stati = new ArrayList<Status>();
+		ServiceEnvironment se = getLocalServices();
+		for (String name : se.serviceDirectory.keySet()){
+			Status status = se.serviceDirectory.get(name).getLastError();
+			if (status != null && status.isError()){
+				log.info(status.toString());
+				stati.add(status);
+			}
+		}
+		return stati;
+	}
+
 }

@@ -148,8 +148,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	protected transient Thread thisThread = null;
 
-	public String lastErrorMsg;
-
 	transient Outbox outbox = null;
 
 	transient Inbox inbox = null;
@@ -801,9 +799,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	public String clearLastError() {
+		String le = lastError.toString();
 		lastError = null;
-		String le = lastErrorMsg;
-		lastErrorMsg = null;
 		return le;
 	}
 
@@ -928,10 +925,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * @return
 	 */
 	public String error(String msg) {
-		lastErrorMsg = msg;
-		log.error(msg);
 		invoke("publishStatus", "error", msg);
-		return lastErrorMsg;
+		return msg;
 	}
 
 	@Override
@@ -1161,7 +1156,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	public boolean hasError() {
-		return lastErrorMsg != null;
+		return lastError != null;
 	}
 
 	// TODO Clock example - roles
@@ -2191,12 +2186,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	public String warn(String msg) {
-		log.error(msg);
+		log.warn(msg);
 		// if (System.currentTimeMillis() - lastWarn > 300) {
 		invoke("publishStatus", "warn", msg);
 		// lastWarn = System.currentTimeMillis();
 		// }
-		lastErrorMsg = msg;
 		return msg;
 	}
 
@@ -2209,5 +2203,5 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public String toString(){
 		return getName();
 	}
-
+	
 }
