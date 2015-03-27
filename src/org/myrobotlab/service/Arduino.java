@@ -1119,6 +1119,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		servos.put(servo.getName(), sd);
 		servoIndex.put(index, sd);
 		servo.setController(this);
+		servo.setPin(pin);
 		log.info("servo index {} pin {} attached ", index, pin);
 		return true;
 	}
