@@ -394,11 +394,6 @@ public class Servo extends Service implements ServoControl {
 		broadcastState();
 	}
 
-	@Override
-	public void moveStep(Float offset) {
-		// TODO: need to implement?
-	}
-
 	// FIXME - bs from gson encoding :P - or should it be Double :P
 	public void moveTo(Double pos) {
 		moveTo(pos.floatValue());

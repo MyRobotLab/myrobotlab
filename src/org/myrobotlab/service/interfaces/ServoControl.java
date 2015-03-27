@@ -57,18 +57,6 @@ public interface ServoControl {
 	public Float getPosFloat();
 
 	/**
-	 * The command accepts a parameter of offset which can be of the range -1.0
-	 * to 1.0. Negative values are in one direction and positive values are in
-	 * the opposite value. For example -1.0 would be maximum offset in a counter
-	 * clock-wise direction and 0.9 would be 90% offset in a clockwise
-	 * direction. 0.0 of course would be stop
-	 * 
-	 * @param offset
-	 *            - new offset
-	 */
-	public void moveStep(Float offset);
-
-	/**
 	 * moveTo moves the servo to a specific location. Typically, a servo has 0
 	 * to 180 positions
 	 * 
