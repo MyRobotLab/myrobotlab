@@ -84,7 +84,12 @@ public interface ServiceInterface extends Messaging, LoggingSink {
 	// is the ability to do "non destructive" tests on a "live" Service at any
 	// time
 	public Status test() throws Exception;
-		
+	
+	public String clearLastError();
+
+	public boolean hasError();
+
+	public Status getLastError();
 
 
 }

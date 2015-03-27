@@ -73,6 +73,10 @@ public abstract class Codec {
 		this.sink = sink;
 	}
 
+	public void clear(){
+		queue.clear();
+	}
+
 	public String decode() {
 		try {
 			if (timeout != null) {
@@ -84,7 +88,7 @@ public abstract class Codec {
 		}
 		return null;
 	}
-
+	
 	final public String decode(int newByte){
 		String decoded = decodeImpl(newByte);
 		if (decoded != null && maxQueue > queue.size()) {
@@ -92,10 +96,10 @@ public abstract class Codec {
 		} 
 		return decoded;
 	}
-	
-	abstract public String decodeImpl(int newByte);
 
 	abstract public String decode(int[] msgs);
+
+	abstract public String decodeImpl(int newByte);
 
 	abstract public int[] encode(String source);
 
@@ -123,15 +127,15 @@ public abstract class Codec {
 		return timeout;
 	}
 
+
 	public void setMaxQueue(int maxQueue) {
 		this.maxQueue = maxQueue;
 	}
 
-
 	public void setQueue(BlockingQueue<String> queue) {
 		this.queue = queue;
 	}
-
+	
 	public Integer setTimeout(Integer timeoutms) {
 		this.timeout = timeoutms;
 		return timeoutms;
