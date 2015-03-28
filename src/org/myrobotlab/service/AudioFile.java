@@ -433,7 +433,7 @@ public class AudioFile extends Service {
 
 			} else {
 				invoke("started");
-				AdvancedPlayer player = new AdvancedPlayer(is);
+				AdvancedPlayer player = new AdvancedPlayer(is, audioDevice);
 				player.setPlayBackListener(playbackListener);
 				player.play();
 				invoke("stopped");
@@ -513,6 +513,10 @@ public class AudioFile extends Service {
 	 */
 	public void setVolume(float volume) {
 		audioDevice.setGain(volume);
+	}
+	
+	public float getVolume() {
+		return audioDevice.getGain();
 	}
 
 }
