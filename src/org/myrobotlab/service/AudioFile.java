@@ -47,10 +47,12 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import javazoom.jl.player.JavaSoundAudioDevice;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
 
+import org.myrobotlab.audio.MRLSoundAudioDevice;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -59,8 +61,12 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+
 public class AudioFile extends Service {
 
+	// The myrobotlab audio device
+	MRLSoundAudioDevice audioDevice = new MRLSoundAudioDevice();
+	
 	public class AdvancedPlayerThread extends Thread {
 		AdvancedPlayer player = null;
 		String filename;
@@ -69,8 +75,9 @@ public class AudioFile extends Service {
 			super(filename);
 			try {
 				this.filename = filename;
-				this.player = new AdvancedPlayer(bis);
+				this.player = new AdvancedPlayer(bis, audioDevice);
 				player.setPlayBackListener(playbackListener);
+				
 			} catch (Exception e) {
 				Logging.logError(e);
 			}
@@ -293,9 +300,15 @@ public class AudioFile extends Service {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		try {
-
+			//VolumeControl.findSpeakers();
+			//VolumeControl.setVolume(0);
+			
 			AudioFile af = (AudioFile) Runtime.createAndStart("audio", "AudioFile");
-			af.playFile("C:\\mrl3\\myrobotlab\\audioFile\\google\\en\\audrey\\test.mp3", false, false);
+			af.playFile("C:\\dev\\workspace.kmw\\myrobotlab\\test.mp3", false, false);
+
+			
+			
+			if (false) {
 			af.silence();
 
 			af.convert("C:\\tools\\Tarsos-master\\test.wav");
@@ -330,6 +343,7 @@ public class AudioFile extends Service {
 			player.playResource("/resource/Clock/tick.mp3");
 			player.playResource("/resource/Clock/tick.mp3");
 			player.playResource("/resource/Clock/tick.mp3");
+			}
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -419,7 +433,7 @@ public class AudioFile extends Service {
 
 			} else {
 				invoke("started");
-				AdvancedPlayer player = new AdvancedPlayer(is);
+				AdvancedPlayer player = new AdvancedPlayer(is, audioDevice);
 				player.setPlayBackListener(playbackListener);
 				player.play();
 				invoke("stopped");
@@ -482,5 +496,27 @@ public class AudioFile extends Service {
 		log.info("stoppedFile {}", filename);
 		return filename;
 	}
+
+	public MRLSoundAudioDevice getAudioDevice() {
+		return audioDevice;
+	}
+
+	public void setAudioDevice(MRLSoundAudioDevice audioDevice) {
+		this.audioDevice = audioDevice;
+	}
+
+	/**
+	 * Specify the volume for playback on the audio file 
+	 * value 0.0 = off  1.0 = normal volume.  
+	 * (values greater than 1.0 may distort the original signal)
+	 * @param volume
+	 */
+	public void setVolume(float volume) {
+		audioDevice.setGain(volume);
+	}
 	
+	public float getVolume() {
+		return audioDevice.getGain();
+	}
+
 }

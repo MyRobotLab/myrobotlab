@@ -126,7 +126,6 @@ public class Speech extends Service implements TextListener {
 
 	public String voiceName = "audrey"; // both voice systems have a list of
 	// available voice names
-	public int volume = 100;
 
 	public FrontendType frontendType = FrontendType.NORMAL;
 	public BackendType backendType = BackendType.GOOGLE;
@@ -159,6 +158,8 @@ public class Speech extends Service implements TextListener {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		try {
 			Speech mouth = (Speech) Runtime.start("mouth", "Speech");
+			mouth.setVolume(0.1F);
+			
 			mouth.test();
 
 			String test = " hello this is a test \\dev\\blah / blah : * ? \" blah \" blah > < <> bla | zod | zod2 ".replaceAll(filter, " ");
@@ -611,4 +612,20 @@ public class Speech extends Service implements TextListener {
 	}
 
 	// speak errors
+	
+	public void setVolume(float volume) {
+		// track the current volume, 
+		// also realtime update the volume of the audio file.
+		if (audioFile != null) {
+			audioFile.setVolume(volume);
+		}
+	}
+	
+	public float getVolume() {
+		if (audioFile != null) {
+			return audioFile.getVolume();
+		} else {
+			return 1.0F;
+		}
+	}	
 }
