@@ -1,15 +1,18 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.framework.Service;
+import org.myrobotlab.codec.Codec;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -68,6 +71,8 @@ public class SerialTest {
 		if (!serial.isConnected()){
 			serial.connect(vport);
 		}
+		
+		serial.setCodec("decimal");
 	}
 
 	@After
@@ -483,7 +488,8 @@ public class SerialTest {
 
 	@Test
 	public final void testReset() {
-		//fail("Not yet implemented"); // TODO
+		serial.reset();
+		assertEquals(0, serial.available());
 	}
 
 	@Test
@@ -492,8 +498,18 @@ public class SerialTest {
 	}
 
 	@Test
-	public final void testSetCodec() {
-		//fail("Not yet implemented"); // TODO
+	public final void testSetCodec() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
+		serial.setCodec(null);
+
+		String rxKey = serial.getRXCodecKey();
+		assertNull(rxKey);
+		
+		Codec rxcodec = serial.getRXCodec();
+		assertNull(rxcodec);
+		
+		Codec txcodec = serial.getTXCodec();
+		assertNull(txcodec);
+
 	}
 
 	@Test
