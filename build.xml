@@ -1,3 +1,4 @@
+
 <!--
 	Dependencies: git 
 	
@@ -13,19 +14,10 @@
 	min - local build - min distribution
 	test - junit and Incubator
 	
-	TODO - ivy maven build
-	
-	FIXME !!!- use ivy correctly !
-	FIXME !!!- manage proxy for ivy
-	
-	FIXME !!! - not so straightforward
-	https://wiki.jenkins-ci.org/display/JENKINS/Git+Plugin#GitPlugin-AdvancedFeatures
+	TODO
 	Push notification from repository
 	curl http://yourserver/jenkins/git/notifyCommit?url=<URL of the Git repository>[&branches=branch1[,branch2]*][&sha1=<commit ID>]
 	
-	
-	TODO - use more Ivy to actually manage dependencies
-	TODO use Ivy to place "integration" libraries into build directory for GUIService & Service
 	TODO test on multiple platforms Linux etc
 	TODO build native code with virtual vms - put in CI system
 	
@@ -85,7 +77,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="dist" basedir=".">
+<project name="myrobotlab" default="report" basedir=".">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
@@ -489,9 +481,9 @@
 	</target>
 
 	<target name="report" depends="test">
-		<junitreport todir="${build}/${report}">
+		<junitreport todir="${report}">
 			<fileset dir="${report}" includes="TEST-*.xml" />
-			<report todir="${build}/report" format="noframes">
+			<report todir="${report}" format="noframes">
 			</report>
 		</junitreport>
 	</target>
@@ -549,7 +541,7 @@
 			<batchtest fork="yes" todir="${build}/report">
 				<fileset dir="${test}">
 					<include name="**/*Test.java" />
-					<exclude name="**/SerialTest.java" />
+					<!-- exclude name="**/SerialTest.java" / -->
 				</fileset>
 			</batchtest>
 
