@@ -161,7 +161,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		}
 
 		// set the program
-		Sketch sketch = new Sketch(newProgram.toString());
+		Sketch sketch = new Sketch("Adafruit16CServoDriver", newProgram.toString());
 		arduino.setSketch(sketch);
 		// broadcast the arduino state - ArduinoGUI should subscribe to
 		// setProgram

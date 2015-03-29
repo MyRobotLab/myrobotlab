@@ -39,153 +39,81 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.control.widget.DigitalButton;
+import org.myrobotlab.control.widget.EditorArduino;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.data.Pin;
 
-/*
- * TODO - move menu into ArduinoGUI from editor
- *      - synch up repo with createLabs
- *      - correct pin state on menu
- * 		- make Communication -> menu -> MRLComm.ino
- *      - make menu builder
- *      - auto-load - MRLComm first
- *      - refresh serial ?
- *      - message syphone - message pump - stdout stdin pipes process creator etc...
- *      - all traces start stop at same time
- *      - 100% on compile & upload
- *      - arrow changed for upload to "up" duh
- *      - incoming pin data -> determines state of inactive/active & oscope pin update
- *      
- *      - Java console - duh
- *      - uploader progress - duh
- *      - error goes to status	
- *      - console info regarding the state & progress of "connecting" to a serialDevice
- *      - TODO - "errorMessage vs message" warnMessage too - embed in Console logic
- *      
- */
-
 public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControlEventHandler {
-
-	class SerialMenuListener implements ActionListener {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			JRadioButtonMenuItem checkbox = (JRadioButtonMenuItem) e.getSource();
-			if (checkbox.isSelected()) {
-				myService.send(boundServiceName, "connect", checkbox.getText(), 57600, 8, 1, 0);
-			} else {
-				myService.send(boundServiceName, "disconnect");
-			}
-
-		}
-	}
 
 	class TraceData {
 		Color color = null;
-		String label;
 		String controllerName;
-		int pin;
 		int data[] = new int[DATA_WIDTH];
 		int index = 0;
-		int total = 0;
+		String label;
 		int max = 0;
-		int min = 1024; // TODO - user input on min/max
-		int sum = 0;
 		int mean = 0;
+		int min = 1024; // TODO - user input on min/max
+		int pin;
+		int sum = 0;
+		int total = 0;
 		int traceStart = 0;
 	}
 
-	/**
-	 * component array - to access all components by name
-	 */
+	static final long serialVersionUID = 1L;
+
+	static final int DATA_WIDTH = 600;
+	static final int DATA_HEIGHT = 800;
+
+	EditorArduino editor;
+	Graphics g = null;
+
+	JLayeredPane imageMap;
+
+	int lastTraceXPos = 0;
 	public Arduino myArduino;
 
-	public ArduinoGUI self;
+	VideoWidget oscope = null;
 
-	HashMap<String, Component> components = new HashMap<String, Component>();
-	static final long serialVersionUID = 1L;
-	// FIXME - you need a pattern or a new Menu
-	// A Menu in the ArduinoGUI versus the Arduino Editor
-	private JMenuItem serialRefresh = new JMenuItem("refresh");
-	private JMenuItem softReset = new JMenuItem("soft reset");
+	JPanel oscopePanel = null;
 
-	private JMenuItem serialDisconnect = new JMenuItem("disconnect");
-
-	JTabbedPane tabs = new JTabbedPane();
-
-	/*
-	 * ---------- Pins begin -------------------------
-	 */
-	JLayeredPane imageMap;
-	/*
-	 * ---------- Pins end -------------------------
-	 */
-	/*
-	 * ---------- Oscope begin -------------------------
-	 */
 	/**
 	 * array list of graphical pin components built from pinList
 	 */
 	ArrayList<PinComponent> pinComponentList = null;
+
+	ArrayList<Pin> pinList = null;
+	public ArduinoGUI self;
 	SerializableImage sensorImage = null;
 
-	Graphics g = null;
-	// FIXME - make oscope widget
-	VideoWidget oscope = null;
+	private JMenuItem serialDisconnect = new JMenuItem("disconnect");
 
-	JPanel oscopePanel = null;
-	/*
-	 * ---------- Oscope end -------------------------
-	 */
-	/*
-	 * ---------- Editor begin -------------------------
-	 */
-	// Base arduinoIDE;
-	DigitalButton uploadButton = null;
-	GridBagConstraints epgc = new GridBagConstraints();
+	private JMenuItem serialRefresh = new JMenuItem("refresh");
+
 	Dimension size = new Dimension(620, 512);
 
-	Map<String, String> boardPreferences;
+	private JMenuItem softReset = new JMenuItem("soft reset");
 
-	/*
-	 * ---------- Editor end -------------------------
-	 */
-
-	// JCheckBoxMenuItem serialDevice;
-	SerialMenuListener serialMenuListener = new SerialMenuListener();
-
-	/**
-	 * pinList - from Arduino
-	 */
-	ArrayList<Pin> pinList = null;
-
-	int DATA_WIDTH = size.width;
-
-	int DATA_HEIGHT = size.height;
+	JTabbedPane tabs = new JTabbedPane();
 
 	HashMap<Integer, TraceData> traceData = new HashMap<Integer, TraceData>();
 
-	int clearX = 0;
-
-	int lastTraceXPos = 0;
+	DigitalButton uploadButton = null;
 
 	/**
 	 * Get the number of lines in a file by counting the number of newline
@@ -235,20 +163,18 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 
 		if (o == serialRefresh) {
 
-			//myService.send(boundServiceName, "getPortNames");
+			// myService.send(boundServiceName, "getPortNames");
 			myService.send(boundServiceName, "publishState");
 			return;
 
 		}
 
 		if (o == softReset) {
-
 			myService.send(boundServiceName, "softReset");
 			return;
 		}
 
 		if (o == serialDisconnect) {
-
 			myService.send(boundServiceName, "disconnect");
 			return;
 		}
@@ -347,11 +273,11 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 	public void attachGUI() {
 		subscribe("publishPin", "publishPin", Pin.class);
 		subscribe("publishState", "getState", Arduino.class);
-		//subscribe("getPortNames", "getPortNames", ArrayList.class);
+		// subscribe("getPortNames", "getPortNames", ArrayList.class);
 		subscribe("getPorts", "getPorts", String.class);
 		// subscribe("setBoard", "setBoard", String.class);
 		// myService.send(boundServiceName, "broadcastState");
-		//send("getPortNames");
+		// send("getPortNames");
 		send("publishState");
 	}
 
@@ -360,16 +286,6 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, DATA_WIDTH, DATA_HEIGHT); // TODO - ratio - to expand
 													// or reduce view
-	}
-
-	public void closeSerialDevice() {
-		myService.send(boundServiceName, "closeSerialDevice");
-	}
-
-	public void createSerialDeviceMenu(JMenu m) {
-		for (int i = 0; i < myArduino.portNames.size(); ++i) {
-			// m.add(a)
-		}
 	}
 
 	@Override
@@ -475,43 +391,18 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 						imageMap.add(p.data, new Integer(2));
 					}
 				}
-
-				JFrame top = myService.getFrame();
 				tabs.insertTab("pins", null, imageMap, "pin panel", 0);
-				GUIService gui = myService;// FIXME - bad bad bad
-														// ...
-
-				// FIXME TabControl2 - tabs.setTabComponentAt(0, new
-				// TabControl(gui,
-				// tabs, imageMap, boundServiceName, "pins"));
 			}
 		});
 	}
 
 	public void getEditorPanel() {
-		// editor = new EditorArduino(boundServiceName, myService, tabs);
-
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				// if (editorPanel != null) {
-				// tabs.remove(editorPanel);
-				// }
-
-				// editorPanel = new JPanel(new BorderLayout());
-
-				// editor.init();
-				// editorPanel.add(editor.getDisplay());
-
-				JFrame top = myService.getFrame();
-				// tabs.insertTab("editor", null, editor.getDisplay(), "editor",
-				// 0);
-				GUIService gui = myService;// FIXME - bad bad bad
-														// ...
-
-				// FIXME TabControl2 - tabs.setTabComponentAt(0, new
-				// TabControl(gui,
-				// tabs, editor.getDisplay(), boundServiceName, "editor"));
+				editor = new EditorArduino(boundServiceName, myService, tabs);
+				tabs.insertTab("editor", null, editor.getDisplay(), "editor", 0);
+				tabs.setTabComponentAt(0, new TabControl2(self, tabs, oscopePanel, "editor"));
 				myService.getFrame().pack();
 			}
 		});
@@ -688,7 +579,6 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 				++opgc.gridx;
 				oscopePanel.add(oscope.display, opgc);
 
-				JFrame top = myService.getFrame();
 				tabs.insertTab("oscope", null, oscopePanel, "oscope panel", 0);
 				tabs.setTabComponentAt(0, new TabControl2(self, tabs, oscopePanel, "oscope"));
 				myService.getFrame().pack();
@@ -731,42 +621,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 					// change is needed
 					getPinPanel();
 					getOscopePanel();
-
-					// editor.serialDeviceMenu.removeAll();
-					// publishMessage(String.format("found %d serial ports",
-					// myArduino.portNames.size()));
-					for (int i = 0; i < myArduino.portNames.size(); ++i) {
-						String portName = myArduino.portNames.get(i);
-						// publishMessage(String.format(" %s", portName));
-
-						JRadioButtonMenuItem serialDevice = new JRadioButtonMenuItem(myArduino.portNames.get(i));
-						/*
-						 * SerialDevice sd = myArduino.getSerialDevice(); if (sd
-						 * != null && sd.getName().equals(portName) &&
-						 * editor.connectButton != null) { if (sd.isOpen()) { //
-						 * FIXME - editor is often == null - race condition :(
-						 * editor.connectButton.activate();
-						 * serialDevice.setSelected(true); } else {
-						 * editor.connectButton.deactivate();
-						 * serialDevice.setSelected(false); } } else {
-						 * serialDevice.setSelected(false); }
-						 */
-						serialDevice.addActionListener(serialMenuListener);
-						// editor.serialDeviceMenu.add(serialDevice);
-						// editor.getTextArea().setText(arduino.getSketch());
-
-						// if the service has a different sketch update the gui
-						// TODO - kinder - gentler - ask user if they want the
-						// update
-					}
-
 				}
-
-				// TODO - work on generalizing editor
-				// editor.serialDeviceMenu.add(serialRefresh);
-				// editor.serialDeviceMenu.add(serialDisconnect);
-				// editor.serialDeviceMenu.add(softReset);
-
 			}
 		});
 
@@ -774,7 +629,6 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 
 	@Override
 	public void init() {
-
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -788,12 +642,9 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 				getEditorPanel();
 
 				display.add(tabs, BorderLayout.CENTER);
-				// tabs.setSelectedIndex(0);
-
 				serialRefresh.addActionListener(self);
 				softReset.addActionListener(self);
 				serialDisconnect.addActionListener(self);
-
 			}
 		});
 	}
@@ -803,7 +654,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 			@Override
 			public void run() {
 
-				// log.info(String.format("%s",pin.toString()));
+				//log.info(String.format("%s",pin.toString()));
 
 				if (!traceData.containsKey(pin.pin)) {
 					TraceData td = new TraceData();
@@ -841,7 +692,6 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 					t.min = pin.value;
 
 				if (t.index < DATA_WIDTH - 1) {
-					clearX = t.index + 1;
 				} else {
 					// TODO - when hit marks all startTracePos - cause the
 					// screen is

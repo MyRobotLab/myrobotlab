@@ -50,8 +50,11 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	int decodeMsgSize = 0;
 	StringBuilder rest = new StringBuilder();
 
-	public static final int MRLCOMM_VERSION = 21;
+	public static final int MAX_MSG_SIZE = 64;
 	
+	public static final int MRLCOMM_VERSION = 21;
+
+	public static final int MAGIC_NUMBER = 170; // 10101010
 
 	// ///// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
 
@@ -460,7 +463,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 		// log.info(String.format("byteCount %d", byteCount));
 		++byteCount;
-		if (byteCount == 1 && newByte != Arduino.MAGIC_NUMBER) {
+		if (byteCount == 1 && newByte != MAGIC_NUMBER) {
 			// reset - try again
 			rest.setLength(0);
 			byteCount = 0;
@@ -539,7 +542,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 			return new int[0];
 		}
 
-		log.info(String.format("encoding input of %d characters", msgs.length()));
+		//log.info(String.format("encoding input of %d characters", msgs.length()));
 
 		newLinePos = msgs.indexOf("\n", pos);
 		slashPos = msgs.indexOf("/", pos);

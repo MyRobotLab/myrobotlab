@@ -61,6 +61,13 @@ public class Pin implements Serializable {
 		this.source = source;
 	}
 
+	public Pin(Pin pin) {
+		this.pin = pin.pin;
+		this.type = pin.type;
+		this.value = pin.value;
+		this.source = pin.source;
+	}
+
 	public void setAsDigital() {
 		pinType = pinType | TYPE_DIGITAL_MASK;
 	}

@@ -29,7 +29,6 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -105,7 +104,6 @@ public class EditorArduino extends Editor implements ActionListener {
 	}
 
 	private JMenu createExamplesMenu() {
-		// FIXME - dynamically build based on resources
 		JMenu menu;
 		menu = new JMenu("Communication");
 		menu.add(createMenuItem("MRLComm.ino", "examples"));
@@ -135,13 +133,8 @@ public class EditorArduino extends Editor implements ActionListener {
 		monitorButton.setVisible(false);
 
 		buttonBar.setBackground(new Color(0, 100, 104));
-		// buttonBar.setForeground(new Color(255, 255, 255));
 		sketchName.setForeground(new Color(255, 255, 255));
 		buttonBar.add(sketchName);
-
-		// addHelpMenuURL("help blah", "http:blahblahblah");
-
-		rebuildBoardsMenu(boardsMenu);
 
 		toolsMenu.add(boardsMenu);
 		toolsMenu.add(serialDeviceMenu);
@@ -164,8 +157,6 @@ public class EditorArduino extends Editor implements ActionListener {
 		helpMenu.add(createMenuItem("Frequently Asked Questions"));
 		helpMenu.add(createMenuItem("Visit Arduino.cc"));
 
-		// loadCommunicationFile(); - get it from the Arduino itself
-
 	}
 
 	public void loadCommunicationFile() {
@@ -177,29 +168,6 @@ public class EditorArduino extends Editor implements ActionListener {
 		log.info(String.format("loadResourceFile %s", resourcePath));
 		String sketch = FileIO.resourceToString(resourcePath);
 		textArea.setText(sketch);
-	}
-
-	public void rebuildBoardsMenu(JMenu menu) {
-		menu.removeAll();
-		ButtonGroup group = new ButtonGroup();
-
-		/*
-		 * HashMap<String, Target> t = myArduino.targetsTable; t.values(); //
-		 * FIXME - t is null
-		 * 
-		 * for (Target target : myArduino.targetsTable.values()) { for (String
-		 * board : target.getBoards().keySet()) { AbstractAction action = new
-		 * AbstractAction(target.getBoards().get(board).get("name")) { public
-		 * void actionPerformed(ActionEvent actionevent) {
-		 * log.info(String.format("switching to %s:%s", (String)
-		 * getValue("target"), (String) getValue("board")));
-		 * myService.send(boundServiceName, "setBoard", (String)
-		 * getValue("board")); } }; action.putValue("target", target.getName());
-		 * action.putValue("board", board); JMenuItem item = new
-		 * JRadioButtonMenuItem(action); if
-		 * (target.getName().equals(myArduino.)) { item.setSelected(true); }
-		 * group.add(item); menu.add(item); } }
-		 */
 	}
 
 }

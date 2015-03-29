@@ -91,5 +91,5 @@ public interface ServiceInterface extends Messaging, LoggingSink {
 
 	public Status getLastError();
 
-
+	public void broadcastState();
 }

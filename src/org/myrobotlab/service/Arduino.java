@@ -1,4 +1,47 @@
-package org.myrobotlab.service;
+	package org.myrobotlab.service;
+
+import static org.myrobotlab.codec.ArduinoMsgCodec.ANALOG_READ_POLLING_START;
+import static org.myrobotlab.codec.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
+import static org.myrobotlab.codec.ArduinoMsgCodec.ANALOG_WRITE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
+import static org.myrobotlab.codec.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
+import static org.myrobotlab.codec.ArduinoMsgCodec.DIGITAL_WRITE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.GET_VERSION;
+import static org.myrobotlab.codec.ArduinoMsgCodec.MAGIC_NUMBER;
+import static org.myrobotlab.codec.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.MRLCOMM_VERSION;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PIN_MODE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_CUSTOM_MSG;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_LOAD_TIMING_EVENT;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_PIN;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_PULSE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_STEPPER_EVENT;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_VERSION;
+import static org.myrobotlab.codec.ArduinoMsgCodec.PULSE_IN;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SENSOR_ATTACH;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SENSOR_POLLING_START;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SENSOR_POLLING_STOP;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_ATTACH;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_DETACH;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_SWEEP_START;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_SWEEP_STOP;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_WRITE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_WRITE_MICROSECONDS;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SET_DEBOUNCE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SET_DIGITAL_TRIGGER_ONLY;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SET_LOAD_TIMING_ENABLED;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SET_PWMFREQUENCY;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SAMPLE_RATE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SERIAL_RATE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SERVO_SPEED;
+import static org.myrobotlab.codec.ArduinoMsgCodec.SET_TRIGGER;
+import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_ATTACH;
+import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_MOVE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_RESET;
+import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_STOP;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -9,7 +52,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.codec.ArduinoMsgCodec;
+import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -61,6 +104,8 @@ import org.slf4j.Logger;
  * public static final int STEPPER_EVENT_STOP = 1; public static final int
  * STEPPER_TYPE_POLOLU = 1; public static final int CUSTOM_MSG = 50;
  * 
+ * FUTURE UPLOADS
+ * https://pragprog.com/magazines/2011-04/advanced-arduino-hacking
  * 
  */
 
@@ -105,7 +150,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		public String data;
 		public String name;
 
-		public Sketch(String data) {
+		public Sketch(String name, String data) {
+			this.name = name;
 			this.data = data;
 		}
 
@@ -126,16 +172,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	private static final long serialVersionUID = 1L;
 
 	public transient final static Logger log = LoggerFactory.getLogger(Arduino.class);
-	// public static final int MRLCOMM_VERSION = 21;
-	// serial protocol functions
-	public static final int MAGIC_NUMBER = 170; // 10101010
 
 	public static final int DIGITAL_VALUE = 1; // normalized with PinData <---
 
 	// direction
 	public static final int ANALOG_VALUE = 3; // normalized with PinData
-
-	// ---------- MRLCOMM FUNCTION INTERFACE END -----------
 
 	public static final int SENSOR_DATA = 37;
 
@@ -224,10 +265,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	transient BlockingQueue<Integer> pulseQueue = new LinkedBlockingQueue<Integer>();
 	transient BlockingQueue<Integer> versionQueue = new LinkedBlockingQueue<Integer>();
 
-	StringBuilder debugTX = new StringBuilder();
-
-	StringBuilder debugRX = new StringBuilder();
-
 	HashMap<String, Motor> motors = new HashMap<String, Motor>();
 
 	HashMap<Integer, String> encoderPins = new HashMap<Integer, String>();
@@ -235,29 +272,28 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	transient Service customEventListener = null;
 
 	/**
-	 * the local name to servo info
+	 * servos - name index of servo we need 2 indexes for servos because they
+	 * will be referenced by name OR by index
 	 */
 	HashMap<String, ServoData> servos = new HashMap<String, ServoData>();
-
+	/**
+	 * index reference of servo
+	 */
 	HashMap<Integer, ServoData> servoIndex = new HashMap<Integer, ServoData>();
 
-	public ArrayList<String> portNames = new ArrayList<String>();
-
-	// peers
+	/**
+	 * Serial service - the Arduino's serial connection
+	 */
 	transient Serial serial;
 
 	int error_arduino_to_mrl_rx_cnt;
-
-	// ----------ServoController begin-------------
-	// FIXME - is this re-entrant ???
-
 	int error_mrl_to_arduino_rx_cnt;
 
 	int byteCount;
 
 	int msgSize;
 
-	int[] msg = new int[64]; // TODO define outside
+	int[] msg = new int[MAX_MSG_SIZE];
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -266,24 +302,16 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return peers;
 	}
 
+	// ---------------------------- ServoController End -----------------------
+	// ---------------------- Protocol Methods Begin ------------------
 
 	public Arduino(String n) {
 		super(n);
-		// FIXME - load last serial port (if exists) THIS WILL NEED TO BE Serial
-		// serice data !!!
-		// FIXME - load board type - allow user to force - (possible to retrieve
-		// from connection? - good idea? or bad?)
-		load(); // config - last com port connected too - last rate
-
 		serial = (Serial) createPeer("serial");
-
 		createPinList();
-		// invoke("getPortNames"); // FIXME - this could happen before gui
-		// initialized - don't do it - waste of time
+		String mrlcomm = FileIO.resourceToString("Arduino/MRLComm2.ino");
+		setSketch(new Sketch("MRLComm", mrlcomm));
 	}
-
-	// ---------------------------- ServoController End -----------------------
-	// ---------------------- Protocol Methods Begin ------------------
 
 	public void addCustomMsgListener(Service service) {
 		customEventListener = service;
@@ -295,8 +323,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @param pin
 	 */
 	public void analogReadPollingStart(Integer pin) {
-		sendMsg(ArduinoMsgCodec.PIN_MODE, pin, INPUT);
-		sendMsg(ArduinoMsgCodec.ANALOG_READ_POLLING_START, pin);
+		sendMsg(PIN_MODE, pin, INPUT);
+		sendMsg(ANALOG_READ_POLLING_START, pin);
 	}
 
 	/**
@@ -305,14 +333,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @param pin
 	 */
 	public void analogReadPollingStop(Integer pin) {
-		sendMsg(ArduinoMsgCodec.ANALOG_READ_POLLING_STOP, pin, 0);
+		sendMsg(ANALOG_READ_POLLING_STOP, pin);
 	}
 
 	public void analogWrite(Integer address, Integer value) {
 		log.info(String.format("analogWrite(%d,%d) to %s", address, value, serial.getName()));
 		// FIXME
 		// if (pin.mode == INPUT) {sendMsg(PIN_MODE, OUTPUT)}
-		sendMsg(ArduinoMsgCodec.ANALOG_WRITE, address, value);
+		sendMsg(ANALOG_WRITE, address, value);
 	}
 
 	/**
@@ -324,9 +352,21 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @throws SerialDeviceException
 	 */
 	public boolean connect(String port) {
-		// FIXME ! <<<-- REMOVE ,this) - patterns should be to add listener on startService
-		//return connect(port, 57600, 8, 1, 0); <- put this back ?
-		return serial.connect(port, this); // <<<-- REMOVE ,this) - patterns should be to add listener on startService
+		// FIXME ! <<<-- REMOVE ,this) - patterns should be to add listener on
+		// startService
+		// return connect(port, 57600, 8, 1, 0); <- put this back ?
+		return serial.connect(port, this); // <<<-- REMOVE ,this) - patterns
+											// should be to add listener on
+											// startService
+	}
+
+	// TODO - should be override .. ??
+	public Serial connectVirtualUART() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException,
+			IllegalArgumentException, InvocationTargetException {
+		Serial uart = serial.createVirtualUART();
+		uart.setCodec("arduino");
+		connect(serial.getName());
+		return uart;
 	}
 
 	public ArrayList<Pin> createPinList() {
@@ -369,8 +409,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @param pin
 	 */
 	public void digitalReadPollingStart(Integer pin) {
-		sendMsg(ArduinoMsgCodec.PIN_MODE, pin, INPUT);
-		sendMsg(ArduinoMsgCodec.DIGITAL_READ_POLLING_START, pin);
+		sendMsg(PIN_MODE, pin, INPUT);
+		sendMsg(DIGITAL_READ_POLLING_START, pin);
 	}
 
 	/**
@@ -379,12 +419,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @param pin
 	 */
 	public void digitalReadPollingStop(Integer pin) {
-		sendMsg(ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP, pin);
+		sendMsg(DIGITAL_READ_POLLING_STOP, pin);
 	}
 
 	public void digitalWrite(Integer address, Integer value) {
 		info("digitalWrite (%d,%d) to %s", address, value, serial.getName());
-		sendMsg(ArduinoMsgCodec.DIGITAL_WRITE, address, value);
+		sendMsg(DIGITAL_WRITE, address, value);
 		pinList.get(address).value = value;
 	}
 
@@ -437,7 +477,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		log.info("getVersion");
 		try {
 			versionQueue.clear();
-			sendMsg(ArduinoMsgCodec.GET_VERSION);
+			sendMsg(GET_VERSION);
 			mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
 
 		} catch (Exception e) {
@@ -445,8 +485,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		}
 		if (mrlCommVersion == null) {
 			error("did not get response from arduino....");
-		} else if (!mrlCommVersion.equals(ArduinoMsgCodec.MRLCOMM_VERSION)) {
-			error(String.format("MRLComm.ino responded with version %s expected version is %s", mrlCommVersion, ArduinoMsgCodec.MRLCOMM_VERSION));
+		} else if (!mrlCommVersion.equals(MRLCOMM_VERSION)) {
+			error(String.format("MRLComm.ino responded with version %s expected version is %s", mrlCommVersion, MRLCOMM_VERSION));
 		} else {
 			info(String.format("connected %s responded version %s ... goodtimes...", serial.getName(), mrlCommVersion));
 		}
@@ -467,6 +507,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin) {
 		return motorAttach(motorName, type, pwmPin, dirPin, null);
 	}
+
+	// ----------- motor controller api begin ----------------
+	// very old problem - how much logic in controller versus motor
+	// the concept of a 2 pin controller is pretty ubiquitous and probably
+	// should be in the motor
 
 	@Override
 	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin, Integer encoderPin) {
@@ -490,13 +535,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		if (Motor.TYPE_LPWM_RPWM.equals(motor.type)) {
 			motor.pwmLeft = pwmPin;
 			motor.pwmRight = dirPin;
-			sendMsg(ArduinoMsgCodec.PIN_MODE, motor.pwmLeft, OUTPUT);
-			sendMsg(ArduinoMsgCodec.PIN_MODE, motor.pwmRight, OUTPUT);
+			sendMsg(PIN_MODE, motor.pwmLeft, OUTPUT);
+			sendMsg(PIN_MODE, motor.pwmRight, OUTPUT);
 		} else {
 			motor.pwmPin = pwmPin;
 			motor.dirPin = dirPin;
-			sendMsg(ArduinoMsgCodec.PIN_MODE, motor.pwmPin, OUTPUT);
-			sendMsg(ArduinoMsgCodec.PIN_MODE, motor.dirPin, OUTPUT);
+			sendMsg(PIN_MODE, motor.pwmPin, OUTPUT);
+			sendMsg(PIN_MODE, motor.dirPin, OUTPUT);
 		}
 
 		motor.broadcastState();
@@ -512,11 +557,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return ret;
 	}
 
-	// ----------- motor controller api begin ----------------
-	// very old problem - how much logic in controller versus motor
-	// the concept of a 2 pin controller is pretty ubiquitous and probably
-	// should be in the motor
-
 	@Override
 	public void motorMove(String name) {
 
@@ -525,16 +565,16 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 		if (Motor.TYPE_LPWM_RPWM.equals(motor.type)) {
 			if (powerLevel < 0) {
-				sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmLeft, 0);
-				sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmRight, Math.abs((int) (powerLevel)));
+				sendMsg(ANALOG_WRITE, motor.pwmLeft, 0);
+				sendMsg(ANALOG_WRITE, motor.pwmRight, Math.abs((int) (powerLevel)));
 			} else {
-				sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmRight, 0);
-				sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmLeft, Math.abs((int) (powerLevel)));
+				sendMsg(ANALOG_WRITE, motor.pwmRight, 0);
+				sendMsg(ANALOG_WRITE, motor.pwmLeft, Math.abs((int) (powerLevel)));
 			}
 
 		} else {
-			sendMsg(ArduinoMsgCodec.DIGITAL_WRITE, motor.dirPin, (powerLevel < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
-			sendMsg(ArduinoMsgCodec.ANALOG_WRITE, motor.pwmPin, Math.abs((int) (powerLevel)));
+			sendMsg(DIGITAL_WRITE, motor.dirPin, (powerLevel < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
+			sendMsg(ANALOG_WRITE, motor.pwmPin, Math.abs((int) (powerLevel)));
 		}
 
 	}
@@ -615,13 +655,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				// log.info(String.format("%d", msg[1]));
 				switch (function) {
 
-				case ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR: {
+				case PUBLISH_MRLCOMM_ERROR: {
 					++error_mrl_to_arduino_rx_cnt;
 					error("MRL->Arduino rx %d type %d", error_mrl_to_arduino_rx_cnt, msg[1]);
 					break;
 				}
 
-				case ArduinoMsgCodec.PUBLISH_VERSION: {
+				case PUBLISH_VERSION: {
 					// TODO - get vendor version
 					// String version = String.format("%d", msg[1]);
 					versionQueue.add(msg[1] & 0xff);
@@ -629,29 +669,30 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					break;
 				}
 				// FIXME PUBLISH_PULSE_IN
-				case ArduinoMsgCodec.PUBLISH_PULSE: {
+				case PUBLISH_PULSE: {
 					// extract signed Java long from byte array offset 1
 					// - length 4 :P
 					Integer pulse = Serial.bytesToInt(msg, 1, 4);
 					pulseQueue.add(pulse);
 					break;
 				}
-				case ArduinoMsgCodec.PUBLISH_PIN: {
+				case PUBLISH_PIN: {
 					// Pin p = new Pin(msg[1], msg[0], (((msg[2] & 0xFF)
 					// << 8) + (msg[3] & 0xFF)), getName());
 					// FIXME
-					Pin pin = pinList.get(msg[1]);
+					//Pin pin = pinList.get(msg[1]); BIG BUG - if a reference is sent and
+					// the same reference whic his trying to be displayed is changed underneath
+					Pin pin = new Pin(pinList.get(msg[1]));
 					pin.value = ((msg[2] & 0xFF) << 8) + (msg[3] & 0xFF);
 					invoke("publishPin", pin);
 					break;
 				}
 				/*
-				 * case ArduinoMsgCodec.PUBLISH_DIGITAL_VALUE: { Pin pin =
-				 * pinList.get(msg[1]); pin.value = msg[2]; invoke("publishPin",
-				 * pin); break; }
+				 * case PUBLISH_DIGITAL_VALUE: { Pin pin = pinList.get(msg[1]);
+				 * pin.value = msg[2]; invoke("publishPin", pin); break; }
 				 */
 
-				case ArduinoMsgCodec.PUBLISH_LOAD_TIMING_EVENT: {
+				case PUBLISH_LOAD_TIMING_EVENT: {
 
 					long microsPerLoop = Serial.bytesToInt(msg, 1, 4);
 					info("load %d us", microsPerLoop);
@@ -659,7 +700,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					break;
 				}
 
-				case ArduinoMsgCodec.PUBLISH_SERVO_EVENT: {
+				case PUBLISH_SERVO_EVENT: {
 
 					int index = msg[1];
 					int eventType = msg[2];
@@ -676,9 +717,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				}
 
 				/*
-				 * case ArduinoMsgCodec.PUBLISH_SENSOR_DATA: { int index = (int)
-				 * msg[1]; SensorData sd = sensorsIndex.get(index); sd.duration
-				 * = Serial.bytesToInt(msg, 2, 4); // HMM WAY TO GO - is NOT to
+				 * case PUBLISH_SENSOR_DATA: { int index = (int) msg[1];
+				 * SensorData sd = sensorsIndex.get(index); sd.duration =
+				 * Serial.bytesToInt(msg, 2, 4); // HMM WAY TO GO - is NOT to
 				 * invoke its own but // invoke publishSensorData on Sensor //
 				 * since its its own service // invoke("publishSensorData", sd);
 				 * // NICE !! - force sensor to have publishSensorData // or
@@ -687,7 +728,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				 * sd.sensor.invoke("publishRange", sd.duration); break; }
 				 */
 
-				case ArduinoMsgCodec.PUBLISH_STEPPER_EVENT: {
+				case PUBLISH_STEPPER_EVENT: {
 
 					int eventType = msg[1];
 					int index = msg[2];
@@ -702,7 +743,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					break;
 				}
 
-				case ArduinoMsgCodec.PUBLISH_CUSTOM_MSG: {
+				case PUBLISH_CUSTOM_MSG: {
 
 					// msg or data is of size byteCount
 					int paramCnt = msg[1];
@@ -781,8 +822,21 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return newByte;
 	}
 
+	@Override
+	public String onConnect(String portName) {
+		info("%s connected to %s", getName(), portName);
+		getVersion();
+		return portName;
+	}
+
 	public void onCustomMsg(Integer ax, Integer ay, Integer az) {
 		log.info("here");
+	}
+
+	@Override
+	public String onDisconnect(String portName) {
+		info("%s disconnected from %s", getName(), portName);
+		return portName;
 	}
 
 	public void pinMode(int address, String mode) {
@@ -795,12 +849,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	public void pinMode(Integer address, Integer value) {
 		log.info(String.format("pinMode(%d,%d) to %s", address, value, serial.getName()));
-		sendMsg(ArduinoMsgCodec.PIN_MODE, address, value);
+		sendMsg(PIN_MODE, address, value);
 	}
 
 	public Integer publishCustomMsg(Integer data) {
 		return data;
 	}
+
+	// ----------- motor controller api end ----------------
 
 	public Long publishLoadTimingEvent(Long us) {
 		log.info(String.format("publishLoadTimingEvent - %d", us));
@@ -839,7 +895,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return data;
 	}
 
-	// ----------- motor controller api end ----------------
+	// ----------- MotorController API End ----------------
 
 	public int publishServoEvent(Integer pos) {
 		return pos;
@@ -857,7 +913,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return pin;
 	}
 
-	// ----------- MotorController API End ----------------
+	// -- StepperController begin ----
 
 	public Integer publishVersion(Integer version) {
 		info("publishVersion %d", version);
@@ -891,7 +947,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		try {
 			if (serial != null) {
 				pulseQueue.clear();
-				sendMsg(ArduinoMsgCodec.PULSE_IN, trigPin, echoPin, value, timeout);
+				sendMsg(PULSE_IN, trigPin, echoPin, value, timeout);
 				// downstream longer timeout than upstream
 				Integer pulse = pulseQueue.poll(250 + timeout, TimeUnit.MILLISECONDS);
 				if (pulse == null) {
@@ -915,8 +971,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		}
 		return pulseIn(trigPin, echoPin, value, timeout);
 	}
-
-	// -- StepperController begin ----
 
 	public long pulseIn(int trigPin, int echoPin, Integer timeout) {
 
@@ -968,19 +1022,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				serial.write(params[i]);
 			}
 
-			if (log.isDebugEnabled()) {
-				debugTX.append("sendMsg -> MAGIC_NUMBER|");
-				debugTX.append("SZ ").append(1 + params.length);
-				debugTX.append(String.format("|FN %d", function));
-				for (int i = 0; i < params.length; ++i) {
-					if (log.isDebugEnabled()) {
-						debugTX.append(String.format("|P%d %d", i, params[i]));
-					}
-				}
-				log.debug(debugTX.toString());
-				debugTX.setLength(0);
-			}
-
 		} catch (Exception e) {
 			error("sendMsg " + e.getMessage());
 		}
@@ -1023,7 +1064,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			sensorIndex = sensors.size();
 
 			// attach index pin
-			sendMsg(ArduinoMsgCodec.SENSOR_ATTACH, sensorIndex, SENSOR_ULTRASONIC, sensor.getTriggerPin(), sensor.getEchoPin());
+			sendMsg(SENSOR_ATTACH, sensorIndex, SENSOR_ULTRASONIC, sensor.getTriggerPin(), sensor.getEchoPin());
 
 			SensorData sd = new SensorData();
 			sd.sensor = sensor;
@@ -1045,7 +1086,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			return false;
 		}
 		int index = sensors.get(name).sensorIndex;
-		sendMsg(ArduinoMsgCodec.SENSOR_POLLING_START, index, timeoutMS);
+		sendMsg(SENSOR_POLLING_START, index, timeoutMS);
 		return true;
 	}
 
@@ -1056,7 +1097,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			return false;
 		}
 		int index = sensors.get(name).sensorIndex;
-		sendMsg(ArduinoMsgCodec.SENSOR_POLLING_STOP, index);
+		sendMsg(SENSOR_POLLING_STOP, index);
 		return true;
 	}
 
@@ -1071,8 +1112,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		}
 
 		if (servos.containsKey(servo.getName())) {
-			log.warn("servo already attach - detach first");
-			return false;
+			log.info("servo already attach - detach first");
+			// important to return true - because we are "attached" !
+			return true;
 		}
 
 		// simple re-map - to guarantee the same MRL Servo gets the same
@@ -1110,7 +1152,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			payload[i + 3] = 0xFF & ascii[i];
 		}
 
-		sendMsg(ArduinoMsgCodec.SERVO_ATTACH, payload);
+		sendMsg(SERVO_ATTACH, payload);
 
 		ServoData sd = new ServoData();
 		sd.pin = pin;
@@ -1141,10 +1183,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 		if (servos.containsKey(servoName)) {
 			ServoData sd = servos.get(servoName);
-			sendMsg(ArduinoMsgCodec.SERVO_DETACH, sd.servoIndex, 0);
-			// FIXME - simplify remove
-			// sd.servo.setController((ServoController)null);
-			// FIXME !!! - DON'T REMOVE !!!
+			sendMsg(SERVO_DETACH, sd.servoIndex, 0);
 			servos.remove(servoName);
 			servoIndex.remove(sd.servoIndex);
 			return true;
@@ -1168,13 +1207,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		}
 		int index = servos.get(servoName).servoIndex;
 		log.info(String.format("servoSweep %s index %d min %d max %d step %d", servoName, index, min, max, step));
-		sendMsg(ArduinoMsgCodec.SERVO_SWEEP_START, index, min, max, step);
+		sendMsg(SERVO_SWEEP_START, index, min, max, step);
 	}
 
 	@Override
 	public void servoSweepStop(String servoName) {
 		int index = servos.get(servoName).servoIndex;
-		sendMsg(ArduinoMsgCodec.SERVO_SWEEP_STOP, index);
+		sendMsg(SERVO_SWEEP_STOP, index);
 	}
 
 	@Override
@@ -1186,7 +1225,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 		int index = servos.get(servoName).servoIndex;
 		log.info(String.format("servoWrite %s %d index %d", servoName, newPos, index));
-		sendMsg(ArduinoMsgCodec.SERVO_WRITE, index, newPos);
+		sendMsg(SERVO_WRITE, index, newPos);
 	}
 
 	// FIXME - not "servo" .. just writeMicroseconds
@@ -1205,7 +1244,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 		log.info(String.format("writeMicroseconds %s %d index %d", servoName, newPos, index));
 
-		sendMsg(ArduinoMsgCodec.SERVO_WRITE_MICROSECONDS, index, newPos);
+		sendMsg(SERVO_WRITE_MICROSECONDS, index, newPos);
 
 	}
 
@@ -1231,15 +1270,15 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		}
 		int lsb = delay & 0xff;
 		int msb = (delay >> 8) & 0xff;
-		sendMsg(ArduinoMsgCodec.SET_DEBOUNCE, msb, lsb);
+		sendMsg(SET_DEBOUNCE, msb, lsb);
 
 	}
 
 	public void setDigitalTriggerOnly(Boolean b) {
 		if (!b)
-			sendMsg(ArduinoMsgCodec.SET_DIGITAL_TRIGGER_ONLY, FALSE);
+			sendMsg(SET_DIGITAL_TRIGGER_ONLY, FALSE);
 		else
-			sendMsg(ArduinoMsgCodec.SET_DIGITAL_TRIGGER_ONLY, TRUE);
+			sendMsg(SET_DIGITAL_TRIGGER_ONLY, TRUE);
 
 	}
 
@@ -1247,9 +1286,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		log.info(String.format("setLoadTimingEnabled %b", enable));
 
 		if (enable) {
-			sendMsg(ArduinoMsgCodec.SET_LOAD_TIMING_ENABLED, TRUE);
+			sendMsg(SET_LOAD_TIMING_ENABLED, TRUE);
 		} else {
-			sendMsg(ArduinoMsgCodec.SET_LOAD_TIMING_ENABLED, FALSE);
+			sendMsg(SET_LOAD_TIMING_ENABLED, FALSE);
 		}
 
 		return enable;
@@ -1284,7 +1323,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			prescalarValue = 0x03;
 		}
 
-		sendMsg(ArduinoMsgCodec.SET_PWMFREQUENCY, address, prescalarValue);
+		sendMsg(SET_PWMFREQUENCY, address, prescalarValue);
 	}
 
 	/**
@@ -1301,13 +1340,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		}
 		int lsb = rate & 0xff;
 		int msb = (rate >> 8) & 0xff;
-		sendMsg(ArduinoMsgCodec.SET_SAMPLE_RATE, msb, lsb);
+		sendMsg(SET_SAMPLE_RATE, msb, lsb);
 
 		return rate;
 	}
 
 	public void setSerialRate(int rate) {
-		sendMsg(ArduinoMsgCodec.SET_SERIAL_RATE, rate);
+		sendMsg(SET_SERIAL_RATE, rate);
 	}
 
 	@Override
@@ -1317,9 +1356,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			ServoData sd = servos.get(servoName);
 
 			if (enable) {
-				sendMsg(ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED, sd.servoIndex, TRUE);
+				sendMsg(SET_SERVO_EVENTS_ENABLED, sd.servoIndex, TRUE);
 			} else {
-				sendMsg(ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED, sd.servoIndex, FALSE);
+				sendMsg(SET_SERVO_EVENTS_ENABLED, sd.servoIndex, FALSE);
 			}
 
 			return true;
@@ -1334,11 +1373,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			error("speed %f out of bounds", speed);
 			return;
 		}
-		sendMsg(ArduinoMsgCodec.SET_SERVO_SPEED, servos.get(servoName).servoIndex, (int) (speed * 100));
+		sendMsg(SET_SERVO_SPEED, servos.get(servoName).servoIndex, (int) (speed * 100));
 	}
 
 	public void setSketch(Sketch sketch) {
 		this.sketch = sketch;
+		broadcastState();
 	}
 
 	@Override
@@ -1369,7 +1409,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @return
 	 */
 	public int setTrigger(int pin, int value, int type) {
-		sendMsg(ArduinoMsgCodec.SET_TRIGGER, pin, type);
+		sendMsg(SET_TRIGGER, pin, type);
 		return pin;
 	}
 
@@ -1387,8 +1427,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public void startService() {
 		super.startService();
 		try {
-			serial = (Serial)startPeer("serial");
-			// FIXME - dynamically additive - if codec key has never been used - add key
+			serial = (Serial) startPeer("serial");
+			// FIXME - dynamically additive - if codec key has never been used -
+			// add key
 			serial.setCodec("arduino");
 			serial.addByteListener(this);
 		} catch (Exception e) {
@@ -1429,7 +1470,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			}
 
 			// attach index pin
-			sendMsg(ArduinoMsgCodec.STEPPER_ATTACH, index, type, pins[0], pins[1]);
+			sendMsg(STEPPER_ATTACH, index, type, pins[0], pins[1]);
 
 			stepper.setIndex(index);
 
@@ -1477,7 +1518,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		int lsb = newPos & 0xff;
 		int msb = (newPos >> 8) & 0xff;
 
-		sendMsg(ArduinoMsgCodec.STEPPER_MOVE, stepper.getIndex(), msb, lsb);
+		sendMsg(STEPPER_MOVE, stepper.getIndex(), msb, lsb);
 
 		// TODO - call back event - to say arrived ?
 
@@ -1488,7 +1529,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	@Override
 	public void stepperReset(String stepperName) {
 		StepperControl stepper = steppers.get(stepperName);
-		sendMsg(ArduinoMsgCodec.STEPPER_RESET, stepper.getIndex());
+		sendMsg(STEPPER_RESET, stepper.getIndex());
 	}
 
 	@Override
@@ -1505,7 +1546,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	public void stepperStop(String name) {
 		StepperControl stepper = steppers.get(name);
-		sendMsg(ArduinoMsgCodec.STEPPER_STOP, stepper.getIndex());
+		sendMsg(STEPPER_STOP, stepper.getIndex());
 	}
 
 	@Override
@@ -1576,133 +1617,49 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return status;
 
 	}
-	
-	// TODO - should be override .. ??
-	public Serial connectVirtualUART() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException{
-		Serial uart = serial.createVirtualUART();
-		uart.setCodec("arduino");
-		connect(serial.getName());
-		return uart;
-	}
 
-	@Override
-	public String onConnect(String portName) {
-		info("%s connected to %s", getName(), portName);
-		getVersion();
-		return portName;
-	}
-
-	@Override
-	public String onDisconnect(String portName) {
-		info("%s disconnected from %s", getName(), portName);
-		return portName;
-	}
-	
 	public static void main(String[] args) {
 		try {
-
-			// TODO - sniff & save
-			// JUnit - Arduino Codec control files saved
 
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-			Runtime.start("gui", "GUIService");
-			
-			// starting good testing
-			// virtual.createVirtualPort("vport");
 			virtual.createVirtualArduino("vport");
 			arduino.connect("vport");
 
+			Runtime.start("gui", "GUIService");
+			Runtime.broadcastStates();
+
 			boolean done = true;
-			if (done){
+			if (done) {
 				return;
 			}
-			
-			// arduino.addCustomMsgListener(python);
-			// arduino.customEventListener = python;
-			Serial serial = arduino.getSerial();
-			serial.connectTCP("localhost", 9191);
-			arduino.connect(serial.getPortName());
-
-			// arduino.connect("COM12");
-
-			// arduino.setLoadTimingEnabled(true);
-
-			// final Serial uart = serial.createVirtualUART();
-			// uart.write(new int[] {244,244,225,244});
-
-			log.info(String.format("%d", arduino.getVersion()));
-			arduino.digitalWrite(13, 0);
-			log.info(String.format("%d", arduino.getVersion()));
-			arduino.digitalWrite(13, 1);
-			log.info(String.format("%d", arduino.getVersion()));
-			arduino.digitalWrite(13, 1);
-			log.info(String.format("%d", arduino.getVersion()));
-			arduino.digitalWrite(13, 1);
-			log.info(String.format("%d", arduino.getVersion()));
-
-			arduino.digitalWrite(13, 0);
-			arduino.digitalWrite(13, 1);
-			arduino.digitalWrite(13, 0);
-
 			/*
+			 * Serial serial = arduino.getSerial();
+			 * serial.connectTCP("localhost", 9191);
+			 * arduino.connect(serial.getPortName());
 			 * 
-			 * new Thread() { public void run() { try { Service.sleep(900);
-			 * ArduinoMsgCodec msgf = new ArduinoMsgCodec();
-			 * uart.write(msgf.encode("publishVersion/21\n")); } catch
-			 * (Exception e) { Logging.logException(e); } } }.start();
+			 * 
+			 * arduino.digitalWrite(13, 0); arduino.digitalWrite(13, 1);
+			 * arduino.digitalWrite(13, 0);
+			 * 
+			 * arduino.analogReadPollingStart(15);
+			 * 
+			 * // arduino.test("COM15");
+			 * 
+			 * arduino.setSampleRate(500); arduino.setSampleRate(1000);
+			 * arduino.setSampleRate(5000); arduino.setSampleRate(10000);
+			 * 
+			 * arduino.analogReadPollingStop(15);
 			 */
 
-			log.info(String.format("%d", arduino.getVersion()));
-
-			log.info(String.format("%d", arduino.getVersion()));
-
-			log.info(String.format("%d", arduino.getVersion()));
-
-			arduino.analogReadPollingStart(15);
-
-			// arduino.test("COM15");
-
-			arduino.setSampleRate(500);
-			arduino.setSampleRate(1000);
-			arduino.setSampleRate(5000);
-			arduino.setSampleRate(10000);
-
-			arduino.analogReadPollingStop(15);
-
-			// blocking examples
-
-			/*
-			 * long duration = sr04.ping(); log.info("duration {}", duration);
-			 * long range = sr04.range(); log.info("range {}", range);
-			 */
-			// non blocking - event example
-			// sr04.publishRange(long duration);
-
-			// arduino.pinMode(trigPin, "OUTPUT");
-			// arduino.pinMode(echoPin, "INPUT");
-
-			// arduino.digitalWrite(7, 0);
-			// arduino.digitalWrite(7, 1);
-			// arduino.digitalWrite(7, 0);
-
-			// Runtime.createAndStart("python", "Python");
-			// Runtime.createAndStart("gui01", "GUIService");
-			// arduino.connect("COM15");
-
-			// log.info("{}", arduino.pulseIn(5));
-
-			// FIXME - null pointer error
 			log.info("here");
 
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 	}
-
 
 }

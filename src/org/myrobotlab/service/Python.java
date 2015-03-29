@@ -20,6 +20,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.python.core.Py;
+import org.python.core.PyException;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 import org.python.core.PySystemState;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 public class Python extends Service {
 
 	int interpreterThreadCount = 0;
+
 	/**
 	 * this thread handles all callbacks to Python process all input and sets
 	 * msg handles
@@ -99,9 +101,11 @@ public class Python extends Service {
 						 * msg.method)); }
 						 */
 
-						// commented out recently - no longer using msg handle for 
+						// commented out recently - no longer using msg handle
+						// for
 						// call-backs :)
-						// log.info(String.format("setting data %s", msgHandle));
+						// log.info(String.format("setting data %s",
+						// msgHandle));
 						// interp.set(msgHandle.toString(), msg);
 						interp.exec(compiledObject);
 					} catch (Exception e) {
@@ -172,9 +176,6 @@ public class Python extends Service {
 		private static final long serialVersionUID = 1L;
 		private String name;
 		private String code;
-
-		public Script() {
-		}
 
 		public Script(String name, String script) {
 			this.name = name;
@@ -267,21 +268,6 @@ public class Python extends Service {
 		return name.replaceAll("[/ .]", "_");
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		// String f = "C:\\Program Files\\blah.1.py";
-		// log.info(getName(f));
-
-		Python python = (Python) Runtime.start("python", "Python");
-		python.save();
-		// python.releaseService();
-
-		Runtime.createAndStart("gui", "GUIService");
-
-	}
-
 	public static String makeSafeName(String name) {
 		return name.replaceAll("[\\-/ .]", "");
 	}
@@ -370,27 +356,26 @@ public class Python extends Service {
 		// Python scripts can refer to this service as 'python' regardless
 		// of the actual name
 		/*
-		String selfReferenceScript = String.format("from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.service import Python\n"
-				+ "python = Runtime.getService(\"%s\")\n\n", getName()); // TODO -
-																		// deprecate
-				//+ "runtime = Runtime.getInstance()\n\n" + "myService = Runtime.create(\"%1$s\",\"Python\")\n", getSafeReferenceName(this.getName()));
-		PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
-		interp.exec(compiled);
-		*/
-		
+		 * String selfReferenceScript =
+		 * String.format("from org.myrobotlab.service import Runtime\n" +
+		 * "from org.myrobotlab.service import Python\n" +
+		 * "python = Runtime.getService(\"%s\")\n\n", getName()); // TODO - //
+		 * deprecate //+ "runtime = Runtime.getInstance()\n\n" +
+		 * "myService = Runtime.create(\"%1$s\",\"Python\")\n",
+		 * getSafeReferenceName(this.getName())); PyObject compiled =
+		 * getCompiledMethod("initializePython", selfReferenceScript, interp);
+		 * interp.exec(compiled);
+		 */
+
 		/*
-		String self = String.format("myService = Runtime.getService(\"%s\")", getName());
-		PyObject compiled = getCompiledMethod("initializePython", self, interp);
-		interp.exec(compiled);
-		*/
-		
-		
-		String selfReferenceScript = 
-						"from org.myrobotlab.service import Runtime\n" + 
-						"from org.myrobotlab.service import Python\n"
-				+	 	String.format("%s = Runtime.getService(\"%s\")\n\n",getSafeReferenceName(getName()), getName())
-				+		"Runtime = Runtime.getInstance()\n\n" + 
-				String.format("myService = Runtime.getService(\"%s\")\n", getName()); 
+		 * String self = String.format("myService = Runtime.getService(\"%s\")",
+		 * getName()); PyObject compiled = getCompiledMethod("initializePython",
+		 * self, interp); interp.exec(compiled);
+		 */
+
+		String selfReferenceScript = "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.service import Python\n"
+				+ String.format("%s = Runtime.getService(\"%s\")\n\n", getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
+				+ String.format("myService = Runtime.getService(\"%s\")\n", getName());
 		PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
 		interp.exec(compiled);
 	}
@@ -406,7 +391,7 @@ public class Python extends Service {
 		}
 
 		try {
-			interpThread = new PIThread(String.format("%s.interpreter.%d",getName(), ++interpreterThreadCount), code);
+			interpThread = new PIThread(String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount), code);
 			interpThread.start();
 
 		} catch (Exception e) {
@@ -422,13 +407,14 @@ public class Python extends Service {
 	public void exec(String code) {
 		exec(code, true);
 	}
-	
+
 	/**
 	 * non blocking exec
+	 * 
 	 * @param code
 	 * @param replace
 	 */
-	public void exec(String code, boolean replace){
+	public void exec(String code, boolean replace) {
 		exec(code, replace, false);
 	}
 
@@ -445,8 +431,6 @@ public class Python extends Service {
 	public void exec(String code, boolean replace, boolean blocking) {
 		log.info(String.format("exec(String) \n%s\n", code));
 
-		// code = code.replaceAll("(\r)+\n", "\n"); // DOS2UNIX
-
 		if (interp == null) {
 			createPythonInterpreter();
 		}
@@ -454,26 +438,32 @@ public class Python extends Service {
 			currentScript.setCode(code);
 		}
 		try {
-			if (!blocking){
-				interpThread = new PIThread(String.format("%s.interpreter.%d",getName(), ++interpreterThreadCount),code);
+			if (!blocking) {
+				interpThread = new PIThread(String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount), code);
 				interpThread.start();
 			} else {
 				interp.exec(code);
 			}
-
+		} catch(PyException pe){
+			error(pe.toString());
 		} catch (Exception e) {
+			// PyException - very nice - but we'll handle it all 
+			// the same way at the moment
+			// broadcast msg only
+			error(e.getMessage());
+			// dump stack trace to log
 			Logging.logError(e);
 		}
 	}
 
-	
-	public void execAndWait(String code){
+	public void execAndWait(String code) {
 		exec(code, true, true);
 	}
-	
-	public void execAndWait(){
+
+	public void execAndWait() {
 		exec(currentScript.code, true, true);
 	}
+
 	/**
 	 * executes an external Python file
 	 * 
@@ -495,20 +485,17 @@ public class Python extends Service {
 		Message msg = createMessage(getName(), method, null);
 		inputQueue.add(msg);
 	}
-	
+
 	/**
-	 * FIXME - better method Converter !!!
-	 * can't do this now
+	 * FIXME - better method Converter !!! can't do this now
 	 */
 	/*
-	public void execMethod(String method, Object[]...args) {
-		Message msg = createMessage(getName(), method, args);
-		inputQueue.add(msg);
-	}
-	*/
+	 * public void execMethod(String method, Object[]...args) { Message msg =
+	 * createMessage(getName(), method, args); inputQueue.add(msg); }
+	 */
 
 	public void execMethod(String method, String param1) {
-		Message msg = createMessage(getName(), method, new Object[]{param1});
+		Message msg = createMessage(getName(), method, new Object[] { param1 });
 		inputQueue.add(msg);
 	}
 
@@ -597,8 +584,8 @@ public class Python extends Service {
 		String data = FileIO.fileToString(filename);
 		return loadScript(filename, data);
 	}
-	
-	public boolean loadScript(String scriptName, String newCode){
+
+	public boolean loadScript(String scriptName, String newCode) {
 		if (newCode != null && !newCode.isEmpty()) {
 			log.info(String.format("replacing current script with %1s", scriptName));
 
@@ -607,17 +594,13 @@ public class Python extends Service {
 			// tell other listeners we have changed
 			// our current script
 			// invoke("getScript");
-			invoke("publishLoadedScript", currentScript);
+			// invoke("publishLoadedScript", currentScript);
 			broadcastState();
 			return true;
 		} else {
 			warn(String.format("%1s a not valid script", scriptName));
 			return false;
 		}
-	}
-	
-	public Script publishLoadedScript(Script script){
-		return script;
 	}
 
 	// FIXME - need to replace "script" with Hashmap<filename, script> to
@@ -633,7 +616,7 @@ public class Python extends Service {
 	 */
 	public boolean loadScriptFromResource(String filename) {
 		log.info(String.format("loadScriptFromResource %s", filename));
-		String newCode = FileIO.resourceToString(String.format("VirtualDevice/%s", filename));
+		String newCode = FileIO.resourceToString(filename);
 		return loadScript(filename, newCode);
 	}
 
@@ -739,7 +722,7 @@ public class Python extends Service {
 	public void startService() {
 		super.startService();
 		log.info(String.format("starting python %s", getName()));
-		if (inputQueueThread == null){
+		if (inputQueueThread == null) {
 			inputQueueThread = new InputQueueThread(this);
 			inputQueueThread.start();
 		}
@@ -777,6 +760,23 @@ public class Python extends Service {
 	public void stopService() {
 		super.stopService();
 		stop();// release the interpeter
+	}
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		Runtime.start("gui", "GUIService");
+		// String f = "C:\\Program Files\\blah.1.py";
+		// log.info(getName(f));
+		Python python = (Python) Runtime.start("python", "Python");
+		python.error("this is an error");
+		python.loadScriptFromResource("VirtualDevice/Arduino.py");
+		python.execAndWait();
+		// python.releaseService();
+
+		Runtime.createAndStart("gui", "GUIService");
+
 	}
 
 }
