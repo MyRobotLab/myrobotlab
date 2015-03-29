@@ -33,10 +33,7 @@ public class ArduinoBindingsGenerator {
 		StringBuilder msb = new StringBuilder(method.getName());
 		Class<?>[] params = method.getParameterTypes();
 		for (int j = 0; j < params.length; ++j) {
-			msb.append(String.format(" %s", params[j].getSimpleName()/*
-																	 * .toString(
-																	 * )
-																	 */));
+			msb.append(String.format(" %s", params[j].getSimpleName()));
 		}
 
 		String methodSignatureComment = String.format("// {%s} \n", msb.toString());
