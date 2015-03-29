@@ -147,7 +147,7 @@ public class Servo extends Service implements ServoControl {
 
 	public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
-	ServoController controller;
+	transient ServoController controller;
 
 	// clipping
 
@@ -189,6 +189,16 @@ public class Servo extends Service implements ServoControl {
 	// TODO - computer implemented speed control (non-sweep)
 	boolean speedControlOnUC = false;
 	transient Thread sweeper = null;
+	
+	/**
+	 * isAttached represents if the 
+	 * 
+	 * usually isAttached would be determined by whether the controller != null
+	 * however detach() is a meaningful method on the micro-controller side
+	 * and many services want to be able to detach() and re-attach() without
+	 * a reference to the controller - that is why this boolean variable must
+	 * be kept in sync
+	 */
 	private boolean isAttached = false;
 
 	private boolean inverted = false;

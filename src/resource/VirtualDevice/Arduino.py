@@ -3,17 +3,37 @@
 # an Arduino microcontroller.  The VirtualDevice
 # service will execute this script when
 # createVirtualArduino(port) is called
-
+import time
+import math
 import threading
 from org.myrobotlab.codec import ArduinoMsgCodec
 
+working = False
 worker = None
+
+analogReadPollingPins = []
+digitalReadPollingPins = []
 
 def work():
     """thread worker function"""
-    print 'Worker'
-    return
-
+    global working, analogReadPollingPins
+    x = 0
+    pin = 16
+    working = True
+    while(working):
+        x = x + 0.09
+        y = int(math.cos(x) * 100 + 150)
+    	# retcmd = "publishPin/" + str(pin) + "/3/"+ str(y) +"\n"
+    	# uart.write(codec.encode(retcmd))
+    	
+    	for pinx in analogReadPollingPins:
+    	  retcmd = "publishPin/" + str(pinx) + "/4/"+ str(y) +"\n"
+    	  uart.write(codec.encode(retcmd))
+    	
+    	sleep(0.001)
+    	print (y)
+    	
+    print("I am done !")
 
 codec = ArduinoMsgCodec()
 
@@ -29,24 +49,37 @@ logic.subscribe(uart, "publishDisconnect", "onDisconnect")
 
 
 def onByte(b):
-  global worker
+  global working, worker, analogReadPollingPins
   print("onByte", b)
   command = codec.decode(b)
   if command != None and len(command) > 0 :
     print("decoded", command)
-    if command == "getVersion\n":
+    # rstrip trips the \n from the record
+    command = command.rstrip()
+    clist = command.split('/')
+    
+    if command == "getVersion":
       uart.write(codec.encode("publishVersion/21\n"))
+    
     elif command.startswith("analogReadPollingStart"):
       print("analogReadPollingStart")
-      # if worker == None:
-      uart.write(codec.encode("publishPin/64/1/10\n"))
-      uart.write(codec.encode("publishPin/64/0/20\n"))
-      uart.write(codec.encode("publishPin/64/1/30\n"))
-      uart.write(codec.encode("publishPin/64/0/40\n"))
+      pin = clist[1]
+      analogReadPollingPins.append(pin)
+      if worker == None:
+        worker = threading.Thread(name='worker', target=work)
+        worker.setDaemon(True)
+        worker.start()
         
-        
+    elif command.startswith("analogReadPollingStop"):
+      print("analogReadPollingStop")
+      pin = clist[1]
+      analogReadPollingPins.remove(pin)
 
 
+def off():
+  working = False               
+  worker = None
+      
 def onConnect(portName):
   print("connected to ", portName)
 

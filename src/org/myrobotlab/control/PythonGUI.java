@@ -80,11 +80,9 @@ import org.myrobotlab.ui.autocomplete.MRLCompletionProvider;
  */
 public class PythonGUI extends ServiceGUI implements ActionListener, MouseListener {
 
-	// FIXME - should be part of separate "Editor" class
 	static public class EditorPanel {
 		String filename;
-		TextEditorPane editor;// = new TextEditorPane(); <-- cant be null
-								// constructor
+		TextEditorPane editor;
 		JScrollPane panel;// = createEditorPane();
 
 		public EditorPanel(Script script) {
@@ -525,8 +523,13 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				// merge state with view
 				Script script = python.getScript();
-				//if (scripts.containsKey(arg0))
+				if (script != null){
+					if (!scripts.containsKey(script.getName())){
+						addNewEditorPanel(script);
+					}
+				}
 				
 			}
 			});

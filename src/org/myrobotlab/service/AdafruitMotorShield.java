@@ -224,7 +224,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		}
 
 		// set the program
-		Sketch sketch = new Sketch(newProgram.toString());
+		Sketch sketch = new Sketch("AdafruitMotorShield", newProgram.toString());
 		arduino.setSketch(sketch);
 		// broadcast the arduino state - ArduinoGUI should subscribe to
 		// setProgram

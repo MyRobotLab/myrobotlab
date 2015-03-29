@@ -2310,4 +2310,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return stati;
 	}
 
+	public static void broadcastStates() {
+		ServiceEnvironment se = getLocalServices();
+
+		for (String name : se.serviceDirectory.keySet()){
+			se.serviceDirectory.get(name).broadcastState();
+		}	
+	}
+
 }
