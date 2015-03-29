@@ -9,6 +9,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -35,7 +36,7 @@ public class SerialTest {
 
 		log.info("setUpBeforeClass");
 
-		Runtime.start("gui", "GUIService");
+		//Runtime.start("gui", "GUIService");
 		serial = (Serial) Runtime.start("serial", "Serial");
 		catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
 		virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
@@ -45,6 +46,8 @@ public class SerialTest {
 		uart.setTimeout(100);
 		
 		logic = virtual.getLogic();
+		
+		serial.connect(vport);
 	}
 
 	@AfterClass
@@ -61,7 +64,10 @@ public class SerialTest {
 		
 		serial.clear();
 		serial.setTimeout(100);
-		serial.disconnect();
+		
+		if (!serial.isConnected()){
+			serial.connect(vport);
+		}
 	}
 
 	@After
@@ -137,28 +143,27 @@ public class SerialTest {
 
 	@Test
 	public final void testAvailable() throws IOException, InterruptedException {
-		serial.connect(vport);
 		
 		serial.write(0);
 		serial.write(127);
 		serial.write(128);
 		serial.write(255);
 		
-		Thread.sleep(10);
+		Thread.sleep(100);
 
 		assertEquals(4, uart.available());
 	}
 
 	@Test
 	public final void testClear() throws IOException, InterruptedException {
-		serial.connect(vport);
+		
 		
 		serial.write(0);
 		serial.write(127);
 		serial.write(128);
 		serial.write(255);
 		
-		Thread.sleep(10);
+		Thread.sleep(100);
 
 		assertEquals(4, uart.available());
 		uart.clear();
@@ -168,10 +173,18 @@ public class SerialTest {
 	@Test
 	public final void testConnectString() throws InterruptedException, IOException {
 		
+		
 		log.info("testing connect & disconnect for remote service");
-		catcher.isLocal = false;
 		
 		serial.addByteListener(catcher);
+		
+		if (serial.isConnected()){
+			serial.disconnect();
+			catcher.checkMsg("onDisconnect",vport);
+		}
+
+		catcher.isLocal = false;
+		
 		serial.connect(vport);
 		catcher.checkMsg("onConnect",vport);
 		
@@ -219,6 +232,7 @@ public class SerialTest {
 		serial.disconnect();
 		catcher.checkMsg("onDisconnect",vport);
 		serial.removeByteListener(catcher);
+		serial.connect(vport);
 	}
 
 	@Test
