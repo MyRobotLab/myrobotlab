@@ -73,6 +73,8 @@ public class SerialTest {
 		}
 		
 		serial.setCodec("decimal");
+		
+		serial.addByteListener(catcher);
 	}
 
 	@After
