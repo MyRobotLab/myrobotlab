@@ -510,7 +510,7 @@
 
 	<!-- TODO - upload/publish javadoc -->
 
-	<target name="test" depends="compiletests">
+	<target name="test" depends="compiletests, dist">
 		<junit printsummary="withOutAndErr" fork="true" haltonfailure="yes">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>

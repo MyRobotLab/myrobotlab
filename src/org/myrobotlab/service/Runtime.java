@@ -913,15 +913,10 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return ret;
 	}
 
-	static public List<String> getThreadNames() {
-		Set<Thread> threads = Thread.getAllStackTraces().keySet();
-		ArrayList<String> names = new ArrayList<String>();
-		for (Thread t : threads) {
-			names.add(t.getName());
-		}
-		return names;
+	static public Set<Thread> getThreads() {
+		return Thread.getAllStackTraces().keySet();
 	}
-
+	
 	/**
 	 * dorky pass-throughs to the real JVM Runtime
 	 * 

@@ -2,12 +2,18 @@ package org.myrobotlab.codec;
 
 import java.util.ArrayList;
 
+import org.myrobotlab.service.interfaces.LoggingSink;
+
 public class HexCodec extends Codec {
 
 	String coloumnDelimiter = " ";
 	String rowDelimiter = "\n";
 	int byteCount = 0;
 	int width = 16;
+	
+	public HexCodec(LoggingSink myService) {
+		super(myService);
+	}
 
 	@Override
 	final public String decodeImpl(int data) {

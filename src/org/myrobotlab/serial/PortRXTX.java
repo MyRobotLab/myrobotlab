@@ -39,8 +39,10 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 	private InputStream in;
 	private OutputStream out;
 
+	/*
 	public PortRXTX() {
 	}
+	*/
 
 	public PortRXTX(String portName, int rate, int databits, int stopbits, int parity) throws IOException, PortInUseException, UnsupportedCommOperationException, NoSuchPortException {
 		super(portName, rate, databits, stopbits, parity);
