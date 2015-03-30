@@ -1,11 +1,16 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -32,6 +37,8 @@ public class SerialTest {
 	static Python logic = null;
 	static String vport = "vport";
 	
+	static Set<Thread> startThreads;
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		LoggingFactory.getInstance().configure();
@@ -46,11 +53,26 @@ public class SerialTest {
 		virtual.createVirtualPort(vport);
 		
 		uart = virtual.getUART();
-		uart.setTimeout(100);
+		uart.setTimeout(300);
 		
 		logic = virtual.getLogic();
 		
 		serial.connect(vport);
+		Thread.sleep(300);
+		
+		startThreads = Runtime.getThreads();
+	}
+	
+	public static Set<Thread> getDeadThreads(){
+		Set<Thread> dead = new HashSet<Thread>();
+		Set<Thread> current = Runtime.getThreads();
+		for(Thread thread : startThreads){
+			if (!current.contains(thread)){
+				log.info(String.format("thread %s is dead", thread.getName()));
+				dead.add(thread);
+			}
+		}
+		return dead;
 	}
 
 	@AfterClass
@@ -63,10 +85,10 @@ public class SerialTest {
 		catcher.isLocal = true;
 
 		uart.clear();
-		uart.setTimeout(100);
+		uart.setTimeout(300);
 		
 		serial.clear();
-		serial.setTimeout(100);
+		serial.setTimeout(300);
 		
 		if (!serial.isConnected()){
 			serial.connect(vport);
@@ -159,6 +181,14 @@ public class SerialTest {
 		Thread.sleep(100);
 
 		assertEquals(4, uart.available());
+
+		assertEquals(0, uart.read());
+		assertEquals(127, uart.read());
+		assertEquals(128, uart.read());
+		assertEquals(255, uart.read());
+		
+		Set<Thread> names = getDeadThreads();
+		log.info(names.size() + "");
 	}
 
 	@Test
@@ -180,7 +210,7 @@ public class SerialTest {
 	@Test
 	public final void testConnectString() throws InterruptedException, IOException {
 		
-		
+		// ========== remote pub/sub connect / onByte testing ==========
 		log.info("testing connect & disconnect for remote service");
 		
 		serial.addByteListener(catcher);
@@ -194,31 +224,30 @@ public class SerialTest {
 		
 		serial.connect(vport);
 		catcher.checkMsg("onConnect",vport);
+
+		testReadAndWrite();
 		
-		serial.write(0);
-		serial.write(127);
-		serial.write(128);
-		serial.write(255);
-		
-		assertEquals(0, uart.read());
-		assertEquals(127, uart.read());
-		assertEquals(128, uart.read());
-		assertEquals(255, uart.read());
-		
+		catcher.clear();
 		serial.disconnect();
 		
 		serial.write(255);
 		log.info("testing timeout");
+		
+		boolean expectedFailure = false;
 		try {
 			// timeout makes it throw
 			uart.read();
 		} catch(Exception e){
-			Logging.logError(e);
+			log.info("expected failure on timeout");
+			expectedFailure = true;
 		}
+		
+		assertTrue(expectedFailure);
 		
 		catcher.checkMsg("onDisconnect", vport);
 		serial.removeByteListener(catcher);
 
+		// ========== local pub/sub connect / onByte testing ==========
 		log.info("testing connect & disconnect for local service");
 		catcher.isLocal = true;
 		
@@ -226,20 +255,64 @@ public class SerialTest {
 		serial.connect(vport);
 		catcher.checkMsg("onConnect",vport);
 		
-		serial.write(0);
-		serial.write(127);
-		serial.write(128);
-		serial.write(255);
+		testReadAndWrite();	
 		
-		assertEquals(0, uart.read());
-		assertEquals(127, uart.read());
-		assertEquals(128, uart.read());
-		assertEquals(255, uart.read());		
 		
 		serial.disconnect();
 		catcher.checkMsg("onDisconnect",vport);
 		serial.removeByteListener(catcher);
 		serial.connect(vport);
+	}
+	
+	@Test
+	public final void testReadAndWrite() throws IOException, InterruptedException{
+		Set<Thread> names = getDeadThreads();
+		
+		logThreads();
+		
+		log.info(names.size() + "");
+		
+		// serial --> uart
+		serial.write(0);
+		serial.write(127);
+		serial.write(128);
+		serial.write(255);
+		
+		Thread.sleep(300);
+		assertEquals(0, uart.read());
+		assertEquals(127, uart.read());
+		assertEquals(128, uart.read());
+		assertEquals(255, uart.read());
+
+		// serial <-- uart
+		uart.write(0);
+		uart.write(127);
+		uart.write(128);
+		uart.write(255);
+		
+		Thread.sleep(300);
+		assertEquals(0, serial.read());
+		assertEquals(127, serial.read());
+		assertEquals(128, serial.read());
+		assertEquals(255, serial.read());
+		
+		catcher.clear();
+		
+	}
+
+	public final void logThreads() {
+		Set<Thread> current = Runtime.getThreads();
+		String[] t = new String[current.size()];
+		int i = 0;
+		for(Thread thread : current){
+			t[i] = thread.getName();
+			++i;
+		}
+		
+		Arrays.sort(t);
+		for (i = 0; i < t.length; ++i){
+			log.info(String.format("thread %s", t[i]));
+		}
 	}
 
 	@Test
@@ -500,18 +573,82 @@ public class SerialTest {
 	}
 
 	@Test
-	public final void testSetCodec() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
+	public final void testSetCodec() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException, IOException, InterruptedException {
+		
+		boolean notready = true;
+		if (notready){
+			return;
+		}
+		
+		// ==== null codec test ===
+		log.info("codec null test");
 		serial.setCodec(null);
 
 		String rxKey = serial.getRXCodecKey();
 		assertNull(rxKey);
-		
+			
 		Codec rxcodec = serial.getRXCodec();
 		assertNull(rxcodec);
 		
+		String txKey = serial.getTXCodecKey();
+		assertNull(txKey);
+
 		Codec txcodec = serial.getTXCodec();
 		assertNull(txcodec);
+		
+		testReadAndWrite();
+		
+		// ==== decimal codec test ===
+		serial.setCodec("decimal");
+		
+		rxKey = serial.getRXCodecKey();
+		assertEquals("decimal", rxKey);
+			
+		rxcodec = serial.getRXCodec();
+		assertNotNull(rxcodec);
+		
+		txKey = serial.getTXCodecKey();
+		assertEquals("decimal", txKey);
 
+		txcodec = serial.getTXCodec();
+		assertNotNull(txcodec);
+
+		testReadAndWrite();
+
+		
+		// ==== hex codec test ===
+		serial.setCodec("hex");
+		
+		rxKey = serial.getRXCodecKey();
+		assertEquals("hex", rxKey);
+			
+		rxcodec = serial.getRXCodec();
+		assertNotNull(rxcodec);
+		
+		txKey = serial.getTXCodecKey();
+		assertEquals("hex", txKey);
+
+		txcodec = serial.getTXCodec();
+		assertNotNull(txcodec);
+
+		testReadAndWrite();
+		
+		// ==== ascii codec test ===
+		serial.setCodec("ascii");
+		
+		rxKey = serial.getRXCodecKey();
+		assertEquals("ascii", rxKey);
+			
+		rxcodec = serial.getRXCodec();
+		assertNotNull(rxcodec);
+		
+		txKey = serial.getTXCodecKey();
+		assertEquals("ascii", txKey);
+
+		txcodec = serial.getTXCodec();
+		assertNotNull(txcodec);
+
+		testReadAndWrite();
 	}
 
 	@Test

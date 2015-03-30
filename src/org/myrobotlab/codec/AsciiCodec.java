@@ -1,6 +1,12 @@
 package org.myrobotlab.codec;
 
+import org.myrobotlab.service.interfaces.LoggingSink;
+
 public class AsciiCodec extends Codec {
+
+	public AsciiCodec(LoggingSink myService) {
+		super(myService);
+	}
 
 	@Override
 	final public String decodeImpl(int data) {

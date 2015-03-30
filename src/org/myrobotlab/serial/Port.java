@@ -3,6 +3,7 @@ package org.myrobotlab.serial;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
 
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.logging.LoggerFactory;
@@ -27,6 +28,10 @@ public abstract class Port implements Runnable, PortSource {
 
 	// needs to be owned by Serial
 	HashMap<String, SerialDataListener> listeners = null;
+	
+	CountDownLatch started = null;
+	
+	static int pIndex = 0;
 
 	// thread related
 	transient Thread readingThread = null;
@@ -46,9 +51,12 @@ public abstract class Port implements Runnable, PortSource {
 	
 	boolean isOpen = false;
 
+	// TODO - remove ?
+	/*
 	public Port() {
 	}
-
+	*/
+	
 	public Port(String portName) {
 		this.stats.name = portName;
 		this.name = portName;
@@ -86,12 +94,23 @@ public abstract class Port implements Runnable, PortSource {
 	public boolean isOpen(){ return isOpen; }
 
 	public void listen(HashMap<String, SerialDataListener> listeners) {
+		started = new CountDownLatch(1);
 		this.listeners = listeners;
 		if (readingThread == null) {
-			readingThread = new Thread(this, String.format("%s.portListener", name));
+			++pIndex;
+			readingThread = new Thread(this, String.format("%s.portListener %s", name, pIndex));
 			readingThread.start();
 		} else {
 			log.info(String.format("%s already listening", name));
+		}
+		try {
+			// we want to wait until our
+			// reader has started and is
+			// blocking on a read before 
+			// we proceed
+			started.await();
+			Thread.sleep(100);
+		} catch(InterruptedException e){
 		}
 	}
 
@@ -112,6 +131,7 @@ public abstract class Port implements Runnable, PortSource {
 		listening = true;
 		Integer newByte = -1;
 		try {
+			started.countDown();
 			// TODO - if (Queue) while take()
 			// normal streams are processed here - rxtx is abnormal
 			while (listening && ((newByte = read()) > -1)) {

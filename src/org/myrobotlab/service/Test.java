@@ -51,10 +51,17 @@ public class Test extends Service {
 	BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
 	public static void logThreadNames() {
+		
+		Set<Thread> threads = Runtime.getThreads();
+		String[] tn = new String[threads.size()];
+		int x = 0;
+		for(Thread thread: threads){
+			tn[x] = thread.getName();
+			++x;
+		}
 
-		String[] t = Runtime.getThreadNames().toArray(new String[Runtime.getThreadNames().size()]);
-		Arrays.sort(t);
-		log.warn(Encoder.toJson(t));
+		Arrays.sort(tn);
+		log.warn(Encoder.toJson(tn));
 		/*
 		 * for (int i = 0; i < t.length; ++i){ log.warn(t[i]); }
 		 */
