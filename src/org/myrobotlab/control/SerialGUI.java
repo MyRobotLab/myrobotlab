@@ -33,7 +33,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -164,10 +164,8 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		subscribe("publishRX", "publishRX", Integer.class);
 		subscribe("publishTX", "publishTX", Integer.class);
 		subscribe("publishState", "getState", Serial.class);
-		subscribe("getPortNames", "getPortNames", ArrayList.class);
 
-		send("publishState");
-		send("getPortNames");
+		send("refresh");
 	}
 
 	public void autoScroll(boolean b) {
@@ -184,10 +182,9 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		unsubscribe("publishRX", "publishRX", String.class);
 		unsubscribe("publishTX", "publishTX", String.class);
 		unsubscribe("publishState", "getState", Serial.class);
-		unsubscribe("getPortNames", "getPortNames", ArrayList.class);
 	}
 
-	public void getPortNames(final ArrayList<String> inPorts) {
+	public void getPortNames(final List<String> inPorts) {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -213,6 +210,8 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 				setPortStatus();
 
 				try {
+					
+					getPortNames(serial.getPortNames());
 
 					// prevent re-firing the event :P
 					reqFormat.removeItemListener(myself);

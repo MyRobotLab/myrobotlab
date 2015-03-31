@@ -39,11 +39,10 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 	private InputStream in;
 	private OutputStream out;
 
-	/*
 	public PortRXTX() {
+		super();
 	}
-	*/
-
+	
 	public PortRXTX(String portName, int rate, int databits, int stopbits, int parity) throws IOException, PortInUseException, UnsupportedCommOperationException, NoSuchPortException {
 		super(portName, rate, databits, stopbits, parity);
 		commPortId = CommPortIdentifier.getPortIdentifier(portName);
@@ -167,7 +166,7 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 	
 	public void close(){
 		port.removeEventListener();
-		port.notifyOnDataAvailable(false);
+		// port.notifyOnDataAvailable(false);
 		listening = false;
 		new Thread(){
 			public void run(){
@@ -238,7 +237,14 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 	@Override
 	public void run() {
 		// we don't use countDown - because rxtx manages its own threads(sortof :P)
-		log.info("letting port thread die here because of rxtxlib weirdness");
+		log.info("no port thread in rxtxlib");
+		try {
+			Thread.sleep(300);
+		} catch (InterruptedException e) {
+		}
+		// allow the .listen() in  Port
+		// to proceed
+		opened.countDown();
 	}
 
 	/**

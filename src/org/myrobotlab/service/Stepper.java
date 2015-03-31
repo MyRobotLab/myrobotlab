@@ -58,7 +58,7 @@ public class Stepper extends Service implements StepperControl {
 	public final static Logger log = LoggerFactory.getLogger(Stepper.class.toString());
 
 	private boolean isAttached = false;
-	private int rpm = 0;
+	// TODO - publishQueueStats - rpm other ???
 	private boolean locked = false; // for locking the motor in a stopped
 
 	// position
@@ -95,7 +95,7 @@ public class Stepper extends Service implements StepperControl {
 
 	private StepperController controller = null; // board name
 
-	static final public String STEPPER_TYPE_POLOLU = "STEPPER_TYPE_POLOLU";
+	static final public String STEPPER_TYPE_SIMPLE = "STEPPER_TYPE_POLOLU";
 
 	/**
 	 * step pins this can vary in size 2 for Pololu (dir & step) , 3, 4, 5, ...
@@ -160,7 +160,7 @@ public class Stepper extends Service implements StepperControl {
 	}
 
 	public boolean attach(String arduino, String port, Integer... pins) throws IOException {
-		return attach(this.arduino, port, STEPPER_TYPE_POLOLU, pins);
+		return attach(this.arduino, port, STEPPER_TYPE_SIMPLE, pins);
 	}
 
 	private void attached(boolean isAttached) {
@@ -230,8 +230,8 @@ public class Stepper extends Service implements StepperControl {
 		locked = true;
 	}
 
-	public void move(int newPos) {
-		this.arduino.stepperMove(getName(), newPos);
+	public void moveTo(int newPos) {
+		this.arduino.stepperMoveTo(getName(), newPos);
 	}
 
 	public Integer moveToBlocking(Integer newPos) {
@@ -240,7 +240,7 @@ public class Stepper extends Service implements StepperControl {
 			isBlockingOnStop = true;
 			blockingData.clear();
 
-			move(newPos);
+			moveTo(newPos);
 			Integer gotTo = (Integer) blockingData.poll(10000, TimeUnit.MILLISECONDS);
 			return gotTo;
 		} catch (Exception e) {
@@ -309,6 +309,7 @@ public class Stepper extends Service implements StepperControl {
 	@Override
 	public void stopAndLock() {
 		log.info("stopAndLock");
+		stop();
 		lock();
 	}
 
@@ -337,25 +338,25 @@ public class Stepper extends Service implements StepperControl {
 
 			// stepper.moveToBlocking(77777);
 
-			stepper.move(81100);
+			stepper.moveTo(81100);
 
 			stepper.stop();
 			// stepper.reset();
 
-			stepper.move(100);
+			stepper.moveTo(100);
 
 			// TODO - blocking call
 
 			log.info("here");
 
-			stepper.move(1);
+			stepper.moveTo(1);
 			stepper.reset();
-			stepper.move(2);
+			stepper.moveTo(2);
 
 			log.info("here");
-			stepper.move(-1);
+			stepper.moveTo(-1);
 			log.info("here");
-			stepper.move(-300);
+			stepper.moveTo(-300);
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
