@@ -46,7 +46,7 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 
 	public PortRXTX(String portName, int rate, int databits, int stopbits, int parity) throws IOException, PortInUseException, UnsupportedCommOperationException, NoSuchPortException {
 		super(portName, rate, databits, stopbits, parity);
-		commPortId = CommPortIdentifier.getPortIdentifier(name);
+		commPortId = CommPortIdentifier.getPortIdentifier(portName);
 	}
 
 	public int available() throws IOException {
@@ -147,11 +147,11 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 	public void open() throws IOException {
 		try {
 			if (port != null){
-				log.info(String.format("port %s already open", name));
+				log.info(String.format("port %s already open", portName));
 				return;
 			}
-			log.info(String.format("opening %s", name));
-			port = (RXTXPort) commPortId.open(name, 1000);
+			log.info(String.format("opening %s", portName));
+			port = (RXTXPort) commPortId.open(portName, 1000);
 			port.setSerialPortParams(rate, databits, stopbits, parity);
 			in = port.getInputStream();
 			out = port.getOutputStream();
@@ -159,7 +159,7 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 			port.addEventListener(this);
 			port.notifyOnDataAvailable(true);
 			listening = true;
-			log.info(String.format("opened %s", name));
+			log.info(String.format("opened %s", portName));
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -237,6 +237,7 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 
 	@Override
 	public void run() {
+		// we don't use countDown - because rxtx manages its own threads(sortof :P)
 		log.info("letting port thread die here because of rxtxlib weirdness");
 	}
 
@@ -246,7 +247,7 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 	 */
 	@Override
 	public void serialEvent(SerialPortEvent event) {
-		log.info(String.format("rxtx event on port %s", name));
+		log.info(String.format("rxtx event on port %s", portName));
 
 		Integer newByte = -1;
 
@@ -273,7 +274,7 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 		} catch (Exception e) {
 			++rxErrors;
 			Logging.logError(e);
-		}
+		} 
 
 	}
 
