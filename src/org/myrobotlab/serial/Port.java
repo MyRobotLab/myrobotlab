@@ -11,26 +11,27 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
-
 /**
- * FIXME !!! - implement subclass abstract/interface - HardwarePort & SoftwarePort
+ * FIXME !!! - implement subclass abstract/interface - HardwarePort &
+ * SoftwarePort
+ * 
  * @author Grog
  *
  */
 
 public abstract class Port implements Runnable, PortSource {
-	
-	
 
 	public final static Logger log = LoggerFactory.getLogger(Port.class);
 
-	String name;
+	String portName;
+	String threadName;
 
 	// needs to be owned by Serial
 	HashMap<String, SerialDataListener> listeners = null;
-	
-	CountDownLatch started = null;
-	
+
+	transient CountDownLatch opened = null;
+	transient CountDownLatch closed = null;
+
 	static int pIndex = 0;
 
 	// thread related
@@ -45,21 +46,20 @@ public abstract class Port implements Runnable, PortSource {
 	int databits = 8;
 	int stopbits = 1;
 	int parity = 0;
-	
+
 	int txErrors;
 	int rxErrors;
-	
+
 	boolean isOpen = false;
 
 	// TODO - remove ?
 	/*
-	public Port() {
-	}
-	*/
-	
+	 * public Port() { }
+	 */
+
 	public Port(String portName) {
 		this.stats.name = portName;
-		this.name = portName;
+		this.portName = portName;
 		stats.interval = 1000;
 	}
 
@@ -72,17 +72,26 @@ public abstract class Port implements Runnable, PortSource {
 	}
 
 	public void close() {
+
+		closed = new CountDownLatch(1);
 		listening = false;
 		if (readingThread != null) {
 			readingThread.interrupt();
 		}
 		readingThread = null;
+		try {
+			closed.await();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 		// TODO - suppose to remove listeners ???
-		log.info(String.format("closed port %s", name));
+		log.info(String.format("closed port %s", portName));
+
 	}
 
 	public String getName() {
-		return name;
+		return portName;
 	}
 
 	abstract public boolean isHardware();
@@ -91,47 +100,51 @@ public abstract class Port implements Runnable, PortSource {
 		return listening;
 	}
 
-	public boolean isOpen(){ return isOpen; }
+	public boolean isOpen() {
+		return isOpen;
+	}
 
 	public void listen(HashMap<String, SerialDataListener> listeners) {
-		started = new CountDownLatch(1);
+		opened = new CountDownLatch(1);
 		this.listeners = listeners;
 		if (readingThread == null) {
 			++pIndex;
-			readingThread = new Thread(this, String.format("%s.portListener %s", name, pIndex));
+			threadName = String.format("%s.portListener %s", portName, pIndex);
+			readingThread = new Thread(this, threadName);
 			readingThread.start();
 		} else {
-			log.info(String.format("%s already listening", name));
+			log.info(String.format("%s already listening", portName));
 		}
 		try {
 			// we want to wait until our
 			// reader has started and is
-			// blocking on a read before 
+			// blocking on a read before
 			// we proceed
-			started.await();
+			opened.await();
 			Thread.sleep(100);
-		} catch(InterruptedException e){
+		} catch (InterruptedException e) {
 		}
 	}
 
 	public void open() throws IOException {
-		log.info(String.format("opening port %s", name));
+		log.info(String.format("opening port %s", portName));
 		isOpen = true;
 	}
 
 	abstract public int read() throws IOException, InterruptedException;
+
 	/**
 	 * reads from Ports input stream and puts it on the Serials main RX line -
 	 * to be published and buffered
 	 */
 	@Override
 	public void run() {
-		
-		log.info(String.format("listening on port %s", name));
+
+		log.info(String.format("listening on port %s", portName));
 		listening = true;
 		Integer newByte = -1;
 		try {
-			started.countDown();
+			opened.countDown();
 			// TODO - if (Queue) while take()
 			// normal streams are processed here - rxtx is abnormal
 			while (listening && ((newByte = read()) > -1)) {
@@ -149,26 +162,21 @@ public abstract class Port implements Runnable, PortSource {
 				}
 				// log.info(String.format("%d",newByte));
 			}
-			log.info(String.format("%s no longer listening - last byte %d ", name, newByte));
-		} catch (InterruptedException x){
-			log.info(String.format("%s stopping ", name) );
-		} catch (InterruptedIOException c){
-			log.info(String.format("%s stopping ", name) );
+			log.info(String.format("%s no longer listening - last byte %d ", portName, newByte));
+		} catch (InterruptedException x) {
+			log.info(String.format("InterruptedException %s stopping ", portName));
+		} catch (InterruptedIOException c) {
+			log.info(String.format("InterruptedIOException %s stopping ", portName));
 		} catch (Exception e) {
 			Logging.logError(e);
 		} finally {
-			// because of the rxtxLib non-standard implementation
-			// we do not close when we get a -1
-			/*
-			 * if (!"PortGNU".equals(type)) {
-			 * 
-			 * }
-			 */
-			log.info(String.format("closing port %s", name));
-			close();
+			// allow the thread calling close
+			// to proceed
+			closed.countDown();
+			log.info(String.format("stopped listening on %s", portName));
 		}
 	}
-	
+
 	/**
 	 * "real" serial function stubbed out in the abstract class in case the
 	 * serial implementation does not actually implement this method e.g.

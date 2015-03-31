@@ -81,6 +81,7 @@ public class SerialTest {
 
 	@Before
 	public void setUp() throws Exception {
+		
 		catcher.clear();
 		catcher.isLocal = true;
 
@@ -95,6 +96,7 @@ public class SerialTest {
 		}
 		
 		serial.setCodec("decimal");
+		uart.setCodec("decimal");
 		
 		serial.addByteListener(catcher);
 	}
@@ -172,7 +174,8 @@ public class SerialTest {
 
 	@Test
 	public final void testAvailable() throws IOException, InterruptedException {
-		
+		log.info("testAvailable");
+
 		serial.write(0);
 		serial.write(127);
 		serial.write(128);
@@ -193,8 +196,8 @@ public class SerialTest {
 
 	@Test
 	public final void testClear() throws IOException, InterruptedException {
-		
-		
+		log.info("testClear");
+	
 		serial.write(0);
 		serial.write(127);
 		serial.write(128);
@@ -209,6 +212,7 @@ public class SerialTest {
 
 	@Test
 	public final void testConnectString() throws InterruptedException, IOException {
+		log.info("testConnectString");
 		
 		// ========== remote pub/sub connect / onByte testing ==========
 		log.info("testing connect & disconnect for remote service");
@@ -266,11 +270,11 @@ public class SerialTest {
 	
 	@Test
 	public final void testReadAndWrite() throws IOException, InterruptedException{
-		Set<Thread> names = getDeadThreads();
+		log.info("testReadAndWrite");
+
+		//Set<Thread> names = getDeadThreads();
 		
-		logThreads();
-		
-		log.info(names.size() + "");
+		logThreads();		
 		
 		// serial --> uart
 		serial.write(0);
@@ -574,7 +578,8 @@ public class SerialTest {
 
 	@Test
 	public final void testSetCodec() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException, IOException, InterruptedException {
-		
+		log.info("testSetCodec");
+
 		boolean notready = true;
 		if (notready){
 			return;
