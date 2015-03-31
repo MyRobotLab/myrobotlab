@@ -52,10 +52,10 @@ public abstract class Port implements Runnable, PortSource {
 
 	boolean isOpen = false;
 
-	// TODO - remove ?
-	/*
-	 * public Port() { }
-	 */
+	// necessary - to be able to invoke
+	// "nameless" port implementation to query "hardware" ports
+	// overloading a "Port" and a PortQuery - :P
+	public Port() { }
 
 	public Port(String portName) {
 		this.stats.name = portName;

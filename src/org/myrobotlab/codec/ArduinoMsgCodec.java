@@ -56,314 +56,315 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 	public static final int MAGIC_NUMBER = 170; // 10101010
 
-	// ///// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
+	/////// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
+	
+	///// java ByteToMethod generated definition - DO NOT MODIFY - Begin //////
+	// {publishMRLCommError Integer} 
+	public final static int PUBLISH_MRLCOMM_ERROR =		1;
 
-	// /// java ByteToMethod generated definition - DO NOT MODIFY - Begin //////
-	// {publishMRLCommError Integer}
-	public final static int PUBLISH_MRLCOMM_ERROR = 1;
+	// {getVersion} 
+	public final static int GET_VERSION =		2;
 
-	// {getVersion}
-	public final static int GET_VERSION = 2;
+	// {publishVersion Integer} 
+	public final static int PUBLISH_VERSION =		3;
 
-	// {publishVersion Integer}
-	public final static int PUBLISH_VERSION = 3;
+	// {analogReadPollingStart Integer} 
+	public final static int ANALOG_READ_POLLING_START =		4;
 
-	// {analogReadPollingStart Integer}
-	public final static int ANALOG_READ_POLLING_START = 4;
+	// {analogReadPollingStop Integer} 
+	public final static int ANALOG_READ_POLLING_STOP =		5;
 
-	// {analogReadPollingStop Integer}
-	public final static int ANALOG_READ_POLLING_STOP = 5;
+	// {analogWrite Integer Integer} 
+	public final static int ANALOG_WRITE =		6;
 
-	// {analogWrite Integer Integer}
-	public final static int ANALOG_WRITE = 6;
+	// {digitalReadPollingStart Integer} 
+	public final static int DIGITAL_READ_POLLING_START =		7;
 
-	// {digitalReadPollingStart Integer}
-	public final static int DIGITAL_READ_POLLING_START = 7;
+	// {digitalReadPollingStop Integer} 
+	public final static int DIGITAL_READ_POLLING_STOP =		8;
 
-	// {digitalReadPollingStop Integer}
-	public final static int DIGITAL_READ_POLLING_STOP = 8;
+	// {digitalWrite Integer Integer} 
+	public final static int DIGITAL_WRITE =		9;
 
-	// {digitalWrite Integer Integer}
-	public final static int DIGITAL_WRITE = 9;
+	// {motorAttach String String Integer Integer Integer} 
+	public final static int MOTOR_ATTACH =		10;
 
-	// {motorAttach String String Integer Integer Integer}
-	public final static int MOTOR_ATTACH = 10;
+	// {motorDetach String} 
+	public final static int MOTOR_DETACH =		11;
 
-	// {motorDetach String}
-	public final static int MOTOR_DETACH = 11;
+	// {motorMove String} 
+	public final static int MOTOR_MOVE =		12;
 
-	// {motorMove String}
-	public final static int MOTOR_MOVE = 12;
+	// {motorMoveTo String double} 
+	public final static int MOTOR_MOVE_TO =		13;
 
-	// {motorMoveTo String double}
-	public final static int MOTOR_MOVE_TO = 13;
+	// {pinMode Integer Integer} 
+	public final static int PIN_MODE =		14;
 
-	// {pinMode Integer Integer}
-	public final static int PIN_MODE = 14;
+	// {publishCustomMsg Integer} 
+	public final static int PUBLISH_CUSTOM_MSG =		15;
 
-	// {publishCustomMsg Object[]}
-	public final static int PUBLISH_CUSTOM_MSG = 15;
+	// {publishLoadTimingEvent Long} 
+	public final static int PUBLISH_LOAD_TIMING_EVENT =		16;
 
-	// {publishLoadTimingEvent Long}
-	public final static int PUBLISH_LOAD_TIMING_EVENT = 16;
+	// {publishPin Pin} 
+	public final static int PUBLISH_PIN =		17;
 
-	// {publishPin Pin}
-	public final static int PUBLISH_PIN = 17;
+	// {publishPulse Integer} 
+	public final static int PUBLISH_PULSE =		18;
 
-	// {publishPulse Integer}
-	public final static int PUBLISH_PULSE = 18;
+	// {publishServoEvent Integer} 
+	public final static int PUBLISH_SERVO_EVENT =		19;
 
-	// {publishServoEvent Integer}
-	public final static int PUBLISH_SERVO_EVENT = 19;
+	// {publishSesorData SensorData} 
+	public final static int PUBLISH_SESOR_DATA =		20;
 
-	// {publishSesorData SensorData}
-	public final static int PUBLISH_SESOR_DATA = 20;
+	// {publishStepperEvent StepperData} 
+	public final static int PUBLISH_STEPPER_EVENT =		21;
 
-	// {publishStepperEvent StepperData}
-	public final static int PUBLISH_STEPPER_EVENT = 21;
+	// {publishTrigger Pin} 
+	public final static int PUBLISH_TRIGGER =		22;
 
-	// {publishTrigger Pin}
-	public final static int PUBLISH_TRIGGER = 22;
+	// {pulseIn int int int String} 
+	public final static int PULSE_IN =		23;
 
-	// {pulseIn int int int int}
-	public final static int PULSE_IN = 23;
+	// {sensorAttach UltrasonicSensor} 
+	public final static int SENSOR_ATTACH =		24;
 
-	// {sensorAttach UltrasonicSensor}
-	public final static int SENSOR_ATTACH = 24;
+	// {sensorPollingStart String int} 
+	public final static int SENSOR_POLLING_START =		25;
 
-	// {sensorPollingStart String int}
-	public final static int SENSOR_POLLING_START = 25;
+	// {sensorPollingStop String} 
+	public final static int SENSOR_POLLING_STOP =		26;
 
-	// {sensorPollingStop String}
-	public final static int SENSOR_POLLING_STOP = 26;
+	// {servoAttach Servo Integer} 
+	public final static int SERVO_ATTACH =		27;
 
-	// {servoAttach String Integer}
-	public final static int SERVO_ATTACH = 27;
+	// {servoDetach String} 
+	public final static int SERVO_DETACH =		28;
 
-	// {servoDetach String}
-	public final static int SERVO_DETACH = 28;
+	// {servoSweepStart String int int int} 
+	public final static int SERVO_SWEEP_START =		29;
 
-	// {servoSweepStart String int int int}
-	public final static int SERVO_SWEEP_START = 29;
+	// {servoSweepStop String} 
+	public final static int SERVO_SWEEP_STOP =		30;
 
-	// {servoSweepStop String}
-	public final static int SERVO_SWEEP_STOP = 30;
+	// {servoWrite String Integer} 
+	public final static int SERVO_WRITE =		31;
 
-	// {servoWrite String Integer}
-	public final static int SERVO_WRITE = 31;
+	// {servoWriteMicroseconds String Integer} 
+	public final static int SERVO_WRITE_MICROSECONDS =		32;
 
-	// {servoWriteMicroseconds String Integer}
-	public final static int SERVO_WRITE_MICROSECONDS = 32;
+	// {setDebounce int} 
+	public final static int SET_DEBOUNCE =		33;
 
-	// {setDebounce int}
-	public final static int SET_DEBOUNCE = 33;
+	// {setDigitalTriggerOnly Boolean} 
+	public final static int SET_DIGITAL_TRIGGER_ONLY =		34;
 
-	// {setDigitalTriggerOnly Boolean}
-	public final static int SET_DIGITAL_TRIGGER_ONLY = 34;
+	// {setLoadTimingEnabled boolean} 
+	public final static int SET_LOAD_TIMING_ENABLED =		35;
 
-	// {setLoadTimingEnabled boolean}
-	public final static int SET_LOAD_TIMING_ENABLED = 35;
+	// {setPWMFrequency Integer Integer} 
+	public final static int SET_PWMFREQUENCY =		36;
 
-	// {setPWMFrequency Integer Integer}
-	public final static int SET_PWMFREQUENCY = 36;
+	// {setSampleRate int} 
+	public final static int SET_SAMPLE_RATE =		37;
 
-	// {setSampleRate int}
-	public final static int SET_SAMPLE_RATE = 37;
+	// {setSerialRate int} 
+	public final static int SET_SERIAL_RATE =		38;
 
-	// {setSerialRate int}
-	public final static int SET_SERIAL_RATE = 38;
+	// {setServoEventsEnabled String boolean} 
+	public final static int SET_SERVO_EVENTS_ENABLED =		39;
 
-	// {setServoEventsEnabled String boolean}
-	public final static int SET_SERVO_EVENTS_ENABLED = 39;
+	// {setServoSpeed String Float} 
+	public final static int SET_SERVO_SPEED =		40;
 
-	// {setServoSpeed String Float}
-	public final static int SET_SERVO_SPEED = 40;
+	// {setStepperSpeed Integer} 
+	public final static int SET_STEPPER_SPEED =		41;
 
-	// {setStepperSpeed Integer}
-	public final static int SET_STEPPER_SPEED = 41;
+	// {setTrigger int int int} 
+	public final static int SET_TRIGGER =		42;
 
-	// {setTrigger int int int}
-	public final static int SET_TRIGGER = 42;
+	// {softReset} 
+	public final static int SOFT_RESET =		43;
 
-	// {softReset}
-	public final static int SOFT_RESET = 43;
+	// {stepperAttach StepperControl} 
+	public final static int STEPPER_ATTACH =		44;
 
-	// {stepperAttach StepperControl}
-	public final static int STEPPER_ATTACH = 44;
+	// {stepperDetach String} 
+	public final static int STEPPER_DETACH =		45;
 
-	// {stepperDetach String}
-	public final static int STEPPER_DETACH = 45;
+	// {stepperMoveTo String Integer} 
+	public final static int STEPPER_MOVE_TO =		46;
 
-	// {stepperMove String Integer}
-	public final static int STEPPER_MOVE = 46;
+	// {stepperReset String} 
+	public final static int STEPPER_RESET =		47;
 
-	// {stepperReset String}
-	public final static int STEPPER_RESET = 47;
+	// {stepperStep String Integer Integer} 
+	public final static int STEPPER_STEP =		48;
 
-	// {stepperStep String Integer Integer}
-	public final static int STEPPER_STEP = 48;
+	// {stepperStop String} 
+	public final static int STEPPER_STOP =		49;
 
-	// {stepperStop String}
-	public final static int STEPPER_STOP = 49;
+	// {stopService} 
+	public final static int STOP_SERVICE =		50;
 
-	// {stopService}
-	public final static int STOP_SERVICE = 50;
 
 	static {
-		byteToMethod.put(PUBLISH_MRLCOMM_ERROR, "publishMRLCommError");
-		methodToByte.put("publishMRLCommError", PUBLISH_MRLCOMM_ERROR);
+		byteToMethod.put(PUBLISH_MRLCOMM_ERROR,"publishMRLCommError");
+		methodToByte.put("publishMRLCommError",PUBLISH_MRLCOMM_ERROR);
 
-		byteToMethod.put(GET_VERSION, "getVersion");
-		methodToByte.put("getVersion", GET_VERSION);
+		byteToMethod.put(GET_VERSION,"getVersion");
+		methodToByte.put("getVersion",GET_VERSION);
 
-		byteToMethod.put(PUBLISH_VERSION, "publishVersion");
-		methodToByte.put("publishVersion", PUBLISH_VERSION);
+		byteToMethod.put(PUBLISH_VERSION,"publishVersion");
+		methodToByte.put("publishVersion",PUBLISH_VERSION);
 
-		byteToMethod.put(ANALOG_READ_POLLING_START, "analogReadPollingStart");
-		methodToByte.put("analogReadPollingStart", ANALOG_READ_POLLING_START);
+		byteToMethod.put(ANALOG_READ_POLLING_START,"analogReadPollingStart");
+		methodToByte.put("analogReadPollingStart",ANALOG_READ_POLLING_START);
 
-		byteToMethod.put(ANALOG_READ_POLLING_STOP, "analogReadPollingStop");
-		methodToByte.put("analogReadPollingStop", ANALOG_READ_POLLING_STOP);
+		byteToMethod.put(ANALOG_READ_POLLING_STOP,"analogReadPollingStop");
+		methodToByte.put("analogReadPollingStop",ANALOG_READ_POLLING_STOP);
 
-		byteToMethod.put(ANALOG_WRITE, "analogWrite");
-		methodToByte.put("analogWrite", ANALOG_WRITE);
+		byteToMethod.put(ANALOG_WRITE,"analogWrite");
+		methodToByte.put("analogWrite",ANALOG_WRITE);
 
-		byteToMethod.put(DIGITAL_READ_POLLING_START, "digitalReadPollingStart");
-		methodToByte.put("digitalReadPollingStart", DIGITAL_READ_POLLING_START);
+		byteToMethod.put(DIGITAL_READ_POLLING_START,"digitalReadPollingStart");
+		methodToByte.put("digitalReadPollingStart",DIGITAL_READ_POLLING_START);
 
-		byteToMethod.put(DIGITAL_READ_POLLING_STOP, "digitalReadPollingStop");
-		methodToByte.put("digitalReadPollingStop", DIGITAL_READ_POLLING_STOP);
+		byteToMethod.put(DIGITAL_READ_POLLING_STOP,"digitalReadPollingStop");
+		methodToByte.put("digitalReadPollingStop",DIGITAL_READ_POLLING_STOP);
 
-		byteToMethod.put(DIGITAL_WRITE, "digitalWrite");
-		methodToByte.put("digitalWrite", DIGITAL_WRITE);
+		byteToMethod.put(DIGITAL_WRITE,"digitalWrite");
+		methodToByte.put("digitalWrite",DIGITAL_WRITE);
 
-		byteToMethod.put(MOTOR_ATTACH, "motorAttach");
-		methodToByte.put("motorAttach", MOTOR_ATTACH);
+		byteToMethod.put(MOTOR_ATTACH,"motorAttach");
+		methodToByte.put("motorAttach",MOTOR_ATTACH);
 
-		byteToMethod.put(MOTOR_DETACH, "motorDetach");
-		methodToByte.put("motorDetach", MOTOR_DETACH);
+		byteToMethod.put(MOTOR_DETACH,"motorDetach");
+		methodToByte.put("motorDetach",MOTOR_DETACH);
 
-		byteToMethod.put(MOTOR_MOVE, "motorMove");
-		methodToByte.put("motorMove", MOTOR_MOVE);
+		byteToMethod.put(MOTOR_MOVE,"motorMove");
+		methodToByte.put("motorMove",MOTOR_MOVE);
 
-		byteToMethod.put(MOTOR_MOVE_TO, "motorMoveTo");
-		methodToByte.put("motorMoveTo", MOTOR_MOVE_TO);
+		byteToMethod.put(MOTOR_MOVE_TO,"motorMoveTo");
+		methodToByte.put("motorMoveTo",MOTOR_MOVE_TO);
 
-		byteToMethod.put(PIN_MODE, "pinMode");
-		methodToByte.put("pinMode", PIN_MODE);
+		byteToMethod.put(PIN_MODE,"pinMode");
+		methodToByte.put("pinMode",PIN_MODE);
 
-		byteToMethod.put(PUBLISH_CUSTOM_MSG, "publishCustomMsg");
-		methodToByte.put("publishCustomMsg", PUBLISH_CUSTOM_MSG);
+		byteToMethod.put(PUBLISH_CUSTOM_MSG,"publishCustomMsg");
+		methodToByte.put("publishCustomMsg",PUBLISH_CUSTOM_MSG);
 
-		byteToMethod.put(PUBLISH_LOAD_TIMING_EVENT, "publishLoadTimingEvent");
-		methodToByte.put("publishLoadTimingEvent", PUBLISH_LOAD_TIMING_EVENT);
+		byteToMethod.put(PUBLISH_LOAD_TIMING_EVENT,"publishLoadTimingEvent");
+		methodToByte.put("publishLoadTimingEvent",PUBLISH_LOAD_TIMING_EVENT);
 
-		byteToMethod.put(PUBLISH_PIN, "publishPin");
-		methodToByte.put("publishPin", PUBLISH_PIN);
+		byteToMethod.put(PUBLISH_PIN,"publishPin");
+		methodToByte.put("publishPin",PUBLISH_PIN);
 
-		byteToMethod.put(PUBLISH_PULSE, "publishPulse");
-		methodToByte.put("publishPulse", PUBLISH_PULSE);
+		byteToMethod.put(PUBLISH_PULSE,"publishPulse");
+		methodToByte.put("publishPulse",PUBLISH_PULSE);
 
-		byteToMethod.put(PUBLISH_SERVO_EVENT, "publishServoEvent");
-		methodToByte.put("publishServoEvent", PUBLISH_SERVO_EVENT);
+		byteToMethod.put(PUBLISH_SERVO_EVENT,"publishServoEvent");
+		methodToByte.put("publishServoEvent",PUBLISH_SERVO_EVENT);
 
-		byteToMethod.put(PUBLISH_SESOR_DATA, "publishSesorData");
-		methodToByte.put("publishSesorData", PUBLISH_SESOR_DATA);
+		byteToMethod.put(PUBLISH_SESOR_DATA,"publishSesorData");
+		methodToByte.put("publishSesorData",PUBLISH_SESOR_DATA);
 
-		byteToMethod.put(PUBLISH_STEPPER_EVENT, "publishStepperEvent");
-		methodToByte.put("publishStepperEvent", PUBLISH_STEPPER_EVENT);
+		byteToMethod.put(PUBLISH_STEPPER_EVENT,"publishStepperEvent");
+		methodToByte.put("publishStepperEvent",PUBLISH_STEPPER_EVENT);
 
-		byteToMethod.put(PUBLISH_TRIGGER, "publishTrigger");
-		methodToByte.put("publishTrigger", PUBLISH_TRIGGER);
+		byteToMethod.put(PUBLISH_TRIGGER,"publishTrigger");
+		methodToByte.put("publishTrigger",PUBLISH_TRIGGER);
 
-		byteToMethod.put(PULSE_IN, "pulseIn");
-		methodToByte.put("pulseIn", PULSE_IN);
+		byteToMethod.put(PULSE_IN,"pulseIn");
+		methodToByte.put("pulseIn",PULSE_IN);
 
-		byteToMethod.put(SENSOR_ATTACH, "sensorAttach");
-		methodToByte.put("sensorAttach", SENSOR_ATTACH);
+		byteToMethod.put(SENSOR_ATTACH,"sensorAttach");
+		methodToByte.put("sensorAttach",SENSOR_ATTACH);
 
-		byteToMethod.put(SENSOR_POLLING_START, "sensorPollingStart");
-		methodToByte.put("sensorPollingStart", SENSOR_POLLING_START);
+		byteToMethod.put(SENSOR_POLLING_START,"sensorPollingStart");
+		methodToByte.put("sensorPollingStart",SENSOR_POLLING_START);
 
-		byteToMethod.put(SENSOR_POLLING_STOP, "sensorPollingStop");
-		methodToByte.put("sensorPollingStop", SENSOR_POLLING_STOP);
+		byteToMethod.put(SENSOR_POLLING_STOP,"sensorPollingStop");
+		methodToByte.put("sensorPollingStop",SENSOR_POLLING_STOP);
 
-		byteToMethod.put(SERVO_ATTACH, "servoAttach");
-		methodToByte.put("servoAttach", SERVO_ATTACH);
+		byteToMethod.put(SERVO_ATTACH,"servoAttach");
+		methodToByte.put("servoAttach",SERVO_ATTACH);
 
-		byteToMethod.put(SERVO_DETACH, "servoDetach");
-		methodToByte.put("servoDetach", SERVO_DETACH);
+		byteToMethod.put(SERVO_DETACH,"servoDetach");
+		methodToByte.put("servoDetach",SERVO_DETACH);
 
-		byteToMethod.put(SERVO_SWEEP_START, "servoSweepStart");
-		methodToByte.put("servoSweepStart", SERVO_SWEEP_START);
+		byteToMethod.put(SERVO_SWEEP_START,"servoSweepStart");
+		methodToByte.put("servoSweepStart",SERVO_SWEEP_START);
 
-		byteToMethod.put(SERVO_SWEEP_STOP, "servoSweepStop");
-		methodToByte.put("servoSweepStop", SERVO_SWEEP_STOP);
+		byteToMethod.put(SERVO_SWEEP_STOP,"servoSweepStop");
+		methodToByte.put("servoSweepStop",SERVO_SWEEP_STOP);
 
-		byteToMethod.put(SERVO_WRITE, "servoWrite");
-		methodToByte.put("servoWrite", SERVO_WRITE);
+		byteToMethod.put(SERVO_WRITE,"servoWrite");
+		methodToByte.put("servoWrite",SERVO_WRITE);
 
-		byteToMethod.put(SERVO_WRITE_MICROSECONDS, "servoWriteMicroseconds");
-		methodToByte.put("servoWriteMicroseconds", SERVO_WRITE_MICROSECONDS);
+		byteToMethod.put(SERVO_WRITE_MICROSECONDS,"servoWriteMicroseconds");
+		methodToByte.put("servoWriteMicroseconds",SERVO_WRITE_MICROSECONDS);
 
-		byteToMethod.put(SET_DEBOUNCE, "setDebounce");
-		methodToByte.put("setDebounce", SET_DEBOUNCE);
+		byteToMethod.put(SET_DEBOUNCE,"setDebounce");
+		methodToByte.put("setDebounce",SET_DEBOUNCE);
 
-		byteToMethod.put(SET_DIGITAL_TRIGGER_ONLY, "setDigitalTriggerOnly");
-		methodToByte.put("setDigitalTriggerOnly", SET_DIGITAL_TRIGGER_ONLY);
+		byteToMethod.put(SET_DIGITAL_TRIGGER_ONLY,"setDigitalTriggerOnly");
+		methodToByte.put("setDigitalTriggerOnly",SET_DIGITAL_TRIGGER_ONLY);
 
-		byteToMethod.put(SET_LOAD_TIMING_ENABLED, "setLoadTimingEnabled");
-		methodToByte.put("setLoadTimingEnabled", SET_LOAD_TIMING_ENABLED);
+		byteToMethod.put(SET_LOAD_TIMING_ENABLED,"setLoadTimingEnabled");
+		methodToByte.put("setLoadTimingEnabled",SET_LOAD_TIMING_ENABLED);
 
-		byteToMethod.put(SET_PWMFREQUENCY, "setPWMFrequency");
-		methodToByte.put("setPWMFrequency", SET_PWMFREQUENCY);
+		byteToMethod.put(SET_PWMFREQUENCY,"setPWMFrequency");
+		methodToByte.put("setPWMFrequency",SET_PWMFREQUENCY);
 
-		byteToMethod.put(SET_SAMPLE_RATE, "setSampleRate");
-		methodToByte.put("setSampleRate", SET_SAMPLE_RATE);
+		byteToMethod.put(SET_SAMPLE_RATE,"setSampleRate");
+		methodToByte.put("setSampleRate",SET_SAMPLE_RATE);
 
-		byteToMethod.put(SET_SERIAL_RATE, "setSerialRate");
-		methodToByte.put("setSerialRate", SET_SERIAL_RATE);
+		byteToMethod.put(SET_SERIAL_RATE,"setSerialRate");
+		methodToByte.put("setSerialRate",SET_SERIAL_RATE);
 
-		byteToMethod.put(SET_SERVO_EVENTS_ENABLED, "setServoEventsEnabled");
-		methodToByte.put("setServoEventsEnabled", SET_SERVO_EVENTS_ENABLED);
+		byteToMethod.put(SET_SERVO_EVENTS_ENABLED,"setServoEventsEnabled");
+		methodToByte.put("setServoEventsEnabled",SET_SERVO_EVENTS_ENABLED);
 
-		byteToMethod.put(SET_SERVO_SPEED, "setServoSpeed");
-		methodToByte.put("setServoSpeed", SET_SERVO_SPEED);
+		byteToMethod.put(SET_SERVO_SPEED,"setServoSpeed");
+		methodToByte.put("setServoSpeed",SET_SERVO_SPEED);
 
-		byteToMethod.put(SET_STEPPER_SPEED, "setStepperSpeed");
-		methodToByte.put("setStepperSpeed", SET_STEPPER_SPEED);
+		byteToMethod.put(SET_STEPPER_SPEED,"setStepperSpeed");
+		methodToByte.put("setStepperSpeed",SET_STEPPER_SPEED);
 
-		byteToMethod.put(SET_TRIGGER, "setTrigger");
-		methodToByte.put("setTrigger", SET_TRIGGER);
+		byteToMethod.put(SET_TRIGGER,"setTrigger");
+		methodToByte.put("setTrigger",SET_TRIGGER);
 
-		byteToMethod.put(SOFT_RESET, "softReset");
-		methodToByte.put("softReset", SOFT_RESET);
+		byteToMethod.put(SOFT_RESET,"softReset");
+		methodToByte.put("softReset",SOFT_RESET);
 
-		byteToMethod.put(STEPPER_ATTACH, "stepperAttach");
-		methodToByte.put("stepperAttach", STEPPER_ATTACH);
+		byteToMethod.put(STEPPER_ATTACH,"stepperAttach");
+		methodToByte.put("stepperAttach",STEPPER_ATTACH);
 
-		byteToMethod.put(STEPPER_DETACH, "stepperDetach");
-		methodToByte.put("stepperDetach", STEPPER_DETACH);
+		byteToMethod.put(STEPPER_DETACH,"stepperDetach");
+		methodToByte.put("stepperDetach",STEPPER_DETACH);
 
-		byteToMethod.put(STEPPER_MOVE, "stepperMove");
-		methodToByte.put("stepperMove", STEPPER_MOVE);
+		byteToMethod.put(STEPPER_MOVE_TO,"stepperMoveTo");
+		methodToByte.put("stepperMoveTo",STEPPER_MOVE_TO);
 
-		byteToMethod.put(STEPPER_RESET, "stepperReset");
-		methodToByte.put("stepperReset", STEPPER_RESET);
+		byteToMethod.put(STEPPER_RESET,"stepperReset");
+		methodToByte.put("stepperReset",STEPPER_RESET);
 
-		byteToMethod.put(STEPPER_STEP, "stepperStep");
-		methodToByte.put("stepperStep", STEPPER_STEP);
+		byteToMethod.put(STEPPER_STEP,"stepperStep");
+		methodToByte.put("stepperStep",STEPPER_STEP);
 
-		byteToMethod.put(STEPPER_STOP, "stepperStop");
-		methodToByte.put("stepperStop", STEPPER_STOP);
+		byteToMethod.put(STEPPER_STOP,"stepperStop");
+		methodToByte.put("stepperStop",STEPPER_STOP);
 
-		byteToMethod.put(STOP_SERVICE, "stopService");
-		methodToByte.put("stopService", STOP_SERVICE);
+		byteToMethod.put(STOP_SERVICE,"stopService");
+		methodToByte.put("stopService",STOP_SERVICE);
+
 
 	}
-
-	// static public int instanceCount = 0;
-
+	///// JAVA GENERATED DEFINITION END - DO NOT MODIFY //////
+	
 	static public String byteToMethod(int m) {
 		if (byteToMethod.containsKey(m)) {
 			return byteToMethod.get(m);

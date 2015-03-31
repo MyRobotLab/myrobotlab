@@ -39,7 +39,7 @@ import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED;
 import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SERVO_SPEED;
 import static org.myrobotlab.codec.ArduinoMsgCodec.SET_TRIGGER;
 import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_ATTACH;
-import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_MOVE;
+import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_MOVE_TO;
 import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_RESET;
 import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_STOP;
 
@@ -1455,7 +1455,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 		stepper.setController(this);
 
-		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())) {
+		if (Stepper.STEPPER_TYPE_SIMPLE.equals(stepper.getStepperType())) {
 			// int type = Stepper.STEPPER_TYPE_POLOLU.hashCode(); heh, cool idea
 			// - but byte collision don't want to risk ;)
 			int type = 1;
@@ -1502,14 +1502,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return false;
 	}
 
-	public void stepperMove(String name, Integer newPos) {
+	public void stepperMoveTo(String name, Integer newPos) {
 		if (!steppers.containsKey(name)) {
 			error("%s stepper not found", name);
 			return;
 		}
 
 		StepperControl stepper = steppers.get(name);
-		if (Stepper.STEPPER_TYPE_POLOLU.equals(stepper.getStepperType())) {
+		if (Stepper.STEPPER_TYPE_SIMPLE.equals(stepper.getStepperType())) {
 		} else {
 			error("unknown stepper type");
 			return;
@@ -1518,7 +1518,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		int lsb = newPos & 0xff;
 		int msb = (newPos >> 8) & 0xff;
 
-		sendMsg(STEPPER_MOVE, stepper.getIndex(), msb, lsb);
+		sendMsg(STEPPER_MOVE_TO, stepper.getIndex(), msb, lsb);
 
 		// TODO - call back event - to say arrived ?
 

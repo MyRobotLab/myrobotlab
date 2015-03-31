@@ -222,46 +222,6 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return ret;
 	}
 
-	public static void main(String[] args) {
-		try {
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
-
-			Runtime.start("gui", "GUIService");
-			// Serial serial = (Serial) Runtime.start("serial", "Serial");
-			// serial.test();
-
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			Serial uart = arduino.connectVirtualUART();
-			/*
-			 * Serial serial = arduino.getSerial();
-			 * 
-			 * Serial uart = serial.createVirtualUART();
-			 * arduino.connect(serial.getName());
-			 */
-			// uart.write(39);
-
-			if (!uart.isConnected()) {
-				throw new IOException("not connected!");
-			}
-
-			// USE CASES
-
-			// connect again
-			uart.connect(uart.getPortName());
-
-			/*
-			 * serial.setFormat("arduino"); serial.connectVirtualUART();
-			 */
-
-			// serial.connectTCP("localhost", 9090);
-
-			// serial.connect("COM15");
-			// serial.test();
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	public Serial(String n) {
 		super(n);
@@ -429,7 +389,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			listeners.get(key).onConnect(portName);
 		}
 
-		save(); // successfully bound to port - saving
+		//save(); why?
 		broadcastState();
 		return port;
 	}
@@ -720,7 +680,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public boolean isRecording() {
-		return (outRX != null || outTX != null);
+		boolean ret = (outRX != null && outRX.getOut() != null) || (outTX != null && outTX.getOut() != null);
+		return ret;
 	}
 
 	/**
@@ -984,7 +945,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * 
 	 * @return
 	 */
-	public List<String> refresPorts() {
+	public List<String> refresh() {
 
 		// all current ports
 		portNames.addAll(ports.keySet());
@@ -998,6 +959,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			}
 		}
 
+		broadcastState();
 		return new ArrayList<String>(portNames);
 	}
 
@@ -1097,6 +1059,75 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		stopRecording();
 	}
 
+
+	@Override
+	public String toString() {
+		return String.format("%s->%s", getName(), portName);
+	}
+
+	// write(byte[] b) IOException
+	public void write(byte[] data) throws IOException {
+		for (int i = 0; i < data.length; ++i) {
+			write(data[i]); // recently removed - & 0xFF
+		}
+	}
+
+	// write(int b) IOException
+	public void write(int b) throws IOException {
+		// int newByte = data & 0xFF;
+
+		if (connectedPorts.size() == 0) {
+			error("can not write to a closed port!");
+		}
+
+		for (String portName : connectedPorts.keySet()) {
+			Port writePort = connectedPorts.get(portName);
+			writePort.write(b);
+		}
+
+		// main line TX
+		invoke("publishTX", b);
+
+		++txCount;
+		outTX.write(b);
+	}
+
+	// write(int[] data) throws IOException - not in OutputStream
+	public void write(int[] data) throws IOException {
+		for (int i = 0; i < data.length; ++i) {
+			write(data[i]); // recently removed - & 0xFF
+		}
+	}
+
+	// ============= write methods begin ====================
+	// write(String data) not in OutputStream
+	public void write(String data) throws IOException {
+		write(data.getBytes());
+	}
+
+	// FIXME - change Codec based on file extension !!!
+	// file (formatter/parser) --to--> tx
+	public void writeFile(String filename) {
+		try {
+
+			byte[] fileData = FileIO.fileToByteArray(new File(filename));
+
+			/*
+			 * TODO - ENCODING !!! if (txCodec != null) { // FIXME parse the
+			 * incoming file for (int i = 0; i < fileData.length; ++i) { //
+			 * FIXME - determine what is needed / expected to parse //
+			 * write(txFormatter.parse(fileData[i])); } } else {
+			 */
+			for (int i = 0; i < fileData.length; ++i) {
+				write(fileData[i]);
+			}
+			// }
+
+		} catch (Exception e) {
+			error(e);
+		}
+	}
+	
 	// FIXME !!! - move to Junit !!!
 	@Override
 	public Status test() {
@@ -1127,6 +1158,9 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 
 			// get serial handle and creates a uart & virtual null modem cable
 			Serial serial = (Serial) Runtime.start(getName(), "Serial");
+			serial.setTimeout(timeout);
+			serial.connect("COM15");
+			
 			Serial uart = serial.createVirtualUART();
 
 			// verify the null modem cable is connected
@@ -1143,7 +1177,13 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			uart.record("uart");
 
 			// test blocking on exact size
-			serial.write("VER\r");
+			serial.write(10);
+			serial.write(20);
+			serial.write(30);
+			serial.write(40);
+			serial.write(50);
+			serial.write(60);
+			serial.write(70);
 			uart.write("000D\r");
 			// read back
 			log.info(serial.readString(5));
@@ -1163,6 +1203,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 127, (byte) 128, (byte) 254, (byte) 255 });
 			uart.clear();
 			serial.write("this is the end of the line \n");
+			serial.clear();
+			byte [] blah = serial.readLine();
 			byte[] readBackArray = uart.readLine();
 			log.info(Arrays.toString(readBackArray));
 
@@ -1297,71 +1339,48 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return status;
 	}
 
-	@Override
-	public String toString() {
-		return String.format("%s->%s", getName(), portName);
-	}
 
-	// write(byte[] b) IOException
-	public void write(byte[] data) throws IOException {
-		for (int i = 0; i < data.length; ++i) {
-			write(data[i]); // recently removed - & 0xFF
-		}
-	}
-
-	// write(int b) IOException
-	public void write(int b) throws IOException {
-		// int newByte = data & 0xFF;
-
-		if (connectedPorts.size() == 0) {
-			error("can not write to a closed port!");
-		}
-
-		for (String portName : connectedPorts.keySet()) {
-			Port writePort = connectedPorts.get(portName);
-			writePort.write(b);
-		}
-
-		// main line TX
-		invoke("publishTX", b);
-
-		++txCount;
-		outTX.write(b);
-	}
-
-	// write(int[] data) throws IOException - not in OutputStream
-	public void write(int[] data) throws IOException {
-		for (int i = 0; i < data.length; ++i) {
-			write(data[i]); // recently removed - & 0xFF
-		}
-	}
-
-	// ============= write methods begin ====================
-	// write(String data) not in OutputStream
-	public void write(String data) throws IOException {
-		write(data.getBytes());
-	}
-
-	// FIXME - change Codec based on file extension !!!
-	// file (formatter/parser) --to--> tx
-	public void writeFile(String filename) {
+	public static void main(String[] args) {
 		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			byte[] fileData = FileIO.fileToByteArray(new File(filename));
+			Runtime.start("gui", "GUIService");
+			Serial serial = (Serial) Runtime.start("serial", "Serial");
+			serial.test();
+
+			//Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			//Serial uart = arduino.connectVirtualUART();
+			/*
+			 * Serial serial = arduino.getSerial();
+			 * 
+			 * Serial uart = serial.createVirtualUART();
+			 * arduino.connect(serial.getName());
+			 */
+			// uart.write(39);
 
 			/*
-			 * TODO - ENCODING !!! if (txCodec != null) { // FIXME parse the
-			 * incoming file for (int i = 0; i < fileData.length; ++i) { //
-			 * FIXME - determine what is needed / expected to parse //
-			 * write(txFormatter.parse(fileData[i])); } } else {
-			 */
-			for (int i = 0; i < fileData.length; ++i) {
-				write(fileData[i]);
+			if (!uart.isConnected()) {
+				throw new IOException("not connected!");
 			}
-			// }
 
+			*/
+			
+			// USE CASES
+
+			// connect again
+			//uart.connect(uart.getPortName());
+
+			/*
+			 * serial.setFormat("arduino"); serial.connectVirtualUART();
+			 */
+
+			// serial.connectTCP("localhost", 9090);
+
+			// serial.connect("COM15");
+			// serial.test();
 		} catch (Exception e) {
-			error(e);
+			Logging.logError(e);
 		}
 	}
 

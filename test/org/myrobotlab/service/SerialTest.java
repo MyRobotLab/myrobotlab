@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -9,7 +10,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.myrobotlab.codec.Codec;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -451,8 +450,20 @@ public class SerialTest {
 	}
 
 	@Test
-	public final void testIsRecording() {
-		//fail("Not yet implemented"); // TODO
+	public final void testIsRecording() throws IOException {
+		serial.record("out");
+		assertTrue(serial.isRecording());
+		serial.write(65);
+		serial.write(65);
+		serial.write(65);
+		serial.write(65);
+		serial.write(65);
+		serial.write(65);
+		serial.write(65);
+		serial.write(65);
+		serial.write(65);
+		serial.stopRecording();
+		assertFalse(serial.isRecording());
 	}
 
 	@Test
