@@ -6,6 +6,7 @@ import static com.googlecode.javacv.cpp.opencv_core.cvCreateImage;
 import static com.googlecode.javacv.cpp.opencv_core.cvGetSize;
 import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
 import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
+import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -29,6 +30,7 @@ import com.googlecode.javacv.FrameRecorder;
 import com.googlecode.javacv.OpenCVFrameRecorder;
 import com.googlecode.javacv.OpenKinectFrameGrabber;
 import com.googlecode.javacv.cpp.opencv_core.CvFont;
+import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
@@ -47,7 +49,8 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	public String grabberType = "com.googlecode.javacv.OpenCVFrameGrabber";
 
-	// OpenCVFilter displayFilter = null;
+
+	HashMap<String, Overlay> overlays = new HashMap<String, Overlay>(); 
 
 	// grabber cfg
 	public String format = null;
@@ -124,10 +127,9 @@ public class VideoProcessor implements Runnable, Serializable {
 	 * to be published. In addition to this a specific filter name is needed, if
 	 * the filter name does not exist - input will be displayed
 	 */
-	public boolean publishDisplay = true;
+	public boolean publishDisplay = true;	
 
 	public VideoProcessor() {
-		// parameterless constructor for simple xml
 	}
 
 	public OpenCVFilter addFilter(OpenCVFilter filter) {
@@ -509,6 +511,10 @@ public class VideoProcessor implements Runnable, Serializable {
 								}
 
 								cvPutText(display, frameTitle.toString(), cvPoint(10, 20), font, CvScalar.BLACK);
+								
+								for (Overlay overlay : overlays.values()){
+									cvPutText(display, overlay.text, overlay.pos, overlay.font, overlay.color);
+								}
 							}
 
 						} // end of display processing
@@ -582,6 +588,17 @@ public class VideoProcessor implements Runnable, Serializable {
 	public void setOpencv(OpenCV opencv) {
 		this.opencv = opencv;
 		this.boundServiceName = opencv.getName();
+	}
+	
+	public void putText(int x, int y, String text, int r, int g, int b){
+		CvScalar color = cvScalar( r, g, b, 0 );
+		CvPoint pos = cvPoint(x, y);
+		Overlay overlay = new Overlay(text, pos, color, font);
+		overlays.put(String.format("%d.%d", x,y), overlay);
+	}
+	
+	public void clearText(){
+		overlays.clear();
 	}
 
 	public void showFrameNumbers(boolean b) {
