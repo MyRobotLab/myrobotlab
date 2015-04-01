@@ -113,5 +113,15 @@ public class CodecOutputStream extends OutputStream {
 			codec.clear();
 		}
 	}
+	
+	public void close(){
+		try {
+			if (out != null){
+				out.close();
+			}
+		} catch(Exception e){
+			Logging.logError(e);
+		}
+	}
 
 }

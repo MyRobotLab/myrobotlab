@@ -222,7 +222,6 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return ret;
 	}
 
-
 	public Serial(String n) {
 		super(n);
 		listeners.put(n, this);
@@ -389,7 +388,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			listeners.get(key).onConnect(portName);
 		}
 
-		//save(); why?
+		// save(); why?
 		broadcastState();
 		return port;
 	}
@@ -1012,7 +1011,6 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		outTX.setCodec(key);
 		broadcastState();
 	}
-	
 
 	public void setDTR(boolean state) {
 		port.setDTR(state);
@@ -1045,11 +1043,13 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public void stopRecording() {
-		FileIO.close(outRX);
-		FileIO.close(outTX);
-		outRX = null;
-		outTX = null;
-		broadcastState();
+		try {
+			outRX.close();
+			outTX.close();
+			broadcastState();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 	@Override
@@ -1058,7 +1058,6 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		disconnect();
 		stopRecording();
 	}
-
 
 	@Override
 	public String toString() {
@@ -1127,7 +1126,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			error(e);
 		}
 	}
-	
+
 	// FIXME !!! - move to Junit !!!
 	@Override
 	public Status test() {
@@ -1160,7 +1159,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			Serial serial = (Serial) Runtime.start(getName(), "Serial");
 			serial.setTimeout(timeout);
 			serial.connect("COM15");
-			
+
 			Serial uart = serial.createVirtualUART();
 
 			// verify the null modem cable is connected
@@ -1204,7 +1203,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			uart.clear();
 			serial.write("this is the end of the line \n");
 			serial.clear();
-			byte [] blah = serial.readLine();
+			byte[] blah = serial.readLine();
 			byte[] readBackArray = uart.readLine();
 			log.info(Arrays.toString(readBackArray));
 
@@ -1339,7 +1338,6 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return status;
 	}
 
-
 	public static void main(String[] args) {
 		try {
 			LoggingFactory.getInstance().configure();
@@ -1349,8 +1347,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			Serial serial = (Serial) Runtime.start("serial", "Serial");
 			serial.test();
 
-			//Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			//Serial uart = arduino.connectVirtualUART();
+			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			// Serial uart = arduino.connectVirtualUART();
 			/*
 			 * Serial serial = arduino.getSerial();
 			 * 
@@ -1360,16 +1358,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			// uart.write(39);
 
 			/*
-			if (!uart.isConnected()) {
-				throw new IOException("not connected!");
-			}
+			 * if (!uart.isConnected()) { throw new
+			 * IOException("not connected!"); }
+			 */
 
-			*/
-			
 			// USE CASES
 
 			// connect again
-			//uart.connect(uart.getPortName());
+			// uart.connect(uart.getPortName());
 
 			/*
 			 * serial.setFormat("arduino"); serial.connectVirtualUART();

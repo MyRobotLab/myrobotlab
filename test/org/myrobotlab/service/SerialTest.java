@@ -18,6 +18,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.codec.Codec;
+import org.myrobotlab.codec.DecimalCodec;
+import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -453,17 +455,14 @@ public class SerialTest {
 	public final void testIsRecording() throws IOException {
 		serial.record("out");
 		assertTrue(serial.isRecording());
-		serial.write(65);
-		serial.write(65);
-		serial.write(65);
-		serial.write(65);
-		serial.write(65);
-		serial.write(65);
-		serial.write(65);
-		serial.write(65);
+		int x = 65;
 		serial.write(65);
 		serial.stopRecording();
-		assertFalse(serial.isRecording());
+		assertFalse(!serial.isRecording());
+		
+		String data = FileIO.fileToString("out.tx.dec");
+		DecimalCodec dec = new DecimalCodec(null);
+		assertEquals(dec.decode(x), data);
 	}
 
 	@Test
