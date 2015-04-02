@@ -25,12 +25,12 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvErode;
+import static org.bytedeco.javacpp.opencv_imgproc.cvErode;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterErode extends OpenCVFilter {
 

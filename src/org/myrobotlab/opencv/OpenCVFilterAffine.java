@@ -4,20 +4,21 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.CvBox2D;
-import com.googlecode.javacv.cpp.opencv_core.CvMat;
-import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
-import com.googlecode.javacv.cpp.opencv_core.CvRect;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.CvBox2D;
+import org.bytedeco.javacpp.opencv_core.CvMat;
+import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
+import org.bytedeco.javacpp.opencv_core.CvRect;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
-import static com.googlecode.javacv.cpp.opencv_core.CV_32FC1;
-import static com.googlecode.javacv.cpp.opencv_core.CV_32FC2;
-import static com.googlecode.javacv.cpp.opencv_core.cvCreateMat;
-import static com.googlecode.javacv.cpp.opencv_core.cvSize2D32f;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvBoxPoints;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvWarpAffine;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvBoundingRect;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cv2DRotationMatrix;
+import static org.bytedeco.javacpp.opencv_core.CV_32FC1;
+import static org.bytedeco.javacpp.opencv_core.CV_32FC2;
+import static org.bytedeco.javacpp.opencv_core.cvCreateMat;
+import static org.bytedeco.javacpp.opencv_core.cvSize2D32f;
+import static org.bytedeco.javacpp.opencv_core.cvPoint2D32f;
+import static org.bytedeco.javacpp.opencv_imgproc.cvBoxPoints;
+import static org.bytedeco.javacpp.opencv_imgproc.cvWarpAffine;
+import static org.bytedeco.javacpp.opencv_imgproc.cvBoundingRect;
+import static org.bytedeco.javacpp.opencv_imgproc.cv2DRotationMatrix;
 
 public class OpenCVFilterAffine extends OpenCVFilter {
 
@@ -55,9 +56,14 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 		// TODO : Create the affine filter and return the new image
 		// Find the center of the image
 		
-		CvPoint2D32f center = new CvPoint2D32f(image.width() / 2.0F , image.height() / 2.0F);
-
-	    CvBox2D box = new CvBox2D(center, cvSize2D32f(image.width() - 1, image.height() - 1), angle);
+		CvPoint2D32f center = cvPoint2D32f(image.width() / 2.0F , image.height() / 2.0F);
+		// TODO: test this...
+	    // CvBox2D box = new CvBox2D(center, cvSize2D32f(image.width() - 1, image.height() - 1), angle);
+	    CvBox2D box = new CvBox2D();
+	    box.center(center);
+	    box.size(cvSize2D32f(image.width() - 1, image.height() - 1));
+	    box.angle(angle);
+	    
 	    CvPoint2D32f points = new CvPoint2D32f(4);
 	    cvBoxPoints(box, points);
 	    CvMat pointMat = cvCreateMat(1, 4, CV_32FC2);

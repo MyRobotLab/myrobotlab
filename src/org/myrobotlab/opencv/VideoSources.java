@@ -3,7 +3,7 @@ package org.myrobotlab.opencv;
 import java.util.HashMap;
 import java.util.Set;
 
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 /**
  * @author GroG

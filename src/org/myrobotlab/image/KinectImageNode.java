@@ -1,14 +1,14 @@
 package org.myrobotlab.image;
 
-import static com.googlecode.javacv.cpp.opencv_core.cvResetImageROI;
-import static com.googlecode.javacv.cpp.opencv_core.cvSetImageROI;
+import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
+import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
 
 import java.awt.Rectangle;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.googlecode.javacv.cpp.opencv_core.CvRect;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.CvRect;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class KinectImageNode implements Serializable {
 	private static final long serialVersionUID = 1L;

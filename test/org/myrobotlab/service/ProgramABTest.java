@@ -18,12 +18,11 @@ public class ProgramABTest {
 		testService.startSession(path, session, botName);
 		Response resp = testService.getResponse(session, "time test");
 
-		/* mebbe force it to work faster - for build ? ;)
-		Thread.sleep(61000);
+		Thread.sleep(1000);
 
 		resp = testService.getResponse(session, "BORING TIME");
 		System.out.println(resp.msg);
-		assertEquals("My Default Response 3.", resp.msg);
-		*/
+		// assertEquals("My Default Response 3.", resp.msg);
+
 	}
 }

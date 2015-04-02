@@ -25,25 +25,27 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static com.googlecode.javacv.cpp.opencv_core.CV_RGB;
-import static com.googlecode.javacv.cpp.opencv_core.cvAvg;
-import static com.googlecode.javacv.cpp.opencv_core.cvDrawRect;
-import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
-import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
-import static com.googlecode.javacv.cpp.opencv_core.cvRect;
-import static com.googlecode.javacv.cpp.opencv_core.cvResetImageROI;
-import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
-import static com.googlecode.javacv.cpp.opencv_core.cvSetImageROI;
+import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_core.CV_RGB;
+import static org.bytedeco.javacpp.opencv_core.cvAvg;
+import static org.bytedeco.javacpp.opencv_core.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_core.cvFont;
+import static org.bytedeco.javacpp.opencv_core.cvPutText;
+import static org.bytedeco.javacpp.opencv_core.cvRect;
+import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
+import static org.bytedeco.javacpp.opencv_core.cvScalar;
+import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
+import static org.bytedeco.javacpp.opencv_core.cvInitFont;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.CvFont;
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
-import com.googlecode.javacv.cpp.opencv_core.CvRect;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.CvFont;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvRect;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterAverageColor extends OpenCVFilter {
 
@@ -59,8 +61,8 @@ public class OpenCVFilterAverageColor extends OpenCVFilter {
 	transient CvScalar fillColor = cvScalar(0.0, 0.0, 0.0, 1.0);
 
 	transient CvRect roi = cvRect(100, 40, 200, 100);
-	transient CvPoint p0 = new CvPoint(100, 40);
-	transient CvPoint p1 = new CvPoint(200, 100);
+	transient CvPoint p0 = cvPoint(100, 40);
+	transient CvPoint p1 = cvPoint(200, 100);
 
 	transient CvScalar avg = null;
 
@@ -78,8 +80,14 @@ public class OpenCVFilterAverageColor extends OpenCVFilter {
 	boolean makeGrid = true;
 	boolean publishColorName = false;
 
-	CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
+	
+	CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
+	// CvFont font = new CvFont();
+	//font = cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 0.5f, 1.0f, 0, 1, 8);
+	//cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1, 1);
+
+	
 	final static String[][][] colorNameCube = { { { "black", "navy", "blue" }, { "green", "teal", "bondi blue" }, { "lime", "persian green", "aqua" } },
 			{ { "maroon", "purple", "amethyst" }, { "olive", "gray", "sky blue" }, { "brown", "aquamarine", "pale blue" } },
 			{ { "red", "rose", "fushia" }, { "persimmon", "pink", "plum" }, { "yellow", "apricot", "white" } } };

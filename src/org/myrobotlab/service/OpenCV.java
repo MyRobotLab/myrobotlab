@@ -31,26 +31,27 @@ package org.myrobotlab.service;
 
  static wild card imports for quickly finding static functions in eclipse
  */
- //import static com.googlecode.javacv.cpp.opencv_calib3d.*;
- //import static com.googlecode.javacv.cpp.opencv_contrib.*;
- //import static com.googlecode.javacv.cpp.opencv_core.*;
- import static com.googlecode.javacv.cpp.opencv_features2d.SimpleBlobDetector;
-import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImageM;
- /*import static com.googlecode.javacv.cpp.opencv_flann.*;
- import static com.googlecode.javacv.cpp.opencv_highgui.*;
- import static com.googlecode.javacv.cpp.opencv_imgproc.*;
- import static com.googlecode.javacv.cpp.opencv_legacy.*;
- import static com.googlecode.javacv.cpp.opencv_ml.*;
- import static com.googlecode.javacv.cpp.opencv_nonfree.*;
- import static com.googlecode.javacv.cpp.opencv_objdetect.*;
- import static com.googlecode.javacv.cpp.opencv_photo.*;
- import static com.googlecode.javacv.cpp.opencv_stitching.*;
- import static com.googlecode.javacv.cpp.opencv_video.*;
- import static com.googlecode.javacv.cpp.opencv_videostab.*; */
+ //import static org.bytedeco.javacpp.opencv_calib3d.*;
+ //import static org.bytedeco.javacpp.opencv_contrib.*;
+ //import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_features2d.SimpleBlobDetector;
+import static org.bytedeco.javacpp.opencv_highgui.cvLoadImageM;
+ /*import static org.bytedeco.javacpp.opencv_flann.*;
+ import static org.bytedeco.javacpp.opencv_highgui.*;
+ import static org.bytedeco.javacpp.opencv_imgproc.*;
+ import static org.bytedeco.javacpp.opencv_legacy.*;
+ import static org.bytedeco.javacpp.opencv_ml.*;
+ import static org.bytedeco.javacpp.opencv_nonfree.*;
+ import static org.bytedeco.javacpp.opencv_objdetect.*;
+ import static org.bytedeco.javacpp.opencv_photo.*;
+ import static org.bytedeco.javacpp.opencv_stitching.*;
+ import static org.bytedeco.javacpp.opencv_video.*;
+ import static org.bytedeco.javacpp.opencv_videostab.*; */
 
- //import static com.googlecode.javacv.cpp.opencv_gpu.*;
- //import static com.googlecode.javacv.cpp.opencv_superres.*;
- //import static com.googlecode.javacv.cpp.opencv_ts.*;
+ //import static org.bytedeco.javacpp.opencv_gpu.*;
+ //import static org.bytedeco.javacpp.opencv_superres.*;
+ //import static org.bytedeco.javacpp.opencv_ts.*;
+
 
 
 
@@ -85,20 +86,17 @@ import org.myrobotlab.opencv.OpenCVFilterAnd;
 import org.myrobotlab.opencv.OpenCVFilterCanny;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterSimpleBlobDetector;
+import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.interfaces.VideoSource;
 import org.slf4j.Logger;
-
-import com.googlecode.javacv.FrameGrabber;
-import com.googlecode.javacv.cpp.opencv_core.CvArr;
-import com.googlecode.javacv.cpp.opencv_core.CvMat;
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
-import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
-import com.googlecode.javacv.cpp.opencv_core.CvRect;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
-import com.googlecode.javacv.cpp.opencv_features2d.KeyPoint;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
+import org.bytedeco.javacpp.opencv_core.CvRect;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCV extends VideoSource {
 
@@ -879,18 +877,20 @@ public class OpenCV extends VideoSource {
 		Runtime.start("gui", "GUIService");
 		
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-		
+		opencv.setCameraIndex(0);
 		
 //		opencv.setInputSource("file");
 //		opencv.setInputFileName("c:/test.avi");
 //		opencv.capture();
 		
+		OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
+		opencv.addFilter(tr);
 		//OpenCVFilterSimpleBlobDetector blobDet = new OpenCVFilterSimpleBlobDetector("blobber");
 		//opencv.addFilter(blobDet);
 		
 		//OpenCVFilterAffine affine = new OpenCVFilterAffine("left");
 		//affine.setAngle(45);
-		//opencv.addFilter(affine);
+		// opencv.addFilter(affine);
 //		opencv.test();
 //		
 //		opencv.setFrameGrabberType("org.myrobotlab.opencv.ImageFileFrameGrabber");

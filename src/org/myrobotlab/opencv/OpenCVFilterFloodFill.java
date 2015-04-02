@@ -25,16 +25,17 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.CV_RGB;
-import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvFloodFill;
+import static org.bytedeco.javacpp.opencv_core.CV_RGB;
+import static org.bytedeco.javacpp.opencv_core.cvScalar;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_imgproc.cvFloodFill;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterFloodFill extends OpenCVFilter {
 
@@ -44,7 +45,7 @@ public class OpenCVFilterFloodFill extends OpenCVFilter {
 
 	IplImage buffer = null;
 
-	CvPoint startPoint = new CvPoint(180, 120);
+	CvPoint startPoint = cvPoint(180, 120);
 	CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
 	CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0, 0.5, 1.0);
 	CvScalar up_diff = CV_RGB(20.0, 20.0, 20.0);
@@ -66,7 +67,7 @@ public class OpenCVFilterFloodFill extends OpenCVFilter {
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 		if (startPoint == null) {
-			startPoint = new CvPoint(image.width() / 2, image.height() - 4);
+			startPoint = cvPoint(image.width() / 2, image.height() - 4);
 		}
 
 		// fillColor = cvScalar(255.0, 255.0, 255.0, 1.0);

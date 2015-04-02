@@ -84,14 +84,14 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.CanvasFrame;
-import com.googlecode.javacv.FrameGrabber;
+import org.bytedeco.javacv.CanvasFrame;
+import org.bytedeco.javacv.FrameGrabber;
 
 public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, VideoGUISource, ActionListener {
 
 	static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(OpenCVGUI.class.toString());
-	public String prefixPath = "com.googlecode.javacv.";
+	public String prefixPath = "org.bytedeco.javacv.";
 
 	BasicArrowButton addFilterButton = new BasicArrowButton(BasicArrowButton.EAST);
 	BasicArrowButton removeFilterButton = new BasicArrowButton(BasicArrowButton.WEST);
@@ -157,10 +157,9 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 			String selected = (String) grabberTypeSelect.getSelectedItem();
 
 			if ("IPCamera".equals(selected) || "Pipeline".equals(selected)) {
-
 				prefixPath = "org.myrobotlab.opencv.";
 			} else {
-				prefixPath = "com.googlecode.javacv.";
+				prefixPath = "org.bytedeco.javacv.";
 			}
 
 			vp.grabberType = prefixPath + (String) grabberTypeSelect.getSelectedItem() + "FrameGrabber";

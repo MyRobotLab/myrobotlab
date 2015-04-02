@@ -33,11 +33,11 @@ package org.myrobotlab.opencv;
  *  CV_HSV2BGR_FULL uses full 0 to 255 range
  */
 
-import static com.googlecode.javacv.cpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
-import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_RGB2HSV;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_core.cvPutText;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_RGB2HSV;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
 import java.awt.Graphics;
 import java.nio.ByteBuffer;
@@ -45,9 +45,9 @@ import java.nio.ByteBuffer;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.CvFont;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.CvFont;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterHSV extends OpenCVFilter {
 
@@ -68,7 +68,7 @@ public class OpenCVFilterHSV extends OpenCVFilter {
 	Graphics g = null;
 	String lastHexValueOfPoint = "";
 
-	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
+	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 
 	public OpenCVFilterHSV() {
 		super();

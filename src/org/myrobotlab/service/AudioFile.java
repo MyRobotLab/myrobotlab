@@ -300,12 +300,10 @@ public class AudioFile extends Service {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		try {
-			//VolumeControl.findSpeakers();
-			//VolumeControl.setVolume(0);
-			
+
 			AudioFile af = (AudioFile) Runtime.createAndStart("audio", "AudioFile");
 			af.playFile("C:\\dev\\workspace.kmw\\myrobotlab\\test.mp3", false, false);
-
+			af.setVolume(1.0F);
 			
 			
 			if (false) {

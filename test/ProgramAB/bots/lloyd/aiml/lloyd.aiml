@@ -90,28 +90,23 @@
     </template>  
   </category>
   
-  
+ 
   <category><pattern>TIME TEST</pattern>
-    <template>ok.
-      <think><set name="tswa"><date format="%I:%M" jformat="hh:mm"/></set></think>
+    <template>ok. <set name="tswa"><date jformat="yyyy-MM-dd hh:mm:ss" /></set>
     </template>
   </category>
-
+ 
   <category>
     <pattern>BORING TIME</pattern>
-    <template>
-      <set var="from"><get name="tswa"/></set>
-      <set var="minutes">
+    <template><think><set var="minutes">
         <interval>
-          <jformat>hh:mm</jformat>
-          <style>minutes</style>
-          <from><get var="from"/></from>
-          <to><date jformat="hh:mm"/></to>
+          <jformat>yyyy-MM-dd hh:mm:ss</jformat>
+          <style>seconds</style>
+          <from><get name="tswa"/></from>
+          <to><date jformat="yyyy-MM-dd hh:mm:ss"/></to>
         </interval>
-      </set>
-      I am bored since <get var="minutes"/>
-      <think><set name="tswa"><date format="%I:%M" jformat="hh:mm"/></set></think>
+      </set></think> I am bored since <get var="minutes"/>.
     </template>
-  </category>
+  </category> 
   
 </aiml>

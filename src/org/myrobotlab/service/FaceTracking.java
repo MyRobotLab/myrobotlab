@@ -34,7 +34,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
 
 public class FaceTracking extends Service {
 

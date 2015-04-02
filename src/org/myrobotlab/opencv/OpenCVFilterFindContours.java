@@ -25,22 +25,23 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static com.googlecode.javacv.cpp.opencv_core.cvClearMemStorage;
-import static com.googlecode.javacv.cpp.opencv_core.cvCreateImage;
-import static com.googlecode.javacv.cpp.opencv_core.cvCreateMemStorage;
-import static com.googlecode.javacv.cpp.opencv_core.cvDrawRect;
-import static com.googlecode.javacv.cpp.opencv_core.cvGetSize;
-import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
-import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2GRAY;
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_CHAIN_APPROX_SIMPLE;
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_POLY_APPROX_DP;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvApproxPoly;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvBoundingRect;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvContourPerimeter;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvFindContours;
+import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
+import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
+import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
+import static org.bytedeco.javacpp.opencv_core.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_core.cvFont;
+import static org.bytedeco.javacpp.opencv_core.cvPutText;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_CHAIN_APPROX_SIMPLE;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_POLY_APPROX_DP;
+import static org.bytedeco.javacpp.opencv_imgproc.cvApproxPoly;
+import static org.bytedeco.javacpp.opencv_imgproc.cvBoundingRect;
+import static org.bytedeco.javacpp.opencv_imgproc.cvContourPerimeter;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.javacpp.opencv_imgproc.cvFindContours;
 
 import java.util.ArrayList;
 
@@ -48,15 +49,15 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.Rectangle;
 import org.slf4j.Logger;
 
-import com.googlecode.javacpp.Loader;
-import com.googlecode.javacv.cpp.opencv_core.CvContour;
-import com.googlecode.javacv.cpp.opencv_core.CvFont;
-import com.googlecode.javacv.cpp.opencv_core.CvMemStorage;
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
-import com.googlecode.javacv.cpp.opencv_core.CvRect;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.CvSeq;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.javacpp.opencv_core.CvContour;
+import org.bytedeco.javacpp.opencv_core.CvFont;
+import org.bytedeco.javacpp.opencv_core.CvMemStorage;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvRect;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.CvSeq;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterFindContours extends OpenCVFilter {
 
@@ -64,8 +65,9 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFindContours.class.getCanonicalName());
 
-	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
+	transient CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
+	
 	// FIXME - ok - use awt - use mrl pojo's if expected to serialize to Android
 	// TODO - publish MRL objects - TODO make SerializableImage bundle with
 	// Object map for data publishing
@@ -92,8 +94,8 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 	// transient IplImage display = null;
 	transient IplImage dst = null;
 	transient CvSeq contourPointer = new CvSeq();
-	transient CvPoint drawPoint0 = new CvPoint(0, 0);
-	transient CvPoint drawPoint1 = new CvPoint(0, 0);
+	transient CvPoint drawPoint0 = cvPoint(0, 0);
+	transient CvPoint drawPoint1 = cvPoint(0, 0);
 	transient CvMemStorage cvStorage = null;
 
 	public OpenCVFilterFindContours() {
