@@ -527,6 +527,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		chat.predicates.getPredicateDefaults(sessionPredicateFilename);
 		sessions.put(session, chat);
 
+
 		// lets test if the robot knows the name of the person in the session
 		String name = chat.predicates.get("name").trim();
 		// TODO: this implies that the default value for "name" is default
@@ -537,6 +538,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 			String inputPredicateStream = "name:" + session;
 			// load those predicates
 			chat.predicates.getPredicateDefaultsFromInputStream(IOUtils.toInputStream(inputPredicateStream));
+
 		}
 		String userName = chat.predicates.get("name");
 		log.info("Started session for {} , username {}", session, userName);

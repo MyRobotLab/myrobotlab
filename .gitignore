@@ -2,6 +2,7 @@
 /dist
 /.ivy
 /.myrobotlab
+/.settings
 /update
 /libraries
 /arduino

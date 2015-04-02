@@ -59,15 +59,6 @@
 	<classpathentry kind="lib" path="/repo/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.northwestern.topcodes/1.0/topcodes.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/3.3.0/smack.jar"/>
-	<classpathentry kind="lib" path="/repo/com.googlecode.javacv/0.6/javacpp.jar"/>
-	<classpathentry kind="lib" path="/repo/com.googlecode.javacv/0.6/javacv-windows-x86_64.jar"/>
-	<classpathentry kind="lib" path="/repo/com.googlecode.javacv/0.6/javacv.jar"/>
-	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.6/opencv-2.4.6.0-windows-x86_64.jar"/>
-	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.6/opencv-2.4.6.0-windows-x86.jar"/>
-	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.6/opencv-2.4.6.1-android-arm.jar"/>
-	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.6/opencv-2.4.6.1-linux-x86_64.jar"/>
-	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.6/opencv-2.4.6.1-linux-x86.jar"/>
-	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.6/opencv-2.4.6.1-macosx-x86_64.jar"/>
 	<classpathentry kind="lib" path="/repo/org.java_websocket.websocket/1.2/java_websocket.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-async-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-core-3.0.5.jar"/>
@@ -91,5 +82,9 @@
 	<classpathentry kind="lib" path="/repo/org.junit/4.11/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="/repo/com.google.gson/2.2.4/gson-2.2.4.jar"/>
 	<classpathentry kind="lib" path="/repo/net.java.games.jinput/20120914/jinput.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/0.10/javacpp.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/0.10/javacv.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.10/opencv-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.10/opencv.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -25,28 +25,30 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static com.googlecode.javacv.cpp.opencv_core.CV_RGB;
-import static com.googlecode.javacv.cpp.opencv_core.IPL_DEPTH_32F;
-import static com.googlecode.javacv.cpp.opencv_core.cvCopy;
-import static com.googlecode.javacv.cpp.opencv_core.cvCreateImage;
-import static com.googlecode.javacv.cpp.opencv_core.cvMinMaxLoc;
-import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
-import static com.googlecode.javacv.cpp.opencv_core.cvRectangle;
-import static com.googlecode.javacv.cpp.opencv_core.cvResetImageROI;
-import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
-import static com.googlecode.javacv.cpp.opencv_core.cvSetImageROI;
-import static com.googlecode.javacv.cpp.opencv_core.cvSize;
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_TM_SQDIFF;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvMatchTemplate;
+import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_core.CV_RGB;
+import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_32F;
+import static org.bytedeco.javacpp.opencv_core.cvCopy;
+import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
+import static org.bytedeco.javacpp.opencv_core.cvMinMaxLoc;
+import static org.bytedeco.javacpp.opencv_core.cvPutText;
+import static org.bytedeco.javacpp.opencv_core.cvRectangle;
+import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
+import static org.bytedeco.javacpp.opencv_core.cvScalar;
+import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
+import static org.bytedeco.javacpp.opencv_core.cvSize;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_core.cvFont;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_TM_SQDIFF;
+import static org.bytedeco.javacpp.opencv_imgproc.cvMatchTemplate;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import com.googlecode.javacv.cpp.opencv_core.CvFont;
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
-import com.googlecode.javacv.cpp.opencv_core.CvRect;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacpp.opencv_core.CvFont;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvRect;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 // TODO - http://opencv.willowgarage.com/wiki/FastMatchTemplate
 // FIXME - get template from exterior source
@@ -74,7 +76,7 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 	transient CvPoint tempRect0 = new CvPoint();
 	transient CvPoint tempRect1 = new CvPoint();
 
-	transient CvPoint centeroid = new CvPoint(0, 0);
+	transient CvPoint centeroid = cvPoint(0, 0);
 
 	int clickCount = 0;
 
@@ -82,8 +84,8 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 
 	public CvRect rect = new CvRect();
 	public boolean makeTemplate = false;
-	CvPoint textpt = new CvPoint(10, 20);
-	private CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
+	CvPoint textpt = cvPoint(10, 20);
+	private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
 	public int matchRatio = Integer.MAX_VALUE;
 
@@ -120,8 +122,7 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 			// EXAMINED
 			cvMatchTemplate(image, template, res, CV_TM_SQDIFF);
 			// cvNormalize( ftmp[i], ftmp[i], 1, 0, CV_MINMAX );
-
-			cvMinMaxLoc(res, minVal, maxVal, minLoc, maxLoc, null);
+			cvMinMaxLoc(res, new DoublePointer(minVal), new DoublePointer(maxVal), minLoc, maxLoc, null);
 
 			tempRect0.x(minLoc.x());
 			tempRect0.y(minLoc.y());

@@ -26,34 +26,34 @@
 package org.myrobotlab.opencv;
 
 /*
- import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2HSV;
- import static com.googlecode.javacv.cpp.opencv_imgproc.CV_HAAR_DO_CANNY_PRUNING;
- import static com.googlecode.javacv.cpp.opencv_imgproc.cvHaarDetectObjects;
- import static com.googlecode.javacv.cpp.opencv_core.CV_RGB;
- import static com.googlecode.javacv.cpp.opencv_core.cvClearMemStorage;
- import static com.googlecode.javacv.cpp.opencv_core.cvCreateMemStorage;
- import static com.googlecode.javacv.cpp.opencv_core.cvDrawLine;
- import static com.googlecode.javacv.cpp.opencv_core.cvGetSeqElem;
- import static com.googlecode.javacv.cpp.opencv_core.cvLoad;
- import static com.googlecode.javacv.cpp.opencv_core.cvRectangle;
- import static com.googlecode.javacv.cpp.opencv_core.cvSize;
- import com.googlecode.javacv.cpp.opencv_imgproc.CvHaarClassifierCascade;
- import com.googlecode.javacv.cpp.opencv_core.CvMemStorage;
- import com.googlecode.javacv.cpp.opencv_core.CvPoint;
- import com.googlecode.javacv.cpp.opencv_core.CvRect;
- import com.googlecode.javacv.cpp.opencv_core.CvSeq;
- import com.googlecode.javacv.cpp.opencv_core.IplImage;
+ import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2HSV;
+ import static org.bytedeco.javacpp.opencv_imgproc.CV_HAAR_DO_CANNY_PRUNING;
+ import static org.bytedeco.javacpp.opencv_imgproc.cvHaarDetectObjects;
+ import static org.bytedeco.javacpp.opencv_core.CV_RGB;
+ import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
+ import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
+ import static org.bytedeco.javacpp.opencv_core.cvDrawLine;
+ import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
+ import static org.bytedeco.javacpp.opencv_core.cvLoad;
+ import static org.bytedeco.javacpp.opencv_core.cvRectangle;
+ import static org.bytedeco.javacpp.opencv_core.cvSize;
+ import org.bytedeco.javacpp.opencv_imgproc.CvHaarClassifierCascade;
+ import org.bytedeco.javacpp.opencv_core.CvMemStorage;
+ import org.bytedeco.javacpp.opencv_core.CvPoint;
+ import org.bytedeco.javacpp.opencv_core.CvRect;
+ import org.bytedeco.javacpp.opencv_core.CvSeq;
+ import org.bytedeco.javacpp.opencv_core.IplImage;
  */
 
-import static com.googlecode.javacv.cpp.opencv_core.cvClearMemStorage;
-import static com.googlecode.javacv.cpp.opencv_core.cvCreateMemStorage;
-import static com.googlecode.javacv.cpp.opencv_core.cvDrawRect;
-import static com.googlecode.javacv.cpp.opencv_core.cvGetSeqElem;
-import static com.googlecode.javacv.cpp.opencv_core.cvLoad;
-import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
-import static com.googlecode.javacv.cpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
-import static com.googlecode.javacv.cpp.opencv_objdetect.CV_HAAR_FIND_BIGGEST_OBJECT;
-import static com.googlecode.javacv.cpp.opencv_objdetect.cvHaarDetectObjects;
+import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
+import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
+import static org.bytedeco.javacpp.opencv_core.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
+import static org.bytedeco.javacpp.opencv_core.cvLoad;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_FIND_BIGGEST_OBJECT;
+import static org.bytedeco.javacpp.opencv_objdetect.cvHaarDetectObjects;
 
 import java.util.ArrayList;
 
@@ -61,14 +61,14 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.Rectangle;
 import org.slf4j.Logger;
 
-import com.googlecode.javacpp.Loader;
-import com.googlecode.javacv.cpp.opencv_core.CvMemStorage;
-import com.googlecode.javacv.cpp.opencv_core.CvRect;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.CvSeq;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
-import com.googlecode.javacv.cpp.opencv_objdetect;
-import com.googlecode.javacv.cpp.opencv_objdetect.CvHaarClassifierCascade;
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.javacpp.opencv_core.CvMemStorage;
+import org.bytedeco.javacpp.opencv_core.CvRect;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.CvSeq;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_objdetect;
+import org.bytedeco.javacpp.opencv_objdetect.CvHaarClassifierCascade;
 
 public class OpenCVFilterFaceDetect extends OpenCVFilter {
 

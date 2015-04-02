@@ -1,16 +1,22 @@
 package org.myrobotlab.audio;
 
+import java.util.List;
+
+//import be.tarsos.dsp.AudioEvent;
+//import be.tarsos.dsp.AudioProcessor;
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.JavaSoundAudioDevice;
 
 public class MRLSoundAudioDevice extends JavaSoundAudioDevice {
 
+	
+	//private List<AudioProcessor> audioProcessors = null; 
+	
 	private float gain = 0.1F;
 
 	@Override
-	public void write(short[] paramArrayOfShort, int paramInt1, int paramInt2)
-			throws JavaLayerException {
-		// 
+	public void write(short[] paramArrayOfShort, int paramInt1, int paramInt2) throws JavaLayerException {
+		
 		if (gain == 1.0) {
 			// default behavior
 			super.write(paramArrayOfShort, paramInt1, paramInt2);

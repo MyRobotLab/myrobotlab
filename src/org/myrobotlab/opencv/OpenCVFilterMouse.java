@@ -25,15 +25,17 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.cvCreateImage;
-import static com.googlecode.javacv.cpp.opencv_core.cvDrawLine;
-import static com.googlecode.javacv.cpp.opencv_core.cvGet2D;
-import static com.googlecode.javacv.cpp.opencv_core.cvGetSize;
-import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2GRAY;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvCanny;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvDilate;
+import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
+import static org.bytedeco.javacpp.opencv_core.cvDrawLine;
+import static org.bytedeco.javacpp.opencv_core.cvGet2D;
+import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_core.cvScalar;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCanny;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.javacpp.opencv_imgproc.cvDilate;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,9 +43,9 @@ import java.util.HashMap;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 /*
  * 
@@ -104,9 +106,9 @@ public class OpenCVFilterMouse extends OpenCVFilter {
 	ArrayList<CvPoint> path = new ArrayList<CvPoint>();
 	HashMap<String, CvPoint> unique = new HashMap<String, CvPoint>();
 
-	CvPoint p0 = new CvPoint(0, 0);
+	CvPoint p0 = cvPoint(0, 0);
 
-	CvPoint p1 = new CvPoint(0, 0);
+	CvPoint p1 = cvPoint(0, 0);
 
 	CvScalar pathColor = cvScalar(0.0, 255.0, 0.0, 1.0);
 
@@ -283,7 +285,7 @@ public class OpenCVFilterMouse extends OpenCVFilter {
 				} // switch
 
 			} // while (!doneSweeping)
-			CvPoint p = new CvPoint(mousePos.x(), mousePos.y());
+			CvPoint p = cvPoint(mousePos.x(), mousePos.y());
 			path.add(p);
 			/*
 			 * if (!unique.containsKey(p.toString())) { unique.put(p.toString(),
@@ -374,7 +376,7 @@ public class OpenCVFilterMouse extends OpenCVFilter {
 
 			} // while (!doneSweeping)
 
-			path.add(new CvPoint(mousePos.x(), mousePos.y()));
+			path.add(cvPoint(mousePos.x(), mousePos.y()));
 			if (mousePos.x() == startPoint.x() && mousePos.y() == startPoint.y()) {
 				doneMoving = true;
 			}
@@ -402,8 +404,8 @@ public class OpenCVFilterMouse extends OpenCVFilter {
 		if (startPoint == null) {
 			lastWall = SOUTH; // since we know the mousePos and startPoint are
 								// on the bottom perimeter
-			mousePos = new CvPoint(image.width() / 2, image.height() - 1);
-			startPoint = new CvPoint(image.width() / 2 - 1, image.height() - 1); // put
+			mousePos = cvPoint(image.width() / 2, image.height() - 1);
+			startPoint = cvPoint(image.width() / 2 - 1, image.height() - 1); // put
 																					// start
 																					// point
 																					// left

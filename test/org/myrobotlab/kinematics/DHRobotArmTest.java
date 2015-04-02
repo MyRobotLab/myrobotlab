@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class DHRobotArmTest {
 
-	@Test
+	// @Test
 	public void testDHArm() {
 
 		// distance to common normal
@@ -50,18 +50,21 @@ public class DHRobotArmTest {
 	@Test
 	public void testJacobian() {
 
-		DHRobotArm testArm = createArm();
+		DHRobotArm testArm = createInMoovLeftArm();
 		Matrix jInverse = testArm.getJInverse();
 		System.out.println(jInverse);
-
 		// now, the deltaPosition array has the delta x,y,z coordinates 
 		// what's the instantaneous rate of change for each of those
 		// compute the rate of change for this
 
 		// ok.		
-		testArm.moveToGoal(new Point(0,1,0));
+		testArm.moveToGoal(new Point(50,50,50));
 		
-
+		int i =0;
+		for (DHLink link : testArm.getLinks()) {
+			i++;
+			System.out.println("Link : " + i + " "+ link.getThetaDegrees());
+		}
 	}
 
 
@@ -69,12 +72,35 @@ public class DHRobotArmTest {
 	public DHRobotArm createArm() {
 		DHRobotArm arm = new DHRobotArm();
 		// d , r, theta , alpha
-		
 		DHLink link1 = new DHLink(0, 1, 45*Math.PI/180, 0);
 		arm.addLink(link1);
 		DHLink link2 = new DHLink(0.0, 0.2, 45*Math.PI/180, 90*Math.PI/180);
 		arm.addLink(link2);
-
 		return arm;
 	}
+	
+	
+	public double degToRad(double degrees) {
+		return degrees * Math.PI/180.0;
+	}
+	
+	public DHRobotArm createInMoovLeftArm() {
+		DHRobotArm arm = new DHRobotArm();
+		// d , r, theta , alpha
+		
+		DHLink link1 = new DHLink(200, 100, degToRad(0), degToRad(90));
+		DHLink link2 = new DHLink(0, 100, degToRad(-66), degToRad(-90));
+		DHLink link3 = new DHLink(50, 1, degToRad(47), degToRad(90));
+		DHLink link4 = new DHLink(100, 0, degToRad(-148), degToRad(90));
+		DHLink link5 = new DHLink(0, 100, degToRad(22), degToRad(180));
+		
+		arm.addLink(link1);
+		arm.addLink(link2);
+		arm.addLink(link3);
+		arm.addLink(link4);
+		arm.addLink(link5);
+		
+		return arm;
+	}
+	
 }

@@ -25,7 +25,7 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,8 +34,8 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.CvSize;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.CvSize;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public abstract class OpenCVFilter implements Serializable {
 

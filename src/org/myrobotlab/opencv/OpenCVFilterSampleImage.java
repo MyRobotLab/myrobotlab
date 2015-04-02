@@ -25,8 +25,9 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.cvDrawRect;
-import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
+import static org.bytedeco.javacpp.opencv_core.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_core.cvScalar;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -39,9 +40,9 @@ import javax.imageio.ImageIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterSampleImage extends OpenCVFilter {
 
@@ -97,17 +98,17 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
 		// cvFillPoly( image, pt, arr, 2, random_color(&rng), line_type, 0 );
 
 		// black background
-		CvPoint p0 = new CvPoint(0, 0);
-		CvPoint p1 = new CvPoint(image.width(), image.height());
+		CvPoint p0 = cvPoint(0, 0);
+		CvPoint p1 = cvPoint(image.width(), image.height());
 
 		CvScalar fillColor = cvScalar(0.0, 0.0, 0.0, 1.0);
 		cvDrawRect(image, p0, p1, fillColor, 240, 1, 0);
 
-		p0 = new CvPoint(110, 80);
-		p1 = new CvPoint(150, 130);
+		p0 = cvPoint(110, 80);
+		p1 = cvPoint(150, 130);
 
 		fillColor = cvScalar(0.0, 256.0, 0.0, 0.0);
-		cvDrawRect(image, new CvPoint(160, 120), new CvPoint(164, 124), fillColor, 2, 1, 0);
+		cvDrawRect(image, cvPoint(160, 120), cvPoint(164, 124), fillColor, 2, 1, 0);
 
 		/*
 		 * cvDrawRect(image, p0, p1, fillColor, 2, 1, 0); fillColor =

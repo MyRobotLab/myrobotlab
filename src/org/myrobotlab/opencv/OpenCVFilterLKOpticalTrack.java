@@ -25,33 +25,37 @@
 
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static com.googlecode.javacv.cpp.opencv_core.CV_TERMCRIT_EPS;
-import static com.googlecode.javacv.cpp.opencv_core.CV_TERMCRIT_ITER;
-import static com.googlecode.javacv.cpp.opencv_core.IPL_DEPTH_32F;
-import static com.googlecode.javacv.cpp.opencv_core.cvCircle;
-import static com.googlecode.javacv.cpp.opencv_core.cvCopy;
-import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
-import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
-import static com.googlecode.javacv.cpp.opencv_core.cvSize;
-import static com.googlecode.javacv.cpp.opencv_core.cvTermCriteria;
-import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2GRAY;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvGoodFeaturesToTrack;
-import static com.googlecode.javacv.cpp.opencv_video.cvCalcOpticalFlowPyrLK;
+import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_EPS;
+import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_ITER;
+import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_32F;
+import static org.bytedeco.javacpp.opencv_core.cvCircle;
+import static org.bytedeco.javacpp.opencv_core.cvCopy;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_core.cvScalar;
+import static org.bytedeco.javacpp.opencv_core.cvPutText;
+import static org.bytedeco.javacpp.opencv_core.cvSize;
+import static org.bytedeco.javacpp.opencv_core.cvTermCriteria;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
+import static org.bytedeco.javacpp.opencv_video.cvCalcOpticalFlowPyrLK;
 
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.Point2Df;
 import org.slf4j.Logger;
-
-import com.googlecode.javacv.cpp.opencv_core.CvFont;
-import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.CvSize;
-import com.googlecode.javacv.cpp.opencv_core.CvTermCriteria;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.opencv_core.CvFont;
+import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.CvSize;
+import org.bytedeco.javacpp.opencv_core.CvTermCriteria;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.helper.opencv_core.CvArr;
 
 public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
@@ -102,7 +106,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 	transient IplImage preGrey, grey, eig, tmp, prePyramid, pyramid, swap, mask, image;
 	transient CvPoint2D32f prePoints, points, swapPoints;
 
-	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
+	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 
 	public OpenCVFilterLKOpticalTrack() {
 		super();
@@ -136,7 +140,16 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 			}
 			cvCircle(frame, cvPoint(xPixel, yPixel), 1, CvScalar.GREEN, -1, 8, 0);
 		}
-		cvPutText(frame, String.format("valid %d", pointsToPublish.size()), cvPoint(10, 10), font, CvScalar.GREEN);
+		// TODO: finish JavaCV upgrade
+		String text = String.format("valid %d", pointsToPublish.size());
+		
+		// CvScalar scalar = cvScalar(1.0);
+		// TODO:JavaCV upgrade this isn't worky .. i think the cvPoint is bogus?
+		// cvPutText(frame, text, cvPoint(10, 10), font, CvScalar.GREEN);
+		cvPutText(frame, text, cvPoint(10, 10), font, CvScalar.GREEN);
+		
+		// cvPutText(frame, text, cvPoint(10, 10), font, CvScalar.GREEN);
+		log.info("cvPutText no worky yet..");
 		return frame;
 	}
 
@@ -195,7 +208,9 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
 			if (needTrackingPoints) { // use good features filter ?
 				count[0] = MAX_POINT_COUNT;
-				cvGoodFeaturesToTrack(preGrey, eig, tmp, prePoints, count, 0.05, 5.0, mask, 3, 0, 0.04);
+				IntPointer countPointer = new IntPointer(count);
+				cvGoodFeaturesToTrack(preGrey, eig, tmp, prePoints, countPointer, 0.05, 5.0, mask, 3, 0, 0.04);
+				
 				// why should I find sub-pixel resolution ???
 				// cvFindCornerSubPix(preGrey, prePoints, count[0],
 				// cvSize(win_size, win_size), cvSize(-1, -1),
@@ -214,11 +229,19 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 				}
 
 				// CvPoint2D32f points = new CvPoint2D32f(MAX_POINT_COUNT); //
-				// WTF?
+				// WTF?	
+				CvSize size = cvSize(win_size, win_size);
+				CvTermCriteria termCriteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3); 
 
-				cvCalcOpticalFlowPyrLK(preGrey, grey, null, null, prePoints, points, count[0], cvSize(win_size, win_size), 5, status, error,
-						cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3), 0);
+				// TODO: validate if there's a better way to wrape these objects (introduced in JavaCV upgrade)
+				BytePointer statusPointer = new BytePointer(status);
+				CvTermCriteria cvTermCriteria = new CvTermCriteria(new FloatPointer(termCriteria));
+				FloatPointer errorFP = new FloatPointer(error);
+				
+				// TODO: Validate what the "count" is, this changed from an array to a scalar in the JavaCV upgrade.
+				cvCalcOpticalFlowPyrLK((CvArr)preGrey, (CvArr)grey, null, null, prePoints, points, count[0], size, 5, statusPointer, errorFP, cvTermCriteria, 0);
 
+				CvArr grayArray = grey;
 				/*
 				 * getting ready to publish - so let's use Pojos - not JNI
 				 * OpenCV nor Swing because remote consumers may not have those

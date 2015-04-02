@@ -1,12 +1,12 @@
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImage;
+import static org.bytedeco.javacpp.opencv_highgui.cvLoadImage;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.FrameGrabber;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class ImageFileFrameGrabber extends FrameGrabber {
 

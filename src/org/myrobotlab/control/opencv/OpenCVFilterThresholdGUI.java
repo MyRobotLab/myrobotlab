@@ -49,19 +49,14 @@ public class OpenCVFilterThresholdGUI extends OpenCVFilterGUI {
 
 		@Override
 		public void stateChanged(ChangeEvent e) {
-
-			OpenCVFilterCanny bf = (OpenCVFilterCanny) boundFilter.filter;
-
+			OpenCVFilterThreshold bf = (OpenCVFilterThreshold) boundFilter.filter;
 			JSlider2 slider = (JSlider2) e.getSource();
-
 			if (slider.getName().equals("lowThreshold")) {
 				bf.lowThreshold = slider.getValue();
 			} else if (slider.getName().equals("lowThreshold")) {
 				bf.highThreshold = slider.getValue();
 			}
-
 			slider.value.setText("" + slider.getValue());
-
 			setFilterState(bf);
 		}
 	}

@@ -26,24 +26,24 @@
 // http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static com.googlecode.javacv.cpp.opencv_core.cvCircle;
-import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
-import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
+import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_core.cvCircle;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_core.cvPutText;
 
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.Point2Df;
 import org.slf4j.Logger;
-
-import com.googlecode.javacv.cpp.opencv_core.CvFont;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
-import com.googlecode.javacv.cpp.opencv_core.MatVector;
-import com.googlecode.javacv.cpp.opencv_features2d.KeyPoint;
-import com.googlecode.javacv.cpp.opencv_features2d.KeyPointVectorVector;
-import com.googlecode.javacv.cpp.opencv_features2d.SimpleBlobDetector;
+import org.bytedeco.javacpp.opencv_core.CvFont;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_core.MatVector;
+import org.bytedeco.javacpp.opencv_features2d.KeyPoint;
+import org.bytedeco.javacpp.opencv_features2d.KeyPointVectorVector;
+import org.bytedeco.javacpp.opencv_features2d.SimpleBlobDetector;
 
 public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 
@@ -52,7 +52,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSimpleBlobDetector.class.getCanonicalName());
 
 	public ArrayList<Point2Df> pointsToPublish = new ArrayList<Point2Df>();
-	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
+	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 	
 	public OpenCVFilterSimpleBlobDetector()  {
 		super();
@@ -76,7 +76,8 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 
 		// TODO: i'd like to detect all the points at once..  
 		// can i pass an array or something like that?  hmm.
-		o.detect(image, point, null);
+		// TODO: this is null?! we blow up! (after javacv upgrade)
+		o.detect(new Mat(image), point);
 		
 		//System.out.println(point.toString());
 		float x = point.pt().x();
@@ -88,7 +89,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 		// pointsToPublish.clear();
 		// min distance to an existing point ?
 		// up to 25 pixels away?
-		double minDist = 10.0;
+		double minDist = 20.0;
 		// Is this a new blob? or an old blob?
 		boolean dupPoint = false;
 		for (Point2Df p : pointsToPublish) {
@@ -125,7 +126,9 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 			//}
 			cvCircle(frame, cvPoint(xPixel, yPixel), 5, CvScalar.GREEN, -1, 8, 0);
 		}
-		cvPutText(frame, String.format("valid %d", pointsToPublish.size()), cvPoint(10,10), font, CvScalar.GREEN);
+		//cvPutText(frame, String.format("valid %d", pointsToPublish.size()), cvPoint(10,10), font, CvScalar.GREEN);
+		//cvPutText(frame, String.format("valid %d", pointsToPublish.size()), cvPoint(10,10), font, CvScalar.GREEN);
+		log.info("cvPutText is no worky yet, until JavaCV upgrade is done..");
 		return frame;
 	}
 
@@ -133,6 +136,10 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 	public void imageChanged(IplImage image) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void clearPoints() {
+		pointsToPublish.clear();
 	}
 
 }

@@ -1,12 +1,21 @@
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static com.googlecode.javacv.cpp.opencv_core.cvCopy;
-import static com.googlecode.javacv.cpp.opencv_core.cvCreateImage;
-import static com.googlecode.javacv.cpp.opencv_core.cvGetSize;
-import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
-import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
-import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
+import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_core.cvCopy;
+import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
+import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_core.cvPutText;
+import static org.bytedeco.javacpp.opencv_core.cvScalar;
+
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.FrameRecorder;
+import org.bytedeco.javacv.OpenCVFrameRecorder;
+import org.bytedeco.javacv.OpenKinectFrameGrabber;
+import org.bytedeco.javacpp.opencv_core.CvFont;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -25,14 +34,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.FrameGrabber;
-import com.googlecode.javacv.FrameRecorder;
-import com.googlecode.javacv.OpenCVFrameRecorder;
-import com.googlecode.javacv.OpenKinectFrameGrabber;
-import com.googlecode.javacv.cpp.opencv_core.CvFont;
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 public class VideoProcessor implements Runnable, Serializable {
 
@@ -47,7 +48,7 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	public String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
 
-	public String grabberType = "com.googlecode.javacv.OpenCVFrameGrabber";
+	public String grabberType = "org.bytedeco.javacv.OpenCVFrameGrabber";
 
 
 	HashMap<String, Overlay> overlays = new HashMap<String, Overlay>(); 
@@ -66,8 +67,10 @@ public class VideoProcessor implements Runnable, Serializable {
 	// GRABBER END --------------------------
 	// DEPRECATED - always use blocking queue
 	// public boolean useBlockingData = false;
-	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
-
+	//transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
+	// TODO: JavaCV upgrade, this changed?
+	transient CvFont font = new CvFont();
+  
 	// DEPRECATED deemed a bad idea - non blocking
 	// use getOpenCVData
 	// OpenCVData lastData = null;
@@ -509,10 +512,11 @@ public class VideoProcessor implements Runnable, Serializable {
 								if (showTimestamp) {
 									frameTitle.append(System.currentTimeMillis());
 								}
-
 								cvPutText(display, frameTitle.toString(), cvPoint(10, 20), font, CvScalar.BLACK);
-								
+								// TODO: re-enable this as part of the JavaCV upgrade
+								log.info("cvPutText ignored.. javacv upgrade not done yet...");
 								for (Overlay overlay : overlays.values()){
+									// TODO: figure out why cvPutText is no worky in JavaCV 0.10
 									cvPutText(display, overlay.text, overlay.pos, overlay.font, overlay.color);
 								}
 							}

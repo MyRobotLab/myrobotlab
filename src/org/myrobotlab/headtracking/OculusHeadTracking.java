@@ -49,7 +49,7 @@ public class OculusHeadTracking implements Runnable, Serializable {
 	  		
 	  		try {
 	  			// TODO: should we have a minor pause here?
-				Thread.sleep(1);
+				Thread.sleep(20);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

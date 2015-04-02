@@ -1,6 +1,6 @@
 package org.myrobotlab.opencv;
 
-import static com.googlecode.javacv.cpp.opencv_highgui.cvEncodeImage;
+import static org.bytedeco.javacpp.opencv_highgui.cvEncodeImage;
 import static org.myrobotlab.opencv.VideoProcessor.INPUT_KEY;
 
 import java.awt.image.BufferedImage;
@@ -24,8 +24,8 @@ import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.data.Rectangle;
 import org.slf4j.Logger;
 
-import com.googlecode.javacv.cpp.opencv_core.CvMat;
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.CvMat;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 /**
  * This is the data returned from a single pass of an OpenCV pipeline of
