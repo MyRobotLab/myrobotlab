@@ -40,10 +40,10 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
 import org.bytedeco.javacv.ObjectFinder;
 import org.bytedeco.javacv.ObjectFinder.Settings;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.CvSize;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterSURF extends OpenCVFilter {
@@ -85,24 +85,46 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 
 		IplImage objectColor = IplImage.create(object.width(), object.height(), 8, 3);
 		cvCvtColor(object, objectColor, CV_GRAY2BGR);
-
-		// a new image to hold the side by side comparison
-		IplImage correspond = IplImage.create(image.width(), object.height() + image.height(), 8, 1);
-		cvSetImageROI(correspond, cvRect(0, 0, object.width(), object.height()));
-		cvCopy(object, correspond);
-		cvSetImageROI(correspond, cvRect(0, object.height(), correspond.width(), correspond.height()));
 		
+		
+		// object is now black and white
 		IplImage imageBW = IplImage.create(image.width(), image.height(),8,1);
 		cvCvtColor(image, imageBW, CV_BGR2GRAY);
+		// image bw is now black and white		
+		
+
+		// a new image to hold the side by side comparison
+		int correspondWidth = image.width() + object.width();
+		int correspondHeight = Max(image.height(), object.height());
+		
+		// Create a new image to hold the object and the image side by side
+		IplImage correspond = IplImage.create(correspondWidth, correspondHeight, 8, 1);
+
+//		IplImage correspond = IplImage.create(Max(image.width(), object.width()), object.height() + image.height(), 8, 1);
+		
+		// Copy the object to be found into the corresponding image
+		cvSetImageROI(correspond, cvRect(0, 0, object.width(), object.height()));
+		cvCopy(object, correspond);
+		
+//		cvSetImageROI(correspond, cvRect(0, object.height(), correspondWidth, correspondHeight));
+		// Copy the image to the corresponding 
+		
+		cvSetImageROI(correspond, cvRect(object.width(), 0, image.width(), image.height()));
+	
+//		cvSetImageROI(correspond, cvRect(0, object.width(), imageBW.width(), imageBW.height()));
 		cvCopy(imageBW, correspond);
+		// 
 		cvResetImageROI(correspond);
 
 		// set up the object finder
 		// TOOD: potentially re-use this finder object?
-		ObjectFinder.Settings settings = new ObjectFinder.Settings();
-		settings.setObjectImage(object);
-		settings.setUseFLANN(true);
-		settings.setRansacReprojThreshold(5);
+		if (settings == null) {
+			ObjectFinder.Settings settings = new ObjectFinder.Settings();
+			settings.setObjectImage(object);
+			settings.setUseFLANN(true);
+			settings.setRansacReprojThreshold(5);
+			settings.setHessianThreshold(50);
+		}
 		ObjectFinder finder = new ObjectFinder(settings);
 
 		// grab a timestamp
@@ -112,16 +134,39 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 		double[] dst_corners = finder.find(image);
 		log.info("Finding time = " + (System.currentTimeMillis() - start) + " ms");
 
-		if (dst_corners != null) {
+		if (dst_corners != null && dst_corners.length > 0) {
+			log.info("DIST CORNER SIZE :" + dst_corners.length);
 			// TODO: add a callback
-			for (int i = 0; i < 4; i++) {
-				int j = (i + 1) % 4;
-				int x1 = (int) Math.round(dst_corners[2 * i]);
-				int y1 = (int) Math.round(dst_corners[2 * i + 1]);
-				int x2 = (int) Math.round(dst_corners[2 * j]);
-				int y2 = (int) Math.round(dst_corners[2 * j + 1]);
-				cvLine(correspond, cvPoint(x1, y1 + object.height()), cvPoint(x2, y2 + object.height()), CvScalar.WHITE, 1, 8, 0);
+			// TODO: add this info the the  CVData
+			int pointCount = 0;
+			for (int i = 0; i < dst_corners.length; ) {
+				pointCount +=1;
+				// TODO: any idea what the heck?!
+				if (i+3 >= dst_corners.length) {
+					log.warn("Unexpected size of point array.");
+					break;
+				}
+				// Points in the object  ?
+				int x1 = (int) Math.round(dst_corners[i]);
+				int y1 = (int) Math.round(dst_corners[i+1]);
+				
+				// points in the video ?
+				int x2 = (int) Math.round(dst_corners[i+2]);
+				int y2 = (int) Math.round(dst_corners[i+3]);
+
+				//				int x1 = (int) Math.round(dst_corners[2 * i]);
+//				int y1 = (int) Math.round(dst_corners[2 * i + 1]);
+//				int x2 = (int) Math.round(dst_corners[2 * j]);
+//				int y2 = (int) Math.round(dst_corners[2 * j + 1]);
+				// TODO: draw a line on the new corresponding image ?				
+//				cvLine(correspond, cvPoint(x1, y1 + object.height()), cvPoint(x2, y2 + object.height()), CvScalar.WHITE, 1, 8, 0);
+				cvLine(correspond, cvPoint(x1, y1), cvPoint(x2+object.width(), y2), CvScalar.WHITE, 1, 8, 0);
+                // increment the loop counter
+				i+=4;				
 			}
+			log.info("Found " + pointCount + " correlated points of interest.");
+		} else {
+			log.info("No Object Found in video.");
 		}
 
 		// TODO: what additional info do we get from the obj finder?
@@ -149,6 +194,14 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 		// correspondFrame.dispose();
 
 		return correspond;
+	}
+
+	private int Max(int a, int b) {
+		// TODO Auto-generated method stub
+		if (a > b){
+			return a;
+		} 
+		return b;
 	}
 
 	/**
