@@ -67,7 +67,6 @@ import org.myrobotlab.service.interfaces.SensorDataPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.StepperControl;
 import org.myrobotlab.service.interfaces.StepperController;
 import org.slf4j.Logger;
 
@@ -158,13 +157,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	/**
-	 * FIXME - implement ! :)
+	 * MRLComm --> Arduino
+	 * Data from MRLComm.ino for a stepper stepper Event
 	 */
-	class StepperData implements Serializable {
+	class StepperEvent implements Serializable {
 		private static final long serialVersionUID = 1L;
-		transient ServoControl servo = null;
-		Integer pin = null;
-		int servoIndex = -1;
+		int stepperIndex = -1;
 	}
 
 	public Sketch sketch;
@@ -223,9 +221,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	ArrayList<Pin> pinList = null;
 
 	// data and mapping for data going from MRL ---to---> Arduino
-	HashMap<String, StepperControl> steppers = new HashMap<String, StepperControl>();
+	HashMap<String, Stepper> steppers = new HashMap<String, Stepper>();
 	// index for data mapping going from Arduino ---to---> MRL
-	HashMap<Integer, StepperControl> stepperIndex = new HashMap<Integer, StepperControl>();
+	HashMap<Integer, Stepper> stepperIndex = new HashMap<Integer, Stepper>();
 
 	// data and mapping for data going from MRL ---to---> Arduino
 	HashMap<String, SensorData> sensors = new HashMap<String, SensorData>();
@@ -739,7 +737,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					// TODO - stepper ServoControl interface - not
 					// needed Servo is abstraction enough
 					Stepper stepper = (Stepper) stepperIndex.get(index);
-					stepper.invoke("publishStepperEvent", currentPos);
+					//stepper.invoke("publishStepperEvent", currentPos);
+					// LOCAL !!! - Remote from Arduino or Stepper ?!?!?
+					// ?? stepper.publishStepperEvent(currentPos);
+					stepper.setPos(currentPos);
 					break;
 				}
 
@@ -905,7 +906,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return data;
 	}
 
-	public StepperData publishStepperEvent(StepperData data) {
+	public StepperEvent publishStepperEvent(StepperEvent data) {
 		return data;
 	}
 
@@ -1381,7 +1382,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		broadcastState();
 	}
 
-	@Override
 	public void setStepperSpeed(Integer speed) {
 		// TODO Auto-generated method stub
 
@@ -1437,47 +1437,38 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		}
 	}
 
-	@Override
-	public boolean stepperAttach(StepperControl stepper) {
+	public boolean stepperAttach(Stepper stepper) {
 		String stepperName = stepper.getName();
 		log.info(String.format("stepperAttach %s", stepperName));
-		Integer index = 0;
-
-		if (serial == null) {
-			error("could not attach stepper - no serial device!");
+		
+		if (!isConnected()){
+			error("%s must be connected to serial port before attaching stepper", getName());
 			return false;
 		}
+		
+		int index = 0;
 
 		if (steppers.containsKey(stepperName)) {
-			log.warn("stepper already attach - detach first");
-			return false;
+			warn("stepper already attach - detach first");
+			return true;
 		}
 
 		stepper.setController(this);
 
-		if (Stepper.STEPPER_TYPE_SIMPLE.equals(stepper.getStepperType())) {
-			// int type = Stepper.STEPPER_TYPE_POLOLU.hashCode(); heh, cool idea
-			// - but byte collision don't want to risk ;)
-			int type = 1;
-
+		if (Stepper.STEPPER_TYPE_SIMPLE == stepper.getStepperType()) {
+			
 			// simple count = index mapping
 			index = steppers.size();
 
-			Integer[] pins = stepper.getPins();
-			if (pins.length != 2) {
-				error("Pololu stepper needs 2 pins defined - direction pin & step pin");
-				return false;
-			}
-
 			// attach index pin
-			sendMsg(STEPPER_ATTACH, index, type, pins[0], pins[1]);
+			sendMsg(STEPPER_ATTACH, index, stepper.getStepperType(), stepper.getDirPin(), stepper.getStepPin());
 
 			stepper.setIndex(index);
 
 			steppers.put(stepperName, stepper);
 			stepperIndex.put(index, stepper);
 
-			log.info(String.format("stepper STEPPER_TYPE_POLOLU index %d pin direction %d step %d attached ", index, pins[0], pins[1]));
+			log.info(String.format("stepper STEPPER_TYPE_SIMPLE index %d pin direction %d step %d attached ", index, stepper.getDirPin(), stepper.getStepPin()));
 		} else {
 			error("unkown type of stepper");
 			return false;
@@ -1497,20 +1488,26 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public boolean stepperDetach(String name) {
-		// TODO Auto-generated method stub
+	public boolean stepperDetach(String stepperName) {
+		Stepper stepper = null;
+		if (steppers.containsKey(stepperName)){
+			stepper = steppers.remove(stepperName);
+			if (stepperIndex.containsKey(stepper.getIndex())){
+				stepperIndex.remove(stepper.getIndex());
+				return true;
+			}
+		}
 		return false;
 	}
 
-	public void stepperMoveTo(String name, Integer newPos) {
+	public void stepperMoveTo(String name, int newPos, int style) {
 		if (!steppers.containsKey(name)) {
 			error("%s stepper not found", name);
 			return;
 		}
 
-		StepperControl stepper = steppers.get(name);
-		if (Stepper.STEPPER_TYPE_SIMPLE.equals(stepper.getStepperType())) {
-		} else {
+		Stepper stepper = steppers.get(name);
+		if (Stepper.STEPPER_TYPE_SIMPLE != stepper.getStepperType()) {
 			error("unknown stepper type");
 			return;
 		}
@@ -1518,7 +1515,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		int lsb = newPos & 0xff;
 		int msb = (newPos >> 8) & 0xff;
 
-		sendMsg(STEPPER_MOVE_TO, stepper.getIndex(), msb, lsb);
+		sendMsg(STEPPER_MOVE_TO, stepper.getIndex(), msb, lsb, style);
 
 		// TODO - call back event - to say arrived ?
 
@@ -1528,24 +1525,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	@Override
 	public void stepperReset(String stepperName) {
-		StepperControl stepper = steppers.get(stepperName);
+		Stepper stepper = steppers.get(stepperName);
 		sendMsg(STEPPER_RESET, stepper.getIndex());
 	}
 
-	@Override
-	public void stepperStep(String name, Integer steps) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void stepperStep(String name, Integer steps, Integer style) {
-		// TODO Auto-generated method stub
-
-	}
-
 	public void stepperStop(String name) {
-		StepperControl stepper = steppers.get(name);
+		Stepper stepper = steppers.get(name);
 		sendMsg(STEPPER_STOP, stepper.getIndex());
 	}
 

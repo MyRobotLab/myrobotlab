@@ -512,7 +512,7 @@ public class VideoProcessor implements Runnable, Serializable {
 								if (showTimestamp) {
 									frameTitle.append(System.currentTimeMillis());
 								}
-								cvPutText(display, frameTitle.toString(), cvPoint(10, 20), font, CvScalar.BLACK);
+								cvPutText(display, frameTitle.toString(), cvPoint(200, 200), font, CvScalar.BLACK);
 								// TODO: re-enable this as part of the JavaCV upgrade
 								log.info("cvPutText ignored.. javacv upgrade not done yet...");
 								for (Overlay overlay : overlays.values()){

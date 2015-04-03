@@ -23,7 +23,6 @@ import org.myrobotlab.service.interfaces.ArduinoShield;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.service.interfaces.StepperControl;
 import org.myrobotlab.service.interfaces.StepperController;
 import org.slf4j.Logger;
 
@@ -140,6 +139,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		try {
+			// FIXME !!! - don't use Adafruit's library - do your own stepper control through "pure" MRLComm.ino
 			AdafruitMotorShield fruity = (AdafruitMotorShield) Runtime.createAndStart("fruity", "AdafruitMotorShield");
 			Runtime.createAndStart("gui01", "GUIService");
 
@@ -150,11 +150,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 
 			// create a 200 step stepper on adafruitsheild port 1
 			Stepper stepper1 = fruity.createStepper(200, 1);
-
-			// step 100 in one direction
-			stepper1.step(100);
-			// step 100 in the other
-			stepper1.step(-100);
 
 			// FIXME - needs to be cleaned up - tear down
 			fruity.releaseStepper(stepper1.getName());
@@ -441,30 +436,8 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	}
 
 	@Override
-	public boolean stepperAttach(StepperControl stepperControl) {
-		Integer[] data = stepperControl.getPins();
-		if (data.length != 1 || data[0].getClass() != Integer.class) {
-			error("Adafruit stepper needs 1 Integers to specify port");
-			return false;
-		}
-
-		Stepper stepper = (Stepper) stepperControl; // FIXME - only support
-													// stepper at the moment ..
-													// so not a big deal ... yet
-													// :P
-		Integer stepperPort = data[0];
-		if (arduino == null || !arduino.isConnected()) {
-			error(String.format("can not attach servo %s before Arduino %s is connected", stepper.getName(), getName()));
-			return false;
-		}
-		stepper.setController(this);
-		stepper.broadcastState();
-
-		steppers.put(stepper.getName(), stepper);
-		arduino.sendMsg(AF_STEPPER_ATTACH, stepperControl.getSteps(), stepperPort);
-		deviceNameToNumber.put(stepper.getName(), stepperPort);
-		arduino.sendMsg(AF_STEPPER_SET_SPEED, stepperPort, 10); // default to 10
-																// rpm
+	public boolean stepperAttach(Stepper stepper) {
+		// TODO - USE "PURE" MRLCOMM.INO - nothing gained with Adafruit's library
 
 		return true;
 	}
@@ -489,28 +462,21 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 
 	}
 
-	@Override
-	// FIXME DEPRECATE !!!! - use method with style
-	public void stepperStep(String name, Integer steps) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void stepperStep(String name, Integer inSteps, Integer style) {
-
-		if (inSteps < 0) {
-			direction = BACKWARD;
-		} else {
-			direction = FORWARD;
-		}
-		step = Math.abs(inSteps);
-		arduino.sendMsg(AF_STEPPER_STEP, deviceNameToNumber.get(name), step >> 8 & 0xFF, step & 0xFF, direction, style);
-	}
-
 	public void stop(Integer motorPortNumber) {
 		// setSpeed(motorNumber, speed);
 		run(motorPortNumber, RELEASE);
+	}
+
+	@Override
+	public void stepperMoveTo(String name, int pos, int style) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stepperStop(String name) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

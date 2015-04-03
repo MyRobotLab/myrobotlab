@@ -22,11 +22,19 @@ public class ArduinoBindingsGenerator {
 
 	static TreeMap<String, Method> sorted = new TreeMap<String, Method>();
 
-	static StringBuilder ino = new StringBuilder("///// INO GENERATED DEFINITION BEGIN //////\n");
+	static StringBuilder inoTemplate = new StringBuilder("///// INO GENERATED DEFINITION BEGIN //////\n");
+	static StringBuilder pythonTemplate = new StringBuilder("##### PYTHON GENERATED DEFINITION BEGIN ######\n");
 
 	static StringBuilder javaDefines = new StringBuilder("\t///// java ByteToMethod generated definition - DO NOT MODIFY - Begin //////\n");
 	static StringBuilder javaBindingsInit = new StringBuilder();
 
+	/**
+	 * called for each method - java method is the "source" of reflected data
+	 * so all method context code should be generated in this function
+	 * 
+	 * @param key
+	 * @param index
+	 */
 	public static void createBindingsFor(String key, int index) {
 
 		Method method = sorted.get(key);
@@ -37,20 +45,28 @@ public class ArduinoBindingsGenerator {
 		}
 
 		String methodSignatureComment = String.format("// {%s} \n", msb.toString());
+		String pythonSignatureComment = String.format("  # {%s} \n", msb.toString());
 
-		ino.append(methodSignatureComment);
+		inoTemplate.append(methodSignatureComment);
+		pythonTemplate.append(pythonSignatureComment);
 		String underscore = Encoder.toUnderScore(method.getName());
-		ino.append(String.format("#define %s\t\t%d\n\n", underscore, index));
+		inoTemplate.append(String.format("#define %s\t\t%d\n\n", underscore, index));
+		pythonTemplate.append(String.format("  %s = %d\n\n", underscore, index));
 
 		javaDefines.append(String.format("\t%s", methodSignatureComment));
 		javaDefines.append(String.format("\tpublic final static int %s =\t\t%d;\n\n", underscore, index));
 		javaBindingsInit.append(String.format("\t\tbyteToMethod.put(%s,\"%s\");\n", underscore, method.getName()));
 		javaBindingsInit.append(String.format("\t\tmethodToByte.put(\"%s\",%s);\n\n", method.getName(), underscore));
-		// javaByteToMethod.append(String.format("\tmethodToByte.put(%d,\"%s\");\n\n",
-		// index, method.getName()));
-
+		
 	}
 
+	/**
+	 * master method which gets source material for generating msg bindings
+	 * - the source is the Arduino class itself - its method should have a 
+	 * near 1 to 1 relation to the msgs sent to and from MRLComm.ino
+	 * These msgs are examined and msg bindings are created
+	 * @throws IOException
+	 */
 	public static void generateDefinitions() throws IOException {
 
 		HashMap<String, String> snr = new HashMap<String, String>();
@@ -148,28 +164,34 @@ public class ArduinoBindingsGenerator {
 			// log.info(); // hmmm "class someclass" :(
 		}
 
-		ino.append("///// INO GENERATED DEFINITION END //////\n");
+		inoTemplate.append("///// INO GENERATED DEFINITION END //////\n");
+		inoTemplate.append("##### PYTHON GENERATED DEFINITION END #####\n");
 
 		snr.put("<%=java.defines%>", javaDefines.toString());
 		snr.put("<%=java.bindings.init%>", javaBindingsInit.toString());
-		snr.put("<%=mrlcomm.defines%>", ino.toString());
-
-		log.info(ino.toString());
+		snr.put("<%=mrlcomm.defines%>", inoTemplate.toString());
+		snr.put("<%=python.defines%>", pythonTemplate.toString());
+		
+		log.info(inoTemplate.toString());
 		log.info(javaBindingsInit.toString());
 
 		// file template filtering
-		String ArduinoMsgCodec = FileIO.resourceToString("Arduino/ArduinoMsgCodec.txt");
+		String java = FileIO.resourceToString("Arduino/ArduinoMsgCodec.txt");
+		String python = FileIO.resourceToString("Arduino/pythonTemplate.txt");
 		String MRLComm = FileIO.resourceToString("Arduino/MRLComm.txt");
 
+		// merge data with template
 		for (String key : snr.keySet()) {
-			ArduinoMsgCodec = ArduinoMsgCodec.replace(key, snr.get(key));
 			log.info(snr.get(key));
+			java = java.replace(key, snr.get(key));
+			python = python.replace(key, snr.get(key));
 			MRLComm = MRLComm.replace(key, snr.get(key));
-			// MRLComm = MRLComm.replaceAll(key, snr.get(key));
 		}
 
-		FileIO.stringToFile("ArduinoMsgCodec.out.txt", ArduinoMsgCodec);
-		FileIO.stringToFile("MRLComm.out.txt", MRLComm);
+		long ts = System.currentTimeMillis();
+		FileIO.stringToFile(String.format("ArduinoMsgCodec.%d.py", ts), python);
+		FileIO.stringToFile(String.format("ArduinoMsgCodec.%d.java", ts), java);
+		FileIO.stringToFile(String.format("ArduinoMsgCodec.%d.ino", ts), MRLComm);
 
 		// String ret = String.format("%s\n\n%s", ino.toString(),
 		// java.toString());

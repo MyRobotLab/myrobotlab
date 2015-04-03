@@ -27,14 +27,10 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.ArrayList;
 
+import org.myrobotlab.service.Stepper;
 import org.myrobotlab.service.data.Pin;
 
 public interface StepperController {
-
-	public final Integer STYLE_SINGLE = 1;
-	public final Integer STYLE_DOUBLE = 2;
-	public final Integer STYLE_INTERLEAVE = 3;
-	public final Integer STYLE_MICROSTEP = 4;
 
 	public String getName();
 
@@ -47,18 +43,30 @@ public interface StepperController {
 	 */
 	public ArrayList<Pin> getPinList();
 
+	/**
+	 * set the stepper speed
+	 * @param speed
+	 */
 	public void setStepperSpeed(Integer speed);
 
-	public boolean stepperAttach(StepperControl stepper);
+	/**
+	 * attach stepper to controller via reference
+	 * @param stepper
+	 * @return
+	 */
+	public boolean stepperAttach(Stepper stepper);
 
+	/**
+	 * attach stepper to control by name
+	 * @param stepperName
+	 * @return
+	 */
 	public boolean stepperAttach(String stepperName);
 
 	/**
-	 * StepperDetach - detach the Stepper from a specific pin on the controller
-	 * 
+	 * detatch the stepper from the controller - reset resources
 	 * @param name
-	 *            - name of the Stepper
-	 * @return void
+	 * @return
 	 */
 	public boolean stepperDetach(String name);
 
@@ -73,25 +81,19 @@ public interface StepperController {
 	public void stepperReset(String stepper);
 
 	/**
-	 * stepperStep - move stepper an increment
+	 * the basic stepper motor movement control
 	 * 
 	 * @param name
-	 *            - name of the Stepper
-	 * @param position
-	 *            - positive to turn one direction, negative to turn the other
-	 * @return void
+	 * @param pos
+	 * @param style
 	 */
-	public void stepperStep(String name, Integer steps);
+	public void stepperMoveTo(String name, int pos, int style);
 
 	/**
-	 * stepperStep - move stepper an increment
+	 * immediate stop command
 	 * 
 	 * @param name
-	 * @param steps
-	 * @param style
-	 *            - style of stepping STYLE_SINGLE STYLE_DOUBLE STYLE_INTERLEAVE
-	 *            STYLE_MICROSTEP
 	 */
-	public void stepperStep(String name, Integer steps, Integer style);
+	public void stepperStop(String name);
 
 }
