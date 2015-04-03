@@ -30,6 +30,7 @@ import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_core.cvCircle;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_core.cvPutText;
+import static org.bytedeco.javacpp.opencv_core.cvInitFont;
 
 import java.util.ArrayList;
 
@@ -40,9 +41,7 @@ import org.bytedeco.javacpp.opencv_core.CvFont;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.MatVector;
 import org.bytedeco.javacpp.opencv_features2d.KeyPoint;
-import org.bytedeco.javacpp.opencv_features2d.KeyPointVectorVector;
 import org.bytedeco.javacpp.opencv_features2d.SimpleBlobDetector;
 
 public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
@@ -52,17 +51,19 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSimpleBlobDetector.class.getCanonicalName());
 
 	public ArrayList<Point2Df> pointsToPublish = new ArrayList<Point2Df>();
-	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
+	transient CvFont font = new CvFont();
 	
 	public OpenCVFilterSimpleBlobDetector()  {
 		super();
+		cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1.0, 1.0);
 	}
 	
 	public OpenCVFilterSimpleBlobDetector(String name)  {
 		super(name);
+		// TODO: what / when should we initialize this ?
+		cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1.0, 1.0);
 	}
 	
-
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 
@@ -126,9 +127,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 			//}
 			cvCircle(frame, cvPoint(xPixel, yPixel), 5, CvScalar.GREEN, -1, 8, 0);
 		}
-		//cvPutText(frame, String.format("valid %d", pointsToPublish.size()), cvPoint(10,10), font, CvScalar.GREEN);
-		//cvPutText(frame, String.format("valid %d", pointsToPublish.size()), cvPoint(10,10), font, CvScalar.GREEN);
-		log.info("cvPutText is no worky yet, until JavaCV upgrade is done..");
+		cvPutText(frame, String.format("Blobs Found: %d", pointsToPublish.size()), cvPoint(20,40), font, CvScalar.GREEN);
 		return frame;
 	}
 
@@ -140,6 +139,10 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 	
 	public void clearPoints() {
 		pointsToPublish.clear();
+	}
+	
+	public int getNumberOfBlobs() {
+		return pointsToPublish.size();
 	}
 
 }

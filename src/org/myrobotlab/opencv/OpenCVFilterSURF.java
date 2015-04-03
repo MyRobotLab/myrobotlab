@@ -35,6 +35,7 @@ import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
 import static org.bytedeco.javacpp.opencv_highgui.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_highgui.cvLoadImage;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_GRAY2BGR;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -51,7 +52,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSURF.class.getCanonicalName());
 	public Settings settings = new Settings();
-	public ObjectFinder objectFinder = new ObjectFinder(settings);
+	public ObjectFinder objectFinder = null;
 	private IplImage object = null;
 
 	public OpenCVFilterSURF() {
@@ -71,6 +72,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 	public void loadObjectImageFilename(String filename) {
 		IplImage object = cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE);
 		this.setObjectImage(object);
+		this.objectFinder = new ObjectFinder(settings);
 	}
 
 	@Override
@@ -89,7 +91,10 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 		cvSetImageROI(correspond, cvRect(0, 0, object.width(), object.height()));
 		cvCopy(object, correspond);
 		cvSetImageROI(correspond, cvRect(0, object.height(), correspond.width(), correspond.height()));
-		cvCopy(image, correspond);
+		
+		IplImage imageBW = IplImage.create(image.width(), image.height(),8,1);
+		cvCvtColor(image, imageBW, CV_BGR2GRAY);
+		cvCopy(imageBW, correspond);
 		cvResetImageROI(correspond);
 
 		// set up the object finder
@@ -152,6 +157,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 	 * @param image
 	 */
 	public void setObjectImage(IplImage image) {
+		this.object = image;
 		settings.setObjectImage(image);
 	}
 

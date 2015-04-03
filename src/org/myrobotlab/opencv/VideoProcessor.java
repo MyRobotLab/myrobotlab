@@ -7,7 +7,7 @@ import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_core.cvPutText;
 import static org.bytedeco.javacpp.opencv_core.cvScalar;
-
+import static org.bytedeco.javacpp.opencv_core.cvInitFont;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.OpenCVFrameRecorder;
@@ -133,6 +133,7 @@ public class VideoProcessor implements Runnable, Serializable {
 	public boolean publishDisplay = true;	
 
 	public VideoProcessor() {
+		cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1, 1);		
 	}
 
 	public OpenCVFilter addFilter(OpenCVFilter filter) {
@@ -512,11 +513,10 @@ public class VideoProcessor implements Runnable, Serializable {
 								if (showTimestamp) {
 									frameTitle.append(System.currentTimeMillis());
 								}
-								cvPutText(display, frameTitle.toString(), cvPoint(200, 200), font, CvScalar.BLACK);
-								// TODO: re-enable this as part of the JavaCV upgrade
-								log.info("cvPutText ignored.. javacv upgrade not done yet...");
+								// log.info("Adding text: " + frameTitle.toString());
+								cvPutText(display, frameTitle.toString(), cvPoint(20, 20), font, CvScalar.BLACK);
 								for (Overlay overlay : overlays.values()){
-									// TODO: figure out why cvPutText is no worky in JavaCV 0.10
+									// log.info("Overlay text:" + overlay.text);
 									cvPutText(display, overlay.text, overlay.pos, overlay.font, overlay.color);
 								}
 							}

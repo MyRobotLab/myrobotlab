@@ -35,7 +35,6 @@ package org.myrobotlab.service;
  //import static org.bytedeco.javacpp.opencv_contrib.*;
  //import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_features2d.SimpleBlobDetector;
-import static org.bytedeco.javacpp.opencv_highgui.cvLoadImageM;
  /*import static org.bytedeco.javacpp.opencv_flann.*;
  import static org.bytedeco.javacpp.opencv_highgui.*;
  import static org.bytedeco.javacpp.opencv_imgproc.*;
@@ -51,6 +50,7 @@ import static org.bytedeco.javacpp.opencv_highgui.cvLoadImageM;
  //import static org.bytedeco.javacpp.opencv_gpu.*;
  //import static org.bytedeco.javacpp.opencv_superres.*;
  //import static org.bytedeco.javacpp.opencv_ts.*;
+
 
 
 
@@ -85,6 +85,7 @@ import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
 import org.myrobotlab.opencv.OpenCVFilterCanny;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterSURF;
 import org.myrobotlab.opencv.OpenCVFilterSimpleBlobDetector;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.opencv.VideoProcessor;
@@ -140,7 +141,7 @@ public class OpenCV extends VideoSource {
 	public static String VALID_FILTERS[] = { "Affine", "And", "AverageColor", "Canny", "CreateHistogram", "ColorTrack", "Detector", "Dilate", "Erode", "FGBG", "FaceDetect", "Fauvist",
 			"FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2", "HSV", "InRange", "KinectDepth", "KinectDepthMask",
 			"KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr",
-			"ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split", "Threshold", "Transpose" };
+			"ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split", "SURF", "Threshold", "Transpose" };
 
 	// yep its public - cause a whole lotta data
 	// will get set on it before a setState
@@ -882,11 +883,17 @@ public class OpenCV extends VideoSource {
 //		opencv.setInputSource("file");
 //		opencv.setInputFileName("c:/test.avi");
 //		opencv.capture();
-		
-		OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
-		opencv.addFilter(tr);
-		//OpenCVFilterSimpleBlobDetector blobDet = new OpenCVFilterSimpleBlobDetector("blobber");
-		//opencv.addFilter(blobDet);
+		//OpenCVFilterSURF surf = new OpenCVFilterSURF("surf");
+		//String filename = "c:/dev/workspace.kmw/myrobotlab/lloyd.png";
+		//String filename = "c:/dev/workspace.kmw/myrobotlab/kw.jpg";
+		//surf.settings.setHessianThreshold(400);
+		//surf.loadObjectImageFilename(filename);
+		//opencv.addFilter(surf);
+
+		//OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
+		// opencv.addFilter(tr);
+		OpenCVFilterSimpleBlobDetector blobDet = new OpenCVFilterSimpleBlobDetector("blobber");
+		opencv.addFilter(blobDet);
 		
 		//OpenCVFilterAffine affine = new OpenCVFilterAffine("left");
 		//affine.setAngle(45);
