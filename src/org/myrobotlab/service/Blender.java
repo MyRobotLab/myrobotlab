@@ -192,7 +192,7 @@ public class Blender extends Service {
 			info("onAttach - Blender is ready to attach serial device %s", name);
 			// FIXME - more general case determined by "Type"
 			ServiceInterface si = Runtime.getService(name);
-			if ("Arduino".equals(si.getType())) {
+			if ("org.myrobotlab.service.Arduino".equals(si.getType())) {
 				// FIXME - make more general - "any" Serial device !!!
 				Arduino arduino = (Arduino) Runtime.getService(name);
 				if (arduino != null) {

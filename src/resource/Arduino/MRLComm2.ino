@@ -92,7 +92,7 @@
 // {pulseIn int int int String}
 #define PULSE_IN		23
 
-// {sensorAttach UltrasonicSensor} 
+// {sensorAttach UltrasonicSensor}
 #define SENSOR_ATTACH		24
 
 // {sensorPollingStart String int}
@@ -104,7 +104,7 @@
 // {servoAttach Servo Integer}
 #define SERVO_ATTACH		27
 
-// {servoDetach String} 
+// {servoDetach String}
 #define SERVO_DETACH		28
 
 // {servoSweepStart String int int int}
@@ -158,7 +158,7 @@
 // {stepperDetach String}
 #define STEPPER_DETACH		45
 
-// {stepperMoveTo String Integer} 
+// {stepperMoveTo String Integer}
 #define STEPPER_MOVE_TO		46
 
 // {stepperReset String}
@@ -177,12 +177,10 @@
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
 
-
-#define STEPPER_EVENT_STOP				1
-
 #define STEPPER_TYPE_SIMPLE  			1
 
-#define CUSTOM_MSG						50
+// ------ event types ------
+#define STEPPER_EVENT_STOP				1
 
 // servo event types
 #define  SERVO_EVENT_STOPPED			1
@@ -191,17 +189,20 @@
 // error types
 #define ERROR_SERIAL					1
 #define ERROR_UNKOWN_CMD				2
+#define ERROR_ALREADY_EXISTS			3
+#define ERROR_DOES_NOT_EXIST			4
 
-// sensor types
+// ------ error types ------
 #define SENSOR_ULTRASONIC				1
 
+#define CUSTOM_MSG						50
 
 // need a method to identify type of board
 // http://forum.arduino.cc/index.php?topic=100557.0
 
 #define COMMUNICATION_RESET	   252
 #define SOFT_RESET			   253
-#define NOP  255
+#define NOP  				   255
 
 // ----------  MRLCOMM FUNCTION INTERFACE END -----------
 
@@ -274,18 +275,23 @@ typedef struct
   {
   	  int ts;
       int type;
-      int index;
+      int index; // is this redundant?
       int currentPos;
       int targetPos;
       int speed;
-      int dir;
-      bool isRunning;
-      int state;
-      // int dirPin;
-      int step0; // step0 is dirPin is POLOLU TYPE
-      int step1;
-      int step2;
-      int step3;
+      int dir; // not needed ? dirPin or currentPos - targetPos keeps state
+      bool isRunning; // don't need this if compare currentPos with targetPos
+
+      int dirPin;
+      int stepPin;
+
+	  // support up to 5 wire steppers
+      int pin0;
+      int pin1;
+      int pin2;
+      int pin3;
+      int pin4;
+
   }  stepper_type;
 
 stepper_type steppers[STEPPERS_MAX];
@@ -365,8 +371,6 @@ int analogReadPin[ANALOG_PIN_COUNT];          // array of pins to read from
 int analogReadPollingPinCount = 0;            // number of pins currently reading
 int lastAnalogInputValue[ANALOG_PIN_COUNT];   // array of last input values
 bool analogTriggerOnly = false;         // send data back only if its different
-
-unsigned int errorCount = 0;
 
 //---- data record definitions begin -----
 
@@ -488,13 +492,55 @@ void setPWMFrequency (int address, int prescalar)
 
 }
 
-void removeAndShift (int array [], int& len, int removeValue)
+/**
+ * checks the existance of the searched value in the array
+ * - good for not adding to a dynamic list of values if it
+ * already exists
+ */
+bool exists(int array[], int len, int searchValue){
+	for (int i = 0; i < len; ++i)
+	{
+		if (searchValue == array[i])
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * adds new value to a pseudo dynamic array/list
+ * if successful - if value already exists on list
+ * sends back an error
+ */
+bool addNewValue(int array[], int& len, int addValue)
 {
+	if (exists(array, len, addValue)){
+		array[len] = addValue;
+		++len;
+		return true;
+	} else {
+		sendError(ERROR_ALREADY_EXISTS);
+		return false;
+	}
+}
+
+
+bool removeAndShift (int array [], int& len, int removeValue)
+{
+	if (!exists(array, len, removeValue)){
+		sendError(ERROR_DOES_NOT_EXIST);
+		return false;
+	}
+
 	int pos = -1;
 
 	if (len == 0)
 	{
-		return;
+		// "should" never happen
+		// would be calling remove on an empty list
+		// the error ERROR_DOES_NOT_EXIST - "should" be called
+		return true;
 	}
 
 	// find position of value
@@ -510,7 +556,7 @@ void removeAndShift (int array [], int& len, int removeValue)
 	if (pos == len - 1)
 	{
 		--len;
-		return;
+		return true;
 	}
 
 	// if found somewhere else shift left
@@ -522,6 +568,8 @@ void removeAndShift (int array [], int& len, int removeValue)
 		}
 		--len;
 	}
+
+	return true;
 }
 
 boolean getCommand ()
@@ -536,7 +584,6 @@ boolean getCommand ()
 		// checking first byte - beginning of message?
 		if (byteCount == 1 && newByte != MAGIC_NUMBER)
 		{
-			++errorCount;
 			sendError(ERROR_SERIAL);
 
 			// reset - try again
@@ -682,28 +729,26 @@ void loop () {
 		}
 
 		case ANALOG_READ_POLLING_START:{
-			analogReadPin[analogReadPollingPinCount] = ioCmd[1]; // put on polling read list
-			// TODO - if POLLING ALREADY DON'T RE-ADD - MAKE RE-ENTRANT - if already set don't increment
-			++analogReadPollingPinCount;
+			int pin = ioCmd[1];
+			addNewValue(analogReadPin, analogReadPollingPinCount, pin);
 			break;
 		}
 
 		case ANALOG_READ_POLLING_STOP:{
-			// TODO - MAKE RE-ENRANT
-			removeAndShift(analogReadPin, analogReadPollingPinCount, ioCmd[1]);
+			int pin = ioCmd[1];
+			removeAndShift(analogReadPin, analogReadPollingPinCount, pin);
 			break;
 		}
 
 		case DIGITAL_READ_POLLING_START:{
-			// TODO - MAKE RE-ENRANT
-			digitalReadPin[digitalReadPollingPinCount] = ioCmd[1]; // put on polling read list
-			++digitalReadPollingPinCount;
+			int pin = ioCmd[1];
+			addNewValue(digitalReadPin, digitalReadPollingPinCount, pin);
 			break;
 		}
 
 		case DIGITAL_READ_POLLING_STOP:{
-			// TODO - MAKE RE-ENRANT
-			removeAndShift(digitalReadPin, digitalReadPollingPinCount, ioCmd[1]);
+			int pin = ioCmd[1];
+			removeAndShift(digitalReadPin, digitalReadPollingPinCount, pin);
 			break;
 		}
 
@@ -826,18 +871,19 @@ void loop () {
 			break;
 		}
 
-		case STEPPER_MOVE:{
+		/* absolute position - not relative */
+		case STEPPER_MOVE_TO:{
 			stepper_type& stepper = steppers[ioCmd[1]];
 			if (stepper.type == STEPPER_TYPE_SIMPLE) {
-				stepper.isRunning = true;
+				//stepper.isRunning = true;
 
 				stepper.targetPos = stepper.currentPos + (ioCmd[2]<<8) + ioCmd[3];
 				// relative position & direction
 				if (stepper.targetPos < 0) {
 					// direction
-					digitalWrite(stepper.step0, 1);
+					digitalWrite(stepper.dirPin, 1);
 				} else {
-					digitalWrite(stepper.step0, 0);
+					digitalWrite(stepper.dirPin, 0);
 				}
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
@@ -878,7 +924,7 @@ void loop () {
 			break;
 		}
 */
-
+		// used by ultrasonic sensor
 		case SENSOR_ATTACH:{
 			int sensorIndex = ioCmd[1];
 			sensor_type& sensor = sensors[sensorIndex];
@@ -1124,7 +1170,7 @@ void loop () {
 	// TODO - brake - speed - fractional stepping - other stepper types
 	for (int i = 0; i < STEPPERS_MAX; ++i) {
 		stepper_type& stepper = steppers[i];
-		if (stepper.isRunning == true){
+		if (stepper.currentPos != stepper.targetPos){
 			if (stepper.type == STEPPER_TYPE_SIMPLE){
 
 				// direction is already set in initial STEPPER_MOVE
@@ -1146,9 +1192,11 @@ void loop () {
 
 					stepper.currentPos--;
 
-				} else {
-					stepper.isRunning = false;
-					stepper.currentPos = stepper.targetPos; // forcing ? :P
+				}
+
+				if (stepper.currentPos == stepper.targetPos){
+					//stepper.isRunning = false;
+					// stepper.currentPos = stepper.targetPos; // forcing ? :P
 					Serial.write(MAGIC_NUMBER);
 					Serial.write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
 					Serial.write(PUBLISH_STEPPER_EVENT);
@@ -1162,6 +1210,7 @@ void loop () {
 		}
 	}
 
+	// FIXME - fix overflow with getDiff() method !!!
 	unsigned long now = micros();
 	loadTime = now - lastMicros; // avg outside
  	lastMicros = now;

@@ -1,6 +1,6 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author GroG
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -30,16 +30,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.StepperControl;
 import org.myrobotlab.service.interfaces.StepperController;
-import org.slf4j.Logger;
 
 /**
  * @author GroG
@@ -51,36 +47,28 @@ import org.slf4j.Logger;
  *         H-bridges output
  * 
  */
-public class Stepper extends Service implements StepperControl {
+public class Stepper extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Stepper.class.toString());
-
 	private boolean isAttached = false;
-	// TODO - publishQueueStats - rpm other ???
 	private boolean locked = false; // for locking the motor in a stopped
 
-	// position
+	// needs to be int for dumb controller
+	public final static int STEPPER_TYPE_SIMPLE = 1;
+
+	public final Integer STEP_STYLE_SINGLE = 1;
+	public final Integer STEP_STYLE_DOUBLE = 2;
+	public final Integer STEP_STYLE_INTERLEAVE = 3;
+	public final Integer STEP_STYLE_MICROSTEP = 4;
+
 	/**
 	 * controller index for events & controllers to dumb to have dynamic string
 	 * based containers
 	 */
 	private Integer index;
 
-	// Constants that the user passes in to the motor calls
-	public static final Integer FORWARD = 1;
-									public static final Integer BACKWARD = 2;
-	public static final Integer BRAKE = 3;
-	public static final Integer RELEASE = 4;
-
-	// Constants that the user passes in to the stepper calls
-	public static final Integer SINGLE = 1;
-	public static final Integer DOUBLE = 2;
-	public static final Integer INTERLEAVE = 3;
-	public static final Integer MICROSTEP = 4;
-
-	private Integer stepperingStyle = SINGLE;
+	private Integer style = STEP_STYLE_SINGLE;
 
 	transient BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
 
@@ -89,48 +77,26 @@ public class Stepper extends Service implements StepperControl {
 	 */
 	private Integer steps;
 
-	private String type;
+	private int type = STEPPER_TYPE_SIMPLE;
 
-	private Integer currentPos = 0;
+	private int currentPos = 0;
 
-	private StepperController controller = null; // board name
-
-	static final public String STEPPER_TYPE_SIMPLE = "STEPPER_TYPE_POLOLU";
+	private StepperController controller = null;
 
 	/**
-	 * step pins this can vary in size 2 for Pololu (dir & step) , 3, 4, 5, ...
-	 * if more than one - they must be in the correct stepping order
+	 * based on stepper type - pin configuration may vary
 	 */
-	private Integer[] pins; // this data is "shared" with the controller
+	int stepPin;
+	int dirPin;
 
-	/**
-	 * direction pin is used for Pololu stype stepper drivers with a direction
-	 * input
-	 */
-
-	// TODO - generalize
-	private transient Arduino arduino;
+	// support up to 5 wire steppers
+	int pin0;
+	int pin1;
+	int pin2;
+	int pin3;
+	int pin4;
 
 	private boolean isBlockingOnStop = false;
-
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		// put peer definitions in
-		// TODO - generalize
-		peers.put("arduino", "Arduino", "arduino");
-		return peers;
-	}
-
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		Stepper stepper = (Stepper) Runtime.start("stepper", "Stepper");
-		stepper.test();
-
-	}
 
 	public Stepper(String n) {
 		super(n);
@@ -142,37 +108,20 @@ public class Stepper extends Service implements StepperControl {
 	// benefit
 	// of the "publishRange" method being affected by the Sensor service e.g.
 	// change units, sample rate, etc
+	// TODO - isLocal() - determine local callback or pub/sub
 	public void addPublishStepperEventListener(Service service) {
 		addListener("publishStepperEvent", service.getName(), "publishStepperEvent", Integer.class);
 	}
 
-	public boolean attach(Arduino arduino, String port, String type, Integer... pins) throws IOException {
-		this.arduino = arduino;
-		this.type = type;
-		this.pins = pins;
-
-		this.arduino.connect(port);
-		return arduino.stepperAttach(this);
+	public boolean attach(StepperController controller, int dirPin, int stepPin) throws IOException {
+		this.type = STEPPER_TYPE_SIMPLE;
+		this.controller = controller;
+		this.dirPin = dirPin;
+		this.stepPin = stepPin;
+		isAttached = controller.stepperAttach(this);
+		return isAttached;
 	}
 
-	public boolean attach(String port, Integer... pins) throws IOException {
-		return attach((String) null, port, pins);
-	}
-
-	public boolean attach(String arduino, String port, Integer... pins) throws IOException {
-		return attach(this.arduino, port, STEPPER_TYPE_SIMPLE, pins);
-	}
-
-	private void attached(boolean isAttached) {
-		this.isAttached = isAttached;
-		broadcastState();
-	}
-
-	boolean connect(String port) {
-		return arduino.connect(port);
-	}
-
-	@Override
 	public boolean detach() {
 		if (controller == null) {
 			return false;
@@ -181,7 +130,6 @@ public class Stepper extends Service implements StepperControl {
 		return true;
 	}
 
-	@Override
 	public String[] getCategories() {
 		return new String[] { "motor", "control" };
 	}
@@ -194,83 +142,88 @@ public class Stepper extends Service implements StepperControl {
 		return null;
 	}
 
-	@Override
 	public String getDescription() {
 		return "general motor service";
 	}
 
-	@Override
 	public Integer getIndex() {
 		return index;
 	}
 
-	@Override
-	public Integer[] getPins() {
-		return pins;
-	}
-
-	@Override
-	public String getStepperType() {
+	public int getStepperType() {
 		return type;
 	}
 
-	@Override
 	public int getSteps() {
 		return steps;
 	}
 
-	@Override
 	public boolean isAttached() {
 		return isAttached;
 	}
 
-	@Override
 	public void lock() {
 		log.info("lock");
 		locked = true;
 	}
 
 	public void moveTo(int newPos) {
-		this.arduino.stepperMoveTo(getName(), newPos);
-	}
-
-	public Integer moveToBlocking(Integer newPos) {
-		try {
-
-			isBlockingOnStop = true;
+		if (!isBlockingOnStop) {
+			controller.stepperMoveTo(getName(), newPos, style);
+		} else {
 			blockingData.clear();
-
 			moveTo(newPos);
-			Integer gotTo = (Integer) blockingData.poll(10000, TimeUnit.MILLISECONDS);
-			return gotTo;
-		} catch (Exception e) {
-			Logging.logError(e);
-			return null;
+			try {
+				// Integer gotTo = (Integer) blockingData.poll(10000,
+				// TimeUnit.MILLISECONDS);
+				currentPos = (Integer) blockingData.take();
+			} catch (Exception e) { // don't care
+			}
 		}
 	}
 
-	// excellent pattern - put in interface
+	/**
+	 * sets move to block if desired - this will block current thread on a
+	 * moveTo command until the position is reached
+	 * 
+	 * @param block
+	 */
+	public void setBlocking(boolean block) {
+		isBlockingOnStop = block;
+	}
+
+	/*
 	public Integer publishStepperEvent(Integer currentPos) {
 		log.info(String.format("publishStepperEvent %s %d", getName(), currentPos));
+		this.currentPos = currentPos;
+		return currentPos;
+	}
+	
+	public Integer publishStepperStop(Integer currentPos){
+		log.info(String.format("publishStepperStop %s %d", getName(), currentPos));
 		this.currentPos = currentPos;
 		if (isBlockingOnStop) {
 			blockingData.add(currentPos);
 		}
 		return currentPos;
 	}
+	*/
+	
+	public int getPos(){
+		return currentPos;
+	}
 
 	public void reset() {
+		stop();
+		currentPos = 0;
 		controller.stepperReset(getName());
 	}
 
-	@Override
 	public boolean setController(StepperController controller) {
 		this.controller = controller;
-		attached(true);
 		return true;
 	}
 
-	@Override
 	public void setIndex(Integer index) {
 		this.index = index;
 	}
@@ -279,94 +232,77 @@ public class Stepper extends Service implements StepperControl {
 		this.steps = steps;
 	}
 
-	@Override
 	public void setSpeed(Integer rpm) {
 		controller.setStepperSpeed(rpm);
 	}
 
-	@Override
-	public void startService() {
-		super.startService();
-		arduino = (Arduino) startPeer("arduino");
-	}
-
-	@Override
-	public void step(Integer steps) {
-		step(steps, stepperingStyle);
-	}
-
-	@Override
-	public void step(Integer steps, Integer style) {
-		stepperingStyle = style;
-		controller.stepperStep(getName(), steps, style);
-	}
-
-	@Override
 	public void stop() {
-		this.arduino.stepperStop(getName());
+		controller.stepperStop(getName());
 	}
 
-	@Override
 	public void stopAndLock() {
 		log.info("stopAndLock");
 		stop();
 		lock();
 	}
 
-	@Override
+	public void unlock() {
+		log.info("unLock");
+		locked = false;
+	}
+
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
 		try {
-			// FIXME - there has to be a properties method to configure
-			// localized
-			// testing
-			boolean useGUI = true;
+
+			//Runtime.start("gui", "GUIService");
+			String vport = "COM15";
 
 			Stepper stepper = (Stepper) Runtime.start(getName(), "Stepper");
-			// Python python = (Python) Runtime.start("python", "Python");
-
-			// && depending on headless
-			if (useGUI) {
-				Runtime.start("gui", "GUIService");
-			}
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			arduino.connect(vport);
 
 			int dirPin = 34;
 			int stepPin = 38;
-			// nice simple interface
-			// stepper.connect("COM15");
-			stepper.attach("COM12", dirPin, stepPin);
+
+			stepper.attach(arduino, dirPin, stepPin);
 
 			// stepper.moveToBlocking(77777);
 
-			stepper.moveTo(81100);
-
+			stepper.moveTo(375);
 			stepper.stop();
-			// stepper.reset();
+			stepper.moveTo(-375);
+			stepper.reset();
 
 			stepper.moveTo(100);
 
-			// TODO - blocking call
-
-			log.info("here");
-
-			stepper.moveTo(1);
-			stepper.reset();
-			stepper.moveTo(2);
-
-			log.info("here");
-			stepper.moveTo(-1);
-			log.info("here");
-			stepper.moveTo(-300);
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 		return status;
 	}
 
-	@Override
-	public void unlock() {
-		log.info("unLock");
-		locked = false;
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		Stepper stepper = (Stepper) Runtime.start("stepper", "Stepper");
+		stepper.test();
+
+	}
+
+	public int getDirPin() {
+		return dirPin;
+	}
+
+	public int getStepPin() {
+		return stepPin;
+	}
+
+	public int setPos(int currentPos) {
+		this.currentPos = currentPos;
+		return currentPos;
 	}
 
 }

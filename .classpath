@@ -85,6 +85,7 @@
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/0.10/javacpp.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/0.10/javacv.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.10/opencv-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.10/opencv-macosx-x86_64.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.opencv/2.4.10/opencv.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
