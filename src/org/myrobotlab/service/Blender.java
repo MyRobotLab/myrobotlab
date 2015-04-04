@@ -189,7 +189,11 @@ public class Blender extends Service {
 	// call back from blender
 	public String onAttach(String name) {
 		try {
+			
 			info("onAttach - Blender is ready to attach serial device %s", name);
+			// FIXME - MUST WAIT FOR ARDUINO PORT TO BE READY 
+			// THIS KLUDGE PREVENTS A RACE CONDITION
+			Service.sleep(3000);
 			// FIXME - more general case determined by "Type"
 			ServiceInterface si = Runtime.getService(name);
 			if ("org.myrobotlab.service.Arduino".equals(si.getType())) {
@@ -286,13 +290,14 @@ public class Blender extends Service {
 			blender.getVersion();
 
 			Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
-
+			
 			blender.attach(arduino01);
-			sleep(3000);
+			
 			// left.biceps0
 			// i01.head.neck
 			Servo neck = (Servo) Runtime.start("jaw2", "Servo");
 
+			Service.sleep(4000);
 			// Servo rothead = (Servo) Runtime.start("i01.head.rothead",
 			// "Servo");
 
