@@ -289,7 +289,9 @@ public class Blender extends Service {
 
 			blender.attach(arduino01);
 			sleep(3000);
-			Servo neck = (Servo) Runtime.start("i01.head.neck", "Servo");
+			// left.biceps0
+			// i01.head.neck
+			Servo neck = (Servo) Runtime.start("jaw2", "Servo");
 
 			// Servo rothead = (Servo) Runtime.start("i01.head.rothead",
 			// "Servo");
