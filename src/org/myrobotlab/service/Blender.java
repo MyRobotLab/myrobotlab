@@ -9,7 +9,6 @@ import java.net.Socket;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -96,26 +95,18 @@ public class Blender extends Service {
 
 	String expectedBlenderVersion = "0.9";
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-
-			Blender blender = (Blender) Runtime.start("blender", "Blender");
-			blender.test();
-
-			// Runtime.start("gui", "GUIService");
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	public Blender(String n) {
 		super(n);
 	}
 
+	/**
+	 * important "attach" method for Blender - this way
+	 * MRL World notifies Blender to dynamically create
+	 * "virtual" counterpart for device.
+	 * 
+	 * @param service
+	 */
 	public synchronized void attach(Arduino service) {
 		// let Blender know we are going
 		// to virtualize an Arduino
@@ -187,6 +178,13 @@ public class Blender extends Service {
 	}
 
 	// call back from blender
+	/**
+	 * call back from Blender when python script does an attach to 
+	 * a virtual device - returns name of the service attached
+	 * 
+	 * @param name
+	 * @return
+	 */
 	public String onAttach(String name) {
 		try {
 			
@@ -276,25 +274,54 @@ public class Blender extends Service {
 		}
 	}
 
-	@Override
-	public Status test() {
-		Status status = super.test();
+	public void toJson() {
+		sendMsg("toJson");
+	}
+	
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
 		try {
 
+			// create masters 
+			Blender blender = (Blender) Runtime.start("blender", "Blender");
+			// gui 
 			Runtime.start("gui", "GUIService");
-			Blender blender = (Blender) Runtime.start(getName(), "Blender");
+
+			// connect blender service
 			if (!blender.connect()) {
 				throw new Exception("could not connect");
 			}
 
+			// get version
 			blender.getVersion();
 
-			Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+			String bogusLeftPort = "bogusLeftPort";
+			String bogusRightPort = "bogusRightPort";
 			
-			blender.attach(arduino01);
+			// Step #0 pre-create MRL Arduino & Serial - an pre connect with tcp ip port
+			InMoov i01 = (InMoov)Runtime.createAndStart("i01", "InMoov");
+			
+			// Serial i01_left_serial = (Serial)Runtime.createAndStart("i01.left.serial", "Serial");
+			// i01_left_serial.connectTCP(host, port); // is this better (more access) - or bury in blender.attach(?)
+			
+			Arduino i01_left = (Arduino)Runtime.createAndStart("i01.left", "Arduino");
+			Arduino i01_right = (Arduino)Runtime.createAndStart("i01.right", "Arduino");
+			
+			// Step #1 - setup virtual arduino --- NOT SURE - can be done outside
+			blender.attach(i01_left);
+			blender.attach(i01_right);
+			
+			// Step #2 - i01 connects
+			i01.startHead(bogusLeftPort);
+			//i01.startMouthControl(bogusLeftPort);
+			i01.startLeftArm(bogusLeftPort);
 			
 			// left.biceps0
 			// i01.head.neck
+			/*
 			Servo neck = (Servo) Runtime.start("jaw2", "Servo");
 
 			Service.sleep(4000);
@@ -330,16 +357,14 @@ public class Blender extends Service {
 			blender.getVersion();
 			// blender.toJson();
 			// blender.toJson();
+			*/
+
+			// Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {
-			status.addError(e);
+			Logging.logError(e);
 		}
-
-		return status;
 	}
 
-	public void toJson() {
-		sendMsg("toJson");
-	}
 
 }
