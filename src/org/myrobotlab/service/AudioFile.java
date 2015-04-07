@@ -47,7 +47,6 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import javazoom.jl.player.JavaSoundAudioDevice;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
@@ -65,7 +64,7 @@ import org.slf4j.Logger;
 public class AudioFile extends Service {
 
 	// The myrobotlab audio device
-	MRLSoundAudioDevice audioDevice = new MRLSoundAudioDevice();
+	private MRLSoundAudioDevice audioDevice = new MRLSoundAudioDevice();
 	
 	public class AdvancedPlayerThread extends Thread {
 		AdvancedPlayer player = null;
@@ -73,8 +72,10 @@ public class AudioFile extends Service {
 
 		public AdvancedPlayerThread(String filename, BufferedInputStream bis) {
 			super(filename);
+
 			try {
-				this.filename = filename;
+				this.filename = filename;			
+				resetAudioDevice();
 				this.player = new AdvancedPlayer(bis, audioDevice);
 				player.setPlayBackListener(playbackListener);
 				
@@ -431,6 +432,12 @@ public class AudioFile extends Service {
 
 			} else {
 				invoke("started");
+				audioDevice.close();
+				//audioDevice = new MRLSoundAudioDevice();
+				//audioDevice.setGain(this.getVolume());
+				// TODO: figure out how to properly just reuse the same sound audio device.
+				// for now, it seems we need to pass a new one each time.
+				resetAudioDevice();
 				AdvancedPlayer player = new AdvancedPlayer(is, audioDevice);
 				player.setPlayBackListener(playbackListener);
 				player.play();
@@ -444,6 +451,12 @@ public class AudioFile extends Service {
 			return;
 		}
 
+	}
+
+	private void resetAudioDevice() {
+		float volume = audioDevice.getGain();
+		audioDevice = new MRLSoundAudioDevice();
+		audioDevice.setGain(volume);
 	}
 
 	public void playFileBlocking(String filename) {
