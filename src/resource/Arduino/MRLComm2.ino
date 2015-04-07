@@ -853,8 +853,8 @@ void loop () {
 			stepper.speed = 100;
 
 			if (stepper.type == STEPPER_TYPE_SIMPLE) {
-				stepper.step0 = ioCmd[3]; // dir pin
-				stepper.step1 = ioCmd[4]; // step pin
+				stepper.dirPin = ioCmd[3]; // dir pin
+				stepper.stepPin = ioCmd[4]; // step pin
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}
@@ -1178,17 +1178,17 @@ void loop () {
 				if (stepper.currentPos < stepper.targetPos) {
 
 				    // step - POLOLU has single step pin (dir is on step0)
-					digitalWrite(stepper.step1, 1);
+					digitalWrite(stepper.stepPin, 1);
 					delayMicroseconds(1); // :P should require another state? loop is ~106us min ?
-					digitalWrite(stepper.step1, 0);
+					digitalWrite(stepper.stepPin, 0);
 
 					stepper.currentPos++;
 				} else if (stepper.currentPos > stepper.targetPos) {
 
 				    // step - POLOLU has single step pin (dir is on step0)
-					digitalWrite(stepper.step1, 1);
+					digitalWrite(stepper.stepPin, 1);
 					delayMicroseconds(1); // :P should require another state? loop is ~106us min ?
-					digitalWrite(stepper.step1, 0);
+					digitalWrite(stepper.stepPin, 0);
 
 					stepper.currentPos--;
 
