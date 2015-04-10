@@ -49,6 +49,7 @@ import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Stepper;
+import org.myrobotlab.service.Stepper.StepperEvent;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.StepperController;
@@ -84,6 +85,7 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 	StepperControllerPanel controllerTypePanel = new Stepper_UnknownGUI();
 	JComboBox controllerSelect = new JComboBox();
 	StepperController controller = null;
+	JLabel pos = new JLabel("0");
 
 	JCheckBox invert = new JCheckBox("invert");
 	// power
@@ -156,15 +158,23 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 	@Override
 	public void attachGUI() {
 		subscribe("publishState", "getState", Stepper.class);
+		subscribe("publishStepperEvent", "onStepperEvent", Stepper.class);
 		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void detachGUI() {
 		unsubscribe("publishState", "getState", Arduino.class);
-
+		unsubscribe("publishStepperEvent", "onStepperEvent", StepperEvent.class);
 	}
 
+	public void onStepperEvent(StepperEvent event){
+		if (event.eventType == Stepper.STEPPER_EVENT_STEP){
+			pos.setText(String.format("%d", event.pos));
+		}
+	}
+	
+	
 	public void getState(final Stepper stepper) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -233,6 +243,7 @@ public class StepperGUI extends ServiceGUI implements ActionListener, ChangeList
 		// positionPanel begin ------------------
 		positionPanel = new JPanel();
 		positionPanel.setBorder(BorderFactory.createTitledBorder("position"));
+		positionPanel.add(pos);
 		// positionPanel end ------------------
 
 		gc.gridx = 0;

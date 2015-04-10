@@ -50,7 +50,9 @@ public class Encoder {
 	public final static String TYPE_REST = "rest";
 
 	// disableHtmlEscaping to prevent encoding or "=" -
-	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+	// private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+	// FIXME - removing pretty print to fix Blender service - no \n !!! - must allow multiple "named" Builder/Parsers !!!
+	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
 	public final static String API_REST_PREFIX = "api";
 

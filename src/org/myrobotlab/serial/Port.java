@@ -172,7 +172,9 @@ public abstract class Port implements Runnable, PortSource {
 		} finally {
 			// allow the thread calling close
 			// to proceed
-			closed.countDown();
+			if (closed != null){
+				closed.countDown();
+			}
 			log.info(String.format("stopped listening on %s", portName));
 		}
 	}

@@ -158,7 +158,7 @@ public class Speech extends Service implements TextListener {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		try {
 			Speech mouth = (Speech) Runtime.start("mouth", "Speech");
-			mouth.setVolume(0.1F);
+			//mouth.setVolume(0.1F);
 			
 			mouth.test();
 
@@ -605,7 +605,7 @@ public class Speech extends Service implements TextListener {
 		Speech mouth = (Speech) Runtime.start(getName(), "Speech");
 		mouth.speak("I don't use appostrophes, or other punctuation, do you?");
 		mouth.speak("I'm done with this test");
-
+		mouth.speak("I'm done with this test again");
 		// TODO non-blocking - blocking google freetts
 		status.addInfo("done with test");
 		return status;

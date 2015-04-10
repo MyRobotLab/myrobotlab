@@ -158,6 +158,7 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 			port.addEventListener(this);
 			port.notifyOnDataAvailable(true);
 			listening = true;
+			isOpen = true;
 			log.info(String.format("opened %s", portName));
 		} catch (Exception e) {
 			throw new IOException(e);

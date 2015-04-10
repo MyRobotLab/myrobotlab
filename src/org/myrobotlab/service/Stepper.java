@@ -28,7 +28,6 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -48,6 +47,21 @@ import org.myrobotlab.service.interfaces.StepperController;
  * 
  */
 public class Stepper extends Service {
+	
+
+	public final static int STEPPER_EVENT_STOP = 1;
+	public final static int STEPPER_EVENT_STEP = 2;
+	
+	// TODO - control publishing of events @ the controller source
+	// bit flags of types of events to publish
+	public static class StepperEvent {
+		public StepperEvent(int eventType, int pos) {
+			this.eventType = eventType;
+			this.pos = pos;
+		}
+		public int pos;
+		public int eventType;
+	}
 
 	private static final long serialVersionUID = 1L;
 
@@ -112,6 +126,10 @@ public class Stepper extends Service {
 	public void addPublishStepperEventListener(Service service) {
 		addListener("publishStepperEvent", service.getName(), "publishStepperEvent", Integer.class);
 	}
+	
+	public StepperEvent publishStepperEvent(StepperEvent data) {
+		return data;
+	}
 
 	public boolean attach(StepperController controller, int dirPin, int stepPin) throws IOException {
 		this.type = STEPPER_TYPE_SIMPLE;
@@ -119,6 +137,12 @@ public class Stepper extends Service {
 		this.dirPin = dirPin;
 		this.stepPin = stepPin;
 		isAttached = controller.stepperAttach(this);
+		broadcastState();
+		if (isAttached){
+			info("attached stepper %s index %d to %s with dir pin %d step pin %d", getName(), index, controller.getName(), dirPin, stepPin);
+		} else {
+			error("could not attach stepper");
+		}
 		return isAttached;
 	}
 
@@ -209,6 +233,8 @@ public class Stepper extends Service {
 	}
 	*/
 	
+
+	
 	public int getPos(){
 		return currentPos;
 	}
@@ -251,46 +277,6 @@ public class Stepper extends Service {
 		locked = false;
 	}
 
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-		try {
-
-			//Runtime.start("gui", "GUIService");
-			String vport = "COM15";
-
-			Stepper stepper = (Stepper) Runtime.start(getName(), "Stepper");
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			arduino.connect(vport);
-
-			int dirPin = 34;
-			int stepPin = 38;
-
-			stepper.attach(arduino, dirPin, stepPin);
-
-			// stepper.moveToBlocking(77777);
-
-			stepper.moveTo(375);
-			stepper.stop();
-			stepper.moveTo(-375);
-			stepper.reset();
-
-			stepper.moveTo(100);
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		return status;
-	}
-
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		Stepper stepper = (Stepper) Runtime.start("stepper", "Stepper");
-		stepper.test();
-
-	}
 
 	public int getDirPin() {
 		return dirPin;
@@ -303,6 +289,49 @@ public class Stepper extends Service {
 	public int setPos(int currentPos) {
 		this.currentPos = currentPos;
 		return currentPos;
+	}
+
+	public Status test() {
+		Status status = Status.info("starting %s %s test", getName(), getType());
+		try {
+
+			Runtime.start("gui", "GUIService");
+			String vport = "COM15";
+
+			Stepper stepper = (Stepper) Runtime.start(getName(), "Stepper");
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			arduino.connect(vport);
+
+			int dirPin = 34;
+			int stepPin = 38;
+
+			stepper.attach(arduino, dirPin, stepPin);
+
+			// stepper.moveToBlocking(77777);
+			stepper.reset();
+			
+			stepper.moveTo(10);
+			stepper.stop();
+			stepper.moveTo(-10);
+			stepper.reset();
+
+			stepper.moveTo(100);
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		return status;
+	}
+
+
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		Stepper stepper = (Stepper) Runtime.start("stepper", "Stepper");
+		stepper.test();
+
 	}
 
 }

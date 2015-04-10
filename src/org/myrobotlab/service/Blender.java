@@ -185,7 +185,7 @@ public class Blender extends Service {
 	 * @param name
 	 * @return
 	 */
-	public String onAttach(String name) {
+	public synchronized String onAttach(String name) {
 		try {
 			
 			info("onAttach - Blender is ready to attach serial device %s", name);
@@ -263,8 +263,12 @@ public class Blender extends Service {
 			try {
 				Message msg = createMessage("Blender.py", method, data);
 				OutputStream out = control.getOutputStream();
-				String json = Encoder.toJson(msg);
-				info("sending p%s", json);
+				// FIXME - this encoder needs to
+				// NOT PRETTY PRINT - delimiter is \n PRETY PRINT WILL BREAK IT !!!
+				// Should be able to request a "new" named thread safe encoder !!
+				// Adding newline for message delimeter
+				String json = String.format("%s\n", Encoder.toJson(msg));
+				info("sending %s", json);
 				out.write(json.getBytes());
 			} catch (Exception e) {
 				error(e);

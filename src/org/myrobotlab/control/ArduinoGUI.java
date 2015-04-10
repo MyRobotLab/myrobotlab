@@ -402,7 +402,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 			public void run() {
 				editor = new EditorArduino(boundServiceName, myService, tabs);
 				tabs.insertTab("editor", null, editor.getDisplay(), "editor", 0);
-				tabs.setTabComponentAt(0, new TabControl2(self, tabs, oscopePanel, "editor"));
+				tabs.setTabComponentAt(0, new TabControl2(self, tabs, editor.getDisplay(), "editor"));
 				myService.getFrame().pack();
 			}
 		});
@@ -510,12 +510,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 
 				}
 
-				JFrame top = myService.getFrame();
 				tabs.insertTab("pins", null, imageMap, "pin panel", 0);
-				GUIService gui = myService;// FIXME - bad bad bad
-
-				// TabControl2(TabControlEventHandler handler, JTabbedPane tabs,
-				// Container myPanel, String label)
 				tabs.setTabComponentAt(0, new TabControl2(self, tabs, imageMap, "pins"));
 
 			}

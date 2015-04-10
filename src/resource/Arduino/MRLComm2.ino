@@ -181,6 +181,7 @@
 
 // ------ event types ------
 #define STEPPER_EVENT_STOP				1
+#define STEPPER_EVENT_STEP				2
 
 // servo event types
 #define  SERVO_EVENT_STOPPED			1
@@ -279,8 +280,6 @@ typedef struct
       int currentPos;
       int targetPos;
       int speed;
-      int dir; // not needed ? dirPin or currentPos - targetPos keeps state
-      bool isRunning; // don't need this if compare currentPos with targetPos
 
       int dirPin;
       int stepPin;
@@ -397,14 +396,8 @@ pingdar_type pingdars[PINGDARS_MAX];
 	int paramCnt;
 //===custom msg interface end===
 
-
-/* could optimize - but makes for ugly code - just to save a couple clock cycles - counting to 6 :P
-not worth it
-int pingdarsRunningCount = 0;
-int pingdarsRunning[6]; // map array of running pingdars
-*/
-
 void sendServoEvent(servo_type& s, int eventType);
+void sendStepperEvent(stepper_type& s, int eventType);
 unsigned long getUltrasonicRange(sensor_type& sensor);
 // void sendMsg ( int num, ... );
 
@@ -414,7 +407,7 @@ void append(const int& data) {
 	++paramCnt;
 	customParams[paramBuffIndex] = ARDUINO_TYPE_INT;
 	customParams[++paramBuffIndex] = (byte)(data >> 8);
-	customParams[++paramBuffIndex] = ((byte) data & 0xFF);
+	customParams[++paramBuffIndex] = ((byte) data & 0xff);
 	++paramBuffIndex;
 }
 
@@ -811,9 +804,9 @@ void loop () {
 			//Calculate the distance (in cm) based on the speed of sound.
 			// distance = duration/58.2;
 
-			//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xFF);
- 			//sendMsg(5, PULSE_IN, duration >> 24, duration >> 16, duration >> 8, duration & 0xFF);
- 			//sendMsg(6, SENSOR_DATA, 47, duration >> 24, duration >> 16, duration >> 8, duration & 0xFF);
+			//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xff);
+ 			//sendMsg(5, PULSE_IN, duration >> 24, duration >> 16, duration >> 8, duration & 0xff);
+ 			//sendMsg(6, SENSOR_DATA, 47, duration >> 24, duration >> 16, duration >> 8, duration & 0xff);
 
 
 			Serial.write(MAGIC_NUMBER);
@@ -823,7 +816,7 @@ void loop () {
 			Serial.write((byte)(duration >> 24));
 			Serial.write((byte)(duration >> 16));
 			Serial.write((byte)(duration >> 8));
-			Serial.write((byte)duration & 0xFF);
+			Serial.write((byte)duration & 0xff);
 
 
 			break;
@@ -846,15 +839,15 @@ void loop () {
 			stepper_type& stepper = steppers[ioCmd[1]];
 			stepper.index = ioCmd[1];
 			stepper.type = ioCmd[2];
-			stepper.isRunning = false;
 			stepper.currentPos = 0;
 			stepper.targetPos = 0;
-			stepper.dir = 0;
 			stepper.speed = 100;
 
 			if (stepper.type == STEPPER_TYPE_SIMPLE) {
 				stepper.dirPin = ioCmd[3]; // dir pin
 				stepper.stepPin = ioCmd[4]; // step pin
+				pinMode(stepper.dirPin, OUTPUT);
+				pinMode(stepper.stepPin, OUTPUT);
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}
@@ -863,10 +856,8 @@ void loop () {
 
 		case STEPPER_RESET:{
 			stepper_type& stepper = steppers[ioCmd[1]];
-			stepper.isRunning = false;
 			stepper.currentPos = 0;
 			stepper.targetPos = 0;
-			stepper.dir = 0;
 			stepper.speed = 100;
 			break;
 		}
@@ -875,8 +866,6 @@ void loop () {
 		case STEPPER_MOVE_TO:{
 			stepper_type& stepper = steppers[ioCmd[1]];
 			if (stepper.type == STEPPER_TYPE_SIMPLE) {
-				//stepper.isRunning = true;
-
 				stepper.targetPos = stepper.currentPos + (ioCmd[2]<<8) + ioCmd[3];
 				// relative position & direction
 				if (stepper.targetPos < 0) {
@@ -894,16 +883,8 @@ void loop () {
 		case STEPPER_STOP:{
 			stepper_type& stepper = steppers[ioCmd[1]];
 			if (stepper.type == STEPPER_TYPE_SIMPLE) {
-				stepper.isRunning = false;
 				stepper.targetPos = stepper.currentPos;
-
-				Serial.write(MAGIC_NUMBER);
-				Serial.write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
-				Serial.write(PUBLISH_STEPPER_EVENT);
-				Serial.write(STEPPER_EVENT_STOP);
-				Serial.write(stepper.index); // send my index
-				Serial.write(stepper.currentPos >> 8);   // MSB
-				Serial.write(stepper.currentPos & 0xFF);	// LSB
+				sendStepperEvent(stepper, STEPPER_EVENT_STOP);
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}
@@ -1026,14 +1007,14 @@ void loop () {
 			// if my value is different from last time - send it
 			if (lastAnalogInputValue[analogReadPin[i]] != readValue   || !analogTriggerOnly) //TODO - SEND_DELTA_MIN_DIFF
 			{
-				//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xFF);
+				//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xff);
 
 				Serial.write(MAGIC_NUMBER);
 				Serial.write(4); //size
 				Serial.write(PUBLISH_PIN);
 				Serial.write(analogReadPin[i]);
 				Serial.write(readValue >> 8);   // MSB
-				Serial.write(readValue & 0xFF);	// LSB
+				Serial.write(readValue & 0xff);	// LSB
 
 	        }
 			// set the last input value of this pin
@@ -1157,7 +1138,7 @@ void loop () {
 					Serial.write((byte)(sensor.lastValue >> 24));
 					Serial.write((byte)(sensor.lastValue >> 16));
 					Serial.write((byte)(sensor.lastValue >> 8));
-					Serial.write((byte) sensor.lastValue & 0xFF);
+					Serial.write((byte) sensor.lastValue & 0xff);
 					sensor.state = ECHO_STATE_START;
 				} // end else if
 
@@ -1176,34 +1157,22 @@ void loop () {
 				// direction is already set in initial STEPPER_MOVE
 
 				if (stepper.currentPos < stepper.targetPos) {
-
-				    // step - POLOLU has single step pin (dir is on step0)
 					digitalWrite(stepper.stepPin, 1);
 					delayMicroseconds(1); // :P should require another state? loop is ~106us min ?
 					digitalWrite(stepper.stepPin, 0);
-
 					stepper.currentPos++;
-				} else if (stepper.currentPos > stepper.targetPos) {
+					sendStepperEvent(stepper, STEPPER_EVENT_STEP);
 
-				    // step - POLOLU has single step pin (dir is on step0)
+				} else if (stepper.currentPos > stepper.targetPos) {
 					digitalWrite(stepper.stepPin, 1);
 					delayMicroseconds(1); // :P should require another state? loop is ~106us min ?
 					digitalWrite(stepper.stepPin, 0);
-
 					stepper.currentPos--;
-
+					sendStepperEvent(stepper, STEPPER_EVENT_STEP);
 				}
 
 				if (stepper.currentPos == stepper.targetPos){
-					//stepper.isRunning = false;
-					// stepper.currentPos = stepper.targetPos; // forcing ? :P
-					Serial.write(MAGIC_NUMBER);
-					Serial.write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
-					Serial.write(PUBLISH_STEPPER_EVENT);
-					Serial.write(STEPPER_EVENT_STOP);
-					Serial.write(stepper.index); // send my index
-					Serial.write(stepper.currentPos >> 8);   // MSB
-					Serial.write(stepper.currentPos & 0xFF);	// LSB
+					sendStepperEvent(stepper, STEPPER_EVENT_STOP);
 				}
 
 			}
@@ -1226,7 +1195,7 @@ void loop () {
 		Serial.write((byte)(loadTime >> 24));
 		Serial.write((byte)(loadTime >> 16));
 		Serial.write((byte)(loadTime >> 8));
-		Serial.write((byte) loadTime & 0xFF);
+		Serial.write((byte) loadTime & 0xff);
 	}
 
 
@@ -1263,6 +1232,20 @@ void sendServoEvent(servo_type& s, int eventType){
 	Serial.write(s.currentPos);
 	Serial.write(s.targetPos);
 }
+
+void sendStepperEvent(stepper_type& s, int eventType){
+  	// check type of event - STOP vs CURRENT POS
+
+	Serial.write(MAGIC_NUMBER);
+	Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
+	Serial.write(PUBLISH_STEPPER_EVENT);
+	Serial.write(s.index); // send my index
+	// write the long value out
+	Serial.write(eventType);
+	Serial.write(s.currentPos >> 8); // msb
+	Serial.write(s.currentPos & 0xff); // lsb
+}
+
 
 void sendError(int type){
 	Serial.write(MAGIC_NUMBER);
