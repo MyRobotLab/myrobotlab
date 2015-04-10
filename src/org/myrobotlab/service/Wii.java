@@ -29,6 +29,8 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -86,12 +88,57 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 	private long bitCount = 0;
 
 	private boolean strobeState = true;
+	
+	public static class Blah{
+		public String name;
+		Integer pos = 0;
+		Integer x = 7;
+	}
 
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		try {
+
+			Object object = new Object();
+			Class c = Object.class;
+
+			int loops = 1000000;
+
+			long start = System.currentTimeMillis();
+			for (int i = 0; i < loops; i++) {
+				object.toString();
+			}
+			System.out.println(loops + " regular method calls:" + (System.currentTimeMillis() - start) + " milliseconds.");
+			java.lang.reflect.Method method = c.getMethod("toString", null);
+			HashMap<String, Method> mcache = new HashMap<String, Method>();
+			mcache.put("toString", method);
+			
+			Blah blah = null;
+
+			Integer xx = 7;
+			Integer yy = 5;
+			start = System.currentTimeMillis();
+			for (int i = 0; i < loops; i++) {
+				//method.invoke(object, null);
+				//blah = new Blah();
+				//blah.pos = i;
+				xx = i;
+				yy = i;
+				method.invoke(mcache.get("toString"), null);
+			}
+			
+			
+
+			System.out.println(loops + " reflective method calls without lookup:" + (System.currentTimeMillis() - start) + " milliseconds.");
+			start = System.currentTimeMillis();
+			for (int i = 0; i < loops; i++) {
+				//Integer x = new Integer(7);
+				method = c.getMethod(String.format("%s","toString"), null);
+				method.invoke(object, null);
+			}
+			System.out.println(loops + " reflective method calls with lookup:" + (System.currentTimeMillis() - start) + " milliseconds.");
 
 			Wii wii = new Wii("wii");
 

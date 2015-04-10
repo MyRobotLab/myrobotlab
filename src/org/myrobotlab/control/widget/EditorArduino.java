@@ -30,14 +30,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.myrobotlab.control.TabControl2;
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
@@ -169,5 +173,15 @@ public class EditorArduino extends Editor implements ActionListener {
 		String sketch = FileIO.resourceToString(resourcePath);
 		textArea.setText(sketch);
 	}
+	
+	
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		
+	}
+
+	
 
 }

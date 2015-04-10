@@ -190,7 +190,7 @@ public class InMoovArm extends Service {
 
 	public void moveTo(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
 		if (log.isDebugEnabled()) {
-			log.debug(String.format("%s moveTo %d %d %d %d %d", getName(), bicep, rotate, shoulder, omoplate));
+			log.debug(String.format("%s moveTo %d %d %d %d", getName(), bicep, rotate, shoulder, omoplate));
 		}
 		this.bicep.moveTo(bicep);
 		this.rotate.moveTo(rotate);
