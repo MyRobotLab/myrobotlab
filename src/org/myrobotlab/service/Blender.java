@@ -302,8 +302,8 @@ public class Blender extends Service {
 			// get version
 			blender.getVersion();
 
-			String bogusLeftPort = "bogusLeftPort";
-			String bogusRightPort = "bogusRightPort";
+			String vLeftPort = "vleft";
+			String vRightPort = "vright";
 			
 			// Step #0 pre-create MRL Arduino & Serial - an pre connect with tcp ip port
 			InMoov i01 = (InMoov)Runtime.createAndStart("i01", "InMoov");
@@ -316,12 +316,19 @@ public class Blender extends Service {
 			
 			// Step #1 - setup virtual arduino --- NOT SURE - can be done outside
 			blender.attach(i01_left);
+			sleep(3);
 			blender.attach(i01_right);
 			
 			// Step #2 - i01 connects
-			i01.startHead(bogusLeftPort);
+			i01.startHead(vLeftPort);
 			//i01.startMouthControl(bogusLeftPort);
-			i01.startLeftArm(bogusLeftPort);
+			i01.startLeftArm(vLeftPort);
+			
+			i01.startLeftHand(vLeftPort);
+			
+			i01.startRightArm(vRightPort);
+			
+			i01.startRightHand(vRightPort);
 			
 			// left.biceps0
 			// i01.head.neck

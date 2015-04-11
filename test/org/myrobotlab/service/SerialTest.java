@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 
 public class SerialTest {
 
+	//TODO - https://github.com/junit-team/junit/wiki/Parameterized-tests
 
 	public final static Logger log = LoggerFactory.getLogger(SerialTest.class);
 
