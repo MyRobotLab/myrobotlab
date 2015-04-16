@@ -26,7 +26,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
 	transient Python logic;	
 	
 	transient BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
-	transient BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
+	//transient BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
 	
 	public static Peers getPeers(String name) {
@@ -136,7 +136,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
 	
 
 	public void clear() {
-		data.clear();
+		//data.clear();
 		msgs.clear();
 	}
 	

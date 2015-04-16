@@ -112,8 +112,8 @@ public class Editor extends ServiceGUI implements ActionListener {
 	public final Console console;
 
 	// autocompletion
-	final CompletionProvider provider;
-	final AutoCompletion ac;
+	//final CompletionProvider provider;
+	//final AutoCompletion ac;
 
 	String syntaxStyle;
 
@@ -130,8 +130,8 @@ public class Editor extends ServiceGUI implements ActionListener {
 
 		console = new Console();
 
-		provider = createCompletionProvider();
-		ac = new AutoCompletion(provider);
+		//provider = createCompletionProvider();
+		//ac = new AutoCompletion(provider);
 
 		// FYI - files are on the "Arduino" service not on the GUIService -
 		// these
@@ -248,8 +248,8 @@ public class Editor extends ServiceGUI implements ActionListener {
 		textArea.setAntiAliasingEnabled(true);
 
 		// autocompletion
-		ac.install(textArea);
-		ac.setShowDescWindow(true);
+		//ac.install(textArea);
+		//ac.setShowDescWindow(true);
 
 		return new RTextScrollPane(textArea);
 	}

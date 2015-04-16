@@ -15,6 +15,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.MotorControl;
+import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import org.slf4j.Logger;
  * 
  * 
  */
-public class Sabertooth extends Service implements SerialDataListener {
+public class Sabertooth extends Service implements SerialDataListener, MotorController {
 
 	class MotorData implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -67,6 +68,7 @@ public class Sabertooth extends Service implements SerialDataListener {
 	private float minY = 0;
 
 	private float maxY = 180;
+	
 	public static final int INPUT = 0x0;
 
 	public static final int OUTPUT = 0x1;
@@ -100,26 +102,6 @@ public class Sabertooth extends Service implements SerialDataListener {
 	// ----------Sabertooth Packetized Serial Mode Interface Begin
 	// --------------
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.WARN);
-
-		try {
-
-			Sabertooth sabertooth = new Sabertooth("sabertooth");
-			sabertooth.startService();
-
-			Motor m1 = (Motor) Runtime.createAndStart("m1", "Motor");
-			// Motor m2 = (Motor) Runtime.createAndStart("m2", "Motor");
-
-			Runtime.createAndStart("gui", "GUIService");
-			/*
-			 * GUIService gui = new GUIService("gui"); gui.startService();
-			 */
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	public Sabertooth(String n) {
 		super(n);
@@ -337,5 +319,61 @@ public class Sabertooth extends Service implements SerialDataListener {
 		info("%s disconnected from %s", getName(), portName);
 		return portName;
 	}
+	
+	public Serial getSerial(){
+		return serial;
+	}
+	
 
+	// --- MotorController interface begin ----
+	@Override
+	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin, Integer encoderPin) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void motorMoveTo(String name, double position) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	// --- MotorController interface end ----
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		try {
+			
+			String port = "COM15";
+			
+			// ---- Virtual Begin -----
+			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+			virtual.createVirtualPort(port);
+			Serial uart = virtual.getUART();
+			uart.setTimeout(300);
+			// ---- Virtual End -----
+
+			Sabertooth sabertooth = (Sabertooth)Runtime.start("sabertooth", "Sabertooth");
+			sabertooth.connect(port);
+			
+			Motor m1 = (Motor) Runtime.start("m1", "Motor");
+			
+			// Motor m2 = (Motor) Runtime.createAndStart("m2", "Motor");
+
+			Runtime.start("gui", "GUIService");
+			/*
+			 * GUIService gui = new GUIService("gui"); gui.startService();
+			 */
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 }

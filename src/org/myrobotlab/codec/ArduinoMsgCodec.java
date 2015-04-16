@@ -55,6 +55,10 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	public static final int MRLCOMM_VERSION = 21;
 
 	public static final int MAGIC_NUMBER = 170; // 10101010
+	
+	// ----------- event types -------------------
+	public static final int STEPPER_EVENT_STOP = 1;
+	public static final int STEPPER_EVENT_STEP = 2;
 
 	/////// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
 	

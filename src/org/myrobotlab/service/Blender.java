@@ -185,7 +185,7 @@ public class Blender extends Service {
 	 * @param name
 	 * @return
 	 */
-	public String onAttach(String name) {
+	public synchronized String onAttach(String name) {
 		try {
 			
 			info("onAttach - Blender is ready to attach serial device %s", name);
@@ -263,8 +263,12 @@ public class Blender extends Service {
 			try {
 				Message msg = createMessage("Blender.py", method, data);
 				OutputStream out = control.getOutputStream();
-				String json = Encoder.toJson(msg);
-				info("sending p%s", json);
+				// FIXME - this encoder needs to
+				// NOT PRETTY PRINT - delimiter is \n PRETY PRINT WILL BREAK IT !!!
+				// Should be able to request a "new" named thread safe encoder !!
+				// Adding newline for message delimeter
+				String json = String.format("%s\n", Encoder.toJson(msg));
+				info("sending %s", json);
 				out.write(json.getBytes());
 			} catch (Exception e) {
 				error(e);
@@ -298,8 +302,8 @@ public class Blender extends Service {
 			// get version
 			blender.getVersion();
 
-			String bogusLeftPort = "bogusLeftPort";
-			String bogusRightPort = "bogusRightPort";
+			String vLeftPort = "vleft";
+			String vRightPort = "vright";
 			
 			// Step #0 pre-create MRL Arduino & Serial - an pre connect with tcp ip port
 			InMoov i01 = (InMoov)Runtime.createAndStart("i01", "InMoov");
@@ -312,12 +316,18 @@ public class Blender extends Service {
 			
 			// Step #1 - setup virtual arduino --- NOT SURE - can be done outside
 			blender.attach(i01_left);
+			sleep(3);
 			blender.attach(i01_right);
 			
 			// Step #2 - i01 connects
-			i01.startHead(bogusLeftPort);
+			i01.startHead(vLeftPort);
 			//i01.startMouthControl(bogusLeftPort);
-			i01.startLeftArm(bogusLeftPort);
+			i01.startLeftArm(vLeftPort);
+			i01.startLeftHand(vLeftPort);
+			
+			i01.startRightArm(vRightPort);
+			i01.startRightHand(vRightPort);
+			
 			
 			// left.biceps0
 			// i01.head.neck

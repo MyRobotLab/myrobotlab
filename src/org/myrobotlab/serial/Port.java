@@ -147,8 +147,7 @@ public abstract class Port implements Runnable, PortSource {
 			opened.countDown();
 			// TODO - if (Queue) while take()
 			// normal streams are processed here - rxtx is abnormal
-			while (listening && ((newByte = read()) > -1)) {
-				// listener.onByte(newByte); // <-- FIXME ?? onMsg() < ???
+			while (listening && ((newByte = read()) > -1)) { // "real" java byte 255 / -1 will kill this
 				for (String key : listeners.keySet()) {
 					listeners.get(key).onByte(newByte);
 				}
@@ -172,7 +171,9 @@ public abstract class Port implements Runnable, PortSource {
 		} finally {
 			// allow the thread calling close
 			// to proceed
-			closed.countDown();
+			if (closed != null){
+				closed.countDown();
+			}
 			log.info(String.format("stopped listening on %s", portName));
 		}
 	}

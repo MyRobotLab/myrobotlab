@@ -25,6 +25,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * @author kmcgerald
+ *
+ */
 public class MQTT extends Service implements MqttCallback {
 	/**
 	 * Disconnect in a non-blocking way and then sit back and wait to be
