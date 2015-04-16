@@ -30,14 +30,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.myrobotlab.control.TabControl2;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -119,6 +117,7 @@ public class EditorArduino extends Editor implements ActionListener {
 	public void init() {
 		super.init();
 		// NOTE !!! - must be lowercase to match image names
+		/*
 		compileButton = addImageButtonToButtonBar("Arduino", "compile", this);
 		compileButton.setVisible(false);
 		uploadButton = addImageButtonToButtonBar("Arduino", "upload", this);
@@ -160,6 +159,7 @@ public class EditorArduino extends Editor implements ActionListener {
 		helpMenu.add(createMenuItem("Find in Reference", saveMenuMnemonic, "control+shift-F", null));
 		helpMenu.add(createMenuItem("Frequently Asked Questions"));
 		helpMenu.add(createMenuItem("Visit Arduino.cc"));
+		*/
 
 	}
 

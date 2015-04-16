@@ -323,12 +323,11 @@ public class Blender extends Service {
 			i01.startHead(vLeftPort);
 			//i01.startMouthControl(bogusLeftPort);
 			i01.startLeftArm(vLeftPort);
-			
 			i01.startLeftHand(vLeftPort);
 			
 			i01.startRightArm(vRightPort);
-			
 			i01.startRightHand(vRightPort);
+			
 			
 			// left.biceps0
 			// i01.head.neck

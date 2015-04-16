@@ -17,7 +17,7 @@ import org.myrobotlab.framework.Service;
 
 public class LoggingLog4J extends Logging {
 
-	public final static Logger log = Logger.getLogger(Logging.class.getCanonicalName());
+	public final static Logger log = Logger.getLogger(Logging.class);
 
 	private HashSet<String> appenders = new HashSet<String>();
 

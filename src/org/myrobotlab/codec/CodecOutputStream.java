@@ -118,6 +118,7 @@ public class CodecOutputStream extends OutputStream {
 		try {
 			if (out != null){
 				out.close();
+				out = null;
 			}
 		} catch(Exception e){
 			Logging.logError(e);
