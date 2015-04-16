@@ -37,7 +37,9 @@ import javax.swing.JTabbedPane;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Runtime;
@@ -115,6 +117,7 @@ public class EditorArduino extends Editor implements ActionListener {
 	public void init() {
 		super.init();
 		// NOTE !!! - must be lowercase to match image names
+		/*
 		compileButton = addImageButtonToButtonBar("Arduino", "compile", this);
 		compileButton.setVisible(false);
 		uploadButton = addImageButtonToButtonBar("Arduino", "upload", this);
@@ -156,6 +159,7 @@ public class EditorArduino extends Editor implements ActionListener {
 		helpMenu.add(createMenuItem("Find in Reference", saveMenuMnemonic, "control+shift-F", null));
 		helpMenu.add(createMenuItem("Frequently Asked Questions"));
 		helpMenu.add(createMenuItem("Visit Arduino.cc"));
+		*/
 
 	}
 
@@ -169,5 +173,15 @@ public class EditorArduino extends Editor implements ActionListener {
 		String sketch = FileIO.resourceToString(resourcePath);
 		textArea.setText(sketch);
 	}
+	
+	
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		
+	}
+
+	
 
 }

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
@@ -23,11 +24,13 @@ import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.serial.Port;
 import org.slf4j.Logger;
 
 public class SerialTest {
 
-
+	//TODO - https://github.com/junit-team/junit/wiki/Parameterized-tests
+	// - http://www.javaworld.com/article/2076265/testing-debugging/junit-best-practices.html
 	public final static Logger log = LoggerFactory.getLogger(SerialTest.class);
 
 	static Serial serial = null;
@@ -393,17 +396,30 @@ public class SerialTest {
 
 	@Test
 	public final void testGetPort() {
-		//fail("Not yet implemented"); // TODO
+		Port port = serial.getPort();
+		assertFalse(port.isHardware());
 	}
 
 	@Test
 	public final void testGetPortName() {
-		//fail("Not yet implemented"); // TODO
+		log.info("testGetPortName");
+		String portName = serial.getPortName();
+		log.info(String.format("port name is %s", portName));
+		assertEquals(vport, portName);
+		serial.disconnect();
+		portName = serial.getPortName();
+		assertEquals(null, portName);
+		serial.connect(vport);
+		portName = serial.getPortName();
+		assertEquals(vport, portName);
 	}
 
 	@Test
 	public final void testGetPortNames() {
-		//fail("Not yet implemented"); // TODO
+		List<String> ports = serial.getPortNames();
+		log.info(String.format("number of ports %d", ports.size()));
+		// should only be 2 ports - 1 virtual & 1 virtual uart
+		assertEquals(2, ports.size());
 	}
 
 	@Test
@@ -458,7 +474,7 @@ public class SerialTest {
 		int x = 65;
 		serial.write(65);
 		serial.stopRecording();
-		assertFalse(!serial.isRecording());
+		assertFalse(serial.isRecording());
 		
 		String data = FileIO.fileToString("out.tx.dec");
 		DecimalCodec dec = new DecimalCodec(null);

@@ -60,6 +60,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Stepper.StepperEvent;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -154,15 +155,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			this.data = data;
 		}
 
-	}
-
-	/**
-	 * MRLComm --> Arduino
-	 * Data from MRLComm.ino for a stepper stepper Event
-	 */
-	class StepperEvent implements Serializable {
-		private static final long serialVersionUID = 1L;
-		int stepperIndex = -1;
 	}
 
 	public Sketch sketch;
@@ -728,11 +720,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 				case PUBLISH_STEPPER_EVENT: {
 
-					int eventType = msg[1];
-					int index = msg[2];
+					int index = msg[1];
+					int eventType = msg[2];
 					int currentPos = (msg[3] << 8) + (msg[4] & 0xff);
 
-					log.info(String.format(" index %d type %d cur %d", index, eventType, currentPos));
+					log.info(String.format(" index %d type %d cur pos %d", index, eventType, currentPos));
 					// uber good -
 					// TODO - stepper ServoControl interface - not
 					// needed Servo is abstraction enough
@@ -740,7 +732,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					//stepper.invoke("publishStepperEvent", currentPos);
 					// LOCAL !!! - Remote from Arduino or Stepper ?!?!?
 					// ?? stepper.publishStepperEvent(currentPos);
+					// GOOD - model this pattern
+					// set service data directly 
+					// not having a local call back seems ridiculous ! ie. controller separated from controlled periphery 
+					// should not be supported - after updating data directly invoke the event on the stepper
 					stepper.setPos(currentPos);
+					// based on config of stepper - invoke or don't
+					stepper.invoke("publishStepperEvent", new StepperEvent(eventType, currentPos));
+					//
 					break;
 				}
 
@@ -906,9 +905,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return data;
 	}
 
-	public StepperEvent publishStepperEvent(StepperEvent data) {
-		return data;
-	}
+	
 
 	public Pin publishTrigger(Pin pin) {
 		return pin;
@@ -1460,7 +1457,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			// simple count = index mapping
 			index = steppers.size();
 
-			// attach index pin
+			// attach index pin - FIXME - add number of steps and other paramters - initial speed - pause timings
 			sendMsg(STEPPER_ATTACH, index, stepper.getStepperType(), stepper.getDirPin(), stepper.getStepPin());
 
 			stepper.setIndex(index);

@@ -108,9 +108,15 @@ public class ChessGame extends Service {
 		t = "x" + t + code + "z";
 		t = t.toLowerCase();
 
+		invoke("publishMove", t);
+		
 		log.info(t);
 
 		return t;
+	}
+	
+	public String publishMove(String move){
+		return move;
 	}
 
 	public void move(String move) {
