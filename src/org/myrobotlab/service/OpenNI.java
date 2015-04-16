@@ -143,19 +143,6 @@ public class OpenNI extends Service // implements
 		return radians * RAD_TO_DEG;
 	}
 
-	public static void main(String s[]) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("INFO");
-
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
-
-		OpenNI openni = (OpenNI) Runtime.createAndStart("openni", "OpenNI");
-		openni.startUserTracking();
-		// openni.recordSingleFrame();
-		// openni.startHandTracking();
-	}
-
 	public OpenNI(String n) {
 		super(n);
 	}
@@ -915,5 +902,19 @@ public class OpenNI extends Service // implements
 			context.close();
 		}
 	}
+	
+	public static void main(String s[]) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("INFO");
+
+		Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
+
+		OpenNI openni = (OpenNI) Runtime.createAndStart("openni", "OpenNI");
+		openni.startUserTracking();
+		// openni.recordSingleFrame();
+		// openni.startHandTracking();
+	}
+
 
 }

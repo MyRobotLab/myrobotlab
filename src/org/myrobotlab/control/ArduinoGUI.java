@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenuItem;
@@ -50,8 +49,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
 import org.myrobotlab.control.widget.DigitalButton;
-import org.myrobotlab.control.widget.EditorArduino;
+import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.service.Arduino;
@@ -74,13 +76,15 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 		int total = 0;
 		int traceStart = 0;
 	}
+	
+	final RSyntaxTextArea editor = new RSyntaxTextArea();
+	final RTextScrollPane editorScrollPane = new RTextScrollPane(editor);
 
 	static final long serialVersionUID = 1L;
 
 	static final int DATA_WIDTH = 600;
 	static final int DATA_HEIGHT = 800;
 
-	EditorArduino editor;
 	Graphics g = null;
 
 	JLayeredPane imageMap;
@@ -400,9 +404,20 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				editor = new EditorArduino(boundServiceName, myService, tabs);
-				tabs.insertTab("editor", null, editor.getDisplay(), "editor", 0);
-				tabs.setTabComponentAt(0, new TabControl2(self, tabs, editor.getDisplay(), "editor"));
+				//editor.setEnabled(false);
+				String resourcePath = "Arduino/MRLComm2.ino";
+				log.info(String.format("loadResourceFile %s", resourcePath));
+				String sketch = FileIO.resourceToString(resourcePath);
+				
+				editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_C);
+				editor.setCodeFoldingEnabled(true);
+				editor.setAntiAliasingEnabled(true);
+				
+				editor.setText(sketch);
+				
+				editorScrollPane.setPreferredSize(new Dimension(800, 600));
+				tabs.insertTab("mrlcomm", null, editorScrollPane, "mrlcomm", 0);
+				tabs.setTabComponentAt(0, new TabControl2(self, tabs, editorScrollPane, "mrlcomm"));
 				myService.getFrame().pack();
 			}
 		});
