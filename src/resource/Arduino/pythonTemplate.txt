@@ -1,0 +1,4 @@
+##### PYTHON GENERATED INTERFACE BEGIN ##### 
+class ArduinoMsgCodec(object):
+<%=python.defines%>
+##### PYTHON GENERATED INTERFACE END ##### 
