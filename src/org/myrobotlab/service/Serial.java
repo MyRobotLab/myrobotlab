@@ -384,7 +384,10 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		// invoking remote & local onConnect
 		invoke("publishConnect", port.getName());
 		for (String key : listeners.keySet()) {
-			listeners.get(key).onConnect(portName);
+			// NOT A GOOD OPTIMIZATION - AS THE "EVENT" IS MUCH MORE IMPORTANT
+			// THAN THE SPEED OF THE DATA
+			// listeners.get(key).onConnect(portName);
+			send(listeners.get(key).getName(), "onConnect", portName);
 		}
 
 		// save(); why?
@@ -560,7 +563,10 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 
 		// local disconnect
 		for (String key : listeners.keySet()) {
-			listeners.get(key).onDisconnect(portName);
+			// DUMB OPTIMIZATION - THE EVENT IS FAR MORE IMPORTANT THAN THE
+			// SPEED OF THE DATA
+			// listeners.get(key).onDisconnect(portName);
+			send(listeners.get(key).getName(), "onDisconnect", port.getName());
 		}
 
 		info("disconnecting all ports");

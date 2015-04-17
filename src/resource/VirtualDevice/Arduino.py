@@ -6,6 +6,7 @@
 import time
 import math
 import threading
+from random import randint
 from org.myrobotlab.codec import ArduinoMsgCodec
 
 working = False
@@ -18,20 +19,27 @@ def work():
     """thread worker function"""
     global working, analogReadPollingPins
     x = 0
-    pin = 16
     working = True
     while(working):
         x = x + 0.09
         y = int(math.cos(x) * 100 + 150)
     	# retcmd = "publishPin/" + str(pin) + "/3/"+ str(y) +"\n"
     	# uart.write(codec.encode(retcmd))
+
+    	for pinx in digitalReadPollingPins:
+    	  retcmd = "publishPin/" + str(pinx) + "/0/"+str(randint(0,1))+"\n"
+    	  uart.write(codec.encode(retcmd))
     	
     	for pinx in analogReadPollingPins:
-    	  retcmd = "publishPin/" + str(pinx) + "/4/"+ str(y) +"\n"
+    	  #retcmd = "publishPin/" + str(pinx) + "/4/"+ str(y) +"\n"
+    	  retcmd = "publishPin/" + str(pinx) + "/" + str(int(pinx)%4) + "/"+ str(y) +"\n"
     	  uart.write(codec.encode(retcmd))
     	
     	sleep(0.001)
-    	print (y)
+    	#print (y)
+    	# TODO -------
+    	# if (digitalReadPollingPins.length() == 0 && analogReadPollingPins.length() == 0
+    	# working = False
     	
     print("I am done !")
 
@@ -60,7 +68,21 @@ def onByte(b):
     
     if command == "getVersion":
       uart.write(codec.encode("publishVersion/21\n"))
-    
+
+    elif command.startswith("digitalReadPollingStart"):
+      print("digitalReadPollingStart")
+      pin = clist[1]
+      digitalReadPollingPins.append(pin)
+      if worker == None:
+        worker = threading.Thread(name='worker', target=work)
+        worker.setDaemon(True)
+        worker.start()
+        
+    elif command.startswith("digitalReadPollingStop"):
+      print("digitalReadPollingStop")
+      pin = clist[1]
+      digitalReadPollingPins.remove(pin)
+        
     elif command.startswith("analogReadPollingStart"):
       print("analogReadPollingStart")
       pin = clist[1]

@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import io.netty.handler.codec.CodecException;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -303,7 +301,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	}
 
 	@Override
-	public final Integer onByte(Integer newByte) throws IOException, CodecException {
+	public final Integer onByte(Integer newByte) throws IOException {
 		info("%s onByte %s", getName(), newByte);
 		return newByte;
 	}

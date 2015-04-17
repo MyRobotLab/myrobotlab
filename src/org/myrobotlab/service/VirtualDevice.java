@@ -96,6 +96,13 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		logic.execAndWait();
 		return portName;
 	}
+	
+	/* WRONG - the "service" which handles this should
+	 * delegate the event - relaying is a unecessary activity
+	public String publishLoadedScript(String script){
+		return script;
+	}
+	*/
 
 	@Override
 	public Integer onByte(Integer b) throws IOException {
