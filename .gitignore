@@ -21,3 +21,7 @@
 /ProgramAB/
 /build/
 /myrobotlab.jar
+/ArduinoMsgCodec*.txt
+
+/ArduinoMsgCodec*.ino
+/ArduinoMsgCodec*.java

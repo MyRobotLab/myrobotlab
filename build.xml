@@ -14,6 +14,9 @@
 	min - local build - min distribution
 	test - junit and Incubator
 	
+	TODO - generate junit reports
+	http://stackoverflow.com/questions/12445582/generating-junit-reports-from-the-command-line
+	
 	TODO
 	Push notification from repository
 	curl http://yourserver/jenkins/git/notifyCommit?url=<URL of the Git repository>[&branches=branch1[,branch2]*][&sha1=<commit ID>]

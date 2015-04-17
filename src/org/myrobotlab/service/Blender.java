@@ -306,13 +306,13 @@ public class Blender extends Service {
 			String vRightPort = "vright";
 			
 			// Step #0 pre-create MRL Arduino & Serial - an pre connect with tcp ip port
-			InMoov i01 = (InMoov)Runtime.createAndStart("i01", "InMoov");
+			InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
 			
 			// Serial i01_left_serial = (Serial)Runtime.createAndStart("i01.left.serial", "Serial");
 			// i01_left_serial.connectTCP(host, port); // is this better (more access) - or bury in blender.attach(?)
 			
-			Arduino i01_left = (Arduino)Runtime.createAndStart("i01.left", "Arduino");
-			Arduino i01_right = (Arduino)Runtime.createAndStart("i01.right", "Arduino");
+			Arduino i01_left = (Arduino)Runtime.start("i01.left", "Arduino");
+			Arduino i01_right = (Arduino)Runtime.start("i01.right", "Arduino");
 			
 			// Step #1 - setup virtual arduino --- NOT SURE - can be done outside
 			blender.attach(i01_left);
