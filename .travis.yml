@@ -1,0 +1,12 @@
+language: java
+script: ant report
+jdk:
+  - openjdk7
+deploy:
+  provider: releases
+  file:
+    - "dist/myrobotlab.jar"
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
