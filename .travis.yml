@@ -4,6 +4,7 @@ jdk:
   - openjdk7
 deploy:
   provider: releases
+  api-key: 7c28176bdd1945136ca76a79b09434eaf8bff8da
   file:
     - "dist/myrobotlab.jar"
   skip_cleanup: true
