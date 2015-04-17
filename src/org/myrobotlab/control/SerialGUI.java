@@ -25,8 +25,6 @@
 
 package org.myrobotlab.control;
 
-import io.netty.handler.codec.CodecException;
-
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -352,7 +350,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		rxTotal.setText(String.format("%d", rxCount));
 	}
 
-	public final void publishTX(final Integer data) throws CodecException {
+	public final void publishTX(final Integer data){
 		++txCount;
 		tx.append(txFormatter.decode(data));
 		/*

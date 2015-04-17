@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import io.netty.handler.codec.CodecException;
-
 import java.io.IOException;
 
 import org.myrobotlab.framework.Peers;
@@ -82,7 +80,7 @@ public class MPU6050 extends Service implements SerialDataListener {
 	}
 
 	@Override
-	public final Integer onByte(Integer newByte) throws IOException, CodecException {
+	public final Integer onByte(Integer newByte) throws IOException {
 		info("%s onByte %s", getName(), newByte);
 		return newByte;
 	}

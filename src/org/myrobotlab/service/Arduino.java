@@ -345,7 +345,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// FIXME ! <<<-- REMOVE ,this) - patterns should be to add listener on
 		// startService
 		// return connect(port, 57600, 8, 1, 0); <- put this back ?
-		return serial.connect(port, this); // <<<-- REMOVE ,this) - patterns
+		return serial.connect(port); // <<<-- REMOVE ,this) - patterns
 											// should be to add listener on
 											// startService
 	}
@@ -454,6 +454,11 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public Sketch getSketch() {
 		return sketch;
 	}
+	
+	public Integer refreshVersion(){
+		mrlCommVersion = null;
+		return getVersion();
+	}
 
 	/**
 	 * GOOD DESIGN !! - blocking version of getVersion - blocks on
@@ -465,11 +470,17 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 */
 	public Integer getVersion() {
 		log.info("getVersion");
+		
+		// cached
+		if (mrlCommVersion != null){
+			invoke("publishVersion", mrlCommVersion);
+			return mrlCommVersion;
+		}
+		
 		try {
 			versionQueue.clear();
 			sendMsg(GET_VERSION);
 			mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
-
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -655,7 +666,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					// TODO - get vendor version
 					// String version = String.format("%d", msg[1]);
 					versionQueue.add(msg[1] & 0xff);
-					invoke("publishVersion", msg[1] & 0xff);
+					int v = msg[1] & 0xff;
+					log.info(String.format("PUBLISH_VERSION %d", msg[1] & 0xff));
+					invoke("publishVersion", v);
 					break;
 				}
 				// FIXME PUBLISH_PULSE_IN
@@ -828,6 +841,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		getVersion();
 		return portName;
 	}
+	
+	public String getPortName(){
+		return serial.getPortName();
+	}
 
 	public void onCustomMsg(Integer ax, Integer ay, Integer az) {
 		log.info("here");
@@ -904,8 +921,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public SensorData publishSesorData(SensorData data) {
 		return data;
 	}
-
-	
 
 	public Pin publishTrigger(Pin pin) {
 		return pin;
@@ -1612,6 +1627,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			arduino.connect("vport");
 
 			Runtime.start("gui", "GUIService");
+			//Runtime.start("python", "Python");
 			Runtime.broadcastStates();
 
 			boolean done = true;

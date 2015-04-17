@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import io.netty.handler.codec.CodecException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -183,7 +181,7 @@ public class GPS extends Service implements SerialDataListener {
 	}
 
 	@Override
-	public Integer onByte(Integer b) throws IOException, CodecException {
+	public Integer onByte(Integer b) throws IOException {
 
 		try {
 			// log.info("byteReceived Index = " + index + " actual data byte = "

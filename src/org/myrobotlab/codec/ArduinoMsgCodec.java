@@ -1,7 +1,5 @@
 package org.myrobotlab.codec;
 
-import io.netty.handler.codec.CodecException;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;

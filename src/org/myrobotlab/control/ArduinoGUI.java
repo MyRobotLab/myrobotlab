@@ -28,6 +28,7 @@ package org.myrobotlab.control;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -48,6 +49,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultCaret;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -76,6 +78,10 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 		int total = 0;
 		int traceStart = 0;
 	}
+	
+	JPanel statePanel = new JPanel();
+	JLabel state = new JLabel();
+	JLabel version = new JLabel();
 	
 	final RSyntaxTextArea editor = new RSyntaxTextArea();
 	final RTextScrollPane editorScrollPane = new RTextScrollPane(editor);
@@ -272,31 +278,53 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 		}
 
 	}
+	
+	public void onDisconnect(String portName){
+		state.setText("not connected");
+		version.setText("");
+	}
+	
+	public void onConnect(String portName){
+		state.setText(String.format("connected on port %s", portName));
+	}
 
 	@Override
 	public void attachGUI() {
 		subscribe("publishPin", "publishPin", Pin.class);
+		subscribe("publishVersion", "publishVersion", Integer.class);
 		subscribe("publishState", "getState", Arduino.class);
 		// subscribe("getPortNames", "getPortNames", ArrayList.class);
 		subscribe("getPorts", "getPorts", String.class);
+		subscribe("onConnect", "onConnect", String.class);
+		subscribe("onDisconnect", "onDisconnect", String.class);
 		// subscribe("setBoard", "setBoard", String.class);
 		// myService.send(boundServiceName, "broadcastState");
 		// send("getPortNames");
 		send("publishState");
 	}
 
+	public void publishVersion(Integer xver){
+		if (xver != null) {
+			version.setText(xver + "");
+		}
+	}
+	
+	@Override
+	public void detachGUI() {
+		unsubscribe("publishPin", "publishPin", Pin.class);
+		unsubscribe("publishVersion", "publishVersion", Integer.class);
+		unsubscribe("publishState", "getState", Arduino.class);
+		unsubscribe("getPortNames", "getPortNames", ArrayList.class);
+		unsubscribe("onConnect", "onConnect", String.class);
+		unsubscribe("onDisconnect", "onDisconnect", String.class);
+	}
+	
+	
 	public void clearScreen() // TODO - static - put in oscope/image package
 	{
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, DATA_WIDTH, DATA_HEIGHT); // TODO - ratio - to expand
 													// or reduce view
-	}
-
-	@Override
-	public void detachGUI() {
-		unsubscribe("publishPin", "publishPin", Pin.class);
-		unsubscribe("publishState", "getState", Arduino.class);
-		unsubscribe("getPortNames", "getPortNames", ArrayList.class);
 	}
 
 	public void drawGrid() // TODO - static & put in oscope/image package
@@ -409,16 +437,26 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 				log.info(String.format("loadResourceFile %s", resourcePath));
 				String sketch = FileIO.resourceToString(resourcePath);
 				
+				//editorPanel.add(editor, BorderLayout.CENTER);
+				
 				editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_C);
 				editor.setCodeFoldingEnabled(true);
 				editor.setAntiAliasingEnabled(true);
 				
+				
 				editor.setText(sketch);
 				
 				editorScrollPane.setPreferredSize(new Dimension(800, 600));
+				
 				tabs.insertTab("mrlcomm", null, editorScrollPane, "mrlcomm", 0);
 				tabs.setTabComponentAt(0, new TabControl2(self, tabs, editorScrollPane, "mrlcomm"));
 				myService.getFrame().pack();
+				
+				DefaultCaret caret = (DefaultCaret) editor.getCaret();
+				caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+				Cursor cursor = new Cursor(0);
+				editor.setCursor(cursor);
+				editor.setCaretPosition(0);
 			}
 		});
 	}
@@ -625,6 +663,11 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 					myArduino = arduino; // FIXME - super updates registry state
 											// ?
 					pinList = myArduino.getPinList();
+					
+					if (arduino.isConnected()){
+						onConnect(arduino.getPortName());
+						send("getVersion");
+					}
 
 					// update panels based on state change
 					// TODO - check what state the panels are to see if a
@@ -643,6 +686,13 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 			@Override
 			public void run() {
 				display.setLayout(new BorderLayout());
+				
+				state.setText("not connected");
+				statePanel.add(new JLabel("state: "));
+				statePanel.add(state);
+				statePanel.add(new JLabel("     version: "));
+				statePanel.add(version);
+				display.add(statePanel, BorderLayout.NORTH);
 
 				// ---------------- tabs begin ----------------------
 				tabs.setTabPlacement(SwingConstants.RIGHT);
