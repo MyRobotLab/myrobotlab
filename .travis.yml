@@ -1,12 +1,13 @@
 language: java
 script: ant report
 jdk:
-  - openjdk7
+- openjdk7
 deploy:
   provider: releases
+  api_key:
+    secure: NsryAS1EG3aKtKedzYzDefHOsuYEQNAE15iNPk9yeFxJpWLbVsVl8AjGlI+D0Al3RLXqfenGz2SGJmxqKlvFSUovnZ23nyvHQ9+tKKMbSTUpBY/fffrXV97PU56DTZoZTXfnCCTnWFnvdjHQ5jwGIyY8R1EPJIa0v760EtK+oeY=
   file:
     - "dist/myrobotlab.jar"
   skip_cleanup: true
   on:
-    tags: true
-    all_branches: true
+    repo: MyRobotLab/myrobotlab
