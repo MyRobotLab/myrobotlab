@@ -10,4 +10,5 @@ deploy:
     - "dist/myrobotlab.jar"
   skip_cleanup: true
   on:
-    repo: MyRobotLab/myrobotlab
+    tags: true
+    all_branches: true
