@@ -82,7 +82,7 @@ public class LoggingLog4J extends Logging {
 				// FROM_AGENT has only console - Agent has both console & file
 				// appender
 				appender = new ConsoleAppender(layout);
-				appender = new RollingFileAppender(layout, String.format("%s%sagent.1.log", System.getProperty("user.dir"), File.separator), false);
+				appender = new RollingFileAppender(layout, String.format("%s%smyrobotlab.log", System.getProperty("user.dir"), File.separator), false);
 				appender.setName(type);
 				appenders.add(Appender.IS_AGENT);
 			} else if (Appender.FROM_AGENT.equalsIgnoreCase(type)) {
