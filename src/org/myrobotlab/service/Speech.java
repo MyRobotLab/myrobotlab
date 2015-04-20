@@ -227,6 +227,10 @@ public class Speech extends Service implements TextListener {
 		// get rid of parens also maybe?
 		// TODO: find a nice clean list / library to do this
 		String cleanSpeak = toSpeak.replaceAll("^[.\\\\/:;*?\"<>|]?[\\\\/:*?\"<>|\\(\\)]*", " ");
+		// cr/lf are not good in file names.
+		cleanSpeak = cleanSpeak.replaceAll("\r", " ");
+		cleanSpeak = cleanSpeak.replaceAll("\n", " ");
+		cleanSpeak = cleanSpeak.replaceAll("  ", " ");
 		return cleanSpeak.trim().toLowerCase();
 	}
 
