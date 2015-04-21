@@ -179,7 +179,6 @@ public class MemoryWidget {
 	}
 
 	public NodeGUI put(String parentPath, Node node) {
-		log.info("here");
 		// FIXME FIXME FIXME ???? - use JTree's index or NodeGUI's ?
 		NodeGUI parent = (NodeGUI) root.get(parentPath);
 		if (parent == null) {

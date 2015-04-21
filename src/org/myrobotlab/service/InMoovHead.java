@@ -105,20 +105,8 @@ public class InMoovHead extends Service {
 
 	// FIXME - make interface for Arduino / Servos !!!
 	public boolean connect(String port) throws Exception {
-		startService(); // NEEDED? I DONT THINK SO....
-
-		if (arduino == null) {
-			error("arduino is invalid");
-			return false;
-		}
-
 		arduino.connect(port);
-
-		if (!arduino.isConnected()) {
-			error("arduino %s not connected", arduino.getName());
-			return false;
-		}
-
+		
 		attach();
 		setSpeed(0.5f, 0.5f, 0.5f, 0.5f, 0.5f);
 		rest();

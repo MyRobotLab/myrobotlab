@@ -847,7 +847,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	public void onCustomMsg(Integer ax, Integer ay, Integer az) {
-		log.info("here");
+		log.info("onCustomMsg");
 	}
 
 	@Override
@@ -1598,7 +1598,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			sr04.attach(serial.getPortName(), 7, 8);
 			sr04.startRanging();
 
-			log.info("here");
 			sr04.stopRanging();
 		} catch (Exception e) {
 			Logging.logError(e);

@@ -161,72 +161,6 @@ public class Agent extends Service {
 		return status;
 	}
 
-	/**
-	 * First method JVM executes when myrobotlab.jar is in jar form.
-	 * 
-	 * -agent "-logLevel DEBUG -service webgui WebGUI"
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		try {
-			System.out.println("Agent.main starting");
-
-			// split agent commands from runtime commands
-			// String[] agentArgs = new String[0];
-			ArrayList<String> inArgs = new ArrayList<String>();
-			// -agent \"-params -service ... \" string encoded
-			CMDLine runtimeArgs = new CMDLine(args);
-			// -service for Runtime -process a b c d :)
-			if (runtimeArgs.containsKey("-agent")) {
-				// List<String> list = runtimeArgs.getArgumentList("-agent");
-
-				String tmp = runtimeArgs.getArgument("-agent", 0);
-				String[] agentPassedArgs = tmp.split(" ");
-				if (agentPassedArgs.length > 1) {
-					for (int i = 0; i < agentPassedArgs.length; ++i) {
-						inArgs.add(agentPassedArgs[i]);
-					}
-				} else {
-					if (tmp != null) {
-						inArgs.add(tmp);
-					}
-				}
-				/*
-				 * agentArgs = new String[list.size()]; for (int i = 0; i <
-				 * list.size(); ++i){ agentArgs[i] =
-				 * String.format("-%s",list.get(i)); }
-				 */
-			}
-
-			// default args passed to runtime from Agent
-			inArgs.add("-isAgent");
-
-			String[] agentArgs = inArgs.toArray(new String[inArgs.size()]);
-			CMDLine agentCmd = new CMDLine(agentArgs);
-
-			// FIXME -isAgent identifier sent -- default to setting log name to
-			// agent.log !!!
-			Runtime.setRuntimeName("smith");
-			Runtime.main(agentArgs);
-			Agent agent = (Agent) Runtime.start("agent", "Agent");
-
-			if (agentCmd.containsKey("-test")) {
-				agent.serviceTest();
-
-			} else {
-				agent.spawn(args); // <-- agent's is now in charge of first mrl
-									// instance
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace(System.out);
-		} finally {
-			// big hammer
-			System.out.println("Agent.main leaving");
-			// System.exit(0);
-		}
-	}
 
 	public Agent(String n) {
 		super(n);
@@ -646,5 +580,73 @@ public class Agent extends Service {
 
 		return status;
 	}
+	
+	/**
+	 * First method JVM executes when myrobotlab.jar is in jar form.
+	 * 
+	 * -agent "-logLevel DEBUG -service webgui WebGUI"
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		try {
+			System.out.println("Agent.main starting");
+
+			// split agent commands from runtime commands
+			// String[] agentArgs = new String[0];
+			ArrayList<String> inArgs = new ArrayList<String>();
+			// -agent \"-params -service ... \" string encoded
+			CMDLine runtimeArgs = new CMDLine(args);
+			// -service for Runtime -process a b c d :)
+			if (runtimeArgs.containsKey("-agent")) {
+				// List<String> list = runtimeArgs.getArgumentList("-agent");
+
+				String tmp = runtimeArgs.getArgument("-agent", 0);
+				String[] agentPassedArgs = tmp.split(" ");
+				if (agentPassedArgs.length > 1) {
+					for (int i = 0; i < agentPassedArgs.length; ++i) {
+						inArgs.add(agentPassedArgs[i]);
+					}
+				} else {
+					if (tmp != null) {
+						inArgs.add(tmp);
+					}
+				}
+				/*
+				 * agentArgs = new String[list.size()]; for (int i = 0; i <
+				 * list.size(); ++i){ agentArgs[i] =
+				 * String.format("-%s",list.get(i)); }
+				 */
+			}
+
+			// default args passed to runtime from Agent
+			inArgs.add("-isAgent");
+
+			String[] agentArgs = inArgs.toArray(new String[inArgs.size()]);
+			CMDLine agentCmd = new CMDLine(agentArgs);
+
+			// FIXME -isAgent identifier sent -- default to setting log name to
+			// agent.log !!!
+			Runtime.setRuntimeName("smith");
+			Runtime.main(agentArgs);
+			Agent agent = (Agent) Runtime.start("agent", "Agent");
+
+			if (agentCmd.containsKey("-test")) {
+				agent.serviceTest();
+
+			} else {
+				agent.spawn(args); // <-- agent's is now in charge of first mrl
+									// instance
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		} finally {
+			// big hammer
+			System.out.println("Agent.main leaving");
+			// System.exit(0);
+		}
+	}
+
 
 }

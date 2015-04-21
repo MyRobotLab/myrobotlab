@@ -290,14 +290,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * 
 	 * connect = open + listen
 	 * 
-	 * @param portName
+	 * @param inPortName
 	 * @param listener
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean connect(String portName, int baudrate, int databits, int stopbits, int parity) {
+	public boolean connect(String inPortName, int baudrate, int databits, int stopbits, int parity) {
 		try {
-			info("connect to port %s %d|%d|%d|%d", portName, baudrate, databits, stopbits, parity);
+			info("connect to port %s %d|%d|%d|%d", inPortName, baudrate, databits, stopbits, parity);
 			this.baudrate = baudrate;
 			this.databits = databits;
 			this.stopbits = stopbits;
@@ -308,25 +308,26 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			// on the static resource - or just check to see if its on the
 			// "connectedPort" set
 
-			// #1 check to see if were already connected to the port
-			if (this.portName != null && this.portName.equals(portName) && ports.containsKey(portName)) {
+			// #1 check to see if were already connected a port 
+			//if (this.portName != null && this.portName.equals(portName) && ports.containsKey(portName)) {
+			if (this.portName != null) {
 				Port port = ports.get(portName);
 				if (port.isOpen() && port.isListening()) {
-					info("already connected to %s", portName);
+					info("already connected to %s - disconnect", portName);
 					return true;
 				}
 			}
 
 			// #2 connect to a pre-existing
-			if (ports.containsKey(portName)) {
-				connectPort(ports.get(portName), null);
+			if (ports.containsKey(inPortName)) {
+				connectPort(ports.get(inPortName), null);
 				return true;
 			}
 
 			// #3 we dont have an existing port - so we'll try a hardware port
 			// connect at defaullt parameters - if you need custom parameters
 			// create the hardware port first
-			Port port = createHardwarePort(portName, baudrate, databits, stopbits, parity);
+			Port port = createHardwarePort(inPortName, baudrate, databits, stopbits, parity);
 			if (port == null) {
 				return false;
 			}
