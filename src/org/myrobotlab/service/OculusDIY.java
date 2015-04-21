@@ -1,12 +1,11 @@
 package org.myrobotlab.service;
 
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.LeapMotion2.Hand;
-import org.myrobotlab.service.LeapMotion2.LeapData;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
@@ -19,6 +18,14 @@ public class OculusDIY extends Service implements OculusDataPublisher , OculusDa
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(OculusDIY.class);
+	
+	transient public Arduino arduino;
+	
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		peers.put("arduino", "Arduino", "Arduino for DIYOculus and Myo");
+		return peers;
+	}
 
 	Integer lastValue = 30;
 	Integer resetValue = 30;
@@ -29,6 +36,7 @@ public class OculusDIY extends Service implements OculusDataPublisher , OculusDa
 	
 	public OculusDIY(String n) {
 		super(n);
+		arduino = (Arduino) createPeer("arduino");
 	}
 	
 
@@ -37,11 +45,11 @@ public class OculusDIY extends Service implements OculusDataPublisher , OculusDa
 		return "Service to receive and compute data from a DIY Oculus";
 	}
 	
-	public void onCustomMsg(Integer ay, Integer ax2 , Integer headingint){
+	public void onCustomMsg(Integer ay, Integer mx , Integer headingint){
 		//Integer ay = (Integer) data[0];
 		//Integer ax2 = (Integer) data[0];
 		//Integer headingint = (Integer) data[0];
-		this.computeAngles(ax2,headingint);
+		this.computeAngles(mx,headingint);
 		OculusData oculus = new OculusData();
 		oculus.yaw = Double.valueOf(rothead);
 		oculus.pitch = Double.valueOf(head);
@@ -56,9 +64,9 @@ public class OculusDIY extends Service implements OculusDataPublisher , OculusDa
 	    offSet = (90 - lastValue);
 	}
 
-	public void computeAngles(Integer ax2, Integer headingint){
+	public void computeAngles(Integer mx, Integer headingint){
 		
-		head = (20 +(((ax2 - 250)/(-250 -250))*(160-20)));
+		head = (20 +(((mx - 250)/(-250 -250))*(160-20)));
 		lastValue = headingint;
 		if (resetValue > 90 && lastValue <0){ 
 		  rothead = (offSet + headingint + 360);
@@ -98,6 +106,14 @@ public class OculusDIY extends Service implements OculusDataPublisher , OculusDa
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+	
+	public void initializeOculus() throws Exception{
+		if (arduino == null) {
+			arduino = (Arduino) startPeer("arduino");
+		}
+        arduino.addCustomMsgListener(this);
+		return;
 	}
 	
 	@Override
