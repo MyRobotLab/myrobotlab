@@ -406,7 +406,6 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 			arduino.analogReadPollingStop(0);
 
 			serial.stopRecording();
-			log.info("here");
 			// Test test = (org.myrobotlab.service.Test) Runtime.start("test",
 			// "Test");
 

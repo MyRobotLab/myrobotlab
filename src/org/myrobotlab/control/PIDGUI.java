@@ -89,7 +89,6 @@ public class PIDGUI extends ServiceGUI implements ActionListener {
 	}
 
 	public void getState(final PID pid) {
-		log.info("here");
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {

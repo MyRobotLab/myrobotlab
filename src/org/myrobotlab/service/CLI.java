@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Message;
@@ -30,6 +31,15 @@ import org.slf4j.Logger;
  *
  */
 public class CLI extends Service {
+	
+	// commands
+	public final static String cd = "cd";
+	public final static String pwd = "pwd";
+	public final static String ls = "ls";
+	public final static String help = "help";
+	public final static String question = "?";
+	
+	public final static HashSet<String> cmdSet = new HashSet<String>();
 
 	// FIXME - needs refactor / merge with StreamGobbler
 	// FIXME - THIS CONCEPT IS SOOOOOO IMPORTANT
@@ -94,7 +104,7 @@ public class CLI extends Service {
 						continue;
 					}
 
-					if (line.startsWith("cd")) {
+					if (line.startsWith(cd)) {
 						String path = "/";
 						if (line.length() > 2) {
 							// FIXME - cheesy - "look" for relative directories
@@ -106,9 +116,12 @@ public class CLI extends Service {
 							}
 						}
 						cli.cd(path);
-					} else if (line.startsWith("pwd")) {
+					} else if (line.startsWith(help)) {
+						// TODO dump json command object
+						// which has a map of commands
+					} else if (line.startsWith(pwd)) {
 						out(cwd.getBytes());
-					} else if (line.startsWith("ls")) {
+					} else if (line.startsWith(ls)) {
 						String path = cwd; // <-- path =
 						if (line.length() > 3) {
 							path = line.substring(3);

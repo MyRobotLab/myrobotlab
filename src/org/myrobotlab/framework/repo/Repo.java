@@ -662,9 +662,6 @@ public class Repo implements Serializable {
 	 */
 	public boolean isServiceTypeInstalled(String fullTypeName) {
 		boolean ret = true;
-		if (fullTypeName.equals("org.myrobotlab.service.InMoov")) {
-			log.info("here");
-		}
 
 		if (localServiceData != null) {
 			ServiceType st = localServiceData.getServiceType(fullTypeName);

@@ -83,7 +83,6 @@ public class SerializableImage implements Serializable {
 			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("object.data"));
 
 			ImageIO.write(null, "jpg", new MemoryCacheImageOutputStream(out));
-			log.info("here");
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

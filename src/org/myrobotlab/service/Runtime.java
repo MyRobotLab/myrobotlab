@@ -1025,6 +1025,9 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 */
 
 	static public boolean isAgent() {
+		if (cmdline == null){
+			return false;
+		}
 		return cmdline.containsKey("-isAgent");
 	}
 
