@@ -90,13 +90,15 @@ public class OculusDIY extends Service implements OculusDataPublisher, OculusDat
 
 	@Override
 	public void startService() {
-		if (arduino == null) {
-			arduino = (Arduino) startPeer("arduino");
-		}
+		arduino = (Arduino) startPeer("arduino");
 		arduino.addCustomMsgListener(this);
 		return;
 	}
 
+	public Arduino getArduino(){
+		return arduino;
+	}
+	
 	@Override
 	public String[] getCategories() {
 		return new String[] { "video", "control", "sensor" };
@@ -109,8 +111,7 @@ public class OculusDIY extends Service implements OculusDataPublisher, OculusDat
 		try {
 
 			OculusDIY oculus = (OculusDIY) Runtime.start("oculus", "OculusDIY");
-			oculus.test();
-
+			Runtime.start("python", "Python");			
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {
