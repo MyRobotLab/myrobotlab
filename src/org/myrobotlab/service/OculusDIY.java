@@ -7,13 +7,14 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.OculusData;
+import org.myrobotlab.service.interfaces.CustomMsgListener;
 import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Frame;
 
-public class OculusDIY extends Service implements OculusDataPublisher, OculusDataListener {
+public class OculusDIY extends Service implements CustomMsgListener, OculusDataPublisher, OculusDataListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,10 +44,12 @@ public class OculusDIY extends Service implements OculusDataPublisher, OculusDat
 		return "Service to receive and compute data from a DIY Oculus";
 	}
 
-	public void onCustomMsg(Integer ay, Integer mx, Integer headingint) {
-		// Integer ay = (Integer) data[0];
-		// Integer ax2 = (Integer) data[0];
-		// Integer headingint = (Integer) data[0];
+	// public void onCustomMsg(Integer ay, Integer mx, Integer headingint) {
+	@Override
+	public void onCustomMsg(Object[] data) {
+		Integer ay = (Integer) data[0];
+		Integer mx = (Integer) data[1];
+		Integer headingint = (Integer) data[2];
 		this.computeAngles(mx, headingint);
 		OculusData oculus = new OculusData();
 		oculus.yaw = Double.valueOf(rothead);
@@ -95,13 +98,17 @@ public class OculusDIY extends Service implements OculusDataPublisher, OculusDat
 		return;
 	}
 
-	public Arduino getArduino(){
+	public Arduino getArduino() {
 		return arduino;
 	}
-	
+
 	@Override
 	public String[] getCategories() {
 		return new String[] { "video", "control", "sensor" };
+	}
+
+	public boolean connect(String port) {
+		return arduino.connect(port);
 	}
 
 	public static void main(String[] args) {
@@ -111,11 +118,13 @@ public class OculusDIY extends Service implements OculusDataPublisher, OculusDat
 		try {
 
 			OculusDIY oculus = (OculusDIY) Runtime.start("oculus", "OculusDIY");
-			Runtime.start("python", "Python");			
+			Runtime.start("python", "Python");
 			Runtime.start("gui", "GUIService");
+			oculus.connect("COM15");
 
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 	}
+
 }
