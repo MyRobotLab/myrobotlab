@@ -62,6 +62,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Stepper.StepperEvent;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.CustomMsgListener;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SensorDataPublisher;
@@ -259,7 +260,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	HashMap<Integer, String> encoderPins = new HashMap<Integer, String>();
 
-	transient Service customEventListener = null;
+	transient CustomMsgListener customEventListener = null;
 
 	/**
 	 * servos - name index of servo we need 2 indexes for servos because they
@@ -303,7 +304,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		setSketch(new Sketch("MRLComm", mrlcomm));
 	}
 
-	public void addCustomMsgListener(Service service) {
+	public void addCustomMsgListener(CustomMsgListener service) {
 		customEventListener = service;
 	}
 
@@ -786,18 +787,17 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 						} else {
 							error("CUSTOM_MSG - unhandled type %d", paramType);
 						}
-
-						invoke("publishCustomMsg", x);
-
-						// load it on boxing array
-
 					}
 
 					// how to reflectively invoke multi-param method
 					// (Python?)
+					// FIXME - if local call directly? - this is an optimization
 					if (customEventListener != null) {
-						send(customEventListener.getName(), "onCustomMsg", params);
+						//send(customEventListener.getName(), "onCustomMsg", params);
+						customEventListener.onCustomMsg(params);
 					}
+					// FIXME more effecient to only allow subscribers which have used the addCustomMsgListener?
+					invoke("publishCustomMsg", params);
 
 					break;
 				}
