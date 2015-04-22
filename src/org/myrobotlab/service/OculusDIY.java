@@ -66,8 +66,12 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	}
 
 	public void computeAngles(Integer mx, Integer headingint) {
-
-		head = (20 + (((mx - 250) / (-250 - 250)) * (160 - 20)));
+		
+		
+        double y = mx;
+		double x = (20 + (((y - 250) / (-250 - 250)) * (160 - 20)));
+		head = (int)x;
+		
 		lastValue = headingint;
 		if (resetValue > 90 && lastValue < 0) {
 			rothead = (offSet + headingint + 360);
