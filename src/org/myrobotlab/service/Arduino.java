@@ -797,7 +797,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 						customEventListener.onCustomMsg(params);
 					}
 					// FIXME more effecient to only allow subscribers which have used the addCustomMsgListener?
-					invoke("publishCustomMsg", params);
+					invoke("publishCustomMsg", new Object[]{params});
 
 					break;
 				}
@@ -869,7 +869,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		sendMsg(PIN_MODE, address, value);
 	}
 
-	public Integer publishCustomMsg(Integer data) {
+	public Object[] publishCustomMsg(Object[] data) {
 		return data;
 	}
 

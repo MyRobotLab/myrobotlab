@@ -105,6 +105,7 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 
 	@Override
 	public void startService() {
+		super.startService();
 		arduino = (Arduino) startPeer("arduino");
 		arduino.addCustomMsgListener(this);
 		return;
