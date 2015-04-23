@@ -33,7 +33,11 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	Integer head = 90;
 	Integer rothead = 90;
 	Integer offSet = 0;
-
+	Integer centerValue = 200;
+	Integer minHead = -50;
+	Integer maxHead = 500;
+	Integer lastValue2 = 200;
+	
 	public OculusDIY(String n) {
 		super(n);
 		arduino = (Arduino) createPeer("arduino");
@@ -63,13 +67,17 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	public void calibrate() {
 		resetValue = lastValue;
 		offSet = (90 - lastValue);
+		
+		centerValue = lastValue2;
+		minHead = centerValue - 300;
+		maxHead = centerValue + 300;
 	}
 
 	public void computeAngles(Integer mx, Integer headingint) {
 		
-		
+		lastValue2 = mx;
         double y = mx;
-		double x = (20 + (((y - 250) / (-250 - 250)) * (160 - 20)));
+		double x = (20 + (((y - minHead) / (maxHead - minHead)) * (160 - 20)));
 		head = (int)x;
 		
 		lastValue = headingint;
