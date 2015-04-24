@@ -58,7 +58,7 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		OculusData oculus = new OculusData();
 		oculus.yaw = Double.valueOf(rothead);
 		oculus.pitch = Double.valueOf(head);
-		invoke("publishOculusData", data);
+		invoke("publishOculusData", oculus);
 
 		System.out.println(head + "," + rothead);
 

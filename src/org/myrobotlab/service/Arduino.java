@@ -1267,6 +1267,17 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		broadcastState();
 		return board;
 	}
+	
+	/**
+	 * easy way to set to a 54 pin arduino
+	 * @return
+	 */
+	public String setBoardMega(){
+		board = BOARD_TYPE_ATMEGA2560;
+		createPinList();
+		broadcastState();
+		return board;
+	}
 
 	/**
 	 * Debounce ensures that only a single signal will be acted upon for a
