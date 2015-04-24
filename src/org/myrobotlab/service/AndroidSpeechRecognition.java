@@ -21,7 +21,7 @@ import org.slf4j.Logger;
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
-public class AndroidVoiceRecognition extends Service implements TextPublisher {
+public class AndroidSpeechRecognition extends Service implements TextPublisher {
 
 	private class ClientHandler extends Thread {
 
@@ -101,7 +101,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(AndroidVoiceRecognition.class);
+	public final static Logger log = LoggerFactory.getLogger(AndroidSpeechRecognition.class);
 	transient private ClientHandler client;
 	private int port = 5684;
 
@@ -116,14 +116,14 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 		try {
 
 			Runtime.start("gui", "GUIService");
-			Runtime.start("avr", "AndroidVoiceRecognition");
+			Runtime.start("avr", "AndroidSpeechRecognition");
 
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 	}
 
-	public AndroidVoiceRecognition(String n) {
+	public AndroidSpeechRecognition(String n) {
 		super(n);
 		// intializing variables
 		// Should do something useful here in future
@@ -136,7 +136,7 @@ public class AndroidVoiceRecognition extends Service implements TextPublisher {
 
 	@Override
 	public String getDescription() {
-		return "utilizing Android's Voice Recognition";
+		return "utilizing Android's Speech Recognition";
 	}
 
 	private void process(String mes) {
