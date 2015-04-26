@@ -169,12 +169,24 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 		port.removeEventListener();
 		// port.notifyOnDataAvailable(false);
 		listening = false;
+		readingThread = null;// is dead anyway
+		port.close();
+		out = null;
+		in = null;
+		/* 
 		new Thread(){
 			public void run(){
 				log.info("closing streams begin");
+				
+				try {
+					port.close();
+				} catch(Exception e){
+					Logging.logError(e);
+				}
+				
 				try {
 					out.flush();
-					out.close();
+					out.close();					
 				} catch(Exception e){
 					Logging.logError(e);
 				}
@@ -184,9 +196,12 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 				} catch(Exception e){
 					Logging.logError(e);
 				}
+				
+
 				log.info("closing streams end");
 			}
 		}.start();
+		*/
 		port = null;
 	}
 
@@ -245,7 +260,7 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 		}
 		// allow the .listen() in  Port
 		// to proceed
-		opened.countDown();
+//		opened.countDown();
 	}
 
 	/**

@@ -29,8 +29,8 @@ public abstract class Port implements Runnable, PortSource {
 	// needs to be owned by Serial
 	HashMap<String, SerialDataListener> listeners = null;
 
-	transient CountDownLatch opened = null;
-	transient CountDownLatch closed = null;
+	//transient CountDownLatch opened = null;
+	//transient CountDownLatch closed = null;
 
 	static int pIndex = 0;
 
@@ -73,17 +73,19 @@ public abstract class Port implements Runnable, PortSource {
 
 	public void close() {
 
-		closed = new CountDownLatch(1);
+//		closed = new CountDownLatch(1);
 		listening = false;
 		if (readingThread != null) {
 			readingThread.interrupt();
 		}
 		readingThread = null;
+/*		
 		try {
 			closed.await();
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+*/		
 
 		// TODO - suppose to remove listeners ???
 		log.info(String.format("closed port %s", portName));
@@ -105,7 +107,7 @@ public abstract class Port implements Runnable, PortSource {
 	}
 
 	public void listen(HashMap<String, SerialDataListener> listeners) {
-		opened = new CountDownLatch(1);
+//		opened = new CountDownLatch(1);
 		this.listeners = listeners;
 		if (readingThread == null) {
 			++pIndex;
@@ -115,12 +117,18 @@ public abstract class Port implements Runnable, PortSource {
 		} else {
 			log.info(String.format("%s already listening", portName));
 		}
+/*		
 		try {
 			// we want to wait until our
 			// reader has started and is
 			// blocking on a read before
 			// we proceed
 			opened.await();
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+		}
+*/		
+		try{
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 		}
@@ -144,7 +152,7 @@ public abstract class Port implements Runnable, PortSource {
 		listening = true;
 		Integer newByte = -1;
 		try {
-			opened.countDown();
+//			opened.countDown();
 			// TODO - if (Queue) while take()
 			// normal streams are processed here - rxtx is abnormal
 			while (listening && ((newByte = read()) > -1)) { // "real" java byte 255 / -1 will kill this
@@ -171,9 +179,10 @@ public abstract class Port implements Runnable, PortSource {
 		} finally {
 			// allow the thread calling close
 			// to proceed
-			if (closed != null){
+/*			if (closed != null){
 				closed.countDown();
 			}
+*/			
 			log.info(String.format("stopped listening on %s", portName));
 		}
 	}
