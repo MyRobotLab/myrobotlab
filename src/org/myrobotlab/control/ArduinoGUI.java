@@ -314,7 +314,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 		unsubscribe("publishPin", "publishPin", Pin.class);
 		unsubscribe("publishVersion", "publishVersion", Integer.class);
 		unsubscribe("publishState", "getState", Arduino.class);
-		unsubscribe("getPortNames", "getPortNames", ArrayList.class);
+		//unsubscribe("getPortNames", "getPortNames", ArrayList.class);
 		unsubscribe("onConnect", "onConnect", String.class);
 		unsubscribe("onDisconnect", "onDisconnect", String.class);
 	}
