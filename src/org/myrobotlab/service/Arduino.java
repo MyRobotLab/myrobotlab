@@ -1632,14 +1632,22 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+
+			/*
 			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
 			virtual.createVirtualArduino("vport");
 			arduino.connect("vport");
+			*/
+			
 
+			//arduino.setBoardMega();
+			//arduino.connect("COM15");
+			Runtime.start("python", "Python");			
 			Runtime.start("gui", "GUIService");
 			//Runtime.start("python", "Python");
-			Runtime.broadcastStates();
+			//Runtime.broadcastStates();
 
+			//arduino.analogReadPollingStart(68);
 			boolean done = true;
 			if (done) {
 				return;

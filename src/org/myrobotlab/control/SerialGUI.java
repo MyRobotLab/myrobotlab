@@ -138,17 +138,6 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 			}
 		}
 
-		if (o == ports) {
-			String selected = (String) ports.getSelectedItem();
-			if (selected == null || "".equals(selected)) {
-				send("stopPolling");
-			} else {
-				log.info(String.format("changed to %s ", selected));
-				send("setController", selected);
-				send("startPolling");
-			}
-		}
-
 		if (o == send) {
 			String data = tx.getText();
 			send("write", data.getBytes());
@@ -162,7 +151,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		subscribe("publishRX", "publishRX", Integer.class);
 		subscribe("publishTX", "publishTX", Integer.class);
 		subscribe("publishState", "getState", Serial.class);
-
+		// forces scan of ports
 		send("refresh");
 	}
 
@@ -183,36 +172,36 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	}
 
 	public void getPortNames(final List<String> inPorts) {
-
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-
-				ports.removeItemListener((ItemListener) self);
-				ports.removeAllItems();
-				ports.addItem("");
-				for (int i = 0; i < inPorts.size(); ++i) {
-					ports.addItem(inPorts.get(i));
-				}
-				ports.addItemListener((ItemListener) self);
-				setPortStatus();
-			}
-		});
+		ports.removeAllItems();
+		ports.addItem("");
+		for (int i = 0; i < inPorts.size(); ++i) {
+			ports.addItem(inPorts.get(i));
+		}
 	}
 
+	/**
+	 * the gui is no simplified - a single broadcastState() -> getState(Serial) is used to 
+	 * propegate all data which needs updating.  Since that is the case a single invokeLater is used.
+	 * It is unadvised to have more invokeLater in other methods as race conditions are possible 
+	 * @param serial
+	 */
 	public void getState(final Serial serial) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				mySerial = serial;
-				setPortStatus();
-
 				try {
-					
-					getPortNames(serial.getPortNames());
 
 					// prevent re-firing the event :P
 					reqFormat.removeItemListener(myself);
+					ports.removeItemListener(myself);
+
+					mySerial = serial;
+					// refresh all the ports in the combo box
+					getPortNames(serial.getPortNames());
+
+					// set the appropriate status
+					// ie connection value and current port
+					setPortStatus();
 
 					// WARNING
 					// don't use the same output formatters as the serial
@@ -233,6 +222,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 						txFormatter = Codec.getDecoder(key, myService);
 					}
 
+					ports.addItemListener(myself);
 					reqFormat.addItemListener(myself);
 
 				} catch (Exception e) {
@@ -293,8 +283,9 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		sendFile.addActionListener(this);
 		record.addActionListener(this);
 		reqFormat.addItemListener(this);
-		ports.addItemListener(this);
 		refresh.addActionListener(this);
+
+		// zod ports.addItemListener(this);
 
 	}
 
@@ -302,13 +293,13 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	@Override
 	public void itemStateChanged(ItemEvent event) {
 		Object o = event.getSource();
-		if (o == ports) {
+		if (o == ports && event.getStateChange() == ItemEvent.SELECTED) {
 			String port = (String) ports.getSelectedItem();
-			if (port != null && !port.equals(mySerial.getPortName()) && port.length() > 0) {
+			if (port.length() == 0) {
+				send("disconnect");
+			} else if (!port.equals(mySerial.getPortName()) && port.length() > 0) {
 				send("disconnect");
 				send("connect", port);
-			} else if (port.length() == 0) {
-				send("disconnect");
 			}
 		}
 
@@ -350,7 +341,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		rxTotal.setText(String.format("%d", rxCount));
 	}
 
-	public final void publishTX(final Integer data){
+	public final void publishTX(final Integer data) {
 		++txCount;
 		tx.append(txFormatter.decode(data));
 		/*
@@ -365,7 +356,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 	}
 
 	public void setPortStatus() {
-		ports.removeItemListener((ItemListener) self);
+		ports.removeItemListener(myself);
 		if (mySerial.isConnected()) {
 			connectLight.setIcon(Util.getImageIcon("green.png"));
 			log.info(String.format("displaying %s", mySerial.getPortName()));
@@ -374,7 +365,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 			connectLight.setIcon(Util.getImageIcon("red.png"));
 			ports.setSelectedItem("");
 		}
-		ports.addItemListener((ItemListener) self);
+		// zod ports.addItemListener(myself);
 	}
 
 }

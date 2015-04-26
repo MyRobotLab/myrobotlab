@@ -85,7 +85,7 @@ public class WebGUI extends Service implements AuthorizationProvider {
 
 		WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
 
-		webgui.test();
+		//webgui.test();
 		// webgui.useLocalResources(true);
 		// webgui.autoStartBrowser(false);
 		// Runtime.createAndStart("webgui", "WebGUI");
