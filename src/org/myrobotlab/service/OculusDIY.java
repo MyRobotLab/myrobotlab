@@ -37,6 +37,7 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	Integer minHead = -50;
 	Integer maxHead = 500;
 	Integer lastValue2 = 200;
+	Integer bicep = 5;
 	
 	public OculusDIY(String n) {
 		super(n);
@@ -54,10 +55,11 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		Integer ay = (Integer) data[0];
 		Integer mx = (Integer) data[1];
 		Integer headingint = (Integer) data[2];
-		this.computeAngles(mx, headingint);
+		this.computeAngles(mx, headingint,ay);
 		OculusData oculus = new OculusData();
 		oculus.yaw = Double.valueOf(rothead);
 		oculus.pitch = Double.valueOf(head);
+		oculus.roll = Double.valueOf(bicep);
 		invoke("publishOculusData", oculus);
 
 		System.out.println(head + "," + rothead);
@@ -73,7 +75,7 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		maxHead = centerValue + 300;
 	}
 
-	public void computeAngles(Integer mx, Integer headingint) {
+	public void computeAngles(Integer mx, Integer headingint , Integer ay) {
 		
 		lastValue2 = mx;
         double y = mx;
@@ -88,6 +90,11 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		} else {
 			rothead = (offSet + headingint);
 		}
+		
+	    y = ay;
+	    x = (85 +(((y - 20)/(-16000 - 20))*(5 - 85)));
+	    bicep = (int)x;
+	    
 	}
 
 	public OculusData publishOculusData(OculusData oculus) {
