@@ -364,7 +364,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		pinList = new ArrayList<Pin>();
 		int pinType = Pin.DIGITAL_VALUE;
 
-		if (board != null && board.contains("mega")) {
+		if (board != null && board.toLowerCase().contains("mega")) {
 			for (int i = 0; i < 70; ++i) {
 
 				if (i < 1 || (i > 13 && i < 54)) {

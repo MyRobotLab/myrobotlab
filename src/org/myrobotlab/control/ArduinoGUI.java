@@ -35,6 +35,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenuItem;
@@ -62,7 +65,34 @@ import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.data.Pin;
 
-public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControlEventHandler {
+public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControlEventHandler, ItemListener {
+	
+	String[] BOARD_TYPES = new String[]{"",
+		"Arduino Uno",
+		"Arduino Duemilanove w/ ATmega328",
+		"Arduino Diecimila or Duemilanove w/ ATmega168",
+		"Arduino Nano w/ ATmega328",
+		"Arduino Nano w/ ATmega168",
+		"Arduino Mega 2560 or Mega ADK",
+		"Arduino Mega (ATmega1280)",
+		"Arduino Leonardo",
+		"Arduino Micro",
+		"Arduino Mini w/ ATmega328",
+		"Arduino Mini w/ ATmega168",
+		"Arduino Ethernet",
+		"Arduino Fio",
+		"Arduino BT w/ ATmega328",
+		"Arduino BT w/ ATmega168",
+		"LilyPad Arduino w/ ATmega328",
+		"LilyPad Arduino w/ ATmega168",
+		"Arduino Pro or Pro Mini (5V, 16 MHz) w/ ATmega328",
+		"Arduino Pro or Pro Mini (5V, 16 MHz) w/ ATmega168",
+		"Arduino Pro or Pro Mini (3.3V, 8 MHz) w/ ATmega328",
+		"Arduino Pro or Pro Mini (3.3V, 8 MHz) w/ ATmega168",
+		"Arduino NG or older w/ ATmega168",
+		"Arduino NG or older w/ ATmega8"};
+	
+	
 
 	class TraceData {
 		Color color = null;
@@ -82,6 +112,8 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 	JPanel statePanel = new JPanel();
 	JLabel state = new JLabel();
 	JLabel version = new JLabel();
+	
+	JComboBox<String> boardTypes = new JComboBox<String>(BOARD_TYPES);
 	
 	final RSyntaxTextArea editor = new RSyntaxTextArea();
 	final RTextScrollPane editorScrollPane = new RTextScrollPane(editor);
@@ -638,7 +670,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 
 	public void getPinPanel() {
 
-		if (myArduino != null && myArduino.getBoardType() != null && myArduino.getBoardType().contains("mega")) {
+		if (myArduino != null && myArduino.getBoardType() != null && myArduino.getBoardType().toLowerCase().contains(" mega ")) {
 			getMegaPanel();
 			return;
 		}
@@ -688,11 +720,14 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 				display.setLayout(new BorderLayout());
 				
 				state.setText("not connected");
+				statePanel.add(boardTypes);
 				statePanel.add(new JLabel("state: "));
 				statePanel.add(state);
 				statePanel.add(new JLabel("     version: "));
 				statePanel.add(version);
+				
 				display.add(statePanel, BorderLayout.NORTH);
+				
 
 				// ---------------- tabs begin ----------------------
 				tabs.setTabPlacement(SwingConstants.RIGHT);
@@ -705,6 +740,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 				serialRefresh.addActionListener(self);
 				softReset.addActionListener(self);
 				serialDisconnect.addActionListener(self);
+				boardTypes.addItemListener(self);
 			}
 		});
 	}
@@ -777,6 +813,17 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 			}
 		});
 
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent event) {
+		Object o = event.getSource();
+		if (o == boardTypes && event.getStateChange() == ItemEvent.SELECTED) {
+			String type = (String) boardTypes.getSelectedItem();
+			if (type != null && type.length() > 0 ) { // && type.toUpperCase().contains("MEGA")
+				send("setBoard", type);
+			}
+		}
 	}
 
 }
