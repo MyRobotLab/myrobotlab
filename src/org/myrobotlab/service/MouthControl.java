@@ -24,6 +24,8 @@ public class MouthControl extends Service {
 	transient Arduino arduino;
 	transient Speech mouth;
 
+	public boolean autoAttach = true;
+	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		peers.put("jaw", "Servo", "shared Jaw servo instance");
@@ -43,6 +45,8 @@ public class MouthControl extends Service {
 
 			Runtime.createAndStart("gui", "GUIService");
 
+			MouthControl.autoAttach = true;
+			MouthControl.saying("test on");
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -97,6 +101,13 @@ public class MouthControl extends Service {
 	public synchronized void saying(String text) {
 		log.info("move moving to :" + text);
 		if (jaw != null) { // mouthServo.moveTo(Mouthopen);
+			if (autoAttach) {
+				if (!jaw.isAttached()) {
+					// attach the jaw if it's not attached.
+					jaw.attach();
+				}
+			}
+			
 			boolean ison = false;
 			String testword;
 			String[] a = text.split(" ");
@@ -119,9 +130,7 @@ public class MouthControl extends Service {
 
 				for (int x = 0; x < c.length; x++) {
 					char s = c[x];
-
 					if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y') && !ison) {
-
 						jaw.moveTo(mouthOpenedPos); // # move the servo to the
 						// open spot
 						ison = true;
@@ -142,6 +151,14 @@ public class MouthControl extends Service {
 
 		} else {
 			log.info("need to attach first");
+		}
+		
+		//  We're done annimating, lets detach the jaw while not in use.
+		if (autoAttach && jaw != null) {
+			if (jaw.isAttached()) {
+				// attach the jaw if it's not attached.
+				jaw.detach();
+			}
 		}
 	}
 
