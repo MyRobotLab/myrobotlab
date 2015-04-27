@@ -142,14 +142,9 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 		}
 		// TODO: finish JavaCV upgrade
 		String text = String.format("valid %d", pointsToPublish.size());
-		
-		// CvScalar scalar = cvScalar(1.0);
-		// TODO:JavaCV upgrade this isn't worky .. i think the cvPoint is bogus?
-		// cvPutText(frame, text, cvPoint(10, 10), font, CvScalar.GREEN);
+
 		cvPutText(frame, text, cvPoint(10, 10), font, CvScalar.GREEN);
-		
-		// cvPutText(frame, text, cvPoint(10, 10), font, CvScalar.GREEN);
-		log.info("cvPutText no worky yet..");
+
 		return frame;
 	}
 
@@ -210,7 +205,11 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 				count[0] = MAX_POINT_COUNT;
 				IntPointer countPointer = new IntPointer(count);
 				cvGoodFeaturesToTrack(preGrey, eig, tmp, prePoints, countPointer, 0.05, 5.0, mask, 3, 0, 0.04);
-				
+
+				// Call Lucas Kanade algorithm
+				BytePointer features_found = new BytePointer(MAX_POINT_COUNT);
+				FloatPointer feature_errors = new FloatPointer(MAX_POINT_COUNT);
+
 				// why should I find sub-pixel resolution ???
 				// cvFindCornerSubPix(preGrey, prePoints, count[0],
 				// cvSize(win_size, win_size), cvSize(-1, -1),
@@ -218,7 +217,20 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 				// 0.03));
 				needTrackingPoints = false;
 			}
+			
+			/* FIXME !!
 
+			CvSize pyr_sz = cvSize(preGrey.width() + 8, imgB.height() / 3);
+
+			IplImage pyrA = cvCreateImage(pyr_sz, IPL_DEPTH_32F, 1);
+			IplImage pyrB = cvCreateImage(pyr_sz, IPL_DEPTH_32F, 1);
+
+			CvPoint2D32f cornersB = new CvPoint2D32f(MAX_CORNERS);
+			cvCalcOpticalFlowPyrLK(preGrey, grey, pyrA, pyrB, cornersA, cornersB, corner_count.get(), cvSize(win_size, win_size), 5, features_found, feature_errors,
+					cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3), 0);
+
+			*/
+			
 			if (count[0] > 0) {
 
 				// Call Lucas Kanade algorithm
@@ -229,17 +241,19 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 				}
 
 				// CvPoint2D32f points = new CvPoint2D32f(MAX_POINT_COUNT); //
-				// WTF?	
+				// WTF?
 				CvSize size = cvSize(win_size, win_size);
-				CvTermCriteria termCriteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3); 
+				CvTermCriteria termCriteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3);
 
-				// TODO: validate if there's a better way to wrape these objects (introduced in JavaCV upgrade)
+				// TODO: validate if there's a better way to wrape these objects
+				// (introduced in JavaCV upgrade)
 				BytePointer statusPointer = new BytePointer(status);
 				CvTermCriteria cvTermCriteria = new CvTermCriteria(new FloatPointer(termCriteria));
 				FloatPointer errorFP = new FloatPointer(error);
-				
-				// TODO: Validate what the "count" is, this changed from an array to a scalar in the JavaCV upgrade.
-				cvCalcOpticalFlowPyrLK((CvArr)preGrey, (CvArr)grey, null, null, prePoints, points, count[0], size, 5, statusPointer, errorFP, cvTermCriteria, 0);
+
+				// TODO: Validate what the "count" is, this changed from an
+				// array to a scalar in the JavaCV upgrade.
+				cvCalcOpticalFlowPyrLK((CvArr) preGrey, (CvArr) grey, null, null, prePoints, points, count[0], size, 5, statusPointer, errorFP, cvTermCriteria, 0);
 
 				CvArr grayArray = grey;
 				/*

@@ -173,7 +173,8 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 		port.close();
 		out = null;
 		in = null;
-		/* 
+		/*  seen strategy of closing rxtxLib ports in a different thread
+		 *  to keep from infinite blocking .. but
 		new Thread(){
 			public void run(){
 				log.info("closing streams begin");

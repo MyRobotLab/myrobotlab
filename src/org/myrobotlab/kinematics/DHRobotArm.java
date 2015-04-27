@@ -2,7 +2,14 @@ package org.myrobotlab.kinematics;
 
 import java.util.ArrayList;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.GUIService;
+import org.slf4j.Logger;
+
 public class DHRobotArm {
+	
+	transient public final static Logger log = LoggerFactory.getLogger(DHRobotArm.class);
+
 
 	private ArrayList<DHLink> links;
 
@@ -31,7 +38,7 @@ public class DHRobotArm {
 		// this will be used to compute the gradient of x,y,z based on the joint
 		// movement.
 		Point basePosition = this.getPalmPosition();
-		// System.out.println("Base Position : " + basePosition);
+		// log.debug("Base Position : " + basePosition);
 		// for each servo, we'll rotate it forward by delta (and back), and get
 		// the new positions
 		for (int j = 0; j < numLinks; j++) {
@@ -43,7 +50,7 @@ public class DHRobotArm {
 			// change
 			// this is an approx of the gradient of P
 			// UHoh,, what about divide by zero?!
-			// System.out.println("Delta Point" + deltaPoint);
+			// log.debug("Delta Point" + deltaPoint);
 			double dXdj = deltaPoint.getX() / delta;
 			double dYdj = deltaPoint.getY() / delta;
 			double dZdj = deltaPoint.getZ() / delta;
@@ -53,13 +60,13 @@ public class DHRobotArm {
 			// TODO: get orientation roll/pitch/yaw
 		}
 
-		// System.out.println("Jacobian(p)approx");
-		// System.out.println(jacobian);
+		// log.debug("Jacobian(p)approx");
+		// log.debug(jacobian);
 
 		// This is the MAGIC! the pseudo inverse should map
 		// deltaTheta[i] to delta[x,y,z]
 		Matrix jInverse = jacobian.pseudoInverse();
-		// System.out.println("Pseudo inverse Jacobian(p)approx\n" + jInverse);
+		// log.debug("Pseudo inverse Jacobian(p)approx\n" + jInverse);
 		return jInverse;
 	}
 
@@ -98,15 +105,15 @@ public class DHRobotArm {
 		// m.elements[2][0] = 1;
 		// m.elements[3][3] = 1;
 
-		// System.out.println("-------------------------");
-		// System.out.println(m);
+		// log.debug("-------------------------");
+		// log.debug(m);
 		// TODO: validate this approach..
 		for (DHLink link : links) {
 			Matrix s = link.resolveMatrix();
-			// System.out.println(s);
+			// log.debug(s);
 			m = m.multiply(s);
-			// System.out.println("-------------------------");
-			// System.out.println(m);
+			// log.debug("-------------------------");
+			// log.debug(m);
 		}
 		// now m should be the total translation for the arm
 		// given the arms current position
@@ -114,7 +121,7 @@ public class DHRobotArm {
 		double y = m.elements[1][3];
 		double z = m.elements[2][3];
 		// double ws = m.elements[3][3];
-		// System.out.println("World Scale : " + ws);
+		// log.debug("World Scale : " + ws);
 		Point palm = new Point(x, y, z);
 		return palm;
 	}
@@ -129,7 +136,7 @@ public class DHRobotArm {
 			numSteps++;
 			// TODO: what if its unreachable!
 			Point currentPos = this.getPalmPosition();
-			System.out.println("Current Position " + currentPos);
+			log.debug("Current Position " + currentPos);
 			// vector to destination
 			Point deltaPoint = goal.subtract(currentPos);
 			Matrix dP = new Matrix(3, 1);
@@ -142,7 +149,7 @@ public class DHRobotArm {
 			Matrix jInverse = this.getJInverse();
 			// why is this zero?
 			Matrix dTheta = jInverse.multiply(dP);
-			System.out.println("delta Theta + " + dTheta);
+			log.debug("delta Theta + " + dTheta);
 			for (int i = 0; i < dTheta.getNumRows(); i++) {
 				// update joint positions! move towards the goal!
 				double d = dTheta.elements[i][0];
@@ -152,7 +159,7 @@ public class DHRobotArm {
 			// get there.
 			// we should figure out how to scale the steps.
 			if (deltaPoint.magnitude() < errorThreshold) {
-				System.out.println("We made it!  It took " + numSteps + " iterations to get there.");
+				log.debug("We made it!  It took " + numSteps + " iterations to get there.");
 				break;
 			}
 		}
