@@ -2047,17 +2047,18 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return module;
 	}
 
-	public boolean noWorky() {
+	// FIXME THIS IS NOT NORMALIZED !!!
+	static public boolean noWorky(String userId) {
 		try {
-			String ret = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", "runtime", "file", new File("myrobotlab.log"));
+			String ret = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("agent.log"));
 			if (ret.contains("Upload:")) {
-				info("noWorky successfully sent - our crack team of experts will check it out !");
+				log.info("noWorky successfully sent - our crack team of experts will check it out !");
 				return true;
 			}
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
-		error("the noWorky didn't worky !");
+		log.error("the noWorky didn't worky !");
 		return false;
 	}
 
