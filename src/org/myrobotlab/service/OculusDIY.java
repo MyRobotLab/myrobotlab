@@ -28,6 +28,7 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		return peers;
 	}
 
+	Integer lastrotheadvalue = 90;
 	Integer lastValue = 30;
 	Integer resetValue = 30;
 	Integer head = 90;
@@ -89,6 +90,12 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 			rothead = (offSet + headingint - 360);
 		} else {
 			rothead = (offSet + headingint);
+		}
+		System.out.println("difference is" + Math.abs(rothead - lastrotheadvalue));
+		if (Math.abs(rothead - lastrotheadvalue) > 2) {
+			lastrotheadvalue = rothead;
+		}
+		else { rothead = lastrotheadvalue;
 		}
 		
 	    y = ay;
