@@ -92,6 +92,8 @@ public class MyoThalmic extends Service implements DeviceListener {
 		if (currentPose.getType() == PoseType.FIST) {
 			myo.vibrate(VibrationType.VIBRATION_MEDIUM);
 		}
+		
+		invoke("publishPose", pose);
 	}
 	
 	public Pose publishPose(Pose pose){
