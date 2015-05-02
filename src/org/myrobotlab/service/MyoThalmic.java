@@ -16,6 +16,7 @@ import com.thalmic.myo.Quaternion;
 import com.thalmic.myo.Vector3;
 import com.thalmic.myo.enums.Arm;
 import com.thalmic.myo.enums.PoseType;
+import com.thalmic.myo.enums.UnlockType;
 import com.thalmic.myo.enums.VibrationType;
 import com.thalmic.myo.enums.XDirection;
 import com.thalmic.myo.example.DataCollector;
@@ -32,6 +33,8 @@ public class MyoThalmic extends Service implements DeviceListener {
 	double yawW;
 	Pose currentPose;
 	Arm whichArm;
+	
+	Myo myo = null; 
 
 	public void connect() {
 
@@ -40,9 +43,9 @@ public class MyoThalmic extends Service implements DeviceListener {
 		System.out.println("Attempting to find a Myo...");
 		log.info("Attempting to find a Myo");
 
-		Myo myodevice = hub.waitForMyo(10000);
+		myo = hub.waitForMyo(10000);
 
-		if (myodevice == null) {
+		if (myo == null) {
 			// throw new RuntimeException("Unable to find a Myo!");
 			log.info("Unable to find a Myo");
 		}
@@ -73,6 +76,7 @@ public class MyoThalmic extends Service implements DeviceListener {
 
 	@Override
 	public void onOrientationData(Myo myo, long timestamp, Quaternion rotation) {
+
 		Quaternion normalized = rotation.normalized();
 
 		double roll = Math.atan2(2.0f * (normalized.getW() * normalized.getX() + normalized.getY() * normalized.getZ()),
@@ -94,6 +98,10 @@ public class MyoThalmic extends Service implements DeviceListener {
 		}
 		
 		invoke("publishPose", pose);
+	}
+	
+	public void addPoseListener(Service service){
+		addListener("publishPose", service.getName(), "onPose", Pose.class);
 	}
 	
 	public Pose publishPose(Pose pose){
@@ -206,6 +214,21 @@ public class MyoThalmic extends Service implements DeviceListener {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public void lock() {
+		myo.lock();
+	}
+	
+	public void unlock(){
+		myo.unlock(UnlockType.UNLOCK_TIMED);
+	}
+	
+	/*
+	public void setLockingPolicy(String policy){
+		myo.setL
+		myo.setLockingPolicy("none") ;
+	}
+	*/
 	
 	////
 	
