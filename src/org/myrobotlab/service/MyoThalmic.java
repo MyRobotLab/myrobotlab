@@ -35,10 +35,36 @@ public class MyoThalmic extends Service implements DeviceListener {
 	Arm whichArm;
 	
 	Myo myo = null; 
+	Hub hub = null;
+	HubThread hubThread = null;
+	
+	class HubThread extends Thread {
+		public boolean running = false;
+		public void run(){
+			running = true;
+			while (running) {
+				hub.run(1000 / 20);
+				this.toString();
+			}
+			
+			if (hubThread == null){
+				hubThread = new HubThread();
+				hubThread.start();
+			}
+		}
+	}
+	
+	public void disconnect(){
+		if (hubThread != null){
+			hubThread.running = false;
+			hubThread = null;
+		}
+	}
 
 	public void connect() {
 
-		Hub hub = new Hub("com.example.hello-myo");
+		
+		hub = new Hub("com.example.hello-myo");
 
 		System.out.println("Attempting to find a Myo...");
 		log.info("Attempting to find a Myo");
