@@ -50,7 +50,7 @@ public class MyoThalmic extends Service implements DeviceListener {
 			running = true;
 			while (running) {
 				hub.run(1000 / 20);
-				this.toString();
+				myService.toString();
 			}
 		}
 	}
