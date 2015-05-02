@@ -40,16 +40,17 @@ public class MyoThalmic extends Service implements DeviceListener {
 	
 	class HubThread extends Thread {
 		public boolean running = false;
+		MyoThalmic myService = null;
+		
+		public HubThread(MyoThalmic myService){
+			this.myService = myService;
+		}
+		
 		public void run(){
 			running = true;
 			while (running) {
 				hub.run(1000 / 20);
 				this.toString();
-			}
-			
-			if (hubThread == null){
-				hubThread = new HubThread();
-				hubThread.start();
 			}
 		}
 	}
@@ -63,12 +64,10 @@ public class MyoThalmic extends Service implements DeviceListener {
 
 	public void connect() {
 
-		
 		hub = new Hub("com.example.hello-myo");
 
 		System.out.println("Attempting to find a Myo...");
 		log.info("Attempting to find a Myo");
-
 		myo = hub.waitForMyo(10000);
 
 		if (myo == null) {
@@ -79,6 +78,11 @@ public class MyoThalmic extends Service implements DeviceListener {
 		System.out.println("Connected to a Myo armband!");
 		log.info("Connected to a Myo armband");
 		hub.addListener(this);
+		
+		if (hubThread == null){
+			hubThread = new HubThread(this);
+			hubThread.start();
+		}
 
 	}
 
