@@ -31,12 +31,12 @@ public class MyoThalmic extends Service implements DeviceListener {
 	double rollW;
 	double pitchW;
 	double yawW;
-	Pose currentPose;
-	Arm whichArm;
+	transient Pose currentPose;
+	transient Arm whichArm;
 	
-	Myo myo = null; 
-	Hub hub = null;
-	HubThread hubThread = null;
+	transient Myo myo = null; 
+	transient Hub hub = null;
+	transient HubThread hubThread = null;
 	
 	class HubThread extends Thread {
 		public boolean running = false;
