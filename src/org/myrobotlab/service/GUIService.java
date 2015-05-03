@@ -163,23 +163,6 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		return c;
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, URISyntaxException {
-		LoggingFactory.getInstance().configure();
-		Logging logging = LoggingFactory.getInstance();
-		try {
-			logging.setLevel(Level.INFO);
-
-			Runtime.createAndStart("i01", "InMoov");
-
-			GUIService gui2 = (GUIService) Runtime.createAndStart("gui1", "GUIService");
-			gui2.startService();
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
-
 	static public void restart() {
 		JFrame frame = new JFrame();
 		int ret = JOptionPane.showConfirmDialog(frame, "<html>New components have been added,<br>" + " it is necessary to restart in order to use them.</html>", "restart",
@@ -791,6 +774,23 @@ public class GUIService extends Service implements WindowListener, ActionListene
 	@Override
 	public void windowOpened(WindowEvent e) {
 		// log.info("windowOpened");
+
+	}
+
+	public static void main(String[] args) throws ClassNotFoundException, URISyntaxException {
+		LoggingFactory.getInstance().configure();
+		Logging logging = LoggingFactory.getInstance();
+		try {
+			logging.setLevel(Level.INFO);
+
+			Runtime.createAndStart("i01", "InMoov");
+
+			GUIService gui2 = (GUIService) Runtime.createAndStart("gui1", "GUIService");
+			gui2.startService();
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 
 	}
 

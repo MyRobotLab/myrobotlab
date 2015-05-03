@@ -19,6 +19,8 @@
  * requirements - please refer to http://myrobotlab.org/libraries for 
  * details.
  * 
+ * http://docs.opencv.org/modules/video/doc/motion_analysis_and_object_tracking.html#void calcOpticalFlowPyrLK(InputArray prevImg, InputArray nextImg, InputArray prevPts, InputOutputArray nextPts, OutputArray status, OutputArray err, Size winSize, int maxLevel, TermCriteria criteria, int flags, double minEigThreshold)
+ * 
  * Enjoy !
  * 
  * */

@@ -59,6 +59,7 @@ import static org.bytedeco.javacpp.opencv_features2d.SimpleBlobDetector;
 
 
 
+
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -85,6 +86,7 @@ import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
 import org.myrobotlab.opencv.OpenCVFilterCanny;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
 import org.myrobotlab.opencv.OpenCVFilterSURF;
 import org.myrobotlab.opencv.OpenCVFilterSimpleBlobDetector;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
@@ -872,13 +874,13 @@ public class OpenCV extends VideoSource {
 		// lkoptical disparity motion Time To Contact
 		// https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
 		//
-		LoggingFactory.getInstance().configure();
+		org.apache.log4j.BasicConfigurator.configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Runtime.start("gui", "GUIService");
 		
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-		opencv.setCameraIndex(0);
+		// opencv.setCameraIndex(0);
 		
 //		opencv.setInputSource("file");
 //		opencv.setInputFileName("c:/test.avi");
@@ -892,18 +894,18 @@ public class OpenCV extends VideoSource {
 
 		//OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
 		// opencv.addFilter(tr);
-		OpenCVFilterSimpleBlobDetector blobDet = new OpenCVFilterSimpleBlobDetector("blobber");
-		opencv.addFilter(blobDet);
+		/*
+		OpenCVFilterLKOpticalTrack lktrack = new OpenCVFilterLKOpticalTrack("lktrack");
+		opencv.addFilter(lktrack);
+		*/
 		
 		//OpenCVFilterAffine affine = new OpenCVFilterAffine("left");
 		//affine.setAngle(45);
 		// opencv.addFilter(affine);
 //		opencv.test();
-//		
-//		opencv.setFrameGrabberType("org.myrobotlab.opencv.ImageFileFrameGrabber");
-//		opencv.setInputSource(INPUT_SOURCE_IMAGE_FILE);
-//		opencv.setInputFileName("600.3.jpg");
-		opencv.capture();
+
+		//opencv.capture();
+		//opencv.captureFromImageFile("C:\\mrl\\myrobotlab\\image0.png");
 		 
 		//Runtime.createAndStart("gui", "GUIService");
 		//opencv.test();

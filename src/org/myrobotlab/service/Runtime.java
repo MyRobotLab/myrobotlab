@@ -2101,7 +2101,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	/**
 	 * registration event
 	 * 
-	 * @param filename
+	 * @param path
 	 *            - the name of the Service which was successfully registered
 	 * @return
 	 */
@@ -2112,7 +2112,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	/**
 	 * release event
 	 * 
-	 * @param filename
+	 * @param path
 	 *            - the name of the Service which was successfully released
 	 * @return
 	 */
