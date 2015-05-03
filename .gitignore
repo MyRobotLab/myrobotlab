@@ -25,3 +25,5 @@
 
 /ArduinoMsgCodec*.ino
 /ArduinoMsgCodec*.java
+/webapps/
+/agent.log

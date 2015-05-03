@@ -605,7 +605,7 @@ public class HTTPRequest {
 	/**
 	 * post the POST request specified URL, with the specified parameter
 	 * 
-	 * @param filename
+	 * @param path
 	 *            parameter name
 	 * @param value
 	 *            parameter value

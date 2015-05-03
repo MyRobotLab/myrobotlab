@@ -108,38 +108,6 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
 		super(name);
 	}
 
-	/*
-	 * @Override public BufferedImage display(IplImage frame, OpenCVData data) {
-	 * 
-	 * BufferedImage frameBuffer = frame.getBufferedImage(); Graphics2D graphics
-	 * = frameBuffer.createGraphics(); float gradient = 1 / oldest.value; int x,
-	 * y; graphics.setColor(Color.green);
-	 * 
-	 * for (int i = 0; i < count[0]; ++i) {
-	 * 
-	 * corners.position(i); x = (int) corners.x(); y = (int) corners.y();
-	 * 
-	 * if (colorAgeOfPoint) { String key = String.format("%d.%d", x, y); if
-	 * (values.containsKey(key)) { float scale =
-	 * (values.get(String.format("%d.%d", x, y)) * (gradient)); if (scale ==
-	 * 1.0f) // grey { graphics.setColor(Color.white); } else {
-	 * graphics.setColor(new Color(Color.HSBtoRGB(scale, 0.8f, 0.7f))); }
-	 * graphics.drawOval(x, y, 3, 1); //graphics.drawString(String.format("%f",
-	 * scale), x, y); graphics.drawString(String.format("%s", df.format(scale)),
-	 * x, y);
-	 * 
-	 * } else { log.error(key); // FIXME FIXME FIXME ---- WHY THIS SHOULDN"T
-	 * HAPPEN BUT IT HAPPENS ALL THE TIME } } corners.position(i); //
-	 * graphics.drawOval(x, y, 3, 1); }
-	 * 
-	 * // FIXME - ! which is faster OpenCV or awt - it has to go to awt anyway
-	 * // at some point // if its running with guiservice
-	 * 
-	 * return frameBuffer; // TODO - ran out of memory here
-	 * 
-	 * }
-	 */
-
 	@Override
 	public IplImage display(IplImage frame, OpenCVData data) {
 
