@@ -7,6 +7,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.openni.OpenNIData;
+import org.myrobotlab.openni.Skeleton;
+import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 
 public class Sweety extends Service {
@@ -21,7 +24,9 @@ public class Sweety extends Service {
 	transient public Tracking leftTracker;
 	transient public Tracking rightTracker;
 	transient public ProgramAB chatBot;
-
+	transient public OpenNI openni;
+	transient public PID pid;
+	
 	transient Servo leftForearm;
 	transient Servo rightForearm;
 	transient Servo rightShoulder;
@@ -36,13 +41,18 @@ public class Sweety extends Service {
 	transient Servo leftHand;
 	transient Servo leftWrist;
 
-	transient UltrasonicSensor USfront;
-	transient UltrasonicSensor USfrontRight;
-	transient UltrasonicSensor USfrontLeft;
-	transient UltrasonicSensor USback;
-	transient UltrasonicSensor USbackRight;
-	transient UltrasonicSensor USbackLeft;
+	transient public UltrasonicSensor USfront;
+	transient public UltrasonicSensor USfrontRight;
+	transient public UltrasonicSensor USfrontLeft;
+	transient public UltrasonicSensor USback;
+	transient public UltrasonicSensor USbackRight;
+	transient public UltrasonicSensor USbackLeft;
 
+	boolean copyGesture = false;
+	boolean firstSkeleton = true;
+	boolean saveSkeletonFrame = false;
+	
+	// arduino pins variables
 	int rightMotorDirPin = 2;
 	int rightMotorPwmPin = 3;
 	int leftMotorDirPin = 4;
@@ -65,6 +75,50 @@ public class Sweety extends Service {
 	int LATCH = 48;
 	int DATA = 49;
 
+	// variable for servomotors infos ( min, max, neutral )
+	int leftForearmMin = 70;
+	int rightForearmMin = 0;
+	int rightShoulderMin = 2;
+	int leftShoulderMin = 5;
+	int rightArmMin = 0;
+	int neckMin = 55;
+	int leftEyeMin = 25;
+	int leftArmMin = 70;
+	int rightEyeMin = 80;
+	int rightHandMin = 10;
+	int rightWristMin = 0;
+	int leftHandMin = 80;
+	int leftWristMin = 0;
+
+	int leftForearmMax = 155;
+	int rightForearmMax = 80;
+	int rightShoulderMax = 155;
+	int leftShoulderMax = 160;
+	int rightArmMax = 80;
+	int neckMax = 105;
+	int leftEyeMax = 125;
+	int leftArmMax = 160;
+	int rightEyeMax = 180;
+	int rightHandMax = 75;
+	int rightWristMax = 180;
+	int leftHandMax = 150;
+	int leftWristMax = 180;
+
+	int leftForearmNeutral = 150;
+	int rightForearmNeutral = 5;
+	int rightShoulderNeutral = 2;
+	int leftShoulderNeutral = 160;
+	int rightArmNeutral = 2;
+	int neckNeutral = 75;
+	int leftEyeNeutral = 75;
+	int leftArmNeutral = 155;
+	int rightEyeNeutral = 127;
+	int rightHandNeutral = 10;
+	int rightWristNeutral = 116;
+	int leftHandNeutral = 150;
+	int leftWristNeutral = 85;
+	
+	// variables for speak / mouth sync
 	public int delaytime = 50;
 	public int delaytimestop = 200;
 	public int delaytimeletter = 50;
@@ -100,6 +154,8 @@ public class Sweety extends Service {
 		peers.put("rightWrist", "Servo", "servo");
 		peers.put("leftHand", "Servo", "servo");
 		peers.put("leftWrist", "Servo", "servo");
+		peers.put("openni", "OpenNI", "openni");
+		peers.put("pid", "PID", "pid");
 
 		return peers;
 	}
@@ -122,11 +178,10 @@ public class Sweety extends Service {
 		super(n);
 	}
 
+	/**
+	 * Attach the servos to arduino pins
+	 */
 	public void attach() {
-		/**
-		 * Attach the servos to arduino pins
-		 */
-
 		rightForearm.attach(arduino.getName(), 34);
 		leftForearm.attach(arduino.getName(), 35);
 		rightShoulder.attach(arduino.getName(), 36);
@@ -142,19 +197,17 @@ public class Sweety extends Service {
 		leftWrist.attach(arduino.getName(), 45);
 	}
 
+	/**
+	 * Connect the arduino to a COM port . Exemple : connect("COM8")
+	 */
 	public boolean connect(String port) {
-		/**
-		 * Connect the arduino to a COM port . Exemple : connect("COM8")
-		 */
-
 		return arduino.connect(port);
 	}
 
+	/**
+	 * detach the servos to arduino pins
+	 */
 	public void detach() {
-		/**
-		 * detach the servos to arduino pins
-		 */
-
 		rightForearm.detach();
 		leftForearm.detach();
 		rightShoulder.detach();
@@ -183,11 +236,12 @@ public class Sweety extends Service {
 		return "Service for the robot Sweety";
 	}
 
-	public void head(int neckAngle, int rightEyeAngle, int leftEyeAngle) {
-		/**
-		 * Move the right arm . Use : leftArm(shoulder angle, arm angle, forearm
-		 * angle, wrist angle, hand angle) -1 mean "no change"
-		 */
+	/**
+	 * Move the head . Use : head(neckAngle, rightEyeAngle, leftEyeAngle
+	 * -1 mean "no change"
+	 */
+	public void setHeadPosition(int neckAngle, int rightEyeAngle, int leftEyeAngle) {
+		
 		if (neckAngle == -1) {
 			neckAngle = neck.getPos();
 		}
@@ -203,12 +257,43 @@ public class Sweety extends Service {
 		leftEye.moveTo(leftEyeAngle);
 	}
 
-	// TODO protect against self collision with -> servoName.getPos()
-	public void leftArm(int shoulderAngle, int armAngle, int forearmAngle, int wristAngle, int handAngle) {
-		/**
-		 * Move the left arm . Use : leftArm(shoulder angle, arm angle, forearm
-		 * angle, wrist angle, hand angle) -1 mean "no change"
-		 */
+	/**
+	 * Move the right arm . Use : leftArm(shoulder angle, arm angle, forearm
+	 * angle, wrist angle, hand angle) -1 mean "no change"
+	 */
+	public void setRightArmPosition(int shoulderAngle, int armAngle, int forearmAngle, int wristAngle, int handAngle) {
+
+// TODO protect against self collision
+		if (shoulderAngle == -1) {
+			shoulderAngle = rightShoulder.getPos();
+		}
+		if (armAngle == -1) {
+			armAngle = rightArm.getPos();
+		}
+		if (forearmAngle == -1) {
+			forearmAngle = rightForearm.getPos();
+		}
+		if (wristAngle == -1) {
+			wristAngle = rightWrist.getPos();
+		}
+		if (handAngle == -1) {
+			handAngle = rightHand.getPos();
+		}
+
+		rightShoulder.moveTo(shoulderAngle);
+		rightArm.moveTo(armAngle);
+		rightForearm.moveTo(forearmAngle);
+		rightWrist.moveTo(wristAngle);
+		rightHand.moveTo(handAngle);
+	}
+	
+	
+	/**
+	 * Move the left arm . Use : leftArm(shoulder angle, arm angle, forearm
+	 * angle, wrist angle, hand angle) -1 mean "no change"
+	 */
+	public void setLeftArmPosition(int shoulderAngle, int armAngle, int forearmAngle, int wristAngle, int handAngle) {
+// TODO protect against self collision with -> servoName.getPos()
 		if (shoulderAngle == -1) {
 			shoulderAngle = leftShoulder.getPos();
 		}
@@ -232,11 +317,10 @@ public class Sweety extends Service {
 		leftHand.moveTo(handAngle);
 	}
 
+	/**
+	 * Set the mouth attitude . choose : smile, notHappy, speechLess, empty.
+	 */
 	public void mouthState(String value) {
-		/**
-		 * Set the mouth attitude . choose : smile, notHappy, speechLess, empty.
-		 */
-
 		if (value == "smile") {
 			myShiftOut("11011100");
 		} else if (value == "notHappy") {
@@ -249,12 +333,11 @@ public class Sweety extends Service {
 
 	}
 
+	/**
+	 * drive the motors . Speed > 0 go forward . Speed < 0 go backward .
+	 * Direction > 0 go right . Direction < 0 go left
+	 */
 	public void moveMotors(int speed, int direction) {
-		/**
-		 * drive the motors . Speed > 0 go forward . Speed < 0 go backward .
-		 * Direction > 0 go right . Direction < 0 go left
-		 */
-
 		int speedMin = 50; // min PWM needed for the motors
 		boolean isMoving = false;
 		int rightCurrentSpeed = 0;
@@ -350,11 +433,10 @@ public class Sweety extends Service {
 
 	}
 
+	/**
+	 * Used to manage a shift register
+	 */
 	private void myShiftOut(String value) {
-		/**
-		 * Used to manage a shift register
-		 */
-
 		arduino.digitalWrite(LATCH, 0); // Stop the copy
 		for (int i = 0; i < 8; i++) { // Store the data
 			if (value.charAt(i) == '1') {
@@ -369,44 +451,44 @@ public class Sweety extends Service {
 
 	}
 
+	/**
+	 * Move the servos to show asked posture
+	 */
 	public void posture(String pos) {
-		/**
-		 * Move the servos to show asked posture
-		 */
-
 		if (pos == "neutral") {
-			leftArm(145, 108, 136, 85, 150);
-			rightArm(2, 35, 5, 116, 10);
-			head(75, 127, 75);
+			setLeftArmPosition(leftShoulderNeutral, leftArmNeutral, leftForearmNeutral, leftWristNeutral, leftHandNeutral);
+			setRightArmPosition(rightShoulderNeutral, rightArmNeutral, rightForearmNeutral, rightWristNeutral, rightHandNeutral);
+			setHeadPosition(neckNeutral, rightEyeNeutral, leftEyeNeutral);
 		}
 		/*
-		 * Template else if (pos == ""){ leftArm(, , , 85, 150); rightArm(, , ,
-		 * 116, 10); head(75, 127, 75); }
+		 * Template else if (pos == ""){ setLeftArmPosition(, , , 85, 150); setRightArmPosition(, , ,
+		 * 116, 10); setHeadPosition(75, 127, 75); }
 		 */
+		 // TODO correct angles for posture 
 		else if (pos == "yes") {
-			leftArm(0, 85, 136, 85, 150);
-			rightArm(155, 55, 5, 116, 10);
-			head(75, 127, 75);
-		} else if (pos == "concentre") {
-			leftArm(37, 106, 85, 85, 150);
-			rightArm(109, 43, 54, 116, 10);
-			head(97, 127, 75);
+			setLeftArmPosition(0, 95, 136, 85, 150);
+			setRightArmPosition(155, 55, 5, 116, 10);
+			setHeadPosition(75, 127, 75);
+		} else if (pos == "concenter") {
+			setLeftArmPosition(37, 116, 85, 85, 150);
+			setRightArmPosition(109, 43, 54, 116, 10);
+			setHeadPosition(97, 127, 75);
 		} else if (pos == "showLeft") {
-			leftArm(68, 53, 140, 85, 150);
-			rightArm(2, 76, 40, 116, 10);
-			head(85, 127, 75);
+			setLeftArmPosition(68, 63, 160, 85, 150);
+			setRightArmPosition(2, 76, 40, 116, 10);
+			setHeadPosition(85, 127, 75);
 		} else if (pos == "showRight") {
-			leftArm(145, 69, 93, 85, 150);
-			rightArm(80, 110, 5, 116, 10);
-			head(75, 127, 75);
+			setLeftArmPosition(145, 79, 93, 85, 150);
+			setRightArmPosition(80, 110, 5, 116, 10);
+			setHeadPosition(75, 127, 75);
 		} else if (pos == "handsUp") {
-			leftArm(0, 69, 93, 85, 150);
-			rightArm(155, 76, 40, 116, 10);
-			head(75, 127, 75);
+			setLeftArmPosition(0, 79, 93, 85, 150);
+			setRightArmPosition(155, 76, 40, 116, 10);
+			setHeadPosition(75, 127, 75);
 		} else if (pos == "carryBags") {
-			leftArm(145, 69, 93, 85, 150);
-			rightArm(2, 76, 40, 116, 10);
-			head(75, 127, 75);
+			setLeftArmPosition(145, 79, 93, 85, 150);
+			setRightArmPosition(2, 76, 40, 116, 10);
+			setHeadPosition(75, 127, 75);
 		}
 
 	}
@@ -431,40 +513,11 @@ public class Sweety extends Service {
 		return this;
 	}
 
-	// TODO protect against self collision
-	public void rightArm(int shoulderAngle, int armAngle, int forearmAngle, int wristAngle, int handAngle) {
-		/**
-		 * Move the right arm . Use : leftArm(shoulder angle, arm angle, forearm
-		 * angle, wrist angle, hand angle) -1 mean "no change"
-		 */
-		if (shoulderAngle == -1) {
-			shoulderAngle = rightShoulder.getPos();
-		}
-		if (armAngle == -1) {
-			armAngle = rightArm.getPos();
-		}
-		if (forearmAngle == -1) {
-			forearmAngle = rightForearm.getPos();
-		}
-		if (wristAngle == -1) {
-			wristAngle = rightWrist.getPos();
-		}
-		if (handAngle == -1) {
-			handAngle = rightHand.getPos();
-		}
 
-		rightShoulder.moveTo(shoulderAngle);
-		rightArm.moveTo(armAngle);
-		rightForearm.moveTo(forearmAngle);
-		rightWrist.moveTo(wristAngle);
-		rightHand.moveTo(handAngle);
-	}
-
+	/**
+	 * Say text and move mouth leds
+	 */
 	public synchronized void saying(String text) { // Adapt mouth leds to words
-		/**
-		 * Say text and move mouth leds
-		 */
-
 		log.info("Saying :" + text);
 		mouth.speak(text);
 		sleep(50);
@@ -526,6 +579,12 @@ public class Sweety extends Service {
 		// Share arduino service with others
 		reserveRootAs("sweety.leftTracker.arduino", "sweety.arduino");
 		reserveRootAs("sweety.rightTracker.arduino", "sweety.arduino");
+		reserveRootAs("sweety.USfront.arduino", "sweety.arduino");
+		reserveRootAs("sweety.USfrontRight.arduino", "sweety.arduino");
+		reserveRootAs("sweety.USfrontLeft.arduino", "sweety.arduino");
+		reserveRootAs("sweety.USback.arduino", "sweety.arduino");
+		reserveRootAs("sweety.USbackRight.arduino", "sweety.arduino");
+		reserveRootAs("sweety.USbackLeft.arduino", "sweety.arduino");
 
 		chatBot = (ProgramAB) startPeer("chatBot");
 
@@ -549,26 +608,27 @@ public class Sweety extends Service {
 		leftHand = (Servo) startPeer("leftHand");
 		leftWrist = (Servo) startPeer("leftWrist");
 
-		leftForearm.setMinMax(85, 140);
-		rightForearm.setMinMax(5, 67);
-		rightShoulder.setMinMax(0, 155);
-		leftShoulder.setMinMax(0, 145);
-		rightArm.setMinMax(25, 130);
-		neck.setMinMax(55, 105);
-		leftEye.setMinMax(25, 125);
-		leftArm.setMinMax(45, 117);
-		rightEye.setMinMax(80, 180);
-		rightHand.setMinMax(10, 75);
-		rightWrist.setMinMax(0, 180);
-		leftHand.setMinMax(80, 150);
-		leftWrist.setMinMax(0, 180);
+		
+		leftForearm.setMinMax(leftForearmMin, leftForearmMax);
+		rightForearm.setMinMax(rightForearmMin, rightForearmMax);
+		rightShoulder.setMinMax(rightShoulderMin, rightShoulderMax);
+		leftShoulder.setMinMax(leftShoulderMin, leftShoulderMax);
+		rightArm.setMinMax(rightArmMin, rightArmMax);
+		neck.setMinMax(neckMin, neckMax);
+		leftEye.setMinMax(leftEyeMin, leftEyeMax);
+		leftArm.setMinMax(leftArmMin, leftArmMax);
+		rightEye.setMinMax(rightEyeMin, rightEyeMax);
+		rightHand.setMinMax(rightHandMin, rightHandMax);
+		rightWrist.setMinMax(rightWristMin, rightWristMax);
+		leftHand.setMinMax(leftHandMin, leftHandMax);
+		leftWrist.setMinMax(leftWristMin, leftWristMax);
+		
 	}
 
+	/**
+	 * Start the tracking services
+	 */
 	public void startTrack(String port, int leftCameraIndex, int rightCameraIndex) throws Exception {
-		/**
-		 * Start the tracking services
-		 */
-
 		neck.detach();
 		rightEye.detach();
 		leftEye.detach();
@@ -591,11 +651,10 @@ public class Sweety extends Service {
 		saying("tracking activated.");
 	}
 
+	/**
+	 * Start the ultrasonic sensors services
+	 */
 	public void startUltraSonic(String port) throws Exception {
-		/**
-		 * Start the ultrasonic sensors services
-		 */
-
 		USfront = (UltrasonicSensor) startPeer("USfront");
 		USfrontRight = (UltrasonicSensor) startPeer("USfrontRight");
 		USfrontLeft = (UltrasonicSensor) startPeer("USfrontLeft");
@@ -610,7 +669,10 @@ public class Sweety extends Service {
 		USbackRight.attach(port, back_rightUltrasonicTrig, back_rightUltrasonicEcho);
 		USbackLeft.attach(port, back_leftUltrasonicTrig, back_leftUltrasonicEcho);
 	}
-
+	
+	/**
+	 * Stop the tracking services
+	 */
 	public void stopTrack() {
 		leftTracker.opencv.stopCapture();
 		rightTracker.opencv.stopCapture();
@@ -622,7 +684,109 @@ public class Sweety extends Service {
 
 		saying("the tracking if stopped.");
 	}
+	
+	public OpenNI startOpenNI() throws Exception {
+		/*
+		 * Start the Kinect service
+		 */
+		if (openni == null) {
+			System.out.println("starting kinect");
+			openni = (OpenNI) startPeer("openni");
+			pid = (PID) startPeer("pid");
 
+			pid.setMode(PID.MODE_AUTOMATIC);
+			pid.setOutputRange(-1, 1);
+			pid.setPID(10.0, 0.0, 1.0);
+			pid.setControllerDirection(0);
+
+			// re-mapping of skeleton !
+			//openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
+			openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
+
+			//openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
+			openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+			
+			openni.skeleton.leftShoulder.mapXY(0, 180, 180, 0);
+			//openni.skeleton.rightShoulder.mapXY(0, 180, 180, 0);
+			
+			openni.addListener("publishOpenNIData", this.getName(),"onOpenNIData");
+			//openni.addOpenNIData(this);
+		}
+		return openni;
+	}
+
+	public boolean copyGesture(boolean b) throws Exception {
+		log.info("copyGesture {}", b);
+		if (b) {
+			if (openni == null) {
+				openni = startOpenNI();
+			}
+			System.out.println("copying gestures");
+			openni.startUserTracking();
+		} else {
+			System.out.println("stop copying gestures");
+			if (openni != null) {
+				openni.stopCapture();
+				firstSkeleton = true;
+			}
+		}
+
+		copyGesture = b;
+		return b;
+	}
+
+	public String captureGesture() {
+		return captureGesture(null);
+	}
+
+	public String captureGesture(String gestureName) {
+		StringBuffer script = new StringBuffer();
+
+		String indentSpace = "";
+
+		if (gestureName != null) {
+			indentSpace = "  ";
+			script.append(String.format("def %s():\n", gestureName));
+		}
+
+		script.append(indentSpace);
+		script.append(String.format("Sweety.setRightArmPosition(%d,%d,%d,%d,%d)\n", 
+				rightShoulder.getPos(), rightArm.getPos(), rightForearm.getPos(), rightWrist.getPos(), rightHand.getPos()));
+		script.append(indentSpace);
+		script.append(String.format("Sweety.setLeftArmPosition(%d,%d,%d,%d,%d)\n", 
+				leftShoulder.getPos(), leftArm.getPos(), leftForearm.getPos(), leftWrist.getPos(), leftHand.getPos()));
+		script.append(indentSpace);
+		script.append(String.format("Sweety.setHeadPosition(%d,%d,%d)\n", neck.getPos(), leftEye.getPos(), rightEye.getPos()));
+
+		send("python", "appendScript", script.toString());
+
+		return script.toString();
+	}
+	
+	public void onOpenNIData(OpenNIData data) {
+
+		Skeleton skeleton = data.skeleton;
+
+		if (firstSkeleton) {
+			System.out.println("i see you");
+			firstSkeleton = false;
+		}
+		// TODO correct angles for shoulders
+		
+		int LforeArm = Math.round(skeleton.leftElbow.getAngleXY()) - (180 - leftForearmMax);
+		int Larm = Math.round(skeleton.leftShoulder.getAngleXY()) - (180 - leftArmMax);
+		int Lshoulder = Math.round(skeleton.leftShoulder.getAngleYZ()) + leftShoulderMin;
+		int RforeArm = Math.round(skeleton.rightElbow.getAngleXY()) + rightForearmMin;
+		int Rarm = Math.round(skeleton.rightShoulder.getAngleXY()) + rightArmMin;
+		int Rshoulder = Math.round(skeleton.rightShoulder.getAngleYZ()) - (180 - rightShoulderMax);
+		
+		// Move the left side
+		setLeftArmPosition(Lshoulder, Larm, LforeArm, -1, -1);
+
+		// Move the left side
+		setRightArmPosition(Rshoulder, Rarm, RforeArm, -1, -1);
+		}
+	
 	@Override
 	public Status test() {
 		Status status = super.test();
