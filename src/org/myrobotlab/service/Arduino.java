@@ -247,7 +247,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	public static final int MOTOR_BACKWARD = 0;
 
-	private String board;
+	
+	String board;
 
 	/**
 	 * blocking queues to support blocking methods

@@ -73,7 +73,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
 	// start //////////////////////
 
-	transient IntPointer count = new IntPointer(0).put(maxPointCount);
+	//transient IntPointer count = new IntPointer(0).put(maxPointCount);
+	transient IntPointer count = new IntPointer(0).put(0);
 
 	transient IplImage imgA = null;
 	transient IplImage imgB = null;
@@ -211,7 +212,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 		StringBuffer cB = new StringBuffer();
 
 		validCorners = 0;
-
+		pointsToPublish = new ArrayList<Point2Df>();
+		
 		// shift newly calculated corner flows
 		for (int i = 0; i < count.get(); i++) {
 			features_found.position(i);
@@ -224,13 +226,21 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 			ff.append(features_found.get());
 			fe.append(feature_errors.get());
 			cA.append(String.format("(%f,%f)", cornersA.x(), cornersA.y()));
-			cB.append(String.format("(%f,%f)", cornersB.x(), cornersB.y()));
+			float x = cornersB.x();
+			float y = cornersB.y();
+			cB.append(String.format("(%f,%f)", x, y));
 
 			// if in eror - don't bother processing
 			if (features_found.get() == 0 || feature_errors.get() > 550) {
 				// System.out.println("found " + features_found.get() +
 				// " error " + feature_errors.get());
 				continue;
+			}
+			
+			if (useFloatValues) {
+				pointsToPublish.add(new Point2Df(x / width, y / height));
+			} else {
+				pointsToPublish.add(new Point2Df(x, y));
 			}
 
 			++validCorners;
@@ -247,6 +257,11 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 			cornersA.put(cornersB.x(), cornersB.y());
 			// cornersA.put(cornersB.get(i), i);
 			// cvLine(imgC, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0);
+		} // iterated through points
+		
+		if (publishData)
+		{
+			data.set(pointsToPublish);
 		}
 
 		log.info(String.format("MAX_POINT_COUNT %d", maxPointCount));
