@@ -161,35 +161,7 @@ public class Tracking extends Service {
 		return peers;
 	}
 
-	public static void main(String[] args) {
 
-		try {
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.ERROR);
-
-			// Speech speech = new Speech("speech");
-
-			// Y min max 79 - 127
-
-			Tracking tracker = new Tracking("tracker");
-			tracker.getY().setMinMax(79, 127);
-			tracker.getX().setPin(5);
-			tracker.getY().setPin(6);
-			tracker.getOpenCV().setCameraIndex(1);
-			tracker.connect("COM12");
-			// tracker.connect("COM4");
-			tracker.startService();
-			tracker.faceDetect();
-
-			GUIService gui = new GUIService("gui");
-			gui.startService();
-
-			// tracker.getGoodFeatures();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	// FIXME !! question remains does the act of creating peers update the
 	// reservatinos ?
@@ -768,4 +740,34 @@ public class Tracking extends Service {
 
 	}
 
+	public static void main(String[] args) {
+
+		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.ERROR);
+
+			// Speech speech = new Speech("speech");
+
+			// Y min max 79 - 127
+
+			Tracking tracker = new Tracking("tracker");
+			
+			tracker.getY().setMinMax(79, 127);
+			tracker.getX().setPin(5);
+			tracker.getY().setPin(6);
+			tracker.getOpenCV().setCameraIndex(1);
+			tracker.connect("COM12");
+			// tracker.connect("COM4");
+			tracker.startService();
+			tracker.faceDetect();
+
+			GUIService gui = new GUIService("gui");
+			gui.startService();
+
+			// tracker.getGoodFeatures();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
 }

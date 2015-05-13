@@ -16,17 +16,20 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 	private IplImage lastImage;
 	private IplImage cache;
 	private int frameCounter = 0;
-	String filename;
+	String path;
 
-	public ImageFileFrameGrabber(String filename) {
-		this.filename = filename;
+	public ImageFileFrameGrabber(String path) {
+		this.path = path;
+		
+		
 	}
 
 	@Override
 	public IplImage grab() {
 
+
 		if (cache == null) {
-			cache = cvLoadImage(filename);
+			cache = cvLoadImage(path);
 		}
 
 		image = cache.clone();

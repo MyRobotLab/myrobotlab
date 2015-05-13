@@ -630,6 +630,8 @@ public class Agent extends Service {
 			Runtime.setRuntimeName("smith");
 			Runtime.main(agentArgs);
 			Agent agent = (Agent) Runtime.start("agent", "Agent");
+			
+			// FIXME - if "-install" - then install a version ??  minecraft way ?
 
 			if (agentCmd.containsKey("-test")) {
 				agent.serviceTest();
