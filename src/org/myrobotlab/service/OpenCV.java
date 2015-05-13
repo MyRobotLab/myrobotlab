@@ -34,6 +34,12 @@ package org.myrobotlab.service;
  //import static org.bytedeco.javacpp.opencv_calib3d.*;
  //import static org.bytedeco.javacpp.opencv_contrib.*;
  //import static org.bytedeco.javacpp.opencv_core.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+//import static org.bytedeco.javacpp.opencv_gpu.*;
+//import static org.bytedeco.javacpp.opencv_superres.*;
+//import static org.bytedeco.javacpp.opencv_ts.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -60,21 +66,12 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
-import org.myrobotlab.opencv.OpenCVFilterFFMEG;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
-import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.interfaces.VideoSource;
 import org.slf4j.Logger;
-
-//import static org.bytedeco.javacpp.opencv_gpu.*;
-//import static org.bytedeco.javacpp.opencv_superres.*;
-//import static org.bytedeco.javacpp.opencv_ts.*;
-import java.awt.image.BufferedImage;
-import java.awt.Dimension;
-import java.awt.Rectangle;
 /*import static org.bytedeco.javacpp.opencv_flann.*;
  import static org.bytedeco.javacpp.opencv_highgui.*;
  import static org.bytedeco.javacpp.opencv_imgproc.*;
@@ -866,9 +863,11 @@ public class OpenCV extends VideoSource {
 		Runtime.start("gui", "GUIService");
 		
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+		/*
 		OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
 		opencv.addFilter(ffmpeg);
 		opencv.capture();
+		*/
 		
 		// opencv.setCameraIndex(0);
 		
