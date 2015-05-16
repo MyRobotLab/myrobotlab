@@ -50,7 +50,8 @@ public class Encoder {
 	public final static String TYPE_REST = "rest";
 
 	// disableHtmlEscaping to prevent encoding or "=" -
-	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+	//private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 	// FIXME - switch to Jackson
 
 	public final static String API_REST_PREFIX = "api";
