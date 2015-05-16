@@ -87,8 +87,8 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * instances of MRL - keyed with an instance key URI format is
 	 * mrl://gateway/(protocol key)
 	 */
-	// FIXME - someday this will be serializable - but currently have to not
-	// save() on exist
+
+	// gson only serializes - non static & non transient fields
 	static private final HashMap<URI, ServiceEnvironment> instances = new HashMap<URI, ServiceEnvironment>();
 
 	static private final HashMap<String, ServiceInterface> registry = new HashMap<String, ServiceInterface>();
@@ -113,7 +113,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	// FYI - can't be transient - "should" be preserved in
 	// network transport - it's the "instances" repo
 	// FIXME - non static member variables should be initialized in constructor
-	private Repo repo = null;
+	transient private Repo repo = null;
 
 	private Platform platform = Platform.getLocalInstance();
 
@@ -129,7 +129,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	/**
 	 * The singleton of this class.
 	 */
-	private static Runtime runtime = null;
+	transient private static Runtime runtime = null;
 
 	private List<String> jvmArgs;
 

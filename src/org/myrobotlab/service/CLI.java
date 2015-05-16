@@ -53,8 +53,8 @@ public class CLI extends Service {
 		public String cwd = "/";
 		public String prompt = "(:";
 		String name;
-		CLI cli;
-		InputStream is;
+		transient CLI cli;
+		transient InputStream is;
 		// TODO ecoding defaults & methods to change
 		// FIXME - need reference to OutputStream to return
 		String inputEncoding = Encoder.TYPE_REST; // REST JSON
