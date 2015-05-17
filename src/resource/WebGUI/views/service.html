@@ -1,0 +1,29 @@
+<div ng-controller="ServiceCtrl">
+    <!--TODO: refactor the next line-->
+    <div ng-show="title" data-drag="{{drag}}" data-jqyoui-options="{revert: 'invalid',cancel:':not(:not([drag=f]))'}" ng-model="list" jqyoui-draggable="{index: {{index}},animate:true}">
+        <div style="outline: 1px solid black">
+            <!--<div style="resize: both; overflow: auto;">-->
+            <div>
+                <!--header-->
+                <b>{{title}} : {{name}}</b>
+                <!--TODO: add an option-menu (kill-service, ...)-->
+            </div>
+            <div style="outline: 1px solid black" ng-show="inst.size != 'tiny'" drag=f>
+                <!--body-->
+                <div service-body="views/service.html" type="{{type}}" name="name" inst="inst"></div>
+                {{type}}<br>
+                {{title}}<br>
+                {{name}}
+            </div>
+            <div ng-show="!inst.forcesize">
+                <!--footer-->
+                <button ng-click="changesize('tiny')">-</button>
+                <button ng-click="changesize('small')">small</button>
+                <button ng-click="changesize('medium')">medium</button>
+                <button ng-click="changesize('large')">large</button>
+                <button ng-click="changesize('full')">full</button>
+            </div>
+            <!--</div>-->
+        </div>
+    </div>
+</div>
