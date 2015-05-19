@@ -31,9 +31,9 @@ package org.myrobotlab.service;
 
  static wild card imports for quickly finding static functions in eclipse
  */
- //import static org.bytedeco.javacpp.opencv_calib3d.*;
- //import static org.bytedeco.javacpp.opencv_contrib.*;
- //import static org.bytedeco.javacpp.opencv_core.*;
+//import static org.bytedeco.javacpp.opencv_calib3d.*;
+//import static org.bytedeco.javacpp.opencv_contrib.*;
+//import static org.bytedeco.javacpp.opencv_core.*;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 //import static org.bytedeco.javacpp.opencv_gpu.*;
@@ -66,12 +66,14 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
+import org.myrobotlab.opencv.OpenCVFilterFFMEG;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.interfaces.VideoSource;
 import org.slf4j.Logger;
+
 /*import static org.bytedeco.javacpp.opencv_flann.*;
  import static org.bytedeco.javacpp.opencv_highgui.*;
  import static org.bytedeco.javacpp.opencv_imgproc.*;
@@ -87,7 +89,7 @@ import org.slf4j.Logger;
 public class OpenCV extends VideoSource {
 
 	// FIXME - don't return BufferedImage return SerializableImage always !
-	
+
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(OpenCV.class);
@@ -123,15 +125,15 @@ public class OpenCV extends VideoSource {
 
 	transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
-	public static String VALID_FILTERS[] = { "Affine", "And", "AverageColor", "Canny", "CreateHistogram", "ColorTrack", "Detector", "Dilate", "Erode", "FGBG", "FaceDetect", "Fauvist",
-			"FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2", "HSV", "InRange", "KinectDepth", "KinectDepthMask",
-			"KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr",
-			"ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split", "SURF", "Threshold", "Transpose" };
+	static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
+			"Dilate", "Erode", "FaceDetect", "Fauvist", "FFMEG", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2", "HSV", "Input",
+			"InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "Output", "PyramidDown",
+			"PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split", "State", "SURF",
+			"Threshold", "Transpose" };
 
 	// yep its public - cause a whole lotta data
 	// will get set on it before a setState
-	
-	
+
 	transient public VideoProcessor videoProcessor = new VideoProcessor();
 
 	// mask for each named filter
@@ -148,8 +150,9 @@ public class OpenCV extends VideoSource {
 
 	public OpenCV(String n) {
 		super(n);
-		//load(); // FIXME - go into service frame work .. after construction ..
-				// somewhere ...
+		// load(); // FIXME - go into service frame work .. after construction
+		// ..
+		// somewhere ...
 		videoProcessor.setOpencv(this);
 	}
 
@@ -177,8 +180,8 @@ public class OpenCV extends VideoSource {
 	}
 
 	/**
-	 * the publishing point of all OpenCV goodies !
-	 * type conversion is held off until asked for - then its cached SMART ! :)
+	 * the publishing point of all OpenCV goodies ! type conversion is held off
+	 * until asked for - then its cached SMART ! :)
 	 * 
 	 * @param data
 	 * @return
@@ -476,7 +479,7 @@ public class OpenCV extends VideoSource {
 		return boundingBox;
 
 	}
-	
+
 	public OpenCVData getOpenCVData() {
 		return getOpenCVData(500);
 	}
@@ -494,9 +497,8 @@ public class OpenCV extends VideoSource {
 			videoProcessor.publishOpenCVData = true;
 			// videoProcessor.useBlockingData = true;
 			// timeout ? - change to polling
-			
-			
-			if (timeout == null || timeout < 1){
+
+			if (timeout == null || timeout < 1) {
 				data = (OpenCVData) videoProcessor.blockingData.take();
 			} else {
 				data = (OpenCVData) videoProcessor.blockingData.poll(timeout, TimeUnit.MILLISECONDS);
@@ -643,54 +645,53 @@ public class OpenCV extends VideoSource {
 	public Status test() {
 
 		Status status = Status.info("starting %s %s test", getName(), getType());
-		
+
 		try {
 			// FIXME - each filter should have its own test !!!!
-			// 
-			
-			
+			//
+
 			// smart testing - determine what environment has
 			// do i have a camera ?
 			// do i have multiple cameras
 
-			// FIXME FIXME FIXME - this needs to work for directories - recursively - us NIO !!!
+			// FIXME FIXME FIXME - this needs to work for directories -
+			// recursively - us NIO !!!
 			// FileIO.copyResource("OpenCV/testData", "OpenCV/testData");
-			
-			//FileIO.copyResource("OpenCV/testData/mask.png", "OpenCV/testData/mask.png");
-			OpenCV opencv = (OpenCV)Runtime.start(getName(), "OpenCV");
-			//OpenCVFilterCanny canny = new OpenCVFilterCanny();
-			
 
-			
+			// FileIO.copyResource("OpenCV/testData/mask.png",
+			// "OpenCV/testData/mask.png");
+			OpenCV opencv = (OpenCV) Runtime.start(getName(), "OpenCV");
+			// OpenCVFilterCanny canny = new OpenCVFilterCanny();
+
 			OpenCVFilterAffine affine = new OpenCVFilterAffine();
 			opencv.addFilter(affine);
 
 			/*
-			OpenCVFilterCanny canny2 = new OpenCVFilterCanny("canny2");
-			opencv.addFilter(canny2);
-			opencv.capture();
-			*/
-			
+			 * OpenCVFilterCanny canny2 = new OpenCVFilterCanny("canny2");
+			 * opencv.addFilter(canny2); opencv.capture();
+			 */
+
 			String filename = "faces.jpg";
 			String testFilename = String.format("OpenCV/testData/%s", filename);
 			Runtime.createAndStart("gui", "GUIService");
-			
-			
+
 			// resource !!! - it better be there !
 			// opencv.captureFromResourceFile(testFilename);
 			opencv.captureFromImageFile(testFilename);
-			
+
 			OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect("fd");
 			addFilter(fd);
 			String output = recordSingleFrame();
 			log.info(String.format("record single frame - %s", output));
-			
+
 			OpenCVData d = getOpenCVData();
 			ArrayList<org.myrobotlab.service.data.Rectangle> l = d.getBoundingBoxArray();
 			log.info("boundingBox size {}", d.getBoundingBoxArray().size());
-			
+
 			SerializableImage img = getDisplay();
-			if (img == null){throw new MRLError("getDisplay is null");}
+			if (img == null) {
+				throw new MRLError("getDisplay is null");
+			}
 
 			output = recordSingleFrame();
 			log.info(String.format("record single frame - %s", output));
@@ -759,15 +760,14 @@ public class OpenCV extends VideoSource {
 			BufferedImage bimage = ImageIO.read(FileIO.class.getResourceAsStream("/resource/OpenCV/testData/mask.png"));
 			and.loadMask(bimage);
 			addFilter(and);
-			OpenCVData o = getOpenCVData(); 
+			OpenCVData o = getOpenCVData();
 			String outfile = o.writeDisplay();
 			log.info("wrote masked file to {}", outfile);
-			
-		
+
 			// type of test - test which saves result of web page
 			// test combination (combinatorics filter)
-			for (int i = 0; i < VALID_FILTERS.length; ++i) {
-				String filter = VALID_FILTERS[i];
+			for (int i = 0; i < POSSIBLE_FILTERS.length; ++i) {
+				String filter = POSSIBLE_FILTERS[i];
 
 				addFilter(filter);
 
@@ -835,17 +835,20 @@ public class OpenCV extends VideoSource {
 		setInputFileName(filename);
 		capture();
 	}
-	
-	public boolean undockDisplay(boolean b){
+
+	public boolean undockDisplay(boolean b) {
 		undockDisplay = b;
 		broadcastState();
 		return b;
 	}
-	
 
 	@Override
 	public String[] getCategories() {
-		return new String[] {"video","sensor"};
+		return new String[] { "video", "sensor" };
+	}
+
+	static public String[] getPossibleFilters() {
+		return POSSIBLE_FILTERS;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -861,62 +864,60 @@ public class OpenCV extends VideoSource {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Runtime.start("gui", "GUIService");
-		
+
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-		/*
+
 		OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
 		opencv.addFilter(ffmpeg);
 		opencv.capture();
-		*/
 		
-		// opencv.setCameraIndex(0);
-		
-//		opencv.setInputSource("file");
-//		opencv.setInputFileName("c:/test.avi");
-//		opencv.capture();
-		//OpenCVFilterSURF surf = new OpenCVFilterSURF("surf");
-		//String filename = "c:/dev/workspace.kmw/myrobotlab/lloyd.png";
-		//String filename = "c:/dev/workspace.kmw/myrobotlab/kw.jpg";
-		//surf.settings.setHessianThreshold(400);
-		//surf.loadObjectImageFilename(filename);
-		//opencv.addFilter(surf);
+		opencv.removeFilters();
+		ffmpeg.stopRecording();
 
-		//OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
+		// opencv.setCameraIndex(0);
+
+		// opencv.setInputSource("file");
+		// opencv.setInputFileName("c:/test.avi");
+		// opencv.capture();
+		// OpenCVFilterSURF surf = new OpenCVFilterSURF("surf");
+		// String filename = "c:/dev/workspace.kmw/myrobotlab/lloyd.png";
+		// String filename = "c:/dev/workspace.kmw/myrobotlab/kw.jpg";
+		// surf.settings.setHessianThreshold(400);
+		// surf.loadObjectImageFilename(filename);
+		// opencv.addFilter(surf);
+
+		// OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
 		// opencv.addFilter(tr);
 		/*
-		OpenCVFilterLKOpticalTrack lktrack = new OpenCVFilterLKOpticalTrack("lktrack");
-		opencv.addFilter(lktrack);
-		*/
-		
-		//OpenCVFilterAffine affine = new OpenCVFilterAffine("left");
-		//affine.setAngle(45);
-		// opencv.addFilter(affine);
-//		opencv.test();
+		 * OpenCVFilterLKOpticalTrack lktrack = new
+		 * OpenCVFilterLKOpticalTrack("lktrack"); opencv.addFilter(lktrack);
+		 */
 
-		//opencv.capture();
-		//opencv.captureFromImageFile("C:\\mrl\\myrobotlab\\image0.png");
-		 
-		//Runtime.createAndStart("gui", "GUIService");
-		//opencv.test();
+		// OpenCVFilterAffine affine = new OpenCVFilterAffine("left");
+		// affine.setAngle(45);
+		// opencv.addFilter(affine);
+		// opencv.test();
+
+		// opencv.capture();
+		// opencv.captureFromImageFile("C:\\mrl\\myrobotlab\\image0.png");
+
+		// Runtime.createAndStart("gui", "GUIService");
+		// opencv.test();
 		/*
-		Runtime.createAndStart("gui", "GUIService");
-		RemoteAdapter remote = (RemoteAdapter) Runtime.start("ocvremote", "RemoteAdapter");
-		remote.connect("tcp://localhost:6767");
-		
-		opencv.capture();
-		boolean leaveNow = true;
-		if (leaveNow) return;
-		*/
-		
-		
-//		final CvMat image1 = cvLoadImageM("C:/blob.jpg" , 0);
-//		
-//		SimpleBlobDetector o = new SimpleBlobDetector();
-//		KeyPoint point = new KeyPoint();
-//		o.detect(image1, point, null);
-//		
-//		System.out.println(point.toString());
-		
-		
+		 * Runtime.createAndStart("gui", "GUIService"); RemoteAdapter remote =
+		 * (RemoteAdapter) Runtime.start("ocvremote", "RemoteAdapter");
+		 * remote.connect("tcp://localhost:6767");
+		 * 
+		 * opencv.capture(); boolean leaveNow = true; if (leaveNow) return;
+		 */
+
+		// final CvMat image1 = cvLoadImageM("C:/blob.jpg" , 0);
+		//
+		// SimpleBlobDetector o = new SimpleBlobDetector();
+		// KeyPoint point = new KeyPoint();
+		// o.detect(image1, point, null);
+		//
+		// System.out.println(point.toString());
+
 	}
 }

@@ -16,7 +16,8 @@
 	<classpathentry kind="lib" path="/repo/edu.cmu.sphinx/4-1.0beta6/TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.cmu.sphinx/4-1.0beta6/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.cmu.sphinx/4-1.0beta6/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.jar"/>
-	<classpathentry kind="lib" path="/repo/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/>
+	<classpathentry kind="lib" path="/repo/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/> 
+	
 	<classpathentry kind="lib" path="/repo/javaFlacEncoder.FLAC_FileEncoder/0.1/javaFlacEncoder-0.1.jar"/>
 	<classpathentry kind="lib" path="/repo/javax.speech.recognition/1.0/jsapi.jar"/>
 	<classpathentry kind="lib" path="/repo/javax.vecmath/1.5.1/vecmath.jar"/>
@@ -59,7 +60,6 @@
 	<classpathentry kind="lib" path="/repo/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.northwestern.topcodes/1.0/topcodes.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jivesoftware.smack/3.3.0/smack.jar"/>
-	<classpathentry kind="lib" path="/repo/org.java_websocket.websocket/1.2/java_websocket.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-async-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-core-3.0.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.twitter4j.twitter/3.0.5/twitter4j-examples-3.0.5.jar"/>
@@ -90,5 +90,7 @@
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/nettosphere-assembly-2.3.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/geronimo-servlet_3.0_spec-1.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/javax.inject-1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-1.0-20150502.231737-1-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-0.11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

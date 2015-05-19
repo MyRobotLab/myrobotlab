@@ -1288,6 +1288,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		// which hand foriegn connections
 		// if (security == null || security.isAuthorized(msg)) {
 
+		// "local" invoke - you have a "real" reference
 		retobj = invokeOn(this, msg.method, msg.data);
 		// }
 

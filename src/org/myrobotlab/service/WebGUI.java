@@ -1,170 +1,140 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 
-import org.java_websocket.WebSocket;
+import org.atmosphere.cpr.ApplicationConfig;
+import org.atmosphere.cpr.AtmosphereRequest;
+import org.atmosphere.cpr.AtmosphereRequest.Body;
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResourceEvent;
+import org.atmosphere.cpr.AtmosphereResponse;
+import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.cpr.BroadcasterFactory;
+import org.atmosphere.cpr.Serializer;
+import org.atmosphere.nettosphere.Config;
+import org.atmosphere.nettosphere.Handler;
+import org.atmosphere.nettosphere.Nettosphere;
 import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.TypeConverter;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.security.BasicSecurity;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
-import org.myrobotlab.webgui.WSServer;
-import org.myrobotlab.webgui.WSServer.WSMsg;
+import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
-public class WebGUI extends Service implements AuthorizationProvider {
+//@ManagedService(path = "/api")
+//@ManagedService(path = "/snake")
 
-	// import javax.xml.transform.Transformer;
 
-	// TODO - important !!!
-	// api's XML, Text, HTML or other formatting of return type needs to be
-	// encoded as part of the URI "BEFORE" the method request & paramters !!!!
-	// e.g. http://127.0.0.1:7777/api/xml/services/arduino01/digitalWrite/13/1
-	// Consistency is important to maintain the REST API !!!!
-	// Jenkins did it right -
-	// https://wiki.jenkins-ci.org/display/JENKINS/Remote+access+API
-	// http://server/jenkins/crumbIssuer/api/xml (or /api/json) !
-	// HA !! realize that there are 2 encodings !!! inbound and return
-	// VERY SIMPLE BUT IT MUST BE CONSISTENT !!!
-	// http://mrl:7777/api/<inbound format>/<outbound
-	// format>/<method>/<parameters>/
-	// http://mrl:7777/api/<rest>/<xml>/<method>/<params> !!! inbound is rest -
-	// return format is xml !!!
-	// http://mrl:7777/api/<soap>/<xml>/<method>/<params> !!! inbound is soap -
-	// return format is xml !!!
-	// http://mrl:7777/api/<soap>/<soap>/<method>/<params> !!! inbound is soap -
-	// return format is soap !!!
-	// http://mrl:7777/api/<resource>/<json>/<method>/<params> !!! inbound is
-	// resource request - return format is json !!!
-	// default is /<rest>/<gson>/<method>/<params>
+public class WebGUI extends Service implements AuthorizationProvider, Gateway, Handler {
 
-	// dropped - NanoHTTPD in favor of websockets with user call-back
-	// http://nanohttpd.com/
-
-	// FIXME !!! SINGLE WebServer/Socket server - capable of long polling
-	// fallback
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(WebGUI.class);
 
-	public Integer port = 7777;
+	Integer port = 7777;
+	transient Nettosphere nettosphere;
+	transient Broadcaster broadcaster;
+	transient BroadcasterFactory broadcastFactory;
 
+	public String root = "root";
+	boolean useLocalResources = false;
 	boolean autoStartBrowser = true;
-
-	boolean useLocalResources = true;
-
+	
 	public String startURL = "http://127.0.0.1:%d/index.html";
 
-	public String root = "resource";
-
-	public int messages = 0;
-
-	transient WSServer wss;
-
-	public HashMap<String, String> clients = new HashMap<String, String>();
-
-	private HashSet<String> allowMethods = new HashSet<String>();
-
-	private HashSet<String> excludeMethods = new HashSet<String>();
-
-	private HashSet<String> allowServices = new HashSet<String>();
-
-	private HashSet<String> excludeServices = new HashSet<String>();
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
-
-		//webgui.test();
-		// webgui.useLocalResources(true);
-		// webgui.autoStartBrowser(false);
-		// Runtime.createAndStart("webgui", "WebGUI");
-		// webgui.useLocalResources(true);
-
+	
+	// FIXME - shim for Shoutbox
+	// deprecate ???
+	public static class WebMsg {
+		String clientid;
+		// socket
+		Message msg;
 	}
+	
+	// SHOW INTERFACE
+	// FIXME - allowAPI1(true|false)
+	// FIXME - allowAPI2(true|false)
+	// FIXME - allow Protobuf/Thrift/Avro 
+	// FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
 	public WebGUI(String n) {
 		super(n);
-		// first message web browser client is getRegistry
-		// so we want it routed back here to deliver to client
-		subscribe(Runtime.getInstance().getIntanceName(), "getRegistry");
 	}
 
-	public void addConnectListener(Service service) {
-		addListener("publishConnect", service.getName(), "onConnect", WebSocket.class);
+	// ================ Gateway begin ===========================
+
+	@Override
+	public void addConnectionListener(String name) {
+		// TODO Auto-generated method stub
+
 	}
 
-	public void addDisconnectListener(Service service) {
-		addListener("publishDisconnect", service.getName(), "onDisconnect", WebSocket.class);
+	@Override
+	public void connect(String uri) throws URISyntaxException {
+		// TODO Auto-generated method stub
+
 	}
 
-	public boolean addUser(String username, String password) {
-		return BasicSecurity.addUser(username, password);
+	@Override
+	public HashMap<URI, Connection> getClients() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	public void addWSMsgListener(Service service) {
-		addListener("publishWSMsg", service.getName(), "onWSMsg", WSMsg.class);
+	@Override
+	public List<Connection> getConnections(URI clientKey) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	public boolean allowDirectMessaging(boolean b) {
-		wss.allowDirectMessaging(b);
-		return b;
+	@Override
+	public String getPrefix(URI protocolKey) {
+		// TODO Auto-generated method stub
+		return null;
 	}
+
+	@Override
+	public Connection publishNewConnection(Connection keys) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void sendRemote(String key, Message msg) throws URISyntaxException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void sendRemote(URI key, Message msg) {
+		// TODO Auto-generated method stub
+
+	}
+
+	// ================ Gateway end ===========================
+
+	// ================ AuthorizationProvider begin ===========================
 
 	@Override
 	public boolean allowExport(String serviceName) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	public void allowMethod(String method) {
-		allowMethods.add(method);
-	}
-
-	public void allowREST(Boolean b) {
-		if (wss != null) {
-			wss.allowREST(b);
-		}
-	}
-
-	public void autoStartBrowser(boolean autoStartBrowser) {
-		this.autoStartBrowser = autoStartBrowser;
-	}
-
-	/**
-	 * expanding of all resource data from WebGUI onto the file system so that
-	 * it may be customized by the user
-	 */
-	public void customize() {
-		try {
-			Zip.extractFromFile("./myrobotlab.jar", "./resource", "resource");
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "display", "control" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "The new web enabled GUIService 2.0 !";
-	}
-
-	public Integer getPort() {
-		return port;
 	}
 
 	@Override
@@ -175,197 +145,307 @@ public class WebGUI extends Service implements AuthorizationProvider {
 
 	@Override
 	public boolean isAuthorized(Message msg) {
-		String method = msg.method;
-		String service = msg.name;
-
-		if (allowMethods.size() > 0 && !allowMethods.contains(method)) {
-			return false;
-		}
-
-		if (excludeMethods.size() > 0 && excludeMethods.contains(method)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	public void openURL(String url) {
-		BareBonesBrowserLaunch.openURL(url);
-	}
-
-	/**
-	 * called by the framework pre process of messages so that data can be
-	 * routed back to the correct subcomponent and control of the WebGUI can
-	 * still be maintained like a "regular" service
-	 * 
-	 */
-	@Override
-	public boolean preProcessHook(Message m) {
-		// FIXME - problem with collisions of this service's methods
-		// and dialog methods ?!?!?
-
-		// if the method name is == to a method in the GUIService
-		if (methodSet.contains(m.method)) {
-			// process the message like a regular service
-			return true;
-		}
-
-		// otherwise send the message to the dialog with the senders name
-		sendToAll(m);
+		// TODO Auto-generated method stub
 		return false;
 	}
 
-	public WebSocket publishConnect(WebSocket conn) {
-		return conn;
+	// ================ AuthorizationProvider end ===========================
+
+	// ================ Broadcaster begin ===========================
+	public void broadcast(Message msg) {
+		broadcaster.broadcast(msg); // wtf
 	}
 
-	public WebSocket publishDisconnect(WebSocket conn) {
-		return conn;
-	}
+	// ================ Broadcaster end ===========================
 
-	// ============== security begin =========================
-	// FIXME - this will have to be keyed by the service name
-	// if the global datastructures are to be in Security
+	public void startService() {
 
-	// specifically for a gateway
-	// this interface should be incorporated into Security Service
+		//Broadcaster b = broadcasterFactory.get();
+		
+		// a session "might" be nice - but for now we are stateless
+		// SessionSupport ss = new SessionSupport();
 
-	// interesting - regular expresion matching .. its a combined key !
-	// Service.method or perhaps sender.Service.method ?
+		Config.Builder configBuilder = new Config.Builder();
+		configBuilder
+		.resource("C:\\tools\\myrobotlab-WebGUI\\src\\resource\\WebGUI")
+		
+				.resource("./root")
+				
+				// .resource("./rest")  SHOULD I DO THIS ?
+				// .resource(this)
+				// Support 2 APIs
+				// REST - http://host/object/method/param0/param1/...  synchronous DO NOT SUSPEND
+				.resource("/api", this)
+				// For mvn exec:java
+				// .resource("./src/main/resources")
 
-	public WSMsg publishWSMsg(WSMsg wsmsg) {
-		return wsmsg;
-	}
+				// For running inside an IDE
+				// .resource("./nettosphere-samples/games/src/main/resources")
+		
+				.initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
+				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true")
+				.port(port).host("127.0.0.1").build();
+		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
+		
+		s.start();
+		
+		broadcastFactory = s.framework().getBroadcasterFactory();
+		// get default boadcaster
+		broadcaster = broadcastFactory.get("/*");
 
-	public void restart() {
-		stop();
-		startWebSocketServer(port);
-	}
+		log.info("WebGUI2 {} started on port {}", getName(), port);
 
-	/**
-	 * sends JSON encoded MyRobotLab Message to all clients currently connected
-	 * through web sockets
-	 * 
-	 * @param msg
-	 *            message to broadcast
-	 */
-	public void sendToAll(Message msg) {
-		++messages;
-		// String json = Encoder.toJson(msg, Message.class); //toJson(msg);
-		// RECENTLY CHANGED
-		String json = Encoder.toJson(msg);
-		log.debug(String.format("webgui ---to---> all clients [%s]", json));
-		if (messages % 500 == 0) {
-			info(String.format("sent %d messages to %d clients", messages, wss.connections().size())); // TODO
-																										// modulus
-		}
-
-		if (json != null) {
-			wss.sendToAll(json);
-		} else {
-			log.error(String.format("toJson %s.%s is null", msg.name, msg.method));
-		}
-	}
-
-	public Integer setPort(Integer port) {
-		this.port = port;
-		return port;
-	}
-
-	/**
-	 * starts and web socket server, auto launches browser if
-	 * autoStartBrowser=true
-	 * 
-	 * @return true if both servers started
-	 */
-	public boolean start() {
-		// TODO - make sure re-entrant
-		boolean result = startWebSocketServer(port);
-		log.info("using local resources is {}", useLocalResources);
-		log.info("starting web socket server on port {} result is {}", port, result);
+		// BufferedReader br = new BufferedReader(new
+		// InputStreamReader(System.in));
 		if (autoStartBrowser) {
 			log.info("auto starting default browser");
 			BareBonesBrowserLaunch.openURL(String.format(startURL, port));
 		}
-		if (!result) {
-			warn("could not start properly");
-		}
-		return result;
+		
 	}
 
 	@Override
-	public void startService() {
-		super.startService();
-		start();
+	public String[] getCategories() {
+		return new String[] { "display" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "used as a general template";
 	}
 
 	/**
-	 * @param port
-	 *            - port to start server on default is 7778
-	 * @return - true if successfully started
+	 * With a single method Atmosphere does so much !!!
+	 * It sets up the connection, possibly gets a session, turns the
+	 * request into something like a HTTPServletRequest, provides us with 
+	 * input & output streams - and manages all the "long polling" or websocket
+	 * upgrades on its own !
+	 * 
+	 * Atmosphere Rocks !
 	 */
-	public boolean startWebSocketServer(Integer port) {
+	@Override
+	public void handle(AtmosphereResource r) {
+		OutputStream out = null;
 		try {
+			
+			//Broadcaster b = event.broadcaster();
+			//b.broadcast("{message:\"thats what she said\"}");
+			//log.info("broadcaster from resource is {}", b);
+			// r.getResponse().write("Hello World").write(" from Nettosphere").flushBuffer();
 
-			this.port = port;
+			AtmosphereResourceEvent event = r.getAtmosphereResourceEvent();
+			AtmosphereRequest request = r.getRequest();
+			AtmosphereResponse response = r.getResponse();
+			Serializer serializer = r.getSerializer();
+			
+			out = r.getResponse().getOutputStream();
+			InputStream in = r.getRequest().getInputStream();
+			Body body = request.body();
+			String data = body.asString();
 
-			if (wss != null) {
-				wss.stop();
+			// request info
+			String uuid = r.uuid();
+			String pathInfo = request.getPathInfo();
+			String trailingCharacter = null;
+			if (pathInfo != null) {
+					
+			}
+			
+			int length = request.getContentLength();
+			String httpMethod = request.getMethod();
+			
+			log.info(String.format("%s client %s length %d pathInfo %s", httpMethod, uuid, length, pathInfo));
+			log.info(String.format("data %s", data));
+
+			
+			// See - http://myrobotlab.org/content/myrobotlab-web-api for details
+			
+			// FORMAT is http://host/api(/encoding=JSON/decoding=JSON/)/{api-type}/{service name}/{method}/{param0}/{param1}
+			
+			// API 1 - synchronous - not suspended - default encoding & decoding are JSON
+			// GET http://host/api/services/{service name}/{method}/{param0}/{param1}
+
+			// API 2 - asynchronous - is suspended (connection remains open) - default encoding & decoding are JSON
+			// POST http://host/api/messages
+			
+			
+			// TODO - implement non-default non-JSON encodings - e.g. Thrift/Avro ?
+			// String encoding = "json";
+			// String decoding = "json";
+			
+			String[] parts = pathInfo.split("/");
+			// FIXME - min size check - with response showing expected format
+			// KINDER-GENTLER - fewer parts returns possible selections e.g.
+			// if no apiType is specified - tell them what it could be (services | messages)
+			if (parts.length < 3){
+				throw new IOException("http://host:port/api/{api-type}/...  api-type must be (services | messages), please refer to http://myrobotlab.org/content/myrobotlab-web-api for details");
+			}
+			
+			String apiType = parts[2];
+		
+			if ("messages".equals(apiType)){
+				
+				// suspend the connection
+				if (!r.isSuspended()){
+					r.suspend();
+				}
+								
+				// de-serialize message
+				// broadcaster.broadcast(json);
+				// out.write(json.getBytes());
+				// out.flush();
+				
+				// FIXME - single Encoder.invoke() !!!
+				// FIXME - needs to be pushed to CLI !!! - returns Objects - Encode can encode
+			} else if ("services".equals(apiType)){	
+				
+				if ("/api/services".equals(pathInfo)){
+					String services = Encoder.toJson(Runtime.getServices());
+					out.write(services.getBytes());
+					out.flush();
+					// close ?
+					return;
+					
+				} else if  ("/api/services/".equals(pathInfo)){
+					Encoder.write(out, Runtime.getServiceNames());
+					out.flush();
+					return;
+				} else if (parts.length == 4 && !"/".equals(trailingCharacter)) {
+					// /api/services/{service}
+					// which is - give me the {service} state
+					
+					// FIXME clean up - uniform encoding & errors
+					String sname = parts[3];
+					ServiceInterface si = Runtime.getService(sname);
+					if(si == null){
+						throw new IOException(String.format("could not return service", sname));
+					}
+					
+					out.write(Encoder.toJson(si).getBytes());
+					out.flush();
+					
+					return;
+				} else if (parts.length == 4 && "/".equals(trailingCharacter)){
+					// /api/services/{service}/
+					// which is - give me the runtime methods
+					// should have fully type parameter descriptions ?
+					
+					// FIXME clean up - uniform encoding & errors
+					String sname = parts[3];
+					ServiceInterface si = Runtime.getService(sname);
+					if(si == null){
+						//FIXME  return error !
+						// this is synchronous
+						out.write(Encoder.toJson(error("could not return service", sname)).getBytes());
+						out.flush();
+						return;
+					}
+				
+					out.write(Encoder.toJson(si.getDeclaredMethodNames()).getBytes());
+					out.flush();
+					
+					return;
+				}
+				
+				// on to a service instance  runtime vs runtime/
+				
+				// test if length is at least > 5
+				// if not return error + correct format + http reference :)
+				
+				// FIXME ALL URI DECODING IS THE SAME - SAME AS CLI & SAME AS subscribe !!!
+				// service <- gives data state
+				// service/ <- gives methods
+				
+				// get a specific service instance - execute method --with
+				// parameters--
+				String serviceName = parts[3]; // FIXME how to handle
+				String fn = parts[4];
+				Object[] typedParameters = null;
+
+				ServiceInterface si = org.myrobotlab.service.Runtime.getService(serviceName);
+
+				// get parms
+				if (parts.length > 4) {
+					// copy paramater part of rest uri
+					String[] stringParams = new String[parts.length - 5];
+					for (int i = 0; i < parts.length - 5; ++i) {
+						stringParams[i] = parts[i + 5];
+					}
+
+					// FIXME FIXME FIXME !!!!
+					// this is an input format decision !!! .. it "SHOULD" be
+					// determined based on inbound uri format
+
+					typedParameters = TypeConverter.getTypedParamsFromJson(si.getClass(), fn, stringParams);
+				}
+
+				// TODO - handle return type -
+				// TODO top level is return format /html /text /soap /xml /gson
+				// /json /base16 a default could exist - start with SOAP response
+				Object ret = si.invoke(fn, typedParameters);
+				//return returnObject;
+				// encode object
+				// return it ..
+
+				Encoder.write(out, ret);
+				out.flush();
+				
+				/*
+				String json = Encoder.toJson(ret);
+				out.write(json.getBytes());
+				out.flush();
+				*/
+				
+				return;
+				
+			} else {
+				throw new IOException("http://host:port/api/{api-type}/...  api-type must be (services | messages)");
 			}
 
-			wss = new WSServer(this, port);
-			wss.start();
-			return true;
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
+			// finding original
+			// String uuidOiginal = (String)request.getAttribute(ApplicationConfig.SUSPENDED_ATMOSPHERE_RESOURCE_UUID);
+			// AtmosphereResource resource = AtmosphereResourceFactory.getDefault().find(uuid);
 
-		return false;
-	}
+			// r.getResponse().write().flushBuffer();
+			// if ! /api then file/resource system
 
-	public void stop() {
-		try {
-			if (wss != null) {
-				wss.stop();
-				wss = null;
+		} catch (IOException e) {
+			// for "clean" API errors
+			try {
+				//Status status = new Status(e);
+				Status status = Status.error(e.getMessage());
+				Encoder.write(out, status);
+				out.flush();
+			} catch(Exception ex){
+				error(ex);
 			}
-		} catch (Exception e) {
-			Logging.logError(e);
+		} catch (Exception e){
+			// any other error we are 
+			// going to dump full stack trace
+			try {
+				Status status = new Status(e);				
+				Encoder.write(out, status);
+				out.flush();
+			} catch(Exception ex){
+				error(ex);
+			}
 		}
 	}
-
-	@Override
-	public void stopService() {
-		super.stopService();
-		stop();
-	}
-
-	// ============== security end =========================
-
-	@Override
-	public Status test() {
-		Status status = super.test();
-
+	
+	public void extract(){
 		try {
-
-			// test re-entrant starting
-			WebGUI webgui = (WebGUI) Runtime.start(getName(), "WebGUI");
-
-		} catch (Exception e) {
-			status.addError(e);
+			Zip.extractFromFile("./myrobotlab.jar", "root", "resource/WebGUI");
+		} catch (IOException e) {
+			error(e);
 		}
-
-		return status;
 	}
-
-	/**
-	 * @return whether instance is using CDN for delivery of JavaScript
-	 *         libraries to browser
-	 */
-	public boolean useLocalResources() {
-		return useLocalResources;
+	
+	/** - use the service's error() pub sub return
+	public void handleError(){
+		
 	}
-
+	*/
+	
 	/**
 	 * determines if references to JQuery JavaScript library are local or if the
 	 * library is linked to using content delivery network. Default (false) is
@@ -373,8 +453,38 @@ public class WebGUI extends Service implements AuthorizationProvider {
 	 * 
 	 * @param b
 	 */
-	public void useLocalResources(boolean b) {
-		useLocalResources = b;
+	public void useLocalResources(boolean useLocalResources) {
+		this.useLocalResources = useLocalResources;
+	}
+	
+	public void autoStartBrowser(boolean autoStartBrowser) {
+		this.autoStartBrowser = autoStartBrowser;
+	}
+
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+			
+			//Uri.
+			//Uri myUri = Uri.parse("http://stackoverflow.com");
+
+			WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
+			// webgui.extract();
+			
+			/*
+			Message msg = webgui.createMessage("runtime", "start", new Object[]{"arduino", "Arduino"});
+			String json = Encoder.toJson(msg);
+			log.info(json);
+			// Runtime.start("gui", "GUIService");
+			log.info(json);
+			*/
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 }

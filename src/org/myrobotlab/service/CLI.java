@@ -49,7 +49,6 @@ public class CLI extends Service {
 	// Agent + (RemoteAdapter/WebGUI/Netosphere) + CLI(command processor part
 	// with InStream/OutStream) - is most Big-Fu !
 	public class Decoder extends Thread {
-		public String apiTag = "/api";
 		public String cwd = "/";
 		public String prompt = "(:";
 		String name;
@@ -139,13 +138,24 @@ public class CLI extends Service {
 
 						String path = null;
 						if (line.startsWith("/")) {
-							path = String.format("%s%s", apiTag, line);
+							path = String.format("/%s%s", Encoder.PREFIX_API, line);
 						} else {
-							path = String.format("%s%s%s", apiTag, cwd, line);
+							path = String.format("/%s%s%s", Encoder.PREFIX_API, cwd, line);
 						}
 
 						log.info(path);
 						try {
+							
+							// New Way
+							Object ret = Encoder.invoke(path);
+							if (ret != null && ret instanceof Serializable) {
+								// configurable use log or system.out ?
+								// FIXME - make getInstance configurable
+								// Encoder
+								// reference !!!
+								out(Encoder.toJson(ret).getBytes());
+							}
+							/* Old Way
 							Message msg = Encoder.decodePathInfo(path);
 							if (msg != null) {
 								info("incoming msg[%s]", msg);
@@ -168,6 +178,7 @@ public class CLI extends Service {
 									out(Encoder.toJson(ret).getBytes());
 								}
 							}
+							*/
 						} catch (Exception e) {
 							Logging.logError(e);
 						}
@@ -221,23 +232,6 @@ public class CLI extends Service {
 	transient BufferedWriter attachedIn = null;
 
 	transient StreamGobbler attachedOut = null;
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("ERROR");
-
-		try {
-
-			CLI cli = (CLI) Runtime.start("cli", "CLI");
-			/*
-			 * cli.ls("/"); cli.ls("/cli"); cli.ls("/cli/");
-			 */
-			// cli.test();
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	/**
 	 * Command Line Interpreter - used for processing encoded (default RESTful)
@@ -442,6 +436,23 @@ public class CLI extends Service {
 				fos.close();
 			}
 			fos = null;
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("ERROR");
+
+		try {
+
+			CLI cli = (CLI) Runtime.start("cli", "CLI");
+			/*
+			 * cli.ls("/"); cli.ls("/cli"); cli.ls("/cli/");
+			 */
+			// cli.test();
+
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

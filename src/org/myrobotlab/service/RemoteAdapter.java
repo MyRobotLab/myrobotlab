@@ -504,59 +504,6 @@ public class RemoteAdapter extends Service implements Gateway {
 		return ret;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		try {
-
-			int i = 0;
-
-			// RemoteAdapter remote0 = (RemoteAdapter)
-			// Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
-			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
-			Runtime.start(String.format("gui%d", i), "GUIService");
-			// remote0.startUDP(6767);
-			remote1.startListening();
-			// remote1.startListening();
-
-			// remote1.startUDP(6767);
-			// remote1.scan();
-			/*
-			 * Runtime.main(new String[] { "-runtimeName", String.format("r%d",
-			 * i) }); RemoteAdapter remote = (RemoteAdapter)
-			 * Runtime.start(String.format("remote%d", i), "RemoteAdapter");
-			 * Runtime.start(String.format("clock%d", i), "Clock");
-			 * Runtime.start(String.format("gui%d", i), "GUIService");
-			 * 
-			 * // Security security = //
-			 * (Security)Runtime.start(String.format("security", i), //
-			 * "Security"); remote.startListening(); //
-			 * security.allowExportByName("laptop", true); //
-			 * security.allowExportByName("laptop.gui", false); //
-			 * remote.connect("tcp://192.168.0.92:6767"); //
-			 * Runtime.start(String.format("joystick%d", i), "Joystick"); //
-			 * Runtime.start(String.format("python%d", i), "Python");
-			 */
-			// what if null service is passed "register()" no parameters -
-			// I'm sending a registration of nothing?
-			// remote.broadcastState();
-
-			// remote.connect("tcp://127.0.0.1:6767");
-			/*
-			 * THIS WORKS Message msg = remote.createMessage("", "register",
-			 * remote); remote.sendRemote("tcp://127.0.0.1:6868", msg);
-			 */
-
-			// FIXME - sholdn't this be sendRemote ??? or at least
-			// in an interface
-			// remote.sendRemote(uri, msg);
-			// xmpp1.sendMessage("xmpp 2", "robot02 02");
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-
 	public RemoteAdapter(String n) {
 		super(n);
 		defaultPrefix = String.format("%s.", n);
@@ -933,6 +880,64 @@ public class RemoteAdapter extends Service implements Gateway {
 		}
 
 		return status;
+	}
+	
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		try {
+
+			int i = 0;
+
+			// RemoteAdapter remote0 = (RemoteAdapter)
+			// Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
+			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
+			remote1.setTCPPort(6868);
+			remote1.setUDPPort(6868);
+			remote1.startListening();
+			Runtime.start(String.format("gui%d", i), "GUIService");
+			// remote1.startListening(6666, 6666);
+			// remote1.startListening();
+			// remote0.startUDP(6767);
+			// remote1.startListening();
+
+			// remote1.startUDP(6767);
+			// remote1.scan();
+			/*
+			 * Runtime.main(new String[] { "-runtimeName", String.format("r%d",
+			 * i) }); RemoteAdapter remote = (RemoteAdapter)
+			 * Runtime.start(String.format("remote%d", i), "RemoteAdapter");
+			 * Runtime.start(String.format("clock%d", i), "Clock");
+			 * Runtime.start(String.format("gui%d", i), "GUIService");
+			 * 
+			 * // Security security = //
+			 * (Security)Runtime.start(String.format("security", i), //
+			 * "Security"); remote.startListening(); //
+			 * security.allowExportByName("laptop", true); //
+			 * security.allowExportByName("laptop.gui", false); //
+			 * remote.connect("tcp://192.168.0.92:6767"); //
+			 * Runtime.start(String.format("joystick%d", i), "Joystick"); //
+			 * Runtime.start(String.format("python%d", i), "Python");
+			 */
+			// what if null service is passed "register()" no parameters -
+			// I'm sending a registration of nothing?
+			// remote.broadcastState();
+
+			// remote.connect("tcp://127.0.0.1:6767");
+			/*
+			 * THIS WORKS Message msg = remote.createMessage("", "register",
+			 * remote); remote.sendRemote("tcp://127.0.0.1:6868", msg);
+			 */
+
+			// FIXME - sholdn't this be sendRemote ??? or at least
+			// in an interface
+			// remote.sendRemote(uri, msg);
+			// xmpp1.sendMessage("xmpp 2", "robot02 02");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 }

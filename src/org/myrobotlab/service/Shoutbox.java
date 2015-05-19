@@ -10,10 +10,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 
-import org.java_websocket.WebSocket;
 import org.jivesoftware.smack.Roster;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
@@ -26,8 +24,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ProgramAB.Response;
+import org.myrobotlab.service.WebGUI.WebMsg;
 import org.myrobotlab.service.XMPP.XMPPMsg;
-import org.myrobotlab.webgui.WSServer.WSMsg;
 import org.slf4j.Logger;
 
 public class Shoutbox extends Service {
@@ -39,13 +37,14 @@ public class Shoutbox extends Service {
 		public String color;
 
 		// connectivity
-		transient public WebSocket ws; // FIXME - this is most recent websocket
+		transient public String clientID; // FIXME - this is most recent websocket
 										// - loses other connections
 		public String xmpp;
 		public boolean xmppSystemMsgs = false;
 	}
 
 	// key to ---> User???
+	/*
 	static public class Connections implements Serializable {
 		private static final long serialVersionUID = 1L;
 		HashMap<WebSocket, String> wsToKey = new HashMap<WebSocket, String>();
@@ -87,7 +86,7 @@ public class Shoutbox extends Service {
 
 			conn.ip = ip;
 			conn.port = port;
-			conn.ws = ws;
+			conn.clientID = ws;
 			conn.user = userid;
 
 			keyToConn.put(makeKey(ws), conn);
@@ -123,7 +122,7 @@ public class Shoutbox extends Service {
 				Connection conn = entry.getValue();
 
 				// user is in key - get it out and count it
-				if (conn.ws != null) {
+				if (conn.clientID != null) {
 
 				} else if (conn.xmpp != null) {
 
@@ -182,6 +181,8 @@ public class Shoutbox extends Service {
 		}
 
 	} // end class Connections
+	
+	*/
 
 	// FIXME - do not allow double entries on quickStart - make re-entrant
 	// FIXME if link = youtube.com - then embedd (at least with hyperlink &
@@ -284,7 +285,9 @@ public class Shoutbox extends Service {
 	// TODO - force logout command
 	// FIXME - color options
 
-	transient Connections conns = new Connections();
+	//transient Connections conns = new Connections();
+	
+	HashMap<String, Object> clients = new HashMap<String, Object>();
 
 	int msgCount;
 
@@ -328,8 +331,8 @@ public class Shoutbox extends Service {
 	 * @return
 	 */
 
-	static public String makeKey(WebSocket ws) {
-		return String.format("%s:%d", ws.getRemoteSocketAddress().getAddress().getHostAddress(), ws.getRemoteSocketAddress().getPort());
+	static public String makeKey(String ws) {
+		return String.format("%s:%s", ws, ws);
 	}
 
 	public Shoutbox(String n) {
@@ -427,10 +430,12 @@ public class Shoutbox extends Service {
 		return xmpp.getRoster();
 	}
 
+	/*
 	public void listConnections(String key) {
 		log.info("listConnections");
 		sendTo(TYPE_SYSTEM, key, conns.listConnections());
 	}
+	*/
 
 	public void mimicTuring(String msg) {
 		Shout shout = createShout(TYPE_USER, msg);
@@ -438,6 +443,8 @@ public class Shoutbox extends Service {
 		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 		onShout("mr.turing", out);
 	}
+	
+	/** FIXME - DON'T KNOW IF WE CAN GET THE onConnect event in Nettosphere - probably can
 
 	// TODO Create User INFO & INDEXES HERE
 	public void onConnect(WebSocket ws) {
@@ -484,6 +491,7 @@ public class Shoutbox extends Service {
 		conns.remove(ws);
 		info("onDisconnect %s", ws);
 	}
+	*/
 
 	// FIXME - refactor ---(all msgs from non websockets e.g. chatbot | xmpp |
 	// other --to--> websockets
@@ -495,7 +503,7 @@ public class Shoutbox extends Service {
 		// String r = resizeImage(response.msg);
 		String r = response.msg;
 
-		conns.addConnection("mr.turing", "mr.turing");
+		//conns.addConnection("mr.turing", "mr.turing");
 
 		Shout shout = createShout(TYPE_USER, r);
 		shout.from = "mr.turing";
@@ -521,7 +529,7 @@ public class Shoutbox extends Service {
 		 */
 		// sender is put in by WebGUI / WSServer
 		// shout.ip = m.sender;
-		Connection conn = conns.getConnection(key);
+		Connection conn = null;// = conns.getConnection(key);
 
 		Shout shout = Encoder.fromJson(msg, Shout.class);
 
@@ -640,7 +648,7 @@ public class Shoutbox extends Service {
 
 		shouts.add(shout);
 		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
-		webgui.sendToAll(out);
+		//webgui.sendToAll(out);
 
 		if (xmpp != null && !TYPE_SYSTEM.equals(shout.type)) {
 			for (int i = 0; i < xmppRelays.size(); ++i) {
@@ -665,7 +673,7 @@ public class Shoutbox extends Service {
 	 * 
 	 * @param msg
 	 */
-	public void onWSMsg(WSMsg wsmsg) {
+	public void onWSMsg(WebMsg wsmsg) {
 		++msgCount;
 		// msg types individually routed here - this by design
 		// in this way this service (Shoutbox) handles specific
@@ -675,7 +683,7 @@ public class Shoutbox extends Service {
 		// Shoutbox subscibes to onWSMsg and dumps any message we don't want to
 		// handle
 		if ("onShout".equals(wsmsg.msg.method)) {
-			onShout(makeKey(wsmsg.socket), wsmsg.msg);
+			onShout(makeKey(wsmsg.clientid), wsmsg.msg);
 		} else {
 			Message msg = wsmsg.msg;
 			error("unAuthorized message !!! %s.%s from sender %s", msg.name, msg.method, msg.sender);
@@ -689,7 +697,7 @@ public class Shoutbox extends Service {
 
 		// not exactly the same model as onConnect - so we try to add each time
 		String user = xmpp.getEntry(xmppMsg.msg.getFrom()).getName();
-		conns.addConnection(xmppMsg.msg.getFrom(), user);
+		//conns.addConnection(xmppMsg.msg.getFrom(), user);
 
 		Shout shout = createShout(TYPE_USER, xmppMsg.msg.getBody());
 		shout.from = user;
@@ -730,7 +738,7 @@ public class Shoutbox extends Service {
 
 	public String removeXMPPRelay(String user) {
 		xmppRelays.remove(user);
-		conns.remove(xmpp.getJabberID(user));
+		//conns.remove(xmpp.getJabberID(user));
 		return user;
 	}
 
@@ -802,15 +810,16 @@ public class Shoutbox extends Service {
 		String msgString = Encoder.toJson(shout);
 		Message sendTo = createMessage("shoutclient", "onShout", msgString);
 
-		Connection conn = conns.getConnection(key);
+		//Connection conn = conns.getConnection(key);
+		Connection conn = null;
 		if (conn == null) {
 			error("sendTo conn key %s - conn not found", key);
 			return;
 		}
 
-		if (conn.ws != null) {
+		if (conn.clientID != null) {
 			// specialized formatting here
-			conn.ws.send(Encoder.toJson(sendTo));
+			//conn.clientID.send(Encoder.toJson(sendTo));
 		} else if (conn.xmpp != null) {
 			// specialized formatting here
 			xmpp.sendMessage(msgString, conn.xmpp);
@@ -849,13 +858,13 @@ public class Shoutbox extends Service {
 		super.startService();
 		if (webgui == null) {
 			webgui = (WebGUI) createPeer("webgui");
-			webgui.setPort(port);
+			//webgui.setPort(port);
 			webgui.startService();
 
 			// subscribe to events
-			webgui.addConnectListener(this);
-			webgui.addDisconnectListener(this);
-			webgui.addWSMsgListener(this);
+			//webgui.addConnectListener(this);
+			//webgui.addDisconnectListener(this);
+			//webgui.addWSMsgListener(this);
 		}
 
 		// security allows the following method
@@ -870,9 +879,9 @@ public class Shoutbox extends Service {
 		}
 
 		// no REST - for security
-		webgui.allowREST(false);
+		//webgui.allowREST(false);
 		// no direct messaging - for security
-		webgui.allowDirectMessaging(false);
+		//webgui.allowDirectMessaging(false);
 		// FIXME - resource processor is not necessary either !!
 
 		// webgui.startWebSocketServer(port);
@@ -932,7 +941,7 @@ public class Shoutbox extends Service {
 			Shoutbox shoutbox = (Shoutbox) Runtime.create(getName(), "Shoutbox");
 			shoutbox.startService();
 			shoutbox.setNameProvider("org.myrobotlab.client.DrupalNameProvider");
-			webgui.allowREST(true);
+			//webgui.allowREST(true);
 			// shoutbox.startXMPP("incubator@myrobotlab.org", "xxxxxx");
 			// shoutbox.addXMPPRelay("Greg Perry");
 		} catch (Exception e) {
@@ -948,15 +957,15 @@ public class Shoutbox extends Service {
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		shout.time = sdf.format(new Date());
 
-		shout.connectionCount = conns.getConnectionCount();
-		shout.userCount = conns.getUserCount();
-		shout.guestCount = conns.getGuestCount();
+		// shout.connectionCount = conns.getConnectionCount();
+		// shout.userCount = conns.getUserCount();
+		// shout.guestCount = conns.getGuestCount();
 		shout.msgCount = msgCount;
 		return shout;
 	}
 
 	public void version(String connId) {
-		sendTo(TYPE_SYSTEM, connId, conns.listConnections());
+		//sendTo(TYPE_SYSTEM, connId, conns.listConnections());
 		Shout shout = createShout(TYPE_USER, Runtime.getVersion());
 		shout.from = "mr.turing";
 		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));

@@ -61,12 +61,8 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 		mrlToProtocol.put(mrlHost, protocolKey);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.myrobotlab.service.interfaces.CommunicationInterface#getComm(java
-	 * .net.URI)
+	/**
+	 * mrl:/
 	 */
 	public Gateway getComm(URI uri) {
 		if (uri.getScheme().equals(Encoder.SCHEME_MRL)) {

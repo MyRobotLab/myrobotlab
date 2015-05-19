@@ -1,5 +1,6 @@
 package org.myrobotlab.framework;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
@@ -45,78 +46,86 @@ public class TypeConverter {
 	 * @param stringParams
 	 * @return
 	 */
-	static public Object[] getTypedParamsFromJson(Class<?> clazz, String method, String[] stringParams) {
+	static public Object[] getTypedParamsFromJson(Class<?> clazz, String method, String[] stringParams) throws IOException {
 
-		try {
+		// try {
 
-			Method[] methods = clazz.getMethods();
-			for (int i = 0; i < methods.length; ++i) {
-				Method m = methods[i];
-				Class<?>[] types = m.getParameterTypes();
-				// TODO optimize getting name ??? why didn't Java reflect api
-				// use a HashMap ???
-				if (method.equals(m.getName()) && stringParams.length == types.length) {
-					log.info("method with same ordinal of params found {}.{} - building new converter", method, stringParams.length);
+		Method[] methods = clazz.getMethods();
+		for (int i = 0; i < methods.length; ++i) {
+			Method m = methods[i];
+			Class<?>[] types = m.getParameterTypes();
+			// TODO optimize getting name ??? why didn't Java reflect api
+			// use a HashMap ???
+			if (method.equals(m.getName()) && stringParams.length == types.length) {
+				log.info("method with same ordinal of params found {}.{} - building new converter", method, stringParams.length);
 
-					try {
-						Object[] newGSONTypedParamters = new Object[stringParams.length];
+				try {
+					Object[] newGSONTypedParamters = new Object[stringParams.length];
 
-						for (int j = 0; j < types.length; ++j) {
-							Class<?> pType = types[j];
-							String param = stringParams[j];
+					for (int j = 0; j < types.length; ++j) {
+						Class<?> pType = types[j];
+						String param = stringParams[j];
 
-							log.info(String.format("attempting conversion into %s from inbound data %s", pType.getSimpleName(), stringParams[j]));
-							if (pType == String.class) {
-								// escape quotes
-								param = param.replaceAll("\"", "\\\"");
-								// add quotes
-								param = String.format("\"%s\"", param);
-							}
-							newGSONTypedParamters[j] = gson.fromJson(param, pType);
-
+						log.info(String.format("attempting conversion into %s from inbound data %s", pType.getSimpleName(), stringParams[j]));
+						if (pType == String.class) {
+							// escape quotes
+							param = param.replaceAll("\"", "\\\"");
+							// add quotes
+							param = String.format("\"%s\"", param);
 						}
+						newGSONTypedParamters[j] = gson.fromJson(param, pType);
 
-						log.info("successfully converted all types");
-						return newGSONTypedParamters;
-
-					} catch (Exception e) {
-						// Logging.logException(e);
-						log.warn("could not match type from inbound data");
-						continue;
 					}
 
-				} // if name and ordinal match
-			} // through each method
-			log.error(String.format("could not find or convert %s", method));
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
+					log.info("successfully converted all types");
+					return newGSONTypedParamters;
 
-		return null;
+				} catch (Exception e) {
+					// Logging.logException(e);
+					log.warn("could not match type from inbound data");
+					continue;
+				}
+
+			} // if name and ordinal match
+		} // through each method
+
+		String error = String.format("could not find or convert %s", method);
+		log.error(error);
+
+		/*
+		 * } catch (Exception e) { Logging.logError(e); }
+		 * 
+		 * return null;
+		 */
+		throw new IOException(error);
 
 	}
 
 	public static void main(String[] args) {
 
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
-		org.myrobotlab.service.Runtime.createAndStart("clock", "Clock");
+			org.myrobotlab.service.Runtime.createAndStart("clock", "Clock");
 
-		ServiceInterface si = org.myrobotlab.service.Runtime.getService("clock");
+			ServiceInterface si = org.myrobotlab.service.Runtime.getService("clock");
 
-		String stringParams[] = new String[] { "13", "1" };
-		String method = "digitalWrite";
-		Class<?> clazz = si.getClass();
+			String stringParams[] = new String[] { "13", "1" };
+			String method = "digitalWrite";
+			Class<?> clazz = si.getClass();
 
-		Object[] params = getTypedParamsFromJson(clazz, method, stringParams);
+			Object[] params = getTypedParamsFromJson(clazz, method, stringParams);
 
-		si.invoke(method, params);
+			si.invoke(method, params);
 
-		log.info("here");
+			log.info("here");
 
-		Object[] params2 = getTypedParamsFromJson(clazz, method, stringParams);
-		log.info("here");
+			Object[] params2 = getTypedParamsFromJson(clazz, method, stringParams);
+			log.info("here");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 	static public boolean StringToBoolean(String in) {
