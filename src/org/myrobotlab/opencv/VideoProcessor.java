@@ -192,7 +192,7 @@ public class VideoProcessor implements Runnable, Serializable {
 				}
 			}
 		}
-		log.error(String.format("removeFilter could not find %s filter", name));
+		log.error(String.format("getFilter could not find %s filter", name));
 		return null;
 	}
 
@@ -266,6 +266,7 @@ public class VideoProcessor implements Runnable, Serializable {
 			while (itr.hasNext()) {
 				OpenCVFilter filter = itr.next();
 				if (filter == inFilter) {
+					filter.release();
 					itr.remove();
 					if (filters.size() - 1 > 0) {
 						displayFilterName = filters.get(filters.size() - 1).name;
@@ -281,6 +282,9 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	public void removeFilters() {
 		synchronized (filters) {
+			for(OpenCVFilter filter: filters){
+				filter.release();
+			}
 			filters.clear();
 		}
 	}

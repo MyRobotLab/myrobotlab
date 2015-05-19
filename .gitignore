@@ -27,3 +27,5 @@
 /ArduinoMsgCodec*.java
 /webapps/
 /agent.log
+/root/
+/*.mp4

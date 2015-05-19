@@ -8,7 +8,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -50,11 +53,18 @@ public class Encoder {
 	public final static String TYPE_REST = "rest";
 
 	// disableHtmlEscaping to prevent encoding or "=" -
-	//private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+	// private transient static Gson gson = new
+	// GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 	// FIXME - switch to Jackson
+	
+	public final static String PREFIX_API = "api";
 
-	public final static String API_REST_PREFIX = "api";
+	// public final static String PREFIX_API = "/api/services";
+	// public final static String PREFIX_API = "/api/services";
+	// public final static String PREFIX_REST_API = "services";
+	
+	
 
 	public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<Class<?>>(Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class,
 			Float.class, Double.class, Void.class));
@@ -92,33 +102,81 @@ public class Encoder {
 		}
 	}
 
-	public static final Message decodePathInfo(String pathInfo) {
-		return decodePathInfo(pathInfo, API_REST_PREFIX, null);
+
+	// FIXME - need to throw on error - returning null is "often" valid
+	public static Object invoke(String uri) throws IOException {
+		Message msg = Encoder.decodePathInfo(uri);
+		ServiceInterface si = Runtime.getService(msg.name);
+		Object ret = si.invoke(msg.method, msg.data);
+		return ret;
 	}
+	
+	
+	/**
+	 * FIXME - this method requires the class to be loaded for type conversions !!!
+	 * Decoding a URI or path can depend on Context & Environment 
+	 * part of decoding relies on the method signature of an object - therefore it has to be loaded in memory, but
+	 * if the ability to send messages from outside this system is desired - then the Message must be
+	 * able to SPECIFY THE DECODING IT NEEDS !!! - without the clazz available !!!
+	 * 
+	 * URI path decoder - decodes a path into a MRL Message.
+	 * Details are here http://myrobotlab.org/content/myrobotlab-api
+	 * JSON is the default encoding
+	 * 
+	 * @param pathInfo - input path in the format - /{api-type}(/encoding=json/decoding=json/)/{method}/{param0}/{param1}/...
+	 * @return
+	 * @throws IOException
+	 */
+	public static final Message decodePathInfo(String pathInfo) throws IOException {
 
-	// TODO optimization of HashSet combinations of supported encoding instead
-	// of parsing...
-	// e.g. HashMap<String> supportedEncoding.containsKey(
-	public static final Message decodePathInfo(String pathInfo, String apiTag, String encodingTag) {
-
-		// minimal /(api|tag)/name/method
-		// ret encoding /(api|tag)/encoding/name/method
-
-		if (pathInfo == null) {
-			log.error("pathInfo is null");
-			return null;
-		}
-
+		// FIXME optimization of HashSet combinations of supported encoding instead
+		// of parsing...
+		// e.g. HashMap<String> supportedEncoding.containsKey(
+		// refer to - http://myrobotlab.org/content/myrobotlab-api
+	
 		String[] parts = pathInfo.split("/");
-
-		if (parts.length < 4) {
-			log.error(String.format("%s - not enough parts - requires minimal 3", pathInfo));
-			return null;
+		String trailingCharacter = pathInfo.substring(pathInfo.length() - 1); 
+		
+		// synchronous - blocking 
+		// Encoder.invoke(Outputs = null, "path");
+		// search for //: for protocol ?
+		
+		// api has functionality .. 
+		// it delivers the next "set" of access points - which is the services
+		// this allows the calling interface to query
+		
+		if (!PREFIX_API.equals(parts[1])){
+			throw new IOException(String.format("/api expected received %s", pathInfo));
 		}
+		
+		// base query /api
+		// this resolves to a "System" level call
+		// at this point the caller does not need to know the Service names
+		// have 2 choices /api & /api/
+		/* FIXME !!!
+		 * ONE VERY LARGE PROBLEM IS THERE IS NO DEFINITION for nameless Messages NOR 2 api states
+		if (parts.length == 2 && "/".equals(trailingCharacter)){
+			Message msg = new Message();
+			String services = Encoder.toJson(Runtime.getServices());
+			out.write(services.getBytes());
+			out.flush();
+			// close ?
+			return;
+			
+		} else if  ("/api/services/".equals(pathInfo)){
+			Encoder.write(out, Runtime.getServiceNames());
+			out.flush();
+			return;
+		
+		
+		FIXME - not true - need to generate method for /api & /api/
+		if (parts.length < 4) {
+			throw new IOException(String.format("%s - not enough parts - requires minimal 4", pathInfo));
+		}
+		*/
 
-		// FIXME allow parts[x + offset] with apiTag == null
-		if (apiTag != null && !apiTag.equals(parts[1])) {
-			log.error(String.format("apiTag %s specified but %s in ordinal", apiTag, parts[0]));
+		if (!PREFIX_API.equals(parts[1])) {
+			log.error(String.format("apiTag %s specified but %s in ordinal", PREFIX_API, parts[0]));
 			return null;
 		}
 
@@ -132,13 +190,14 @@ public class Encoder {
 			String[] jsonParams = new String[parts.length - 4];
 			System.arraycopy(parts, 4, jsonParams, 0, parts.length - 4);
 			ServiceInterface si = org.myrobotlab.service.Runtime.getService(msg.name);
+			// FIXME - this is a huge assumption ! - needs to be dynamic !
 			msg.data = TypeConverter.getTypedParamsFromJson(si.getClass(), msg.method, jsonParams);
 		}
 
 		return msg;
 	}
 
-	public static Message decodeURI(URI uri) {
+	public static Message decodeURI(URI uri) throws IOException {
 		log.info(String.format("authority %s", uri.getAuthority())); // gperry:blahblah@localhost:7777
 		log.info(String.format("     host %s", uri.getHost())); // localhost
 		log.info(String.format("     port %d", uri.getPort())); // 7777
@@ -147,7 +206,7 @@ public class Encoder {
 		log.info(String.format("   scheme %s", uri.getScheme())); // http
 		log.info(String.format(" userInfo %s", uri.getUserInfo())); // gperry:blahblah
 
-		Message msg = decodePathInfo(uri.getPath(), API_REST_PREFIX, null);
+		Message msg = decodePathInfo(uri.getPath());
 
 		return msg;
 	}
@@ -199,14 +258,14 @@ public class Encoder {
 	// TODO
 	// public static Object encode(Object, encoding) - dispatches appropriately
 
-	static final public String getMsgKey(Message msg){
+	static final public String getMsgKey(Message msg) {
 		return String.format("msg %s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, Encoder.getParameterSignature(msg.data), msg.msgID);
 	}
-	
-	static final public String getMsgTypeKey(Message msg){
+
+	static final public String getMsgTypeKey(Message msg) {
 		return String.format("msg %s.%s --> %s.%s(%s)", msg.sender, msg.sendingMethod, msg.name, msg.method, Encoder.getParameterSignature(msg.data));
 	}
-	
+
 	static final public String getParameterSignature(final Object[] data) {
 		if (data == null) {
 			return "";
@@ -428,6 +487,7 @@ public class Encoder {
 		}
 		return false;
 	}
+
 	public static String type(String type) {
 		int pos0 = type.indexOf(".");
 		if (pos0 > 0) {
@@ -435,6 +495,24 @@ public class Encoder {
 		}
 		return String.format("org.myrobotlab.service.%s", type);
 	}
+	
+	static final String JSON = "application/javascript";
+	
+	// start fresh :P
+	// FIXME should probably use a object factory and interface vs static methods
+	static public void write(OutputStream out, Object toEncode) throws IOException{
+		write(JSON, out, toEncode);
+	}
+	
+	static public void write(String mimeType, OutputStream out, Object toEncode) throws IOException{
+		if (JSON.equals(mimeType)){
+			out.write(gson.toJson(toEncode).getBytes());
+			//out.flush();
+		} else {
+			log.error(String.format("write mimeType %s not supported", mimeType));
+		}
+	}
+	
 
 	// === method signatures end ===
 }

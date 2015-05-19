@@ -30,8 +30,6 @@ import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.RemoteAdapter.CommOptions;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.webgui.RESTProcessor;
-import org.myrobotlab.webgui.RESTProcessor.RESTException;
 import org.slf4j.Logger;
 
 public class XMPP extends Service implements Gateway, MessageListener {
@@ -516,7 +514,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 	}
 
 	// FIXME move to codec package
-	public Object processRESTChatMessage(Message msg) throws RESTException {
+	public Object processRESTChatMessage(Message msg) {
 		String body = msg.getBody();
 		log.info(String.format("processRESTChatMessage [%s]", body));
 
@@ -556,7 +554,15 @@ public class XMPP extends Service implements Gateway, MessageListener {
 
 		// pre-processing end --------
 
-		Object o = RESTProcessor.invoke(uri);
+		// Message msg = Encoder.decodePathInfo(path);
+		Object o = null;
+		
+		try {
+			o = Encoder.invoke(uri);
+		} catch (Exception e) {
+			error(e);
+		}
+		// Object o = RESTProcessor.invoke(uri);
 
 		// FIXME - encoding is that input uri before call ?
 		// or config ?

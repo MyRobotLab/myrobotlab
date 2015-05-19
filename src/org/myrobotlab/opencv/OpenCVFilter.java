@@ -30,12 +30,11 @@ import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.bytedeco.javacpp.opencv_core.CvSize;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.CvSize;
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public abstract class OpenCVFilter implements Serializable {
 
@@ -119,19 +118,6 @@ public abstract class OpenCVFilter implements Serializable {
 		vp.getOpencv().invoke(method, params);
 	}
 	
-	/*
-	
-	public String publishFilterState(String state)
-	{
-		return publishFilterState(this.name, state, (Object[])null);
-	}
-	
-	public String publishFilterState(String state, Object...data)
-	{
-		vp.getOpencv().invoke("publishFilterState", this.name, state, data);
-		return state;
-	}
-	*/
 	
 	public void broadcastFilterState(){
 		FilterWrapper fw = new FilterWrapper(this.name, this);

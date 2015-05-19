@@ -588,7 +588,7 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 
 		kinectImageOrDepth.addActionListener(this);
 
-		possibleFilters = new JList<String>(OpenCV.VALID_FILTERS);
+		possibleFilters = new JList<String>(OpenCV.getPossibleFilters());
 		possibleFilters.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		possibleFilters.setSelectedIndex(0);
 		possibleFilters.setVisibleRowCount(10);

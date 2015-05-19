@@ -43,6 +43,15 @@ public class Zip {
 	}
 
 	static public void extract(String resourcePath, String targetDirectory, String filter, String resourceType, boolean overwrite) throws IOException {
+		
+		if (targetDirectory != null){
+			
+			 if (!"/".equals(targetDirectory.substring(targetDirectory.length() - 1))){
+				 targetDirectory = targetDirectory + "/";
+			 }
+			
+		}
+		
 		log.debug(String.format("extractFromResource (%s,%s)", resourcePath, targetDirectory));
 
 		// String filter = "resource/";
