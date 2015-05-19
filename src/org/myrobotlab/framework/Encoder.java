@@ -39,7 +39,7 @@ import com.google.gson.GsonBuilder;
  * [<scheme>:]<scheme-specific-part>[#<fragment>]
  * http://stackoverflow.com/questions/3641722/valid-characters-for-uri-schemes
  * 
- * branch API test 3
+ * branch API test 4
  */
 public class Encoder {
 
