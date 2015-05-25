@@ -8,7 +8,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.logging.Appender;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class JFugueTest {
@@ -17,6 +21,9 @@ public class JFugueTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		
 		jfugue = (JFugue)Runtime.start("jfugue", "JFugue");
 	}
 
@@ -81,9 +88,10 @@ public class JFugueTest {
 
 	@Test
 	public final void test() {
-		jfugue.playRythm();
+		//  jfugue.playRythm();
 		jfugue.play("C");
 		jfugue.play("C7h");
+		/*
 		jfugue.play("C5maj7w");
 		jfugue.play("G5h+B5h+C6q_D6q");
 		jfugue.play("G5q G5q F5q E5q D5h");
@@ -113,7 +121,22 @@ public class JFugueTest {
 		jfugue.play(55);
 		jfugue.play("E5s A5s C6s B5s E5s B5s D6s C6i E6i G#5i E6i | A5s E5s A5s C6s B5s E5s B5s D6s C6i A5i Ri");
 		jfugue.play(55);
+		*/
 
+	}
+	
+	public static void main(String[] args) {
+		try {
+			
+
+			setUpBeforeClass();
+		
+
+		} catch(Exception e){
+			Logging.logError(e);
+		}
+		
+		System.exit(0);
 	}
 
 }
