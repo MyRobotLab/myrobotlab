@@ -156,29 +156,22 @@ public class HTTPClient extends Service {
 		return "an HTTP client, used to fetch information on the web";
 	}
 
-	@Override
-	public Status test() {
-		Status status = super.test();
-		try {
+	public void test() {
 
-			String google = new String(HTTPClient.get("http://www.google.com/"));
-			log.info(google);
+		String google = new String(HTTPClient.get("http://www.google.com/"));
+		log.info(google);
 
-			// String ntest = new String(HTTPClient.get("nullTest"));
-			// log.info(ntest);
+		// String ntest = new String(HTTPClient.get("nullTest"));
+		// log.info(ntest);
 
-			String script = new String(HTTPClient.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov2.full3.byGael.Langevin.1.py"));
-			log.info(script);
+		String script = new String(HTTPClient.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov2.full3.byGael.Langevin.1.py"));
+		log.info(script);
 
-			HashMap<String, String> params = new HashMap<String, String>();
-			params.put("p", "apple");
-			google = new String(HTTPClient.post("http://www.google.com", params));
-			log.info(google);
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("p", "apple");
+		google = new String(HTTPClient.post("http://www.google.com", params));
+		log.info(google);
 
-		} catch (Exception e) {
-			status.addError(e);
-		}
-		return status;
 	}
 
 }

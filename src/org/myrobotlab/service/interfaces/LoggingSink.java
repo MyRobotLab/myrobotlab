@@ -1,9 +1,11 @@
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.framework.Status;
+
 public interface LoggingSink {
 
 	public String getName();
-	public String error(String format, Object... args);
-	public String info(String format, Object... args);
-	public String warn(String format, Object... args);
+	public Status error(String format, Object... args);
+	public Status info(String format, Object... args);
+	public Status warn(String format, Object... args);
 }

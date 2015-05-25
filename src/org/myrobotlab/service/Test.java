@@ -12,9 +12,9 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
-import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
@@ -46,7 +46,7 @@ public class Test extends Service {
 	transient Set<Thread> threads = null;
 	transient Set<File> files = new HashSet<File>();
 
-	Status status = null;
+	List<Status> status = new ArrayList<Status>();
 
 	BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
@@ -211,7 +211,7 @@ public class Test extends Service {
 		return status;
 	}
 
-	public void exit(Status status) {
+	public void exit(List<Status> status) {
 		try {
 			// check against current state for
 			// NOT NEEDED Regular save file - since Agent is process.waitFor
@@ -258,7 +258,7 @@ public class Test extends Service {
 	 */
 	public void handleError(String errorMsg) {
 		if (status != null) {
-			status.addError(errorMsg);
+			status.add(Status.error(errorMsg));
 		}
 	}
 
@@ -291,12 +291,10 @@ public class Test extends Service {
 
 			// TODO JAXB xml - since it comes with java 7
 
-		} catch (Exception ex) {
-			status.addError(ex);
-			return status;
+		} catch (Exception ex) {			
+			return Status.error(ex);
 		}
 
-		// NO ERROR !!
 		return null;
 	}
 
@@ -307,7 +305,6 @@ public class Test extends Service {
 		return inData;
 	}
 
-	@Override
 	public Status test() {
 		// we are started so .. we'll use the big hammer at the end
 		Status status = Status.info("========TESTING=============");
@@ -326,13 +323,11 @@ public class Test extends Service {
 	 * @param serviceType
 	 * @return
 	 */
-	public void test(String serviceType) {
+	public List<Status> test(String serviceType) {
 
-		// getState();
-		// logThreadNames();
+		List<Status> ret = new ArrayList<Status>();
 
-		log.warn(String.format("==== testing %s ====", serviceType));
-		status = Status.info("==== testing %s ====", serviceType);
+		ret.add(Status.info("==== testing %s ====", serviceType));
 
 		try {
 
@@ -345,13 +340,13 @@ public class Test extends Service {
 			try {
 				s = Runtime.create(serviceType, serviceType);
 			} catch (Exception e) {
-				status.addError("create %s", e);
+				ret.add(Status.error(e));
 				exit(status);
 			}
 
 			// start test
 			if (s == null) {
-				status.addError("could not create %s", serviceType);
+				status.add(Status.info("could not create %s", serviceType));
 				exit(status);
 			}
 
@@ -363,13 +358,14 @@ public class Test extends Service {
 				// FIXME - s.waitForStart();
 				// Thread.sleep(500);
 			} catch (Exception e) {
-				status.addError("startService %s", e);
+				status.add(Status.error(e));
 				exit(status);
 			}
 
 			status.add(serializeTest(s));
 
-			status.add(s.test());
+			// FIXME - JUNIT TESTS !!!!
+			// status.add(s.test()); - can not do this
 			// logThreadNames();
 
 			// assume installed - Agent's job
@@ -380,26 +376,29 @@ public class Test extends Service {
 
 			// release
 			try {
+				status.add(Status.info("releasePeers"));
 				if (s.hasPeers()) {
 					s.releasePeers();
 				}
 			} catch (Exception e) {
-				status.addError("releasePeers %s", e);
+				status.add(Status.error(e));
 			}
 
 			try {
+				status.add(Status.info("releaseService"));
 				s.releaseService();
 			} catch (Exception e) {
-				status.addError("releaseService %s", e);
+				status.add(Status.error(e));
 			}
 
 			log.info("exiting environment");
 
 		} catch (Exception e) {
-			status.addError(e);
+			status.add(Status.error(e));
 		}
 
 		exit(status);
+		return status;
 	}
 
 	/**
@@ -407,20 +406,20 @@ public class Test extends Service {
 	 * 
 	 * @return
 	 */
-	public Status testAll() {
+	public List<Status> testAll() {
 
+		List<Status> ret = new ArrayList<Status>();
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 		Status status = Status.info("subTest");
 
-		status.add(Status.info("will test %d services", serviceTypeNames.length));
+		//status.add(Status.info("will test %d services", serviceTypeNames.length));
 
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 			String fullName = serviceTypeNames[i];
-			test(fullName);
-			// status.add(test(fullName)); cant accumulate with exit(status)
+			ret.addAll((test(fullName)));
 		}
 
-		return status;
+		return ret;
 	}
 
 	public void testServiceScripts() {
@@ -438,24 +437,25 @@ public class Test extends Service {
 
 	// save / load test !
 
-	public Status verifyServicePageScripts() {
+	public List<Status> verifyServicePageScripts() {
+		List<Status> ret = new ArrayList<Status>();
 		Repo repo = Runtime.getInstance().getRepo();
 		ServiceData serviceData = repo.getServiceData();
 		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
 
 		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
 		long startTime = System.currentTimeMillis();
-		status.addNamedInfo("startTime", "%d", startTime);
+		ret.add(info("startTime", "%d", startTime));
 
 		for (int i = 0; i < serviceTypes.size(); ++i) {
 			ServiceType serviceType = serviceTypes.get(i);
 			Status retStatus = verifyServicePageScript(serviceType.getName());
-			if (retStatus.hasError()) {
-				status.add(retStatus);
+			if (retStatus.isError()) {
+				ret.add(retStatus);
 			}
 		}
 
-		return status;
+		return ret;
 	}
 
 }

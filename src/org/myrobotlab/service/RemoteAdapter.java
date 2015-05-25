@@ -50,7 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -859,29 +859,6 @@ public class RemoteAdapter extends Service implements Gateway {
 		}
 	}
 
-	@Override
-	public Status test() {
-		Status status = super.test();
-		try {
-
-			RemoteAdapter remote01 = (RemoteAdapter) Runtime.getService(getName());
-			remote01.startListening();
-
-			RemoteAdapter remote02 = (RemoteAdapter) Runtime.start("remote02", "RemoteAdapter");
-			remote02.startListening(6868);
-			remote02.connect("tcp://localhost:6767");
-
-			// bounds cases
-
-			// how to do out of process .. or is it necessary - no
-
-		} catch (Exception e) {
-			status.addError(e);
-		}
-
-		return status;
-	}
-	
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();

@@ -57,8 +57,8 @@ public class TestCatcher extends Service implements SerialDataListener {
 	/**
 	 * data to hold the incoming messages
 	 */
-	transient BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
-	transient BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
+	transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
+	transient public BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 	
 	ArrayList<Status> errorList = new ArrayList<Status>();
 
@@ -72,33 +72,6 @@ public class TestCatcher extends Service implements SerialDataListener {
 		return isLocal;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		try {
-			TestCatcher catcher01 = new TestCatcher("catcher01");
-			catcher01.startService();
-
-			TestThrower thrower = new TestThrower("thrower");
-			thrower.startService();
-
-			catcher01.subscribe("throwInteger", thrower.getName(), "catchInteger", Integer.class);
-
-			for (int i = 0; i < 1000; ++i) {
-				thrower.invoke("throwInteger", i);
-				if (i % 100 == 0) {
-					thrower.sendBlocking(catcher01.getName(), "catchInteger");
-				}
-			}
-
-			// thrower.throwInteger(count);
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
 
 	public Status onError(Status error){
 		errorList.add(error);
@@ -137,7 +110,9 @@ public class TestCatcher extends Service implements SerialDataListener {
 	public boolean preProcessHook(Message msg) {
 		try {
 			msgs.put(msg);
-			log.info(String.format("%d msg %s ", msgs.size(), msg));
+			if (log.isDebugEnabled()){
+				log.debug(String.format("%d msg %s ", msgs.size(), msg));
+			}
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -168,34 +143,23 @@ public class TestCatcher extends Service implements SerialDataListener {
 		return obj;
 	}
 
-	public ArrayList<Message> waitForMsgs(int count) throws InterruptedException, IOException {
-		return waitForMsgs(count, 1000, 100);
+	public BlockingQueue<Message> waitForMsgs(int count) throws InterruptedException, IOException {
+		return waitForMsgs(count, 1000);
 	}
 
-	public ArrayList<Message> waitForMsgs(int count, int timeout) throws InterruptedException, IOException {
-		return waitForMsgs(count, timeout, 100);
-	}
-
-	public ArrayList<Message> waitForMsgs(int count, int timeout, int pollInterval) throws InterruptedException, IOException {
-		ArrayList<Message> ret = new ArrayList<Message>();
+	public BlockingQueue<Message> waitForMsgs(int count, int timeout) throws InterruptedException, IOException {
 		long start = System.currentTimeMillis();
-		long now = start;
+		int interCount = 0;
 
-		while (ret.size() < count) {
-			now = System.currentTimeMillis();
-			Message msg = msgs.poll(pollInterval, TimeUnit.MILLISECONDS);
-			if (msg != null) {
-				ret.add(msg);
+		while ((interCount = msgs.size()) < count) {
+			if (timeout < System.currentTimeMillis() - start){
+				throw new IOException(String.format("timeout - %d msgs under %d ms expected - got %d in %d ms", interCount, timeout, msgs.size(), System.currentTimeMillis() - start));
 			}
-			if (now - start > timeout) {
-				String error = String.format("waited %d ms received %d messages expecting %d in less than %d ms", now - start, ret.size(), count, timeout);
-				log.error(error);
-				throw new IOException(error);
-			}
+			sleep(10);
 		}
 
-		log.info(String.format("returned %d msgs in %s ms", ret.size(), now - start));
-		return ret;
+		log.warn(String.format("returned %d msgs in %s ms", interCount, System.currentTimeMillis() - start));
+		return msgs;
 	}
 
 	public ArrayList<?> waitForData(int count) throws InterruptedException, IOException {
@@ -306,6 +270,35 @@ public class TestCatcher extends Service implements SerialDataListener {
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+	
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		try {
+			TestCatcher catcher01 = new TestCatcher("catcher01");
+			catcher01.startService();
+
+			TestThrower thrower = new TestThrower("thrower");
+			thrower.startService();
+
+			catcher01.subscribe("throwInteger", thrower.getName(), "catchInteger", Integer.class);
+
+			for (int i = 0; i < 1000; ++i) {
+				thrower.invoke("throwInteger", i);
+				if (i % 100 == 0) {
+					thrower.sendBlocking(catcher01.getName(), "catchInteger");
+				}
+			}
+
+			// thrower.throwInteger(count);
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 	}
 
 }

@@ -60,6 +60,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -897,42 +898,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * 
 	 * @return
 	 */
-	/*
-	 * public Service updateState(String serviceName) {
-	 * sendBlocking(serviceName, "broadcastState", null); ServiceInterface sw =
-	 * Runtime.getService(serviceName); if (sw == null) {
-	 * log.error(String.format("service wrapper came back null for %s",
-	 * serviceName)); return null; }
-	 * 
-	 * return (Service)sw.get(); }
-	 */
+
 	public Heartbeat echoHeartbeat(Heartbeat pulse) {
 		return pulse;
 	}
 
-	public String error(Exception e) {
-		Logging.logError(e);
-		return error(e.getMessage());
-	}
-
-	/**
-	 * a very important method - allows nice formatting of error message
-	 * but does things 2 ways - publishes on an error channel
-	 * and sends a generalized status object as an error
-	 * "should" only do it one way
-	 * 
-	 * @param msg
-	 * @return
-	 */
-	public String error(String msg) {
-		invoke("publishStatus", "error", msg);
-		return msg;
-	}
-
-	@Override
-	public String error(String format, Object... args) {
-		return error(String.format(format, args));
-	}
 
 	@Override
 	abstract public String[] getCategories();
@@ -1234,27 +1204,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		inbox.add(msg);
 	}
 
-	/**
-	 * set status broadcasts an information string to any subscribers
-	 * 
-	 * @param msg
-	 */
 
-	public String info(String msg) {
-		log.info(msg);
-		invoke("publishStatus", "info", msg);
-		return msg;
-	}
-
-	/*
-	 * send takes a name of a target system - the method - and a list of
-	 * parameters and invokes that method at its destination.
-	 */
-
-	@Override
-	public String info(String format, Object... args) {
-		return info(String.format(format, args));
-	}
 
 	// BOXING - BEGIN --------------------------------------
 
@@ -1272,6 +1222,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method, Encoder.getParameterSignature(msg.data), msg.timeStamp));
 		}
 
+		// recently added - to support "nameless" messages - concept you may get a message at this point
+		// which does not belong to you - but is for a service in the same Process
+		// this is to support nameless Runtime messages but theoretically it could
+		// happen in other situations...
+		if (!name.equals(msg.name)){
+			// wrong Service - get the correct one
+			return Runtime.getService(msg.name).invoke(msg);
+		}
+		
 		// SECURITY -
 		// 0. allowing export - whether or not we'll allow services to be
 		// exported - based on Type or Name
@@ -1526,16 +1485,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	/**
-	 * error only channel publishing point versus publishStatus which handles
-	 * info, warn & error
-	 * @param msg
-	 * @return
-	 */
-	public Status publishError(Status error) {
-		return error;
-	}
-
-	/**
 	 * framework diagnostic publishing method for examining load, capacity, and
 	 * throughput of Inbox & Outbox queues
 	 * 
@@ -1554,15 +1503,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 */
 	public Service publishState() {
 		return this;
-	}
-
-	public Status publishStatus(String level, String msg) {
-		Status s = new Status(getName(), level, null, msg);
-		if (level.equals(Status.ERROR)) {
-			lastError = s;
-			invoke("publishError", s);
-		}
-		return s;
 	}
 
 	public void purgeAllTasks() {
@@ -1733,6 +1673,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 				if (!preRoutingHook(m)) {
 					continue;
+				}
+				
+				// nameless Runtime messages
+				if (m.name == null){
+					// don't know if this is "correct" 
+					// but we are substituting the Runtime name as soon as we see that its a null 
+					// name message
+					m.name = Runtime.getInstance().getName();
 				}
 
 				// route if necessary
@@ -2165,11 +2113,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	@Override
-	public Status test() {
-		return Status.info("testing %s of type %s", getName(), getType());
-	}
-
-	@Override
 	public void unsubscribe(String publisherName, String outMethod, String inMethod, Class<?>... parameterType) {
 
 		MRLListener listener = null;
@@ -2186,20 +2129,78 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		unsubscribe(si.getName(), outMethod, inMethod);
 	}
 
-	public String warn(String msg) {
-		log.warn(msg);
-		// if (System.currentTimeMillis() - lastWarn > 300) {
-		invoke("publishStatus", "warn", msg);
-		// lastWarn = System.currentTimeMillis();
-		// }
-		return msg;
+	// ---------------- Status processing begin ------------------
+	public Status error(Exception e) {
+		Status ret= Status.error(e);
+		ret.name = getName();
+		invoke("publishStatus", ret);
+		return ret;
 	}
 
 	@Override
-	public String warn(String format, Object... args) {
-		return warn(String.format(format, args));
+	public Status error(String format, Object... args) {
+		Status ret= Status.error(String.format(format, args));
+		ret.name = getName();
+		invoke("publishStatus", ret);
+		return ret;
+	}
+
+	
+	public Status warn(String msg) {
+		Status ret = Status.warn(msg);
+		invoke("publishStatus", ret);
+		return ret;
+	}
+
+	@Override
+	public Status warn(String format, Object... args) {
+		return Status.warn(format, args);
 	}
 	
+	/**
+	 * set status broadcasts an info string to any subscribers
+	 * 
+	 * @param msg
+	 */
+	public String info(String msg) {
+		Status status = Status.info(msg);
+		invoke("publishStatus", status);
+		return msg;
+	}
+
+	/**
+	 * set status broadcasts an formatted info string to any subscribers
+	 * 
+	 * @param msg
+	 */
+	@Override
+	public Status info(String format, Object... args) {
+		return Status.info(format, args);
+	}
+	
+	/**
+	 * error only channel publishing point versus publishStatus which handles
+	 * info, warn & error
+	 * @param msg
+	 * @return
+	 */
+	public Status publishError(Status status) {
+		return status;
+	}
+
+	public Status publishStatus(Status status) {
+		status.name = getName();
+		if (status.level.equals(Status.ERROR)) {
+			lastError = status;
+			log.error(status.toString());
+			invoke("publishError", status);
+		} else {
+			log.info(status.toString());
+		}
+		return status;
+	}
+	
+	// ---------------- Status processing end ------------------
 	@Override
 	public String toString(){
 		return getName();

@@ -642,186 +642,6 @@ public class OpenCV extends VideoSource {
 		videoProcessor.showTimestamp(b);
 	}
 
-	public Status test() {
-
-		Status status = Status.info("starting %s %s test", getName(), getType());
-
-		try {
-			// FIXME - each filter should have its own test !!!!
-			//
-
-			// smart testing - determine what environment has
-			// do i have a camera ?
-			// do i have multiple cameras
-
-			// FIXME FIXME FIXME - this needs to work for directories -
-			// recursively - us NIO !!!
-			// FileIO.copyResource("OpenCV/testData", "OpenCV/testData");
-
-			// FileIO.copyResource("OpenCV/testData/mask.png",
-			// "OpenCV/testData/mask.png");
-			OpenCV opencv = (OpenCV) Runtime.start(getName(), "OpenCV");
-			// OpenCVFilterCanny canny = new OpenCVFilterCanny();
-
-			OpenCVFilterAffine affine = new OpenCVFilterAffine();
-			opencv.addFilter(affine);
-
-			/*
-			 * OpenCVFilterCanny canny2 = new OpenCVFilterCanny("canny2");
-			 * opencv.addFilter(canny2); opencv.capture();
-			 */
-
-			String filename = "faces.jpg";
-			String testFilename = String.format("OpenCV/testData/%s", filename);
-			Runtime.createAndStart("gui", "GUIService");
-
-			// resource !!! - it better be there !
-			// opencv.captureFromResourceFile(testFilename);
-			opencv.captureFromImageFile(testFilename);
-
-			OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect("fd");
-			addFilter(fd);
-			String output = recordSingleFrame();
-			log.info(String.format("record single frame - %s", output));
-
-			OpenCVData d = getOpenCVData();
-			ArrayList<org.myrobotlab.service.data.Rectangle> l = d.getBoundingBoxArray();
-			log.info("boundingBox size {}", d.getBoundingBoxArray().size());
-
-			SerializableImage img = getDisplay();
-			if (img == null) {
-				throw new MRLError("getDisplay is null");
-			}
-
-			output = recordSingleFrame();
-			log.info(String.format("record single frame - %s", output));
-			// TODO verify file exists ...
-
-			log.info("here");
-
-			/*
-			 * // base set would be file
-			 * FileIO.copyResource(String.format("OpenCV/testData/%s",filename),
-			 * filename);
-			 * 
-			 * // headless section ???
-			 * setFrameGrabberType("ImageFileFrameGrabber");
-			 * setInputSource(INPUT_SOURCE_IMAGE_FILE);
-			 * setInputFileName(filename);
-			 * 
-			 * capture(); captureFromImageFile("shapes.png");
-			 * captureFromResourceFile("");
-			 */
-
-			// int videoCameraIndex = 0;
-			/*
-			 * if (data.length > 0){ if (data[0] instanceof Integer){
-			 * videoCameraIndex = (Integer)data[0]; } }
-			 */
-
-			// capture();
-
-			// should probably use xml file
-			// but currently
-
-			// set frame grabber
-
-			// extract test data
-			// FileIO.getPackageContent(packageName)
-
-			// add cumulatively
-
-			// DUMP OUT PRETTY REPORT WITH ALL FILTERS !!
-			// POST PRETTY REPORT WITH ALL PICTURES !! (test from Orbous -
-			// 12/17/2020 results)
-
-			OpenCVData data = getOpenCVData();
-			// no filters - just input - all these should NOT BE NULL
-			// and equal
-			IplImage image = data.getImage();
-			if (image == null) {
-				throw new MRLError("image null");
-			}
-			IplImage display = data.getDisplay();
-			if (display == null) {
-				throw new MRLError("display null");
-			}
-			IplImage input = data.getInputImage();
-			if (input == null) {
-				throw new MRLError("input null");
-			}
-
-			if (image != display || display != input) {
-				throw new MRLError("not equal");
-			}
-
-			// specific filter tests
-			OpenCVFilterAnd and = new OpenCVFilterAnd();
-			BufferedImage bimage = ImageIO.read(FileIO.class.getResourceAsStream("/resource/OpenCV/testData/mask.png"));
-			and.loadMask(bimage);
-			addFilter(and);
-			OpenCVData o = getOpenCVData();
-			String outfile = o.writeDisplay();
-			log.info("wrote masked file to {}", outfile);
-
-			// type of test - test which saves result of web page
-			// test combination (combinatorics filter)
-			for (int i = 0; i < POSSIBLE_FILTERS.length; ++i) {
-				String filter = POSSIBLE_FILTERS[i];
-
-				addFilter(filter);
-
-				data = getOpenCVData();
-				// setDisplayFilter(filter);
-				// sleep(300);
-
-				// test forcing time delay - regular image is 333 fps on a file
-
-				// recordSingleFrame();
-
-				// check OpenCV DATA !!!! - get points bars lines - bounding
-				// Boxes
-
-				// removeFilter(filter);
-
-				image = data.getImage(filter);
-				if (image == null) {
-					throw new MRLError("image null");
-				}
-				if (display == null) {
-					throw new MRLError("display null");
-				}
-
-				if (!data.getSelectedFilterName().equals(filter)) {
-					throw new MRLError("filter name != selected name");
-				}
-
-				image = data.getImage();
-				if (image == null) {
-					throw new MRLError("image null");
-				}
-
-				display = data.getDisplay();
-
-				input = data.getInputImage();
-
-				int width = data.getWidth();
-				int height = data.getHeight();
-				BufferedImage bi = data.getBufferedImage();
-				String f = data.writeImage();
-				log.info("{}", data.keySet());
-
-				removeFilter(filter);
-
-			}
-
-		} catch (Exception e) {
-			return status.addError(e);
-		}
-
-		status.addInfo("test completed");
-		return status;
-	}
 
 	public void captureFromResourceFile(String filename) {
 		FileIO.copyResource(filename, filename);
@@ -867,12 +687,14 @@ public class OpenCV extends VideoSource {
 
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
 
+		/*
 		OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
 		opencv.addFilter(ffmpeg);
 		opencv.capture();
 		
 		opencv.removeFilters();
 		ffmpeg.stopRecording();
+		*/
 
 		// opencv.setCameraIndex(0);
 

@@ -7,6 +7,7 @@ import java.net.URI;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 

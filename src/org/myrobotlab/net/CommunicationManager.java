@@ -29,7 +29,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 
-import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;

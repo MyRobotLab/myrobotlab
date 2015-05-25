@@ -502,32 +502,24 @@ public class InMoovHand extends Service implements LeapDataListener {
 		return;
 	}
 
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-		try {
-			if (arduino == null) {
-				// gson encoding prevents this
-				throw new Exception("arduino is null");
-			}
+	public void test(){
 
-			if (!arduino.isConnected()) {
-				throw new Exception("arduino not connected");
-			}
-
-			thumb.moveTo(thumb.getPos() + 2);
-			index.moveTo(index.getPos() + 2);
-			majeure.moveTo(majeure.getPos() + 2);
-			ringFinger.moveTo(ringFinger.getPos() + 2);
-			pinky.moveTo(pinky.getPos() + 2);
-			wrist.moveTo(wrist.getPos() + 2);
-
-		} catch (Exception e) {
-			status.addError(e);
+		if (arduino == null) {
+			error("arduino is null");
 		}
 
-		status.addInfo("test completed");
-		return status;
+		if (!arduino.isConnected()) {
+			error("arduino not connected");
+		}
+
+		thumb.moveTo(thumb.getPos() + 2);
+		index.moveTo(index.getPos() + 2);
+		majeure.moveTo(majeure.getPos() + 2);
+		ringFinger.moveTo(ringFinger.getPos() + 2);
+		pinky.moveTo(pinky.getPos() + 2);
+		wrist.moveTo(wrist.getPos() + 2);
+
+		info("test completed");
 	}
 
 	public void three() {

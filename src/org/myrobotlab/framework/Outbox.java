@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.slf4j.Logger;
@@ -105,6 +106,7 @@ public class Outbox implements Runnable, Serializable {
 		return comm;
 	}
 
+	// FIXME - consider using a blocking queue now that we are using Java 5.0
 	@Override
 	public void run() {
 		isRunning = true;

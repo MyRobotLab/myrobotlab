@@ -70,7 +70,7 @@ public class OpenCVFilterFFMEG extends OpenCVFilter {
 
 	@Override
 	public void imageChanged(IplImage image) {
-		initRecorder(name);
+		initRecorder(String.format("%s.%d.mp4", name, System.currentTimeMillis()));
 	}
 
 	void initRecorder(String filename) {

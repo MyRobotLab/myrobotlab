@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.jivesoftware.smack.Roster;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
-import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
@@ -304,18 +304,6 @@ public class Shoutbox extends Service {
 		Peers peers = new Peers(name);
 		peers.put("webgui", "WebGUI", "webgui");
 		return peers;
-	}
-
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		try {
-
-			Shoutbox shoutbox = (Shoutbox) Runtime.create("shoutbox", "Shoutbox");
-			shoutbox.test();
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
 	}
 
 	/**
@@ -932,22 +920,6 @@ public class Shoutbox extends Service {
 		Shout shout = createShout(TYPE_SYSTEM, data);
 		Message onShout = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 		onShout(null, onShout);
-	}
-
-	@Override
-	public Status test() {
-		Status status = super.test();
-		try {
-			Shoutbox shoutbox = (Shoutbox) Runtime.create(getName(), "Shoutbox");
-			shoutbox.startService();
-			shoutbox.setNameProvider("org.myrobotlab.client.DrupalNameProvider");
-			//webgui.allowREST(true);
-			// shoutbox.startXMPP("incubator@myrobotlab.org", "xxxxxx");
-			// shoutbox.addXMPPRelay("Greg Perry");
-		} catch (Exception e) {
-			status.addError(e);
-		}
-		return status;
 	}
 
 	private Shout updateSystemInfo(Shout shout) {

@@ -274,10 +274,7 @@ public class InMoovHead extends Service {
 	 * eyeX.load(); eyeY.load(); jaw.load(); return true; }
 	 */
 
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-		try {
+	public void test() {
 
 			if (arduino == null) {
 				error("arduino is null");
@@ -292,13 +289,6 @@ public class InMoovHead extends Service {
 			eyeX.moveTo(eyeX.getPos() + 2);
 			eyeY.moveTo(eyeY.getPos() + 2);
 			jaw.moveTo(jaw.getPos() + 2);
-
-		} catch (Exception e) {
-			status.addError(e);
-		}
-
-		status.addInfo("test completed");
-		return status;
 	}
 
 }

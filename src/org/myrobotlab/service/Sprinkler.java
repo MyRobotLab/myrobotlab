@@ -39,7 +39,6 @@ public class Sprinkler extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		Sprinkler sprinkler = (Sprinkler) Runtime.start("sprinkler", "Sprinkler");
-		sprinkler.test();
 	}
 
 	public Sprinkler(String n) {
@@ -128,21 +127,6 @@ public class Sprinkler extends Service {
 			arduino.disconnect();
 			arduino.stopService();
 		}
-	}
-
-	@Override
-	public Status test() {
-		Status status = null;
-		try {
-			status = super.test();
-			// get running reference to self
-			Sprinkler sprinkler = (Sprinkler) Runtime.start(getName(), "Sprinkler");
-			sprinkler.startService();
-		} catch (Exception e) {
-			status.addError(e);
-		}
-
-		return status;
 	}
 
 }

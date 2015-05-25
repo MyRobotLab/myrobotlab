@@ -16,8 +16,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.codec.Codec;
-import org.myrobotlab.codec.CodecOutputStream;
+import org.myrobotlab.codec.serial.Codec;
+import org.myrobotlab.codec.serial.CodecOutputStream;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;

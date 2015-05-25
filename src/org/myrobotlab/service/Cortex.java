@@ -4,7 +4,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;

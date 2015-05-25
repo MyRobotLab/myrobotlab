@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNIData;
 import org.myrobotlab.openni.Skeleton;
@@ -56,7 +58,7 @@ public class InMoov extends Service {
 	// hands and arms
 	transient public InMoovHead head;
 	transient public InMoovTorso torso;
-								transient public InMoovArm leftArm;
+	transient public InMoovArm leftArm;
 	transient public InMoovHand leftHand;
 	transient public InMoovArm rightArm;
 	transient public InMoovHand rightHand;
@@ -167,14 +169,18 @@ public class InMoov extends Service {
 	}
 
 	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		Runtime.start("gui", "GUIService");
+			Runtime.start("gui", "GUIService");
 
-		InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-		i01.test();
+			InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+			i01.test();
 
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 		// i01.copyGesture(true);
 
 		// i01.test();
@@ -1360,45 +1366,38 @@ public class InMoov extends Service {
 	 * return true; }
 	 */
 
-	@Override
-	public Status test() {
-		Status status = Status.info("starting InMoov test");
-		try {
-			String rightPort = "COM7";
-			String leftPort = "COM20";
-			String rightUART = "COM7_UART";
-			String leftUART = "COM20_UART";
+	public void test() throws FileNotFoundException {
 
-			Serial luart = (Serial) Runtime.start(leftUART, "Serial");
-			Serial ruart = (Serial) Runtime.start(rightUART, "Serial");
+		String rightPort = "COM7";
+		String leftPort = "COM20";
+		String rightUART = "COM7_UART";
+		String leftUART = "COM20_UART";
 
-			luart.record();
-			ruart.record();
+		Serial luart = (Serial) Runtime.start(leftUART, "Serial");
+		Serial ruart = (Serial) Runtime.start(rightUART, "Serial");
 
-			luart.connect(leftUART);
-			ruart.connect(rightUART);
+		luart.record();
+		ruart.record();
 
-			GUIService gui = (GUIService) Runtime.start("gui", "GUIService");
+		luart.connect(leftUART);
+		ruart.connect(rightUART);
 
-			// get online script
-			String script = new String(HTTPClient.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov2.full3.byGael.Langevin.1.py"));
-			log.info(script);
-			python = (Python) Runtime.start("python", "Python");
-			python.exec(script);
+		GUIService gui = (GUIService) Runtime.start("gui", "GUIService");
 
-			log.info("done");
-			// i01.startHead(leftPort);
-			// i01.systemCheck();
+		// get online script
+		String script = new String(HTTPClient.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov2.full3.byGael.Langevin.1.py"));
+		log.info(script);
+		python = (Python) Runtime.start("python", "Python");
+		python.exec(script);
 
-			luart.releaseService();
-			ruart.releaseService();
+		log.info("done");
+		// i01.startHead(leftPort);
+		// i01.systemCheck();
 
-			Runtime.releaseAll();
-		} catch (Exception e) {
-			status.addError(e);
-		}
+		luart.releaseService();
+		ruart.releaseService();
 
-		return status;
+		// Runtime.releaseAll();
 
 	}
 

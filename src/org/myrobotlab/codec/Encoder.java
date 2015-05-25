@@ -1,4 +1,4 @@
-package org.myrobotlab.framework;
+package org.myrobotlab.codec;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -19,6 +19,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
+import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.TypeConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
 public interface ServiceInterface extends Messaging, LoggingSink {
@@ -40,6 +41,8 @@ public interface ServiceInterface extends Messaging, LoggingSink {
 	public ArrayList<MRLListener> getNotifyList(String key);
 
 	public ArrayList<String> getNotifyListKeySet();
+	
+	public Outbox getOutbox();
 
 	// Deprecate - just use class
 	public String getSimpleName();
@@ -79,12 +82,6 @@ public interface ServiceInterface extends Messaging, LoggingSink {
 
 	public void stopService();
 
-	// can't be statics :(
-	// but is good enough - probably a good idea to keep in mind
-	// is the ability to do "non destructive" tests on a "live" Service at any
-	// time
-	public Status test() throws Exception;
-	
 	public String clearLastError();
 
 	public boolean hasError();
@@ -92,4 +89,6 @@ public interface ServiceInterface extends Messaging, LoggingSink {
 	public Status getLastError();
 
 	public void broadcastState();
+	
+	public Object invoke(Message msg);
 }

@@ -27,7 +27,6 @@ import java.util.List;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -70,7 +69,6 @@ public class Roomba extends Service {
 		try {
 			Roomba roomba = new Roomba("roomba");
 			roomba.startService();
-			roomba.test();
 
 			/*
 			 * roomba.connect("COM6");
@@ -681,43 +679,6 @@ public class Roomba extends Service {
 	 */
 	public void stop() {
 		roombacomm.stop();
-	}
-
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-		/*
-		 * FIXME - need to refactor so it can use virtual serial ports !!!
-		 * 
-		 * try { // must pause after every playNote to let to note sound
-		 * System.out.println("Playing some notes"); roombacomm.playNote(72,
-		 * 10); roombacomm.pause(200); roombacomm.playNote(79, 10);
-		 * roombacomm.pause(200); roombacomm.playNote(76, 10);
-		 * roombacomm.pause(200);
-		 * 
-		 * // test Logo-like functions (blocking) // speed is in mm/s, go* is in
-		 * mm, spin is in degrees roombacomm.setSpeed(100); // can be positive
-		 * or negative roombacomm.goStraight(100); // can be positive or
-		 * negative roombacomm.goForward(100); // negative numbers not allowed
-		 * roombacomm.goBackward(200); // negative numbers not allowed
-		 * 
-		 * roombacomm.setSpeed(150); roombacomm.spin(-360); // can be positive
-		 * or negative roombacomm.spinRight(360); // negative numbers not
-		 * allowed roombacomm.spinLeft(360); // negative numbers not allowed
-		 * 
-		 * // test non-blocking functions roombacomm.goStraightAt(200); // speed
-		 * argument roombacomm.pause(1000); roombacomm.goForwardAt(200); //
-		 * speed argument roombacomm.pause(1000); roombacomm.goBackwardAt(400);
-		 * // speed argument roombacomm.pause(1000);
-		 * 
-		 * roombacomm.spinLeftAt(-15); // mm/s or degs/sec ?
-		 * roombacomm.pause(1000); roombacomm.spinRightAt(15);
-		 * roombacomm.pause(1000);
-		 * 
-		 * } catch (Exception e) { status.addError(e); }
-		 */
-		status.addInfo("test completed");
-		return status;
 	}
 
 	public void tribble() {

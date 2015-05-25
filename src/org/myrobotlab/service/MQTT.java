@@ -273,7 +273,6 @@ public class MQTT extends Service implements MqttCallback {
 			MQTT mqtt = (MQTT) Runtime.start("mqtt", "MQTT");
 			Runtime.start("gui", "GUIService");
 
-			mqtt.test();
 
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -487,28 +486,6 @@ public class MQTT extends Service implements MqttCallback {
 			waitForStateChange(10000);
 			// }
 		}
-	}
-
-	@Override
-	public Status test() {
-
-		Status status = super.test();
-
-		try {
-
-			setPubTopic("mrl");
-			setQos(2);
-			setBroker("tcp://iot.eclipse.org:1883");
-			setClientId("MRL_mqtt_client");
-
-			startClient();
-
-			publish("HELLO I'VE JUST BEEN BORGED");
-
-		} catch (Throwable e) {
-			status.addError((Exception) e);
-		}
-		return status;
 	}
 
 	/**

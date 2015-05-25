@@ -7,7 +7,7 @@ import time
 import math
 import threading
 from random import randint
-from org.myrobotlab.codec import ArduinoMsgCodec
+from org.myrobotlab.codec.serial import ArduinoMsgCodec
 
 working = False
 worker = None

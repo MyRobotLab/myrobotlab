@@ -253,10 +253,4 @@ public class Solr extends Service {
 		solrServer = new HttpSolrServer(solrUrl);
 	}
 
-	@Override
-	public Status test() {
-		// TODO: ?
-		return super.test();
-	}
-
 }

@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -101,8 +100,7 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 		try {
 
 			EddieControlBoard ecb = (EddieControlBoard) Runtime.start("ecb", "EddieControlBoard");
-			ecb.test2();
-
+	
 			// 129 -> 81
 			// 128 -> 80 (full reverse)
 			// 127 -> 7F (full forward)
@@ -451,72 +449,6 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 		return false;
 	}
 
-	@Override
-	public Status test() {
-		Status status = super.test();
-		try {
-			EddieControlBoard ecb = (EddieControlBoard) Runtime.start(getName(), "EddieControlBoard");
-			Runtime.start("gui", "GUIService");
-			Serial uart = ecb.serial.createVirtualUART();
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 00A CCE\r");
-			ecb.startSensors();
-			// ecb.connect(port)
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			uart.write("011 011 011 004 004 004 004 CBB\r");
-			// ecb.go(1, 1);
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return status;
-	}
-
-	public void test2() {
-		try {
-			// COM 9 Mega
-			// COM 8 UNO
-			// COM 10 Usb
-			Runtime.start("gui", "GUIService");
-			EddieControlBoard ecb = (EddieControlBoard) Runtime.getService(getName());
-			ecb.startRemoteAdapter();
-			ecb.startJoystick();
-			ecb.connect("COM10");
-			ecb.startSensors();
-			sleep(10000);
-			ecb.stopSensors();
-			joystick.setController(2);
-			joystick.add1Listener("ecb", "sayBatterLevel");
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	@Override
 	public final Integer onByte(Integer newByte) throws IOException {

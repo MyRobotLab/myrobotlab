@@ -83,11 +83,4 @@ public class TopCodes extends Service {
 
 		return null;
 	}
-
-	@Override
-	public Status test() {
-		Status status = super.test();
-
-		return status;
-	}
 }

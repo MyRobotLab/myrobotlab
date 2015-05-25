@@ -32,59 +32,41 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class TestThrower extends Service {
+	
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(TestThrower.class);
+	public int cnt = 0;
+	public int pulseLimit = 20;
+	public ArrayList<RapidThrower> pitchers = new ArrayList<RapidThrower>();
 
-	public class RapidThrower implements Runnable {
-		Service myService = null;
-		public boolean running = false;
-		Integer count = new Integer(0);
+	public class RapidThrower extends Thread {
+		Service myService;
+		int count = 300;
+		int throwInterval = 10;
 
-		RapidThrower(Service myService) {
+		RapidThrower(Service myService, int count, int throwInterval) {
 			this.myService = myService;
+			this.start();
+		}
+		
+		RapidThrower(Service myService) {
+			this(myService, 100, 10);
 		}
 
 		@Override
 		public void run() {
-			running = true;
-			while (running) {
-				try {
+			for (int i = 0; i < count; ++i)
+			{
 					++count;
-					invoke(throwType, count);
-					Thread.sleep(throwInterval);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					logException(e);
-					running = false;
-				}
+					invoke("pitch", count);
+					Service.sleep(throwInterval);
 			}
 
 		}
 	}
 
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(TestThrower.class.getCanonicalName());
-	public int cnt = 0;
-	public int pulseLimit = 20;
-	public int pitchCnt = 0;
-	public int throwInterval = 100;
-	public String throwType = "throwInteger";
-	public ArrayList<Integer> catcher = new ArrayList<Integer>();
-
-	public ArrayList<Integer> catchList = new ArrayList<Integer>();
-
-	public ArrayList<RapidThrower> pitchers = new ArrayList<RapidThrower>();
-
-	// TODO bury this in Service??
 	public TestThrower(String n) {
 		super(n);
-	}
-
-	public Integer catchInteger(Integer count) {
-		log.info("***THROWER CATCH*** catchInteger " + count);
-		synchronized (catchList) {
-			catchList.add(count);
-			catchList.notify();
-		}
-		return count;
 	}
 
 	@Override
@@ -94,46 +76,30 @@ public class TestThrower extends Service {
 
 	@Override
 	public String getDescription() {
-		return "<html>service for junit tests</html>";
+		return "service for test message sending";
 	}
 
-	public Integer highPitchInteger(Integer count) {
-		++pitchCnt;
-		log.info("highPitchInteger " + pitchCnt);
-		return count;
-	}
-
-	public Integer lowPitchInteger(Integer count) {
-		++pitchCnt;
-		log.info("lowPitchInteger " + pitchCnt);
-		return count;
-	}
-
-	public Integer noPitchInteger(Integer count) {
-		++pitchCnt;
+	public Integer pitch(Integer number) {
+		++cnt;
 		log.info("noPitchInteger null ");
-		return 0;
+		return number;
 	}
-
-	/**
-	 * load test related
-	 * 
-	 * @param num
-	 */
-	public void setNumberOfPitchers(Integer num) {
-		if (pitchers.size() < num) {
-			for (int i = 0; i < num; ++i) {
-				RapidThrower pitcher = new RapidThrower(this);
-				Thread t = new Thread(pitcher);
-				t.start();
-				pitchers.add(pitcher);
-			}
-		} else {
-			for (int i = num; i >= num; --i) {
-				RapidThrower pitcher = pitchers.get(i);
-				pitcher.running = false;
-				pitchers.remove(i);
-			}
+	
+	public void pitchInt(int number){
+		for (int i = 0; i < number; ++i) {
+			invoke("pitch", i);
+		}
+	}
+	
+	public void multiPitcher(int pitchers){
+		for (int i = 0; i < pitchers; ++i){
+			new RapidThrower(this, 300, 10);
+		}
+	}
+	
+	public void multiPitcher(int pitchers, int pitches, int throwInterval){
+		for (int i = 0; i < pitchers; ++i){
+			new RapidThrower(this, pitches, throwInterval);
 		}
 	}
 

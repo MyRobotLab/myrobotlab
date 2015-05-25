@@ -91,7 +91,6 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start("pwm", "Adafruit16CServoDriver");
-		driver.test();
 
 	}
 
@@ -312,69 +311,5 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		// TODO - request myArduino - re connect
 	}
 
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-
-		try {
-			Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start(getName(), "Adafruit16CServoDriver");
-			Arduino arduino = driver.getArduino();
-			Serial serial = arduino.getSerial();
-			Serial virtual = serial.createVirtualUART();
-
-			// FIXME - make virtual UART
-
-			virtual.connect("v1");
-			virtual.record("test/Adafruit16CServoDriver/test");
-			driver.arduino.connect("v0");
-
-			driver.setServo(0, SERVOMIN);
-			driver.setServo(0, SERVOMAX);
-			driver.setServo(0, SERVOMIN);
-			driver.setServo(0, SERVOMAX);
-			driver.setServo(0, SERVOMIN);
-			driver.setServo(0, SERVOMAX);
-			driver.setServo(0, SERVOMIN);
-			driver.setServo(0, SERVOMAX);
-			driver.setServo(0, SERVOMIN);
-			driver.setServo(0, SERVOMAX);
-			driver.setServo(0, SERVOMIN);
-			driver.setServo(0, SERVOMAX);
-
-			// begin();
-			driver.setPWMFreq(60);
-
-			for (int i = SERVOMIN; i < SERVOMAX; ++i) {
-				driver.setPWM(0, 0, i);
-			}
-
-			driver.setPWM(0, 0, 0);
-
-			driver.setPWM(0, 0, SERVOMIN);
-			driver.setPWM(0, 0, SERVOMAX);
-			driver.setPWM(0, 0, SERVOMIN);
-			driver.setPWM(0, 0, SERVOMAX);
-			driver.setPWM(0, 0, SERVOMIN);
-			driver.setPWM(0, 0, SERVOMAX);
-			driver.setPWM(0, 0, SERVOMAX);
-
-			// need to allow time :P
-			// to flush serial thread
-			// sleep(1000);
-			// disconnect / close arduino port
-			// flush cable
-			// stop recording
-			driver.arduino.disconnect();
-			// cable.close();
-			virtual.stopRecording();
-
-			FileIO.compareFiles("test/Adafruit16CServoDriver/test.rx", "test/Adafruit16CServoDriver/control/test.rx");
-
-		} catch (Exception e) {
-			status.addError(e);
-		}
-
-		return status;
-	}
 
 }

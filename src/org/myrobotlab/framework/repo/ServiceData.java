@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
-import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;

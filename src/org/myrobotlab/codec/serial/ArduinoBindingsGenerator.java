@@ -1,4 +1,4 @@
-package org.myrobotlab.codec;
+package org.myrobotlab.codec.serial;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeMap;
 
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;

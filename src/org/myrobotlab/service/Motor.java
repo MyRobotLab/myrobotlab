@@ -393,18 +393,6 @@ public class Motor extends Service implements MotorControl {
 	}
 
 	@Override
-	public Status test() {
-		Status status = super.test();
-		try {
-
-		} catch (Exception e) {
-			status.addError(e);
-			Logging.logError(e);
-		}
-		return status;
-	}
-
-	@Override
 	public void unlock() {
 		log.info("unLock");
 		locked = false;
