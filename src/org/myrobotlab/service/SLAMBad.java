@@ -75,7 +75,7 @@ public class SLAMBad extends Service {
 		LoggingFactory.getInstance().setLevel(Level.WARN);
 
 		SLAMBad slambad = (SLAMBad) Runtime.start("slambad", "SLAMBad");
-		slambad.test();
+		
 		// slambad.addWall(3.0, 0.0, 0.0, 1.0f, 1.0f, 1.0f);
 
 		/*
@@ -147,19 +147,6 @@ public class SLAMBad extends Service {
 			simbad.dispose();
 			simbad = null;
 		}
-	}
-
-	@Override
-	public Status test() {
-		Status status = super.test();
-		SLAMBad slambad = (SLAMBad) Runtime.start(getName(), "SLAMBad");
-		// slambad.addWall(3.0, 0.0, 0.0, 1.0f, 1.0f, 1.0f);
-		slambad.addWall(5.0, 0.0, 1.0, 1.0f, 0.0f, 1.0f);
-
-		/*
-		 * for (int i = 0; i < 100; ++i){ slambad.addRandomWall(); }
-		 */
-		return status;
 	}
 
 }

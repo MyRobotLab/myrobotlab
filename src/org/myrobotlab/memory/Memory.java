@@ -3,7 +3,7 @@ package org.myrobotlab.memory;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;

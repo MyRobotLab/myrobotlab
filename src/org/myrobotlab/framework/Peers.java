@@ -3,6 +3,7 @@ package org.myrobotlab.framework;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;

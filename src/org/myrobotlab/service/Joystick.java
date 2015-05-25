@@ -865,42 +865,4 @@ public class Joystick extends Service {
 		}
 	}
 
-	@Override
-	public Status test() {
-		Status status = super.test();
-
-		try {
-
-			Runtime.start("gui", "GUIService");
-			Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			Servo servo = (Servo) Runtime.start("servo", "Servo");
-
-			// arduino.connect("COM15");
-			// servo.attach(arduino, 4);
-
-			// joy.addZListener(servo);
-
-			// joy.setController(2);
-
-			/*
-			 * RemoteAdapter remote = (RemoteAdapter) Runtime.start("remote",
-			 * "RemoteAdapter"); Runtime.start("python", "Python");
-			 * 
-			 * 
-			 * sleep(1000);
-			 * 
-			 * // from java.net import URI // TODO - PREFIX (CHOOSE PREFIX SO NO
-			 * NAME COLLISION) // SIMPLE CONNECT URI Message msg =
-			 * remote.createMessage("", "register", joy); remote.sendRemote(new
-			 * URI("tcp://127.0.0.1:6868"), msg);
-			 */
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return status;
-	}
-
 }

@@ -1,47 +1,47 @@
 	package org.myrobotlab.service;
 
-import static org.myrobotlab.codec.ArduinoMsgCodec.ANALOG_READ_POLLING_START;
-import static org.myrobotlab.codec.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
-import static org.myrobotlab.codec.ArduinoMsgCodec.ANALOG_WRITE;
-import static org.myrobotlab.codec.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
-import static org.myrobotlab.codec.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
-import static org.myrobotlab.codec.ArduinoMsgCodec.DIGITAL_WRITE;
-import static org.myrobotlab.codec.ArduinoMsgCodec.GET_VERSION;
-import static org.myrobotlab.codec.ArduinoMsgCodec.MAGIC_NUMBER;
-import static org.myrobotlab.codec.ArduinoMsgCodec.MAX_MSG_SIZE;
-import static org.myrobotlab.codec.ArduinoMsgCodec.MRLCOMM_VERSION;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PIN_MODE;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_CUSTOM_MSG;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_LOAD_TIMING_EVENT;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_PIN;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_PULSE;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_STEPPER_EVENT;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PUBLISH_VERSION;
-import static org.myrobotlab.codec.ArduinoMsgCodec.PULSE_IN;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SENSOR_ATTACH;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SENSOR_POLLING_START;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SENSOR_POLLING_STOP;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_ATTACH;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_DETACH;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_SWEEP_START;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_SWEEP_STOP;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_WRITE;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SERVO_WRITE_MICROSECONDS;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SET_DEBOUNCE;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SET_DIGITAL_TRIGGER_ONLY;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SET_LOAD_TIMING_ENABLED;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SET_PWMFREQUENCY;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SAMPLE_RATE;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SERIAL_RATE;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SET_SERVO_SPEED;
-import static org.myrobotlab.codec.ArduinoMsgCodec.SET_TRIGGER;
-import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_ATTACH;
-import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_MOVE_TO;
-import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_RESET;
-import static org.myrobotlab.codec.ArduinoMsgCodec.STEPPER_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_START;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_CUSTOM_MSG;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_LOAD_TIMING_EVENT;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PIN;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_STEPPER_EVENT;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_IN;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_ATTACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_START;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_DETACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_START;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE_MICROSECONDS;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_DEBOUNCE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_DIGITAL_TRIGGER_ONLY;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_LOAD_TIMING_ENABLED;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_PWMFREQUENCY;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SAMPLE_RATE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_SPEED;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.STEPPER_ATTACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.STEPPER_MOVE_TO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.STEPPER_RESET;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.STEPPER_STOP;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -1562,68 +1562,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public void stopService() {
 		super.stopService();
 		disconnect();
-	}
-
-	@Override
-	public Status test() {
-
-		Status status = Status.info("starting %s %s test", getName(), getType());
-
-		try {
-			// get running reference to self
-			Arduino arduino = (Arduino) Runtime.start(getName(), "Arduino");
-			Serial serial = arduino.getSerial();
-			Serial uart = serial.createVirtualUART();
-			uart.record();
-
-			// set board type
-			// FIXME - this should be done by MRLComm.ino (compiled in)
-			status.addInfo("setting board type to %s", BOARD_TYPE_ATMEGA2560);
-			arduino.setBoard(BOARD_TYPE_ATMEGA2560);
-
-			ArrayList<Pin> pinList = getPinList();
-			status.addInfo("found %d pins", pinList.size());
-
-			for (int i = 0; i < pinList.size(); ++i) {
-				arduino.analogWrite(pinList.get(i).pin, 0);
-				arduino.analogWrite(pinList.get(i).pin, 128);
-				arduino.analogWrite(pinList.get(i).pin, 255);
-			}
-
-			for (int i = 0; i < pinList.size(); ++i) {
-				arduino.digitalWrite(pinList.get(i).pin, 1);
-				arduino.digitalWrite(pinList.get(i).pin, 0);
-			}
-
-			arduino.disconnect();
-
-			// nullModem.close();
-
-			for (int i = 0; i < 10; ++i) {
-				long duration = arduino.pulseIn(7, 8);
-				log.info("duration {} uS", duration);
-			}
-
-			UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start("sr04", "UltrasonicSensor");
-			Runtime.start("gui", "GUIService");
-
-			sr04.attach(serial.getPortName(), 7, 8);
-			sr04.startRanging();
-
-			sr04.stopRanging();
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		// TODO - test all functions
-
-		// TODO - test digital pin
-		// getDigitalPins
-
-		// getAnalogPins
-
-		return status;
-
 	}
 
 	public static void main(String[] args) {

@@ -100,7 +100,7 @@ public class Speech extends Service implements TextListener {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Speech.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Speech.class);
 
 	// en_us en_gb en_au en_sa en_nz
 	// String language = "en";
@@ -159,8 +159,6 @@ public class Speech extends Service implements TextListener {
 		try {
 			Speech mouth = (Speech) Runtime.start("mouth", "Speech");
 			//mouth.setVolume(0.1F);
-			
-			mouth.test();
 
 			String test = " hello this is a test \\dev\\blah / blah : * ? \" blah \" blah > < <> bla | zod | zod2 ".replaceAll(filter, " ");
 
@@ -601,18 +599,6 @@ public class Speech extends Service implements TextListener {
 			audioFile = null;
 		}
 		super.stopService();
-	}
-
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-		Speech mouth = (Speech) Runtime.start(getName(), "Speech");
-		mouth.speak("I don't use appostrophes, or other punctuation, do you?");
-		mouth.speak("I'm done with this test");
-		mouth.speak("I'm done with this test again");
-		// TODO non-blocking - blocking google freetts
-		status.addInfo("done with test");
-		return status;
 	}
 
 	// speak errors

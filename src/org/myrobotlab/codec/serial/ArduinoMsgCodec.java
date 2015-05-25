@@ -1,4 +1,4 @@
-package org.myrobotlab.codec;
+package org.myrobotlab.codec.serial;
 
 import java.io.Serializable;
 import java.util.ArrayList;

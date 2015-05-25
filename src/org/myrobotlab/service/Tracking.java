@@ -558,30 +558,6 @@ public class Tracking extends Service {
 		setState(STATE_IDLE);
 	}
 
-	@Override
-	public Status test() {
-		Status status = super.test();
-		Tracking track = (Tracking) Runtime.getService(getName());
-		try {
-			for (int i = 0; i < 1000; ++i) {
-				// invoke("trackPoint", 0.5, 0.5);
-				// faceDetect();
-				track.trackPoint();
-				// trackPoint(0.5f,0.5f);
-				track.setForegroundBackgroundFilter();
-				track.learnBackground();
-				track.searchForeground();
-				track.removeFilters();
-			}
-
-		} catch (Exception e) {
-			error(e);
-		}
-
-		info("test completed");
-		return status;
-	}
-
 	// --------------- publish methods begin ----------------------------
 	public OpenCVData toProcess(OpenCVData data) {
 		return data;

@@ -42,7 +42,6 @@ public class ChessGameManager extends Service {
 		try {
 
 			ChessGameManager template = (ChessGameManager) Runtime.start("chessgame", "ChessGameManager");
-			template.test();
 
 			Runtime.start("gui", "GUIService");
 
@@ -63,32 +62,6 @@ public class ChessGameManager extends Service {
 	@Override
 	public String getDescription() {
 		return "used as a general template";
-	}
-
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-
-		ComputerPlayer white = new ComputerPlayer();
-		Game game2 = new Game(white, new ComputerPlayer());
-
-		Game game = new Game(new HumanPlayer(), new HumanPlayer());
-		game.haveDrawOffer();
-		game.getGameState();
-		if (Piece.BPAWN == game.pos.getPiece(Position.getSquare(4, 4))) {
-
-		}
-
-		boolean res = game.processString("e4");
-		res = game.processString("draw offer e5");
-		res = game.processString("Nc6");
-		res = game.processString("draw offer Bb5");
-		res = game.processString("draw accept");
-		res = game.processString("undo");
-		res = game.processString("redo");
-		res = game.processString("new");
-
-		return status;
 	}
 
 }

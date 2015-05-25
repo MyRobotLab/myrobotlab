@@ -45,8 +45,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
 
-import org.myrobotlab.codec.Codec;
-import org.myrobotlab.codec.DecimalCodec;
+import org.myrobotlab.codec.serial.Codec;
+import org.myrobotlab.codec.serial.DecimalCodec;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;

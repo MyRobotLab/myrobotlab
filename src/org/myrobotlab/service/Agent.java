@@ -16,8 +16,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.cmdline.CMDLine;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
@@ -141,24 +141,25 @@ public class Agent extends Service {
 		return peers;
 	}
 
-	public static Status install(String fullType) {
-		Status status = Status.info("install %s", fullType);
+	public static List<Status> install(String fullType) {
+		List<Status> ret = new ArrayList<Status>();
+		ret.add(Status.info("install %s", fullType));
 		try {
 			Repo repo = new Repo();
 
 			if (!repo.isServiceTypeInstalled(fullType)) {
 				repo.install(fullType);
 				if (repo.hasErrors()) {
-					status.addError(repo.getErrors());
+					ret.add(Status.error(repo.getErrors()));
 				}
 
 			} else {
 				log.info("installed {}", fullType);
 			}
 		} catch (Exception e) {
-			status.addError(e);
+			ret.add(Status.error(e));
 		}
-		return status;
+		return ret;
 	}
 
 
@@ -204,7 +205,9 @@ public class Agent extends Service {
 		return name;
 	}
 
-	public Status serviceTest() {
+	public List<Status> serviceTest() {
+		
+		List<Status> ret = new ArrayList<Status>();
 		// CLEAN FOR TEST METHOD
 
 		// FIXME DEPRECATE !!!
@@ -232,9 +235,9 @@ public class Agent extends Service {
 		ServiceData serviceData = repo.getServiceData();
 		ArrayList<ServiceType> serviceTypes = serviceData.getServiceTypes();
 
-		Status status = Status.info("serviceTest will test %d services", serviceTypes.size());
+		ret.add(info("serviceTest will test %d services", serviceTypes.size()));
 		long startTime = System.currentTimeMillis();
-		status.addNamedInfo("startTime", "%d", startTime);
+		ret.add(info("startTime", "%d", startTime));
 
 		for (int i = 0; i < serviceTypes.size(); ++i) {
 
@@ -291,35 +294,36 @@ public class Agent extends Service {
 				if (data != null) {
 					String test = new String(data);
 					Status testResult = Encoder.fromJson(test, Status.class);
-					if (testResult.hasError()) {
-						status.add(testResult);
+					if (testResult.isError()) {
+						ret.add(testResult);
 					}
 				} else {
-					Status noInfo = new Status("could not get results");
-					status.add(noInfo);
+					info("could not get results");
 				}
 				// destroy env
 				terminate("testEnv");
 
 			} catch (Exception e) {
-				status.addError("ERROR - %s", serviceType);
-				status.addError(e);
+				
+				ret.add(Status.error(e));
 				continue;
 			}
 		}
-
-		status.addNamedInfo("installTime", "%d", installTime);
-		status.addNamedInfo("testTimeMs", "%d", System.currentTimeMillis() - startTime);
-		status.addNamedInfo("testTimeMinutes", "%d", TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime));
-		status.addNamedInfo("endTime", "%d", System.currentTimeMillis());
+		
+		ret.add(info("installTime", "%d", installTime));
+		
+		ret.add(info("installTime %d", installTime));
+		ret.add(info("testTimeMs %d", System.currentTimeMillis() - startTime));
+		ret.add(info("testTimeMinutes %d", TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime)));
+		ret.add(info("endTime %d", System.currentTimeMillis()));
 
 		try {
-			FileIO.savePartFile("fullTest.json", Encoder.toJson(status).getBytes());
+			FileIO.savePartFile("fullTest.json", Encoder.toJson(ret).getBytes());
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 
-		return status;
+		return ret;
 	}
 
 	/**
@@ -559,28 +563,6 @@ public class Agent extends Service {
 		System.exit(0);
 	}
 
-	@Override
-	public Status test() {
-		Status status = Status.info("agent test begin");
-
-		try {
-			// JUnitCore junit = new JUnitCore();
-			// Result result = junit.run(testClasses);
-
-			/*
-			 * Bootstrap test = new BootstrapHotSpot(); // spawn mrl instance
-			 * Process process = test.spawn(new String[]{"-service", "test",
-			 * "Test"}); //Process process = test.spawn(new String[]{});
-			 */
-
-			// process.destroy();
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return status;
-	}
-	
 	/**
 	 * First method JVM executes when myrobotlab.jar is in jar form.
 	 * 

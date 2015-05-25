@@ -16,8 +16,10 @@ public abstract class Logging {
 
 	// public static HashMap<String, Long> timerMap = null;
 
-	public final static void logError(final Throwable e) {
-		log.error(stackToString(e));
+	public final static String logError(final Throwable e) {
+		String ret = stackToString(e);
+		log.error(ret);
+		return ret;
 	}
 
 	/**

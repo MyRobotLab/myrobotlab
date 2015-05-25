@@ -23,7 +23,6 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 		try {
 
 			TextTransform transform = (TextTransform) Runtime.start("transform", "TextTransform");
-			transform.test();
 
 			Runtime.start("gui", "GUIService");
 
@@ -57,10 +56,5 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 		return text;
 	}
 
-	@Override
-	public Status test() {
-		Status status = super.test();
 
-		return status;
-	}
 }

@@ -167,7 +167,6 @@ public class Sweety extends Service {
 		try {
 
 			Sweety sweety = (Sweety) Runtime.start("sweety", "Sweety");
-			sweety.test();
 
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -786,13 +785,5 @@ public class Sweety extends Service {
 		// Move the left side
 		setRightArmPosition(Rshoulder, Rarm, RforeArm, -1, -1);
 		}
-	
-	@Override
-	public Status test() {
-		Status status = super.test();
-		Runtime.start("gui", "GUIService");
-
-		return status;
-	}
 
 }

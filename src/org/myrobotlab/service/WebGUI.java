@@ -20,8 +20,8 @@ import org.atmosphere.cpr.Serializer;
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.fileLib.Zip;
-import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -211,7 +211,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 	@Override
 	public String getDescription() {
-		return "used as a general template";
+		return "web enabled gui";
 	}
 
 	/**

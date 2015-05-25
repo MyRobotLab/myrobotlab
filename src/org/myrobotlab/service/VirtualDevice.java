@@ -81,8 +81,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		try {
 
 			VirtualDevice template = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-			template.test();
-
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {

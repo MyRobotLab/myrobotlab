@@ -32,8 +32,8 @@ import java.util.TreeMap;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.cmdline.CMDLine;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MessageListener;
@@ -811,18 +811,24 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	/**
+	 * Return the named service - 
+	 * 		- if name is not null, but service is not found - return null (for re-entrant Service creation)
+	 *  	- if the name IS null, return Runtime - to support api/getServiceNames
+	 *    	- if the is not null, and service is found - return the Service
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public static ServiceInterface getService(String name) {
 
-		if (!registry.containsKey(name)) {
-			log.debug(String.format("service %s does not exist", name));
-			return null;
+		if (name == null) {
+			return Runtime.getInstance();
 		}
-
-		return registry.get(name);
+		if (!registry.containsKey(name)) {
+			return null;
+		} else {
+			return registry.get(name);
+		}
 	}
 
 	/**
@@ -2294,6 +2300,21 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			}
 		}	
 		return false;
+	}
+	
+	/**
+	 * remove all subscriptions from all local Services
+	 */
+	static public void removeAllSubscriptions(){
+		ServiceEnvironment se = getServiceEnvironment(null);
+		Set<String> keys = se.serviceDirectory.keySet();
+		for(String name : keys){
+			ServiceInterface si = getService(name);
+			ArrayList<String> nlks =  si.getNotifyListKeySet();
+			for (int i = 0; i < nlks.size(); ++i){
+				si.getOutbox().notifyList.clear();
+			}
+		}
 	}
 	
 	public static ArrayList<Status> getErrors() {

@@ -27,7 +27,7 @@ package org.myrobotlab.service.data;
 
 import java.io.Serializable;
 
-import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.codec.Encoder;
 
 public class Pin implements Serializable {
 	private static final long serialVersionUID = 1L;

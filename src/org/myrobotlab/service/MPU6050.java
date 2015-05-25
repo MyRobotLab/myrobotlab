@@ -34,7 +34,6 @@ public class MPU6050 extends Service implements SerialDataListener {
 		try {
 
 			MPU6050 mpu6050 = (MPU6050) Runtime.start("mpu6050", "MPU6050");
-			mpu6050.test();
 
 			Runtime.start("gui", "GUIService");
 

@@ -1,8 +1,9 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
+
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -298,17 +299,14 @@ public class InMoovArm extends Service {
 		arduino.startService();
 	}
 
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-
-		try {
+	public void test() {
+		
 			if (arduino == null) {
-				throw new Exception("arduino is null");
+				error("arduino is null");
 			}
 
 			if (!arduino.isConnected()) {
-				throw new Exception("arduino not connected");
+				error("arduino not connected");
 			}
 
 			bicep.moveTo(bicep.getPos() + 2);
@@ -317,12 +315,5 @@ public class InMoovArm extends Service {
 			omoplate.moveTo(omoplate.getPos() + 2);
 
 			sleep(300);
-
-		} catch (Exception e) {
-			status.addError(e);
-		}
-
-		status.addInfo("test completed");
-		return status;
 	}
 }

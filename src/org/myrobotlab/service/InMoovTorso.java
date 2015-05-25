@@ -238,16 +238,14 @@ public class InMoovTorso extends Service {
 		arduino.startService();
 	}
 
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-		try {
+	public void test() {
+	
 			if (arduino == null) {
-				throw new Exception("arduino is null");
+				error("arduino is null");
 			}
 
 			if (!arduino.isConnected()) {
-				throw new Exception("arduino not connected");
+				error("arduino not connected");
 			}
 
 			topStom.moveTo(topStom.getPos() + 2);
@@ -257,12 +255,5 @@ public class InMoovTorso extends Service {
 			moveTo(35, 45, 55);
 			String move = getScript("i01");
 			log.info(move);
-
-		} catch (Exception e) {
-			status.addError(e);
-		}
-
-		status.addInfo("test completed");
-		return status;
 	}
 }

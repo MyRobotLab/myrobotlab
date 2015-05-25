@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.ivy.core.report.ResolveReport;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Encoder;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -96,7 +96,7 @@ public class Incubator extends Service {
 		LoggingFactory.getInstance().addAppender(Appender.FILE);
 
 		Incubator incubator = (Incubator) Runtime.start("incubator", "Incubator");
-		incubator.test();
+		
 		// incubator.servoArduinoOpenCVGUIService();
 
 		/*
@@ -188,7 +188,9 @@ public class Incubator extends Service {
 		log.info(report.toString());
 	}
 
-	public Status pythonTest() throws IOException {
+	public List<Status> pythonTest() throws IOException {
+		ArrayList<Status> ret = new ArrayList<Status>();
+		
 		Python python = (Python) Runtime.start("python", "Python");
 		Serial uart99 = (Serial) Runtime.start("uart99", "Serial");
 		// take inventory of currently running services
@@ -201,9 +203,10 @@ public class Incubator extends Service {
 		}
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
-		Status status = Status.info("subTest");
+		ret.add(new Status("subTest"));
 
-		status.add(Status.info("will test %d services", serviceTypeNames.length));
+		ret.add(Status.info("will test %d services", serviceTypeNames.length));
+		ret.add(new Status("subTest"));
 
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 			String fullName = serviceTypeNames[i];
@@ -212,7 +215,7 @@ public class Incubator extends Service {
 			String py = FileIO.resourceToString(String.format("Python/examples/%s.py", shortName));
 
 			if (py == null || py.length() == 0) {
-				status.addError("%s.py does not exist", shortName);
+				ret.add(Status.error("%s.py does not exist", shortName));
 			} else {
 				//uart99.connect("UART99");
 				uart99.recordRX(String.format("%s.rx", shortName)); // FIXME
@@ -243,12 +246,14 @@ public class Incubator extends Service {
 	// FIXME - do all types of serialization
 	// TODO - encode decode test JSON & XML
 	// final ArrayList<Status>
-	public Status serializeTest() {
+	public ArrayList<Status> serializeTest() {
+		
+		ArrayList<Status> ret = new ArrayList<Status>();
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 		Status status = Status.info("serializeTest");
 
-		status.add(Status.info("will test %d services", serviceTypeNames.length));
+		ret.add(Status.info("will test %d services", serviceTypeNames.length));
 
 		Set<Thread> originalThreads = Thread.getAllStackTraces().keySet();
 
@@ -267,14 +272,14 @@ public class Incubator extends Service {
 			try {
 
 				// install it
-				status.add(install(fullType));
+				ret.add(install(fullType));
 
 				// create it
 				log.info("creating {}", fullType);
 				s = Runtime.create(fullType, fullType);
 
 				if (s == null) {
-					status.addError("could not create %s service", fullType);
+					ret.add(Status.error("could not create %s service", fullType));
 					continue;
 				}
 
@@ -283,8 +288,8 @@ public class Incubator extends Service {
 				s.startService();
 
 			} catch (Exception e) {
-				status.addError("ERROR - %s", fullType);
-				status.addError(e);
+				ret.add(Status.error("ERROR - %s", fullType));
+				ret.add(new Status(e));
 				continue;
 			}
 
@@ -315,7 +320,7 @@ public class Incubator extends Service {
 				if (currentThreads.size() > originalThreads.size()) {
 					for (Thread t : currentThreads) {
 						if (!originalThreads.contains(t)) {
-							status.addError("%s has added thread %s but not cleanly removed it", fullType, t.getName());
+							ret.add(Status.error("%s has added thread %s but not cleanly removed it", fullType, t.getName()));
 
 							// resetting original thread count
 							originalThreads = currentThreads;
@@ -327,14 +332,15 @@ public class Incubator extends Service {
 				log.info("released {}", fullType);
 
 			} catch (Exception ex) {
-				status.addError(ex);
+				ret.add(new Status(ex));
 			}
 		} // end of loop
 
-		return status;
+		return ret;
 	}
 
-	public Status serviceTest() {
+	public List<Status> serviceTest() {
+		List<Status> ret = new ArrayList<Status>();
 
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 
@@ -355,14 +361,14 @@ public class Incubator extends Service {
 			try {
 
 				// install it
-				status.add(install(fullType));
+				ret.add(install(fullType));
 
 				// create it
 				log.info("creating {}", fullType);
 				s = Runtime.create(fullType, fullType);
 
 				if (s == null) {
-					status.addError("could not create %s service", fullType);
+					ret.add(Status.error("could not create %s service", fullType));
 					continue;
 				}
 
@@ -371,10 +377,13 @@ public class Incubator extends Service {
 				s.startService();
 
 				log.info("starting {}", fullType);
+				// FIXME - will need to do JUnit !!!!
+				/*
 				Status result = s.test();
 				if (result != null && result.hasError()) {
-					status.add(result);
+					ret.add(result);
 				}
+				*/
 
 				s.releaseService();
 
@@ -383,13 +392,12 @@ public class Incubator extends Service {
 				}
 
 			} catch (Exception e) {
-				status.addError("ERROR - %s", fullType);
-				status.addError(e);
+				ret.add(error(e));
 				continue;
 			}
 		}
-		return status;
 
+		return ret;
 	}
 
 	@Override
@@ -397,6 +405,7 @@ public class Incubator extends Service {
 		super.startService();
 	}
 
+	/*
 	public Status subTest() {
 
 		HashSet<String> keepMeRunning = new HashSet<String>();
@@ -409,16 +418,16 @@ public class Incubator extends Service {
 		String[] serviceTypeNames = Runtime.getInstance().getServiceTypeNames();
 		Status status = Status.info("subTest");
 
-		status.add(Status.info("will test %d services", serviceTypeNames.length));
+		ret.add(Status.info("will test %d services", serviceTypeNames.length));
 
 		for (int i = 0; i < serviceTypeNames.length; ++i) {
 			String fullName = serviceTypeNames[i];
 			String shortName = fullName.substring(fullName.lastIndexOf(".") + 1);
 			try {
 				ServiceInterface si = Runtime.start(shortName, shortName);
-				status.add(si.test());
+				ret.add(si.test());
 			} catch (Exception e) {
-				status.addError(e);
+				ret.addError(e);
 			}
 
 			// clean services
@@ -428,14 +437,16 @@ public class Incubator extends Service {
 		return status;
 
 	}
+	*/
 
+	/*
 	@Override
-	public Status test() {
+	public List<Status> test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
 
-		// status.add(subTest());
-		// status.add(serializeTest());
-		status.add(serviceTest());
+		// ret.add(subTest());
+		// ret.add(serializeTest());
+		return ret.add(serviceTest());
 
 		if (status.hasError()) {
 			handleError(status);
@@ -443,6 +454,7 @@ public class Incubator extends Service {
 
 		return status;
 	}
+	*/
 
 	public void testInMoovPythonScripts() {
 		try {

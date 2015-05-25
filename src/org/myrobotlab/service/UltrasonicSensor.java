@@ -51,7 +51,6 @@ public class UltrasonicSensor extends Service implements RangeListener {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start("sr04", "UltrasonicSensor");
-		sr04.test();
 
 		/*
 		 * GUIService gui = new GUIService("gui"); gui.startService();
@@ -164,97 +163,6 @@ public class UltrasonicSensor extends Service implements RangeListener {
 
 	public void stopRanging() {
 		arduino.sensorPollingStop(getName());
-	}
-
-	// TODO - Virtual Serial test - do a record of tx & rx on a real sensor
-	// then send the data - IT MUST BE INTERLEAVED
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-		try {
-			// FIXME - there has to be a properties method to configure
-			// localized
-			// testing
-			boolean useGUI = true;
-			boolean useVirtualPorts = true;
-			int triggerPin = 7;
-			int echoPin = 8;
-
-			String port = "COM15";
-
-			UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start(getName(), "UltrasonicSensor");
-			Servo servo = (Servo) Runtime.start("servo", "Servo");
-
-			// && depending on headless
-			if (useGUI) {
-				Runtime.start("gui", "GUIService");
-			}
-
-			Serial uart = null;
-			if (useVirtualPorts) {
-				uart = arduino.getSerial();
-				uart.record();
-			}
-
-			// nice simple interface
-
-			sr04.attach(port, triggerPin, echoPin);
-			// arduino.re
-			// TODO - VIRTUAL NULL MODEM WITH TEST DATA !!!!
-			// RECORD FROM ACTUAL SENSOR !!!
-
-			// sr04.arduino.setLoadTimingEnabled(true);
-
-			sr04.addRangeListener(this);
-
-			sr04.startRanging();
-			log.info("here");
-			sr04.stopRanging();
-
-			uart.stopRecording();
-
-			sr04.arduino.setLoadTimingEnabled(true);
-			sr04.arduino.setLoadTimingEnabled(false);
-
-			servo.attach("sr04.arduino", 4);
-			servo.setSpeed(0.99f);
-			servo.setEventsEnabled(true);
-			servo.setEventsEnabled(false);
-			servo.moveTo(30);
-
-			/*
-			 * 
-			 * for (int i = 0; i < 100; ++i) { log.info("ping 1"); long duration
-			 * = sr04.ping(); log.info("duration {}", duration); }
-			 */
-			servo.setEventsEnabled(true);
-			sr04.startRanging();
-			log.info("here");
-			servo.moveTo(130);
-			sr04.stopRanging();
-
-			// sensor.attach(arduino, "COM15", 7, 8);
-			for (int i = 1; i < 200; i += 10) {
-				sr04.startRanging(i);
-
-				servo.setSpeed(0.8f);
-				servo.moveTo(30);
-				servo.moveTo(175);
-				sr04.stopRanging();
-			}
-
-			sr04.startRanging(5);
-			sr04.startRanging(10);
-
-			sr04.startRanging();
-
-			sr04.stopRanging();
-		} catch (Exception e) {
-			status.addError(e);
-		}
-
-		return status;
-
 	}
 
 }

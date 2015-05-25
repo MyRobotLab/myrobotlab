@@ -73,7 +73,6 @@ public class Pingdar extends Service {
 		 */
 
 		Pingdar pingdar = (Pingdar) Runtime.start("pingdar", "Pingdar");
-		pingdar.test();
 
 		// Runtime.createAndStart("gui", "GUIService");
 
@@ -237,28 +236,5 @@ public class Pingdar extends Service {
 		return true;
 	}
 
-	@Override
-	public Status test() {
-		Status status = Status.info("starting %s %s test", getName(), getType());
-
-		try {
-
-			Pingdar pingdar = (Pingdar) Runtime.start(getName(), "Pingdar");
-			pingdar.attach("COM15", 7, 8, 4);
-
-			pingdar.arduino.setSampleRate(5000); // <-- DOES THIS MAKE A
-													// DIFFERENCE ???
-			pingdar.sweep(20, 160);
-
-			pingdar.stop();
-
-			pingdar.sweep(80, 90);
-			pingdar.stop();
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return status;
-	}
 
 }

@@ -43,7 +43,6 @@ public class Keyboard extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Keyboard keyboard = (Keyboard) Runtime.start("keyboard", "Keyboard");
-		keyboard.test();
 
 	}
 
@@ -148,17 +147,6 @@ public class Keyboard extends Service {
 
 	public void reMap(String from, String to) {
 		remap.put(from, to);
-	}
-
-	@Override
-	public Status test() {
-		Status status = super.test();
-		Keyboard keyboard = (Keyboard) Runtime.start(getName(), "Keyboard");
-		// TODO simulate keypress ?
-		Runtime.start("gui", "GUIService");
-		keyboard.addKeyListener(keyboard);
-
-		return status;
 	}
 
 }

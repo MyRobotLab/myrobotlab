@@ -5,7 +5,7 @@ import it.sauronsoftware.cron4j.Scheduler;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import org.myrobotlab.framework.Encoder;
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;

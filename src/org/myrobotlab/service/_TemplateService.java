@@ -20,8 +20,6 @@ public class _TemplateService extends Service {
 		try {
 
 			_TemplateService template = (_TemplateService) Runtime.start("template", "_TemplateService");
-			template.test();
-
 			Runtime.start("gui", "GUIService");
 
 		} catch (Exception e) {
