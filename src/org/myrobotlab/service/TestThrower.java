@@ -81,7 +81,7 @@ public class TestThrower extends Service {
 
 	public Integer pitch(Integer number) {
 		++cnt;
-		log.info("noPitchInteger null ");
+		log.debug("noPitchInteger null ");
 		return number;
 	}
 	
@@ -104,12 +104,12 @@ public class TestThrower extends Service {
 	}
 
 	public Integer throwInteger(Integer count) {
-		log.info("throwInteger " + count);
+		log.debug("throwInteger " + count);
 		return count;
 	}
 
 	public void throwNothing() {
-		log.info("throwNothing");
+		log.debug("throwNothing");
 	}
 
 	public String throwString(String nameOfTargetService, String nameOfMethod, String data) {
