@@ -547,7 +547,7 @@
 			<batchtest fork="yes" todir="${build}/report">
 				<fileset dir="${test}">
 					<include name="**/*Test.java" />
-					<!-- exclude name="**/SerialTest.java" / -->
+					<exclude name="**/JFugueTest.java" />
 				</fileset>
 			</batchtest>
 
