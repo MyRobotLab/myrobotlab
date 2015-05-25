@@ -65,9 +65,17 @@ public class MessageTest {
 	@Test
 	public void clearRoutes() throws Exception {
 		catcher.clear();
-
 		catcher.subscribe("thrower", "pitch", "onPitch");
 		
+		Service.sleep(100);
+		
+		thrower.pitchInt(8000);
+		BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
+		
+		
+
+		log.warn(String.format("caught %d balls", balls.size()));
+		log.warn(String.format("left balls %d ", catcher.msgs.size()));
 		
 		Runtime.removeAllSubscriptions();
 		
