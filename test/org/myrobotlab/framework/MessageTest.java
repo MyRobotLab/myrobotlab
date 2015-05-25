@@ -41,7 +41,7 @@ public class MessageTest {
 		// ROUTE MUST STABALIZE - BEFORE MSGS - otherwise they will be missed
 		Service.sleep(100);
 		
-		thrower.pitchInt(8000);
+		thrower.pitchInt(1000);
 		BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
 
 		log.warn(String.format("caught %d balls", balls.size()));
@@ -69,7 +69,7 @@ public class MessageTest {
 		
 		Service.sleep(100);
 		
-		thrower.pitchInt(8000);
+		thrower.pitchInt(1000);
 		BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
 		
 		
