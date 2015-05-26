@@ -392,7 +392,43 @@ public class Speech extends Service implements TextListener {
 	}
 
 	// front-end functions
+	
 	public boolean speak(String toSpeak) {
+		//  TODO: smart chunk the speech ..
+		
+		System.err.println("to Speak " + toSpeak);
+		boolean result = false;
+		boolean remainingText = true;
+		String buff = toSpeak;
+		
+		while (remainingText) {
+			// find the first chunk
+			int maxUtterance = 100;
+			if (buff.length() < 100) {
+				//System.err.println(buff);
+				result = speakInternal(buff);
+				break;
+			}
+			
+			int lastSpace = buff.substring(0, maxUtterance).lastIndexOf(" ");
+			if (lastSpace == -1 ) {
+				// that's it. 
+				//System.err.println(buff);
+				result = speakInternal(buff);
+				break;
+			}
+			String currBuff = buff.substring(0, lastSpace);
+			//System.err.println(currBuff);
+			result = speakInternal(currBuff);
+			if (!result) {
+				break;
+			}
+			buff = buff.substring(lastSpace);
+		}
+		return result;
+	}
+	
+	public boolean speakInternal(String toSpeak) {
 		toSpeak = toSpeak.replaceAll(filter, " ");
 		if (toSpeak == null || toSpeak.length() == 0) {
 			return false;
@@ -621,6 +657,8 @@ public class Speech extends Service implements TextListener {
 	public Status test() {
 		Status status = Status.info("starting %s %s test", getName(), getType());
 		Speech mouth = (Speech) Runtime.start(getName(), "Speech");
+		//mouth.speak("Light scattering is a form of scattering in which light is the form of propagating energy which is scattered. Light scattering can be thought of as the deflection of a ray from a straight path, for example by irregularities in the propagation medium, particles, or in the interface between two media. Deviations from the law of reflection due to irregularities on a surface are also usually considered to be a form of scattering. When these irregularities are considered to be random and dense enough that their individual effects average out, this kind of scattered reflection is commonly referred to as diffuse reflection.");
+		//mouth.speak("hello");
 		mouth.speak("I don't use appostrophes, or other punctuation, do you?");
 		mouth.speak("I'm done with this test");
 		mouth.speak("I'm done with this test again");
