@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -507,7 +508,10 @@ public class Speech extends Service implements TextListener {
 
 		// Sanitize the filename so it can be properly cached.
 		toSpeak = cleanFilename(toSpeak);
-		String audioFileName = "audioFile/google/" + language + "/" + voiceName + "/" + toSpeak + ".mp3";
+		String utteranceHash = hashFilename(toSpeak);
+		addToUtteranceMapping(toSpeak, utteranceHash);
+		
+		String audioFileName = "audioFile/google/" + language + "/" + voiceName + "/" + utteranceHash + ".mp3";
 		File f = new File(audioFileName);
 		log.info(f + (f.exists() ? " is found " : " is missing "));
 
@@ -564,6 +568,16 @@ public class Speech extends Service implements TextListener {
 		invoke("isSpeaking", false);
 	}
 
+	private void addToUtteranceMapping(String toSpeak, String utteranceHash) {
+		// TODO : persist this somewhere other than the log file...
+		log.info("Utterance Map: {} = \"{}\"", utteranceHash , toSpeak);
+	}
+	private String hashFilename(String toSpeak) {
+		// TODO Auto-generated method stub
+		String digest = DigestUtils.md5Hex(toSpeak);
+		return digest;
+	}
+	
 	public boolean speakNormal(String toSpeak) {
 		// idealy in "normal" speech our ideas are queued
 		// until we have time to actually say them
