@@ -66,7 +66,6 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
-import org.myrobotlab.opencv.OpenCVFilterFFMEG;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
@@ -766,8 +765,8 @@ public class OpenCV extends VideoSource {
 
 			// type of test - test which saves result of web page
 			// test combination (combinatorics filter)
-			for (int i = 0; i < POSSIBLE_FILTERS.length; ++i) {
-				String filter = POSSIBLE_FILTERS[i];
+			for (int i = 0; i < VALID_FILTERS.length; ++i) {
+				String filter = VALID_FILTERS[i];
 
 				addFilter(filter);
 
@@ -848,7 +847,7 @@ public class OpenCV extends VideoSource {
 	}
 
 	static public String[] getPossibleFilters() {
-		return POSSIBLE_FILTERS;
+		return VALID_FILTERS;
 	}
 
 	public static void main(String[] args) throws Exception {
