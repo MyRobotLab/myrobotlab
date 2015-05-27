@@ -13,7 +13,7 @@
     </head>
     <body ng-controller="MainCtrl">
 
-        <div class="navbar navbar-inverse">
+        <div class="navbar navbar-inverse" role="navigation">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle">
@@ -34,18 +34,38 @@
                         <li><a href="/e">/e</a></li>
                     </ul>
 
-                    <div class="col-sm-3 col-md-3 pull-right">
-                        <form class="navbar-form" role="search">
-                            <div class="input-group">
-                                <!--TODO: implement search with real-time suggestions: https://angular-ui.github.io/bootstrap/#/typeahead ; maybe ng-click is needed, too-->
-                                <!--TODO: use the callback to select the right workspace and focus the selected service: "typeahead-on-select($item, $model, $label)"-->
-                                <input type="text" class="form-control" placeholder="Search" ng-model="searchSelectedService" typeahead="state as state.name for state in allServices | filter:{name:$viewValue}" typeahead-template-url="views/searchtemplate.html">
-                                <div class="input-group-btn">
-                                    <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <form class="navbar-form">
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="About">
+                                    <i class="glyphicon glyphicon-info-sign"></i>
+                                </button>
+                            </form>
+                        </li>
+
+                        <li>
+                            <form class="navbar-form">
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Help">
+                                    <i class="glyphicon glyphicon-question-sign"></i>
+                                </button>
+                            </form>
+                        </li>
+
+                        <li>
+                            <form class="navbar-form" role="search">
+                                <div class="input-group">
+                                    <!--TODO: implement search with real-time suggestions: https://angular-ui.github.io/bootstrap/#/typeahead ; maybe ng-click is needed, too-->
+                                    <!--TODO: use the callback to select the right workspace and focus the selected service: "typeahead-on-select($item, $model, $label)"-->
+                                    <input type="text" class="form-control" placeholder="Search" ng-model="searchSelectedService" typeahead="state as state.name for state in allServices | filter:{name:$viewValue}" typeahead-template-url="views/searchtemplate.html">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Search">
+                                            <i class="glyphicon glyphicon-search"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
-                    </div>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -60,12 +80,41 @@
                 <div class="col-md-12">
                     <tabset>
                         <tab ng-repeat="workspace in workspaces"
-                             heading="{{workspace.name}}"
                              active=workspace.active>
-                            <div tab-component="views/main.html" index="{{$index}}" workspaces="workspaces"></div>     
+                            <tab-heading>
+                                <!--custom build split dropdown (button & dropdown) BUT without the button thingy-->
+                                <div dropdown auto-close="disabled" is-open="workspace.dropdownisopen">
+                                    <div>{{workspace.name}}&nbsp;&nbsp;<i dropdown-toggle class="glyphicon glyphicon-chevron-down"></i></div>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#" popover-template="'views/workspaceeditnametemplate.html'" popover-title="{{workspace.name}}"><i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;Edit</a></li>
+                                        <li><a href="#" ng-click="removeWorkspace($index)"><i class="glyphicon glyphicon-trash"></i>&nbsp;&nbsp;Delete</a></li>
+                                        <!--<li><a href="#">Something else here</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a></li>-->
+                                    </ul>
+                                </div>
+
+                                <!--<div class="btn-group" dropdown>
+                                    <button type="button" class="btn btn-default">{{workspace.name}}</button>
+                                    <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle>
+                                        <span class="caret"></span>
+                                        <span class="sr-only">Split button!</span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a href="#">Action</a></li>
+                                        <li><a href="#">Another action</a></li>
+                                        <li><a href="#">Something else here</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a></li>
+                                    </ul>
+                                </div>-->
+                            </tab-heading>
+                            <div tab-component index="{{$index}}" workspaces="workspaces"></div>     
                         </tab>
                         <tab heading="+" select="addWorkspace()">
-                            <!--<tab-heading><i class="icon-plus-sign"></i></tab-heading>-->
+                            <tab-heading>
+                                <i class="glyphicon glyphicon-plus"></i>
+                            </tab-heading>
                         </tab>
                     </tabset>
                 </div>

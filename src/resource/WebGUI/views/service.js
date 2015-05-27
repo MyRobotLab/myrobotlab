@@ -17,7 +17,6 @@ angular.module('mrlapp.service', ['ngDragDrop'])
 
         .controller('ServiceCtrl', ['$scope', '$modal', 'ServiceControllerService', function ($scope, $modal, ServiceControllerService) {
                 $scope.name = $scope.list[$scope.index].name;
-                $scope.title = $scope.list[$scope.index].title;
                 $scope.drag = $scope.list[$scope.index].drag;
                 $scope.type = $scope.list[$scope.index].type;
 
