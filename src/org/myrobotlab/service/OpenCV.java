@@ -68,6 +68,7 @@ import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterAnd;
 import org.myrobotlab.opencv.OpenCVFilterFFMEG;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterFaceRecognition;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
@@ -867,18 +868,28 @@ public class OpenCV extends VideoSource {
 
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
 
-		OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
-		opencv.addFilter(ffmpeg);
-		opencv.capture();
+		// Face recognition test...
+		opencv.setCameraIndex(1);
+		OpenCVFilterFaceRecognition rec = new OpenCVFilterFaceRecognition("facerec");
+		opencv.addFilter(rec);
+		// a file that contains the training dataset
+		rec.learn("facerec/all10.txt");
+		// end face recognition test.
 		
-		opencv.removeFilters();
-		ffmpeg.stopRecording();
+		
+		
+		//		OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
+		//		opencv.addFilter(ffmpeg);
+		//		opencv.capture();
+		//		opencv.removeFilters();
+		//		ffmpeg.stopRecording();
 
 		// opencv.setCameraIndex(0);
 
 		// opencv.setInputSource("file");
 		// opencv.setInputFileName("c:/test.avi");
-		// opencv.capture();
+		
+		opencv.capture();
 		// OpenCVFilterSURF surf = new OpenCVFilterSURF("surf");
 		// String filename = "c:/dev/workspace.kmw/myrobotlab/lloyd.png";
 		// String filename = "c:/dev/workspace.kmw/myrobotlab/kw.jpg";

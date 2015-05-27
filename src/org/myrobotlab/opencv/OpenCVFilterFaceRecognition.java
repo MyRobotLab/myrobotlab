@@ -33,9 +33,15 @@ import static org.bytedeco.javacpp.opencv_core.cvWriteString;
 import static org.bytedeco.javacpp.opencv_highgui.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_highgui.cvLoadImage;
 import static org.bytedeco.javacpp.opencv_highgui.cvSaveImage;
+import static org.bytedeco.javacpp.opencv_imgproc.cvResize;
 import static org.bytedeco.javacpp.opencv_legacy.CV_EIGOBJ_NO_CALLBACK;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_RGB2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,6 +89,9 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 	IplImage pAvgTrainImg;
 	/** the projected training faces */
 	CvMat projectedTrainFaceMat;
+
+	
+	CvMat trainPersonNumMat;  // the person numbers during training
 
 
 	public OpenCVFilterFaceRecognition()  {
@@ -158,6 +167,10 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 
 		// Save all the eigenvectors as images, so that they can be checked.
 		storeEigenfaceImages();
+		
+		// TODO: do this else where!
+		trainPersonNumMat = loadTrainingData();
+		
 	}
 
 
@@ -263,7 +276,20 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 		CvFileStorage fileStorage;
 		int i;
 
-		String faceDataFile =  "facedetect/facedetect.xml";
+		String faceDataFile =  "facerec" + "/facedetect.xml";
+		File f = new File(faceDataFile);
+		if (!f.exists()) {
+			// Touch the file.
+			 FileOutputStream fos;
+			try {
+				fos = new FileOutputStream(f);
+				fos.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			 			 
+		}
 		log.info("writing "+ faceDataFile);
 
 		// create a file-storage interface
@@ -406,9 +432,17 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 						personNumber); // v
 
 				// load the face image
-				faceImgArr[iFace] = cvLoadImage(
+				IplImage tmpImg = cvLoadImage(
 						imgFilename, // filename
 						CV_LOAD_IMAGE_GRAYSCALE); // isColor
+				// TODO: training images must have the same dimensions
+				int IMG_WIDTH=640;
+				int IMG_HEIGHT=480;
+				IplImage resizedImage = IplImage.create(IMG_WIDTH, IMG_HEIGHT, tmpImg.depth(), tmpImg.nChannels());
+			    //cvSmooth(origImg, origImg);
+			    cvResize(tmpImg, resizedImage);// so, resize them here ??
+				
+				faceImgArr[iFace] = resizedImage;
 
 				if (faceImgArr[iFace] == null) {
 					throw new RuntimeException("Can't load image from " + imgFilename);
@@ -510,7 +544,7 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 	    CvMat pTrainPersonNumMat = null; // the person numbers during training
 	    CvFileStorage fileStorage;
 	    int i;
-	    String filename = "facedetect/facedetect.xml";
+	    String filename = "facerec/facedetect.xml";
 	    // create a file-storage interface
 	    fileStorage = cvOpenFileStorage(
 	            filename, // filename
@@ -620,14 +654,15 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 		int iNearest;
 		int nearest;
 
-		CvMat trainPersonNumMat;  // the person numbers during training
 		
-		// TODO: do this else where!
-		 trainPersonNumMat = loadTrainingData();
-		
+		 // TODO: we need to probably be the same image props  as the training set.
+		 
+		 IplImage grayscaleImg = IplImage.create(640, 480, IPL_DEPTH_8U, 1);
+		 cvCvtColor(image, grayscaleImg, CV_RGB2GRAY);
+		 
 		// project the test image onto the PCA subspace
 		cvEigenDecomposite(
-				image, // obj
+				grayscaleImg, // obj
 				nEigens, // nEigObjs
 				eigenVectArr, // eigInput (Pointer)
 				0, // ioFlags
@@ -642,12 +677,17 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 		confidence = pConfidence.get();
 		nearest = trainPersonNumMat.data_i().get(iNearest);
 
-		log.info("nearest = " + nearest + " . Confidence = " + confidence);
+		float threshold = -4;
+		if (confidence > threshold) {
+			log.info("Person " + personNames.get(nearest-1) + " nearest = " + nearest + " . Confidence = " + confidence);
+		} else {
+			log.info("No Match ?" + confidence);
+		}
 
 
 
 		// TODO Auto-generated method stub
-		return null;
+		return grayscaleImg;
 	}
 
 	
@@ -665,8 +705,8 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 	    int iTrain = 0;
 	    int iNearest = 0;
 
-	    log.info("................");
-	    log.info("find nearest neighbor from " + nTrainFaces + " training faces");
+	    // log.info("................");
+	    // log.info("find nearest neighbor from " + nTrainFaces + " training faces");
 	    for (iTrain = 0; iTrain < nTrainFaces; iTrain++) {
 	      //LOGGER.info("considering training face " + (iTrain + 1));
 	      double distSq = 0;
@@ -687,7 +727,7 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 	      if (distSq < leastDistSq) {
 	        leastDistSq = distSq;
 	        iNearest = iTrain;
-	        log.info("  training face " + (iTrain + 1) + " is the new best match, least squared distance: " + leastDistSq);
+	        // log.info("  training face " + (iTrain + 1) + " is the new best match, least squared distance: " + leastDistSq);
 	      }
 	    }
 
@@ -697,7 +737,8 @@ public class OpenCVFilterFaceRecognition extends OpenCVFilter {
 	    float pConfidence = (float) (1.0f - Math.sqrt(leastDistSq / (float) (nTrainFaces * nEigens)) / 255.0f);
 	    pConfidencePointer.put(pConfidence);
 
-	    log.info("training face " + (iNearest + 1) + " is the final best match, confidence " + pConfidence);
+	    // log.info("training face " + (iNearest + 1) + " is the final best match, confidence " + pConfidence);
+	    
 	    return iNearest;
 	  }
 	
