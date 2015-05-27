@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -88,7 +89,7 @@ public class MyoThalmic extends Service implements DeviceListener {
 
 	public MyoThalmic(String n) {
 		super(n);
-		rollW = 0;
+ 
 		pitchW = 0;
 		yawW = 0;
 		currentPose = new Pose();
@@ -125,8 +126,7 @@ public class MyoThalmic extends Service implements DeviceListener {
 		currentPose = pose;
 		if (currentPose.getType() == PoseType.FIST) {
 			myo.vibrate(VibrationType.VIBRATION_MEDIUM);
-		}
-		
+		}		
 		invoke("publishPose", pose);
 	}
 	
@@ -226,6 +226,8 @@ public class MyoThalmic extends Service implements DeviceListener {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
 
 	@Override
 	public void onGyroscopeData(Myo myo, long timestamp, Vector3 gyro) {

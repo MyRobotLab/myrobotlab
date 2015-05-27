@@ -125,15 +125,15 @@ public class OpenCV extends VideoSource {
 
 	transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
-	static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
-			"Dilate", "Erode", "FaceDetect", "Fauvist", "FFMEG", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2", "HSV", "Input",
-			"InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "Output", "PyramidDown",
-			"PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split", "State", "SURF",
-			"Threshold", "Transpose" };
+	public static String VALID_FILTERS[] = { "Affine", "And", "AverageColor", "Canny", "CreateHistogram", "ColorTrack", "Detector", "Dilate", "Erode", "FGBG",
+		    "FaceDetect", "FaceRecognition","Fauvist","FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2", "HSV",
+		    "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not",
+		    "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector",
+		    "Smooth", "Split", "SURF", "Threshold", "Transpose" };
 
 	// yep its public - cause a whole lotta data
 	// will get set on it before a setState
-
+	
 	transient public VideoProcessor videoProcessor = new VideoProcessor();
 
 	// mask for each named filter
