@@ -119,7 +119,6 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 					log.error("Cannot start microphone.");
 					recognizer.deallocate();
 				}
-
 				// loop the recognition until the program exits.
 				isListening = true;
 				while (isRunning) {

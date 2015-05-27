@@ -136,7 +136,9 @@ public class DHRobotArm {
 			numSteps++;
 			// TODO: what if its unreachable!
 			Point currentPos = this.getPalmPosition();
-			log.debug("Current Position " + currentPos);
+			log.info("Current Position " + currentPos);
+
+			System.out.println("Current Position " + currentPos);
 			// vector to destination
 			Point deltaPoint = goal.subtract(currentPos);
 			Matrix dP = new Matrix(3, 1);
@@ -149,7 +151,7 @@ public class DHRobotArm {
 			Matrix jInverse = this.getJInverse();
 			// why is this zero?
 			Matrix dTheta = jInverse.multiply(dP);
-			log.debug("delta Theta + " + dTheta);
+			System.out.println("delta Theta + " + dTheta);
 			for (int i = 0; i < dTheta.getNumRows(); i++) {
 				// update joint positions! move towards the goal!
 				double d = dTheta.elements[i][0];
