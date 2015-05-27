@@ -150,6 +150,7 @@ public class WebGUI2 extends Service implements AuthorizationProvider, Gateway, 
 				// For mvn exec:java
 				// .resource("./src/main/resources")
                                 .resource("./src/resource/WebGUI")
+                                .resource("./src/resource")
 				// For running inside an IDE
 				// .resource("./nettosphere-samples/games/src/main/resources")
 		

@@ -155,7 +155,7 @@ angular.module('mrlapp', [
                         index: '@index',
                         workspaces: '=workspaces'
                     },
-                    templateUrl: 'views/main.html'
+                    templateUrl: 'views/tab.html'
                 };
             }])
 
@@ -190,6 +190,8 @@ angular.module('mrlapp', [
         .controller('MainCtrl', ['$scope', 'ServiceControllerService', function ($scope, ServiceControllerService) {
 
                 $scope.generallist = [];
+        
+                var workspacecounter = 0;
 
                 var setAllInactive = function () {
                     angular.forEach($scope.workspaces, function (workspace) {
@@ -198,23 +200,28 @@ angular.module('mrlapp', [
                 };
 
                 var addNewWorkspace = function () {
-                    var id = $scope.workspaces.length + 1;
+                    workspacecounter++;
                     $scope.workspaces.push({
-                        id: id,
-                        name: "Workspace " + id,
-                        active: true
+                        name: "Workspace " + workspacecounter,
+                        active: true,
+                        dropdownisopen: false
                     });
                 };
 
-                $scope.workspaces =
-                        [
-                            {id: 1, name: "Workspace 1", active: true},
-                            {id: 2, name: "Workspace 2", active: false}
-                        ];
+                $scope.workspaces = [];
+                addNewWorkspace();
+                addNewWorkspace();
+                setAllInactive();
+                $scope.workspaces[0].active = true;
 
                 $scope.addWorkspace = function () {
                     setAllInactive();
                     addNewWorkspace();
+                };
+                
+                $scope.removeWorkspace = function (index) {
+                    console.log('removeworkspace, ', index);
+                    $scope.workspaces.splice(index, 1);
                 };
 
                 $scope.generallistgtc = {};
@@ -312,8 +319,6 @@ angular.module('mrlapp', [
 
                 if (!HelperService.isUndefinedOrNull($scope.index)) {
                     $scope.workspace = $scope.workspaces[$scope.index];
-//                    $scope.workspace.id = $scope.workspaces[$scope.index].id;
-//                    $scope.workspace.name = $scope.workspaces[$scope.index].name;
                 }
 
                 $scope.list1 = [];
@@ -322,21 +327,21 @@ angular.module('mrlapp', [
                 $scope.list4 = [];
 
                 $scope.list5 = [
-                    {'name': 'sera', 'title': 'Item 1', 'drag': true, 'height': 30, 'type': 'clock'},
-                    {'name': 'serb', 'title': 'Item 2', 'drag': true, 'height': 30, 'type': 'arduino'},
-                    {'name': 'serc', 'title': 'Item 3', 'drag': true, 'height': 30, 'type': 'clock'},
-                    {'name': 'serd', 'title': 'Item 4', 'drag': true, 'height': 30, 'type': 'arduino'},
-                    {'name': 'sere', 'title': 'Item 5', 'drag': true, 'height': 30, 'type': 'clock'},
-                    {'name': 'serf', 'title': 'Item 6', 'drag': true, 'height': 30, 'type': 'arduino'},
-                    {'name': 'serg', 'title': 'Item 7', 'drag': true, 'height': 30, 'type': 'clock'},
-                    {'name': 'serh', 'title': 'Item 8', 'drag': true, 'height': 30, 'type': 'arduino'},
-                    {'name': 'seri', 'title': 'Item 9', 'drag': true, 'height': 30, 'type': 'clock'},
-                    {'name': 'serj', 'title': 'Item 10', 'drag': true, 'height': 30, 'type': 'arduino'},
-                    {'name': 'serk', 'title': 'Item 11', 'drag': true, 'height': 30, 'type': 'clock'},
-                    {'name': 'serl', 'title': 'Item 12', 'drag': true, 'height': 30, 'type': 'arduino'},
-                    {'name': 'serm', 'title': 'Item 13', 'drag': true, 'height': 30, 'type': 'clock'},
-                    {'name': 'sern', 'title': 'Item 14', 'drag': true, 'height': 30, 'type': 'arduino'},
-                    {'name': 'sero', 'title': 'Item 15', 'drag': true, 'height': 30, 'type': 'clock'}
+                    {'name': 'sera', 'drag': true, 'height': 30, 'type': 'clock'},
+                    {'name': 'serb', 'drag': true, 'height': 30, 'type': 'arduino'},
+                    {'name': 'serc', 'drag': true, 'height': 30, 'type': 'clock'},
+                    {'name': 'serd', 'drag': true, 'height': 30, 'type': 'arduino'},
+                    {'name': 'sere', 'drag': true, 'height': 30, 'type': 'clock'},
+                    {'name': 'serf', 'drag': true, 'height': 30, 'type': 'arduino'},
+                    {'name': 'serg', 'drag': true, 'height': 30, 'type': 'clock'},
+                    {'name': 'serh', 'drag': true, 'height': 30, 'type': 'arduino'},
+                    {'name': 'seri', 'drag': true, 'height': 30, 'type': 'clock'},
+                    {'name': 'serj', 'drag': true, 'height': 30, 'type': 'arduino'},
+                    {'name': 'serk', 'drag': true, 'height': 30, 'type': 'clock'},
+                    {'name': 'serl', 'drag': true, 'height': 30, 'type': 'arduino'},
+                    {'name': 'serm', 'drag': true, 'height': 30, 'type': 'clock'},
+                    {'name': 'sern', 'drag': true, 'height': 30, 'type': 'arduino'},
+                    {'name': 'sero', 'drag': true, 'height': 30, 'type': 'clock'}
                 ];
 
                 $scope.list1gtc = {};
