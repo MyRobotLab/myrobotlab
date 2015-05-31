@@ -57,7 +57,7 @@ public class UltrasonicSensorTest {
 		virtual.createVirtualArduino(vport);
 		logic = virtual.getLogic();
 
-		catcher.subscribe(arduino, "publishError", "onError");
+		catcher.subscribe(arduino,"onError");
 
 		uart = virtual.getUART();
 		uart.setCodec("arduino");

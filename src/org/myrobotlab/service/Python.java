@@ -305,7 +305,8 @@ public class Python extends Service {
 											// "initServicesScripts()"
 		// register for addition of new services
 
-		subscribe("registered", Runtime.getInstance().getName(), "registered", ServiceInterface.class);
+		// TODO subscribe("/registered");
+		subscribe(Runtime.getInstance().getName(), "registered");
 		log.info(String.format("created python %s", getName()));
 	}
 
@@ -686,7 +687,7 @@ public class Python extends Service {
 		return data;
 	}
 
-	public void registered(ServiceInterface s) {
+	public void onRegistered(ServiceInterface s) {
 
 		String registerScript = "";
 

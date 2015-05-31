@@ -298,9 +298,9 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 	public void subscribe(String outMethod, String inMethod, Class<?>... parameterType) {
 		MRLListener listener = null;
 		if (parameterType != null) {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod, parameterType);
+			listener = new MRLListener(outMethod, myService.getName(), inMethod);
 		} else {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod, null);
+			listener = new MRLListener(outMethod, myService.getName(), inMethod);
 		}
 
 		myService.send(boundServiceName, "addListener", listener);
@@ -409,9 +409,9 @@ public abstract class ServiceGUI extends WindowAdapter implements TabControlEven
 
 		MRLListener listener = null;
 		if (parameterType != null) {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod, parameterType);
+			listener = new MRLListener(outMethod, myService.getName(), inMethod);
 		} else {
-			listener = new MRLListener(outMethod, myService.getName(), inMethod, null);
+			listener = new MRLListener(outMethod, myService.getName(), inMethod);
 		}
 		myService.send(boundServiceName, "removeListener", listener);
 

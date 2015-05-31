@@ -247,8 +247,8 @@ public class FaceTracking extends Service {
 		// pan.attach(arduino.getName(), 13);
 
 		camera.addListener("publish", getName(), "input");
-		camera.addListener("isTracking", getName(), "isTracking", Boolean.class);
-		camera.addListener("sizeChange", getName(), "sizeChange", Dimension.class);
+		camera.addListener("isTracking", getName(), "isTracking");
+		camera.addListener("sizeChange", getName(), "sizeChange");
 		// addListener("pan", "logger", "log");
 		// addListener("tilt", "logger", "log");
 		addListener("pan", "pan", "move");

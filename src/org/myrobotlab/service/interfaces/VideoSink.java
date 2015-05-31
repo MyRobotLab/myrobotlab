@@ -12,7 +12,7 @@ public abstract class VideoSink extends Service {
 	}
 
 	public boolean attach(VideoSource vs) {
-		subscribe("publishDisplay", vs.getName(), "publishDisplay", SerializableImage.class);
+		subscribe(vs.getName(), "publishDisplay");
 		return true;
 	}
 
@@ -27,7 +27,7 @@ public abstract class VideoSink extends Service {
 	}
 
 	public boolean detach(VideoSource vs) {
-		unsubscribe("publishDisplay", vs.getName(), "publishDisplay", SerializableImage.class);
+		unsubscribe(vs.getName(), "publishDisplay");
 		return true;
 	}
 

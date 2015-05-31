@@ -46,7 +46,7 @@ public class MouthControl extends Service {
 			Runtime.createAndStart("gui", "GUIService");
 
 			MouthControl.autoAttach = true;
-			MouthControl.saying("test on");
+			MouthControl.onSaying("test on");
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -60,7 +60,7 @@ public class MouthControl extends Service {
 
 		jaw.setPin(7);
 		jaw.setController(arduino);
-		mouth.addListener(getName(), "saying");
+		subscribe(mouth.getName(), "saying");
 	}
 
 	// FIXME make interface
@@ -98,7 +98,7 @@ public class MouthControl extends Service {
 		return "mouth movements based on spoken text";
 	}
 
-	public synchronized void saying(String text) {
+	public synchronized void onSaying(String text) {
 		log.info("move moving to :" + text);
 		if (jaw != null) { // mouthServo.moveTo(Mouthopen);
 			if (autoAttach) {

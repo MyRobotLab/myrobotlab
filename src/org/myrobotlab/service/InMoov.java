@@ -259,13 +259,16 @@ public class InMoov extends Service {
 
 	}
 
+	/**
+	 * subscribe to the runtime for any new services
+	 */
 	public void addRoutes() {
-		// register with runtime for any new services
-		// their errors are routed to mouth
-		subscribe(this.getName(), "publishError", "handleError");
-
+		
 		Runtime r = Runtime.getInstance();
-		r.addListener(getName(), "registered");
+		subscribe(r.getName(), "registered");
+		
+		// handle my own error the same way too
+		subscribe(getName(), "publishError");
 	}
 
 	public void armsFront() {
@@ -648,7 +651,7 @@ public class InMoov extends Service {
 		moveHand(which, 130, 180, 180, 180, 180);
 	}
 
-	public void handleError(String msg) {
+	public void onError(String msg) {
 		// lets try not to nag
 		if (!lastInMoovError.equals(msg) && speakErrors) {
 			speakBlocking(msg);
@@ -889,11 +892,8 @@ public class InMoov extends Service {
 	 * 
 	 * @param sw
 	 */
-	public void registered(ServiceInterface sw) {
-		// FIXME FIXME FIXME !!! - this right idea - but expanded methods have
-		// incorrect parameter placement !!
-		// addListener & suscribe the same !!!!
-		subscribe(sw.getName(), "publishError", "handleError");
+	public void onRegistered(ServiceInterface sw) {
+		subscribe(sw.getName(), "publishError");
 	}
 
 	public void rest() {

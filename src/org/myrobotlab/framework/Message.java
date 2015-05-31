@@ -132,6 +132,11 @@ public class Message implements Serializable {
 	 */
 	public Object[] data;
 
+	/**
+	 * TODO - this needs to be a POJO - remove main to a JUnit Test !!
+	 * @param args
+	 * @throws InterruptedException
+	 */
 	public static void main(String[] args) throws InterruptedException {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);

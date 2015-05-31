@@ -359,7 +359,7 @@ public class Plantoid extends Service {
 		leg1.moveTo(90 + power);
 	}
 
-	public void publishPin(Pin pin) {
+	public void onPin(Pin pin) {
 		// if (log.isDebugEnabled())
 		{
 			log.info(String.format("pin %d value %d", pin.pin, pin.value));
@@ -520,7 +520,7 @@ public class Plantoid extends Service {
 		pan.attach();
 		tilt.attach();
 
-		arduino.addListener(getName(), "publishPin");
+		subscribe(arduino.getName(), "publishPin");
 
 		// startPolling();
 		attachPanTilt();

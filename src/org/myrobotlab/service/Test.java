@@ -256,7 +256,7 @@ public class Test extends Service {
 	/**
 	 * call-back from service under testing to route errors to this service...
 	 */
-	public void handleError(String errorMsg) {
+	public void onError(String errorMsg) {
 		if (status != null) {
 			status.add(Status.error(errorMsg));
 		}
@@ -264,7 +264,7 @@ public class Test extends Service {
 
 	public void registered(ServiceInterface sw) {
 
-		subscribe(sw.getName(), "publishError", "handleError");
+		subscribe(sw.getName(), "publishError");
 	}
 
 	// TODO - do all forms of serialization - binary json xml
@@ -351,7 +351,7 @@ public class Test extends Service {
 			}
 
 			// add error route - for call backs
-			subscribe("publishError", s.getName(), "handleError", String.class);
+			subscribe(s.getName(), "publishError",  getName(), "onError");
 
 			try {
 				s.startService();

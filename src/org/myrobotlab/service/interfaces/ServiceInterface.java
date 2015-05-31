@@ -9,18 +9,21 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
-public interface ServiceInterface extends Messaging, LoggingSink {
-
-	// FIXME !!!! - refactor - split into 2 interfaces ServiceInterface -
-	// service related methods & Messaging
-
-	// getTestEnvironment() - hasServo hasArduino ???
-
-	// hasError() - publish subscribe - getError().getSourceName()
+public interface ServiceInterface extends Messaging, LoggingSink, NameProvider {
 
 
-	// ErrorSink
-	//public String error(String format, Object... args);
+	/**
+	 * this is a local method which adds a request from some
+	 * foreign service with address information (otherService/callback) for a topic callback
+	 * Adds an entry on the notify list
+	 * 
+	 * @param localTopic
+	 * @param otherService
+	 * @param callback
+	 */
+	public void addListener(String localTopic, String otherService, String callback);
+
+	public void removeListener(String localTopic, String otherService, String callback);
 
 	public String[] getCategories();
 
@@ -35,8 +38,6 @@ public interface ServiceInterface extends Messaging, LoggingSink {
 	public String[] getMethodNames();
 
 	public Method[] getMethods();
-
-	public String getName();
 
 	public ArrayList<MRLListener> getNotifyList(String key);
 

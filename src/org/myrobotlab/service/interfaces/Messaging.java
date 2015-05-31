@@ -3,14 +3,11 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.framework.Message;
 
 public interface Messaging {
-	public void addListener(String outMethod, String namedInstance, String inMethod, Class<?>... paramTypes);
-
+	
 	/**
-	 * in will put a message in the Service's inbox - it will require the
-	 * Service's thread to process it.
+	 * put message in inbox, so it will be processed by this service
 	 * 
 	 * @param msg
-	 *            - message to process
 	 */
 	public void in(Message msg);
 
@@ -22,20 +19,26 @@ public interface Messaging {
 
 	public boolean isLocal();
 
-	public void removeListener(String outMethod, String serviceName, String inMethod, Class<?>... paramTypes);
-
 	public void send(String name, String method);
 
 	public void send(String name, String method, Object... data);
 
-	public Object sendBlocking(String name, Integer timeout, String method, Object... data);
-
 	public Object sendBlocking(String name, String method);
 
 	public Object sendBlocking(String name, String method, Object... data);
+	
+	public Object sendBlocking(String name, Integer timeout, String method, Object... data);
 
-	public void subscribe(String outMethod, String publisherName, String inMethod, Class<?>... parameterType);
+	public void subscribe(NameProvider topicName, String topicKey);
+	
+	public void subscribe(String topicName, String topicKey);
+	
+	public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod);
 
-	public void unsubscribe(String outMethod, String publisherName, String inMethod, Class<?>... parameterType);
+	public void unsubscribe(NameProvider topicName, String topicKey);
+
+	public void unsubscribe(String topicName, String topicKey);
+	
+	public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod);
 
 }

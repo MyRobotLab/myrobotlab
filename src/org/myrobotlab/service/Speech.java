@@ -440,13 +440,13 @@ public class Speech extends Service implements TextListener {
 		if (b) {
 			for (int i = 0; i < services.size(); ++i) {
 				ServiceInterface sw = services.get(i);
-				subscribe(sw.getName(), "publishError", "speak");
+				subscribe(sw.getName(), "publishError", getName(), "speak");
 				// this.addListener(outMethod, namedInstance, inMethod);
 			}
 		} else {
 			for (int i = 0; i < services.size(); ++i) {
 				ServiceInterface sw = services.get(i);
-				unsubscribe(sw.getName(), "publishError", "speak");
+				unsubscribe(sw.getName(), "publishError", getName(), "speak");
 				// this.addListener(outMethod, namedInstance, inMethod);
 			}
 		}

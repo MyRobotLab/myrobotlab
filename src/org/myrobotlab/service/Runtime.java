@@ -244,6 +244,9 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 */
 	static public synchronized ServiceInterface create(String name, String type) {
 		String fullTypeName;
+		if (name.indexOf("/") != -1){
+			throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
+		}
 		if (type.indexOf(".") == -1) {
 			fullTypeName = String.format("org.myrobotlab.service.%s", type);
 		} else {
@@ -450,8 +453,8 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 					nes = sw.getNotifyList(n);
 					for (int i = 0; i < nes.size(); ++i) {
 						listener = nes.get(i);
-						sb.append("<MRLListener outMethod=\"").append(listener.outMethod).append("\" name=\"").append(listener.name).append("\" inMethod=\"")
-								.append(listener.inMethod).append("\" />");
+						sb.append("<MRLListener outMethod=\"").append(listener.topicMethod).append("\" name=\"").append(listener.callbackName).append("\" inMethod=\"")
+								.append(listener.callbackMethod).append("\" />");
 					}
 					sb.append("</addListener>");
 				}
@@ -821,7 +824,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 */
 	public static ServiceInterface getService(String name) {
 
-		if (name == null) {
+		if (name == null || name.length() == 0) {
 			return Runtime.getInstance();
 		}
 		if (!registry.containsKey(name)) {

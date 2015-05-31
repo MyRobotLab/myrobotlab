@@ -249,9 +249,9 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			listeners.put(si.getName(), (SerialDataListener) si);
 		} else {
 			// pub sub
-			addListener("publishRX", si.getName(), "onByte", Integer.class);
-			addListener("publishConnect", si.getName(), "onConnect", String.class);
-			addListener("publishDisconnect", si.getName(), "onDisconnect", String.class);
+			addListener("publishRX", si.getName(), "onByte");
+			addListener("publishConnect", si.getName(), "onConnect");
+			addListener("publishDisconnect", si.getName(), "onDisconnect");
 		}
 	}
 
@@ -502,7 +502,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			return hardwarePort;
 
 		} catch (Exception e) {
-			error(e.getMessage());
+			error(e);
 			Logging.logError(e);
 		}
 
@@ -981,9 +981,9 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			listeners.remove(si.getName());
 		} else {
 			// pub sub
-			removeListener("publishRX", si.getName(), "onByte", Integer.class);
-			removeListener("publishConnect", si.getName(), "onConnect", String.class);
-			removeListener("publishDisconnect", si.getName(), "onDisconnect", String.class);
+			removeListener("publishRX", si.getName(), "onByte");
+			removeListener("publishConnect", si.getName(), "onConnect");
+			removeListener("publishDisconnect", si.getName(), "onDisconnect");
 		}
 	}
 

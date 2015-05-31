@@ -46,7 +46,7 @@ import org.slf4j.Logger;
 
 public class Outbox implements Runnable, Serializable {
 	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(Outbox.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Outbox.class);
 
 	static public final String RELAY = "RELAY";
 	static public final String IGNORE = "IGNORE";
@@ -161,8 +161,8 @@ public class Outbox implements Runnable, Serializable {
 
 				for (int i = 0; i < subList.size(); ++i) {
 					MRLListener listener = subList.get(i);
-					msg.name = listener.name;
-					msg.method = listener.inMethod;
+					msg.name = listener.callbackName;
+					msg.method = listener.callbackMethod;
 					comm.send(msg);
 
 					// must make new for internal queues

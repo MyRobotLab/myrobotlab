@@ -430,7 +430,7 @@ public class WiiDAR extends Service {
 	 * }
 	 */
 
-	public Pin publishPin(Pin pd) {
+	public Pin onPin(Pin pd) {
 		++cnt;
 		lastEncoderData = pd;
 		// log.error("pin v " + pd.value + " " + cnt + " " + pd.time);

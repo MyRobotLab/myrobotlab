@@ -133,7 +133,6 @@ public class AWTRobot extends Service {
 		AWTRobot awt = (AWTRobot) Runtime.createAndStart("awt", "AWTRobot");
 		awt.setBounds(0, 0, 100, 100);
 		TesseractOCR tess = (TesseractOCR) Runtime.createAndStart("tess", "TesseractOCR");
-		tess.subscribe("publishDisplay", awt.getName(), "OCR");
 		// new TIFFImageWriteParam();
 		// mouse.setBounds(new Rectangle(500,500));
 		// VideoStreamer

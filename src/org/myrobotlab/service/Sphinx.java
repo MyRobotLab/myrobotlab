@@ -319,12 +319,12 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	}
 
 	public void addTextListener(TextListener service) {
-		addListener("publishText", service.getName(), "onText", String.class);
+		addListener("publishText", service.getName(), "onText");
 	}
 
 	public void addVoiceRecognitionListener(Service s) {
 		// TODO - reflect on a public heard method - if doesn't exist error ?
-		addListener("recognized", s.getName(), "heard", String.class);
+		addListener("recognized", s.getName(), "heard");
 	}
 
 	// TODO - make "Speech" interface if desired
@@ -334,11 +334,11 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 			return false;
 		}
 		// if I'm speaking - I shouldn't be listening
-		subscribe("isSpeaking", mouth.getName(), "isSpeaking", Boolean.class);
+		subscribe(mouth, "isSpeaking");
 		// TODO - make config drive whether confirmation is desired
-		mouth.subscribe("requestConfirmation", getName(), "requestConfirmation", String.class);
-		mouth.subscribe("confirmed", getName(), "speak", String.class);
-		mouth.subscribe("negated", getName(), "speak", String.class);
+		mouth.subscribe(getName(), "requestConfirmation");
+		mouth.subscribe(getName(), "confirmed", mouth.getName(), "speak");
+		mouth.subscribe(getName(), "negated", mouth.getName(), "speak");
 		log.info(String.format("attached Speech service %s to Sphinx service %s with default message routes", mouth.getName(), getName()));
 		return true;
 	}
@@ -444,7 +444,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	 * @param b
 	 * @return
 	 */
-	public synchronized boolean isSpeaking(Boolean talking) {
+	public synchronized boolean onIsSpeaking(Boolean talking) {
 		if (talking) {
 			isListening = false;
 			log.info("I'm talking so I'm not listening"); // Gawd, ain't that
@@ -535,7 +535,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		return word;
 	}
 
-	public String requestConfirmation(String txt) {
+	public String onRequestConfirmation(String txt) {
 		return txt;
 	}
 

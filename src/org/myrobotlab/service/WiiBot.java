@@ -192,9 +192,9 @@ public class WiiBot extends Service {
 		wii.startService();
 
 		// send data from the wii to wiidar
-		wii.addListener(wiidar.getName(), "publishIR", IRData.class);
+		wii.addListener("publishIR", wiidar.getName(), "onIR");
 		// data from widar to the gui
-		wiidar.addListener("publishArrayofPoints", gui.getName(), "displaySweepData", Point.class);
+		wiidar.addListener("publishArrayofPoints", gui.getName(), "displaySweepData");
 
 		// send the data from the wii to wiidar
 		// wii.addListener("publishIR", wiidar.getName(), "computeDepth",
@@ -202,12 +202,12 @@ public class WiiBot extends Service {
 		// send the computed depth & data to the gui
 		// addListener("computeDepth", gui.getName(),"publishSinglePoint",
 		// Point.class);
-		wiidar.addListener("publishSinglePoint", gui.getName(), "publishSinglePoint", Point.class);
+		wiidar.addListener("publishSinglePoint", gui.getName(), "publishSinglePoint");
 		// gui.addListener("processImage", opencv.getName(),"input",
 		// BufferedImage.class);
 		// wii.addListener("publishPin", wiidar.getName(), "publishPin",
 		// IRData.class);
-		arduino.addListener(wiidar.getName(), "publishPin", Pin.class);
+		arduino.addListener( "publishPin", wiidar.getName(), "onPin");
 
 	}
 }

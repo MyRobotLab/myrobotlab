@@ -204,7 +204,7 @@ public class OpenNI extends Service // implements
 	}
 
 	public void addOpenNIData(Service service) {
-		addListener("publishOpenNIData", service.getName(), "onOpenNIData", OpenNIData.class);
+		addListener("publishOpenNIData", service.getName(), "onOpenNIData");
 	}
 
 	public void addRubySketchUpFrame(Skeleton skeleton, boolean singleFrame) {

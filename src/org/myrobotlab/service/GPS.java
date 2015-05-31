@@ -177,7 +177,7 @@ public class GPS extends Service implements SerialDataListener {
 	}
 
 	public void addGPSListener(Service service) {
-		addListener("publishGPS", service.getName(), "onGPS", Long.class);
+		addListener("publishGPS", service.getName(), "onGPS");
 	}
 
 	@Override

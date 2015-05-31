@@ -60,12 +60,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-
 public class AudioFile extends Service {
 
 	// The myrobotlab audio device
 	private MRLSoundAudioDevice audioDevice = new MRLSoundAudioDevice();
-	
+
 	public class AdvancedPlayerThread extends Thread {
 		AdvancedPlayer player = null;
 		String filename;
@@ -74,11 +73,11 @@ public class AudioFile extends Service {
 			super(filename);
 
 			try {
-				this.filename = filename;			
+				this.filename = filename;
 				resetAudioDevice();
 				this.player = new AdvancedPlayer(bis, audioDevice);
 				player.setPlayBackListener(playbackListener);
-				
+
 			} catch (Exception e) {
 				Logging.logError(e);
 			}
@@ -305,43 +304,40 @@ public class AudioFile extends Service {
 			AudioFile af = (AudioFile) Runtime.createAndStart("audio", "AudioFile");
 			af.playFile("C:\\dev\\workspace.kmw\\myrobotlab\\test.mp3", false, false);
 			af.setVolume(1.0F);
-			
-			
+
 			if (false) {
-			af.silence();
+				af.silence();
 
-			af.convert("C:\\tools\\Tarsos-master\\test.wav");
+				af.convert("C:\\tools\\Tarsos-master\\test.wav");
 
-			Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
-			Python python = (Python) Runtime.createAndStart("python", "Python");
-			AudioFile player = new AudioFile("player");
-			// player.playFile(filename, true);
-			player.startService();
-			GUIService gui = (GUIService) Runtime.createAndStart("gui", "GUIService");
+				Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
+				Python python = (Python) Runtime.createAndStart("python", "Python");
+				AudioFile player = new AudioFile("player");
+				// player.playFile(filename, true);
+				player.startService();
+				GUIService gui = (GUIService) Runtime.createAndStart("gui", "GUIService");
 
-			joystick.setController(2);
-			joystick.broadcastState();
+				joystick.setController(2);
+				joystick.broadcastState();
 
-			python.subscribe(joystick.getName(), "button1", "input");
+				// BasicController control = (BasicController) player;
 
-			// BasicController control = (BasicController) player;
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\start.mp3");
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\radio.chatter.4.mp3");
 
-			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\start.mp3");
-			player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\radio.chatter.4.mp3");
+				player.silence();
 
-			player.silence();
-
-			// player.playResource("Clock/tick.mp3");
-			player.playResource("/resource/Clock/tick.mp3");
-			player.playResource("/resource/Clock/tick.mp3");
-			player.playResource("/resource/Clock/tick.mp3");
-			player.playResource("/resource/Clock/tick.mp3");
-			player.playResource("/resource/Clock/tick.mp3");
-			player.playResource("/resource/Clock/tick.mp3");
-			player.playResource("/resource/Clock/tick.mp3");
+				// player.playResource("Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
 			}
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -433,9 +429,10 @@ public class AudioFile extends Service {
 			} else {
 				invoke("started");
 				audioDevice.close();
-				//audioDevice = new MRLSoundAudioDevice();
-				//audioDevice.setGain(this.getVolume());
-				// TODO: figure out how to properly just reuse the same sound audio device.
+				// audioDevice = new MRLSoundAudioDevice();
+				// audioDevice.setGain(this.getVolume());
+				// TODO: figure out how to properly just reuse the same sound
+				// audio device.
 				// for now, it seems we need to pass a new one each time.
 				resetAudioDevice();
 				AdvancedPlayer player = new AdvancedPlayer(is, audioDevice);
@@ -517,15 +514,15 @@ public class AudioFile extends Service {
 	}
 
 	/**
-	 * Specify the volume for playback on the audio file 
-	 * value 0.0 = off  1.0 = normal volume.  
-	 * (values greater than 1.0 may distort the original signal)
+	 * Specify the volume for playback on the audio file value 0.0 = off 1.0 =
+	 * normal volume. (values greater than 1.0 may distort the original signal)
+	 * 
 	 * @param volume
 	 */
 	public void setVolume(float volume) {
 		audioDevice.setGain(volume);
 	}
-	
+
 	public float getVolume() {
 		return audioDevice.getGain();
 	}

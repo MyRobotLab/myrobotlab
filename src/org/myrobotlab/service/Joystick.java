@@ -305,7 +305,7 @@ public class Joystick extends Service {
 	}
 
 	public void addKeyListener(Service service) {
-		addListener("publishKey", service.getName(), "onKey", String.class);
+		addListener("publishKey", service.getName(), "onKey");
 	}
 
 	public void addKeyListener(String serviceName) {
