@@ -1,4 +1,4 @@
-angular.module('mrlapp.service', ['ngDragDrop'])
+angular.module('mrlapp.service', [])
 
         .directive('serviceBody', [function () {
                 return {
