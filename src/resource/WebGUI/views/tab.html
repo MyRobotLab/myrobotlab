@@ -1,16 +1,23 @@
 <div ng-controller="TabsChildCtrl">
-    <div class="row">
+    
+    <div ng-repeat="item in list5" service-component style="width: 500px" index="{{$index}}" list="list5" reftomain="reftomain"></div>
+
+    <!--<div ng-repeat="item in list"
+         service-component
+         index="{{$index}}" list="list" size="size"></div>-->
+
+    <!--<div class="row">
         <div class="col-md-3">
-            <div drop-component="views/service.html" list="list1" gtc="list1gtc"></div>
+            <div drop-component="views/service.html" list="list1"></div>
         </div>
         <div class="col-md-3">
-            <div drop-component="views/service.html" list="list2" gtc="list2gtc"></div>
+            <div drop-component="views/service.html" list="list2"></div>
         </div>
         <div class="col-md-3">
-            <div drop-component="views/service.html" list="list3" gtc="list3gtc"></div>
+            <div drop-component="views/service.html" list="list3"></div>
         </div>
         <div class="col-md-3">
-            <div drop-component="views/service.html" list="list4" gtc="list4gtc"></div>
+            <div drop-component="views/service.html" list="list4"></div>
         </div>
     </div>
     <div class="row">
@@ -21,5 +28,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>-->
 </div>

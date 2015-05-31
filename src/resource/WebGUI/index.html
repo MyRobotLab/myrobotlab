@@ -6,13 +6,10 @@
         <link rel="stylesheet" href="lib/normalize.css">
         <link rel="stylesheet" href="/lib/jquery-ui-1.11.4/css/jquery-ui.min.css">
         <link rel="stylesheet" href="/lib/bootstrap-3.3.4/css/bootstrap.min.css">
-        <style>
-            .btn-droppable { width: 180px; height: 30px; padding-left: 4px; }
-            .btn-draggable { width: 160px; }
-        </style>
     </head>
     <body ng-controller="MainCtrl">
 
+        <!--Navbar-->
         <div class="navbar navbar-inverse" role="navigation">
             <div class="container-fluid">
                 <div class="navbar-header">
@@ -69,11 +66,16 @@
                 </div>
             </div>
         </div>
-        <pre>Model: {{searchSelectedService| json}}</pre>
+
+        <!--"content"-->
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-12">
-                    <div drop-component="views/service.html" list="generallist" size="forcetiny" gtc="generallistgtc"></div>
+                <div class="col-md-6" style="min-height: 200px">
+                    <!--<div drop-component list="generallist" size="forcetiny"></div>-->
+                    <div ng-repeat="item in generallist" service-component style="width: 500px" index="{{$index}}" list="generallist" reftomain="reftomain" size="forcetiny"></div>
+                </div>
+                <div class="col-md-6">
+                    <pre>Model: {{searchSelectedService| json}}</pre>
                 </div>
             </div>
             <div class="row">
@@ -109,7 +111,7 @@
                                     </ul>
                                 </div>-->
                             </tab-heading>
-                            <div tab-component index="{{$index}}" workspaces="workspaces"></div>     
+                            <div tab-component index="{{$index}}" workspaces="workspaces" reftomain="reftomain"></div>
                         </tab>
                         <tab heading="+" select="addWorkspace()">
                             <tab-heading>
