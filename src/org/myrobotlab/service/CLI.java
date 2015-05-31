@@ -80,7 +80,8 @@ public class CLI extends Service {
 				// FIXME FIXME FIXME - line.split(" ") - invoke(line[0], line)
 				// "One Handler to Rule them All !"
 				while ((line = br.readLine()) != null) {
-
+					// FIXME - must read char by char to process up-arrow history commands 
+					//in.read()
 					line = line.trim();
 
 					if (line.length() == 0) {
