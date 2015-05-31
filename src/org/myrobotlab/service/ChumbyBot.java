@@ -163,10 +163,10 @@ public class ChumbyBot extends Service {
 		arduino.connect("/dev/ttyUSB0");
 
 		// arduino to sensor monitor
-		arduino.addListener("publishPin", sensors.getName(), "sensorInput", Pin.class);
+		arduino.addListener("publishPin", sensors.getName(), "sensorInput");
 
 		// sensor monitor to chumbybot
-		sensors.addListener("publishPinAlert", this.getName(), "publishPinAlert", Trigger.class);
+		sensors.addListener("publishPinAlert", this.getName(), "publishPinAlert");
 
 		arduino.analogReadPollingStart(0);
 

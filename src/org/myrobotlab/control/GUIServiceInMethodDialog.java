@@ -114,7 +114,7 @@ public class GUIServiceInMethodDialog extends JDialog implements ActionListener 
 			// listener.getName() = myService.getDstServiceName();
 			// listener.outMethod = myService.getSrcMethodName().split(" ")[0];
 			// listener.inMethod = myService.getDstMethodName().split(" ")[0];
-			MRLListener listener = new MRLListener(myService.getSrcMethodName().split(" ")[0], myService.getDstServiceName(), myService.getDstMethodName().split(" ")[0], null // this
+			MRLListener listener = new MRLListener(myService.getSrcMethodName().split(" ")[0], myService.getDstServiceName(), myService.getDstMethodName().split(" ")[0] // this
 																																												// is
 																																												// not
 																																												// being
@@ -140,8 +140,8 @@ public class GUIServiceInMethodDialog extends JDialog implements ActionListener 
 			mxGraph graph = myService.getGraph();
 			Object parent = graph.getDefaultParent();
 			HashMap<String, mxCell> serviceCells = myService.getCells();
-			graph.insertEdge(parent, null, GUIServiceGUI.formatMethodString(listener.outMethod, listener.paramTypes, listener.inMethod), serviceCells.get(srcService),
-					serviceCells.get(listener.name));
+			graph.insertEdge(parent, null, GUIServiceGUI.formatMethodString(listener.topicMethod, listener.callbackMethod), serviceCells.get(srcService),
+					serviceCells.get(listener.callbackName));
 
 			this.dispose();
 		}

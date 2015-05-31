@@ -14,12 +14,12 @@ public abstract class VideoSource extends Service {
 	}
 
 	public boolean attach(VideoSink vs) {
-		vs.subscribe("publishDisplay", getName(), "publishDisplay", SerializableImage.class);
+		subscribe(vs.getName(), "publishDisplay");
 		return true;
 	}
 
 	public boolean detach(VideoSink vs) {
-		vs.unsubscribe("publishDisplay", getName(), "publishDisplay", SerializableImage.class);
+		unsubscribe(vs.getName(), "publishDisplay");
 		return true;
 	}
 

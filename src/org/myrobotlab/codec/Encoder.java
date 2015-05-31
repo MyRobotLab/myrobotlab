@@ -10,7 +10,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,7 +115,10 @@ public class Encoder {
 		return ret;
 	}
 	
-	
+	public static final String capitalize(final String line) {
+		return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+	}
+
 	/**
 	 * FIXME - this method requires the class to be loaded for type conversions !!!
 	 * Decoding a URI or path can depend on Context & Environment 
@@ -132,6 +134,8 @@ public class Encoder {
 	 * @return
 	 * @throws IOException
 	 */
+	
+	// FIXME - reconcile with WebGUIServlet
 	public static final Message decodePathInfo(String pathInfo) throws IOException {
 
 		// FIXME optimization of HashSet combinations of supported encoding instead
@@ -187,15 +191,30 @@ public class Encoder {
 
 		// FIXME INVOKING VS PUTTING A MESSAGE ON THE BUS
 		Message msg = new Message();
-		msg.name = parts[2];
-		msg.method = parts[3];
+		
+		
+		if (parts.length == 3){
+			// lazy runtime method call
+			msg.method = parts[2];
+		} else {
+			msg.name = parts[2];
+			msg.method = parts[3];
+		}
 
 		if (parts.length > 4) {
 			// FIXME - ALL STRINGS AT THE MOMENT !!!
 			String[] jsonParams = new String[parts.length - 4];
-			System.arraycopy(parts, 4, jsonParams, 0, parts.length - 4);
+			// System.arraycopy(parts, 4, jsonParams, 0, parts.length - 4);
+			
+			// FIXME - this is a huge assumption of type of encoding ! - needs to be dynamic !
+			for (int i = 0; i < jsonParams.length; ++i) {
+				String result = java.net.URLDecoder.decode(parts[i + 4], "UTF-8");
+				jsonParams[i] = result;
+			}
+			
 			ServiceInterface si = org.myrobotlab.service.Runtime.getService(msg.name);
-			// FIXME - this is a huge assumption ! - needs to be dynamic !
+			// FIXME - this is a huge assumption of type of encoding ! - needs to be dynamic !
+					
 			msg.data = TypeConverter.getTypedParamsFromJson(si.getClass(), msg.method, jsonParams);
 		}
 
@@ -229,9 +248,17 @@ public class Encoder {
 		return byteStream.toByteArray();
 	}
 
-	static public final String getCallBack(String methodName) {
-		String callback = String.format("on%s%s", methodName.substring(0, 1).toUpperCase(), methodName.substring(1));
-		return callback;
+	static public final String getCallBackName(String topicMethod) {
+		// replacements
+		if (topicMethod.startsWith("publish")) {
+			return String.format("on%s", topicMethod.substring("publish".length()));
+		} else if (topicMethod.startsWith("get")) {
+			return String.format("on%s", topicMethod.substring("get".length()));
+		}
+
+		// no replacement - just pefix and capitalize
+		// FIXME - subscribe to onMethod --- gets ---> onOnMethod :P
+		return String.format("on%s", capitalize(topicMethod));
 	}
 
 	// concentrator data coming from decoder

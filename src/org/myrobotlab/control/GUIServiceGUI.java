@@ -143,7 +143,7 @@ public class GUIServiceGUI extends ServiceGUI {
 
 	JButton dumpButton = new JButton("dump");
 
-	public static String formatMethodString(String out, Class<?>[] paramTypes, String in) {
+	public static String formatMethodString(String out, String in) {
 		// test if outmethod = in
 		String methodString = out;
 		// if (methodString != in) {
@@ -157,6 +157,7 @@ public class GUIServiceGUI extends ServiceGUI {
 
 		methodString += "(";
 
+		/*
 		if (paramTypes != null) {
 			for (int j = 0; j < paramTypes.length; ++j) {
 				// methodString += paramTypes[j].getCanonicalName();
@@ -169,6 +170,7 @@ public class GUIServiceGUI extends ServiceGUI {
 				}
 			}
 		}
+		*/
 
 		methodString += ")";
 
@@ -435,10 +437,10 @@ public class GUIServiceGUI extends ServiceGUI {
 
 						// ROUTING LABELS
 						if (showRouteLabels) {
-							mxCell c = (mxCell) graph.insertEdge(parent, null, formatMethodString(listener.outMethod, listener.paramTypes, listener.inMethod),
-									serviceCells.get(s.getName()), serviceCells.get(listener.name));
+							mxCell c = (mxCell) graph.insertEdge(parent, null, formatMethodString(listener.topicMethod, listener.callbackMethod),
+									serviceCells.get(s.getName()), serviceCells.get(listener.callbackName));
 						} else {
-							mxCell c = (mxCell) graph.insertEdge(parent, null, "", serviceCells.get(s.getName()), serviceCells.get(listener.name));
+							mxCell c = (mxCell) graph.insertEdge(parent, null, "", serviceCells.get(s.getName()), serviceCells.get(listener.callbackName));
 						}
 					}
 				}

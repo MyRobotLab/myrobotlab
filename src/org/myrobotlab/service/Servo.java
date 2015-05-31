@@ -224,7 +224,7 @@ public class Servo extends Service implements ServoControl {
 
 	// uber good
 	public void addServoEventListener(Service service) {
-		addListener("publishServoEvent", service.getName(), "onServoEvent", Integer.class);
+		addListener("publishServoEvent", service.getName(), "onServoEvent");
 	}
 
 	/*

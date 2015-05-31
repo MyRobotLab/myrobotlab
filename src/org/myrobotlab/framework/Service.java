@@ -71,6 +71,7 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.Invoker;
+import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -305,6 +306,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				Type t = f.getType();
 
 				log.info(String.format("setting %s", f.getName()));
+				if (Modifier.isStatic(f.getModifiers())){
+					continue;
+				}
+				
 				if (t.equals(java.lang.Boolean.TYPE)) {
 					targetClass.getDeclaredField(f.getName()).setBoolean(target, f.getBoolean(source));
 				} else if (t.equals(java.lang.Character.TYPE)) {
@@ -566,21 +571,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		}
 	}
 
-	/**
-	 * uses the Runtime to send a message on behalf of "name"'d service
-	 * 
-	 * @param senderName
-	 * @param name
-	 * @param method
-	 * @param data
-	 */
-	public static void proxySend(String senderName, String name, String method, Object... data) {
-		Message msg = Runtime.getInstance().createMessage(name, method, data);
-		msg.sender = senderName;
-		msg.sendingMethod = "send";
-		Runtime.getInstance().getOutbox().add(msg);
-	}
-
+	
 	/**
 	 * Reserves a name for a root level Service. allows modifications to the
 	 * reservation map at the highest level
@@ -709,25 +700,33 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		// re-implement but only create if there is a task!!
 		this.inbox = new Inbox(name);
 		this.outbox = new Outbox(this);
-
-		cm = new CommunicationManager(this);
+		cm = new CommunicationManager(name);
+		this.outbox.setCommunicationManager(cm);
 
 		TSFormatter.setCalendar(cal);
 		load();
 		Runtime.register(this, null);
 	}
 
+	
+	
+	public void addListener(MRLListener listener){
+		addListener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
+	}
 	/**
 	 * adds a MRL message listener to this service this is the result of a
 	 * "subscribe" from a different service
 	 *  FIXME !! - implement with HashMap or HashSet .. WHY ArrayList ???
-	 * @param listener
+	 *  @param topicMethod - method when called, it's return will be sent to the callbackName/calbackMethod
+	 *  @param callbackName - name of the service to send return message to
+	 *  @param callbackMethod - name of the method to send return data to
 	 */
-	public void addListener(MRLListener listener) {
-		if (outbox.notifyList.containsKey(listener.outMethod.toString())) {
+	public void addListener(String topicMethod, String callbackName, String callbackMethod) {
+		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+		if (outbox.notifyList.containsKey(listener.topicMethod.toString())) {
 			// iterate through all looking for duplicate
 			boolean found = false;
-			ArrayList<MRLListener> nes = outbox.notifyList.get(listener.outMethod.toString());
+			ArrayList<MRLListener> nes = outbox.notifyList.get(listener.topicMethod.toString());
 			for (int i = 0; i < nes.size(); ++i) {
 				MRLListener entry = nes.get(i);
 				if (entry.equals(listener)) {
@@ -737,38 +736,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				}
 			}
 			if (!found) {
-				log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.outMethod, listener.name, listener.inMethod));
+				log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
 				nes.add(listener);
 			}
 		} else {
 			ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
 			notifyList.add(listener);
-			log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.outMethod, listener.name, listener.inMethod));
-			outbox.notifyList.put(listener.outMethod.toString(), notifyList);
+			log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
+			outbox.notifyList.put(listener.topicMethod.toString(), notifyList);
 		}
-
-	}
-
-	/**
-	 * 
-	 * @param name
-	 * @param outAndInMethod
-	 */
-	public void addListener(String name, String outAndInMethod, Class<?>... paramTypes) {
-		addListener(outAndInMethod, name, outAndInMethod, paramTypes);
-	}
-
-	/**
-	 * 
-	 * @param outMethod
-	 * @param namedInstance
-	 * @param inMethod
-	 * @param paramTypes
-	 */
-	@Override
-	public void addListener(String outMethod, String namedInstance, String inMethod, Class<?>... paramTypes) {
-		MRLListener listener = new MRLListener(outMethod, namedInstance, inMethod, paramTypes);
-		addListener(listener);
 	}
 
 	// -------------------------------- new createPeer end
@@ -792,9 +768,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	// new state functions begin --------------------------
-	/**
-	 * 
-	 */
 	public void broadcastState() {
 		invoke("publishState");
 	}
@@ -1411,8 +1384,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			if (cfg.exists()) {
 				// serializer.read(o, cfg);
 				String json = FileIO.fileToString(filename);
-				o = Encoder.fromJson(json, o.getClass());
-
+				Object saved = Encoder.fromJson(json, o.getClass());
+				copyShallowFrom(o, saved);
 				return true;
 			}
 			log.info(String.format("cfg file %s does not exist", filename));
@@ -1584,6 +1557,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * 
 	 * @param listener
 	 */
+	/* DEPRECATE MRLListener Object interface - use String params
 	public void removeListener(MRLListener listener) {
 		if (!outbox.notifyList.containsKey(listener.outMethod.toString())) {
 			log.error(String.format("removeListener requested %s to be removed - but does not exist", listener));
@@ -1597,14 +1571,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			}
 		}
 	}
-
-	public void removeListener(String serviceName, String inOutMethod) {
-		removeListener(inOutMethod, serviceName, inOutMethod, (Class<?>[]) null);
-	}
-
-	public void removeListener(String serviceName, String inOutMethod, Class<?>... paramTypes) {
-		removeListener(inOutMethod, serviceName, inOutMethod, paramTypes);
-	}
+	*/
 
 	/**
 	 * 
@@ -1614,12 +1581,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * @param paramTypes
 	 */
 	@Override
-	public void removeListener(String outMethod, String serviceName, String inMethod, Class<?>... paramTypes) {
+	public void removeListener(String outMethod, String serviceName, String inMethod) {
 		if (outbox.notifyList.containsKey(outMethod)) {
 			ArrayList<MRLListener> nel = outbox.notifyList.get(outMethod);
 			for (int i = 0; i < nel.size(); ++i) {
 				MRLListener target = nel.get(i);
-				if (target.name.compareTo(serviceName) == 0) {
+				if (target.callbackName.compareTo(serviceName) == 0) {
 					nel.remove(i);
 				}
 			}
@@ -2055,80 +2022,40 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 		save();
 	}
-	
-	public void subscribe(ServiceInterface si, String inOutMethod) {
-		subscribe(si.getName(), inOutMethod);
+	// -------------- Messaging Begins -----------------------
+	public void subscribe(NameProvider topicName, String topicMethod){
+		String callbackMethod = Encoder.getCallBackName(topicMethod);
+		subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
 	}
 	
-	public void subscribe(ServiceInterface si, String outMethod, String inMethod) {
-		subscribe(si.getName(), outMethod, inMethod);
-	}
-
-	/**
-	 * method to subscribe to a service's method as an event with data from the
-	 * return type this establishes a message route from the target's service
-	 * method back to the subscribers method. For example, a Log service might
-	 * subscribe to a Clocks pulse "out" method, when this is successfully done
-	 * the returned data fom the pulse will be sent to the Log's service "in"
-	 * method
-	 * 
-	 * @param publisherName
-	 *            - name of service this service will be subscribing to
-	 * @param inOutMethod
-	 *            - the name of the target service method and the subscribers in
-	 *            method - if they are the same
-	 */
-	public void subscribe(String publisherName, String inOutMethod) {
-		subscribe(inOutMethod, publisherName, inOutMethod, (Class<?>[]) null);
-	}
-
-	/**
-	 * when "out" method and "in" method names differ a simple way to think of
-	 * this is myservice.subscribe(publisher->publishingMethod -> inMethod)
-	 * establishing a message route whenever publisher->publishingMethod gets
-	 * invoked the returned data goes to myservice.inMethod
-	 * 
-	 * allows the following to happen :
-	 * myservice.inMethod(publisher->publishingMethod())
-	 * 
-	 * @param publisherName
-	 * @param outMethod
-	 * @param inMethod
-	 */
-	public void subscribe(String publisherName, String outMethod, String inMethod) {
-		subscribe(outMethod, publisherName, inMethod, (Class<?>[]) null);
-	}
-
-	// FIXME FIXME FIXME FIXME FIXME!!! - these have very bad signatures !!!
-	@Override
-	public void subscribe(String outMethod, String publisherName, String inMethod, Class<?>... parameterType) {
-		MRLListener listener = null;
-		if (parameterType != null) {
-			listener = new MRLListener(outMethod, getName(), inMethod, parameterType);
-		} else {
-			listener = new MRLListener(outMethod, getName(), inMethod, null);
-		}
-
-		send(publisherName, "addListener", listener);
-	}
-
-	@Override
-	public void unsubscribe(String publisherName, String outMethod, String inMethod, Class<?>... parameterType) {
-
-		MRLListener listener = null;
-		if (parameterType != null) {
-			listener = new MRLListener(outMethod, getName(), inMethod, parameterType);
-		} else {
-			listener = new MRLListener(outMethod, getName(), inMethod, null);
-		}
-
-		send(publisherName, "removeListener", listener);
+	public void subscribe(String topicName, String topicMethod){
+		String callbackMethod = Encoder.getCallBackName(topicMethod);
+		subscribe(topicName, topicMethod, getName(), callbackMethod);
 	}
 	
-	public void unsubscribe(ServiceInterface si, String outMethod, String inMethod) {
-		unsubscribe(si.getName(), outMethod, inMethod);
+	public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
+		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
+		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+		cm.send(createMessage(topicName, "addListener", listener));
 	}
 
+	public void unsubscribe(NameProvider topicName, String topicMethod){
+		String callbackMethod = Encoder.getCallBackName(topicMethod);
+		subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
+	}
+	
+	public void unsubscribe(String topicName, String topicMethod){
+		String callbackMethod = Encoder.getCallBackName(topicMethod);
+		unsubscribe(topicName, topicMethod, getName(), callbackMethod);
+	}
+	
+	public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
+		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
+		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+		cm.send(createMessage(topicName, "removeListener", listener));
+	}
+	
+	// -------------- Messaging Ends -----------------------
 	// ---------------- Status processing begin ------------------
 	public Status error(Exception e) {
 		Status ret= Status.error(e);

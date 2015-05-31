@@ -300,10 +300,10 @@ public class TweedleBot extends Service {
 		explore();
 
 		// set a route of data from arduino to the sensor monitor
-		arduino.addListener("publishPin", sensors.getName(), "sensorInput", Pin.class);
+		arduino.addListener("publishPin", sensors.getName(), "sensorInput");
 
 		// set an alert from sensor monitor to MyRobot
-		sensors.addListener("publishPinAlert", this.getName(), "sensorAlert", Trigger.class);
+		sensors.addListener("publishPinAlert", this.getName(), "sensorAlert");
 		sensors.addTrigger(arduino.getName(), ALERT_WALL, 600, 700, 3, 5, 0);
 
 		// move & set timer

@@ -380,7 +380,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		gui.attachGUI();
 
 		// TODO - all auto-subscribtions could be done here
-		subscribe("publishStatus", se.getName(), "getStatus", String.class);
+		subscribe(se.getName(), "publishStatus", getName(), "getStatus");
 		return gui;
 	}
 

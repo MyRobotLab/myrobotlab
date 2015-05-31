@@ -104,19 +104,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	}
 
 	public void addOOBTextListener(TextListener service) {
-		addListener("publishOOBText", service.getName(), "onOOBText", String.class);
+		addListener("publishOOBText", service.getName(), "onOOBText");
 	}
 
 	public void addResponseListener(Service service) {
-		addListener("publishResponse", service.getName(), "onResponse", Response.class);
+		addListener("publishResponse", service.getName(), "onResponse");
 	}
 
 	public void addTextListener(TextListener service) {
-		addListener("publishText", service.getName(), "onText", String.class);
+		addListener("publishText", service.getName(), "onText");
 	}
 
 	public void addTextPublisher(TextPublisher service) {
-		addListener("publishText", service.getName(), "onText", String.class);
+		addListener("publishText", service.getName(), "onText");
 	}
 
 	private void cleanOutOfDateAimlIFFiles(String botName, String path) {

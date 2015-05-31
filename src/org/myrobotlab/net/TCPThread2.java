@@ -124,7 +124,7 @@ public class TCPThread2 extends Thread {
 
 				if ("addListener".equals(msg.method)) {
 					MRLListener listener = (MRLListener) msg.data[0];
-					listener.name = String.format("%s%s", myService.getPrefix(protocolKey), listener.name);
+					listener.callbackName = String.format("%s%s", myService.getPrefix(protocolKey), listener.callbackName);
 				}
 
 				// FIXME - THIS NEEDS TO BE NORMALIZED - WILL BE THE SAME IN

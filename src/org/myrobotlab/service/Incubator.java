@@ -46,7 +46,7 @@ public class Incubator extends Service {
 	// any other times - find the diff of threads - generated errors
 	// approprately
 
-	// TODO - subscribe to registered --> generates subscription to
+	// TODO - subscribe to onRegistered --> generates subscription to
 	// publishState() - filter on Errors
 
 	// FIXME NEED TO AD SOME REPO MANAGEMENT ROUTINES TO RUNTIME - LIKE REMOVE
@@ -120,16 +120,16 @@ public class Incubator extends Service {
 
 	// very good - dynamicly subscribing to other service's
 	// published errors
-	// step 1 subscribe to runtimes registered event
-	// step 2 in any registered -
+	// step 1 subscribe to runtimes onRegistered event
+	// step 2 in any onRegistered -
 	// step 3 - fix up - so that state is handled (not just "error")
 	public void addRoutes() {
-		// register with runtime for any new services
-		// their errors are routed to mouth
-		subscribe(this.getName(), "publishError", "handleError");
-
+		
 		Runtime r = Runtime.getInstance();
-		r.addListener(getName(), "registered");
+		subscribe(r.getName(), "registered");
+		
+		// handle my own error the same way too
+		subscribe(getName(), "publishError");
 	}
 
 	@Override
@@ -147,9 +147,9 @@ public class Incubator extends Service {
 		return "used as a general template";
 	}
 
-	public void handleError(Status status) {
+	public void onError(Status status) {
 		try {
-			// FIXME - remove - only add xmp if HandleError requires an error
+			// FIXME - remove - only add xmp if onError requires an error
 			// alert
 			XMPP xmpp = (XMPP) startPeer("xmpp");
 			// python = (Python) startPeer("python");
@@ -173,7 +173,7 @@ public class Incubator extends Service {
 
 	}
 
-	public void handleError(String msg) {
+	public void onError(String msg) {
 		// AHHHH! with just error (vs log.error) - goes in infinite loop
 		log.error(String.format("cool - all errors are caught here since we register for them - this error is - %s", msg));
 	}
@@ -236,9 +236,9 @@ public class Incubator extends Service {
 
 	}
 
-	public void registered(ServiceInterface sw) {
+	public void onRegistered(ServiceInterface sw) {
 
-		subscribe(sw.getName(), "publishError", "handleError");
+		subscribe(sw.getName(), "publishError");
 	}
 
 	// FIXME - 2 sets of services - 1 by serviceData.xml & 1 by all files in
@@ -449,7 +449,7 @@ public class Incubator extends Service {
 		return ret.add(serviceTest());
 
 		if (status.hasError()) {
-			handleError(status);
+			onError(status);
 		}
 
 		return status;

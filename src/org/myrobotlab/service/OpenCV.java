@@ -44,17 +44,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-import javax.imageio.ImageIO;
-
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.FrameGrabber;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.MRLError;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
@@ -64,9 +60,6 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.opencv.OpenCVFilterAffine;
-import org.myrobotlab.opencv.OpenCVFilterAnd;
-import org.myrobotlab.opencv.OpenCVFilterFFMEG;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;

@@ -124,12 +124,8 @@ public class OculusRift extends Service implements OculusDataPublisher {
 			
 			// create msg routes from opencv services
 			// a bit kludgy because OpenCV is old :P
-			//subscribe(leftOpenCV.getName(), "publishDisplay", "onPublishDisplay", SerializableImage.class);
-			//subscribe(rightOpenCV.getName(), "publishDisplay", "onPublishDisplay", SerializableImage.class);
-			subscribe(leftOpenCV.getName(), "publishDisplay", "onPublishDisplay");
-			subscribe(rightOpenCV.getName(), "publishDisplay", "onPublishDisplay");
-
-			
+			subscribe(leftOpenCV.getName(), "publishDisplay");
+			subscribe(rightOpenCV.getName(), "publishDisplay");
 			// Add some filters to rotate the images (cameras are mounted on their sides.)
 			// TODO: use 1 filter per eye for the rotations.  (might not be exactly 90degree rotation)
 			// TODO: replace with Affine filter.
@@ -168,7 +164,7 @@ public class OculusRift extends Service implements OculusDataPublisher {
 		}
 	}
 	
-	public void onPublishDisplay(SerializableImage frame){
+	public void onDisplay(SerializableImage frame){
 		
 		if ("left".equals(frame.getSource())){
 			lastRiftFrame.left = frame;
@@ -255,7 +251,7 @@ public class OculusRift extends Service implements OculusDataPublisher {
 	}
 	
 	public void addRiftFrameListener(Service service){
-		addListener("publishRiftFrame", service.getName(), "onRiftFrame", RiftFrame.class);
+		addListener("publishRiftFrame", service.getName(), "onRiftFrame");
 	}
 	
 	public RiftFrame publishRiftFrame(RiftFrame frame){

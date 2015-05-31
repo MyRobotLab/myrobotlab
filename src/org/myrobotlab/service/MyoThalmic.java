@@ -131,7 +131,7 @@ public class MyoThalmic extends Service implements DeviceListener {
 	}
 	
 	public void addPoseListener(Service service){
-		addListener("publishPose", service.getName(), "onPose", Pose.class);
+		addListener("publishPose", service.getName(), "onPose");
 	}
 	
 	public Pose publishPose(Pose pose){

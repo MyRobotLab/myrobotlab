@@ -35,6 +35,7 @@ import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
 //@ManagedService(path = "/api")
@@ -175,16 +176,20 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// .resource(this)
 				// Support 2 APIs
 				// REST - http://host/object/method/param0/param1/...  synchronous DO NOT SUSPEND
-				.resource("/api", this)
+				//.resource("/api", this) TODO - go beyond Servlets
+				.resource("/api", WebGUIServlet.class)
 				// For mvn exec:java
 				// .resource("./src/main/resources")
 
 				// For running inside an IDE
 				// .resource("./nettosphere-samples/games/src/main/resources")
 		
+				// if Jetty is in the classpath it will use it by default - we want to use Netty
+				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport")
 				.initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
 				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true")
-				.port(port).host("127.0.0.1").build();
+				.port(port).host("0.0.0.0").build();
+		//.host("127.0.0.1").build();
 		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
 		
 		s.start();

@@ -139,7 +139,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 	}
 
 	public void addXMPPMsgListener(Service service) {
-		addListener("publishXMPPMsg", service.getName(), "onXMPPMsg", XMPPMsg.class);
+		addListener("publishXMPPMsg", service.getName(), "onXMPPMsg");
 	}
 
 	/**
@@ -426,7 +426,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 
 					// IMPORTANT - this is an optimization and probably should
 					// be in the Comm interface defintion
-					cm.addRemote(uri, protocolKey);
+					getOutbox().getCommunicationManager().addRemote(uri, protocolKey);
 
 					// check if the URI is already defined - if not - we will
 					// send back the services which we want to export - Security

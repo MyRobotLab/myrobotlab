@@ -55,7 +55,7 @@ public class TestCatcherGUI extends ServiceGUI {
 	// directory
 	// autoBind(ServiceName) would send all NotificationEntries to a service
 	public void bindCatchInteger() {
-		MRLListener MRLListener = new MRLListener("catchInteger", myService.getName(), "catchInteger", new Class[] { Integer.class });
+		MRLListener MRLListener = new MRLListener("catchInteger", myService.getName(), "catchInteger");
 		myService.send(boundServiceName, "addListener", MRLListener);
 	}
 

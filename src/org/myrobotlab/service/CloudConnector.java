@@ -57,7 +57,7 @@ public class CloudConnector extends Service {
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.connect("COM12");
 			arduino.analogReadPollingStart(3);
-			arduino.addListener("publishPin", cloud.getName(), "publishPin", Pin.class);
+			arduino.addListener("publishPin", cloud.getName(), "publishPin");
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

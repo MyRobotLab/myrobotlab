@@ -512,7 +512,7 @@ public class RemoteAdapter extends Service implements Gateway {
 
 	@Override
 	public void addConnectionListener(String name) {
-		addListener("publishNewConnection", name, "onNewConnection", Connection.class);
+		addListener("publishNewConnection", name, "onNewConnection");
 	}
 
 	// FIXME - add to Gateway interfaceS

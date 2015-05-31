@@ -110,7 +110,7 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	}
 
 	public void addOculusDataListener(Service service) {
-		addListener("publishOculusData", service.getName(), "onOculusData", Frame.class);
+		addListener("publishOculusData", service.getName(), "onOculusData");
 	}
 
 	public OculusData onOculusData(OculusData oculus) {

@@ -19,8 +19,10 @@ import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.MethodCache;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.WebGUI3;
 import org.myrobotlab.service.WebGUI3.Error;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,21 +164,25 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 			return;
 		}
 
-		String clazzName = null;
-		String objectName = null;
-		Class<?> clazz = null;
+		
 
 		// inspect
+		/*
 		if (parts.length > 1) {
 			objectName = parts[1];
 			clazzName = String.format("%s.%s", ENTITY_PACKAGE, parts[1]);
 
 			clazz = Class.forName(clazzName);
 		}
+		*/
 
 		ArrayList<MethodInfo> info = null;
 		if (parts.length == 2) {
+			String[] serviceNames = Runtime.getServiceNames();
+			
+			/* TODO - relfect with javdoc info
 			log.info("inspecting");
+			
 			Method[] methods = clazz.getDeclaredMethods();
 			info = new ArrayList<MethodInfo>();
 			for (Method method : methods) {
@@ -193,11 +199,35 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 					info.add(m);
 				}
 			}
-			codec.encode(out, info);
+			*/
+			codec.encode(out, serviceNames);
 			response.addHeader("Content-Type", codec.getMimeType());
 			return;
-		}
+		} else if (parts.length == 3) {
+			ServiceInterface si = Runtime.getService(parts[2]);
+			Method[] methods = si.getDeclaredMethods();
+			codec.encode(out, methods);
+			response.addHeader("Content-Type", codec.getMimeType());
+			return;
+		}/* else if (parts.length > 3) {
+			String serviceName = parts[2];
+			String method = parts[3];
+			
+			ServiceInterface si = Runtime.getService(serviceName);
+			
+			// decode parameters 
+			String[] params = new String[parts.length - 4]; // <- this i "wrong" - a big assumption that they are "Strings"
+			Object[] 
+			for (int i = 0; i < params.length; ++i){
+				
+			}
+			
+		}*/
+		
+		String name = parts[2];
 
+		ServiceInterface si = Runtime.getService(name);
+		Class<?> clazz = si.getClass();
 		Class<?>[] paramTypes = null;
 		Object[] params = new Object[0];
 
@@ -230,7 +260,7 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 		// 2. "attempt" to get method
 		// 3. (optional) - if failure - scan methods - find one with
 		// signature - cache it - call it
-		String methodName = String.format("%s", parts[2]);
+		String methodName = String.format("%s", parts[3]);
 
 		// decoded array of encoded parameters
 		Object[] encodedArray = new Object[0];
@@ -247,7 +277,7 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 			// WE NOW HAVE ORDINAL
 
 			// URI - PARAMETERS - TODO - define added encoding spec > 5 ?
-		} else if (parts.length > 3) {
+		} else if (parts.length > 4) {
 			// REQUIREMENT must be in an encoded array - even binary
 			// 1. array is URI /
 			// 2. will need to decode contents of each parameter later based
@@ -257,32 +287,28 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 			// difference is initial state regardless of encoding we are
 			// guaranteed the URI parts are strings
 			// encodedArray = new Object[parts.length - 3];
-			encodedArray = new Object[parts.length - 3];
+			encodedArray = new Object[parts.length - 4];
 
 			for (int i = 0; i < encodedArray.length; ++i) {
-				encodedArray[i] = parts[i + 3];
+				String result = java.net.URLDecoder.decode(parts[i + 4], "UTF-8");
+				encodedArray[i] = result;
 			}
 
 			// WE NOW HAVE ORDINAL
 		}
-
+				
 		// FETCH AND MERGE METHOD - we have ordinal count now - but NOT the decoded
 		// parameters
 		// NOW HAVE ORDINAL - fetch the method with its types
-		paramTypes = MethodCache.getCandidateOnOrdinalSignature(clazz, methodName, encodedArray.length);
+		paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), methodName, encodedArray.length);
 		// WE NOW HAVE ORDINAL AND TYPES
 		params = new Object[encodedArray.length];
 
 		// DECODE AND FILL THE PARAMS
 		for (int i = 0; i < params.length; ++i) {
+			
 			params[i] = codec.decode(encodedArray[i], paramTypes[i]);
 		}
-
-
-		// FIXME - wether to get new instance, "registered instance" or some
-		// other naming mechanism 
-		Constructor<?> mc = clazz.getConstructor();
-		Object obj = mc.newInstance();
 
 		Method method = clazz.getMethod(methodName, paramTypes); // getDeclaredMethod
 																	// zod
@@ -299,7 +325,7 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 		// best to fail - then attempt to resolve through scanning through
 		// methods and trying types - then cache the result
 
-		Object retobj = method.invoke(obj, params);
+		Object retobj = method.invoke(si, params);
 		response.addHeader("Content-Type", codec.getMimeType());
 		codec.encode(out, retobj);
 		

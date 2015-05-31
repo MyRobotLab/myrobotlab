@@ -37,7 +37,7 @@ public class MessageTest {
 	public void simpleSubscribeAndThrow() throws Exception {
 
 		catcher.clear();
-		catcher.subscribe("thrower", "pitch", "onPitch");
+		catcher.subscribe("thrower", "pitch");
 		// ROUTE MUST STABALIZE - BEFORE MSGS - otherwise they will be missed
 		Service.sleep(100);
 		
@@ -51,7 +51,7 @@ public class MessageTest {
 	@Test
 	public void broadcastMessage() throws Exception {
 		catcher.clear();
-		catcher.subscribe("thrower", "pitch", "onPitch");
+		catcher.subscribe("thrower", "pitch");
 		
 		Message msg = thrower.createMessage(null, "getServiceNames", null);
 		CommunicationInterface comm = thrower.getComm();
@@ -62,17 +62,20 @@ public class MessageTest {
 		assertNotNull(ret);
 	}
 	
+	/**
+	 * test to verify we can remove all message routes
+	 * @throws Exception
+	 */
 	@Test
-	public void clearRoutes() throws Exception {
+	static final public void clearRoutes() throws Exception {
 		catcher.clear();
-		catcher.subscribe("thrower", "pitch", "onPitch");
+		catcher.subscribe("thrower", "pitch");
 		
+		// "long" pause to make sure our message route is in
 		Service.sleep(100);
 		
 		thrower.pitchInt(1000);
 		BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
-		
-		
 
 		log.warn(String.format("caught %d balls", balls.size()));
 		log.warn(String.format("left balls %d ", catcher.msgs.size()));
@@ -86,12 +89,77 @@ public class MessageTest {
 		String[] ret = (String[])thrower.invoke(msg);
 		log.info(String.format("got %s", Arrays.toString(ret)));
 		assertNotNull(ret);
+		
+		catcher.clear();
+		
+		// "long" pause to make sure our message route is in
+		Service.sleep(100);
+		
+		thrower.pitchInt(1000);
+		
+		Service.sleep(100);
+		assertEquals(0, catcher.msgs.size());
+
 	}
 	
 	@Test
-	public void invokeStringNotation() throws Exception {
+	static public void badNameTest() throws Exception {
 		catcher.clear();
-		catcher.subscribe("thrower/pitch", "onPitch");
+		TestCatcher catcher2 = null;
+		try {
+			Runtime.start("myName/isGeorge", "TestCatcher");
+		} catch (Exception e){
+			// Logging.logError(e);
+			log.info("good bad name threw");
+		}
+		assertNull(catcher2);
+	}
+	
+	@Test
+	static public void invokeStringNotation() throws Exception {
+		catcher.clear();
+		// FIXME - implement
+		// catcher.subscribe("thrower/pitch");
+		
+		catcher.clear();
+		catcher.subscribe("thrower", "pitch");
+		Service.sleep(100);
+		
+		thrower.pitchInt(1000);
+		BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
+		
+		assertEquals(1000, balls.size());
+		
+		/*
+		
+		Runtime runtime = Runtime.getInstance();
+		
+		Message msg = thrower.createMessage(null, "getServiceNames", null);
+		CommunicationInterface comm = thrower.getComm();
+		comm.send(msg);
+		
+		String[] ret = (String[])thrower.invoke(msg);
+		log.info(String.format("got %s", Arrays.toString(ret)));
+		assertNotNull(ret);
+		*/
+	}
+	
+	/**
+	 * test to excercise
+	 * @throws Exception
+	 */
+	@Test
+	static public void RuntimeTests() throws Exception {
+		catcher.clear();
+		// FIXME - implement
+		// catcher.subscribe("thrower/pitch");
+		
+		catcher.clear();
+		catcher.subscribe("thrower", "pitch");
+		Service.sleep(100);
+		
+		thrower.pitchInt(1000);
+		BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
 		
 		Runtime runtime = Runtime.getInstance();
 		
@@ -104,6 +172,7 @@ public class MessageTest {
 		assertNotNull(ret);
 	}
 	
+	
 	public static void main(String[] args) {
 		try {
 			
@@ -113,6 +182,9 @@ public class MessageTest {
 			logging.addAppender(Appender.FILE);
 			
 			setUpBeforeClass();
+			//clearRoutes();
+			// badNameTest();
+			invokeStringNotation();
 		
 
 		} catch(Exception e){

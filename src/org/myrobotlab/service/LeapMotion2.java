@@ -91,11 +91,11 @@ public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPu
 	}
 
 	public void addFrameListener(Service service) {
-		addListener("publishFrame", service.getName(), "onFrame", Frame.class);
+		addListener("publishFrame", service.getName(), "onFrame");
 	}
 
 	public void addLeapDataListener(Service service) {
-		addListener("publishLeapData", service.getName(), "onLeapData", Frame.class);
+		addListener("publishLeapData", service.getName(), "onLeapData");
 	}
 
 	public void checkPolicy() {

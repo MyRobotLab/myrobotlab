@@ -41,7 +41,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
 	}
 
 	public void addTextListener(TextListener service) {
-		addListener("publishText", service.getName(), "onText", String.class);
+		addListener("publishText", service.getName(), "onText");
 	}
 
 	@Override

@@ -15,17 +15,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-/**
- * Extract information from the process information pseudo-file system called
- * "/proc".
- * 
- * @author pmdusso
- * @version 1.0 @created 24-abr-2012 15:22:37
- * 
- *          origin : http://djmonitor.googlecode.com/svn-history/r1/src/parser/
- *          ProcParser.java Code license GNU GPL v3
- * 
- */
 public class ProcParser {
 
 	static public final String CPU = "CPU";

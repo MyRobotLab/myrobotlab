@@ -124,7 +124,7 @@ public class Stepper extends Service {
 	// change units, sample rate, etc
 	// TODO - isLocal() - determine local callback or pub/sub
 	public void addPublishStepperEventListener(Service service) {
-		addListener("publishStepperEvent", service.getName(), "publishStepperEvent", Integer.class);
+		addListener("publishStepperEvent", service.getName(), "publishStepperEvent");
 	}
 	
 	public StepperEvent publishStepperEvent(StepperEvent data) {

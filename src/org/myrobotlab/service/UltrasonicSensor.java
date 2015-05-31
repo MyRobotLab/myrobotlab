@@ -68,7 +68,7 @@ public class UltrasonicSensor extends Service implements RangeListener {
 	// of the "publishRange" method being affected by the Sensor service e.g.
 	// change units, sample rate, etc
 	public void addRangeListener(Service service) {
-		addListener("publishRange", service.getName(), "onRange", Long.class);
+		addListener("publishRange", service.getName(), "onRange");
 	}
 
 	// ---- part of interfaces begin -----
@@ -164,5 +164,6 @@ public class UltrasonicSensor extends Service implements RangeListener {
 	public void stopRanging() {
 		arduino.sensorPollingStop(getName());
 	}
+
 
 }

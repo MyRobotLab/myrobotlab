@@ -1,28 +1,3 @@
-/**
- *                    
- * @author greg (at) myrobotlab.org
- *  
- * This file is part of MyRobotLab (http://myrobotlab.org).
- *
- * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version (subject to the "Classpath" exception
- * as provided in the LICENSE.txt file that accompanied this code).
- *
- * MyRobotLab is distributed in the hope that it will be useful or fun,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * All libraries in thirdParty bundle are subject to their own license
- * requirements - please refer to http://myrobotlab.org/libraries for 
- * details.
- * 
- * Enjoy !
- * 
- * */
-
 package org.myrobotlab.net;
 
 import java.io.Serializable;
@@ -30,39 +5,55 @@ import java.net.URI;
 import java.util.HashMap;
 
 import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Outbox;
-import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.TestCatcher;
+import org.myrobotlab.service.TestThrower;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
-public class CommunicationManager implements Serializable, CommunicationInterface {
+/**
+ * goal of this class is to provide the interface for non-blocking communication (local &
+ * remote) a good test of this goal is for this
+ * class to be used outside of MRL process.
+ * 
+ * e.g. - the goal is the design of a very small lib - using only native
+ * dependencies can do all of the necessary messaging MRL supports with very
+ * little work
+ * 
+ * @author GroG
+ *
+ */
+public class CommunicationManager implements Serializable, CommunicationInterface, NameProvider {
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(CommunicationManager.class);
-	Service myService = null;
-	Outbox outbox = null;
+	String name;
 
-	static HashMap<URI, URI> mrlToProtocol = new HashMap<URI, URI>();
+	/**
+	 * mrlToProtocolKey -
+	 */
+	static HashMap<URI, URI> mrlToProtocolKey = new HashMap<URI, URI>();
 
-	public CommunicationManager(Service myService) {
-		this.myService = myService;
-		this.outbox = myService.getOutbox();
-		outbox.setCommunicationManager(this);
+	public CommunicationManager(String name) {
+		this.name = name;
 	}
 
 	// FIXME - put in Runtime
 	@Override
 	public void addRemote(URI mrlHost, URI protocolKey) {
-		mrlToProtocol.put(mrlHost, protocolKey);
+		mrlToProtocolKey.put(mrlHost, protocolKey);
 	}
 
 	/**
-	 * mrl:/
+	 * mrl:/ get a gateway for remote communication
 	 */
 	public Gateway getComm(URI uri) {
 		if (uri.getScheme().equals(Encoder.SCHEME_MRL)) {
@@ -100,14 +91,62 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 			// msg.sendingMethod, sw.getHost(), msg.name, msg.method,
 			// Encoder.getParameterSignature(msg.data)));
 
-			URI protocolKey = mrlToProtocol.get(host);
+			URI protocolKey = mrlToProtocolKey.get(host);
 			getComm(host).sendRemote(protocolKey, msg);
 		}
 	}
 
+	/**
+	 * get a gateway, send the message through the gateway with a protocol key
+	 */
 	@Override
 	final public void send(final URI uri, final Message msg) {
 		getComm(uri).sendRemote(uri, msg);
+	}
+
+	// FIXME - remove all others !!!
+	public Message createMessage(String name, String method, Object... data) {
+		Message msg = new Message();
+		msg.name = name; // destination instance name
+		msg.sender = getName();
+		msg.data = data;
+		msg.method = method;
+
+		return msg;
+	}
+	
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	static public int count(String data, char toCount){
+		int charCount = 0;
+
+		for( int i = 0; i < data.length( ); i++ )
+		{
+			char tmp = data.charAt( i );
+
+		    if( toCount == tmp )
+		        ++charCount;
+		}
+		
+		return charCount;
+	}
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.WARN);
+
+		// TODO - send a verify for service & another verify for method ?
+
+		TestThrower thrower = (TestThrower)Runtime.start("thrower", "TestThrower");
+		TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
+		
+		CommunicationManager cm = new CommunicationManager("catcher");
+		
+	
 	}
 
 }

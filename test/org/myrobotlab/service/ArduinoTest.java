@@ -62,7 +62,7 @@ public class ArduinoTest {
 		virtual.createVirtualArduino(vport);
 		logic = virtual.getLogic();
 
-		catcher.subscribe(arduino, "publishError", "onError");
+		catcher.subscribe(arduino.getName(), "publishError");
 
 		uart = virtual.getUART();
 		uart.setCodec("arduino");

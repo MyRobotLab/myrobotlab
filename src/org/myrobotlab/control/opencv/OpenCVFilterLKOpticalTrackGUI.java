@@ -117,7 +117,7 @@ public class OpenCVFilterLKOpticalTrackGUI extends OpenCVFilterGUI implements Ac
 		display.add(clearPoints, gc);
 
 		// set the hook
-		MRLListener listener = new MRLListener("publishFilterState", myService.getName(), "setFilterState", new Class[] { FilterWrapper.class });
+		MRLListener listener = new MRLListener("publishFilterState", myService.getName(), "setFilterState");
 		myService.send(boundServiceName, "addListener", listener);
 		// thread wait?
 		// send the event
