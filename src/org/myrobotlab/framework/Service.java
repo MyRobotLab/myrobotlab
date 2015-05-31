@@ -299,6 +299,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			try {
 				Field f = fields[j];
 
+				int modifiers = f.getModifiers();
+						
+				//if (Modifier.isPublic(mod)
+				
 				if (!(Modifier.isPublic(f.getModifiers()) && !(f.getName().equals("log")) && !Modifier.isTransient(f.getModifiers()))) {
 					log.debug(String.format("skipping %s", f.getName()));
 					continue;
@@ -306,7 +310,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				Type t = f.getType();
 
 				log.info(String.format("setting %s", f.getName()));
-				if (Modifier.isStatic(f.getModifiers())){
+				if (Modifier.isStatic(f.getModifiers()) || Modifier.isFinal(f.getModifiers())){
 					continue;
 				}
 				

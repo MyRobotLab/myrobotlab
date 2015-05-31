@@ -67,7 +67,7 @@ public class MessageTest {
 	 * @throws Exception
 	 */
 	@Test
-	static final public void clearRoutes() throws Exception {
+	public final void clearRoutes() throws Exception {
 		catcher.clear();
 		catcher.subscribe("thrower", "pitch");
 		
@@ -103,7 +103,7 @@ public class MessageTest {
 	}
 	
 	@Test
-	static public void badNameTest() throws Exception {
+	final public void badNameTest() throws Exception {
 		catcher.clear();
 		TestCatcher catcher2 = null;
 		try {
@@ -116,7 +116,7 @@ public class MessageTest {
 	}
 	
 	@Test
-	static public void invokeStringNotation() throws Exception {
+	final public void invokeStringNotation() throws Exception {
 		catcher.clear();
 		// FIXME - implement
 		// catcher.subscribe("thrower/pitch");
@@ -149,7 +149,7 @@ public class MessageTest {
 	 * @throws Exception
 	 */
 	@Test
-	static public void RuntimeTests() throws Exception {
+	final public void RuntimeTests() throws Exception {
 		catcher.clear();
 		// FIXME - implement
 		// catcher.subscribe("thrower/pitch");
@@ -184,7 +184,7 @@ public class MessageTest {
 			setUpBeforeClass();
 			//clearRoutes();
 			// badNameTest();
-			invokeStringNotation();
+			// invokeStringNotation();
 		
 
 		} catch(Exception e){
