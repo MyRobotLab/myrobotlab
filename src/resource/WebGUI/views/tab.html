@@ -1,0 +1,32 @@
+<div ng-controller="TabsChildCtrl">
+    
+    <div ng-repeat="item in list5" service-component style="width: 500px" index="{{$index}}" list="list5" reftomain="reftomain"></div>
+
+    <!--<div ng-repeat="item in list"
+         service-component
+         index="{{$index}}" list="list" size="size"></div>-->
+
+    <!--<div class="row">
+        <div class="col-md-3">
+            <div drop-component="views/service.html" list="list1"></div>
+        </div>
+        <div class="col-md-3">
+            <div drop-component="views/service.html" list="list2"></div>
+        </div>
+        <div class="col-md-3">
+            <div drop-component="views/service.html" list="list3"></div>
+        </div>
+        <div class="col-md-3">
+            <div drop-component="views/service.html" list="list4"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="container form-inline" style="text-align: center;">
+                <div class="btn btn-droppable" ng-repeat="item in list5" data-drop="true" ng-model='list5' data-jqyoui-options="{accept:':not([ng-model=list5])'}"  jqyoui-droppable="{index: {{$index}}}">
+                    <div class="btn btn-info btn-draggable" data-drag="{{item.drag}}" data-jqyoui-options="{revert: 'invalid'}" ng-model="list5" jqyoui-draggable="{index: {{$index}},placeholder:true,animate:true}" ng-hide="!item.name">{{item.name}}</div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+</div>
