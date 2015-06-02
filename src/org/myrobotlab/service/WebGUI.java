@@ -168,16 +168,18 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		Config.Builder configBuilder = new Config.Builder();
 		configBuilder
-		.resource("C:\\tools\\myrobotlab-WebGUI\\src\\resource\\WebGUI")
+		//.resource("C:\\tools\\myrobotlab-WebGUI\\src\\resource\\WebGUI")
 		
-				.resource("./root")
-				
+				//.resource("./root")
+				.resource("./src/resource/WebGUI")
+                .resource("./src/resource")
 				// .resource("./rest")  SHOULD I DO THIS ?
 				// .resource(this)
 				// Support 2 APIs
 				// REST - http://host/object/method/param0/param1/...  synchronous DO NOT SUSPEND
 				//.resource("/api", this) TODO - go beyond Servlets
 				.resource("/api", WebGUIServlet.class)
+
 				// For mvn exec:java
 				// .resource("./src/main/resources")
 
