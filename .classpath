@@ -94,5 +94,6 @@
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
+	<classpathentry kind="lib" path="build-lib/tools.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1143,7 +1143,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	public String help() {
-		return help("URL", "DECLARED");
+		return help("url", "declared");
 	}
 
 	public String help(String format, String level) {
