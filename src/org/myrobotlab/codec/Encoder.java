@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -208,7 +209,7 @@ public class Encoder {
 			
 			// FIXME - this is a huge assumption of type of encoding ! - needs to be dynamic !
 			for (int i = 0; i < jsonParams.length; ++i) {
-				String result = java.net.URLDecoder.decode(parts[i + 4], "UTF-8");
+				String result = URLDecoder.decode(parts[i + 4], "UTF-8");
 				jsonParams[i] = result;
 			}
 			

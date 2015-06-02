@@ -108,6 +108,7 @@ public class Python extends Service {
 						// msgHandle));
 						// interp.set(msgHandle.toString(), msg);
 						interp.exec(compiledObject);
+
 					} catch (Exception e) {
 						Logging.logError(e);
 						python.error(e.getMessage());
@@ -500,6 +501,23 @@ public class Python extends Service {
 		inputQueue.add(msg);
 	}
 
+	public String eval(String method) {
+		String jsonMethod = String.format("%s()", method);
+		PyObject o = interp.eval(jsonMethod);
+		String ret = o.toString();
+		/*
+		interp.exec(
+		interp.get("ret_val");
+		interp.exec(compiledObject);
+		interp.eval();
+		    Object x = engine.get("x");
+		    System.out.println("x: " + x);
+		*/
+		return ret;
+	}
+	
+	
+
 	public void execResource(String filename) {
 		String script = FileIO.resourceToString(filename);
 		exec(script);
@@ -771,9 +789,9 @@ public class Python extends Service {
 		// String f = "C:\\Program Files\\blah.1.py";
 		// log.info(getName(f));
 		Python python = (Python) Runtime.start("python", "Python");
-		python.error("this is an error");
-		python.loadScriptFromResource("VirtualDevice/Arduino.py");
-		python.execAndWait();
+		// python.error("this is an error");
+		// python.loadScriptFromResource("VirtualDevice/Arduino.py");
+		// python.execAndWait();
 		// python.releaseService();
 
 		Runtime.createAndStart("gui", "GUIService");

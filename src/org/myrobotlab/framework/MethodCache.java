@@ -29,25 +29,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Serial;
 import org.slf4j.Logger;
 
-/**
- * A cache for methods. Used to get methods by their signature and stores them
- * in a local cache for performance reasons. This class is a singleton - so use
- * getInstance to get an instance of it.
- *
- * @author Davanum Srinivas <dims@yahoo.com>
- * @author Sebastian Dietrich <sebastian.dietrich@anecon.com>
- */
 public class MethodCache {
 
-	/**
-	 * Class used as the key for the method cache table.
-	 *
-	 */
 	static class MethodKey {
-		/** the name of the method in the cache */
+		
 		private final String methodName;
-		/** the list of types accepted by the method as arguments */
-		private final Class[] parameterTypes;
+		private final Class<?>[] parameterTypes;
 
 		/**
 		 * Creates a new <code>MethodKey</code> instance.
@@ -57,7 +44,7 @@ public class MethodCache {
 		 * @param parameterTypes
 		 *            a <code>Class[]</code> value
 		 */
-		MethodKey(String methodName, Class[] parameterTypes) {
+		MethodKey(String methodName, Class<?>[] parameterTypes) {
 			this.methodName = methodName;
 			this.parameterTypes = parameterTypes;
 		}

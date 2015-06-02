@@ -30,10 +30,13 @@ public class EncoderTest {
 		// NOT VALID API - can not be typed to an objects method signature
 		// Message m = e.decodeURI(new URI("http://www.myrobotlab.org/api/foo/bar/a/b/d?baz=bam&bap=bop"));
 		
-		Message m = Encoder.decodeURI(new URI("http://www.myrobotlab.org/api/foo/getCategories"));
+		Message m = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo/getCategories"));
 		assertNotNull(m);
 		assertEquals("foo", m.getName());
 		
+		m = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api"));
+		assertNotNull(m);
+		assertEquals("foo", m.getName());
 
 	}
 
