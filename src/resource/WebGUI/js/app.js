@@ -357,7 +357,10 @@ angular.module('mrlapp', [
                     };
 
                     request.onTransportFailure = function (errorMsg, request) {
+<<<<<<< HEAD
                     	console.log('Error: falling back to long-polling ' + errorMsg);
+=======
+>>>>>>> WebGUI
                         jQuery.atmosphere.info(errorMsg);
                         if (window.EventSource) {
                             request.fallbackTransport = "sse";
@@ -367,13 +370,17 @@ angular.module('mrlapp', [
                         Connection.transport = request.fallbackTransport;
                     };
 
+<<<<<<< HEAD
                     /**
                      * main Message processor
                      */
+=======
+>>>>>>> WebGUI
                     request.onMessage = function (response) {
                         var message = response.responseBody;
                         var packet;
                         try {
+<<<<<<< HEAD
                         	// TODO - from registry (services array?) get the appropriate serviceGUI
                         	// e.g.  services[msg.name].eval(msg.method(msg.data))
                         	// 
@@ -390,6 +397,11 @@ angular.module('mrlapp', [
                             
                         } catch (e) {
                             console.log('Error Message: ', message);
+=======
+                            packet = eval('(' + message + ')'); //jQuery.parseJSON(message);
+                        } catch (e) {
+                            console.log('Message: ', message);
+>>>>>>> WebGUI
                             return;
                         }
 
@@ -398,9 +410,13 @@ angular.module('mrlapp', [
                     Connection.socket = $.atmosphere.subscribe(request);
                 };
 
+<<<<<<< HEAD
                 Connection.connect(document.location.origin.toString() + '/api');
                 // console.log($)
                 //Connection.connect('/api');
+=======
+                Connection.connect(document.location.toString() + 'api/messages');
+>>>>>>> WebGUI
             }])
 
         .controller('TabsChildCtrl', ['$scope', 'ServiceControllerService', 'HelperService', function ($scope, ServiceControllerService, HelperService) {
