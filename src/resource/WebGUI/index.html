@@ -2,7 +2,7 @@
 <html ng-app="mrlapp">
     <head lang="en">
         <meta charset="utf-8">
-        <title>MyRobotLab - WebUI2</title>
+        <title>MyRobotLab - WebUI</title>
         <link rel="stylesheet" href="lib/normalize.css">
         <link rel="stylesheet" href="/lib/jquery-ui-1.11.4/css/jquery-ui.min.css">
         <link rel="stylesheet" href="/lib/bootstrap-3.3.4/css/bootstrap.min.css">
@@ -33,17 +33,21 @@
 
                     <ul class="nav navbar-nav navbar-right">
                         <!--Status-->
-                        <!--integrate a glyphicon (or picture) before the status (status-type, from which service the status came, ...(or something even better))-->
-                        <!--TODO: dropdown (or something similar) for status-archive needed-->
+                        <!--TODO: (maybe) integrate a glyphicon (or picture) before the status (status-type, from which service the status came, ...(or something even better))-->
                         <li>
                             <form class="navbar-form">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" style="width: 500px" placeholder="Status" ng-model="statusakt" readonly>
-                                    <div class="input-group-btn">
+                                <div class="input-group" dropdown>
+                                    <input type="text" class="form-control" style="width: 500px" placeholder="Status" ng-model="statuslist[statuslist.length - 1]" readonly>
+                                    <div class="input-group-btn" dropdown-toggle>
                                         <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Status">
                                             <i class="glyphicon glyphicon-dashboard"></i>
                                         </button>
                                     </div>
+                                    <ul class="dropdown-menu" style="width: 540px">
+                                        <li ng-repeat="status in statuslist| reverse track by $index "><a href="#">{{status}}</a></li>
+                                        <!--<li><a href="#"><i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;Edit</a></li>
+                                        <li><a href="#"><i class="glyphicon glyphicon-trash"></i>&nbsp;&nbsp;Delete</a></li>-->
+                                    </ul>
                                 </div>
                             </form>
                         </li>
