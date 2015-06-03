@@ -25,34 +25,50 @@
                 <div class="collapse navbar-collapse navbar-ex1-collapse">
 
                     <ul class="nav navbar-nav">
-                        <li><a href="/a">Status</a></li>
-                        <li><a href="/b">some status of some sort has occurred</a></li>
-
+                        <li><a href="http://www.myrobotlab.org">/MyRobotLab.org</a></li>
+                        <!--<li><a href="/b">/b</a></li>
+                        <li><a href="/c">/c</a></li>
+                        <li><a href="/d">/d</a></li>
+                        <li><a href="/e">/e</a></li>-->
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
+                        <!--Status-->
+                        <!--integrate a glyphicon (or picture) before the status (status-type, from which service the status came, ...(or something even better))-->
+                        <!--TODO: dropdown (or something similar) for status-archive needed-->
                         <li>
                             <form class="navbar-form">
-                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="About">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" style="width: 500px" placeholder="Status" ng-model="statusakt" readonly>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Status">
+                                            <i class="glyphicon glyphicon-dashboard"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </li>
+                        <!--About-->
+                        <li>
+                            <form class="navbar-form">
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="About" ng-click="about()">
                                     <i class="glyphicon glyphicon-info-sign"></i>
                                 </button>
                             </form>
                         </li>
-
+                        <!--Help-->
                         <li>
                             <form class="navbar-form">
-                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Help">
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Help" ng-click="help()">
                                     <i class="glyphicon glyphicon-question-sign"></i>
                                 </button>
                             </form>
                         </li>
-
+                        <!--Search-->
                         <li>
                             <form class="navbar-form" role="search">
                                 <div class="input-group">
-                                    <!--TODO: implement search with real-time suggestions: https://angular-ui.github.io/bootstrap/#/typeahead ; maybe ng-click is needed, too-->
-                                    <!--TODO: use the callback to select the right workspace and focus the selected service: "typeahead-on-select($item, $model, $label)"-->
-                                    <input type="text" class="form-control" placeholder="Search" ng-model="searchSelectedService" typeahead="state as state.name for state in allServices | filter:{name:$viewValue}" typeahead-template-url="views/searchtemplate.html">
+                                    <input type="text" class="form-control" placeholder="Search" ng-model="searchSelectedService" typeahead="service as service.name for service in allServices | filter:{name:$viewValue}" typeahead-template-url="views/searchtemplate.html" typeahead-on-select='searchOnSelect($item, $model, $label)'>
                                     <div class="input-group-btn">
                                         <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Search">
                                             <i class="glyphicon glyphicon-search"></i>
@@ -74,6 +90,7 @@
                     <div ng-repeat="item in generallist" service-component style="width: 500px" index="{{$index}}" list="generallist" reftomain="reftomain" size="forcetiny"></div>
                 </div>
                 <div class="col-md-6">
+                    <div>DEBUG-SECTION not assigned yet</div>
                     <pre>Model: {{searchSelectedService| json}}</pre>
                 </div>
             </div>
