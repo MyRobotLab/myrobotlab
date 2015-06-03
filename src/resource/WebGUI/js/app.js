@@ -73,7 +73,7 @@ angular.module('mrlapp', [
 
                 this.test = function (name) {
                     //TODO: remove
-                    executeFunctionByName("pulse", this.services[name].servic);
+                    executeFunctionByName("pulse", this.services[name].servic.methods);
 //                    this.services["clock"].servic["tester"].apply(this);
                 };
 
@@ -237,6 +237,10 @@ angular.module('mrlapp', [
             }])
 
         .controller('MainCtrl', ['$scope', 'ServiceControllerService', function ($scope, ServiceControllerService) {
+                
+                $scope.statusakt = 'I am going to be the new WebUI for MyRobotLab!';
+
+                $scope.allServices = [];
 
                 $scope.generallist = [];
 
@@ -271,10 +275,15 @@ angular.module('mrlapp', [
 
                 $scope.removeWorkspace = function (index) {
                     console.log('removeworkspace, ', index);
-                    $scope.workspaces.splice(index, 1);
-                    $scope.workspacesref.splice(index, 1);
+                    if ($scope.workspaces.length > 1) {
+                        $scope.workspaces.splice(index, 1);
+                        $scope.workspacesref.splice(index, 1);
+                    } else {
+                        console.log('cant remove, not enough workspaces left');
+                    }
                 };
 
+                //TODO: refactor this
                 $scope.reftomain = {};
 
                 $scope.reftomain.addRefToWorkspace = function (index, workspace) {
@@ -298,9 +307,47 @@ angular.module('mrlapp', [
                     $scope.workspacesref[ind].addDragToList($scope.generallist[index]);
                     $scope.generallist.splice(index, 1);
                 };
-
-                //TODO: populate list dynamically & with the services, not states & flags
-                $scope.allServices = [{'name': 'Alabama', 'flag': '5/5c/Flag_of_Alabama.svg/45px-Flag_of_Alabama.svg.png'}, {'name': 'Alaska', 'flag': 'e/e6/Flag_of_Alaska.svg/43px-Flag_of_Alaska.svg.png'}, {'name': 'Arizona', 'flag': '9/9d/Flag_of_Arizona.svg/45px-Flag_of_Arizona.svg.png'}, {'name': 'Arkansas', 'flag': '9/9d/Flag_of_Arkansas.svg/45px-Flag_of_Arkansas.svg.png'}, {'name': 'California', 'flag': '0/01/Flag_of_California.svg/45px-Flag_of_California.svg.png'}, {'name': 'Colorado', 'flag': '4/46/Flag_of_Colorado.svg/45px-Flag_of_Colorado.svg.png'}, {'name': 'Connecticut', 'flag': '9/96/Flag_of_Connecticut.svg/39px-Flag_of_Connecticut.svg.png'}, {'name': 'Delaware', 'flag': 'c/c6/Flag_of_Delaware.svg/45px-Flag_of_Delaware.svg.png'}, {'name': 'Florida', 'flag': 'f/f7/Flag_of_Florida.svg/45px-Flag_of_Florida.svg.png'}, {'name': 'Georgia', 'flag': '5/54/Flag_of_Georgia_%28U.S._state%29.svg/46px-Flag_of_Georgia_%28U.S._state%29.svg.png'}, {'name': 'Hawaii', 'flag': 'e/ef/Flag_of_Hawaii.svg/46px-Flag_of_Hawaii.svg.png'}, {'name': 'Idaho', 'flag': 'a/a4/Flag_of_Idaho.svg/38px-Flag_of_Idaho.svg.png'}, {'name': 'Illinois', 'flag': '0/01/Flag_of_Illinois.svg/46px-Flag_of_Illinois.svg.png'}, {'name': 'Indiana', 'flag': 'a/ac/Flag_of_Indiana.svg/45px-Flag_of_Indiana.svg.png'}, {'name': 'Iowa', 'flag': 'a/aa/Flag_of_Iowa.svg/44px-Flag_of_Iowa.svg.png'}, {'name': 'Kansas', 'flag': 'd/da/Flag_of_Kansas.svg/46px-Flag_of_Kansas.svg.png'}, {'name': 'Kentucky', 'flag': '8/8d/Flag_of_Kentucky.svg/46px-Flag_of_Kentucky.svg.png'}, {'name': 'Louisiana', 'flag': 'e/e0/Flag_of_Louisiana.svg/46px-Flag_of_Louisiana.svg.png'}, {'name': 'Maine', 'flag': '3/35/Flag_of_Maine.svg/45px-Flag_of_Maine.svg.png'}, {'name': 'Maryland', 'flag': 'a/a0/Flag_of_Maryland.svg/45px-Flag_of_Maryland.svg.png'}, {'name': 'Massachusetts', 'flag': 'f/f2/Flag_of_Massachusetts.svg/46px-Flag_of_Massachusetts.svg.png'}, {'name': 'Michigan', 'flag': 'b/b5/Flag_of_Michigan.svg/45px-Flag_of_Michigan.svg.png'}, {'name': 'Minnesota', 'flag': 'b/b9/Flag_of_Minnesota.svg/46px-Flag_of_Minnesota.svg.png'}, {'name': 'Mississippi', 'flag': '4/42/Flag_of_Mississippi.svg/45px-Flag_of_Mississippi.svg.png'}, {'name': 'Missouri', 'flag': '5/5a/Flag_of_Missouri.svg/46px-Flag_of_Missouri.svg.png'}, {'name': 'Montana', 'flag': 'c/cb/Flag_of_Montana.svg/45px-Flag_of_Montana.svg.png'}, {'name': 'Nebraska', 'flag': '4/4d/Flag_of_Nebraska.svg/46px-Flag_of_Nebraska.svg.png'}, {'name': 'Nevada', 'flag': 'f/f1/Flag_of_Nevada.svg/45px-Flag_of_Nevada.svg.png'}, {'name': 'New Hampshire', 'flag': '2/28/Flag_of_New_Hampshire.svg/45px-Flag_of_New_Hampshire.svg.png'}, {'name': 'New Jersey', 'flag': '9/92/Flag_of_New_Jersey.svg/45px-Flag_of_New_Jersey.svg.png'}, {'name': 'New Mexico', 'flag': 'c/c3/Flag_of_New_Mexico.svg/45px-Flag_of_New_Mexico.svg.png'}, {'name': 'New York', 'flag': '1/1a/Flag_of_New_York.svg/46px-Flag_of_New_York.svg.png'}, {'name': 'North Carolina', 'flag': 'b/bb/Flag_of_North_Carolina.svg/45px-Flag_of_North_Carolina.svg.png'}, {'name': 'North Dakota', 'flag': 'e/ee/Flag_of_North_Dakota.svg/38px-Flag_of_North_Dakota.svg.png'}, {'name': 'Ohio', 'flag': '4/4c/Flag_of_Ohio.svg/46px-Flag_of_Ohio.svg.png'}, {'name': 'Oklahoma', 'flag': '6/6e/Flag_of_Oklahoma.svg/45px-Flag_of_Oklahoma.svg.png'}, {'name': 'Oregon', 'flag': 'b/b9/Flag_of_Oregon.svg/46px-Flag_of_Oregon.svg.png'}, {'name': 'Pennsylvania', 'flag': 'f/f7/Flag_of_Pennsylvania.svg/45px-Flag_of_Pennsylvania.svg.png'}, {'name': 'Rhode Island', 'flag': 'f/f3/Flag_of_Rhode_Island.svg/32px-Flag_of_Rhode_Island.svg.png'}, {'name': 'South Carolina', 'flag': '6/69/Flag_of_South_Carolina.svg/45px-Flag_of_South_Carolina.svg.png'}, {'name': 'South Dakota', 'flag': '1/1a/Flag_of_South_Dakota.svg/46px-Flag_of_South_Dakota.svg.png'}, {'name': 'Tennessee', 'flag': '9/9e/Flag_of_Tennessee.svg/46px-Flag_of_Tennessee.svg.png'}, {'name': 'Texas', 'flag': 'f/f7/Flag_of_Texas.svg/45px-Flag_of_Texas.svg.png'}, {'name': 'Utah', 'flag': 'f/f6/Flag_of_Utah.svg/45px-Flag_of_Utah.svg.png'}, {'name': 'Vermont', 'flag': '4/49/Flag_of_Vermont.svg/46px-Flag_of_Vermont.svg.png'}, {'name': 'Virginia', 'flag': '4/47/Flag_of_Virginia.svg/44px-Flag_of_Virginia.svg.png'}, {'name': 'Washington', 'flag': '5/54/Flag_of_Washington.svg/46px-Flag_of_Washington.svg.png'}, {'name': 'West Virginia', 'flag': '2/22/Flag_of_West_Virginia.svg/46px-Flag_of_West_Virginia.svg.png'}, {'name': 'Wisconsin', 'flag': '2/22/Flag_of_Wisconsin.svg/45px-Flag_of_Wisconsin.svg.png'}, {'name': 'Wyoming', 'flag': 'b/bc/Flag_of_Wyoming.svg/43px-Flag_of_Wyoming.svg.png'}];
+                
+                //TODO: not final method & location
+                $scope.createService = function (name, type) {
+                    //spawn service in first workspace
+                    var spawnin = 0;
+                    $scope.workspacesref[spawnin].addDragToList({
+                        'name': name,
+                        'type': type
+                    });
+                    $scope.allServices.push({
+                        'name': name,
+                        'type': type,
+                        'workspace': spawnin
+                    });
+                };
+                
+                $scope.about = function () {
+                    console.log('about');
+                };
+                
+                var servicecounter = 0;
+                
+                $scope.help = function () {
+                    console.log('help');
+                    var servicetype;
+                    if (servicecounter % 2 == 0) {
+                        servicetype = 'clock';
+                    } else {
+                        servicetype = 'arduino';
+                    }
+                    $scope.createService("ser"+servicecounter, servicetype);
+                    servicecounter++;
+                };
+                
+                $scope.searchOnSelect = function (item, model, label) {
+                    console.log('searchOnSelect');
+                    //select the workspace containing the selected service
+                    setAllInactive();
+                    $scope.workspaces[item.workspace].active = true;
+                    //TODO: scroll to selected service
+                };
 
                 var Connection = {};
                 Connection.transport = 'websocket';
@@ -393,33 +440,33 @@ angular.module('mrlapp', [
                     $scope.workspace = $scope.workspaces[$scope.index];
                 }
 
+                //TODO: refactor this
                 $scope.reftotab = {};
                 $scope.reftotab.addDragToList = function (panel) {
-                    $scope.list5.push(panel);
+                    angular.forEach($scope.servicelist, function (value, key) {
+                        value.zindex++;
+                    });
+                    panel.zindex = 1;
+                    $scope.servicelist.push(panel);
                 };
 
                 $scope.reftomain.addRefToWorkspace($scope.index, $scope.reftotab);
 
-//                $scope.list1 = [];
-//                $scope.list2 = [];
-//                $scope.list3 = [];
-//                $scope.list4 = [];
-
-                $scope.list5 = [
-                    {'name': 'sera', 'drag': true, 'zindex': 1, 'type': 'clock'},
-                    {'name': 'serb', 'drag': true, 'zindex': 2, 'type': 'arduino'},
-                    {'name': 'serc', 'drag': true, 'zindex': 3, 'type': 'clock'},
-                    {'name': 'serd', 'drag': true, 'zindex': 4, 'type': 'arduino'},
-                    {'name': 'sere', 'drag': true, 'zindex': 5, 'type': 'clock'},
-                    {'name': 'serf', 'drag': true, 'zindex': 6, 'type': 'arduino'},
-                    {'name': 'serg', 'drag': true, 'zindex': 7, 'type': 'clock'},
-                    {'name': 'serh', 'drag': true, 'zindex': 8, 'type': 'arduino'},
-                    {'name': 'seri', 'drag': true, 'zindex': 9, 'type': 'clock'},
-                    {'name': 'serj', 'drag': true, 'zindex': 10, 'type': 'arduino'},
-                    {'name': 'serk', 'drag': true, 'zindex': 11, 'type': 'clock'},
-                    {'name': 'serl', 'drag': true, 'zindex': 12, 'type': 'arduino'},
-                    {'name': 'serm', 'drag': true, 'zindex': 13, 'type': 'clock'},
-                    {'name': 'sern', 'drag': true, 'zindex': 14, 'type': 'arduino'},
-                    {'name': 'sero', 'drag': true, 'zindex': 15, 'type': 'clock'}
+                $scope.servicelist = [
+//                    {'name': 'sera', 'drag': true, 'zindex': 1, 'type': 'clock'},
+//                    {'name': 'serb', 'drag': true, 'zindex': 2, 'type': 'arduino'},
+//                    {'name': 'serc', 'drag': true, 'zindex': 3, 'type': 'clock'},
+//                    {'name': 'serd', 'drag': true, 'zindex': 4, 'type': 'arduino'},
+//                    {'name': 'sere', 'drag': true, 'zindex': 5, 'type': 'clock'},
+//                    {'name': 'serf', 'drag': true, 'zindex': 6, 'type': 'arduino'},
+//                    {'name': 'serg', 'drag': true, 'zindex': 7, 'type': 'clock'},
+//                    {'name': 'serh', 'drag': true, 'zindex': 8, 'type': 'arduino'},
+//                    {'name': 'seri', 'drag': true, 'zindex': 9, 'type': 'clock'},
+//                    {'name': 'serj', 'drag': true, 'zindex': 10, 'type': 'arduino'},
+//                    {'name': 'serk', 'drag': true, 'zindex': 11, 'type': 'clock'},
+//                    {'name': 'serl', 'drag': true, 'zindex': 12, 'type': 'arduino'},
+//                    {'name': 'serm', 'drag': true, 'zindex': 13, 'type': 'clock'},
+//                    {'name': 'sern', 'drag': true, 'zindex': 14, 'type': 'arduino'},
+//                    {'name': 'sero', 'drag': true, 'zindex': 15, 'type': 'clock'}
                 ];
             }]);
