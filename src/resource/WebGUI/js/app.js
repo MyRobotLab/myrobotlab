@@ -354,7 +354,8 @@ angular.module('mrlapp', [
                 Connection.socket = null;
 
                 Connection.receivedMessage = function (message) {
-                    //TODO
+                    console.log('Received Message: ', message);
+                    //TODO - process message (& probably forward it to ServiceControllerService (in most cases))
 //                    var packet = message;
 //                    switch (packet.type) {
 //                            case 'update':
@@ -398,15 +399,13 @@ angular.module('mrlapp', [
                     };
 
                     request.onClose = function (response) {
+                        console.log('websocket, onclose');
                         if (response.state == "unsubscribe") {
                             console.log('Info: ' + Connection.transport + ' closed.');
                         }
                     };
 
                     request.onTransportFailure = function (errorMsg, request) {
-
-                    	console.log('Error: falling back to long-polling ' + errorMsg);
-
                         jQuery.atmosphere.info(errorMsg);
                         if (window.EventSource) {
                             request.fallbackTransport = "sse";
@@ -414,34 +413,21 @@ angular.module('mrlapp', [
                             request.fallbackTransport = 'long-polling';
                         }
                         Connection.transport = request.fallbackTransport;
+                        
+                        console.log('Error: falling back to ' + Connection.transport + ' ' + errorMsg);
                     };
-
-
-                    /**
-                     * main Message processor
-                     */
 
                     request.onMessage = function (response) {
                         var message = response.responseBody;
                         var packet;
                         try {
-
-                        	// TODO - from registry (services array?) get the appropriate serviceGUI
-                        	// e.g.  services[msg.name].eval(msg.method(msg.data))
-                        	// 
-                        	
-                        	// send to bound service name
-                        	//  ServiceGUI.prototype.send = function(method, data) {
-                        	//	    var msg = new Message(this.name, method, data);
-                        	//  	var json = JSON.stringify(msg);
-                        	//   	connection.ws.send(json);
-                        	//   };
-                        	
-                        	
                             packet = eval('(' + message + ')'); //jQuery.parseJSON(message);
-                            
                         } catch (e) {
-                            console.log('Error Message: ', message);
+                            if (message == 'X') {
+                                console.log('heartbeat:', message);
+                            } else {
+                                console.log('Error Message: ', message);
+                            }
                             return;
                         }
 
@@ -450,10 +436,10 @@ angular.module('mrlapp', [
                     Connection.socket = $.atmosphere.subscribe(request);
                 };
 
-                Connection.connect(document.location.origin.toString() + '/api');
-                // console.log($)
-                //Connection.connect('/api');
-
+                Connection.connect(document.location.toString() + 'api/messages');
+//                Connection.connect(document.location.origin.toString() + '/api');
+//                console.log($);
+//                Connection.connect('/api');
             }])
 
         .controller('TabsChildCtrl', ['$scope', 'ServiceControllerService', 'HelperService', function ($scope, ServiceControllerService, HelperService) {
