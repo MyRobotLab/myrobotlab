@@ -236,9 +236,25 @@ angular.module('mrlapp', [
                 };
             }])
 
+        .filter('reverse', function () {
+            return function (items) {
+                return items.slice().reverse();
+            };
+        })
+
         .controller('MainCtrl', ['$scope', 'ServiceControllerService', function ($scope, ServiceControllerService) {
-                
-                $scope.statusakt = 'I am going to be the new WebUI for MyRobotLab!';
+
+//                $scope.statusakt = 'I am going to be the new WebUI for MyRobotLab!';
+                $scope.statuslist = [];
+
+                $scope.addStatus = function (status) {
+                    $scope.statuslist.push(status);
+                };
+
+                $scope.addStatus('And this is my status history!');
+                $scope.addStatus('And this is my status history!');
+                $scope.addStatus('And this is my status history!');
+                $scope.addStatus('I am going to be the new WebUI for MyRobotLab!');
 
                 $scope.allServices = [];
 
@@ -307,7 +323,7 @@ angular.module('mrlapp', [
                     $scope.workspacesref[ind].addDragToList($scope.generallist[index]);
                     $scope.generallist.splice(index, 1);
                 };
-                
+
                 //TODO: not final method & location
                 $scope.createService = function (name, type) {
                     //spawn service in first workspace
@@ -322,13 +338,13 @@ angular.module('mrlapp', [
                         'workspace': spawnin
                     });
                 };
-                
+
                 $scope.about = function () {
                     console.log('about');
                 };
-                
+
                 var servicecounter = 0;
-                
+
                 $scope.help = function () {
                     console.log('help');
                     var servicetype;
@@ -337,10 +353,10 @@ angular.module('mrlapp', [
                     } else {
                         servicetype = 'arduino';
                     }
-                    $scope.createService("ser"+servicecounter, servicetype);
+                    $scope.createService("ser" + servicecounter, servicetype);
                     servicecounter++;
                 };
-                
+
                 $scope.searchOnSelect = function (item, model, label) {
                     console.log('searchOnSelect');
                     //select the workspace containing the selected service
@@ -413,7 +429,7 @@ angular.module('mrlapp', [
                             request.fallbackTransport = 'long-polling';
                         }
                         Connection.transport = request.fallbackTransport;
-                        
+
                         console.log('Error: falling back to ' + Connection.transport + ' ' + errorMsg);
                     };
 
