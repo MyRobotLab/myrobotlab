@@ -1,4 +1,4 @@
 <a>
-    <img ng-src="http://upload.wikimedia.org/wikipedia/commons/thumb/{{match.model.flag}}" width="16">
-    <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+    <img src="{{match.model.type}}.png" alt="" width="16">
+    <span bind-html-unsafe="match.model.name | typeaheadHighlight:query"></span>
 </a>
