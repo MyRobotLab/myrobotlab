@@ -2,7 +2,7 @@ angular.module('mrlapp.service.clockgui', ['ngDragDrop'])
 
         .controller('ClockGuiCtrl', ['$scope', 'ServiceControllerService', function ($scope, ServiceControllerService) {
 
-                $scope.inst.pulse = function () {
+                $scope.inst.methods.pulse = function () {
                     console.log("pulse - YEAH!!!");
                 };
 

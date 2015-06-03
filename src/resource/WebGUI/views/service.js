@@ -25,37 +25,47 @@ angular.module('mrlapp.service', [])
                 $scope.inst = ServiceControllerService.getServiceInst($scope.name);
                 if ($scope.inst == null) {
                     $scope.inst = {};
+                    $scope.inst.fw = {}; //framework-section - DO NOT WRITE IN THERE!
+                    $scope.inst.data = {}; //data-section
+                    $scope.inst.methods = {}; //methods-section
                     ServiceControllerService.addService($scope.name, $scope.inst);
                 }
                 console.log("$scope,size", $scope.size);
                 if ($scope.size != null && $scope.size.lastIndexOf("force", 0) == 0) {
-                    $scope.inst.oldsize = $scope.inst.size;
-                    $scope.inst.size = $scope.size.substring(5, $scope.size.length);
-                    $scope.inst.forcesize = true;
+                    $scope.inst.fw.oldsize = $scope.inst.fw.size;
+                    $scope.inst.fw.size = $scope.size.substring(5, $scope.size.length);
+                    $scope.inst.fw.forcesize = true;
                 } else {
-                    if ($scope.inst.oldsize != null) {
-                        $scope.inst.size = $scope.inst.oldsize;
-                        $scope.inst.oldsize = null;
+                    if ($scope.inst.fw.oldsize != null) {
+                        $scope.inst.fw.size = $scope.inst.fw.oldsize;
+                        $scope.inst.fw.oldsize = null;
                     }
-                    $scope.inst.forcesize = false;
+                    $scope.inst.fw.forcesize = false;
                 }
-                if (!$scope.inst.size) {
-                    $scope.inst.size = "medium";
-                    $scope.inst.oldsize = null;
+                if (!$scope.inst.fw.size) {
+                    $scope.inst.fw.size = "medium";
+                    $scope.inst.fw.oldsize = null;
                 }
                 //TODO: add whatever service-specific functions are needed (init, ...)
                 //attachGUI(), detachGUI(), send(method, data), sendTo(name, method, data),
                 //subscribe(inMethod, outMethod), subscribeTo(publisherName, inMethod, outMethod),
                 //key(inStr), releaseService(), serviceGUIInit(), broadcastState()
+                $scope.inst.fw.subscribe = function(inMethod, outMethod) {
+                    
+                };
+                
+                $scope.inst.fw.subscribeTo = function(publisherName, inMethod, outMethod) {
+                    
+                };
                 //END_specific Service-Initialisation
 
+                //footer-size-change-buttons
                 $scope.changesize = function (size) {
                     console.log("button clicked", size);
-                    $scope.inst.oldsize = $scope.inst.size;
-                    $scope.inst.size = size;
+                    $scope.inst.fw.oldsize = $scope.inst.fw.size;
+                    $scope.inst.fw.size = size;
                     if (size == "full") {
-                        //alert('Not yet');
-                        //TODO - full: https://angular-ui.github.io/bootstrap/#modal , large
+                        //launch the service as a modal ('full')
                         var modalInstance = $modal.open({
                             animation: true,
                             templateUrl: 'views/servicefulltemplate.html',
@@ -73,16 +83,18 @@ angular.module('mrlapp.service', [])
                                 }
                             }
                         });
+                        //modal closed -> recover to old size
                         modalInstance.result.then(function () {
-                            $scope.inst.size = $scope.inst.oldsize;
-                            $scope.inst.oldsize = null;
+                            $scope.inst.fw.size = $scope.inst.fw.oldsize;
+                            $scope.inst.fw.oldsize = null;
                         });
                     }
                 };
             }])
 
         .controller('ServiceFullCtrl', function ($scope, $modalInstance, name, type, inst) {
-
+            //Controller for the modal (service-full)
+            
             $scope.name = name;
             $scope.type = type;
             $scope.inst = inst;
