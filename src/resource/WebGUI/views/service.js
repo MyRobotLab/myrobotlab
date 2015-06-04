@@ -50,12 +50,17 @@ angular.module('mrlapp.service', [])
                 //attachGUI(), detachGUI(), send(method, data), sendTo(name, method, data),
                 //subscribe(inMethod, outMethod), subscribeTo(publisherName, inMethod, outMethod),
                 //key(inStr), releaseService(), serviceGUIInit(), broadcastState()
-                $scope.inst.fw.subscribe = function(inMethod, outMethod) {
-                    
+                $scope.inst.fw.send = function (method, data) {
+                    $scope.inst.fw.sendTo($scope.name, method, data);
                 };
-                
-                $scope.inst.fw.subscribeTo = function(publisherName, inMethod, outMethod) {
-                    
+                $scope.inst.fw.sendTo = function (name, method, data) {
+                    ServiceControllerService.sendTo(name, method, data);
+                };
+                $scope.inst.fw.subscribe = function (inMethod, outMethod) {
+                    //TODO
+                };
+                $scope.inst.fw.subscribeTo = function (publisherName, inMethod, outMethod) {
+                    //TODO
                 };
                 //END_specific Service-Initialisation
 
@@ -94,15 +99,15 @@ angular.module('mrlapp.service', [])
 
         .controller('ServiceFullCtrl', function ($scope, $modalInstance, name, type, inst) {
             //Controller for the modal (service-full)
-            
+
             $scope.name = name;
             $scope.type = type;
             $scope.inst = inst;
-            
+
             $scope.modal = true;
-            
+
             console.log("servicefullctrl", $scope.name, $scope.type, $scope.inst);
-            
+
             $scope.close = function () {
                 $modalInstance.close();
             };

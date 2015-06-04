@@ -5,7 +5,7 @@ angular.module('mrlapp', [
     'mrlapp.service.clockgui'
 ])
 
-        .service('ServiceControllerService', ['HelperService', function (HelperService) {
+        .service('ServiceControllerService', ['HelperService', 'ConnectionService', function (HelperService, ConnectionService) {
 
                 /*function Message() {
                  this.msgID;
@@ -21,16 +21,16 @@ angular.module('mrlapp', [
                  this.data;
                  }*/
 
-                /*function Message(name, method, params) {
-                 this.msgID = new Date().getTime();
-                 this.timeStamp = this.msgID;
-                 this.name = name;
-                 this.sender = webguiName; // FIXME - named passed in
-                 this.sendingMethod = method;
-                 this.historyList = new Array(); // necessary?
-                 this.method = method;
-                 this.data = params;
-                 }*/
+                function Message(name, method, params) {
+                    this.msgID = new Date().getTime();
+                    this.timeStamp = this.msgID;
+                    this.name = name;
+                    this.sender = webguiName; // FIXME - named passed in
+                    this.sendingMethod = method;
+                    this.historyList = new Array(); // necessary?
+                    this.method = method;
+                    this.data = params;
+                }
 
                 this.services = [];
 
@@ -77,6 +77,23 @@ angular.module('mrlapp', [
 //                    this.services["clock"].servic["tester"].apply(this);
                 };
 
+                //direct support (in service.js)
+//                this.send = function (method, data) {
+//                };
+
+                this.sendTo = function (name, method, data) {
+                    var msg = new Message(name, method, data);
+                    ConnectionService.sendMessage(msg);
+                };
+
+                this.subscribe = function (inMethod, outMethod) {
+                    //TODO
+                };
+
+                this.subscribeTo = function (publisherName, inMethod, outMethod) {
+                    //TODO
+                };
+
 //                TODO - delete
 //                this.observers = [];
 //
@@ -109,6 +126,113 @@ angular.module('mrlapp', [
                     }
                     return context[func].apply(this, args);
                 }
+            }])
+
+        .service('ConnectionService', [function () {
+
+                this.connect = function (host) {
+                    Connection.connect(host);
+                };
+
+                this.sendMessage = function (message) {
+                    Connection.sendMessage(message);
+                };
+
+                this.sendDirectMessage = function (message) {
+                    Connection.sendDirectMessage(message);
+                };
+
+                var Connection = {};
+                Connection.transport = 'websocket';
+                Connection.socket = null;
+
+                Connection.receivedMessage = function (message) {
+                    console.log('Received Message: ', message);
+                    //TODO - process message (& probably forward it to ServiceControllerService (in most cases))
+//                    var packet = message;
+//                    switch (packet.type) {
+//                            case 'update':
+//                                for (var i = 0; i < packet.data.length; i++) {
+//                                    Game.updateSnake(packet.data[i].id, packet.data[i].body);
+//                                }
+//                                break;
+//                            case 'join':
+//                                for (var j = 0; j < packet.data.length; j++) {
+//                                    Game.addSnake(packet.data[j].id, packet.data[j].color);
+//                                }
+//                                break;
+//                            case 'leave':
+//                                Game.removeSnake(packet.id);
+//                                break;
+//                            case 'dead':
+//                                Console.log('Info: Your snake is dead, bad luck!');
+//                                Game.direction = 'none';
+//                                break;
+//                            case 'kill':
+//                                Console.log('Info: Head shot!');
+//                                break;
+//                        }
+                };
+
+                Connection.sendMessage = function (message) {
+                    var json = jQuery.stringifyJSON(message);
+                    Connection.sendDirectMessage(json);
+                };
+
+                Connection.sendDirectMessage = function (message) {
+                    Connection.socket.push(message);
+                    console.log('Sent message: ' + message);
+                };
+
+                Connection.connect = function (host) {
+                    var request = {url: host,
+                        transport: 'websocket',
+                        enableProtocol: true,
+                        trackMessageLength: true,
+                        logLevel: 'debug'};
+
+                    request.onOpen = function (response) {
+                        // Socket open ...
+                        console.log('Info: ' + Connection.transport + ' connection opened.');
+                    };
+
+                    request.onClose = function (response) {
+                        console.log('websocket, onclose');
+                        if (response.state == "unsubscribe") {
+                            console.log('Info: ' + Connection.transport + ' closed.');
+                        }
+                    };
+
+                    request.onTransportFailure = function (errorMsg, request) {
+                        jQuery.atmosphere.info(errorMsg);
+                        if (window.EventSource) {
+                            request.fallbackTransport = "sse";
+                        } else {
+                            request.fallbackTransport = 'long-polling';
+                        }
+                        Connection.transport = request.fallbackTransport;
+
+                        console.log('Error: falling back to ' + Connection.transport + ' ' + errorMsg);
+                    };
+
+                    request.onMessage = function (response) {
+                        var message = response.responseBody;
+                        var packet;
+                        try {
+                            packet = eval('(' + message + ')'); //jQuery.parseJSON(message);
+                        } catch (e) {
+                            if (message == 'X') {
+                                console.log('heartbeat:', message);
+                            } else {
+                                console.log('Error Message: ', message);
+                            }
+                            return;
+                        }
+
+                        Connection.receivedMessage(packet);
+                    };
+                    Connection.socket = $.atmosphere.subscribe(request);
+                };
             }])
 
         .service('HelperService', [function () {
@@ -242,7 +366,8 @@ angular.module('mrlapp', [
             };
         })
 
-        .controller('MainCtrl', ['$scope', 'ServiceControllerService', function ($scope, ServiceControllerService) {
+        .controller('MainCtrl', ['$scope', '$location', '$anchorScroll', 'ConnectionService', 'ServiceControllerService',
+            function ($scope, $location, $anchorScroll, ConnectionService, ServiceControllerService) {
 
                 //START_Status
                 $scope.statuslist = [];
@@ -365,100 +490,14 @@ angular.module('mrlapp', [
                     //select the workspace containing the selected service
                     setAllInactive();
                     $scope.workspaces[item.workspace].active = true;
-                    //TODO: scroll to selected service
+                    //scroll to selected service
+                    $location.hash(item.name);
+                    $anchorScroll();
                 };
 
-                var Connection = {};
-                Connection.transport = 'websocket';
-                Connection.socket = null;
-
-                Connection.receivedMessage = function (message) {
-                    console.log('Received Message: ', message);
-                    //TODO - process message (& probably forward it to ServiceControllerService (in most cases))
-//                    var packet = message;
-//                    switch (packet.type) {
-//                            case 'update':
-//                                for (var i = 0; i < packet.data.length; i++) {
-//                                    Game.updateSnake(packet.data[i].id, packet.data[i].body);
-//                                }
-//                                break;
-//                            case 'join':
-//                                for (var j = 0; j < packet.data.length; j++) {
-//                                    Game.addSnake(packet.data[j].id, packet.data[j].color);
-//                                }
-//                                break;
-//                            case 'leave':
-//                                Game.removeSnake(packet.id);
-//                                break;
-//                            case 'dead':
-//                                Console.log('Info: Your snake is dead, bad luck!');
-//                                Game.direction = 'none';
-//                                break;
-//                            case 'kill':
-//                                Console.log('Info: Head shot!');
-//                                break;
-//                        }
-                };
-
-                Connection.sendMessage = function (message) {
-                    Connection.socket.push(message);
-                    console.log('Sent message: ' + message);
-                };
-
-                Connection.connect = function (host) {
-                    var request = {url: host,
-                        transport: 'websocket',
-                        enableProtocol: true,
-                        trackMessageLength: true,
-                        logLevel: 'debug'};
-
-                    request.onOpen = function (response) {
-                        // Socket open ...
-                        console.log('Info: ' + Connection.transport + ' connection opened.');
-                    };
-
-                    request.onClose = function (response) {
-                        console.log('websocket, onclose');
-                        if (response.state == "unsubscribe") {
-                            console.log('Info: ' + Connection.transport + ' closed.');
-                        }
-                    };
-
-                    request.onTransportFailure = function (errorMsg, request) {
-                        jQuery.atmosphere.info(errorMsg);
-                        if (window.EventSource) {
-                            request.fallbackTransport = "sse";
-                        } else {
-                            request.fallbackTransport = 'long-polling';
-                        }
-                        Connection.transport = request.fallbackTransport;
-
-                        console.log('Error: falling back to ' + Connection.transport + ' ' + errorMsg);
-                    };
-
-                    request.onMessage = function (response) {
-                        var message = response.responseBody;
-                        var packet;
-                        try {
-                            packet = eval('(' + message + ')'); //jQuery.parseJSON(message);
-                        } catch (e) {
-                            if (message == 'X') {
-                                console.log('heartbeat:', message);
-                            } else {
-                                console.log('Error Message: ', message);
-                            }
-                            return;
-                        }
-
-                        Connection.receivedMessage(packet);
-                    };
-                    Connection.socket = $.atmosphere.subscribe(request);
-                };
-
-                Connection.connect(document.location.origin.toString() + '/api');
-//                Connection.connect(document.location.origin.toString() + '/api');
-//                console.log($);
-//                Connection.connect('/api');
+                //connect to backend
+                ConnectionService.connect(document.location.origin.toString() + '/api');
+//                ConnectionService.connect('/api');
             }])
 
         .controller('TabsChildCtrl', ['$scope', 'ServiceControllerService', 'HelperService', function ($scope, ServiceControllerService, HelperService) {

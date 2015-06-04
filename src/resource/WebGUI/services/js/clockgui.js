@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.clockgui', ['ngDragDrop'])
+angular.module('mrlapp.service.clockgui', [])
 
         .controller('ClockGuiCtrl', ['$scope', 'ServiceControllerService', function ($scope, ServiceControllerService) {
 
@@ -6,6 +6,7 @@ angular.module('mrlapp.service.clockgui', ['ngDragDrop'])
                     console.log("pulse - YEAH!!!");
                 };
 
+                //refactor & ...
                 ServiceControllerService.addListener($scope.name, "pulse", "pulse");
 
                 //let "pulse" be called
