@@ -53,6 +53,7 @@ public class Encoder {
 
 	public final static String SCHEME_BASE64 = "base64";
 
+	// TODO change to mime-type
 	public final static String TYPE_JSON = "json";
 
 	public final static String TYPE_REST = "rest";
@@ -65,12 +66,7 @@ public class Encoder {
 	
 	public final static String PREFIX_API = "api";
 
-	// public final static String PREFIX_API = "/api/services";
-	// public final static String PREFIX_API = "/api/services";
-	// public final static String PREFIX_REST_API = "services";
 	
-	
-
 	public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<Class<?>>(Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class,
 			Float.class, Double.class, Void.class));
 

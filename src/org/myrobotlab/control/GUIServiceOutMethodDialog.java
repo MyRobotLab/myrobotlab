@@ -72,9 +72,9 @@ public class GUIServiceOutMethodDialog extends JDialog implements ActionListener
 						Method m = null;
 						if (md.methodEntry.parameterTypes == null) {
 							log.info("paramterType is null");
-							m = c.getMethod(md.methodEntry.name);
+							m = c.getMethod(md.methodEntry.methodName);
 						} else {
-							m = c.getMethod(md.methodEntry.name, md.methodEntry.parameterTypes);
+							m = c.getMethod(md.methodEntry.methodName, md.methodEntry.parameterTypes);
 						}
 						ToolTip anno = m.getAnnotation(ToolTip.class);
 						if (anno != null) {
@@ -183,11 +183,11 @@ public class GUIServiceOutMethodDialog extends JDialog implements ActionListener
 
 	public String formatOutMethod(MethodEntry me) {
 		if (me.returnType == null || me.returnType == void.class) {
-			return me.name;
+			return me.methodName;
 		} else {
 			String p = me.returnType.getCanonicalName();
 			String t[] = p.split("\\.");
-			return (me.name + " -> " + t[t.length - 1]);
+			return (me.methodName + " -> " + t[t.length - 1]);
 		}
 	}
 

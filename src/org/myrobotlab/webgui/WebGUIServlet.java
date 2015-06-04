@@ -2,7 +2,6 @@ package org.myrobotlab.webgui;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.MethodCache;
+import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.WebGUI3;
@@ -144,6 +144,9 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 			log.info(String.format(String.format("out encoding : accept %s", headers.get("accept"))));
 		}
 
+		// FIXME - allow different encodings
+		response.addHeader("Content-Type", codec.getMimeType());
+		
 		// FIXME reconstruct REST request & log
 		String pathInfo = request.getPathInfo();
 		String[] parts = null;
@@ -159,8 +162,6 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 					"API",
 					String.format("http(s)://{host}:{port}/api/{Object}/{Method} where {Object}=%s - to query Object methods use http(s)://{host}:{port}/api/{Object}",
 							Arrays.toString(OBJECTS)));
-			
-			response.addHeader("Content-Type", codec.getMimeType());
 			return;
 		}
 
@@ -178,7 +179,7 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 
 		ArrayList<MethodInfo> info = null;
 		if (parts.length == 2) {
-			String[] serviceNames = Runtime.getServiceNames();
+			ServiceEnvironment si = Runtime.getLocalServices();
 			
 			/* TODO - relfect with javdoc info
 			log.info("inspecting");
@@ -200,14 +201,14 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 				}
 			}
 			*/
-			codec.encode(out, serviceNames);
-			response.addHeader("Content-Type", codec.getMimeType());
+			
+			
+			codec.encode(out, si);
 			return;
 		} else if (parts.length == 3) {
 			ServiceInterface si = Runtime.getService(parts[2]);
 			Method[] methods = si.getDeclaredMethods();
 			codec.encode(out, methods);
-			response.addHeader("Content-Type", codec.getMimeType());
 			return;
 		}/* else if (parts.length > 3) {
 			String serviceName = parts[2];
@@ -242,7 +243,6 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 			int bytesRead = in.read(body);
 			if (bytesRead != cl) {
 				handleError("BadInput", String.format("client said it would send %d bytes but only %d were read", cl, bytesRead));
-				response.addHeader("Content-Type", codec.getMimeType());
 				return;
 			}
 		}
@@ -326,7 +326,6 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 		// methods and trying types - then cache the result
 
 		Object retobj = method.invoke(si, params);
-		response.addHeader("Content-Type", codec.getMimeType());
 		codec.encode(out, retobj);
 		
 		MethodCache.cache(clazz, method);
@@ -336,7 +335,6 @@ protected void process(HttpServletRequest request, HttpServletResponse response)
 
 	} catch (Exception e) {
 		handleError(e);
-		response.addHeader("Content-Type", codec.getMimeType());
 	}
 
 }

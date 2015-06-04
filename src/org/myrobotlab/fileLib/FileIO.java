@@ -91,6 +91,23 @@ public class FileIO {
 		}
 	}
 
+	static public void deleteRecursive(File path) {
+		File[] c = path.listFiles();
+		log.info("clearing dir " + path.toString());
+		for (File file : c) {
+			if (file.isDirectory()) {
+				deleteRecursive(file);
+				log.info("deleting dir " + file.toString());
+				file.delete();
+			} else {
+				log.info("deleting file " + file.toString());
+				file.delete();
+			}
+		}
+
+		path.delete();
+	}
+
 	/**
 	 * general purpose stream closer for single line closing
 	 * 
