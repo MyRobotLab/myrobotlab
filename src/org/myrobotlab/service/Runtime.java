@@ -764,10 +764,10 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 				continue;
 			}
 			me = new MethodEntry();
-			me.name = m.getName();
+			me.methodName = m.getName();
 			me.parameterTypes = m.getParameterTypes();
 			me.returnType = m.getReturnType();
-			s = MethodEntry.getSignature(me.name, me.parameterTypes, me.returnType);
+			s = MethodEntry.getSignature(me.methodName, me.parameterTypes, me.returnType);
 			ret.put(s, me);
 		}
 

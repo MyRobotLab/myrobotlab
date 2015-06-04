@@ -69,10 +69,6 @@ public class GUIServiceInMethodDialog extends JDialog implements ActionListener 
 		}
 
 		TreeMap<String, MethodEntry> m = new TreeMap<String, MethodEntry>(Runtime.getMethodMap(v.name));
-		// TreeMap<String,MethodEntry> m = new TreeMap<String,
-		// MethodEntry>(myService.getHostCFG().getMethodMap(v.getName()));
-		// HashMap<String, MethodEntry> m =
-		// myService.getHostCFG().getMethodMap(serviceName);
 
 		JComboBox combo = new JComboBox();
 		combo.addActionListener(this);
@@ -149,7 +145,7 @@ public class GUIServiceInMethodDialog extends JDialog implements ActionListener 
 
 	public String formatOutMethod(MethodEntry me) {
 		StringBuffer ret = new StringBuffer();
-		ret.append(me.name);
+		ret.append(me.methodName);
 		if (me.parameterTypes != null) {
 			ret.append(" (");
 			for (int i = 0; i < me.parameterTypes.length; ++i) {

@@ -452,7 +452,7 @@ angular.module('mrlapp', [
                     Connection.socket = $.atmosphere.subscribe(request);
                 };
 
-                Connection.connect(document.location.toString() + 'api/messages');
+                Connection.connect(document.location.origin.toString() + '/api');
 //                Connection.connect(document.location.origin.toString() + '/api');
 //                console.log($);
 //                Connection.connect('/api');
