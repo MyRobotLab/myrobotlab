@@ -244,7 +244,7 @@ angular.module('mrlapp', [
 
         .controller('MainCtrl', ['$scope', 'ServiceControllerService', function ($scope, ServiceControllerService) {
 
-//                $scope.statusakt = 'I am going to be the new WebUI for MyRobotLab!';
+                //START_Status
                 $scope.statuslist = [];
 
                 $scope.addStatus = function (status) {
@@ -255,11 +255,15 @@ angular.module('mrlapp', [
                 $scope.addStatus('And this is my status history!');
                 $scope.addStatus('And this is my status history!');
                 $scope.addStatus('I am going to be the new WebUI for MyRobotLab!');
+                //END_Status
 
                 $scope.allServices = [];
 
                 $scope.generallist = [];
 
+                //START_Workspaces
+                $scope.workspaces = [];
+                $scope.workspacesref = [];
                 var workspacecounter = 0;
 
                 var setAllInactive = function () {
@@ -277,8 +281,6 @@ angular.module('mrlapp', [
                     });
                 };
 
-                $scope.workspaces = [];
-                $scope.workspacesref = [];
                 addNewWorkspace();
                 addNewWorkspace();
                 setAllInactive();
@@ -298,6 +300,7 @@ angular.module('mrlapp', [
                         console.log('cant remove, not enough workspaces left');
                     }
                 };
+                //END_Workspaces
 
                 //TODO: refactor this
                 $scope.reftomain = {};
