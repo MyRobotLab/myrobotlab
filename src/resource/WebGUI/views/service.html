@@ -1,20 +1,18 @@
-<div ng-controller="ServiceCtrl">
+<div ng-controller="ServiceCtrl" id="{{name}}">
 
     <!--<div style="resize: both; overflow: auto;"></div>-->
 
     <div class="panel panel-default">
         <div class="panel-heading">
+            <!--header-->
             <h3 class="panel-title">
-                <!--header-->
                 <img src="{{type}}.png" alt="" width="16">
-                <b>{{name}}</b>
+                <b>{{name}}</b><div class="pull-right">{{type}}</div>
                 <!--TODO: add an option-menu (kill-service, ...)--></h3>
         </div>
         <div class="panel-body" ng-show="inst.fw.size != 'tiny' && inst.fw.size != 'full'">
             <!--body-->
             <div service-body="views/service.html" type="{{type}}" name="name" inst="inst"></div>
-            {{type}}<br>
-            {{name}}
         </div>
         <div class="panel-footer" ng-show="!inst.fw.forcesize">
             <!--footer-->
