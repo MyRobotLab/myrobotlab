@@ -68,16 +68,22 @@ public class Platform implements Serializable {
 			}
 
 			if ("arm".equals(arch)) {
+				
 				// FIXME - procparser is unsafe and borked !!
 				// Integer armv = ProcParser.getArmInstructionVersion();
+				// Current work around: trigger off the os.version to choose arm6 or arm7
+
+				// assume ras pi 1 .
 				Integer armv = 6;
-				if (armv != null) {
-					// FIXME - hacked for raspi = armv6.hfp
-					// platform.arch = String.format("armv%d", armv);
+				
+				// if the os version has "v7" in it, it's a pi 2  
+				// TODO: this is still pretty hacky.. 
+				String osVersion = System.getProperty("os.version").toLowerCase();
+				if (osVersion.contains("v7")) {
+					armv = 7;
 				}
-				// arch = "armv6"; // assume its version 6 instruction set
-				// FIXME FIXME FIXME - hacked for raspi
-				platform.arch = "armv6.hfp";
+				// TODO: revisit how we determine the architecture version
+				platform.arch = "armv"+armv+".hfp";
 			}
 
 			if (platform.arch == null) {
