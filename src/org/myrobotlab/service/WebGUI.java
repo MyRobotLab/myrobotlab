@@ -3,39 +3,48 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.AtmosphereRequest;
-import org.atmosphere.cpr.AtmosphereRequest.Body;
 import org.atmosphere.cpr.AtmosphereResource;
-import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
-import org.atmosphere.cpr.Serializer;
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
+import org.myrobotlab.codec.Codec;
+import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.MethodCache;
 import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.TypeConverter;
+import org.myrobotlab.framework.StatusLevel;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
+//import org.myrobotlab.service.WebGUI3.Error;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.webgui.WebGUIServlet;
+//import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
 //@ManagedService(path = "/api")
@@ -177,8 +186,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// .resource(this)
 				// Support 2 APIs
 				// REST - http://host/object/method/param0/param1/...  synchronous DO NOT SUSPEND
-				//.resource("/api", this) TODO - go beyond Servlets
-				.resource("/api", WebGUIServlet.class)
+				.resource("/api", this)// TODO - go beyond Servlets
+				//.resource("/api", WebGUIServlet.class)
 
 				// For mvn exec:java
 				// .resource("./src/main/resources")
@@ -220,6 +229,21 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	public String getDescription() {
 		return "web enabled gui";
 	}
+	
+	
+	public Map<String, String> getHeadersInfo(HttpServletRequest request) {
+
+		Map<String, String> map = new HashMap<String, String>();
+
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while (headerNames.hasMoreElements()) {
+			String key = (String) headerNames.nextElement();
+			String value = request.getHeader(key);
+			map.put(key.toLowerCase(), value);
+		}
+
+		return map;
+	}
 
 	/**
 	 * With a single method Atmosphere does so much !!!
@@ -232,210 +256,236 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	 */
 	@Override
 	public void handle(AtmosphereResource r) {
+		
+		Codec codec = null;
 		OutputStream out = null;
+
 		try {
 			
-			//Broadcaster b = event.broadcaster();
-			//b.broadcast("{message:\"thats what she said\"}");
-			//log.info("broadcaster from resource is {}", b);
-			// r.getResponse().write("Hello World").write(" from Nettosphere").flushBuffer();
-
-			AtmosphereResourceEvent event = r.getAtmosphereResourceEvent();
 			AtmosphereRequest request = r.getRequest();
 			AtmosphereResponse response = r.getResponse();
-			Serializer serializer = r.getSerializer();
-			
-			out = r.getResponse().getOutputStream();
 			InputStream in = r.getRequest().getInputStream();
-			Body body = request.body();
-			String data = body.asString();
+			out = r.getResponse().getOutputStream();
 
-			// request info
-			String uuid = r.uuid();
+			Map<String, String> headers = getHeadersInfo(request);
+
+			if (headers.containsKey("content-type")) {
+				log.info(String.format(String.format("in encoding : content-type %s", headers.get("content-type"))));
+			}
+			if (headers.containsKey("accept")) {
+				log.info(String.format(String.format("out encoding : accept %s", headers.get("accept"))));
+			}
+			
+			// FIXME reconstruct REST request & log
 			String pathInfo = request.getPathInfo();
-			String trailingCharacter = null;
+			String[] parts = null;
+
+			// get default encoder
+			codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
+
 			if (pathInfo != null) {
-					
+				parts = pathInfo.split("/");
+			}
+
+			if (parts == null || parts.length < 3) {
+				response.addHeader("Content-Type", codec.getMimeType());
+				handleError(out, codec, "API", "http(s)://{host}:{port}/api/{api-type}/{Object}/{Method}");
+				return;
 			}
 			
-			int length = request.getContentLength();
-			String httpMethod = request.getMethod();
+			// set specified encoder
 			
-			log.info(String.format("%s client %s length %d pathInfo %s", httpMethod, uuid, length, pathInfo));
-			log.info(String.format("data %s", data));
-
-			
-			// See - http://myrobotlab.org/content/myrobotlab-web-api for details
-			
-			// FORMAT is http://host/api(/encoding=JSON/decoding=JSON/)/{api-type}/{service name}/{method}/{param0}/{param1}
-			
-			// API 1 - synchronous - not suspended - default encoding & decoding are JSON
-			// GET http://host/api/services/{service name}/{method}/{param0}/{param1}
-
-			// API 2 - asynchronous - is suspended (connection remains open) - default encoding & decoding are JSON
-			// POST http://host/api/messages
-			
-			
-			// TODO - implement non-default non-JSON encodings - e.g. Thrift/Avro ?
-			// String encoding = "json";
-			// String decoding = "json";
-			
-			String[] parts = pathInfo.split("/");
-			// FIXME - min size check - with response showing expected format
-			// KINDER-GENTLER - fewer parts returns possible selections e.g.
-			// if no apiType is specified - tell them what it could be (services | messages)
-			if (parts.length < 3){
-				throw new IOException("http://host:port/api/{api-type}/...  api-type must be (services | messages), please refer to http://myrobotlab.org/content/myrobotlab-web-api for details");
+			String apiTypeKey = parts[2];
+			String codecMimeType = Encoder.getKeyToMimeType(apiTypeKey);
+			if (!codecMimeType.equals(codec.getMimeType())){
+				// request to switch codec types on 
+				codec = CodecFactory.getCodec(codecMimeType);
 			}
 			
-			String apiType = parts[2];
-		
-			if ("messages".equals(apiType)){
+			response.addHeader("Content-Type", codec.getMimeType());
+
+			ArrayList<MethodEntry> info = null;
+			if (parts.length == 3) {
+				// *** /api/messages  ***
+				ServiceEnvironment si = Runtime.getLocalServices();
 				
-				// suspend the connection
-				if (!r.isSuspended()){
-					r.suspend();
-				}
-								
-				// de-serialize message
-				// broadcaster.broadcast(json);
-				// out.write(json.getBytes());
-				// out.flush();
+				/* TODO - relfect with javdoc info
+				log.info("inspecting");
 				
-				// FIXME - single Encoder.invoke() !!!
-				// FIXME - needs to be pushed to CLI !!! - returns Objects - Encode can encode
-			} else if ("services".equals(apiType)){	
-				
-				if ("/api/services".equals(pathInfo)){
-					String services = Encoder.toJson(Runtime.getServices());
-					out.write(services.getBytes());
-					out.flush();
-					// close ?
-					return;
-					
-				} else if  ("/api/services/".equals(pathInfo)){
-					Encoder.write(out, Runtime.getServiceNames());
-					out.flush();
-					return;
-				} else if (parts.length == 4 && !"/".equals(trailingCharacter)) {
-					// /api/services/{service}
-					// which is - give me the {service} state
-					
-					// FIXME clean up - uniform encoding & errors
-					String sname = parts[3];
-					ServiceInterface si = Runtime.getService(sname);
-					if(si == null){
-						throw new IOException(String.format("could not return service", sname));
+				Method[] methods = clazz.getDeclaredMethods();
+				info = new ArrayList<MethodInfo>();
+				for (Method method : methods) {
+					if (!filter.contains(method.getName())) {
+						MethodInfo m = new MethodInfo();
+						m.name = method.getName();
+						Class<?>[] types = method.getParameterTypes();
+						m.parameterTypes = new String[types.length];
+						for (int i = 0; i < types.length; ++i) {
+							m.parameterTypes[i] = types[i].getSimpleName();
+						}
+						m.returnType = method.getReturnType().getSimpleName(); // NULL
+																				// ?
+						info.add(m);
 					}
-					
-					out.write(Encoder.toJson(si).getBytes());
-					out.flush();
-					
-					return;
-				} else if (parts.length == 4 && "/".equals(trailingCharacter)){
-					// /api/services/{service}/
-					// which is - give me the runtime methods
-					// should have fully type parameter descriptions ?
-					
-					// FIXME clean up - uniform encoding & errors
-					String sname = parts[3];
-					ServiceInterface si = Runtime.getService(sname);
-					if(si == null){
-						//FIXME  return error !
-						// this is synchronous
-						out.write(Encoder.toJson(error("could not return service", sname)).getBytes());
-						out.flush();
-						return;
-					}
-				
-					out.write(Encoder.toJson(si.getDeclaredMethodNames()).getBytes());
-					out.flush();
-					
-					return;
 				}
-				
-				// on to a service instance  runtime vs runtime/
-				
-				// test if length is at least > 5
-				// if not return error + correct format + http reference :)
-				
-				// FIXME ALL URI DECODING IS THE SAME - SAME AS CLI & SAME AS subscribe !!!
-				// service <- gives data state
-				// service/ <- gives methods
-				
-				// get a specific service instance - execute method --with
-				// parameters--
-				String serviceName = parts[3]; // FIXME how to handle
-				String fn = parts[4];
-				Object[] typedParameters = null;
-
-				ServiceInterface si = org.myrobotlab.service.Runtime.getService(serviceName);
-
-				// get parms
-				if (parts.length > 4) {
-					// copy paramater part of rest uri
-					String[] stringParams = new String[parts.length - 5];
-					for (int i = 0; i < parts.length - 5; ++i) {
-						stringParams[i] = parts[i + 5];
-					}
-
-					// FIXME FIXME FIXME !!!!
-					// this is an input format decision !!! .. it "SHOULD" be
-					// determined based on inbound uri format
-
-					typedParameters = TypeConverter.getTypedParamsFromJson(si.getClass(), fn, stringParams);
-				}
-
-				// TODO - handle return type -
-				// TODO top level is return format /html /text /soap /xml /gson
-				// /json /base16 a default could exist - start with SOAP response
-				Object ret = si.invoke(fn, typedParameters);
-				//return returnObject;
-				// encode object
-				// return it ..
-
-				Encoder.write(out, ret);
-				out.flush();
-				
-				/*
-				String json = Encoder.toJson(ret);
-				out.write(json.getBytes());
-				out.flush();
 				*/
 				
+				respond(out, codec, "getLocalServices", si);
 				return;
+			} else if (parts.length == 4) {
+				// *** /api/messages/runtime  ***
+				ServiceInterface si = Runtime.getService(parts[3]);
+				Method[] methods = si.getDeclaredMethods();
+				respond(out, codec, "getDeclaredMethods", si);
+				return;
+			}/* else if (parts.length > 3) {
+				String serviceName = parts[2];
+				String method = parts[3];
 				
-			} else {
-				throw new IOException("http://host:port/api/{api-type}/...  api-type must be (services | messages)");
+				ServiceInterface si = Runtime.getService(serviceName);
+				
+				// decode parameters 
+				String[] params = new String[parts.length - 4]; // <- this i "wrong" - a big assumption that they are "Strings"
+				Object[] 
+				for (int i = 0; i < params.length; ++i){
+					
+				}
+				
+			}*/
+			
+			String name = parts[2];
+
+			ServiceInterface si = Runtime.getService(name);
+			Class<?> clazz = si.getClass();
+			Class<?>[] paramTypes = null;
+			Object[] params = new Object[0];
+
+			// FIXME - decode body assumption is that its in an ARRAY
+			// MUST MAKE DECISION ON PRECEDENCE
+			// String body = convertStreamToString(in);
+			int cl = request.getContentLength();
+			byte[] body = null;
+
+			if (cl > 0) {
+				body = new byte[cl];
+				int bytesRead = in.read(body);
+				if (bytesRead != cl) {
+					handleError(out, codec, "BadInput", String.format("client said it would send %d bytes but only %d were read", cl, bytesRead));
+					return;
+				}
+			}
+			
+			// FIXME - sloppy to convert to String here - should be done in the Encoder (if that happens)
+			String b = null;
+			if (body != null){
+				b = new String(body);
+			}
+			log.info(String.format("POST Body [%s]", b));
+
+			// FIXED ME
+			// 1. get method "name" and incoming ordinal - generate method
+			// signature (optional)- check method cache
+			// 2. "attempt" to get method
+			// 3. (optional) - if failure - scan methods - find one with
+			// signature - cache it - call it
+			String methodName = String.format("%s", parts[3]);
+
+			// decoded array of encoded parameters
+			Object[] encodedArray = new Object[0];
+
+			// BODY - PARAMETERS
+			if (cl > 0) {
+				// REQUIREMENT must be in an encoded array - even binary
+				// 1. decode the array
+				// 2. will need to decode contents of each parameter later based
+				// on signature of reflected method
+
+				encodedArray = codec.decodeArray(b);
+
+				// WE NOW HAVE ORDINAL
+
+				// URI - PARAMETERS - TODO - define added encoding spec > 5 ?
+			} else if (parts.length > 4) {
+				// REQUIREMENT must be in an encoded array - even binary
+				// 1. array is URI /
+				// 2. will need to decode contents of each parameter later based
+				// on signature of reflected method
+
+				// get params from uri - its our array
+				// difference is initial state regardless of encoding we are
+				// guaranteed the URI parts are strings
+				// encodedArray = new Object[parts.length - 3];
+				encodedArray = new Object[parts.length - 4];
+
+				for (int i = 0; i < encodedArray.length; ++i) {
+					String result = java.net.URLDecoder.decode(parts[i + 4], "UTF-8");
+					encodedArray[i] = result;
+				}
+
+				// WE NOW HAVE ORDINAL
+			}
+					
+			// FETCH AND MERGE METHOD - we have ordinal count now - but NOT the decoded
+			// parameters
+			// NOW HAVE ORDINAL - fetch the method with its types
+			paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), methodName, encodedArray.length);
+			// WE NOW HAVE ORDINAL AND TYPES
+			params = new Object[encodedArray.length];
+
+			// DECODE AND FILL THE PARAMS
+			for (int i = 0; i < params.length; ++i) {
+				
+				params[i] = codec.decode(encodedArray[i], paramTypes[i]);
 			}
 
-			// finding original
-			// String uuidOiginal = (String)request.getAttribute(ApplicationConfig.SUSPENDED_ATMOSPHERE_RESOURCE_UUID);
-			// AtmosphereResource resource = AtmosphereResourceFactory.getDefault().find(uuid);
+			Method method = clazz.getMethod(methodName, paramTypes); 
 
-			// r.getResponse().write().flushBuffer();
-			// if ! /api then file/resource system
+			// NOTE --------------
+			// strategy of find correct method with correct parameter types
+			// "name" is the strongest binder - but without a method cache we
+			// are condemned to scan through all methods
+			// also without a method cache - we have to figure out if the
+			// signature would fit with instanceof for each object
+			// and "boxed" types as well
 
-		} catch (IOException e) {
-			// for "clean" API errors
-			try {
-				//Status status = new Status(e);
-				Status status = Status.error(e.getMessage());
-				Encoder.write(out, status);
-				out.flush();
-			} catch(Exception ex){
-				error(ex);
-			}
-		} catch (Exception e){
-			// any other error we are 
-			// going to dump full stack trace
-			try {
-				Status status = new Status(e);				
-				Encoder.write(out, status);
-				out.flush();
-			} catch(Exception ex){
-				error(ex);
-			}
+			// best to fail - then attempt to resolve through scanning through
+			// methods and trying types - then cache the result
+
+			Object ret = method.invoke(si, params);
+			respond(out, codec, method.getName(), ret);
+			
+			MethodCache.cache(clazz, method);
+			
+			// FIXME - there is no content mime-type being set !!! this would depend on codec being used
+			// FIXME - currently a keyword - "json" internally defines the codec - getMimeType !!
+
+		} catch (Exception e) {
+			handleError(out, codec, e);
+		}
+
+	}
+	
+	// FIXME !!! - ALL CODECS SHOULD HANDLE MSG INSTEAD OF OBJECT !!!
+	// THEN YOU COULD ALSO HAVE urlToMsg(URL url) 
+	// "lower layer encoders can strip down to the data" !!!
+	public void respond(OutputStream out, Codec codec, String method, Object ret) throws Exception{
+		// getName() ? -> should it be AngularJS client name ?
+		Message msg = createMessage(getName(), Encoder.getCallBackName(method), ret);
+		codec.encode(out, msg);
+	}
+
+	public void handleError(OutputStream out, Codec codec, Throwable e) {
+		handleError(out, codec, e.getMessage(), Logging.logError(e));
+	}
+
+	// FIXME - APP_EVENT_LOG for normalizing (if available)
+	public void handleError(OutputStream out, Codec codec, String key, String detail) {
+		try {
+			log.error(detail);
+			Status error = new Status(getName(), StatusLevel.ERROR, key, detail);
+			respond(out, codec, "handleError", error);
+		} catch (Exception e) {
+			Logging.logError(e);
 		}
 	}
 	

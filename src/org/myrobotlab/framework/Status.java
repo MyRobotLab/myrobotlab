@@ -1,5 +1,10 @@
 package org.myrobotlab.framework;
 
+import static org.myrobotlab.framework.StatusLevel.DEBUG;
+import static org.myrobotlab.framework.StatusLevel.ERROR;
+import static org.myrobotlab.framework.StatusLevel.INFO;
+import static org.myrobotlab.framework.StatusLevel.WARN;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -23,15 +28,6 @@ public class Status implements Serializable {// extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(Status.class);
-
-	public final static String DEBUG = "debug";
-
-	public final static String INFO = "info";
-
-	public final static String WARN = "warn";
-
-	public final static String ERROR = "error";
-
 	public String name; // service name ???
 
 	public String level;

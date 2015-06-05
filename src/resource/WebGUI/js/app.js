@@ -27,7 +27,7 @@ angular.module('mrlapp', [
                     this.name = name;
                     this.sender = webguiName; // FIXME - named passed in
                     this.sendingMethod = method;
-                    this.historyList = new Array(); // necessary?
+                    this.historyList;// not necessary = new Array(); // necessary?
                     this.method = method;
                     this.data = params;
                 }
@@ -147,7 +147,11 @@ angular.module('mrlapp', [
                 Connection.socket = null;
 
                 Connection.receivedMessage = function (message) {
-                    console.log('Received Message: ', message);
+                	console.log('Received Message: ', message);
+                	
+                	msg = jQuery.parseJSON(message)
+                    
+                	console.log('Received Message: ', msg.name, msg.method);
                     //TODO - process message (& probably forward it to ServiceControllerService (in most cases))
 //                    var packet = message;
 //                    switch (packet.type) {
@@ -216,20 +220,45 @@ angular.module('mrlapp', [
                     };
 
                     request.onMessage = function (response) {
-                        var message = response.responseBody;
-                        var packet;
+                        var body = response.responseBody;
                         try {
-                            packet = eval('(' + message + ')'); //jQuery.parseJSON(message);
+                        	
+                            msg = jQuery.parseJSON(body);
+                            
+                    		switch (msg.method) {
+                            case 'onLocalServices':
+                            	// if just connected - got a Runtime.getLocalServices msg response
+                            	// within the msg.data is a Java ServiceEnvironment
+                            	// it has Platform info & all local running Services
+                                // We need to load all JavaScript types of the Running services
+                            	// and create a dictionary of name : --to--> instance of Service type
+                            	// the following services var needs to be in a global object or service - reachable by all
+                            	services = msg.data[0].serviceDirectory;
+                            	for (var serviceName in services) {
+                            		service = services[serviceName];
+                            		console.log('mrl is currently running a ' + service.name + ' of type ' + service.simpleName);
+                                }
+                            	
+                            	platform = msg.data[0].platform;
+                            	// lets display this
+                            	platformId = platform.arch + '.' + platform.bitness + '.' + platform.os;
+                            	// and this
+                            	version = platform.mrlVersion;
+                            	
+                                break;
+                            case 'onHandleError':
+                               // this is an Error in msg form - so its a controlled error sent by mrl to notify
+                               // something has gone wrong in the backend
+                            	console.log('Error onHandleError: ', msg.data[0]);
+                                break;
+                    		}                    		
+                            
                         } catch (e) {
-                            if (message == 'X') {
-                                console.log('heartbeat:', message);
-                            } else {
-                                console.log('Error Message: ', message);
-                            }
+                        	console.log('Error onMessage: ', e, body);
                             return;
                         }
 
-                        Connection.receivedMessage(packet);
+                       // Connection.receivedMessage(packet);
                     };
                     Connection.socket = $.atmosphere.subscribe(request);
                 };
@@ -496,7 +525,7 @@ angular.module('mrlapp', [
                 };
 
                 //connect to backend
-                ConnectionService.connect(document.location.origin.toString() + '/api');
+                ConnectionService.connect(document.location.origin.toString() + '/api/messages');
 //                ConnectionService.connect('/api');
             }])
 
