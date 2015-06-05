@@ -7,20 +7,6 @@ angular.module('mrlapp', [
 
         .service('ServiceControllerService', ['HelperService', 'ConnectionService', function (HelperService, ConnectionService) {
 
-                /*function Message() {
-                 this.msgID;
-                 this.timestamp;
-                 this.name;
-                 this.sender;
-                 this.sendingMethod;
-                 this.historyList;
-                 this.security;
-                 this.status;
-                 this.msgType;
-                 this.method;
-                 this.data;
-                 }*/
-
                 function Message(name, method, params) {
                     this.msgID = new Date().getTime();
                     this.timeStamp = this.msgID;
@@ -94,29 +80,6 @@ angular.module('mrlapp', [
                     //TODO
                 };
 
-//                TODO - delete
-//                this.observers = [];
-//
-//                this.registerObserver = function (observer) {
-//                    this.observers.push(observer);
-//                };
-//
-//                this.notifyAll = function () {
-//                    for (var index = 0; index < this.observers.length; ++index)
-//                        this.observers[index].notify();
-//                };
-//
-//                this.myData = ["some", "list", "of", "data"];
-//
-//                this.setData = function (newData) {
-//                    myData = newData;
-//                    notifyAll();
-//                };
-//
-//                this.getData = function () {
-//                    return myData;
-//                };
-
                 function executeFunctionByName(functionName, context /*, args */) {
                     var args = [].slice.call(arguments).splice(2);
                     var namespaces = functionName.split(".");
@@ -146,38 +109,6 @@ angular.module('mrlapp', [
                 Connection.transport = 'websocket';
                 Connection.socket = null;
 
-                Connection.receivedMessage = function (message) {
-                	console.log('Received Message: ', message);
-                	
-                	msg = jQuery.parseJSON(message)
-                    
-                	console.log('Received Message: ', msg.name, msg.method);
-                    //TODO - process message (& probably forward it to ServiceControllerService (in most cases))
-//                    var packet = message;
-//                    switch (packet.type) {
-//                            case 'update':
-//                                for (var i = 0; i < packet.data.length; i++) {
-//                                    Game.updateSnake(packet.data[i].id, packet.data[i].body);
-//                                }
-//                                break;
-//                            case 'join':
-//                                for (var j = 0; j < packet.data.length; j++) {
-//                                    Game.addSnake(packet.data[j].id, packet.data[j].color);
-//                                }
-//                                break;
-//                            case 'leave':
-//                                Game.removeSnake(packet.id);
-//                                break;
-//                            case 'dead':
-//                                Console.log('Info: Your snake is dead, bad luck!');
-//                                Game.direction = 'none';
-//                                break;
-//                            case 'kill':
-//                                Console.log('Info: Head shot!');
-//                                break;
-//                        }
-                };
-
                 Connection.sendMessage = function (message) {
                     var json = jQuery.stringifyJSON(message);
                     Connection.sendDirectMessage(json);
@@ -195,7 +126,7 @@ angular.module('mrlapp', [
                         trackMessageLength: true,
                         logLevel: 'debug'};
 
-                    request.onOpen = function (response) {
+                    	request.onOpen = function (response) {
                         // Socket open ...
                         console.log('Info: ' + Connection.transport + ' connection opened.');
                     };
@@ -257,8 +188,6 @@ angular.module('mrlapp', [
                         	console.log('Error onMessage: ', e, body);
                             return;
                         }
-
-                       // Connection.receivedMessage(packet);
                     };
                     Connection.socket = $.atmosphere.subscribe(request);
                 };
@@ -529,7 +458,7 @@ angular.module('mrlapp', [
 //                ConnectionService.connect('/api');
             }])
 
-        .controller('TabsChildCtrl', ['$scope', 'ServiceControllerService', 'HelperService', function ($scope, ServiceControllerService, HelperService) {
+        .controller('TabsChildCtrl', ['$scope', 'ConnectionService', 'ServiceControllerService', 'HelperService', function ($scope, ConnectionService, ServiceControllerService, HelperService) {
 
                 console.log("scope,workspaces", $scope.workspaces);
                 console.log("scope,index", $scope.index);
@@ -551,7 +480,7 @@ angular.module('mrlapp', [
                 $scope.reftomain.addRefToWorkspace($scope.index, $scope.reftotab);
 
                 $scope.servicelist = [
-//                    {'name': 'sera', 'drag': true, 'zindex': 1, 'type': 'clock'},
+//                    {'name': 'sera', 'drag': true, 'zindex': 1, 'type': 'clock'}
 //                    {'name': 'serb', 'drag': true, 'zindex': 2, 'type': 'arduino'},
 //                    {'name': 'serc', 'drag': true, 'zindex': 3, 'type': 'clock'},
 //                    {'name': 'serd', 'drag': true, 'zindex': 4, 'type': 'arduino'},
