@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class CodecJson implements Codec {
+public class CodecMessage implements Codec {
 	/**
 	 * Result set to JSON - this is a fluid definition, except for the family
 	 * qualifier will always be 'd'
@@ -22,6 +22,9 @@ public class CodecJson implements Codec {
 
 	@Override
 	public void encode(OutputStream out, Object obj) throws IOException {
+		
+		// TODO - test if Message .. if not wrap it ..
+		
 		out.write(mapper.toJson(obj).getBytes());
 		// jackson stream way !
 		// mapper.writeValue(out, obj);
@@ -57,7 +60,7 @@ public class CodecJson implements Codec {
 
 	@Override
 	public String getKey() {
-		return "json";
+		return "messages";
 	}
 
 }

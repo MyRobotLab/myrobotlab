@@ -2121,7 +2121,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	public Status publishStatus(Status status) {
 		status.name = getName();
-		if (status.level.equals(Status.ERROR)) {
+		if (status.level.equals(StatusLevel.ERROR)) {
 			lastError = status;
 			log.error(status.toString());
 			invoke("publishError", status);

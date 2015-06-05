@@ -54,7 +54,12 @@ public class Encoder {
 	public final static String SCHEME_BASE64 = "base64";
 
 	// TODO change to mime-type
+	public final static String TYPE_MESSAGES = "messages";
 	public final static String TYPE_JSON = "json";
+	
+	public final static String MIME_TYPE_JSON = "application/json";
+	public final static String MIME_TYPE_MESSAGES = "application/mrl-json";
+	
 
 	public final static String TYPE_REST = "rest";
 
@@ -63,6 +68,8 @@ public class Encoder {
 	// GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 	// FIXME - switch to Jackson
+
+	private static boolean initialized = false;
 	
 	public final static String PREFIX_API = "api";
 
@@ -86,6 +93,10 @@ public class Encoder {
 	final static HashMap<String, ArrayList<Method>> methodOrdinal = new HashMap<String, ArrayList<Method>>();
 
 	final static HashSet<String> objectsCached = new HashSet<String>();
+	
+	final static HashMap<String, String> keyToMimeType = new HashMap<String, String>();
+	
+	
 
 	public static final Message base64ToMsg(String base64) {
 		String data = base64;
@@ -540,6 +551,27 @@ public class Encoder {
 		} else {
 			log.error(String.format("write mimeType %s not supported", mimeType));
 		}
+	}
+
+
+	public static String getKeyToMimeType(String apiTypeKey) {
+		if (!initialized ){
+			init();
+		}
+
+		String ret = MIME_TYPE_MESSAGES;
+		if (keyToMimeType.containsKey(apiTypeKey)){
+			ret = keyToMimeType.get(apiTypeKey);
+		}
+		
+		return ret;
+	}
+
+
+	private static synchronized void init() {
+		keyToMimeType.put("messages", MIME_TYPE_MESSAGES);
+		keyToMimeType.put("services", MIME_TYPE_JSON);
+		initialized = true;
 	}
 	
 
