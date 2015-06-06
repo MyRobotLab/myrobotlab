@@ -59,10 +59,10 @@ angular.module('mrlapp.service', [])
                         ServiceControllerService.sendTo(name, method, data);
                     };
                     $scope.inst.fw.subscribe = function (inMethod, outMethod) {
-                        //TODO
+                        $scope.inst.fw.subscribeTo($scope.name, inMethod, outMethod);
                     };
                     $scope.inst.fw.subscribeTo = function (publisherName, inMethod, outMethod) {
-                        //TODO
+                        ServiceControllerService.subscribeTo(publisherName, inMethod, outMethod);
                     };
                 }
                 //END_specific Service-Initialisation

@@ -114,12 +114,12 @@ angular.module('mrlapp', [
                     wsconnService.sendMessage(msg);
                 };
 
-                this.subscribe = function (inMethod, outMethod) {
-                    //TODO
-                };
+                //direct support (in service.js)
+//                this.subscribe = function (inMethod, outMethod) {
+//                };
 
                 this.subscribeTo = function (publisherName, inMethod, outMethod) {
-                    //TODO
+                    this.sendTo(InstanceService.getName(), "subscribe", [publisherName, inMethod, outMethod]);
                 };
 
                 function executeFunctionByName(functionName, context /*, args */) {
@@ -398,7 +398,6 @@ angular.module('mrlapp', [
                 //TODO: not final method & location
                 $scope.createService = function (name, type, simpletype) {
                     console.log('trying to launch ' + name + ' of ' + type + ' / ' + simpletype);
-                    //made something wrong
 //                    console.log($scope.workspacesref);
                     if (HelperService.isUndefinedOrNull($scope.workspacesref[0])) {
                         //for Chrome - race condition!
@@ -407,15 +406,15 @@ angular.module('mrlapp', [
                         var listener = $scope.$watch(function () {
                             return $scope.workspacesref[0];
                         }, function () {
-                                    console.log('noticed change, checking');
+                            console.log('noticed change, checking');
 //                                    console.log($scope.workspacesref);
-                                    if ($scope.workspacesref.length > spawnin) {
-                                        console.log('done! with waiting');
+                            if ($scope.workspacesref.length > spawnin) {
+                                console.log('done! with waiting');
 //                                        console.log($scope.workspacesref);
-                                        listener();
-                                        createServiceReally(name, type, simpletype);
-                                    }
-                                });
+                                listener();
+                                createServiceReally(name, type, simpletype);
+                            }
+                        });
                     } else {
                         createServiceReally(name, type, simpletype);
                     }
