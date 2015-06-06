@@ -32,9 +32,19 @@ angular.module('mrlapp', [
                 this.getVersion = function () {
                     return version;
                 };
+
+                var name;
+
+                this.setName = function (nm) {
+                    name = nm;
+                };
+
+                this.getName = function () {
+                    return name;
+                };
             }])
 
-        .service('ServiceControllerService', ['HelperService', 'wsconnService', function (HelperService, wsconnService) {
+        .service('ServiceControllerService', ['HelperService', 'InstanceService', 'wsconnService', function (HelperService, InstanceService, wsconnService) {
 
                 //TODO: sender? - what should be entered there? webgui-instance-name?
                 //sendingMethod shouldn't equals to method, or?
@@ -42,7 +52,7 @@ angular.module('mrlapp', [
                     this.msgID = new Date().getTime();
                     this.timeStamp = this.msgID;
                     this.name = name;
-                    this.sender = webguiName; // FIXME - named passed in
+                    this.sender = InstanceService.getName(); // FIXME - named passed in
                     this.sendingMethod = '';
                     this.historyList;// not necessary = new Array(); // necessary?
                     this.method = method;
@@ -254,8 +264,8 @@ angular.module('mrlapp', [
             };
         })
 
-        .controller('MainCtrl', ['$scope', '$location', '$anchorScroll', 'ServiceControllerService', 'wsconnService', 'InstanceService',
-            function ($scope, $location, $anchorScroll, ServiceControllerService, wsconnService, InstanceService) {
+        .controller('MainCtrl', ['$scope', '$location', '$anchorScroll', 'ServiceControllerService', 'wsconnService', 'InstanceService', 'HelperService',
+            function ($scope, $location, $anchorScroll, ServiceControllerService, wsconnService, InstanceService, HelperService) {
 
                 //spawn all services in first workspace (also if workspaces with services are deleted)
                 var spawnin = 0;
@@ -333,6 +343,7 @@ angular.module('mrlapp', [
                 $scope.reftomain = {};
 
                 $scope.reftomain.addRefToWorkspace = function (index, workspace) {
+                    console.log('adding ref to workspace', index, workspace);
                     $scope.workspacesref[index] = workspace;
                 };
 
@@ -387,6 +398,31 @@ angular.module('mrlapp', [
                 //TODO: not final method & location
                 $scope.createService = function (name, type, simpletype) {
                     console.log('trying to launch ' + name + ' of ' + type + ' / ' + simpletype);
+                    //made something wrong
+//                    console.log($scope.workspacesref);
+                    if (HelperService.isUndefinedOrNull($scope.workspacesref[0])) {
+                        //for Chrome - race condition!
+                        //should find a better way
+                        console.log('waiting for workspaces to register themselves');
+                        var listener = $scope.$watch(function () {
+                            return $scope.workspacesref[0];
+                        }, function () {
+                                    console.log('noticed change, checking');
+//                                    console.log($scope.workspacesref);
+                                    if ($scope.workspacesref.length > spawnin) {
+                                        console.log('done! with waiting');
+//                                        console.log($scope.workspacesref);
+                                        listener();
+                                        createServiceReally(name, type, simpletype);
+                                    }
+                                });
+                    } else {
+                        createServiceReally(name, type, simpletype);
+                    }
+//                    createServiceReally(name, type, simpletype);
+                };
+
+                var createServiceReally = function (name, type, simpletype) {
                     $scope.workspacesref[spawnin].addDragToList({
                         'name': name,
                         'type': type,
@@ -434,6 +470,7 @@ angular.module('mrlapp', [
                 };
 
                 var onMessage = function (msg) {
+                    //TODO: not final location
                     console.log('JeyJeyJeyJeyJeyJeyJeyJeyJeyJey');
                     console.log('Message:', msg);
                     switch (msg.method) {
@@ -450,6 +487,9 @@ angular.module('mrlapp', [
                                 var type = value.simpleName.toLowerCase();
                                 var simpletype = value.simpleName;
                                 $scope.createService(name, type, simpletype);
+                                if (type == 'webgui') {
+                                    InstanceService.setName(name);
+                                }
                             });
                             $scope.$apply();
 //                            for (var serviceName in services) {

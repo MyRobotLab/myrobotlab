@@ -4,8 +4,6 @@ angular.module('mrlapp.service', [])
                 return {
                     scope: {
                         name: '=name',
-                        type: '=type',
-                        simpletype: '=simpletype',
                         inst: '=inst'
                     },
                     link: function (scope, elem, attr) {
@@ -53,18 +51,20 @@ angular.module('mrlapp.service', [])
                 //attachGUI(), detachGUI(), send(method, data), sendTo(name, method, data),
                 //subscribe(inMethod, outMethod), subscribeTo(publisherName, inMethod, outMethod),
                 //key(inStr), releaseService(), serviceGUIInit(), broadcastState()
-                $scope.inst.fw.send = function (method, data) {
-                    $scope.inst.fw.sendTo($scope.name, method, data);
-                };
-                $scope.inst.fw.sendTo = function (name, method, data) {
-                    ServiceControllerService.sendTo(name, method, data);
-                };
-                $scope.inst.fw.subscribe = function (inMethod, outMethod) {
-                    //TODO
-                };
-                $scope.inst.fw.subscribeTo = function (publisherName, inMethod, outMethod) {
-                    //TODO
-                };
+                if ($scope.inst.fw.send == null) {
+                    $scope.inst.fw.send = function (method, data) {
+                        $scope.inst.fw.sendTo($scope.name, method, data);
+                    };
+                    $scope.inst.fw.sendTo = function (name, method, data) {
+                        ServiceControllerService.sendTo(name, method, data);
+                    };
+                    $scope.inst.fw.subscribe = function (inMethod, outMethod) {
+                        //TODO
+                    };
+                    $scope.inst.fw.subscribeTo = function (publisherName, inMethod, outMethod) {
+                        //TODO
+                    };
+                }
                 //END_specific Service-Initialisation
 
                 //footer-size-change-buttons
