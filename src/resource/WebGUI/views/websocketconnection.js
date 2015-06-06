@@ -1,9 +1,9 @@
 angular.module('mrlapp.wsconn', [])
         .service('wsconnService', [function () {
                 //refactor this - more generalization & probably using .provide to inject a config & a callback before creation of the service
-                
+
                 var callback;
-                
+
                 this.subscribeToMessages = function (cb) {
                     callback = cb;
                 };
@@ -17,7 +17,7 @@ angular.module('mrlapp.wsconn', [])
                     socket.push(message);
                     console.log('Sent message: ' + message);
                 };
-                
+
                 var transport = 'websocket';
                 var socket = null;
 
@@ -54,14 +54,18 @@ angular.module('mrlapp.wsconn', [])
 
                     request.onMessage = function (response) {
                         var body = response.responseBody;
-                        var msg;
-                        try {
-                            msg = jQuery.parseJSON(body);
-                        } catch (e) {
-                            console.log('Error onMessage: ', e, body);
-                            return;
+                        if (body == 'X') {
+                            console.log("heartbeat:", body);
+                        } else {
+                            var msg;
+                            try {
+                                msg = jQuery.parseJSON(body);
+                            } catch (e) {
+                                console.log('Error onMessage: ', e, body);
+                                return;
+                            }
+                            callback(msg);
                         }
-                        callback(msg);
                     };
                     socket = $.atmosphere.subscribe(request);
                 };
