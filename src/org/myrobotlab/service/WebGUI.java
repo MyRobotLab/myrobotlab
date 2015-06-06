@@ -296,6 +296,13 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// set specified encoder
 			
 			String apiTypeKey = parts[2];
+			
+			if ("messages".equals(apiTypeKey)){
+				if (!r.isSuspended()){
+					r.suspend();
+				}
+			}
+			
 			String codecMimeType = Encoder.getKeyToMimeType(apiTypeKey);
 			if (!codecMimeType.equals(codec.getMimeType())){
 				// request to switch codec types on 
@@ -306,7 +313,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			ArrayList<MethodEntry> info = null;
 			if (parts.length == 3) {
-				// *** /api/messages  ***
+				// *** /api/messages  **
+				
 				ServiceEnvironment si = Runtime.getLocalServices();
 				
 				/* TODO - relfect with javdoc info
@@ -321,7 +329,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 						Class<?>[] types = method.getParameterTypes();
 						m.parameterTypes = new String[types.length];
 						for (int i = 0; i < types.length; ++i) {
-							m.parameterTypes[i] = types[i].getSimpleName();
+							m.parameterTypes[i] = types[i].getSimpleName()
 						}
 						m.returnType = method.getReturnType().getSimpleName(); // NULL
 																				// ?
