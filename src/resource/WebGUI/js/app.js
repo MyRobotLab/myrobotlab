@@ -1,18 +1,49 @@
 angular.module('mrlapp', [
     'ui.bootstrap',
+    'mrlapp.wsconn',
     'mrlapp.service',
     'mrlapp.service.arduinogui',
     'mrlapp.service.clockgui'
 ])
 
-        .service('ServiceControllerService', ['HelperService', 'ConnectionService', function (HelperService, ConnectionService) {
+        .service('InstanceService', [function () {
+                //TODO: should solve this different
 
+                var platform;
+                var platformId;
+                var version;
+
+                this.setPlatform = function (pl) {
+                    platform = pl;
+                    // lets display this
+                    platformId = platform.arch + '.' + platform.bitness + '.' + platform.os;
+                    // and this
+                    version = platform.mrlVersion;
+                };
+
+                this.getPlatform = function () {
+                    return platform;
+                };
+
+                this.getPlatformId = function () {
+                    return platformId;
+                };
+
+                this.getVersion = function () {
+                    return version;
+                };
+            }])
+
+        .service('ServiceControllerService', ['HelperService', 'wsconnService', function (HelperService, wsconnService) {
+
+                //TODO: sender? - what should be entered there? webgui-instance-name?
+                //sendingMethod shouldn't equals to method, or?
                 function Message(name, method, params) {
                     this.msgID = new Date().getTime();
                     this.timeStamp = this.msgID;
                     this.name = name;
                     this.sender = webguiName; // FIXME - named passed in
-                    this.sendingMethod = method;
+                    this.sendingMethod = '';
                     this.historyList;// not necessary = new Array(); // necessary?
                     this.method = method;
                     this.data = params;
@@ -69,7 +100,8 @@ angular.module('mrlapp', [
 
                 this.sendTo = function (name, method, data) {
                     var msg = new Message(name, method, data);
-                    ConnectionService.sendMessage(msg);
+                    msg.sendingMethod = 'send';
+                    wsconnService.sendMessage(msg);
                 };
 
                 this.subscribe = function (inMethod, outMethod) {
@@ -89,108 +121,6 @@ angular.module('mrlapp', [
                     }
                     return context[func].apply(this, args);
                 }
-            }])
-
-        .service('ConnectionService', [function () {
-
-                this.connect = function (host) {
-                    Connection.connect(host);
-                };
-
-                this.sendMessage = function (message) {
-                    Connection.sendMessage(message);
-                };
-
-                this.sendDirectMessage = function (message) {
-                    Connection.sendDirectMessage(message);
-                };
-
-                var Connection = {};
-                Connection.transport = 'websocket';
-                Connection.socket = null;
-
-                Connection.sendMessage = function (message) {
-                    var json = jQuery.stringifyJSON(message);
-                    Connection.sendDirectMessage(json);
-                };
-
-                Connection.sendDirectMessage = function (message) {
-                    Connection.socket.push(message);
-                    console.log('Sent message: ' + message);
-                };
-
-                Connection.connect = function (host) {
-                    var request = {url: host,
-                        transport: 'websocket',
-                        enableProtocol: true,
-                        trackMessageLength: true,
-                        logLevel: 'debug'};
-
-                    	request.onOpen = function (response) {
-                        // Socket open ...
-                        console.log('Info: ' + Connection.transport + ' connection opened.');
-                    };
-
-                    request.onClose = function (response) {
-                        console.log('websocket, onclose');
-                        if (response.state == "unsubscribe") {
-                            console.log('Info: ' + Connection.transport + ' closed.');
-                        }
-                    };
-
-                    request.onTransportFailure = function (errorMsg, request) {
-                        jQuery.atmosphere.info(errorMsg);
-                        if (window.EventSource) {
-                            request.fallbackTransport = "sse";
-                        } else {
-                            request.fallbackTransport = 'long-polling';
-                        }
-                        Connection.transport = request.fallbackTransport;
-
-                        console.log('Error: falling back to ' + Connection.transport + ' ' + errorMsg);
-                    };
-
-                    request.onMessage = function (response) {
-                        var body = response.responseBody;
-                        try {
-                        	
-                            msg = jQuery.parseJSON(body);
-                            
-                    		switch (msg.method) {
-                            case 'onLocalServices':
-                            	// if just connected - got a Runtime.getLocalServices msg response
-                            	// within the msg.data is a Java ServiceEnvironment
-                            	// it has Platform info & all local running Services
-                                // We need to load all JavaScript types of the Running services
-                            	// and create a dictionary of name : --to--> instance of Service type
-                            	// the following services var needs to be in a global object or service - reachable by all
-                            	services = msg.data[0].serviceDirectory;
-                            	for (var serviceName in services) {
-                            		service = services[serviceName];
-                            		console.log('mrl is currently running a ' + service.name + ' of type ' + service.simpleName);
-                                }
-                            	
-                            	platform = msg.data[0].platform;
-                            	// lets display this
-                            	platformId = platform.arch + '.' + platform.bitness + '.' + platform.os;
-                            	// and this
-                            	version = platform.mrlVersion;
-                            	
-                                break;
-                            case 'onHandleError':
-                               // this is an Error in msg form - so its a controlled error sent by mrl to notify
-                               // something has gone wrong in the backend
-                            	console.log('Error onHandleError: ', msg.data[0]);
-                                break;
-                    		}                    		
-                            
-                        } catch (e) {
-                        	console.log('Error onMessage: ', e, body);
-                            return;
-                        }
-                    };
-                    Connection.socket = $.atmosphere.subscribe(request);
-                };
             }])
 
         .service('HelperService', [function () {
@@ -324,8 +254,11 @@ angular.module('mrlapp', [
             };
         })
 
-        .controller('MainCtrl', ['$scope', '$location', '$anchorScroll', 'ConnectionService', 'ServiceControllerService',
-            function ($scope, $location, $anchorScroll, ConnectionService, ServiceControllerService) {
+        .controller('MainCtrl', ['$scope', '$location', '$anchorScroll', 'ServiceControllerService', 'wsconnService', 'InstanceService',
+            function ($scope, $location, $anchorScroll, ServiceControllerService, wsconnService, InstanceService) {
+
+                //spawn all services in first workspace (also if workspaces with services are deleted)
+                var spawnin = 0;
 
                 //START_Status
                 $scope.statuslist = [];
@@ -377,6 +310,17 @@ angular.module('mrlapp', [
                 $scope.removeWorkspace = function (index) {
                     console.log('removeworkspace, ', index);
                     if ($scope.workspaces.length > 1) {
+                        //recovering services in deleted workspace (if any)
+                        var childservicelist = $scope.workspacesref[index].getDragsInList();
+                        if (childservicelist.length > 0) {
+                            console.log('recovering' + childservicelist.length + 'services form deleted workspace');
+                            angular.forEach(childservicelist, function (value, key) {
+                                $scope.workspacesref[spawnin].addDragToList(value);
+                                //set new workspace-index for search
+                                setWorkspaceIndexForSearch(value.name, spawnin);
+                            });
+                        }
+                        //DELETE!
                         $scope.workspaces.splice(index, 1);
                         $scope.workspacesref.splice(index, 1);
                     } else {
@@ -393,9 +337,26 @@ angular.module('mrlapp', [
                 };
 
                 $scope.reftomain.dragInGenerallist = function (index, list) {
-                    console.log('tab -> general');
-                    $scope.generallist.push(list[index]);
-                    list.splice(index, 1);
+                    //until I fix the behavior of the list, only able to store service (also adjust zindex then!)
+                    if ($scope.generallist.length < 1) {
+                        console.log('tab -> general');
+                        //MOVE!
+                        var service = list[index];
+                        var zindex = service.zindex;
+                        service.zindex = 1;
+                        $scope.generallist.push(service);
+                        list.splice(index, 1);
+                        //set new workspace-index for search
+                        setWorkspaceIndexForSearch(service.name, -1);
+                        //adjust zindex for all other services (in service's previous list)
+                        angular.forEach(list, function (value, key) {
+                            if (value.zindex > zindex) {
+                                value.zindex--;
+                            }
+                        });
+                    } else {
+                        console.log('not able to move - general is already containing a service!');
+                    }
                 };
 
                 $scope.reftomain.dragOutGenerallist = function (index) {
@@ -406,21 +367,35 @@ angular.module('mrlapp', [
                             ind = key;
                         }
                     });
-                    $scope.workspacesref[ind].addDragToList($scope.generallist[index]);
+                    //MOVE!
+                    var service = $scope.generallist[index];
                     $scope.generallist.splice(index, 1);
+                    $scope.workspacesref[ind].addDragToList(service);
+                    //set new workspace-index for search
+                    setWorkspaceIndexForSearch(service.name, ind);
+                };
+
+                var setWorkspaceIndexForSearch = function (servicename, workspaceindex) {
+                    //set new workspace-index for search
+                    angular.forEach($scope.allServices, function (value, key) {
+                        if (value.name == servicename) {
+                            value.workspace = workspaceindex;
+                        }
+                    });
                 };
 
                 //TODO: not final method & location
-                $scope.createService = function (name, type) {
-                    //spawn service in first workspace
-                    var spawnin = 0;
+                $scope.createService = function (name, type, simpletype) {
+                    console.log('trying to launch ' + name + ' of ' + type + ' / ' + simpletype);
                     $scope.workspacesref[spawnin].addDragToList({
                         'name': name,
-                        'type': type
+                        'type': type,
+                        'simpletype': simpletype
                     });
                     $scope.allServices.push({
                         'name': name,
                         'type': type,
+                        'simpletype': simpletype,
                         'workspace': spawnin
                     });
                 };
@@ -434,31 +409,71 @@ angular.module('mrlapp', [
                 $scope.help = function () {
                     console.log('help');
                     var servicetype;
+                    var simpletype;
                     if (servicecounter % 2 == 0) {
                         servicetype = 'clock';
+                        simpletype = 'Clock';
                     } else {
                         servicetype = 'arduino';
+                        simpletype = 'Arduino';
                     }
-                    $scope.createService("ser" + servicecounter, servicetype);
+                    $scope.createService("ser" + servicecounter, servicetype, simpletype);
                     servicecounter++;
                 };
 
                 $scope.searchOnSelect = function (item, model, label) {
                     console.log('searchOnSelect');
-                    //select the workspace containing the selected service
-                    setAllInactive();
-                    $scope.workspaces[item.workspace].active = true;
-                    //scroll to selected service
-                    $location.hash(item.name);
-                    $anchorScroll();
+                    if (item.workspace != -1) {
+                        //select the workspace containing the selected service
+                        setAllInactive();
+                        $scope.workspaces[item.workspace].active = true;
+                        //scroll to selected service
+                        $location.hash(item.name);
+                        $anchorScroll();
+                    }
                 };
 
+                var onMessage = function (msg) {
+                    console.log('JeyJeyJeyJeyJeyJeyJeyJeyJeyJey');
+                    console.log('Message:', msg);
+                    switch (msg.method) {
+                        case 'onLocalServices':
+                            // if just connected - got a Runtime.getLocalServices msg response
+                            // within the msg.data is a Java ServiceEnvironment
+                            // it has Platform info & all local running Services
+                            // We need to load all JavaScript types of the Running services
+                            // and create a dictionary of name : --to--> instance of Service type
+                            // the following services var needs to be in a global object or service - reachable by all
+                            var services = msg.data[0].serviceDirectory;
+                            angular.forEach(services, function (value, key) {
+                                var name = value.name;
+                                var type = value.simpleName.toLowerCase();
+                                var simpletype = value.simpleName;
+                                $scope.createService(name, type, simpletype);
+                            });
+                            $scope.$apply();
+//                            for (var serviceName in services) {
+//                                service = services[serviceName];
+//                                console.log('mrl is currently running a ' + service.name + ' of type ' + service.simpleName);
+//                            }
+                            InstanceService.setPlatform(msg.data[0].platform);
+                            break;
+                        case 'onHandleError':
+                            // this is an Error in msg form - so its a controlled error sent by mrl to notify
+                            // something has gone wrong in the backend
+                            console.log('Error onHandleError: ', msg.data[0]);
+                            break;
+                    }
+                };
+
+                wsconnService.subscribeToMessages(onMessage);
+                wsconnService.connect(document.location.origin.toString() + '/api/messages');
                 //connect to backend
-                ConnectionService.connect(document.location.origin.toString() + '/api/messages');
+//                ConnectionService.connect(document.location.origin.toString() + '/api/messages');
 //                ConnectionService.connect('/api');
             }])
 
-        .controller('TabsChildCtrl', ['$scope', 'ConnectionService', 'ServiceControllerService', 'HelperService', function ($scope, ConnectionService, ServiceControllerService, HelperService) {
+        .controller('TabsChildCtrl', ['$scope', 'ServiceControllerService', 'HelperService', function ($scope, ServiceControllerService, HelperService) {
 
                 console.log("scope,workspaces", $scope.workspaces);
                 console.log("scope,index", $scope.index);
@@ -467,33 +482,25 @@ angular.module('mrlapp', [
                     $scope.workspace = $scope.workspaces[$scope.index];
                 }
 
+                $scope.servicelist = [];
+
                 //TODO: refactor this
                 $scope.reftotab = {};
-                $scope.reftotab.addDragToList = function (panel) {
-                    angular.forEach($scope.servicelist, function (value, key) {
-                        value.zindex++;
-                    });
-                    panel.zindex = 1;
-                    $scope.servicelist.push(panel);
+                $scope.reftotab.addDragToList = function (service) {
+                    if (service != null) {
+                        var max = -1;
+                        angular.forEach($scope.servicelist, function (value, key) {
+                            if (value.zindex > max) {
+                                max = value.zindex;
+                            }
+                        });
+                        service.zindex = max + 1;
+                        $scope.servicelist.push(service);
+                    }
+                };
+                $scope.reftotab.getDragsInList = function () {
+                    return $scope.servicelist;
                 };
 
                 $scope.reftomain.addRefToWorkspace($scope.index, $scope.reftotab);
-
-                $scope.servicelist = [
-//                    {'name': 'sera', 'drag': true, 'zindex': 1, 'type': 'clock'}
-//                    {'name': 'serb', 'drag': true, 'zindex': 2, 'type': 'arduino'},
-//                    {'name': 'serc', 'drag': true, 'zindex': 3, 'type': 'clock'},
-//                    {'name': 'serd', 'drag': true, 'zindex': 4, 'type': 'arduino'},
-//                    {'name': 'sere', 'drag': true, 'zindex': 5, 'type': 'clock'},
-//                    {'name': 'serf', 'drag': true, 'zindex': 6, 'type': 'arduino'},
-//                    {'name': 'serg', 'drag': true, 'zindex': 7, 'type': 'clock'},
-//                    {'name': 'serh', 'drag': true, 'zindex': 8, 'type': 'arduino'},
-//                    {'name': 'seri', 'drag': true, 'zindex': 9, 'type': 'clock'},
-//                    {'name': 'serj', 'drag': true, 'zindex': 10, 'type': 'arduino'},
-//                    {'name': 'serk', 'drag': true, 'zindex': 11, 'type': 'clock'},
-//                    {'name': 'serl', 'drag': true, 'zindex': 12, 'type': 'arduino'},
-//                    {'name': 'serm', 'drag': true, 'zindex': 13, 'type': 'clock'},
-//                    {'name': 'sern', 'drag': true, 'zindex': 14, 'type': 'arduino'},
-//                    {'name': 'sero', 'drag': true, 'zindex': 15, 'type': 'clock'}
-                ];
             }]);

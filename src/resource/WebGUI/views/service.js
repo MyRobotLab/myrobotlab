@@ -4,6 +4,8 @@ angular.module('mrlapp.service', [])
                 return {
                     scope: {
                         name: '=name',
+                        type: '=type',
+                        simpletype: '=simpletype',
                         inst: '=inst'
                     },
                     link: function (scope, elem, attr) {
@@ -19,6 +21,7 @@ angular.module('mrlapp.service', [])
                 $scope.name = $scope.list[$scope.index].name;
                 $scope.drag = $scope.list[$scope.index].drag;
                 $scope.type = $scope.list[$scope.index].type;
+                $scope.simpletype = $scope.list[$scope.index].simpletype;
 
                 //START_specific Service-Initialisation
                 //"inst" is given to the specific service-UI
@@ -83,6 +86,9 @@ angular.module('mrlapp.service', [])
                                 type: function () {
                                     return $scope.type;
                                 },
+                                simpletype: function () {
+                                    return $scope.simpletype;
+                                },
                                 inst: function () {
                                     return $scope.inst;
                                 }
@@ -97,16 +103,17 @@ angular.module('mrlapp.service', [])
                 };
             }])
 
-        .controller('ServiceFullCtrl', function ($scope, $modalInstance, name, type, inst) {
+        .controller('ServiceFullCtrl', function ($scope, $modalInstance, name, type, simpletype, inst) {
             //Controller for the modal (service-full)
 
             $scope.name = name;
             $scope.type = type;
+            $scope.simpletype = simpletype;
             $scope.inst = inst;
 
             $scope.modal = true;
 
-            console.log("servicefullctrl", $scope.name, $scope.type, $scope.inst);
+            console.log("servicefullctrl", $scope.name, $scope.type, $scope.simpletype, $scope.inst);
 
             $scope.close = function () {
                 $modalInstance.close();

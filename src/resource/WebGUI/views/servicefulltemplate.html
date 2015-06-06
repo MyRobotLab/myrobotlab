@@ -1,8 +1,12 @@
 <div class="modal-header">
-    <h3 class="modal-title">{{name}}</h3>
+    <h3 class="modal-title">
+        <img src="{{type}}.png" alt="" width="16">
+        <b>{{name}}</b>
+        <div class="pull-right">{{simpletype}}</div>
+    </h3>
 </div>
 <div class="modal-body">
-    <div service-body="views/service.html" type="{{type}}" name="name" inst="inst"></div>
+    <div service-body="views/service.html" name="name" type="type" simpletype="simpletype" inst="inst"></div>
 </div>
 <div class="modal-footer">
     <button class="btn btn-primary" ng-click="close()">close</button>
