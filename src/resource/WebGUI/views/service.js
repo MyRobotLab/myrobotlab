@@ -65,6 +65,19 @@ angular.module('mrlapp.service', [])
                         ServiceControllerService.subscribeTo(publisherName, inMethod, outMethod);
                     };
                 }
+                //to be overridden (fallback, if not)
+                if ($scope.inst.methods.init == null) {
+                    $scope.inst.methods.init = function () {
+                    };
+                }
+                if ($scope.inst.methods.attachGUI == null) {
+                    $scope.inst.methods.attachGUI = function () {
+                    };
+                }
+                if ($scope.inst.methods.detachGUI == null) {
+                    $scope.inst.methods.detachGUI = function () {
+                    };
+                }
                 //END_specific Service-Initialisation
 
                 //footer-size-change-buttons

@@ -2,10 +2,10 @@ angular.module('mrlapp.wsconn', [])
         .service('wsconnService', [function () {
                 //refactor this - more generalization & probably using .provide to inject a config & a callback before creation of the service
 
-                var callback;
+                var callbacks = [];
 
-                this.subscribeToMessages = function (cb) {
-                    callback = cb;
+                this.subscribeToMessages = function (callback) {
+                    callbacks.push(callback);
                 };
 
                 this.sendMessage = function (message) {
@@ -64,9 +64,12 @@ angular.module('mrlapp.wsconn', [])
                                 console.log('Error onMessage: ', e, body);
                                 return;
                             }
-                            callback(msg);
+                            angular.forEach(callbacks, function (value, key) {
+                                value(msg);
+                            });
                         }
                     };
+
                     socket = $.atmosphere.subscribe(request);
                 };
             }]);

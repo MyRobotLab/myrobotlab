@@ -1,14 +1,5 @@
 angular.module('mrlapp.service.webguigui', [])
 
-        .controller('RuntimeGuiCtrl', ['$scope', 'ServiceControllerService', function ($scope, ServiceControllerService) {
-
-                $scope.inst.methods.pulse = function () {
-                    console.log("pulse - YEAH!!!");
-                };
-
-                //refactor & ...
-                ServiceControllerService.addListener($scope.name, "pulse", "pulse");
-
-                //let "pulse" be called
-                ServiceControllerService.test($scope.name);
+        .controller('WebGUIGuiCtrl', ['$scope', function ($scope) {
+                //TODO ...
             }]);
