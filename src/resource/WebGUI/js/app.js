@@ -3,7 +3,9 @@ angular.module('mrlapp', [
     'mrlapp.wsconn',
     'mrlapp.service',
     'mrlapp.service.arduinogui',
-    'mrlapp.service.clockgui'
+    'mrlapp.service.clockgui',
+    'mrlapp.service.webguigui',
+    'mrlapp.service.runtimegui'
 ])
 
         .service('InstanceService', [function () {
@@ -64,7 +66,6 @@ angular.module('mrlapp', [
                 function Serv(name, servic) {
                     this.name = name;
                     this.servic = servic;
-                    this.listener = [];
                 }
 
                 this.getServiceInst = function (name) {
@@ -82,25 +83,9 @@ angular.module('mrlapp', [
                     //TODO - fill in
                 };
 
-                this.addListener = function (name, listener, listener2) {
-                    //TODO: right name?
-                    //TODO - need to work on this
-                    this.services[name].listener.push(listener);
-                };
-
-                this.removeListener = function () {
-                    //TODO: right name?
-                    //TODO - fill in
-                };
-
-                this.notify = function () {
-                    //TODO: what did I want to do with this function?
-                    //TODO - fill in
-                };
-
-                this.test = function (name) {
+                this.test = function (servicename, method) {
                     //TODO: remove
-                    executeFunctionByName("pulse", this.services[name].servic.methods);
+                    executeFunctionByName(method, this.services[servicename].servic.methods);
 //                    this.services["clock"].servic["tester"].apply(this);
                 };
 
@@ -111,6 +96,7 @@ angular.module('mrlapp', [
                 this.sendTo = function (name, method, data) {
                     var msg = new Message(name, method, data);
                     msg.sendingMethod = 'send';
+//                    console.log('SendTo:', msg);
                     wsconnService.sendMessage(msg);
                 };
 
@@ -159,6 +145,8 @@ angular.module('mrlapp', [
                         var outgenerallist = false;
                         var ingenerallist = false;
 
+                        //maybe change to absolute & layout the panels manually
+                        //-> no panel glitch away (when you move another panel)
                         element.css({
                             position: 'relative'
                         });
@@ -243,18 +231,6 @@ angular.module('mrlapp', [
                         reftomain: '=reftomain'
                     },
                     templateUrl: 'views/tab.html'
-                };
-            }])
-
-        .directive('dropComponent', [function () {
-                return {
-                    scope: {
-                        //"=" -> binding to items in parent-scope specified by attribute
-                        //"@" -> using passed attribute
-                        list: '=list',
-                        size: '@size'
-                    },
-                    templateUrl: 'views/drop.html'
                 };
             }])
 
@@ -348,7 +324,7 @@ angular.module('mrlapp', [
                 };
 
                 $scope.reftomain.dragInGenerallist = function (index, list) {
-                    //until I fix the behavior of the list, only able to store service (also adjust zindex then!)
+                    //until I fix the behavior of the (general)list, only able to store service (also adjust zindex(e) then!)
                     if ($scope.generallist.length < 1) {
                         console.log('tab -> general');
                         //MOVE!

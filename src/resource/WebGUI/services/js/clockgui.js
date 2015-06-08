@@ -1,14 +1,18 @@
 angular.module('mrlapp.service.clockgui', [])
 
-        .controller('ClockGuiCtrl', ['$scope', 'ServiceControllerService', function ($scope, ServiceControllerService) {
+        .controller('ClockGuiCtrl', ['$scope', function ($scope) {
 
-                $scope.inst.methods.pulse = function () {
-                    console.log("pulse - YEAH!!!");
-                };
+                if ($scope.inst.data.test != 'yaya') {
+                    $scope.inst.data.test = 'yaya';
+                    //only call subscribe once (loop!, onLocalServices is send back, reinitializing, re-subscribing, ...)
+                    //-> fix Java (I think)
+                    $scope.inst.fw.subscribe("pulse", "pulse");
+                }
 
-                //refactor & ...
-                ServiceControllerService.addListener($scope.name, "pulse", "pulse");
-
-                //let "pulse" be called
-                ServiceControllerService.test($scope.name);
+//                $scope.inst.methods.pulse = function () {
+//                    console.log("pulse - YEAH!!!");
+//                };
+//
+//                //let "pulse" be called
+//                ServiceControllerService.test($scope.name, "pulse");
             }]);
