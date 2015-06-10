@@ -1,11 +1,12 @@
 angular.module('mrlapp', [
     'ui.bootstrap',
+    'oc.lazyLoad',
     'mrlapp.wsconn',
-    'mrlapp.service',
-    'mrlapp.service.arduinogui',
-    'mrlapp.service.clockgui',
-    'mrlapp.service.webguigui',
-    'mrlapp.service.runtimegui'
+    'mrlapp.service'
+//    'mrlapp.service.arduinogui',
+//    'mrlapp.service.clockgui',
+//    'mrlapp.service.runtimegui',
+//    'mrlapp.service.webguigui'
 ])
 
         .service('InstanceService', [function () {

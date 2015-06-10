@@ -15,11 +15,18 @@ angular.module('mrlapp.service', [])
                 };
             }])
 
-        .controller('ServiceCtrl', ['$scope', '$modal', 'ServiceControllerService', function ($scope, $modal, ServiceControllerService) {
+        .controller('ServiceCtrl', ['$scope', '$ocLazyLoad', '$modal', 'ServiceControllerService', function ($scope, $ocLazyLoad, $modal, ServiceControllerService) {
                 $scope.name = $scope.list[$scope.index].name;
                 $scope.drag = $scope.list[$scope.index].drag;
                 $scope.type = $scope.list[$scope.index].type;
                 $scope.simpletype = $scope.list[$scope.index].simpletype;
+
+                //load the service(-module) (lazy) (from the server)
+                //TODO: should I really do this here?
+                console.log('lazy-loading:', $scope.type);
+                $ocLazyLoad.load("services/js/" + $scope.type + "gui.js").then(function () {
+                    $scope.serviceloaded = true;
+                });
 
                 //START_specific Service-Initialisation
                 //"inst" is given to the specific service-UI
