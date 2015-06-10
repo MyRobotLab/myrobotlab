@@ -14,7 +14,9 @@
         </div>
         <div class="panel-body" ng-show="inst.fw.size != 'tiny' && inst.fw.size != 'full'">
             <!--body-->
-            <div service-body="views/service.html" type="{{type}}" name="name" inst="inst"></div>
+            <div ng-if="serviceloaded">
+                <div service-body="views/service.html" type="{{type}}" name="name" inst="inst"></div>
+            </div>
         </div>
         <div class="panel-footer" ng-show="!inst.fw.forcesize">
             <!--footer-->
