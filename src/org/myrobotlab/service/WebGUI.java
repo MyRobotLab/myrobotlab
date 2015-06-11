@@ -525,6 +525,23 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	public void autoStartBrowser(boolean autoStartBrowser) {
 		this.autoStartBrowser = autoStartBrowser;
 	}
+	
+	@Override
+	public boolean preProcessHook(Message m) {
+		// FIXME - problem with collisions of this service's methods
+		// and dialog methods ?!?!?
+
+		// FIXME - collisions may exist
+		// if the method name is == to a method in the GUIService
+		if (methodSet.contains(m.method)) {
+			// process the message like a regular service
+			return true;
+		}
+
+		// otherwise send the message to the dialog with the senders name
+		broadcast(m);
+		return false;
+	}
 
 	
 	public static void main(String[] args) {
