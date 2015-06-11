@@ -50,7 +50,6 @@ import org.slf4j.Logger;
 //@ManagedService(path = "/api")
 //@ManagedService(path = "/snake")
 
-
 public class WebGUI extends Service implements AuthorizationProvider, Gateway, Handler {
 
 	private static final long serialVersionUID = 1L;
@@ -65,10 +64,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	public String root = "root";
 	boolean useLocalResources = false;
 	boolean autoStartBrowser = true;
-	
+
 	public String startURL = "http://127.0.0.1:%d/index.html";
 
-	
 	// FIXME - shim for Shoutbox
 	// deprecate ???
 	public static class WebMsg {
@@ -76,11 +74,11 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// socket
 		Message msg;
 	}
-	
+
 	// SHOW INTERFACE
 	// FIXME - allowAPI1(true|false)
 	// FIXME - allowAPI2(true|false)
-	// FIXME - allow Protobuf/Thrift/Avro 
+	// FIXME - allow Protobuf/Thrift/Avro
 	// FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
 	public WebGUI(String n) {
@@ -170,41 +168,42 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 	public void startService() {
 
-		//Broadcaster b = broadcasterFactory.get();
-		
+		// Broadcaster b = broadcasterFactory.get();
+
 		// a session "might" be nice - but for now we are stateless
 		// SessionSupport ss = new SessionSupport();
 
 		Config.Builder configBuilder = new Config.Builder();
 		configBuilder
-		//.resource("C:\\tools\\myrobotlab-WebGUI\\src\\resource\\WebGUI")
-		
-				//.resource("./root")
+				// .resource("C:\\tools\\myrobotlab-WebGUI\\src\\resource\\WebGUI")
+
+				// .resource("./root")
 				.resource("./src/resource/WebGUI")
-                .resource("./src/resource")
-				// .resource("./rest")  SHOULD I DO THIS ?
+				.resource("./src/resource")
+				// .resource("./rest") SHOULD I DO THIS ?
 				// .resource(this)
 				// Support 2 APIs
-				// REST - http://host/object/method/param0/param1/...  synchronous DO NOT SUSPEND
-				.resource("/api", this)// TODO - go beyond Servlets
-				//.resource("/api", WebGUIServlet.class)
+				// REST - http://host/object/method/param0/param1/...
+				// synchronous DO NOT SUSPEND
+				.resource("/api", this)
+				// TODO - go beyond Servlets
+				// .resource("/api", WebGUIServlet.class)
 
 				// For mvn exec:java
 				// .resource("./src/main/resources")
 
 				// For running inside an IDE
 				// .resource("./nettosphere-samples/games/src/main/resources")
-		
-				// if Jetty is in the classpath it will use it by default - we want to use Netty
-				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport")
-				.initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
-				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true")
-				.port(port).host("0.0.0.0").build();
-		//.host("127.0.0.1").build();
+
+				// if Jetty is in the classpath it will use it by default - we
+				// want to use Netty
+				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
+				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build();
+		// .host("127.0.0.1").build();
 		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
-		
+
 		s.start();
-		
+
 		broadcastFactory = s.framework().getBroadcasterFactory();
 		// get default boadcaster
 		broadcaster = broadcastFactory.get("/*");
@@ -217,7 +216,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			log.info("auto starting default browser");
 			BareBonesBrowserLaunch.openURL(String.format(startURL, port));
 		}
-		
+
 	}
 
 	@Override
@@ -229,8 +228,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	public String getDescription() {
 		return "web enabled gui";
 	}
-	
-	
+
 	public Map<String, String> getHeadersInfo(HttpServletRequest request) {
 
 		Map<String, String> map = new HashMap<String, String>();
@@ -246,22 +244,21 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	}
 
 	/**
-	 * With a single method Atmosphere does so much !!!
-	 * It sets up the connection, possibly gets a session, turns the
-	 * request into something like a HTTPServletRequest, provides us with 
-	 * input & output streams - and manages all the "long polling" or websocket
-	 * upgrades on its own !
+	 * With a single method Atmosphere does so much !!! It sets up the
+	 * connection, possibly gets a session, turns the request into something
+	 * like a HTTPServletRequest, provides us with input & output streams - and
+	 * manages all the "long polling" or websocket upgrades on its own !
 	 * 
 	 * Atmosphere Rocks !
 	 */
 	@Override
 	public void handle(AtmosphereResource r) {
-		
+
 		Codec codec = null;
 		OutputStream out = null;
 
 		try {
-			
+
 			AtmosphereRequest request = r.getRequest();
 			AtmosphereResponse response = r.getResponse();
 			InputStream in = r.getRequest().getInputStream();
@@ -275,7 +272,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			if (headers.containsKey("accept")) {
 				log.info(String.format(String.format("out encoding : accept %s", headers.get("accept"))));
 			}
-			
+
 			// FIXME reconstruct REST request & log
 			String pathInfo = request.getPathInfo();
 			String[] parts = null;
@@ -292,75 +289,68 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				handleError(out, codec, "API", "http(s)://{host}:{port}/api/{api-type}/{Object}/{Method}");
 				return;
 			}
-			
+
 			// set specified encoder
-			
+
 			String apiTypeKey = parts[2];
-			
-			if ("messages".equals(apiTypeKey)){
-				if (!r.isSuspended()){
+
+			if ("messages".equals(apiTypeKey)) {
+				if (!r.isSuspended()) {
 					r.suspend();
 				}
 			}
-			
+
 			String codecMimeType = Encoder.getKeyToMimeType(apiTypeKey);
-			if (!codecMimeType.equals(codec.getMimeType())){
-				// request to switch codec types on 
+			if (!codecMimeType.equals(codec.getMimeType())) {
+				// request to switch codec types on
 				codec = CodecFactory.getCodec(codecMimeType);
 			}
-			
+
 			response.addHeader("Content-Type", codec.getMimeType());
 
 			ArrayList<MethodEntry> info = null;
 			if (parts.length == 3) {
-				// *** /api/messages  **
-				
+				// *** /api/messages **
+
 				ServiceEnvironment si = Runtime.getLocalServices();
-				
-				/* TODO - relfect with javdoc info
-				log.info("inspecting");
-				
-				Method[] methods = clazz.getDeclaredMethods();
-				info = new ArrayList<MethodInfo>();
-				for (Method method : methods) {
-					if (!filter.contains(method.getName())) {
-						MethodInfo m = new MethodInfo();
-						m.name = method.getName();
-						Class<?>[] types = method.getParameterTypes();
-						m.parameterTypes = new String[types.length];
-						for (int i = 0; i < types.length; ++i) {
-							m.parameterTypes[i] = types[i].getSimpleName()
-						}
-						m.returnType = method.getReturnType().getSimpleName(); // NULL
-																				// ?
-						info.add(m);
-					}
-				}
-				*/
-				
+
+				/*
+				 * TODO - relfect with javdoc info log.info("inspecting");
+				 * 
+				 * Method[] methods = clazz.getDeclaredMethods(); info = new
+				 * ArrayList<MethodInfo>(); for (Method method : methods) { if
+				 * (!filter.contains(method.getName())) { MethodInfo m = new
+				 * MethodInfo(); m.name = method.getName(); Class<?>[] types =
+				 * method.getParameterTypes(); m.parameterTypes = new
+				 * String[types.length]; for (int i = 0; i < types.length; ++i)
+				 * { m.parameterTypes[i] = types[i].getSimpleName() }
+				 * m.returnType = method.getReturnType().getSimpleName(); //
+				 * NULL // ? info.add(m); } }
+				 */
+
 				respond(out, codec, "getLocalServices", si);
 				return;
 			} else if (parts.length == 4) {
-				// *** /api/messages/runtime  ***
+				// *** /api/messages/runtime ***
 				ServiceInterface si = Runtime.getService(parts[3]);
 				Method[] methods = si.getDeclaredMethods();
 				respond(out, codec, "getDeclaredMethods", si);
 				return;
-			}/* else if (parts.length > 3) {
-				String serviceName = parts[2];
-				String method = parts[3];
-				
-				ServiceInterface si = Runtime.getService(serviceName);
-				
-				// decode parameters 
-				String[] params = new String[parts.length - 4]; // <- this i "wrong" - a big assumption that they are "Strings"
-				Object[] 
-				for (int i = 0; i < params.length; ++i){
-					
-				}
-				
-			}*/
-			
+			}/*
+			 * else if (parts.length > 3) { String serviceName = parts[2];
+			 * String method = parts[3];
+			 * 
+			 * ServiceInterface si = Runtime.getService(serviceName);
+			 * 
+			 * // decode parameters String[] params = new String[parts.length -
+			 * 4]; // <- this i "wrong" - a big assumption that they are
+			 * "Strings" Object[] for (int i = 0; i < params.length; ++i){
+			 * 
+			 * }
+			 * 
+			 * }
+			 */
+
 			String name = parts[2];
 
 			ServiceInterface si = Runtime.getService(name);
@@ -382,10 +372,11 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 					return;
 				}
 			}
-			
-			// FIXME - sloppy to convert to String here - should be done in the Encoder (if that happens)
+
+			// FIXME - sloppy to convert to String here - should be done in the
+			// Encoder (if that happens)
 			String b = null;
-			if (body != null){
+			if (body != null) {
 				b = new String(body);
 			}
 			log.info(String.format("POST Body [%s]", b));
@@ -432,8 +423,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 				// WE NOW HAVE ORDINAL
 			}
-					
-			// FETCH AND MERGE METHOD - we have ordinal count now - but NOT the decoded
+
+			// FETCH AND MERGE METHOD - we have ordinal count now - but NOT the
+			// decoded
 			// parameters
 			// NOW HAVE ORDINAL - fetch the method with its types
 			paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), methodName, encodedArray.length);
@@ -442,11 +434,11 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			// DECODE AND FILL THE PARAMS
 			for (int i = 0; i < params.length; ++i) {
-				
+
 				params[i] = codec.decode(encodedArray[i], paramTypes[i]);
 			}
 
-			Method method = clazz.getMethod(methodName, paramTypes); 
+			Method method = clazz.getMethod(methodName, paramTypes);
 
 			// NOTE --------------
 			// strategy of find correct method with correct parameter types
@@ -461,22 +453,24 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			Object ret = method.invoke(si, params);
 			respond(out, codec, method.getName(), ret);
-			
+
 			MethodCache.cache(clazz, method);
-			
-			// FIXME - there is no content mime-type being set !!! this would depend on codec being used
-			// FIXME - currently a keyword - "json" internally defines the codec - getMimeType !!
+
+			// FIXME - there is no content mime-type being set !!! this would
+			// depend on codec being used
+			// FIXME - currently a keyword - "json" internally defines the codec
+			// - getMimeType !!
 
 		} catch (Exception e) {
 			handleError(out, codec, e);
 		}
 
 	}
-	
+
 	// FIXME !!! - ALL CODECS SHOULD HANDLE MSG INSTEAD OF OBJECT !!!
-	// THEN YOU COULD ALSO HAVE urlToMsg(URL url) 
+	// THEN YOU COULD ALSO HAVE urlToMsg(URL url)
 	// "lower layer encoders can strip down to the data" !!!
-	public void respond(OutputStream out, Codec codec, String method, Object ret) throws Exception{
+	public void respond(OutputStream out, Codec codec, String method, Object ret) throws Exception {
 		// getName() ? -> should it be AngularJS client name ?
 		Message msg = createMessage(getName(), Encoder.getCallBackName(method), ret);
 		codec.encode(out, msg);
@@ -496,21 +490,21 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			Logging.logError(e);
 		}
 	}
-	
-	public void extract(){
+
+	public void extract() {
 		try {
 			Zip.extractFromFile("./myrobotlab.jar", "root", "resource/WebGUI");
 		} catch (IOException e) {
 			error(e);
 		}
 	}
-	
-	/** - use the service's error() pub sub return
-	public void handleError(){
-		
-	}
-	*/
-	
+
+	/**
+	 * - use the service's error() pub sub return public void handleError(){
+	 * 
+	 * }
+	 */
+
 	/**
 	 * determines if references to JQuery JavaScript library are local or if the
 	 * library is linked to using content delivery network. Default (false) is
@@ -521,11 +515,11 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	public void useLocalResources(boolean useLocalResources) {
 		this.useLocalResources = useLocalResources;
 	}
-	
+
 	public void autoStartBrowser(boolean autoStartBrowser) {
 		this.autoStartBrowser = autoStartBrowser;
 	}
-	
+
 	@Override
 	public boolean preProcessHook(Message m) {
 		// FIXME - problem with collisions of this service's methods
@@ -543,26 +537,29 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		return false;
 	}
 
-	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
-			
-			//Uri.
-			//Uri myUri = Uri.parse("http://stackoverflow.com");
+
+			// Uri.
+			// Uri myUri = Uri.parse("http://stackoverflow.com");
 
 			WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
 			// webgui.extract();
 			
+            Runtime.start("clck", "Clock");
+            Runtime.start("clck2", "Clock");
+            Runtime.start("clck3", "Clock");
+
+
 			/*
-			Message msg = webgui.createMessage("runtime", "start", new Object[]{"arduino", "Arduino"});
-			String json = Encoder.toJson(msg);
-			log.info(json);
-			// Runtime.start("gui", "GUIService");
-			log.info(json);
-			*/
+			 * Message msg = webgui.createMessage("runtime", "start", new
+			 * Object[]{"arduino", "Arduino"}); String json =
+			 * Encoder.toJson(msg); log.info(json); // Runtime.start("gui",
+			 * "GUIService"); log.info(json);
+			 */
 
 		} catch (Exception e) {
 			Logging.logError(e);
