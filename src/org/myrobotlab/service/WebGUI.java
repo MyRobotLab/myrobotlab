@@ -548,6 +548,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
 			// webgui.extract();
+                        Runtime.start("clck", "Clock");
+                        Runtime.start("clck2", "Clock");
+                        Runtime.start("clck3", "Clock");
 			
             Runtime.start("clck", "Clock");
             Runtime.start("clck2", "Clock");
