@@ -179,7 +179,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 				// .resource("./root")
 				.resource("./src/resource/WebGUI")
+				//.resource("./src/resource/MaVo_WebGUI")
 				.resource("./src/resource")
+				//.resource("./src/resource")
 				// .resource("./rest") SHOULD I DO THIS ?
 				// .resource(this)
 				// Support 2 APIs
@@ -197,7 +199,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 				// if Jetty is in the classpath it will use it by default - we
 				// want to use Netty
-				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
+				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport")
+				.initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
 				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build();
 		// .host("127.0.0.1").build();
 		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
@@ -548,14 +551,15 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
 			// webgui.extract();
-                        Runtime.start("clck", "Clock");
-                        Runtime.start("clck2", "Clock");
-                        Runtime.start("clck3", "Clock");
-			
-            Runtime.start("clck", "Clock");
-            Runtime.start("clck2", "Clock");
-            Runtime.start("clck3", "Clock");
+			/*
+			Runtime.start("clck", "Clock");
+			Runtime.start("clck2", "Clock");
+			Runtime.start("clck3", "Clock");
 
+			Runtime.start("clck", "Clock");
+			Runtime.start("clck2", "Clock");
+			Runtime.start("clck3", "Clock");
+			*/
 
 			/*
 			 * Message msg = webgui.createMessage("runtime", "start", new

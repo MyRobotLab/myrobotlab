@@ -1,0 +1,103 @@
+        <div class="navbar navbar-inverse" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">MyRobotLab</a>
+                </div>
+                <div class="collapse navbar-collapse navbar-ex1-collapse">
+
+                    <ul class="nav navbar-nav">
+                        <li><a href="http://www.myrobotlab.org">/MyRobotLab.org</a></li>
+                        <!--<li><a href="/b">/b</a></li>
+                        <li><a href="/c">/c</a></li>
+                        <li><a href="/d">/d</a></li>
+                        <li><a href="/e">/e</a></li>-->
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                            <!--Connection-->
+                            <li>
+                            <form class="navbar-form">
+                                <div class="input-group" dropdown>
+                                    <input type="text" class="form-control" style="width: 500px"
+                                           placeholder="http://localhost:7777" ng-model="Connection" readonly>
+                                    <div class="input-group-btn" dropdown-toggle>
+                                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Connection">
+                                            <i class="glyphicon glyphicon-link"></i>
+                                        </button>
+                                    </div>
+                                    <ul class="dropdown-menu" style="width: 540px">
+                                    <!--
+                                        <li ng-repeat="status in statuslist| reverse track by $index "><a href="#">{{status}}</a></li>
+                                       -->
+                                        <!--<li><a href="#"><i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;Edit</a></li>
+                                        <li><a href="#"><i class="glyphicon glyphicon-trash"></i>&nbsp;&nbsp;Delete</a></li>-->
+                                    </ul>
+                                </div>
+                            </form>
+                        </li>
+                        <!--Status-->
+                        <!--TODO: (maybe) integrate a glyphicon (or picture) before the status (status-type, from which service the status came, ...(or something even better))-->
+                        <li>
+                            <form class="navbar-form">
+                                <div class="input-group" dropdown>
+                                    <input type="text" class="form-control" style="width: 500px"
+                                           placeholder="Status" ng-model="statuslist[statuslist.length - 1]" readonly>
+                                    <div class="input-group-btn" dropdown-toggle>
+                                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Status">
+                                            <i class="glyphicon glyphicon-dashboard"></i>
+                                        </button>
+                                    </div>
+                                    <ul class="dropdown-menu" style="width: 540px">
+                                    <!--
+                                        <li ng-repeat="status in statuslist| reverse track by $index "><a href="#">{{status}}</a></li>
+                                       -->
+                                        <!--<li><a href="#"><i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;Edit</a></li>
+                                        <li><a href="#"><i class="glyphicon glyphicon-trash"></i>&nbsp;&nbsp;Delete</a></li>-->
+                                    </ul>
+                                </div>
+                            </form>
+                        </li>
+                        <!--About-->
+                        <li>
+                            <form class="navbar-form">
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="About" ng-click="about()">
+                                    <i class="glyphicon glyphicon-info-sign"></i>
+                                </button>
+                            </form>
+                        </li>
+                        <!--Help-->
+                        <li>
+                            <form class="navbar-form">
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Help" ng-click="help()">
+                                    <i class="glyphicon glyphicon-question-sign"></i>
+                                </button>
+                            </form>
+                        </li>
+                        <!--Search-->
+                        <li>
+                            <form class="navbar-form" role="search">
+                                <div class="input-group">
+                                    <input type="text" class="form-control"
+                                           placeholder="Search"
+                                           ng-model="searchSelectedService"
+                                           typeahead="service as service.name for service in allServices | filter:{name:$viewValue}"
+                                           typeahead-template-url="views/searchtemplate.html"
+                                           typeahead-on-select='searchOnSelect($item, $model, $label)'>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Search">
+                                            <i class="glyphicon glyphicon-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>

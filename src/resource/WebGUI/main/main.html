@@ -1,0 +1,26 @@
+current gateway : {{name}}<br/>
+platform: {{platform}}<br/>
+services
+<ul>
+    <li ng-repeat="service in serviceDirectory"> {{service.name}} </li>
+</ul>
+
+<div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6" style="min-height: 200px">
+                    <!--<div drop-component list="generallist" size="forcetiny"></div>-->
+                    <div ng-repeat="item in generallist"
+                         service-component
+                         style="width: 500px"
+                         index="{{$index}}"
+                         list="generallist"
+                         reftomain="reftomain"
+                         size="forcetiny">
+                    s</div>
+                </div>
+                <div class="col-md-6">
+                    <div>DEBUG-SECTION not assigned yet</div>
+                    <pre>Model: {{searchSelectedService| json}}</pre>
+                </div>
+            </div>
+</div>       
