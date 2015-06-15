@@ -4,7 +4,8 @@ angular.module('mrlapp.service', [])
                 return {
                     scope: {
                         name: '=name',
-                        inst: '=inst'
+                        inst: '=inst',
+                        myService: '=myService'
                     },
                     link: function (scope, elem, attr) {
                         scope.getContentUrl = function () {
@@ -15,28 +16,22 @@ angular.module('mrlapp.service', [])
                 };
             }])
 
-        .controller('ServiceCtrl', ['$scope', '$ocLazyLoad', '$modal', 'ServiceControllerService', function ($scope, $ocLazyLoad, $modal, ServiceControllerService) {
+        .controller('ServiceCtrl', ['$scope', '$modal', 'mrl', function ($scope, $modal, mrl) {
                 $scope.name = $scope.list[$scope.index].name;
                 $scope.drag = $scope.list[$scope.index].drag;
                 $scope.type = $scope.list[$scope.index].type;
                 $scope.simpletype = $scope.list[$scope.index].simpletype;
 
-                //load the service(-module) (lazy) (from the server)
-                //TODO: should I really do this here?
-                console.log('lazy-loading:', $scope.type);
-                $ocLazyLoad.load("services/js/" + $scope.type + "gui.js").then(function () {
-                    $scope.serviceloaded = true;
-                });
-
                 //START_specific Service-Initialisation
                 //"inst" is given to the specific service-UI
-                $scope.inst = ServiceControllerService.getServiceInst($scope.name);
+                $scope.inst = mrl.getService($scope.name);
                 if ($scope.inst == null) {
                     $scope.inst = {};
                     $scope.inst.fw = {}; //framework-section - DO NOT WRITE IN THERE!
                     $scope.inst.data = {}; //data-section
                     $scope.inst.methods = {}; //methods-section
-                    ServiceControllerService.addService($scope.name, $scope.inst);
+                    $scope.inst.myService = mrl.services[$scope.name];
+                    mrl.addService($scope.name, $scope.inst);
                 }
                 console.log("$scope,size", $scope.size);
                 if ($scope.size != null && $scope.size.lastIndexOf("force", 0) == 0) {
@@ -63,13 +58,13 @@ angular.module('mrlapp.service', [])
                         $scope.inst.fw.sendTo($scope.name, method, data);
                     };
                     $scope.inst.fw.sendTo = function (name, method, data) {
-                        ServiceControllerService.sendTo(name, method, data);
+                        mrl.sendTo(name, method, data);
                     };
                     $scope.inst.fw.subscribe = function (inMethod, outMethod) {
                         $scope.inst.fw.subscribeTo($scope.name, inMethod, outMethod);
                     };
                     $scope.inst.fw.subscribeTo = function (publisherName, inMethod, outMethod) {
-                        ServiceControllerService.subscribeTo(publisherName, inMethod, outMethod);
+                        mrl.subscribeTo(publisherName, inMethod, outMethod);
                     };
                 }
                 //to be overridden (fallback, if not)
@@ -121,6 +116,13 @@ angular.module('mrlapp.service', [])
                         });
                     }
                 };
+                
+                angular.element(document).ready(function () {
+                    console.log('Hello World');
+                    mrl.registerForServices($scope.createService);
+                    mrl.connect(document.location.origin.toString() + '/api/messages');
+                });
+
             }])
 
         .controller('ServiceFullCtrl', function ($scope, $modalInstance, name, type, simpletype, inst) {
