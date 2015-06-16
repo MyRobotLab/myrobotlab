@@ -259,9 +259,9 @@ public class Encoder {
 	static public final String getCallBackName(String topicMethod) {
 		// replacements
 		if (topicMethod.startsWith("publish")) {
-			return String.format("on%s", topicMethod.substring("publish".length()));
+			return String.format("on%s", capitalize(topicMethod.substring("publish".length())));
 		} else if (topicMethod.startsWith("get")) {
-			return String.format("on%s", topicMethod.substring("get".length()));
+			return String.format("on%s", capitalize(topicMethod.substring("get".length())));
 		}
 
 		// no replacement - just pefix and capitalize

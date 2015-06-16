@@ -12,6 +12,7 @@ angular.module('mrlapp', ['ui.bootstrap',
 						'mrlapp.mrl', 
 						'mrlapp.main.mainContoller', 
 						'mrlapp.main.serviceDirective', 
+						'mrlapp.test.testController', 
 						'ngRoute' 
 
 						/*
@@ -31,12 +32,9 @@ angular.module('mrlapp', ['ui.bootstrap',
         }).when('/workpace', {
             templateUrl: 'main/workspace.html',
         //controller : 'PhoneListCtrl'
-        }).when('/services', {
-            templateUrl: 'main/phone-list.html',
-        //controller : 'PhoneListCtrl'
-        }).when('/service/:name', {
-            templateUrl: 'main/phone-detail.html',
-        //controller : 'PhoneDetailCtrl'
+        }).when('/test', {
+            templateUrl: 'test/test.html',
+        	controller: 'testController'
         }).otherwise({
             redirectTo: '/main'
         });

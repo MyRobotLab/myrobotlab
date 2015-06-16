@@ -280,6 +280,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			String pathInfo = request.getPathInfo();
 			String[] parts = null;
 
+			// GET vs POST - post assumes low-level messaging
+			// GET is high level synchronous
+			String httpMethod = request.getMethod();
+			
 			// get default encoder
 			codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
 
