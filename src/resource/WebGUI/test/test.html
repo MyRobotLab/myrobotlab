@@ -1,0 +1,30 @@
+<h2>Testing !</h2>
+current name : {{name}}<br/>
+current gateway : {{gateway.name}}<br/>
+current runtime : {{runtime.name}}<br/>
+platform: {{platform.arch}}.{{platform.bitness}}.{{platform.os}}<br/>
+version: {{platform.mrlVersion}}<br/>
+<h3>services</h3>
+<ul>
+    <li ng-repeat="service in serviceDirectory"> {{service.name}} </li>
+</ul>
+
+<div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6" style="min-height: 200px">
+                    <!--<div drop-component list="generallist" size="forcetiny"></div>-->
+                    <div ng-repeat="item in generallist"
+                         service-component
+                         style="width: 500px"
+                         index="{{$index}}"
+                         list="generallist"
+                         reftomain="reftomain"
+                         size="forcetiny">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div>DEBUG-SECTION not assigned yet</div>
+                    <pre>Model: {{searchSelectedService| json}}</pre>
+                </div>
+            </div>
+</div>       
