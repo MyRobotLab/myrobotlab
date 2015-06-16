@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.AtmosphereRequest;
+import org.atmosphere.cpr.AtmosphereRequest.Body;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
@@ -167,7 +168,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	// ================ Broadcaster end ===========================
 
 	public void startService() {
-
+		super.startService();
 		// Broadcaster b = broadcasterFactory.get();
 
 		// a session "might" be nice - but for now we are stateless
@@ -312,6 +313,20 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// request to switch codec types on
 				codec = CodecFactory.getCodec(codecMimeType);
 			}
+			
+			/*
+			 interesting ....
+			 switch (r.transport()) {
+					case JSONP:
+					case LONG_POLLING:
+					      event.getResource().resume();
+					    break;
+					case WEBSOCKET:
+					case STREAMING:
+					  res.getWriter().flush();
+					break;
+					}
+			 */
 
 			response.addHeader("Content-Type", codec.getMimeType());
 
@@ -319,8 +334,19 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			if (parts.length == 3) {
 				// *** /api/messages **
 
-				ServiceEnvironment si = Runtime.getLocalServices();
+				// starndard JSON asynchronous message with POST'ed parameters
+				if ("messages".equals(parts[2]) && "POST".equals(httpMethod)){
+					Body body = request.body();
+					Message msg = Encoder.fromJson(body.asString(), Message.class);
+					msg.sender = getName();
+					log.info(String.format("got msg %s", msg.toString()));
+					out(msg);
+					return;
+				}
 
+				
+				ServiceEnvironment si = Runtime.getLocalServices();
+				
 				/*
 				 * TODO - relfect with javdoc info log.info("inspecting");
 				 * 
