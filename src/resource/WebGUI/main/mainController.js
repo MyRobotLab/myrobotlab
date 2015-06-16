@@ -15,7 +15,7 @@ angular.module('mrlapp.main.mainContoller', ['mrlapp.mrl'])
                 //$scope.platform = msg.data[0].platform;
                 console.log("YAY ! - ");
 
-                mrl.subscribe('runtime', 'onRegister');
+                mrl.subscribe('runtime', 'registered');
             //console.log('trying to launch ' + service.name + ' of ' + service.simpleName + ' / ' + service.serviceClass);
             });
         };
