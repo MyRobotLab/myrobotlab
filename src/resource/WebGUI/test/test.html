@@ -23,6 +23,13 @@ version: {{platform.mrlVersion}}<br/>
                     </div>
                 </div>
                 <div class="col-md-6">
+                <form class="service-form">
+                    <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="About" ng-click="start()">
+                        <i class="glyphicon glyphicon-info-sign"></i>
+                    </button>
+                    <input type="text" class="form-control" style="vertical-align: top;width: 200px" placeholder="clock01" ng-model="testName"></input>
+                    <input type="text" class="form-control" style="vertical-align: top;width: 200px" placeholder="Clock" ng-model="testType"></input>
+                </form>
                     <div>DEBUG-SECTION not assigned yet</div>
                     <pre>Model: {{searchSelectedService| json}}</pre>
                 </div>
