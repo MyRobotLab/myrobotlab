@@ -1,8 +1,10 @@
 package org.myrobotlab.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -162,7 +164,15 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 	// ================ Broadcaster begin ===========================
 	public void broadcast(Message msg) {
-		broadcaster.broadcast(msg); // wtf
+		try {
+			Codec codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			codec.encode(bos, msg);
+			bos.close();
+			broadcaster.broadcast(new String(bos.toByteArray())); // wtf
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 	// ================ Broadcaster end ===========================
@@ -180,9 +190,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 				// .resource("./root")
 				.resource("./src/resource/WebGUI")
-				//.resource("./src/resource/MaVo_WebGUI")
+				// .resource("./src/resource/MaVo_WebGUI")
 				.resource("./src/resource")
-				//.resource("./src/resource")
+				// .resource("./src/resource")
 				// .resource("./rest") SHOULD I DO THIS ?
 				// .resource(this)
 				// Support 2 APIs
@@ -200,8 +210,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 				// if Jetty is in the classpath it will use it by default - we
 				// want to use Netty
-				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport")
-				.initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
+				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
 				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build();
 		// .host("127.0.0.1").build();
 		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
@@ -221,6 +230,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			BareBonesBrowserLaunch.openURL(String.format(startURL, port));
 		}
 
+		// susbcribe to our Runtimes methods of interest
+		Runtime runtime = Runtime.getInstance();
+		subscribe(runtime.getName(), "registered");
+		subscribe(runtime.getName(), "released");
 	}
 
 	@Override
@@ -248,10 +261,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	}
 
 	/**
-	 * With a single method Atmosphere does so much !!! It sets up the
-	 * connection, possibly gets a session, turns the request into something
-	 * like a HTTPServletRequest, provides us with input & output streams - and
-	 * manages all the "long polling" or websocket upgrades on its own !
+	 * With a single method Atmosphere does so much !!! It sets up the connection, possibly gets a session, turns the request into something like a HTTPServletRequest, provides us
+	 * with input & output streams - and manages all the "long polling" or websocket upgrades on its own !
 	 * 
 	 * Atmosphere Rocks !
 	 */
@@ -267,6 +278,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			AtmosphereResponse response = r.getResponse();
 			InputStream in = r.getRequest().getInputStream();
 			out = r.getResponse().getOutputStream();
+
+			r.setBroadcaster(broadcaster);
 
 			Map<String, String> headers = getHeadersInfo(request);
 
@@ -284,7 +297,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// GET vs POST - post assumes low-level messaging
 			// GET is high level synchronous
 			String httpMethod = request.getMethod();
-			
+
 			// get default encoder
 			codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
 
@@ -313,19 +326,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// request to switch codec types on
 				codec = CodecFactory.getCodec(codecMimeType);
 			}
-			
+
 			/*
-			 interesting ....
-			 switch (r.transport()) {
-					case JSONP:
-					case LONG_POLLING:
-					      event.getResource().resume();
-					    break;
-					case WEBSOCKET:
-					case STREAMING:
-					  res.getWriter().flush();
-					break;
-					}
+			 * interesting .... switch (r.transport()) { case JSONP: case LONG_POLLING: event.getResource().resume(); break; case WEBSOCKET: case STREAMING:
+			 * res.getWriter().flush(); break; }
 			 */
 
 			response.addHeader("Content-Type", codec.getMimeType());
@@ -335,7 +339,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// *** /api/messages **
 
 				// starndard JSON asynchronous message with POST'ed parameters
-				if ("messages".equals(parts[2]) && "POST".equals(httpMethod)){
+				if ("messages".equals(parts[2]) && "POST".equals(httpMethod)) {
 					Body body = request.body();
 					Message msg = Encoder.fromJson(body.asString(), Message.class);
 					msg.sender = getName();
@@ -344,21 +348,15 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 					return;
 				}
 
-				
 				ServiceEnvironment si = Runtime.getLocalServices();
-				
+
 				/*
 				 * TODO - relfect with javdoc info log.info("inspecting");
 				 * 
-				 * Method[] methods = clazz.getDeclaredMethods(); info = new
-				 * ArrayList<MethodInfo>(); for (Method method : methods) { if
-				 * (!filter.contains(method.getName())) { MethodInfo m = new
-				 * MethodInfo(); m.name = method.getName(); Class<?>[] types =
-				 * method.getParameterTypes(); m.parameterTypes = new
-				 * String[types.length]; for (int i = 0; i < types.length; ++i)
-				 * { m.parameterTypes[i] = types[i].getSimpleName() }
-				 * m.returnType = method.getReturnType().getSimpleName(); //
-				 * NULL // ? info.add(m); } }
+				 * Method[] methods = clazz.getDeclaredMethods(); info = new ArrayList<MethodInfo>(); for (Method method : methods) { if (!filter.contains(method.getName())) {
+				 * MethodInfo m = new MethodInfo(); m.name = method.getName(); Class<?>[] types = method.getParameterTypes(); m.parameterTypes = new String[types.length]; for (int
+				 * i = 0; i < types.length; ++i) { m.parameterTypes[i] = types[i].getSimpleName() } m.returnType = method.getReturnType().getSimpleName(); // NULL // ? info.add(m);
+				 * } }
 				 */
 
 				respond(out, codec, "getLocalServices", si);
@@ -370,14 +368,12 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				respond(out, codec, "getDeclaredMethods", si);
 				return;
 			}/*
-			 * else if (parts.length > 3) { String serviceName = parts[2];
-			 * String method = parts[3];
+			 * else if (parts.length > 3) { String serviceName = parts[2]; String method = parts[3];
 			 * 
 			 * ServiceInterface si = Runtime.getService(serviceName);
 			 * 
-			 * // decode parameters String[] params = new String[parts.length -
-			 * 4]; // <- this i "wrong" - a big assumption that they are
-			 * "Strings" Object[] for (int i = 0; i < params.length; ++i){
+			 * // decode parameters String[] params = new String[parts.length - 4]; // <- this i "wrong" - a big assumption that they are "Strings" Object[] for (int i = 0; i <
+			 * params.length; ++i){
 			 * 
 			 * }
 			 * 
@@ -539,9 +535,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	 */
 
 	/**
-	 * determines if references to JQuery JavaScript library are local or if the
-	 * library is linked to using content delivery network. Default (false) is
-	 * to use the CDN
+	 * determines if references to JQuery JavaScript library are local or if the library is linked to using content delivery network. Default (false) is to use the CDN
 	 * 
 	 * @param b
 	 */
@@ -582,20 +576,14 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
 			// webgui.extract();
 			/*
-			Runtime.start("clck", "Clock");
-			Runtime.start("clck2", "Clock");
-			Runtime.start("clck3", "Clock");
-
-			Runtime.start("clck", "Clock");
-			Runtime.start("clck2", "Clock");
-			Runtime.start("clck3", "Clock");
-			*/
+			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock"); Runtime.start("clck3", "Clock");
+			 * 
+			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock"); Runtime.start("clck3", "Clock");
+			 */
 
 			/*
-			 * Message msg = webgui.createMessage("runtime", "start", new
-			 * Object[]{"arduino", "Arduino"}); String json =
-			 * Encoder.toJson(msg); log.info(json); // Runtime.start("gui",
-			 * "GUIService"); log.info(json);
+			 * Message msg = webgui.createMessage("runtime", "start", new Object[]{"arduino", "Arduino"}); String json = Encoder.toJson(msg); log.info(json); //
+			 * Runtime.start("gui", "GUIService"); log.info(json);
 			 */
 
 		} catch (Exception e) {

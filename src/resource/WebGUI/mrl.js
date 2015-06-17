@@ -29,6 +29,8 @@ angular
         this.gateway;
         this.runtime;
         this.platform;
+
+        var connected = false;
         
         var self = this;
         var instances = {};
@@ -174,8 +176,8 @@ angular
                     msg = jQuery.parseJSON(body);
 
                     // process name callbacks - most common
-                    if (msg.name in nameCallbackMap) {
-                        cbs = nameCallbackMap[msg.name];
+                    if (msg.sender in nameCallbackMap) {
+                        cbs = nameCallbackMap[msg.sender];
                         for (var i = 0; i < cbs.length; i++) {
                             cbs[i](msg);
                         }
