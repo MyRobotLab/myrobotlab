@@ -6,7 +6,7 @@ platform: {{platform.arch}}.{{platform.bitness}}.{{platform.os}}<br/>
 version: {{platform.mrlVersion}}<br/>
 <h3>services</h3>
 <ul>
-    <li ng-repeat="service in serviceDirectory"> {{service.name}} </li>
+    <li ng-repeat="service in serviceDirectory"> {{service.name}} {{service.pulseData}}</li>
 </ul>
 
 <div class="container-fluid">
