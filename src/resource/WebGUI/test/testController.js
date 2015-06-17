@@ -8,10 +8,30 @@ angular.module('mrlapp.test.testController', ['mrlapp.mrl'])
         
         $scope.onRuntimeMsg = function(msg) {
              $scope.$apply(function() {
-                console.log("SUPER YAY ! - ");
+                console.log("Runtime Msg - ");
                 if (msg.method == "onRegistered"){
                     var newService = msg.data[0];
                     $scope.serviceDirectory[newService.name] = newService;
+                    if(newService.simpleName == "Clock"){
+
+                        // subscribe to pulse (all methods?)
+                        mrl.subscribeToService($scope.onClockMsg, newService.name);
+
+                        // send a start
+                        mrl.sendTo($scope.gateway.name,"subscribe", newService.name, "pulse");
+                        mrl.sendTo(newService.name, "startClock");
+                    }
+                }
+                
+             });
+        }
+
+        $scope.onClockMsg  = function(msg) {
+             $scope.$apply(function() {
+                console.log("Clock Msg ! - ");
+                if (msg.method == "onPulse"){
+                    var pulseData = msg.data[0];
+                    $scope.serviceDirectory[msg.sender].pulseData = pulseData;                    
                 }
                 
              });

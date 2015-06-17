@@ -285,7 +285,7 @@ angular
             console.log(arguments[0]);
             var args = Array.prototype.slice.call(arguments, 2);
             var msg = this.createMessage(name, method, args);
-            msg.sendingMethod = 'send';
+            msg.sendingMethod = 'sendTo';
             // console.log('SendTo:', msg);
             this.sendMessage(msg);
         };
