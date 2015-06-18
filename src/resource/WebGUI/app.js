@@ -8,34 +8,32 @@
 // http://slides.wesalvaro.com/20121113/#/1/1
 // http://tylermcginnis.com/angularjs-factory-vs-service-vs-provider/
 
-angular.module('mrlapp', ['ui.bootstrap', 
-						'mrlapp.mrl', 
-						'mrlapp.main.mainContoller', 
-						'mrlapp.main.serviceDirective', 
-						'mrlapp.test.testController', 
-						'ngRoute' 
-
-						/*
-														 * , 'mrlapp.wsconn',
-														 * 'mrlapp.service',
-														 * 'mrlapp.service.arduinogui',
-														 * 'mrlapp.service.clockgui',
-														 * 'mrlapp.service.webguigui',
-														 * 'mrlapp.service.runtimegui'
-														 */
+angular.module('mrlapp', [
+    'ngRoute',
+    'ui.bootstrap',
+    'mrlapp.mrl',
+    'mrlapp.main.mainCtrl',
+    'mrlapp.main.serviceDirective',
+    'mrlapp.main.service',
+    'mrlapp.service.arduinogui',
+    'mrlapp.service.clockgui',
+    'mrlapp.service.webguigui',
+    'mrlapp.service.runtimegui',
+    'mrlapp.main.statestoragesvc',
+    'mrlapp.test.testController'
 ])
 
-.config(['$routeProvider', function($routeProvider) {
-        $routeProvider.when('/main', {
-            templateUrl: 'main/main.html',
-            controller: 'mainContoller'
-        }).when('/workpace', {
-            templateUrl: 'main/workspace.html',
-        //controller : 'PhoneListCtrl'
-        }).when('/test', {
-            templateUrl: 'test/test.html',
-        	controller: 'testController'
-        }).otherwise({
-            redirectTo: '/main'
-        });
-    }]);
+        .config(['$routeProvider', function ($routeProvider) {
+                $routeProvider.when('/main', {
+                    templateUrl: 'main/main.html',
+                    controller: 'mainCtrl'
+                }).when('/workpace', {
+                    templateUrl: 'main/workspace.html',
+                    //controller : 'PhoneListCtrl'
+                }).when('/test', {
+                    templateUrl: 'test/test.html',
+                    controller: 'testController'
+                }).otherwise({
+                    redirectTo: '/main'
+                });
+            }]);
