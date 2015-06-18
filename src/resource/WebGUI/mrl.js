@@ -40,6 +40,16 @@ angular
         var socket = null;
         var callbacks = [];
         
+        // connectivity related begins
+        // required by AtmosphereJS
+        // https://github.com/Atmosphere/atmosphere/wiki/jQuery.atmosphere.js-atmosphere.js-API
+        this.url = document.location.origin.toString() + '/api/messages';
+        this.transport = 'websocket';
+        this.enableProtocol = true;
+        this.trackMessageLength = true;
+        this.logLevel = 'debug';        
+        // connectivity related end
+        
         var msgCount = 0;
 
         // map of service names to callbacks
@@ -110,15 +120,6 @@ angular
             console.log('Sent msg: ' + msg);
         };
 
-        // enternal onConnect event
-        // happens when first connect with backend
-        // currently its recieving and processing the
-        // Runtime.getLocalServices method - but
-        // this might change in the future
-        
-        var onConnect = function(inData) {
-        
-        }
 
         // since framework does not have a hello() onHello() defined
         // protocol - we are using Runtime.onLocalServices to do 
@@ -158,6 +159,9 @@ angular
             }
 
             self.gateway = sd[gatewayName];
+
+            // ok now we are connected
+            this.connected = true;
         }
 
         // onMessage gets all messaging from the Nettophere server
@@ -214,6 +218,7 @@ angular
         
         
         this.onClose = function(response) {
+            this.connected = false;
             console.log('websocket, onclose');
             if (response.state == "unsubscribe") {
                 console.log('Info: ' + transport + ' closed.');
@@ -221,8 +226,14 @@ angular
         };
         
         this.onOpen = function(response) {
+            // this.connected = true; mrl.isConnected means data
+            // was asked and recieved from the backend
             console.log('Info: ' + transport + ' connection opened.');
         };
+
+        this.isConnected = function() {
+            return connected;
+        }
 
         // initial connect - purpose of this function is to establish
         // a connection with Atmosphere with the Nettophere backend.
@@ -230,24 +241,23 @@ angular
         // to that structure. request object is just a proxy for Atmosphere.
         // Configuration (different proxy) should allow
         this.connect = function(url, proxy) {
-            var request = {
-                url: url,
-                transport: 'websocket',
-                enableProtocol: true,
-                trackMessageLength: true,
-                logLevel: 'debug'
-            };
             
-            request.onOpen = this.onOpen;
-            request.onClose = this.onClose;
-            request.onTransportFailure = this.onTransportFailure;
-            request.onMessage = this.onMessage;
+            if (connected) {
+                console.log("aleady connected");
+                return;
+            }
 
+            // TODO - use proxy for connectionless testing
+            if (url != undefined && url != null) {
+                this.url = url;
+            }
+
+            // FIXME - make a hello() protocol !!                       
             // setting up initial callback - this possibly will change
             // when the framework creates a "hello()" method
             this.subscribeToMethod(this.onLocalServices, 'onLocalServices');
             
-            socket = $.atmosphere.subscribe(request);
+            socket = $.atmosphere.subscribe(this);        
         };
         // --------- ws end ---------------------
 
