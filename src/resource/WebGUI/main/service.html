@@ -1,4 +1,4 @@
-<div ng-controller="ServiceCtrl" id="{{name}}">
+<div id="{{name}}">
 
     <!--<div style="resize: both; overflow: auto;"></div>-->
 
@@ -6,17 +6,17 @@
         <div class="panel-heading">
             <!--header-->
             <h3 class="panel-title">
-                <img src="{{type}}.png" alt="" width="16">
-                <b>{{name}}</b>
-                <div class="pull-right">{{simpletype}}</div>
+                <img src="{{::service.type}}.png" alt="" width="16">
+                <b>{{::service.name}}</b>
+                <div class="pull-right">{{::service.simpleName}}</div>
                 <!--TODO: add an option-menu (kill-service, ...)-->
             </h3>
         </div>
-        <div class="panel-body" ng-show="inst.fw.size != 'tiny' && inst.fw.size != 'full'">
+        <div class="panel-body" ng-show="fw.size != 'tiny' && fw.size != 'full'">
             <!--body-->
-            <div service-body="service.html" type="{{type}}" name="name" inst="inst"></div>
+            <div service-body type="{{service.type}}" fw="fw" data="data" guidata="guidata" methods="methods"></div>
         </div>
-        <div class="panel-footer" ng-show="!inst.fw.forcesize">
+        <div class="panel-footer" ng-show="!fw.forcesize">
             <!--footer-->
             <button class="btn btn-default" type="submit" ng-click="changesize('tiny')">
                 <i class="glyphicon glyphicon-minus"></i>
