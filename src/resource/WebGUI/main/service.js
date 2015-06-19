@@ -126,21 +126,24 @@ angular.module('mrlapp.main.service', [
                         //launch the service as a modal ('full')
                         var modalInstance = $modal.open({
                             animation: true,
-                            templateUrl: 'views/servicefulltemplate.html',
+                            templateUrl: 'service/servicefulltemplate.html',
                             controller: 'ServiceFullCtrl',
                             size: 'lg',
                             resolve: {
-                                name: function () {
-                                    return $scope.name;
+                                service: function () {
+                                    return $scope.service;
                                 },
-                                type: function () {
-                                    return $scope.type;
+                                fw: function () {
+                                    return $scope.fw;
                                 },
-                                simpletype: function () {
-                                    return $scope.simpletype;
+                                data: function () {
+                                    return $scope.data;
                                 },
-                                inst: function () {
-                                    return $scope.inst;
+                                guidata: function () {
+                                    return $scope.guidata;
+                                },
+                                methods: function () {
+                                    return $scope.methods;
                                 }
                             }
                         });
@@ -160,17 +163,16 @@ angular.module('mrlapp.main.service', [
 
             }])
 
-        .controller('ServiceFullCtrl', function ($scope, $modalInstance, name, type, simpletype, inst) {
+        .controller('ServiceFullCtrl', function ($scope, $modalInstance, service, fw, data, guidata, methods) {
             //Controller for the modal (service-full)
 
-            $scope.name = name;
-            $scope.type = type;
-            $scope.simpletype = simpletype;
-            $scope.inst = inst;
+            $scope.service = service;
+            $scope.fw = fw;
+            $scope.data = data;
+            $scope.guidata = guidata;
+            $scope.methods = methods;
 
             $scope.modal = true;
-
-            console.log("servicefullctrl", $scope.name, $scope.type, $scope.simpletype, $scope.inst);
 
             $scope.close = function () {
                 $modalInstance.close();

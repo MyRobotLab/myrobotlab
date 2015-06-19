@@ -20,6 +20,8 @@ angular.module('mrlapp', [
     'mrlapp.service.webguigui',
     'mrlapp.service.runtimegui',
     'mrlapp.main.statestoragesvc',
+    'mrlapp.main.statesvc',
+    'mrlapp.nav',
     'mrlapp.test.testController'
 ])
 
