@@ -13,15 +13,13 @@ angular.module('mrlapp', [
     'ui.bootstrap',
     'mrlapp.mrl',
     'mrlapp.main.mainCtrl',
-    'mrlapp.main.serviceDirective',
-    'mrlapp.main.service',
+    'mrlapp.main.statesvc',
+    'mrlapp.nav',
+    'mrlapp.service',
     'mrlapp.service.arduinogui',
     'mrlapp.service.clockgui',
     'mrlapp.service.webguigui',
     'mrlapp.service.runtimegui',
-    'mrlapp.main.statestoragesvc',
-    'mrlapp.main.statesvc',
-    'mrlapp.nav',
     'mrlapp.test.testController'
 ])
 

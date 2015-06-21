@@ -7,6 +7,6 @@ angular.module('mrlapp.nav')
                         //"@" -> using passed attribute
                     },
                     templateUrl: 'nav/nav.html',
-                    controller: 'navCtrl'
+                    controller: 'NavCtrl'
                 };
             }]);

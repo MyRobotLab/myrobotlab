@@ -1,9 +1,6 @@
-angular.module('mrlapp.nav', [
-    'mrlapp.mrl',
-    'mrlapp.main.statesvc'
-])
+angular.module('mrlapp.nav')
 
-        .controller('navCtrl', ['$scope', '$location', '$anchorScroll', 'StateSvc',
+        .controller('NavCtrl', ['$scope', '$location', '$anchorScroll', 'StateSvc',
             function ($scope, $location, $anchorScroll, StateSvc) {
                 $scope.statuslist = StateSvc.getStatuses();
 
@@ -22,17 +19,11 @@ angular.module('mrlapp.nav', [
 
                 //TODO: find a way to get all Services - probably something like mrl.getAllServices()
                 $scope.searchServices = [];
-                
+
                 $scope.searchOnSelect = function (item, model, label) {
                     console.log('searchOnSelect');
                     //scroll to selected service
                     $location.hash(item.name);
                     $anchorScroll();
                 };
-            }])
-
-        .filter('reverse', function () {
-            return function (items) {
-                return items.slice().reverse();
-            };
-        });
+            }]);

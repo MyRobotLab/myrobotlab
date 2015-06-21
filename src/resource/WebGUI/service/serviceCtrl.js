@@ -1,38 +1,7 @@
-angular.module('mrlapp.main.service', [
-    'mrlapp.mrl',
-    'mrlapp.main.statestoragesvc'
-])
+angular.module('mrlapp.service')
 
-        .directive('serviceBody', [function () {
-                return {
-                    scope: {
-                        fw: '=',
-                        data: '=',
-                        guidata: '=',
-                        methods: '='
-//                        inst: '=inst',
-                    },
-//                    controller: "@",  //Not working as I
-//                    name: "ctrlName", //want it to
-                    link: function (scope, elem, attr) {
-//                        scope.fw = attr.inst.fw;
-//                        scope.data = attr.inst.data;
-//                        scope.guidata = attr.inst.guidata;
-//                        scope.methods = attr.inst.methods;
-
-                        scope.getContentUrl = function () {
-                            //TODO: TEST THIS! - seems to not work as expected
-                            var template = 'service/views/' + attr.type + 'gui.html';
-                            return (angular.isDefined(template)) ? template : 'service/views/default.html';
-//                            return 'service/views/' + attr.type + 'gui.html';
-                        };
-                    },
-                    template: '<div ng-include="getContentUrl()"></div>'
-                };
-            }])
-
-        .controller('ServiceCtrl', ['$scope', '$modal', 'mrl', 'StateStorageSvc',
-            function ($scope, $modal, mrl, StateStorageSvc) {
+        .controller('ServiceCtrl', ['$scope', '$modal', 'mrl', 'ServiceSvc',
+            function ($scope, $modal, mrl, ServiceSvc) {
                 console.log('testing', $scope);
 
                 //make sure $scope.service is there
@@ -48,14 +17,14 @@ angular.module('mrlapp.main.service', [
                 var init = function () {
                     //START_specific Service-Initialisation
                     //"inst" is given to the specific service-UI
-                    $scope.inst = StateStorageSvc.getService($scope.service.name);
+                    $scope.inst = ServiceSvc.getServiceInstance($scope.service.name);
                     if ($scope.inst == null) {
                         $scope.inst = {};
                         $scope.inst.fw = {}; //framework-section - DO NOT WRITE IN THERE!
                         $scope.inst.data = mrl.getService($scope.service.name); //mrl-data-section
                         $scope.inst.guidata = {}; //data-section - write your data in there!
                         $scope.inst.methods = {}; //methods-section
-                        StateStorageSvc.addService($scope.service.name, $scope.inst);
+                        ServiceSvc.addServiceInstance($scope.service.name, $scope.inst);
                         //should be able to delete this:
 //                    $scope.inst.myService = mrl.services[$scope.name];
 //                    mrl.addService($scope.name, $scope.inst);
@@ -161,20 +130,4 @@ angular.module('mrlapp.main.service', [
 //                    mrl.connect(document.location.origin.toString() + '/api/messages');
 //                });
 
-            }])
-
-        .controller('ServiceFullCtrl', function ($scope, $modalInstance, service, fw, data, guidata, methods) {
-            //Controller for the modal (service-full)
-
-            $scope.service = service;
-            $scope.fw = fw;
-            $scope.data = data;
-            $scope.guidata = guidata;
-            $scope.methods = methods;
-
-            $scope.modal = true;
-
-            $scope.close = function () {
-                $modalInstance.close();
-            };
-        });
+            }]);

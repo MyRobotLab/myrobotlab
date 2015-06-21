@@ -1,11 +1,11 @@
-angular.module('mrlapp.main.serviceDirective', ['mrlapp.mrl'])
+angular.module('mrlapp.service')
         .directive('serviceDirective', ['$document', function ($document) {
                 return {
                     scope: {
                         //"=" -> binding to items in parent-scope specified by attribute
                         //"@" -> using passed attribute
                     },
-                    templateUrl: 'main/service.html',
+                    templateUrl: 'service/service.html',
                     controller: 'ServiceCtrl',
                     link: function (scope, element, attr) {
                         //TODO: wonder why I need to this? (parseJSON)
