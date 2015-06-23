@@ -62,7 +62,7 @@ angular.module('mrlapp.test.testController', ['mrlapp.mrl'])
                     // $scope.guiData[msg.sender].pulseData = pulseData;
                     _self.addNewServiceGUI(newService);
                 }
-                if (msg.method == "onRegistered") {
+                if (msg.method == "onReleased") {
                     _self.removeServiceGUI(msg.data[0]);
                 }
             
