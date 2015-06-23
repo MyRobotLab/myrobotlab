@@ -52,7 +52,9 @@ angular
             url: document.location.origin.toString() + '/api/messages',
             transport: 'websocket',
             enableProtocol: true,
-            trackMessageLength: true,
+            // trackMessageLength: true,
+            // maxTextMessageSize: 10000000,
+            //maxBinaryMessageSize: 10000000,
             logLevel: 'debug'
         };
 

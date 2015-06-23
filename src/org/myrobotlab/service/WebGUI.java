@@ -210,7 +210,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 				// if Jetty is in the classpath it will use it by default - we
 				// want to use Netty
-				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
+				//.initParam("org.atmosphere.websocket.maxTextMessageSize", "100000")
+				//.initParam("org.atmosphere.websocket.maxBinaryMessageSize", "100000")
+				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport")
+				.initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
 				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build();
 		// .host("127.0.0.1").build();
 		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
