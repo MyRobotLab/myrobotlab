@@ -1,32 +1,30 @@
 angular.module('mrlapp.main.mainCtrl', ['mrlapp.mrl'])
+.controller('mainCtrl', ['$scope', '$document', 'mrl', 
+    function($scope, $document, mrl) {
+        
+        console.log('is connected: ' + mrl.isConnected());
+        
+        
+        $scope.gateway = mrl.getGateway();
+        $scope.runtime = mrl.getRuntime();
+        $scope.platform = mrl.getPlatform();
+        $scope.registry = mrl.getRegistry();
+        
+        $scope.guiData = {};
+        
+        for (var name in $scope.registry) {
+            if ($scope.registry.hasOwnProperty(name)) {
+                var service = $scope.registry[name];
+                var data = {};
+                data.service = service;
+                $scope.guiData[name] = data;
+                //_self.addNewServiceGUI(service);
+            }
+        }
 
-        .controller('mainCtrl', ['$scope', '$document', 'mrl',
-            function ($scope, $document, mrl) {
-
-                $scope.onLocalServices = function (msg) {
-                    $scope.$apply(function () {
-                        console.log("YAY ! - ");
-                        console.log(msg);
-
-                        $scope.name = msg.name;
-                        $scope.platform = msg.data[0].platform;
-                        $scope.serviceEnvironment = msg.data[0];
-                        $scope.serviceDirectory = msg.data[0].serviceDirectory;
-                        //$scope.platform = msg.data[0].platform;
-                        console.log("YAY ! - ");
-
-                        mrl.subscribe('runtime', 'registered');
-                        //console.log('trying to launch ' + service.name + ' of ' + service.simpleName + ' / ' + service.serviceClass);
-                    });
-                };
-
-                //mrl.subscribeToMethod($scope.onLocalServices);
-                // subscribe to a particular method
-                // probably should be refactored to allow Hello, I'm {{name}} - platform  request
-                // which should come back (server response -> Hello I'm Runtime "runtime" - here is my service Environment
-
-                // subscribe to onLocalServices
-                mrl.subscribeToMethod($scope.onLocalServices, 'onLocalServices');
-                // connect and us message
-                mrl.connect(document.location.origin.toString() + '/api/messages');
-            }]);
+    //$scope.serviceEnvironment = msg.data[0];
+    //$scope.serviceDirectory = msg.data[0].serviceDirectory;
+    //$scope.platform = msg.data[0].platform;
+    //mrl.subscribe('runtime', 'registered');
+    
+    }]);
