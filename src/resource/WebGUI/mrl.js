@@ -52,7 +52,9 @@ angular
             url: document.location.origin.toString() + '/api/messages',
             transport: 'websocket',
             enableProtocol: true,
-            trackMessageLength: true,
+            // trackMessageLength: true,
+            // maxTextMessageSize: 10000000,
+            //maxBinaryMessageSize: 10000000,
             logLevel: 'debug'
         };
 
@@ -366,8 +368,10 @@ angular
                 
                 deferred = $q.defer();
                 deferred.promise.then(function(result) {
+                    console.log("SUCCESS : connect deferred - result success");
                     var result = result;
                 }, function(error) {
+                    console.log("ERROR : connect deferred - result error");
                     var error = error;
                 });
             
@@ -406,7 +410,7 @@ angular
                     }, function(error) {
                         var error = error;
                     });
-                    return connected;
+                    return deferred.promise;
                 },
                 
                 isConnected: function() {
@@ -417,7 +421,8 @@ angular
                 },
                 sendTo: _self.sendTo,
                 subscribe: _self.subscribe,
-                subscribeToService : _self.subscribeToService 
+                subscribeToService : _self.subscribeToService,
+                promise: _self.promise
             /*,
                 save: function() {
                     return $http.post(_self.backendUrl + '/users', 
