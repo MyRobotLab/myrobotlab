@@ -20,19 +20,22 @@
 
 angular
 .module('mrlapp.mrl', [])
-.service('mrl', [function() {
+//.service('mrl', ['$q', function($q) {
+.provider('mrl', [function() {
+        var _self = this;
+
 
         // The name of the gateway I am
         // currently attached to
         // tried to make these private ..
         // too much of a pain :P
+        // FIXME - try again...
         this.gateway;
         this.runtime;
         this.platform;
-
+        
         var connected = false;
         
-        var self = this;
         var instances = {};
         var registry = {};
         
@@ -40,16 +43,20 @@ angular
         var socket = null;
         var callbacks = [];
         
+        var deferred = null;
+
         // connectivity related begins
         // required by AtmosphereJS
         // https://github.com/Atmosphere/atmosphere/wiki/jQuery.atmosphere.js-atmosphere.js-API
-        this.url = document.location.origin.toString() + '/api/messages';
-        this.transport = 'websocket';
-        this.enableProtocol = true;
-        this.trackMessageLength = true;
-        this.logLevel = 'debug';        
-        // connectivity related end
-        
+        this.request = {
+            url: document.location.origin.toString() + '/api/messages',
+            transport: 'websocket',
+            enableProtocol: true,
+            trackMessageLength: true,
+            logLevel: 'debug'
+        };
+
+        // connectivity related end 
         var msgCount = 0;
 
         // map of service names to callbacks
@@ -89,6 +96,7 @@ angular
             callbacks.push(callback);
         };
         
+        // FIXME CHECK FOR DUPLICATES
         this.subscribeToService = function(callback, serviceName) {
             if (!(serviceName in nameCallbackMap)) {
                 nameCallbackMap[serviceName] = [];
@@ -117,7 +125,7 @@ angular
         
         this.sendRaw = function(msg) {
             socket.push(msg);
-            console.log('Sent msg: ' + msg);
+            console.log('sendRaw: ' + msg);
         };
 
 
@@ -129,9 +137,9 @@ angular
 
             // find the gateway we are talking too
             // TODO make full service?
-            // self.gateway = msg.sender;
+            // _self.gateway = msg.sender;
             var gatewayName = msg.sender;
-            self.platform = msg.data[0].platform;
+            _self.platform = msg.data[0].platform;
 
             // instances update
             // find the name of the runtime
@@ -146,22 +154,38 @@ angular
             // registry update
             for (var key in sd) {
                 if (sd.hasOwnProperty(key)) {
-                    // do stuff
                     var service = sd[key];
                     console.log("found " + key + " of type " + service.simpleName);
                     registry[key] = {};
                     registry[key] = service;
-                    if (service.simpleName == "Runtime"){
-                            // the one and only runtime
-                            self.runtime = service;
+                    if (service.simpleName == "Runtime") {
+                        // the one and only runtime
+                        _self.runtime = service;
+                        _self.subscribeToService(_self.onRuntimeMsg, service.name);
                     }
                 }
             }
-
-            self.gateway = sd[gatewayName];
+            
+            _self.gateway = sd[gatewayName];
 
             // ok now we are connected
-            this.connected = true;
+            connected = true;
+            
+            deferred.resolve('connected !');
+            return deferred.promise;
+        }
+        
+        // keeping the registy up to date with
+        // new or removed services
+        this.onRuntimeMsg = function(msg) {
+            if (msg.name == "registered") {
+                var newService = msg.data[0];
+                _self.registry[newService.name] = {};
+                _self.registry[newService.name] = newService;
+            } else if (msg.name == "released") {
+                var name = msg.data[0];
+                delete _self.registry[name];
+            }
         }
 
         // onMessage gets all messaging from the Nettophere server
@@ -224,41 +248,6 @@ angular
                 console.log('Info: ' + transport + ' closed.');
             }
         };
-        
-        this.onOpen = function(response) {
-            // this.connected = true; mrl.isConnected means data
-            // was asked and recieved from the backend
-            console.log('Info: ' + transport + ' connection opened.');
-        };
-
-        this.isConnected = function() {
-            return connected;
-        }
-
-        // initial connect - purpose of this function is to establish
-        // a connection with Atmosphere with the Nettophere backend.
-        // It creates a request structure and assings mrl service methods
-        // to that structure. request object is just a proxy for Atmosphere.
-        // Configuration (different proxy) should allow
-        this.connect = function(url, proxy) {
-            
-            if (connected) {
-                console.log("aleady connected");
-                return;
-            }
-
-            // TODO - use proxy for connectionless testing
-            if (url != undefined && url != null) {
-                this.url = url;
-            }
-
-            // FIXME - make a hello() protocol !!                       
-            // setting up initial callback - this possibly will change
-            // when the framework creates a "hello()" method
-            this.subscribeToMethod(this.onLocalServices, 'onLocalServices');
-            
-            socket = $.atmosphere.subscribe(this);        
-        };
         // --------- ws end ---------------------
 
         // TODO createMessage
@@ -294,17 +283,19 @@ angular
         this.sendTo = function(name, method, data) {
             console.log(arguments[0]);
             var args = Array.prototype.slice.call(arguments, 2);
-            var msg = this.createMessage(name, method, args);
+            var msg = _self.createMessage(name, method, args);
             msg.sendingMethod = 'sendTo';
             // console.log('SendTo:', msg);
-            this.sendMessage(msg);
+            _self.sendMessage(msg);
         };
 
-        // IMPORTANT - subscribe subscribes 
+        // the "real" subscribe - this creates a subscription
+        // from the Java topicName service, such that every time the
+        // topicMethod is invoked a message comes back to the gateway(webgui),
+        // from there it is relayed to the Angular app - and will be sent
+        // to all the callbacks which have been registered to it
         this.subscribe = function(topicName, topicMethod) {
-            this.sendTo(InstanceService.getName(), 
-            "subscribe", [publisherName, inMethod, 
-                outMethod]);
+            _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod);
         };
         
         this.invoke = function(functionName, context) {
@@ -337,7 +328,116 @@ angular
         this.registerForServices = function(callback) {
             this.serviceListeners.push(callback);
         }
+        
+        this.onOpen = function(response) {
+            // connected = true;
+            // this.connected = true; mrl.isConnected means data
+            // was asked and recieved from the backend
+            console.log('onOpen: ' + transport + ' connection opened.');
+        // TODO - chain the onLocalServices / hello with defer.resolve 
+        // at the end
+        };
 
-    // ws.subscribeToMessages(this.onMessage);
+        // injectables go here
+        // the special $get method called when
+        // a service gets instantiated for the 1st time?
+        // it also represents config's view of the provider
+        // when we inject our provider into a function by way of the provider name ("mrl"), Angular will call $get to retrieve the object to inject
+        this.$get = function($q) {
+            
+            this.connect = function(url, proxy) {
+                
+                if (connected) {
+                    console.log("aleady connected");
+                    return this;
+                }
+
+                // TODO - use proxy for connectionless testing
+                if (url != undefined && url != null) {
+                    this.url = url;
+                }
+
+                // FIXME - make a hello() protocol !!                       
+                // setting up initial callback - this possibly will change
+                // when the framework creates a "hello()" method
+                this.subscribeToMethod(this.onLocalServices, 'onLocalServices');
+                
+                socket = $.atmosphere.subscribe(this.request);
+                
+                deferred = $q.defer();
+                deferred.promise.then(function(result) {
+                    var result = result;
+                }, function(error) {
+                    var error = error;
+                });
+            
+            };
+            
+            this.onError = function(response) {
+                console.log('onError, can not connect');
+                deferred.reject('onError, can not connect');
+                return deferred.promise;
+            };
+
+            // the Angular service interface object
+            var service = {
+                getGateway: function() {
+                    return _self.gateway;
+                },
+                getLocalServices: function() {
+                    return instances["null"];
+                },
+                getPlatform: function() {
+                    return _self.platform;
+                },
+                getRuntime: function() {
+                    return _self.runtime;
+                },
+                getService: function(name) {
+                    return _self.getService(name);
+                },
+                init: function() {
+                    if (connected) {
+                        return true;
+                    }
+                    _self.connect();
+                    deferred.promise.then(function(result) {
+                        var result = result;
+                    }, function(error) {
+                        var error = error;
+                    });
+                    return connected;
+                },
+                
+                isConnected: function() {
+                    return connected;
+                },
+                getRegistry: function() {
+                    return registry;
+                },
+                sendTo: _self.sendTo,
+                subscribe: _self.subscribe,
+                subscribeToService : _self.subscribeToService 
+            /*,
+                save: function() {
+                    return $http.post(_self.backendUrl + '/users', 
+                    {
+                        user: service.user
+                    });
+                }
+                */
+            }
+            
+            return service;
+        }
+
+        // assign callbacks
+        this.request.onOpen = this.onOpen;
+        this.request.onClose = this.onClose;
+        this.request.onTransportFailure = this.onTransportFailure;
+        this.request.onMessage = this.onMessage;
+        this.request.onOpen = this.onOpen;
+        this.request.onError = this.onError;
+    
     
     }]);

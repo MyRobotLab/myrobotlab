@@ -1,17 +1,17 @@
-current gateway : {{name}}<br/>
-platform: {{platform}}<br/>
+current gateway : {{gateway.name}}<br/>
+platform: {{platform.arch}}.{{platform.bitness}}.{{platform.os}}<br/>
 services
 <ul>
-    <li ng-repeat="service in serviceDirectory"> {{service.name}} </li>
+    <li ng-repeat="data in guiData"> {{data.service.name}} </li>
 </ul>
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-6" style="min-height: 200px">
-            <div ng-repeat="service in serviceDirectory"
+            <div ng-repeat="data in guiData"
                  service-directive
                  style="width: 500px"
-                 service="{{service}}">
+                 service="{{data.service}}">
             </div>
         </div>
         <div class="col-md-6">

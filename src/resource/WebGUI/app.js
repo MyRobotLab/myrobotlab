@@ -7,33 +7,43 @@
 // http://odetocode.com/blogs/scott/archive/2014/05/07/using-compile-in-angular.aspx
 // http://slides.wesalvaro.com/20121113/#/1/1
 // http://tylermcginnis.com/angularjs-factory-vs-service-vs-provider/
+// http://odetocode.com/blogs/scott/archive/2014/05/20/using-resolve-in-angularjs-routes.aspx
 
 angular.module('mrlapp', [
-    'ngRoute',
-    'ui.bootstrap',
-    'mrlapp.mrl',
-    'mrlapp.main.mainCtrl',
-    'mrlapp.main.statesvc',
-    'mrlapp.nav',
-    'mrlapp.service',
-    'mrlapp.service.arduinogui',
-    'mrlapp.service.clockgui',
-    'mrlapp.service.webguigui',
-    'mrlapp.service.runtimegui',
+    'ngRoute', 
+    'ng', 
+    'ui.bootstrap', 
+    'mrlapp.mrl', 
+    'mrlapp.main.mainCtrl', 
+    'mrlapp.main.statesvc', 
+    'mrlapp.nav', 
+    'mrlapp.service', 
+    'mrlapp.service.arduinogui', 
+    'mrlapp.service.clockgui', 
+    'mrlapp.service.webguigui', 
+    'mrlapp.service.runtimegui', 
     'mrlapp.test.testController'
 ])
-
-        .config(['$routeProvider', function ($routeProvider) {
-                $routeProvider.when('/main', {
-                    templateUrl: 'main/main.html',
-                    controller: 'mainCtrl'
-                }).when('/workpace', {
-                    templateUrl: 'main/workspace.html',
-                    //controller : 'PhoneListCtrl'
-                }).when('/test', {
-                    templateUrl: 'test/test.html',
-                    controller: 'testController'
-                }).otherwise({
-                    redirectTo: '/main'
-                });
-            }]);
+.config(['$routeProvider', 'mrlProvider', function($routeProvider, mrlProvider) {
+        $routeProvider.when('/main', {
+            templateUrl: 'main/main.html',
+            controller: 'mainCtrl',
+             resolve: {
+                message: function(mrl) {
+                    return mrl.init();
+                }
+            }   
+        }).when('/workpace', {
+            templateUrl: 'main/workspace.html',
+        }).when('/test', {
+            templateUrl: 'test/test.html',
+            controller: 'testController',
+            resolve: {
+                message: function(mrl) {
+                    return mrl.init();
+                }
+            }
+        }).otherwise({
+            redirectTo: '/main'
+        });
+    }]);
