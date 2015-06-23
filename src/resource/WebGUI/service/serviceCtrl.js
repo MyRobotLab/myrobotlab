@@ -3,18 +3,23 @@ angular.module('mrlapp.service')
         .controller('ServiceCtrl', ['$scope', '$modal', 'mrl', 'ServiceSvc',
             function ($scope, $modal, mrl, ServiceSvc) {
                 console.log('testing', $scope);
+                
+                var isUndefinedOrNull = function (val) {
+                    return angular.isUndefined(val) || val === null;
+                };
 
                 //make sure $scope.service is there
                 var listener = $scope.$watch(function () {
                     return $scope.service;
                 }, function () {
-                    if (!mrl.isUndefinedOrNull($scope.service.name)) {
+                    if (!isUndefinedOrNull($scope.service.name)) {
                         listener();
                         init();
                     }
                 });
 
                 var init = function () {
+                    console.log('serviceShouldBeReady', $scope.service);
                     //START_specific Service-Initialisation
                     //"inst" is given to the specific service-UI
                     $scope.inst = ServiceSvc.getServiceInstance($scope.service.name);
@@ -50,6 +55,23 @@ angular.module('mrlapp.service')
                     if (!$scope.fw.size) {
                         $scope.fw.size = "medium";
                         $scope.fw.oldsize = null;
+                    }
+                    
+                    //TODO: think of something better
+                    var initDone = false;
+                    $scope.fw.initDone = function () {
+                        if (!initDone) {
+                            initDone = true;
+                            // create message bindings
+                            mrl.subscribeToService($scope.methods.onMsg, $scope.data.name);
+                        }
+                    };
+                    
+                    //TODO: not completly happy
+                    //to be overriden
+                    if ($scope.methods.onMsg == null) {
+                        $scope.methods.onMsg = function () {
+                        };
                     }
 
                     //TODO: add whatever service-specific functions are needed (init, ...)

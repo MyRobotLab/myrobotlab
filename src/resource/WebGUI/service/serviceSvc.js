@@ -1,5 +1,9 @@
 angular.module('mrlapp.service')
-        .service('ServiceSvc', ['mrl', function (mrl) {
+        .service('ServiceSvc', [function () {
+
+                var isUndefinedOrNull = function (val) {
+                    return angular.isUndefined(val) || val === null;
+                };
 
                 var serviceInstances = [];
 
@@ -8,7 +12,7 @@ angular.module('mrlapp.service')
                 };
 
                 this.getServiceInstance = function (name) {
-                    if (mrl.isUndefinedOrNull(serviceInstances[name])) {
+                    if (isUndefinedOrNull(serviceInstances[name])) {
                         return null;
                     }
                     return serviceInstances[name].servic;
