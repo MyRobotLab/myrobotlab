@@ -18,7 +18,7 @@ angular.module('mrlapp.service')
 //                        scope.methods = attr.inst.methods;
 
                         scope.getContentUrl = function () {
-                            //TODO: TEST THIS! - seems to not work as expected
+                            //TODO: TEST THIS! - seems to not work as expected (altough it does work)
                             var template = 'service/views/' + attr.type + 'gui.html';
                             return (angular.isDefined(template)) ? template : 'service/views/default.html';
 //                            return 'service/views/' + attr.type + 'gui.html';
