@@ -51,39 +51,6 @@ angular.module('mrlapp.service')
                         $scope.fw.size = "medium";
                         $scope.fw.oldsize = null;
                     }
-
-                    //TODO: add whatever service-specific functions are needed (init, ...)
-                    //attachGUI(), detachGUI(), send(method, data), sendTo(name, method, data),
-                    //subscribe(inMethod, outMethod), subscribeTo(publisherName, inMethod, outMethod),
-                    //key(inStr), releaseService(), serviceGUIInit(), broadcastState()
-//                if ($scope.fw.send == null) {
-//                    $scope.fw.send = function (method, data) {
-//                        $scope.fw.sendTo($scope.name, method, data);
-//                    };
-//                    $scope.fw.sendTo = function (name, method, data) {
-//                        mrl.sendTo(name, method, data);
-//                    };
-//                    $scope.fw.subscribe = function (inMethod, outMethod) {
-//                        $scope.fw.subscribeTo($scope.name, inMethod, outMethod);
-//                    };
-//                    $scope.fw.subscribeTo = function (publisherName, inMethod, outMethod) {
-//                        mrl.subscribeTo(publisherName, inMethod, outMethod);
-//                    };
-//                }
-                    //to be overridden (fallback, if not)
-//                if ($scope.methods.init == null) {
-//                    $scope.methods.init = function () {
-//                    };
-//                }
-//                if ($scope.methods.attachGUI == null) {
-//                    $scope.methods.attachGUI = function () {
-//                    };
-//                }
-//                if ($scope.methods.detachGUI == null) {
-//                    $scope.methods.detachGUI = function () {
-//                    };
-//                }
-                    //END_specific Service-Initialisation
                 };
 
                 //footer-size-change-buttons

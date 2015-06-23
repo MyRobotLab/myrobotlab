@@ -25,14 +25,16 @@ angular.module('mrlapp', [
     'mrlapp.test.testController'
 ])
 .config(['$routeProvider', 'mrlProvider', function($routeProvider, mrlProvider) {
+        
+        //mrlProvider.init();
         $routeProvider.when('/main', {
             templateUrl: 'main/main.html',
             controller: 'mainCtrl',
-             resolve: {
+            resolve: {
                 message: function(mrl) {
                     return mrl.init();
                 }
-            }   
+            }
         }).when('/workpace', {
             templateUrl: 'main/workspace.html',
         }).when('/test', {
