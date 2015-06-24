@@ -229,9 +229,18 @@ public class Solr extends Service {
 		} catch (SolrServerException e) {
 			log.warn("Search failed with exception", e);
 		}
+		invoke("publishResults", resp);
+		//invoke("publishResults");
 		return resp;
 	}
 
+	//public String publishResults() {
+	//	return "this is a foo.";
+	//};
+	public QueryResponse publishResults(QueryResponse resp) {
+		return resp;
+	};
+	
 	/**
 	 * Set the url for the solr instance to communicate with.
 	 * 
