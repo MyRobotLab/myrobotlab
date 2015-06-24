@@ -1,9 +1,9 @@
 angular.module('mrlapp.service')
 
-        .controller('ServiceCtrl', ['$scope', '$modal', 'mrl', 'ServiceSvc',
-            function ($scope, $modal, mrl, ServiceSvc) {
+        .controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'ServiceSvc',
+            function ($scope, $modal, $ocLazyLoad, mrl, ServiceSvc) {
                 console.log('testing', $scope);
-                
+
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
                 };
@@ -20,6 +20,14 @@ angular.module('mrlapp.service')
 
                 var init = function () {
                     console.log('serviceShouldBeReady', $scope.service);
+
+                    //load the service(-module) (lazy) (from the server)
+                    //TODO: should this really be done here?
+                    console.log('lazy-loading:', $scope.service.type);
+                    $ocLazyLoad.load("service/js/" + $scope.service.type + "gui.js").then(function () {
+                        $scope.serviceloaded = true;
+                    });
+
                     //START_specific Service-Initialisation
                     //"inst" is given to the specific service-UI
                     $scope.inst = ServiceSvc.getServiceInstance($scope.service.name);
@@ -56,7 +64,7 @@ angular.module('mrlapp.service')
                         $scope.fw.size = "medium";
                         $scope.fw.oldsize = null;
                     }
-                    
+
                     //TODO: think of something better
                     var initDone = false;
                     $scope.fw.initDone = function () {
@@ -66,7 +74,7 @@ angular.module('mrlapp.service')
                             mrl.subscribeToService($scope.methods.onMsg, $scope.data.name);
                         }
                     };
-                    
+
                     //TODO: not completly happy
                     //to be overriden
                     if ($scope.methods.onMsg == null) {
