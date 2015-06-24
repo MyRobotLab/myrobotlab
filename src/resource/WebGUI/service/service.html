@@ -1,4 +1,4 @@
-<div id="{{name}}">
+<div id="{{::name}}">
 
     <!--<div style="resize: both; overflow: auto;"></div>-->
 
@@ -14,7 +14,12 @@
         </div>
         <div class="panel-body" ng-show="fw.size != 'tiny' && fw.size != 'full'">
             <!--body-->
-            <div service-body type="{{service.type}}" fw="fw" data="data" guidata="guidata" methods="methods"></div>
+            <div ng-if="!serviceloaded">
+                <i class="glyphicon glyphicon-download-alt"></i>&nbsp;&nbsp;loading service ...
+            </div>
+            <div ng-if="serviceloaded">
+                <div service-body type="{{service.type}}" fw="fw" data="data" guidata="guidata" methods="methods"></div>
+            </div>
         </div>
         <div class="panel-footer" ng-show="!fw.forcesize">
             <!--footer-->

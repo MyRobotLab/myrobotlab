@@ -10,18 +10,19 @@
 // http://odetocode.com/blogs/scott/archive/2014/05/20/using-resolve-in-angularjs-routes.aspx
 
 angular.module('mrlapp', [
-    'ngRoute', 
-    'ng', 
-    'ui.bootstrap', 
-    'mrlapp.mrl', 
-    'mrlapp.main.mainCtrl', 
-    'mrlapp.main.statesvc', 
-    'mrlapp.nav', 
-    'mrlapp.service', 
-    'mrlapp.service.arduinogui', 
-    'mrlapp.service.clockgui', 
-    'mrlapp.service.webguigui', 
-    'mrlapp.service.runtimegui', 
+    'ngRoute',
+    'ng',
+    'ui.bootstrap',
+    'oc.lazyLoad',
+    'mrlapp.mrl',
+    'mrlapp.main.mainCtrl',
+    'mrlapp.main.statesvc',
+    'mrlapp.nav',
+    'mrlapp.service',
+//    'mrlapp.service.arduinogui',
+//    'mrlapp.service.clockgui',
+//    'mrlapp.service.webguigui',
+//    'mrlapp.service.runtimegui',
     'mrlapp.test.testController'
 ])
 .config(['$routeProvider', 'mrlProvider', function($routeProvider, mrlProvider) {
