@@ -18,7 +18,7 @@
                 <i class="glyphicon glyphicon-download-alt"></i>&nbsp;&nbsp;loading service ...
             </div>
             <div ng-if="serviceloaded">
-                <div service-body type="{{service.type}}" fw="fw" data="data" guidata="guidata" methods="methods"></div>
+                <div service-body type="{{service.type}}" simplename="{{service.simpleName}}" fw="fw" data="data" guidata="guidata" methods="methods"></div>
             </div>
         </div>
         <div class="panel-footer" ng-show="!fw.forcesize">
