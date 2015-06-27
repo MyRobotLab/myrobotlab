@@ -15,9 +15,11 @@ angular.module('mrlapp.nav')
             });
         }
 
-        var onStatus = function(status) {
+        var onStatus = function(statusMsg) {
+            var status = statusMsg.data[0];
+            var s = status.name + ' ' + status.level + ' ' + status.detail;
             $scope.$apply(function() {
-               StateSvc.addStatus(status);
+               StateSvc.addStatus(s);
             });
         }
 
@@ -57,12 +59,5 @@ angular.module('mrlapp.nav')
         mrl.subscribeToMethod(onStatus, "onStatus");
 
         $scope.statuslist = StateSvc.getStatuses();
-        
-        /*
-        StateSvc.addStatus('And this is my status history!');
-        StateSvc.addStatus('And this is my status history!');
-        StateSvc.addStatus('And this is my status history!');
-        StateSvc.addStatus('I am going to be the new WebUI for MyRobotLab!');
-        */
 
     }]);
