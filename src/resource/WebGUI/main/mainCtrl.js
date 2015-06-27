@@ -1,9 +1,10 @@
 angular.module('mrlapp.main.mainCtrl', ['mrlapp.mrl'])
-.controller('mainCtrl', ['$scope', '$document', 'mrl', 
-    function($scope, $document, mrl) {
+.controller('mainCtrl', ['$scope', '$document', 'mrl', 'ServiceSvc', 
+    function($scope, $document, mrl, ServiceSvc) {
         
         console.log('is connected: ' + mrl.isConnected());
         
+        $scope.services = ServiceSvc.getServices();
         
         $scope.gateway = mrl.getGateway();
         $scope.runtime = mrl.getRuntime();

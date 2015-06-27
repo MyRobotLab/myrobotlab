@@ -3,22 +3,24 @@ angular.module('mrlapp.service')
         .controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'ServiceSvc',
             function ($scope, $modal, $ocLazyLoad, mrl, ServiceSvc) {
                 console.log('testing', $scope);
+                
+               $scope.anker = $scope.service.name + '_-_' + $scope.service.panelindex + '_-_';
 
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
                 };
 
-                //make sure $scope.service is there
-                var listener = $scope.$watch(function () {
-                    return $scope.service;
-                }, function () {
-                    if (!isUndefinedOrNull($scope.service.name)) {
-                        listener();
-                        init();
-                    }
-                });
+//                //make sure $scope.service is there
+//                var listener = $scope.$watch(function () {
+//                    return $scope.service;
+//                }, function () {
+//                    if (!isUndefinedOrNull($scope.service.name)) {
+//                        listener();
+//                        init();
+//                    }
+//                });
 
-                var init = function () {
+//                var init = function () {
                     console.log('serviceShouldBeReady', $scope.service);
 
                     //load the service(-module) (lazy) (from the server)
@@ -74,6 +76,15 @@ angular.module('mrlapp.service')
                             mrl.subscribeToService($scope.methods.onMsg, $scope.data.name);
                         }
                     };
+                    $scope.fw.panelcount = $scope.service.panelcount;
+                    $scope.fw.setPanelCount = function (number) {
+                        console.log('setting panelcount', number);
+                        var old = $scope.fw.panelcount;
+                        $scope.fw.panelcount = number;
+                        ServiceSvc.notifyPanelCountChanged($scope.data.name, old, number);
+                    };
+                    //TODO - if not set to something else
+//                    $scope.fw.setPanelCount(1);
 
                     //TODO: not completly happy
                     //to be overriden
@@ -82,7 +93,7 @@ angular.module('mrlapp.service')
                         };
                     }
                     //END_specific Service-Initialisation
-                };
+//                };
 
                 //footer-size-change-buttons
                 $scope.changesize = function (size) {

@@ -2,6 +2,8 @@ angular.module('mrlapp.service.clockgui', [])
 
         .controller('ClockGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
                 console.log('ClockGuiCtrl');
+        
+                $scope.fw.setPanelCount(2);
 
                 // load data bindings for this type
                 $scope.data.pulseData = '';
