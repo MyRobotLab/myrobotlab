@@ -6,7 +6,8 @@ angular.module('mrlapp.service')
                         fw: '=',
                         data: '=',
                         guidata: '=',
-                        methods: '='
+                        methods: '=',
+                        panelindex: '='
 //                        inst: '=inst',
                     },
 //                    controller: "@",  //Not working as I
