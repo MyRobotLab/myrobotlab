@@ -1,4 +1,4 @@
-
+// https://github.com/johnpapa/angular-styleguide
 // http://kirkbushell.me/when-to-use-directives-controllers-or-services-in-angular/
 // http://stackoverflow.com/questions/12576798/how-to-watch-service-variables
 // http://stackoverflow.com/questions/19845950/angularjs-how-to-dynamically-add-html-and-bind-to-controller
@@ -18,15 +18,10 @@ angular.module('mrlapp', [
     'mrlapp.main.mainCtrl',
     'mrlapp.main.statesvc',
     'mrlapp.nav',
-    'mrlapp.service',
-//    'mrlapp.service.arduinogui',
-//    'mrlapp.service.clockgui',
-//    'mrlapp.service.webguigui',
-//    'mrlapp.service.runtimegui',
+    'mrlapp.service'
 ])
 .config(['$routeProvider', 'mrlProvider', function($routeProvider, mrlProvider) {
 
-        //mrlProvider.init();
         $routeProvider.when('/main', {
             templateUrl: 'main/main.html',
             controller: 'mainCtrl',
@@ -36,7 +31,7 @@ angular.module('mrlapp', [
                 }
             }
         }).when('/workpace', {
-            templateUrl: 'main/workspace.html',
+            templateUrl: 'workpace/index.html',
         }).otherwise({
             redirectTo: '/main'
         });
