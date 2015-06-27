@@ -6,23 +6,23 @@
         <div class="panel-heading">
             <!--header-->
             <h3 class="panel-title">
-                <img src="{{::service.type}}.png" alt="" width="16">
-                <b>{{::service.name}}</b>
-                <div class="pull-right">{{::service.simpleName}}</div>
+                <img src="{{::spawndata.type}}.png" alt="" width="16">
+                <b>{{::spawndata.name}}</b>
+                <div class="pull-right">{{::spawndata.simpleName}}</div>
                 <!--TODO: add an option-menu (kill-service, ...)-->
             </h3>
         </div>
-        <div class="panel-body" ng-show="fw.size != 'tiny' && fw.size != 'full'">
+        <div class="panel-body" ng-show="gui.size != 'tiny' && gui.size != 'full'">
             <!--body-->
             <div ng-if="!serviceloaded">
                 <i class="glyphicon glyphicon-download-alt"></i>&nbsp;&nbsp;loading service ...
             </div>
             <div ng-if="serviceloaded">
-                panelindex: {{service.panelindex}}
-                <div service-body type="{{service.type}}" simplename="{{service.simpleName}}" panelindex="service.panelindex" fw="fw" data="data" guidata="guidata" methods="methods"></div>
+                panelindex: {{spawndata.panelindex}}
+                <div service-body type="{{spawndata.type}}" simplename="{{spawndata.simpleName}}" panelindex="spawndata.panelindex" gui="gui" service="service"></div>
             </div>
         </div>
-        <div class="panel-footer" ng-show="!fw.forcesize">
+        <div class="panel-footer" ng-show="!gui.forcesize">
             <!--footer-->
             <button class="btn btn-default" type="submit" ng-click="changesize('tiny')">
                 <i class="glyphicon glyphicon-minus"></i>

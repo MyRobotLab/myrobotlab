@@ -4,16 +4,11 @@ angular.module('mrlapp.service')
                     scope: {
                         //"=" -> binding to items in parent-scope specified by attribute
                         //"@" -> using passed attribute
-                        service: '='
+                        spawndata: '=service'
                     },
                     templateUrl: 'service/service.html',
                     controller: 'ServiceCtrl',
                     link: function (scope, element, attr) {
-//                        //TODO: wonder why I need to this? (parseJSON)
-//                        scope.service = jQuery.parseJSON(attr.service);
-//                        //TODO: probably should move this somewhere else
-//                        scope.service.type = scope.service.simpleName.toLowerCase();
-//                        console.log('attributes', scope.service);
 
                         //TODO - later ...
 //                        var startX = 0, startY = 0, x = 0, y = 0;

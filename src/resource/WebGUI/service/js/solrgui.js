@@ -2,13 +2,13 @@ angular.module('mrlapp.service.solrgui', [])
   .controller('SolrGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
                 console.log('SolrGuiCtrl');
                 // TODO: something useful?!
-                $scope.methods.onMsg = function (msg) {
+                $scope.service.onMsg = function (msg) {
                     console.log("Solr Msg ! - ");  
                     console.log(msg);
                     if (msg.method == "onResults") {
                     	// Results!
-                    	var solrResults = msg.data[0];
-                    	$scope.data.solrResults = solrResults;
+                    	var solrResults = msg.service[0];
+                    	$scope.service.solrResults = solrResults;
                     	$scope.$apply();
                     }
                     
@@ -17,13 +17,13 @@ angular.module('mrlapp.service.solrgui', [])
                 
                 $scope.search = function(querystring) {
                     console.log('SolrGuiCtrl - Search Clicked!');
-                	mrl.sendTo($scope.data.name, "search", querystring);
+                	mrl.sendTo($scope.service.name, "search", querystring);
                 	
                 };
                 
-                mrl.subscribe($scope.data.name, 'publishResults', $scope.data.results);
+                mrl.subscribe($scope.service.name, 'publishResults', $scope.service.results);
                 
-                $scope.fw.initDone();
+                $scope.gui.initDone();
                 
                 
                 

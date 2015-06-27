@@ -4,92 +4,83 @@ angular.module('mrlapp.service')
             function ($scope, $modal, $ocLazyLoad, mrl, ServiceSvc) {
                 console.log('testing', $scope);
                 
-               $scope.anker = $scope.service.name + '_-_' + $scope.service.panelindex + '_-_';
+               $scope.anker = $scope.spawndata.name + '_-_' + $scope.spawndata.panelindex + '_-_';
 
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
                 };
 
-//                //make sure $scope.service is there
+//                //make sure $scope.spawndata is there
 //                var listener = $scope.$watch(function () {
-//                    return $scope.service;
+//                    return $scope.spawndata;
 //                }, function () {
-//                    if (!isUndefinedOrNull($scope.service.name)) {
+//                    if (!isUndefinedOrNull($scope.spawndata.name)) {
 //                        listener();
 //                        init();
 //                    }
 //                });
 
 //                var init = function () {
-                    console.log('serviceShouldBeReady', $scope.service);
+                    console.log('serviceShouldBeReady', $scope.spawndata);
 
                     //load the service(-module) (lazy) (from the server)
                     //TODO: should this really be done here?
-                    console.log('lazy-loading:', $scope.service.type);
-                    $ocLazyLoad.load("service/js/" + $scope.service.type + "gui.js").then(function () {
+                    console.log('lazy-loading:', $scope.spawndata.type);
+                    $ocLazyLoad.load("service/js/" + $scope.spawndata.type + "gui.js").then(function () {
                         $scope.serviceloaded = true;
                     });
 
                     //START_specific Service-Initialisation
                     //"inst" is given to the specific service-UI
-                    $scope.inst = ServiceSvc.getServiceInstance($scope.service.name);
+                    $scope.inst = ServiceSvc.getServiceInstance($scope.spawndata.name);
                     if ($scope.inst == null) {
                         $scope.inst = {};
-                        $scope.inst.fw = {}; //framework-section - DO NOT WRITE IN THERE!
-                        $scope.inst.data = mrl.getService($scope.service.name); //mrl-data-section
-                        $scope.inst.guidata = {}; //data-section - write your data in there!
-                        $scope.inst.methods = {}; //methods-section
-                        ServiceSvc.addServiceInstance($scope.service.name, $scope.inst);
-                        //should be able to delete this:
-//                    $scope.inst.myService = mrl.services[$scope.name];
-//                    mrl.addService($scope.name, $scope.inst);
+                        $scope.inst.gui = {}; //framework-section - DO NOT WRITE IN THERE!
+                        $scope.inst.service = mrl.getService($scope.spawndata.name); //mrl-data-section
+                        ServiceSvc.addServiceInstance($scope.spawndata.name, $scope.inst);
                     }
-                    $scope.fw = $scope.inst.fw;
-                    $scope.data = $scope.inst.data;
-                    $scope.guidata = $scope.inst.guidata;
-                    $scope.methods = $scope.inst.methods;
+                    $scope.gui = $scope.inst.gui;
+                    $scope.service = $scope.inst.service;
 
                     //TODO: refactor
                     console.log("$scope,size", $scope.size);
                     if ($scope.size != null && $scope.size.lastIndexOf("force", 0) == 0) {
-                        $scope.fw.oldsize = $scope.fw.size;
-                        $scope.fw.size = $scope.size.substring(5, $scope.size.length);
-                        $scope.fw.forcesize = true;
+                        $scope.gui.oldsize = $scope.gui.size;
+                        $scope.gui.size = $scope.size.substring(5, $scope.size.length);
+                        $scope.gui.forcesize = true;
                     } else {
-                        if ($scope.fw.oldsize != null) {
-                            $scope.fw.size = $scope.fw.oldsize;
-                            $scope.fw.oldsize = null;
+                        if ($scope.gui.oldsize != null) {
+                            $scope.gui.size = $scope.gui.oldsize;
+                            $scope.gui.oldsize = null;
                         }
-                        $scope.fw.forcesize = false;
+                        $scope.gui.forcesize = false;
                     }
-                    if (!$scope.fw.size) {
-                        $scope.fw.size = "medium";
-                        $scope.fw.oldsize = null;
+                    if (!$scope.gui.size) {
+                        $scope.gui.size = "medium";
+                        $scope.gui.oldsize = null;
                     }
 
                     //TODO: think of something better
                     var initDone = false;
-                    $scope.fw.initDone = function () {
+                    $scope.gui.initDone = function () {
                         if (!initDone) {
                             initDone = true;
                             // create message bindings
-                            mrl.subscribeToService($scope.methods.onMsg, $scope.data.name);
+                            mrl.subscribeToService($scope.service.onMsg, $scope.service.name);
                         }
                     };
-                    $scope.fw.panelcount = $scope.service.panelcount;
-                    $scope.fw.setPanelCount = function (number) {
+                    $scope.gui.panelcount = $scope.spawndata.panelcount;
+                    $scope.gui.setPanelCount = function (number) {
                         console.log('setting panelcount', number);
-                        var old = $scope.fw.panelcount;
-                        $scope.fw.panelcount = number;
-                        ServiceSvc.notifyPanelCountChanged($scope.data.name, old, number);
+                        var old = $scope.gui.panelcount;
+                        $scope.gui.panelcount = number;
+                        ServiceSvc.notifyPanelCountChanged($scope.service.name, old, number);
                     };
-                    //TODO - if not set to something else
-//                    $scope.fw.setPanelCount(1);
 
                     //TODO: not completly happy
                     //to be overriden
-                    if ($scope.methods.onMsg == null) {
-                        $scope.methods.onMsg = function () {
+                    if ($scope.service.onMsg == null) {
+                        $scope.service.onMsg = function () {
                         };
                     }
                     //END_specific Service-Initialisation
@@ -98,8 +89,8 @@ angular.module('mrlapp.service')
                 //footer-size-change-buttons
                 $scope.changesize = function (size) {
                     console.log("button clicked", size);
-                    $scope.fw.oldsize = $scope.fw.size;
-                    $scope.fw.size = size;
+                    $scope.gui.oldsize = $scope.gui.size;
+                    $scope.gui.size = size;
                     if (size == "full") {
                         //launch the service as a modal ('full')
                         var modalInstance = $modal.open({
@@ -108,27 +99,21 @@ angular.module('mrlapp.service')
                             controller: 'ServiceFullCtrl',
                             size: 'lg',
                             resolve: {
+                                spawndata: function () {
+                                    return $scope.spawndata;
+                                },
+                                gui: function () {
+                                    return $scope.gui;
+                                },
                                 service: function () {
                                     return $scope.service;
-                                },
-                                fw: function () {
-                                    return $scope.fw;
-                                },
-                                data: function () {
-                                    return $scope.data;
-                                },
-                                guidata: function () {
-                                    return $scope.guidata;
-                                },
-                                methods: function () {
-                                    return $scope.methods;
                                 }
                             }
                         });
                         //modal closed -> recover to old size
                         modalInstance.result.then(function () {
-                            $scope.fw.size = $scope.fw.oldsize;
-                            $scope.fw.oldsize = null;
+                            $scope.gui.size = $scope.gui.oldsize;
+                            $scope.gui.oldsize = null;
                         });
                     }
                 };
