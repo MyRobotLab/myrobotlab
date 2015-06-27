@@ -267,13 +267,24 @@ angular
 
         // TODO createMessage
         this.createMessage = function(inName, inMethod, inParams) {
-            var msg = {
-                msgID: new Date().getTime(),
-                name: inName,
-                method: inMethod,
-                data: inParams
-            };
-            return msg;
+        	// TODO: consider a different way to pass inParams for a no arg method.
+        	// rather than an array with a single null element.
+        	if (inParams.length = 1 && inParams[0] == null) {
+                var msg = {
+                        msgID: new Date().getTime(),
+                        name: inName,
+                        method: inMethod,
+                    };
+                    return msg;
+        	} else {
+	            var msg = {
+	                msgID: new Date().getTime(),
+	                name: inName,
+	                method: inMethod,
+	                data: inParams
+	            };
+	            return msg;
+        	}
         }
         
         this.isUndefinedOrNull = function(val) {
