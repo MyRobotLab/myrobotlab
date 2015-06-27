@@ -3,7 +3,14 @@
     gui {{gui}}<br>
     service {{service}}<br>
     pulseData {{service.pulseData}}<br>
-    <div ng-switch on="gui.size">
+    
+   <button ng-click="toggle()" ng-init="count=0">
+  	{{label}} Clock
+   </button>
+   
+   <input type="text" ng-type="string" ng-model="interval" ng-change="changeInterval(interval)"/>       
+       
+   <div ng-switch on="gui.size">
         <div class="animate-switch" ng-switch-when="small">Small view</div>
         <div class="animate-switch" ng-switch-when="medium">Medium view<br>mevi</div>
         <div class="animate-switch" ng-switch-when="large">Large view<br>lavi<br>lavi</div>
