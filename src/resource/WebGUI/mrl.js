@@ -42,6 +42,11 @@ angular
         var transport = 'websocket';
         var socket = null;
         var callbacks = [];
+
+        // framewok level callbacks
+        var onOpenCallbacks = [];
+        var onCloseCallbacks = [];
+        var onStatus = [];
         
         var deferred = null;
 
@@ -55,7 +60,7 @@ angular
             // trackMessageLength: true,
             // maxTextMessageSize: 10000000,
             //maxBinaryMessageSize: 10000000,
-            logLevel: 'debug'
+            logLevel: 'info'
         };
 
         // connectivity related end 
@@ -97,7 +102,7 @@ angular
         this.subscribeToMessages = function(callback) {
             callbacks.push(callback);
         };
-        
+
         // FIXME CHECK FOR DUPLICATES
         this.subscribeToService = function(callback, serviceName) {
             if (!(serviceName in nameCallbackMap)) {
@@ -176,7 +181,7 @@ angular
             deferred.resolve('connected !');
             return deferred.promise;
         }
-        
+
         // keeping the registy up to date with
         // new or removed services
         this.onRuntimeMsg = function(msg) {
@@ -242,6 +247,9 @@ angular
             console.log('Error: falling back to ' + transport + ' ' + errorMsg);
         };
         
+        this.onStatus = function(status) {
+            console.log(status);
+        }
         
         this.onClose = function(response) {
             this.connected = false;
@@ -249,6 +257,11 @@ angular
             if (response.state == "unsubscribe") {
                 console.log('Info: ' + transport + ' closed.');
             }
+            
+            for (var i = 0; i < onCloseCallbacks.length; i++) {
+                onCloseCallbacks[i]();
+            }
+        
         };
         // --------- ws end ---------------------
 
@@ -336,9 +349,20 @@ angular
             // this.connected = true; mrl.isConnected means data
             // was asked and recieved from the backend
             console.log('onOpen: ' + transport + ' connection opened.');
+            for (var i = 0; i < onOpenCallbacks.length; i++) {
+                onOpenCallbacks[i]();
+            }
         // TODO - chain the onLocalServices / hello with defer.resolve 
         // at the end
         };
+        
+        this.subscribeOnOpen = function(callback) {
+            onOpenCallbacks.push(callback);
+        }
+        
+        this.subscribeOnClose = function(callback) {
+            onCloseCallbacks.push(callback);
+        }
 
         // injectables go here
         // the special $get method called when
@@ -421,7 +445,10 @@ angular
                 },
                 sendTo: _self.sendTo,
                 subscribe: _self.subscribe,
-                subscribeToService : _self.subscribeToService,
+                subscribeToService: _self.subscribeToService,
+                subscribeOnClose: _self.subscribeOnClose,
+                subscribeOnOpen: _self.subscribeOnOpen,
+                subscribeToMethod: _self.subscribeToMethod,
                 promise: _self.promise
             /*,
                 save: function() {

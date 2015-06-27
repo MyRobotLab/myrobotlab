@@ -238,6 +238,20 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		subscribe(runtime.getName(), "registered");
 		subscribe(runtime.getName(), "released");
 	}
+	
+	public void onRegistered(ServiceInterface si){
+		// new service
+		// subscribe to the status events
+		subscribe(si.getName(), "publishStatus");
+		
+		// broadcast it too
+		// repackage message
+		/* don't need to do this :)
+		Message m = createMessage(getName(), "onRegistered", si);
+		m.sender = Runtime.getInstance().getName();
+		broadcast(m);
+		*/
+	}
 
 	@Override
 	public String[] getCategories() {
@@ -555,15 +569,18 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// FIXME - problem with collisions of this service's methods
 		// and dialog methods ?!?!?
 
-		// FIXME - collisions may exist
-		// if the method name is == to a method in the GUIService
+		// broadcast 
+		broadcast(m);
+		
+		// if the method name is == to a method in the WebGUI
+		// process it
 		if (methodSet.contains(m.method)) {
 			// process the message like a regular service
 			return true;
 		}
 
 		// otherwise send the message to the dialog with the senders name
-		broadcast(m);
+		// broadcast(m);
 		return false;
 	}
 
@@ -577,6 +594,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// Uri myUri = Uri.parse("http://stackoverflow.com");
 
 			WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
+			Runtime.start("clock01", "Clock");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
+			Runtime.start("gui", "GUIService");
+			
 			// webgui.extract();
 			/*
 			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock"); Runtime.start("clck3", "Clock");
