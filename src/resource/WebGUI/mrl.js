@@ -269,11 +269,11 @@ angular
         this.createMessage = function(inName, inMethod, inParams) {
         	// TODO: consider a different way to pass inParams for a no arg method.
         	// rather than an array with a single null element.
-        	if (inParams.length = 1 && inParams[0] == null) {
+        	if (inParams.length == 1 && inParams[0] === null) {
                 var msg = {
                         msgID: new Date().getTime(),
                         name: inName,
-                        method: inMethod,
+                        method: inMethod
                     };
                     return msg;
         	} else {
