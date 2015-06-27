@@ -23,7 +23,6 @@ angular.module('mrlapp', [
 //    'mrlapp.service.clockgui',
 //    'mrlapp.service.webguigui',
 //    'mrlapp.service.runtimegui',
-    'mrlapp.test.testController'
 ])
 .config(['$routeProvider', 'mrlProvider', function($routeProvider, mrlProvider) {
 
@@ -38,14 +37,6 @@ angular.module('mrlapp', [
             }
         }).when('/workpace', {
             templateUrl: 'main/workspace.html',
-        }).when('/test', {
-            templateUrl: 'test/test.html',
-            controller: 'testController',
-            resolve: {
-                message: function(mrl) {
-                    return mrl.init();
-                }
-            }
         }).otherwise({
             redirectTo: '/main'
         });
