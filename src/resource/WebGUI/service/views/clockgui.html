@@ -3,10 +3,16 @@
     gui {{gui}}<br>
     service {{service}}<br>
     pulseData {{pulseData}}<br>
-    
-   <button ng-click="toggle()"  class="btn btn-default" ng-init="count=0">{{label}}</button>
-   
-   <input type="text" ng-type="string" ng-model="interval" ng-change="changeInterval(interval)"/>       
+
+   <div class="col-xs-3">
+    <button ng-click="toggle()"  class="btn btn-default" ng-init="count=0">{{label}}</button>
+   </div>       
+   <div class="col-xs-3">
+   <input type="text" class="form-control" ng-type="string" ng-model="interval" ng-change="changeInterval(interval)"/> ms
+   </div>       
+   <div class="col-xs-3">
+   ms
+   </div>       
        
    <div ng-switch on="gui.size">
         <div class="animate-switch" ng-switch-when="small">Small view</div>
