@@ -19,7 +19,8 @@ public class MethodCache {
 		} else {
 			// changed to getMethods to support inheritance
 			// if failure - overloading funny re-implementing a vTable in c++
-			Method[] methods = clazz.getDeclaredMethods();
+			// Method[] methods = clazz.getDeclaredMethods();
+			Method[] methods = clazz.getMethods();
 			for (Method method : methods) {
 				
 				// FIXME - future Many to one Map - if incoming data can "hint" would be

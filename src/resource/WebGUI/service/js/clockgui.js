@@ -37,6 +37,7 @@ angular.module('mrlapp.service.clockgui', [])
         
         $scope.toggle = function() {
             if ($scope.label == "Start") {
+                mrl.sendTo($scope.service.name, "setInterval", $scope.interval);
                 mrl.sendTo($scope.service.name, "startClock");
             } else {
                 mrl.sendTo($scope.service.name, "stopClock");

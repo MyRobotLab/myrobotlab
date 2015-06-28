@@ -358,10 +358,58 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// starndard JSON asynchronous message with POST'ed parameters
 				if ("messages".equals(parts[2]) && "POST".equals(httpMethod)) {
 					Body body = request.body();
+					
+					// first decoding will give you an array of types in msg.data[]
+					// but they are un-coerced - we need the method signature candidate 
+					// to determine what we should coerce them into
 					Message msg = Encoder.fromJson(body.asString(), Message.class);
 					msg.sender = getName();
 					log.info(String.format("got msg %s", msg.toString()));
-					out(msg);
+					
+					//out(msg);
+										
+					// get the service
+					ServiceInterface si = Runtime.getService(msg.name);
+					Class<?> clazz = si.getClass();
+					
+					Class<?>[] paramTypes = null;
+					Object[] params = new Object[msg.data.length];
+					// decoded array of encoded parameters
+					// FIXME - not "really" correct !
+					Object[] encodedArray = msg.data;//new Object[msg.data.length];
+					
+					//encodedArray = codec.decodeArray(b);
+					
+					paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
+					// WE NOW HAVE ORDINAL AND TYPES
+					params = new Object[encodedArray.length];
+
+					// DECODE AND FILL THE PARAMS
+					for (int i = 0; i < params.length; ++i) {
+						params[i] = codec.decode(encodedArray[i], paramTypes[i]);
+					}
+
+					Method method = clazz.getMethod(msg.method, paramTypes);
+
+					// NOTE --------------
+					// strategy of find correct method with correct parameter types
+					// "name" is the strongest binder - but without a method cache we
+					// are condemned to scan through all methods
+					// also without a method cache - we have to figure out if the
+					// signature would fit with instanceof for each object
+					// and "boxed" types as well
+
+					// best to fail - then attempt to resolve through scanning through
+					// methods and trying types - then cache the result
+
+					Object ret = method.invoke(si, params);
+					
+					// FIXME - Is this how to support synchronous ?
+					// What does this mean ? 
+					//respond(out, codec, method.getName(), ret);
+
+					MethodCache.cache(clazz, method);				
+					
 					return;
 				}
 
