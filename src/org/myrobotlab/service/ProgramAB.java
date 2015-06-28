@@ -52,17 +52,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		}
 	}
 
-	private Bot bot = null;
+	private transient Bot bot = null;
 
 	private String path = "ProgramAB";
 	private String botName = "alice2";
 
 	// private Chat chatSession=null;
-	private HashMap<String, Chat> sessions = new HashMap<String, Chat>();
+	private transient HashMap<String, Chat> sessions = new HashMap<String, Chat>();
 	// TODO: better parsing than a regex...
-	Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-
-	Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+	private transient Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+	private transient Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 
 	private boolean processOOB = true;
 	private final Date serviceStartTime;

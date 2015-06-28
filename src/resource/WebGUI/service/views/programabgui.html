@@ -2,12 +2,309 @@
     Service   : {{service.name}} of type {{service.simpleName}}<br/>
     Bot   Name: {{service.botName}}<br/>
     Start Time: {{service.serviceStartTime}}<br/>
-	<!--  TODO: add google web speech toolkit to this input text box -->
+    <br/>
+    <!-- Here is the Google Web Speech Toolkit! Pretty much straight from their example. -->
+    <div id="info">
+  		<p id="info_start">Click on the microphone icon and begin speaking.</p>
+		<p id="info_speak_now">Speak now.</p>
+		<p id="info_no_speech">No speech was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">
+      microphone settings</a>.</p>
+		<p id="info_no_microphone" style="display:none">
+    No microphone was found. Ensure that a microphone is installed and that
+    <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">
+    microphone settings</a> are configured correctly.</p>
+		<p id="info_allow">Click the "Allow" button above to enable your microphone.</p>
+		<p id="info_denied">Permission to use microphone was denied.</p>
+		<p id="info_blocked">Permission to use microphone is blocked. To change,
+    go to chrome://settings/contentExceptions#media-stream</p>
+		<p id="info_upgrade">Web Speech API is not supported by this browser.
+     Upgrade to <a href="//www.google.com/chrome">Chrome</a>
+     version 25 or later.</p>
+	</div>
+    <div class="right">
+  		<button id="start_button" onclick="startButton(event)"><img id="start_img" src="service/img/mic.gif" alt="Start"></button>
+	</div>
+	<div id="results">
+  		<span id="final_span" class="final"></span>
+  		<span id="interim_span" class="interim"></span>
+	  <p/>
+	</div>
+    <div class="center">
+  <div id="div_language">
+    <select id="select_language" onchange="updateCountry()"></select>&nbsp;&nbsp;
+    <select id="select_dialect"></select>
+  </div>
+</div>
+	
+<script>
+// TODO: I think that we should probably be able to move most of this
+// code into the angularjs side of the house. 
+// (I just didn't feel like re-writing it all now..soon.)
+// Beginning of the script here.
+// First some utility functions
+function upgrade() {
+	start_button.style.visibility = 'hidden';
+	showInfo('info_upgrade');
+};
+
+// help clean up some text
+function linebreak(s) {
+	var two_line = /\n\n/g;
+	var one_line = /\n/g;
+	return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+};
+
+// capitalize a string and return it.		
+function capitalize(s) {
+	var first_char = /\S/;
+	return s.replace(first_char, function(m) { return m.toUpperCase(); });
+};
+
+//view/hide the info strings on the page for current status.
+function showInfo(s) {
+	if (s) {
+		for (var child = info.firstChild; child; child = child.nextSibling) {
+			if (child.style) {
+				child.style.display = child.id == s ? 'inline' : 'none';
+			};
+		};
+		info.style.visibility = 'visible';
+	} else {
+		info.style.visibility = 'hidden';
+	};
+};
+
+// The startButton event, this is when we start listening for spoken text.
+function startButton(event) {
+	if (recognizing) {
+		recognition.stop();
+		return;
+	};
+	// init the current text.
+	final_transcript = '';
+	recognition.lang = select_dialect.value;
+	recognition.start();
+	ignore_onend = false;
+	final_span.innerHTML = '';
+	interim_span.innerHTML = '';
+	start_img.src = 'service/img/mic-slash.gif';
+	showInfo('info_allow');
+	showButtons('none');
+	start_timestamp = event.timeStamp;
+};
+
+// helper function
+var current_style;
+function showButtons(style) {
+	if (style == current_style) {
+		return;
+	};
+	current_style = style;
+	copy_button.style.display = style;
+	email_button.style.display = style;
+	copy_info.style.display = 'none';
+	email_info.style.display = 'none';
+};
+
+//handle it if a new country/language is selected.
+function updateCountry() {
+	  for (var i = select_dialect.options.length - 1; i >= 0; i--) {
+	    select_dialect.remove(i);
+	  }
+	  var list = langs[select_language.selectedIndex];
+	  for (var i = 1; i < list.length; i++) {
+	    select_dialect.options.add(new Option(list[i][1], list[i][0]));
+	  }
+	  select_dialect.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
+};
+
+// All of the supported languages that can be selected (and dialects)
+var langs =
+[['Afrikaans',       ['af-ZA']],
+ ['Bahasa Indonesia',['id-ID']],
+ ['Bahasa Melayu',   ['ms-MY']],
+ ['Català',          ['ca-ES']],
+ ['Čeština',         ['cs-CZ']],
+ ['Deutsch',         ['de-DE']],
+ ['English',         ['en-AU', 'Australia'],
+                     ['en-CA', 'Canada'],
+                     ['en-IN', 'India'],
+                     ['en-NZ', 'New Zealand'],
+                     ['en-ZA', 'South Africa'],
+                     ['en-GB', 'United Kingdom'],
+                     ['en-US', 'United States']],
+ ['Español',         ['es-AR', 'Argentina'],
+                     ['es-BO', 'Bolivia'],
+                     ['es-CL', 'Chile'],
+                     ['es-CO', 'Colombia'],
+                     ['es-CR', 'Costa Rica'],
+                     ['es-EC', 'Ecuador'],
+                     ['es-SV', 'El Salvador'],
+                     ['es-ES', 'España'],
+                     ['es-US', 'Estados Unidos'],
+                     ['es-GT', 'Guatemala'],
+                     ['es-HN', 'Honduras'],
+                     ['es-MX', 'México'],
+                     ['es-NI', 'Nicaragua'],
+                     ['es-PA', 'Panamá'],
+                     ['es-PY', 'Paraguay'],
+                     ['es-PE', 'Perú'],
+                     ['es-PR', 'Puerto Rico'],
+                     ['es-DO', 'República Dominicana'],
+                     ['es-UY', 'Uruguay'],
+                     ['es-VE', 'Venezuela']],
+ ['Euskara',         ['eu-ES']],
+ ['Français',        ['fr-FR']],
+ ['Galego',          ['gl-ES']],
+ ['Hrvatski',        ['hr_HR']],
+ ['IsiZulu',         ['zu-ZA']],
+ ['Íslenska',        ['is-IS']],
+ ['Italiano',        ['it-IT', 'Italia'],
+                     ['it-CH', 'Svizzera']],
+ ['Magyar',          ['hu-HU']],
+ ['Nederlands',      ['nl-NL']],
+ ['Norsk bokmål',    ['nb-NO']],
+ ['Polski',          ['pl-PL']],
+ ['Português',       ['pt-BR', 'Brasil'],
+                     ['pt-PT', 'Portugal']],
+ ['Română',          ['ro-RO']],
+ ['Slovenčina',      ['sk-SK']],
+ ['Suomi',           ['fi-FI']],
+ ['Svenska',         ['sv-SE']],
+ ['Türkçe',          ['tr-TR']],
+ ['български',       ['bg-BG']],
+ ['Pусский',         ['ru-RU']],
+ ['Српски',          ['sr-RS']],
+ ['한국어',            ['ko-KR']],
+ ['中文',             ['cmn-Hans-CN', '普通话 (中国大陆)'],
+                     ['cmn-Hans-HK', '普通话 (香港)'],
+                     ['cmn-Hant-TW', '中文 (台灣)'],
+                     ['yue-Hant-HK', '粵語 (香港)']],
+ ['日本語',           ['ja-JP']],
+ ['Lingua latīna',   ['la']]];
+
+// populate the languages control
+// TODO: move this into angular land?
+for (var i = 0; i < langs.length; i++) {
+  select_language.options[i] = new Option(langs[i][0], i);
+}
+// defaults.
+select_language.selectedIndex = 6;
+select_dialect.selectedIndex = 6;
+updateCountry();
+
+// Initial state, update user that they can click the button.
+showInfo('info_start');
+
+// the recognized text ultimately accumulates here
+var final_transcript = '';
+// are we currently recognizing speech or not.
+var recognizing = false;
+var ignore_onend;
+var start_timestamp;
+if (!('webkitSpeechRecognition' in window)) {
+	// if the browser is too old, this isn't supported.
+	upgrade();
+} else {
+	start_button.style.display = 'inline-block';
+	// create the webspeech toolkit
+	var recognition = new webkitSpeechRecognition();
+	// config properties on the webkit speech stuff.
+	recognition.continuous = true;
+	recognition.interimResults = true;
+
+	// called when recognition starts.
+	recognition.onstart = function() {
+		recognizing = true;
+		showInfo('info_speak_now');
+		start_img.src = 'service/img/mic-animate.gif';
+	};
+
+	// called when there's an error (handles a few cases)
+	recognition.onerror = function(event) {
+		if (event.error == 'no-speech') {
+	      start_img.src = 'service/img/mic.gif';
+	      showInfo('info_no_speech');
+	      ignore_onend = true;
+		};
+		if (event.error == 'audio-capture') {
+	      start_img.src = 'service/img/mic.gif';
+	      showInfo('info_no_microphone');
+	      ignore_onend = true;
+		};
+		if (event.error == 'not-allowed') {
+	      if (event.timeStamp - start_timestamp < 100) {
+	        showInfo('info_blocked');
+	      } else {
+	        showInfo('info_denied');
+	      };
+	      ignore_onend = true;
+		};
+	};
+
+	// called when recognition finishes.
+	recognition.onend = function() {
+		recognizing = false;
+		if (ignore_onend) {
+			return;
+		};
+		start_img.src = 'service/img/mic.gif';
+		if (!final_transcript) {
+			showInfo('info_start');
+			return;
+		};
+		showInfo('');
+		if (window.getSelection) {
+			window.getSelection().removeAllRanges();
+			var range = document.createRange();
+			range.selectNode(document.getElementById('final_span'));
+			window.getSelection().addRange(range);
+		};
+	};
+	
+	// called when a result is returned from recognition
+	recognition.onresult = function(event) {
+		var interim_transcript = '';
+		for (var i = event.resultIndex; i < event.results.length; ++i) {
+			if (event.results[i].isFinal) {
+		    	final_transcript += event.results[i][0].transcript;
+				// window.alert("Recognized Speech:"+ final_transcript);
+		        // TODO: Use MRL SendTO!!!
+		        // TODO: what's my best choice here?
+				// Recognized sentence is in "final_transcript"
+		        // mrl.sendTo();
+		        var elem = document.getElementById("utterance");
+				elem.value = final_transcript;
+				// by clicking this button we go into angularjs land.
+				document.getElementById("askProgramAB").click(); 
+		        final_transcript = '';
+				interm_transcript = '';
+			} else {
+		    	// we're not at the boundry of speech detection
+				// append this fragment. 
+				interim_transcript += event.results[i][0].transcript;
+			};
+		};
+		final_transcript = capitalize(final_transcript);
+		final_span.innerHTML = linebreak(final_transcript);
+		interim_span.innerHTML = linebreak(interim_transcript);
+		if (final_transcript || interim_transcript) {
+			showButtons('inline-block');
+		};
+	};
+};
+
+</script>
+    
+<br/>
+    
 	<form>
-    <input ng-model="utterance" name="utterance" ng-init=""/>  
-    <button ng-click="askProgramAB(utterance)" ng-init="">Ask</button>
+		<input ng-model="utterance" name="utterance" id="utterance" ng-init=""/>  
+		<button id="askProgramAB" ng-click="askProgramAB(utterance)" ng-init="">Ask</button>
     </form>
     <br/>
+    
+    <!--  the conversation history/log table -->
     <table>
       <thead>
         <tr>
@@ -21,6 +318,7 @@
       </tbody>
     </table>    
     
+    <!--  boiler plate bottom of the panel. -->
     <div ng-switch on="gui.size">
         <div class="animate-switch" ng-switch-when="small">Small view</div>
         <div class="animate-switch" ng-switch-when="medium">Medium view</div>
