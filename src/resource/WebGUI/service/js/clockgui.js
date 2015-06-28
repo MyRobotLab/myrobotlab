@@ -10,11 +10,10 @@ angular.module('mrlapp.service.clockgui', [])
                 $scope.label = "Start";
         }
 
-        $scope.gui.setPanelCount(1);
         // load data bindings for this type
         $scope.pulseData = '';
 
-        $scope.service.onMsg = function(msg) {
+        $scope.gui.onMsg = function(msg) {
            
             switch (msg.method) {
                 case 'onPulse':
@@ -46,7 +45,7 @@ angular.module('mrlapp.service.clockgui', [])
         
         $scope.changeInterval = function() {
             mrl.sendTo($scope.service.name, "setInterval", $scope.interval);
-        }
+        };
         
         mrl.subscribe($scope.service.name, 'pulse');
         mrl.subscribe($scope.service.name, 'clockStarted');

@@ -66,7 +66,7 @@ angular.module('mrlapp.service')
                         if (!initDone) {
                             initDone = true;
                             // create message bindings
-                            mrl.subscribeToService($scope.service.onMsg, $scope.service.name);
+                            mrl.subscribeToService($scope.gui.onMsg, $scope.service.name);
                         }
                     };
                     $scope.gui.panelcount = $scope.spawndata.panelcount;
