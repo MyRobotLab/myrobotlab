@@ -6,7 +6,7 @@ angular.module('mrlapp.service.programabgui', [])
     $scope.rows = [];
     
     $scope.service = mrl.getService($scope.service.name);
-    $scope.service.onMsg = function (msg) {
+    $scope.gui.onMsg = function (msg) {
         console.log("Program AB Msg !");
         if (msg.method == "onText") {
             var textData = msg.data[0];

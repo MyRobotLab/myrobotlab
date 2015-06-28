@@ -2,7 +2,7 @@ angular.module('mrlapp.service.solrgui', [])
   .controller('SolrGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
                 console.log('SolrGuiCtrl');
                 // TODO: something useful?!
-                $scope.service.onMsg = function (msg) {
+                $scope.gui.onMsg = function (msg) {
                     console.log("Solr Msg ! - ");  
                     console.log(msg);
                     if (msg.method == "onResults") {
