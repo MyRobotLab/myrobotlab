@@ -2,11 +2,9 @@
     HEY!!! - ClockGUI here!<br>
     gui {{gui}}<br>
     service {{service}}<br>
-    pulseData {{service.pulseData}}<br>
+    pulseData {{pulseData}}<br>
     
-   <button ng-click="toggle()" ng-init="count=0">
-  	{{label}} Clock
-   </button>
+   <button ng-click="toggle()"  class="btn btn-default" ng-init="count=0">{{label}}</button>
    
    <input type="text" ng-type="string" ng-model="interval" ng-change="changeInterval(interval)"/>       
        
