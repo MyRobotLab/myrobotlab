@@ -22,16 +22,34 @@ public class MethodCache {
 			// Method[] methods = clazz.getDeclaredMethods();
 			Method[] methods = clazz.getMethods();
 			for (Method method : methods) {
-				
+
 				// FIXME - future Many to one Map - if incoming data can "hint" would be
 				// an optimization
-				if (methodName.equals(method.getName())){
-					return method.getParameterTypes();
+				if (methodName.equals(method.getName())) {
+					// name matches - lets do more checking
+					Class<?>[] pTypes = method.getParameterTypes();
+					if (ordinal == pTypes.length) {
+						// param length matches
+						boolean interfaceInParamList = false;
+						for (int i = 0; i < pTypes.length; ++i) {
+							// we don't support interfaces
+							// because what will we decode too ?
+							// we just can't ! :)
+							if (pTypes[i].isInterface()) {
+								interfaceInParamList = true;
+								break;
+							}
+						}
+						
+						if (!interfaceInParamList){
+							return pTypes;
+						}
+					}
 				}
-			}			
+			}
 			throw new NoSuchMethodException(String.format("could not find %s.%s in declared methods", clazz.getSimpleName(), methodName));
 		}
-		
+
 	}
 
 	final public static void cache(Class<?> clazz, Method method) {

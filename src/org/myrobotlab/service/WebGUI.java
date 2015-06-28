@@ -381,6 +381,18 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 					//encodedArray = codec.decodeArray(b);
 					
 					paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
+					
+					StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name, msg.method));
+					for (int i = 0; i < paramTypes.length; ++i){
+						if (i != 0){
+							sb.append(",");
+						}
+						sb.append(paramTypes[i].getSimpleName());
+					}
+					sb.append(")");
+					log.info(sb.toString());
+					
+					
 					// WE NOW HAVE ORDINAL AND TYPES
 					params = new Object[encodedArray.length];
 
