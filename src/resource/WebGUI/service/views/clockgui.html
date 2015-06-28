@@ -8,7 +8,7 @@
     <button ng-click="toggle()"  class="btn btn-default" ng-init="count=0">{{label}}</button>
    </div>       
    <div class="col-xs-3">
-   <input type="text" class="form-control" ng-type="string" ng-model="interval" ng-change="changeInterval(interval)"/> ms
+   <input type="text" class="form-control" ng-type="number" ng-model="interval" ng-disabled="intervalDisabled" />
    </div>       
    <div class="col-xs-3">
    ms
