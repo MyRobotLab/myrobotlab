@@ -114,13 +114,13 @@ angular.module('mrlapp.service')
                         case 'onRegistered':
                             var newService = msg.data[0];
 //                            this.addServiceInstance(newService.name, newService);
-                            this.addService(newService.name, newService);
+                            _self.addService(newService.name, newService);
                             break;
 
                         case 'onReleased':
                             var name = msg.data[0];
-                            this.removeServiceInstance(name);
-                            this.removeService(name);
+                            _self.removeServiceInstance(name);
+                            _self.removeService(name);
                             break;
                     }
                 };
