@@ -4,7 +4,13 @@ angular.module('mrlapp.main.mainCtrl', ['mrlapp.mrl'])
         
         console.log('is connected: ' + mrl.isConnected());
         
+        //service-panels & update-routine
         $scope.services = ServiceSvc.getServices();
+        var panelsUpdated = function() {
+            $scope.services = ServiceSvc.getServices();
+            $scope.$apply();
+        };
+        ServiceSvc.subscribeToUpdates(panelsUpdated);
         
         $scope.gateway = mrl.getGateway();
         $scope.runtime = mrl.getRuntime();

@@ -1,5 +1,6 @@
 angular.module('mrlapp.service')
         .service('ServiceSvc', ['mrl', function (mrl) {
+                _self = this;
 
                 var gateway = mrl.getGateway();
                 var runtime = mrl.getRuntime();
@@ -9,6 +10,25 @@ angular.module('mrlapp.service')
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
                 };
+                
+                //START_update-notification
+                //TODO: think of better way
+                var updateSubscribtions = [];
+                this.subscribeToUpdates = function (callback) {
+                    updateSubscribtions.push(callback);
+                };
+                this.unsubscribeFromUpdates = function (callback) {
+                    var index = updateSubscribtions.indexOf(callback);
+                    if (index != -1) {
+                        updateSubscribtions.splice(index, 1);
+                    }
+                };
+                var notifyAllOfUpdate = function () {
+                    angular.forEach(updateSubscribtions, function (value, key) {
+                        value();
+                    });
+                };
+                //END_update-notification
 
                 //START_Service Instances
                 var serviceInstances = [];
@@ -57,6 +77,7 @@ angular.module('mrlapp.service')
                         services[service.name + '_-_' + service.panelindex + '_-_'] = service;
                     }
                     console.log('adding#3:', name, guiData, services);
+                    notifyAllOfUpdate();
                 };
 
                 this.removeService = function (name) {
@@ -71,6 +92,7 @@ angular.module('mrlapp.service')
                             services.splice(index, 1);
                         }
                     }
+                    notifyAllOfUpdate();
                 };
 
                 this.getServices = function () {
@@ -107,8 +129,7 @@ angular.module('mrlapp.service')
                     }
                 };
                 //END_Services
-                
-                _self = this;
+
                 this.onMsg = function (msg) {
                     switch (msg.method) {
                         case 'onRegistered':
@@ -125,7 +146,7 @@ angular.module('mrlapp.service')
                     }
                 };
                 mrl.subscribeToService(this.onMsg, runtime.name);
-                
+
                 for (var name in registry) {
                     if (registry.hasOwnProperty(name)) {
                         this.addService(name, registry[name]);
