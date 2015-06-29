@@ -185,13 +185,19 @@ angular
         // keeping the registy up to date with
         // new or removed services
         this.onRuntimeMsg = function(msg) {
-            if (msg.name == "registered") {
-                var newService = msg.data[0];
-                _self.registry[newService.name] = {};
-                _self.registry[newService.name] = newService;
-            } else if (msg.name == "released") {
-                var name = msg.data[0];
-                delete _self.registry[name];
+            switch (msg.method) {
+                case 'onRegistered':
+                    var newService = msg.data[0];
+                    registry[newService.name] = {};
+                    registry[newService.name] = newService;
+                    break;
+                
+                case 'onReleased':
+                    var name = msg.data[0];
+                    // FIXME - unregister from all callbacks
+                    delete registry[name];
+                    
+                    break;
             }
         }
 
@@ -267,24 +273,24 @@ angular
 
         // TODO createMessage
         this.createMessage = function(inName, inMethod, inParams) {
-        	// TODO: consider a different way to pass inParams for a no arg method.
-        	// rather than an array with a single null element.
-        	if (inParams.length == 1 && inParams[0] === null) {
+            // TODO: consider a different way to pass inParams for a no arg method.
+            // rather than an array with a single null element.
+            if (inParams.length == 1 && inParams[0] === null) {
                 var msg = {
-                        msgID: new Date().getTime(),
-                        name: inName,
-                        method: inMethod
-                    };
-                    return msg;
-        	} else {
-	            var msg = {
-	                msgID: new Date().getTime(),
-	                name: inName,
-	                method: inMethod,
-	                data: inParams
-	            };
-	            return msg;
-        	}
+                    msgID: new Date().getTime(),
+                    name: inName,
+                    method: inMethod
+                };
+                return msg;
+            } else {
+                var msg = {
+                    msgID: new Date().getTime(),
+                    name: inName,
+                    method: inMethod,
+                    data: inParams
+                };
+                return msg;
+            }
         }
         
         this.isUndefinedOrNull = function(val) {
