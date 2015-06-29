@@ -10,7 +10,7 @@ angular.module('mrlapp.service')
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
                 };
-                
+
                 //START_update-notification
                 //TODO: think of better way
                 var updateSubscribtions = [];
@@ -81,16 +81,11 @@ angular.module('mrlapp.service')
                 };
 
                 this.removeService = function (name) {
+                    console.log('removing service', name, guiData);
                     var panelcount = guiData[name].panelcount;
-                    var index = guiData.indexOf(name);
-                    if (index != -1) {
-                        guiData.splice(index, 1);
-                    }
+                    delete guiData[name];
                     for (var i = 0; i < panelcount; i++) {
-                        var index = services.indexOf(name + '_-_' + i + '_-_');
-                        if (index != -1) {
-                            services.splice(index, 1);
-                        }
+                        delete services[name + '_-_' + i + '_-_'];
                     }
                     notifyAllOfUpdate();
                 };
@@ -106,10 +101,7 @@ angular.module('mrlapp.service')
 
                     if (diff < 0) {
                         for (var i = oldcount - 1; i > count - 1; i++) {
-                            var index = services.indexOf(name + '_-_' + i + '_-_');
-                            if (index != -1) {
-                                services.splice(index, 1);
-                            }
+                            delete services[name + '_-_' + i + '_-_'];
                         }
                         for (var i = count - 1; i >= 0; i++) {
                             services[name + '_-_' + i + '_-_'].panelcount = count;
@@ -139,9 +131,9 @@ angular.module('mrlapp.service')
                             break;
 
                         case 'onReleased':
-                            var name = msg.data[0];
-                            _self.removeServiceInstance(name);
-                            _self.removeService(name);
+                            var service = msg.data[0];
+                            _self.removeService(service.name);
+                            _self.removeServiceInstance(service.name);
                             break;
                     }
                 };
