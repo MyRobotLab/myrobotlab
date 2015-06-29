@@ -106,13 +106,15 @@ angular.module('mrlapp.service')
                         }
                     }
                 };
+                //END_Services
+                
                 _self = this;
                 this.onMsg = function (msg) {
                     switch (msg.method) {
                         case 'onRegistered':
                             var newService = msg.data[0];
 //                            this.addServiceInstance(newService.name, newService);
-                            _self.addService(newService.name, newService);
+                            this.addService(newService.name, newService);
                             break;
 
                         case 'onReleased':
@@ -129,5 +131,4 @@ angular.module('mrlapp.service')
                         this.addService(name, registry[name]);
                     }
                 }
-                //END_Services
             }]);
