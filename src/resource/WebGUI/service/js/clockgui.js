@@ -1,8 +1,8 @@
 angular.module('mrlapp.service.clockgui', [])
 .controller('ClockGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
         console.log('ClockGuiCtrl');
+        // get latest copy of a services
         $scope.service = mrl.getService($scope.service.name);
-        
         $scope.interval = $scope.service.interval;
         if ($scope.service.isClockRunning == true){
                 $scope.label = "Stop";
@@ -39,9 +39,9 @@ angular.module('mrlapp.service.clockgui', [])
             }
         };
         
-        $scope.toggle = function() {
-            if ($scope.label == "Start") {
-                mrl.sendTo($scope.service.name, "setInterval", $scope.interval);
+        $scope.toggle = function(label, interval) {
+            if (label == "Start") {
+                mrl.sendTo($scope.service.name, "setInterval", interval);
                 mrl.sendTo($scope.service.name, "startClock");
             } else {
                 mrl.sendTo($scope.service.name, "stopClock");
