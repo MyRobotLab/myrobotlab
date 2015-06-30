@@ -1,29 +1,10 @@
 <div>
-    HEY!!! - ClockGUI here!<br>
-    gui {{gui}}<br>
-    service {{service}}<br>
-    pulseData {{pulseData}}<br>
-
+    <h3>{{pulseData}}</h3>
    <div class="col-xs-3">
-    <button ng-click="toggle()"  class="btn btn-default" ng-init="count=0">{{label}}</button>
+    <button ng-click="toggle(label, interval)"  class="btn btn-default" ng-init="count=0">{{label}}</button>
    </div>       
    <div class="col-xs-3">
-   <input type="text" class="form-control" ng-type="number" ng-model="interval" ng-disabled="intervalDisabled" />
+    <input type="text" class="form-control" ng-type="number" ng-model="interval" ng-disabled="intervalDisabled" />
    </div>       
-   <div class="col-xs-3">
-   ms
-   </div>       
-       
-   <div ng-switch on="gui.size">
-        <div class="animate-switch" ng-switch-when="small">Small view</div>
-        <div class="animate-switch" ng-switch-when="medium">Medium view<br>mevi</div>
-        <div class="animate-switch" ng-switch-when="large">Large view<br>lavi<br>lavi</div>
-        <div class="animate-switch" ng-switch-when="full">Full view<br>fuvi<br>fuvi<br>fuvi</div>
-    </div>
-    Panelindex: 
-    <div ng-switch on="panelindex">
-        <div class="animate-switch" ng-switch-when="0">0</div>
-        <div class="animate-switch" ng-switch-when="1">1</div>
-        <div class="animate-switch" ng-switch-when="2">2</div>
-    </div>
+   <div class="col-xs-3">ms</div>       
 </div>

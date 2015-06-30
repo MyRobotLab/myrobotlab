@@ -80,7 +80,7 @@ public class Clock extends Service {
 	public boolean isClockRunning;
 
 	public int interval = 1000;
-
+	
 	public transient ClockThread myClock = null;
 
 	// FIXME
