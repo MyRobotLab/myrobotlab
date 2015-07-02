@@ -92,4 +92,6 @@ public interface ServiceInterface extends Messaging, LoggingSink, NameProvider {
 	public void broadcastState();
 	
 	public Object invoke(Message msg);
+
+	public void out(String method, Object retobj);
 }
