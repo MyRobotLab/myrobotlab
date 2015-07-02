@@ -1,9 +1,22 @@
-<div>
-    
-   <div class="col-xs-3">{{platform}}
-    <button ng-click="toggle()"  class="btn btn-default" ng-init="count=0">start</button>
-   </div>       
-   <div class="col-xs-3">
-    <input type="text" class="form-control" ng-type="text" ng-model="name"/>
-   </div>         
+<div class="row">
+<div class="col-lg-12">
+     {{platform}} {{version}}
+     <pre>Model: {{customSelected | json}}</pre>
+</div>     
+<div class="col-lg-4">
+     <input class="form-control" type="text" ng-model="newName" placeholder="name">
+</div>
+<div class="col-lg-4">
+    <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" typeahead="state as state.name for state in possibleServices | filter:{name:$viewValue}" typeahead-template-url="customTemplate.html">
+    <script type="text/ng-template" id="customTemplate.html">
+    <a>
+      <img ng-src="/{{match.model.img}}" width="16">
+      <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+    </a>
+    </script>
+   
+</div>  
+<div class="col-lg-4">
+    <button class="btn btn-default pull-right" style="width:100%" ng-click="start(newName, newType)">start service <span class="glyphicon glyphicon-plus"></span></button>
+</div>   
 </div>
