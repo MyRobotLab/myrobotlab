@@ -2,6 +2,9 @@ angular.module('mrlapp.service.templategui', [])
         .controller('TemplateGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
                 console.log('TemplateGuiCtrl');
 
+                // get fresh copy
+                $scope.service = mrl.getService($scope.service.name);
+
                 //you can access two objects
                 //$scope.gui & $scope.service
                 //$scope.gui contains some framwork functions related to your service panel

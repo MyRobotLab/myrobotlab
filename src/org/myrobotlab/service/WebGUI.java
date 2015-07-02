@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -352,89 +353,19 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			ArrayList<MethodEntry> info = null;
 			if (parts.length == 3) {
-				// *** /api/messages **
-
-				// starndard JSON asynchronous message with POST'ed parameters
+				// ======================================== 
+				// POST http://{host}:{port}/api/messages
+				// ========================================
+				// posted message api
 				if ("messages".equals(parts[2]) && "POST".equals(httpMethod)) {
 					Body body = request.body();
-					
-					// first decoding will give you an array of types in msg.data[]
-					// but they are un-coerced - we need the method signature candidate 
-					// to determine what we should coerce them into
-					Message msg = Encoder.fromJson(body.asString(), Message.class);
-					msg.sender = getName();
-					log.info(String.format("got msg %s", msg.toString()));
-					
-					//out(msg);
-										
-					// get the service
-					ServiceInterface si = Runtime.getService(msg.name);
-					Class<?> clazz = si.getClass();
-					
-					Class<?>[] paramTypes = null;
-					Object[] params = new Object[msg.data.length];
-					// decoded array of encoded parameters
-					// FIXME - not "really" correct !
-					Object[] encodedArray = msg.data;//new Object[msg.data.length];
-					
-					//encodedArray = codec.decodeArray(b);
-					
-					paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
-					
-					StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name, msg.method));
-					for (int i = 0; i < paramTypes.length; ++i){
-						if (i != 0){
-							sb.append(",");
-						}
-						sb.append(paramTypes[i].getSimpleName());
-					}
-					sb.append(")");
-					log.info(sb.toString());
-					
-					
-					// WE NOW HAVE ORDINAL AND TYPES
-					params = new Object[encodedArray.length];
-
-					// DECODE AND FILL THE PARAMS
-					for (int i = 0; i < params.length; ++i) {
-						params[i] = codec.decode(encodedArray[i], paramTypes[i]);
-					}
-
-					Method method = clazz.getMethod(msg.method, paramTypes);
-
-					// NOTE --------------
-					// strategy of find correct method with correct parameter types
-					// "name" is the strongest binder - but without a method cache we
-					// are condemned to scan through all methods
-					// also without a method cache - we have to figure out if the
-					// signature would fit with instanceof for each object
-					// and "boxed" types as well
-
-					// best to fail - then attempt to resolve through scanning through
-					// methods and trying types - then cache the result
-
-					Object ret = method.invoke(si, params);
-					
-					// FIXME - Is this how to support synchronous ?
-					// What does this mean ? 
-					//respond(out, codec, method.getName(), ret);
-
-					MethodCache.cache(clazz, method);				
-					
+					processMessageAPI(codec, body);
 					return;
 				}
 
 				ServiceEnvironment si = Runtime.getLocalServices();
 
-				/*
-				 * TODO - relfect with javdoc info log.info("inspecting");
-				 * 
-				 * Method[] methods = clazz.getDeclaredMethods(); info = new ArrayList<MethodInfo>(); for (Method method : methods) { if (!filter.contains(method.getName())) {
-				 * MethodInfo m = new MethodInfo(); m.name = method.getName(); Class<?>[] types = method.getParameterTypes(); m.parameterTypes = new String[types.length]; for (int
-				 * i = 0; i < types.length; ++i) { m.parameterTypes[i] = types[i].getSimpleName() } m.returnType = method.getReturnType().getSimpleName(); // NULL // ? info.add(m);
-				 * } }
-				 */
-
+				// FIXME - relfect with javdoc info log.info("inspecting");
 				respond(out, codec, "getLocalServices", si);
 				return;
 			} else if (parts.length == 4) {
@@ -443,18 +374,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				Method[] methods = si.getDeclaredMethods();
 				respond(out, codec, "getDeclaredMethods", si);
 				return;
-			}/*
-			 * else if (parts.length > 3) { String serviceName = parts[2]; String method = parts[3];
-			 * 
-			 * ServiceInterface si = Runtime.getService(serviceName);
-			 * 
-			 * // decode parameters String[] params = new String[parts.length - 4]; // <- this i "wrong" - a big assumption that they are "Strings" Object[] for (int i = 0; i <
-			 * params.length; ++i){
-			 * 
-			 * }
-			 * 
-			 * }
-			 */
+			}
 
 			String name = parts[2];
 
@@ -522,7 +442,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				encodedArray = new Object[parts.length - 4];
 
 				for (int i = 0; i < encodedArray.length; ++i) {
-					String result = java.net.URLDecoder.decode(parts[i + 4], "UTF-8");
+					String result = URLDecoder.decode(parts[i + 4], "UTF-8");
 					encodedArray[i] = result;
 				}
 
@@ -570,6 +490,81 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			handleError(out, codec, e);
 		}
 
+	}
+	
+	public void processMessageAPI(Codec codec, Body body) throws Exception{
+		
+		// first decoding will give you an array of types in msg.data[]
+		// but they are un-coerced - we need the method signature candidate 
+		// to determine what we should coerce them into
+		Message msg = Encoder.fromJson(body.asString(), Message.class);
+		msg.sender = getName();
+		log.info(String.format("got msg %s", msg.toString()));
+		
+		//out(msg);
+							
+		// get the service
+		ServiceInterface si = Runtime.getService(msg.name);
+		Class<?> clazz = si.getClass();
+		
+		Class<?>[] paramTypes = null;
+		Object[] params = new Object[msg.data.length];
+		// decoded array of encoded parameters
+		// FIXME - not "really" correct !
+		Object[] encodedArray = msg.data;//new Object[msg.data.length];
+		
+		//encodedArray = codec.decodeArray(b);
+		
+		paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
+		
+		StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name, msg.method));
+		for (int i = 0; i < paramTypes.length; ++i){
+			if (i != 0){
+				sb.append(",");
+			}
+			sb.append(paramTypes[i].getSimpleName());
+		}
+		sb.append(")");
+		log.info(sb.toString());
+		
+		
+		// WE NOW HAVE ORDINAL AND TYPES
+		params = new Object[encodedArray.length];
+
+		// DECODE AND FILL THE PARAMS
+		for (int i = 0; i < params.length; ++i) {
+			params[i] = codec.decode(encodedArray[i], paramTypes[i]);
+		}
+		
+		// FIXME FIXME FIXME !!!!
+		// Service.invoke needs to use method cach BUT - internal queues HAVE type information
+		// AND decoded json DOES NOT - needs to be optimized such that it knows the encoding
+		// before using the method cache - and the "hint" determins getBestCanidate !!!!
+
+		Method method = clazz.getMethod(msg.method, paramTypes);
+
+		// NOTE --------------
+		// strategy of find correct method with correct parameter types
+		// "name" is the strongest binder - but without a method cache we
+		// are condemned to scan through all methods
+		// also without a method cache - we have to figure out if the
+		// signature would fit with instanceof for each object
+		// and "boxed" types as well
+
+		// best to fail - then attempt to resolve through scanning through
+		// methods and trying types - then cache the result
+
+		// FIXME - not good - using my thread to execute another services
+		// method and put its return on the the services out queue :P
+		Object retobj = method.invoke(si, params);
+		
+		// FIXME - Is this how to support synchronous ?
+		// What does this mean ? 
+		//respond(out, codec, method.getName(), ret);
+		
+		si.out(msg.method, retobj);
+		
+		MethodCache.cache(clazz, method);				
 	}
 
 	// FIXME !!! - ALL CODECS SHOULD HANDLE MSG INSTEAD OF OBJECT !!!
