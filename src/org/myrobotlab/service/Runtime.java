@@ -113,7 +113,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	// FYI - can't be transient - "should" be preserved in
 	// network transport - it's the "instances" repo
 	// FIXME - non static member variables should be initialized in constructor
-	transient private Repo repo = null;
+	private Repo repo = null;
 
 	private Platform platform = Platform.getLocalInstance();
 
@@ -124,7 +124,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	/**
 	 * Object used to synchronize initializing this singleton.
 	 */
-	private static final Object instanceLockObject = new Object();
+	transient private static final Object instanceLockObject = new Object();
 
 	/**
 	 * The singleton of this class.

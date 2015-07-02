@@ -57,7 +57,7 @@ public class Repo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Repo.class);
+	public transient final static Logger log = LoggerFactory.getLogger(Repo.class);
 
 	public HashSet<String> nativeFileExt = new HashSet<String>(Arrays.asList("dll", "so", "dylib", "jnilib"));
 
@@ -77,7 +77,7 @@ public class Repo implements Serializable {
 	 * will be no Runtime running - but Repo requests are still desired.
 	 */
 
-	private ServiceData remoteServiceData = null;
+	transient private ServiceData remoteServiceData = null;
 
 	private Platform platform;
 	transient Ivy ivy = null; // we'll never use remote ivy only local
@@ -85,7 +85,7 @@ public class Repo implements Serializable {
 	/**
 	 * call back notification of progress
 	 */
-	RepoUpdateListener listener = null;
+	transient RepoUpdateListener listener = null;
 
 	private boolean getRemoteRepo = false;
 

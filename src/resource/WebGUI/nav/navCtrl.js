@@ -14,15 +14,15 @@ angular.module('mrlapp.nav')
                 $scope.connected = 'disconnected';
             });
         }
-
+        
         var onStatus = function(statusMsg) {
             var status = statusMsg.data[0];
             var s = status.name + ' ' + status.level + ' ' + status.detail;
             $scope.$apply(function() {
-               StateSvc.addStatus(s);
+                StateSvc.addStatus(s);
             });
         }
-
+        
         $scope.about = function() {
             // modal display of all contributors & link to myobotlab.org
             console.log('about');
@@ -35,7 +35,7 @@ angular.module('mrlapp.nav')
 
         //TODO: find a way to get all Services - probably something like mrl.getAllServices()
         $scope.searchServices = [];
-        
+
         // TODO - green png if connected - if not re-connect button
         if (mrl.isConnected()) {
             $scope.connected = 'connected';
@@ -53,11 +53,11 @@ angular.module('mrlapp.nav')
         // FIXME change class not style here ! uniform danger/error/warn/info
         // FIXME -> if error pink background
         $scope.statusStyle = "statusStyle={'background-color':'pink'}";
-
+        
         mrl.subscribeOnOpen(onOpen);
         mrl.subscribeOnClose(onClose);
         mrl.subscribeToMethod(onStatus, "onStatus");
-
+        
         $scope.statuslist = StateSvc.getStatuses();
-
+    
     }]);
