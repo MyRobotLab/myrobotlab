@@ -2,7 +2,6 @@ angular.module('mrlapp.service')
 
         .controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'ServiceSvc',
             function ($scope, $modal, $ocLazyLoad, mrl, ServiceSvc) {
-                console.log('testing', $scope);
 
                 $scope.anker = $scope.spawndata.name + '_-_' + $scope.spawndata.panelindex + '_-_';
 
@@ -19,33 +18,18 @@ angular.module('mrlapp.service')
                 });
 
                 //START_specific Service-Initialisation
-                //"inst" is given to the specific service-UI
+                //.gui & .service are given to the specific service-UI
                 $scope.inst = ServiceSvc.getServiceInstance($scope.spawndata.name);
                 if ($scope.inst == null) {
-                    $scope.inst = {};
-                    $scope.inst.gui = {}; //framework-section - DO NOT WRITE IN THERE!
-                    $scope.inst.service = mrl.getService($scope.spawndata.name); //mrl-data-section
-                    ServiceSvc.addServiceInstance($scope.spawndata.name, $scope.inst);
+                    console.log("ERROR - ServiceInstance not found!");
                 }
-                $scope.gui = $scope.inst.gui;
-                $scope.service = $scope.inst.service;
+                $scope.gui = $scope.inst.gui; //framework-section - DO NOT WRITE IN THERE!
+                $scope.service = $scope.inst.service; //mrl-data-section
 
-                //TODO: refactor
-                console.log("$scope,size", $scope.size);
-                if ($scope.size != null && $scope.size.lastIndexOf("force", 0) == 0) {
-                    $scope.gui.oldsize = $scope.gui.size;
-                    $scope.gui.size = $scope.size.substring(5, $scope.size.length);
-                    $scope.gui.forcesize = true;
-                } else {
-                    if ($scope.gui.oldsize != null) {
-                        $scope.gui.size = $scope.gui.oldsize;
-                        $scope.gui.oldsize = null;
-                    }
-                    $scope.gui.forcesize = false;
-                }
-                if (!$scope.gui.size) {
-                    $scope.gui.size = "medium";
-                    $scope.gui.oldsize = null;
+                //size
+                if (!$scope.spawndata.size) {
+                    $scope.spawndata.size = 'medium';
+                    $scope.spawndata.oldsize = null;
                 }
 
                 //TODO: think of something better
@@ -76,9 +60,9 @@ angular.module('mrlapp.service')
 
                 //footer-size-change-buttons
                 $scope.changesize = function (size) {
-                    console.log("button clicked", size);
-                    $scope.gui.oldsize = $scope.gui.size;
-                    $scope.gui.size = size;
+                    console.log("change size", $scope.service.name, size);
+                    $scope.spawndata.oldsize = $scope.spawndata.size;
+                    $scope.spawndata.size = size;
                     if (size == "full") {
                         //launch the service as a modal ('full')
                         var modalInstance = $modal.open({
@@ -100,16 +84,12 @@ angular.module('mrlapp.service')
                         });
                         //modal closed -> recover to old size
                         modalInstance.result.then(function () {
-                            $scope.gui.size = $scope.gui.oldsize;
-                            $scope.gui.oldsize = null;
+                            $scope.spawndata.size = $scope.spawndata.oldsize;
+                            $scope.spawndata.oldsize = null;
+                        }, function (e) {
+                            $scope.spawndata.size = $scope.spawndata.oldsize;
+                            $scope.spawndata.oldsize = null;
                         });
                     }
                 };
-
-//                angular.element(document).ready(function () {
-//                    console.log('Hello World');
-//                    mrl.registerForServices($scope.createService);
-//                    mrl.connect(document.location.origin.toString() + '/api/messages');
-//                });
-
             }]);

@@ -5,6 +5,7 @@ angular.module('mrlapp.service')
                     scope: {
                         gui: '=',
                         service: '=',
+                        size: '=',
                         panelindex: '='
                     },
                     link: function (scope, elem, attr) {

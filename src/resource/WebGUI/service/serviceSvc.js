@@ -2,6 +2,8 @@ angular.module('mrlapp.service')
         .service('ServiceSvc', ['mrl', function (mrl) {
                 _self = this;
 
+                console.log('ServiceSvc-START');
+
                 var gateway = mrl.getGateway();
                 var runtime = mrl.getRuntime();
                 var platform = mrl.getPlatform();
@@ -33,8 +35,11 @@ angular.module('mrlapp.service')
                 //START_Service Instances
                 var serviceInstances = [];
 
-                this.addServiceInstance = function (name, service) {
-                    serviceInstances[name] = service;
+                this.addServiceInstance = function (name) {
+                    console.log('creating service-instance', name);
+                    serviceInstances[name] = {};
+                    serviceInstances[name].gui = {};
+                    serviceInstances[name].service = mrl.getService(name);
                 };
 
                 this.getServiceInstance = function (name) {
@@ -54,7 +59,20 @@ angular.module('mrlapp.service')
 
                 //START_Services
                 var guiData = {};
-                var services = {};
+                var services = [];
+
+                var addPanel = function (service, panelindex) {
+                    services.push({
+                        simpleName: service.simpleName,
+                        name: service.name,
+                        type: service.type,
+                        panelcount: service.panelcount,
+                        panelindex: panelindex,
+                        size: 'medium',
+                        oldsize: null,
+                        forcesize: false
+                    });
+                };
 
                 this.addService = function (name, temp) {
                     console.log('adding:', name, guiData);
@@ -67,14 +85,7 @@ angular.module('mrlapp.service')
                         guiData[name].panelcount = 1;
 
                         var serviceexp = guiData[name];
-                        var service = {
-                            simpleName: serviceexp.simpleName,
-                            name: serviceexp.name,
-                            type: serviceexp.type,
-                            panelcount: serviceexp.panelcount,
-                            panelindex: 0
-                        };
-                        services[service.name + '_-_' + service.panelindex + '_-_'] = service;
+                        addPanel(serviceexp, 0);
                     }
                     console.log('adding#3:', name, guiData, services);
                     notifyAllOfUpdate();
@@ -82,11 +93,20 @@ angular.module('mrlapp.service')
 
                 this.removeService = function (name) {
                     console.log('removing service', name, guiData);
-                    var panelcount = guiData[name].panelcount;
+//                    var panelcount = guiData[name].panelcount;
                     delete guiData[name];
-                    for (var i = 0; i < panelcount; i++) {
-                        delete services[name + '_-_' + i + '_-_'];
-                    }
+                    var removelist = [];
+                    angular.forEach(services, function (value, key) {
+                        if (value.name == name) {
+                            removelist.push(key);
+                        }
+                    });
+                    angular.forEach(removelist, function (value, key) {
+                        services.splice(value, 1);
+                    });
+//                    for (var i = 0; i < panelcount; i++) {
+//                        delete services[name + '_-_' + i + '_-_'];
+//                    }
                     notifyAllOfUpdate();
                 };
 
@@ -101,22 +121,27 @@ angular.module('mrlapp.service')
 
                     if (diff < 0) {
                         for (var i = oldcount - 1; i > count - 1; i++) {
-                            delete services[name + '_-_' + i + '_-_'];
+                            var remove = -1;
+                            angular.forEach(services, function (value, key) {
+                                if (value.name == name && value.panelindex == i) {
+                                    remove = key;
+                                }
+                            });
+                            services.splice(remove, 1);
+//                            delete services[name + '_-_' + i + '_-_'];
                         }
-                        for (var i = count - 1; i >= 0; i++) {
-                            services[name + '_-_' + i + '_-_'].panelcount = count;
-                        }
+                        angular.forEach(services, function (value, key) {
+                            if (value.name == name) {
+                                value.panelcount = count;
+                            }
+                        });
+//                        for (var i = count - 1; i >= 0; i++) {
+//                            services[name + '_-_' + i + '_-_'].panelcount = count;
+//                        }
                     } else if (diff > 0) {
                         var serviceexp = guiData[name];
                         for (var i = oldcount; i < count; i++) {
-                            var service = {
-                                simpleName: serviceexp.simpleName,
-                                name: serviceexp.name,
-                                type: serviceexp.type,
-                                panelcount: serviceexp.panelcount,
-                                panelindex: i
-                            };
-                            services[service.name + '_-_' + service.panelindex + '_-_'] = service;
+                            addPanel(serviceexp, i);
                         }
                     }
                 };
@@ -126,7 +151,7 @@ angular.module('mrlapp.service')
                     switch (msg.method) {
                         case 'onRegistered':
                             var newService = msg.data[0];
-//                            this.addServiceInstance(newService.name, newService);
+                            _self.addServiceInstance(newService.name);
                             _self.addService(newService.name, newService);
                             break;
 
@@ -137,10 +162,12 @@ angular.module('mrlapp.service')
                             break;
                     }
                 };
+                console.log('ServiceSvc-Runtime', runtime, mrl.getRuntime());
                 mrl.subscribeToService(this.onMsg, runtime.name);
 
                 for (var name in registry) {
                     if (registry.hasOwnProperty(name)) {
+                        this.addServiceInstance(name);
                         this.addService(name, registry[name]);
                     }
                 }
