@@ -76,6 +76,7 @@ public class AudioCapture extends Service {
 						byteArrayOutputStream.write(tempBuffer, 0, cnt);
 					}// end if
 				}// end while
+				targetDataLine.close();
 				byteArrayOutputStream.close();
 			} catch (Exception e) {
 				error(e);
