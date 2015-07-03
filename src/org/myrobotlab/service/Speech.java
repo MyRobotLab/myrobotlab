@@ -691,7 +691,7 @@ public class Speech extends Service implements TextListener {
 		mouth.speak("I'm done with this test again");
 		// Swedish
 		mouth.setLanguage("sv");
-		mouth.speak("Testar Svenska. Häst, åsna, föl, gås, mås");
+		mouth.speak("Testar Svenska. Häst, åsna, föl, gås");
 		// French
 		mouth.setLanguage("fr");
 		mouth.speak("Teste le français. Joyeux Noël.");
