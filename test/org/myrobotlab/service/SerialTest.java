@@ -177,7 +177,7 @@ public class SerialTest {
 
 
 	@Test
-	public final void testAvailable() throws IOException, InterruptedException {
+	public final void testAvailable() throws Exception, InterruptedException {
 		log.info("testAvailable");
 
 		serial.write(0);
@@ -199,7 +199,7 @@ public class SerialTest {
 	}
 
 	@Test
-	public final void testClear() throws IOException, InterruptedException {
+	public final void testClear() throws Exception, InterruptedException {
 		log.info("testClear");
 	
 		serial.write(0);
@@ -215,7 +215,7 @@ public class SerialTest {
 	}
 
 	@Test
-	public final void testConnectString() throws InterruptedException, IOException {
+	public final void testConnectString() throws InterruptedException, Exception {
 		log.info("testConnectString");
 		
 		// ========== remote pub/sub connect / onByte testing ==========
@@ -273,7 +273,7 @@ public class SerialTest {
 	}
 	
 	@Test
-	public final void testReadAndWrite() throws IOException, InterruptedException{
+	public final void testReadAndWrite() throws Exception, InterruptedException{
 		log.info("testReadAndWrite");
 
 		//Set<Thread> names = getDeadThreads();
@@ -468,7 +468,7 @@ public class SerialTest {
 	}
 
 	@Test
-	public final void testIsRecording() throws IOException {
+	public final void testIsRecording() throws Exception {
 		serial.record("out");
 		assertTrue(serial.isRecording());
 		int x = 65;
@@ -603,7 +603,7 @@ public class SerialTest {
 	}
 
 	@Test
-	public final void testSetCodec() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException, IOException, InterruptedException {
+	public final void testSetCodec() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException, Exception, InterruptedException {
 		log.info("testSetCodec");
 
 		boolean notready = true;

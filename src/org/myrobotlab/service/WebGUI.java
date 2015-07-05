@@ -288,6 +288,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		Codec codec = null;
 		OutputStream out = null;
+		String httpMethod = r.getRequest().getMethod();
 
 		try {
 
@@ -313,7 +314,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			// GET vs POST - post assumes low-level messaging
 			// GET is high level synchronous
-			String httpMethod = request.getMethod();
+			// String httpMethod = request.getMethod();
 
 			// get default encoder
 			codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
@@ -324,7 +325,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			if (parts == null || parts.length < 3) {
 				response.addHeader("Content-Type", codec.getMimeType());
-				handleError(out, codec, "API", "http(s)://{host}:{port}/api/{api-type}/{Object}/{Method}");
+				handleError(httpMethod, out, codec, "API", "http(s)://{host}:{port}/api/{api-type}/{Object}/{Method}");
 				return;
 			}
 
@@ -393,7 +394,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				body = new byte[cl];
 				int bytesRead = in.read(body);
 				if (bytesRead != cl) {
-					handleError(out, codec, "BadInput", String.format("client said it would send %d bytes but only %d were read", cl, bytesRead));
+					handleError(httpMethod, out, codec, "BadInput", String.format("client said it would send %d bytes but only %d were read", cl, bytesRead));
 					return;
 				}
 			}
@@ -487,7 +488,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// - getMimeType !!
 
 		} catch (Exception e) {
-			handleError(out, codec, e);
+			handleError(httpMethod, out, codec, e);
 		}
 
 	}
@@ -576,16 +577,20 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		codec.encode(out, msg);
 	}
 
-	public void handleError(OutputStream out, Codec codec, Throwable e) {
-		handleError(out, codec, e.getMessage(), Logging.logError(e));
+	public void handleError(String httpMethod, OutputStream out, Codec codec, Throwable e) {
+		handleError(httpMethod, out, codec, e.getMessage(), Logging.logError(e));
 	}
 
 	// FIXME - APP_EVENT_LOG for normalizing (if available)
-	public void handleError(OutputStream out, Codec codec, String key, String detail) {
-		try {
+	public void handleError(String httpMethod, OutputStream out, Codec codec, String key, String detail) {
+		try {			
 			log.error(detail);
 			Status error = new Status(getName(), StatusLevel.ERROR, key, detail);
-			respond(out, codec, "handleError", error);
+			if ("POST".equals(httpMethod)){
+				broadcast(createMessage(getName(), "onStatus", error));
+			} else {
+				respond(out, codec, "handleError", error);
+			}
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -648,7 +653,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// Uri myUri = Uri.parse("http://stackoverflow.com");
 
 			WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
-			Runtime.start("clock01", "Clock");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
+			Runtime.start("serial01", "Serial");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
 			Runtime.start("gui", "GUIService");
 			
 			// webgui.extract();
