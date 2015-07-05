@@ -41,6 +41,7 @@ public class LIDAR extends Service implements SerialDataListener {
 	private byte[] message;
 	private boolean dataAvailable = false;
 	String info; // used for outputting log.info messages
+	
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -245,7 +246,7 @@ public class LIDAR extends Service implements SerialDataListener {
 		model = m;
 	}
 
-	public void setScanMode(int spread, float angularResolution) throws IOException {
+	public void setScanMode(int spread, float angularResolution) throws Exception {
 		state = STATE_MODE_CHANGE;
 		buffer.reset();
 		index = 0;
@@ -310,7 +311,7 @@ public class LIDAR extends Service implements SerialDataListener {
 		}
 	}
 
-	public void singleScan() throws IOException {
+	public void singleScan() throws Exception {
 		state = STATE_SINGLE_SCAN;
 		serial.write(new byte[] { 0x02, 0x00, 0x02, 0x00, 0x30, 0x01, 0x31, 0x18 });
 		index = 0;
@@ -342,7 +343,7 @@ public class LIDAR extends Service implements SerialDataListener {
 		}
 	}
 
-	public void write(byte[] command) throws IOException {
+	public void write(byte[] command) throws Exception {
 		// iterate through the byte array sending each one to the serial port.
 		for (int i = 0; i < command.length; i++) {
 			serial.write(command[i]);

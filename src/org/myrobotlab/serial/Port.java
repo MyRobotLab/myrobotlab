@@ -3,7 +3,6 @@ package org.myrobotlab.serial;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.HashMap;
-import java.util.concurrent.CountDownLatch;
 
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.logging.LoggerFactory;
@@ -43,8 +42,8 @@ public abstract class Port implements Runnable, PortSource {
 	// hardware serial port details
 	// default convention over configuration
 	int rate = 57600;
-	int databits = 8;
-	int stopbits = 1;
+	int dataBits = 8;
+	int stopBits = 1;
 	int parity = 0;
 
 	int txErrors;
@@ -63,11 +62,11 @@ public abstract class Port implements Runnable, PortSource {
 		stats.interval = 1000;
 	}
 
-	public Port(String portName, int rate, int databits, int stopbits, int parity) throws IOException {
+	public Port(String portName, int rate, int dataBits, int stopBits, int parity) throws IOException {
 		this(portName);
 		this.rate = rate;
-		this.databits = databits;
-		this.stopbits = stopbits;
+		this.dataBits = dataBits;
+		this.stopBits = stopBits;
 		this.parity = parity;
 	}
 
@@ -139,7 +138,7 @@ public abstract class Port implements Runnable, PortSource {
 		isOpen = true;
 	}
 
-	abstract public int read() throws IOException, InterruptedException;
+	abstract public int read() throws Exception;
 
 	/**
 	 * reads from Ports input stream and puts it on the Serials main RX line -
@@ -210,6 +209,6 @@ public abstract class Port implements Runnable, PortSource {
 	 * 
 	 */
 
-	abstract public void write(int b) throws IOException;
+	abstract public void write(int b) throws Exception;
 
 }

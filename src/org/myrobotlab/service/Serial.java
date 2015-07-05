@@ -378,8 +378,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		if (listener != null) {
 			listeners.put(listener.getName(), listener);
 		}
-		port.listen(listeners);
 		port.open();
+		port.listen(listeners);
 		connectedPorts.put(portName, newPort);
 
 		// invoking remote & local onConnect
@@ -606,7 +606,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		if (platform.isDalvik()) {
 			return HARDWARE_LIBRARY_ANDROID_BLUETOOTH;
 		} else {
-			return HARDWARE_LIBRARY_RXTX;
+			return HARDWARE_LIBRARY_JSSC;
+			// return HARDWARE_LIBRARY_RXTX; buh bye !!
 		}
 	}
 
@@ -1071,14 +1072,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	// write(byte[] b) IOException
-	public void write(byte[] data) throws IOException {
+	public void write(byte[] data) throws Exception {
 		for (int i = 0; i < data.length; ++i) {
 			write(data[i] & 0xff); // recently removed - & 0xFF
 		}
 	}
 
 	// write(int b) IOException
-	public void write(int b) throws IOException {
+	public void write(int b) throws Exception {
 		// int newByte = data & 0xFF;
 
 		if (connectedPorts.size() == 0) {
@@ -1098,7 +1099,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	// write(int[] data) throws IOException - not in OutputStream
-	public void write(int[] data) throws IOException {
+	public void write(int[] data) throws Exception {
 		for (int i = 0; i < data.length; ++i) {
 			write(data[i]); // recently removed - & 0xFF
 		}
@@ -1106,7 +1107,11 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 
 	// ============= write methods begin ====================
 	// write(String data) not in OutputStream
-	public void write(String data) throws IOException {
+	public void write(String data) throws Exception {
+		write(data.getBytes());
+	}
+	
+	public void writeString(String data) throws Exception {
 		write(data.getBytes());
 	}
 

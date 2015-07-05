@@ -1,6 +1,6 @@
 angular.module('mrlapp.service')
         .service('ServiceSvc', ['mrl', function (mrl) {
-                _self = this;
+                var _self = this;
 
                 console.log('ServiceSvc-START');
 

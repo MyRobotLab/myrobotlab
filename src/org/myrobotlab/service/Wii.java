@@ -25,12 +25,12 @@
 
 package org.myrobotlab.service;
 
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+
+import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;

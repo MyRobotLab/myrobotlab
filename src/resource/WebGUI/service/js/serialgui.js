@@ -1,15 +1,34 @@
 angular.module('mrlapp.service.serialgui', [])
 .controller('SerialGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
         console.log('SerialGuiCtrl');
+        var _self = this;
+        
+        this.updateState = function(service) {
+            $scope.service = service;
+            $scope.isConnected = ($scope.service.portName != null);
+            $scope.isConnectedImage = ($scope.service.portName != null) ? "connected" : "disconnected";
+            $scope.connectText = ($scope.service.portName == null) ? "connect" : "disconnect";
+        }
 
-        // get fresh copy
+        // initialization
+        $scope.rx = "";
+        $scope.rxCount = 0;
+        $scope.tx = "";
+        $scope.txCount = 0;
+        $scope.txData = "";
+        $scope.possiblePorts = [];
+        $scope.possibleBaud = ['600', '1200', '2400', '4800', '9600', '19200', '38400', '57600', '115200'];
+        
+        
+        $scope.dynamicPopover = {
+            content: 'Hello, World!',
+            templateUrl: 'myPopoverTemplate2.html',
+            title: 'Title'
+        };
+
+        // initial update
         $scope.service = mrl.getService($scope.service.name);
-
-        //you can access two objects
-        //$scope.gui & $scope.service
-        //$scope.gui contains some framwork functions related to your service panel
-        //-> you can call functions on it, but NEVER write in it
-        //$scope.service is your service-object, it is the representation of the service running in mrl
+        _self.updateState($scope.service);
 
         //with this method, you can set how many panels you would like to show
         $scope.gui.setPanelCount(1);
@@ -18,17 +37,32 @@ angular.module('mrlapp.service.serialgui', [])
         //it is the ONLY exception of writing into .gui
         //-> you will receive all messages routed to your service here
         $scope.gui.onMsg = function(msg) {
+            console.log('CALLBACK - ' + msg.method);
             switch (msg.method) {
                 case 'onPortNames':
                     $scope.possiblePorts = msg.data[0];
                     $scope.$apply();
                     break;
-                case 'onClockStarted':
-                    $scope.label = "Stop";
+                case 'onRefresh':
+                    $scope.possiblePorts = msg.data[0];
                     $scope.$apply();
                     break;
-                case 'onClockStopped':
-                    $scope.label = "Start";
+                case 'onState':
+                    // backend update 
+                    _self.updateState(msg.data[0]);
+                    $scope.$apply();
+                    break;
+                case 'onRX':
+                    $scope.rx += ' ' + msg.data[0];
+                    ++$scope.rxCount;
+                    if ($scope.rx.length > 400) {
+                        $scope.rx = $scope.rx.substring($scope.rx.length - 400);
+                    }
+                    $scope.$apply();
+                    break;
+                case 'onTX':
+                    ++$scope.txCount;
+                    $scope.tx += msg.data[0];
                     $scope.$apply();
                     break;
                 default:
@@ -39,18 +73,33 @@ angular.module('mrlapp.service.serialgui', [])
 
         //you can subscribe to methods
         mrl.subscribe($scope.service.name, 'getPortNames');
+        mrl.subscribe($scope.service.name, 'publishRX');
+        mrl.subscribe($scope.service.name, 'publishTX');
+        mrl.subscribe($scope.service.name, 'publishState');
+        mrl.subscribe($scope.service.name, 'refresh');
+        
+        mrl.sendTo($scope.service.name, 'publishState');
         mrl.sendTo($scope.service.name, 'getPortNames');
-
-        $scope.port = '';//$scope.service.baudrate;
-        $scope.possiblePorts = [];
         
+        $scope.refresh = function() {
+            mrl.sendTo($scope.service.name, 'refresh');
+        }
         
-        $scope.selected = $scope.service.baudrate;
-        $scope.possibleBaud = ['600', '1200', '2400', '4800', '9600', '19200', '38400', '57600', '115200'];
-
-        $scope.databits = $scope.service.databits;
-        $scope.stopbits = $scope.service.stopbits;
-        $scope.parity = $scope.service.parity;
+        $scope.disconnect = function() {
+            mrl.sendTo($scope.service.name, 'disconnect')
+        }
+        
+        $scope.connect = function(portName, baudrate, databits, stopbits, parity) {
+            mrl.sendTo($scope.service.name, 'connect', portName, baudrate, databits, stopbits, parity);
+        }
+        
+        $scope.writeString = function(txData) {
+            mrl.sendTo($scope.service.name, 'writeString', txData);
+        }
+        
+        $scope.connect = function(portName, baudrate, databits, stopbits, parity) {
+            mrl.sendTo($scope.service.name, 'connect', portName, baudrate, databits, stopbits, parity);
+        }
 
         //after you're done with setting up your service-panel, call this method
         $scope.gui.initDone();

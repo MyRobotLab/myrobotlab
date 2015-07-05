@@ -151,10 +151,10 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 			}
 			log.info(String.format("opening %s", portName));
 			port = (RXTXPort) commPortId.open(portName, 1000);
-			port.setSerialPortParams(rate, databits, stopbits, parity);
+			port.setSerialPortParams(rate, dataBits, stopBits, parity);
 			in = port.getInputStream();
 			out = port.getOutputStream();
-			setParams(rate, databits, stopbits, parity);
+			setParams(rate, dataBits, stopBits, parity);
 			port.addEventListener(this);
 			port.notifyOnDataAvailable(true);
 			listening = true;

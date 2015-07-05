@@ -13,6 +13,7 @@ angular.module('mrlapp', [
     'ngRoute',
     'ng',
     'ui.bootstrap',
+    'ui.ace',
     'oc.lazyLoad',
     'mrlapp.mrl',
     'mrlapp.main.mainCtrl',
