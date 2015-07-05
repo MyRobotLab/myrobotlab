@@ -26,6 +26,7 @@ public class Sweety extends Service {
 	transient public ProgramAB chatBot;
 	transient public OpenNI openni;
 	transient public PID pid;
+	transient public HtmlFilter htmlFilter;
 	
 	transient Servo leftForearm;
 	transient Servo rightForearm;
@@ -133,6 +134,7 @@ public class Sweety extends Service {
 		peers.put("chatBot", "ProgramAB", "chatBot");
 		peers.put("leftTracker", "Tracking", "leftTracker");
 		peers.put("rightTracker", "Tracking", "rightTracker");
+		peers.put("htmlFilter", "HtmlFilter", "htmlFilter");
 
 		peers.put("USfront", "UltrasonicSensor", "USfront");
 		peers.put("USfrontRight", "UltrasonicSensor", "USfrontRight");
@@ -521,7 +523,7 @@ public class Sweety extends Service {
 		log.info("Saying :" + text);
 		mouth.speak(text);
 		sleep(50);
-		boolean ison = false;
+		boolean isOn = false;
 		String testword;
 		String[] a = text.split(" ");
 		for (int w = 0; w < a.length; w++) {
@@ -542,18 +544,18 @@ public class Sweety extends Service {
 			for (int x = 0; x < c.length; x++) {
 				char s = c[x];
 
-				if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y') && !ison) {
+				if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y') && !isOn) {
 
 					myShiftOut("00011100");
-					ison = true;
+					isOn = true;
 					sleep(delaytime);
 					myShiftOut("00000100");
 				} else if (s == '.') {
-					ison = false;
+					isOn = false;
 					myShiftOut("00000000");
 					sleep(delaytimestop);
 				} else {
-					ison = false;
+					isOn = false;
 					sleep(delaytimeletter); // # sleep half a second
 				}
 
@@ -587,7 +589,8 @@ public class Sweety extends Service {
 		reserveRootAs("sweety.USbackLeft.arduino", "sweety.arduino");
 
 		chatBot = (ProgramAB) startPeer("chatBot");
-
+		htmlFilter = (HtmlFilter) startPeer("htmlFilter");
+				
 		mouth = (Speech) startPeer("mouth");
 		mouth.setLanguage("fr");
 		mouth.setBackendType("GOOGLE");
@@ -622,6 +625,7 @@ public class Sweety extends Service {
 		rightWrist.setMinMax(rightWristMin, rightWristMax);
 		leftHand.setMinMax(leftHandMin, leftHandMax);
 		leftWrist.setMinMax(leftWristMin, leftWristMax);
+		
 		
 	}
 
@@ -700,14 +704,14 @@ public class Sweety extends Service {
 			pid.setControllerDirection(0);
 
 			// re-mapping of skeleton !
-			//openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
-			openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
+			openni.skeleton.leftElbow.mapXY(0, 180, leftForearmMin, leftForearmMax); //
+			openni.skeleton.rightElbow.mapXY(0, 180, rightForearmMax, rightForearmMin);
 
-			//openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
-			openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+			openni.skeleton.leftShoulder.mapYZ(0, 180, leftShoulderMin, leftShoulderMax); //
+			openni.skeleton.rightShoulder.mapYZ(0, 180, rightShoulderMax, rightShoulderMin);
 			
-			openni.skeleton.leftShoulder.mapXY(0, 180, 180, 0);
-			//openni.skeleton.rightShoulder.mapXY(0, 180, 180, 0);
+			openni.skeleton.leftShoulder.mapXY(0, 180, leftShoulderMax, leftShoulderMin);
+			openni.skeleton.rightShoulder.mapXY(0, 180, rightShoulderMin, rightShoulderMax);//
 			
 			openni.addListener("publishOpenNIData", this.getName(),"onOpenNIData");
 			//openni.addOpenNIData(this);
@@ -773,12 +777,12 @@ public class Sweety extends Service {
 		}
 		// TODO correct angles for shoulders
 		
-		int LforeArm = Math.round(skeleton.leftElbow.getAngleXY()) - (180 - leftForearmMax);
-		int Larm = Math.round(skeleton.leftShoulder.getAngleXY()) - (180 - leftArmMax);
-		int Lshoulder = Math.round(skeleton.leftShoulder.getAngleYZ()) + leftShoulderMin;
-		int RforeArm = Math.round(skeleton.rightElbow.getAngleXY()) + rightForearmMin;
-		int Rarm = Math.round(skeleton.rightShoulder.getAngleXY()) + rightArmMin;
-		int Rshoulder = Math.round(skeleton.rightShoulder.getAngleYZ()) - (180 - rightShoulderMax);
+		int LforeArm = Math.round(skeleton.leftElbow.getAngleXY());
+		int Larm = Math.round(skeleton.leftShoulder.getAngleXY());
+		int Lshoulder = Math.round(skeleton.leftShoulder.getAngleYZ()) + 80;
+		int RforeArm = Math.round(skeleton.rightElbow.getAngleXY());
+		int Rarm = Math.round(skeleton.rightShoulder.getAngleXY());
+		int Rshoulder = Math.round(skeleton.rightShoulder.getAngleYZ()) - 80;
 		
 		// Move the left side
 		setLeftArmPosition(Lshoulder, Larm, LforeArm, -1, -1);

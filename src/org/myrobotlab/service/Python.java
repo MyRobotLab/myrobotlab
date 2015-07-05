@@ -79,10 +79,10 @@ public class Python extends Service {
 						// without it - no overloading is possible
 
 						if (msg.data == null || msg.data.length == 0) {
-							compiledObject = getCompiledMethod(msg.method, String.format("%s()", msg.method), interp);
+							compiledObject = getCompiledMethod(msg.method, String.format("ret_val = %s()", msg.method), interp);
 						} else {
 							StringBuffer methodWithParams = new StringBuffer();
-							methodWithParams.append(String.format("%s(", msg.method));
+							methodWithParams.append(String.format("ret_val = %s(", msg.method));
 							for (int i = 0; i < msg.data.length; ++i) {
 								String paramHandle = String.format("%s_p%d", msgHandle, i);
 								interp.set(paramHandle.toString(), msg.data[i]);
@@ -498,6 +498,23 @@ public class Python extends Service {
 		Message msg = createMessage(getName(), method, new Object[] { param1 });
 		inputQueue.add(msg);
 	}
+	
+	public String eval(String method) {
+		String jsonMethod = String.format("%s()", method);
+		PyObject o = interp.eval(jsonMethod);
+		String ret = o.toString();
+		/*
+		interp.exec(
+		interp.get("ret_val");
+		interp.exec(compiledObject);
+		interp.eval();
+		    Object x = engine.get("x");
+		    System.out.println("x: " + x);
+		*/
+		return ret;
+	}
+	
+	
 
 	public void execResource(String filename) {
 		String script = FileIO.resourceToString(filename);
@@ -767,8 +784,11 @@ public class Python extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Runtime.start("gui", "GUIService");
+		 Runtime.start("webgui", "WebGUI");
+		 Runtime.start("python", "Python");
 		// String f = "C:\\Program Files\\blah.1.py";
 		// log.info(getName(f));
+		/*
 		Python python = (Python) Runtime.start("python", "Python");
 		python.error("this is an error");
 		python.loadScriptFromResource("VirtualDevice/Arduino.py");
@@ -776,6 +796,8 @@ public class Python extends Service {
 		// python.releaseService();
 
 		Runtime.createAndStart("gui", "GUIService");
+		
+		*/
 
 	}
 
