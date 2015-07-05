@@ -11,29 +11,29 @@ angular.module('mrlapp.service')
                     link: function (scope, element, attr) {
 
                         //TODO - later ...
-//                        var startX = 0, startY = 0, x = 0, y = 0;
-//                        var offsetY = 200;
-//                        var headerY = 50;
-//                        var footerY = 50;
+                        var startX = 0, startY = 0, x = 0, y = 0;
+                        var offsetY = 200;
+                        var headerY = 50;
+                        var footerY = 50;
 //
 //                        var outgenerallist = false;
 //                        var ingenerallist = false;
 //
-//                        //maybe change to absolute & layout the panels manually
-//                        //-> no panel glitch away (when you move another panel)
-//                        element.css({
-//                            position: 'relative'
-//                        });
+                        //maybe change to absolute & layout the panels manually
+                        //-> no panel glitch away (when you move another panel)
+                        element.css({
+                            position: 'relative'
+                        });
 //
-//                        element.on('mousedown', function (event) {
+                        element.on('mousedown', function (event) {
 //                            outgenerallist = event.pageY < 250;
-//                            startX = event.pageX - x;
-//                            startY = event.pageY - y;
-//                            var height = element.height();
-//                            if (startY < offsetY + headerY ||
-//                                    startY > offsetY + height - footerY) {
-//                                // Prevent default dragging of selected content
-//                                event.preventDefault();
+                            startX = event.pageX - x;
+                            startY = event.pageY - y;
+                            var height = element.height();
+                            if (startY < offsetY + headerY ||
+                                    startY > offsetY + height - footerY) {
+                                // Prevent default dragging of selected content
+                                event.preventDefault();
 //
 //                                //put panel in foreground
 //                                //TODO: worky, but sometimes buggy
@@ -57,32 +57,32 @@ angular.module('mrlapp.service')
 ////                                });
 ////                                console.log('zindex3', str2);
 //
-//                                element.css({
-//                                    cursor: 'move',
+                                element.css({
+                                    cursor: 'move',
 //                                    'z-index': zindex
-//                                });
-//                                $document.on('mousemove', mousemove);
-//                                $document.on('mouseup', mouseup);
-//                            }
-//                        });
+                                });
+                                $document.on('mousemove', mousemove);
+                                $document.on('mouseup', mouseup);
+                            }
+                        });
 //
-//                        function mousemove(event) {
+                        function mousemove(event) {
 ////                            console.log('mousemove', event.pageX, event.pageY);
 //                            ingenerallist = event.pageY < 250;
-//                            y = event.pageY - startY;
-//                            x = event.pageX - startX;
-//                            element.css({
-//                                top: y + 'px',
-//                                left: x + 'px'
-//                            });
-//                        }
+                            y = event.pageY - startY;
+                            x = event.pageX - startX;
+                            element.css({
+                                top: y + 'px',
+                                left: x + 'px'
+                            });
+                        }
 //
-//                        function mouseup() {
-//                            $document.off('mousemove', mousemove);
-//                            $document.off('mouseup', mouseup);
-//                            element.css({
-//                                cursor: 'auto'
-//                            });
+                        function mouseup() {
+                            $document.off('mousemove', mousemove);
+                            $document.off('mouseup', mouseup);
+                            element.css({
+                                cursor: 'auto'
+                            });
 //                            //move panel to different list (if it was moved there)
 //                            //TODO: worky, but sometimes buggy
 //                            if (ingenerallist && !outgenerallist) {
@@ -90,7 +90,7 @@ angular.module('mrlapp.service')
 //                            } else if (!ingenerallist && outgenerallist) {
 //                                scope.reftomain.dragOutGenerallist(scope.index);
 //                            }
-//                        }
+                        }
                     }
                 };
             }]);
