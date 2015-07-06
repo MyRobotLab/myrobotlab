@@ -2,8 +2,6 @@ angular.module('mrlapp.service')
         .service('ServiceSvc', ['mrl', function (mrl) {
                 var _self = this;
 
-                console.log('ServiceSvc-START');
-
                 var gateway = mrl.getGateway();
                 var runtime = mrl.getRuntime();
                 var platform = mrl.getPlatform();
@@ -62,14 +60,62 @@ angular.module('mrlapp.service')
                 var services = [];
 
                 var addPanel = function (service, panelindex) {
+                    var panelname;
+                    if (isUndefinedOrNull(service.panelnames) ||
+                            isUndefinedOrNull(service.panelnames[panelindex])) {
+                        panelname = 'panel' + panelindex.toString();
+                    } else {
+                        panelname = service.panelnames[panelindex];
+                    }
+                    var showpanelname;
+                    if (isUndefinedOrNull(service.showpanelnames) ||
+                            isUndefinedOrNull(service.showpanelnames[panelindex])) {
+                        showpanelname = false;
+                    } else {
+                        showpanelname = service.showpanelnames[panelindex];
+                    }
+                    var panelsize;
+                    if (isUndefinedOrNull(service.panelsizes) ||
+                            isUndefinedOrNull(service.panelsizes[panelindex])) {
+                        panelsize = {
+                            sizes: {
+                                tiny: {
+                                    glyphicon: 'glyphicon glyphicon-minus',
+                                    width: 200,
+                                    body: 'collapse'
+                                },
+                                small: {
+                                    glyphicon: 'glyphicon glyphicon-resize-small',
+                                    width: 300
+                                },
+                                large: {
+                                    glyphicon: 'glyphicon glyphicon-resize-full',
+                                    width: 500
+                                },
+                                full: {
+                                    glyphicon: 'glyphicon glyphicon-fullscreen',
+                                    width: 0,
+                                    body: 'collapse'
+                                }},
+                            aktsize: 'large',
+                            oldsize: null};
+                    } else {
+                        panelsize = service.panelsizes[panelindex];
+                        if (isUndefinedOrNull(panelsize.aktsize)) {
+                            console.log('ERROR_no current size defined');
+                        }
+                        panelsize.oldsize = null;
+                    }
+                    console.log('ServiceSvc-panelsize', panelsize);
                     services.push({
                         simpleName: service.simpleName,
                         name: service.name,
                         type: service.type,
                         panelcount: service.panelcount,
                         panelindex: panelindex,
-                        size: 'medium',
-                        oldsize: null,
+                        panelname: panelname,
+                        showpanelname: showpanelname,
+                        panelsize: panelsize,
                         forcesize: false
                     });
                 };
@@ -83,6 +129,9 @@ angular.module('mrlapp.service')
                         guiData[name].name = temp.name;
                         guiData[name].type = temp.simpleName.toLowerCase();
                         guiData[name].panelcount = 1;
+                        guiData[name].panelnames = null;
+                        guiData[name].showpanelnames = null;
+                        guiData[name].panelsizes = null;
 
                         var serviceexp = guiData[name];
                         addPanel(serviceexp, 0);
@@ -144,6 +193,36 @@ angular.module('mrlapp.service')
                             addPanel(serviceexp, i);
                         }
                     }
+                };
+
+                this.notifyPanelNamesChanged = function (name, names) {
+                    console.log('notifyPanelNamesChanged', name, names);
+                    guiData[name].panelnames = names;
+                    angular.forEach(services, function (value, key) {
+                        if (value.name == name) {
+                            value.panelname = names[value.panelindex];
+                        }
+                    });
+                };
+
+                this.notifyPanelShowNamesChanged = function (name, show) {
+                    console.log('notifyPanelShowNamesChanged', name, show);
+                    guiData[name].showpanelnames = show;
+                    angular.forEach(services, function (value, key) {
+                        if (value.name == name) {
+                            value.showpanelname = show[value.panelindex];
+                        }
+                    });
+                };
+
+                this.notifyPanelSizesChanged = function (name, sizes) {
+                    console.log('notifyPanelSizesChanged', name, sizes);
+                    guiData[name].panelsizes = sizes;
+                    angular.forEach(services, function (value, key) {
+                        if (value.name == name) {
+                            value.panelsize = sizes[value.panelindex];
+                        }
+                    });
                 };
                 //END_Services
 

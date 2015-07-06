@@ -13,6 +13,39 @@ angular.module('mrlapp.service.templategui', [])
 
                 //with this method, you can set how many panels you would like to show
                 $scope.gui.setPanelCount(1);
+                //set custom panel-names
+                $scope.gui.setPanelNames(['me1', 'me2', 'me3']);
+                //set if panel-name should be shown or hidden (true->show)
+                $scope.gui.setPanelShowNames([true, false, true]);
+                //set custom-sizes
+                $scope.gui.setPanelSizes([
+                    {/*panel1*/
+                        sizes: {
+                            //size-options, these will be shown as a option to select from
+                            //(and can be applied)
+                            tinye: {
+                                glyphicon: 'glyphicon glyphicon-minus', //define a glyphicon to show
+                                width: 200, //width of this size-setting
+                                body: 'collapse' //means that the body-section of the panel won't be shown
+                            },
+                            small: {
+                                glyphicon: 'glyphicon glyphicon-resize-small',
+                                width: 300
+                            },
+                            large: {
+                                glyphicon: 'glyphicon glyphicon-resize-full',
+                                width: 500
+                            },
+                            full: {
+                                glyphicon: 'glyphicon glyphicon-fullscreen',
+                                width: 0,
+                                body: 'collapse'
+                            }},
+                        aktsize: 'large', //set this as the start-value
+                        oldsize: null //save-point for size-changes
+                    },
+                    {/*panel2*/},
+                    {/*panel3*/}]);
 
                 //you HAVE TO define this method &
                 //it is the ONLY exception of writing into .gui

@@ -62,7 +62,7 @@ angular.module('mrlapp.nav')
         $scope.searchOnSelect = function(item, model, label) {
             console.log('searchOnSelect');
             //scroll to selected service
-            $location.hash(item.name + '_-_' + item.panelindex + '_-_');
+            $location.hash(item.name + '_-_' + item.panelname + '_-_');
             $anchorScroll();
         };
         //END_Search
