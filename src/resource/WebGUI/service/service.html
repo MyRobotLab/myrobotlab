@@ -8,7 +8,7 @@
             <h3 class="panel-title">
                 <img src="{{::spawndata.type}}.png" alt="" width="16">
                 <b>{{::spawndata.name}}</b>
-                <div class="pull-right">{{::spawndata.simpleName}}&nbsp;&nbsp;<div popover-placement="right" popover-template="'serviceMenu.html'" class="glyphicon glyphicon-th-list"></div></div>
+                <div class="pull-right">{{::spawndata.simpleName}}&nbsp;&nbsp;<div popover-placement="right" popover-template="'serviceMenu.html'" class="glyphicon glyphicon-list"></div></div>
                 <!-- options begin ---->
                 <script type="text/ng-template" id="serviceMenu.html">
 
@@ -39,6 +39,7 @@
         </div>
         <div class="panel-footer" ng-show="!spawndata.forcesize && spawndata.size != 'full'">
             <!--footer-->
+            <!-- redundant in menu
             <button class="btn btn-default" type="submit" ng-click="changesize('tiny')">
                 <i class="glyphicon glyphicon-minus"></i>
             </button>
@@ -54,6 +55,7 @@
             <button class="btn btn-default" type="submit" ng-click="changesize('full')">
                 <i class="glyphicon glyphicon-fullscreen"></i>
             </button>
+            -->
         </div>
     </div>
 </div>

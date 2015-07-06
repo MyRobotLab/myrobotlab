@@ -1,7 +1,7 @@
 <div class="row">
 <div class="col-lg-12">
-     {{platform}} {{version}}
-     <pre>Model: {{customSelected | json}}</pre>
+    <label for="platform">{{platform}} {{version}}</label>
+     <!--<pre>Model: {{customSelected | json}}</pre> -->
 </div>     
 <div class="col-lg-4">
      <input class="form-control" type="text" ng-model="newName" placeholder="name">
@@ -14,7 +14,6 @@
       <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
     </a>
     </script>
-   
 </div>  
 <div class="col-lg-4">
     <button class="btn btn-default" ng-click="start(newName, newType)">start service</button>

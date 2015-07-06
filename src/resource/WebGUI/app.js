@@ -13,6 +13,7 @@ angular.module('mrlapp', [
     'ngRoute',
     'ng',
     'ui.bootstrap',
+    'ngClipboard',
     'ui.ace',
     'oc.lazyLoad',
     'mrlapp.mrl',
@@ -21,7 +22,9 @@ angular.module('mrlapp', [
     'mrlapp.nav',
     'mrlapp.service'
 ])
-.config(['$routeProvider', 'mrlProvider', function($routeProvider, mrlProvider) {
+.config(['$routeProvider', 'mrlProvider', 'ngClipProvider', function($routeProvider, mrlProvider, ngClipProvider) {
+
+        ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
 
         $routeProvider.when('/main', {
             templateUrl: 'main/main.html',

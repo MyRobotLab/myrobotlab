@@ -1,33 +1,30 @@
-<div class="row">
 <!--
-<div class="col-lg-12">
+<div class="row">
+  <div class="col-lg-12">
     connect {{connectText}}<br>
     gui {{gui}}<br>
     service {{service}}
+  </div>
 </div>
 -->
-</div>
-
 <div class="row">
-<div class="col-lg-2">
+  <div class="col-lg-2">
     <img ng-src="../{{isConnectedImage}}.png" />
-</div>
-<div class="col-lg-5">
-    <!-- <pre>Model: {{selected | json}}</pre>-->
-    <h4>port</h4>
+  </div>
+  <div class="col-lg-3">    
+    <label for="service.portName">port</label>
     <input type="text" ng-disabled="isConnected" ng-model="service.portName" typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
-</div>
-<div class="col-lg-5">
-
-<button class="btn btn-default"  ng-click="refresh()">refresh</button>
-<button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button>
-<button class="btn btn-default" ng-show="!isConnected" ng-click="connect(service.portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button>
-    <button popover-placement="right" popover-template="dynamicPopover.templateUrl" popover-title="{{dynamicPopover.title}}" class="btn btn-default">options</button>
-
-</div>
+  </div>
+  <div class="col-lg-7">
+    <button class="btn btn-default"  ng-click="refresh()">refresh</button>
+    <button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button>
+    <button class="btn btn-default" ng-show="!isConnected" ng-click="connect(service.portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button>
+    <!-- <button popover-placement="right" popover-template="dynamicPopover.templateUrl" popover-title="{{dynamicPopover.title}}" class="btn btn-default">options</button> -->
+  </div>
 </div>
 
 <!-- options begin ---->
+<!--
 <script type="text/ng-template" id="myPopoverTemplate2.html">
 
         <div>{{dynamicPopover.content}}</div>
@@ -39,23 +36,24 @@
         </div>
 
 </script>
+-->
 <!-- options end ---->
 
 <div class="row">
 <div class="col-lg-3">
-    <h4>baud</h4>
+    <label for="service.baudrate">rate</label>
     <input type="text" ng-disabled="isConnected" ng-model="service.baudrate" typeahead="baudrate for baudrate in possibleBaud | filter:$viewValue | limitTo:8" class="form-control">
 </div>
-<div class="col-lg-3">
-    <h4>data bits</h4>
+<div class="col-lg-3">    
+    <label for="service.databits">data bits</label>
     <input type="text" ng-disabled="isConnected" ng-model="service.databits" class="form-control">
 </div>
 <div class="col-lg-3">
-    <h4>stop bits</h4>
+    <label for="service.stopbits">stop bits</label>
     <input type="text" ng-disabled="isConnected" ng-model="service.stopbits" class="form-control">
 </div>
 <div class="col-lg-3">
-    <h4>parity</h4>
+    <label for="service.parity">parity</label>
     <input type="text" ng-disabled="isConnected" ng-model="service.parity" class="form-control">
 </div>
 </div>
@@ -69,7 +67,7 @@
 
 <div class="row">
 <div class="col-lg-12">
-  <label for="comment">tx {{txCount}}</label>
+  <label for="tx">tx {{txCount}}</label>
   <textarea ng-model="tx" class="form-control" rows="3" id="tx"></textarea>
 
   <input type="text" ng-disabled="!isConnected" placeholder="send data here" ng-model="txData" class="form-control">
