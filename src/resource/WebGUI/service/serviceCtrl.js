@@ -3,7 +3,7 @@ angular.module('mrlapp.service')
         .controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'ServiceSvc',
             function ($scope, $modal, $ocLazyLoad, mrl, ServiceSvc) {
 
-                $scope.anker = $scope.spawndata.name + '_-_' + $scope.spawndata.panelindex + '_-_';
+                $scope.anker = $scope.spawndata.name + '_-_' + $scope.spawndata.panelname + '_-_';
 
                 console.log('serviceShouldBeReady', $scope.spawndata);
 
@@ -27,10 +27,10 @@ angular.module('mrlapp.service')
                 $scope.service = $scope.inst.service; //mrl-data-section
 
                 //size
-                if (!$scope.spawndata.size) {
-                    $scope.spawndata.size = 'medium';
-                    $scope.spawndata.oldsize = null;
-                }
+//                if (!$scope.spawndata.size) {
+//                    $scope.spawndata.size = 'medium';
+//                    $scope.spawndata.oldsize = null;
+//                }
 
                 //TODO: think of something better
                 var initDone = false;
@@ -48,6 +48,18 @@ angular.module('mrlapp.service')
                     $scope.gui.panelcount = number;
                     ServiceSvc.notifyPanelCountChanged($scope.service.name, old, number);
                 };
+                $scope.gui.setPanelNames = function (names) {
+                    console.log('setting panelnames', names);
+                    ServiceSvc.notifyPanelNamesChanged($scope.service.name, names);
+                };
+                $scope.gui.setPanelShowNames = function (show) {
+                    console.log('setting panelshownames', show);
+                    ServiceSvc.notifyPanelShowNamesChanged($scope.service.name, show);
+                };
+                $scope.gui.setPanelSizes = function (sizes) {
+                    console.log('setting panelsizes');
+                    ServiceSvc.notifyPanelSizesChanged($scope.service.name, sizes);
+                };
 
                 //TODO: not completly happy
                 //to be overriden
@@ -61,8 +73,9 @@ angular.module('mrlapp.service')
                 //footer-size-change-buttons
                 $scope.changesize = function (size) {
                     console.log("change size", $scope.service.name, size);
-                    $scope.spawndata.oldsize = $scope.spawndata.size;
-                    $scope.spawndata.size = size;
+                    $scope.spawndata.panelsize.oldsize = $scope.spawndata.panelsize.aktsize;
+                    $scope.spawndata.panelsize.aktsize = size;
+                    $scope.notifySizeChanged();
                     if (size == "full") {
                         //launch the service as a modal ('full')
                         var modalInstance = $modal.open({
@@ -84,11 +97,13 @@ angular.module('mrlapp.service')
                         });
                         //modal closed -> recover to old size
                         modalInstance.result.then(function () {
-                            $scope.spawndata.size = $scope.spawndata.oldsize;
-                            $scope.spawndata.oldsize = null;
+                            $scope.spawndata.panelsize.aktsize = $scope.spawndata.panelsize.oldsize;
+                            $scope.spawndata.panelsize.oldsize = null;
+                            $scope.notifySizeChanged();
                         }, function (e) {
-                            $scope.spawndata.size = $scope.spawndata.oldsize;
-                            $scope.spawndata.oldsize = null;
+                            $scope.spawndata.panelsize.aktsize = $scope.spawndata.panelsize.oldsize;
+                            $scope.spawndata.panelsize.oldsize = null;
+                            $scope.notifySizeChanged();
                         });
                     }
                 };

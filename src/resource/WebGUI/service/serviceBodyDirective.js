@@ -6,7 +6,7 @@ angular.module('mrlapp.service')
                         gui: '=',
                         service: '=',
                         size: '=',
-                        panelindex: '='
+                        panelname: '='
                     },
                     link: function (scope, elem, attr) {
                         //inject controller into the service-panel
