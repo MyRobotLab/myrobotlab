@@ -1,30 +1,103 @@
 <!--
+
 <div class="row">
-<div class="col-lg-12">
-    connect {{connectText}}<br>
+  <div class="col-lg-12">
     gui {{gui}}<br>
     service {{service}}
+  </div>
 </div>
-</div>
+
+http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
 
 -->
 
 <div class="row">
+ <div class="col-lg-6">
 
+   <label for="type">board</label>
+   <select ng-model="service.board" class="form-control">
+    	<option>Arduino Uno</option>
+		<option>Arduino Duemilanove w/ ATmega328</option>
+		<option>Arduino Diecimila or Duemilanove w/ ATmega168</option>
+		<option>Arduino Nano w/ ATmega328</option>
+		<option>Arduino Nano w/ ATmega168</option>
+		<option>Arduino Mega 2560 or Mega ADK</option>
+		<option>Arduino Mega (ATmega1280)</option>
+		<option>Arduino Leonardo</option>
+		<option>Arduino Micro</option>
+		<option>Arduino Mini w/ ATmega328</option>
+		<option>Arduino Mini w/ ATmega168</option>
+		<option>Arduino Ethernet</option>
+		<option>Arduino Fio</option>
+		<option>Arduino BT w/ ATmega328</option>
+		<option>Arduino BT w/ ATmega168</option>
+		<option>LilyPad Arduino w/ ATmega328</option>
+		<option>LilyPad Arduino w/ ATmega168</option>
+		<option>Arduino Pro or Pro Mini (5V, 16 MHz) w/ ATmega328</option>
+		<option>Arduino Pro or Pro Mini (5V, 16 MHz) w/ ATmega168</option>
+		<option>Arduino Pro or Pro Mini (3.3V, 8 MHz) w/ ATmega328</option>
+		<option>Arduino Pro or Pro Mini (3.3V, 8 MHz) w/ ATmega168</option>
+		<option>Arduino NG or older w/ ATmega168</option>
+		<option>Arduino NG or older w/ ATmega8</option>
+	</select>
 
-    <!-- <button type="button" popover-placement="right" popover-template="'mrlcomm.html'">load MRLComm ino</button> -->
-    <button type="button" popover-placement="right" popover-template="'mrlcomm.html'" class="btn btn-default" ><span class="glyphicon glyphicon-file"></span>load MRLComm.ino </button>
-                    <!-- options begin ---->
-                <script type="text/ng-template" id="mrlcomm.html">
-
+ </div>
+ <div class="col-lg-4"> 
+ </div>
+ <div class="col-lg-2"> 
+  <div popover-placement="right" popover-template="'arduinoMenu.html'" class="glyphicon glyphicon-cog pull-right"></div>
+ </div>
+    
+                <!-- options begin ---->
+                <script type="text/ng-template" id="arduinoMenu.html">
                     <div class="form-group">
                     Before attaching to an Arduino you must load MRLComm.ino into your board.  This needs to be done only once. 
-
                     copy button
-                    <textarea ng-model="service.sketch.data" class="form-control" rows="10" width="100%" id="tx"></textarea>               
+                                 
                     </div>
-
                 </script>
                 <!-- options end ---->
 
+    <!-- <button type="button" class="btn btn-default" ng-click="toggleShowMRLComm()"><span class="glyphicon glyphicon-file"></span> MRLComm.ino</button> -->
+    
+</div>
+</div>
+
+
+<div class="row">
+ <div class="col-lg-12">
+ <tabset justified="true">
+    <tab heading="MRLComm.ino">
+    <button class="btn btn-default pull-right" clip-copy="service.sketch.data"><span class="glyphicon glyphicon-copy"></span> copy</button>
+    <div class="col-lg-12" style="height: 600px;" ui-ace="{
+                                           useWrapMode : true,
+                                           showGutter: true,
+                                           theme:'chrome',
+                                           mode: 'c_cpp',
+                                           firstLineNumber: 1,
+                                           onLoad: aceLoaded,
+                                           onChange: aceChanged}">
+    </div>
+    </tab>
+    <tab heading="Oscope">
+
+     <canvas id="myCanvas" width="578" height="200"></canvas>
+    <script>
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+
+      context.beginPath();
+      context.moveTo(100, 150);
+      context.lineTo(450, 50);
+      context.stroke();
+    </script>
+
+
+
+    </tab>
+    <tab heading="Pins">
+      <img src="service/arduino/Arduino_ADK_MEGA_2560-Rev3_icon.svg" width="200%" height="200%" />
+    </tab>
+  </tabset>
+  </div>
 </div>

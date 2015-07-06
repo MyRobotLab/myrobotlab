@@ -653,7 +653,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// Uri myUri = Uri.parse("http://stackoverflow.com");
 
 			WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
-			Runtime.start("serial01", "Serial");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
+			Runtime.start("arduino", "Arduino");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
 			Runtime.start("gui", "GUIService");
 			
 			// webgui.extract();

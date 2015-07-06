@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -52,6 +53,7 @@ import org.slf4j.Logger;
 
 import com.sun.speech.freetts.Voice;
 import com.sun.speech.freetts.VoiceManager;
+import java.net.URLEncoder;
 
 public class Speech extends Service implements TextListener {
 
@@ -100,7 +102,8 @@ public class Speech extends Service implements TextListener {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Speech.class);
+	public final static Logger log = LoggerFactory.getLogger(Speech.class
+			.getCanonicalName());
 
 	// en_us en_gb en_au en_sa en_nz
 	// String language = "en";
@@ -115,7 +118,9 @@ public class Speech extends Service implements TextListener {
 	// TODO - seperate all of the var into appropriate parts - ie Global ATT
 	// Google FreeTTS
 
-	private String googleURI = "http://translate.google.com/translate_tts?tl=%s&q=";
+	//private String googleURI = "http://translate.google.com/translate_tts?tl=%s&q=";
+	private String googleURI = "http://translate.google.com/translate_tts?ie=UTF-8&tl=%s&q=";
+	
 	static String filter = "[\\\\/:\\*\\?\"<>\\|]";
 	transient private Voice myVoice = null;
 	private boolean initialized = false;
@@ -146,21 +151,23 @@ public class Speech extends Service implements TextListener {
 	public final static String BACKEND_TYPE_FREETTS = "FREETTS";
 
 	public final static String BACKEND_TYPE_GOOGLE = "GOOGLE";
-
+	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		peers.put("audioFile", "AudioFile", "plays tts files");
 		return peers;
 	}
+
 	// codes - http://code.google.com/apis/language/translate/v2/using_rest.html
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		try {
 			Speech mouth = (Speech) Runtime.start("mouth", "Speech");
-			//mouth.setVolume(0.1F);
-
-			String test = " hello this is a test \\dev\\blah / blah : * ? \" blah \" blah > < <> bla | zod | zod2 ".replaceAll(filter, " ");
+			// mouth.setVolume(0.1F);
+			
+			String test = " hello this is a test \\dev\\blah / blah : * ? \" blah \" blah > < <> bla | zod | zod2 "
+					.replaceAll(filter, " ");
 
 			log.info(test);
 			Speech speech = new Speech("speech");
@@ -175,8 +182,9 @@ public class Speech extends Service implements TextListener {
 
 			speech.setGenderMale();
 
-			// speech.setBackendType(BACKEND_TYPE_GOOGLE);
-			// speech.setLanguage("fr");
+			//speech.setBackendType(BACKEND_TYPE_GOOGLE);
+		    //speech.setLanguage("fr");
+		    
 			speech.speakBlocking("this should work");
 			speech.speakBlocking("bork bork bork bork again more more");
 			speech.speak("did you say start clock");
@@ -195,6 +203,7 @@ public class Speech extends Service implements TextListener {
 			speech.speak("aaaaaaaaah, long vowels sound");
 
 			speech.setGoogleURI("http://tts-api.com/tts.mp3?q=");
+			
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -224,12 +233,14 @@ public class Speech extends Service implements TextListener {
 		// ; is forbidden on unix.. not sure what else we need
 		// get rid of parens also maybe?
 		// TODO: find a nice clean list / library to do this
-		String cleanSpeak = toSpeak.replaceAll("^[.\\\\/:;*?\"<>|]?[\\\\/:*?\"<>|\\(\\)]*", " ");
+		String cleanSpeak = toSpeak.replaceAll(
+				"^[.\\\\/:;*?\"<>|]?[\\\\/:*?\"<>|\\(\\)]*", " ");
 		// cr/lf are not good in file names.
 		cleanSpeak = cleanSpeak.replaceAll("\r", " ");
 		cleanSpeak = cleanSpeak.replaceAll("\n", " ");
 		cleanSpeak = cleanSpeak.replaceAll("  ", " ");
 		return cleanSpeak.trim().toLowerCase();
+		// return cleanSpeak.trim();
 	}
 
 	public byte[] getByteArrayFromResponse(HttpResponse response) {
@@ -279,7 +290,8 @@ public class Speech extends Service implements TextListener {
 			VoiceManager voiceManager = VoiceManager.getInstance();
 			Voice[] voices = voiceManager.getVoices();
 			for (int i = 0; i < voices.length; i++) {
-				log.info("    " + voices[i].getName() + " (" + voices[i].getDomain() + " domain)");
+				log.info("    " + voices[i].getName() + " ("
+						+ voices[i].getDomain() + " domain)");
 				voiceList.add(voices[i].getName());
 			}
 		} else if (backendType == BackendType.ATT) {
@@ -389,7 +401,43 @@ public class Speech extends Service implements TextListener {
 	}
 
 	// front-end functions
+
 	public boolean speak(String toSpeak) {
+		// TODO: smart chunk the speech ..
+
+		System.err.println("to Speak " + toSpeak);
+		boolean result = false;
+		boolean remainingText = true;
+		String buff = toSpeak;
+
+		while (remainingText) {
+			// find the first chunk
+			int maxUtterance = 100;
+			if (buff.length() < 100) {
+				// System.err.println(buff);
+				result = speakInternal(buff);
+				break;
+			}
+
+			int lastSpace = buff.substring(0, maxUtterance).lastIndexOf(" ");
+			if (lastSpace == -1) {
+				// that's it.
+				// System.err.println(buff);
+				result = speakInternal(buff);
+				break;
+			}
+			String currBuff = buff.substring(0, lastSpace);
+			// System.err.println(currBuff);
+			result = speakInternal(currBuff);
+			if (!result) {
+				break;
+			}
+			buff = buff.substring(lastSpace);
+		}
+		return result;
+	}
+
+	public boolean speakInternal(String toSpeak) {
 		toSpeak = toSpeak.replaceAll(filter, " ");
 		if (toSpeak == null || toSpeak.length() == 0) {
 			return false;
@@ -425,7 +473,8 @@ public class Speech extends Service implements TextListener {
 		} else if (backendType == BackendType.GOOGLE) { // google tts
 			speakGoogle(toSpeak);
 		} else {
-			log.error("back-end speech backendType " + backendType + " not supported ");
+			log.error("back-end speech backendType " + backendType
+					+ " not supported ");
 			return false;
 		}
 		return true;
@@ -466,7 +515,8 @@ public class Speech extends Service implements TextListener {
 			myVoice = voiceManager.getVoice(voiceName);
 
 			if (myVoice == null) {
-				error("Cannot find a voice named " + voiceName + ".  Please specify a different voice.");
+				error("Cannot find a voice named " + voiceName
+						+ ".  Please specify a different voice.");
 				return;
 			} else {
 				initialized = true;
@@ -495,17 +545,24 @@ public class Speech extends Service implements TextListener {
 	public void speakGoogle(String toSpeak) {
 
 		if (!fileCacheInitialized) {
-			boolean success = (new File("audioFile/google/" + language + "/" + voiceName)).mkdirs();
+			boolean success = (new File("audioFile/google/" + language + "/"
+					+ voiceName)).mkdirs();
 			if (!success) {
-				log.debug("could not create directory: audioFile/google/" + language + "/" + voiceName);
+				log.debug("could not create directory: audioFile/google/"
+						+ language + "/" + voiceName);
 			} else {
 				fileCacheInitialized = true;
 			}
 		}
 
 		// Sanitize the filename so it can be properly cached.
-		toSpeak = cleanFilename(toSpeak);
-		String audioFileName = "audioFile/google/" + language + "/" + voiceName + "/" + toSpeak + ".mp3";
+		String cashFilename = toSpeak;
+		cashFilename = cleanFilename(cashFilename);
+		String utteranceHash = hashFilename(cashFilename);
+		addToUtteranceMapping(cashFilename, utteranceHash);
+
+		String audioFileName = "audioFile/google/" + language + "/" + voiceName
+				+ "/" + utteranceHash + ".mp3";
 		File f = new File(audioFileName);
 		log.info(f + (f.exists() ? " is found " : " is missing "));
 
@@ -525,21 +582,27 @@ public class Speech extends Service implements TextListener {
 				client = new DefaultHttpClient();
 
 				if (googleProxyHost != null) {
-					HttpHost proxy = new HttpHost(googleProxyHost, googleProxyPort);
-					client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+					HttpHost proxy = new HttpHost(googleProxyHost,
+							googleProxyPort);
+					client.getParams().setParameter(
+							ConnRoutePNames.DEFAULT_PROXY, proxy);
 				}
 
 				String baseURI = String.format(googleURI, language);
-				// URI uri = new URI("http", null, "translate.google.com", 80,
-				// "/translate_tts", "tl=" + language + "&q=" + toSpeak, null);
-				// URI uri = new URI(baseURI + URLEncoder.encode(toSpeak,
-				// "ISO-8859-1"));
-				log.info(baseURI + toSpeak.replaceAll(" ", "%20"));
-				URI uri = new URI(baseURI + toSpeak.replaceAll(" ", "%20"));
-
+				//URI uri = new URI("http", null, "translate.google.com", 80,
+				//"/translate_tts", "tl=" + language + "&q=" + toSpeak, null);
+				
+				log.info(baseURI + URLEncoder.encode(toSpeak,"UTF-8"));
+				URI uri = new URI(baseURI + URLEncoder.encode(toSpeak,"UTF-8"));
+				//log.info(baseURI + URLEncoder.encode(toSpeak,"ISO8859-15"));
+				//URI uri = new URI(baseURI + URLEncoder.encode(toSpeak,"ISO8859-15"));
+				//log.info(baseURI + toSpeak.replaceAll(" ", "%20"));
+				//URI uri = new URI(baseURI + toSpeak.replaceAll(" ", "%20"));
+				
 				log.info(uri.toASCIIString());
 				// HTTPClient.HTTPData data =
 				// HTTPClient.get(uri.toASCIIString());
+
 
 				HttpGet request = new HttpGet(uri.toASCIIString());
 				HttpResponse response = client.execute(request);
@@ -548,7 +611,8 @@ public class Speech extends Service implements TextListener {
 
 				FileOutputStream fos = new FileOutputStream(audioFileName);
 				fos.write(data);
-
+				fos.close();
+				
 			} catch (Exception e) {
 				Logging.logError(e);
 			}
@@ -560,6 +624,17 @@ public class Speech extends Service implements TextListener {
 		audioFile.playFile(audioFileName, true);
 		sleep(afterSpeechPause);// important pause after speech
 		invoke("isSpeaking", false);
+	}
+
+	private void addToUtteranceMapping(String toSpeak, String utteranceHash) {
+		// TODO : persist this somewhere other than the log file...
+		log.info("Utterance Map: {} = \"{}\"", utteranceHash, toSpeak);
+	}
+
+	private String hashFilename(String toSpeak) {
+		// TODO Auto-generated method stub
+		String digest = DigestUtils.md5Hex(toSpeak);
+		return digest;
 	}
 
 	public boolean speakNormal(String toSpeak) {
@@ -575,7 +650,8 @@ public class Speech extends Service implements TextListener {
 		} else if (backendType == BackendType.GOOGLE) { // festival tts
 			in(createMessage(getName(), "speakGoogle", toSpeak));
 		} else {
-			log.error("back-end speech backendType " + backendType + " not supported ");
+			log.error("back-end speech backendType " + backendType
+					+ " not supported ");
 			return false;
 		}
 
@@ -601,21 +677,20 @@ public class Speech extends Service implements TextListener {
 		super.stopService();
 	}
 
-	// speak errors
-	
+
 	public void setVolume(float volume) {
-		// track the current volume, 
+		// track the current volume,
 		// also realtime update the volume of the audio file.
 		if (audioFile != null) {
 			audioFile.setVolume(volume);
 		}
 	}
-	
+
 	public float getVolume() {
 		if (audioFile != null) {
 			return audioFile.getVolume();
 		} else {
 			return 1.0F;
 		}
-	}	
+	}
 }

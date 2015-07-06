@@ -1,11 +1,7 @@
-<div>
-    HEY!!! - WebGUIGuiCtrl here!
-    {{name}}
-    {{port}}
-    <div ng-switch on="size">
-        <div class="animate-switch" ng-switch-when="small">Small view</div>
-        <div class="animate-switch" ng-switch-when="medium">Medium view<br>mevi</div>
-        <div class="animate-switch" ng-switch-when="large">Large view<br>lavi<br>lavi</div>
-        <div class="animate-switch" ng-switch-when="full">Full view<br>fuvi<br>fuvi<br>fuvi</div>
-    </div>
+<div class="row">
+  <div class="col-lg-12">    
+    <label for="service.port">port</label>
+    <!-- <input type="text" ng-disabled="isConnected" ng-model="service.port" class="form-control"> -->
+    {{service.port}}
+  </div>        
 </div>
