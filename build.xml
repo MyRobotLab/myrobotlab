@@ -397,7 +397,7 @@
 
 		<echo>compile start</echo>
 		<!-- compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}/classes" debug="true" includeantruntime="false">
+		<javac srcdir="${src}" destdir="${build}/classes" debug="true" includeantruntime="false" encoding="utf-8">
 			<exclude name="org/myrobotlab/service/Android.java" />
 			<exclude name="org/myrobotlab/service/SEAR.java" />
 			<exclude name="org/myrobotlab/control/SEARGUI.java" />
@@ -441,7 +441,7 @@
 	<!-- compile the unit tests prior to running them. -->
 	<target name="compiletests" depends="compile" description="compile the test source ">
 		<echo>compile tests start</echo>
-		<javac srcdir="test" destdir="build/test" debug="true" includeantruntime="false">
+		<javac srcdir="test" destdir="build/test" debug="true" includeantruntime="false" encoding="utf-8">
 			<classpath>
 				<path refid="test.classpath" />
 				<pathelement location="${build}/classes" />
