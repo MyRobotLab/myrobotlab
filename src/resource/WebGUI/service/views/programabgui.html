@@ -1,33 +1,7 @@
 <div>
-    Service   : {{service.name}} of type {{service.simpleName}}<br/>
-    Bot   Name: {{service.botName}}<br/>
-    Start Time: {{service.serviceStartTime}}<br/>
-    <br/>
-    <!--  TODO: allow the user to upgrade ?
-	<p id="info_upgrade">Web Speech API is not supported by this browser.
-     Upgrade to <a href="//www.google.com/chrome">Chrome</a>
-     version 25 or later.</p>  -->
-	
-	<br/>
-	Recognition Results: {{current_text}} 
-	<br/>
-    <div class="center">
-      <div id="div_language">
-        <select id="select_language" onchange="updateCountry()"></select>&nbsp;&nbsp;
-        <select id="select_dialect"></select>
-      </div>
-    </div>
-	
+<!--  TODO Move this stuff into angular land! -->
 <script>
-// TODO: I think that we should probably be able to move most of this
-// code into the angularjs side of the house. 
-// (I just didn't feel like re-writing it all now..soon.)
-// Beginning of the script here.
-// First some utility functions
-
-//view/hide the info strings on the page for current status.
-
-//handle it if a new country/language is selected.
+// handle it if a new country/language is selected.
 function updateCountry() {
 	  for (var i = select_dialect.options.length - 1; i >= 0; i--) {
 	    select_dialect.remove(i);
@@ -38,7 +12,6 @@ function updateCountry() {
 	  }
 	  select_dialect.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
 };
-
 // All of the supported languages that can be selected (and dialects)
 var langs =
 [['Afrikaans',       ['af-ZA']],
@@ -103,9 +76,7 @@ var langs =
                      ['yue-Hant-HK', '粵語 (香港)']],
  ['日本語',           ['ja-JP']],
  ['Lingua latīna',   ['la']]];
-
 // populate the languages control
-// TODO: move this into angular land?
 for (var i = 0; i < langs.length; i++) {
   select_language.options[i] = new Option(langs[i][0], i);
 }
@@ -114,27 +85,53 @@ select_language.selectedIndex = 6;
 updateCountry();
 select_dialect.selectedIndex = 6;
 //updateCountry();
-
-// Initial state, update user that they can click the button.
-// showInfo('info_start');
 </script>
+
+    Service   : {{service.name}} of type {{service.simpleName}}<br/>
+    <!--  Bot   Name: {{service.botName}}<br/>  -->
+    Start Time: {{service.serviceStartTime}}<br/>
 <br/>
-    Status: {{status}}
+<table>
+  <tr>
+    <td>Bot Name</td>
+    <td><input ng-model="botname" name="botname" id="botname" ng-init="botname='alice2'"/></td>
+  </tr>
+  <tr>
+    <td>ProgramAB Path</td>
+    <td><input ng-model="botpath" name="botpath" id="botpath" ng-init="botpath='ProgramAB'"/></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><button id="startSession" ng-click="startSession(botname,botpath)" ng-init="startSessionLabel = 'Start Session'">{{startSessionLabel}}</button></td>
+  </tr>
+</table>
+
+    <!--  TODO: allow the user to upgrade ?
+	<p id="info_upgrade">Web Speech API is not supported by this browser.
+     Upgrade to <a href="//www.google.com/chrome">Chrome</a>
+     version 25 or later.</p>  -->	
+<br/>
+Status: {{status}}
+<br/>
 	<form>
 		<input ng-model="utterance" name="utterance" id="utterance" ng-init=""/>  
-		<button id="askProgramAB" ng-click="askProgramAB(utterance)" ng-init="">Ask Program AB</button>
+		<button type="submit" id="askProgramAB" ng-click="askProgramAB(utterance)" ng-init="">Ask Program AB</button>
+	    <button id="startListening" ng-click="startRecognition()" ng-init="listenbuttonimg ='service/img/mic.gif'" ng-src="listenbuttonimg">
+     		<img ng-src="{{listenbuttonimg}}"/>
+        </button>
     </form>
     <br/>
-    
-    <button id="startListening" ng-click="startRecognition()" ng-init="listenbuttonimg ='service/img/mic.gif'" ng-src="listenbuttonimg">
-     <img ng-src="{{listenbuttonimg}}"/>
-    </button>
-    
+    <div class="center">
+      <div id="div_language">
+        <select id="select_language" onchange="updateCountry()"></select>&nbsp;&nbsp;
+        <select id="select_dialect"></select>
+      </div>
+    </div>
     <br/>
-    
-    <br/>
+	Recognition Results: {{current_text}} 
+    <!-- <br/>
     Current Response: {{currResponse}}
-    <br/>
+    <br/>  -->
     <!--  the conversation history/log table -->
     <table>
       <thead>
@@ -144,15 +141,9 @@ select_dialect.selectedIndex = 6;
       </thead>
       <tbody>
         <tr ng-repeat="rowContent in rows track by $index">
-          <td>{{rowContent}}</td>
+          <td>{{rowContent.name}}</td><td>{{rowContent.response}}</td>
         </tr>
       </tbody>
     </table>    
-    <!--  boiler plate bottom of the panel. -->
-    <div ng-switch on="size">
-        <div class="animate-switch" ng-switch-when="small">Small view</div>
-        <div class="animate-switch" ng-switch-when="medium">Medium view</div>
-        <div class="animate-switch" ng-switch-when="large">Large view</div>
-        <div class="animate-switch" ng-switch-when="full">Full view</div>
-    </div>   
+ 
 </div>
