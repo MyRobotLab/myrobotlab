@@ -79,7 +79,7 @@ angular.module('mrlapp.service.programabgui', [])
 		    	$scope.utterance = final_transcript;
 				$scope.$apply();
 				$scope.askProgramAB(final_transcript);
-				
+				final_transcript  = '';
 				interm_transcript = '';
 			} else {
 		    	// we're not at the boundry of speech detection
@@ -100,7 +100,7 @@ angular.module('mrlapp.service.programabgui', [])
             var textData = msg.data[0];
             //$scope.serviceDirectory[msg.sender].pulseData = pulseData;
             $scope.currResponse = textData;
-            $scope.rows.unshift("Bot : " + textData);
+            $scope.rows.unshift({name:"Bot:" , response:textData});
             console.log('currResponse', $scope.currResponse);
             $scope.$apply();
         };
@@ -108,10 +108,18 @@ angular.module('mrlapp.service.programabgui', [])
     $scope.askProgramAB = function (utterance) {
     	$scope.service = mrl.getService($scope.service.name);
     	mrl.sendTo($scope.service.name, "getResponse", utterance);
-    	$scope.rows.unshift("User : " + utterance);
+    	$scope.rows.unshift({ name:"User" , response:utterance} );
+    	// $scope.utterance = '';
     	// TODO: clear the text box.
     	// $scope.utterance = '';
     };
+    $scope.startSession = function (botname,botpath) {
+    	$scope.rows.unshift("Reload Session for Bot " + botname);
+    	$scope.startSessionLabel = 'Reload Session';
+    	$scope.$apply();
+    	$scope.service = mrl.getService($scope.service.name);
+    	mrl.sendTo($scope.service.name, "startSession", botpath, botname);
+    }
     // toggle type of button for starting/stopping speech $scope.recognition.
 	$scope.startRecognition = function () {
 		console.log("Start Recognition clicked.");

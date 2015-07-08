@@ -200,6 +200,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	 * @return
 	 */
 	public Response getResponse(String session, String text) {
+		log.info("Get Response for : "  + text);
 		if (session == null) {
 			session = "default";
 		}
@@ -539,11 +540,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 			chat.predicates.getPredicateDefaultsFromInputStream(IOUtils.toInputStream(inputPredicateStream));
 
 		}
+		this.botName = botName;
 		String userName = chat.predicates.get("name");
 		log.info("Started session for {} , username {}", session, userName);
 		// TODO: to make sure if the start session is updated, that the button
 		// updates in the gui ?
-		// broadcastState();
+		broadcastState();
 	}
 
 	public void writeAIML() {
