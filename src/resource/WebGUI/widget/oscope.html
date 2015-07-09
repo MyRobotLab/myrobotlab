@@ -1,0 +1,20 @@
+<div class="row">
+  <div class="col-lg-10">
+    <canvas width="750" height="600" id="screen"></canvas>
+  </div>
+
+  <div class="col-lg-1" data-ng-repeat="(pinKey, pin) in pinList">   
+      <button class="btn btn-default"  ng-click="trace('pin.pin')">{{ pin.pin }}</button>
+  </div>
+<!--  
+  <div class="col-lg-1">
+    <button class="btn btn-default"  ng-click="trace('d1')">d1</button>
+    <button class="btn btn-default"  ng-click="trace('d1')">d3</button>
+  </div>
+-->  
+  <div class="col-lg-1">
+    <button class="btn btn-default"  ng-click="trace('d2')">d2</button>
+    <button class="btn btn-default"  ng-click="trace('d2')">d4</button>
+  </div>
+</div>
+ 

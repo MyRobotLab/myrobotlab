@@ -67,6 +67,7 @@ http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
 <div class="row">
  <div class="col-lg-12">
  <tabset justified="true">
+ 
     <tab heading="MRLComm.ino">
     <button class="btn btn-default pull-right" clip-copy="service.sketch.data"><span class="glyphicon glyphicon-copy"></span> copy</button>
     <div class="col-lg-12" style="height: 600px;" ui-ace="{
@@ -79,21 +80,12 @@ http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
                                            onChange: aceChanged}">
     </div>
     </tab>
+
+
     <tab heading="Oscope">
 
-     <canvas id="myCanvas" width="578" height="200"></canvas>
-    <script>
-      var canvas = document.getElementById('myCanvas');
-      var context = canvas.getContext('2d');
-
-      context.beginPath();
-      context.moveTo(100, 150);
-      context.lineTo(450, 50);
-      context.stroke();
-    </script>
-
-
-
+ 	<oscope width="500" height="600" id="oscope" ng-model="service.name" ></oscope>
+ 
     </tab>
     <tab heading="Pins">
       <img src="service/arduino/Arduino_ADK_MEGA_2560-Rev3_icon.svg" width="200%" height="200%" />

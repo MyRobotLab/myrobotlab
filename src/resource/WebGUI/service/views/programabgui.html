@@ -93,16 +93,16 @@ select_dialect.selectedIndex = 6;
 <br/>
 <table>
   <tr>
-    <td>Bot Name</td>
-    <td><input ng-model="botname" name="botname" id="botname" ng-init="botname='alice2'"/></td>
+    <td>Bot Name </td>
+    <td> <input ng-model="botname" class="form-control"  name="botname" id="botname" ng-init="botname='alice2'"/></td>
   </tr>
   <tr>
-    <td>ProgramAB Path</td>
-    <td><input ng-model="botpath" name="botpath" id="botpath" ng-init="botpath='ProgramAB'"/></td>
+    <td>ProgramAB Path </td>
+    <td> <input ng-model="botpath"  class="form-control"  name="botpath" id="botpath" ng-init="botpath='ProgramAB'"/></td>
   </tr>
   <tr>
     <td></td>
-    <td><button id="startSession" ng-click="startSession(botname,botpath)" ng-init="startSessionLabel = 'Start Session'">{{startSessionLabel}}</button></td>
+    <td><button id="startSession" class="btn btn-default"  ng-click="startSession(botname,botpath)" ng-init="startSessionLabel = 'Start Session'">{{startSessionLabel}}</button></td>
   </tr>
 </table>
 
@@ -114,17 +114,17 @@ select_dialect.selectedIndex = 6;
 Status: {{status}}
 <br/>
 	<form>
-		<input ng-model="utterance" name="utterance" id="utterance" ng-init=""/>  
-		<button type="submit" id="askProgramAB" ng-click="askProgramAB(utterance)" ng-init="">Ask Program AB</button>
-	    <button id="startListening" ng-click="startRecognition()" ng-init="listenbuttonimg ='service/img/mic.gif'" ng-src="listenbuttonimg">
+		<input class="form-control" ng-model="utterance" name="utterance" id="utterance" ng-init=""/>  
+		<button type="submit" class="btn btn-default" id="askProgramAB" ng-click="askProgramAB(utterance)" ng-init="">Ask Program AB</button>
+	    <button id="startListening" class="btn btn-default" ng-click="startRecognition()" ng-init="listenbuttonimg ='service/img/mic.gif'" ng-src="listenbuttonimg">
      		<img ng-src="{{listenbuttonimg}}"/>
         </button>
     </form>
     <br/>
     <div class="center">
       <div id="div_language">
-        <select id="select_language" onchange="updateCountry()"></select>&nbsp;&nbsp;
-        <select id="select_dialect"></select>
+        <select class="form-control" id="select_language" onchange="updateCountry()"></select>&nbsp;&nbsp;
+        <select class="form-control" id="select_dialect"></select>
       </div>
     </div>
     <br/>
