@@ -1,5 +1,4 @@
 angular.module('mrlapp.service')
-
         .directive('serviceBody', ['$compile', function ($compile) {
                 return {
                     scope: {

@@ -25,5 +25,16 @@ angular.module('mrlapp.service.arduinogui', [])
             {title: 'Dynamic Title 1',content: 'Dynamic content 1'}, 
             {title: 'Dynamic Title 2',content: 'Dynamic content 2',disabled: true}
         ];
+        /*
+        var canvas = document.getElementById('myCanvas');
+        if (canvas.getContext) {
+            console.log("drawing");
+            var ctx = canvas.getContext("2d");
+            //clear the canvas
+            ctx.clearRect(0, 10, canvas.width, canvas.height);
+            
+            ctx.fillRect(0, 10, width, height);
+        }
+        */
     
     }]);
