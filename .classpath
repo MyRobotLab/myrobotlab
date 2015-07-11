@@ -16,8 +16,7 @@
 	<classpathentry kind="lib" path="/repo/edu.cmu.sphinx/4-1.0beta6/TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.cmu.sphinx/4-1.0beta6/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
 	<classpathentry kind="lib" path="/repo/edu.cmu.sphinx/4-1.0beta6/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.jar"/>
-	<classpathentry kind="lib" path="/repo/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/> 
-	
+	<classpathentry kind="lib" path="/repo/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/>
 	<classpathentry kind="lib" path="/repo/javaFlacEncoder.FLAC_FileEncoder/0.1/javaFlacEncoder-0.1.jar"/>
 	<classpathentry kind="lib" path="/repo/javax.speech.recognition/1.0/jsapi.jar"/>
 	<classpathentry kind="lib" path="/repo/javax.vecmath/1.5.1/vecmath.jar"/>
@@ -40,7 +39,6 @@
 	<classpathentry kind="lib" path="/repo/com.sun.mail/1.4.5/smtp.jar"/>
 	<classpathentry kind="lib" path="/repo/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar"/>
 	<classpathentry kind="lib" path="/repo/org.fife.autocomplete/2.0.4/autocomplete.jar"/>
-	<classpathentry kind="lib" path="/repo/com.googlecode.jssc/0.9.0/jssc.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.chatterbot/1.2.1/chatter-bot-api.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/0.0.5/pi4j-core.jar"/>
 	<classpathentry kind="lib" path="/repo/com.pi4j.pi4j/0.0.5/pi4j-gpio-extension.jar"/>
@@ -92,5 +90,6 @@
 	<classpathentry kind="lib" path="/repo/org.atmosphere.nettosphere/2.3.0/javax.inject-1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-1.0-20150502.231737-1-windows-x86_64.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-0.11.jar"/>
+	<classpathentry kind="lib" path="/repo/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
