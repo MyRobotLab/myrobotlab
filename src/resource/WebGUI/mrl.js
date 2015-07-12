@@ -386,12 +386,12 @@ angular
         // a service gets instantiated for the 1st time?
         // it also represents config's view of the provider
         // when we inject our provider into a function by way of the provider name ("mrl"), Angular will call $get to retrieve the object to inject
-        this.$get = function($q) {
+        this.$get = function($q, $log) {
             
             this.connect = function(url, proxy) {
                 
                 if (connected) {
-                    console.log("aleady connected");
+                    $log.info("aleady connected");
                     return this;
                 }
 
@@ -409,17 +409,17 @@ angular
                 
                 deferred = $q.defer();
                 deferred.promise.then(function(result) {
-                    console.log("SUCCESS : connect deferred - result success");
+                    $log.info("connect deferred - result success");
                     var result = result;
                 }, function(error) {
-                    console.log("ERROR : connect deferred - result error");
+                    $log.error("connect deferred - result error");
                     var error = error;
                 });
             
             };
             
             this.onError = function(response) {
-                console.log('onError, can not connect');
+                log.error('onError, can not connect');
                 deferred.reject('onError, can not connect');
                 return deferred.promise;
             };

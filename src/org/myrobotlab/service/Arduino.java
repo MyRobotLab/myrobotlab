@@ -301,7 +301,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		super(n);
 		serial = (Serial) createPeer("serial");
 		createPinList();
-		String mrlcomm = FileIO.resourceToString("Arduino/MRLComm2.ino");
+		String mrlcomm = FileIO.resourceToString("Arduino/MRLComm.ino");
 		setSketch(new Sketch("MRLComm", mrlcomm));
 	}
 
@@ -687,7 +687,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					// FIXME
 					//Pin pin = pinList.get(msg[1]); BIG BUG - if a reference is sent and
 					// the same reference whic his trying to be displayed is changed underneath
-					Pin pin = new Pin(pinList.get(msg[1]));
+					//Pin pin = new Pin(pinList.get(msg[1]));
+					Pin pin = pinList.get(msg[1]);
 					pin.value = ((msg[2] & 0xFF) << 8) + (msg[3] & 0xFF);
 					invoke("publishPin", pin);
 					break;
@@ -846,6 +847,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public String getPortName(){
 		return serial.getPortName();
 	}
+	
+	public int publishStepperEvent(Integer pos) {
+		return pos;
+	}
 
 	public void onCustomMsg(Integer ax, Integer ay, Integer az) {
 		log.info("onCustomMsg");
@@ -919,7 +924,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return pos;
 	}
 
-	public SensorData publishSesorData(SensorData data) {
+	public SensorData publishSensorData(SensorData data) {
 		return data;
 	}
 
@@ -1571,6 +1576,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			
+			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+			virtual.createVirtualArduino("vport");
+			Python logic = virtual.getLogic();
+
+			//catcher.subscribe(arduino.getName(), "publishError");
+
+			Serial uart = virtual.getUART();
 
 			/*
 			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");

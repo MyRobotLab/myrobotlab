@@ -233,7 +233,16 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			BareBonesBrowserLaunch.openURL(String.format(startURL, port));
 		}
 
-		// susbcribe to our Runtimes methods of interest
+		// we want all onState & onStatus events from all services
+		ServiceEnvironment se = Runtime.getLocalServices();
+		for (String name : se.serviceDirectory.keySet()){
+			ServiceInterface si = se.serviceDirectory.get(name);
+			onRegistered(si);
+		}
+				
+		// additionally we will want onState & onStatus events from all services
+		// from all new services which were created "after" the webgui
+		// so susbcribe to our Runtimes methods of interest
 		Runtime runtime = Runtime.getInstance();
 		subscribe(runtime.getName(), "registered");
 		subscribe(runtime.getName(), "released");
@@ -243,6 +252,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// new service
 		// subscribe to the status events
 		subscribe(si.getName(), "publishStatus");
+		subscribe(si.getName(), "publishState");
 		
 		// broadcast it too
 		// repackage message
