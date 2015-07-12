@@ -36,6 +36,7 @@ angular.module('mrlapp.service.serialgui', [])
         //you HAVE TO define this method &
         //it is the ONLY exception of writing into .gui
         //-> you will receive all messages routed to your service here
+        // FIXME - why this function on the scope? why is it on gui ? - i believe it should be on this.onMsg
         $scope.gui.onMsg = function(msg) {
             console.log('CALLBACK - ' + msg.method);
             switch (msg.method) {

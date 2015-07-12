@@ -16,76 +16,169 @@
 */
 
 #include <Servo.h>
-
-// ----------  MRLCOMM FUNCTION INTERFACE BEGIN -----------
-#define MRLCOMM_VERSION				20
+#define MRLCOMM_VERSION				24
 
 // serial protocol functions
 #define MAGIC_NUMBER  					170 // 10101010
 
-// MRL ---> Arduino methods
-#define DIGITAL_WRITE        			0
-#define DIGITAL_VALUE        			1
-#define ANALOG_WRITE         			2
-#define ANALOG_VALUE         			3
-#define PINMODE              			4
-#define PULSE_IN             			5
-#define SERVO_ATTACH         			6
-#define SERVO_WRITE          			7
-#define SERVO_SET_MAX_PULSE  			8
-#define SERVO_DETACH         			9
-#define SET_PWM_FREQUENCY    			11
-#define SET_SERVO_SPEED           		12
-#define ANALOG_READ_POLLING_START	 	13
-#define ANALOG_READ_POLLING_STOP	 	14
-#define DIGITAL_READ_POLLING_START	 	15
-#define DIGITAL_READ_POLLING_STOP		16
-#define SET_ANALOG_TRIGGER				17
-#define REMOVE_ANALOG_TRIGGER			18
-#define SET_DIGITAL_TRIGGER				19
-#define REMOVE_DIGITAL_TRIGGER			20
-#define DIGITAL_DEBOUNCE_ON				21
-#define DIGITAL_DEBOUNCE_OFF			22
-#define DIGITAL_TRIGGER_ONLY_ON			23
-#define DIGITAL_TRIGGER_ONLY_OFF		24
-#define SET_SERIAL_RATE					25
-#define GET_MRLCOMM_VERSION				26
-#define SET_SAMPLE_RATE					27
-#define SERVO_WRITE_MICROSECONDS		28
-#define MRLCOMM_ERROR					29
+// ----- MRLCOMM FUNCTION GENERATED INTERFACE BEGIN -----------
+///// INO GENERATED DEFINITION BEGIN //////
+// {publishMRLCommError Integer} 
+#define PUBLISH_MRLCOMM_ERROR		1
 
-#define PINGDAR_ATTACH              	30
-#define PINGDAR_START             		31
-#define PINGDAR_STOP              		32
-#define PINGDAR_DATA 					33
+// {getVersion} 
+#define GET_VERSION		2
 
-#define SENSOR_ATTACH 					34
-#define SENSOR_POLLING_START			35
-#define SENSOR_POLLING_STOP				36
-#define SENSOR_DATA 					37
+// {publishVersion Integer} 
+#define PUBLISH_VERSION		3
 
-#define SERVO_SWEEP_START				38
-#define SERVO_SWEEP_STOP				39
+// {analogReadPollingStart Integer} 
+#define ANALOG_READ_POLLING_START		4
 
-// callback event - e.g. position arrived
-// MSG MAGIC | SZ | SERVO-INDEX | POSITION
-#define SERVO_EVENTS_ENABLE				40
-#define SERVO_EVENT					41
+// {analogReadPollingStop Integer} 
+#define ANALOG_READ_POLLING_STOP		5
 
-#define LOAD_TIMING_ENABLE				42
-#define LOAD_TIMING_EVENT				43
+// {analogWrite Integer Integer} 
+#define ANALOG_WRITE		6
 
-#define STEPPER_ATTACH					44
-#define STEPPER_MOVE					45
-#define STEPPER_STOP					46
-#define STEPPER_RESET					47
+// {digitalReadPollingStart Integer} 
+#define DIGITAL_READ_POLLING_START		7
 
-#define STEPPER_EVENT					48
+// {digitalReadPollingStop Integer} 
+#define DIGITAL_READ_POLLING_STOP		8
+
+// {digitalWrite Integer Integer} 
+#define DIGITAL_WRITE		9
+
+// {motorAttach String String Integer Integer Integer} 
+#define MOTOR_ATTACH		10
+
+// {motorDetach String} 
+#define MOTOR_DETACH		11
+
+// {motorMove String} 
+#define MOTOR_MOVE		12
+
+// {motorMoveTo String double} 
+#define MOTOR_MOVE_TO		13
+
+// {pinMode Integer Integer} 
+#define PIN_MODE		14
+
+// {publishCustomMsg Object[]} 
+#define PUBLISH_CUSTOM_MSG		15
+
+// {publishLoadTimingEvent Long} 
+#define PUBLISH_LOAD_TIMING_EVENT		16
+
+// {publishPin Pin} 
+#define PUBLISH_PIN		17
+
+// {publishPulse Integer} 
+#define PUBLISH_PULSE		18
+
+// {publishSensorData SensorData} 
+#define PUBLISH_SENSOR_DATA		19
+
+// {publishServoEvent Integer} 
+#define PUBLISH_SERVO_EVENT		20
+
+// {publishStepperEvent Integer} 
+#define PUBLISH_STEPPER_EVENT		21
+
+// {publishTrigger Pin} 
+#define PUBLISH_TRIGGER		22
+
+// {pulseIn int int int String} 
+#define PULSE_IN		23
+
+// {sensorAttach String} 
+#define SENSOR_ATTACH		24
+
+// {sensorPollingStart String int} 
+#define SENSOR_POLLING_START		25
+
+// {sensorPollingStop String} 
+#define SENSOR_POLLING_STOP		26
+
+// {servoAttach String Integer} 
+#define SERVO_ATTACH		27
+
+// {servoDetach Servo} 
+#define SERVO_DETACH		28
+
+// {servoSweepStart String int int int} 
+#define SERVO_SWEEP_START		29
+
+// {servoSweepStop String} 
+#define SERVO_SWEEP_STOP		30
+
+// {servoWrite String Integer} 
+#define SERVO_WRITE		31
+
+// {servoWriteMicroseconds String Integer} 
+#define SERVO_WRITE_MICROSECONDS		32
+
+// {setDebounce int} 
+#define SET_DEBOUNCE		33
+
+// {setDigitalTriggerOnly Boolean} 
+#define SET_DIGITAL_TRIGGER_ONLY		34
+
+// {setLoadTimingEnabled boolean} 
+#define SET_LOAD_TIMING_ENABLED		35
+
+// {setPWMFrequency Integer Integer} 
+#define SET_PWMFREQUENCY		36
+
+// {setSampleRate int} 
+#define SET_SAMPLE_RATE		37
+
+// {setSerialRate int} 
+#define SET_SERIAL_RATE		38
+
+// {setServoEventsEnabled String boolean} 
+#define SET_SERVO_EVENTS_ENABLED		39
+
+// {setServoSpeed String Float} 
+#define SET_SERVO_SPEED		40
+
+// {setStepperSpeed Integer} 
+#define SET_STEPPER_SPEED		41
+
+// {setTrigger int int int} 
+#define SET_TRIGGER		42
+
+// {softReset} 
+#define SOFT_RESET		43
+
+// {stepperAttach Stepper} 
+#define STEPPER_ATTACH		44
+
+// {stepperDetach String} 
+#define STEPPER_DETACH		45
+
+// {stepperMoveTo String int int} 
+#define STEPPER_MOVE_TO		46
+
+// {stepperReset String} 
+#define STEPPER_RESET		47
+
+// {stepperStop String} 
+#define STEPPER_STOP		48
+
+// {stopService} 
+#define STOP_SERVICE		49
+
+///// INO GENERATED DEFINITION END //////
+
+// ----- MRLCOMM FUNCTION GENERATED INTERFACE END -----------
+
+#define STEPPER_TYPE_SIMPLE  			1
+
+// ------ event types ------
 #define STEPPER_EVENT_STOP				1
-
-#define STEPPER_TYPE_POLOLU  			1
-
-#define CUSTOM_MSG						50
+#define STEPPER_EVENT_STEP				2
 
 // servo event types
 #define  SERVO_EVENT_STOPPED			1
@@ -94,17 +187,20 @@
 // error types
 #define ERROR_SERIAL					1
 #define ERROR_UNKOWN_CMD				2
+#define ERROR_ALREADY_EXISTS			3
+#define ERROR_DOES_NOT_EXIST			4
 
-// sensor types
+// ------ error types ------
 #define SENSOR_ULTRASONIC				1
 
+#define CUSTOM_MSG						50
 
 // need a method to identify type of board
 // http://forum.arduino.cc/index.php?topic=100557.0
 
 #define COMMUNICATION_RESET	   252
 #define SOFT_RESET			   253
-#define NOP  255
+#define NOP  				   255
 
 // ----------  MRLCOMM FUNCTION INTERFACE END -----------
 
@@ -177,18 +273,21 @@ typedef struct
   {
   	  int ts;
       int type;
-      int index;
+      int index; // is this redundant?
       int currentPos;
       int targetPos;
       int speed;
-      int dir;
-      bool isRunning;
-      int state;
-      // int dirPin;
-      int step0; // step0 is dirPin is POLOLU TYPE
-      int step1;
-      int step2;
-      int step3;
+
+      int dirPin;
+      int stepPin;
+
+	  // support up to 5 wire steppers
+      int pin0;
+      int pin1;
+      int pin2;
+      int pin3;
+      int pin4;
+
   }  stepper_type;
 
 stepper_type steppers[STEPPERS_MAX];
@@ -269,8 +368,6 @@ int analogReadPollingPinCount = 0;            // number of pins currently readin
 int lastAnalogInputValue[ANALOG_PIN_COUNT];   // array of last input values
 bool analogTriggerOnly = false;         // send data back only if its different
 
-unsigned int errorCount = 0;
-
 //---- data record definitions begin -----
 
 
@@ -296,14 +393,8 @@ pingdar_type pingdars[PINGDARS_MAX];
 	int paramCnt;
 //===custom msg interface end===
 
-
-/* could optimize - but makes for ugly code - just to save a couple clock cycles - counting to 6 :P
-not worth it
-int pingdarsRunningCount = 0;
-int pingdarsRunning[6]; // map array of running pingdars
-*/
-
 void sendServoEvent(servo_type& s, int eventType);
+void sendStepperEvent(stepper_type& s, int eventType);
 unsigned long getUltrasonicRange(sensor_type& sensor);
 // void sendMsg ( int num, ... );
 
@@ -313,7 +404,7 @@ void append(const int& data) {
 	++paramCnt;
 	customParams[paramBuffIndex] = ARDUINO_TYPE_INT;
 	customParams[++paramBuffIndex] = (byte)(data >> 8);
-	customParams[++paramBuffIndex] = ((byte) data & 0xFF);
+	customParams[++paramBuffIndex] = ((byte) data & 0xff);
 	++paramBuffIndex;
 }
 
@@ -391,13 +482,55 @@ void setPWMFrequency (int address, int prescalar)
 
 }
 
-void removeAndShift (int array [], int& len, int removeValue)
+/**
+ * checks the existance of the searched value in the array
+ * - good for not adding to a dynamic list of values if it
+ * already exists
+ */
+bool exists(int array[], int len, int searchValue){
+	for (int i = 0; i < len; ++i)
+	{
+		if (searchValue == array[i])
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * adds new value to a pseudo dynamic array/list
+ * if successful - if value already exists on list
+ * sends back an error
+ */
+bool addNewValue(int array[], int& len, int addValue)
 {
+	if (!exists(array, len, addValue)){
+		array[len] = addValue;
+		++len;
+		return true;
+	} else {
+		sendError(ERROR_ALREADY_EXISTS);
+		return false;
+	}
+}
+
+
+bool removeAndShift (int array [], int& len, int removeValue)
+{
+	if (!exists(array, len, removeValue)){
+		sendError(ERROR_DOES_NOT_EXIST);
+		return false;
+	}
+
 	int pos = -1;
 
 	if (len == 0)
 	{
-		return;
+		// "should" never happen
+		// would be calling remove on an empty list
+		// the error ERROR_DOES_NOT_EXIST - "should" be called
+		return true;
 	}
 
 	// find position of value
@@ -413,7 +546,7 @@ void removeAndShift (int array [], int& len, int removeValue)
 	if (pos == len - 1)
 	{
 		--len;
-		return;
+		return true;
 	}
 
 	// if found somewhere else shift left
@@ -425,6 +558,8 @@ void removeAndShift (int array [], int& len, int removeValue)
 		}
 		--len;
 	}
+
+	return true;
 }
 
 boolean getCommand ()
@@ -439,7 +574,6 @@ boolean getCommand ()
 		// checking first byte - beginning of message?
 		if (byteCount == 1 && newByte != MAGIC_NUMBER)
 		{
-			++errorCount;
 			sendError(ERROR_SERIAL);
 
 			// reset - try again
@@ -488,7 +622,7 @@ void loop () {
 			break;
 		}
 
-		case PINMODE:{
+		case PIN_MODE:{
 			pinMode(ioCmd[1], ioCmd[2]);
 			break;
 		}
@@ -538,13 +672,13 @@ void loop () {
 			break;
 		}
 
-		case SERVO_EVENTS_ENABLE:{
+		case PUBLISH_SERVO_EVENT:{
 			servo_type& s = servos[ioCmd[1]];
 			s.eventsEnabled = ioCmd[2];
 			break;
 		}
 
-		case LOAD_TIMING_ENABLE:{
+		case SET_LOAD_TIMING_ENABLED:{
 			loadTimingEnabled = ioCmd[1];
 			//loadTimingModulus = ioCmd[2];
 			loadTimingModulus = 1000;
@@ -579,63 +713,54 @@ void loop () {
 			break;
 		}
 
-		case SET_PWM_FREQUENCY:{
+		case SET_PWMFREQUENCY:{
 			setPWMFrequency (ioCmd[1], ioCmd[2]);
 			break;
 		}
 
 		case ANALOG_READ_POLLING_START:{
-			analogReadPin[analogReadPollingPinCount] = ioCmd[1]; // put on polling read list
-			// TODO - if POLLING ALREADY DON'T RE-ADD - MAKE RE-ENTRANT - if already set don't increment
-			++analogReadPollingPinCount;
+			int pin = ioCmd[1];
+			addNewValue(analogReadPin, analogReadPollingPinCount, pin);
 			break;
 		}
 
 		case ANALOG_READ_POLLING_STOP:{
-			// TODO - MAKE RE-ENRANT
-			removeAndShift(analogReadPin, analogReadPollingPinCount, ioCmd[1]);
+			int pin = ioCmd[1];
+			removeAndShift(analogReadPin, analogReadPollingPinCount, pin);
 			break;
 		}
 
 		case DIGITAL_READ_POLLING_START:{
-			// TODO - MAKE RE-ENRANT
-			digitalReadPin[digitalReadPollingPinCount] = ioCmd[1]; // put on polling read list
-			++digitalReadPollingPinCount;
+			int pin = ioCmd[1];
+			addNewValue(digitalReadPin, digitalReadPollingPinCount, pin);
 			break;
 		}
 
 		case DIGITAL_READ_POLLING_STOP:{
-			// TODO - MAKE RE-ENRANT
-			removeAndShift(digitalReadPin, digitalReadPollingPinCount, ioCmd[1]);
+			int pin = ioCmd[1];
+			removeAndShift(digitalReadPin, digitalReadPollingPinCount, pin);
 			break;
 		}
 
-		case SET_ANALOG_TRIGGER:{
+		case SET_TRIGGER:{
+                        // FIXME !!! - you need 1. a complete pin list !!!   analog & digital should be defined by attribute not
+                        // data structure !!!  if (pin.type == ??? if needed
 			// TODO - if POLLING ALREADY DON'T RE-ADD - MAKE RE-ENTRANT
 			analogReadPin[analogReadPollingPinCount] = ioCmd[1]; // put on polling read list
 			++analogReadPollingPinCount;
 			break;
 		}
 
-		case DIGITAL_DEBOUNCE_ON:{
-			// debounceDelay = 50;
+		case SET_DEBOUNCE:{
+			// default debounceDelay = 50;
 			debounceDelay = ((ioCmd[1]<<8) + ioCmd[2]);
 			break;
 		}
 
-		case DIGITAL_DEBOUNCE_OFF:{
-			debounceDelay = 0;
+		case SET_DIGITAL_TRIGGER_ONLY:{
+			digitalTriggerOnly = ioCmd[1];
 			break;
-		}
-
-		case DIGITAL_TRIGGER_ONLY_ON:{
-			digitalTriggerOnly = true;
-			break;
-
-		case DIGITAL_TRIGGER_ONLY_OFF:
-			digitalTriggerOnly = false;
-			break;
-		}
+                }
 
 		case SET_SERIAL_RATE:
 		{
@@ -645,10 +770,10 @@ void loop () {
 			break;
 		}
 
-		case GET_MRLCOMM_VERSION:{
+		case GET_VERSION:{
 			Serial.write(MAGIC_NUMBER);
 			Serial.write(2); // size
-			Serial.write(GET_MRLCOMM_VERSION);
+			Serial.write(PUBLISH_VERSION);
 			Serial.write((byte)MRLCOMM_VERSION);
 			break;
 			}
@@ -676,9 +801,9 @@ void loop () {
 			//Calculate the distance (in cm) based on the speed of sound.
 			// distance = duration/58.2;
 
-			//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xFF);
- 			//sendMsg(5, PULSE_IN, duration >> 24, duration >> 16, duration >> 8, duration & 0xFF);
- 			//sendMsg(6, SENSOR_DATA, 47, duration >> 24, duration >> 16, duration >> 8, duration & 0xFF);
+			//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xff);
+ 			//sendMsg(5, PULSE_IN, duration >> 24, duration >> 16, duration >> 8, duration & 0xff);
+ 			//sendMsg(6, SENSOR_DATA, 47, duration >> 24, duration >> 16, duration >> 8, duration & 0xff);
 
 
 			Serial.write(MAGIC_NUMBER);
@@ -688,7 +813,7 @@ void loop () {
 			Serial.write((byte)(duration >> 24));
 			Serial.write((byte)(duration >> 16));
 			Serial.write((byte)(duration >> 8));
-			Serial.write((byte)duration & 0xFF);
+			Serial.write((byte)duration & 0xff);
 
 
 			break;
@@ -711,15 +836,15 @@ void loop () {
 			stepper_type& stepper = steppers[ioCmd[1]];
 			stepper.index = ioCmd[1];
 			stepper.type = ioCmd[2];
-			stepper.isRunning = false;
 			stepper.currentPos = 0;
 			stepper.targetPos = 0;
-			stepper.dir = 0;
 			stepper.speed = 100;
 
-			if (stepper.type == STEPPER_TYPE_POLOLU) {
-				stepper.step0 = ioCmd[3]; // dir pin
-				stepper.step1 = ioCmd[4]; // step pin
+			if (stepper.type == STEPPER_TYPE_SIMPLE) {
+				stepper.dirPin = ioCmd[3]; // dir pin
+				stepper.stepPin = ioCmd[4]; // step pin
+				pinMode(stepper.dirPin, OUTPUT);
+				pinMode(stepper.stepPin, OUTPUT);
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}
@@ -728,26 +853,23 @@ void loop () {
 
 		case STEPPER_RESET:{
 			stepper_type& stepper = steppers[ioCmd[1]];
-			stepper.isRunning = false;
 			stepper.currentPos = 0;
 			stepper.targetPos = 0;
-			stepper.dir = 0;
 			stepper.speed = 100;
 			break;
 		}
 
-		case STEPPER_MOVE:{
+		/* absolute position - not relative */
+		case STEPPER_MOVE_TO:{
 			stepper_type& stepper = steppers[ioCmd[1]];
-			if (stepper.type == STEPPER_TYPE_POLOLU) {
-				stepper.isRunning = true;
-
+			if (stepper.type == STEPPER_TYPE_SIMPLE) {
 				stepper.targetPos = stepper.currentPos + (ioCmd[2]<<8) + ioCmd[3];
 				// relative position & direction
 				if (stepper.targetPos < 0) {
 					// direction
-					digitalWrite(stepper.step0, 1);
+					digitalWrite(stepper.dirPin, 1);
 				} else {
-					digitalWrite(stepper.step0, 0);
+					digitalWrite(stepper.dirPin, 0);
 				}
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
@@ -757,17 +879,9 @@ void loop () {
 
 		case STEPPER_STOP:{
 			stepper_type& stepper = steppers[ioCmd[1]];
-			if (stepper.type == STEPPER_TYPE_POLOLU) {
-				stepper.isRunning = false;
+			if (stepper.type == STEPPER_TYPE_SIMPLE) {
 				stepper.targetPos = stepper.currentPos;
-
-				Serial.write(MAGIC_NUMBER);
-				Serial.write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
-				Serial.write(STEPPER_EVENT);
-				Serial.write(STEPPER_EVENT_STOP);
-				Serial.write(stepper.index); // send my index
-				Serial.write(stepper.currentPos >> 8);   // MSB
-				Serial.write(stepper.currentPos & 0xFF);	// LSB
+				sendStepperEvent(stepper, STEPPER_EVENT_STOP);
 			} else {
 				sendError(ERROR_UNKOWN_CMD);
 			}
@@ -776,6 +890,8 @@ void loop () {
 
 			// --VENDOR CODE BEGIN--
 			// --VENDOR CODE END--
+// not sure if its worth implementing - same info can be retrieved from publish servo event & publish pin
+/*
 
 		case PINGDAR_ATTACH:{
 			int pingdarIndex = ioCmd[1];
@@ -785,7 +901,8 @@ void loop () {
 			pingdar.step = 1;
 			break;
 		}
-
+*/
+		// used by ultrasonic sensor
 		case SENSOR_ATTACH:{
 			int sensorIndex = ioCmd[1];
 			sensor_type& sensor = sensors[sensorIndex];
@@ -856,6 +973,7 @@ void loop () {
 			  }
 			}
 
+			// FIXME !! - normalize with analog
 			// read the pin
 			readValue = digitalRead(digitalReadPin[i]);
 
@@ -863,9 +981,10 @@ void loop () {
 			if (lastDigitalInputValue[digitalReadPin[i]] != readValue  || !digitalTriggerOnly)
 			{
 				Serial.write(MAGIC_NUMBER);
-				Serial.write(3); // size
-				Serial.write(DIGITAL_VALUE);
+				Serial.write(4); // size
+				Serial.write(PUBLISH_PIN);
 				Serial.write(digitalReadPin[i]);// Pin#
+				Serial.write(0); 	// MSB
 				Serial.write(readValue); 	// LSB
 
 			    lastDebounceTime[digitalReadPin[i]] = millis();
@@ -885,14 +1004,14 @@ void loop () {
 			// if my value is different from last time - send it
 			if (lastAnalogInputValue[analogReadPin[i]] != readValue   || !analogTriggerOnly) //TODO - SEND_DELTA_MIN_DIFF
 			{
-				//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xFF);
+				//sendMsg(4, ANALOG_VALUE, analogReadPin[i], readValue >> 8, readValue & 0xff);
 
 				Serial.write(MAGIC_NUMBER);
 				Serial.write(4); //size
-				Serial.write(ANALOG_VALUE);
+				Serial.write(PUBLISH_PIN);
 				Serial.write(analogReadPin[i]);
 				Serial.write(readValue >> 8);   // MSB
-				Serial.write(readValue & 0xFF);	// LSB
+				Serial.write(readValue & 0xff);	// LSB
 
 	        }
 			// set the last input value of this pin
@@ -1010,13 +1129,13 @@ void loop () {
 				} else if (sensor.state == ECHO_STATE_GOOD_RANGE || sensor.state == ECHO_STATE_TIMEOUT) {
 					Serial.write(MAGIC_NUMBER);
 					Serial.write(6); // size 1 FN + 4 bytes of unsigned long
-					Serial.write(SENSOR_DATA);
+					Serial.write(PUBLISH_SENSOR_DATA);
 					Serial.write(i);
 		            // write the long value out
 					Serial.write((byte)(sensor.lastValue >> 24));
 					Serial.write((byte)(sensor.lastValue >> 16));
 					Serial.write((byte)(sensor.lastValue >> 8));
-					Serial.write((byte) sensor.lastValue & 0xFF);
+					Serial.write((byte) sensor.lastValue & 0xff);
 					sensor.state = ECHO_STATE_START;
 				} // end else if
 
@@ -1029,44 +1148,35 @@ void loop () {
 	// TODO - brake - speed - fractional stepping - other stepper types
 	for (int i = 0; i < STEPPERS_MAX; ++i) {
 		stepper_type& stepper = steppers[i];
-		if (stepper.isRunning == true){
-			if (stepper.type == STEPPER_TYPE_POLOLU){
+		if (stepper.currentPos != stepper.targetPos){
+			if (stepper.type == STEPPER_TYPE_SIMPLE){
 
 				// direction is already set in initial STEPPER_MOVE
 
 				if (stepper.currentPos < stepper.targetPos) {
-
-				    // step - POLOLU has single step pin (dir is on step0)
-					digitalWrite(stepper.step1, 1);
+					digitalWrite(stepper.stepPin, 1);
 					delayMicroseconds(1); // :P should require another state? loop is ~106us min ?
-					digitalWrite(stepper.step1, 0);
-
+					digitalWrite(stepper.stepPin, 0);
 					stepper.currentPos++;
+					sendStepperEvent(stepper, STEPPER_EVENT_STEP);
+
 				} else if (stepper.currentPos > stepper.targetPos) {
-
-				    // step - POLOLU has single step pin (dir is on step0)
-					digitalWrite(stepper.step1, 1);
+					digitalWrite(stepper.stepPin, 1);
 					delayMicroseconds(1); // :P should require another state? loop is ~106us min ?
-					digitalWrite(stepper.step1, 0);
-
+					digitalWrite(stepper.stepPin, 0);
 					stepper.currentPos--;
+					sendStepperEvent(stepper, STEPPER_EVENT_STEP);
+				}
 
-				} else {
-					stepper.isRunning = false;
-					stepper.currentPos = stepper.targetPos; // forcing ? :P
-					Serial.write(MAGIC_NUMBER);
-					Serial.write(5); // size = 1 FN + 1 eventType + 1 index + 1 curPos
-					Serial.write(STEPPER_EVENT);
-					Serial.write(STEPPER_EVENT_STOP);
-					Serial.write(stepper.index); // send my index
-					Serial.write(stepper.currentPos >> 8);   // MSB
-					Serial.write(stepper.currentPos & 0xFF);	// LSB
+				if (stepper.currentPos == stepper.targetPos){
+					sendStepperEvent(stepper, STEPPER_EVENT_STOP);
 				}
 
 			}
 		}
 	}
 
+	// FIXME - fix overflow with getDiff() method !!!
 	unsigned long now = micros();
 	loadTime = now - lastMicros; // avg outside
  	lastMicros = now;
@@ -1077,12 +1187,12 @@ void loop () {
  		// send it
 		Serial.write(MAGIC_NUMBER);
 		Serial.write(5); // size 1 FN + 4 bytes of unsigned long
-		Serial.write(LOAD_TIMING_EVENT);
+		Serial.write(PUBLISH_LOAD_TIMING_EVENT);
         // write the long value out
 		Serial.write((byte)(loadTime >> 24));
 		Serial.write((byte)(loadTime >> 16));
 		Serial.write((byte)(loadTime >> 8));
-		Serial.write((byte) loadTime & 0xFF);
+		Serial.write((byte) loadTime & 0xff);
 	}
 
 
@@ -1112,7 +1222,7 @@ void sendServoEvent(servo_type& s, int eventType){
 
 	Serial.write(MAGIC_NUMBER);
 	Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
-	Serial.write(SERVO_EVENT);
+	Serial.write(PUBLISH_SERVO_EVENT);
 	Serial.write(s.index); // send my index
 	// write the long value out
 	Serial.write(eventType);
@@ -1120,10 +1230,24 @@ void sendServoEvent(servo_type& s, int eventType){
 	Serial.write(s.targetPos);
 }
 
+void sendStepperEvent(stepper_type& s, int eventType){
+  	// check type of event - STOP vs CURRENT POS
+
+	Serial.write(MAGIC_NUMBER);
+	Serial.write(5); // size = 1 FN + 1 INDEX + 1 eventType + 1 curPos
+	Serial.write(PUBLISH_STEPPER_EVENT);
+	Serial.write(s.index); // send my index
+	// write the long value out
+	Serial.write(eventType);
+	Serial.write(s.currentPos >> 8); // msb
+	Serial.write(s.currentPos & 0xff); // lsb
+}
+
+
 void sendError(int type){
 	Serial.write(MAGIC_NUMBER);
 	Serial.write(2); // size = 1 FN + 1 TYPE
-	Serial.write(MRLCOMM_ERROR);
+	Serial.write(PUBLISH_MRLCOMM_ERROR);
 	Serial.write(type);
 }
 

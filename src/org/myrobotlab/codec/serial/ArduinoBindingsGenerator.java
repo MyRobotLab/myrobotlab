@@ -142,6 +142,9 @@ public class ArduinoBindingsGenerator {
 		exclude.add("setBoard");	
 		exclude.add("setSketch");	
 
+		exclude.add("refreshVersion");	
+		exclude.add("getPortName");	
+		exclude.add("setBoardMega");	
 		
 		int index = 0;
 
