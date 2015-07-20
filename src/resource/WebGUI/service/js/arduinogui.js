@@ -3,8 +3,8 @@ angular.module('mrlapp.service.arduinogui', [])
         console.log('ArduinoGuiCtrl');
         _self = this;
         
-        $scope.gui.onMsg = function(msg) {
-            console.log('CALLBACK - ' + msg.method);
+        var onMsg = function(msg) {
+            //console.log('CALLBACK - ' + msg.method);
             switch (msg.method) {
                 case 'onPortNames':
                     $scope.possiblePorts = msg.data[0];
@@ -57,14 +57,11 @@ angular.module('mrlapp.service.arduinogui', [])
             $scope.showMRLComm = ($scope.showMRLComm) ? false : true;
         }
         
-        $scope.aceLoaded = function(_editor) {
+        $scope.aceLoaded = function(editor) {
             // Options
-            _editor.setReadOnly(true);
-            _editor.$blockScrolling = Infinity;
-            _editor.setValue($scope.service.sketch.data, -1);
-
-            //editor.setValue(str, -1) // moves cursor to the start
-        
+            editor.setReadOnly(true);
+            editor.$blockScrolling = Infinity;
+            editor.setValue($scope.service.sketch.data, -1);        
         };
         
         $scope.aceChanged = function(e) {
@@ -75,17 +72,13 @@ angular.module('mrlapp.service.arduinogui', [])
         $scope.service = mrl.getService($scope.service.name);
         $scope.updateState($scope.service);
 
-        /*
-        var canvas = document.getElementById('myCanvas');
-        if (canvas.getContext) {
-            console.log("drawing");
-            var ctx = canvas.getContext("2d");
-            //clear the canvas
-            ctx.clearRect(0, 10, canvas.width, canvas.height);
-            
-            ctx.fillRect(0, 10, width, height);
-        }
-        */
+
+        // subsumption !!! - we want to repress serial messages they are
+        // WAY TO MANY AND NOT INTEREsTING !!
+        // we want to unregister tx & rx events !!
+        // now the tricky part of finding "real" name of a peer ?
+        // mrl.getPeerName()
+        // mrl.sendTo(name, 'unsubscribe', board);
         
-        $scope.gui.initDone();
+        $scope.panel.initDone();
     }]);

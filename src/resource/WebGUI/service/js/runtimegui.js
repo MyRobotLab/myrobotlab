@@ -13,7 +13,7 @@ angular.module('mrlapp.service.runtimegui', [])
         $scope.platform = platform.arch + "." + platform.bitness + "." + platform.os;
         $scope.version = platform.mrlVersion;
         
-        $scope.gui.onMsg = function(msg) {
+        $scope.panel.onMsg = function(msg) {
             
             switch (msg.method) {
                 case 'onPulse':

@@ -1100,7 +1100,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
+		System.out.println(Arrays.toString(args));
 		// global for this process
 		globalArgs = args;
 

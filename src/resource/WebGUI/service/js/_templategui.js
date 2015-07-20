@@ -6,19 +6,19 @@ angular.module('mrlapp.service.templategui', [])
                 $scope.service = mrl.getService($scope.service.name);
 
                 //you can access two objects
-                //$scope.gui & $scope.service
-                //$scope.gui contains some framwork functions related to your service panel
+                //$scope.panel & $scope.service
+                //$scope.panel contains some framwork functions related to your service panel
                 //-> you can call functions on it, but NEVER write in it
                 //$scope.service is your service-object, it is the representation of the service running in mrl
 
                 //with this method, you can set how many panels you would like to show
-                $scope.gui.setPanelCount(1);
+                $scope.panel.setPanelCount(1);
                 //set custom panel-names
-                $scope.gui.setPanelNames(['me1', 'me2', 'me3']);
+                $scope.panel.setPanelNames(['me1', 'me2', 'me3']);
                 //set if panel-name should be shown or hidden (true->show)
-                $scope.gui.setPanelShowNames([true, false, true]);
+                $scope.panel.setPanelShowNames([true, false, true]);
                 //set custom-sizes
-                $scope.gui.setPanelSizes([
+                $scope.panel.setPanelSizes([
                     {/*panel1*/
                         sizes: {
                             //size-options, these will be shown as a option to select from
@@ -50,7 +50,7 @@ angular.module('mrlapp.service.templategui', [])
                 //you HAVE TO define this method &
                 //it is the ONLY exception of writing into .gui
                 //-> you will receive all messages routed to your service here
-                $scope.gui.onMsg = function (msg) {
+                $scope.panel.onMsg = function (msg) {
                     switch (msg.method) {
                         case 'onPulse':
                             $scope.pulseData = msg.data[0];
@@ -76,5 +76,5 @@ angular.module('mrlapp.service.templategui', [])
                 mrl.subscribe($scope.service.name, 'clockStopped');
 
                 //after you're done with setting up your service-panel, call this method
-                $scope.gui.initDone();
+                $scope.panel.initDone();
             }]);

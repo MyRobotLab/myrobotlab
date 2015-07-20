@@ -1,65 +1,45 @@
-<div id="{{::anker}}">
+<div id="{{::anker}}" draggable ng-show="show">
 
-    <!--<div style="resize: both; overflow: auto;"></div>-->
+    <!--for each service-->
 
     <div class="panel panel-default">
         <div class="panel-heading">
             <!--header-->
             <h3 class="panel-title">
-                <img src="{{::spawndata.type}}.png" alt="" width="16">
-                <b>{{::spawndata.name}}</b><div style="display:inline;" ng-if="spawndata.showpanelname">&nbsp;&nbsp;{{spawndata.panelname}}</div>
-                <div class="pull-right">{{::spawndata.simpleName}}&nbsp;&nbsp;<div popover-placement="right" popover-template="'serviceMenu.html'" class="glyphicon glyphicon-list"></div></div>
+                <img src="{{::panel.type}}.png" alt="" width="16">
+                <b>{{::service.name}}</b><div style="display:inline;">
+                <div class="pull-right">{{::service.simpleName}}&nbsp;&nbsp;<div popover-placement="right" popover-template="'serviceMenu.html'" class="glyphicon glyphicon-list"></div></div>
                 <!-- options begin ---->
                 <script type="text/ng-template" id="serviceMenu.html">
-
+                    <!-- TODO needs to be self adjusting - so that if it "is" min "min" is hidden from the menu -->
                     <div class="form-group">
-                    <p><span class="glyphicon glyphicon-question-sign"></span> <a href="http://myrobotlab.org/service/{{::spawndata.simpleName}}" target="_blank" >help</a></p>
-                    <div ng-repeat="(sizename, sizeoption) in spawndata.panelsize.sizes">
-                    <p ng-click="changesize(sizename)"><span class="{{::sizeoption.glyphicon}}"></span> {{::sizename}}</p>
-                    </div>
-                    <!--<p><span class="glyphicon glyphicon-fullscreen"></span> fullscreen</p>
-                    <p><span class="glyphicon glyphicon-resize-small"></span> minimize</p>
-                    <p><span class="glyphicon glyphicon-resize-full"></span> maximize</p>-->                    
+                    <p><span class="glyphicon glyphicon-question-sign"></span> <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" >help</a></p>
+
+                    <p ng-click="changesize('default')"><span class="glyphicon glyphicon-resize-full"></span> expand</p>
+                    <p ng-click="changesize('tiny')"><span class="glyphicon glyphicon-minus"></span> min</p>
                     
+                    <p ng-click="hide()"><span class="glyphicon glyphicon-eye-close"></span> hide</p>
                     <p><span class="glyphicon glyphicon-remove"></span> release</p>
-                    <p><span class="glyphicon glyphicon-alert"></span> no worky</p>                    
+                    <p><nobr><span class="glyphicon glyphicon-alert"></span> no worky</nobr></p>                    
                     </div>
 
                 </script>
                 <!-- options end ---->
             </h3>
         </div>
-        <div class="panel-body" ng-show="spawndata.panelsize.sizes[spawndata.panelsize.aktsize].body != 'collapse'">
+        <div class="panel-body" ng-show="service.panelsize.sizes[service.panelsize.aktsize].body != 'collapse'">
             <!--body-->
             <div ng-if="!servicenotfound && !serviceloaded">
                 <i class="glyphicon glyphicon-download-alt"></i>&nbsp;&nbsp;loading service ...
             </div>
             <div ng-if="!servicenotfound && serviceloaded">
-                <div service-body type="{{spawndata.type}}" simplename="{{spawndata.simpleName}}" size="spawndata.panelsize.aktsize" panelname="spawndata.panelname" gui="gui" service="service"></div>
+                <div service-body type="{{panel.type}}" simplename="{{service.simpleName}}" panelname="service.name" panel="panel" service="service"></div>
             </div>
             <div ng-if="servicenotfound">
                 <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;service not found
             </div>
         </div>
-        <div class="panel-footer" ng-show="!spawndata.forcesize && spawndata.panelsize.aktsize != 'full'">
-            <!--footer-->
-            <!-- redundant in menu
-            <button class="btn btn-default" type="submit" ng-click="changesize('tiny')">
-                <i class="glyphicon glyphicon-minus"></i>
-            </button>
-            <button class="btn btn-default" type="submit" ng-click="changesize('small')">
-                <i class="glyphicon glyphicon-resize-small"></i>
-            </button>
-            <button class="btn btn-default" type="submit" ng-click="changesize('medium')">
-                M
-            </button>
-            <button class="btn btn-default" type="submit" ng-click="changesize('large')">
-                <i class="glyphicon glyphicon-resize-full"></i>
-            </button>
-            <button class="btn btn-default" type="submit" ng-click="changesize('full')">
-                <i class="glyphicon glyphicon-fullscreen"></i>
-            </button>
-            -->
+        <div class="panel-footer" ng-show="!service.forcesize && service.panelsize.aktsize != 'full'">          
         </div>
     </div>
 </div>
