@@ -14,8 +14,7 @@ angular.module('mrlapp.service')
                 $log.info('serviceBodyDirective.link');
                 var ctrl = "";
                 try {
-                    var bla = scope.service;
-                    ctrl = scope.panel.service.simpleName + "GuiCtrl";
+                    ctrl = scope.panel.simpleName + "GuiCtrl";
                     var html = '<div ng-controller=\"' + ctrl + '\"><div service-body-second type="' + attr.type + '"></div></div>';
                     elem.html(html).show();
                     $compile(elem.contents())(scope);
