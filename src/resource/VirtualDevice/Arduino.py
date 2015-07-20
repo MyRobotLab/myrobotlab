@@ -50,13 +50,13 @@ uart = virtual.getUART()
 uart.setCodec("arduino")
 logic = virtual.getLogic()
 
-logic.subscribe(uart, "publishRX", "onByte")
-logic.subscribe(uart, "publishConnect", "onConnect")
-logic.subscribe(uart, "publishPortNames", "onPortNames")
-logic.subscribe(uart, "publishDisconnect", "onDisconnect")
+logic.subscribe(uart.getName(), "publishRX")
+logic.subscribe(uart.getName(), "onConnect")
+logic.subscribe(uart.getName(), "onPortNames")
+logic.subscribe(uart.getName(), "onDisconnect")
 
 
-def onByte(b):
+def onRX(b):
   global working, worker, analogReadPollingPins
   print("onByte", b)
   command = codec.decode(b)
@@ -67,7 +67,7 @@ def onByte(b):
     clist = command.split('/')
     
     if command == "getVersion":
-      uart.write(codec.encode("publishVersion/21\n"))
+      uart.write(codec.encode("publishVersion/24\n"))
 
     elif command.startswith("digitalReadPollingStart"):
       print("digitalReadPollingStart")

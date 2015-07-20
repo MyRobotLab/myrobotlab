@@ -16,7 +16,7 @@ angular.module('mrlapp.service.clockgui', [])
         $scope.pulseData = '';
 
 
-        $scope.gui.onMsg = function(msg) {
+        $scope.panel.onMsg = function(msg) {
            
             switch (msg.method) {
                 case 'onPulse':
@@ -52,5 +52,5 @@ angular.module('mrlapp.service.clockgui', [])
         mrl.subscribe($scope.service.name, 'clockStarted');
         mrl.subscribe($scope.service.name, 'clockStopped');
         
-        $scope.gui.initDone();
+        $scope.panel.initDone();
     }]);

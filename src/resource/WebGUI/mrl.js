@@ -20,7 +20,6 @@
 
 angular
 .module('mrlapp.mrl', [])
-//.service('mrl', ['$q', function($q) {
 .provider('mrl', [function() {
         var _self = this;
 
@@ -132,7 +131,7 @@ angular
         
         this.sendRaw = function(msg) {
             socket.push(msg);
-            console.log('sendRaw: ' + msg);
+        // console.log('sendRaw: ' + msg);
         };
 
 
@@ -162,7 +161,7 @@ angular
             for (var key in sd) {
                 if (sd.hasOwnProperty(key)) {
                     var service = sd[key];
-                    console.log("found " + key + " of type " + service.simpleName);
+                    //console.log("found " + key + " of type " + service.simpleName);
                     registry[key] = {};
                     registry[key] = service;
                     if (service.simpleName == "Runtime") {
@@ -313,7 +312,7 @@ angular
         };
         
         this.sendTo = function(name, method, data) {
-            console.log(arguments[0]);
+            //console.log(arguments[0]);
             var args = Array.prototype.slice.call(arguments, 2);
             var msg = _self.createMessage(name, method, args);
             msg.sendingMethod = 'sendTo';
@@ -457,8 +456,19 @@ angular
                 isConnected: function() {
                     return connected;
                 },
+                
+                isUndefinedOrNull: function(val) {
+                    return angular.isUndefined(val) || val === null;
+                },
+                
                 getRegistry: function() {
                     return registry;
+                },
+                getServices: function() {
+                    var arrayOfServices = Object.keys(registry).map(function(key) {
+                        return registry[key]
+                    });
+                    return arrayOfServices;
                 },
                 sendTo: _self.sendTo,
                 subscribe: _self.subscribe,
@@ -467,14 +477,9 @@ angular
                 subscribeOnOpen: _self.subscribeOnOpen,
                 subscribeToMethod: _self.subscribeToMethod,
                 promise: _self.promise
-            /*,
-                save: function() {
-                    return $http.post(_self.backendUrl + '/users', 
-                    {
-                        user: service.user
-                    });
-                }
-                */
+
+            // FIXME - no sql like interface
+            // put/get value to and from webgui service            
             }
             
             return service;

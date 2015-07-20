@@ -30,14 +30,11 @@ angular.module('mrlapp.service.serialgui', [])
         $scope.service = mrl.getService($scope.service.name);
         _self.updateState($scope.service);
 
-        //with this method, you can set how many panels you would like to show
-        $scope.gui.setPanelCount(1);
-
         //you HAVE TO define this method &
         //it is the ONLY exception of writing into .gui
         //-> you will receive all messages routed to your service here
         // FIXME - why this function on the scope? why is it on gui ? - i believe it should be on this.onMsg
-        $scope.gui.onMsg = function(msg) {
+        $scope.panel.onMsg = function(msg) {
             console.log('CALLBACK - ' + msg.method);
             switch (msg.method) {
                 case 'onPortNames':
@@ -74,7 +71,7 @@ angular.module('mrlapp.service.serialgui', [])
 
         //you can subscribe to methods
         mrl.subscribe($scope.service.name, 'getPortNames');
-        mrl.subscribe($scope.service.name, 'publishRX');
+//        mrl.subscribe($scope.service.name, 'publishRX'); testing ...
         mrl.subscribe($scope.service.name, 'publishTX');
         mrl.subscribe($scope.service.name, 'publishState');
         mrl.subscribe($scope.service.name, 'refresh');
@@ -103,5 +100,5 @@ angular.module('mrlapp.service.serialgui', [])
         }
 
         //after you're done with setting up your service-panel, call this method
-        $scope.gui.initDone();
+        $scope.panel.initDone();
     }]);

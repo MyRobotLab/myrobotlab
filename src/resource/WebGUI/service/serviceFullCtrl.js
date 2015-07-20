@@ -1,9 +1,9 @@
 angular.module('mrlapp.service')
 
-        .controller('ServiceFullCtrl', function ($scope, $modalInstance, spawndata, gui, service) {
+        .controller('ServiceFullCtrl', function ($scope, $modalInstance, service, gui, service) {
             //Controller for the modal (service-full)
 
-            $scope.spawndata = spawndata;
+            $scope.service = service;
             $scope.gui = gui;
             $scope.service = service;
 

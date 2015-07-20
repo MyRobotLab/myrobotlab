@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-lg-12">
+  <div class="col-lg-6">
     <div class="dropdown">
       <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
        set sample rate
@@ -7,17 +7,21 @@
       </button>
       <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
         <li>
-        <input type="text" ng-disabled="isConnected" ng-model="service.databits" class="form-control"/> 
-      </li>
+          <input type="text" ng-disabled="isConnected" ng-model="service.databits" class="form-control"/> 
+        </li>
       </ul>
     </div>
   </div>
+  <div class="col-lg-6">
+      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+       clear screen </button>
+    </div>
 </div>
 
 <div class="row">
   <!-- look here - http://html5.litten.com/using-multiple-html5-canvases-as-layers/  or  style="background: url('./images/image.jpg')"-->
   <div class="col-lg-10">
-    <canvas width="750" height="600" id="screen"></canvas>
+    <canvas width="800" height="1024" id="screen"></canvas>
   </div>
 
   <div class="col-lg-1" data-ng-repeat="(pinKey, pin) in pinList">   

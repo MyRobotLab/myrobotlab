@@ -160,7 +160,7 @@
 		<pathelement location="${repo}/com.sun.mail/1.4.5/smtp.jar"/>
 		<pathelement location="${repo}/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar"/>
 		<pathelement location="${repo}/org.fife.autocomplete/2.0.4/autocomplete.jar"/>
-		<pathelement location="${repo}/com.googlecode.jssc/0.9.0/jssc.jar"/>
+		<pathelement location="${repo}/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
 		<pathelement location="${repo}/com.googlecode.chatterbot/1.2.1/chatter-bot-api.jar"/>
 		<pathelement location="${repo}/com.pi4j.pi4j/0.0.5/pi4j-core.jar"/>
 		<pathelement location="${repo}/com.pi4j.pi4j/0.0.5/pi4j-gpio-extension.jar"/>

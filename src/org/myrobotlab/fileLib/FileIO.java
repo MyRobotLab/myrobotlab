@@ -42,6 +42,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipException;
 
 import org.myrobotlab.logging.Level;
@@ -51,8 +53,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * class of useful utility functions we do not use nio - for portability reasons
- * e.g. Android
+ * class of useful utility functions we do not use nio - for portability reasons e.g. Android
  * 
  * @author GroG
  *
@@ -335,9 +336,7 @@ public class FileIO {
 	}
 
 	/**
-	 * similar to ls - when running in jar form will return contents of path in
-	 * an array list of files when running in the ide will return the contents
-	 * of /bin + path
+	 * similar to ls - when running in jar form will return contents of path in an array list of files when running in the ide will return the contents of /bin + path
 	 * 
 	 * @param path
 	 * @return
@@ -364,8 +363,7 @@ public class FileIO {
 				File file = new File(targetDir + path + "/" + tmp[i]);
 				ret.add(file);
 				/*
-				 * if (dirCheck.isDirectory()) { ret.add(tmp[i] + "/"); } else {
-				 * ret.add(tmp[i]); }
+				 * if (dirCheck.isDirectory()) { ret.add(tmp[i] + "/"); } else { ret.add(tmp[i]); }
 				 */
 			}
 			dir.list();
@@ -389,10 +387,8 @@ public class FileIO {
 	}
 
 	/**
-	 * inter process file communication - default is to wait and attempt to load
-	 * a file in the next second - it comes from savePartFile - then the writing
-	 * of the file from a different process should be an atomic move regardless
-	 * of file size
+	 * inter process file communication - default is to wait and attempt to load a file in the next second - it comes from savePartFile - then the writing of the file from a
+	 * different process should be an atomic move regardless of file size
 	 * 
 	 * @param filename
 	 * @throws IOException
@@ -421,48 +417,6 @@ public class FileIO {
 
 	// jar pathing end ---------------
 	// -- os primitives begin -------
-
-	public static void main(String[] args) throws ZipException, IOException {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-			String t = "this is a test";
-			FileIO.savePartFile("save.txt", t.getBytes());
-			byte[] data = FileIO.loadPartFile("save.txt", 10000);
-			if (data != null) {
-				log.info(new String(data));
-			}
-
-			/*
-			 * String data = resourceToString("version.txt"); data =
-			 * resourceToString("framework/ivychain.xml"); data =
-			 * resourceToString("framework/serviceData.xml");
-			 * 
-			 * byte[] ba = resourceToByteArray("version.txt"); ba =
-			 * resourceToByteArray("framework/version.txt"); ba =
-			 * resourceToByteArray("framework/serviceData.xml");
-			 * 
-			 * String hello = resourceToString("blah.txt");
-			 * 
-			 * copyResource("mrl_logo.jpg", "mrl_logo.jpg");
-			 * 
-			 * byte[] b = resourceToByteArray("mrl_logo.jpg");
-			 * 
-			 * File[] files = getPackageContent("");
-			 * 
-			 * log.info(getBinaryPath());
-			 * 
-			 * log.info("{}", b);
-			 * 
-			 * log.info("done");
-			 */
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
 
 	public final static Object readBinary(String filename) {
 		try {
@@ -621,6 +575,103 @@ public class FileIO {
 			return false;
 		}
 		return true;
+	}
+
+	/*
+	 * static public final extractResources(String to) {
+	 * 
+	 * }
+	 */
+
+	static public final void extract(String jarFile, String from, String to) throws IOException {
+		log.info(String.format("extract(%s, %s, %s)", jarFile, from, to));
+		JarFile jar = new JarFile(jarFile);
+		Enumeration<JarEntry> enumEntries = jar.entries();
+
+		boolean firstMatch = true;
+		boolean fromIsDirectory = false;
+
+		while (enumEntries.hasMoreElements()) {
+			JarEntry file = (JarEntry) enumEntries.nextElement();
+
+			// filter out non matching stuff
+			if (from != null && !file.getName().startsWith(from)) {
+				// log.info(String.format("skipping %s", file.getName()));
+				continue;
+			}
+
+			// if first match && is a directory skip
+
+			File outFile =  null;
+
+			if (file.isDirectory()) { 
+				if (firstMatch) {
+					//  && from != null && from.equals(file.getName())
+					
+					// if from is a directory - we don't want
+					// the directory copied but its contents
+					fromIsDirectory = true;
+					firstMatch = false;
+					continue;
+				}
+				
+				new File(to + File.separator + file.getName());
+				outFile.mkdir();
+				firstMatch = false;
+				continue;
+			}
+			InputStream is = jar.getInputStream(file);
+			FileOutputStream fos = new FileOutputStream(outFile);
+			while (is.available() > 0) {
+				fos.write(is.read());
+			}
+			fos.close();
+			is.close();
+		}
+
+		jar.close();
+	}
+
+	// FIXME - UNIT TESTS !!!
+	public static void main(String[] args) throws ZipException, IOException {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+
+			extract("dist/myrobotlab.jar", "resource", "test1");
+
+			String t = "this is a test";
+			FileIO.savePartFile("save.txt", t.getBytes());
+			byte[] data = FileIO.loadPartFile("save.txt", 10000);
+			if (data != null) {
+				log.info(new String(data));
+			}
+
+			/*
+			 * String data = resourceToString("version.txt"); data = resourceToString("framework/ivychain.xml"); data = resourceToString("framework/serviceData.xml");
+			 * 
+			 * byte[] ba = resourceToByteArray("version.txt"); ba = resourceToByteArray("framework/version.txt"); ba = resourceToByteArray("framework/serviceData.xml");
+			 * 
+			 * String hello = resourceToString("blah.txt");
+			 * 
+			 * copyResource("mrl_logo.jpg", "mrl_logo.jpg");
+			 * 
+			 * byte[] b = resourceToByteArray("mrl_logo.jpg");
+			 * 
+			 * File[] files = getPackageContent("");
+			 * 
+			 * log.info(getBinaryPath());
+			 * 
+			 * log.info("{}", b);
+			 * 
+			 * log.info("done");
+			 */
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 	}
 
 }

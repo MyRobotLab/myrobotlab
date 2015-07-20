@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,6 +31,7 @@ import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.codec.MethodCache;
+import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodEntry;
@@ -185,6 +187,22 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// SessionSupport ss = new SessionSupport();
 
 		Config.Builder configBuilder = new Config.Builder();
+		if (FileIO.inJar()){
+			// FIXME - check if exists - do not unzip
+			// if !exists unzip all resources
+			File resource = new File("resource");
+			
+			if (!resource.exists()){
+				//FileIO.copyResource(fromFilename, toFilename);
+			} else {
+				log.warn("resource directory already exists will not extract");
+			}
+			
+			configBuilder.resource("resource");
+		} else {
+			
+		}
+		
 		configBuilder
 				// .resource("C:\\tools\\myrobotlab-WebGUI\\src\\resource\\WebGUI")
 
@@ -192,6 +210,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				.resource("./src/resource/WebGUI")
 				// .resource("./src/resource/MaVo_WebGUI")
 				.resource("./src/resource")
+				
 				// .resource("./src/resource")
 				// .resource("./rest") SHOULD I DO THIS ?
 				// .resource(this)
@@ -659,6 +678,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		try {
 
+			FileIO.copyResource("WebGUI", "resource");
 			// Uri.
 			// Uri myUri = Uri.parse("http://stackoverflow.com");
 

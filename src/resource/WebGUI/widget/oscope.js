@@ -1,6 +1,6 @@
- /*
+/*
 
- dependenci - tinygradient, tinycolor
+ dependencies - tinygradient, tinycolor
 
 
 */
@@ -39,17 +39,16 @@ angular.module('mrlapp.service')
                 //'gold'                      // named color
                 ]);
                 
+                
                 var colorsHsv = null;
 
+                // FIXME - optimization - get pinlist on change - includes pin type
+                // use pinlist defintion to determine details of incoming data
                 // display update interfaces
                 var setTraceButtons = function(pinList) {
-                    scope.pinList = pinList;
-                    
-                    colorsHsv = gradient.hsv(pinList.length);
-                    
+                    scope.pinList = pinList;                    
+                    colorsHsv = gradient.hsv(pinList.length);                    
                     scope.pinButtonList = [pinList.length];
-                    //scope.buttonStyle = 
-                    //scope.buttonText = [service.pinList.length];
                     
                     for (i = 0; i < pinList.length; ++i) {
 
@@ -86,7 +85,7 @@ angular.module('mrlapp.service')
                         if (pin.type == 1) {
                             scope.pinButtonList[i].text = String("000" + i).slice(-3);
                         } else if (pin.type == 3) {
-                            scope.pinButtonList[i].text = 'A' + String("00" + (i/* - 53*/)).slice(-2);
+                            scope.pinButtonList[i].text = 'A' + String("00" + (i /* - 53*/)).slice(-2);
                         } else if (pin.type == 2) {
                             scope.pinButtonList[i].text = 'P' + String("00" + (i)).slice(-2);
                         } else {
@@ -98,7 +97,7 @@ angular.module('mrlapp.service')
                 }
                 
                 scope.onMsg = function(msg) {
-                    console.log('CALLBACK - ' + msg.method);
+                    //console.log('CALLBACK - ' + msg.method);
                     switch (msg.method) {
                         case 'onState':
                             // backend update 
@@ -117,22 +116,32 @@ angular.module('mrlapp.service')
                             
                             if (button.type == 1) {
                                 // digital
-                                y = scope.height - inPin.value - 10 * inPin.pin;
+                                y = scope.height - inPin.value * 35 - 10 * inPin.pin;
                             } else {
                                 // analog
                                 y = scope.height - inPin.value - 10;
                             }
 
+                            // this certainly did not work
+                            // ctx.putImageData(id, pinData.posX, pinData.posY);
+
+                            _self.ctx.beginPath();
                             // from
                             _self.ctx.moveTo(pinData.posX, pinData.posY);
                             // to
+                            
                             pinData.posX++;
                             pinData.posY = y;
+                            
                             _self.ctx.lineTo(pinData.posX, pinData.posY);
                             // color
                             _self.ctx.strokeStyle = pinData.colorHexString;
                             // draw it
                             _self.ctx.stroke();
+                            _self.ctx.closePath();
+                            if (pinData.posX == scope.width) {
+                                pinData.posX = 0;
+                            }
                             break;
                         case 'onTX':
                             ++scope.txCount;

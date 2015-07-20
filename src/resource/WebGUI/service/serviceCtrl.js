@@ -1,80 +1,72 @@
 angular.module('mrlapp.service')
-
-.controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'ServiceSvc', '$log', 
-    function($scope, $modal, $ocLazyLoad, mrl, ServiceSvc, $log) {
+// FIXME FIXME FIXME
+// THIS IS NOT SERVICE SPECIFIC !! MEANING IT NEEDS TO BE COMBINED WITH mainCtrl !!!
+// DO NOT ADD NEW DATA TO service
+// panel should probably be retrieved from serviceSvc
+.controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'serviceSvc', '$log', 
+    function($scope, $modal, $ocLazyLoad, mrl, serviceSvc, $log) {
+        // TEMPORARY $scope variables !!!!
+        // this runs through for each service - 
+        // all scope data is temporary unless its put into an associative  array
+        // the name switches every time.
+        // $scope.anker = name + '_-_' + $scope.service.panelname + '_-_';
+        var name = $scope.service.name;
+        var panel = serviceSvc.getServicePanel(name);
         
-        $scope.anker = $scope.spawndata.name + '_-_' + $scope.spawndata.panelname + '_-_';
+        $scope.anker = name;
+        $scope.panel = panel;
         
-        $log.info('serviceShouldBeReady', $scope.spawndata);
+        $log.info('ServiceCtrl', name);
 
-        //load the service(-module) (lazy) (from the server)
-        //TODO: should this really be done here?
-        $log.info('lazy-loading:', $scope.spawndata.type);
-        $ocLazyLoad.load("service/js/" + $scope.spawndata.type + "gui.js").then(function() {
-            $scope.serviceloaded = true;
+        var type = $scope.panel.type;
+
+        $log.info('lazy-loading:', type);
+        $ocLazyLoad.load("service/js/" + type + "gui.js").then(function() {
+            $scope.serviceloaded = true; // FIXME why is this needed?
         }, function(e) {
-            $log.info('lazy-loading wasnt successful:', $scope.spawndata.type);
+            $log.info('lazy-loading wasnt successful:', type);
             $scope.servicenotfound = true;
         });
 
-        //START_specific Service-Initialisation
-        //.gui & .service are given to the specific service-UI
-        $scope.inst = ServiceSvc.getServiceInstance($scope.spawndata.name);
-        if ($scope.inst == null) {
-            $log.error("ERROR - ServiceInstance not found!");
-        }
-        $scope.gui = $scope.inst.gui; //framework-section - DO NOT WRITE IN THERE!
-        $scope.service = $scope.inst.service; //mrl-data-section
-
-        //size
-        //                if (!$scope.spawndata.size) {
-        //                    $scope.spawndata.size = 'medium';
-        //                    $scope.spawndata.oldsize = null;
-        //                }
-
-        //TODO: think of something better
+   
         var initDone = false;
-        $scope.gui.initDone = function() {
+        panel.initDone = function() {
             if (!initDone) {
                 initDone = true;
                 // create message bindings
-                mrl.subscribeToService($scope.gui.onMsg, $scope.service.name);
+                mrl.subscribeToService(panel.onMsg, name);
             }
         };
-        $scope.gui.panelcount = $scope.spawndata.panelcount;
-        $scope.gui.setPanelCount = function(number) {
-            $log.info('setting panelcount', number);
-            var old = $scope.gui.panelcount;
-            $scope.gui.panelcount = number;
-            ServiceSvc.notifyPanelCountChanged($scope.service.name, old, number);
-        };
-        $scope.gui.setPanelNames = function(names) {
+
+        panel.setPanelNames = function(names) {
             $log.info('setting panelnames', names);
-            ServiceSvc.notifyPanelNamesChanged($scope.service.name, names);
         };
-        $scope.gui.setPanelShowNames = function(show) {
+        panel.setPanelShowNames = function(show) {
             $log.info('setting panelshownames', show);
-            ServiceSvc.notifyPanelShowNamesChanged($scope.service.name, show);
         };
-        $scope.gui.setPanelSizes = function(sizes) {
+        panel.setPanelSizes = function(sizes) {
             $log.info('setting panelsizes');
-            ServiceSvc.notifyPanelSizesChanged($scope.service.name, sizes);
+            serviceSvc.notifyPanelSizesChanged(name, sizes);
         };
 
         //TODO: not completly happy
         //to be overriden
-        if ($scope.gui.onMsg == null) {
-            $scope.gui.onMsg = function() {
+        if (panel.onMsg == null) {
+            panel.onMsg = function() {
                 console.log('ERR got message to default service endpoint!');
             };
         }
         //END_specific Service-Initialisation
 
+        $scope.hide = function() {
+             $scope.show = false;  
+        }
+
         //footer-size-change-buttons
         $scope.changesize = function(size) {
-            console.log("change size", $scope.service.name, size);
-            $scope.spawndata.panelsize.oldsize = $scope.spawndata.panelsize.aktsize;
-            $scope.spawndata.panelsize.aktsize = size;
+            console.log("change size", name, size);
+            $scope.service.panelsize.oldsize = $scope.service.panelsize.aktsize;
+            $scope.service.panelsize.aktsize = size;
             $scope.notifySizeChanged();
             if (size == "full") {
                 //launch the service as a modal ('full')
@@ -83,27 +75,14 @@ angular.module('mrlapp.service')
                     templateUrl: 'service/servicefulltemplate.html',
                     controller: 'ServiceFullCtrl',
                     size: 'lg',
-                    resolve: {
-                        spawndata: function() {
-                            return $scope.spawndata;
-                        },
-                        gui: function() {
-                            return $scope.gui;
+                    resolve: {                        
+                        panel: function() {
+                            return panel;
                         },
                         service: function() {
                             return $scope.service;
                         }
                     }
-                });
-                //modal closed -> recover to old size
-                modalInstance.result.then(function() {
-                    $scope.spawndata.panelsize.aktsize = $scope.spawndata.panelsize.oldsize;
-                    $scope.spawndata.panelsize.oldsize = null;
-                    $scope.notifySizeChanged();
-                }, function(e) {
-                    $scope.spawndata.panelsize.aktsize = $scope.spawndata.panelsize.oldsize;
-                    $scope.spawndata.panelsize.oldsize = null;
-                    $scope.notifySizeChanged();
                 });
             }
         };

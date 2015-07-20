@@ -1,8 +1,8 @@
 angular.module('mrlapp.nav')
 
-.controller('NavCtrl', ['$scope', '$location', '$anchorScroll', 'StateSvc', 'mrl', 'ServiceSvc',
-    function($scope, $location, $anchorScroll, StateSvc, mrl, ServiceSvc) {
-        
+.controller('NavCtrl', ['$scope', '$location', '$anchorScroll', 'StateSvc', 'mrl', 'serviceSvc', 
+    function($scope, $location, $anchorScroll, StateSvc, mrl, serviceSvc) {
+
         //START_green-/red-LED
         // TODO - green png if connected - if not re-connect button
         if (mrl.isConnected()) {
@@ -44,7 +44,7 @@ angular.module('mrlapp.nav')
         
         mrl.subscribeToMethod(onStatus, "onStatus");
         //END_Status
-
+        
         $scope.about = function() {
             // modal display of all contributors & link to myobotlab.org
             console.log('about');
@@ -56,14 +56,17 @@ angular.module('mrlapp.nav')
         };
 
         //START_Search
-        $scope.searchServices = ServiceSvc.getServices();
-        console.log('searchServices', $scope.searchServices);
+        // $scope.searchPanels = mrl.getServices();
+        $scope.searchPanels = serviceSvc.getPanelList();
+        console.log('searchPanels', $scope.searchPanels);
         
         $scope.searchOnSelect = function(item, model, label) {
             console.log('searchOnSelect');
+            // FIXME - check if panel is hide or show - make hide
+            // FIXME - change position to (0, 0) with highest z index
             //scroll to selected service
-            $location.hash(item.name + '_-_' + item.panelname + '_-_');
+            $location.hash(item.name);
             $anchorScroll();
         };
-        //END_Search
+    //END_Search
     }]);

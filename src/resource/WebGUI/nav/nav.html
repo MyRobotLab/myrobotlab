@@ -12,11 +12,7 @@
         <div class="collapse navbar-collapse navbar-ex1-collapse">
 
             <ul class="nav navbar-nav">
-                <li><a href="http://www.myrobotlab.org">/MyRobotLab.org</a></li>
-                <!--<li><a href="/b">/b</a></li>
-                <li><a href="/c">/c</a></li>
-                <li><a href="/d">/d</a></li>
-                <li><a href="/e">/e</a></li>-->
+                <li><a href="http://www.myrobotlab.org">/MyRobotLab.org</a></li>            
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
@@ -81,12 +77,13 @@
 
 
                 <li>
+                <!-- pre>Model: {{searchSelectedService | json}}</pre-->
                     <form class="navbar-form" role="search">
                         <div class="input-group">
                             <input type="text" class="form-control"
                                    placeholder="Search"
                                    ng-model="searchSelectedService"
-                                   typeahead="service as service.name for service in searchServices | filter:{name:$viewValue}"
+                                   typeahead="name for name in searchPanels | filter:{name:$viewValue}"
                                    typeahead-template-url="nav/searchtemplate.html"
                                    typeahead-on-select='searchOnSelect($item, $model, $label)'>
                             <div class="input-group-btn">

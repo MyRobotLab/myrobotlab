@@ -94,7 +94,7 @@ angular.module('mrlapp.service.programabgui', [])
 			console.log("show buttons should be called here for inline-block");
 		};
 	}; 
-    $scope.gui.onMsg = function (msg) {
+    $scope.panel.onMsg = function (msg) {
         console.log("Program AB Msg !");
         if (msg.method == "onText") {
             var textData = msg.data[0];
@@ -144,6 +144,6 @@ angular.module('mrlapp.service.programabgui', [])
     // subscribe to the response from programab.
     mrl.subscribe($scope.service.name, 'publishText');
     // we're done.
-    $scope.gui.initDone(); 
+    $scope.panel.initDone(); 
     
   }]);
