@@ -47,8 +47,22 @@ angular.module('mrlapp.nav')
         
         $scope.about = function() {
             // modal display of all contributors & link to myobotlab.org
+            // & version & platform
             console.log('about');
         };
+        
+        $scope.hideAll = function() {
+            // hide all panels
+            console.log('hideAll');            
+            serviceSvc.hideAll();
+        };
+        
+        $scope.showAll = function() {
+            // show all panels
+            console.log('showAll');
+            serviceSvc.showAll();
+        };
+        
         
         $scope.help = function() {
             // modal display of no worky 

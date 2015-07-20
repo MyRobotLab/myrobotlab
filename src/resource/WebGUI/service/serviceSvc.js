@@ -52,12 +52,13 @@ angular.module('mrlapp.service')
 
             // creating new PANEL !!!
             var panel = {};
+            panel.show = true;
             panel.name = name;
             panel.type = service.simpleName.toLowerCase();
             // FIXME !!! REMOVE THIS all normalized values can
             // be copied over .. 
-            panel.service = service; // FIXME - probably should not do this
-            panel.type = service.simpleName.toLowerCase();
+            // panel.service = service; // FIXME - probably should not do this
+            panel.simpleName = service.simpleName;
             panel.type = service.simpleName.toLowerCase();
             panel.simpleName = service.simpleName;
 
@@ -65,6 +66,25 @@ angular.module('mrlapp.service')
             servicePanels[name] = panel;
         
         };
+        
+        this.hideAll = function() {
+            for (var name in servicePanels) {
+                if (servicePanels.hasOwnProperty(name)) {
+                    var panel = servicePanels[name];
+                    panel.show = false;
+                }
+            }        
+        }
+        
+        this.showAll = function() {
+            for (var name in servicePanels) {
+                if (servicePanels.hasOwnProperty(name)) {
+                    var panel = servicePanels[name];
+                    panel.show = true;
+                }
+            }        
+        }
+        
         
         this.getServicePanel = function(name) {
             $log.info('serviceSvc.getServicePanel', name);
