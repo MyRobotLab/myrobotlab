@@ -58,8 +58,8 @@ angular.module('mrlapp.service')
         }
         //END_specific Service-Initialisation
 
-        $scope.hide = function() {
-             $scope.show = false;  
+        $scope.hide = function(val) {
+             $scope.show = !val;  
         }
 
         //footer-size-change-buttons
@@ -86,4 +86,9 @@ angular.module('mrlapp.service')
                 });
             }
         };
+
+
+        // assign a scope method to the panel
+        serviceSvc.getServicePanel(name).hide = $scope.hide;
+
     }]);
