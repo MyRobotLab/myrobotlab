@@ -52,7 +52,7 @@ angular.module('mrlapp.service')
 
             // creating new PANEL !!!
             var panel = {};
-            panel.show = true;
+            //panel.show = true;
             panel.name = name;
             panel.type = service.simpleName.toLowerCase();
             // FIXME !!! REMOVE THIS all normalized values can
@@ -71,7 +71,7 @@ angular.module('mrlapp.service')
             for (var name in servicePanels) {
                 if (servicePanels.hasOwnProperty(name)) {
                     var panel = servicePanels[name];
-                    panel.show = false;
+                    panel.hide(true);
                 }
             }        
         }
@@ -80,7 +80,7 @@ angular.module('mrlapp.service')
             for (var name in servicePanels) {
                 if (servicePanels.hasOwnProperty(name)) {
                     var panel = servicePanels[name];
-                    panel.show = true;
+                    panel.hide(false);
                 }
             }        
         }
