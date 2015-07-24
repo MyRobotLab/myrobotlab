@@ -872,6 +872,10 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return ret;
 	}
 
+	public static ArrayList<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
+		return getServiceNamesFromInterface(Class.forName(interfaze));
+	}
+	
 	/**
 	 * @param interfaceName
 	 * @return service names which match
