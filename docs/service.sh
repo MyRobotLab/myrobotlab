@@ -6,6 +6,7 @@
 # this file is installed in init.d which permissions chmod +x and ownership of jenkins
 # [root@devnode01 init.d]# ls -al sprinkler
 # -rwxr-xr-x 1 jenkins jenkins 1602 Jun  5 18:29 sprinkler
+# http://www.jcgonzalez.com/linux-java-service-wrapper-example
 
 SERVICE_NAME=sprinkler
 CP=/opt/mrl/myrobotlab.jar:/opt/mrl/libraries/jar/*
