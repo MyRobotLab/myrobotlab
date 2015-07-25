@@ -1,85 +1,44 @@
-<!--
-<div class="row">
-<div class="col-lg-3">
-    <button class="btn btn-default"  ng-click="open()">open</button>
+<!-- file menu button bar begin -->
+<div class="btn-group">
+  <div class="dropdown">
+    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <span class="glyphicon glyphicon-open">open</span><span class="caret"></span>
+      </button>
+
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+      <li><a href="#">home</a></li>
+      <li><a href="#">pyrobot</a></li>
+      <li><a href="#">local</a></li>
+      <li><a href="#">open</a></li>
+    </ul>
+
+  <button type="button" class="btn btn-default" ng-model="isExecuting" ng-click="execute()"><span class="glyphicon glyphicon-play"></span>execute</button>
+  <button type="button" class="btn btn-default"                        ng-click="stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
+  <button type="button" class="btn btn-default"                        ng-click="save()"><span class="glyphicon glyphicon-save"></span>save</button>
+  <button type="button" class="btn btn-default"                        ng-click="copy()"><span class="glyphicon glyphicon-copy"></span>copy</button>
+  </div><!-- FIXME - something is wrong - this end div is the dropdown !!! -->
 </div>
-</div>
--->
-<nav class="navbar navbar-default">
-  <div class="container-fluid">
-    <!-- <div class="navbar-header">
-    <!--
-      <a class="navbar-brand" href="#">
-        <img alt="Brand" src="...">
-      </a>
-      -->
-<ul class="nav navbar-nav">      
-<!-- file begin -->
 
-<li>
-<div class="dropdown">
-  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-    file
-    <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-    <li><a href="#">home</a></li>
-    <li><a href="#">pyrobot</a></li>
-    <li><a href="#">local</a></li>
-    <li><a href="#">open</a></li>
-    <li><a href="#">save</a></li>
-  </ul>
-</div>
-</li>
+<!-- file menu button bar end -->
+<tabset justified="true">
+    <tab heading="untitled">	    
+		<div style="height: 600px;width: 100%;" ui-ace="{
+		                                       useWrapMode : true,
+		                                       showGutter: true,
+		                                       theme:'chrome',
+		                                       mode: 'python',
+		                                       firstLineNumber: 1,
+		                                       onLoad: aceLoaded,
+		                                       onChange: aceChanged}">
+		</div>
+    </tab>
 
-<!-- file end -->
-
-<!-- run begin -->
-<li>
-<div class="btn-group dropdown-menu-right" role="group" aria-label="..." >
-  <button type="button" class="btn btn-default" ng-model="isExecuting" ng-click="execute()" ><span class="glyphicon glyphicon-cog"></span>execute</button>
-  <button type="button" class="btn btn-default">stop</button>
-</div>
-</li>
-<!-- run end -->
-</ul>
-    </div>
-  </div>
-</nav>
+    <tab heading="new file"> 		
+    </tab>
+    
+</tabset>
 
 
-<div class="row">
-    <div class="col-lg-12" style="height: 600px;" ui-ace="{
-                                           useWrapMode : true,
-                                           showGutter: true,
-                                           theme:'chrome',
-                                           mode: 'python',
-                                           firstLineNumber: 1,
-                                           onLoad: aceLoaded,
-                                           onChange: aceChanged}">
-    </div>
-</div>
-<div class="row">    
 
-    <!--
-    HEY!!! - PythonGUI here!<br>
-    gui {{gui}}<br>
-    service {{service}}
-    -->
 
-    <!--you can define various sizes and show more or less elements according to your size-->
-    <div ng-switch on="size">
-        <div class="animate-switch" ng-switch-when="small">Small view</div>
-        <div class="animate-switch" ng-switch-when="medium">Medium view<br>mevi</div>
-        <div class="animate-switch" ng-switch-when="large">Large view<br>lavi<br>lavi</div>
-        <div class="animate-switch" ng-switch-when="full">Full view<br>fuvi<br>fuvi<br>fuvi</div>
-    </div>
 
-    <!--for having several panels - you don't have to show the same in every panel-->
-    Panelname: 
-    <div ng-switch on="panelname">
-        <div class="animate-switch" ng-switch-when="0">0</div>
-        <div class="animate-switch" ng-switch-when="1">1</div>
-        <div class="animate-switch" ng-switch-when="2">2</div>
-    </div>
-</div>

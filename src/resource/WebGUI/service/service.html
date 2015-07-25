@@ -1,31 +1,22 @@
 <div id="{{::anker}}" draggable ng-show="show">
-
     <!--for each service-->
-
     <div class="panel panel-default">
         <div class="panel-heading">
             <!--header-->
-            <h3 class="panel-title">
-                <img src="{{::panel.type}}.png" alt="" width="16">
-                <b>{{::service.name}}</b><div style="display:inline;">
-                <div class="pull-right">{{::service.simpleName}}&nbsp;&nbsp;<div popover-placement="right" popover-template="'serviceMenu.html'" auto-close='1' class="glyphicon glyphicon-list"></div></div>
-                <!-- options begin ---->
-                <script type="text/ng-template" id="serviceMenu.html">
-                    <!-- TODO needs to be self adjusting - so that if it "is" min "min" is hidden from the menu -->
-                    <div class="form-group">
-                    <p><span class="glyphicon glyphicon-question-sign"></span> <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" >help</a></p>
-
-                    <p ng-click="changesize('default')"><span class="glyphicon glyphicon-resize-full"></span> expand</p>
-                    <p ng-click="changesize('tiny')"><span class="glyphicon glyphicon-minus"></span> min</p>
-                    
-                    <p ng-click="hide('false')"><span class="glyphicon glyphicon-eye-close"></span> hide</p>
-                    <p><span class="glyphicon glyphicon-remove"></span> release</p>
-                    <p><nobr><span class="glyphicon glyphicon-alert"></span> no worky</nobr></p> 
-                    <a class="btn btn-primary"  ng-click="$hide()">Close</a>                   
-                    </div>
-
-                </script>
-                <!-- options end ---->
+            <h3 class="panel-title"><img src="{{::panel.type}}.png" width="16"><b>{{::service.name}}</b>
+                 
+                 <span class="pull-right">{{::service.simpleName}}&nbsp;&nbsp;
+                     <span class="dropdown pull-right">
+                        <button class="btn-link dropdown-toggle glyphicon glyphicon-list" style="color:black" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                          </button>
+                            <!-- what you do with a service or panel in a generic way -->
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                              <li><a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" ><span class="glyphicon glyphicon-question-sign"></span> help</a></li>
+                              <li><a href="#" ng-click="hide('false')" target="_blank" ><span class="glyphicon glyphicon-eye-close"></span> hide</a></li>
+                              <li><a href="#" ng-click="hide('false')" target="_blank" ><span class="glyphicon glyphicon-remove"></span> release</a></li>
+                            </ul>
+                     </span>
+                  </span>
             </h3>
         </div>
         <div class="panel-body" ng-show="service.panelsize.sizes[service.panelsize.aktsize].body != 'collapse'">
@@ -34,7 +25,9 @@
                 <i class="glyphicon glyphicon-download-alt"></i>&nbsp;&nbsp;loading service ...
             </div>
             <div ng-if="!servicenotfound && serviceloaded">
-                <div service-body type="{{panel.type}}" simplename="{{service.simpleName}}" panelname="service.name" panel="panel" service="service"></div>
+                <div service-body type="{{panel.type}}" simplename="{{service.simpleName}}" panelname="service.name" panel="panel" service="service">
+                    <!-- content body here -->
+                </div>
             </div>
             <div ng-if="servicenotfound">
                 <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;service not found
