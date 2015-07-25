@@ -12,7 +12,7 @@
       <li><a href="#">open</a></li>
     </ul>
 
-  <button type="button" class="btn btn-default" ng-model="isExecuting" ng-click="execute()"><span class="glyphicon glyphicon-play"></span>execute</button>
+  <button type="button" class="btn btn-default" ng-click="execute()"><span class="glyphicon glyphicon-play"></span>execute</button>
   <button type="button" class="btn btn-default"                        ng-click="stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
   <button type="button" class="btn btn-default"                        ng-click="save()"><span class="glyphicon glyphicon-save"></span>save</button>
   <button type="button" class="btn btn-default"                        ng-click="copy()"><span class="glyphicon glyphicon-copy"></span>copy</button>
@@ -25,7 +25,7 @@
 		<div style="height: 600px;width: 100%;" ui-ace="{
 		                                       useWrapMode : true,
 		                                       showGutter: true,
-		                                       theme:'chrome',
+		                                       theme:'twilight',
 		                                       mode: 'python',
 		                                       firstLineNumber: 1,
 		                                       onLoad: aceLoaded,
