@@ -2,6 +2,7 @@ package org.myrobotlab.codec;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class MethodCache {
 
@@ -17,6 +18,7 @@ public class MethodCache {
 			Method m = cache.get(signature);
 			return m.getParameterTypes();
 		} else {
+			TreeMap<Integer, Method> methodScore = new TreeMap<Integer, Method>(); 
 			// changed to getMethods to support inheritance
 			// if failure - overloading funny re-implementing a vTable in c++
 			// Method[] methods = clazz.getDeclaredMethods();
@@ -28,6 +30,7 @@ public class MethodCache {
 				if (methodName.equals(method.getName())) {
 					// name matches - lets do more checking
 					Class<?>[] pTypes = method.getParameterTypes();
+					int score = 0;
 					if (ordinal == pTypes.length) {
 						// param length matches
 						boolean interfaceInParamList = false;
@@ -35,19 +38,32 @@ public class MethodCache {
 							// we don't support interfaces
 							// because what will we decode too ?
 							// we just can't ! :)
-							if (pTypes[i].isInterface()) {
+							Class<?> type = pTypes[i]; 
+							if (type.isInterface()) {
 								interfaceInParamList = true;
 								break;
 							}
+							
+							if (type.isPrimitive() || type.equals(String.class)){
+								++score;
+							}
+							
 						}
 						
 						if (!interfaceInParamList){
-							return pTypes;
+							// rank / score method							
+							methodScore.put(score, method);
 						}
 					}
 				}
+			} // we checked all methods
+			
+			
+			if(methodScore.size() > 0){
+					return methodScore.get(methodScore.lastKey()).getParameterTypes();
+			} else {
+				throw new NoSuchMethodException(String.format("could not find %s.%s in declared methods", clazz.getSimpleName(), methodName));
 			}
-			throw new NoSuchMethodException(String.format("could not find %s.%s in declared methods", clazz.getSimpleName(), methodName));
 		}
 
 	}
