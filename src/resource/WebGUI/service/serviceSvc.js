@@ -16,11 +16,18 @@ angular.module('mrlapp.service')
     
     var _self = this;
     var servicePanels = {};
+    var zIndexMax = 0;
     
     var isUndefinedOrNull = function(val) {
         return angular.isUndefined(val) || val === null ;
     }
     ;
+
+    this.getNextZIndex = function(name){
+      ++zIndexMax;
+      servicePanels[name].zIndex = zIndexMax;
+      return zIndexMax;
+    }
     
     
     // returns map/object of panels
