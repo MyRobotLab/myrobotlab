@@ -5,7 +5,7 @@
 
 */
 angular.module('mrlapp.service')
-.directive('oscope', ['$compile', 'mrl', '$log', function($compile, mrl, $log) {
+.directive('oscope', ['$log', 'mrl', function($log, mrl) {
         return {
             restrict: "E",
             templateUrl: 'widget/oscope.html',
@@ -98,7 +98,7 @@ angular.module('mrlapp.service')
                 }
                 
                 scope.onMsg = function(msg) {
-                    console.log('CALLBACK - ' + msg.method);
+                    $log.info('CALLBACK - ' + msg.method);
                     switch (msg.method) {
                         case 'onState':
                             // backend update 
@@ -140,7 +140,7 @@ angular.module('mrlapp.service')
                             scope.$apply();
                             break;
                         default:
-                            console.log("ERROR - unhandled method " + msg.method);
+                            $log.error("ERROR - unhandled method " + msg.method);
                             break;
                     }
                 };

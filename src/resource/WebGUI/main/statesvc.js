@@ -1,17 +1,21 @@
-angular.module('mrlapp.main.statesvc', ['mrlapp.mrl'])
+angular.module('mrlapp.main.statesvc', [])
         .service('StateSvc', [function () {
-                
+
                 var statuslist = [];
 
-                this.addStatus = function (status) {
-                    statuslist.push(status);
+                this.addStatus = function (name, level, detail) {
+                    statuslist.push({
+                        name: name,
+                        level: level,
+                        detail: detail
+                    });
                 };
-                
-                this.getStatuses = function() {
+
+                this.getStatuses = function () {
                     return statuslist;
                 };
-                
-                this.cleatStatuses = function () {
+
+                this.clearStatuses = function () {
                     statuslist = [];
                 };
             }]);

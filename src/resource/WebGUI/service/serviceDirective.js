@@ -1,114 +1,143 @@
 angular.module('mrlapp.service')
-        .directive('serviceDirective', ['$document', function ($document) {
+        .directive('serviceDirective', [function () {
                 return {
                     scope: {
                         //"=" -> binding to items in parent-scope specified by attribute
                         //"@" -> using passed attribute
-                        spawndata: '=service'
+                        spawndata: '=panel'
                     },
                     templateUrl: 'service/service.html',
                     controller: 'ServiceCtrl',
                     link: function (scope, element, attr) {
-                        
-//                        scope.$watch(function () {
-//                            return scope.spawndata.panelsize.aktsize;
-//                        }, function () {
-//                            var aktsize = scope.spawndata.panelsize.aktsize;
-//                            angular.forEach(scope.spawndata.panelsize.sizes, function (value, key) {
-//                                if (value.name == aktsize) {
-//                                    element.css({
-//                                        width: value.width + 'px'
-//                                    });
-//                                }
-//                            });
-//                        });
-                        scope.notifySizeChanged = function() {
+
+                        //width - change on size change
+                        //-->preset sizes (width is undefined)
+                        //-->free-form-resizing (width is defined)
+                        scope.notifySizeChanged = function (width) {
+                            if (!width) {
+                                scope.resetResizing();
+                            }
+                            width = scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].width + width || scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].width;
                             element.css({
-                                width: scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].width + 'px'
+                                width: width + 'px'
                             });
                         };
+                        scope.notifySizeChanged();
 
-//                        //TODO - later ...
-//                        var startX = 0, startY = 0, x = 0, y = 0;
-//                        var offsetY = 200;
-//                        var headerY = 50;
-//                        var footerY = 50;
-////
-////                        var outgenerallist = false;
-////                        var ingenerallist = false;
-////
-//                        //maybe change to absolute & layout the panels manually
-//                        //-> no panel glitch away (when you move another panel)
-//                        element.css({
-//                            position: 'relative'
-//                        });
-////
-//                        element.on('mousedown', function (event) {
-////                            outgenerallist = event.pageY < 250;
-//                            startX = event.pageX - x;
-//                            startY = event.pageY - y;
-//                            var height = element.height();
-//                            if (startY < offsetY + headerY ||
-//                                    startY > offsetY + height - footerY) {
-//                                // Prevent default dragging of selected content
-//                                event.preventDefault();
-////
-////                                //put panel in foreground
-////                                //TODO: worky, but sometimes buggy
-////                                var zindex = scope.list[scope.index].zindex;
-////                                console.log('zindex', zindex);
-//////                                var str1 = '';
-//////                                angular.forEach(scope.list, function (value, key) {
-//////                                    str1 = str1 + value.zindex + ", ";
-//////                                });
-//////                                console.log('zindex3', str1);
-////                                angular.forEach(scope.list, function (value, key) {
-////                                    //console.log("zindex2", key, value.zindex);
-////                                    if (value.zindex > zindex) {
-////                                        value.zindex--;
-////                                    }
-////                                });
-////                                scope.list[scope.index].zindex = scope.list.length;
-//////                                var str2 = '';
-//////                                angular.forEach(scope.list, function (value, key) {
-//////                                    str2 = str2 + value.zindex + ", ";
-//////                                });
-//////                                console.log('zindex3', str2);
-////
-//                                element.css({
-//                                    cursor: 'move',
-////                                    'z-index': zindex
-//                                });
-//                                $document.on('mousemove', mousemove);
-//                                $document.on('mouseup', mouseup);
-//                            }
-//                        });
-////
-//                        function mousemove(event) {
-//////                            console.log('mousemove', event.pageX, event.pageY);
-////                            ingenerallist = event.pageY < 250;
-//                            y = event.pageY - startY;
-//                            x = event.pageX - startX;
-//                            element.css({
-//                                top: y + 'px',
-//                                left: x + 'px'
-//                            });
-//                        }
-////
-//                        function mouseup() {
-//                            $document.off('mousemove', mousemove);
-//                            $document.off('mouseup', mouseup);
-//                            element.css({
-//                                cursor: 'auto'
-//                            });
-////                            //move panel to different list (if it was moved there)
-////                            //TODO: worky, but sometimes buggy
-////                            if (ingenerallist && !outgenerallist) {
-////                                scope.reftomain.dragInGenerallist(scope.index, scope.list);
-////                            } else if (!ingenerallist && outgenerallist) {
-////                                scope.reftomain.dragOutGenerallist(scope.index);
-////                            }
-//                        }
+                        scope.spawndata.notifyZIndexChanged = function () {
+                            element.css({
+                                'z-index': scope.spawndata.zindex
+                            });
+                        };
+                        scope.spawndata.notifyZIndexChanged();
+
+                        scope.$watch(function () {
+                            return element.height();
+                        }, function () {
+                            scope.spawndata.height = element.height();
+                        });
+
+                        //position: 'absolute' is necessary (even tough it introduces some more work)
+                        //without it other panels jump / glitch around when a panel is moved from this list
+                        if (!scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].denyMoving) {
+                            element.css({
+                                position: 'absolute'
+                            });
+                        }
+
+                        scope.onMoved = function () {
+                            element.css({
+                                top: scope.spawndata.posy + 'px',
+                                left: scope.spawndata.posx + 'px'
+                            });
+                        };
+                        if (!scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].denyMoving) {
+                            scope.onMoved();
+                        }
+                    }
+                };
+            }])
+        .directive('dragDirective', ['$document', 'ServiceSvc', function ($document, ServiceSvc) {
+                return {
+                    link: function (scope, element, attr) {
+
+                        var startX = 0;
+                        var startY = 0;
+                        var resizeX = 10;
+
+                        element.on('mousedown', function (event) {
+                            startX = event.pageX - scope.spawndata.posx;
+                            startY = event.pageY - scope.spawndata.posy;
+                            if (((!scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].freeform)
+                                    || (scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].freeform
+                                            && startX < element.width() - resizeX))
+                                    && !scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].denyMoving) {
+                                // Prevent default dragging of selected content
+                                event.preventDefault();
+
+                                ServiceSvc.putPanelZIndexOnTop(scope.spawndata.name, scope.spawndata.panelname);
+
+                                element.css({
+                                    cursor: 'move'
+                                });
+                                $document.on('mousemove', mousemove);
+                                $document.on('mouseup', mouseup);
+                            }
+                        });
+
+                        function mousemove(event) {
+                            scope.spawndata.posy = event.pageY - startY;
+                            scope.spawndata.posx = event.pageX - startX;
+                            scope.onMoved();
+                        }
+
+                        function mouseup() {
+                            $document.off('mousemove', mousemove);
+                            $document.off('mouseup', mouseup);
+                            element.css({
+                                cursor: 'auto'
+                            });
+                        }
+                    }
+                };
+            }])
+        .directive('resizeDirective', ['$document', function ($document) {
+                return {
+                    link: function (scope, element, attr) {
+
+                        var x = 0;
+                        var startX = 0;
+
+                        scope.resetResizing = function () {
+                            x = 0;
+                            startX = 0;
+                        };
+
+                        element.on('mousedown', function (event) {
+                            startX = event.pageX - x;
+
+                            // Prevent default dragging of selected content
+                            event.preventDefault();
+
+                            element.css({
+                                cursor: 'e-resize'
+                            });
+                            $document.on('mousemove', mousemove);
+                            $document.on('mouseup', mouseup);
+                        });
+
+                        function mousemove(event) {
+                            x = event.pageX - startX;
+                            scope.notifySizeChanged(x);
+                        }
+
+                        function mouseup() {
+                            $document.off('mousemove', mousemove);
+                            $document.off('mouseup', mouseup);
+                            element.css({
+                                cursor: 'auto'
+                            });
+                        }
                     }
                 };
             }]);

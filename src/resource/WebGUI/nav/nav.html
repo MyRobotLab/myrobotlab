@@ -49,44 +49,50 @@
                         <img src="../../{{connected}}.png" alt="">
                         <div class="input-group" dropdown>
                             <input type="text" class="form-control" style="width: 500px"
-                                   placeholder="Status" ng-model="statuslist[statuslist.length - 1]" readonly>
+                                   placeholder="Status" ng-model="firststatus" readonly>
                             <div class="input-group-btn" dropdown-toggle>
                                 <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Status">
                                     <i class="glyphicon glyphicon-dashboard"></i>
                                 </button>
                             </div>
                             <ul class="dropdown-menu" style="width: 540px">
-                                <li ng-repeat="status in statuslist| reverse track by $index " ng-style="{{statusStyle}}"><a href="">{{status}}</a></li>
+                                <li ng-repeat="status in statuslist| reverse track by $index">
+                                    <a href="">
+                                        <div ng-if="status.level == 'debug'"><i class="glyphicon glyphicon-record"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-primary">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                        <div ng-if="status.level == 'info'"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-info">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                        <div ng-if="status.level == 'warn'"><i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-warning">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                        <div ng-if="status.level == 'error'"><i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-danger">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                        <div ng-if="status.level != 'debug' && status.level != 'info' && status.level != 'warn' && status.level != 'error'"><i class="glyphicon glyphicon-question-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-default">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </form>
                 </li>
-                <!--About-->
+                <!--Minimize all / Expand all / Toggle minlist-->
                 <li>
                     <form class="navbar-form">
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="About" ng-click="about()">
-                            <i class="glyphicon glyphicon-info-sign"></i>
-                        </button>
-                    </form>
-                </li>
-                <!--Help-->
-                <li>
-                    <form class="navbar-form">
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Help" ng-click="help()">
-                            <i class="glyphicon glyphicon-question-sign"></i>
-                        </button>
+                        <div class="btn-group">
+                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Minimize All" ng-click="showAll(false)">
+                                <i class="glyphicon glyphicon-eye-close"></i>
+                            </button>
+                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Expand All" ng-click="showAll(true)">
+                                <i class="glyphicon glyphicon-eye-open"></i>
+                            </button>
+                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Toggle minlist" ng-click="toggleMinList()">
+                                <i class="glyphicon glyphicon-th"></i>
+                            </button>
+                        </div>
                     </form>
                 </li>
                 <!--Search-->
-
-
                 <li>
                     <form class="navbar-form" role="search">
                         <div class="input-group">
                             <input type="text" class="form-control"
                                    placeholder="Search"
-                                   ng-model="searchSelectedService"
-                                   typeahead="service as service.name for service in searchServices | filter:{name:$viewValue}"
+                                   ng-model="searchSelectedPanel"
+                                   typeahead="panel as panel.name for panel in searchPanels | filter:{name:$viewValue}"
                                    typeahead-template-url="nav/searchtemplate.html"
                                    typeahead-on-select='searchOnSelect($item, $model, $label)'>
                             <div class="input-group-btn">
@@ -97,7 +103,31 @@
                         </div>
                     </form>
                 </li>
+                <!--More features-->
+                <!-- - About-->
+                <!-- - Help-->
+                <li>
+                    <form class="navbar-form">
+                        <div class="btn-group" dropdown>
+                            <div dropdown-toggle>
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="More features">
+                                    <i class="glyphicon glyphicon-option-horizontal"></i>
+                                </button>
+                            </div>
+                            <ul class="dropdown-menu">
+                                <li><a href="" ng-click="about()"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;&nbsp;About</a></li>
+                                <li><a href="" ng-click="help()"><i class="glyphicon glyphicon-question-sign"></i>&nbsp;&nbsp;Help</a></li>
+                            </ul>
+                        </div>
+                    </form>
+                </li>
             </ul>
         </div>
+    </div>
+</div>
+<div style="height: 80vh; width: 200px; z-index: 100; position: fixed; right: 200px; background-color: lightgray;" ng-show="showminlist" sticky offset="50">
+    <div ng-repeat="panel in minlist"
+         service-directive
+         panel="panel">
     </div>
 </div>

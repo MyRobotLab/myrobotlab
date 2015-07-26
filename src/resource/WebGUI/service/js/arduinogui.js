@@ -1,10 +1,10 @@
 angular.module('mrlapp.service.arduinogui', [])
-.controller('ArduinoGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
-        console.log('ArduinoGuiCtrl');
+.controller('ArduinoGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
+        $log.info('ArduinoGuiCtrl');
         _self = this;
         
         $scope.gui.onMsg = function(msg) {
-            console.log('CALLBACK - ' + msg.method);
+            $log.info('CALLBACK - ' + msg.method);
             switch (msg.method) {
                 case 'onPortNames':
                     $scope.possiblePorts = msg.data[0];
@@ -28,7 +28,7 @@ angular.module('mrlapp.service.arduinogui', [])
                     $scope.$apply();
                     break;
                 default:
-                    console.log("ERROR - unhandled method " + msg.method);
+                    $log.error("ERROR - unhandled method " + msg.method);
                     break;
             }        
         }
@@ -78,7 +78,7 @@ angular.module('mrlapp.service.arduinogui', [])
         /*
         var canvas = document.getElementById('myCanvas');
         if (canvas.getContext) {
-            console.log("drawing");
+            $log.info("drawing");
             var ctx = canvas.getContext("2d");
             //clear the canvas
             ctx.clearRect(0, 10, canvas.width, canvas.height);

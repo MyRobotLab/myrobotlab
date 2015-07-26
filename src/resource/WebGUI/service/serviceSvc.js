@@ -1,5 +1,5 @@
 angular.module('mrlapp.service')
-        .service('ServiceSvc', ['mrl', function (mrl) {
+        .service('ServiceSvc', ['mrl', '$log', function (mrl, $log) {
                 var _self = this;
 
                 var gateway = mrl.getGateway();
@@ -34,7 +34,7 @@ angular.module('mrlapp.service')
                 var serviceInstances = [];
 
                 this.addServiceInstance = function (name) {
-                    console.log('creating service-instance', name);
+                    $log.info('creating service-instance', name);
                     serviceInstances[name] = {};
                     serviceInstances[name].gui = {};
                     serviceInstances[name].service = mrl.getService(name);
@@ -56,10 +56,26 @@ angular.module('mrlapp.service')
                 //END_Service Instances
 
                 //START_Services
-                var guiData = {};
-                var services = [];
+                var services = {};
+                var panels = {};
+
+                this.getPanels = function () {
+                    //return panels as an object
+                    return panels;
+                };
+
+                this.getPanelsList = function () {
+                    //return panels as an array (thanks GroG!, found this in your code ; ))
+                    return Object.keys(panels).map(function (key) {
+                        return panels[key];
+                    });
+                };
 
                 var addPanel = function (service, panelindex) {
+                    //creates a new Panel
+                    //--> for a new service (or)
+                    //--> another panel for an existing service
+                    //panelname
                     var panelname;
                     if (isUndefinedOrNull(service.panelnames) ||
                             isUndefinedOrNull(service.panelnames[panelindex])) {
@@ -67,6 +83,7 @@ angular.module('mrlapp.service')
                     } else {
                         panelname = service.panelnames[panelindex];
                     }
+                    //showpanelname
                     var showpanelname;
                     if (isUndefinedOrNull(service.showpanelnames) ||
                             isUndefinedOrNull(service.showpanelnames[panelindex])) {
@@ -74,15 +91,20 @@ angular.module('mrlapp.service')
                     } else {
                         showpanelname = service.showpanelnames[panelindex];
                     }
+                    //panelsize
                     var panelsize;
                     if (isUndefinedOrNull(service.panelsizes) ||
                             isUndefinedOrNull(service.panelsizes[panelindex])) {
+                        //explanation in service/js/_templategui.js
                         panelsize = {
                             sizes: {
+                                //size-options, these will be shown as a option to select from
+                                //(and can be applied)
                                 tiny: {
-                                    glyphicon: 'glyphicon glyphicon-minus',
-                                    width: 200,
-                                    body: 'collapse'
+                                    glyphicon: 'glyphicon glyphicon-minus', //define a glyphicon to show
+                                    width: 200, //width of this size-setting
+                                    body: 'collapse', //means that the body-section of the panel won't be shown
+                                    footer: 'collapse' //don't show footer-section of panel
                                 },
                                 small: {
                                     glyphicon: 'glyphicon glyphicon-resize-small',
@@ -95,134 +117,225 @@ angular.module('mrlapp.service')
                                 full: {
                                     glyphicon: 'glyphicon glyphicon-fullscreen',
                                     width: 0,
-                                    body: 'collapse'
-                                }},
-                            aktsize: 'large',
-                            oldsize: null};
+                                    fullscreen: true, //show fullscreen (modal)
+                                    body: 'collapse',
+                                    footer: 'collapse'
+                                },
+                                free: {
+                                    glyphicon: 'glyphicon glyphicon-resize-horizontal',
+                                    width: 500,
+                                    freeform: true //allow free-form resizing (width)
+                                }
+                            },
+                            order: ["free", "full", "large", "small", "tiny"], //shows your size-options in this order
+                            aktsize: 'large' //set this as the start-value
+                        };
                     } else {
                         panelsize = service.panelsizes[panelindex];
                         if (isUndefinedOrNull(panelsize.aktsize)) {
-                            console.log('ERROR_no current size defined');
+                            $log.error('ERROR_no current size defined');
                         }
-                        panelsize.oldsize = null;
                     }
-                    console.log('ServiceSvc-panelsize', panelsize);
-                    services.push({
+                    panelsize.sizes['min'] = {
+                        glyphicon: 'glyphicon glyphicon-eye-close',
+                        width: 200,
+                        body: 'collapse',
+                        footer: 'collapse',
+                        forcesize: true,
+                        denyMoving: true
+                    };
+                    panelsize.order.push('min');
+                    panelsize.oldsize = null;
+                    $log.info('ServiceSvc-panelsize', panelsize);
+                    //posy
+                    //TODO - refactor this !!! (and make it work better)
+                    var panelsarray = _self.getPanelsList();
+                    var posy = 0;
+                    for (var i = 0; i < panelsarray.length; i++) {
+                        var value = panelsarray[i];
+                        var height = 300;
+                        var spacing = 30;
+                        var comp1 = value.posy;
+                        var comp2 = value.posy + value.height;
+                        if (posy <= comp1 && posy + height >= comp1) {
+                            posy = comp2 + spacing;
+                            i = 0;
+                        } else if (posy <= comp2 && posy + height >= comp2) {
+                            posy = comp2 + spacing;
+                            i = 0;
+                        } else if (posy >= comp1 && posy <= comp2) {
+                            posy = comp2 + spacing;
+                            i = 0;
+                        } else if (posy + height >= comp1 && posy + height <= comp2) {
+                            posy = comp2 + spacing;
+                            i = 0;
+                        }
+                    }
+                    //zindex
+                    var zindex = 1;
+                    angular.forEach(panels, function (value, key) {
+                        //$log.info("zindex2", key, value.zindex);
+                        if (value.zindex > zindex) {
+                            zindex = value.zindex;
+                        }
+                    });
+                    zindex = zindex + 1;
+                    //construct panel & add it to list
+                    panels[service.name + '_-_' + panelindex + '_-_'] = {
                         simpleName: service.simpleName,
                         name: service.name,
                         type: service.type,
-                        panelcount: service.panelcount,
+                        list: 'main',
                         panelindex: panelindex,
                         panelname: panelname,
                         showpanelname: showpanelname,
                         panelsize: panelsize,
-                        forcesize: false
-                    });
+                        height: 0,
+                        posx: 15,
+                        posy: posy,
+                        zindex: zindex
+                    };
                 };
 
                 this.addService = function (name, temp) {
-                    console.log('adding:', name, guiData);
-                    if (isUndefinedOrNull(guiData[name])) {
-                        console.log('adding#2:', name);
-                        guiData[name] = {};
-                        guiData[name].simpleName = temp.simpleName;
-                        guiData[name].name = temp.name;
-                        guiData[name].type = temp.simpleName.toLowerCase();
-                        guiData[name].panelcount = 1;
-                        guiData[name].panelnames = null;
-                        guiData[name].showpanelnames = null;
-                        guiData[name].panelsizes = null;
+                    //create a new service (and a panel of the new service (addPanel))
+                    $log.info('adding:', name, services);
+                    if (isUndefinedOrNull(services[name])) {
+                        $log.info('adding#2:', name);
+                        services[name] = {
+                            simpleName: temp.simpleName,
+                            name: temp.name,
+                            type: temp.simpleName.toLowerCase(),
+                            panelcount: 1,
+                            panelnames: null,
+                            showpanelnames: null,
+                            panelsizes: null
+                        };
 
-                        var serviceexp = guiData[name];
-                        addPanel(serviceexp, 0);
+                        addPanel(services[name], 0);
                     }
-                    console.log('adding#3:', name, guiData, services);
+                    $log.info('adding#3:', name, services, panels);
                     notifyAllOfUpdate();
                 };
 
                 this.removeService = function (name) {
-                    console.log('removing service', name, guiData);
-//                    var panelcount = guiData[name].panelcount;
-                    delete guiData[name];
-                    var removelist = [];
-                    angular.forEach(services, function (value, key) {
-                        if (value.name == name) {
-                            removelist.push(key);
-                        }
-                    });
-                    angular.forEach(removelist, function (value, key) {
-                        services.splice(value, 1);
-                    });
-//                    for (var i = 0; i < panelcount; i++) {
-//                        delete services[name + '_-_' + i + '_-_'];
-//                    }
+                    //remove a service and it's panels
+                    $log.info('removing service', name, services);
+                    var panelcount = services[name].panelcount;
+                    delete services[name];
+                    for (var i = 0; i < panelcount; i++) {
+                        delete panels[name + '_-_' + i + '_-_'];
+                    }
                     notifyAllOfUpdate();
                 };
 
-                this.getServices = function () {
-                    return services;
-                };
+                this.notifyPanelCountChanged = function (name, count) {
+                    //service want's to change the amount of panels
+                    var oldcount = services[name].panelcount;
+                    $log.info('notifyPanelCountChanged', name, oldcount, count);
+                    if (oldcount != count) {
+                        services[name].panelcount = count;
+                        var diff = count - oldcount;
 
-                this.notifyPanelCountChanged = function (name, oldcount, count) {
-                    console.log('notifyPanelCountChanged', name, oldcount, count);
-                    guiData[name].panelcount = count;
-                    var diff = count - oldcount;
-
-                    if (diff < 0) {
-                        for (var i = oldcount - 1; i > count - 1; i++) {
-                            var remove = -1;
-                            angular.forEach(services, function (value, key) {
-                                if (value.name == name && value.panelindex == i) {
-                                    remove = key;
-                                }
-                            });
-                            services.splice(remove, 1);
-//                            delete services[name + '_-_' + i + '_-_'];
-                        }
-                        angular.forEach(services, function (value, key) {
-                            if (value.name == name) {
-                                value.panelcount = count;
+                        if (diff < 0) {
+                            for (var i = oldcount - 1; i > count - 1; i++) {
+                                delete panels[name + '_-_' + i + '_-_'];
                             }
-                        });
-//                        for (var i = count - 1; i >= 0; i++) {
-//                            services[name + '_-_' + i + '_-_'].panelcount = count;
-//                        }
-                    } else if (diff > 0) {
-                        var serviceexp = guiData[name];
-                        for (var i = oldcount; i < count; i++) {
-                            addPanel(serviceexp, i);
+                        } else if (diff > 0) {
+                            var serviceexp = services[name];
+                            for (var i = oldcount; i < count; i++) {
+                                addPanel(serviceexp, i);
+                            }
                         }
+                        notifyAllOfUpdate();
                     }
                 };
 
                 this.notifyPanelNamesChanged = function (name, names) {
-                    console.log('notifyPanelNamesChanged', name, names);
-                    guiData[name].panelnames = names;
-                    angular.forEach(services, function (value, key) {
-                        if (value.name == name) {
-                            value.panelname = names[value.panelindex];
-                        }
-                    });
+                    //service want's to change the panel-names
+                    $log.info('notifyPanelNamesChanged', name, names);
+                    services[name].panelnames = names;
+                    var panelcount = services[name].panelcount;
+                    for (var i = 0; i < panelcount; i++) {
+                        panels[name + '_-_' + i + '_-_'].panelname = names[i];
+                    }
                 };
 
                 this.notifyPanelShowNamesChanged = function (name, show) {
-                    console.log('notifyPanelShowNamesChanged', name, show);
-                    guiData[name].showpanelnames = show;
-                    angular.forEach(services, function (value, key) {
-                        if (value.name == name) {
-                            value.showpanelname = show[value.panelindex];
-                        }
-                    });
+                    //service want's to change which panel-names should be shown
+                    $log.info('notifyPanelShowNamesChanged', name, show);
+                    services[name].showpanelnames = show;
+                    var panelcount = services[name].panelcount;
+                    for (var i = 0; i < panelcount; i++) {
+                        panels[name + '_-_' + i + '_-_'].showpanelname = show[i];
+                    }
                 };
 
                 this.notifyPanelSizesChanged = function (name, sizes) {
-                    console.log('notifyPanelSizesChanged', name, sizes);
-                    guiData[name].panelsizes = sizes;
-                    angular.forEach(services, function (value, key) {
-                        if (value.name == name) {
-                            value.panelsize = sizes[value.panelindex];
+                    //service want's to change the size-options of panels
+                    $log.info('notifyPanelSizesChanged', name, sizes);
+                    services[name].panelsizes = sizes;
+                    var panelcount = services[name].panelcount;
+                    for (var i = 0; i < panelcount; i++) {
+                        panels[name + '_-_' + i + '_-_'].panelsize = sizes[i];
+                    }
+                };
+
+                this.putPanelZIndexOnTop = function (name, panelname) {
+                    //panel requests to be put on top of the other panels
+                    $log.info('putPanelZIndexOnTop', name, panelname);
+                    var panelindex = -1;
+                    angular.forEach(panels, function (value, key) {
+                        if (value.name == name && value.panelname == panelname) {
+                            panelindex = value.panelindex;
                         }
                     });
+                    var zindex = panels[name + '_-_' + panelindex + '_-_'].zindex;
+                    var max = 1;
+                    angular.forEach(panels, function (value, key) {
+                        if (value.zindex > max) {
+                            max = value.zindex;
+                        }
+                        if (value.zindex > zindex) {
+                            value.zindex--;
+                        }
+                    });
+                    panels[name + '_-_' + panelindex + '_-_'].zindex = max;
+                    angular.forEach(panels, function (value, key) {
+                        value.notifyZIndexChanged();
+                    });
+                };
+
+                this.movePanelToList = function (name, panelname, list) {
+                    //move panel to specified list
+                    $log.info('movePanelToList', name, panelname, list);
+                    var panelindex = -1;
+                    angular.forEach(panels, function (value, key) {
+                        if (value.name == name && value.panelname == panelname) {
+                            panelindex = value.panelindex;
+                        }
+                    });
+                    panels[name + '_-_' + panelindex + '_-_'].list = list;
+                    notifyAllOfUpdate();
+                };
+
+                this.showAll = function (show) {
+                    //minimize / expand all panels
+                    $log.info('showAll', show);
+                    if (!show) {
+                        //minimize
+                        angular.forEach(panels, function (value, key) {
+                            value.panelsize.oldsize = value.panelsize.aktsize;
+                            value.panelsize.aktsize = 'min';
+                            value.list = 'min';
+                        });
+                    } else {
+                        angular.forEach(panels, function (value, key) {
+                            value.panelsize.aktsize = value.panelsize.oldsize;
+                            value.list = 'main';
+                        });
+                    }
+                    notifyAllOfUpdate();
                 };
                 //END_Services
 
@@ -241,7 +354,7 @@ angular.module('mrlapp.service')
                             break;
                     }
                 };
-                console.log('ServiceSvc-Runtime', runtime, mrl.getRuntime());
+                $log.info('ServiceSvc-Runtime', runtime, mrl.getRuntime());
                 mrl.subscribeToService(this.onMsg, runtime.name);
 
                 for (var name in registry) {
