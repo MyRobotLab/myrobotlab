@@ -8,6 +8,8 @@ angular.module('mrlapp.service.pythongui', [])
     $scope.service = mrl.getService($scope.service.name);
     $scope.name = name;
 
+    $scope.output='';
+
     // the awesome ace editor 1
     var editor = null ;
     
@@ -22,8 +24,9 @@ angular.module('mrlapp.service.pythongui', [])
     //-> you will receive all messages routed to your service here
     $scope.panel.onMsg = function(msg) {
         switch (msg.method) {
-        case 'onPulse':
-            $scope.pulseData = msg.data[0];
+        case 'onStdOut':
+            $scope.output = msg.data[0] + $scope.output;
+            // $scope.output = $scope.output + msg.data[0];
             $scope.$apply();
             break;
         case 'onClockStarted':
@@ -62,9 +65,13 @@ angular.module('mrlapp.service.pythongui', [])
     ;
     
     //you can subscribe to methods
-    mrl.subscribe(name, 'pulse');
+    mrl.subscribe(name, 'publishStdOut');
     mrl.subscribe(name, 'clockStarted');
     mrl.subscribe(name, 'clockStopped');
+
+    // FIXME re-entrant?
+    mrl.sendTo(name, "attachPythonConsole");
+
     
     //after you're done with setting up your service-panel, call this method
     $scope.panel.initDone();

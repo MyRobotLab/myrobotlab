@@ -66,8 +66,9 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
     }
     //END_specific Service-Initialisation
     
-    $scope.hide = function(val) {
-        $scope.show = !val;
+    $scope.setShow = function(val) {
+        $scope.show = val;
+        $log.info('show ' + $scope.show);
     }
     
     //footer-size-change-buttons
@@ -107,7 +108,7 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
     }
     
     // assign a scope method to the panel
-    serviceSvc.getServicePanel(name).hide = $scope.hide;
+    serviceSvc.getServicePanel(name).setShow = $scope.setShow;
 
 }
 ]);
