@@ -76,11 +76,12 @@ angular.module('mrlapp.nav')
         
         $scope.searchOnSelect = function(item, model, label) {
             console.log('searchOnSelect');
+            serviceSvc.setPosition(item.name, 0, 0);
             // FIXME - check if panel is hide or show - make hide
             // FIXME - change position to (0, 0) with highest z index
             //scroll to selected service
-            $location.hash(item.name);
-            $anchorScroll();
+            // $location.hash(item.name);
+            // $anchorScroll();
         };
     //END_Search
     }]);

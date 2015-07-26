@@ -22,12 +22,25 @@ angular.module('mrlapp.service')
         return angular.isUndefined(val) || val === null ;
     }
     ;
-
-    this.getNextZIndex = function(name){
-      ++zIndexMax;
-      servicePanels[name].zIndex = zIndexMax;
-      return zIndexMax;
+    
+    this.getNextZIndex = function(name) {
+        ++zIndexMax;
+        servicePanels[name].zIndex = zIndexMax;
+        return zIndexMax;
     }
+    ;
+    
+    this.setPosition = function(name, x, y) {
+        servicePanels[name].x = x;
+        servicePanels[name].y = y;
+    }
+    ;
+    
+    this.setDimensions = function(name, width, height) {
+        servicePanels[name].width = width;
+        servicePanels[name].height = height;
+    }
+    ;
     
     
     // returns map/object of panels
@@ -35,6 +48,7 @@ angular.module('mrlapp.service')
     this.getPanels = function() {
         return servicePanels;
     }
+    ;
     
     
     // returns list of panels
@@ -46,6 +60,7 @@ angular.module('mrlapp.service')
         );
         return arrayOfPanels;
     }
+    ;
     
     this.addServicePanel = function(name) {
         $log.info('serviceSvc.addServicePanel', name);
@@ -70,6 +85,10 @@ angular.module('mrlapp.service')
         panel.simpleName = service.simpleName;
         panel.type = service.simpleName.toLowerCase();
         panel.simpleName = service.simpleName;
+        panel.x = 0;
+        panel.y = 0;
+        panel.width = 0;
+        panel.height = 0;
         
         // adding it to our map of panels
         servicePanels[name] = panel;
@@ -85,7 +104,15 @@ angular.module('mrlapp.service')
             }
         }
     }
+    ;
     
+    this.setPosition = function(name, x, y) {
+        servicePanels[name].setShow(true);
+        servicePanels[name].setPosition(x, y);
+    }
+    ;
+    
+    // TODO - method to take name and hide/show
     this.showAll = function() {
         for (var name in servicePanels) {
             if (servicePanels.hasOwnProperty(name)) {
@@ -94,6 +121,7 @@ angular.module('mrlapp.service')
             }
         }
     }
+    ;
     
     
     this.getServicePanel = function(name) {
@@ -103,12 +131,14 @@ angular.module('mrlapp.service')
             return null ;
         }
         return servicePanels[name];
-    };
+    }
+    ;
     
     this.removeServicePanel = function(name) {
         $log.info('serviceSvc.removeServicePanel', name);
         delete servicePanels[name];
-    };
+    }
+    ;
     
     /**
      * addService(name)
@@ -132,6 +162,7 @@ angular.module('mrlapp.service')
         }
         );
     }
+    ;
     
     this.onMsg = function(msg) {
         switch (msg.method) {
