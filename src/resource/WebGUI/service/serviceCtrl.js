@@ -64,12 +64,23 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
         }
         ;
     }
-    //END_specific Service-Initialisation
+    ;
     
     $scope.setShow = function(val) {
+        $log.info('setShow ' + $scope.show);
         $scope.show = val;
-        $log.info('show ' + $scope.show);
     }
+    ;
+    
+    $scope.setPosition = function(x, y) {
+        $log.info('setPosition ', x, ',', y);
+        // FIXME !! MERGE STYLE !!! 
+        // $scope.style = "{position:'static', top:" + 50 +", left:" + 50 +"}";
+        $scope.style = "{'color':'green','top':" + 250 +", 'left':" + 250 +"}";
+        //$scope.$apply();
+    }
+    ;
+    
     
     //footer-size-change-buttons
     $scope.changesize = function(size) {
@@ -97,18 +108,24 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
     }
     ;
     
-    $scope.test = function() {       
-        var serviceList = angular.element( document.querySelector( '#serviceList' ) );
+    $scope.test = function() {
+        var serviceList = angular.element(document.querySelector('#serviceList'));
         $http.get("service/service.html")
         .then(function(response) {
             //$('body').prepend($compile(response.data)($scope));
             serviceList.prepend($compile(response.data)($scope));
         }
-        );        
+        );
     }
+    ;
     
+    
+    // IMPORTANT - this is where functionality is taken from the "one"
+    // service panel currently being processed and made available to "many"
+    // through the assignment of data & functions in the serviceSvc
     // assign a scope method to the panel
     serviceSvc.getServicePanel(name).setShow = $scope.setShow;
+    serviceSvc.getServicePanel(name).setPosition = $scope.setPosition;
 
 }
 ]);

@@ -16,28 +16,7 @@
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
-                <!--Connection-->
-                <!--TODO: add in-->
-                <!--<li>
-                <form class="navbar-form">
-                    <div class="input-group" dropdown>
-                        <input type="text" class="form-control" style="width: 500px"
-                               placeholder="http://localhost:7777" ng-model="Connection" readonly>
-                        <div class="input-group-btn" dropdown-toggle>
-                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Connection">
-                                <i class="glyphicon glyphicon-link"></i>
-                            </button>
-                        </div>
-                        <ul class="dropdown-menu" style="width: 540px">
-                <!--
-                <li ng-repeat="status in statuslist| reverse track by $index "><a href="#">{{status}}</a></li>
-                -->
-                <!--<li><a href="#"><i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;Edit</a></li>
-                <li><a href="#"><i class="glyphicon glyphicon-trash"></i>&nbsp;&nbsp;Delete</a></li>-->
-                <!--</ul>
-            </div>
-        </form>
-    </li>-->
+                
                 <!--Status-->
                 <!--TODO: (maybe) integrate a glyphicon (or picture) before the status (status-type, from which service the status came, ...(or something even better))-->
                 <li>
@@ -59,38 +38,24 @@
                 </li>
                 <!--About-->
                 <li>
-                    <form class="navbar-form">
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="About" ng-click="about()">
+                        <button class="btn" type="submit" tooltip-placement="bottom" tooltip="About" ng-click="about()">
                             <i class="glyphicon glyphicon-info-sign"></i>
                         </button>
-                    </form>
-                </li>
+
                 <!--Hide All-->
-                <li>
-                    <form class="navbar-form">
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Hide All" ng-click="hideAll()">
+                        <button class="btn" type="submit" tooltip-placement="bottom" tooltip="Hide All" ng-click="hideAll()">
                             <i class="glyphicon glyphicon-eye-close"></i>
                         </button>
-                    </form>
-                </li>
                 <!--Show All-->
-                <li>
-                    <form class="navbar-form">
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Show All" ng-click="showAll()">
+                        <button class="btn" type="submit" tooltip-placement="bottom" tooltip="Show All" ng-click="showAll()">
                             <i class="glyphicon glyphicon-eye-open"></i>
                         </button>
-                    </form>
-                </li>
                 <!--Help-->
-                <li>
-                    <form class="navbar-form">
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Help" ng-click="help()">
+                        <button class="btn" type="submit" tooltip-placement="bottom" tooltip="Help" ng-click="help()">
                             <i class="glyphicon glyphicon-question-sign"></i>
                         </button>
-                    </form>
-                </li>
                 <!--Search-->
-
+                </li>
 
                 <li>
                 <!-- pre>Model: {{searchSelectedService | json}}</pre-->
@@ -99,7 +64,7 @@
                             <input type="text" class="form-control"
                                    placeholder="Search"
                                    ng-model="searchSelectedService"
-                                   typeahead="name for name in searchPanels | filter:{name:$viewValue}"
+                                   typeahead="name.name as name for name in searchPanels | filter:{name:$viewValue}"
                                    typeahead-template-url="nav/searchtemplate.html"
                                    typeahead-on-select='searchOnSelect($item, $model, $label)'>
                             <div class="input-group-btn">
