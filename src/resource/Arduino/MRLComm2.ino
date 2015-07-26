@@ -16,7 +16,7 @@
 */
 
 #include <Servo.h>
-#define MRLCOMM_VERSION				21
+#define MRLCOMM_VERSION				22
 
 // serial protocol functions
 #define MAGIC_NUMBER  					170 // 10101010
@@ -65,7 +65,7 @@
 // {pinMode Integer Integer}
 #define PIN_MODE		14
 
-// {publishCustomMsg Integer}
+// {publishCustomMsg Object[]}
 #define PUBLISH_CUSTOM_MSG		15
 
 // {publishLoadTimingEvent Long}
@@ -77,19 +77,19 @@
 // {publishPulse Integer}
 #define PUBLISH_PULSE		18
 
+// {publishSensorData SensorData}
+#define PUBLISH_SENSOR_DATA		19
+
 // {publishServoEvent Integer}
-#define PUBLISH_SERVO_EVENT		19
+#define PUBLISH_SERVO_EVENT		20
 
-// {publishSesorData SensorData}
-#define PUBLISH_SESOR_DATA		20
-
-// {publishStepperEvent StepperData}
+// {publishStepperEvent Integer}
 #define PUBLISH_STEPPER_EVENT		21
 
 // {publishTrigger Pin}
 #define PUBLISH_TRIGGER		22
 
-// {pulseIn int int int String}
+// {pulseIn int int int int}
 #define PULSE_IN		23
 
 // {sensorAttach UltrasonicSensor}
@@ -152,26 +152,23 @@
 // {softReset}
 #define SOFT_RESET		43
 
-// {stepperAttach StepperControl}
+// {stepperAttach String}
 #define STEPPER_ATTACH		44
 
 // {stepperDetach String}
 #define STEPPER_DETACH		45
 
-// {stepperMoveTo String Integer}
+// {stepperMoveTo String int int}
 #define STEPPER_MOVE_TO		46
 
 // {stepperReset String}
 #define STEPPER_RESET		47
 
-// {stepperStep String Integer Integer}
-#define STEPPER_STEP		48
-
 // {stepperStop String}
-#define STEPPER_STOP		49
+#define STEPPER_STOP		48
 
 // {stopService}
-#define STOP_SERVICE		50
+#define STOP_SERVICE		49
 
 ///// INO GENERATED DEFINITION END //////
 
@@ -1132,7 +1129,7 @@ void loop () {
 				} else if (sensor.state == ECHO_STATE_GOOD_RANGE || sensor.state == ECHO_STATE_TIMEOUT) {
 					Serial.write(MAGIC_NUMBER);
 					Serial.write(6); // size 1 FN + 4 bytes of unsigned long
-					Serial.write(PUBLISH_SESOR_DATA);
+					Serial.write(PUBLISH_SENSOR_DATA);
 					Serial.write(i);
 		            // write the long value out
 					Serial.write((byte)(sensor.lastValue >> 24));

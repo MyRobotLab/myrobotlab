@@ -50,7 +50,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 	public static final int MAX_MSG_SIZE = 64;
 	
-	public static final int MRLCOMM_VERSION = 21;
+	public static final int MRLCOMM_VERSION = 22;
 
 	public static final int MAGIC_NUMBER = 170; // 10101010
 	
@@ -103,7 +103,7 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {pinMode Integer Integer} 
 	public final static int PIN_MODE =		14;
 
-	// {publishCustomMsg Integer} 
+	// {publishCustomMsg Object[]} 
 	public final static int PUBLISH_CUSTOM_MSG =		15;
 
 	// {publishLoadTimingEvent Long} 
@@ -115,19 +115,19 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {publishPulse Integer} 
 	public final static int PUBLISH_PULSE =		18;
 
+	// {publishSensorData SensorData} 
+	public final static int PUBLISH_SENSOR_DATA =		19;
+
 	// {publishServoEvent Integer} 
-	public final static int PUBLISH_SERVO_EVENT =		19;
+	public final static int PUBLISH_SERVO_EVENT =		20;
 
-	// {publishSesorData SensorData} 
-	public final static int PUBLISH_SESOR_DATA =		20;
-
-	// {publishStepperEvent StepperData} 
+	// {publishStepperEvent Integer} 
 	public final static int PUBLISH_STEPPER_EVENT =		21;
 
 	// {publishTrigger Pin} 
 	public final static int PUBLISH_TRIGGER =		22;
 
-	// {pulseIn int int int String} 
+	// {pulseIn int int int int} 
 	public final static int PULSE_IN =		23;
 
 	// {sensorAttach UltrasonicSensor} 
@@ -190,26 +190,23 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {softReset} 
 	public final static int SOFT_RESET =		43;
 
-	// {stepperAttach StepperControl} 
+	// {stepperAttach String} 
 	public final static int STEPPER_ATTACH =		44;
 
 	// {stepperDetach String} 
 	public final static int STEPPER_DETACH =		45;
 
-	// {stepperMoveTo String Integer} 
+	// {stepperMoveTo String int int} 
 	public final static int STEPPER_MOVE_TO =		46;
 
 	// {stepperReset String} 
 	public final static int STEPPER_RESET =		47;
 
-	// {stepperStep String Integer Integer} 
-	public final static int STEPPER_STEP =		48;
-
 	// {stepperStop String} 
-	public final static int STEPPER_STOP =		49;
+	public final static int STEPPER_STOP =		48;
 
 	// {stopService} 
-	public final static int STOP_SERVICE =		50;
+	public final static int STOP_SERVICE =		49;
 
 
 	static {
@@ -267,11 +264,11 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		byteToMethod.put(PUBLISH_PULSE,"publishPulse");
 		methodToByte.put("publishPulse",PUBLISH_PULSE);
 
+		byteToMethod.put(PUBLISH_SENSOR_DATA,"publishSensorData");
+		methodToByte.put("publishSensorData",PUBLISH_SENSOR_DATA);
+
 		byteToMethod.put(PUBLISH_SERVO_EVENT,"publishServoEvent");
 		methodToByte.put("publishServoEvent",PUBLISH_SERVO_EVENT);
-
-		byteToMethod.put(PUBLISH_SESOR_DATA,"publishSesorData");
-		methodToByte.put("publishSesorData",PUBLISH_SESOR_DATA);
 
 		byteToMethod.put(PUBLISH_STEPPER_EVENT,"publishStepperEvent");
 		methodToByte.put("publishStepperEvent",PUBLISH_STEPPER_EVENT);
@@ -353,9 +350,6 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 		byteToMethod.put(STEPPER_RESET,"stepperReset");
 		methodToByte.put("stepperReset",STEPPER_RESET);
-
-		byteToMethod.put(STEPPER_STEP,"stepperStep");
-		methodToByte.put("stepperStep",STEPPER_STEP);
 
 		byteToMethod.put(STEPPER_STOP,"stepperStop");
 		methodToByte.put("stepperStop",STEPPER_STOP);

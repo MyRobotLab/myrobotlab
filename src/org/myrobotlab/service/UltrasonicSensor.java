@@ -159,11 +159,24 @@ public class UltrasonicSensor extends Service implements RangeListener {
 
 	@Override
 	public void startService() {
+		super.startService();
 		arduino = (Arduino) startPeer("arduino");
 	}
 
 	public void stopRanging() {
 		arduino.sensorPollingStop(getName());
+	}
+	
+	/**
+	 * FIXME - needs to be in a Sensor Interface
+	 * THIS IS A GOOD METHOD ! - ITS THE RAW DATA ARRAY IN A NON PUBLISHED
+	 * DIRECT CALL BACK FROM ARDUINO (through an interface soon)
+	 * The "business" logic to make this meaningful is rightfully in this class
+	 * @param data
+	 */
+	public void onSensorData(int[] data){
+		long duration = Serial.bytesToInt(data, 0, 4);
+		invoke("publishRange", duration);
 	}
 
 	// TODO - Virtual Serial test - do a record of tx & rx on a real sensor
@@ -176,14 +189,14 @@ public class UltrasonicSensor extends Service implements RangeListener {
 			// localized
 			// testing
 			boolean useGUI = true;
-			boolean useVirtualPorts = true;
-			int triggerPin = 7;
-			int echoPin = 8;
+			boolean useVirtualPorts = false;
+			int triggerPin = 6;
+			int echoPin = 6;
 
-			String port = "COM15";
+			String port = "COM18";
 
 			UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start(getName(), "UltrasonicSensor");
-			Servo servo = (Servo) Runtime.start("servo", "Servo");
+			// Servo servo = (Servo) Runtime.start("servo", "Servo");
 
 			// && depending on headless
 			if (useGUI) {
@@ -211,22 +224,23 @@ public class UltrasonicSensor extends Service implements RangeListener {
 			log.info("here");
 			sr04.stopRanging();
 
+			if (useVirtualPorts) {
+				return status;
+			}
+			
 			uart.stopRecording();
 
 			sr04.arduino.setLoadTimingEnabled(true);
 			sr04.arduino.setLoadTimingEnabled(false);
 
+			/*
 			servo.attach("sr04.arduino", 4);
 			servo.setSpeed(0.99f);
 			servo.setEventsEnabled(true);
 			servo.setEventsEnabled(false);
 			servo.moveTo(30);
 
-			/*
-			 * 
-			 * for (int i = 0; i < 100; ++i) { log.info("ping 1"); long duration
-			 * = sr04.ping(); log.info("duration {}", duration); }
-			 */
+	
 			servo.setEventsEnabled(true);
 			sr04.startRanging();
 			log.info("here");
@@ -242,6 +256,7 @@ public class UltrasonicSensor extends Service implements RangeListener {
 				servo.moveTo(175);
 				sr04.stopRanging();
 			}
+			*/
 
 			sr04.startRanging(5);
 			sr04.startRanging(10);

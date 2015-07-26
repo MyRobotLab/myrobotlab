@@ -1,6 +1,6 @@
 /**
  *                    
- * @author greg (at) myrobotlab.orgg
+ * @author greg (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *

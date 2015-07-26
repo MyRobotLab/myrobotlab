@@ -107,6 +107,7 @@ public class ArduinoBindingsGenerator {
 		exclude.add("getBoardType");
 		exclude.add("getCategories");
 		exclude.add("getPeers");
+		exclude.add("getPortName");
 		exclude.add("getPinList");
 		exclude.add("getSerial");
 		exclude.add("getStepperData");// WTF
@@ -115,8 +116,10 @@ public class ArduinoBindingsGenerator {
 		exclude.add("onByte");
 		exclude.add("onCustomMsg");
 		exclude.add("releaseService");
+		exclude.add("refreshVersion");
 		exclude.add("sendMsg");
 		exclude.add("setBoardType");
+		exclude.add("setBoardMega");
 		exclude.add("startService");
 		exclude.add("test");
 
