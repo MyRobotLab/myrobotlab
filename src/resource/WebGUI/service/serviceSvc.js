@@ -74,7 +74,7 @@ angular.module('mrlapp.service')
         for (var name in servicePanels) {
             if (servicePanels.hasOwnProperty(name)) {
                 var panel = servicePanels[name];
-                panel.hide(true);
+                panel.setShow(false);
             }
         }
     }
@@ -83,7 +83,7 @@ angular.module('mrlapp.service')
         for (var name in servicePanels) {
             if (servicePanels.hasOwnProperty(name)) {
                 var panel = servicePanels[name];
-                panel.hide(false);
+                panel.setShow(true);
             }
         }
     }
