@@ -1,6 +1,6 @@
 angular.module('mrlapp.service.guiservicegui', [])
-        .controller('GUIServiceGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
-                console.log('GUIServiceGuiCtrl');
+        .controller('GUIServiceGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+                $log.info('GUIServiceGuiCtrl');
 
                 // get fresh copy
                 $scope.service = mrl.getService($scope.service.name);
@@ -32,7 +32,7 @@ angular.module('mrlapp.service.guiservicegui', [])
                             $scope.$apply();
                             break;
                         default:
-                            console.log("ERROR - unhandled method " + msg.method);
+                            $log.error("ERROR - unhandled method " + msg.method);
                             break;
                     }
                 };

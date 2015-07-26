@@ -1,6 +1,6 @@
 angular.module('mrlapp.service.templategui', [])
-        .controller('TemplateGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
-                console.log('TemplateGuiCtrl');
+        .controller('TemplateGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+                $log.info('TemplateGuiCtrl');
 
                 // get fresh copy
                 $scope.service = mrl.getService($scope.service.name);
@@ -23,10 +23,11 @@ angular.module('mrlapp.service.templategui', [])
                         sizes: {
                             //size-options, these will be shown as a option to select from
                             //(and can be applied)
-                            tinye: {
+                            tiny: {
                                 glyphicon: 'glyphicon glyphicon-minus', //define a glyphicon to show
                                 width: 200, //width of this size-setting
-                                body: 'collapse' //means that the body-section of the panel won't be shown
+                                body: 'collapse', //means that the body-section of the panel won't be shown
+                                footer: 'collapse' //don't show footer-section of panel
                             },
                             small: {
                                 glyphicon: 'glyphicon glyphicon-resize-small',
@@ -39,10 +40,18 @@ angular.module('mrlapp.service.templategui', [])
                             full: {
                                 glyphicon: 'glyphicon glyphicon-fullscreen',
                                 width: 0,
-                                body: 'collapse'
-                            }},
-                        aktsize: 'large', //set this as the start-value
-                        oldsize: null //save-point for size-changes
+                                fullscreen: true, //show fullscreen (modal)
+                                body: 'collapse',
+                                footer: 'collapse'
+                            },
+                            free: {
+                                glyphicon: 'glyphicon glyphicon-resize-horizontal',
+                                width: 500,
+                                freeform: true //allow free-form resizing (width)
+                            }
+                        },
+                        order: ["free", "full", "large", "small", "tiny"], //shows your size-options in this order
+                        aktsize: 'large' //set this as the start-value
                     },
                     {/*panel2*/},
                     {/*panel3*/}]);
@@ -65,7 +74,7 @@ angular.module('mrlapp.service.templategui', [])
                             $scope.$apply();
                             break;
                         default:
-                            console.log("ERROR - unhandled method " + msg.method);
+                            $log.error("ERROR - unhandled method " + msg.method);
                             break;
                     }
                 };

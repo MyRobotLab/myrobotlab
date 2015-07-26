@@ -1,32 +1,47 @@
 <div id="{{::anker}}">
 
-    <!--<div style="resize: both; overflow: auto;"></div>-->
-
     <div class="panel panel-default">
-        <div class="panel-heading">
+        <div class="panel-heading" drag-directive>
             <!--header-->
             <h3 class="panel-title">
                 <img src="{{::spawndata.type}}.png" alt="" width="16">
                 <b>{{::spawndata.name}}</b><div style="display:inline;" ng-if="spawndata.showpanelname">&nbsp;&nbsp;{{spawndata.panelname}}</div>
-                <div class="pull-right">{{::spawndata.simpleName}}&nbsp;&nbsp;<div popover-placement="right" popover-template="'serviceMenu.html'" class="glyphicon glyphicon-list"></div></div>
-                <!-- options begin ---->
-                <script type="text/ng-template" id="serviceMenu.html">
-
-                    <div class="form-group">
-                    <p><span class="glyphicon glyphicon-question-sign"></span> <a href="http://myrobotlab.org/service/{{::spawndata.simpleName}}" target="_blank" >help</a></p>
-                    <div ng-repeat="(sizename, sizeoption) in spawndata.panelsize.sizes">
-                    <p ng-click="changesize(sizename)"><span class="{{::sizeoption.glyphicon}}"></span> {{::sizename}}</p>
-                    </div>
-                    <!--<p><span class="glyphicon glyphicon-fullscreen"></span> fullscreen</p>
-                    <p><span class="glyphicon glyphicon-resize-small"></span> minimize</p>
-                    <p><span class="glyphicon glyphicon-resize-full"></span> maximize</p>-->                    
-                    
-                    <p><span class="glyphicon glyphicon-remove"></span> release</p>
-                    <p><span class="glyphicon glyphicon-alert"></span> no worky</p>                    
-                    </div>
-
-                </script>
-                <!-- options end ---->
+                <div class="pull-right" dropdown dropdown-append-to-body>
+                    {{::spawndata.simpleName}}&nbsp;&nbsp;
+                    <span style="cursor: pointer;" tooltip-placement="right" tooltip="Menu"><i dropdown-toggle class="glyphicon glyphicon-list"></i></span>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="http://myrobotlab.org/service/{{::spawndata.simpleName}}" target="_blank">
+                                <i class="glyphicon glyphicon-question-sign"></i>
+                                &nbsp;&nbsp;help
+                            </a>
+                        </li>
+                        <li ng-show="!spawndata.panelsize.sizes[spawndata.panelsize.aktsize].forcesize" ng-repeat="sizename in spawndata.panelsize.order">
+                            <a href="" ng-show="spawndata.panelsize.aktsize != sizename" ng-click="changesize(sizename)">
+                                <i class="{{::spawndata.panelsize.sizes[sizename].glyphicon}}"></i>
+                                &nbsp;&nbsp;{{::sizename}}
+                            </a>
+                        </li>
+                        <li ng-show="spawndata.panelsize.sizes[spawndata.panelsize.aktsize].forcesize">
+                            <a href="" ng-click="changesize('unmin')">
+                                <i class="glyphicon glyphicon-eye-open"></i>
+                                &nbsp;&nbsp;expand
+                            </a>
+                        </li>
+                        <li>
+                            <a href="">
+                                <i class="glyphicon glyphicon-remove"></i>
+                                &nbsp;&nbsp;release
+                            </a>
+                        </li>
+                        <li>
+                            <a href="">
+                                <i class="glyphicon glyphicon-alert"></i>
+                                &nbsp;&nbsp;no worky
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </h3>
         </div>
         <div class="panel-body" ng-show="spawndata.panelsize.sizes[spawndata.panelsize.aktsize].body != 'collapse'">
@@ -41,25 +56,14 @@
                 <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;service not found
             </div>
         </div>
-        <div class="panel-footer" ng-show="!spawndata.forcesize && spawndata.panelsize.aktsize != 'full'">
+        <div class="panel-footer" ng-show="spawndata.panelsize.sizes[spawndata.panelsize.aktsize].footer != 'collapse'" drag-directive>
             <!--footer-->
-            <!-- redundant in menu
-            <button class="btn btn-default" type="submit" ng-click="changesize('tiny')">
-                <i class="glyphicon glyphicon-minus"></i>
-            </button>
-            <button class="btn btn-default" type="submit" ng-click="changesize('small')">
-                <i class="glyphicon glyphicon-resize-small"></i>
-            </button>
-            <button class="btn btn-default" type="submit" ng-click="changesize('medium')">
-                M
-            </button>
-            <button class="btn btn-default" type="submit" ng-click="changesize('large')">
-                <i class="glyphicon glyphicon-resize-full"></i>
-            </button>
-            <button class="btn btn-default" type="submit" ng-click="changesize('full')">
-                <i class="glyphicon glyphicon-fullscreen"></i>
-            </button>
-            -->
+            <div>
+                &nbsp;
+                <div class="pull-right" ng-show="spawndata.panelsize.sizes[spawndata.panelsize.aktsize].freeform">
+                    <span style="cursor: e-resize;"><i resize-directive class="glyphicon glyphicon-resize-horizontal"></i></span>
+                </div>
+            </div>
         </div>
     </div>
 </div>

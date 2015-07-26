@@ -12,31 +12,40 @@
 angular.module('mrlapp', [
     'ngRoute',
     'ng',
-    'ui.bootstrap',
+    'ui.bootstrap', //BootstrapUI (in Angular style)
+    'oc.lazyLoad', //lazyload
+    'sticky', //sticky elements
     'ngClipboard',
-    'ui.ace',
-    'oc.lazyLoad',
-    'mrlapp.mrl',
+    'ui.ace', //funky editor
+    'mrlapp.mrl', //mrl.js (/mrl.js) - the really really core
+    'mrlapp.main.mrlLogger', //custom logger! (it extends the default angular one ($log))
     'mrlapp.main.mainCtrl',
-    'mrlapp.main.statesvc',
-    'mrlapp.nav',
-    'mrlapp.service'
+    'mrlapp.main.statesvc', //very basic service for storing "statuses"
+    'mrlapp.main.filter',
+    'mrlapp.nav', //Navbar & Co. (/nav)
+    'mrlapp.service' //Service & Co. (/service)
 ])
-.config(['$routeProvider', 'mrlProvider', 'ngClipProvider', function($routeProvider, mrlProvider, ngClipProvider) {
+        .config(['$provide', '$routeProvider', 'mrlProvider', 'ngClipProvider',
+            function ($provide, $routeProvider, mrlProvider, ngClipProvider) {
 
-        ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
+                ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
 
-        $routeProvider.when('/main', {
-            templateUrl: 'main/main.html',
-            controller: 'mainCtrl',
-            resolve: {
-                message: function(mrl) {
-                    return mrl.init();
-                }
-            }
-        }).when('/workpace', {
-            templateUrl: 'workpace/index.html',
-        }).otherwise({
-            redirectTo: '/main'
-        });
-    }]);
+                //set the logger up (extend the angular default one)
+                $provide.decorator('$log', function ($delegate, mrlLogger) {
+                    return mrlLogger($delegate);
+                });
+
+                $routeProvider.when('/main', {
+                    templateUrl: 'main/main.html',
+                    controller: 'mainCtrl',
+                    resolve: {
+                        message: function (mrl) {
+                            return mrl.init();
+                        }
+                    }
+//        }).when('/workpace', {
+//            templateUrl: 'workpace/index.html',
+                }).otherwise({
+                    redirectTo: '/main'
+                });
+            }]);

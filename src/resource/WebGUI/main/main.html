@@ -4,14 +4,15 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-6" style="min-height: 200px">
-            <div ng-repeat="service in services"
+            <div ng-repeat="panel in panels"
                  service-directive
-                 service="service">
+                 panel="panel">
             </div>
         </div>
         <div class="col-md-6">
             <div>DEBUG-SECTION not assigned yet</div>
             <pre>Model: {{searchSelectedService| json}}</pre>
+            <pre>{{log| json}}</pre>
         </div>
     </div>
 </div>       

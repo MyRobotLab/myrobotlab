@@ -1,7 +1,7 @@
 angular.module('mrlapp.service.webguigui', [])
 
-        .controller('WebGUIGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
-                console.log('WebGUIGuiCtrl');
+        .controller('WebGUIGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+                $log.info('WebGUIGuiCtrl');
                 // get fresh copy
                 $scope.service = mrl.getService($scope.service.name);
 
@@ -32,7 +32,7 @@ angular.module('mrlapp.service.webguigui', [])
                             $scope.$apply();
                             break;
                         default:
-                            console.log("ERROR - unhandled method " + msg.method);
+                            $log.error("ERROR - unhandled method " + msg.method);
                             break;
                     }
                 };
