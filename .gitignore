@@ -22,7 +22,6 @@
 /build/
 /myrobotlab.jar
 /ArduinoMsgCodec*.txt
-
 /ArduinoMsgCodec*.ino
 /ArduinoMsgCodec*.java
 /webapps/
@@ -31,3 +30,6 @@
 /*.mp4
 /*.ard
 /*.dec
+/src/resource/WebGUI/lib/*.tmp
+/src/resource/WebGUI/service/*.tmp
+/src/resource/WebGUI/service/js/*.tmp
