@@ -92,7 +92,7 @@
                             <input type="text" class="form-control"
                                    placeholder="Search"
                                    ng-model="searchSelectedPanel"
-                                   typeahead="panel as panel.name for panel in searchPanels | filter:{name:$viewValue}"
+                                   typeahead="panel as panel.name for panel in allPanels | filter:{name:$viewValue}"
                                    typeahead-template-url="nav/searchtemplate.html"
                                    typeahead-on-select='searchOnSelect($item, $model, $label)'>
                             <div class="input-group-btn">
