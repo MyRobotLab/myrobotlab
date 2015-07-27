@@ -50,7 +50,7 @@
                 <i class="glyphicon glyphicon-download-alt"></i>&nbsp;&nbsp;loading service ...
             </div>
             <div ng-if="!servicenotfound && serviceloaded">
-                <div service-body type="{{spawndata.type}}" simplename="{{spawndata.simpleName}}" size="spawndata.panelsize.aktsize" panelname="spawndata.panelname" gui="gui" service="service"></div>
+                <div service-body type="{{spawndata.type}}" simplename="{{spawndata.simpleName}}" size="spawndata.panelsize.aktsize" panelname="spawndata.panelname" data="servicedata" cb="cb"></div>
             </div>
             <div ng-if="servicenotfound">
                 <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;service not found

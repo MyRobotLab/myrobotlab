@@ -1,7 +1,7 @@
 angular.module('mrlapp.nav')
 
-        .controller('NavCtrl', ['$scope', '$log', '$filter', '$location', '$anchorScroll', 'mrl', 'StateSvc', 'ServiceSvc',
-            function ($scope, $log, $filter, $location, $anchorScroll, mrl, StateSvc, ServiceSvc) {
+        .controller('NavCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', 'mrl', 'StateSvc', 'ServiceSvc',
+            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, StateSvc, ServiceSvc) {
 
                 //START_green-/red-LED
                 // TODO - green png if connected - if not re-connect button
@@ -72,19 +72,20 @@ angular.module('mrlapp.nav')
                     $scope.showminlist = !$scope.showminlist;
                 };
 
-                //service-panels & update-routine
-                $scope.allpanels = ServiceSvc.getPanelsList();
-                $scope.minlist = $filter('panellist')($scope.allpanels, 'min');
+                //service-panels & update-routine (also used for search)
                 var panelsUpdated = function () {
-                    $scope.minlist = $filter('panellist')($scope.allpanels, 'min');
-                    $scope.$apply();
+                    $timeout(function () {
+                        $scope.allpanels = ServiceSvc.getPanelsList();
+                        $scope.minlist = $filter('panellist')($scope.allpanels, 'min');
+                    });
                 };
+                panelsUpdated();
                 ServiceSvc.subscribeToUpdates(panelsUpdated);
                 //END_minimize/expand all & minlist
 
                 //START_Search
-                $scope.searchPanels = ServiceSvc.getPanelsList();
-                $log.info('searchPanels', $scope.searchPanels);
+                //panels are retrieved above (together with minlist)
+                $log.info('searchPanels', $scope.allPanels);
 
                 $scope.searchOnSelect = function (item, model, label) {
                     $log.info('searchOnSelect');

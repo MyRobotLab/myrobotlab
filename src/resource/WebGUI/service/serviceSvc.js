@@ -36,8 +36,8 @@ angular.module('mrlapp.service')
                 this.addServiceInstance = function (name) {
                     $log.info('creating service-instance', name);
                     serviceInstances[name] = {};
-                    serviceInstances[name].gui = {};
-                    serviceInstances[name].service = mrl.getService(name);
+//                    serviceInstances[name].gui = {};
+//                    serviceInstances[name].service = mrl.getService(name);
                 };
 
                 this.getServiceInstance = function (name) {
