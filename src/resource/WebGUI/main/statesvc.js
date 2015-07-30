@@ -14,7 +14,7 @@ angular.module('mrlapp.main.statesvc', ['mrlapp.mrl'])
             return statuslist;
         };
         
-        this.cleatStatuses = function() {
+                this.clearStatuses = function () {
             statuslist = [];
         };
     }]);

@@ -1,10 +1,10 @@
 angular.module('mrlapp.service.solrgui', [])
-  .controller('SolrGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
-                console.log('SolrGuiCtrl');
+  .controller('SolrGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+                $log.info('SolrGuiCtrl');
                 // TODO: something useful?!
                 $scope.panel.onMsg = function (msg) {
-                    console.log("Solr Msg ! - ");  
-                    console.log(msg);
+                    $log.info("Solr Msg ! - ");  
+                    $log.info(msg);
                     if (msg.method == "onResults") {
                     	// Results!
                     	var solrResults = msg.data[0];
@@ -13,7 +13,7 @@ angular.module('mrlapp.service.solrgui', [])
                     }
                 };
                 $scope.search = function(querystring) {
-                    console.log('SolrGuiCtrl - Search Clicked!' + querystring);
+                    $log.info('SolrGuiCtrl - Search Clicked!' + querystring);
                 	mrl.sendTo($scope.service.name, "search", querystring);
                 };
                 

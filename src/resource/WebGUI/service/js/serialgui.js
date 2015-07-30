@@ -1,6 +1,6 @@
 angular.module('mrlapp.service.serialgui', [])
-.controller('SerialGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
-        console.log('SerialGuiCtrl');
+.controller('SerialGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
+        $log.info('SerialGuiCtrl');
         var _self = this;
         
         this.updateState = function(service) {
@@ -31,11 +31,11 @@ angular.module('mrlapp.service.serialgui', [])
         _self.updateState($scope.service);
 
         //you HAVE TO define this method &
-        //it is the ONLY exception of writing into .gui
+        //it is the ONLY exception of writing into .panel
         //-> you will receive all messages routed to your service here
         // FIXME - why this function on the scope? why is it on gui ? - i believe it should be on this.onMsg
         $scope.panel.onMsg = function(msg) {
-            console.log('CALLBACK - ' + msg.method);
+            $log.info('CALLBACK - ' + msg.method);
             switch (msg.method) {
                 case 'onPortNames':
                     $scope.possiblePorts = msg.data[0];
@@ -64,7 +64,7 @@ angular.module('mrlapp.service.serialgui', [])
                     $scope.$apply();
                     break;
                 default:
-                    console.log("ERROR - unhandled method " + msg.method);
+                    $log.error("ERROR - unhandled method " + msg.method);
                     break;
             }
         };

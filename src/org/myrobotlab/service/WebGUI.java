@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,7 +60,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 	public final static Logger log = LoggerFactory.getLogger(WebGUI.class);
 
-	Integer port = 7777;
+	Integer port = 8888;
 	transient Nettosphere nettosphere;
 	transient Broadcaster broadcaster;
 	transient BroadcasterFactory broadcastFactory;

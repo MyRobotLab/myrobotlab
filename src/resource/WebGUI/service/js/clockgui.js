@@ -1,6 +1,6 @@
 angular.module('mrlapp.service.clockgui', [])
-.controller('ClockGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
-        console.log('ClockGuiCtrl');
+.controller('ClockGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
+        $log.info('ClockGuiCtrl');
         // get latest copy of a services
         $scope.service = mrl.getService($scope.service.name);
         $scope.interval = $scope.service.interval;
@@ -34,7 +34,7 @@ angular.module('mrlapp.service.clockgui', [])
                     $scope.$apply();
                     break;
                 default:
-                    console.log("ERROR - unhandled method " + $scope.name + " " + msg.method);
+                    $log.error("ERROR - unhandled method " + $scope.name + " " + msg.method);
                     break;
             }
         };

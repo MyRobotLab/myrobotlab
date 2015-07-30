@@ -60,7 +60,7 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
     //to be overriden
     if (panel.onMsg == null ) {
         panel.onMsg = function() {
-            console.log('ERR got message to default service endpoint!');
+            $log.error('ERR got message to default service endpoint!');
         }
         ;
     }
@@ -84,7 +84,7 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
     
     //footer-size-change-buttons
     $scope.changesize = function(size) {
-        console.log("change size", name, size);
+        $log.info("change size", name, size);
         $scope.service.panelsize.oldsize = $scope.service.panelsize.aktsize;
         $scope.service.panelsize.aktsize = size;
         $scope.notifySizeChanged();

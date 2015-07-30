@@ -1,7 +1,7 @@
 angular.module('mrlapp.service.webguigui', [])
 
-        .controller('WebGUIGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
-                console.log('WebGUIGuiCtrl');
+        .controller('WebGUIGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+                $log.info('WebGUIGuiCtrl');
                 // get fresh copy
                 $scope.service = mrl.getService($scope.service.name);
 
@@ -13,7 +13,7 @@ angular.module('mrlapp.service.webguigui', [])
 
 
                 //you HAVE TO define this method &
-                //it is the ONLY exception of writing into .gui
+                //it is the ONLY exception of writing into .panel
                 //-> you will receive all messages routed to your service here
                 $scope.panel.onMsg = function (msg) {
                     switch (msg.method) {
@@ -30,7 +30,7 @@ angular.module('mrlapp.service.webguigui', [])
                             $scope.$apply();
                             break;
                         default:
-                            console.log("ERROR - unhandled method " + msg.method);
+                            $log.error("ERROR - unhandled method " + msg.method);
                             break;
                     }
                 };

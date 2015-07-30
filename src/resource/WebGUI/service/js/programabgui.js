@@ -1,6 +1,6 @@
 angular.module('mrlapp.service.programabgui', [])
-        .controller('ProgramABGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
-    console.log('ProgramABGuiCtrl');
+        .controller('ProgramABGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+    $log.info('ProgramABGuiCtrl');
     // when to use $scope or anything?!
     $scope.currResponse = '';
     $scope.utterance = '';
@@ -91,17 +91,17 @@ angular.module('mrlapp.service.programabgui', [])
 		$scope.$apply();
 		if (final_transcript || interim_transcript) {
 			// TODO: fix this? do we care?
-			console.log("show buttons should be called here for inline-block");
+			$log.info("show buttons should be called here for inline-block");
 		};
 	}; 
     $scope.panel.onMsg = function (msg) {
-        console.log("Program AB Msg !");
+        $log.info("Program AB Msg !");
         if (msg.method == "onText") {
             var textData = msg.data[0];
             //$scope.serviceDirectory[msg.sender].pulseData = pulseData;
             $scope.currResponse = textData;
             $scope.rows.unshift({name:"Bot:" , response:textData});
-            console.log('currResponse', $scope.currResponse);
+            $log.info('currResponse', $scope.currResponse);
             $scope.$apply();
         };
     }; 
@@ -122,9 +122,9 @@ angular.module('mrlapp.service.programabgui', [])
     }
     // toggle type of button for starting/stopping speech $scope.recognition.
 	$scope.startRecognition = function () {
-		console.log("Start Recognition clicked.");
+		$log.info("Start Recognition clicked.");
 		if ($scope.recognizing) {
-			console.log("Stoppping recognition");
+			$log.info("Stoppping recognition");
 			$scope.recognition.stop();
 			return;
 		};

@@ -1,7 +1,7 @@
 angular.module('mrlapp.service.runtimegui', [])
 
-.controller('RuntimeGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
-        console.log('RuntimeGuiCtrl');
+.controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
+        $log.info('RuntimeGuiCtrl');
         
         var getSimpleName = function(fullname) {
             return (fullname.substring(fullname.lastIndexOf(".") + 1));
@@ -31,7 +31,7 @@ angular.module('mrlapp.service.runtimegui', [])
                     $scope.$apply();
                     break;
                 default:
-                    console.log("ERROR - unhandled method " + $scope.name + " " + msg.method);
+                    $log.error("ERROR - unhandled method " + $scope.name + " " + msg.method);
                     break;
             }
         };
