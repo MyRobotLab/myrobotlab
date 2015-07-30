@@ -1,6 +1,6 @@
 angular.module('mrlapp.service.pythongui', [])
 .controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
-    console.log('PythonGuiCtrl');
+    $log.info('PythonGuiCtrl');
     
     // get fresh copy
     // basic data set
@@ -38,7 +38,7 @@ angular.module('mrlapp.service.pythongui', [])
             $scope.$apply();
             break;
         default:
-            console.log("ERROR - unhandled method " + msg.method);
+            $log.error("ERROR - unhandled method " + msg.method);
             break;
         }
     }

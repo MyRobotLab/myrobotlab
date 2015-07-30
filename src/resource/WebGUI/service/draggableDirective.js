@@ -47,7 +47,7 @@ angular.module('mrlapp.service')
             );
             /*
             angular.element(document).bind('mousedown', function() {
-                console.log('clicked on document');
+                $log.info('clicked on document');
             }
             );
             */
