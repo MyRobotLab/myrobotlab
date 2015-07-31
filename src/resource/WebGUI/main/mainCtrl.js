@@ -2,8 +2,8 @@
     One (only one) "workspace" controller needs to process the panels[]
 */    
 angular.module('mrlapp.main.mainCtrl', ['mrlapp.mrl'])
-.controller('mainCtrl', ['$log', '$scope', '$document', 'mrl', 'serviceSvc', 
-    function($log, $scope, $document, mrl, serviceSvc) {
+.controller('mainCtrl', ['$log', '$scope',  'mrl', 'serviceSvc', 
+    function($log, $scope, mrl, serviceSvc) {
         $log.info('mainCtrl');
         $scope.services = mrl.getRegistry();
     }]);

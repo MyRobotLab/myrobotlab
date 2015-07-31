@@ -1,7 +1,7 @@
 angular.module('mrlapp.nav')
 
-.controller('NavCtrl', ['$scope', '$location', '$anchorScroll', 'StateSvc', 'mrl', 'serviceSvc', 
-    function($scope, $location, $anchorScroll, StateSvc, mrl, serviceSvc) {
+.controller('NavCtrl', ['$scope',  '$log', '$location', '$anchorScroll', 'StateSvc', 'mrl', 'serviceSvc', 
+    function($scope, $log, $location, $anchorScroll, StateSvc, mrl, serviceSvc) {
 
         //START_green-/red-LED
         // TODO - green png if connected - if not re-connect button
@@ -32,11 +32,11 @@ angular.module('mrlapp.nav')
 
         // FIXME change class not style here ! uniform danger/error/warn/info
         // FIXME -> if error pink background
-        $scope.statusStyle = "statusStyle={'background-color':'pink'}";
+//        $scope.statusStyle = "statusStyle={'background-color':'pink'}";
         
         var onStatus = function(statusMsg) {
-            var status = statusMsg.data[0];
-            var s = status.name + ' ' + status.level + ' ' + status.detail;
+                    var s = statusMsg.data[0];
+                    log.info('status', s);
             $scope.$apply(function() {
                 StateSvc.addStatus(s);
             });
@@ -48,34 +48,40 @@ angular.module('mrlapp.nav')
         $scope.about = function() {
             // modal display of all contributors & link to myobotlab.org
             // & version & platform
-            console.log('about');
+                    $log.info('about');
+        };
+
+        $scope.help = function() {
+            // modal display of no worky 
+                    $log.info('help');
         };
         
         $scope.hideAll = function() {
-            // hide all panels
-            console.log('hideAll');            
+            $log.info('help');
             serviceSvc.hideAll();
         };
         
         $scope.showAll = function() {
             // show all panels
-            console.log('showAll');
+            $log.info('showAll');
             serviceSvc.showAll();
         };
         
-        
-        $scope.help = function() {
-            // modal display of no worky 
-            console.log('help');
-        };
+
+                $scope.showminlist = false;
+                $scope.toggleMinList = function () {
+                    $log.info('toggling MinList');
+                    $scope.showminlist = !$scope.showminlist;
+                };
+
 
         //START_Search
         // $scope.searchPanels = mrl.getServices();
         $scope.searchPanels = serviceSvc.getPanelList();
-        console.log('searchPanels', $scope.searchPanels);
+        $log.info('searchPanels', $scope.searchPanels);
         
         $scope.searchOnSelect = function(item, model, label) {
-            console.log('searchOnSelect');
+            
             serviceSvc.setPosition(item.name, 0, 0);
             // FIXME - check if panel is hide or show - make hide
             // FIXME - change position to (0, 0) with highest z index
