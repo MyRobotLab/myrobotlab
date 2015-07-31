@@ -503,6 +503,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// but they are un-coerced - we need the method signature candidate
 		// to determine what we should coerce them into
 		Message msg = Encoder.fromJson(body.asString(), Message.class);
+		if (msg == null){
+			log.error(String.format("msg is null %s", body.asString()));
+			return;
+		}
 		msg.sender = getName();
 		log.info(String.format("got msg %s", msg.toString()));
 

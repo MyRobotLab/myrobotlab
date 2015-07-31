@@ -57,10 +57,11 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
     ;
     
     //TODO: not completly happy
-    //to be overriden
+    //to be overriden  
+    // - What is this GAP ?
     if (panel.onMsg == null ) {
         panel.onMsg = function() {
-            $log.error('ERR got message to default service endpoint!');
+            $log.error('empty onMsg body!');
         }
         ;
     }
