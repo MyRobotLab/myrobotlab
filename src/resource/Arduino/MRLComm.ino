@@ -13,6 +13,9 @@
 *
 * Requirements: MyRobotLab running on a computer & a serial connection
 *
+* FIXME - find "easiest" way to upload a single hex file !!! command line example
+* perhaps avrdude ?
+*
 */
 
 #include <Servo.h>
@@ -23,151 +26,151 @@
 
 // ----- MRLCOMM FUNCTION GENERATED INTERFACE BEGIN -----------
 ///// INO GENERATED DEFINITION BEGIN //////
-// {publishMRLCommError Integer} 
+// {publishMRLCommError Integer}
 #define PUBLISH_MRLCOMM_ERROR		1
 
-// {getVersion} 
+// {getVersion}
 #define GET_VERSION		2
 
-// {publishVersion Integer} 
+// {publishVersion Integer}
 #define PUBLISH_VERSION		3
 
-// {analogReadPollingStart Integer} 
+// {analogReadPollingStart Integer}
 #define ANALOG_READ_POLLING_START		4
 
-// {analogReadPollingStop Integer} 
+// {analogReadPollingStop Integer}
 #define ANALOG_READ_POLLING_STOP		5
 
-// {analogWrite Integer Integer} 
+// {analogWrite Integer Integer}
 #define ANALOG_WRITE		6
 
-// {digitalReadPollingStart Integer} 
+// {digitalReadPollingStart Integer}
 #define DIGITAL_READ_POLLING_START		7
 
-// {digitalReadPollingStop Integer} 
+// {digitalReadPollingStop Integer}
 #define DIGITAL_READ_POLLING_STOP		8
 
-// {digitalWrite Integer Integer} 
+// {digitalWrite Integer Integer}
 #define DIGITAL_WRITE		9
 
-// {motorAttach String String Integer Integer Integer} 
+// {motorAttach String String Integer Integer Integer}
 #define MOTOR_ATTACH		10
 
-// {motorDetach String} 
+// {motorDetach String}
 #define MOTOR_DETACH		11
 
-// {motorMove String} 
+// {motorMove String}
 #define MOTOR_MOVE		12
 
-// {motorMoveTo String double} 
+// {motorMoveTo String double}
 #define MOTOR_MOVE_TO		13
 
-// {pinMode Integer Integer} 
+// {pinMode Integer Integer}
 #define PIN_MODE		14
 
-// {publishCustomMsg Object[]} 
+// {publishCustomMsg Object[]}
 #define PUBLISH_CUSTOM_MSG		15
 
-// {publishLoadTimingEvent Long} 
+// {publishLoadTimingEvent Long}
 #define PUBLISH_LOAD_TIMING_EVENT		16
 
-// {publishPin Pin} 
+// {publishPin Pin}
 #define PUBLISH_PIN		17
 
-// {publishPulse Integer} 
+// {publishPulse Integer}
 #define PUBLISH_PULSE		18
 
-// {publishSensorData SensorData} 
+// {publishSensorData SensorData}
 #define PUBLISH_SENSOR_DATA		19
 
-// {publishServoEvent Integer} 
+// {publishServoEvent Integer}
 #define PUBLISH_SERVO_EVENT		20
 
-// {publishStepperEvent Integer} 
+// {publishStepperEvent Integer}
 #define PUBLISH_STEPPER_EVENT		21
 
-// {publishTrigger Pin} 
+// {publishTrigger Pin}
 #define PUBLISH_TRIGGER		22
 
-// {pulseIn int int int String} 
+// {pulseIn int int int String}
 #define PULSE_IN		23
 
-// {sensorAttach String} 
+// {sensorAttach String}
 #define SENSOR_ATTACH		24
 
-// {sensorPollingStart String int} 
+// {sensorPollingStart String int}
 #define SENSOR_POLLING_START		25
 
-// {sensorPollingStop String} 
+// {sensorPollingStop String}
 #define SENSOR_POLLING_STOP		26
 
-// {servoAttach String Integer} 
+// {servoAttach String Integer}
 #define SERVO_ATTACH		27
 
-// {servoDetach Servo} 
+// {servoDetach Servo}
 #define SERVO_DETACH		28
 
-// {servoSweepStart String int int int} 
+// {servoSweepStart String int int int}
 #define SERVO_SWEEP_START		29
 
-// {servoSweepStop String} 
+// {servoSweepStop String}
 #define SERVO_SWEEP_STOP		30
 
-// {servoWrite String Integer} 
+// {servoWrite String Integer}
 #define SERVO_WRITE		31
 
-// {servoWriteMicroseconds String Integer} 
+// {servoWriteMicroseconds String Integer}
 #define SERVO_WRITE_MICROSECONDS		32
 
-// {setDebounce int} 
+// {setDebounce int}
 #define SET_DEBOUNCE		33
 
-// {setDigitalTriggerOnly Boolean} 
+// {setDigitalTriggerOnly Boolean}
 #define SET_DIGITAL_TRIGGER_ONLY		34
 
-// {setLoadTimingEnabled boolean} 
+// {setLoadTimingEnabled boolean}
 #define SET_LOAD_TIMING_ENABLED		35
 
-// {setPWMFrequency Integer Integer} 
+// {setPWMFrequency Integer Integer}
 #define SET_PWMFREQUENCY		36
 
-// {setSampleRate int} 
+// {setSampleRate int}
 #define SET_SAMPLE_RATE		37
 
-// {setSerialRate int} 
+// {setSerialRate int}
 #define SET_SERIAL_RATE		38
 
-// {setServoEventsEnabled String boolean} 
+// {setServoEventsEnabled String boolean}
 #define SET_SERVO_EVENTS_ENABLED		39
 
-// {setServoSpeed String Float} 
+// {setServoSpeed String Float}
 #define SET_SERVO_SPEED		40
 
-// {setStepperSpeed Integer} 
+// {setStepperSpeed Integer}
 #define SET_STEPPER_SPEED		41
 
-// {setTrigger int int int} 
+// {setTrigger int int int}
 #define SET_TRIGGER		42
 
-// {softReset} 
+// {softReset}
 #define SOFT_RESET		43
 
-// {stepperAttach Stepper} 
+// {stepperAttach Stepper}
 #define STEPPER_ATTACH		44
 
-// {stepperDetach String} 
+// {stepperDetach String}
 #define STEPPER_DETACH		45
 
-// {stepperMoveTo String int int} 
+// {stepperMoveTo String int int}
 #define STEPPER_MOVE_TO		46
 
-// {stepperReset String} 
+// {stepperReset String}
 #define STEPPER_RESET		47
 
-// {stepperStop String} 
+// {stepperStop String}
 #define STEPPER_STOP		48
 
-// {stopService} 
+// {stopService}
 #define STOP_SERVICE		49
 
 ///// INO GENERATED DEFINITION END //////

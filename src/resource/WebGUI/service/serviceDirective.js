@@ -4,7 +4,7 @@ angular.module('mrlapp.service')
                     scope: {
                         //"=" -> binding to items in parent-scope specified by attribute
                         //"@" -> using passed attribute
-                        spawndata: '=panel'
+                        panel: '=panel'
                     },
                     templateUrl: 'service/service.html',
                     controller: 'ServiceCtrl',
@@ -13,46 +13,46 @@ angular.module('mrlapp.service')
                         //width - change on size change
                         //-->preset sizes (width is undefined)
                         //-->free-form-resizing (width is defined)
-                        scope.notifySizeChanged = function (width) {
+                        scope.panel.notifySizeChanged = function (width) {
                             if (!width) {
                                 scope.resetResizing();
                             }
-                            width = scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].width + width || scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].width;
+                            width = scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].width + width || scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].width;
                             element.css({
                                 width: width + 'px'
                             });
                         };
-                        scope.notifySizeChanged();
+                        scope.panel.notifySizeChanged();
 
-                        scope.spawndata.notifyZIndexChanged = function () {
+                        scope.panel.notifyZIndexChanged = function () {
                             element.css({
-                                'z-index': scope.spawndata.zindex
+                                'z-index': scope.panel.zindex
                             });
                         };
-                        scope.spawndata.notifyZIndexChanged();
+                        scope.panel.notifyZIndexChanged();
 
                         scope.$watch(function () {
                             return element.height();
                         }, function () {
-                            scope.spawndata.height = element.height();
+                            scope.panel.height = element.height();
                         });
 
                         //position: 'absolute' is necessary (even tough it introduces some more work)
                         //without it other panels jump / glitch around when a panel is moved from this list
-                        if (!scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].denyMoving) {
+                        if (!scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].denyMoving) {
                             element.css({
                                 position: 'absolute'
                             });
                         }
 
-                        scope.onMoved = function () {
+                        scope.panel.notifyPositionChanged = function () {
                             element.css({
-                                top: scope.spawndata.posy + 'px',
-                                left: scope.spawndata.posx + 'px'
+                                top: scope.panel.posy + 'px',
+                                left: scope.panel.posx + 'px'
                             });
                         };
-                        if (!scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].denyMoving) {
-                            scope.onMoved();
+                        if (!scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].denyMoving) {
+                            scope.panel.notifyPositionChanged();
                         }
                     }
                 };
@@ -66,16 +66,16 @@ angular.module('mrlapp.service')
                         var resizeX = 10;
 
                         element.on('mousedown', function (event) {
-                            startX = event.pageX - scope.spawndata.posx;
-                            startY = event.pageY - scope.spawndata.posy;
-                            if (((!scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].freeform)
-                                    || (scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].freeform
+                            startX = event.pageX - scope.panel.posx;
+                            startY = event.pageY - scope.panel.posy;
+                            if (((!scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].freeform)
+                                    || (scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].freeform
                                             && startX < element.width() - resizeX))
-                                    && !scope.spawndata.panelsize.sizes[scope.spawndata.panelsize.aktsize].denyMoving) {
+                                    && !scope.panel.panelsize.sizes[scope.panel.panelsize.aktsize].denyMoving) {
                                 // Prevent default dragging of selected content
                                 event.preventDefault();
 
-                                ServiceSvc.putPanelZIndexOnTop(scope.spawndata.name, scope.spawndata.panelname);
+                                ServiceSvc.putPanelZIndexOnTop(scope.panel.name, scope.panel.panelname);
 
                                 element.css({
                                     cursor: 'move'
@@ -86,9 +86,9 @@ angular.module('mrlapp.service')
                         });
 
                         function mousemove(event) {
-                            scope.spawndata.posy = event.pageY - startY;
-                            scope.spawndata.posx = event.pageX - startX;
-                            scope.onMoved();
+                            scope.panel.posy = event.pageY - startY;
+                            scope.panel.posx = event.pageX - startX;
+                            scope.panel.notifyPositionChanged();
                         }
 
                         function mouseup() {
@@ -128,7 +128,7 @@ angular.module('mrlapp.service')
 
                         function mousemove(event) {
                             x = event.pageX - startX;
-                            scope.notifySizeChanged(x);
+                            scope.panel.notifySizeChanged(x);
                         }
 
                         function mouseup() {

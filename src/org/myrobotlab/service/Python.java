@@ -320,9 +320,9 @@ public class Python extends Service {
 	 *            the code to append
 	 * @return the resulting concatenation
 	 */
-	public String appendScript(String data) {
+	public Script appendScript(String data) {
 		currentScript.setCode(String.format("%s\n%s", currentScript.getCode(), data));
-		return data;
+		return currentScript;
 	}
 
 	/**
@@ -353,27 +353,6 @@ public class Python extends Service {
 		if (modulesDir != null) {
 			sys.path.append(new PyString(modulesDir));
 		}
-
-		// add self reference
-		// Python scripts can refer to this service as 'python' regardless
-		// of the actual name
-		/*
-		 * String selfReferenceScript =
-		 * String.format("from org.myrobotlab.service import Runtime\n" +
-		 * "from org.myrobotlab.service import Python\n" +
-		 * "python = Runtime.getService(\"%s\")\n\n", getName()); // TODO - //
-		 * deprecate //+ "runtime = Runtime.getInstance()\n\n" +
-		 * "myService = Runtime.create(\"%1$s\",\"Python\")\n",
-		 * getSafeReferenceName(this.getName())); PyObject compiled =
-		 * getCompiledMethod("initializePython", selfReferenceScript, interp);
-		 * interp.exec(compiled);
-		 */
-
-		/*
-		 * String self = String.format("myService = Runtime.getService(\"%s\")",
-		 * getName()); PyObject compiled = getCompiledMethod("initializePython",
-		 * self, interp); interp.exec(compiled);
-		 */
 
 		String selfReferenceScript = "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.service import Python\n"
 				+ String.format("%s = Runtime.getService(\"%s\")\n\n", getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
@@ -488,14 +467,6 @@ public class Python extends Service {
 		inputQueue.add(msg);
 	}
 
-	/**
-	 * FIXME - better method Converter !!! can't do this now
-	 */
-	/*
-	 * public void execMethod(String method, Object[]...args) { Message msg =
-	 * createMessage(getName(), method, args); inputQueue.add(msg); }
-	 */
-
 	public void execMethod(String method, String param1) {
 		Message msg = createMessage(getName(), method, new Object[] { param1 });
 		inputQueue.add(msg);
@@ -505,18 +476,8 @@ public class Python extends Service {
 		String jsonMethod = String.format("%s()", method);
 		PyObject o = interp.eval(jsonMethod);
 		String ret = o.toString();
-		/*
-		interp.exec(
-		interp.get("ret_val");
-		interp.exec(compiledObject);
-		interp.eval();
-		    Object x = engine.get("x");
-		    System.out.println("x: " + x);
-		*/
 		return ret;
-	}
-	
-	
+	}	
 
 	public void execResource(String filename) {
 		String script = FileIO.resourceToString(filename);

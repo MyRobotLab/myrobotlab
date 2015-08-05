@@ -3,9 +3,9 @@ angular.module('mrlapp.service')
         .controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'ServiceSvc', '$log',
             function ($scope, $modal, $ocLazyLoad, mrl, ServiceSvc, $log) {
 
-                $scope.anker = $scope.spawndata.name + '_-_' + $scope.spawndata.panelname + '_-_';
+                $scope.anker = $scope.panel.name + '_' + $scope.panel.panelname;
 
-                $log.info('ServiceCtrl', $scope.spawndata.name);
+                $log.info('ServiceCtrl', $scope.panel.name);
 
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
@@ -13,105 +13,96 @@ angular.module('mrlapp.service')
 
                 //load the service(-module) (lazy) (from the server)
                 //TODO: should this really be done here?
-                $log.info('lazy-loading:', $scope.spawndata.type);
-                $ocLazyLoad.load("service/js/" + $scope.spawndata.type + "gui.js").then(function () {
-                    $log.info('lazy-loading successful:', $scope.spawndata.type);
+                $log.info('lazy-loading:', $scope.panel.type);
+                $ocLazyLoad.load("service/js/" + $scope.panel.type + "gui.js").then(function () {
+                    $log.info('lazy-loading successful:', $scope.panel.type);
                     $scope.serviceloaded = true;
                 }, function (e) {
-                    $log.warn('lazy-loading wasnt successful:', $scope.spawndata.type);
+                    $log.warn('lazy-loading wasnt successful:', $scope.panel.type);
                     $scope.servicenotfound = true;
                 });
 
                 //START_specific Service-Initialisation
                 //get the service-data (same for all panels off a service)
-                $scope.servicedata = ServiceSvc.getServiceInstance($scope.spawndata.name);
+                $scope.servicedata = ServiceSvc.getServiceData($scope.panel.name);
 
                 $scope.cb = {};
                 var controllerscope;
                 $scope.cb.notifycontrollerisready = function (ctrlscope) {
-                    $log.info('notifycontrollerisready', $scope.spawndata.name);
+                    $log.info('notifycontrollerisready', $scope.panel.name);
                     controllerscope = ctrlscope;
                     controllerscope.getService = function () {
-                        return mrl.getService($scope.spawndata.name);
+                        return mrl.getService($scope.panel.name);
                     };
                     controllerscope.subscribe = function (method) {
-                        return mrl.subscribe($scope.spawndata.name, method);
+                        return mrl.subscribe($scope.panel.name, method);
                     };
                     controllerscope.send = function (method, data) {
                         //TODO - what if it is has more than one data?
                         if (isUndefinedOrNull(data)) {
-                            return mrl.sendTo($scope.spawndata.name, method);
+                            return mrl.sendTo($scope.panel.name, method);
                         } else {
-                            return mrl.sendTo($scope.spawndata.name, method, data);
+                            return mrl.sendTo($scope.panel.name, method, data);
                         }
                     };
                     controllerscope.setPanelCount = function (number) {
                         $log.info('setting panelcount', number);
-                        ServiceSvc.notifyPanelCountChanged($scope.spawndata.name, number);
+                        ServiceSvc.notifyPanelCountChanged($scope.panel.name, number);
                     };
                     controllerscope.setPanelNames = function (names) {
                         $log.info('setting panelnames', names);
-                        ServiceSvc.notifyPanelNamesChanged($scope.spawndata.name, names);
+                        ServiceSvc.notifyPanelNamesChanged($scope.panel.name, names);
                     };
                     controllerscope.setPanelShowNames = function (show) {
                         $log.info('setting panelshownames', show);
-                        ServiceSvc.notifyPanelShowNamesChanged($scope.spawndata.name, show);
+                        ServiceSvc.notifyPanelShowNamesChanged($scope.panel.name, show);
                     };
                     controllerscope.setPanelSizes = function (sizes) {
-                        $log.info('setting panelsizes');
-                        ServiceSvc.notifyPanelSizesChanged($scope.spawndata.name, sizes);
+                        $log.info('setting panelsizes', sizes);
+                        ServiceSvc.notifyPanelSizesChanged($scope.panel.name, sizes);
                     };
+                    //FIXME - only do this (init & subscribeToService) ONCE per service
                     controllerscope.init();
-                    mrl.subscribeToService(controllerscope.onMsg, $scope.spawndata.name);
+                    mrl.subscribeToService(controllerscope.onMsg, $scope.panel.name);
                 };
                 //END_specific Service-Initialisation
 
                 //service-menu-size-change-buttons
                 $scope.changesize = function (size) {
-//                    $log.info("change size", $scope.service.name, size);
-//                    if (size == 'min') {
-//                        $scope.spawndata.panelsize.oldsize = $scope.spawndata.panelsize.aktsize;
-//                        $scope.spawndata.panelsize.aktsize = size;
-//                        $scope.notifySizeChanged();
-//                        ServiceSvc.movePanelToList($scope.spawndata.name, $scope.spawndata.panelname, 'min');
-//                    } else if (size == 'unmin') {
-//                        $scope.spawndata.panelsize.aktsize = $scope.spawndata.panelsize.oldsize;
-//                        $scope.notifySizeChanged();
-//                        ServiceSvc.movePanelToList($scope.spawndata.name, $scope.spawndata.panelname, 'main');
-//                    } else {
-//                        $scope.spawndata.panelsize.oldsize = $scope.spawndata.panelsize.aktsize;
-//                        $scope.spawndata.panelsize.aktsize = size;
-//                        $scope.notifySizeChanged();
-//                        if ($scope.spawndata.panelsize.sizes[$scope.spawndata.panelsize.aktsize].fullscreen) {
-//                            //launch the service as a modal ('full')
-//                            var modalInstance = $modal.open({
-//                                animation: true,
-//                                templateUrl: 'service/servicefulltemplate.html',
-//                                controller: 'ServiceFullCtrl',
-//                                size: 'lg',
-//                                resolve: {
-//                                    spawndata: function () {
-//                                        return $scope.spawndata;
-//                                    },
-//                                    gui: function () {
-//                                        return $scope.gui;
-//                                    },
-//                                    service: function () {
-//                                        return $scope.service;
-//                                    }
-//                                }
-//                            });
-//                            //modal closed -> recover to old size
-//                            modalInstance.result.then(function () {
-//                                $scope.spawndata.panelsize.aktsize = $scope.spawndata.panelsize.oldsize;
-//                                $scope.spawndata.panelsize.oldsize = null;
-//                                $scope.notifySizeChanged();
-//                            }, function (e) {
-//                                $scope.spawndata.panelsize.aktsize = $scope.spawndata.panelsize.oldsize;
-//                                $scope.spawndata.panelsize.oldsize = null;
-//                                $scope.notifySizeChanged();
-//                            });
-//                        }
-//                    }
+                    $log.info("change size", $scope.panel.name, size);
+                    if (size == 'min') {
+                        $scope.panel.panelsize.oldsize = $scope.panel.panelsize.aktsize;
+                        $scope.panel.panelsize.aktsize = size;
+                        $scope.panel.notifySizeChanged();
+                        ServiceSvc.movePanelToList($scope.panel.name, $scope.panel.panelname, 'min');
+                    } else if (size == 'unmin') {
+                        $scope.panel.panelsize.aktsize = $scope.panel.panelsize.oldsize;
+                        $scope.panel.notifySizeChanged();
+                        ServiceSvc.movePanelToList($scope.panel.name, $scope.panel.panelname, 'main');
+                    } else {
+                        $scope.panel.panelsize.oldsize = $scope.panel.panelsize.aktsize;
+                        $scope.panel.panelsize.aktsize = size;
+                        $scope.panel.notifySizeChanged();
+                        if ($scope.panel.panelsize.sizes[$scope.panel.panelsize.aktsize].fullscreen) {
+                            //launch the service as a modal ('full')
+                            var modalInstance = $modal.open({
+                                animation: true,
+                                templateUrl: 'service/servicefulltemplate.html',
+                                controller: 'ServiceFullCtrl',
+                                size: 'lg',
+                                scope: $scope
+                            });
+                            //modal closed -> recover to old size
+                            modalInstance.result.then(function () {
+                                $scope.panel.panelsize.aktsize = $scope.panel.panelsize.oldsize;
+                                $scope.panel.panelsize.oldsize = null;
+                                $scope.panel.notifySizeChanged();
+                            }, function (e) {
+                                $scope.panel.panelsize.aktsize = $scope.panel.panelsize.oldsize;
+                                $scope.panel.panelsize.oldsize = null;
+                                $scope.panel.notifySizeChanged();
+                            });
+                        }
+                    }
                 };
             }]);

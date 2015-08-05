@@ -30,6 +30,7 @@ import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.codec.MethodCache;
+import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodEntry;
@@ -59,7 +60,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 	public final static Logger log = LoggerFactory.getLogger(WebGUI.class);
 
-	Integer port = 7777;
+	Integer port = 8888;
 	transient Nettosphere nettosphere;
 	transient Broadcaster broadcaster;
 	transient BroadcasterFactory broadcastFactory;
@@ -68,7 +69,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	boolean useLocalResources = false;
 	boolean autoStartBrowser = true;
 
-	public String startURL = "http://127.0.0.1:%d/index.html";
+	public String startURL = "http://localhost:%d/index.html";
 
 	// FIXME - shim for Shoutbox
 	// deprecate ???
@@ -180,44 +181,41 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	public void startService() {
 		super.startService();
 		// Broadcaster b = broadcasterFactory.get();
-
 		// a session "might" be nice - but for now we are stateless
 		// SessionSupport ss = new SessionSupport();
+		
+		// extract all resources
+		// if resource directory exists - do not overwrite !
+		// could whipe out user mods
+		FileIO.extractResources();
 
 		Config.Builder configBuilder = new Config.Builder();
 		configBuilder
-				// .resource("C:\\tools\\myrobotlab-WebGUI\\src\\resource\\WebGUI")
-
-				// .resource("./root")
+		/* did not work :(
+		.resource("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource")
+		.resource("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGUI")
+		*/
+		
+				// for debugging
 				.resource("./src/resource/WebGUI")
-				// .resource("./src/resource/MaVo_WebGUI")
 				.resource("./src/resource")
-				// .resource("./src/resource")
-				// .resource("./rest") SHOULD I DO THIS ?
-				// .resource(this)
+				// for runtime - after extractions
+				.resource("./resource/WebGUI")
+				.resource("./resource")
+		
 				// Support 2 APIs
 				// REST - http://host/object/method/param0/param1/...
 				// synchronous DO NOT SUSPEND
 				.resource("/api", this)
-				// TODO - go beyond Servlets
-				// .resource("/api", WebGUIServlet.class)
-
-				// For mvn exec:java
-				// .resource("./src/main/resources")
-
-				// For running inside an IDE
-				// .resource("./nettosphere-samples/games/src/main/resources")
 
 				// if Jetty is in the classpath it will use it by default - we
 				// want to use Netty
-				//.initParam("org.atmosphere.websocket.maxTextMessageSize", "100000")
-				//.initParam("org.atmosphere.websocket.maxBinaryMessageSize", "100000")
-				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport")
-				.initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
+				// .initParam("org.atmosphere.websocket.maxTextMessageSize", "100000")
+				// .initParam("org.atmosphere.websocket.maxBinaryMessageSize", "100000")
+				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
 				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build();
-		// .host("127.0.0.1").build();
-		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
 
+		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
 		s.start();
 
 		broadcastFactory = s.framework().getBroadcasterFactory();
@@ -226,8 +224,6 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		log.info("WebGUI2 {} started on port {}", getName(), port);
 
-		// BufferedReader br = new BufferedReader(new
-		// InputStreamReader(System.in));
 		if (autoStartBrowser) {
 			log.info("auto starting default browser");
 			BareBonesBrowserLaunch.openURL(String.format(startURL, port));
@@ -235,11 +231,11 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		// we want all onState & onStatus events from all services
 		ServiceEnvironment se = Runtime.getLocalServices();
-		for (String name : se.serviceDirectory.keySet()){
+		for (String name : se.serviceDirectory.keySet()) {
 			ServiceInterface si = se.serviceDirectory.get(name);
 			onRegistered(si);
 		}
-				
+
 		// additionally we will want onState & onStatus events from all services
 		// from all new services which were created "after" the webgui
 		// so susbcribe to our Runtimes methods of interest
@@ -247,20 +243,18 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		subscribe(runtime.getName(), "registered");
 		subscribe(runtime.getName(), "released");
 	}
-	
-	public void onRegistered(ServiceInterface si){
+
+	public void onRegistered(ServiceInterface si) {
 		// new service
 		// subscribe to the status events
 		subscribe(si.getName(), "publishStatus");
 		subscribe(si.getName(), "publishState");
-		
+
 		// broadcast it too
 		// repackage message
-		/* don't need to do this :)
-		Message m = createMessage(getName(), "onRegistered", si);
-		m.sender = Runtime.getInstance().getName();
-		broadcast(m);
-		*/
+		/*
+		 * don't need to do this :) Message m = createMessage(getName(), "onRegistered", si); m.sender = Runtime.getInstance().getName(); broadcast(m);
+		 */
 	}
 
 	@Override
@@ -364,7 +358,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			ArrayList<MethodEntry> info = null;
 			if (parts.length == 3) {
-				// ======================================== 
+				// ========================================
 				// POST http://{host}:{port}/api/messages
 				// ========================================
 				// posted message api
@@ -502,43 +496,46 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		}
 
 	}
-	
-	public void processMessageAPI(Codec codec, Body body) throws Exception{
-		
+
+	public void processMessageAPI(Codec codec, Body body) throws Exception {
+
 		// first decoding will give you an array of types in msg.data[]
-		// but they are un-coerced - we need the method signature candidate 
+		// but they are un-coerced - we need the method signature candidate
 		// to determine what we should coerce them into
 		Message msg = Encoder.fromJson(body.asString(), Message.class);
+		if (msg == null){
+			log.error(String.format("msg is null %s", body.asString()));
+			return;
+		}
 		msg.sender = getName();
 		log.info(String.format("got msg %s", msg.toString()));
-		
-		//out(msg);
-							
+
+		// out(msg);
+
 		// get the service
 		ServiceInterface si = Runtime.getService(msg.name);
 		Class<?> clazz = si.getClass();
-		
+
 		Class<?>[] paramTypes = null;
 		Object[] params = new Object[msg.data.length];
 		// decoded array of encoded parameters
 		// FIXME - not "really" correct !
-		Object[] encodedArray = msg.data;//new Object[msg.data.length];
-		
-		//encodedArray = codec.decodeArray(b);
-		
+		Object[] encodedArray = msg.data;// new Object[msg.data.length];
+
+		// encodedArray = codec.decodeArray(b);
+
 		paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
-		
+
 		StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name, msg.method));
-		for (int i = 0; i < paramTypes.length; ++i){
-			if (i != 0){
+		for (int i = 0; i < paramTypes.length; ++i) {
+			if (i != 0) {
 				sb.append(",");
 			}
 			sb.append(paramTypes[i].getSimpleName());
 		}
 		sb.append(")");
 		log.info(sb.toString());
-		
-		
+
 		// WE NOW HAVE ORDINAL AND TYPES
 		params = new Object[encodedArray.length];
 
@@ -546,7 +543,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		for (int i = 0; i < params.length; ++i) {
 			params[i] = codec.decode(encodedArray[i], paramTypes[i]);
 		}
-		
+
 		// FIXME FIXME FIXME !!!!
 		// Service.invoke needs to use method cach BUT - internal queues HAVE type information
 		// AND decoded json DOES NOT - needs to be optimized such that it knows the encoding
@@ -568,14 +565,14 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// FIXME - not good - using my thread to execute another services
 		// method and put its return on the the services out queue :P
 		Object retobj = method.invoke(si, params);
-		
+
 		// FIXME - Is this how to support synchronous ?
-		// What does this mean ? 
-		//respond(out, codec, method.getName(), ret);
-		
+		// What does this mean ?
+		// respond(out, codec, method.getName(), ret);
+
 		si.out(msg.method, retobj);
-		
-		MethodCache.cache(clazz, method);				
+
+		MethodCache.cache(clazz, method);
 	}
 
 	// FIXME !!! - ALL CODECS SHOULD HANDLE MSG INSTEAD OF OBJECT !!!
@@ -593,10 +590,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 	// FIXME - APP_EVENT_LOG for normalizing (if available)
 	public void handleError(String httpMethod, OutputStream out, Codec codec, String key, String detail) {
-		try {			
+		try {
 			log.error(detail);
 			Status error = new Status(getName(), StatusLevel.ERROR, key, detail);
-			if ("POST".equals(httpMethod)){
+			if ("POST".equals(httpMethod)) {
 				broadcast(createMessage(getName(), "onStatus", error));
 			} else {
 				respond(out, codec, "handleError", error);
@@ -638,9 +635,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// FIXME - problem with collisions of this service's methods
 		// and dialog methods ?!?!?
 
-		// broadcast 
+		// broadcast
 		broadcast(m);
-		
+
 		// if the method name is == to a method in the WebGUI
 		// process it
 		if (methodSet.contains(m.method)) {
@@ -659,13 +656,11 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		try {
 
-			// Uri.
-			// Uri myUri = Uri.parse("http://stackoverflow.com");
-
-			WebGUI webgui = (WebGUI) Runtime.start("webgui", "WebGUI");
+			Runtime.start("webgui", "WebGUI");
+			Runtime.start("python", "Python");
 			Runtime.start("arduino", "Arduino");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
-			Runtime.start("gui", "GUIService");
-			
+			//Runtime.start("gui", "GUIService");
+
 			// webgui.extract();
 			/*
 			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock"); Runtime.start("clck3", "Clock");

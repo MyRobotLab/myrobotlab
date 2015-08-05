@@ -85,12 +85,12 @@ angular.module('mrlapp.nav')
 
                 //START_Search
                 //panels are retrieved above (together with minlist)
-                $log.info('searchPanels', $scope.allPanels);
+                $log.info('searchPanels', $scope.allpanels);
 
                 $scope.searchOnSelect = function (item, model, label) {
-                    $log.info('searchOnSelect');
+                    $log.info('searchOnSelect', item);
                     //scroll to selected panel
-                    $location.hash(item.name + '_-_' + item.panelname + '_-_');
+                    $location.hash(item.name + '_' + item.panelname);
                     $anchorScroll();
                 };
                 //END_Search
