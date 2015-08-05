@@ -6,9 +6,9 @@ angular.module('mrlapp.service')
     return {
         restrict: 'A',
         link: function(scope, elem, attr, ctrl) {
-            elem.draggable();
+            elem.parent().draggable();
             
-            elem.bind('mousedown', function(e) {
+            elem.parent().bind('mousedown', function(e) {
                 e.stopPropagation();
                 src = e.currentTarget.id;
                 //elem.css('z-index', '1000');
@@ -27,7 +27,7 @@ angular.module('mrlapp.service')
             }
             );
             
-            elem.bind('mouseup', function(e) {
+            elem.parent().bind('mouseup', function(e) {
                 e.stopPropagation();
                 src = e.currentTarget.id;
                 //elem.css('z-index', '1000');

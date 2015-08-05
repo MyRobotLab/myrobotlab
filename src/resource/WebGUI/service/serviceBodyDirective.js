@@ -8,6 +8,7 @@ angular.module('mrlapp.service')
             scope: {
                 panel: '=',
                 service: '=',
+                        size: '=',
                 panelname: '='
             },
             link: function(scope, elem, attr) {
