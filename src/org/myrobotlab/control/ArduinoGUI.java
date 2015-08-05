@@ -147,7 +147,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 
 	private JMenuItem serialRefresh = new JMenuItem("refresh");
 
-	Dimension size = new Dimension(620, 512);
+	Dimension size = new Dimension(800, 1024);
 
 	private JMenuItem softReset = new JMenuItem("soft reset");
 
@@ -465,7 +465,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 			@Override
 			public void run() {
 				//editor.setEnabled(false);
-				String resourcePath = "Arduino/MRLComm2.ino";
+				String resourcePath = "Arduino/MRLComm.ino";
 				log.info(String.format("loadResourceFile %s", resourcePath));
 				String sketch = FileIO.resourceToString(resourcePath);
 				
@@ -751,7 +751,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 			public void run() {
 
 				//log.info(String.format("%s",pin.toString()));
-
+				
 				if (!traceData.containsKey(pin.pin)) {
 					TraceData td = new TraceData();
 					float gradient = 1.0f / pinComponentList.size();
@@ -775,7 +775,8 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 					int quantum = -10;
 					g.drawLine(t.index, t.data[t.index - 1] * quantum + yoffset, t.index, pin.value * quantum + yoffset);
 				} else if (pin.type == Pin.ANALOG_VALUE) {
-					g.drawLine(t.index, DATA_HEIGHT - t.data[t.index - 1] / 2, t.index, DATA_HEIGHT - pin.value / 2);
+					g.drawLine(t.index, DATA_HEIGHT - t.data[t.index - 1], t.index, DATA_HEIGHT - pin.value);
+					//log.info("" + (pin.value / 2));
 				} else {
 					log.error("dont know how to display pin data method");
 				}

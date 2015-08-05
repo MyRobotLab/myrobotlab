@@ -1,0 +1,38 @@
+<div class="row">
+  <h3>Servo GUI</h3>
+  
+  <button name="attach" ng-click="attachDetach(controller,pin)" ng-init="">{{attachButtonLabel}}</button>
+  
+  <input type="text" name="controller" ng-model="controller" />
+  <!--TODO: make this a dynamic dropdown <select name="controller" ng-model="controller">
+  <option>arduino</option>
+  <option>Second</option>
+  </select>  -->
+  
+  Pin
+  <select name="pin" ng-model="pin">
+  <option>1</option>
+  <option>2</option>
+  <option>3</option>
+  <option>4</option>
+  <option>5</option>
+  <option>6</option>
+  <option>7</option>
+  <option>8</option>
+  <option>9</option>
+  <option>10</option>
+  <option>11</option>
+  <option>12</option>
+  </select>
+  <input type="range" name="angle" min="0" max="180" ng-type="number" ng-model="angle"  ng-change="moveTo(angle)" />
+  {{angle}}
+  <br/>
+  <button name="updateLimits" ng-click="updateLimits(min,max)">Update limits</button>
+  Min
+  <input type="text" name="min" ng-model="min" value="0"/>
+  Max
+  <input type="text" name="max" ng-model="max" value="180"/>
+  <br/>
+  Status:{{status}}
+  <br/>
+</div>

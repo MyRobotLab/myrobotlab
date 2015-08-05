@@ -1592,6 +1592,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				MRLListener target = nel.get(i);
 				if (target.callbackName.compareTo(serviceName) == 0) {
 					nel.remove(i);
+					log.info(String.format("removeListener requested %s.%s to be removed", serviceName, outMethod));
 				}
 			}
 		} else {
@@ -2055,8 +2056,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	
 	public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
 		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
+		/* wa deprecated
 		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
 		cm.send(createMessage(topicName, "removeListener", listener));
+		*/
+		cm.send(createMessage(topicName, "removeListener", new Object[]{topicMethod, callbackName, callbackMethod}));
 	}
 	
 	// -------------- Messaging Ends -----------------------

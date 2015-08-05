@@ -1,0 +1,69 @@
+Rough Flow 
+
+WebGUI starts - it is always interested in newly "registered" or "released" services - so it subscribes to the Runtime.registered and Runtime.released
+All messages from subscriptions are broadcasted to all browsers
+
+A browser loads index.html which starts the angular app - index.html loads all framework scripts through <script src=
+app.js - loads - it contains framework module defintions & routes - the routes contain resolve: directives which initialize the mrl service
+
+The Angular mrl service initializes and tries to upgrade the connection to a websocket - it either successfully upgrades or uses long polling to maintain the connection
+The Angular mrl service does a request to http://{host}:{port}/api/messages  the "messages" api key will direct the WebGUI to suspend the connection - allowing for message based communication
+Connection heartbeats begin
+You can see message flow easily by going to http://localhost:7777/api/messages while a Clock is pulsing - JSON messages should appear at the rate of the Clock pulse
+Runtime.getLocalServices() is the default method called @ http://localhost:7777/api/messages - This is the default response from the WebGUI and the url is not service name aware.  The response which comes back contains all the local services encoded in JSON 
+The response is processed by the mrl service.  The gateway - determined by the name of the message's sender and the Runtime - determined by the service type are both set as references in the mrl service.  Both can be retrieved through mrl.getGateway() & mrl.getRuntime()
+navCtl.js is executed and several callbacks are setup - onClose & onOpen to determine connectivity - also Status logging .. whenever Service.info(msg) Service.warn(msg) o Service.error(msg) is executed - the messages propegate to the nav bar
+mainCtrl.js is processed
+serviceCtrl.js is I "think" its processed due to serviceDirective.js (little unclear on the details)
+lazy loader loads {type}Ctrl.js for each service type processed 
+ng-include is compiled along with an ng-controller director for that type
+finally the service panel {type}gui.html is processed with the appropriate instance information
+ 
+ MyRobotLab - Making Dumb Robots Smarter Inexpensively
+ 
+1. WebGUI starts
+
+registers with Runtime newly created or
+removed services
+
+registers for all 
+publishStatus and publishState events
+
+all messages routed to the webgui from 
+subscriptions will be broadcasted to all
+Angular clients
+
+starts webapi on port 7777
+
+
+2. index.html loads and starts the
+Angular app
+
+all global scripts are loaded
+
+all service specific script should be loaded dynamically
+when that service is identified
+
+the app uses ngRoute to route to a workspace
+before routing the communication between the Angular mrl service and
+the running instance of mrl begins
+
+/api/messages
+
+getLocalServices
+onLocalServices
+
+mrl subscribes to the "method name" getLocalServices - when a
+return onLocalServices message returns it is processed .subscribeToMethod(this.onLocalServices, 'onLocalServices')
+
+
+http://{host}:{port}/api/messages
+
+
+mainCtrl
+
+
+<div ng-repeat="service in services"
+                 service-directive
+                 service="service">
+            </div>

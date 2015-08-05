@@ -119,6 +119,8 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 
 	@Override
 	public int read() throws Exception {
+		return port.readIntArray(1)[0];
+		/*
 		if (port == null) {
 			return -1;
 		}
@@ -128,6 +130,7 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 		} else {
 			return -1;
 		}
+		*/
 	}
 
 	@Override

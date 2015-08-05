@@ -42,6 +42,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipException;
 
 import org.myrobotlab.logging.Level;
@@ -51,8 +53,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * class of useful utility functions we do not use nio - for portability reasons
- * e.g. Android
+ * class of useful utility functions we do not use nio - for portability reasons e.g. Android
  * 
  * @author GroG
  *
@@ -263,17 +264,6 @@ public class FileIO {
 
 	// getBytes end ------------------
 
-	static public String getResouceLocation() {
-		URL url = File.class.getResource("/resource");
-
-		// FIXME - DALVIK issue !
-		if (url == null) {
-			return null; // FIXME DALVIK issue
-		} else {
-			return url.toString();
-		}
-	}
-
 	static public String getResourceJarPath() {
 
 		if (!inJar()) {
@@ -295,18 +285,6 @@ public class FileIO {
 		return url.toString();
 	}
 
-	public static final String getSource() {
-		try {
-			// return
-			// URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),
-			// "UTF-8");
-			return FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-		} catch (Exception e) {
-			Logging.logError(e);
-			return null;
-		}
-	}
-
 	static public byte[] getURL(URL url) {
 		try {
 			URLConnection conn = url.openConnection();
@@ -315,6 +293,17 @@ public class FileIO {
 			Logging.logError(e);
 		}
 		return null;
+	}
+
+	static public String getResouceLocation() {
+		URL url = File.class.getResource("/resource");
+
+		// FIXME - DALVIK issue !
+		if (url == null) {
+			return null; // FIXME DALVIK issue
+		} else {
+			return url.toString();
+		}
 	}
 
 	static public boolean inJar() {
@@ -334,10 +323,32 @@ public class FileIO {
 		return false;
 	}
 
+	public static String getJarName() {
+		String nm = getSource();
+		if (!nm.endsWith(".jar")) {
+			log.error("mrl is not in a jar!");
+			return null;
+		}
+		return nm;
+	}
+
+	public static final String getSource() {
+		try {
+			// return
+			// URLDecoder.decode(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),
+			// "UTF-8");
+			String source = FileIO.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+			log.info("getSource {}", source);
+			return source;
+		} catch (Exception e) {
+			log.error("getSource threw");
+			Logging.logError(e);
+			return null;
+		}
+	}
+
 	/**
-	 * similar to ls - when running in jar form will return contents of path in
-	 * an array list of files when running in the ide will return the contents
-	 * of /bin + path
+	 * similar to ls - when running in jar form will return contents of path in an array list of files when running in the ide will return the contents of /bin + path
 	 * 
 	 * @param path
 	 * @return
@@ -364,8 +375,7 @@ public class FileIO {
 				File file = new File(targetDir + path + "/" + tmp[i]);
 				ret.add(file);
 				/*
-				 * if (dirCheck.isDirectory()) { ret.add(tmp[i] + "/"); } else {
-				 * ret.add(tmp[i]); }
+				 * if (dirCheck.isDirectory()) { ret.add(tmp[i] + "/"); } else { ret.add(tmp[i]); }
 				 */
 			}
 			dir.list();
@@ -389,10 +399,8 @@ public class FileIO {
 	}
 
 	/**
-	 * inter process file communication - default is to wait and attempt to load
-	 * a file in the next second - it comes from savePartFile - then the writing
-	 * of the file from a different process should be an atomic move regardless
-	 * of file size
+	 * inter process file communication - default is to wait and attempt to load a file in the next second - it comes from savePartFile - then the writing of the file from a
+	 * different process should be an atomic move regardless of file size
 	 * 
 	 * @param filename
 	 * @throws IOException
@@ -421,48 +429,6 @@ public class FileIO {
 
 	// jar pathing end ---------------
 	// -- os primitives begin -------
-
-	public static void main(String[] args) throws ZipException, IOException {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-			String t = "this is a test";
-			FileIO.savePartFile("save.txt", t.getBytes());
-			byte[] data = FileIO.loadPartFile("save.txt", 10000);
-			if (data != null) {
-				log.info(new String(data));
-			}
-
-			/*
-			 * String data = resourceToString("version.txt"); data =
-			 * resourceToString("framework/ivychain.xml"); data =
-			 * resourceToString("framework/serviceData.xml");
-			 * 
-			 * byte[] ba = resourceToByteArray("version.txt"); ba =
-			 * resourceToByteArray("framework/version.txt"); ba =
-			 * resourceToByteArray("framework/serviceData.xml");
-			 * 
-			 * String hello = resourceToString("blah.txt");
-			 * 
-			 * copyResource("mrl_logo.jpg", "mrl_logo.jpg");
-			 * 
-			 * byte[] b = resourceToByteArray("mrl_logo.jpg");
-			 * 
-			 * File[] files = getPackageContent("");
-			 * 
-			 * log.info(getBinaryPath());
-			 * 
-			 * log.info("{}", b);
-			 * 
-			 * log.info("done");
-			 */
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
 
 	public final static Object readBinary(String filename) {
 		try {
@@ -621,6 +587,219 @@ public class FileIO {
 			return false;
 		}
 		return true;
+	}
+
+	static public void copyFile(InputStream is, long size, String outFile) throws IOException {
+		String[] parts = outFile.split("/");
+		if (parts.length > 1) {
+			if (parts.length > 1) {
+				File d = new File(outFile.substring(0, outFile.lastIndexOf("/")));
+				if (!d.exists()) {
+					d.mkdirs();
+				}
+			}
+		}
+		
+		FileOutputStream fos = new FileOutputStream(new File(outFile));
+		/* apparently size is not correct or is compressed size ? dunno something aint right !
+		byte[] buffer = new byte[(int) size];
+		is.read(buffer);
+		FileOutputStream fos = new FileOutputStream(new File(outFile));
+		fos.write(buffer);
+		fos.close();
+		is.close();
+		*/
+		
+		// some files are big - nice to have a big buffer
+		byte[] byteArray = new byte[262144];
+        int i;
+        
+        while ((i = is.read(byteArray)) > 0) 
+        {
+            fos.write(byteArray, 0, i);
+        }
+        is.close();
+        fos.close();
+	}
+
+	static public final boolean extractResources() {
+		try {
+			return extractResources(false);
+		} catch(Exception e){
+			Logging.logError(e);
+		}
+		return false;
+	}
+
+	static public final boolean extractResources(boolean force) throws IOException {
+		String resourceName = "resource";
+		File check = new File(resourceName);
+		if (check.exists() && !force) {
+			log.warn("{} aleady exists - not extracting", resourceName);
+			return false;
+		}
+
+		if (!inJar() && !force) {
+			log.warn("mrl is not operating in a jar - not extracting");
+			return false;
+		}
+
+		return extract(getJarName(), resourceName, "");
+	}
+
+	static public final boolean extract(String jarFile, String from, String to) throws IOException {
+		//extract(/C:/mrl/myrobotlab/dist/myrobotlab.jar, resource, )
+		log.info(String.format("extract(%s, %s, %s)", jarFile, from, to));
+
+		boolean contents = false;
+		boolean found = false;
+		boolean firstMatch = true;
+
+		JarFile jar = new JarFile(jarFile);
+		Enumeration<JarEntry> enumEntries = jar.entries();
+
+		// normalize slash
+		if (from != null){
+			from = from.replace("\\", "\\\\");
+		}
+		
+		if (to != null) {
+			to = to.replace("\\", "\\\\");
+		}
+		
+		// normalize [from | from/ | from/*]
+		String fromRoot = null;
+		if (from != null && (from.endsWith("/") || from.endsWith("/*"))) {
+			fromRoot = from.substring(0, from.lastIndexOf("/"));
+			contents = true;
+		} else {
+			fromRoot = from;
+		}
+
+		// normalize [to , to/]
+		if (to == null || to.equals("") || to.equals("./")){
+			to = ".";
+		}
+
+		while (enumEntries.hasMoreElements()) {
+			JarEntry file = (JarEntry) enumEntries.nextElement();
+			// log.debug(file.getName());
+
+			// spin through resrouces until a match
+			if (fromRoot != null && !file.getName().startsWith(fromRoot)) {
+				// log.info(String.format("skipping %s", file.getName()));
+				continue;
+			}
+
+			found = true;
+
+			// our first match !
+			if (!file.isDirectory()) {
+				// not a directory
+				String name = null;
+				if (contents) {
+					name = String.format("%s/%s", to, file.getName().substring((fromRoot.length() + 1)));
+				} else {
+					if (firstMatch) {
+						// file to file
+						name = to;
+					} else {
+						// dirFile to file
+						name = String.format("%s/%s", to, file.getName());
+					}
+				}
+
+				log.info("extracting {} to {}", file.getName(), name);
+				copyFile(jar.getInputStream(file), file.getSize(), name);
+				// file to file copy ... done
+				if (firstMatch) {
+					break;
+				}
+			} else {
+				// df
+				// if (conti)
+				String name = null;
+				if (contents) {
+					name = String.format("%s/%s", to, file.getName().substring((fromRoot.length() + 1)));
+				} else {
+					name = String.format("%s/%s", to, file.getName());
+				}
+				File d = new File(name);
+				d.mkdirs();
+			}
+
+			firstMatch = false;
+		}
+
+		if (!found) {
+			log.error("could not find {}", from);
+		}
+
+		jar.close();
+
+		return found;
+	}
+
+	// FIXME - UNIT TESTS !!!
+	public static void main(String[] args) throws ZipException, IOException {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+			/*
+			 * final URL jarUrl = new URL("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource"); final JarURLConnection connection = (JarURLConnection)
+			 * jarUrl.openConnection(); final URL url = connection.getJarFileURL();
+			 * 
+			 * System.out.println(url.getFile());
+			 */
+
+			//extract("/C:/mrl/myrobotlab/dist/myrobotlab.jar", "resource", "");
+			extract("dist/myrobotlab.jar", "resource", "");
+			// extractResources();
+			/*
+			 * // extract directory to a non existent directory // result should be test7 extract("dist/myrobotlab.jar", "resource/AdafruitMotorShield/*", "test66");
+			 * 
+			 * // file to file extract("dist/myrobotlab.jar", "module.properties", "module.txt");
+			 * 
+			 * // file to file extract("dist/myrobotlab.jar", "resource/ACEduinoMotorShield.png", "ACEduinoMotorShield.png");
+			 * 
+			 * // file to file extract("dist/myrobotlab.jar", "resource/ACEduinoMotorShield.png", "test2/deeper/ACEduinoMotorShield.png");
+			 * 
+			 * // extract directory to a non existent directory // result should be test7 extract("dist/myrobotlab.jar", "resource/*", "test7");
+			 * 
+			 * // extract directory to a non existent directory // result should be test8/testdeeper/(contents of resource) extract("dist/myrobotlab.jar", "resource/",
+			 * "test8/testdeeper");
+			 * 
+			 * // extract directory to a non existent directory // result should be test3/deep/deeper/resource extract("dist/myrobotlab.jar", "resource", "test3/deep/deeper");
+			 * 
+			 * String t = "this is a test"; FileIO.savePartFile("save.txt", t.getBytes()); byte[] data = FileIO.loadPartFile("save.txt", 10000); if (data != null) { log.info(new
+			 * String(data)); }
+			 */
+
+			/*
+			 * String data = resourceToString("version.txt"); data = resourceToString("framework/ivychain.xml"); data = resourceToString("framework/serviceData.xml");
+			 * 
+			 * byte[] ba = resourceToByteArray("version.txt"); ba = resourceToByteArray("framework/version.txt"); ba = resourceToByteArray("framework/serviceData.xml");
+			 * 
+			 * String hello = resourceToString("blah.txt");
+			 * 
+			 * copyResource("mrl_logo.jpg", "mrl_logo.jpg");
+			 * 
+			 * byte[] b = resourceToByteArray("mrl_logo.jpg");
+			 * 
+			 * File[] files = getPackageContent("");
+			 * 
+			 * log.info(getBinaryPath());
+			 * 
+			 * log.info("{}", b);
+			 * 
+			 * log.info("done");
+			 */
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 	}
 
 }

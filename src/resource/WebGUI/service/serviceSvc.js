@@ -31,27 +31,22 @@ angular.module('mrlapp.service')
                 //END_update-notification
 
                 //START_Service Instances
-                var serviceInstances = [];
+                var serviceData = {};
 
-                this.addServiceInstance = function (name) {
+                this.addServiceData = function (name) {
                     $log.info('creating service-instance', name);
-                    serviceInstances[name] = {};
-//                    serviceInstances[name].gui = {};
-//                    serviceInstances[name].service = mrl.getService(name);
+                    serviceData[name] = {};
                 };
 
-                this.getServiceInstance = function (name) {
-                    if (isUndefinedOrNull(serviceInstances[name])) {
+                this.getServiceData = function (name) {
+                    if (isUndefinedOrNull(serviceData[name])) {
                         return null;
                     }
-                    return serviceInstances[name];
+                    return serviceData[name];
                 };
 
-                this.removeServiceInstance = function (name) {
-                    var index = serviceInstances.indexOf(name);
-                    if (index != -1) {
-                        serviceInstances.splice(index, 1);
-                    }
+                this.removeServiceData = function (name) {
+                    delete serviceData[name];
                 };
                 //END_Service Instances
 
@@ -181,7 +176,7 @@ angular.module('mrlapp.service')
                     });
                     zindex = zindex + 1;
                     //construct panel & add it to list
-                    panels[service.name + '_-_' + panelindex + '_-_'] = {
+                    panels[service.name + '/' + panelindex] = {
                         simpleName: service.simpleName,
                         name: service.name,
                         type: service.type,
@@ -224,7 +219,7 @@ angular.module('mrlapp.service')
                     var panelcount = services[name].panelcount;
                     delete services[name];
                     for (var i = 0; i < panelcount; i++) {
-                        delete panels[name + '_-_' + i + '_-_'];
+                        delete panels[name + '/' + i];
                     }
                     notifyAllOfUpdate();
                 };
@@ -239,7 +234,7 @@ angular.module('mrlapp.service')
 
                         if (diff < 0) {
                             for (var i = oldcount - 1; i > count - 1; i++) {
-                                delete panels[name + '_-_' + i + '_-_'];
+                                delete panels[name + '/' + i];
                             }
                         } else if (diff > 0) {
                             var serviceexp = services[name];
@@ -257,7 +252,7 @@ angular.module('mrlapp.service')
                     services[name].panelnames = names;
                     var panelcount = services[name].panelcount;
                     for (var i = 0; i < panelcount; i++) {
-                        panels[name + '_-_' + i + '_-_'].panelname = names[i];
+                        panels[name + '/' + i].panelname = names[i];
                     }
                 };
 
@@ -267,7 +262,7 @@ angular.module('mrlapp.service')
                     services[name].showpanelnames = show;
                     var panelcount = services[name].panelcount;
                     for (var i = 0; i < panelcount; i++) {
-                        panels[name + '_-_' + i + '_-_'].showpanelname = show[i];
+                        panels[name + '/' + i].showpanelname = show[i];
                     }
                 };
 
@@ -277,7 +272,7 @@ angular.module('mrlapp.service')
                     services[name].panelsizes = sizes;
                     var panelcount = services[name].panelcount;
                     for (var i = 0; i < panelcount; i++) {
-                        panels[name + '_-_' + i + '_-_'].panelsize = sizes[i];
+                        panels[name + '/' + i].panelsize = sizes[i];
                     }
                 };
 
@@ -290,7 +285,7 @@ angular.module('mrlapp.service')
                             panelindex = value.panelindex;
                         }
                     });
-                    var zindex = panels[name + '_-_' + panelindex + '_-_'].zindex;
+                    var zindex = panels[name + '/' + panelindex].zindex;
                     var max = 1;
                     angular.forEach(panels, function (value, key) {
                         if (value.zindex > max) {
@@ -300,7 +295,7 @@ angular.module('mrlapp.service')
                             value.zindex--;
                         }
                     });
-                    panels[name + '_-_' + panelindex + '_-_'].zindex = max;
+                    panels[name + '/' + panelindex].zindex = max;
                     angular.forEach(panels, function (value, key) {
                         value.notifyZIndexChanged();
                     });
@@ -315,7 +310,7 @@ angular.module('mrlapp.service')
                             panelindex = value.panelindex;
                         }
                     });
-                    panels[name + '_-_' + panelindex + '_-_'].list = list;
+                    panels[name + '/' + panelindex].list = list;
                     notifyAllOfUpdate();
                 };
 
@@ -342,15 +337,15 @@ angular.module('mrlapp.service')
                 this.onMsg = function (msg) {
                     switch (msg.method) {
                         case 'onRegistered':
-                            var newService = msg.data[0];
-                            _self.addServiceInstance(newService.name);
-                            _self.addService(newService.name, newService);
+                            var service = msg.data[0];
+                            _self.addServiceData(service.name);
+                            _self.addService(service.name, service);
                             break;
 
                         case 'onReleased':
                             var service = msg.data[0];
                             _self.removeService(service.name);
-                            _self.removeServiceInstance(service.name);
+                            _self.removeServiceData(service.name);
                             break;
                     }
                 };
@@ -359,7 +354,7 @@ angular.module('mrlapp.service')
 
                 for (var name in registry) {
                     if (registry.hasOwnProperty(name)) {
-                        this.addServiceInstance(name);
+                        this.addServiceData(name);
                         this.addService(name, registry[name]);
                     }
                 }
