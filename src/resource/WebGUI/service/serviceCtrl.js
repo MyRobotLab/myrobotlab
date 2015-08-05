@@ -1,8 +1,8 @@
-angular.module('mrlapp.service')
 // FIXME FIXME FIXME
 // THIS IS NOT SERVICE SPECIFIC !! MEANING IT NEEDS TO BE COMBINED WITH mainCtrl !!!
 // DO NOT ADD NEW DATA TO service
 // panel should probably be retrieved from serviceSvc
+angular.module('mrlapp.service')
 .controller('ServiceCtrl', ['$log', '$rootScope', '$compile', '$scope', '$modal', '$ocLazyLoad', 'mrl', 'serviceSvc', '$http', 
 function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSvc, $http) {
     // TEMPORARY $scope variables !!!!
@@ -32,6 +32,7 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
     );
     
     
+                //TODO: think of something better
     var initDone = false;
     panel.initDone = function() {
         if (!initDone) {
@@ -81,13 +82,26 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
         //$scope.$apply();
     }
     ;
+
+    
+    $scope.test = function() {
+        var serviceList = angular.element(document.querySelector('#serviceList'));
+        $http.get("service/service.html")
+        .then(function(response) {
+            //$('body').prepend($compile(response.data)($scope));
+            serviceList.prepend($compile(response.data)($scope));
+        }
+        );
+    }
+    ;
+
     
     
     //footer-size-change-buttons
     $scope.changesize = function(size) {
         $log.info("change size", name, size);
-        $scope.service.panelsize.oldsize = $scope.service.panelsize.aktsize;
-        $scope.service.panelsize.aktsize = size;
+        $scope.panel.panelsize.oldsize = $scope.panel.panelsize.aktsize;
+        $scope.panel.panelsize.aktsize = size;
         $scope.notifySizeChanged();
         if (size == "full") {
             //launch the service as a modal ('full')
@@ -106,17 +120,6 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
                 }
             });
         }
-    }
-    ;
-    
-    $scope.test = function() {
-        var serviceList = angular.element(document.querySelector('#serviceList'));
-        $http.get("service/service.html")
-        .then(function(response) {
-            //$('body').prepend($compile(response.data)($scope));
-            serviceList.prepend($compile(response.data)($scope));
-        }
-        );
     }
     ;
     
