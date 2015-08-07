@@ -2,11 +2,7 @@ angular.module('mrlapp.service.runtimegui', [])
 
 .controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
         $log.info('RuntimeGuiCtrl');
-        
-        var getSimpleName = function(fullname) {
-            return (fullname.substring(fullname.lastIndexOf(".") + 1));
-        }
-        
+                
         $scope.service = mrl.getService($scope.service.name);
         var platform = $scope.service.platform;
         // make the platform string
@@ -40,22 +36,8 @@ angular.module('mrlapp.service.runtimegui', [])
         //mrl.subscribe($scope.service.name, 'pulse');            
         
         $scope.newType = undefined;
-        $scope.possibleServices = [];
-
-        // pump model data from repo
-        for (var property in $scope.service.repo.localServiceData.serviceTypes) {
-            if ($scope.service.repo.localServiceData.serviceTypes.hasOwnProperty(property)) {
-                var serviceType = $scope.service.repo.localServiceData.serviceTypes[property];
-                var model = {};
-                model.name = getSimpleName(property);
-                model.img = model.name + '.png';
-                model.alt = serviceType.description;
-                $scope.possibleServices.push(model);
-            }
-        }
-        
-        $scope.possibleServices = $scope.possibleServices;
-        
+        $scope.possibleServices = mrl.getPossibleServices();
+   
         $scope.start = function(newName, newTypeModel) {
             mrl.sendTo($scope.service.name, "start", newName, newTypeModel.name);
         }

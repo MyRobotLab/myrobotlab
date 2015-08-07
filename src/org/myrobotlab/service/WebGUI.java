@@ -70,6 +70,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	boolean autoStartBrowser = true;
 
 	public String startURL = "http://localhost:%d/index.html";
+	
+	// FIXME might need to change to HashMap<String, HashMap<String,String>> to add
+	// client session
+	public HashMap<String, String> servicePanels = new HashMap<String, String>(); 
 
 	// FIXME - shim for Shoutbox
 	// deprecate ???
@@ -650,6 +654,17 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		return false;
 	}
 
+	public void savePanel(String name, String panel){
+		servicePanels.put(name, panel);
+	}
+
+	public String loadPanel(String name){
+		if (servicePanels.containsKey(name)){
+			return servicePanels.get(name);
+		}
+		return null;
+	}
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -657,8 +672,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		try {
 
 			Runtime.start("webgui", "WebGUI");
-			Runtime.start("python", "Python");
-			Runtime.start("arduino", "Arduino");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
+			//Runtime.start("python", "Python");
+			//Runtime.start("arduino", "Arduino");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
 			//Runtime.start("gui", "GUIService");
 
 			// webgui.extract();
