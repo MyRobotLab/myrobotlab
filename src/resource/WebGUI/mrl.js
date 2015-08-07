@@ -132,20 +132,25 @@ angular
     ;
     
     this.escapeJsonSpecialChars = function(data) {
-        var x = data.replace(/\\n/g, "\\n")
-        .replace(/\\'/g, "\\'")
-        .replace(/\\"/g, '\\"')
-        .replace(/\\&/g, "\\&")
-        .replace(/\\r/g, "\\r")
-        .replace(/\\t/g, "\\t")
-        .replace("↵", "FOO") 
-        .replace(/\\b/g, "\\b")
-        .replace("p", "z")
-        //.replace(\u21b5/g,"\\n")
-        .replace("↵", "\\n") 
-        .replace(/\\f/g, "\\f");
-        console.log(x);
-        return x;
+    	
+    	data = "\"" + data + "\"";
+    	return data;
+//    	data = data.split("↵");
+//    	data = data.join();
+//        var x = data.replace(/\\n/g, "\\n")
+//        .replace(/\\'/g, "\\'")
+//        .replace(/\\"/g, '\\"')
+//        .replace(/\\&/g, "\\&")
+//        .replace(/\\r/g, "\\r")
+//        .replace(/\\t/g, "\\t")
+//        .replace("↵", "FOO") 
+//        .replace(/\\b/g, "\\b")
+//        .replace("p", "z")
+//        //.replace(\u21b5/g,"\\n")
+//        .replace("↵", "\\n") 
+//        .replace(/\\f/g, "\\f");
+//        console.log(x);
+//        return x;
     }
     ;
     
