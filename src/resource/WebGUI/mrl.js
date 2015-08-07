@@ -132,11 +132,9 @@ angular
     ;
     
     this.escapeJsonSpecialChars = function(data) {
-    	
-    	data = "\"" + data + "\"";
-    	return data;
-//    	data = data.split("↵");
-//    	data = data.join();
+    	// Encode the quote marks. not sure why this isn't already done for us.
+    	return "\"" + data.replace(/\"/g, "\\\"") + "\"";
+
 //        var x = data.replace(/\\n/g, "\\n")
 //        .replace(/\\'/g, "\\'")
 //        .replace(/\\"/g, '\\"')
