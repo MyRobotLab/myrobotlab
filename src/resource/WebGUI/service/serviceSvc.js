@@ -90,6 +90,21 @@ angular.module('mrlapp.service')
     }
     ;
     
+    this.movePanelToList = function(name, panelname, list) {
+        //move panel to specified list
+        $log.info('movePanelToList', name, panelname, list);
+        var panelindex = -1;
+        angular.forEach(servicePanels, function(value, key) {
+            if (value.name == name && value.panelname == panelname) {
+                panelindex = value.panelindex;
+            }
+        }
+        );
+        servicePanels[name].list = list;
+        notifyAllOfUpdate();
+    }
+    ;
+    
     this.getServicePanel = function(name) {
         $log.info('serviceSvc.getServicePanel', name);
         if (isUndefinedOrNull(servicePanels[name])) {
@@ -247,7 +262,7 @@ angular.module('mrlapp.service')
             height: 0,
             zindex: zindex
         };
-
+        
         // adding it to our map of panels
         servicePanels[name] = panel;
     
@@ -409,6 +424,31 @@ angular.module('mrlapp.service')
         );
     }
     ;
+    
+    this.savePanels = function() {
+        angular.forEach(servicePanels, function(value, key) {
+            _self.savePanel(key);
+        }
+        );
+    }
+    
+    
+    /**
+    * save a panel to the WebGUI - it will keep the object in memory allowing 
+    * it to be loaded back into the correct size, position, state, etc
+    */
+    this.savePanel = function(name) {
+        var gateway = mrl.getGateway();
+        mrl.sendTo(gateway.name, "savePanel", name, getPanel(name));
+    }
+    
+    /**
+    * load a panel from the WebGUI
+    */
+    this.loadPanel = function(name) {
+        var gateway = mrl.getGateway();
+        mrl.sendTo(gateway.name, "loadPanel", getPanel(name));
+    }
     
     
     // why are all services subscribing to runtime?

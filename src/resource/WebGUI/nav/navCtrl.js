@@ -1,7 +1,6 @@
 angular.module('mrlapp.nav')
-
-        .controller('NavCtrl', ['$scope', '$log', '$filter', '$location', '$anchorScroll', 'mrl', 'StateSvc', 'serviceSvc',
-            function ($scope, $log, $filter, $location, $anchorScroll, mrl, StateSvc, serviceSvc) {
+.controller('NavCtrl', ['$scope', '$log', '$filter', '$location', '$anchorScroll', 'mrl', 'StateSvc', 'serviceSvc', 
+function($scope, $log, $filter, $location, $anchorScroll, mrl, StateSvc, serviceSvc) {
     
     //START_green-/red-LED
     // TODO - green png if connected - if not re-connect button
@@ -32,7 +31,13 @@ angular.module('mrlapp.nav')
     //END_green-/red-LED
     
     //START_Status
+    // FIXME - what does StateSvc have statuses GAH names all wrong    
     $scope.statuslist = StateSvc.getStatuses();
+    
+    $scope.possibleServices = mrl.getPossibleServices();
+    
+    var p = mrl.getPlatform();
+    $scope.platform = p.arch + "." + p.bitness + "." + p.os + " " + p.mrlVersion;
     
     // FIXME change class not style here ! uniform danger/error/warn/info
     // FIXME -> if error pink background
@@ -40,7 +45,7 @@ angular.module('mrlapp.nav')
     
     var onStatus = function(statusMsg) {
         var s = statusMsg.data[0];
-        log.info('status', s);
+        $log.info('status', s);
         $scope.$apply(function() {
             StateSvc.addStatus(s);
         }
@@ -77,6 +82,11 @@ angular.module('mrlapp.nav')
     }
     ;
     
+    $scope.test = function() {
+        $log.info('test');
+        var x = mrl.getPossibleServices();
+    }
+    ;
     
     $scope.showminlist = false;
     $scope.toggleMinList = function() {
@@ -101,6 +111,10 @@ angular.module('mrlapp.nav')
         // $anchorScroll();
     }
     ;
-    //END_Search
+    
+    $scope.start = function(newName, newTypeModel) {
+        mrl.sendTo(mrl.getRuntime().name, "start", newName, newTypeModel.name);
+    }
+
 }
 ]);

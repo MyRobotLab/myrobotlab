@@ -386,13 +386,17 @@ angular
     }
     ;
     
+    var getSimpleName = function(fullname) {
+        return ( fullname.substring(fullname.lastIndexOf(".") + 1)) ;
+    };    
+    
     this.subscribeOnOpen = function(callback) {
         onOpenCallbacks.push(callback);
-    }
+    };
     
     this.subscribeOnClose = function(callback) {
         onCloseCallbacks.push(callback);
-    }
+    };
     
     // injectables go here
     // the special $get method called when
@@ -451,6 +455,20 @@ angular
             },
             getPlatform: function() {
                 return _self.platform;
+            },
+            getPossibleServices: function() {
+                var possibleServices = [];
+                for (var property in _self.runtime.repo.localServiceData.serviceTypes) {
+                    if (_self.runtime.repo.localServiceData.serviceTypes.hasOwnProperty(property)) {
+                        var serviceType = _self.runtime.repo.localServiceData.serviceTypes[property];
+                        var model = {};
+                        model.name = getSimpleName(property);
+                        model.img = model.name + '.png';
+                        model.alt = serviceType.description;
+                        possibleServices.push(model);
+                    }
+                }
+                return possibleServices;
             },
             getRuntime: function() {
                 return _self.runtime;
