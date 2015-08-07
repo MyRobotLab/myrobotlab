@@ -98,6 +98,7 @@ angular
         return "on%s",
         capitalize(topicMethod);
     }
+    ;
     
     // FIXME name would be subscribeToAllMsgs
     this.subscribeToMessages = function(callback) {
@@ -112,6 +113,7 @@ angular
         }
         nameCallbackMap[serviceName].push(callback);
     }
+    ;
     
     this.subscribeToType = function(callback, typeName) {
         if (!(typeName in typeCallbackMap)) {
@@ -119,6 +121,7 @@ angular
         }
         typeCallbackMap[typeName].push(callback);
     }
+    ;
     
     this.subscribeToMethod = function(callback, methodName) {
         if (!(methodName in methodCallbackMap)) {
@@ -126,8 +129,32 @@ angular
         }
         methodCallbackMap[methodName].push(callback);
     }
+    ;
+    
+    this.escapeJsonSpecialChars = function(data) {
+        var x = data.replace(/\\n/g, "\\n")
+        .replace(/\\'/g, "\\'")
+        .replace(/\\"/g, '\\"')
+        .replace(/\\&/g, "\\&")
+        .replace(/\\r/g, "\\r")
+        .replace(/\\t/g, "\\t")
+        .replace("↵", "FOO") 
+        .replace(/\\b/g, "\\b")
+        .replace("p", "z")
+        //.replace(\u21b5/g,"\\n")
+        .replace("↵", "\\n") 
+        .replace(/\\f/g, "\\f");
+        console.log(x);
+        return x;
+    }
+    ;
     
     this.sendMessage = function(msg) {
+        if (msg.data != null ) {
+            for (i = 0; i < msg.data.length; ++i) {
+                msg.data[i] = _self.escapeJsonSpecialChars(msg.data[i]);
+            }
+        }
         var json = jQuery.stringifyJSON(msg);
         this.sendRaw(json);
     }
@@ -388,15 +415,18 @@ angular
     
     var getSimpleName = function(fullname) {
         return ( fullname.substring(fullname.lastIndexOf(".") + 1)) ;
-    };    
+    }
+    ;
     
     this.subscribeOnOpen = function(callback) {
         onOpenCallbacks.push(callback);
-    };
+    }
+    ;
     
     this.subscribeOnClose = function(callback) {
         onCloseCallbacks.push(callback);
-    };
+    }
+    ;
     
     // injectables go here
     // the special $get method called when
