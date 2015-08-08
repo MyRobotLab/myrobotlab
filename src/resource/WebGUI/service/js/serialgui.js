@@ -85,19 +85,15 @@ angular.module('mrlapp.service.serialgui', [])
         
         $scope.disconnect = function() {
             mrl.sendTo($scope.service.name, 'disconnect')
-        }
-        
-        $scope.connect = function(portName, baudrate, databits, stopbits, parity) {
-            mrl.sendTo($scope.service.name, 'connect', portName, baudrate, databits, stopbits, parity);
-        }
+        };
         
         $scope.writeString = function(txData) {
             mrl.sendTo($scope.service.name, 'writeString', txData);
-        }
+        };
         
         $scope.connect = function(portName, baudrate, databits, stopbits, parity) {
             mrl.sendTo($scope.service.name, 'connect', portName, baudrate, databits, stopbits, parity);
-        }
+        };
 
         //after you're done with setting up your service-panel, call this method
         $scope.panel.initDone();
