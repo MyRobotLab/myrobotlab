@@ -65,7 +65,7 @@ public class MarySpeech extends Service implements TextListener {
 	public boolean speakInternal(String toSpeak, boolean blocking) {
 		AudioInputStream audio;
 		try {
-			audio = marytts.generateAudio("Hello world.");
+			audio = marytts.generateAudio(toSpeak);
 			AudioPlayer player = new AudioPlayer(audio);
 			player.start();
 			// To make this blocking you can join the player thread.
