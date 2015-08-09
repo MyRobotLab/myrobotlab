@@ -130,35 +130,41 @@ angular
         methodCallbackMap[methodName].push(callback);
     }
     ;
-    
+    /* NOT needed - started to break anyway when data was int or bool or null vs string
     this.escapeJsonSpecialChars = function(data) {
-    	// Encode the quote marks. not sure why this isn't already done for us.
-    	return "\"" + data.replace(/\"/g, "\\\"") + "\"";
-
-//        var x = data.replace(/\\n/g, "\\n")
-//        .replace(/\\'/g, "\\'")
-//        .replace(/\\"/g, '\\"')
-//        .replace(/\\&/g, "\\&")
-//        .replace(/\\r/g, "\\r")
-//        .replace(/\\t/g, "\\t")
-//        .replace("↵", "FOO") 
-//        .replace(/\\b/g, "\\b")
-//        .replace("p", "z")
-//        //.replace(\u21b5/g,"\\n")
-//        .replace("↵", "\\n") 
-//        .replace(/\\f/g, "\\f");
-//        console.log(x);
-//        return x;
+        // Encode the quote marks. not sure why this isn't already done for us. <- Ya ! why ?!?
+        return "\"" + data.replace(/\"/g, "\\\"") + "\"";
+        
+        //        var x = data.replace(/\\n/g, "\\n")
+        //        .replace(/\\'/g, "\\'")
+        //        .replace(/\\"/g, '\\"')
+        //        .replace(/\\&/g, "\\&")
+        //        .replace(/\\r/g, "\\r")
+        //        .replace(/\\t/g, "\\t")
+        //        .replace("↵", "FOO") 
+        //        .replace(/\\b/g, "\\b")
+        //        .replace("p", "z")
+        //        //.replace(\u21b5/g,"\\n")
+        //        .replace("↵", "\\n") 
+        //        .replace(/\\f/g, "\\f");
+        //        console.log(x);
+        //        return x;
     }
     ;
-    
+    */
     this.sendMessage = function(msg) {
+
         if (msg.data != null ) {
             for (i = 0; i < msg.data.length; ++i) {
-                msg.data[i] = _self.escapeJsonSpecialChars(msg.data[i]);
+                // encode the data parameters
+                msg.data[i] = JSON.stringify(msg.data[i]);
             }
         }
-        var json = jQuery.stringifyJSON(msg);
+        
+        //var json = jQuery.stringifyJSON(msg); <-- from atmosphere
+        // now encode the container & contents
+        var json = JSON.stringify(msg);
+        // <-- native STILL DOES NOT ENCODE QUOTES :P !
         this.sendRaw(json);
     }
     ;
