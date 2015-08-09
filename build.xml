@@ -213,6 +213,18 @@
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-server-7.6.13.v20130916.jar"/>
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-client-5.1.2-jar-with-dependencies.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-runtime-5.1.2-jar-with-dependencies.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/icu4j-54.1.1.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/voice-cmu-slt-hsmm-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-en-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-de-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-fr-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-it-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-ru-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-sv-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-te-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-tr-5.1.2.jar"/>
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
 
