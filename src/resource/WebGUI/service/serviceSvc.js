@@ -30,7 +30,7 @@ angular.module('mrlapp.service')
                 };
                 //END_update-notification
 
-                //START_Service Instances
+                //START_ServiceData
                 var serviceData = {};
 
                 this.addServiceData = function (name) {
@@ -48,9 +48,9 @@ angular.module('mrlapp.service')
                 this.removeServiceData = function (name) {
                     delete serviceData[name];
                 };
-                //END_Service Instances
+                //END_ServiceData
 
-                //START_Services
+                //START_ServicePanels
                 var services = {};
                 var panels = {};
 
@@ -338,7 +338,29 @@ angular.module('mrlapp.service')
 //                    }
 //                    notifyAllOfUpdate();
                 };
-                //END_Services
+                
+                //these 3 methods need to be refactored
+                //but it is a start in a very good direction
+                this.savePanels = function () {
+                    angular.forEach(panels, function (value, key) {
+                        _self.savePanel(key);
+                    }
+                    );
+                };
+
+                //save a panel to the WebGUI - it will keep the object in memory allowing 
+                //it to be loaded back into the correct size, position, state, etc
+                this.savePanel = function (name) {
+                    var gateway = mrl.getGateway();
+                    mrl.sendTo(gateway.name, "savePanel", name, getPanel(name));
+                };
+
+                //load a panel from the WebGUI
+                this.loadPanel = function (name) {
+                    var gateway = mrl.getGateway();
+                    mrl.sendTo(gateway.name, "loadPanel", getPanel(name));
+                };
+                //END_ServicePanels
 
                 this.onMsg = function (msg) {
                     switch (msg.method) {

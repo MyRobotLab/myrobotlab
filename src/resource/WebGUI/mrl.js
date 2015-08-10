@@ -98,6 +98,7 @@ angular
         return "on%s",
         capitalize(topicMethod);
     }
+    ;
     
     // FIXME name would be subscribeToAllMsgs
     this.subscribeToMessages = function(callback) {
@@ -112,6 +113,7 @@ angular
         }
         nameCallbackMap[serviceName].push(callback);
     }
+    ;
     
     this.subscribeToType = function(callback, typeName) {
         if (!(typeName in typeCallbackMap)) {
@@ -119,6 +121,7 @@ angular
         }
         typeCallbackMap[typeName].push(callback);
     }
+    ;
     
     this.subscribeToMethod = function(callback, methodName) {
         if (!(methodName in methodCallbackMap)) {
@@ -126,9 +129,42 @@ angular
         }
         methodCallbackMap[methodName].push(callback);
     }
-    
+    ;
+    /* NOT needed - started to break anyway when data was int or bool or null vs string
+    this.escapeJsonSpecialChars = function(data) {
+        // Encode the quote marks. not sure why this isn't already done for us. <- Ya ! why ?!?
+        return "\"" + data.replace(/\"/g, "\\\"") + "\"";
+        
+        //        var x = data.replace(/\\n/g, "\\n")
+        //        .replace(/\\'/g, "\\'")
+        //        .replace(/\\"/g, '\\"')
+        //        .replace(/\\&/g, "\\&")
+        //        .replace(/\\r/g, "\\r")
+        //        .replace(/\\t/g, "\\t")
+        //        .replace("↵", "FOO") 
+        //        .replace(/\\b/g, "\\b")
+        //        .replace("p", "z")
+        //        //.replace(\u21b5/g,"\\n")
+        //        .replace("↵", "\\n") 
+        //        .replace(/\\f/g, "\\f");
+        //        console.log(x);
+        //        return x;
+    }
+    ;
+    */
     this.sendMessage = function(msg) {
-        var json = jQuery.stringifyJSON(msg);
+
+        if (msg.data != null ) {
+            for (i = 0; i < msg.data.length; ++i) {
+                // encode the data parameters
+                msg.data[i] = JSON.stringify(msg.data[i]);
+            }
+        }
+        
+        //var json = jQuery.stringifyJSON(msg); <-- from atmosphere
+        // now encode the container & contents
+        var json = JSON.stringify(msg);
+        // <-- native STILL DOES NOT ENCODE QUOTES :P !
         this.sendRaw(json);
     }
     ;
@@ -386,13 +422,20 @@ angular
     }
     ;
     
+    var getSimpleName = function(fullname) {
+        return ( fullname.substring(fullname.lastIndexOf(".") + 1)) ;
+    }
+    ;
+    
     this.subscribeOnOpen = function(callback) {
         onOpenCallbacks.push(callback);
     }
+    ;
     
     this.subscribeOnClose = function(callback) {
         onCloseCallbacks.push(callback);
     }
+    ;
     
     // injectables go here
     // the special $get method called when
@@ -451,6 +494,20 @@ angular
             },
             getPlatform: function() {
                 return _self.platform;
+            },
+            getPossibleServices: function() {
+                var possibleServices = [];
+                for (var property in _self.runtime.repo.localServiceData.serviceTypes) {
+                    if (_self.runtime.repo.localServiceData.serviceTypes.hasOwnProperty(property)) {
+                        var serviceType = _self.runtime.repo.localServiceData.serviceTypes[property];
+                        var model = {};
+                        model.name = getSimpleName(property);
+                        model.img = model.name + '.png';
+                        model.alt = serviceType.description;
+                        possibleServices.push(model);
+                    }
+                }
+                return possibleServices;
             },
             getRuntime: function() {
                 return _self.runtime;

@@ -13,9 +13,28 @@
 
             <ul class="nav navbar-nav">
                 <li><a href="http://www.myrobotlab.org">/MyRobotLab.org</a></li>
+                <li><a href="http://www.myrobotlab.org">{{platform}}</a></li>
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
+                <!--quick-start a service-->
+                <!--TODO: Do something! To many elements in the navbar! -> navbar stacks! -> occupying screen-space! (not everyone has a very big screen)-->
+                <li>
+                <form class="navbar-form">
+                <!-- pre>Model: {{searchSelectedService | json}}</pre-->
+                    <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" typeahead="state as state.name for state in possibleServices | filter:{name:$viewValue}" typeahead-template-url="customTemplate.html">
+                    <script type="text/ng-template" id="customTemplate.html">
+                        <a>
+                            <img ng-src="/{{match.model.img}}" width="16">
+                            <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+                        </a>
+                    </script>
+                        
+                         <input class="form-control" type="text" ng-model="newName" placeholder="name">
+                            <button class="btn btn-default" ng-click="start(newName, newType)">start</button>
+                        
+                </form>
+                </li>
                 <!--Status-->
                 <li>
                     <form class="navbar-form">
