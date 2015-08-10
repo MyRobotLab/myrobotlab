@@ -1,46 +1,46 @@
 <!-- file menu button bar begin -->
 <div class="btn-group">
-  <div class="dropdown">
-    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-      <span class="glyphicon glyphicon-open">open</span><span class="caret"></span>
-      </button>
+    <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <span class="glyphicon glyphicon-open">open</span><span class="caret"></span>
+        </button>
 
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-      <li><a href="#">home</a></li>
-      <li><a href="#">pyrobot</a></li>
-      <li><a href="#">local</a></li>
-      <li><a href="#">open</a></li>
-    </ul>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <li><a href="#">home</a></li>
+            <li><a href="#">pyrobot</a></li>
+            <li><a href="#">local</a></li>
+            <li><a href="#">open</a></li>
+        </ul>
 
-  <button type="button" class="btn btn-default" ng-click="execute()"><span class="glyphicon glyphicon-play"></span>execute</button>
-  <button type="button" class="btn btn-default"                        ng-click="stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
-  <button type="button" class="btn btn-default"                        ng-click="save()"><span class="glyphicon glyphicon-save"></span>save</button>
-  <button type="button" class="btn btn-default"                        ng-click="copy()"><span class="glyphicon glyphicon-copy"></span>copy</button>
-  </div><!-- FIXME - something is wrong - this end div is the dropdown !!! -->
+        <button type="button" class="btn btn-default" ng-click="data.execute()"><span class="glyphicon glyphicon-play"></span>execute</button>
+        <button type="button" class="btn btn-default" ng-click="data.stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
+        <button type="button" class="btn btn-default" ng-click="data.save()"><span class="glyphicon glyphicon-save"></span>save</button>
+        <button type="button" class="btn btn-default" ng-click="data.copy()"><span class="glyphicon glyphicon-copy"></span>copy</button>
+    </div><!-- FIXME - something is wrong - this end div is the dropdown !!! -->
 </div>
 
 <!-- file menu button bar end theme:'twilight',-->
 <tabset justified="true">
     <tab heading="untitled">	    
-		<div style="height: 300px;width: 100%;" ui-ace="{
-		                                       useWrapMode : true,
-		                                       showGutter: true,		                                       
-                                           theme:'chrome',
-		                                       mode: 'python',
-		                                       firstLineNumber: 1,
-		                                       onLoad: aceLoaded,
-		                                       onChange: aceChanged}">
-		</div>
+        <div style="height: 300px;width: 100%;" ui-ace="{
+             useWrapMode : true,
+             showGutter: true,		                                       
+             theme:'chrome',
+             mode: 'python',
+             firstLineNumber: 1,
+             onLoad: data.aceLoaded,
+             onChange: data.aceChanged}">
+        </div>
     </tab>
 
     <tab heading="new file"> 		
     </tab>
-    
+
 </tabset>
 <!-- FIXME - make debug window directive -->
 <hr/>
 
-<textarea ng-model="output" id="output" class="col-lg-12" readonly>
+<textarea ng-model="data.output" id="output" class="col-lg-12" readonly>
 </textarea>	
 
 

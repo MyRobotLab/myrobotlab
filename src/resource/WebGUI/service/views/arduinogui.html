@@ -1,12 +1,5 @@
 <!--
 
-<div class="row">
-  <div class="col-lg-12">
-    gui {{gui}}<br>
-    service {{service}}
-  </div>
-</div>
-
 http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
 
 -->
@@ -14,16 +7,16 @@ http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
 <!--
 <div class="row">
   <div class="col-lg-2">
-    <img ng-src="../{{isConnectedImage}}.png" />
+    <img ng-src="../{{data.isConnectedImage}}.png" />
   </div>
   <div class="col-lg-3">    
-    <label for="service.portName">port</label>
-    <input type="text" ng-disabled="isConnected" ng-model="service.portName" typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
+    <label for="portName">port</label>
+    <input type="text" id="portname" ng-disabled="data.isConnected" ng-model="data.service.portName" typeahead="portName for portName in data.possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
   </div>
   <div class="col-lg-7">
-    <button class="btn btn-default"  ng-click="refresh()">refresh</button>
-    <button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button>
-    <button class="btn btn-default" ng-show="!isConnected" ng-click="connect(service.portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button>
+    <button class="btn btn-default"  ng-click="data.refresh()">refresh</button>
+    <button class="btn btn-default" ng-show="data.isConnected" ng-click="data.disconnect()">disconnect</button>
+    <button class="btn btn-default" ng-show="!data.isConnected" ng-click="data.connect(data.service.portName, data.service.baudrate, data.service.databits, data.service.stopbits, data.service.parity)">connect</button>
   </div>
 </div>
 -->
@@ -31,7 +24,7 @@ http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
  <div class="col-lg-6">
 
    <label for="type">board</label>
-   <select ng-model="board" ng-change="onBoardChange(board)" class="form-control">
+   <select ng-model="data.board" ng-change="data.onBoardChange(data.board)" class="form-control">
     	<option>Arduino Uno</option>
 		<option>Arduino Duemilanove w/ ATmega328</option>
 		<option>Arduino Diecimila or Duemilanove w/ ATmega168</option>
@@ -74,7 +67,7 @@ http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
                 </script>
                 <!-- options end ---->
 
-    <!-- <button type="button" class="btn btn-default" ng-click="toggleShowMRLComm()"><span class="glyphicon glyphicon-file"></span> MRLComm.ino</button> -->
+    <!-- <button type="button" class="btn btn-default" ng-click="data.toggleShowMRLComm()"><span class="glyphicon glyphicon-file"></span> MRLComm.ino</button> -->
     
 </div>
 </div>
@@ -85,20 +78,20 @@ http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
  <tabset justified="true">
  
     <tab heading="MRLComm.ino">
-    <button class="btn btn-default pull-right" clip-copy="service.sketch.data"><span class="glyphicon glyphicon-copy"></span> copy</button>
+    <button class="btn btn-default pull-right" clip-copy="data.service.sketch.data"><span class="glyphicon glyphicon-copy"></span> copy</button>
     <div class="col-lg-12" style="height: 600px;" ui-ace="{
                                            useWrapMode : true,
                                            showGutter: true,
                                            theme:'chrome',
                                            mode: 'c_cpp',
                                            firstLineNumber: 1,
-                                           onLoad: aceLoaded,
-                                           onChange: aceChanged}">
+                                           onLoad: data.aceLoaded,
+                                           onChange: data.aceChanged}">
     </div>
     </tab>
 
     <tab heading="Oscope">
- 		<oscope width="500" height="1024" id="oscope" ng-model="service.name" ></oscope>
+ 		<oscope width="500" height="1024" id="oscope" ng-model="data.service.name" ></oscope>
     </tab>
 
     <tab heading="Pins">

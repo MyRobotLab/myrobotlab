@@ -1,79 +1,71 @@
 angular.module('mrlapp.service.pythongui', [])
-.controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
-    $log.info('PythonGuiCtrl');
-    
-    // get fresh copy
-    // basic data set
-    var name = $scope.service.name;
-    $scope.service = mrl.getService($scope.service.name);
-    $scope.name = name;
+        .controller('PythonGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+                var _self = this;
+                $log.info('PythonGuiCtrl');
 
-    $scope.output='';
+                this.init = function () {
+                    // get latest copy of a service
+                    $scope.data.service = this.getService();
+                    //init some variables
+                    $scope.data.output = '';
+                    // the awesome ace editor 1
+                    $scope.data.editor = null;
 
-    // the awesome ace editor 1
-    var editor = null ;
-    
-    //you can access two objects
-    //$scope.panel & $scope.service
-    //$scope.panel contains some framwork functions related to your service panel
-    //-> you can call functions on it, but NEVER write in it
-    //$scope.service is your service-object, it is the representation of the service running in mrl
-    
-    //you HAVE TO define this method &
-    //it is the ONLY exception of writing into .gui
-    //-> you will receive all messages routed to your service here
-    $scope.panel.onMsg = function(msg) {
-        switch (msg.method) {
-        case 'onStdOut':
-            $scope.output = msg.data[0] + $scope.output;
-            // $scope.output = $scope.output + msg.data[0];
-            $scope.$apply();
-            break;
-        case 'onClockStarted':
-            $scope.label = "Stop";
-            $scope.$apply();
-            break;
-        case 'onClockStopped':
-            $scope.label = "Start";
-            $scope.$apply();
-            break;
-        default:
-            $log.error("ERROR - unhandled method " + msg.method);
-            break;
-        }
-    }
-    ;
-    
-    $scope.aceLoaded = function(e) {
-        $log.info("ace loaded");
-        // Options
-        editor = e;
-        //editor.setReadOnly(true);
-    }
-    ;
-    
-    $scope.aceChanged = function(e) {
-        $log.info("ace changed");
-        //
-    }
-    ;
-    
-    $scope.execute = function() {
-        $log.info("execute");
-        mrl.sendTo(name, "exec", editor.getValue());
-    }
-    ;
-    
-    //you can subscribe to methods
-    mrl.subscribe(name, 'publishStdOut');
-    mrl.subscribe(name, 'clockStarted');
-    mrl.subscribe(name, 'clockStopped');
+                    this.onMsg = function (msg) {
+                        switch (msg.method) {
+                            case 'onStdOut':
+                                $scope.data.output = msg.data[0] + $scope.data.output;
+                                // $scope.data.output = $scope.data.output + msg.data[0];
+                                $scope.$apply();
+                                break;
+                            case 'onClockStarted':
+                                $scope.data.label = "Stop";
+                                $scope.$apply();
+                                break;
+                            case 'onClockStopped':
+                                $scope.data.label = "Start";
+                                $scope.$apply();
+                                break;
+                            default:
+                                $log.error("ERROR - unhandled method " + msg.method);
+                                break;
+                        }
+                    };
 
-    // FIXME re-entrant?
-    mrl.sendTo(name, "attachPythonConsole");
+                    $scope.data.aceLoaded = function (e) {
+                        $log.info("ace loaded");
+                        // Options
+                        $scope.data.editor = e;
+                        //editor.setReadOnly(true);
+                    };
 
-    
-    //after you're done with setting up your service-panel, call this method
-    $scope.panel.initDone();
-}
-]);
+                    $scope.data.aceChanged = function (e) {
+                        $log.info("ace changed");
+                        //
+                    };
+
+                    $scope.data.execute = function () {
+                        $log.info("execute");
+                        _self.send("exec", $scope.data.editor.getValue());
+                    };
+
+                    $scope.data.stop = function () {
+                    };
+
+                    $scope.data.save = function () {
+                    };
+
+                    $scope.data.copy = function () {
+                    };
+
+                    //Subscriptions
+                    this.subscribe('publishStdOut');
+                    this.subscribe('clockStarted');
+                    this.subscribe('clockStopped');
+
+                    // FIXME re-entrant?
+                    this.send("attachPythonConsole");
+                };
+
+                $scope.cb.notifycontrollerisready(this);
+            }]);

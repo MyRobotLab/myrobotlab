@@ -1,4 +1,5 @@
 <a>
-   <img src="{{match.model.simpleName}}.png" alt="" width="16">
+    <img src="{{match.model.simpleName}}.png" alt="" width="16">
     <span bind-html-unsafe="match.model.name | typeaheadHighlight:query"></span>
+    <span ng-if="match.model.showpanelname"><i>&nbsp;&nbsp;{{match.model.panelname}}</i></span>
 </a>

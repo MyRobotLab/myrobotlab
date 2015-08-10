@@ -1,135 +1,108 @@
-// FIXME FIXME FIXME
-// THIS IS NOT SERVICE SPECIFIC !! MEANING IT NEEDS TO BE COMBINED WITH mainCtrl !!!
-// DO NOT ADD NEW DATA TO service
-// panel should probably be retrieved from serviceSvc
 angular.module('mrlapp.service')
-.controller('ServiceCtrl', ['$log', '$rootScope', '$compile', '$scope', '$modal', '$ocLazyLoad', 'mrl', 'serviceSvc', '$http', 
-function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSvc, $http) {
-    // TEMPORARY $scope variables !!!!
-    // this runs through for each service - 
-    // all scope data is temporary unless its put into an associative  array
-    // the name switches every time.
-    // $scope.anker = name + '_-_' + $scope.service.panelname + '_-_';
-    var name = $scope.service.name;
-    var panel = serviceSvc.getServicePanel(name);
-    
-    $scope.anker = name;
-    $scope.panel = panel;
-    
-    $log.info('ServiceCtrl', name);
-    
-    var type = $scope.panel.type;
-    
-    $log.info('lazy-loading:', type);
-    $ocLazyLoad.load("service/js/" + type + "gui.js").then(function() {
-        $scope.serviceloaded = true;
-        // FIXME why is this needed?
-    }
-    , function(e) {
-        $log.info('lazy-loading wasnt successful:', type);
-        $scope.servicenotfound = true;
-    }
-    );
-    
-    
-                //TODO: think of something better
-    var initDone = false;
-    panel.initDone = function() {
-        if (!initDone) {
-            initDone = true;
-            // create message bindings
-            mrl.subscribeToService(panel.onMsg, name);
-        }
-    }
-    ;
-    
-    panel.setPanelNames = function(names) {
-        $log.info('setting panelnames', names);
-    }
-    ;
-    panel.setPanelShowNames = function(show) {
-        $log.info('setting panelshownames', show);
-    }
-    ;
-    panel.setPanelSizes = function(sizes) {
-        $log.info('setting panelsizes');
-        serviceSvc.notifyPanelSizesChanged(name, sizes);
-    }
-    ;
-    
-    //TODO: not completly happy
-    //to be overriden  
-    // - What is this GAP ?
-    if (panel.onMsg == null ) {
-        panel.onMsg = function() {
-            $log.error('empty onMsg body!');
-        }
-        ;
-    }
-    ;
-    
-    $scope.setShow = function(val) {
-        $log.info('setShow ' + $scope.show);
-        $scope.show = val;
-    }
-    ;
-    
-    $scope.setPosition = function(x, y) {
-        $log.info('setPosition ', x, ',', y);
-        // FIXME !! MERGE STYLE !!! 
-        // $scope.style = "{position:'static', top:" + 50 +", left:" + 50 +"}";
-        $scope.style = "{'color':'green','top':" + 250 +", 'left':" + 250 +"}";
-        //$scope.$apply();
-    }
-    ;
 
-    
-    $scope.test = function() {
-        var serviceList = angular.element(document.querySelector('#serviceList'));
-        $http.get("service/service.html")
-        .then(function(response) {
-            //$('body').prepend($compile(response.data)($scope));
-            serviceList.prepend($compile(response.data)($scope));
-        }
-        );
-    }
-    ;
+        .controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'ServiceSvc', '$log',
+            function ($scope, $modal, $ocLazyLoad, mrl, ServiceSvc, $log) {
 
-    
-    
-    //footer-size-change-buttons
-    $scope.changesize = function(size) {
-        $log.info("change size", name, size);
-        $scope.panel.panelsize.oldsize = $scope.panel.panelsize.aktsize;
-        $scope.panel.panelsize.aktsize = size;
-        $scope.notifySizeChanged();
-        if (size == "full") {
-            //launch the service as a modal ('full')
-            var modalInstance = $modal.open({
-                animation: true,
-                templateUrl: 'service/servicefulltemplate.html',
-                controller: 'ServiceFullCtrl',
-                size: 'lg',
-                resolve: {
-                    panel: function() {
-                        return panel;
-                    },
-                    service: function() {
-                        return $scope.service;
+                $scope.anker = $scope.panel.name + '_' + $scope.panel.panelname;
+
+                $log.info('ServiceCtrl', $scope.panel.name);
+
+                var isUndefinedOrNull = function (val) {
+                    return angular.isUndefined(val) || val === null;
+                };
+
+                //load the service(-module) (lazy) (from the server)
+                //TODO: should this really be done here?
+                $log.info('lazy-loading:', $scope.panel.type);
+                $ocLazyLoad.load("service/js/" + $scope.panel.type + "gui.js").then(function () {
+                    $log.info('lazy-loading successful:', $scope.panel.type);
+                    $scope.serviceloaded = true;
+                }, function (e) {
+                    $log.warn('lazy-loading wasnt successful:', $scope.panel.type);
+                    $scope.servicenotfound = true;
+                });
+
+                //START_specific Service-Initialisation
+                //get the service-data (same for all panels off a service)
+                $scope.servicedata = ServiceSvc.getServiceData($scope.panel.name);
+
+                $scope.cb = {};
+                var controllerscope;
+                $scope.cb.notifycontrollerisready = function (ctrlscope) {
+                    $log.info('notifycontrollerisready', $scope.panel.name);
+                    controllerscope = ctrlscope;
+                    controllerscope.getService = function () {
+                        return mrl.getService($scope.panel.name);
+                    };
+                    controllerscope.subscribe = function (method) {
+                        return mrl.subscribe($scope.panel.name, method);
+                    };
+                    controllerscope.send = function (method, data) {
+                        //TODO - what if it is has more than one data?
+                        if (isUndefinedOrNull(data)) {
+                            return mrl.sendTo($scope.panel.name, method);
+                        } else {
+                            return mrl.sendTo($scope.panel.name, method, data);
+                        }
+                    };
+                    controllerscope.setPanelCount = function (number) {
+                        $log.info('setting panelcount', number);
+                        ServiceSvc.notifyPanelCountChanged($scope.panel.name, number);
+                    };
+                    controllerscope.setPanelNames = function (names) {
+                        $log.info('setting panelnames', names);
+                        ServiceSvc.notifyPanelNamesChanged($scope.panel.name, names);
+                    };
+                    controllerscope.setPanelShowNames = function (show) {
+                        $log.info('setting panelshownames', show);
+                        ServiceSvc.notifyPanelShowNamesChanged($scope.panel.name, show);
+                    };
+                    controllerscope.setPanelSizes = function (sizes) {
+                        $log.info('setting panelsizes', sizes);
+                        ServiceSvc.notifyPanelSizesChanged($scope.panel.name, sizes);
+                    };
+                    //FIXME - only do this (init & subscribeToService) ONCE per service
+                    controllerscope.init();
+                    mrl.subscribeToService(controllerscope.onMsg, $scope.panel.name);
+                };
+                //END_specific Service-Initialisation
+
+                //service-menu-size-change-buttons
+                $scope.changesize = function (size) {
+                    $log.info("change size", $scope.panel.name, size);
+                    if (size == 'min') {
+                        $scope.panel.panelsize.oldsize = $scope.panel.panelsize.aktsize;
+                        $scope.panel.panelsize.aktsize = size;
+                        $scope.panel.notifySizeChanged();
+                        ServiceSvc.movePanelToList($scope.panel.name, $scope.panel.panelname, 'min');
+                    } else if (size == 'unmin') {
+                        $scope.panel.panelsize.aktsize = $scope.panel.panelsize.oldsize;
+                        $scope.panel.notifySizeChanged();
+                        ServiceSvc.movePanelToList($scope.panel.name, $scope.panel.panelname, 'main');
+                    } else {
+                        $scope.panel.panelsize.oldsize = $scope.panel.panelsize.aktsize;
+                        $scope.panel.panelsize.aktsize = size;
+                        $scope.panel.notifySizeChanged();
+                        if ($scope.panel.panelsize.sizes[$scope.panel.panelsize.aktsize].fullscreen) {
+                            //launch the service as a modal ('full')
+                            var modalInstance = $modal.open({
+                                animation: true,
+                                templateUrl: 'service/servicefulltemplate.html',
+                                controller: 'ServiceFullCtrl',
+                                size: 'lg',
+                                scope: $scope
+                            });
+                            //modal closed -> recover to old size
+                            modalInstance.result.then(function () {
+                                $scope.panel.panelsize.aktsize = $scope.panel.panelsize.oldsize;
+                                $scope.panel.panelsize.oldsize = null;
+                                $scope.panel.notifySizeChanged();
+                            }, function (e) {
+                                $scope.panel.panelsize.aktsize = $scope.panel.panelsize.oldsize;
+                                $scope.panel.panelsize.oldsize = null;
+                                $scope.panel.notifySizeChanged();
+                            });
+                        }
                     }
-                }
-            });
-        }
-    }
-    ;
-    
-    
-    // IMPORTANT - this is where functionality is taken from the "one"
-    // service panel currently being processed and made available to "many"
-    // through the assignment of data & functions in the serviceSvc
-    // assign a scope method to the panel
-    serviceSvc.getServicePanel(name).setShow = $scope.setShow;
-    serviceSvc.getServicePanel(name).setPosition = $scope.setPosition;
-
-}
-]);
+                };
+            }]);

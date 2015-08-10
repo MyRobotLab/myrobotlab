@@ -1,25 +1,27 @@
 angular.module('mrlapp.service.solrgui', [])
-  .controller('SolrGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+        .controller('SolrGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+                var _self = this;
                 $log.info('SolrGuiCtrl');
-                // TODO: something useful?!
-                $scope.panel.onMsg = function (msg) {
-                    $log.info("Solr Msg ! - ");  
-                    $log.info(msg);
-                    if (msg.method == "onResults") {
-                    	// Results!
-                    	var solrResults = msg.data[0];
-                    	$scope.service.solrResults = solrResults;
-                    	$scope.$apply();
-                    }
-                };
-                $scope.search = function(querystring) {
-                    $log.info('SolrGuiCtrl - Search Clicked!' + querystring);
-                	mrl.sendTo($scope.service.name, "search", querystring);
-                };
-                
 
-                
-                mrl.subscribe($scope.service.name, 'publishResults', $scope.service.results);
-                $scope.panel.initDone();
-                
-  }]);
+                this.init = function () {
+                    // TODO: something useful?!
+                    this.onMsg = function (msg) {
+                        $log.info("Solr Msg ! - ");
+                        $log.info(msg);
+                        if (msg.method == "onResults") {
+                            // Results!
+                            var solrResults = msg.data[0];
+                            $scope.data.service.solrResults = solrResults;
+                            $scope.$apply();
+                        }
+                    };
+                    $scope.data.search = function (querystring) {
+                        $log.info('SolrGuiCtrl - Search Clicked!' + querystring);
+                        this.send("search", querystring);
+                    };
+
+                    this.subscribe('publishResults', $scope.data.service.results);
+                };
+
+                $scope.cb.notifycontrollerisready(this);
+            }]);
