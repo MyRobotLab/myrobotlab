@@ -1,12 +1,9 @@
-/*
-    general reverse directive
-*/
 angular.module('mrlapp.main.filter', [])
 //general reverse filter
-.filter('reverse', function() {
-    return function(items) {
-        return items.slice().reverse();
-    };
+        .filter('reverse', function () {
+            return function (items) {
+                return items.slice().reverse();
+            };
         })
         //filter to sort out any panels that don't belong to that list
         .filter('panellist', function () {
@@ -19,4 +16,4 @@ angular.module('mrlapp.main.filter', [])
                 });
                 return newarray;
             };
-});
+        });

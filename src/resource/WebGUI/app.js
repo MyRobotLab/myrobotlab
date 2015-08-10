@@ -28,24 +28,24 @@ angular.module('mrlapp', [
         .config(['$provide', '$routeProvider', 'mrlProvider', 'ngClipProvider',
             function ($provide, $routeProvider, mrlProvider, ngClipProvider) {
 
-        ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
+                ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
 
                 //set the logger up (extend the angular default one)
                 $provide.decorator('$log', function ($delegate, mrlLogger) {
                     return mrlLogger($delegate);
                 });
 
-        $routeProvider.when('/main', {
-            templateUrl: 'main/main.html',
-            controller: 'mainCtrl',
-            resolve: {
-                message: function(mrl) {
-                    return mrl.init();
-                }
-            }
+                $routeProvider.when('/main', {
+                    templateUrl: 'main/main.html',
+                    controller: 'mainCtrl',
+                    resolve: {
+                        message: function (mrl) {
+                            return mrl.init();
+                        }
+                    }
 //        }).when('/workpace', {
 //            templateUrl: 'workpace/index.html',
-        }).otherwise({
-            redirectTo: '/main'
-        });
-    }]);
+                }).otherwise({
+                    redirectTo: '/main'
+                });
+            }]);

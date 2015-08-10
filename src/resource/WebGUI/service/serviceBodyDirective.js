@@ -1,37 +1,25 @@
- /*
-  from: serviceCtrl + service.html     
-*/
 angular.module('mrlapp.service')
-.directive('serviceBody', ['$log', '$compile', function($log, $compile) {
-        $log.info('serviceBodyDirective');
-        return {
-            scope: {
-                panel: '=',
-                service: '=',
+        .directive('serviceBody', ['$compile', function ($compile) {
+                return {
+                    scope: {
+                        data: '=',
                         size: '=',
-                panelname: '='
-            },
-            link: function(scope, elem, attr) {
-                $log.info('serviceBodyDirective.link');
-                var ctrl = "";
-                try {
-                    ctrl = scope.panel.simpleName + "GuiCtrl";
-                    var html = '<div ng-controller=\"' + ctrl + '\"><div service-body-second type="' + attr.type + '"></div></div>';
-                    elem.html(html).show();
-                    $compile(elem.contents())(scope);
-                } catch (err) {
-                    $log.error("serviceBodyDirective threw compiling ", ctrl, err);
-                }
-            }
-        };
-    }])
-
-.directive('serviceBodySecond', ['$log', function($log) {
-        $log.info('serviceBodyDirective - serviceBodySecond');
-        return {
-            //inject template into the service-panel
-            templateUrl: function(element, attr) {
-                return 'service/views/' + attr.type + 'gui.html';
-            }
-        };
-    }]);
+                        panelname: '=',
+                        cb: '='
+                    },
+                    link: function (scope, elem, attr) {
+                        //inject controller into the service-panel
+                        var html = '<div ng-controller=\"' + attr.simplename + 'GuiCtrl as guictrl\"><div service-body-second type="' + attr.type + '" cb=' + scope.cb + '></div></div>';
+                        elem.html(html).show();
+                        $compile(elem.contents())(scope);
+                    }
+                };
+            }])
+        .directive('serviceBodySecond', [function () {
+                return {
+                    //inject template into the service-panel
+                    templateUrl: function (element, attr) {
+                        return 'service/views/' + attr.type + 'gui.html';
+                    }
+                };
+            }]);

@@ -1,8 +1,8 @@
 /*
     mis-named statesvc should be named statussvs
 */
-angular.module('mrlapp.main.statesvc', ['mrlapp.mrl'])
-.service('StateSvc', [function() {
+angular.module('mrlapp.main.statesvc', [])
+        .service('StateSvc', [function () {
         
         var statuslist = [];
         
@@ -10,7 +10,7 @@ angular.module('mrlapp.main.statesvc', ['mrlapp.mrl'])
             statuslist.push(status);
         };
         
-        this.getStatuses = function() {
+                this.getStatuses = function () {
             return statuslist;
         };
         

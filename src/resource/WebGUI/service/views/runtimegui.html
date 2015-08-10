@@ -1,13 +1,13 @@
 <div class="row">
 <div class="col-lg-12">
-    <label for="platform">{{platform}} {{version}}</label>
+    <label for="platform">{{data.platform}} {{data.version}}</label><!--ERR: no id="platform"-->
      <!--<pre>Model: {{customSelected | json}}</pre> -->
 </div>     
 <div class="col-lg-4">
-     <input class="form-control" type="text" ng-model="newName" placeholder="name">
+     <input class="form-control" type="text" ng-model="data.newName" placeholder="name">
 </div>
 <div class="col-lg-4">
-    <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" typeahead="state as state.name for state in possibleServices | filter:{name:$viewValue}" typeahead-template-url="customTemplate.html">
+    <input class="form-control" type="text" ng-model="data.newType" placeholder="Service Type" typeahead="state as state.name for state in data.possibleServices | filter:{name:$viewValue}" typeahead-template-url="customTemplate.html">
     <script type="text/ng-template" id="customTemplate.html">
     <a>
       <img ng-src="/{{match.model.img}}" width="16">
@@ -16,6 +16,6 @@
     </script>
 </div>  
 <div class="col-lg-4">
-    <button class="btn btn-default" ng-click="start(newName, newType)">start service</button>
+    <button class="btn btn-default" ng-click="data.start(data.newName, data.newType)">start service</button>
 </div>   
 </div>

@@ -1,17 +1,16 @@
-<!--for each service-->
-<div id="{{::anker}}" ng-show="show" style="position:'absolute'" ng-style="style" >
+<div id="{{::anker}}" ng-show="!panel.hide">
     <div class="panel panel-default">
         <div class="panel-heading" drag-directive>
             <!--header-->
             <h3 class="panel-title">
-                <img src="{{::service.simpleName}}.png" alt="" width="16">
-                <b>{{::service.name}}</b><div style="display:inline;" ng-if="service.showpanelname">&nbsp;&nbsp;{{service.panelname}}</div>
+                <img src="{{::panel.simpleName}}.png" alt="" width="16">
+                <b>{{::panel.name}}</b><div style="display:inline;" ng-if="panel.showpanelname">&nbsp;&nbsp;{{panel.panelname}}</div>
                 <div class="pull-right" dropdown dropdown-append-to-body>
-                    {{::service.simpleName}}&nbsp;&nbsp;
+                    {{::panel.simpleName}}&nbsp;&nbsp;
                     <span style="cursor: pointer;" tooltip-placement="right" tooltip="Menu"><i dropdown-toggle class="glyphicon glyphicon-list"></i></span>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank">
+                            <a href="http://myrobotlab.org/service/{{::panel.simpleName}}" target="_blank">
                                 <i class="glyphicon glyphicon-question-sign"></i>
                                 &nbsp;&nbsp;help
                             </a>
@@ -26,6 +25,18 @@
                             <a href="" ng-click="changesize('unmin')">
                                 <i class="glyphicon glyphicon-eye-open"></i>
                                 &nbsp;&nbsp;expand
+                            </a>
+                        </li>
+                        <li ng-show="!panel.panelsize.sizes[panel.panelsize.aktsize].forcesize">
+                            <a href="" ng-click="panel.hide = !panel.hide">
+                                <span ng-show="!panel.hide">
+                                    <i class="glyphicon glyphicon-eye-close"></i>
+                                    &nbsp;&nbsp;hide
+                                </span>
+                                <span ng-show="panel.hide"><!--could be useless ...-->
+                                    <i class="glyphicon glyphicon-eye-close"></i>
+                                    &nbsp;&nbsp;show
+                                </span>
                             </a>
                         </li>
                         <li>
@@ -50,9 +61,7 @@
                 <i class="glyphicon glyphicon-download-alt"></i>&nbsp;&nbsp;loading service ...
             </div>
             <div ng-if="!servicenotfound && serviceloaded">
-                <div service-body type="{{panel.type}}" simplename="{{service.simpleName}}" size="panel.panelsize.aktsize" panelname="panel.panelname"  panel="panel" service="service">
-                    <!-- content body here -->
-                </div>
+                <div service-body type="{{panel.type}}" simplename="{{panel.simpleName}}" size="panel.panelsize.aktsize" panelname="panel.panelname" data="servicedata" cb="cb"></div>
             </div>
             <div ng-if="servicenotfound">
                 <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;service not found
