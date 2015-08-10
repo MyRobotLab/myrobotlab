@@ -86,6 +86,10 @@ angular.module('mrlapp.service.serialgui', [])
                         _self.send('disconnect');
                     };
 
+                    $scope.data.connect = function (portName, baudrate, databits, stopbits, parity) {
+                        _self.send('connect', portName, baudrate, databits, stopbits, parity);
+                    };
+
                     $scope.data.writeString = function (txData) {
                         _self.send('writeString', txData);
                     };
