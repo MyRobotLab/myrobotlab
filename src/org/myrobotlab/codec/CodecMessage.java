@@ -44,12 +44,6 @@ public class CodecMessage implements Codec {
 	@Override
 	public Object decode(Object data, Class<?> type) throws Exception {
 		// data has to be a String !! .. just has to be
-		// String x = "\"" + (String)data + "\"";
-
-		// FIXME JACKSON is not like GSON - it will not decode twice !!!
-		// REMOVED HACK !!
-		// String instr = String.format("\"%s\"", data.toString());
-		// String instr = String.format("%s", data.toString());
 		return mapper.fromJson(data.toString(), type);
 	}
 

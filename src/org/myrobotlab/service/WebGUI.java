@@ -672,7 +672,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		try {
 
 			Runtime.start("webgui", "WebGUI");
-			//Runtime.start("python", "Python");
+			Runtime.start("cli", "CLI");
 			//Runtime.start("arduino", "Arduino");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
 			//Runtime.start("gui", "GUIService");
 

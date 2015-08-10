@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.myrobotlab.codec.Encoder;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.StreamGobbler;
 import org.myrobotlab.logging.LoggerFactory;
@@ -32,14 +31,40 @@ import org.slf4j.Logger;
  */
 public class CLI extends Service {
 	
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(CLI.class);
+	public final static HashSet<String> cmdSet = new HashSet<String>();
+
+	
 	// commands
 	public final static String cd = "cd";
 	public final static String pwd = "pwd";
 	public final static String ls = "ls";
 	public final static String help = "help";
 	public final static String question = "?";
+
+	private HashMap<String, Pipe> pipes = new HashMap<String, Pipe>();
+	// my "real" in & out
+	transient Decoder in;
+	transient OutputStream os;
+
+	ArrayList<String> history = new ArrayList<String>();
+
+	transient FileOutputStream fos;
 	
-	public final static HashSet<String> cmdSet = new HashSet<String>();
+	String cwd = "/";
+	//String prompt = "(:";
+	String prompt = "#";
+
+	
+	// active relay - could be list - but lets start simple
+	String attached = null;
+	// transient OutputStream attachedIn = null;
+	transient BufferedWriter attachedIn = null;
+
+	transient StreamGobbler attachedOut = null;
+	
+	
 
 	// FIXME - needs refactor / merge with StreamGobbler
 	// FIXME - THIS CONCEPT IS SOOOOOO IMPORTANT
@@ -49,8 +74,7 @@ public class CLI extends Service {
 	// Agent + (RemoteAdapter/WebGUI/Netosphere) + CLI(command processor part
 	// with InStream/OutStream) - is most Big-Fu !
 	public class Decoder extends Thread {
-		public String cwd = "/";
-		public String prompt = "(:";
+		// public String cwd = "/"; CHANGED THIS - it now is GLOBAL - :P
 		String name;
 		transient CLI cli;
 		transient InputStream is;
@@ -73,7 +97,7 @@ public class CLI extends Service {
 				BufferedReader br = new BufferedReader(in); // < FIXME ? is
 															// Buffered
 															// Necessary?
-				out(String.format("\n[%s %s]%s", Runtime.getInstance().getName(), cwd, prompt).getBytes());
+				writePrompt();
 
 				String line = null;
 
@@ -198,11 +222,125 @@ public class CLI extends Service {
 			 */
 		}
 
-		public void writePrompt() throws IOException {
-			out(String.format("\n[%s %s]%s", Runtime.getInstance().getName(), cwd, prompt).getBytes());
-		}
 
 	}
+	
+	public void writePrompt() throws IOException {
+		out(String.format("%s:%s%s", Runtime.getInstance().getName(), cwd, prompt).getBytes());
+	}
+	
+	
+	public Object process(String line) throws IOException{
+		// FIXME - must read char by char to process up-arrow history commands 
+		//in.read()
+		line = line.trim();
+
+		if (line.length() == 0) {
+			writePrompt();
+			return null;
+		}
+
+		if (attachedIn != null) {
+			if ("detach".equals(line)) {
+				// multiple in future mabye
+				detach();
+				return null;
+			}
+
+			// relaying command to another process
+			attachedIn.write(line);
+			attachedIn.newLine();
+			attachedIn.flush();
+			// writePrompt();
+			return null;
+		}
+
+		if (line.startsWith(cd)) {
+			String path = "/";
+			if (line.length() > 2) {
+				// FIXME - cheesy - "look" for relative directories
+				// !
+				if (!line.contains("/")) {
+					path = "/" + line.substring(3);
+				} else {
+					path = line.substring(3);
+				}
+			}
+			cd(path);
+		} else if (line.startsWith(help)) {
+			// TODO dump json command object
+			// which has a map of commands
+		} else if (line.startsWith(pwd)) {
+			out(cwd.getBytes());
+		} else if (line.startsWith(ls)) {
+			String path = cwd; // <-- path =
+			if (line.length() > 3) {
+				path = line.substring(3);
+			}
+
+			path = path.trim();
+			// absolute path always
+			ls(path);
+		} else if (line.startsWith("lp")) {
+
+			// cli.lp(path??);
+			// cli.lp();
+
+		} else {
+
+			String path = null;
+			if (line.startsWith("/")) {
+				path = String.format("/%s%s", Encoder.PREFIX_API, line);
+			} else {
+				path = String.format("/%s%s%s", Encoder.PREFIX_API, cwd, line);
+			}
+
+			log.info(path);
+			try {
+				
+				// New Way
+				Object ret = Encoder.invoke(path);
+				if (ret != null && ret instanceof Serializable) {
+					// configurable use log or system.out ?
+					// FIXME - make getInstance configurable
+					// Encoder
+					// reference !!!
+					out(Encoder.toJson(ret).getBytes());
+				}
+				/* Old Way
+				Message msg = Encoder.decodePathInfo(path);
+				if (msg != null) {
+					info("incoming msg[%s]", msg);
+
+					// get service - is this a security breech ?
+					ServiceInterface si = Runtime.getService(msg.name);
+					Object ret = si.invoke(msg.method, msg.data);
+
+					// want message ? or just data ?
+					// configurable ...
+					// if you data with tags - you might as well do
+					// message !
+					// - return only callbacks this way ->
+					// si.in(msg);
+					if (ret != null && ret instanceof Serializable) {
+						// configurable use log or system.out ?
+						// FIXME - make getInstance configurable
+						// Encoder
+						// reference !!!
+						out(Encoder.toJson(ret).getBytes());
+					}
+				}
+				*/
+			} catch (Exception e) {
+				Logging.logError(e);
+			}
+
+		}
+		writePrompt();
+		
+		return null;
+	}
+	
 
 	public class Pipe {
 		public String name;
@@ -216,23 +354,6 @@ public class CLI extends Service {
 		}
 	}
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(CLI.class);
-
-	private HashMap<String, Pipe> pipes = new HashMap<String, Pipe>();
-	// my "real" in & out
-	transient Decoder in;
-	transient OutputStream os;
-
-	transient FileOutputStream fos;
-
-	// active relay - could be list - but lets start simple
-	String attached = null;
-	// transient OutputStream attachedIn = null;
-	transient BufferedWriter attachedIn = null;
-
-	transient StreamGobbler attachedOut = null;
 
 	/**
 	 * Command Line Interpreter - used for processing encoded (default RESTful)
@@ -330,7 +451,8 @@ public class CLI extends Service {
 	}
 
 	public String cd(String path) {
-		in.cwd = path;
+		//in.cwd = path;
+		cwd = path;
 		return path;
 	}
 
@@ -379,7 +501,6 @@ public class CLI extends Service {
 	 * @throws IOException
 	 */
 	public void ls(String path) throws IOException {
-		StringBuffer sb = new StringBuffer();
 		String[] parts = path.split("/");
 
 		if (path.equals("/")) {
@@ -407,6 +528,15 @@ public class CLI extends Service {
 		if (fos != null)
 			fos.write(data);
 		// }
+		invoke("stdout", data);
+	}
+	
+	public String stdout(byte[] data){
+		if (data != null)
+		return new String(data);
+		else {
+			return "";
+		}
 	}
 
 	public void out(String str) throws IOException {
