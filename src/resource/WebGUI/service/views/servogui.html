@@ -1,39 +1,39 @@
 <div class="row">
-  <h3>Servo GUI</h3>
-  
-  <button name="attach" ng-click="data.attachDetach(data.controller,data.pin)">{{data.attachButtonLabel}}</button>
-  
-  <input type="text" name="controller" ng-model="data.controller" />
-  <!--@kwatters: You might be interested in ngOptions (basically a "dynamic" select)-->
-  <!--TODO: make this a dynamic dropdown <select name="controller" ng-model="data.controller">
-  <option>arduino</option>
-  <option>Second</option>
-  </select>  -->
-  
-  Pin
-  <select name="pin" ng-model="data.pin">
-  <option>1</option>
-  <option>2</option>
-  <option>3</option>
-  <option>4</option>
-  <option>5</option>
-  <option>6</option>
-  <option>7</option>
-  <option>8</option>
-  <option>9</option>
-  <option>10</option>
-  <option>11</option>
-  <option>12</option>
-  </select>
-  <input type="range" name="angle" min="0" max="180" ng-type="number" ng-model="data.angle"  ng-change="data.moveTo(data.angle)" />
-  {{data.angle}}
-  <br/>
-  <button name="updateLimits" ng-click="data.updateLimits(data.min,data.max)">Update limits</button>
-  Min
-  <input type="text" name="min" ng-model="data.min" value="0"/>
-  Max
-  <input type="text" name="max" ng-model="data.max" value="180"/>
-  <br/>
-  Status:{{data.status}}
-  <br/>
+    <h3>Servo GUI</h3>
+
+    <button name="attach" ng-click="data.attachDetach(data.controller, data.pin)">{{data.attachButtonLabel}}</button>
+
+    <input type="text" name="controller" ng-model="data.controller" />
+    <!--@kwatters: You might be interested in ngOptions (basically a "dynamic" select)-->
+    <!--TODO: make this a dynamic dropdown <select name="controller" ng-model="data.controller">
+    <option>arduino</option>
+    <option>Second</option>
+    </select>  -->
+
+    Pin
+    <select name="pin" ng-model="data.pin">
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+        <option>6</option>
+        <option>7</option>
+        <option>8</option>
+        <option>9</option>
+        <option>10</option>
+        <option>11</option>
+        <option>12</option>
+    </select>
+    <input type="range" name="angle" min="0" max="180" ng-type="number" ng-model="data.angle"  ng-change="data.moveTo(data.angle)" />
+    {{data.angle}}
+    <br/>
+    <button name="updateLimits" ng-click="data.updateLimits(data.min, data.max)">Update limits</button>
+    Min
+    <input type="text" name="min" ng-model="data.min" value="0"/>
+    Max
+    <input type="text" name="max" ng-model="data.max" value="180"/>
+    <br/>
+    Status:{{data.status}}
+    <br/>
 </div>

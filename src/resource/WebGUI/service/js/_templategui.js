@@ -2,7 +2,7 @@ angular.module('mrlapp.service.templategui', [])
         .controller('TemplateGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
                 var _self = this;
                 $log.info('TemplateGuiCtrl');
-                
+
                 //clockgui.js is a good example of how a simple service could look like
 
                 //you can store your "data" into $scope.data

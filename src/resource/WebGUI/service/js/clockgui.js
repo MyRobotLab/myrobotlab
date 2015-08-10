@@ -52,7 +52,7 @@ angular.module('mrlapp.service.clockgui', [])
                     this.subscribe('clockStopped');
                     //(still needs something for unsubscribing)
                 };
-                
+
                 //this could be removed (and probably will, but was too much effort for now)
                 $scope.cb.notifycontrollerisready(this);
             }]);

@@ -338,7 +338,7 @@ angular.module('mrlapp.service')
 //                    }
 //                    notifyAllOfUpdate();
                 };
-                
+
                 //these 3 methods need to be refactored
                 //but it is a start in a very good direction
                 this.savePanels = function () {

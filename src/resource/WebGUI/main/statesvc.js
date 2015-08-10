@@ -1,20 +1,20 @@
 /*
-    mis-named statesvc should be named statussvs
-*/
+ mis-named statesvc should be named statussvs
+ */
 angular.module('mrlapp.main.statesvc', [])
         .service('StateSvc', [function () {
-        
-        var statuslist = [];
-        
-        this.addStatus = function(status) {
-            statuslist.push(status);
-        };
-        
+
+                var statuslist = [];
+
+                this.addStatus = function (status) {
+                    statuslist.push(status);
+                };
+
                 this.getStatuses = function () {
-            return statuslist;
-        };
-        
+                    return statuslist;
+                };
+
                 this.clearStatuses = function () {
-            statuslist = [];
-        };
-    }]);
+                    statuslist = [];
+                };
+            }]);
