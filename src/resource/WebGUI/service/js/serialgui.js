@@ -93,10 +93,6 @@ angular.module('mrlapp.service.serialgui', [])
                     $scope.data.writeString = function (txData) {
                         _self.send('writeString', txData);
                     };
-
-                    $scope.data.connect = function (portName, baudrate, databits, stopbits, parity) {
-                        _self.sendTo('connect', portName, baudrate, databits, stopbits, parity);
-                    };
                 };
 
                 $scope.cb.notifycontrollerisready(this);

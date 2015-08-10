@@ -1,149 +1,150 @@
 <div>
-<!--  TODO Move this stuff into angular land! -->
-<script>
-// handle it if a new country/language is selected.
-function updateCountry() {
-	  for (var i = select_dialect.options.length - 1; i >= 0; i--) {
-	    select_dialect.remove(i);
-	  }
-	  var list = langs[select_language.selectedIndex];
-	  for (var i = 1; i < list.length; i++) {
-	    select_dialect.options.add(new Option(list[i][1], list[i][0]));
-	  }
-	  select_dialect.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
-};
-// All of the supported languages that can be selected (and dialects)
-var langs =
-[['Afrikaans',       ['af-ZA']],
- ['Bahasa Indonesia',['id-ID']],
- ['Bahasa Melayu',   ['ms-MY']],
- ['Català',          ['ca-ES']],
- ['Čeština',         ['cs-CZ']],
- ['Deutsch',         ['de-DE']],
- ['English',         ['en-AU', 'Australia'],
-                     ['en-CA', 'Canada'],
-                     ['en-IN', 'India'],
-                     ['en-NZ', 'New Zealand'],
-                     ['en-ZA', 'South Africa'],
-                     ['en-GB', 'United Kingdom'],
-                     ['en-US', 'United States']],
- ['Español',         ['es-AR', 'Argentina'],
-                     ['es-BO', 'Bolivia'],
-                     ['es-CL', 'Chile'],
-                     ['es-CO', 'Colombia'],
-                     ['es-CR', 'Costa Rica'],
-                     ['es-EC', 'Ecuador'],
-                     ['es-SV', 'El Salvador'],
-                     ['es-ES', 'España'],
-                     ['es-US', 'Estados Unidos'],
-                     ['es-GT', 'Guatemala'],
-                     ['es-HN', 'Honduras'],
-                     ['es-MX', 'México'],
-                     ['es-NI', 'Nicaragua'],
-                     ['es-PA', 'Panamá'],
-                     ['es-PY', 'Paraguay'],
-                     ['es-PE', 'Perú'],
-                     ['es-PR', 'Puerto Rico'],
-                     ['es-DO', 'República Dominicana'],
-                     ['es-UY', 'Uruguay'],
-                     ['es-VE', 'Venezuela']],
- ['Euskara',         ['eu-ES']],
- ['Français',        ['fr-FR']],
- ['Galego',          ['gl-ES']],
- ['Hrvatski',        ['hr_HR']],
- ['IsiZulu',         ['zu-ZA']],
- ['Íslenska',        ['is-IS']],
- ['Italiano',        ['it-IT', 'Italia'],
-                     ['it-CH', 'Svizzera']],
- ['Magyar',          ['hu-HU']],
- ['Nederlands',      ['nl-NL']],
- ['Norsk bokmål',    ['nb-NO']],
- ['Polski',          ['pl-PL']],
- ['Português',       ['pt-BR', 'Brasil'],
-                     ['pt-PT', 'Portugal']],
- ['Română',          ['ro-RO']],
- ['Slovenčina',      ['sk-SK']],
- ['Suomi',           ['fi-FI']],
- ['Svenska',         ['sv-SE']],
- ['Türkçe',          ['tr-TR']],
- ['български',       ['bg-BG']],
- ['Pусский',         ['ru-RU']],
- ['Српски',          ['sr-RS']],
- ['한국어',            ['ko-KR']],
- ['中文',             ['cmn-Hans-CN', '普通话 (中国大陆)'],
-                     ['cmn-Hans-HK', '普通话 (香港)'],
-                     ['cmn-Hant-TW', '中文 (台灣)'],
-                     ['yue-Hant-HK', '粵語 (香港)']],
- ['日本語',           ['ja-JP']],
- ['Lingua latīna',   ['la']]];
-// populate the languages control
-for (var i = 0; i < langs.length; i++) {
-  select_language.options[i] = new Option(langs[i][0], i);
-}
-// defaults.
-select_language.selectedIndex = 6;
-updateCountry();
-select_dialect.selectedIndex = 6;
-//updateCountry();
-</script>
+    <!--  TODO Move this stuff into angular land! -->
+    <script>
+    // handle it if a new country/language is selected.
+        function updateCountry() {
+            for (var i = select_dialect.options.length - 1; i >= 0; i--) {
+                select_dialect.remove(i);
+            }
+            var list = langs[select_language.selectedIndex];
+            for (var i = 1; i < list.length; i++) {
+                select_dialect.options.add(new Option(list[i][1], list[i][0]));
+            }
+            select_dialect.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
+        }
+        ;
+    // All of the supported languages that can be selected (and dialects)
+        var langs =
+                [['Afrikaans', ['af-ZA']],
+                    ['Bahasa Indonesia', ['id-ID']],
+                    ['Bahasa Melayu', ['ms-MY']],
+                    ['Català', ['ca-ES']],
+                    ['Čeština', ['cs-CZ']],
+                    ['Deutsch', ['de-DE']],
+                    ['English', ['en-AU', 'Australia'],
+                        ['en-CA', 'Canada'],
+                        ['en-IN', 'India'],
+                        ['en-NZ', 'New Zealand'],
+                        ['en-ZA', 'South Africa'],
+                        ['en-GB', 'United Kingdom'],
+                        ['en-US', 'United States']],
+                    ['Español', ['es-AR', 'Argentina'],
+                        ['es-BO', 'Bolivia'],
+                        ['es-CL', 'Chile'],
+                        ['es-CO', 'Colombia'],
+                        ['es-CR', 'Costa Rica'],
+                        ['es-EC', 'Ecuador'],
+                        ['es-SV', 'El Salvador'],
+                        ['es-ES', 'España'],
+                        ['es-US', 'Estados Unidos'],
+                        ['es-GT', 'Guatemala'],
+                        ['es-HN', 'Honduras'],
+                        ['es-MX', 'México'],
+                        ['es-NI', 'Nicaragua'],
+                        ['es-PA', 'Panamá'],
+                        ['es-PY', 'Paraguay'],
+                        ['es-PE', 'Perú'],
+                        ['es-PR', 'Puerto Rico'],
+                        ['es-DO', 'República Dominicana'],
+                        ['es-UY', 'Uruguay'],
+                        ['es-VE', 'Venezuela']],
+                    ['Euskara', ['eu-ES']],
+                    ['Français', ['fr-FR']],
+                    ['Galego', ['gl-ES']],
+                    ['Hrvatski', ['hr_HR']],
+                    ['IsiZulu', ['zu-ZA']],
+                    ['Íslenska', ['is-IS']],
+                    ['Italiano', ['it-IT', 'Italia'],
+                        ['it-CH', 'Svizzera']],
+                    ['Magyar', ['hu-HU']],
+                    ['Nederlands', ['nl-NL']],
+                    ['Norsk bokmål', ['nb-NO']],
+                    ['Polski', ['pl-PL']],
+                    ['Português', ['pt-BR', 'Brasil'],
+                        ['pt-PT', 'Portugal']],
+                    ['Română', ['ro-RO']],
+                    ['Slovenčina', ['sk-SK']],
+                    ['Suomi', ['fi-FI']],
+                    ['Svenska', ['sv-SE']],
+                    ['Türkçe', ['tr-TR']],
+                    ['български', ['bg-BG']],
+                    ['Pусский', ['ru-RU']],
+                    ['Српски', ['sr-RS']],
+                    ['한국어', ['ko-KR']],
+                    ['中文', ['cmn-Hans-CN', '普通话 (中国大陆)'],
+                        ['cmn-Hans-HK', '普通话 (香港)'],
+                        ['cmn-Hant-TW', '中文 (台灣)'],
+                        ['yue-Hant-HK', '粵語 (香港)']],
+                    ['日本語', ['ja-JP']],
+                    ['Lingua latīna', ['la']]];
+    // populate the languages control
+        for (var i = 0; i < langs.length; i++) {
+            select_language.options[i] = new Option(langs[i][0], i);
+        }
+    // defaults.
+        select_language.selectedIndex = 6;
+        updateCountry();
+        select_dialect.selectedIndex = 6;
+    //updateCountry();
+    </script>
 
     Service   : {{service.name}} of type {{service.simpleName}}<br/>
     <!--  Bot   Name: {{service.botName}}<br/>  -->
     Start Time: {{service.serviceStartTime}}<br/>
-<br/>
-<table>
-  <tr>
-    <td>Bot Name </td>
-    <td> <input ng-model="botname" class="form-control"  name="botname" id="botname" ng-init="botname='alice2'"/></td>
-  </tr>
-  <tr>
-    <td>ProgramAB Path </td>
-    <td> <input ng-model="botpath"  class="form-control"  name="botpath" id="botpath" ng-init="botpath='ProgramAB'"/></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td><button id="startSession" class="btn btn-default"  ng-click="startSession(botname,botpath)" ng-init="startSessionLabel = 'Start Session'">{{startSessionLabel}}</button></td>
-  </tr>
-</table>
+    <br/>
+    <table>
+        <tr>
+            <td>Bot Name </td>
+            <td> <input ng-model="botname" class="form-control"  name="botname" id="botname" ng-init="botname = 'alice2'"/></td>
+        </tr>
+        <tr>
+            <td>ProgramAB Path </td>
+            <td> <input ng-model="botpath"  class="form-control"  name="botpath" id="botpath" ng-init="botpath = 'ProgramAB'"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><button id="startSession" class="btn btn-default"  ng-click="startSession(botname, botpath)" ng-init="startSessionLabel = 'Start Session'">{{startSessionLabel}}</button></td>
+        </tr>
+    </table>
 
     <!--  TODO: allow the user to upgrade ?
-	<p id="info_upgrade">Web Speech API is not supported by this browser.
+        <p id="info_upgrade">Web Speech API is not supported by this browser.
      Upgrade to <a href="//www.google.com/chrome">Chrome</a>
      version 25 or later.</p>  -->	
-<br/>
-Status: {{status}}
-<br/>
-	<form>
-		<input class="form-control" ng-model="utterance" name="utterance" id="utterance" ng-init=""/>  
-		<button type="submit" class="btn btn-default" id="askProgramAB" ng-click="askProgramAB(utterance)" ng-init="">Ask Program AB</button>
-	    <button id="startListening" class="btn btn-default" ng-click="startRecognition()" ng-init="listenbuttonimg ='service/img/mic.gif'" ng-src="listenbuttonimg">
-     		<img ng-src="{{listenbuttonimg}}"/>
+    <br/>
+    Status: {{status}}
+    <br/>
+    <form>
+        <input class="form-control" ng-model="utterance" name="utterance" id="utterance" ng-init=""/>  
+        <button type="submit" class="btn btn-default" id="askProgramAB" ng-click="askProgramAB(utterance)" ng-init="">Ask Program AB</button>
+        <button id="startListening" class="btn btn-default" ng-click="startRecognition()" ng-init="listenbuttonimg = 'service/img/mic.gif'" ng-src="listenbuttonimg">
+            <img ng-src="{{listenbuttonimg}}"/>
         </button>
     </form>
     <br/>
     <div class="center">
-      <div id="div_language">
-        <select class="form-control" id="select_language" onchange="updateCountry()"></select>&nbsp;&nbsp;
-        <select class="form-control" id="select_dialect"></select>
-      </div>
+        <div id="div_language">
+            <select class="form-control" id="select_language" onchange="updateCountry()"></select>&nbsp;&nbsp;
+            <select class="form-control" id="select_dialect"></select>
+        </div>
     </div>
     <br/>
-	Recognition Results: {{current_text}} 
+    Recognition Results: {{current_text}} 
     <!-- <br/>
     Current Response: {{currResponse}}
     <br/>  -->
     <!--  the conversation history/log table -->
     <table>
-      <thead>
-        <tr>
-          <th width="200">Chat Session Log:</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="rowContent in rows track by $index">
-          <td>{{rowContent.name}}</td><td>{{rowContent.response}}</td>
-        </tr>
-      </tbody>
+        <thead>
+            <tr>
+                <th width="200">Chat Session Log:</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="rowContent in rows track by $index">
+                <td>{{rowContent.name}}</td><td>{{rowContent.response}}</td>
+            </tr>
+        </tbody>
     </table>    
- 
+
 </div>

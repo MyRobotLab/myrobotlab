@@ -12,33 +12,25 @@
         <div class="collapse navbar-collapse navbar-ex1-collapse">
 
             <ul class="nav navbar-nav">
-                <li><li><a href="http://www.myrobotlab.org">{{platform}}</a></li>
-                <!--<li><a href="/b">/b</a></li>
-                <li><a href="/c">/c</a></li>
-                <li><a href="/d">/d</a></li>
-                <li><a href="/e">/e</a></li>-->
+                <li><a href="http://www.myrobotlab.org">{{platform}}</a></li>
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
                 <!--quick-start a service-->
                 <!--TODO: Do something! To many elements in the navbar! -> navbar stacks! -> occupying screen-space! (not everyone has a very big screen)-->
                 <li>
-                <form class="navbar-form">
-                <!-- pre>Model: {{searchSelectedService | json}}</pre-->
-                    <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" typeahead="state as state.name for state in possibleServices | filter:{name:$viewValue}" typeahead-template-url="customTemplate.html">
-                    <script type="text/ng-template" id="customTemplate.html">
-                        <a>
+                    <form class="navbar-form">
+                        <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" typeahead="state as state.name for state in possibleServices | filter:{name:$viewValue}" typeahead-template-url="customTemplate.html">
+                        <script type="text/ng-template" id="customTemplate.html">
+                            <a>
                             <img ng-src="/{{match.model.img}}" width="16">
                             <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
-                        </a>
-                    </script>
-                        
-                         <input class="form-control" type="text" ng-model="newName" placeholder="name">
-                            <button class="btn btn-default" ng-click="start(newName, newType)">start</button>
-                        
-                </form>
+                            </a>
+                        </script>
+                        <input class="form-control" type="text" ng-model="newName" placeholder="name">
+                        <button class="btn btn-default" ng-click="start(newName, newType)">start</button>
+                    </form>
                 </li>
-
                 <!--Status-->
                 <!--TODO: (maybe) integrate a glyphicon (or picture) before the status (status-type, from which service the status came, ...(or something even better))-->                
                 <li>

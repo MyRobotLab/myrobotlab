@@ -81,6 +81,6 @@ angular.module('mrlapp.service.arduinogui', [])
                     // mrl.getPeerName()
                     // this.send('unsubscribe', board);
                 };
-                
+
                 $scope.cb.notifycontrollerisready(this);
             }]);

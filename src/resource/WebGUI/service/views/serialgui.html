@@ -1,17 +1,17 @@
 <div class="row">
-  <div class="col-lg-2">
-    <img ng-src="../{{data.isConnectedImage}}.png" />
-  </div>
-  <div class="col-lg-3">    
-    <label for="data.service.portName">port</label>
-    <input type="text" ng-disabled="data.isConnected" ng-model="data.service.portName" typeahead="portName for portName in data.possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
-  </div>
-  <div class="col-lg-7">
-    <button class="btn btn-default"  ng-click="data.refresh()">refresh</button>
-    <button class="btn btn-default" ng-show="data.isConnected" ng-click="data.disconnect()">disconnect</button>
-    <button class="btn btn-default" ng-show="!data.isConnected" ng-click="data.connect(data.service.portName, data.service.baudrate, data.service.databits, data.service.stopbits, data.service.parity)">connect</button>
-    <!-- <button popover-placement="right" popover-template="data.dynamicPopover.templateUrl" popover-title="{{data.dynamicPopover.title}}" class="btn btn-default">options</button> -->
-  </div>
+    <div class="col-lg-2">
+        <img ng-src="../{{data.isConnectedImage}}.png" />
+    </div>
+    <div class="col-lg-3">    
+        <label for="data.service.portName">port</label>
+        <input type="text" ng-disabled="data.isConnected" ng-model="data.service.portName" typeahead="portName for portName in data.possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
+    </div>
+    <div class="col-lg-7">
+        <button class="btn btn-default"  ng-click="data.refresh()">refresh</button>
+        <button class="btn btn-default" ng-show="data.isConnected" ng-click="data.disconnect()">disconnect</button>
+        <button class="btn btn-default" ng-show="!data.isConnected" ng-click="data.connect(data.service.portName, data.service.baudrate, data.service.databits, data.service.stopbits, data.service.parity)">connect</button>
+        <!-- <button popover-placement="right" popover-template="data.dynamicPopover.templateUrl" popover-title="{{data.dynamicPopover.title}}" class="btn btn-default">options</button> -->
+    </div>
 </div>
 
 <!-- options begin ---->
@@ -31,38 +31,38 @@
 <!-- options end ---->
 
 <div class="row">
-<div class="col-lg-3">
-    <label for="baudrate">rate</label>
-    <input type="text" id="baudrate" ng-disabled="data.isConnected" ng-model="data.service.baudrate" typeahead="baudrate for baudrate in data.possibleBaud | filter:$viewValue | limitTo:8" class="form-control">
-</div>
-<div class="col-lg-3">    
-    <label for="databits">data bits</label>
-    <input type="text" id="databits" ng-disabled="data.isConnected" ng-model="data.service.databits" class="form-control">
-</div>
-<div class="col-lg-3">
-    <label for="stopbits">stop bits</label>
-    <input type="text" id="stopbits" ng-disabled="data.isConnected" ng-model="data.service.stopbits" class="form-control">
-</div>
-<div class="col-lg-3">
-    <label for="parity">parity</label>
-    <input type="text" id="parity" ng-disabled="data.isConnected" ng-model="data.service.parity" class="form-control">
-</div>
-</div>
-
-<div class="row">
-<div class="col-lg-12">
-  <label for="rx">rx {{data.rxCount}}</label>
-  <textarea id="rx" ng-model="daza.rx" class="form-control" rows="8"></textarea>
-</div>
+    <div class="col-lg-3">
+        <label for="baudrate">rate</label>
+        <input type="text" id="baudrate" ng-disabled="data.isConnected" ng-model="data.service.baudrate" typeahead="baudrate for baudrate in data.possibleBaud | filter:$viewValue | limitTo:8" class="form-control">
+    </div>
+    <div class="col-lg-3">    
+        <label for="databits">data bits</label>
+        <input type="text" id="databits" ng-disabled="data.isConnected" ng-model="data.service.databits" class="form-control">
+    </div>
+    <div class="col-lg-3">
+        <label for="stopbits">stop bits</label>
+        <input type="text" id="stopbits" ng-disabled="data.isConnected" ng-model="data.service.stopbits" class="form-control">
+    </div>
+    <div class="col-lg-3">
+        <label for="parity">parity</label>
+        <input type="text" id="parity" ng-disabled="data.isConnected" ng-model="data.service.parity" class="form-control">
+    </div>
 </div>
 
 <div class="row">
-<div class="col-lg-12">
-  <label for="tx">tx {{data.txCount}}</label>
-  <textarea id="tx" ng-model="data.tx" class="form-control" rows="3"></textarea>
-
-  <input type="text" ng-disabled="!data.isConnected" placeholder="send data here" ng-model="data.txData" class="form-control">
-<button class="btn btn-default" ng-disabled="!data.isConnected" ng-click="writeString(data.txData)">send</button>
-<!-- TODO - implement :) <button class="btn btn-default" ng-disabled="!data.isConnected" ng-click="data.sendFile()">send file</button> -->
+    <div class="col-lg-12">
+        <label for="rx">rx {{data.rxCount}}</label>
+        <textarea id="rx" ng-model="daza.rx" class="form-control" rows="8"></textarea>
+    </div>
 </div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <label for="tx">tx {{data.txCount}}</label>
+        <textarea id="tx" ng-model="data.tx" class="form-control" rows="3"></textarea>
+
+        <input type="text" ng-disabled="!data.isConnected" placeholder="send data here" ng-model="data.txData" class="form-control">
+        <button class="btn btn-default" ng-disabled="!data.isConnected" ng-click="writeString(data.txData)">send</button>
+        <!-- TODO - implement :) <button class="btn btn-default" ng-disabled="!data.isConnected" ng-click="data.sendFile()">send file</button> -->
+    </div>
 </div>
