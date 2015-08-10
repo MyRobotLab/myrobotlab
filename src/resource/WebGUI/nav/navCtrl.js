@@ -1,5 +1,4 @@
 angular.module('mrlapp.nav')
-
         .controller('NavCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', 'mrl', 'StateSvc', 'ServiceSvc',
             function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, StateSvc, ServiceSvc) {
 
@@ -30,6 +29,11 @@ angular.module('mrlapp.nav')
                 //START_Status
                 $scope.statuslist = StateSvc.getStatuses();
 
+    $scope.possibleServices = mrl.getPossibleServices();
+    
+    var p = mrl.getPlatform();
+    $scope.platform = p.arch + "." + p.bitness + "." + p.os + " " + p.mrlVersion;
+    
                 // FIXME change class not style here ! uniform danger/error/warn/info
                 // FIXME -> if error pink background
                 //        $scope.statusStyle = "statusStyle={'background-color':'pink'}";
@@ -106,4 +110,8 @@ angular.module('mrlapp.nav')
 //                    $anchorScroll();
                 };
                 //END_Search
+                
+                $scope.start = function(newName, newTypeModel) {
+                    mrl.sendTo(mrl.getRuntime().name, "start", newName, newTypeModel.name);
+                };
             }]);

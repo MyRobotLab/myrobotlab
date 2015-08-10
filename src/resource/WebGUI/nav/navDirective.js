@@ -1,5 +1,4 @@
 angular.module('mrlapp.nav')
-
         .directive('navDirective', [function () {
                 return {
                     scope: {

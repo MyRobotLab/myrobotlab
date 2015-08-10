@@ -47,10 +47,10 @@ public class CodecMessage implements Codec {
 		// String x = "\"" + (String)data + "\"";
 
 		// FIXME JACKSON is not like GSON - it will not decode twice !!!
-
-		String instr = String.format("\"%s\"", data.toString());
+		// REMOVED HACK !!
+		// String instr = String.format("\"%s\"", data.toString());
 		// String instr = String.format("%s", data.toString());
-		return mapper.fromJson(instr, type);
+		return mapper.fromJson(data.toString(), type);
 	}
 
 	@Override

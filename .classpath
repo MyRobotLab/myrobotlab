@@ -43,7 +43,7 @@
 	<classpathentry kind="lib" path="/repo/it.sauronsoftware.cron4j/2.2.5/cron4j-2.2.5.jar"/>
 	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/asm-3.1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/dynamicjava-base.jar"/>
-	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/plt.jar"/> 
+	<classpathentry kind="lib" path="/repo/org.drjava.java/20120818/plt.jar"/>
 	<classpathentry kind="lib" path="/repo/net.sourceforge.tess4j/1.1/tess4j.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.2.5/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="/repo/org.apache.commons.httpclient/4.2.5/commons-logging-1.1.1.jar"/>
@@ -92,8 +92,20 @@
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
 	<classpathentry kind="lib" path="/repo/org.jfugue.music/4.0.3/jfugue-4.0.3.jar"/>
-	<classpathentry kind="lib" path="build-lib/tools.jar"/> 
+	<classpathentry kind="lib" path="build-lib/tools.jar"/>
 	<classpathentry kind="lib" path="/repo/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
 	<classpathentry kind="lib" path="/repo/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-client-5.1.2-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-de-5.1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-en-5.1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-fr-5.1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-it-5.1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-ru-5.1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-sv-5.1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-te-5.1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-lang-tr-5.1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-runtime-5.1.2-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/voice-cmu-slt-hsmm-5.1.2.jar"/>
+	<classpathentry kind="lib" path="/repo/marytts/5.1.2/icu4j-54.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
