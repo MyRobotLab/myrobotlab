@@ -196,4 +196,7 @@ public class Sprinkler extends Service {
 		}
 	}
 
+	public void on(int pin, int minutes){
+		
+	}
 }
