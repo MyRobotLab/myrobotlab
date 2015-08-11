@@ -1,7 +1,7 @@
 angular.module('mrlapp.service')
 
-        .controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'ServiceSvc', '$log',
-            function ($scope, $modal, $ocLazyLoad, mrl, ServiceSvc, $log) {
+        .controller('ServiceCtrl', ['$scope', '$log', '$modal', 'mrl', 'ServiceSvc',
+            function ($scope, $log, $modal, mrl, ServiceSvc) {
 
                 $scope.anker = $scope.panel.name + '_' + $scope.panel.panelname;
 
@@ -11,10 +11,7 @@ angular.module('mrlapp.service')
                     return angular.isUndefined(val) || val === null;
                 };
 
-                //START_specific Service-Initialisation
-                //get the service-data (same for all panels off a service)
-                $scope.servicedata = ServiceSvc.getServiceData($scope.panel.name);
-
+                //init all functions on gui's controller scope when controller is ready
                 $scope.cb = {};
                 var controllerscope;
                 $scope.cb.notifycontrollerisready = function (ctrlscope) {
@@ -54,7 +51,6 @@ angular.module('mrlapp.service')
                     controllerscope.init();
                     mrl.subscribeToService(controllerscope.onMsg, $scope.panel.name);
                 };
-                //END_specific Service-Initialisation
 
                 //service-menu-size-change-buttons
                 $scope.changesize = function (size) {
