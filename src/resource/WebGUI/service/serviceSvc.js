@@ -1,5 +1,5 @@
 angular.module('mrlapp.service')
-        .service('ServiceSvc', ['mrl', '$log', function (mrl, $log) {
+        .service('ServiceSvc', ['mrl', '$log', '$ocLazyLoad', function (mrl, $log, $ocLazyLoad) {
                 var _self = this;
 
                 var gateway = mrl.getGateway();
@@ -180,6 +180,7 @@ angular.module('mrlapp.service')
                         simpleName: service.simpleName,
                         name: service.name,
                         type: service.type,
+                        templatestatus: service.templatestatus,
                         list: 'main',
                         panelindex: panelindex,
                         panelname: panelname,
@@ -194,20 +195,28 @@ angular.module('mrlapp.service')
                 };
 
                 this.addService = function (name, temp) {
-                    //create a new service (and a panel of the new service (addPanel))
-                    if (isUndefinedOrNull(services[name])) {
-                        services[name] = {
-                            simpleName: temp.simpleName,
-                            name: temp.name,
-                            type: temp.simpleName.toLowerCase(),
-                            panelcount: 1,
-                            panelnames: null,
-                            showpanelnames: null,
-                            panelsizes: null
-                        };
+                    //create a new service and loads it's template
+                    services[name] = {
+                        simpleName: temp.simpleName,
+                        name: temp.name,
+                        type: temp.simpleName.toLowerCase(),
+                        panelcount: 1,
+                        panelnames: null,
+                        showpanelnames: null,
+                        panelsizes: null
+                    };
+                    $log.info('lazy-loading:', services[name].type);
+                    $ocLazyLoad.load("service/js/" + services[name].type + "gui.js").then(function () {
+                        $log.info('lazy-loading successful:', services[name].type);
+                        services[name].templatestatus = 'loaded';
                         addPanel(services[name], 0);
-                    }
-                    notifyAllOfUpdate();
+                        notifyAllOfUpdate();
+                    }, function (e) {
+                        $log.warn('lazy-loading wasnt successful:', services[name].type);
+                        services[name].templatestatus = 'notfound';
+                        addPanel(services[name], 0);
+                        notifyAllOfUpdate();
+                    });
                 };
 
                 this.removeService = function (name) {
