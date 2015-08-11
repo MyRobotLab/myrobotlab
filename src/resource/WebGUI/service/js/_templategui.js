@@ -74,7 +74,7 @@ angular.module('mrlapp.service.templategui', [])
                                 //do something
                                 break;
                             default:
-                                $log.error("ERROR - unhandled method " + $scope.data.service.name + " " + msg.method);
+                                $log.warn("ERROR - unhandled method " + $scope.data.service.name + " " + msg.method);
                                 break;
                         }
                     };

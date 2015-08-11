@@ -195,9 +195,7 @@ angular.module('mrlapp.service')
 
                 this.addService = function (name, temp) {
                     //create a new service (and a panel of the new service (addPanel))
-                    $log.info('adding:', name, services);
                     if (isUndefinedOrNull(services[name])) {
-                        $log.info('adding#2:', name);
                         services[name] = {
                             simpleName: temp.simpleName,
                             name: temp.name,
@@ -207,10 +205,8 @@ angular.module('mrlapp.service')
                             showpanelnames: null,
                             panelsizes: null
                         };
-
                         addPanel(services[name], 0);
                     }
-                    $log.info('adding#3:', name, services, panels);
                     notifyAllOfUpdate();
                 };
 
@@ -344,20 +340,17 @@ angular.module('mrlapp.service')
                 this.savePanels = function () {
                     angular.forEach(panels, function (value, key) {
                         _self.savePanel(key);
-                    }
-                    );
+                    });
                 };
 
                 //save a panel to the WebGUI - it will keep the object in memory allowing 
                 //it to be loaded back into the correct size, position, state, etc
                 this.savePanel = function (name) {
-                    var gateway = mrl.getGateway();
                     mrl.sendTo(gateway.name, "savePanel", name, getPanel(name));
                 };
 
                 //load a panel from the WebGUI
                 this.loadPanel = function (name) {
-                    var gateway = mrl.getGateway();
                     mrl.sendTo(gateway.name, "loadPanel", getPanel(name));
                 };
                 //END_ServicePanels
