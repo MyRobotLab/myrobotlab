@@ -1,10 +1,6 @@
 angular.module('mrlapp.service')
-
         .controller('ServiceCtrl', ['$scope', '$log', '$modal', 'mrl', 'ServiceSvc',
             function ($scope, $log, $modal, mrl, ServiceSvc) {
-
-                $scope.anker = $scope.panel.name + '_' + $scope.panel.panelname;
-
                 $log.info('ServiceCtrl', $scope.panel.name);
 
                 var isUndefinedOrNull = function (val) {
