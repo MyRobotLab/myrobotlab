@@ -30,26 +30,6 @@ angular.module('mrlapp.service')
                 };
                 //END_update-notification
 
-                //START_ServiceData
-                var serviceData = {};
-
-                this.addServiceData = function (name) {
-                    $log.info('creating service-instance', name);
-                    serviceData[name] = {};
-                };
-
-                this.getServiceData = function (name) {
-                    if (isUndefinedOrNull(serviceData[name])) {
-                        return null;
-                    }
-                    return serviceData[name];
-                };
-
-                this.removeServiceData = function (name) {
-                    delete serviceData[name];
-                };
-                //END_ServiceData
-
                 //START_ServicePanels
                 var services = {};
                 var panels = {};
@@ -180,6 +160,7 @@ angular.module('mrlapp.service')
                         simpleName: service.simpleName,
                         name: service.name,
                         type: service.type,
+                        data: service.data,
                         templatestatus: service.templatestatus,
                         list: 'main',
                         panelindex: panelindex,
@@ -200,6 +181,7 @@ angular.module('mrlapp.service')
                         simpleName: temp.simpleName,
                         name: temp.name,
                         type: temp.simpleName.toLowerCase(),
+                        data: {},
                         panelcount: 1,
                         panelnames: null,
                         showpanelnames: null,
@@ -368,23 +350,19 @@ angular.module('mrlapp.service')
                     switch (msg.method) {
                         case 'onRegistered':
                             var service = msg.data[0];
-                            _self.addServiceData(service.name);
                             _self.addService(service.name, service);
                             break;
 
                         case 'onReleased':
                             var service = msg.data[0];
                             _self.removeService(service.name);
-                            _self.removeServiceData(service.name);
                             break;
                     }
                 };
-                $log.info('ServiceSvc-Runtime', runtime, mrl.getRuntime());
                 mrl.subscribeToService(this.onMsg, runtime.name);
 
                 for (var name in registry) {
                     if (registry.hasOwnProperty(name)) {
-                        this.addServiceData(name);
                         this.addService(name, registry[name]);
                     }
                 }
