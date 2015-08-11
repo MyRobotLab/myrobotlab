@@ -38,7 +38,7 @@ angular.module('mrlapp.service')
                         return mrl.subscribe($scope.panel.name, method);
                     };
                     controllerscope.send = function (method, data) {
-                        //TODO - what if it is has more than one data?
+                        //TODO & FIXME !important! - what if it is has more than one data?
                         if (isUndefinedOrNull(data)) {
                             return mrl.sendTo($scope.panel.name, method);
                         } else {

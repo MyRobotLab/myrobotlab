@@ -1,7 +1,7 @@
 <div>
     <h3>{{data.pulseData}}</h3>
     <div class="col-xs-3">
-        <button class="btn btn-default" ng-show="!data.isClockRunning" ng-click="data.startClock(interval)">Start</button>
+        <button class="btn btn-default" ng-show="!data.isClockRunning" ng-click="data.startClock(data.interval)">Start</button>
         <button class="btn btn-default" ng-show="data.isClockRunning" ng-click="data.stopClock()">Stop</button>
     </div>       
     <div class="col-xs-3">

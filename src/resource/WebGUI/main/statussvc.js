@@ -1,8 +1,5 @@
-/*
- mis-named statesvc should be named statussvs
- */
-angular.module('mrlapp.main.statesvc', [])
-        .service('StateSvc', [function () {
+angular.module('mrlapp.main.statussvc', [])
+        .service('StatusSvc', [function () {
 
                 var statuslist = [];
 
