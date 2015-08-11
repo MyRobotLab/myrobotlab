@@ -57,13 +57,10 @@
         </div>
         <div class="panel-body" ng-show="panel.panelsize.sizes[panel.panelsize.aktsize].body != 'collapse'">
             <!--body-->
-            <div ng-if="!servicenotfound && !serviceloaded">
-                <i class="glyphicon glyphicon-download-alt"></i>&nbsp;&nbsp;loading service ...
-            </div>
-            <div ng-if="!servicenotfound && serviceloaded">
+            <div ng-if="panel.templatestatus == 'loaded'">
                 <div service-body type="{{panel.type}}" simplename="{{panel.simpleName}}" size="panel.panelsize.aktsize" panelname="panel.panelname" data="servicedata" cb="cb"></div>
             </div>
-            <div ng-if="servicenotfound">
+            <div ng-if="panel.templatestatus == 'notfound'">
                 <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;service not found
             </div>
         </div>

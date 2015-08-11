@@ -11,17 +11,6 @@ angular.module('mrlapp.service')
                     return angular.isUndefined(val) || val === null;
                 };
 
-                //load the service(-module) (lazy) (from the server)
-                //TODO: should this really be done here?
-                $log.info('lazy-loading:', $scope.panel.type);
-                $ocLazyLoad.load("service/js/" + $scope.panel.type + "gui.js").then(function () {
-                    $log.info('lazy-loading successful:', $scope.panel.type);
-                    $scope.serviceloaded = true;
-                }, function (e) {
-                    $log.warn('lazy-loading wasnt successful:', $scope.panel.type);
-                    $scope.servicenotfound = true;
-                });
-
                 //START_specific Service-Initialisation
                 //get the service-data (same for all panels off a service)
                 $scope.servicedata = ServiceSvc.getServiceData($scope.panel.name);
