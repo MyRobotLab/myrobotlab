@@ -1,6 +1,6 @@
 angular.module('mrlapp.nav')
-        .controller('NavCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', 'mrl', 'StateSvc', 'ServiceSvc',
-            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, StateSvc, ServiceSvc) {
+        .controller('NavCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', 'mrl', 'StatusSvc', 'ServiceSvc',
+            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, StatusSvc, ServiceSvc) {
 
                 //START_green-/red-LED
                 // TODO - green png if connected - if not re-connect button
@@ -26,28 +26,24 @@ angular.module('mrlapp.nav')
                 mrl.subscribeOnClose(onClose);
                 //END_green-/red-LED
 
-                //START_Status
-                $scope.statuslist = StateSvc.getStatuses();
-
                 $scope.possibleServices = mrl.getPossibleServices();
 
                 var p = mrl.getPlatform();
                 $scope.platform = p.arch + "." + p.bitness + "." + p.os + " " + p.mrlVersion;
 
-                // FIXME change class not style here ! uniform danger/error/warn/info
-                // FIXME -> if error pink background
-                //        $scope.statusStyle = "statusStyle={'background-color':'pink'}";
+                //START_Status
+                $scope.statuslist = StatusSvc.getStatuses();
 
+                //TODO would make sense to move this to ServiceSvc - question is what happens with firststatus
+                //don't think another notification-callback would be good
                 var onStatus = function (statusMsg) {
-                    var s = statusMsg.data[0];
-                    $scope.$apply(function () {
-                        StateSvc.addStatus(s);
-                        //TODO - think of a better solution (instead of firststatus) (and hopefully better styled)
-                        var status = $scope.statuslist[$scope.statuslist.length - 1];
-                        $scope.firststatus = status.name + " " + status.level + " " + status.detail;
-                    });
+//                    $timeout(function () {
+                    StatusSvc.addStatus(statusMsg.data[0]);
+                    //TODO - think of a better solution (instead of firststatus) (and hopefully better styled)
+                    var status = $scope.statuslist[$scope.statuslist.length - 1];
+                    $scope.firststatus = status.name + " " + status.level + " " + status.detail;
+//                    });
                 };
-
                 mrl.subscribeToMethod(onStatus, "onStatus");
                 //END_Status
 

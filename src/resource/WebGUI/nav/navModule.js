@@ -1,5 +1,5 @@
 angular.module('mrlapp.nav', [
     'mrlapp.mrl',
-    'mrlapp.main.statesvc',
+    'mrlapp.main.statussvc',
     'mrlapp.main.filter'
 ]);

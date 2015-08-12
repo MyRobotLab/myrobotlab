@@ -29,14 +29,13 @@ angular.module('mrlapp.service.clockgui', [])
                                 $scope.$apply();
                                 break;
                             default:
-                                $log.error("ERROR - unhandled method " + $scope.data.service.name + " " + msg.method);
+                                $log.warn("ERROR - unhandled method " + $scope.data.service.name + " " + msg.method);
                                 break;
                         }
                     };
 
                     //start the clock
                     $scope.data.startClock = function (interval) {
-                        console.log('send-this', this);
                         _self.send("setInterval", interval);
                         _self.send("startClock");
                     };
