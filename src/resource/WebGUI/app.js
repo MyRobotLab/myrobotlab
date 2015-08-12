@@ -20,7 +20,7 @@ angular.module('mrlapp', [
     'mrlapp.mrl', //mrl.js (/mrl.js) - the really really core
     'mrlapp.main.mrlLogger', //custom logger! (it extends the default angular one ($log))
     'mrlapp.main.mainCtrl',
-    'mrlapp.main.statesvc', //very basic service for storing "statuses"
+    'mrlapp.main.statussvc', //very basic service for storing "statuses"
     'mrlapp.main.filter',
     'mrlapp.nav', //Navbar & Co. (/nav)
     'mrlapp.service' //Service & Co. (/service)

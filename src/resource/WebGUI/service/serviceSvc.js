@@ -1,5 +1,5 @@
 angular.module('mrlapp.service')
-        .service('ServiceSvc', ['mrl', '$log', function (mrl, $log) {
+        .service('ServiceSvc', ['mrl', '$log', '$ocLazyLoad', function (mrl, $log, $ocLazyLoad) {
                 var _self = this;
 
                 var gateway = mrl.getGateway();
@@ -29,26 +29,6 @@ angular.module('mrlapp.service')
                     });
                 };
                 //END_update-notification
-
-                //START_ServiceData
-                var serviceData = {};
-
-                this.addServiceData = function (name) {
-                    $log.info('creating service-instance', name);
-                    serviceData[name] = {};
-                };
-
-                this.getServiceData = function (name) {
-                    if (isUndefinedOrNull(serviceData[name])) {
-                        return null;
-                    }
-                    return serviceData[name];
-                };
-
-                this.removeServiceData = function (name) {
-                    delete serviceData[name];
-                };
-                //END_ServiceData
 
                 //START_ServicePanels
                 var services = {};
@@ -180,6 +160,8 @@ angular.module('mrlapp.service')
                         simpleName: service.simpleName,
                         name: service.name,
                         type: service.type,
+                        data: service.data,
+                        templatestatus: service.templatestatus,
                         list: 'main',
                         panelindex: panelindex,
                         panelname: panelname,
@@ -194,24 +176,29 @@ angular.module('mrlapp.service')
                 };
 
                 this.addService = function (name, temp) {
-                    //create a new service (and a panel of the new service (addPanel))
-                    $log.info('adding:', name, services);
-                    if (isUndefinedOrNull(services[name])) {
-                        $log.info('adding#2:', name);
-                        services[name] = {
-                            simpleName: temp.simpleName,
-                            name: temp.name,
-                            type: temp.simpleName.toLowerCase(),
-                            panelcount: 1,
-                            panelnames: null,
-                            showpanelnames: null,
-                            panelsizes: null
-                        };
-
+                    //create a new service and loads it's template
+                    services[name] = {
+                        simpleName: temp.simpleName,
+                        name: temp.name,
+                        type: temp.simpleName.toLowerCase(),
+                        data: {},
+                        panelcount: 1,
+                        panelnames: null,
+                        showpanelnames: null,
+                        panelsizes: null
+                    };
+                    $log.info('lazy-loading:', services[name].type);
+                    $ocLazyLoad.load("service/js/" + services[name].type + "gui.js").then(function () {
+                        $log.info('lazy-loading successful:', services[name].type);
+                        services[name].templatestatus = 'loaded';
                         addPanel(services[name], 0);
-                    }
-                    $log.info('adding#3:', name, services, panels);
-                    notifyAllOfUpdate();
+                        notifyAllOfUpdate();
+                    }, function (e) {
+                        $log.warn('lazy-loading wasnt successful:', services[name].type);
+                        services[name].templatestatus = 'notfound';
+                        addPanel(services[name], 0);
+                        notifyAllOfUpdate();
+                    });
                 };
 
                 this.removeService = function (name) {
@@ -344,20 +331,17 @@ angular.module('mrlapp.service')
                 this.savePanels = function () {
                     angular.forEach(panels, function (value, key) {
                         _self.savePanel(key);
-                    }
-                    );
+                    });
                 };
 
                 //save a panel to the WebGUI - it will keep the object in memory allowing 
                 //it to be loaded back into the correct size, position, state, etc
                 this.savePanel = function (name) {
-                    var gateway = mrl.getGateway();
                     mrl.sendTo(gateway.name, "savePanel", name, getPanel(name));
                 };
 
                 //load a panel from the WebGUI
                 this.loadPanel = function (name) {
-                    var gateway = mrl.getGateway();
                     mrl.sendTo(gateway.name, "loadPanel", getPanel(name));
                 };
                 //END_ServicePanels
@@ -366,23 +350,19 @@ angular.module('mrlapp.service')
                     switch (msg.method) {
                         case 'onRegistered':
                             var service = msg.data[0];
-                            _self.addServiceData(service.name);
                             _self.addService(service.name, service);
                             break;
 
                         case 'onReleased':
                             var service = msg.data[0];
                             _self.removeService(service.name);
-                            _self.removeServiceData(service.name);
                             break;
                     }
                 };
-                $log.info('ServiceSvc-Runtime', runtime, mrl.getRuntime());
                 mrl.subscribeToService(this.onMsg, runtime.name);
 
                 for (var name in registry) {
                     if (registry.hasOwnProperty(name)) {
-                        this.addServiceData(name);
                         this.addService(name, registry[name]);
                     }
                 }

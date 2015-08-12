@@ -1,31 +1,13 @@
 angular.module('mrlapp.service')
-
-        .controller('ServiceCtrl', ['$scope', '$modal', '$ocLazyLoad', 'mrl', 'ServiceSvc', '$log',
-            function ($scope, $modal, $ocLazyLoad, mrl, ServiceSvc, $log) {
-
-                $scope.anker = $scope.panel.name + '_' + $scope.panel.panelname;
-
+        .controller('ServiceCtrl', ['$scope', '$log', '$modal', 'mrl', 'ServiceSvc',
+            function ($scope, $log, $modal, mrl, ServiceSvc) {
                 $log.info('ServiceCtrl', $scope.panel.name);
 
                 var isUndefinedOrNull = function (val) {
                     return angular.isUndefined(val) || val === null;
                 };
 
-                //load the service(-module) (lazy) (from the server)
-                //TODO: should this really be done here?
-                $log.info('lazy-loading:', $scope.panel.type);
-                $ocLazyLoad.load("service/js/" + $scope.panel.type + "gui.js").then(function () {
-                    $log.info('lazy-loading successful:', $scope.panel.type);
-                    $scope.serviceloaded = true;
-                }, function (e) {
-                    $log.warn('lazy-loading wasnt successful:', $scope.panel.type);
-                    $scope.servicenotfound = true;
-                });
-
-                //START_specific Service-Initialisation
-                //get the service-data (same for all panels off a service)
-                $scope.servicedata = ServiceSvc.getServiceData($scope.panel.name);
-
+                //init all functions on gui's controller scope when controller is ready
                 $scope.cb = {};
                 var controllerscope;
                 $scope.cb.notifycontrollerisready = function (ctrlscope) {
@@ -38,7 +20,7 @@ angular.module('mrlapp.service')
                         return mrl.subscribe($scope.panel.name, method);
                     };
                     controllerscope.send = function (method, data) {
-                        //TODO - what if it is has more than one data?
+                        //TODO & FIXME !important! - what if it is has more than one data?
                         if (isUndefinedOrNull(data)) {
                             return mrl.sendTo($scope.panel.name, method);
                         } else {
@@ -65,7 +47,6 @@ angular.module('mrlapp.service')
                     controllerscope.init();
                     mrl.subscribeToService(controllerscope.onMsg, $scope.panel.name);
                 };
-                //END_specific Service-Initialisation
 
                 //service-menu-size-change-buttons
                 $scope.changesize = function (size) {
