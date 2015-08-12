@@ -37,6 +37,8 @@ import org.myrobotlab.logging.LoggingFactory;
 /**
  * @author GroG
  * 
+ * FIXME - either a structure interface or a typical java setter getter NO MIX !!
+ * 
  */
 public class Message implements Serializable {
 	private static final long serialVersionUID = 1L;
