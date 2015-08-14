@@ -26,11 +26,6 @@ angular.module('mrlapp.service.webguigui', [])
                                 break;
                         }
                     };
-
-                    //you can subscribe to methods
-                    this.subscribe('pulse');
-                    this.subscribe('clockStarted');
-                    this.subscribe('clockStopped');
                 };
 
                 $scope.cb.notifycontrollerisready(this);
