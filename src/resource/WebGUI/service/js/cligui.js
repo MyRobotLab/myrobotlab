@@ -5,7 +5,7 @@ angular.module('mrlapp.service.cligui', [])
 
                 this.init = function () {
                     // get fresh copy
-                    var service = mrl.getService($scope.data.service.name);
+                    var service = this.getService();
 
                     this.onMsg = function (msg) {
                         switch (msg.method) {
