@@ -60,6 +60,7 @@ public class MessageTest {
 		String[] ret = (String[])thrower.invoke(msg);
 		log.info(String.format("got %s", Arrays.toString(ret)));
 		assertNotNull(ret);
+		
 	}
 	
 	/**
