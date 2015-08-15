@@ -870,6 +870,7 @@ public class RemoteAdapter extends Service implements Gateway {
 
 			// RemoteAdapter remote0 = (RemoteAdapter)
 			// Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
+			Runtime.start("rrt", "Runtime");
 			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
 			remote1.setTCPPort(6868);
 			remote1.setUDPPort(6868);
