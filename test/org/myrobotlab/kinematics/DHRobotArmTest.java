@@ -1,10 +1,14 @@
 package org.myrobotlab.kinematics;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class DHRobotArmTest {
+	public final static Logger log = LoggerFactory.getLogger(DHRobotArmTest.class);
+
 
 	// @Test
 	public void testDHArm() {
@@ -41,7 +45,7 @@ public class DHRobotArmTest {
 		// you want to know where the hand is.
 		//coord = arm.getPalmPosition();
 
-		System.out.println(coord);
+		log.info("" + coord);
 		// assertEquals(coord.toString(),"(2.0, 1.0, 1.0)" );
 		
 		assertEquals("(x=0.141421, y=0.141421, z=0.400000)", coord.toString());
@@ -49,7 +53,7 @@ public class DHRobotArmTest {
 
 	@Test
 	public void testJacobian() {
-
+		log.info("testJacobian");
 		DHRobotArm testArm = createInMoovLeftArm();
 		Matrix jInverse = testArm.getJInverse();
 		System.out.println(jInverse);
@@ -63,13 +67,15 @@ public class DHRobotArmTest {
 		int i =0;
 		for (DHLink link : testArm.getLinks()) {
 			i++;
-			System.out.println("Link : " + i + " "+ link.getThetaDegrees());
+			log.info("Link : " + i + " "+ link.getThetaDegrees());
 		}
 	}
 
 
 
 	public DHRobotArm createArm() {
+		log.info("createArm");
+
 		DHRobotArm arm = new DHRobotArm();
 		// d , r, theta , alpha
 		DHLink link1 = new DHLink(0, 1, 45*Math.PI/180, 0);
@@ -85,6 +91,7 @@ public class DHRobotArmTest {
 	}
 	
 	public DHRobotArm createInMoovLeftArm() {
+		log.info("createInMoovLeftArm");
 		DHRobotArm arm = new DHRobotArm();
 		// d , r, theta , alpha
 		
