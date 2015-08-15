@@ -35,6 +35,8 @@ public class DataCollector extends AbstractDeviceListener {
 	rollW = ((roll + Math.PI) / (Math.PI * 2.0) * SCALE);
 	pitchW = ((pitch + Math.PI / 2.0) / Math.PI * SCALE);
 	yawW = ((yaw + Math.PI) / (Math.PI * 2.0) * SCALE);
+	
+	
     }
 
     @Override
@@ -91,5 +93,17 @@ public class DataCollector extends AbstractDeviceListener {
 	    builder.append(character);
 	}
 	return builder.toString();
+    }
+    
+    public double getYaw() {
+        return yawW;
+    }
+    
+    public double getPitch() {
+        return pitchW;
+    }
+    
+    public double getRoll() {
+        return rollW;
     }
 }

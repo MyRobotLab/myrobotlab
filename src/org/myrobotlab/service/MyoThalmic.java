@@ -6,6 +6,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.OculusData;
 import org.slf4j.Logger;
 
 import com.thalmic.myo.DeviceListener;
@@ -38,6 +39,12 @@ public class MyoThalmic extends Service implements DeviceListener {
 	transient Myo myo = null; 
 	transient Hub hub = null;
 	transient HubThread hubThread = null;
+	
+	public static class OrientationData {
+		public double rollW;
+		public double pitchW;
+		public double yawW;
+	}
 	
 	class HubThread extends Thread {
 		public boolean running = false;
@@ -89,8 +96,8 @@ public class MyoThalmic extends Service implements DeviceListener {
 
 	public MyoThalmic(String n) {
 		super(n);
- 
-		pitchW = 0;
+        rollW = 0;
+        pitchW = 0;
 		yawW = 0;
 		currentPose = new Pose();
 	}
@@ -119,6 +126,11 @@ public class MyoThalmic extends Service implements DeviceListener {
 		rollW = ((roll + Math.PI) / (Math.PI * 2.0) * SCALE);
 		pitchW = ((pitch + Math.PI / 2.0) / Math.PI * SCALE);
 		yawW = ((yaw + Math.PI) / (Math.PI * 2.0) * SCALE);
+		OrientationData orientation = new OrientationData();
+		orientation.rollW = rollW;
+		orientation.pitchW = pitchW;
+		orientation.yawW = yawW;
+		System.out.println(orientation.rollW);
 	}
 
 	@Override
@@ -128,6 +140,14 @@ public class MyoThalmic extends Service implements DeviceListener {
 			myo.vibrate(VibrationType.VIBRATION_MEDIUM);
 		}		
 		invoke("publishPose", pose);
+	}
+	
+	public OrientationData publishOrientationData(OrientationData orientation){
+		return orientation;
+	}
+	
+	public void addOrientationDataListener(Service service){
+		addListener("publishOrientationData", service.getName(), "onOrientationData");
 	}
 	
 	public void addPoseListener(Service service){
@@ -286,12 +306,16 @@ public class MyoThalmic extends Service implements DeviceListener {
 
 			System.out.println("Connected to a Myo armband!");
 			log.info("Connected to a Myo armband");
-			DeviceListener dataCollector = new DataCollector();
+			DataCollector dataCollector = new DataCollector();
 			hub.addListener(dataCollector);
 
 			while (true) {
 				hub.run(1000 / 20);
-				System.out.print(dataCollector);
+				//System.out.print(dataCollector);
+				System.out.println("yaw is " + dataCollector.getYaw());
+				System.out.println("roll is " + dataCollector.getRoll());
+				System.out.println("pitch is " + dataCollector.getPitch());
+				
 
 				Runtime.start("gui", "GUIService");
 
