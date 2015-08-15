@@ -254,7 +254,7 @@
 	<!-- ================ init begin ================= -->
 	<target name="init" depends="repoClone">
 		<echo message="compiling with ${ant.java.version}" />
-		<echoproperties />
+		<!-- great for debugging <echoproperties /> -->
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
 		<!-- mail task properties -->
@@ -269,8 +269,6 @@
 		<!-- get from local properties file -->
 		<property name="mail.from" value="build@myrobotlab.org" />
 		<property name="mail.tolist" value="" />
-
-		<echoproperties />
 
 		<!-- TODO - get repo's comment -->
 
