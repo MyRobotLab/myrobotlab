@@ -1,7 +1,10 @@
 package org.myrobotlab.framework;
 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 
@@ -35,6 +38,7 @@ public class MessageTest {
 
 	@Test
 	public void simpleSubscribeAndThrow() throws Exception {
+		log.info("simpleSubscribeAndThrow");
 
 		catcher.clear();
 		catcher.subscribe("thrower", "pitch");
@@ -50,6 +54,8 @@ public class MessageTest {
 
 	@Test
 	public void broadcastMessage() throws Exception {
+		log.info("broadcastMessage");
+
 		catcher.clear();
 		catcher.subscribe("thrower", "pitch");
 		
@@ -69,6 +75,8 @@ public class MessageTest {
 	 */
 	@Test
 	public final void clearRoutes() throws Exception {
+		log.info("clearRoutes");
+
 		catcher.clear();
 		catcher.subscribe("thrower", "pitch");
 		
@@ -105,6 +113,7 @@ public class MessageTest {
 	
 	@Test
 	final public void badNameTest() throws Exception {
+		log.info("badNameTest");
 		catcher.clear();
 		TestCatcher catcher2 = null;
 		try {
@@ -118,6 +127,7 @@ public class MessageTest {
 	
 	@Test
 	final public void invokeStringNotation() throws Exception {
+		log.info("invokeStringNotation");
 		catcher.clear();
 		// FIXME - implement
 		// catcher.subscribe("thrower/pitch");
@@ -151,6 +161,8 @@ public class MessageTest {
 	 */
 	@Test
 	final public void RuntimeTests() throws Exception {
+		log.info("RuntimeTests");
+
 		catcher.clear();
 		// FIXME - implement
 		// catcher.subscribe("thrower/pitch");
