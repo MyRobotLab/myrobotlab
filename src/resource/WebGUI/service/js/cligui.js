@@ -38,14 +38,14 @@ angular.module('mrlapp.service.cligui', [])
                         var c = String.fromCharCode((96 <= keyCode && keyCode <= 105) ? keyCode - 48 : keyCode);
                         $log.info('keyPress ', keyCode);
                         if (keyCode == 13) {
-                            this.send('process', buffer);
+                            _self.send('process', buffer);
                             buffer = '';
                             return;
                         }
                         buffer = buffer + String.fromCharCode(keyCode);
                     };
 
-                    this.subscribe('stdout');
+                    _self.subscribe('stdout');
                 };
 
                 $scope.cb.notifycontrollerisready(this);

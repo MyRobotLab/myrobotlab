@@ -256,7 +256,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	static public ServiceInterface createAndStart(String name, String type) {
-		ServiceInterface s = create(name, type);
+		ServiceInterface s = null;
 		// framework level catch of all startServices
 		// we will catch it here and log it with a stack trace
 		// its not a good idea to let exceptions propegate higher - because
@@ -265,9 +265,14 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		// before
 		// going into the unkown - so we catch it !
 		try {
+			s = create(name, type);
 			s.startService();
 		} catch (Exception e) {
-			Runtime.getInstance().error(e.getMessage());
+			String error = e.getMessage();
+			if (error == null){
+				error = "error";
+			}
+			Runtime.getInstance().error(String.format("createAndStart(%s, %s) %s", name, type, error));
 			Logging.logError(e);
 		}
 		return s;
