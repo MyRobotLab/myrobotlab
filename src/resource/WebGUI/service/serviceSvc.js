@@ -308,22 +308,6 @@ angular.module('mrlapp.service')
                     angular.forEach(panels, function (value, key) {
                         value.hide = !show;
                     });
-//                    //minimize / expand all panels
-//                    $log.info('showAll', show);
-//                    if (!show) {
-//                        //minimize
-//                        angular.forEach(panels, function (value, key) {
-//                            value.panelsize.oldsize = value.panelsize.aktsize;
-//                            value.panelsize.aktsize = 'min';
-//                            value.list = 'min';
-//                        });
-//                    } else {
-//                        angular.forEach(panels, function (value, key) {
-//                            value.panelsize.aktsize = value.panelsize.oldsize;
-//                            value.list = 'main';
-//                        });
-//                    }
-//                    notifyAllOfUpdate();
                 };
 
                 //these 3 methods need to be refactored

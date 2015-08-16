@@ -79,7 +79,8 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="dist" basedir=".">
+<!-- travis is ant report -->
+<project name="myrobotlab" default="report" basedir=".">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
