@@ -24,7 +24,7 @@ deploy:
 #  local-dir: dist
   file:
    - "dist/myrobotlab.jar"
-  acl: ''
+  acl: 'public_read'
   on:
     repo: MyRobotLab/myrobotlab
     branch: develop
