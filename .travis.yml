@@ -3,13 +3,29 @@ sudo: false
 script: ant report
 jdk:
 - openjdk7
+# deploy:
+#  provider: releases
+#  api_key:
+#    secure: NsryAS1EG3aKtKedzYzDefHOsuYEQNAE15iNPk9yeFxJpWLbVsVl8AjGlI+D0Al3RLXqfenGz2SGJmxqKlvFSUovnZ23nyvHQ9+tKKMbSTUpBY/fffrXV97PU56DTZoZTXfnCCTnWFnvdjHQ5jwGIyY8R1EPJIa0v760EtK+oeY=
+#  file:
+#    - "dist/myrobotlab.jar"
+#  skip_cleanup: true
+#  on:
+#    tags: true
+#    all_branches: true
+#    
+
 deploy:
-  provider: releases
-  api_key:
-    secure: NsryAS1EG3aKtKedzYzDefHOsuYEQNAE15iNPk9yeFxJpWLbVsVl8AjGlI+D0Al3RLXqfenGz2SGJmxqKlvFSUovnZ23nyvHQ9+tKKMbSTUpBY/fffrXV97PU56DTZoZTXfnCCTnWFnvdjHQ5jwGIyY8R1EPJIa0v760EtK+oeY=
+  provider: s3
+  access_key_id: AKIAJGL6AEN37LDO3N7A
+  secret_access_key:
+    secure: W8HJgOUEt/d+C+1zeD+Znum0Yso8LLZ9eV8rUrYH2MIVl5dCcH+WaGwhLompNOAUbWYhjcr8Rn/SLqvCEcVWe651R4pwHiD0KNfDUwp907Ic/efluCd/T6RjCG7pjbE5bdPIeZjyupMcZMHU4aW7YN6QE1UlVPhDFKQlU84iGsc=
+  bucket: mrl-bucket-01
+#  local-dir: dist
   file:
-    - "dist/myrobotlab.jar"
-  skip_cleanup: true
+   - "dist/myrobotlab.jar"
+  acl: ''
   on:
-    tags: true
-    all_branches: true
+    repo: MyRobotLab/myrobotlab
+    branch: develop
+  
