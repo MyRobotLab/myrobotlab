@@ -673,9 +673,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			//Runtime.start("myrun", "Runtime");
 			Runtime.start("webgui2", "WebGUI");
-			//RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote2", "RemoteAdapter");
-			//remote.startListening();
-			//Runtime.start("python", "Python");
+			RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote2", "RemoteAdapter");
+			remote.startListening();
+			Runtime.start("python", "Python");
 			//Runtime.start("arduino", "Arduino");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
 			//Runtime.start("gui", "GUIService");
 
