@@ -27,7 +27,8 @@ deploy:
     secure: W8HJgOUEt/d+C+1zeD+Znum0Yso8LLZ9eV8rUrYH2MIVl5dCcH+WaGwhLompNOAUbWYhjcr8Rn/SLqvCEcVWe651R4pwHiD0KNfDUwp907Ic/efluCd/T6RjCG7pjbE5bdPIeZjyupMcZMHU4aW7YN6QE1UlVPhDFKQlU84iGsc=
   bucket: mrl-bucket-01
 #  local-dir: dist
-  file: "dist/myrobotlab.jar"
+  file: 
+  	- "dist/myrobotlab.jar"
   skip_cleanup: true
   acl: 'public_read'
   on:
