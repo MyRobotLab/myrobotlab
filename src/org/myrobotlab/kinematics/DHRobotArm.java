@@ -126,7 +126,7 @@ public class DHRobotArm {
 		return palm;
 	}
 
-	void moveToGoal(Point goal) {
+	public void moveToGoal(Point goal) {
 		// we know where we are.. we know where we want to go.
 		int numSteps = 0;
 		double iterStep = 0.01;

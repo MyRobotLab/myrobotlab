@@ -5,7 +5,7 @@ import java.text.NumberFormat;
 
 /**
  * Represents a 3d point in space.
- * 
+ * TODO: add rotation (pitch/roll/yaw - rx,ry,rz)
  * @author kwatters
  *
  */
