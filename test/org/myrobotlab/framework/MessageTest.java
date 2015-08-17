@@ -58,6 +58,7 @@ public class MessageTest {
 
 		catcher.clear();
 		catcher.subscribe("thrower", "pitch");
+		Service.sleep(100);
 		
 		Message msg = thrower.createMessage(null, "getServiceNames", null);
 		CommunicationInterface comm = thrower.getComm();
@@ -185,7 +186,7 @@ public class MessageTest {
 		assertNotNull(ret);
 	}
 	
-	
+	/*
 	public static void main(String[] args) {
 		try {
 			
@@ -206,4 +207,5 @@ public class MessageTest {
 		
 		System.exit(0);
 	}
+	*/
 }
