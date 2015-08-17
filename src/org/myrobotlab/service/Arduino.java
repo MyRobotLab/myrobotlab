@@ -147,7 +147,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		int servoIndex = -1;
 	}
 
-	public static class Sketch {
+	public static class Sketch implements Serializable {
+		private static final long serialVersionUID = 1L;
 		public String data;
 		public String name;
 
