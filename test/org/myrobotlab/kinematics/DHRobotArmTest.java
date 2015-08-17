@@ -21,7 +21,7 @@ public class DHRobotArmTest {
 		double alpha=90.0 * Math.PI / 180.0;
 		// angle between Z and Z-1 axis
 		double theta=45.0 * Math.PI / 180.0;
-		DHLink link1 = new DHLink(d, r, theta, alpha);
+		DHLink link1 = new DHLink(null, d, r, theta, alpha);
 
 		//	double d1=0;
 		//	double r1=0;
@@ -78,9 +78,9 @@ public class DHRobotArmTest {
 
 		DHRobotArm arm = new DHRobotArm();
 		// d , r, theta , alpha
-		DHLink link1 = new DHLink(0, 1, 45*Math.PI/180, 0);
+		DHLink link1 = new DHLink(null, 0, 1, 45*Math.PI/180, 0);
 		arm.addLink(link1);
-		DHLink link2 = new DHLink(0.0, 0.2, 45*Math.PI/180, 90*Math.PI/180);
+		DHLink link2 = new DHLink(null, 0.0, 0.2, 45*Math.PI/180, 90*Math.PI/180);
 		arm.addLink(link2);
 		return arm;
 	}
@@ -95,11 +95,11 @@ public class DHRobotArmTest {
 		DHRobotArm arm = new DHRobotArm();
 		// d , r, theta , alpha
 		
-		DHLink link1 = new DHLink(200, 100, degToRad(0), degToRad(90));
-		DHLink link2 = new DHLink(0, 100, degToRad(-66), degToRad(-90));
-		DHLink link3 = new DHLink(50, 1, degToRad(47), degToRad(90));
-		DHLink link4 = new DHLink(100, 0, degToRad(-148), degToRad(90));
-		DHLink link5 = new DHLink(0, 100, degToRad(22), degToRad(180));
+		DHLink link1 = new DHLink(null, 200, 100, degToRad(0), degToRad(90));
+		DHLink link2 = new DHLink(null, 0, 100, degToRad(-66), degToRad(-90));
+		DHLink link3 = new DHLink(null, 50, 1, degToRad(47), degToRad(90));
+		DHLink link4 = new DHLink(null, 100, 0, degToRad(-148), degToRad(90));
+		DHLink link5 = new DHLink(null, 0, 100, degToRad(22), degToRad(180));
 		
 		arm.addLink(link1);
 		arm.addLink(link2);

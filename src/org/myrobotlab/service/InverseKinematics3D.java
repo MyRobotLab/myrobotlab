@@ -1,0 +1,84 @@
+package org.myrobotlab.service;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.kinematics.DHLink;
+import org.myrobotlab.kinematics.DHRobotArm;
+import org.myrobotlab.kinematics.IKEngine;
+import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
+import org.slf4j.Logger;
+
+public class InverseKinematics3D extends Service implements IKJointAnglePublisher {
+
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(InverseKinematics3D.class.getCanonicalName());
+
+	private DHRobotArm currentArm = null;
+	
+	public InverseKinematics3D(String n) {
+		super(n);
+		// TODO: init
+	}
+
+	public Point currentPosition() {
+		return currentArm.getPalmPosition();		
+	}
+	
+	public void moveTo(Point p) {
+		currentArm.moveToGoal(p);
+		HashMap<String, Double> angleMap = new HashMap<String, Double>();
+		for (DHLink l : currentArm.getLinks()) {
+			String jointName = l.getName();
+			double theta = l.getTheta();
+			angleMap.put(jointName, theta);
+		}
+		invoke("publishJointAngles", angleMap);
+	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[] { "robot", "control" };
+	}
+
+	@Override
+	public String getDescription() {
+		return "a 3D kinematics service supporting D-H parameters";
+	}
+
+	public DHRobotArm getCurrentArm() {
+		return currentArm;
+	}
+
+	public void setCurrentArm(DHRobotArm currentArm) {
+		this.currentArm = currentArm;
+	}
+
+
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
+
+		// Runtime.createAndStart("gui", "GUIService");
+		/*
+		 * GUIService gui = new GUIService("gui"); gui.startService();
+		 */
+	}
+
+
+
+	@Override
+	public Map<String, Float> publishJointAngles(Map<String, Float> angleMap) {
+		// TODO Auto-generated method stub
+		return angleMap;
+	}
+
+	
+}
