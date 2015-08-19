@@ -28,9 +28,7 @@ angular.module('mrlapp.service.guiservicegui', [])
                     };
 
                     //you can subscribe to methods
-                    this.subscribe('pulse');
-                    this.subscribe('clockStarted');
-                    this.subscribe('clockStopped');
+                    // this.subscribe('pulse');         
                 };
 
                 $scope.cb.notifycontrollerisready(this);

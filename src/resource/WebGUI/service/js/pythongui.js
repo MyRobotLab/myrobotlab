@@ -60,8 +60,6 @@ angular.module('mrlapp.service.pythongui', [])
 
                     //Subscriptions
                     this.subscribe('publishStdOut');
-                    this.subscribe('clockStarted');
-                    this.subscribe('clockStopped');
 
                     // FIXME re-entrant?
                     this.send("attachPythonConsole");
