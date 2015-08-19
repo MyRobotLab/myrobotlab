@@ -4,7 +4,6 @@ angular.module('mrlapp.service.clockgui', [])
                 $log.info('ClockGuiCtrl');
 
                 this.init = function () {
-                    //this.setPanelCount(2);
 
                     // get latest copy of a service
                     $scope.data.service = this.getService();

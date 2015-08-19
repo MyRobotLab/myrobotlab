@@ -15,8 +15,6 @@ angular.module('mrlapp.service.templategui', [])
                 //do everything you need to do ONCE (per service) in here
                 this.init = function () {
 
-                    //with this method, you can set how many panels you would like to show
-                    this.setPanelCount(1);
                     //set custom panel-names
                     this.setPanelNames(['me1', 'me2', 'me3']);
                     //set if panel-name should be shown or hidden (true->show)
