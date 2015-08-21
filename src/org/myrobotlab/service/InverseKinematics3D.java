@@ -30,13 +30,17 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		return currentArm.getPalmPosition();		
 	}
 	
+	public void moveTo(double x, double y, double z) {
+		moveTo(new Point(x,y,z));
+	}
+	
 	public void moveTo(Point p) {
 		currentArm.moveToGoal(p);
-		HashMap<String, Double> angleMap = new HashMap<String, Double>();
+		HashMap<String, Float> angleMap = new HashMap<String, Float>();
 		for (DHLink l : currentArm.getLinks()) {
 			String jointName = l.getName();
 			double theta = l.getTheta();
-			angleMap.put(jointName, theta);
+			angleMap.put(jointName, (float)theta);
 		}
 		invoke("publishJointAngles", angleMap);
 	}
