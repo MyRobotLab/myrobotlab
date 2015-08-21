@@ -6,11 +6,11 @@ import java.util.Map;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
-import org.myrobotlab.kinematics.IKEngine;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.slf4j.Logger;
 
@@ -40,7 +40,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		for (DHLink l : currentArm.getLinks()) {
 			String jointName = l.getName();
 			double theta = l.getTheta();
-			angleMap.put(jointName, (float)theta);
+			angleMap.put(jointName, (float)MathUtils.radToDeg(theta));
 		}
 		invoke("publishJointAngles", angleMap);
 	}
