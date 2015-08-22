@@ -10,6 +10,7 @@ public class DHRobotArm {
 	
 	transient public final static Logger log = LoggerFactory.getLogger(DHRobotArm.class);
 
+	private int maxIterations = 1000;
 
 	private ArrayList<DHLink> links;
 
@@ -126,7 +127,7 @@ public class DHRobotArm {
 		return palm;
 	}
 
-	void moveToGoal(Point goal) {
+	public void moveToGoal(Point goal) {
 		// we know where we are.. we know where we want to go.
 		int numSteps = 0;
 		double iterStep = 0.01;
@@ -134,6 +135,10 @@ public class DHRobotArm {
 		// what's the current point
 		while (true) {
 			numSteps++;
+			if (numSteps >= maxIterations) {
+				log.info("Attempted to iterate there, but didn't make it. giving up.");
+				break;
+			}
 			// TODO: what if its unreachable!
 			Point currentPos = this.getPalmPosition();
 			log.debug("Current Position " + currentPos);
@@ -159,7 +164,7 @@ public class DHRobotArm {
 			// get there.
 			// we should figure out how to scale the steps.
 			if (deltaPoint.magnitude() < errorThreshold) {
-				log.debug("We made it!  It took " + numSteps + " iterations to get there.");
+				log.info("We made it!  It took " + numSteps + " iterations to get there.");
 				break;
 			}
 		}

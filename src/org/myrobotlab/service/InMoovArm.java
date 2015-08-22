@@ -1,13 +1,19 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.kinematics.DHLink;
+import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.slf4j.Logger;
 
-public class InMoovArm extends Service {
+public class InMoovArm extends Service implements IKJointAngleListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -300,20 +306,65 @@ public class InMoovArm extends Service {
 	}
 
 	public void test() {
-		
 			if (arduino == null) {
 				error("arduino is null");
 			}
-
 			if (!arduino.isConnected()) {
 				error("arduino not connected");
 			}
-
 			bicep.moveTo(bicep.getPos() + 2);
 			rotate.moveTo(rotate.getPos() + 2);
 			shoulder.moveTo(shoulder.getPos() + 2);
 			omoplate.moveTo(omoplate.getPos() + 2);
-
 			sleep(300);
 	}
+
+	@Override
+	public void onJointAngles(Map<String, Float> angleMap) {
+		// We should walk though our list of servos and see if 
+		// the map has it.. if so .. move to it!
+		//Peers p = InMoovArm.getPeers(getName()).getPeers("Servo");
+		// TODO: look up the mapping for all the servos in the arm.
+		ArrayList<String> servos = new ArrayList<String>();
+		servos.add("omoplate");
+		servos.add("shoulder");
+		servos.add("rotate");
+		servos.add("bicep");
+		for (String s: servos) {
+			if (angleMap.containsKey(s)) {
+				if ("omoplate".equals(s)) {
+					omoplate.moveTo(angleMap.get(s));
+				}
+				if ("shoulder".equals(s)) {
+					shoulder.moveTo(angleMap.get(s));
+				}
+				if ("rotate".equals(s)) {
+					rotate.moveTo(angleMap.get(s));
+				}
+				if ("bicep".equals(s)) {
+					bicep.moveTo(angleMap.get(s));
+				}
+			}
+		}
+	}
+	
+	public DHRobotArm getDHRobotArm() {
+		
+		// TODO: specify this correctly and document the reference frames!
+		DHRobotArm arm = new DHRobotArm();
+		// d , r, theta , alpha
+		
+		DHLink link1 = new DHLink("omoplate", 0, 40, 0, MathUtils.degToRad(-90));
+		DHLink link2 = new DHLink("shoulder", 80, 0, 0, MathUtils.degToRad(90));
+		DHLink link3 = new DHLink("rotate", 280, 0, 0, MathUtils.degToRad(90));
+		DHLink link4 = new DHLink("bicep", 0, 280, 0, MathUtils.degToRad(180));
+		
+		arm.addLink(link1);
+		arm.addLink(link2);
+		arm.addLink(link3);
+		arm.addLink(link4);
+		
+		return arm;
+	}
+	
 }

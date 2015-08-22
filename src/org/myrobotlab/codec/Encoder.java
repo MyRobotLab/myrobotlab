@@ -152,7 +152,7 @@ public class Encoder {
 		// refer to - http://myrobotlab.org/content/myrobotlab-api
 	
 		String[] parts = pathInfo.split("/");
-		String trailingCharacter = pathInfo.substring(pathInfo.length() - 1); 
+		//String trailingCharacter = pathInfo.substring(pathInfo.length() - 1); 
 		
 		// synchronous - blocking 
 		// Encoder.invoke(Outputs = null, "path");
@@ -165,32 +165,6 @@ public class Encoder {
 		if (!PREFIX_API.equals(parts[1])){
 			throw new IOException(String.format("/api expected received %s", pathInfo));
 		}
-		
-		// base query /api
-		// this resolves to a "System" level call
-		// at this point the caller does not need to know the Service names
-		// have 2 choices /api & /api/
-		/* FIXME !!!
-		 * ONE VERY LARGE PROBLEM IS THERE IS NO DEFINITION for nameless Messages NOR 2 api states
-		if (parts.length == 2 && "/".equals(trailingCharacter)){
-			Message msg = new Message();
-			String services = Encoder.toJson(Runtime.getServices());
-			out.write(services.getBytes());
-			out.flush();
-			// close ?
-			return;
-			
-		} else if  ("/api/services/".equals(pathInfo)){
-			Encoder.write(out, Runtime.getServiceNames());
-			out.flush();
-			return;
-		
-		
-		FIXME - not true - need to generate method for /api & /api/
-		if (parts.length < 4) {
-			throw new IOException(String.format("%s - not enough parts - requires minimal 4", pathInfo));
-		}
-		*/
 
 		if (!PREFIX_API.equals(parts[1])) {
 			log.error(String.format("apiTag %s specified but %s in ordinal", PREFIX_API, parts[0]));
@@ -200,13 +174,28 @@ public class Encoder {
 		// FIXME INVOKING VS PUTTING A MESSAGE ON THE BUS
 		Message msg = new Message();
 		
-		
-		if (parts.length == 3){
-			// lazy runtime method call
-			msg.method = parts[2];
-		} else {
+		if (parts.length > 3){
 			msg.name = parts[2];
 			msg.method = parts[3];
+		} else if (parts.length == 3){
+			// lazy runtime method call
+			msg.method = parts[2];
+			// FIXME - NOT GOOD - the encoder SHOULD NOT NEED OR DEPEND ON ANY RUNTIME OR
+			// INSTANCE INFO !!
+			// precedence - 
+			// 1. Runtime method
+			/*
+			if (Runtime.getInstance().getMessageSet().contains(msg.method)){
+				
+			}
+			// 2. get named instance of service
+			if ()
+			*/
+			
+		} else {
+			// lazy runtime help
+			msg.method = "help";
+			return msg;
 		}
 
 		if (parts.length > 4) {

@@ -667,6 +667,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return "------\r\n" + sw.toString() + "------\r\n";
 	}
 
+	// FIXME - make a static initialization part !!!
+	
 	/**
 	 * 
 	 * @param reservedKey
@@ -678,6 +680,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		serviceClass = this.getClass().getCanonicalName();
 		simpleName = this.getClass().getSimpleName();
 
+		// FIXME - this is 'sort-of' static :P
 		if (methodSet == null) {
 			methodSet = getMessageSet();
 		}
@@ -950,6 +953,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return lastError;
 	}
 
+	// FIXME - use the method cache 
 	public HashSet<String> getMessageSet() {
 		HashSet<String> ret = new HashSet<String>();
 		Method[] methods = getMethods();
@@ -971,10 +975,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		}
 		return ret;
 	}
-
-	// parameterType is not used for any critical look-up - but can be used at
-	// runtime check to
-	// check parameter mating
 
 	@Override
 	public Method[] getMethods() {

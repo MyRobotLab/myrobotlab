@@ -22,22 +22,31 @@ public class EncoderTest {
 
 	@Test
 	public void testEncoderDecodeURI() throws Exception {
-		Encoder e = new Encoder();
+		//Encoder e = new Encoder();
 
-		// create and start a service named foo, decode a url for that service.
-		org.myrobotlab.service.TestCatcher testService = new org.myrobotlab.service.TestCatcher("foo");
-		testService.startService();
-		// NOT VALID API - can not be typed to an objects method signature
-		// Message m = e.decodeURI(new URI("http://www.myrobotlab.org/api/foo/bar/a/b/d?baz=bam&bap=bop"));
+		Message msg = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo/getCategories"));
+		assertNotNull(msg);
+		assertEquals("foo", msg.getName());
+		assertEquals("getCategories", msg.method);
 		
-		Message m = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo/getCategories"));
-		assertNotNull(m);
-		assertEquals("foo", m.getName());
+		msg = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api"));
+		assertNotNull(msg);
+		assertEquals("help", msg.method);
+		assertEquals("", msg.getName()); // FIXME SHOULD BE NULL
 		
-		m = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api"));
-		assertNotNull(m);
-		assertEquals("foo", m.getName());
+		// Runtime.getService(foo) (TYPE)
+		msg = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo"));
+		assertNotNull(msg);
+		assertEquals("", msg.getName());
+		assertEquals("foo", msg.method);
 
+		// Runtime.showMethods(foo) (TYPE)
+		/*
+		msg = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo/"));
+		assertNotNull(msg);
+		assertEquals("foo", msg.getName());
+		*/
+		
 	}
 
 }
