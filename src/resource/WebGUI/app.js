@@ -31,9 +31,11 @@ angular.module('mrlapp', [
                 ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
 
                 //set the logger up (extend the angular default one)
+/*                
                 $provide.decorator('$log', function ($delegate, mrlLogger) {
                     return mrlLogger($delegate);
                 });
+*/                
 
                 $routeProvider.when('/main', {
                     templateUrl: 'main/main.html',

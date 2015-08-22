@@ -1,6 +1,6 @@
 angular.module('mrlapp.nav')
-        .controller('NavCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', 'mrl', 'StatusSvc', 'ServiceSvc',
-            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, StatusSvc, ServiceSvc) {
+        .controller('NavCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', 'mrl', 'StatusSvc', 'serviceSvc',
+            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, StatusSvc, serviceSvc) {
 
                 //START_green-/red-LED
                 // TODO - green png if connected - if not re-connect button
@@ -34,7 +34,7 @@ angular.module('mrlapp.nav')
                 //START_Status
                 $scope.statuslist = StatusSvc.getStatuses();
 
-                //TODO would make sense to move this to ServiceSvc - question is what happens with firststatus
+                //TODO would make sense to move this to serviceSvc - question is what happens with firststatus
                 //don't think another notification-callback would be good
                 var onStatus = function (statusMsg) {
 //                    $timeout(function () {
@@ -61,7 +61,7 @@ angular.module('mrlapp.nav')
                 $scope.showAll = function (value) {
                     //hide or show all panels
                     $log.info('showAll', value);
-                    ServiceSvc.showAll(value);
+                    serviceSvc.showAll(value);
                 };
 
                 $scope.showminlist = false;
@@ -73,12 +73,12 @@ angular.module('mrlapp.nav')
                 //service-panels & update-routine (also used for search)
                 var panelsUpdated = function () {
                     $timeout(function () {
-                        $scope.allpanels = ServiceSvc.getPanelsList();
+                        $scope.allpanels = serviceSvc.getPanelsList();
                         $scope.minlist = $filter('panellist')($scope.allpanels, 'min');
                     });
                 };
                 panelsUpdated();
-                ServiceSvc.subscribeToUpdates(panelsUpdated);
+                serviceSvc.subscribeToUpdates(panelsUpdated);
 
                 //START_Search
                 //panels are retrieved above (together with minlist)
@@ -88,14 +88,14 @@ angular.module('mrlapp.nav')
                     //expand panel if minified
                     if (item.list == 'min') {
                         item.panelsize.aktsize = item.panelsize.oldsize;
-                        ServiceSvc.movePanelToList(item.name, item.panelname, 'main');
+                        serviceSvc.movePanelToList(item.name, /*item.panelname,*/ 'main');
                     }
                     //show panel if hidden
                     if (item.hide) {
                         item.hide = false;
                     }
                     //put panel on top
-                    ServiceSvc.putPanelZIndexOnTop(item.name, item.panelname);
+                    serviceSvc.putPanelZIndexOnTop(item.name/*, item.panelname*/);
                     item.notifyZIndexChanged();
                     //move panel to top of page
                     item.posx = 15;

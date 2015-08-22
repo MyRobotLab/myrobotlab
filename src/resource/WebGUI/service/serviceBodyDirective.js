@@ -4,7 +4,6 @@ angular.module('mrlapp.service')
                     scope: {
                         data: '=',
                         size: '=',
-                        panelname: '=',
                         cb: '='
                     },
                     link: function (scope, elem, attr) {
