@@ -23,10 +23,17 @@ public class DHLink {
 	private double min = -Math.PI;
 	private double max = Math.PI;
 	
+	// TODO: figure this out.
+	private String name;
+	
+
+
 	// private Matrix m;
 	// TODO: add max/min angle
-	public DHLink(double d, double r, double theta, double alpha) {
+	public DHLink(String name, double d, double r, double theta, double alpha) {
 		super();
+		// The name of the servo that we are controlling.  
+		this.name = name;
 		this.d = d;
 		this.r = r;
 		this.theta = theta;
@@ -201,5 +208,15 @@ public class DHLink {
 	public void setMax(double max) {
 		this.max = max;
 	}
+	
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 }
 

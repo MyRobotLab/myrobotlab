@@ -1,10 +1,14 @@
 package org.myrobotlab.kinematics;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class DHRobotArmTest {
+	public final static Logger log = LoggerFactory.getLogger(DHRobotArmTest.class);
+
 
 	// @Test
 	public void testDHArm() {
@@ -17,7 +21,7 @@ public class DHRobotArmTest {
 		double alpha=90.0 * Math.PI / 180.0;
 		// angle between Z and Z-1 axis
 		double theta=45.0 * Math.PI / 180.0;
-		DHLink link1 = new DHLink(d, r, theta, alpha);
+		DHLink link1 = new DHLink(null, d, r, theta, alpha);
 
 		//	double d1=0;
 		//	double r1=0;
@@ -41,7 +45,7 @@ public class DHRobotArmTest {
 		// you want to know where the hand is.
 		//coord = arm.getPalmPosition();
 
-		System.out.println(coord);
+		log.info("" + coord);
 		// assertEquals(coord.toString(),"(2.0, 1.0, 1.0)" );
 		
 		assertEquals("(x=0.141421, y=0.141421, z=0.400000)", coord.toString());
@@ -49,7 +53,7 @@ public class DHRobotArmTest {
 
 	@Test
 	public void testJacobian() {
-
+		log.info("testJacobian");
 		DHRobotArm testArm = createInMoovLeftArm();
 		Matrix jInverse = testArm.getJInverse();
 		System.out.println(jInverse);
@@ -63,18 +67,20 @@ public class DHRobotArmTest {
 		int i =0;
 		for (DHLink link : testArm.getLinks()) {
 			i++;
-			System.out.println("Link : " + i + " "+ link.getThetaDegrees());
+			log.info("Link : " + i + " "+ link.getThetaDegrees());
 		}
 	}
 
 
 
 	public DHRobotArm createArm() {
+		log.info("createArm");
+
 		DHRobotArm arm = new DHRobotArm();
 		// d , r, theta , alpha
-		DHLink link1 = new DHLink(0, 1, 45*Math.PI/180, 0);
+		DHLink link1 = new DHLink(null, 0, 1, 45*Math.PI/180, 0);
 		arm.addLink(link1);
-		DHLink link2 = new DHLink(0.0, 0.2, 45*Math.PI/180, 90*Math.PI/180);
+		DHLink link2 = new DHLink(null, 0.0, 0.2, 45*Math.PI/180, 90*Math.PI/180);
 		arm.addLink(link2);
 		return arm;
 	}
@@ -85,14 +91,15 @@ public class DHRobotArmTest {
 	}
 	
 	public DHRobotArm createInMoovLeftArm() {
+		log.info("createInMoovLeftArm");
 		DHRobotArm arm = new DHRobotArm();
 		// d , r, theta , alpha
 		
-		DHLink link1 = new DHLink(200, 100, degToRad(0), degToRad(90));
-		DHLink link2 = new DHLink(0, 100, degToRad(-66), degToRad(-90));
-		DHLink link3 = new DHLink(50, 1, degToRad(47), degToRad(90));
-		DHLink link4 = new DHLink(100, 0, degToRad(-148), degToRad(90));
-		DHLink link5 = new DHLink(0, 100, degToRad(22), degToRad(180));
+		DHLink link1 = new DHLink(null, 200, 100, degToRad(0), degToRad(90));
+		DHLink link2 = new DHLink(null, 0, 100, degToRad(-66), degToRad(-90));
+		DHLink link3 = new DHLink(null, 50, 1, degToRad(47), degToRad(90));
+		DHLink link4 = new DHLink(null, 100, 0, degToRad(-148), degToRad(90));
+		DHLink link5 = new DHLink(null, 0, 100, degToRad(22), degToRad(180));
 		
 		arm.addLink(link1);
 		arm.addLink(link2);

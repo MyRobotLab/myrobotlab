@@ -53,8 +53,8 @@ public class ArduinoTest {
 
 		log.info("setUpBeforeClass");
 
-		Runtime.start("gui", "GUIService");
-		Runtime.start("webgui", "WebGUI");
+		//Runtime.start("gui", "GUIService");
+		//Runtime.start("webgui", "WebGUI");
 		
 		arduino = (Arduino) Runtime.start("arduino", "Arduino");
 		serial = arduino.getSerial();
