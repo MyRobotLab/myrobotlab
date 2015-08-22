@@ -1,6 +1,6 @@
 angular.module('mrlapp.service')
-.controller('ServiceCtrl', ['$scope', '$log', '$modal', 'mrl', 'ServiceSvc', 
-function($scope, $log, $modal, mrl, ServiceSvc) {
+.controller('ServiceCtrl', ['$scope', '$log', '$modal', 'mrl', 'serviceSvc', 
+function($scope, $log, $modal, mrl, serviceSvc) {
     $log.info('ServiceCtrl', $scope.panel.name);
     
     var isUndefinedOrNull = function(val) {
@@ -34,7 +34,7 @@ function($scope, $log, $modal, mrl, ServiceSvc) {
         ;
         controllerscope.setPanelSizes = function(sizes) {
             $log.info('setting panelsizes', sizes);
-            ServiceSvc.notifyPanelSizesChanged($scope.panel.name, sizes);
+            serviceSvc.notifyPanelSizesChanged($scope.panel.name, sizes);
         }
         ;
         //FIXME - only do this (init & subscribeToService) ONCE per service
@@ -50,11 +50,11 @@ function($scope, $log, $modal, mrl, ServiceSvc) {
             $scope.panel.panelsize.oldsize = $scope.panel.panelsize.aktsize;
             $scope.panel.panelsize.aktsize = size;
             $scope.panel.notifySizeChanged();
-            ServiceSvc.movePanelToList($scope.panel.name, $scope.panel.panelname, 'min');
+            serviceSvc.movePanelToList($scope.panel.name, 'min');
         } else if (size == 'unmin') {
             $scope.panel.panelsize.aktsize = $scope.panel.panelsize.oldsize;
             $scope.panel.notifySizeChanged();
-            ServiceSvc.movePanelToList($scope.panel.name, $scope.panel.panelname, 'main');
+            serviceSvc.movePanelToList($scope.panel.name, 'main');
         } else {
             $scope.panel.panelsize.oldsize = $scope.panel.panelsize.aktsize;
             $scope.panel.panelsize.aktsize = size;

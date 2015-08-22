@@ -1,5 +1,6 @@
 angular.module('mrlapp.service')
-.service('ServiceSvc', ['mrl', '$log', '$ocLazyLoad', function(mrl, $log, $ocLazyLoad) {
+.service('serviceSvc', ['mrl', '$log', '$ocLazyLoad', function(mrl, $log, $ocLazyLoad) {
+    $log.info("serviceSvc");
     var _self = this;
     
     // FIXME - there is no reason to have
@@ -19,6 +20,8 @@ angular.module('mrlapp.service')
     //START_update-notification
     //TODO: think of better way
     var updateSubscribtions = [];
+
+
     this.subscribeToUpdates = function(callback) {
         updateSubscribtions.push(callback);
     }
@@ -55,23 +58,21 @@ angular.module('mrlapp.service')
         );
     }
     ;
-
-    this.loadNewPanel = function(temp){
+    
+    this.loadNewPanel = function(temp) {
         //create a new service and loads it's template
         var name = temp.name;
         services[temp.name] = {
             simpleName: temp.simpleName,
             name: temp.name,
             type: temp.simpleName.toLowerCase(),
+            // deprecate data - non descriptive
             data: {},
-            // deprecate ! - data is non descriptive
-            //panelcount: 1,
             panelnames: null ,
-            showpanelnames: null ,
             panelsizes: null 
         };
-
-
+        
+        
         // FIXME - dynamic loading takes time .. and is asynchronous 
         // the "rest" of framework processing needs to be done AFTER the servicegui has processed
         $log.info('lazy-loading:', services[name].type);
@@ -79,24 +80,30 @@ angular.module('mrlapp.service')
             $log.info('lazy-loading successful:', services[name].type);
             services[name].templatestatus = 'loaded';
             _self.addPanel(services[name]);
+            // FIXME - needs to be removed !!! 
             notifyAllOfUpdate();
         }
         , function(e) {
             $log.warn('lazy-loading wasnt successful:', services[name].type);
             services[name].templatestatus = 'notfound';
             _self.addPanel(services[name]);
+            // FIXME - needs to be removed !!! 
             notifyAllOfUpdate();
         }
         );
-        
+    
     }
+    ;
     
     this.addPanel = function(temp) {
         var name = temp.name;
         
         // FIXME -- check if existing
+        if (panels.hasOwnProperty(name)) {
+            $log.error('addPanel (', name, ') already exists');
+            return;
+        }
         
-    
         
         // FIXME - temporary hack - until services can be removed
         var service = services[temp.name];
@@ -105,11 +112,7 @@ angular.module('mrlapp.service')
         //creates a new Panel
         //--> for a new service (or)
         //--> another panel for an existing service
-        //panelname
-        var panelname = service.name;
-        var showpanelname = true;
         
-        //panelsize
         var panelsize;
         if (isUndefinedOrNull(service.panelsizes)) {
             panelsize = {
@@ -163,7 +166,7 @@ angular.module('mrlapp.service')
         };
         panelsize.order.push('min');
         panelsize.oldsize = null ;
-        $log.info('ServiceSvc-panelsize', panelsize);
+        $log.info('serviceSvc-panelsize', panelsize);
         //posy
         //TODO - refactor this !!! (and make it work better)
         var panelsarray = _self.getPanelsList();
@@ -206,12 +209,9 @@ angular.module('mrlapp.service')
             data: service.data,
             templatestatus: service.templatestatus,
             list: 'main',
-            //panelindex: 0,
-            panelname: panelname,
-            showpanelname: showpanelname,
             panelsize: panelsize,
-            subPanels: {},
             // TODO - subPanels
+            subPanels: {},
             height: 0,
             posx: 15,
             posy: posy,
@@ -238,12 +238,12 @@ angular.module('mrlapp.service')
     }
     ;
     
-    this.putPanelZIndexOnTop = function(name, panelname) {
+    this.putPanelZIndexOnTop = function(name /*, panelname*/) {
         //panel requests to be put on top of the other panels
-        $log.info('putPanelZIndexOnTop', name, panelname);
+        $log.info('putPanelZIndexOnTop', name /*, panelname*/);
         var index = -1;
         angular.forEach(panels, function(value, key) {
-            if (value.name == name && value.panelname == panelname) {
+            if (value.name == name /* && value.panelname == panelname*/) {
                 index = value.index;
             }
         }
@@ -267,12 +267,12 @@ angular.module('mrlapp.service')
     }
     ;
     
-    this.movePanelToList = function(name, panelname, list) {
+    this.movePanelToList = function(name, list) {
         //move panel to specified list
-        $log.info('movePanelToList', name, panelname, list);
+        $log.info('movePanelToList', name, list);
         var index = -1;
         angular.forEach(panels, function(value, key) {
-            if (value.name == name && value.panelname == panelname) {
+            if (value.name == name) {
                 index = value.index;
             }
         }
@@ -333,9 +333,14 @@ angular.module('mrlapp.service')
     ;
     
     
-    // initialization
+    // initialization - warning - if this file was included in index.html
+    // it will load in a non predictive manner - and other initializations can occur
+    // before or after
     mrl.subscribeToService(this.onMsg, runtime.name);
     
+    // initialization of all currently defined services' panels will
+    // be created onRegistered - will create panels which are created
+    // after initialization
     for (var name in registry) {
         if (registry.hasOwnProperty(name)) {
             _self.loadNewPanel(registry[name]);
