@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.myrobotlab.framework.Peers;
@@ -325,6 +326,14 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		// the map has it.. if so .. move to it!
 		//Peers p = InMoovArm.getPeers(getName()).getPeers("Servo");
 		// TODO: look up the mapping for all the servos in the arm.
+		
+		// we map the servo 90 degrees to be 0 degrees.
+		HashMap<String, Float> calibrationMap = new HashMap<String, Float>();
+		calibrationMap.put("omoplate", 90F);
+		calibrationMap.put("shoulder", 90F);
+		calibrationMap.put("rotate", 90F);
+		calibrationMap.put("bicep", 90F);
+		
 		ArrayList<String> servos = new ArrayList<String>();
 		servos.add("omoplate");
 		servos.add("shoulder");
@@ -333,16 +342,20 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		for (String s: servos) {
 			if (angleMap.containsKey(s)) {
 				if ("omoplate".equals(s)) {
-					omoplate.moveTo(angleMap.get(s));
+					Float angle = (angleMap.get(s) + calibrationMap.get(s))%360;
+					omoplate.moveTo(angle);
 				}
 				if ("shoulder".equals(s)) {
-					shoulder.moveTo(angleMap.get(s));
+					Float angle = (angleMap.get(s) + calibrationMap.get(s))%360;
+					shoulder.moveTo(angle);
 				}
 				if ("rotate".equals(s)) {
-					rotate.moveTo(angleMap.get(s));
+					Float angle = (angleMap.get(s) + calibrationMap.get(s))%360;
+					rotate.moveTo(angle);
 				}
 				if ("bicep".equals(s)) {
-					bicep.moveTo(angleMap.get(s));
+					Float angle = (angleMap.get(s) + calibrationMap.get(s))%360;
+					bicep.moveTo(angle);
 				}
 			}
 		}
