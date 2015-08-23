@@ -26,7 +26,7 @@ public abstract class Port implements Runnable, PortSource {
 	String threadName;
 
 	// needs to be owned by Serial
-	HashMap<String, SerialDataListener> listeners = null;
+	transient HashMap<String, SerialDataListener> listeners = null;
 
 	//transient CountDownLatch opened = null;
 	//transient CountDownLatch closed = null;

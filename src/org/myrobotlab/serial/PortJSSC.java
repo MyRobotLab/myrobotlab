@@ -1,6 +1,7 @@
 package org.myrobotlab.serial;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,9 @@ import org.slf4j.Logger;
  *         rxtx would not be able to use the Serial service or ports.
  * 
  */
-public class PortJSSC extends Port implements PortSource, SerialPortEventListener {
+public class PortJSSC extends Port implements PortSource, SerialPortEventListener, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(PortJSSC.class);
 
@@ -29,7 +32,7 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 
 	// private CommPortIdentifier commPortId;
 
-	SerialPort port = null;
+	transient SerialPort port = null;
 
 	public PortJSSC() {
 		super();
@@ -43,6 +46,14 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 	/*
 	 * public int available() throws IOException { port. return in.available(); }
 	 */
+	
+	public boolean isOpen(){
+		if (port != null){
+			return port.isOpened();
+		}
+		
+		return false;
+	}
 
 	public int getBaudRate() {
 		return rate;

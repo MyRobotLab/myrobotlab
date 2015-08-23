@@ -55,7 +55,6 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -474,11 +473,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public Integer getVersion() {
 		log.info("getVersion");
 		
-		// cached
+		// NO ! - no cache !
+		/*
 		if (mrlCommVersion != null){
 			invoke("publishVersion", mrlCommVersion);
 			return mrlCommVersion;
 		}
+		*/
 		
 		try {
 			versionQueue.clear();
@@ -499,7 +500,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	public boolean isConnected() {
-		return serial.isConnected();
+		if (serial != null && serial.isConnected()){
+			return true;
+		}
+		return false;
 	}
 
 	@Override

@@ -32,12 +32,12 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 
 	public final static Logger log = LoggerFactory.getLogger(PortRXTX.class);
 
-	private gnu.io.RXTXPort port;
+	transient private gnu.io.RXTXPort port;
 
-	private CommPortIdentifier commPortId;
+	transient private CommPortIdentifier commPortId;
 
-	private InputStream in;
-	private OutputStream out;
+	transient private InputStream in;
+	transient private OutputStream out;
 
 	public PortRXTX() {
 		super();
