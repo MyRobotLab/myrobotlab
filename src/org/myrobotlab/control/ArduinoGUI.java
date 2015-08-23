@@ -147,7 +147,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 
 	private JMenuItem serialRefresh = new JMenuItem("refresh");
 
-	Dimension size = new Dimension(800, 1024);
+	Dimension size = new Dimension(800, 512);
 
 	private JMenuItem softReset = new JMenuItem("soft reset");
 
@@ -760,33 +760,35 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 					traceData.put(pin.pin, td);
 					td.index = lastTraceXPos;
 				}
+				
+				int value = pin.value / 2;
 
 				TraceData t = traceData.get(pin.pin);
 				t.index++;
 				lastTraceXPos = t.index;
-				t.data[t.index] = pin.value;
+				t.data[t.index] = value;
 				++t.total;
-				t.sum += pin.value;
+				t.sum += value;
 				t.mean = t.sum / t.total;
 
 				g.setColor(t.color);
 				if (pin.type == Pin.DIGITAL_VALUE || pin.type == Pin.PWM_VALUE) {
 					int yoffset = pin.pin * 15 + 35;
 					int quantum = -10;
-					g.drawLine(t.index, t.data[t.index - 1] * quantum + yoffset, t.index, pin.value * quantum + yoffset);
+					g.drawLine(t.index, t.data[t.index - 1] * quantum + yoffset, t.index, value * quantum + yoffset);
 				} else if (pin.type == Pin.ANALOG_VALUE) {
-					g.drawLine(t.index, DATA_HEIGHT - t.data[t.index - 1], t.index, DATA_HEIGHT - pin.value);
-					//log.info("" + (pin.value / 2));
+					g.drawLine(t.index, DATA_HEIGHT - t.data[t.index - 1], t.index, DATA_HEIGHT - value);
+					//log.info("" + (value / 2));
 				} else {
 					log.error("dont know how to display pin data method");
 				}
 
 				// computer min max and mean
 				// if different then blank & post to screen
-				if (pin.value > t.max)
-					t.max = pin.value;
-				if (pin.value < t.min)
-					t.min = pin.value;
+				if (value > t.max)
+					t.max = value;
+				if (value < t.min)
+					t.min = value;
 
 				if (t.index < DATA_WIDTH - 1) {
 				} else {

@@ -73,7 +73,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * same time. If blocking is not used then the internal buffer will fill to
 	 * the BUFFER_SIZE and just be left - overrun data will be lost
 	 */
-	transient int BUFFER_SIZE = 1024;
+	int BUFFER_SIZE = 1024;
 
 	/**
 	 * blocking queue for blocking rx read requests
@@ -95,14 +95,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * remote manipulations and identification should always be done through
 	 * portNames
 	 */
-	static transient HashMap<String, Port> ports = new HashMap<String, Port>();
+	static HashMap<String, Port> ports = new HashMap<String, Port>();
 
 	/**
 	 * all the ports we are currently connected to typically there is 0 to 1
 	 * connected ports - however the serial service has the ability to "fork"
 	 * ports where it is connected to 2 or more ports simultaneously
 	 */
-	transient HashMap<String, Port> connectedPorts = new HashMap<String, Port>();
+	HashMap<String, Port> connectedPorts = new HashMap<String, Port>();
 
 	/**
 	 * used as the "default" port - now that Serial can multiplex with multiple
@@ -333,6 +333,12 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			}
 
 			connectPort(port, null);
+			
+			// even when the JNI says it is connected
+			// rarely is everything ready to go
+			// give us half a second for all the buffers
+			// & hardware to be ready
+			// sleep(1500);
 			return true;
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -381,6 +387,12 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		port.open();
 		port.listen(listeners);
 		connectedPorts.put(portName, newPort);
+		
+		// FYI !!!
+		// give us a second before we advertise the port
+		// is open - often the hardware or JNI buffers
+		// are not ready even though we have "opened" it
+		sleep(1000);
 
 		// invoking remote & local onConnect
 		invoke("publishConnect", port.getName());

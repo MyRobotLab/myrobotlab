@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -20,7 +21,9 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class CodecOutputStream extends OutputStream {
+public class CodecOutputStream extends OutputStream implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(CodecOutputStream.class);
 

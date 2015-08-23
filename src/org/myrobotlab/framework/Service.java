@@ -1695,10 +1695,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 */
 	@Override
 	public boolean save() {
-		//info("saving %s", getName());
+		
 		try {
 			File cfg = new File(String.format("%s%s%s.json", cfgDir, File.separator, getName()));
 			// serializer.write(this, cfg);
+			info("saving %s", cfg.getName());
+			
 			if (this instanceof Runtime) {
 				info("we cant serialize runtime yet");
 				return false;
