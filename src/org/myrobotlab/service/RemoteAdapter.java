@@ -872,7 +872,7 @@ public class RemoteAdapter extends Service implements Gateway {
 			// Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
 			Runtime.start("raspi", "Runtime");
 			Runtime.start("gui", "GUIService");
-			Runtime.start("python", "Python");
+			//Runtime.start("python", "Python");
 			Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
 			//remote1.setTCPPort(6868);

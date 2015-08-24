@@ -3,16 +3,17 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div id="serviceList" class="col-md-6" style="min-height: 200px">
+        <div id="serviceList" class="col-md-12" style="min-height: 200px">
             <div ng-repeat="service in services"
                  service-directive
                  service="service">
             </div>
-        </div>
+        </div><!--
         <div class="col-md-6">
             <div>DEBUG-SECTION not assigned yet</div>
             <pre>Model: {{searchSelectedService| json}}</pre>
             <pre>{{log| json}}</pre>
         </div>
+        -->
     </div>
 </div>       
