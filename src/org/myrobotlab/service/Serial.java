@@ -674,6 +674,9 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public String getRXCodecKey() {
+		if (outRX == null){
+			return null;
+		}
 		return outRX.getKey();
 	}
 
@@ -686,10 +689,16 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public Codec getTXCodec() {
+		if (outTX == null){
+			return null;
+		}
 		return outTX.getCodec();
 	}
 
 	public String getTXCodecKey() {
+		if (outTX == null){
+			return null;
+		}
 		return outTX.getKey();
 	}
 
