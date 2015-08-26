@@ -431,7 +431,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 					// check if the URI is already defined - if not - we will
 					// send back the services which we want to export - Security
 					// will filter appropriately
-					ServiceEnvironment foreignProcess = Runtime.getServiceEnvironment(uri);
+					ServiceEnvironment foreignProcess = Runtime.getEnvironment(uri);
 					if (foreignProcess == null) {
 						// not defined we will send export
 						// TODO - Security filters - default export (include

@@ -37,10 +37,8 @@ import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Rumbler;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.ServiceInterface;

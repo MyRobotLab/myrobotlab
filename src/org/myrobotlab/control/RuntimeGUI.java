@@ -477,7 +477,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 	 * Add data to the list model for display
 	 */
 	public void getCurrentServices() {
-		HashMap<String, ServiceInterface> services = Runtime.getRegistry();
+		Map<String, ServiceInterface> services = Runtime.getRegistry();
 
 		Map<String, ServiceInterface> sortedMap = null;
 		sortedMap = new TreeMap<String, ServiceInterface>(services);

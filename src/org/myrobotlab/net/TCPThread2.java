@@ -145,7 +145,7 @@ public class TCPThread2 extends Thread {
 					// will
 					// send back the services which we want to export -
 					// Security will filter appropriately
-					ServiceEnvironment foreignProcess = Runtime.getServiceEnvironment(uri);
+					ServiceEnvironment foreignProcess = Runtime.getEnvironment(uri);
 
 					// FIXME - normalize ...
 					Object[] msgData = msg.data;

@@ -331,7 +331,7 @@ public class GUIServiceGUI extends ServiceGUI {
 	public void buildLocalServiceGraph() {
 
 		log.info("buildLocalServiceGraph-begin");
-		HashMap<String, ServiceInterface> services = Runtime.getRegistry();
+		Map<String, ServiceInterface> services = Runtime.getRegistry();
 		log.info("GUIServiceGUI service count " + Runtime.getRegistry().size());
 
 		TreeMap<String, ServiceInterface> sortedMap = new TreeMap<String, ServiceInterface>(services);

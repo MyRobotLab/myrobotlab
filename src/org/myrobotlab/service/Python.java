@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.fileLib.FileIO;
@@ -283,7 +284,7 @@ public class Python extends Service {
 		log.info(String.format("creating python %s", getName()));
 		// get all currently registered services and add appropriate python
 		// handles
-		HashMap<String, ServiceInterface> svcs = Runtime.getRegistry();
+		Map<String, ServiceInterface> svcs = Runtime.getRegistry();
 		StringBuffer initScript = new StringBuffer();
 		initScript.append("from time import sleep\n");
 		initScript.append("from org.myrobotlab.service import Runtime\n");

@@ -174,7 +174,7 @@ angular.module('mrlapp.service')
                     },
                     large: {
                         glyphicon: 'glyphicon glyphicon-resize-full',
-                        width: 500
+                        width: 900
                     },
                     full: {
                         glyphicon: 'glyphicon glyphicon-fullscreen',
@@ -186,7 +186,7 @@ angular.module('mrlapp.service')
                     },
                     free: {
                         glyphicon: 'glyphicon glyphicon-resize-horizontal',
-                        width: 500,
+                        width: 900,
                         freeform: true //allow free-form resizing (width)
                     }
                 },
@@ -313,7 +313,7 @@ angular.module('mrlapp.service')
                     },
                     large: {
                         glyphicon: 'glyphicon glyphicon-resize-full',
-                        width: 500
+                        width: 900
                     },
                     full: {
                         glyphicon: 'glyphicon glyphicon-fullscreen',
@@ -325,7 +325,7 @@ angular.module('mrlapp.service')
                     },
                     free: {
                         glyphicon: 'glyphicon glyphicon-resize-horizontal',
-                        width: 500,
+                        width: 900,
                         freeform: true //allow free-form resizing (width)
                     }
                 },

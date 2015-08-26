@@ -70,10 +70,11 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	boolean autoStartBrowser = true;
 
 	public String startURL = "http://localhost:%d/index.html";
-	
-	// FIXME might need to change to HashMap<String, HashMap<String,String>> to add
+
+	// FIXME might need to change to HashMap<String, HashMap<String,String>> to
+	// add
 	// client session
-	public HashMap<String, String> servicePanels = new HashMap<String, String>(); 
+	public HashMap<String, String> servicePanels = new HashMap<String, String>();
 
 	// FIXME - shim for Shoutbox
 	// deprecate ???
@@ -170,11 +171,13 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	// ================ Broadcaster begin ===========================
 	public void broadcast(Message msg) {
 		try {
-			Codec codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			codec.encode(bos, msg);
-			bos.close();
-			broadcaster.broadcast(new String(bos.toByteArray())); // wtf
+			if (broadcaster != null) {
+				Codec codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				codec.encode(bos, msg);
+				bos.close();
+				broadcaster.broadcast(new String(bos.toByteArray())); // wtf
+			}
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -187,7 +190,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// Broadcaster b = broadcasterFactory.get();
 		// a session "might" be nice - but for now we are stateless
 		// SessionSupport ss = new SessionSupport();
-		
+
 		// extract all resources
 		// if resource directory exists - do not overwrite !
 		// could whipe out user mods
@@ -195,18 +198,21 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		Config.Builder configBuilder = new Config.Builder();
 		configBuilder
-		/* did not work :(
-		.resource("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource")
-		.resource("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGUI")
-		*/
-		
+				/*
+				 * did not work :( .resource(
+				 * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource")
+				 * .resource(
+				 * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGUI"
+				 * )
+				 */
+
 				// for debugging
 				.resource("./src/resource/WebGUI")
 				.resource("./src/resource")
 				// for runtime - after extractions
 				.resource("./resource/WebGUI")
 				.resource("./resource")
-		
+
 				// Support 2 APIs
 				// REST - http://host/object/method/param0/param1/...
 				// synchronous DO NOT SUSPEND
@@ -214,8 +220,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 				// if Jetty is in the classpath it will use it by default - we
 				// want to use Netty
-				// .initParam("org.atmosphere.websocket.maxTextMessageSize", "100000")
-				// .initParam("org.atmosphere.websocket.maxBinaryMessageSize", "100000")
+				// .initParam("org.atmosphere.websocket.maxTextMessageSize",
+				// "100000")
+				// .initParam("org.atmosphere.websocket.maxBinaryMessageSize",
+				// "100000")
 				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
 				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build();
 
@@ -232,6 +240,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			log.info("auto starting default browser");
 			BareBonesBrowserLaunch.openURL(String.format(startURL, port));
 		}
+
+		// get all instances
 
 		// we want all onState & onStatus events from all services
 		ServiceEnvironment se = Runtime.getLocalServices();
@@ -257,7 +267,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// broadcast it too
 		// repackage message
 		/*
-		 * don't need to do this :) Message m = createMessage(getName(), "onRegistered", si); m.sender = Runtime.getInstance().getName(); broadcast(m);
+		 * don't need to do this :) Message m = createMessage(getName(),
+		 * "onRegistered", si); m.sender = Runtime.getInstance().getName();
+		 * broadcast(m);
 		 */
 	}
 
@@ -286,8 +298,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	}
 
 	/**
-	 * With a single method Atmosphere does so much !!! It sets up the connection, possibly gets a session, turns the request into something like a HTTPServletRequest, provides us
-	 * with input & output streams - and manages all the "long polling" or websocket upgrades on its own !
+	 * With a single method Atmosphere does so much !!! It sets up the
+	 * connection, possibly gets a session, turns the request into something
+	 * like a HTTPServletRequest, provides us with input & output streams - and
+	 * manages all the "long polling" or websocket upgrades on its own !
 	 * 
 	 * Atmosphere Rocks !
 	 */
@@ -354,8 +368,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			}
 
 			/*
-			 * interesting .... switch (r.transport()) { case JSONP: case LONG_POLLING: event.getResource().resume(); break; case WEBSOCKET: case STREAMING:
-			 * res.getWriter().flush(); break; }
+			 * interesting .... switch (r.transport()) { case JSONP: case
+			 * LONG_POLLING: event.getResource().resume(); break; case
+			 * WEBSOCKET: case STREAMING: res.getWriter().flush(); break; }
 			 */
 
 			response.addHeader("Content-Type", codec.getMimeType());
@@ -372,10 +387,12 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 					return;
 				}
 
-				ServiceEnvironment si = Runtime.getLocalServices();
+				// ServiceEnvironment env = Runtime.getLocalServices();
+				HashMap<URI, ServiceEnvironment> env = Runtime.getEnvironments();
 
+				// FIXME - getEnvironments()
 				// FIXME - relfect with javdoc info log.info("inspecting");
-				respond(out, codec, "getLocalServices", si);
+				respond(out, codec, "getLocalServices", env);
 				return;
 			} else if (parts.length == 4) {
 				// *** /api/messages/runtime ***
@@ -485,8 +502,16 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// best to fail - then attempt to resolve through scanning through
 			// methods and trying types - then cache the result
 
-			Object ret = method.invoke(si, params);
-			respond(out, codec, method.getName(), ret);
+			// FIXME - this is duplicated in processMessageAPI :(
+			if (si.isLocal()) {
+				log.info("{} is local", name);
+				Object ret = method.invoke(si, params);
+				respond(out, codec, method.getName(), ret);
+			} else {
+				log.info("{} is is remote", name);
+				Message msg = createMessage(name, method.getName(), params);
+				out(msg);
+			}
 
 			MethodCache.cache(clazz, method);
 
@@ -507,7 +532,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// but they are un-coerced - we need the method signature candidate
 		// to determine what we should coerce them into
 		Message msg = Encoder.fromJson(body.asString(), Message.class);
-		if (msg == null){
+		if (msg == null) {
 			log.error(String.format("msg is null %s", body.asString()));
 			return;
 		}
@@ -549,9 +574,12 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		}
 
 		// FIXME FIXME FIXME !!!!
-		// Service.invoke needs to use method cach BUT - internal queues HAVE type information
-		// AND decoded json DOES NOT - needs to be optimized such that it knows the encoding
-		// before using the method cache - and the "hint" determins getBestCanidate !!!!
+		// Service.invoke needs to use method cach BUT - internal queues HAVE
+		// type information
+		// AND decoded json DOES NOT - needs to be optimized such that it knows
+		// the encoding
+		// before using the method cache - and the "hint" determins
+		// getBestCanidate !!!!
 
 		Method method = clazz.getMethod(msg.method, paramTypes);
 
@@ -568,13 +596,21 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		// FIXME - not good - using my thread to execute another services
 		// method and put its return on the the services out queue :P
-		Object retobj = method.invoke(si, params);
+		if (si.isLocal()) {
+			log.info("{} is local", si.getName());
 
-		// FIXME - Is this how to support synchronous ?
-		// What does this mean ?
-		// respond(out, codec, method.getName(), ret);
+			Object retobj = method.invoke(si, params);
 
-		si.out(msg.method, retobj);
+			// FIXME - Is this how to support synchronous ?
+			// What does this mean ?
+			// respond(out, codec, method.getName(), ret);
+
+			si.out(msg.method, retobj);
+		} else {
+			log.info("{} is remote", si.getName());
+			send(msg.name, msg.method, msg.data);
+			// out(msg); LETHAL !
+		}
 
 		MethodCache.cache(clazz, method);
 	}
@@ -622,7 +658,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	 */
 
 	/**
-	 * determines if references to JQuery JavaScript library are local or if the library is linked to using content delivery network. Default (false) is to use the CDN
+	 * determines if references to JQuery JavaScript library are local or if the
+	 * library is linked to using content delivery network. Default (false) is
+	 * to use the CDN
 	 * 
 	 * @param b
 	 */
@@ -654,12 +692,12 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		return false;
 	}
 
-	public void savePanel(String name, String panel){
+	public void savePanel(String name, String panel) {
 		servicePanels.put(name, panel);
 	}
 
-	public String loadPanel(String name){
-		if (servicePanels.containsKey(name)){
+	public String loadPanel(String name) {
+		if (servicePanels.containsKey(name)) {
 			return servicePanels.get(name);
 		}
 		return null;
@@ -673,23 +711,29 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			// Runtime.start("gui", "GUIService");
 			Runtime.start("webgui2", "WebGUI");
-			// RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote2", "RemoteAdapter");
-			//remote.startListening();
-			//remote.connect("tcp://127.0.0.1:6767");
+			// RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote2",
+			// "RemoteAdapter");
+			// remote.startListening();
+			// remote.connect("tcp://127.0.0.1:6767");
 			Runtime.start("python", "Python");
-			//Runtime.start("arduino", "Arduino");// Runtime.start("clock01", "Clock"); Runtime.start("clck3", "Clock");
-			//Runtime.start("gui", "GUIService");
+			// Runtime.start("arduino", "Arduino");// Runtime.start("clock01",
+			// "Clock"); Runtime.start("clck3", "Clock");
+			// Runtime.start("gui", "GUIService");
 
 			// webgui.extract();
 			/*
-			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock"); Runtime.start("clck3", "Clock");
+			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock");
+			 * Runtime.start("clck3", "Clock");
 			 * 
-			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock"); Runtime.start("clck3", "Clock");
+			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock");
+			 * Runtime.start("clck3", "Clock");
 			 */
 
 			/*
-			 * Message msg = webgui.createMessage("runtime", "start", new Object[]{"arduino", "Arduino"}); String json = Encoder.toJson(msg); log.info(json); //
-			 * Runtime.start("gui", "GUIService"); log.info(json);
+			 * Message msg = webgui.createMessage("runtime", "start", new
+			 * Object[]{"arduino", "Arduino"}); String json =
+			 * Encoder.toJson(msg); log.info(json); // Runtime.start("gui",
+			 * "GUIService"); log.info(json);
 			 */
 
 		} catch (Exception e) {

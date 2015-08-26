@@ -374,7 +374,7 @@ public class RemoteAdapter extends Service implements Gateway {
 							// will
 							// send back the services which we want to export -
 							// Security will filter appropriately
-							ServiceEnvironment foreignProcess = Runtime.getServiceEnvironment(mrlURI);
+							ServiceEnvironment foreignProcess = Runtime.getEnvironment(mrlURI);
 
 							ServiceInterface si = (ServiceInterface) msg.data[0];
 							// HMMM a vote for String vs URI here - since we
@@ -870,10 +870,12 @@ public class RemoteAdapter extends Service implements Gateway {
 
 			// RemoteAdapter remote0 = (RemoteAdapter)
 			// Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
-			Runtime.start("raspi", "Runtime");
+			Runtime.start("mac", "Runtime");
 			Runtime.start("gui", "GUIService");
-			//Runtime.start("python", "Python");
-			Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+			//Runtime.start("webgui", "WebGUI");
+			Runtime.start("python", "Python");
+			Runtime.start("mac.clock", "Clock");
+			// Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
 			//remote1.setTCPPort(6868);
 			//remote1.setUDPPort(6868);

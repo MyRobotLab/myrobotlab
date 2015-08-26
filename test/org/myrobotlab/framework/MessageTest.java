@@ -3,6 +3,7 @@ package org.myrobotlab.framework;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
@@ -144,7 +145,17 @@ public class MessageTest {
 		*/
 
 	}
+	
+	/*
+	
+	@Test
+	final public void badTest(){
+		boolean foo = false;
+		assertTrue(foo);
+	}
 
+	*/
+	
 	/**
 	 * test to excercise
 	 * 
