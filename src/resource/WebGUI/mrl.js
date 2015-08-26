@@ -35,7 +35,8 @@ angular
     
     var connected = false;
     
-    var instances = {};
+    var environments = {};
+    var myEnv = {};
     var registry = {};
     
     var transport = 'websocket';
@@ -130,30 +131,9 @@ angular
         methodCallbackMap[methodName].push(callback);
     }
     ;
-    /* NOT needed - started to break anyway when data was int or bool or null vs string
-    this.escapeJsonSpecialChars = function(data) {
-        // Encode the quote marks. not sure why this isn't already done for us. <- Ya ! why ?!?
-        return "\"" + data.replace(/\"/g, "\\\"") + "\"";
-        
-        //        var x = data.replace(/\\n/g, "\\n")
-        //        .replace(/\\'/g, "\\'")
-        //        .replace(/\\"/g, '\\"')
-        //        .replace(/\\&/g, "\\&")
-        //        .replace(/\\r/g, "\\r")
-        //        .replace(/\\t/g, "\\t")
-        //        .replace("↵", "FOO") 
-        //        .replace(/\\b/g, "\\b")
-        //        .replace("p", "z")
-        //        //.replace(\u21b5/g,"\\n")
-        //        .replace("↵", "\\n") 
-        //        .replace(/\\f/g, "\\f");
-        //        console.log(x);
-        //        return x;
-    }
-    ;
-    */
+    
     this.sendMessage = function(msg) {
-
+        
         if (msg.data != null ) {
             for (i = 0; i < msg.data.length; ++i) {
                 // encode the data parameters
@@ -180,40 +160,50 @@ angular
     // protocol - we are using Runtime.onLocalServices to do 
     // initial processing of data after a connect
     this.onLocalServices = function(msg) {
-        console.log('onLocalServices:');
+        console.log('getEnvironments:');
         
         // find the gateway we are talking too
         // TODO make full service?
         // _self.gateway = msg.sender;
         var gatewayName = msg.sender;
-        _self.platform = msg.data[0].platform;
+        _self.environments = msg.data[0];
+        _self.myEnv = _self.environments["null"];
         
-        // instances update
+        
+        _self.platform = _self.myEnv.platform;
+        
+        // environments update
         // find the name of the runtime
         // not sure if this is "right" - but this is how
         // it is in Java .. the instance map with a null protokey
         // is the "local" instance - dunno even if javascript supports a null/undefined
         // object member name :P - perhaps it should be the protokey of the gateway instead
         // of null
-        instances["null"] = msg.data[0];
-        sd = msg.data[0].serviceDirectory;
+        
+        var sd = _self.myEnv.serviceDirectory;
         
         // registry update
-        for (var key in sd) {
-            if (sd.hasOwnProperty(key)) {
-                var service = sd[key];
-                //console.log("found " + key + " of type " + service.simpleName);
-                registry[key] = {};
-                registry[key] = service;
-                if (service.simpleName == "Runtime") {
-                    // the one and only runtime
-                    _self.runtime = service;
-                    _self.subscribeToService(_self.onRuntimeMsg, service.name);
+        for (var uri in _self.environments) {
+            if (_self.environments.hasOwnProperty(uri)) {
+                sd = _self.environments[uri].serviceDirectory;
+                for (var key in sd) {
+                    if (sd.hasOwnProperty(key)) {
+                        var service = sd[key];
+                        //console.log("found " + key + " of type " + service.simpleName);
+                        registry[key] = {};
+                        registry[key] = service;
+                        console.log("registry found", key);
+                        if (service.simpleName == "Runtime" && uri == "null") {
+                            // the one and only local runtime
+                            _self.runtime = service;
+                            _self.subscribeToService(_self.onRuntimeMsg, service.name);
+                        }
+                    }
                 }
             }
         }
         
-        _self.gateway = sd[gatewayName];
+        _self.gateway = _self.myEnv.serviceDirectory[gatewayName];
         
         // ok now we are connected
         connected = true;
@@ -393,7 +383,7 @@ angular
     // the following method should dynamically load the
     // Angular module
     // if not loaded &
-    // instanciate a new instances with the (service)
+    // instanciate a new environments with the (service)
     // data
     this.register = function(service) {
         registry[service.name] = {};
@@ -490,7 +480,7 @@ angular
                 return _self.gateway;
             },
             getLocalServices: function() {
-                return instances["null"];
+                return environments["null"];
             },
             getPlatform: function() {
                 return _self.platform;

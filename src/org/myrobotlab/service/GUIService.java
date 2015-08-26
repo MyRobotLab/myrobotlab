@@ -339,7 +339,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 			serviceGUIMap.put(welcomeTabText, welcome);
 		}
 
-		HashMap<String, ServiceInterface> services = Runtime.getRegistry();
+		Map<String, ServiceInterface> services = Runtime.getRegistry();
 		log.info("buildTabPanels service count " + Runtime.getRegistry().size());
 
 		TreeMap<String, ServiceInterface> sortedMap = new TreeMap<String, ServiceInterface>(services);

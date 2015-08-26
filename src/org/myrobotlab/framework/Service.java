@@ -138,7 +138,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	protected String prefix = null; // if foreign - this will be name prefix -
 									// set by Gateway
 
-	private final String name;
+	private String name;
 
 	private String simpleName; // used in gson encoding for getSimpleName()
 
@@ -300,9 +300,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				Field f = fields[j];
 
 				int modifiers = f.getModifiers();
-						
-				//if (Modifier.isPublic(mod)
-				
+
+				// if (Modifier.isPublic(mod)
+
 				if (!(Modifier.isPublic(f.getModifiers()) && !(f.getName().equals("log")) && !Modifier.isTransient(f.getModifiers()))) {
 					log.debug(String.format("skipping %s", f.getName()));
 					continue;
@@ -310,10 +310,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				Type t = f.getType();
 
 				log.info(String.format("setting %s", f.getName()));
-				if (Modifier.isStatic(f.getModifiers()) || Modifier.isFinal(f.getModifiers())){
+				if (Modifier.isStatic(f.getModifiers()) || Modifier.isFinal(f.getModifiers())) {
 					continue;
 				}
-				
+
 				if (t.equals(java.lang.Boolean.TYPE)) {
 					targetClass.getDeclaredField(f.getName()).setBoolean(target, f.getBoolean(source));
 				} else if (t.equals(java.lang.Character.TYPE)) {
@@ -575,7 +575,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		}
 	}
 
-	
 	/**
 	 * Reserves a name for a root level Service. allows modifications to the
 	 * reservation map at the highest level
@@ -668,7 +667,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	// FIXME - make a static initialization part !!!
-	
+
 	/**
 	 * 
 	 * @param reservedKey
@@ -715,18 +714,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		Runtime.register(this, null);
 	}
 
-	
-	
-	public void addListener(MRLListener listener){
+	public void addListener(MRLListener listener) {
 		addListener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
 	}
+
 	/**
 	 * adds a MRL message listener to this service this is the result of a
-	 * "subscribe" from a different service
-	 *  FIXME !! - implement with HashMap or HashSet .. WHY ArrayList ???
-	 *  @param topicMethod - method when called, it's return will be sent to the callbackName/calbackMethod
-	 *  @param callbackName - name of the service to send return message to
-	 *  @param callbackMethod - name of the method to send return data to
+	 * "subscribe" from a different service FIXME !! - implement with HashMap or
+	 * HashSet .. WHY ArrayList ???
+	 * 
+	 * @param topicMethod
+	 *            - method when called, it's return will be sent to the
+	 *            callbackName/calbackMethod
+	 * @param callbackName
+	 *            - name of the service to send return message to
+	 * @param callbackMethod
+	 *            - name of the method to send return data to
 	 */
 	public void addListener(String topicMethod, String callbackName, String callbackMethod) {
 		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
@@ -883,7 +886,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return pulse;
 	}
 
-
 	@Override
 	abstract public String[] getCategories();
 
@@ -953,7 +955,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return lastError;
 	}
 
-	// FIXME - use the method cache 
+	// FIXME - use the method cache
 	public HashSet<String> getMessageSet() {
 		HashSet<String> ret = new HashSet<String>();
 		Method[] methods = getMethods();
@@ -988,17 +990,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 */
 	public Message getMsg() throws InterruptedException {
 		return inbox.getMsg();
-	}
-
-	@Override
-	public String getName() {
-		// prefix is set by Gateway
-		if (prefix == null) {
-			return name;
-		} else {
-			return String.format("%s%s", prefix, name);
-		}
-
 	}
 
 	/**
@@ -1181,8 +1172,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		inbox.add(msg);
 	}
 
-
-
 	// BOXING - BEGIN --------------------------------------
 
 	/**
@@ -1199,15 +1188,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method, Encoder.getParameterSignature(msg.data), msg.timeStamp));
 		}
 
-		// recently added - to support "nameless" messages - concept you may get a message at this point
-		// which does not belong to you - but is for a service in the same Process
-		// this is to support nameless Runtime messages but theoretically it could
+		// recently added - to support "nameless" messages - concept you may get
+		// a message at this point
+		// which does not belong to you - but is for a service in the same
+		// Process
+		// this is to support nameless Runtime messages but theoretically it
+		// could
 		// happen in other situations...
-		if (!name.equals(msg.name)){
+		if (!name.equals(msg.name)) {
 			// wrong Service - get the correct one
 			return Runtime.getService(msg.name).invoke(msg);
 		}
-		
+
 		// SECURITY -
 		// 0. allowing export - whether or not we'll allow services to be
 		// exported - based on Type or Name
@@ -1473,8 +1465,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	/**
-	 * publishing point for the whole service
-	 * the entire Service is published
+	 * publishing point for the whole service the entire Service is published
 	 * 
 	 * @return
 	 */
@@ -1561,21 +1552,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * 
 	 * @param listener
 	 */
-	/* DEPRECATE MRLListener Object interface - use String params
-	public void removeListener(MRLListener listener) {
-		if (!outbox.notifyList.containsKey(listener.outMethod.toString())) {
-			log.error(String.format("removeListener requested %s to be removed - but does not exist", listener));
-			return;
-		}
-		ArrayList<MRLListener> nel = outbox.notifyList.get(listener.outMethod.toString());
-		for (int i = 0; i < nel.size(); ++i) {
-			MRLListener target = nel.get(i);
-			if (target.name.compareTo(listener.name) == 0) {
-				nel.remove(i);
-			}
-		}
-	}
-	*/
+	/*
+	 * DEPRECATE MRLListener Object interface - use String params public void
+	 * removeListener(MRLListener listener) { if
+	 * (!outbox.notifyList.containsKey(listener.outMethod.toString())) {
+	 * log.error(String.format(
+	 * "removeListener requested %s to be removed - but does not exist",
+	 * listener)); return; } ArrayList<MRLListener> nel =
+	 * outbox.notifyList.get(listener.outMethod.toString()); for (int i = 0; i <
+	 * nel.size(); ++i) { MRLListener target = nel.get(i); if
+	 * (target.name.compareTo(listener.name) == 0) { nel.remove(i); } } }
+	 */
 
 	/**
 	 * 
@@ -1646,11 +1633,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				if (!preRoutingHook(m)) {
 					continue;
 				}
-				
+
 				// nameless Runtime messages
-				if (m.name == null){
-					// don't know if this is "correct" 
-					// but we are substituting the Runtime name as soon as we see that its a null 
+				if (m.name == null) {
+					// don't know if this is "correct"
+					// but we are substituting the Runtime name as soon as we
+					// see that its a null
 					// name message
 					m.name = Runtime.getInstance().getName();
 				}
@@ -1664,7 +1652,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 				if (!preProcessHook(m)) {
 					// if preProcessHook returns false
-					// the message does not need to continue 
+					// the message does not need to continue
 					// processing
 					continue;
 				}
@@ -1695,17 +1683,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 */
 	@Override
 	public boolean save() {
-		
+
 		try {
 			File cfg = new File(String.format("%s%s%s.json", cfgDir, File.separator, getName()));
 			// serializer.write(this, cfg);
 			info("saving %s", cfg.getName());
-			
+
 			if (this instanceof Runtime) {
 				info("we cant serialize runtime yet");
 				return false;
 			}
-			
+
 			String s = Encoder.toJson(this);
 			FileOutputStream out = new FileOutputStream(cfg);
 			out.write(s.getBytes());
@@ -1893,7 +1881,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	@Override
 	public void setPrefix(String prefix) {
-		this.prefix = prefix;
+		this.name = String.format("%s%s", prefix, name);
+	}
+
+	@Override
+	public String getName() {
+		// prefix is set by Gateway
+		/*
+		 * if (prefix == null) { return name; } else { return
+		 * String.format("%s%s", prefix, name); }
+		 */
+
+		return name;
+
 	}
 
 	/**
@@ -2029,46 +2029,48 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 		save();
 	}
+
 	// -------------- Messaging Begins -----------------------
-	public void subscribe(NameProvider topicName, String topicMethod){
+	public void subscribe(NameProvider topicName, String topicMethod) {
 		String callbackMethod = Encoder.getCallBackName(topicMethod);
 		subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
 	}
-	
-	public void subscribe(String topicName, String topicMethod){
+
+	public void subscribe(String topicName, String topicMethod) {
 		String callbackMethod = Encoder.getCallBackName(topicMethod);
 		subscribe(topicName, topicMethod, getName(), callbackMethod);
 	}
-	
+
 	public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
 		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
 		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
 		cm.send(createMessage(topicName, "addListener", listener));
 	}
 
-	public void unsubscribe(NameProvider topicName, String topicMethod){
+	public void unsubscribe(NameProvider topicName, String topicMethod) {
 		String callbackMethod = Encoder.getCallBackName(topicMethod);
 		subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
 	}
-	
-	public void unsubscribe(String topicName, String topicMethod){
+
+	public void unsubscribe(String topicName, String topicMethod) {
 		String callbackMethod = Encoder.getCallBackName(topicMethod);
 		unsubscribe(topicName, topicMethod, getName(), callbackMethod);
 	}
-	
+
 	public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
 		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
-		/* wa deprecated
-		MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-		cm.send(createMessage(topicName, "removeListener", listener));
-		*/
-		cm.send(createMessage(topicName, "removeListener", new Object[]{topicMethod, callbackName, callbackMethod}));
+		/*
+		 * wa deprecated MRLListener listener = new MRLListener(topicMethod,
+		 * callbackName, callbackMethod); cm.send(createMessage(topicName,
+		 * "removeListener", listener));
+		 */
+		cm.send(createMessage(topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
 	}
-	
+
 	// -------------- Messaging Ends -----------------------
 	// ---------------- Status processing begin ------------------
 	public Status error(Exception e) {
-		Status ret= Status.error(e);
+		Status ret = Status.error(e);
 		ret.name = getName();
 		invoke("publishStatus", ret);
 		return ret;
@@ -2076,13 +2078,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	@Override
 	public Status error(String format, Object... args) {
-		Status ret= Status.error(String.format(format, args));
+		Status ret = Status.error(String.format(format, args));
 		ret.name = getName();
 		invoke("publishStatus", ret);
 		return ret;
 	}
 
-	
 	public Status warn(String msg) {
 		Status ret = Status.warn(msg);
 		invoke("publishStatus", ret);
@@ -2093,7 +2094,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public Status warn(String format, Object... args) {
 		return Status.warn(format, args);
 	}
-	
+
 	/**
 	 * set status broadcasts an info string to any subscribers
 	 * 
@@ -2114,10 +2115,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public Status info(String format, Object... args) {
 		return Status.info(format, args);
 	}
-	
+
 	/**
 	 * error only channel publishing point versus publishStatus which handles
 	 * info, warn & error
+	 * 
 	 * @param msg
 	 * @return
 	 */
@@ -2136,11 +2138,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		}
 		return status;
 	}
-	
+
 	// ---------------- Status processing end ------------------
 	@Override
-	public String toString(){
+	public String toString() {
 		return getName();
 	}
-	
+
 }

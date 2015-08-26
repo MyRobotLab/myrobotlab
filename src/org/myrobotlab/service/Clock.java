@@ -168,22 +168,22 @@ public class Clock extends Service {
 			// TCP CONNECT WORKS BEGIN ---------------------------------
 			try {
 
-				int i = 7;
+				int i = 4;
 
 				// for (int i = 1; i < 4; ++i) {
-				Runtime.main(new String[] { "-runtimeName", String.format("mac", i) });
+				Runtime.main(new String[] { "-runtimeName", String.format("runtime.%d", i) });
 
 				// auto-grab the next port if can not listen???
-//				RemoteAdapter remote = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
+				RemoteAdapter remote = (RemoteAdapter) Runtime.start(String.format("remote%d", i), "RemoteAdapter");
 				// remote.setUDPPort(6868);
 				// remote.setTCPPort(6868);
 				// remote.scan();
 //				remote.setDefaultPrefix("raspi");
-				//Runtime.start(String.format("clock", i), "Clock");
-				Runtime.start(String.format("gui", i), "GUIService");
-				Runtime.start(String.format("python", i), "Python");
+				Runtime.start(String.format("clock%d", i), "Clock");
+				//Runtime.start(String.format("gui", i), "GUIService");
+				//Runtime.start(String.format("python", i), "Python");
 				
-//				remote.connect("tcp://127.0.0.1:6767");
+				remote.connect("tcp://127.0.0.1:6767");
 				// Runtime.start(String.format("p%d", i), "Python");
 				// remote.scan();
 

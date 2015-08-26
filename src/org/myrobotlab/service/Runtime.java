@@ -89,9 +89,16 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 */
 
 	// gson only serializes - non static & non transient fields
-	static private final HashMap<URI, ServiceEnvironment> instances = new HashMap<URI, ServiceEnvironment>();
+	// has to be HashMap - because null is self
+	/**
+	 * environments of running mrl instances - the null environment is the current local
+	 */
+	static private final HashMap<URI, ServiceEnvironment> environments = new HashMap<URI, ServiceEnvironment>();
 
-	static private final HashMap<String, ServiceInterface> registry = new HashMap<String, ServiceInterface>();
+	/**
+	 * a registry of all services regardless of which environment they came from - each must have a unique name
+	 */
+	static private final TreeMap<String, ServiceInterface> registry = new TreeMap<String, ServiceInterface>();
 
 	/**
 	 * map to hide methods we are not interested in
@@ -382,7 +389,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 	public static String dump() {
 		StringBuffer sb = new StringBuffer().append("\ninstances:\n");
-		Map<URI, ServiceEnvironment> sorted = instances;
+		Map<URI, ServiceEnvironment> sorted = environments;
 		Iterator<URI> hkeys = sorted.keySet().iterator();
 		URI url;
 		ServiceEnvironment se;
@@ -391,7 +398,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		ServiceInterface sw;
 		while (hkeys.hasNext()) {
 			url = hkeys.next();
-			se = instances.get(url);
+			se = environments.get(url);
 			sb.append("\t").append(url);
 
 			// good check :)
@@ -684,12 +691,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * @return
 	 */
 	public static ServiceEnvironment getLocalServices() {
-		if (!instances.containsKey(null)) {
+		if (!environments.containsKey(null)) {
 			runtime.error("local (null) ServiceEnvironment does not exist");
 			return null;
 		}
 
-		return instances.get(null);
+		return environments.get(null);
 	}
 
 	/**
@@ -709,12 +716,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * 
 	 */
 	public static ServiceEnvironment getLocalServicesForExport() {
-		if (!instances.containsKey(null)) {
+		if (!environments.containsKey(null)) {
 			runtime.error("local (null) ServiceEnvironment does not exist");
 			return null;
 		}
 
-		ServiceEnvironment local = instances.get(null);
+		ServiceEnvironment local = environments.get(null);
 
 		// URI is null but the "acceptor" will fill in the correct URI/ID
 		ServiceEnvironment export = new ServiceEnvironment(null);
@@ -814,7 +821,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * 
 	 * @return
 	 */
-	public static HashMap<String, ServiceInterface> getRegistry() {
+	public static Map<String, ServiceInterface> getRegistry() {
 		return registry;// FIXME should return copy
 	}
 
@@ -844,9 +851,9 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * @param url
 	 * @return
 	 */
-	public static ServiceEnvironment getServiceEnvironment(URI url) {
-		if (instances.containsKey(url)) {
-			return instances.get(url); // FIXME should return copy
+	public static ServiceEnvironment getEnvironment(URI url) {
+		if (environments.containsKey(url)) {
+			return environments.get(url); // FIXME should return copy
 		}
 		return null;
 	}
@@ -855,8 +862,9 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * 
 	 * @return
 	 */
-	public static HashMap<URI, ServiceEnvironment> getServiceEnvironments() {
-		return new HashMap<URI, ServiceEnvironment>(instances);
+	public static HashMap<URI, ServiceEnvironment> getEnvironments() {
+		// return copy
+		return new HashMap<URI, ServiceEnvironment>(environments);
 	}
 
 	// Reference - cpu utilization
@@ -895,9 +903,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	public static List<ServiceInterface> getServices() {
-		// QUESTION - why isn't registry just a treemap ?
-		TreeMap<String, ServiceInterface> sorted = new TreeMap<String, ServiceInterface>(registry);
-		List<ServiceInterface> list = new ArrayList<ServiceInterface>(sorted.values());
+		List<ServiceInterface> list = new ArrayList<ServiceInterface>(registry.values());
 		return list;
 	}
 
@@ -1290,11 +1296,11 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 */
 	public final static synchronized ServiceInterface register(ServiceInterface s, URI url) {
 		ServiceEnvironment se = null;
-		if (!instances.containsKey(url)) {
+		if (!environments.containsKey(url)) {
 			se = new ServiceEnvironment(url);
-			instances.put(url, se);
+			environments.put(url, se);
 		} else {
-			se = instances.get(url);
+			se = environments.get(url);
 		}
 
 		if (s != null) {
@@ -1330,7 +1336,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 				ServiceInterface gateway = registry.get(n);
 
 				// for each JVM this gateway is is attached too
-				for (Map.Entry<URI, ServiceEnvironment> o : instances.entrySet()) {
+				for (Map.Entry<URI, ServiceEnvironment> o : environments.entrySet()) {
 					// Map.Entry<String,SerializableImage> pairs = o;
 					URI uri = o.getKey();
 					// if its a foreign JVM & the gateway responsible for the
@@ -1394,7 +1400,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		if (sw.isLocal()) {
 			sw.stopService();
 		}
-		ServiceEnvironment se = instances.get(sw.getInstanceId());
+		ServiceEnvironment se = environments.get(sw.getInstanceId());
 		se.serviceDirectory.remove(name);
 		rt.invoke("released", sw);
 		log.warn("released {}", name);
@@ -1409,7 +1415,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	public static boolean release(URI url) /* release process environment */
 	{
 		boolean ret = true;
-		ServiceEnvironment se = instances.get(url);
+		ServiceEnvironment se = environments.get(url);
 		if (se == null) {
 			log.warn("attempt to release {} not successful - it does not exist", url);
 			return false;
@@ -1455,7 +1461,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	{
 		log.debug("releaseAll");
 
-		ServiceEnvironment se = instances.get(null); // local services only
+		ServiceEnvironment se = environments.get(null); // local services only
 		if (se == null) {
 			log.info("releaseAll called when everything is released, all done here");
 			return;
@@ -1496,7 +1502,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		runtime.stopService();
 
 		log.info("clearing hosts environments");
-		instances.clear();
+		environments.clear();
 
 		log.info("clearing registry");
 		registry.clear();
@@ -1959,7 +1965,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * @return Platform description
 	 */
 	public Platform getPlatform(URI uri) {
-		ServiceEnvironment local = instances.get(uri);
+		ServiceEnvironment local = environments.get(uri);
 		if (local != null) {
 			return local.platform;
 		}
@@ -1981,11 +1987,11 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 */
 	public int getServiceCount() {
 		int cnt = 0;
-		Iterator<URI> it = instances.keySet().iterator();
+		Iterator<URI> it = environments.keySet().iterator();
 		ServiceEnvironment se;
 		Iterator<String> it2;
 		while (it.hasNext()) {
-			se = instances.get(it.next());
+			se = environments.get(it.next());
 			it2 = se.serviceDirectory.keySet().iterator();
 			while (it2.hasNext()) {
 				++cnt;
@@ -2001,8 +2007,8 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * 
 	 * @return
 	 */
-	public int getServiceEnvironmentCount() {
-		return instances.size();
+	public int getEnvironmentCount() {
+		return environments.size();
 	}
 
 	/**
@@ -2045,7 +2051,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * @return version string
 	 */
 	public String getVersion(URI uri) {
-		ServiceEnvironment local = instances.get(uri);
+		ServiceEnvironment local = environments.get(uri);
 		if (local != null) {
 			return local.platform.getVersion();
 		}
@@ -2318,7 +2324,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * remove all subscriptions from all local Services
 	 */
 	static public void removeAllSubscriptions(){
-		ServiceEnvironment se = getServiceEnvironment(null);
+		ServiceEnvironment se = getEnvironment(null);
 		Set<String> keys = se.serviceDirectory.keySet();
 		for(String name : keys){
 			ServiceInterface si = getService(name);
