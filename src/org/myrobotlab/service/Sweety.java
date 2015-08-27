@@ -634,7 +634,7 @@ public class Sweety extends Service {
 
 		leftTracker = (Tracking) startPeer("leftTracker");
 		leftTracker.y.setPin(39); // neck
-		leftTracker.ypid.invert();
+		leftTracker.pid.invert("y");
 		leftTracker.x.setPin(40); // right eye
 		leftTracker.connect(port);
 		leftTracker.opencv.setCameraIndex(leftCameraIndex);
@@ -642,7 +642,7 @@ public class Sweety extends Service {
 
 		rightTracker = (Tracking) startPeer("rightTracker");
 		rightTracker.y.setPin(50); // nothing
-		rightTracker.ypid.invert();
+		rightTracker.pid.invert("y");
 		rightTracker.x.setPin(42); // right eye
 		rightTracker.connect(port);
 		rightTracker.opencv.setCameraIndex(rightCameraIndex);
