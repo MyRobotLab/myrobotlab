@@ -370,7 +370,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		DHLink link1 = new DHLink("omoplate", 0, 40, 0, MathUtils.degToRad(-90));
 		DHLink link2 = new DHLink("shoulder", 80, 0, 0, MathUtils.degToRad(90));
 		DHLink link3 = new DHLink("rotate", 280, 0, 0, MathUtils.degToRad(90));
-		DHLink link4 = new DHLink("bicep", 0, 280, 0, MathUtils.degToRad(180));
+		DHLink link4 = new DHLink("bicep", 0, 280, 0, MathUtils.degToRad(0));
 		
 		arm.addLink(link1);
 		arm.addLink(link2);
