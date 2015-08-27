@@ -34,3 +34,4 @@
 /src/resource/WebGUI/service/*.tmp
 /src/resource/WebGUI/service/js/*.tmp
 /__MACOSX/
+/MRLComm/
