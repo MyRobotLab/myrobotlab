@@ -104,7 +104,7 @@
 	<!-- directory for the build to go into -->
 	<property name="build" location="build" />
 	<!-- location for the unit test reports to go into -->
-	<property name="report" location="dist/report" />
+	<property name="report" location="build/report" />
 	<!-- directory for the distrbituion to go into -->
 	<property name="dist" location="dist" />
 	<available file="${build}/classes/resource/license" property="license.present" />
@@ -316,7 +316,6 @@
 		<mkdir dir="${build}/lib" />
 		<mkdir dir="${build}/test" />
 		<mkdir dir="${build}/report" />
-		<mkdir dir="${report}" />
 
 	</target>
 	<!-- ================ init end ================= -->
@@ -500,10 +499,13 @@
 
 	<target name="report" depends="test">
 		<junitreport todir="${report}">
-			<fileset dir="${build}" includes="TEST-*.xml" />
+			<fileset dir="${report}" includes="TEST-*.xml" />
 			<report todir="${report}" format="noframes">
 			</report>
 		</junitreport>
+		<copy todir="${dist}">
+			<fileset dir="${build}/report" />
+		</copy>
 	</target>
 
 	<target name="mail" depends="report">
