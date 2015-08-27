@@ -27,8 +27,9 @@ deploy:
   skip_cleanup: true
 #  local-dir: dist
 #  file: "dist/myrobotlab.jar"
+  # travis will only copy 1 dir
   local_dir: dist
-  local_dir: build/report
+#  local_dir: build/report
   acl: 'public_read'
   on:
     repo: MyRobotLab/myrobotlab

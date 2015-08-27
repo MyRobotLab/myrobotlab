@@ -104,7 +104,7 @@
 	<!-- directory for the build to go into -->
 	<property name="build" location="build" />
 	<!-- location for the unit test reports to go into -->
-	<property name="report" location="build/report" />
+	<property name="report" location="dist/report" />
 	<!-- directory for the distrbituion to go into -->
 	<property name="dist" location="dist" />
 	<available file="${build}/classes/resource/license" property="license.present" />
