@@ -316,7 +316,6 @@
 		<mkdir dir="${build}/lib" />
 		<mkdir dir="${build}/test" />
 		<mkdir dir="${build}/report" />
-		<mkdir dir="${report}" />
 
 	</target>
 	<!-- ================ init end ================= -->
