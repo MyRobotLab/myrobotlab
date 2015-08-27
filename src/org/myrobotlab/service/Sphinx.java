@@ -50,7 +50,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
-import org.myrobotlab.speech.DialogManager;
 import org.slf4j.Logger;
 
 import edu.cmu.sphinx.frontend.util.Microphone;
@@ -209,7 +208,6 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	transient ConfigurationManager cm = null;
 	transient Recognizer recognizer = null;
 
-	transient DialogManager dialogManager = null;
 	transient SpeechProcessor speechProcessor = null;
 
 	private boolean isListening = false;
