@@ -310,6 +310,7 @@
 		<!-- create all necessary directories -->
 		<mkdir dir="${dist}" />
 		<mkdir dir="${dist}/archive" />
+		<mkdir dir="${dist}/report" />
 		<!-- the build directory -->
 		<mkdir dir="${build}" />
 		<mkdir dir="${build}/classes" />
