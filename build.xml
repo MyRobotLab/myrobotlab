@@ -499,7 +499,7 @@
 
 	<target name="report" depends="test">
 		<junitreport todir="${report}">
-			<fileset dir="${report}" includes="TEST-*.xml" />
+			<fileset dir="${build}" includes="TEST-*.xml" />
 			<report todir="${report}" format="noframes">
 			</report>
 		</junitreport>
