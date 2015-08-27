@@ -90,7 +90,7 @@ public class Tracking extends Service {
 	private String state = STATE_IDLE;
 
 	// ------ PEER SERVICES BEGIN------
-	transient public PID xpid, ypid;
+	transient public PID2 pid;
 	transient public OpenCV opencv;
 	transient public Arduino arduino;
 	transient public Servo x, y;
@@ -137,7 +137,7 @@ public class Tracking extends Service {
 
 	/*
 	 * public void releaseService() { x.releaseService(); y.releaseService();
-	 * xpid.releaseService(); ypid.releaseService(); arduino.releaseService();
+	 * pid.releaseService(); ypid.releaseService(); arduino.releaseService();
 	 * opencv.releaseService(); }
 	 */
 
@@ -154,7 +154,7 @@ public class Tracking extends Service {
 		Peers peers = new Peers(name);
 		peers.put("x", "Servo", "pan servo");
 		peers.put("y", "Servo", "tilt servo");
-		peers.put("xpid", "PID", "pan PID");
+		peers.put("pid", "PID", "pan PID");
 		peers.put("ypid", "PID", "tilt PID");
 		peers.put("opencv", "OpenCV", "shared OpenCV instance");
 		peers.put("arduino", "Arduino", "shared Arduino instance");
@@ -172,8 +172,7 @@ public class Tracking extends Service {
 		// createPeer("X","Servo") <-- create peer of default type
 		x = (Servo) createPeer("x");
 		y = (Servo) createPeer("y");
-		xpid = (PID) createPeer("xpid");
-		ypid = (PID) createPeer("ypid");
+		pid = (PID2) createPeer("pid");
 		opencv = (OpenCV) createPeer("opencv");
 		arduino = (Arduino) createPeer("arduino");
 
@@ -184,19 +183,19 @@ public class Tracking extends Service {
 
 		setDefaultPreFilters();
 
-		xpid.setPID(5.0, 5.0, 0.1);
-		xpid.setControllerDirection(PID.DIRECTION_DIRECT);
-		xpid.setMode(PID.MODE_AUTOMATIC);
-		xpid.setOutputRange(-10, 10); // <- not correct - based on maximum
-		xpid.setSampleTime(30);
-		xpid.setSetpoint(0.5); // set center
+		pid.setPID("x", 5.0, 5.0, 0.1);
+		pid.setControllerDirection("x", PID.DIRECTION_DIRECT);
+		pid.setMode("x", PID.MODE_AUTOMATIC);
+		pid.setOutputRange("x", -10, 10); // <- not correct - based on maximum
+		pid.setSampleTime("x", 30);
+		pid.setSetpoint("x", 0.5); // set center
 
-		ypid.setPID(5.0, 5.0, 0.1);
-		ypid.setControllerDirection(PID.DIRECTION_DIRECT);
-		ypid.setMode(PID.MODE_AUTOMATIC);
-		ypid.setOutputRange(-10, 10); // <- not correct - based on maximum
-		ypid.setSampleTime(30);
-		ypid.setSetpoint(0.5); // set center
+		pid.setPID("y", 5.0, 5.0, 0.1);
+		pid.setControllerDirection("y", PID.DIRECTION_DIRECT);
+		pid.setMode("y", PID.MODE_AUTOMATIC);
+		pid.setOutputRange("y", -10, 10); // <- not correct - based on maximum
+		pid.setSampleTime("y", 30);
+		pid.setSetpoint("y", 0.5); // set center
 
 		x.setController(arduino);
 		y.setController(arduino);
@@ -302,17 +301,14 @@ public class Tracking extends Service {
 		return x;
 	}
 
-	public PID getXPID() {
-		return xpid;
+	public PID2 getPID() {
+		return pid;
 	}
 
 	public Servo getY() {
 		return y;
 	}
 
-	public PID getYPID() {
-		return ypid;
-	}
 
 	// --------------- publish methods end ----------------------------
 
@@ -543,8 +539,7 @@ public class Tracking extends Service {
 		super.startService();
 		x.startService();
 		y.startService();
-		xpid.startService();
-		ypid.startService();
+		pid.startService();
 		arduino.startService();
 		opencv.startService();
 	}
@@ -597,8 +592,8 @@ public class Tracking extends Service {
 		latency = System.currentTimeMillis() - targetPoint.timestamp;
 		log.info(String.format("pt %s", targetPoint));
 
-		xpid.setInput(targetPoint.x);
-		ypid.setInput(targetPoint.y);
+		pid.setInput("x", targetPoint.x);
+		pid.setInput("y", targetPoint.y);
 		int currentXServoPos = x.getPos();
 		int currentYServoPos = y.getPos();
 
@@ -614,8 +609,8 @@ public class Tracking extends Service {
 			}
 		} else {
 
-			if (xpid.compute()) {
-				currentXServoPos += (int) xpid.getOutput();
+			if (pid.compute("x")) {
+				currentXServoPos += (int) pid.getOutput("x");
 				if (currentXServoPos != lastXServoPos) {
 					x.moveTo(currentXServoPos);
 					currentXServoPos = x.getPos();
@@ -635,8 +630,8 @@ public class Tracking extends Service {
 				error(String.format("%f x limit out of range", currentYServoPos));
 			}
 		} else {
-			if (ypid.compute()) {
-				currentYServoPos += (int) ypid.getOutput();
+			if (pid.compute("y")) {
+				currentYServoPos += (int) pid.getOutput("y");
 				if (currentYServoPos != lastYServoPos) {
 					y.moveTo(currentYServoPos);
 					currentYServoPos = y.getPos();
@@ -651,7 +646,7 @@ public class Tracking extends Service {
 
 		if (cnt % updateModulus == 0) {
 			broadcastState(); // update graphics ?
-			info(String.format("computeX %f computeY %f", xpid.getOutput(), xpid.getOutput()));
+			info(String.format("computeX %f computeY %f", pid.getOutput("x"), pid.getOutput("y")));
 		}
 	}
 
