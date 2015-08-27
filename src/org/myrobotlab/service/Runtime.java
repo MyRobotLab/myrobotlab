@@ -2355,5 +2355,13 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			se.serviceDirectory.get(name).broadcastState();
 		}	
 	}
+	
+	public static Runtime get(){
+		return Runtime.getInstance();
+	}
+
+	public static String getRuntimeName(){
+		return Runtime.getInstance().getName();
+	}
 
 }

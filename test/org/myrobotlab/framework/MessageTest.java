@@ -175,14 +175,10 @@ public class MessageTest {
 
 		thrower.pitchInt(1000);
 		BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
-
-		Runtime runtime = Runtime.getInstance();
-
-		Message msg = thrower.createMessage(null, "getServiceNames", null);
-		CommunicationInterface comm = thrower.getComm();
-		comm.send(msg);
-
-		String[] ret = (String[]) thrower.invoke(msg);
+		log.info("got {} balls", balls.size());
+		
+		String runtimeName = Runtime.getInstance().getName();
+		String[] ret = (String[]) thrower.sendBlocking(runtimeName, "getServiceNames");
 		log.info(String.format("got %s", Arrays.toString(ret)));
 		assertNotNull(ret);
 	}
