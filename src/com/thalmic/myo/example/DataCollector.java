@@ -1,5 +1,7 @@
 package com.thalmic.myo.example;
 
+import org.myrobotlab.service.data.MyoData;
+
 import com.thalmic.myo.AbstractDeviceListener;
 import com.thalmic.myo.Myo;
 import com.thalmic.myo.Pose;
@@ -23,6 +25,7 @@ public class DataCollector extends AbstractDeviceListener {
 	yawW = 0;
 	currentPose = new Pose();
     }
+    
 
     @Override
     public void onOrientationData(Myo myo, long timestamp, Quaternion rotation) {
@@ -35,11 +38,18 @@ public class DataCollector extends AbstractDeviceListener {
 	rollW = ((roll + Math.PI) / (Math.PI * 2.0) * SCALE);
 	pitchW = ((pitch + Math.PI / 2.0) / Math.PI * SCALE);
 	yawW = ((yaw + Math.PI) / (Math.PI * 2.0) * SCALE);
+	MyoData myodata = new MyoData();
+	myodata.roll = rollW;
+	myodata.pitch = pitchW;
+	myodata.yaw = yawW;
+	
     }
 
     @Override
     public void onPose(Myo myo, long timestamp, Pose pose) {
 	currentPose = pose;
+	MyoData myodata = new MyoData();
+	myodata.currentPose = pose;
 	if (currentPose.getType() == PoseType.FIST) {
 	    myo.vibrate(VibrationType.VIBRATION_MEDIUM);
 	}
