@@ -296,7 +296,7 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 			System.out.println("Connected to a Myo armband!");
 			log.info("Connected to a Myo armband");
 			//DeviceListener dataCollector = new DataCollector();
-			hub.addListener(myo);
+			//hub.addListener(myo);
 
 			while (true) {
 				hub.run(1000 / 20);
