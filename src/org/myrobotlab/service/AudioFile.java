@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,9 +62,18 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class AudioFile extends Service {
+	static final long serialVersionUID = 1L;
+	static Logger log = LoggerFactory.getLogger(AudioFile.class.getCanonicalName());
 
-	// The myrobotlab audio device
-	private MRLSoundAudioDevice audioDevice = new MRLSoundAudioDevice();
+	String globalCache = "audioFile";
+	MRLSoundAudioDevice audioDevice = new MRLSoundAudioDevice();
+	
+	enum Position {
+		LEFT, RIGHT, NORMAL
+	}
+
+	transient AePlayWave wavPlayer = new AePlayWave();
+	int pausedOnFrame = 0;
 
 	public class AdvancedPlayerThread extends Thread {
 		AdvancedPlayer player = null;
@@ -197,17 +207,7 @@ public class AudioFile extends Service {
 		}
 	}
 
-	enum Position {
-		LEFT, RIGHT, NORMAL
-	}
 
-	private static final long serialVersionUID = 1L;
-
-	public final static Logger log = LoggerFactory.getLogger(AudioFile.class.getCanonicalName());
-
-	transient AePlayWave wavPlayer = new AePlayWave();
-
-	int pausedOnFrame = 0;
 
 	transient PlaybackListener playbackListener = new PlaybackListener() {
 		@Override
@@ -295,57 +295,6 @@ public class AudioFile extends Service {
 		}
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		try {
-
-			AudioFile af = (AudioFile) Runtime.createAndStart("audio", "AudioFile");
-			af.playFile("C:\\dev\\workspace.kmw\\myrobotlab\\test.mp3", false, false);
-			af.setVolume(1.0F);
-
-			if (false) {
-				af.silence();
-
-				af.convert("C:\\tools\\Tarsos-master\\test.wav");
-
-				Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
-				Python python = (Python) Runtime.createAndStart("python", "Python");
-				AudioFile player = new AudioFile("player");
-				// player.playFile(filename, true);
-				player.startService();
-				GUIService gui = (GUIService) Runtime.createAndStart("gui", "GUIService");
-
-				joystick.setController(2);
-				joystick.broadcastState();
-
-				// BasicController control = (BasicController) player;
-
-				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\start.mp3");
-				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\radio.chatter.4.mp3");
-
-				player.silence();
-
-				// player.playResource("Clock/tick.mp3");
-				player.playResource("/resource/Clock/tick.mp3");
-				player.playResource("/resource/Clock/tick.mp3");
-				player.playResource("/resource/Clock/tick.mp3");
-				player.playResource("/resource/Clock/tick.mp3");
-				player.playResource("/resource/Clock/tick.mp3");
-				player.playResource("/resource/Clock/tick.mp3");
-				player.playResource("/resource/Clock/tick.mp3");
-			}
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		// player.playBlockingWavFile("I am ready.wav");
-		// player.play("hello my name is audery");
-		// player.playWAV("hello my name is momo");
-	}
 
 	public AudioFile(String n) {
 		super(n);
@@ -391,6 +340,8 @@ public class AudioFile extends Service {
 	}
 
 	// FIXME - bad assumptions
+	// FIXME - DEPRECATE ONLY USE FULL FILENAME AS INPUT
+	@Deprecated
 	public void play(String name) {
 		playFile("audioFile/" + name + ".mp3", false);
 	}
@@ -526,5 +477,81 @@ public class AudioFile extends Service {
 	public float getVolume() {
 		return audioDevice.getGain();
 	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		try {
+
+			AudioFile af = (AudioFile) Runtime.createAndStart("audio", "AudioFile");
+			af.playFile("C:\\dev\\workspace.kmw\\myrobotlab\\test.mp3", false, false);
+			af.setVolume(1.0F);
+
+			boolean test = false;
+			if (test) {
+				af.silence();
+
+				af.convert("C:\\tools\\Tarsos-master\\test.wav");
+
+				Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
+				Python python = (Python) Runtime.createAndStart("python", "Python");
+				AudioFile player = new AudioFile("player");
+				// player.playFile(filename, true);
+				player.startService();
+				GUIService gui = (GUIService) Runtime.createAndStart("gui", "GUIService");
+
+				joystick.setController(2);
+				joystick.broadcastState();
+
+				// BasicController control = (BasicController) player;
+
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\start.mp3");
+				player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\radio.chatter.4.mp3");
+
+				player.silence();
+
+				// player.playResource("Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+				player.playResource("/resource/Clock/tick.mp3");
+			}
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		// player.playBlockingWavFile("I am ready.wav");
+		// player.play("hello my name is audery");
+		// player.playWAV("hello my name is momo");
+	}
+
+
+	public boolean cacheContains(String filename) {
+		File file = new File(globalCache + File.separator + filename);
+		return file.exists();
+	}
+	
+	public void playCachedFile(String filename){
+		playFile(globalCache + File.separator + filename);
+	}
+
+
+	public void cache(String filename, byte[] data) throws IOException {
+		File file = new File(globalCache + File.separator +  filename);
+		File parentDir = new File(file.getParent());
+		if (!parentDir.exists()){			
+			parentDir.mkdirs();
+		}
+		FileOutputStream fos = new FileOutputStream(globalCache + File.separator + filename);
+		fos.write(data);
+		fos.close();
+	}
+
 
 }

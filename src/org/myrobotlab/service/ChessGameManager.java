@@ -23,7 +23,7 @@ public class ChessGameManager extends Service {
 
 	transient WebGUI webgui;
 	transient Serial serial;
-	transient Speech speech;
+	transient SpeechSynthesis speech;
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);

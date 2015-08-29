@@ -64,7 +64,7 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 	transient RemoteAdapter remote;
 
 	transient Python python;
-	transient Speech mouth;
+	transient SpeechSynthesis mouth;
 
 	HashMap<String, Float> lastSensorValues = new HashMap<String, Float>();
 	int sampleCount = 0;
@@ -429,7 +429,7 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 		keyboard = (Keyboard) startPeer("keyboard");
 		keyboard.addKeyListener(this);
 		python = (Python) Runtime.start("python", "Python");
-		mouth = (Speech) Runtime.start("mouth", "Speech");
+		mouth = (SpeechSynthesis) Runtime.start("mouth", "Speech");
 	}
 
 	public void startWebGUI() throws Exception {

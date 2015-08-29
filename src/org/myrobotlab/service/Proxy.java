@@ -1,14 +1,14 @@
 package org.myrobotlab.service;
 
-import java.util.HashMap;
-
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MessageListener;
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -20,14 +20,36 @@ public class Proxy extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Proxy.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Proxy.class);
 
-	private String mimicName = null;
-	private String mimicType = null;
+	
+	// private String mimicName = null;
+	// private String mimicType = null;
 	// private Service target = null;
-	private HashMap<MessageListener, Object> listeners = new HashMap<MessageListener, Object>();
-
+	// private HashMap<MessageListener, Object> listeners = new HashMap<MessageListener, Object>();
 	// TODO - override getName & getType depending on OS/JVM
+	
+	ServiceInterface proxied = null;
+	// or Peer proxied
+
+	
+	@Override
+	public boolean preProcessHook(Message m) {
+		
+		// FIXME - invoke the real proxied service !!!
+
+		// if the method name is == to a method in the WebGUI
+		// process it
+		if (methodSet.contains(m.method)) {
+			// process the message like a regular service
+			return true;
+		}
+
+		// otherwise send the message to the dialog with the senders name
+		// broadcast(m);
+		return false;
+	}
+
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -46,6 +68,19 @@ public class Proxy extends Service {
 		super(n);
 	}
 
+	@Override
+	public String[] getCategories() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* 
 	public void addMessageListener(MessageListener listener) {
 		listeners.put(listener, null);
 	}
@@ -76,5 +111,5 @@ public class Proxy extends Service {
 		this.mimicName = mimicName;
 		// mimicType = s.getClass(). FIXME - no direct getClass calls..
 	}
-
+	*/
 }

@@ -15,11 +15,11 @@ public class SpeechTest {
 
 	public final static Logger log = LoggerFactory.getLogger(SpeechTest.class);
 
-	static private Speech speech = null;
+	static private SpeechSynthesis speech = null;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		speech = (Speech) Runtime.start("speech", "Speech");
+		speech = (SpeechSynthesis) Runtime.start("speech", "Speech");
 	}
 
 	@AfterClass

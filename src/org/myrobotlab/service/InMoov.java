@@ -1005,13 +1005,6 @@ public class InMoov extends Service {
 		return false;
 	}
 
-	boolean speakBlocking(String speak, Object... fdata) {
-		if (mouth != null && !mute) {
-			return mouth.speakBlocking(speak, fdata);
-		}
-
-		return false;
-	}
 
 	public boolean speakErrors(boolean b) {
 		speakErrors = b;
@@ -1044,7 +1037,7 @@ public class InMoov extends Service {
 	}
 
 	public InMoovArm startArm(String side, String port, String boardType) throws Exception {
-		speakBlocking("starting %s arm", side);
+		speakBlocking(String.format("starting %s arm", side));
 
 		InMoovArm arm = (InMoovArm) startPeer(String.format("%sArm", side));
 		arms.put(side, arm);
@@ -1081,7 +1074,7 @@ public class InMoov extends Service {
 	}
 
 	public InMoovHand startHand(String side, String port, String boardType) throws Exception {
-		speakBlocking("starting %s hand", side);
+		speakBlocking(String.format("starting %s hand", side));
 
 		InMoovHand hand = (InMoovHand) startPeer(String.format("%sHand", side));
 		hand.setSide(side);
@@ -1098,7 +1091,7 @@ public class InMoov extends Service {
 
 	public InMoovHead startHead(String port, String type) throws Exception {
 		// log.warn(InMoov.buildDNA(myKey, serviceClass))
-		speakBlocking("starting head on %s", port);
+		speakBlocking(String.format("starting head on %s", port));
 
 		opencv = (OpenCV) startPeer("opencv");
 		head = (InMoovHead) startPeer("head");
@@ -1148,7 +1141,7 @@ public class InMoov extends Service {
 
 	// gestures begin ---------------
 
-	public Speech startMouth() throws Exception {
+	public SpeechSynthesis startMouth() throws Exception {
 		mouth = (Speech) startPeer("mouth");
 		speakBlocking("starting mouth");
 
@@ -1219,7 +1212,7 @@ public class InMoov extends Service {
 	}
 
 	public void startPIR(String port, int pin) throws IOException {
-		speakBlocking("starting pee. eye. are. sensor on port %s pin %d", port, pin);
+		speakBlocking(String.format("starting pee. eye. are. sensor on port %s pin %d", port, pin));
 		if (arduinos.containsKey(port)) {
 			Arduino arduino = arduinos.get(port);
 			arduino.connect(port);
@@ -1269,7 +1262,7 @@ public class InMoov extends Service {
 
 	public InMoovTorso startTorso(String port, String type) throws Exception {
 		// log.warn(InMoov.buildDNA(myKey, serviceClass))
-		speakBlocking("starting torso on %s", port);
+		speakBlocking(String.format("starting torso on %s", port));
 
 		torso = (InMoovTorso) startPeer("torso");
 

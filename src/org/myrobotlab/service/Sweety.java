@@ -20,7 +20,7 @@ public class Sweety extends Service {
 
 	transient public Arduino arduino;
 	transient public Sphinx ear;
-	transient public Speech mouth;
+	transient public SpeechSynthesis mouth;
 	transient public Tracking leftTracker;
 	transient public Tracking rightTracker;
 	transient public ProgramAB chatBot;
@@ -587,9 +587,13 @@ public class Sweety extends Service {
 
 		chatBot = (ProgramAB) startPeer("chatBot");
 
-		mouth = (Speech) startPeer("mouth");
+		mouth = (SpeechSynthesis) startPeer("mouth");
 		mouth.setLanguage("fr");
-		mouth.setBackendType("GOOGLE");
+		// Hi Beetlejuice - Google is BORKED
+		// We are using MaryTTS which is Open Source (YAY!), Runs locally & speaks French I think,
+		// but we have to figure it out !  
+		// Cheers !
+		// mouth.setBackendType("GOOGLE");
 
 		ear = (Sphinx) startPeer("ear");
 
