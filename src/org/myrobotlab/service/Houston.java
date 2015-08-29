@@ -30,7 +30,7 @@ public class Houston extends Service {
 	transient Motor rbmotor;
 
 	transient Sphinx ear;
-	transient Speech mouth;
+	transient SpeechSynthesis mouth;
 
 	transient OpenCV eye;
 
@@ -89,7 +89,7 @@ public class Houston extends Service {
 																		// back
 
 		ear = (Sphinx) Runtime.createAndStart("ear", "Sphinx");// right back
-		mouth = (Speech) Runtime.createAndStart("mouth", "Speech");// right back
+		mouth = (SpeechSynthesis) Runtime.createAndStart("mouth", "Speech");// right back
 
 		eye = (OpenCV) Runtime.createAndStart("eye", "OpenCV");// right back
 

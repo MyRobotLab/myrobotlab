@@ -79,7 +79,7 @@ public class Plantoid extends Service {
 	transient private Keyboard keyboard;
 	transient private OpenCV opencv;
 	transient private Servo leg1, leg2, leg3, leg4, pan, tilt;
-	transient private Speech speech;
+	transient private SpeechSynthesis speech;
 	transient private Tracking tracking;
 	transient private VideoStreamer streamer;
 

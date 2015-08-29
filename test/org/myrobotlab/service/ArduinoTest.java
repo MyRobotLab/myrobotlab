@@ -17,6 +17,7 @@ import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.slf4j.Logger;
@@ -53,9 +54,9 @@ public class ArduinoTest {
 
 		log.info("setUpBeforeClass");
 
-		//Runtime.start("gui", "GUIService");
-		//Runtime.start("webgui", "WebGUI");
-		
+		// Runtime.start("gui", "GUIService");
+		Runtime.start("webgui", "WebGUI");
+
 		arduino = (Arduino) Runtime.start("arduino", "Arduino");
 		serial = arduino.getSerial();
 
@@ -240,7 +241,7 @@ public class ArduinoTest {
 
 	@Test
 	public final void testGetBoardType() {
-		//arduino.setBoardMega();
+		// arduino.setBoardMega();
 		// fail("Not yet implemented"); // TODO
 	}
 
@@ -318,13 +319,13 @@ public class ArduinoTest {
 	@Test
 	public final void testPinModeIntString() {
 		arduino.pinMode(8, "OUTPUT");
-		assertEquals("pinMode/8/1\n",uart.decode());
+		assertEquals("pinMode/8/1\n", uart.decode());
 	}
 
 	@Test
 	public final void testPinModeIntegerInteger() {
 		arduino.pinMode(8, Arduino.OUTPUT);
-		assertEquals("pinMode/8/1\n",uart.decode());
+		assertEquals("pinMode/8/1\n", uart.decode());
 	}
 
 	@Test
@@ -425,27 +426,27 @@ public class ArduinoTest {
 	@Test
 	public final void testServoAttachServoInteger() {
 		Servo servo = (Servo) Runtime.start("servo", "Servo");
-		
+
 		// NOT THE WAY TO ATTACH SERVOS !!
 		// isAttached will not get set
 		// dont know a good fix - asside from not using it !
 		// arduino.servoAttach(servo, servoPin);
 		// re-entrant test
 		// arduino.servoAttach(servo, servoPin);
-		
+
 		// common way
 		servo.attach(arduino, servoPin);
-		
+
 		// another way
 		// servo.setPin(servoPin);
 		// servo.setController(arduino);
-		
+
 		assertTrue(servo.isAttached());
-		
-		//re-entrant test
+
+		// re-entrant test
 		servo.attach(arduino, servoPin);
 
-		assertTrue(servo.isAttached());	
+		assertTrue(servo.isAttached());
 		assertEquals(servoPin, servo.getPin().intValue());
 		assertEquals(arduino.getName(), servo.getControllerName());
 
@@ -462,21 +463,21 @@ public class ArduinoTest {
 		// detach
 		servo.detach();
 		assertEquals("servoDetach/7/0\n", uart.decode());
-		
+
 		servo.moveTo(10);
 		String shouldBeNull = uart.decode();
 		assertNull(shouldBeNull);
-		
+
 		// re-attach
 		servo.attach();
 		assertEquals("servoAttach/7/9/5/115/101/114/118/111\n", uart.decode());
-		assertTrue(servo.isAttached());	
+		assertTrue(servo.isAttached());
 		assertEquals(servoPin, servo.getPin().intValue());
 		assertEquals(arduino.getName(), servo.getControllerName());
-		
+
 		servo.moveTo(90);
 		assertEquals("servoWrite/7/90\n", uart.decode());
-		
+
 		servo.releaseService();
 	}
 
@@ -643,6 +644,27 @@ public class ArduinoTest {
 	@Test
 	public final void testMain() {
 		// fail("Not yet implemented"); // TODO
+	}
+
+	public static void main(String[] args) {
+		try {
+
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
+
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+
+			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+			virtual.createVirtualArduino("vport");
+			Python logic = virtual.getLogic();
+			
+			// remove all serial listeners !!
+			
+			Runtime.start("webgui", "WebGUI");
+			
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 }

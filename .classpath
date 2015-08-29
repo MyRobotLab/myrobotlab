@@ -107,5 +107,6 @@
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/marytts-runtime-5.1.2-jar-with-dependencies.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/voice-cmu-slt-hsmm-5.1.2.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/icu4j-54.1.1.jar"/>
+	<classpathentry kind="lib" path="/repo/org.jsoup/1.8.3/jsoup-1.8.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

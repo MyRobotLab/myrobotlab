@@ -268,7 +268,7 @@ public class MyoThalmic extends Service implements DeviceListener {
 
 		try {
 
-			MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
+			//MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
 			Hub hub = new Hub("com.example.hello-myo");
 
 			System.out.println("Attempting to find a Myo...");
