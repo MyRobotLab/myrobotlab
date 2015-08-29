@@ -5,6 +5,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.MyoData;
+import org.myrobotlab.service.interfaces.MyoDataListener;
+import org.myrobotlab.service.interfaces.MyoDataPublisher;
 import org.slf4j.Logger;
 
 import com.thalmic.myo.DeviceListener;
@@ -21,7 +24,7 @@ import com.thalmic.myo.enums.VibrationType;
 import com.thalmic.myo.enums.XDirection;
 import com.thalmic.myo.example.DataCollector;
 
-public class MyoThalmic extends Service implements DeviceListener {
+public class MyoThalmic extends Service implements DeviceListener , MyoDataListener , MyoDataPublisher  {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,6 +40,7 @@ public class MyoThalmic extends Service implements DeviceListener {
 	transient Myo myo = null; 
 	transient Hub hub = null;
 	transient HubThread hubThread = null;
+	MyoData myodata = new MyoData();
 	
 	class HubThread extends Thread {
 		public boolean running = false;
@@ -55,13 +59,14 @@ public class MyoThalmic extends Service implements DeviceListener {
 		}
 	}
 	
+	
 	public void disconnect(){
 		if (hubThread != null){
 			hubThread.running = false;
 			hubThread = null;
 		}
 	}
-
+   
 	public void connect() {
 
 		hub = new Hub("com.example.hello-myo");
@@ -118,16 +123,24 @@ public class MyoThalmic extends Service implements DeviceListener {
 		rollW = ((roll + Math.PI) / (Math.PI * 2.0) * SCALE);
 		pitchW = ((pitch + Math.PI / 2.0) / Math.PI * SCALE);
 		yawW = ((yaw + Math.PI) / (Math.PI * 2.0) * SCALE);
+		myodata.roll = rollW;
+		myodata.pitch = pitchW;
+		myodata.yaw = yawW;
+		
+		invoke("publishMyoData",myodata);
+		System.out.println(myodata.roll);
+		
 	}
 
 	@Override
 	public void onPose(Myo myo, long timestamp, Pose pose) {
 		currentPose = pose;
+		myodata.currentPose = pose;
 		if (currentPose.getType() == PoseType.FIST) {
 			myo.vibrate(VibrationType.VIBRATION_MEDIUM);
 		}
-		
 		invoke("publishPose", pose);
+		invoke("publishMyoData",myodata);
 	}
 	
 	public void addPoseListener(Service service){
@@ -282,12 +295,12 @@ public class MyoThalmic extends Service implements DeviceListener {
 
 			System.out.println("Connected to a Myo armband!");
 			log.info("Connected to a Myo armband");
-			DeviceListener dataCollector = new DataCollector();
-			hub.addListener(dataCollector);
+			//DeviceListener dataCollector = new DataCollector();
+			hub.addListener(myo);
 
 			while (true) {
 				hub.run(1000 / 20);
-				System.out.print(dataCollector);
+				//System.out.print(dataCollector);
 
 				Runtime.start("gui", "GUIService");
 
@@ -295,6 +308,22 @@ public class MyoThalmic extends Service implements DeviceListener {
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+
+	@Override
+	public MyoData onMyoData(MyoData myodata) {
+		// TODO Auto-generated method stub
+		return myodata;
+	}
+
+	@Override
+	public MyoData publishMyoData(MyoData myodata) {
+		
+		return myodata;
+	}
+	
+    public void addMyoDataListener(Service service) {
+    	addListener("publishMyoData",service.getName(),"onMyoData");
 	}
 
 }
