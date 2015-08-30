@@ -49,7 +49,7 @@ public class DataCollector extends AbstractDeviceListener {
     public void onPose(Myo myo, long timestamp, Pose pose) {
 	currentPose = pose;
 	MyoData myodata = new MyoData();
-	myodata.currentPose = pose;
+	myodata.currentPose = pose.getType();
 	if (currentPose.getType() == PoseType.FIST) {
 	    myo.vibrate(VibrationType.VIBRATION_MEDIUM);
 	}
