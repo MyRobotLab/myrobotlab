@@ -274,12 +274,19 @@ public class AudioFile extends Service {
 			
 			AudioData data = new AudioData("scruff.mp3");
 			af.play(data);
+			
+			data = new AudioData("hair.mp3");
+			af.play(data);
+			
 			af.pause();
 			af.resume();
+			
 			//af.playFile("C:\\dev\\workspace.kmw\\myrobotlab\\test.mp3", false, false);
 			af.setVolume(0.50f);
 			
 			af.stop();
+			af.resume();
+			
 
 			boolean test = false;
 			if (test) {
