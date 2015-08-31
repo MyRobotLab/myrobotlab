@@ -1,6 +1,6 @@
 package org.myrobotlab.service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public interface SpeechSynthesis {
 
@@ -8,7 +8,7 @@ public interface SpeechSynthesis {
 	// for event handlers  - previously isSpeaking event would happen with a true or false
 	public abstract Boolean isSpeaking(Boolean b);
 
-	public abstract ArrayList<String> getVoices();
+	public abstract List<String> getVoices();
 
 	public boolean setVoice(String voice);
 
@@ -37,5 +37,7 @@ public interface SpeechSynthesis {
 	public abstract String publishStartSpeaking(String utterance);
 
 	public abstract String publishEndSpeaking(String utterance);
+	
+	//public boolean speakQueued(String toSpeak);
 
 }

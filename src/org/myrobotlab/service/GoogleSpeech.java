@@ -56,41 +56,6 @@ import com.sun.speech.freetts.VoiceManager;
 
 public class GoogleSpeech extends Service implements TextListener {
 
-	/*
-	 * Speech supports 2 different text to speech systems One is FreeTTS and the
-	 * other is a remote/cloud access of ATTs online implementation. The FreeTTS
-	 * is a complete voice system and can be loaded with different
-	 * external/thirdParty voices.
-	 * 
-	 * The ATT is probably on the edge of licensing. An online system at ATT is
-	 * available to use. This service will send the text to that online service,
-	 * download the file and play it. Once it is downloaded, it will use the
-	 * same file each time the text phrase is requested.
-	 * 
-	 * There is a front-end set of functions and a back-end set of functions.
-	 * The front-end concerns how the calling process and request will be
-	 * handled. There are 4 types of speaking. speakNormal - when this function
-	 * is utilized, it means any simultaneous requests for speech will be
-	 * dropped. This most closely approximates human speech. You may have a
-	 * bazillion thoughts going on in your head but you only have 1 mouth.
-	 * speakQueued - this function queues up all of the requests for speech and
-	 * will speak each one until done. This can have the behavior of being very
-	 * out of context, as speaking takes considerable time relative to many
-	 * other processes. speakBlocking - This blocks the calling thread until the
-	 * speak function is finished. I can see very little meaningful use for
-	 * this. speakMulti - This will create threads for each requests possibly
-	 * allowing every speech thread to complete in the same time. (very Cybil)
-	 * The back-end are just types of speech engines (ATT, FREETTS)
-	 * 
-	 * References : Excellent reference -
-	 * http://www.codeproject.com/Articles/435434/Text-to-Speech-tts-for-the-Web
-	 * http://www.text2speech.org/ - another possible back-end
-	 */
-
-	// FIXME - Speech doesn't need HTTPClient - could just use
-	// org.myrobotlab.net.HTTPRequest - and benefit from
-	// 1 less dependency & proxy info
-
 	public static enum BackendType {
 		ATT, FREETTS, GOOGLE
 	}
@@ -101,8 +66,7 @@ public class GoogleSpeech extends Service implements TextListener {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(GoogleSpeech.class
-			.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(GoogleSpeech.class);
 
 	// en_us en_gb en_au en_sa en_nz
 	// String language = "en";
@@ -164,11 +128,6 @@ public class GoogleSpeech extends Service implements TextListener {
 		try {
 			GoogleSpeech mouth = (GoogleSpeech) Runtime.start("mouth", "Speech");
 			// mouth.setVolume(0.1F);
-			
-			String test = " hello this is a test \\dev\\blah / blah : * ? \" blah \" blah > < <> bla | zod | zod2 "
-					.replaceAll(filter, " ");
-
-			log.info(test);
 			GoogleSpeech speech = new GoogleSpeech("speech");
 			speech.startService();
 
