@@ -1,6 +1,6 @@
 package org.myrobotlab.service.data;
 
-import com.thalmic.myo.Pose;
+import com.thalmic.myo.enums.PoseType;
 
 /**
  * @author GroG
@@ -13,14 +13,14 @@ public class MyoData {
 	public double roll = 0;
 	public double pitch = 0;
 	public double yaw = 0;
-	public Pose currentPose;
+	public PoseType currentPose;
 
 	// default constructor (values will be null until set)
 	public MyoData() {
 	}
 	
 	// constructor with initial values for roll/pitch/yaw
-	public MyoData(double roll, double pitch, double yaw, Pose currentPose) {
+	public MyoData(double roll, double pitch, double yaw, PoseType currentPose) {
 		this.roll = roll;
 		this.pitch = pitch;
 		this.yaw = yaw;
@@ -41,9 +41,10 @@ public class MyoData {
 		return yaw;
 	}
 	
-	public Pose getPose() {
+	public PoseType getPose() {
 		return currentPose;
 	}
+
 
 	public void setRoll(double roll) {
 		this.roll = roll;
