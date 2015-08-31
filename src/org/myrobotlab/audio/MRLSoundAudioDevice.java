@@ -1,7 +1,5 @@
 package org.myrobotlab.audio;
 
-import java.util.List;
-
 //import be.tarsos.dsp.AudioEvent;
 //import be.tarsos.dsp.AudioProcessor;
 import javazoom.jl.decoder.JavaLayerException;

@@ -20,6 +20,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
@@ -55,7 +56,7 @@ public class ArduinoTest {
 		log.info("setUpBeforeClass");
 
 		// Runtime.start("gui", "GUIService");
-		Runtime.start("webgui", "WebGUI");
+		
 
 		arduino = (Arduino) Runtime.start("arduino", "Arduino");
 		serial = arduino.getSerial();
@@ -75,6 +76,10 @@ public class ArduinoTest {
 
 		arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
 		arduino.connect(vport);
+		
+		//serial.removeListener("onByte", serviceName, inMethod);
+		
+		
 
 		Service.sleep(500);
 		// nice to be able to check messages
@@ -651,16 +656,22 @@ public class ArduinoTest {
 
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
-
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-
-			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-			virtual.createVirtualArduino("vport");
-			Python logic = virtual.getLogic();
 			
-			// remove all serial listeners !!
+			ArduinoTest.setUpBeforeClass();
+			ArduinoTest test = new ArduinoTest();
 			
-			Runtime.start("webgui", "WebGUI");
+			WebGUI gui = (WebGUI)Runtime.start("webgui", "WebGUI");
+			//ServiceInterface gui = Runtime.start("gui", "GUIService");
+			
+			Runtime.dumpToFile();
+			
+			log.info("here");
+			serial.removeByteListener(gui.getName());
+			uart.removeByteListener(gui.getName());
+			
+			Runtime.dumpToFile();
+			
+			
 			
 		} catch (Exception e) {
 			Logging.logError(e);

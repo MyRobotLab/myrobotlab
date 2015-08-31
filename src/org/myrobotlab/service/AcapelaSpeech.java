@@ -25,8 +25,6 @@
 
 package org.myrobotlab.service;
 
-import java.io.File;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +41,7 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -50,23 +49,24 @@ import org.myrobotlab.service.interfaces.TextListener;
 public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesis {
 
 	private static final long serialVersionUID = 1L;
-	
-	String voice = "Jasmijn";
+
+	String voice = "Tyler";
 	HashSet<String> voices = new HashSet<String>();
-	
+
 	String pathPrefix = null;
-	
+
 	PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
-	
+
 	// FIXME - PEER notation
 	transient AudioFile audioFile = new AudioFile("audioFile");
+
 	public AcapelaSpeech(String n) {
 		super(n);
 		connectionManager.setMaxTotal(10);
-		
+
 		// FIXME Peer notation
 		audioFile.startService();
-		
+
 		voices.add("Leila");
 		voices.add("Laia");
 		voices.add("Eliska");
@@ -111,11 +111,11 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 
 	@Override
 	public ArrayList<String> getVoices() {
-		return  new ArrayList<String>(voices);
+		return new ArrayList<String>(voices);
 	}
-	
+
 	@Override
-	public String getVoice(){
+	public String getVoice() {
 		return voice;
 	}
 
@@ -126,79 +126,32 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 	}
 
 	@Override
-	public String saying(String t) {
-		return null;
+	public String saying(String speech) {
+		return speech;
 	}
 
 	@Override
 	public void setLanguage(String l) {
 		// FIXME ! "MyLanguages", "sonid8" ???
+		// FIXME - implement !!!
 	}
-	
-	@Override
-	public boolean speak(String toSpeak) {
+
+	public String getMp3Url(String toSpeak) {
 		HttpPost post = null;
-		HttpGet get = null;
+
 		try {
-			
-			String encodedSpeech = URLEncoder.encode(toSpeak, "UTF-8");
-			
-			pathPrefix = String.format("%s%s%s", AcapelaSpeech.class.getSimpleName(), File.separator,  voice);
-			String filename = String.format("%s%s%s.mp3", pathPrefix, File.separator, encodedSpeech);
-			
-			if (audioFile.cacheContains(filename)){
-				audioFile.playCachedFile(filename);
-				return true;
-			}
 
 			HttpClient client = new DefaultHttpClient(connectionManager);
 
 			// request form & send text
 			String url = "http://www.acapela-group.com/demo-tts/DemoHTML5Form_V2.php?langdemo=Powered+by+%3Ca+href%3D%22http%3A%2F%2Fwww.acapela-vaas.com"
 					+ "%22%3EAcapela+Voice+as+a+Service%3C%2Fa%3E.+For+demo+and+evaluation+purpose+only%2C+for+commercial+use+of+generated+sound+files+please+go+to+"
-					+"%3Ca+href%3D%22http%3A%2F%2Fwww.acapela-box.com%22%3Ewww.acapela-box.com%3C%2Fa%3E";
+					+ "%3Ca+href%3D%22http%3A%2F%2Fwww.acapela-box.com%22%3Ewww.acapela-box.com%3C%2Fa%3E";
 
 			post = new HttpPost(url);
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			nvps.add(new BasicNameValuePair("MyLanguages", "sonid8"));
 			nvps.add(new BasicNameValuePair("MySelectedVoice", voice));
-			/*
-			nvps.add(new BasicNameValuePair("0", "Leila"));
-			nvps.add(new BasicNameValuePair("1", "Laia"));
-			nvps.add(new BasicNameValuePair("2", "Eliska"));
-			nvps.add(new BasicNameValuePair("3", "Mette"));
-			nvps.add(new BasicNameValuePair("4", "Zoe"));
-			nvps.add(new BasicNameValuePair("5", "Jasmijn"));
-			nvps.add(new BasicNameValuePair("6", "Tyler"));
-			nvps.add(new BasicNameValuePair("7", "Deepa"));
-			nvps.add(new BasicNameValuePair("8", "Rhona"));
-			nvps.add(new BasicNameValuePair("9", "Rachel"));
-			nvps.add(new BasicNameValuePair("10", "Sharon"));
-			nvps.add(new BasicNameValuePair("11", "Hanna"));
-			nvps.add(new BasicNameValuePair("12", "Sanna"));
-			nvps.add(new BasicNameValuePair("13", "Justine"));
-			nvps.add(new BasicNameValuePair("14", "Louise"));
-			nvps.add(new BasicNameValuePair("15", "Manon"));
-			nvps.add(new BasicNameValuePair("16", "Claudia"));
-			nvps.add(new BasicNameValuePair("MySelectedVoice", "Dimitris"));
-			nvps.add(new BasicNameValuePair("18", "Fabiana"));
-			nvps.add(new BasicNameValuePair("19", "Sakura"));
-			nvps.add(new BasicNameValuePair("20", "Minji"));
-			nvps.add(new BasicNameValuePair("21", "Lulu"));
-			nvps.add(new BasicNameValuePair("22", "Bente"));
-			nvps.add(new BasicNameValuePair("23", "Monika"));
-			nvps.add(new BasicNameValuePair("24", "Marcia"));
-			nvps.add(new BasicNameValuePair("25", "Celia"));
-			nvps.add(new BasicNameValuePair("26", "Alyona"));
-			nvps.add(new BasicNameValuePair("27", "Biera"));
-			nvps.add(new BasicNameValuePair("28", "Ines"));
-			nvps.add(new BasicNameValuePair("29", "Rodrigo"));
-			nvps.add(new BasicNameValuePair("30", "Elin"));
-			nvps.add(new BasicNameValuePair("31", "Samuel"));
-			nvps.add(new BasicNameValuePair("32", "Kal"));
-			nvps.add(new BasicNameValuePair("33", "Mia"));
-			nvps.add(new BasicNameValuePair("34", "Ipek"));
-			*/
 			nvps.add(new BasicNameValuePair("MyTextForTTS", toSpeak));
 			nvps.add(new BasicNameValuePair("t", "1"));
 			nvps.add(new BasicNameValuePair("SendToVaaS", ""));
@@ -207,16 +160,16 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 
 			log.info(response.getStatusLine().toString());
 			HttpEntity entity = response.getEntity();
-			
+
 			byte[] b = FileIO.toByteArray(entity.getContent());
 
-			/* form response with javascript redirect to mp3 url			
-			long ts = System.currentTimeMillis();
-			FileOutputStream fos = new FileOutputStream(String.format("response.%d.html", ts));
-			fos.write(b);
-			fos.close();
-			*/
-			
+			/*
+			 * form response with javascript redirect to mp3 url long ts =
+			 * System.currentTimeMillis(); FileOutputStream fos = new
+			 * FileOutputStream(String.format("response.%d.html", ts));
+			 * fos.write(b); fos.close();
+			 */
+
 			// parse out mp3 file url
 			String mp3Url = null;
 			String data = new String(b);
@@ -229,52 +182,78 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 				}
 			}
 
-			if (mp3Url == null){
+			if (mp3Url == null) {
 				error("could not get mp3 back from Acapela server !");
-				return false;
 			}
-			// / end of 1st post
 
-			// fetch mp3 file
-			get = new HttpGet(mp3Url);
-			log.info("mp3Url {}", mp3Url);
+			return mp3Url;
 
-			// get mp3 file & save to
-
-			response = client.execute(get);
-
-			log.info("got {}", response.getStatusLine());
-			entity = response.getEntity();
-
-			// cache the mp3 content
-			b = FileIO.toByteArray(entity.getContent());
-			audioFile.cache(filename, b);
-			
-			// FIXME - BAD DESIGN ! BRITTLE STRUCTURE ! - NOT HELPFUL
-			audioFile.playCachedFile(filename);
-			// do something useful with the response body
-			// and ensure it is fully consumed
-			EntityUtils.consume(entity);
-
-			return true;
 		} catch (Exception e) {
 			Logging.logError(e);
 		} finally {
-			if (post != null){
+			if (post != null) {
 				post.releaseConnection();
 			}
-			
-			if (get != null){
+		}
+
+		return null;
+
+	}
+
+	public byte[] getRemoteFile(String toSpeak) {
+		
+		String mp3Url = getMp3Url(toSpeak);
+		
+		HttpGet get = null;
+		byte[] b = null;
+		try {
+			HttpClient client = new DefaultHttpClient(connectionManager);
+			HttpResponse response = null;
+
+			// fetch file
+			get = new HttpGet(mp3Url);
+			log.info("mp3Url {}", mp3Url);
+
+			// get mp3 file & save to cache
+			response = client.execute(get);
+
+			log.info("got {}", response.getStatusLine());
+			HttpEntity entity = response.getEntity();
+
+			// cache the mp3 content
+			b = FileIO.toByteArray(entity.getContent());
+
+			EntityUtils.consume(entity);
+		} catch (Exception e) {
+			Logging.logError(e);
+		} finally {
+			if (get != null) {
 				get.releaseConnection();
 			}
 		}
 
-		return false;
+		return b;
 	}
 
 	@Override
-	public boolean speakBlocking(String toSpeak) {
+	public boolean speak(String toSpeak) {
+		// queue a utterance and leave
+		Message msg = createMessage(getName(),"speakQueued", toSpeak);
+		in(msg);
+		// its async - we dont wait
+		// so its always true
 		return true;
+	}
+	
+	@Override
+	public boolean speakBlocking(String toSpeak) {
+
+		invoke("isSpeaking", true);
+		invoke("saying", toSpeak);
+		// audioFile.playFile(audioFileName, true);
+		// sleep(afterSpeechPause);// important pause after speech
+		invoke("isSpeaking", false);
+		return false;
 	}
 
 	@Override
@@ -314,7 +293,7 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
-		//LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		// LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
 		AcapelaSpeech speech = (AcapelaSpeech) Runtime.start("speech", "AcapelaSpeech");
 		List<String> voices = speech.getVoices();
@@ -323,7 +302,30 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 			speech.speak(String.format("Hello again my name is %s", speech.getVoice()));
 			sleep(1000);
 		}
-		//speech.speakBlocking("Hello World");
+		// speech.speakBlocking("Hello World");
+	}
+
+	public boolean speakQueued(String toSpeak) {
+		try {
+
+			String filename = Speech.getLocalFileName(this, toSpeak, "mp3");
+
+			if (audioFile.cacheContains(filename)) {
+				audioFile.playCachedFile(filename);
+				return true;
+			}
+			
+			
+			byte[] b = getRemoteFile(toSpeak);
+			audioFile.cache(filename, b);
+
+			audioFile.playCachedFile(filename);
+			return true;
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		return false;
 	}
 
 }

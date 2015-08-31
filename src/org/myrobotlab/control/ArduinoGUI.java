@@ -121,7 +121,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 	static final long serialVersionUID = 1L;
 
 	static final int DATA_WIDTH = 600;
-	static final int DATA_HEIGHT = 800;
+	static final int DATA_HEIGHT = 1024;
 
 	Graphics g = null;
 
@@ -147,7 +147,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 
 	private JMenuItem serialRefresh = new JMenuItem("refresh");
 
-	Dimension size = new Dimension(800, 512);
+	Dimension size = new Dimension(DATA_WIDTH, DATA_HEIGHT);
 
 	private JMenuItem softReset = new JMenuItem("soft reset");
 

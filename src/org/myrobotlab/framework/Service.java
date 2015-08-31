@@ -593,6 +593,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		log.info(String.format("reserved key %s -> %s %s %s", key, actualName, simpleTypeName, comment));
 		dna.put(key, new ServiceReservation(key, actualName, simpleTypeName, comment));
 	}
+	
+	/**
+	 *  basic useful reset of a peer before service is created
+	 * @param string
+	 * @param string2
+	 */
+	public void setPeer(String peerName, String peerType) {
+		String fullKey = String.format("%s.%s", getName(), peerName);
+		ServiceReservation sr = new ServiceReservation(fullKey, peerName, peerType, null);
+		dna.put(fullKey, sr);
+	}
 
 	/*
 	 * static public Set<String> getDependencies(String serviceClass) {

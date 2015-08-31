@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.sound.sampled.AudioInputStream;
@@ -96,9 +97,9 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 	}
 
 	@Override
-	public ArrayList<String> getVoices() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<String> getVoices() {
+		List<String> list = new ArrayList<String>(marytts.getAvailableVoices());
+		return list;
 	}
 
 	@Override
@@ -170,5 +171,6 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 	public String getVoice() {
 		return marytts.getVoice();
 	}
+
 	
 }
