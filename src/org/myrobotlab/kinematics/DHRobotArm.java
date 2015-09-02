@@ -88,6 +88,50 @@ public class DHRobotArm {
 		return links.size();
 	}
 
+	public Point getJointPosition(int index) {
+		if (index > this.links.size() || index < 0) {
+			// TODO: bound check
+			return null;
+		}
+		
+		Matrix m = new Matrix(4, 4);
+		// TODO: init to the ident?
+
+		// initial frame orientated around x
+		m.elements[0][0] = 1;
+		m.elements[1][1] = 1;
+		m.elements[2][2] = 1;
+		m.elements[3][3] = 1;
+
+		// initial frame orientated around z
+		// m.elements[0][2] = 1;
+		// m.elements[1][1] = 1;
+		// m.elements[2][0] = 1;
+		// m.elements[3][3] = 1;
+
+		// log.debug("-------------------------");
+		// log.debug(m);
+		// TODO: validate this approach..
+		for (int i = 0 ; i <= index; i++) {
+			DHLink link = links.get(i);
+			Matrix s = link.resolveMatrix();
+			// log.debug(s);
+			m = m.multiply(s);
+			// log.debug("-------------------------");
+			// log.debug(m);
+		}
+		// now m should be the total translation for the arm
+		// given the arms current position
+		double x = m.elements[0][3];
+		double y = m.elements[1][3];
+		double z = m.elements[2][3];
+		// double ws = m.elements[3][3];
+		// log.debug("World Scale : " + ws);
+		Point jointPosition = new Point(x, y, z);
+		return jointPosition;
+		
+	}
+	
 	public Point getPalmPosition() {
 		// TODO Auto-generated method stub
 		// return the position of the end effector wrt the base frame
