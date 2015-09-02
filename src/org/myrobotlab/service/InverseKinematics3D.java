@@ -43,6 +43,18 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 			angleMap.put(jointName, (float)MathUtils.radToDeg(theta));
 		}
 		invoke("publishJointAngles", angleMap);
+		
+		// we want to publish the joint positions 
+		// this way we can render on the web gui..
+		double[][] jointPositionMap = new double[currentArm.getNumLinks()][3];
+		for (int i = 0 ; i < currentArm.getNumLinks() ; i++) {
+			Point jp = currentArm.getJointPosition(i);
+			jointPositionMap[i][0] = jp.getX();
+			jointPositionMap[i][1] = jp.getY();
+			jointPositionMap[i][2] = jp.getZ();
+		}
+		// TODO: pass a better datastructure?
+		invoke("publishJointPositions", (Object)jointPositionMap);
 	}
 	
 	@Override
@@ -76,13 +88,14 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		 */
 	}
 
-
-
 	@Override
 	public Map<String, Float> publishJointAngles(Map<String, Float> angleMap) {
 		// TODO Auto-generated method stub
 		return angleMap;
 	}
 
+	public double[][] publishJointPositions(double[][] jointPositionMap) {
+		return jointPositionMap;
+	}
 	
 }
