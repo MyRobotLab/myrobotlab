@@ -45,6 +45,14 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * PID2 -  control service from
+ * 
+ * http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-introduction/
+ * This will likely get merged/replaced with PID service.
+ * 
+ */
 public class PID2 extends Service {
 
 	class PIDData {

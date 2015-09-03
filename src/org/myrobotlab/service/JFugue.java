@@ -33,6 +33,11 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * JFugue - This service can generate tones to be played
+ * Also it can generate some sounds and music based on string patterns that define the beat.
+ *
+ */
 public class JFugue extends Service {
 
 	private static final long serialVersionUID = 1L;

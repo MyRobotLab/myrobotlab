@@ -8,6 +8,12 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * MouthControl - This service will animate a jaw servo to move as its speaking
+ * It's peers are the jaw servo, speech service and an arduino.
+ *
+ */
 public class MouthControl extends Service {
 
 	private static final long serialVersionUID = 1L;

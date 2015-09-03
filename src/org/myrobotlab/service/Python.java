@@ -30,10 +30,15 @@ import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 
 /**
+ * 
+ * Python - This service provides python scripting support.
+ * It uses the jython integration and provides python 2.7 syntax compliance.
+ * 
+ * More Info at :
+ * https://www.python.org/
+ * http://www.jython.org/
+ * 
  * @author GroG
- * 
- *         a Service to access Python interpreter.
- * 
  * 
  */
 public class Python extends Service {

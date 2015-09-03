@@ -7,6 +7,12 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * InverseKinematics provides basic 2D inverse kinematics features.
+ * This class will be replaced with the DH parameter based InverseKinematics3D service.
+ *
+ */
 public class InverseKinematics extends Service {
 
 	protected IKEngine ikEngine;

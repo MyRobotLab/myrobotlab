@@ -15,9 +15,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.IPCameraFrameGrabber;
 import org.slf4j.Logger;
 
-// Android related - http://stackoverflow.com/questions/8301543/android-bitmap-to-bufferedimage
-// Bitmap to BufferedImage - conversion once Bitmap class is serialized
-
+/**
+ * IPCamera - a service to allow streaming of video from an IP based camera.
+ *
+ * Android related - http://stackoverflow.com/questions/8301543/android-bitmap-to-bufferedimage
+ * Bitmap to BufferedImage - conversion once Bitmap class is serialized
+ */
 public class IPCamera extends Service {
 
 	public class VideoProcess implements Runnable {

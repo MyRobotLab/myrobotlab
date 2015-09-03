@@ -11,6 +11,12 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * Pingdar - this service will control a sweeping servo and an ultrasonic sensor module.
+ * The result is a sonar style range finding.
+ *
+ */
 public class Pingdar extends Service {
 
 	public static class Point {

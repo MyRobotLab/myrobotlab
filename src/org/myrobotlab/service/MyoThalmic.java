@@ -24,6 +24,24 @@ import com.thalmic.myo.enums.VibrationType;
 import com.thalmic.myo.enums.XDirection;
 import com.thalmic.myo.example.DataCollector;
 
+/**
+ * 
+ * MyoThalmic - This service provides connectivity to the Myo band.
+ * https://www.myo.com/ 
+ * It provides orientation tracking infromation such as roll,pitch and yaw.
+ * In addition it can detect a "pose" or gesture made by the hand while it's worn.
+ *  
+ * REST,
+ * FIST,
+ * WAVE_IN,
+ * WAVE_OUT,
+ * FINGERS_SPREAD,
+ * DOUBLE_TAP,
+ * UNKNOWN
+ * 
+ * The addPoseListener will wire data the orientation and pose data to another service.
+ * 
+ */
 public class MyoThalmic extends Service implements DeviceListener , MyoDataListener , MyoDataPublisher  {
 
 	private static final long serialVersionUID = 1L;

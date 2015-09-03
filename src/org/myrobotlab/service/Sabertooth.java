@@ -20,15 +20,13 @@ import org.slf4j.Logger;
 
 /**
  * 
+ * SaberTooth - SaberTooth service for the sabertooth motor controller command
+ *  
+ * More Info: http://www.dimensionengineering.com/datasheets/Sabertooth2x25.pdf
+ * 
+ * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 + speed) & 0b01111111);
+ * 
  * @author GroG
- * 
- *         SaberTooth service for the sabertooth motor controller command
- *         reference :
- *         http://www.dimensionengineering.com/datasheets/Sabertooth2x25.pdf
- * 
- *         Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address
- *         + 0 + speed) & 0b01111111);
- * 
  * 
  */
 public class Sabertooth extends Service implements SerialDataListener, MotorController {

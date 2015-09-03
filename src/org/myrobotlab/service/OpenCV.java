@@ -79,6 +79,18 @@ import org.slf4j.Logger;
  import static org.bytedeco.javacpp.opencv_video.*;
  import static org.bytedeco.javacpp.opencv_videostab.*; */
 
+/**
+ * 
+ * OpenCV - This service provides webcam support and video image processing
+ * It uses the JavaCV binding to the OpenCV library.  
+ * OpenCV is a computer vision library.  You can create an OpenCV service
+ * and then add a pipeline of OpenCVFilters to it to provide things like
+ * facial recognition, and KLOpticalTracking
+ * 
+ * More Info about OpenCV : http://opencv.org/
+ * JavaCV is maintained by Samuel Audet : https://github.com/bytedeco/javacv
+ * 
+ */
 public class OpenCV extends VideoSource {
 
 	// FIXME - don't return BufferedImage return SerializableImage always !

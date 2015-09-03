@@ -43,6 +43,13 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * PID - software based PID controller.  This handles a single input / output based on control theory.
+ * This will be consolidated with the PID2 service at some point.
+ * More info at https://en.wikipedia.org/wiki/PID_controller
+ *
+ */
 public class PID extends Service {
 
 	private static final long serialVersionUID = 1L;

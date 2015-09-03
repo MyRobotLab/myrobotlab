@@ -14,6 +14,19 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * InverseKinematics3D - This class provides a 3D based inverse kinematics implementation
+ * that allows you to specify the robot arm geometry based on DH Parameters.
+ * This will use a pseudo-inverse jacobian gradient descent approach to 
+ * move the end affector to the desired x,y,z postions in space with 
+ * respect to the base frame.
+ * 
+ * Rotation and Orientation information is not currently supported. (but should be easy to add)
+ *
+ * @author kwatters
+ * 
+ */
 public class InverseKinematics3D extends Service implements IKJointAnglePublisher {
 
 	private static final long serialVersionUID = 1L;

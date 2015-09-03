@@ -10,6 +10,14 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * MPU6050 - MPU-6050 sensor contains a MEMS accelerometer and a MEMS gyro in a single chip. 
+ * It is very accurate, as it contains 16-bits analog to digital conversion hardware for each channel. 
+ * Therefor it captures the x, y, and z channel at the same time.
+ * http://playground.arduino.cc/Main/MPU-6050
+ *
+ */
 public class MPU6050 extends Service implements SerialDataListener {
 
 	private static final long serialVersionUID = 1L;
