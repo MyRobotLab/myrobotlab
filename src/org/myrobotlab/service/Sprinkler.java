@@ -12,6 +12,11 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+
+/**
+ * Sprinkler - This service waters Grogs front,back, and garden.
+ * 
+ */
 public class Sprinkler extends Service {
 
 	private static final long serialVersionUID = 1L;

@@ -28,6 +28,11 @@ import org.myrobotlab.service.WebGUI.WebMsg;
 import org.myrobotlab.service.XMPP.XMPPMsg;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * Shoutbox - This service powers the shoutbox on MyRobotLab.org.
+ *
+ */
 public class Shoutbox extends Service {
 	public static class Connection implements Serializable {
 		private static final long serialVersionUID = 1L;

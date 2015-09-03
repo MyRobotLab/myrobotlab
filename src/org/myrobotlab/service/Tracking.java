@@ -58,6 +58,14 @@ import org.slf4j.Logger;
 
 // TODO - attach() ???  Static name peer key list ???
 
+/**
+ * 
+ * Tracking - This service connects to the video stream from OpenCV 
+ * It then uses LK tracking for a point in the video stream.  As that point moves
+ * the x and y servos that are attached to a camera will move to keep the point in the screen.
+ * (controlling yaw and pitch.)
+ *
+ */
 public class Tracking extends Service {
 
 	private static final long serialVersionUID = 1L;

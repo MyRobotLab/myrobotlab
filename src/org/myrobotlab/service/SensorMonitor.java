@@ -40,6 +40,13 @@ import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.Trigger;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * SensorMonitor - he SensorMonitor takes a variety of input data and displays it to a user interface. 
+ * It also has the capability of adding alerts.  
+ * An alert would be triggered if a sensor goes above or below some threshold.
+ *
+ */
 public class SensorMonitor extends Service {
 
 	private static final long serialVersionUID = 1L;

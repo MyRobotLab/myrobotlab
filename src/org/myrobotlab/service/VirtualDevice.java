@@ -16,6 +16,15 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * VirtualDevice - This is a virtual serial port device that can be used to
+ * redirect serial data over a network for example.
+ * Blender service requires this so the serial commands to an inmoov and be
+ * pumped over the network to blender, rather than over the serial port to 
+ * an actual arduino.
+ *
+ */
 public class VirtualDevice extends Service implements SerialDataListener {
 
 	private static final long serialVersionUID = 1L;

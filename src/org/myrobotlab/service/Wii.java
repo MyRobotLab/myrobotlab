@@ -55,10 +55,16 @@ import wiiusej.wiiusejevents.wiiuseapievents.NunchukInsertedEvent;
 import wiiusej.wiiusejevents.wiiuseapievents.NunchukRemovedEvent;
 import wiiusej.wiiusejevents.wiiuseapievents.StatusEvent;
 
-// http://diy.sickmods.net/Tutorials/Wii/Disassemble_Wiimote/
-// http://procrastineering.blogspot.com/2008/09/working-with-pixart-camera-directly.html
-// http://www.bot-thoughts.com/2010/12/connecting-mbed-to-wiimote-ir-camera.html
 
+/**
+ * 
+ * Wii - support for the wiimote as a controller.
+ * 
+ * http://diy.sickmods.net/Tutorials/Wii/Disassemble_Wiimote/
+ * http://procrastineering.blogspot.com/2008/09/working-with-pixart-camera-directly.html
+ * http://www.bot-thoughts.com/2010/12/connecting-mbed-to-wiimote-ir-camera.html
+ *
+ */
 public class Wii extends Service implements WiimoteListener, SerialPortEventListener {
 
 	public static class IRData implements Serializable {

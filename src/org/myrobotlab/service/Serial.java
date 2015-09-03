@@ -34,6 +34,11 @@ import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * Serial - a service that allows reading and writing to a serial port device.
+ *
+ */
 public class Serial extends Service implements PortSource, QueueSource, SerialDataListener {
 
 	/**
