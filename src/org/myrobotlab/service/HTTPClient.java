@@ -48,6 +48,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
+ * HTTPClient - ability to send a http post.
+ *  
  * @author greg (at) myrobotlab.org wrapper service for Apache HTTPClient
  */
 public class HTTPClient extends Service {

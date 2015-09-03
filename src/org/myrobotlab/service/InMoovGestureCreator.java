@@ -21,10 +21,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Python.Script;
 import org.slf4j.Logger;
 
+
 /**
- * based on _TemplateService
- */
-/**
+ * InMoovGestureCreator - This is a helper service to create gestures for the InMoov
+ * It has a swing based gui that allows you to set servo angles on the InMoov to create
+ * new gestures.
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */

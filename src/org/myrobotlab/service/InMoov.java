@@ -18,6 +18,16 @@ import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
+/**
+ * InMoov - The InMoov Service.
+ * 
+ * The InMoov service allows control of the InMoov robot.  This robot was created by hairygael.  
+ * It's an open source 3D printable robot.  
+ * All of the parts and instructions to build are on his blog (http://inmoov.blogspot.com/ and http://www.inmoov.fr/).
+ * InMoov is a composite of servos, Arduinos, microphone, camera, kinect and computer.  
+ * The InMoov service is composed of many other peer services, and allows easy initialization and control of these sub systems.
+ *
+ */
 public class InMoov extends Service {
 
 	private static final long serialVersionUID = 1L;

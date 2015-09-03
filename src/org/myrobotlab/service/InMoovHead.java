@@ -6,6 +6,12 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+/**
+ * InMoovHead - This is the inmoov head service.
+ * This service controls the servos for the following:
+ * jaw, eyeX, eyeY, rothead and neck.
+ * 
+ */
 public class InMoovHead extends Service {
 
 	private static final long serialVersionUID = 1L;

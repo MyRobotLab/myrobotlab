@@ -27,6 +27,10 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
+/**
+ * Incubator - This is a sort of testing / example service.
+ *
+ */
 public class Incubator extends Service {
 
 	private static final long serialVersionUID = 1L;

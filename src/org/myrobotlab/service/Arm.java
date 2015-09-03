@@ -33,6 +33,11 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
+
+/**
+ * Arm
+ * 
+ */
 public class Arm extends Service {
 
 	public transient final static Logger log = LoggerFactory.getLogger(Arm.class.getCanonicalName());

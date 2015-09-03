@@ -7,6 +7,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * BeagleBoardBlack - Skeleton of Beagle Board Black service. 
+ * Primarily this service will allow access through Java to the GPIO of the BBB.
+ * Needs a Pi4J code to be ported to a BBB4J library.
+ */
 public class BeagleBoardBlack extends Service {
 
 	private static final long serialVersionUID = 1L;

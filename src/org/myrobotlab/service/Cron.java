@@ -1,10 +1,8 @@
 package org.myrobotlab.service;
 
 import it.sauronsoftware.cron4j.Scheduler;
-
 import java.io.Serializable;
 import java.util.ArrayList;
-
 import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -13,6 +11,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * Cron - This is a cron based service that can execute a "task" at some point
+ * in the future such as "invoke this method on that service"
+ *
+ */
 public class Cron extends Service {
 
 	public static class Task implements Serializable, Runnable {
@@ -109,10 +112,27 @@ public class Cron extends Service {
 		super(n);
 	}
 
+	/**
+	 * addTask - Add a task to the cron service to invoke a method on a service on some schedule.
+	 * 
+	 * @param cron - The cron string to define the schedule
+	 * @param serviceName - The name of the service to invoke
+	 * @param method - the method on the service to invoke when the task starts.
+	 * @return
+	 */
 	public String addTask(String cron, String serviceName, String method) {
 		return addTask(cron, serviceName, method, (Object[]) null);
 	}
 
+	/**
+	 * addTask - Add a task to the cron service to invoke a method on a service on some schedule.
+	 * 
+	 * @param cron - The cron string to define the schedule
+	 * @param name - The name of the service to invoke
+	 * @param method - the method on the service to invoke when the task starts.
+	 * @param data - additional objects/varags to pass to the method 
+	 * @return
+	 */
 	public String addTask(String cron, String name, String method, Object... data) {
 		Task task = new Task(this, cron, name, method, data);
 		tasks.add(task);

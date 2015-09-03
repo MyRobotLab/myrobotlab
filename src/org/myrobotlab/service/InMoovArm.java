@@ -1,10 +1,8 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.DHLink;
@@ -14,6 +12,12 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.slf4j.Logger;
 
+/**
+ * InMoovArm - This is the Arm sub-service for the InMoov Robot.
+ * It consists of 4 Servos:  bicep, rotate,shoulder,omoplate 
+ * It uses Arduino to control the servos.
+ *
+ */
 public class InMoovArm extends Service implements IKJointAngleListener {
 
 	private static final long serialVersionUID = 1L;

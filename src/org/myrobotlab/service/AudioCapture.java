@@ -52,6 +52,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+
+/**
+ * AudioCapture - a service that can record and playback from a microphone.
+ * 
+ */
 public class AudioCapture extends Service {
 
 	class CaptureThread extends Thread {

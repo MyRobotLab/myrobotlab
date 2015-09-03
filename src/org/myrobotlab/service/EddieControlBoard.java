@@ -16,6 +16,11 @@ import org.myrobotlab.service.interfaces.KeyListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
+/**
+ * EddieControlBoard - This service will communicate with the parallax EddieControlBoard
+ * It can publish sensor data , control motors and more! 
+ *
+ */
 public class EddieControlBoard extends Service implements KeyListener, ButtonListener, SerialDataListener {
 
 	class SensorPoller extends Thread {

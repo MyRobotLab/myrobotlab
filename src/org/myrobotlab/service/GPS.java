@@ -17,6 +17,23 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
+/**
+ * GPS - Global Positioning System for MyRobotLab. 
+ * It will read data from a GPS sensor through a serial connection and parse it into its appropriate fields
+ * The service is able to parse NMEA sentences coming in over Serial (including Bluetooth Serial). 
+ * One important note is that the Lat and Lon in NMEA are in the format ddmm.mmmm which means that 
+ * they have to be converted to Degrees (d) from Degrees(d) Minutes(m) to be used with some of the other functions in the service.  
+ * The service automatically does the conversion when it parses the sentences into GPSData objects. 
+ * If you capture the raw GPS data coming out of the device to a file, it won't be the converted version. 
+ * It will be the raw NMEA value.
+ * some Geo Fence capabilities have been added.  The most basic of these is the Point based radius.  
+ * You define a Lat/Lon point and a radius around it in meters and then you can 
+ * test to see if other points are inside or outside the fence.  
+ * A more complicated/flexible version is created by sending an array of GPS points to form a polygon. 
+ * The last point will be connected back to the first point automatically to close the fence.  
+ * So if your robot is sending you it's current GPS coordinates, you can see if has wandered into our out of a fenced area.
+ *
+ */
 public class GPS extends Service implements SerialDataListener {
 
 	/***********************************************************************************

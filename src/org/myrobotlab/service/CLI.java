@@ -23,8 +23,13 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
- * CLI should be a singleton in a process !
+ * CLI - This is a command line interface to MyRobotLab.
+ * It supports some shell like commands such as "cd", and "ls"
+ * Use the command "help" to display help.
  *
+ * should be a singleton in a process.
+ * This does not seem to work on cygwin/windows, but it does work in a command prompt.
+ * Linux/Mac can use this via a Terminal / Console window.
  * 
  * @author GroG
  *
