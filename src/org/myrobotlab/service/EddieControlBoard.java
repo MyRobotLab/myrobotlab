@@ -14,6 +14,7 @@ import org.myrobotlab.service.Joystick.Button;
 import org.myrobotlab.service.interfaces.ButtonListener;
 import org.myrobotlab.service.interfaces.KeyListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**

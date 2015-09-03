@@ -18,6 +18,12 @@ import com.wolfram.alpha.WAQuery;
 import com.wolfram.alpha.WAQueryResult;
 import com.wolfram.alpha.WASubpod;
 
+/**
+ * 
+ * WolframAlpha - This service allows you to send a query to WolframAlpha
+ * and get the result.
+ *
+ */
 public class WolframAlpha extends Service {
 
 	private static final long serialVersionUID = 1L;

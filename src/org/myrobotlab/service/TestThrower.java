@@ -31,6 +31,11 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * TestThrower - used for testing.
+ *
+ */
 public class TestThrower extends Service {
 	
 	private static final long serialVersionUID = 1L;

@@ -19,6 +19,19 @@ import org.slf4j.Logger;
 import topcodes.Scanner;
 import topcodes.TopCode;
 
+/**
+ * 
+ * TopCodes - This service allows to recognize a special codes. 
+ * You can print these codes using the attached topcodes.pdf.
+ * The service gives back the following information :
+ * Number of the code recognized
+ * Coordinates of the center of the code (x,y) 
+ * Diameter of the code (which can be used to find distance)
+ * Angular rotation of the code
+ * ​THERE ARE 99 DIFFERENT CODES.
+ * CAMERA SHOULD BE AS PERPENDICULAR AS POSSIBLE TO THE CODE, IN ORDER TO WORK WELL.
+ *
+ */
 public class TopCodes extends Service {
 
 	private static final long serialVersionUID = 1L;

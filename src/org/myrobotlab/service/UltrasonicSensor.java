@@ -14,6 +14,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * UltrasonicSensor - This will read data from an ultrasonic sensor module
+ * connected to an android.
+ *
+ */
 public class UltrasonicSensor extends Service implements RangeListener {
 
 	private static final long serialVersionUID = 1L;

@@ -17,47 +17,13 @@ import org.slf4j.Logger;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 
-class Environment {
-	public interface LinuxLibC extends Library {
-		public int setenv(String name, String value, int overwrite);
-
-		public int unsetenv(String name);
-	}
-
-	static public class POSIX {
-		static Object libc;
-		static {
-			if (System.getProperty("os.name").equals("Linux")) {
-				libc = Native.loadLibrary("c", LinuxLibC.class);
-			} else {
-				libc = Native.loadLibrary("msvcrt", WinLibC.class);
-			}
-		}
-
-		public int setenv(String name, String value, int overwrite) {
-			if (libc instanceof LinuxLibC) {
-				return ((LinuxLibC) libc).setenv(name, value, overwrite);
-			} else {
-				return ((WinLibC) libc)._putenv(name + "=" + value);
-			}
-		}
-
-		public int unsetenv(String name) {
-			if (libc instanceof LinuxLibC) {
-				return ((LinuxLibC) libc).unsetenv(name);
-			} else {
-				return ((WinLibC) libc)._putenv(name + "=");
-			}
-		}
-	}
-
-	public interface WinLibC extends Library {
-		public int _putenv(String name);
-	}
-
-	static POSIX libc = new POSIX();
-}
-
+/**
+ * 
+ * TesseractOCR - This service will use the open source project tesseract.
+ * Tesseract will take an Image and extract any recognizable text from that image 
+ * as a string.
+ *
+ */
 public class TesseractOCR extends Service {
 
 	private static final long serialVersionUID = 1L;
@@ -128,4 +94,45 @@ public class TesseractOCR extends Service {
 		super.stopService();
 	}
 
+}
+
+class Environment {
+	public interface LinuxLibC extends Library {
+		public int setenv(String name, String value, int overwrite);
+
+		public int unsetenv(String name);
+	}
+
+	static public class POSIX {
+		static Object libc;
+		static {
+			if (System.getProperty("os.name").equals("Linux")) {
+				libc = Native.loadLibrary("c", LinuxLibC.class);
+			} else {
+				libc = Native.loadLibrary("msvcrt", WinLibC.class);
+			}
+		}
+
+		public int setenv(String name, String value, int overwrite) {
+			if (libc instanceof LinuxLibC) {
+				return ((LinuxLibC) libc).setenv(name, value, overwrite);
+			} else {
+				return ((WinLibC) libc)._putenv(name + "=" + value);
+			}
+		}
+
+		public int unsetenv(String name) {
+			if (libc instanceof LinuxLibC) {
+				return ((LinuxLibC) libc).unsetenv(name);
+			} else {
+				return ((WinLibC) libc)._putenv(name + "=");
+			}
+		}
+	}
+
+	public interface WinLibC extends Library {
+		public int _putenv(String name);
+	}
+
+	static POSIX libc = new POSIX();
 }

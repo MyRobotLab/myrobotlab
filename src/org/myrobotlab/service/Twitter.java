@@ -20,6 +20,12 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
+/**
+ * 
+ * Twitter - a service that allows you to send a tweet from MRL assuming you have
+ * a consumerKey and accessToken from a twitter account.
+ *
+ */
 public class Twitter extends Service {
 
 	private static final long serialVersionUID = 1L;

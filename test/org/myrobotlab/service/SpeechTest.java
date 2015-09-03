@@ -9,6 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 public class SpeechTest {

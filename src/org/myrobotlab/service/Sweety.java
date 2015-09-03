@@ -10,8 +10,15 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNIData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * Sweety - The sweety robot service. 
+ * Maintained by \@beetlejuice 
+ *
+ */
 public class Sweety extends Service {
 
 	private static final long serialVersionUID = 1L;

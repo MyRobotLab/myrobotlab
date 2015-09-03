@@ -58,6 +58,12 @@ import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 import edu.cmu.sphinx.util.props.PropertyException;
 
+/**
+ * 
+ * Sphinx - Speech recognition based on CMU Sphinx.
+ * This service must be told what it's listening for.  It does not do free-form speech recognition.
+ * 
+ */
 public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
 	/**

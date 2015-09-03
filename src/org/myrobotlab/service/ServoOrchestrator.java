@@ -27,10 +27,6 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
- * based on _TemplateService
- * "Clock-Code" modified from "Clock-Service"
- */
-/**
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */

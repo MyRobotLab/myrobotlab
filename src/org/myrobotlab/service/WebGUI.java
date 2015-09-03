@@ -54,6 +54,11 @@ import org.slf4j.Logger;
 //@ManagedService(path = "/api")
 //@ManagedService(path = "/snake")
 
+/**
+ * 
+ * WebGUI - This service is the AngularJS based GUI
+ *
+ */
 public class WebGUI extends Service implements AuthorizationProvider, Gateway, Handler {
 
 	private static final long serialVersionUID = 1L;
