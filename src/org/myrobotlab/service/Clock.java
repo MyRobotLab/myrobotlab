@@ -39,6 +39,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.ClockEvent;
 import org.slf4j.Logger;
 
+/**
+ * Clock - This is a simple clock service that can be started and stopped.
+ * It generates a pulse with a timestamp on a regular interval defined by
+ * the setInterval(Integer) method.  Interval is in milliseconds.
+ */
 public class Clock extends Service {
 
 	public class ClockThread implements Runnable {

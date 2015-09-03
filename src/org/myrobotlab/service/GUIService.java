@@ -35,7 +35,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -75,35 +74,40 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;
 
-/*
- * GUIService -> Look at service registry
- * GUIService -> attempt to create a panel for each registered service
- * 		GUIService -> create panel
- *      GUIService -> panel.init(this, serviceName);
- *      	   panel.send(Notify, someoutputfn, GUIName, panel.inputfn, data);
- *  
- *       
- *       
- *       serviceName (source) --> GUIService-> msg
- * Arduino arduino01 -> post message -> outbox -> outbound -> notifyList -> reference of sender? (NO) will not transport
- * across process boundry 
- * 
- * 		serviceGUI needs a Runtime
- * 		Arduino arduin-> post back (data) --> GUIService - look up serviceGUI by senders name ServiceGUI->invoke(data)
- * 
- * References :
- * http://www.scribd.com/doc/13122112/Java6-Rules-Adding-Components-To-The-Tabs-On-JTabbedPaneI-Now-A-breeze
+/**
+ * GUIService - This is the java swing based GUI for MyRobotLab.  
+ * This service allows other services control features to be displayed.  
+ * It is the service which you "see" when you start MyRobotLab.  
+ * It provides a service tab for other services.  
+ * With its own tab it provides a map of message routes and icons of currently running services.
  */
-
 public class GUIService extends Service implements WindowListener, ActionListener, Serializable {
 
+	/*
+	 * GUIService -> Look at service registry
+	 * GUIService -> attempt to create a panel for each registered service
+	 * 		GUIService -> create panel
+	 *      GUIService -> panel.init(this, serviceName);
+	 *      	   panel.send(Notify, someoutputfn, GUIName, panel.inputfn, data);
+	 *  
+	 *       
+	 *       
+	 *       serviceName (source) --> GUIService-> msg
+	 * Arduino arduino01 -> post message -> outbox -> outbound -> notifyList -> reference of sender? (NO) will not transport
+	 * across process boundry 
+	 * 
+	 * 		serviceGUI needs a Runtime
+	 * 		Arduino arduin-> post back (data) --> GUIService - look up serviceGUI by senders name ServiceGUI->invoke(data)
+	 * 
+	 * References :
+	 * http://www.scribd.com/doc/13122112/Java6-Rules-Adding-Components-To-The-Tabs-On-JTabbedPaneI-Now-A-breeze
+	 */
 	private static final long serialVersionUID = 1L;
 
 	transient public final static Logger log = LoggerFactory.getLogger(GUIService.class);

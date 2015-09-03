@@ -9,6 +9,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * InMoovTorso - The inmoov torso.  This will allow control of the 
+ * topStom, midStom, and lowStom servos. 
+ *
+ */
 public class InMoovTorso extends Service {
 
 	private static final long serialVersionUID = 1L;

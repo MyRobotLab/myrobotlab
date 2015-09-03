@@ -46,6 +46,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
 
+
+/**
+ * AcapelaSpeech
+ * 
+ */
 public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesis {
 
 	private static final long serialVersionUID = 1L;

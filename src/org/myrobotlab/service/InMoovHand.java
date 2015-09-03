@@ -14,6 +14,13 @@ import org.myrobotlab.service.LeapMotion2.LeapData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.slf4j.Logger;
 
+/**
+ * InMoovHand - The Hand sub service for the InMoov Robot.
+ * This service has 6 servos controlled by an arduino.
+ * thumb,index,majeure,ringFinger,pinky, and wrist
+ * 
+ * There is also leap motion support.
+ */
 public class InMoovHand extends Service implements LeapDataListener {
 
 	private static final long serialVersionUID = 1L;
@@ -61,13 +68,11 @@ public class InMoovHand extends Service implements LeapDataListener {
 			rightHand.startService();
 			Runtime.createAndStart("webgui", "WebGUI");
 			// rightHand.connect("COM12"); TEST RECOVERY !!!
-
 			rightHand.close();
 			rightHand.open();
 			rightHand.openPinch();
 			rightHand.closePinch();
 			rightHand.rest();
-
 			/*
 			 * GUIService gui = new GUIService("gui"); gui.startService();
 			 */

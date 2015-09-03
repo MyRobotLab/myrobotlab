@@ -2,6 +2,10 @@ package org.myrobotlab.service;
 
 import java.util.List;
 
+/**
+ * SpeechSynthesis
+ * 
+ */
 public interface SpeechSynthesis {
 
 	// kept for legacy - use publishStartSpeaking & publishEndSpeaking
