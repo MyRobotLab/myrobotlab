@@ -45,6 +45,11 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
+/**
+ * Joystick - The joystick service supports reading data from buttons and joysticks.
+ * It supports many joysticks, though the button mapping may vary from controller to controller.
+ *
+ */
 public class Joystick extends Service {
 
 	static public class Button implements Serializable {

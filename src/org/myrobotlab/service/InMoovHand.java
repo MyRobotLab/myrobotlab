@@ -9,8 +9,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.LeapMotion2.Hand;
-import org.myrobotlab.service.LeapMotion2.LeapData;
+import org.myrobotlab.service.LeapMotion.Hand;
+import org.myrobotlab.service.LeapMotion.LeapData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.slf4j.Logger;
 
@@ -30,7 +30,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 	/**
 	 * peer services
 	 */
-	transient public LeapMotion2 leap;
+	transient public LeapMotion leap;
 	transient public Servo thumb;
 	transient public Servo index;
 	transient public Servo majeure;
@@ -472,7 +472,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 
 	public void startLeapTracking() throws Exception {
 		if (leap == null) {
-			leap = (LeapMotion2) startPeer("leap");
+			leap = (LeapMotion) startPeer("leap");
 		}
 		this.index.map(90, 0, this.index.getMin(), this.index.getMax());
 		this.thumb.map(90, 50, this.thumb.getMin(), this.thumb.getMax());

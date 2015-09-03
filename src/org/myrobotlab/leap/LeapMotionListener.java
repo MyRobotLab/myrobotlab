@@ -1,8 +1,8 @@
 package org.myrobotlab.leap;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.LeapMotion2;
-import org.myrobotlab.service.LeapMotion2.LeapData;
+import org.myrobotlab.service.LeapMotion;
+import org.myrobotlab.service.LeapMotion.LeapData;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
@@ -15,9 +15,9 @@ import com.leapmotion.leap.Vector;
 public class LeapMotionListener extends Listener {
 
 	public final static Logger log = LoggerFactory.getLogger(LeapMotionListener.class);
-	LeapMotion2 myService = null;
+	LeapMotion myService = null;
 
-	public LeapMotionListener(LeapMotion2 myService) {
+	public LeapMotionListener(LeapMotion myService) {
 		this.myService = myService;
 	}
 
@@ -31,8 +31,8 @@ public class LeapMotionListener extends Listener {
 		return angle;
 	}
 
-	private LeapMotion2.Hand mapLeapHandData(Hand lh) {
-		LeapMotion2.Hand mrlHand = new LeapMotion2.Hand();
+	private LeapMotion.Hand mapLeapHandData(Hand lh) {
+		LeapMotion.Hand mrlHand = new LeapMotion.Hand();
 		// process the normal
 		Vector palmNormal = lh.palmNormal();
 		mrlHand.palmNormalX = palmNormal.getX();
@@ -92,8 +92,8 @@ public class LeapMotionListener extends Listener {
 		Hand lh = controller.frame().hands().leftmost();
 		Hand rh = controller.frame().hands().rightmost();
 		// map the data to the MRL Hand pojo
-		LeapMotion2.Hand mrlLHand = mapLeapHandData(lh);
-		LeapMotion2.Hand mrlRHand = mapLeapHandData(rh);
+		LeapMotion.Hand mrlLHand = mapLeapHandData(lh);
+		LeapMotion.Hand mrlRHand = mapLeapHandData(rh);
 		// set them to the LeapData obj
 		data.leftHand = mrlLHand;
 		data.rightHand = mrlRHand;

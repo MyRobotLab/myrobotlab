@@ -7,6 +7,14 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * MultiWii - this is a skeleton service intended as a place holder to 
+ * support controling the MultiWii
+ *
+ * MultiWii is a general purpose software to control a multirotor RC model.
+ * http://www.multiwii.com/
+ */
 public class MultiWii extends Service {
 
 	transient public Serial serial;

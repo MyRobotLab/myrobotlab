@@ -15,12 +15,22 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 
-// video0 = rgbpilot cam
-// video1 = pink plant static NIR - 
-// Imaged from there should be taken and put through the infrapix, then opencv Nope static camera view of the braaaains
-// video2 = NIR pilot cam
-
+/**
+ * 
+ * Plantoid - Unknown state
+ * 
+ * A plantoid is a hypothetical robot or synthetic organism designed to look, act and grow like a plant. 
+ * The concept was first scientifically published in 2010
+ * More info at : 
+ * http://www.plantoidrobotics.org/
+ * http://myrobotlab.org/service/plantoid
+ * 
+ */
 public class Plantoid extends Service {
+	// video0 = rgbpilot cam
+	// video1 = pink plant static NIR - 
+	// Imaged from there should be taken and put through the infrapix, then opencv Nope static camera view of the braaaains
+	// video2 = NIR pilot cam
 	public class Scanner extends Thread {
 		int start = 0;
 		int end = 180;

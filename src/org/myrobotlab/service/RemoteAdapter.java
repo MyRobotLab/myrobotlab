@@ -67,6 +67,16 @@ import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * RemoteAdapter - Multi-node / distributed myrobotlab support.
+ * 
+ * A RemoteAdapter allows other instances of MyRobotLab to connect.  
+ * Services and resources can be shared by 2 or more joined instances.  
+ * The default communication listener is a UDP server listening on all addresses on port 6767.
+ * 
+ * 
+ */
 public class RemoteAdapter extends Service implements Gateway {
 
 	// TODO - global address book of discovered connection

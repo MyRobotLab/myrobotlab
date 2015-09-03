@@ -14,6 +14,13 @@ import org.slf4j.Logger;
 
 import com.leapmotion.leap.Frame;
 
+/**
+ * 
+ * OculusDIY - This service is the DIY oculus service.
+ * It might need a custom build of MRLComm to work.  
+ * Check with \@Alessandruino for questions.
+ *
+ */
 public class OculusDIY extends Service implements CustomMsgListener, OculusDataPublisher, OculusDataListener {
 
 	private static final long serialVersionUID = 1L;

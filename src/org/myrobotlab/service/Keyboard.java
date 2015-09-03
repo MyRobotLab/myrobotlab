@@ -13,6 +13,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
+/**
+ * Keyboard - The keyboard service will track keys that are pressed so they can
+ * be used as input to other services via the addKeyListener(Service) call. 
+ *  
+ *
+ */
 public class Keyboard extends Service {
 
 	public class Command {

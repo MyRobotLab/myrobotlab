@@ -33,6 +33,12 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * Log - This service should allow you to record and play back messages.
+ * for testing purposes only.
+ *
+ */
 public class Log extends Service {
 
 	private static final long serialVersionUID = 1L;

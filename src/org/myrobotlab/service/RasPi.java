@@ -24,6 +24,14 @@ import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.wiringpi.SoftPwm;
 
+/**
+ * 
+ * RasPi - This is the MyRobotLab Service for the Raspberry Pi.  
+ * It should allow all control offered by the great Pi4J project.
+ * 
+ * More Info : http://pi4j.com/
+ * 
+ */
 public class RasPi extends Service {
 
 	public static class Device {

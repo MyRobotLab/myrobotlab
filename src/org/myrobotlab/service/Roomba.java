@@ -35,6 +35,13 @@ import org.myrobotlab.roomba.RoombaComm;
 import org.myrobotlab.roomba.RoombaCommPort;
 import org.slf4j.Logger;
 
+/**
+ * 
+ * Roomba - This service allows MRL to connect to a Roomba.  
+ * The GUI Service provides the RoombaComm for manual control and testing.
+ * 
+ * More Info: http://hackingroomba.com/code/roombacomm/
+ */
 public class Roomba extends Service {
 
 	private static final long serialVersionUID = 1L;

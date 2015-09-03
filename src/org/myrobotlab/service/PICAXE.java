@@ -31,7 +31,12 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-/*
+/**
+ * 
+ * PICAXE - this service is for the PICAXE microcontroller.
+ * 
+ * http://www.picaxe.com/
+ * 
  *  Currently supports:
  *   	Arduino Duemilanove - http://arduino.cc/en/Main/ArduinoBoardDuemilanove
  *   

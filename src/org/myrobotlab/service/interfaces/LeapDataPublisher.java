@@ -1,6 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.service.LeapMotion2.LeapData;
+import org.myrobotlab.service.LeapMotion.LeapData;
 
 public interface LeapDataPublisher {
 

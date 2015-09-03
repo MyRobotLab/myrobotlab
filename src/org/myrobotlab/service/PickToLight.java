@@ -49,30 +49,33 @@ import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 
-// TODO - post report & statistics
-// TODO - update URI - meta data - make update.jar
-// bin calls
-// moduleList calls
-// setAllBoxesLEDs (on off)
-// setBoxesOn(String list)
-// setBoxesOff(String list)
-// getBesSwitchState()
-// displayString(boxlist, str)
-// ZOD
-// update uri
-// blinkOff
 
-// TODO - automated registration
-// Polling / Sensor - important - check sensor state
-// FIXME - EROR is not being handled in non IP address & no connectivity !!!!
-
-// - read config in /boot/  - registration url including password - proxy ? 
 
 /**
+ * 
+ * PickToLight - unknown service?
+ * 
  * @author GroG
  * 
  *         C:\mrl\myrobotlab>xjc -d src -p org.myrobotlab.pickToLight
  *         PickToLightTypes.xsd
+ *         
+ *  TODO - post report & statistics
+ * TODO - update URI - meta data - make update.jar
+ * bin calls
+ * moduleList calls
+ * setAllBoxesLEDs (on off)
+ * setBoxesOn(String list)
+ * setBoxesOff(String list)
+ * getBesSwitchState()
+ * displayString(boxlist, str)
+ * ZOD
+ * update uri
+ * blinkOff
+ * TODO - automated registration
+ * Polling / Sensor - important - check sensor state
+ * FIXME - EROR is not being handled in non IP address & no connectivity !!!!
+ * - read config in /boot/  - registration url including password - proxy ? 
  * 
  */
 public class PickToLight extends Service implements GpioPinListenerDigital {
