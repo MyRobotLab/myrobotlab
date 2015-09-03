@@ -151,6 +151,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		subscribe("publishRX", "publishRX", Integer.class);
 		subscribe("publishTX", "publishTX", Integer.class);
 		subscribe("publishState", "getState", Serial.class);
+		subscribe("getPortNames", "onPortNames", List.class);
 		// forces scan of ports
 		send("refresh");
 	}
@@ -171,7 +172,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		unsubscribe("publishState", "getState", Serial.class);
 	}
 
-	public void getPortNames(final List<String> inPorts) {
+	public void onPortNames(final List<String> inPorts) {
 		ports.removeAllItems();
 		ports.addItem("");
 		for (int i = 0; i < inPorts.size(); ++i) {
@@ -197,7 +198,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 
 					mySerial = serial;
 					// refresh all the ports in the combo box
-					getPortNames(serial.getPortNames());
+					onPortNames(serial.getPortNames());
 
 					// set the appropriate status
 					// ie connection value and current port
