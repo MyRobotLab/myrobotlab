@@ -1,5 +1,5 @@
 angular.module('mrlapp.service.guiservicegui', [])
-        .controller('GUIServiceGuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
+        .controller('GUIServiceGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
                 $log.info('GUIServiceGuiCtrl');
 
                 // get fresh copy
@@ -10,8 +10,6 @@ angular.module('mrlapp.service.guiservicegui', [])
                 //$scope.panel contains some framwork functions related to your service panel
                 //-> you can call functions on it, but NEVER write in it
                 //$scope.service is your service-object, it is the representation of the service running in mrl
-
-
                 //you HAVE TO define this method &
                 //it is the ONLY exception of writing into .gui
                 //-> you will receive all messages routed to your service here

@@ -34,6 +34,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
 	private DHRobotArm currentArm = null;
 	
+	
+	
 	public InverseKinematics3D(String n) {
 		super(n);
 		// TODO: init
@@ -59,15 +61,27 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		
 		// we want to publish the joint positions 
 		// this way we can render on the web gui..
-		double[][] jointPositionMap = new double[currentArm.getNumLinks()][3];
-		for (int i = 0 ; i < currentArm.getNumLinks() ; i++) {
-			Point jp = currentArm.getJointPosition(i);
+		double[][] jointPositionMap = createJointPositionMap();
+		// TODO: pass a better datastructure?
+		invoke("publishJointPositions", (Object)jointPositionMap);
+	}
+
+	public double[][] createJointPositionMap() {
+		
+		double[][] jointPositionMap = new double[currentArm.getNumLinks()+1][3];
+		
+		// first position is the origin...  second is the end of the first link
+		jointPositionMap[0][0] = 0;
+		jointPositionMap[0][1] = 0;
+		jointPositionMap[0][2] = 0;
+		
+		for (int i = 1 ; i <= currentArm.getNumLinks() ; i++) {
+			Point jp = currentArm.getJointPosition(i-1);
 			jointPositionMap[i][0] = jp.getX();
 			jointPositionMap[i][1] = jp.getY();
 			jointPositionMap[i][2] = jp.getZ();
 		}
-		// TODO: pass a better datastructure?
-		invoke("publishJointPositions", (Object)jointPositionMap);
+		return jointPositionMap;
 	}
 	
 	@Override
@@ -87,8 +101,6 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	public void setCurrentArm(DHRobotArm currentArm) {
 		this.currentArm = currentArm;
 	}
-
-
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
