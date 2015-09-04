@@ -365,7 +365,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		}
 	}
 	
-	public DHRobotArm getDHRobotArm() {
+	public static DHRobotArm getDHRobotArm() {
 		
 		// TODO: specify this correctly and document the reference frames!
 		DHRobotArm arm = new DHRobotArm();
