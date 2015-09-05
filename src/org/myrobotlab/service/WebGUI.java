@@ -721,6 +721,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// remote.startListening();
 			// remote.connect("tcp://127.0.0.1:6767");
 			Runtime.start("python", "Python");
+			Runtime.start("remote", "RemoteAdapter");
 			// Runtime.start("arduino", "Arduino");// Runtime.start("clock01",
 			// "Clock"); Runtime.start("clck3", "Clock");
 			// Runtime.start("gui", "GUIService");

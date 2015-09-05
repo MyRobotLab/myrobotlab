@@ -48,9 +48,10 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 		speak(text);
 	}
 	
-	public boolean speak(String toSpeak) {
+	public int speak(String toSpeak) {
 		// TODO: handle the isSpeaking logic/state
-		return speakInternal(toSpeak, false);
+		speakInternal(toSpeak, false);
+		return -1;
 	}
 
 	public boolean speakBlocking(String toSpeak) {

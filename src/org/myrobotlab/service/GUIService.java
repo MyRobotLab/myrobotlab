@@ -787,10 +787,14 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		try {
 			logging.setLevel(Level.INFO);
 
-			Runtime.createAndStart("i01", "InMoov");
-
-			GUIService gui2 = (GUIService) Runtime.createAndStart("gui1", "GUIService");
-			gui2.startService();
+			//Runtime.start("i01", "InMoov");
+			Runtime.start("mac", "Runtime");
+			Runtime.start("python", "Python");
+			RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote", "RemoteAdapter");
+			remote.setDefaultPrefix("raspi");
+			remote.connect("tcp://127.0.0.1:6767");
+			GUIService gui = (GUIService) Runtime.start("gui", "GUIService");
+			gui.startService();
 
 		} catch (Exception e) {
 			Logging.logError(e);

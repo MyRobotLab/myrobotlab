@@ -1582,13 +1582,15 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			
+			/*
 			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
 			virtual.createVirtualArduino("vport");
 			Python logic = virtual.getLogic();
+			*/
 
 			//catcher.subscribe(arduino.getName(), "publishError");
 
-			Serial uart = virtual.getUART();
+			// Serial uart = virtual.getUART();
 
 			/*
 			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
@@ -1599,7 +1601,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			//arduino.setBoardMega();
 			//arduino.connect("COM15");
-			Runtime.start("python", "Python");			
+			// Runtime.start("python", "Python");			
+			Runtime.start("raspi", "Runtime");	
+			RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote", "RemoteAdapter");	
+			remote.startListening();
+			Runtime.start("cli", "CLI");				
+			Runtime.start("servo", "Servo");				
 			Runtime.start("gui", "GUIService");
 			//Runtime.start("python", "Python");
 			//Runtime.broadcastStates();

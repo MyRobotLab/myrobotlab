@@ -100,14 +100,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * remote manipulations and identification should always be done through
 	 * portNames
 	 */
-	static HashMap<String, Port> ports = new HashMap<String, Port>();
+	transient static HashMap<String, Port> ports = new HashMap<String, Port>();
 
 	/**
 	 * all the ports we are currently connected to typically there is 0 to 1
 	 * connected ports - however the serial service has the ability to "fork"
 	 * ports where it is connected to 2 or more ports simultaneously
 	 */
-	HashMap<String, Port> connectedPorts = new HashMap<String, Port>();
+	transient HashMap<String, Port> connectedPorts = new HashMap<String, Port>();
 
 	/**
 	 * used as the "default" port - now that Serial can multiplex with multiple

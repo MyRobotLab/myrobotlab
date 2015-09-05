@@ -41,12 +41,10 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
-
 
 /**
  * AcapelaSpeech
@@ -66,12 +64,18 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 	// FIXME - PEER notation
 	transient AudioFile audioFile = new AudioFile("audioFile");
 
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+
+		// put peer definitions in
+		peers.put("audioFile", "AudioFile", "audioFile");
+
+		return peers;
+	}
+
 	public AcapelaSpeech(String n) {
 		super(n);
 		connectionManager.setMaxTotal(10);
-
-		// FIXME Peer notation
-		audioFile.startService();
 
 		voices.add("Leila");
 		voices.add("Laia");
@@ -108,6 +112,16 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 		voices.add("Kal");
 		voices.add("Mia");
 		voices.add("Ipek");
+	}
+
+	public void startService() {
+		super.startService();
+		startPeer("audioFile");
+		audioFile.startService();
+	}
+
+	public AudioFile getAudioFile() {
+		return audioFile;
 	}
 
 	@Override
@@ -207,9 +221,9 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 	}
 
 	public byte[] getRemoteFile(String toSpeak) {
-		
+
 		String mp3Url = getMp3Url(toSpeak);
-		
+
 		HttpGet get = null;
 		byte[] b = null;
 		try {
@@ -241,16 +255,6 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 		return b;
 	}
 
-	@Override
-	public boolean speak(String toSpeak) {
-		// queue a utterance and leave
-		Message msg = createMessage(getName(),"speakQueued", toSpeak);
-		in(msg);
-		// its async - we dont wait
-		// so its always true
-		return true;
-	}
-	
 	@Override
 	public boolean speakBlocking(String toSpeak) {
 
@@ -297,41 +301,29 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 		return null;
 	}
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		// LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		AcapelaSpeech speech = (AcapelaSpeech) Runtime.start("speech", "AcapelaSpeech");
-		List<String> voices = speech.getVoices();
-		for (int i = 0; i < voices.size(); ++i) {
-			speech.setVoice(voices.get(i));
-			speech.speak(String.format("Hello again my name is %s", speech.getVoice()));
-			sleep(1000);
-		}
-		// speech.speakBlocking("Hello World");
-	}
-
-	public boolean speakQueued(String toSpeak) {
+	public int speak(String toSpeak) {
 		try {
 
 			String filename = Speech.getLocalFileName(this, toSpeak, "mp3");
 
 			if (audioFile.cacheContains(filename)) {
-				audioFile.playCachedFile(filename);
-				return true;
+				return audioFile.playCachedFile(filename);
 			}
-			
-			
+
 			byte[] b = getRemoteFile(toSpeak);
 			audioFile.cache(filename, b);
+			return audioFile.playCachedFile(filename);
 
-			audioFile.playCachedFile(filename);
-			return true;
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 
-		return false;
+		return -1;
+	}
+
+	public int speak(String voice, String toSpeak) {
+		setVoice(voice);
+		return speak(toSpeak);
 	}
 
 }

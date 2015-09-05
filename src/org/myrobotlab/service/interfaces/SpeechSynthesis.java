@@ -30,7 +30,7 @@ public interface SpeechSynthesis {
 	 * @param toSpeak - the string of text to speak.
 	 * @return
 	 */
-	public abstract boolean speak(String toSpeak);
+	public abstract int speak(String toSpeak);
 
 	/**
 	 * Begin speaking and wait until all speech has been played back/
