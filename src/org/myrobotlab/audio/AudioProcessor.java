@@ -3,7 +3,9 @@ package org.myrobotlab.audio;
 import java.io.File;
 import java.io.IOException;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -12,12 +14,20 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
+import org.eclipse.jetty.util.log.Log;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.AudioFile.AudioData;
+import org.slf4j.Logger;
+
+import com.sun.tools.javac.util.List;
 
 // FIXME - make runnable
 public class AudioProcessor extends Thread {
+	
+	static Logger log = LoggerFactory.getLogger(AudioProcessor.class);
+
 
 	// REFERENCES -
 	// http://www.javalobby.org/java/forums/t18465.html
@@ -29,6 +39,9 @@ public class AudioProcessor extends Thread {
 	// internal registry ... i think
 
 	Queue<String> commands = new ConcurrentLinkedQueue<String>();
+	
+	int currentTrackCount = 0;
+	int trackCount = 0;
 
 	float volume = 1.0f;
 	// float targetVolume = currentVolume;
@@ -44,16 +57,28 @@ public class AudioProcessor extends Thread {
 	public boolean pause = false;
 	
 	public boolean isPlaying = false;
+	
+	boolean isRunning = false;
+	
+	public String queueName;
 
-	public AudioProcessor(AudioFile audioFile) {
-		myService = audioFile;
+	public boolean repeat;
+
+	public String waitForKey = null;
+	
+	Object lock = new Object();
+	
+	BlockingQueue<AudioData> track = new LinkedBlockingQueue<AudioData>();
+	
+
+	public AudioProcessor(AudioFile audioFile, String queueName) {
+		super(String.format("%s:track",queueName));
+		this.myService = audioFile;
+		this.queueName = queueName;
 	}
 
-	public void play(AudioData data) {
-
-		// validate data
-		targetVolume = data.volume;
-		targetBalance = data.balance;
+	// FIXME play with this thread - but block incoming thread
+	public int play(AudioData data) {
 
 		AudioInputStream din = null;
 		try {
@@ -74,6 +99,7 @@ public class AudioProcessor extends Thread {
 				line.start();
 
 				int nBytesRead = 0;
+				volume = 0; // new file being played or repeat - targetVolume should be old volume - needs setting to target
 				isPlaying = true;
 				while (isPlaying && (nBytesRead = din.read(buffer, 0, buffer.length)) != -1) {
 					// byte[] goofy = new byte[4096];
@@ -116,8 +142,13 @@ public class AudioProcessor extends Thread {
 					line.write(buffer, 0, nBytesRead);
 
 					if (pause) {
-						Object lock = myService.getLock();
+						//Object lock = myService.getLock(queueName); // getLocks my lock
 						synchronized (lock) {
+							// notify all waiting for me
+							List<Object> locks = myService.getLocksWaitingFor(queueName);
+							for (int i = 0; i < locks.size(); ++i){
+								locks.get(i).notifyAll();
+							}
 							lock.wait();
 						}
 					}
@@ -139,26 +170,53 @@ public class AudioProcessor extends Thread {
 				}
 			}
 		}
+		
+		return -1;
 	}
 
-	boolean isRunning = false;
+	
 
 	@Override
 	public void run() {
 		isRunning = true;
 
 		try {
+			AudioData data = null;
+			int lastTrackPlayed = currentTrackCount;
 			while (isRunning) {
 				
 				if (pause) {
-					Object lock = myService.getLock();
+					//Object lock = myService.getLock(queueName);
 					synchronized (lock) {
 						lock.wait();
 					}
 				}
 
-				AudioData data = myService.getNextAudioData();
+				if (!repeat || data == null){
+					data = track.take();	
+					++currentTrackCount;
+					
+				} 
+				
+				// check to see if we should be waiting for another track to finish
+				if (waitForKey != null){
+					Object waitForLock = myService.getWaitForLock(waitForKey);
+					synchronized (waitForLock) {
+						waitForLock.wait();
+					}
+				}
+				
 				play(data);
+				if (currentTrackCount != lastTrackPlayed){
+					String key = String.format("%s:%s", queueName, currentTrackCount);
+					Object waitForLock = myService.getWaitForLock(key);
+					if (waitForLock != null){
+						synchronized (waitForLock) {
+							waitForLock.notify();
+						}
+					}
+				}
+				
 			}
 		} catch (Exception e) {
 			isRunning = false;
@@ -185,6 +243,20 @@ public class AudioProcessor extends Thread {
 
 	public float getVolume() {
 		return volume;
+	}
+
+	public int add(AudioData data) {
+		++trackCount;
+		track.add(data);
+		return trackCount;
+	}
+
+	public Object getLock() {
+		return lock;
+	}
+
+	public boolean isRunning() {
+		return isRunning;
 	}
 
 }

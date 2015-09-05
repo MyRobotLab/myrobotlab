@@ -22,7 +22,6 @@ import com.thalmic.myo.enums.PoseType;
 import com.thalmic.myo.enums.UnlockType;
 import com.thalmic.myo.enums.VibrationType;
 import com.thalmic.myo.enums.XDirection;
-import com.thalmic.myo.example.DataCollector;
 
 /**
  * 
@@ -89,7 +88,7 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 
 		hub = new Hub("com.example.hello-myo");
 
-		System.out.println("Attempting to find a Myo...");
+		log.info("Attempting to find a Myo...");
 		log.info("Attempting to find a Myo");
 		myo = hub.waitForMyo(10000);
 
@@ -98,7 +97,7 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 			log.info("Unable to find a Myo");
 		}
 
-		System.out.println("Connected to a Myo armband!");
+		log.info("Connected to a Myo armband!");
 		log.info("Connected to a Myo armband");
 		hub.addListener(this);
 		
@@ -146,7 +145,7 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 		myodata.yaw = yawW;
 		
 		invoke("publishMyoData",myodata);
-		System.out.println(myodata.roll);
+		log.info("roll {}", myodata.roll);
 		
 	}
 
@@ -293,41 +292,6 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 	
 	////
 	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-
-			//MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
-			Hub hub = new Hub("com.example.hello-myo");
-
-			System.out.println("Attempting to find a Myo...");
-			log.info("Attempting to find a Myo");
-
-			Myo myodevice = hub.waitForMyo(10000);
-
-			if (myodevice == null) {
-				throw new RuntimeException("Unable to find a Myo!");
-			}
-
-			System.out.println("Connected to a Myo armband!");
-			log.info("Connected to a Myo armband");
-			//DeviceListener dataCollector = new DataCollector();
-			//hub.addListener(myo);
-
-			while (true) {
-				hub.run(1000 / 20);
-				//System.out.print(dataCollector);
-
-				Runtime.start("gui", "GUIService");
-
-			}
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-
 	@Override
 	public MyoData onMyoData(MyoData myodata) {
 		// TODO Auto-generated method stub
@@ -343,5 +307,46 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
     public void addMyoDataListener(Service service) {
     	addListener("publishMyoData",service.getName(),"onMyoData");
 	}
+    
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+
+			MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
+			myo.connect();
+			
+			/*
+			Hub hub = new Hub("com.example.hello-myo");
+
+			log.info("Attempting to find a Myo...");
+			log.info("Attempting to find a Myo");
+
+			Myo myodevice = hub.waitForMyo(10000);
+
+			if (myodevice == null) {
+				throw new RuntimeException("Unable to find a Myo!");
+			}
+
+			log.info("Connected to a Myo armband!");
+			log.info("Connected to a Myo armband");
+			
+			//DeviceListener dataCollector = new DataCollector();
+			//hub.addListener(myo);
+
+			while (true) {
+				hub.run(1000 / 20);
+				//System.out.print(dataCollector);
+
+				
+
+			}
+			*/
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 
 }

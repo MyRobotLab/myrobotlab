@@ -154,6 +154,7 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		subscribe("getPortNames", "onPortNames", List.class);
 		// forces scan of ports
 		send("refresh");
+		send("getPortNames");
 	}
 
 	public void autoScroll(boolean b) {
@@ -297,9 +298,9 @@ public class SerialGUI extends ServiceGUI implements ActionListener, ItemListene
 		if (o == ports && event.getStateChange() == ItemEvent.SELECTED) {
 			String port = (String) ports.getSelectedItem();
 			if (port.length() == 0) {
-				send("disconnect");
+				//send("disconnect");
 			} else if (!port.equals(mySerial.getPortName()) && port.length() > 0) {
-				send("disconnect");
+				//send("disconnect");
 				send("connect", port);
 			}
 		}

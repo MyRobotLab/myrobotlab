@@ -394,11 +394,8 @@
 
 		<echo>compile start</echo>
 		<!-- compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}/classes" debug="true" includeantruntime="false">
-			<exclude name="org/myrobotlab/service/Android.java" />
-			<exclude name="org/myrobotlab/service/SEAR.java" />
-			<exclude name="org/myrobotlab/control/SEARGUI.java" />
-			<exclude name="org/myrobotlab/service/ArduinoBT.java" />
+		<javac srcdir="${src}" destdir="${build}/classes" debug="true" includeantruntime="false">			
+			<!-- exclude name="org/myrobotlab/service/ExcludeBrokenFile.java" / --> 
 			<classpath refid="compile.classpath" />
 		</javac>
 		<echo>compile end</echo>

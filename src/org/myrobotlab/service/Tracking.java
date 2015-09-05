@@ -610,11 +610,7 @@ public class Tracking extends Service {
 		// if I'm at my min & and the target is further min - don't compute
 		// pid
 		if ((currentXServoPos <= x.getMin() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMax() && xSetpoint - targetPoint.x > 0)) {
-			if (currentXServoPos == currentXServoPos) {
-				error(String.format("%d x limit out of range", currentXServoPos));
-			} else {
 				error(String.format("%f x limit out of range", currentXServoPos));
-			}
 		} else {
 
 			if (pid.compute("x")) {
@@ -632,11 +628,7 @@ public class Tracking extends Service {
 		}
 
 		if ((currentYServoPos <= y.getMin() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMax() && ySetpoint - targetPoint.y > 0)) {
-			if (currentYServoPos == currentYServoPos) {
-				error(String.format("%d x limit out of range", currentYServoPos));
-			} else {
-				error(String.format("%f x limit out of range", currentYServoPos));
-			}
+				error(String.format("%f y limit out of range", currentYServoPos));
 		} else {
 			if (pid.compute("y")) {
 				currentYServoPos += (int) pid.getOutput("y");

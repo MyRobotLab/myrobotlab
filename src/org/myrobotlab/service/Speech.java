@@ -91,8 +91,9 @@ public class Speech extends Proxy implements TextListener, SpeechSynthesis {
 	}
 
 	@Override
-	public boolean speak(String toSpeak) {
-		return proxy.speak(toSpeak);
+	public int speak(String toSpeak) {
+		proxy.speak(toSpeak);
+		return -1;
 	}
 
 	@Override
