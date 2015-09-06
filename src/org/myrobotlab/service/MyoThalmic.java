@@ -26,94 +26,95 @@ import com.thalmic.myo.enums.XDirection;
 /**
  * 
  * MyoThalmic - This service provides connectivity to the Myo band.
- * https://www.myo.com/ 
- * It provides orientation tracking infromation such as roll,pitch and yaw.
- * In addition it can detect a "pose" or gesture made by the hand while it's worn.
- *  
- * REST,
- * FIST,
- * WAVE_IN,
- * WAVE_OUT,
- * FINGERS_SPREAD,
- * DOUBLE_TAP,
- * UNKNOWN
+ * https://www.myo.com/ It provides orientation tracking infromation such as
+ * roll,pitch and yaw. In addition it can detect a "pose" or gesture made by the
+ * hand while it's worn.
  * 
- * The addPoseListener will wire data the orientation and pose data to another service.
+ * REST, FIST, WAVE_IN, WAVE_OUT, FINGERS_SPREAD, DOUBLE_TAP, UNKNOWN
+ * 
+ * The addPoseListener will wire data the orientation and pose data to another
+ * service.
  * 
  */
-public class MyoThalmic extends Service implements DeviceListener , MyoDataListener , MyoDataPublisher  {
+public class MyoThalmic extends Service implements DeviceListener, MyoDataListener, MyoDataPublisher {
 
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(MyoThalmic.class);
 
-	static final int SCALE = 18;
-	double rollW;
-	double pitchW;
-	double yawW;
+	static int scale = 180;
+	double rollW = 0;
+	double pitchW = 0;
+	double yawW = 0;
 	transient Pose currentPose;
 	transient Arm whichArm;
-	
-	transient Myo myo = null; 
+
+	transient Myo myo = null;
 	transient Hub hub = null;
 	transient HubThread hubThread = null;
 	MyoData myodata = new MyoData();
-	
+	boolean delta = false;
+
+
+	boolean isConnected = false;
+
 	class HubThread extends Thread {
 		public boolean running = false;
 		MyoThalmic myService = null;
-		
-		public HubThread(MyoThalmic myService){
+
+		public HubThread(MyoThalmic myService) {
 			this.myService = myService;
 		}
-		
-		public void run(){
+
+		public void run() {
 			running = true;
 			while (running) {
 				hub.run(1000 / 20);
-				log.info(myService.toString());
+				// log.info(myService.toString());
 			}
 		}
 	}
-	
-	
-	public void disconnect(){
-		if (hubThread != null){
+
+	public void disconnect() {
+		if (hubThread != null) {
 			hubThread.running = false;
 			hubThread = null;
 		}
+
+		hub.removeListener(this);
+
+		isConnected = false;
+		broadcastState();
 	}
-   
+
 	public void connect() {
-
-		hub = new Hub("com.example.hello-myo");
-
-		log.info("Attempting to find a Myo...");
-		log.info("Attempting to find a Myo");
-		myo = hub.waitForMyo(10000);
-
 		if (myo == null) {
-			// throw new RuntimeException("Unable to find a Myo!");
-			log.info("Unable to find a Myo");
+			info("Attempting to find a Myo...");
+			myo = hub.waitForMyo(10000);
 		}
 
-		log.info("Connected to a Myo armband!");
-		log.info("Connected to a Myo armband");
+		if (myo == null) {
+			error("Unable to find a Myo");
+			isConnected = false;
+			return;
+		}
+
+		info("Connected to a Myo armband!");
 		hub.addListener(this);
-		
-		if (hubThread == null){
+
+		if (hubThread == null) {
 			hubThread = new HubThread(this);
 			hubThread.start();
 		}
 
+		isConnected = true;
+		broadcastState();
 	}
 
 	public MyoThalmic(String n) {
 		super(n);
-		rollW = 0;
-		pitchW = 0;
-		yawW = 0;
 		currentPose = new Pose();
+		hub = new Hub("com.example.hello-myo");
 	}
 
 	@Override
@@ -126,6 +127,7 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 		return "used as a general template";
 	}
 
+
 	@Override
 	public void onOrientationData(Myo myo, long timestamp, Quaternion rotation) {
 
@@ -137,16 +139,23 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 		double yaw = Math.atan2(2.0f * (normalized.getW() * normalized.getZ() + normalized.getX() * normalized.getY()),
 				1.0f - 2.0f * (normalized.getY() * normalized.getY() + normalized.getZ() * normalized.getZ()));
 
-		rollW = ((roll + Math.PI) / (Math.PI * 2.0) * SCALE);
-		pitchW = ((pitch + Math.PI / 2.0) / Math.PI * SCALE);
-		yawW = ((yaw + Math.PI) / (Math.PI * 2.0) * SCALE);
-		myodata.roll = rollW;
-		myodata.pitch = pitchW;
-		myodata.yaw = yawW;
-		
-		invoke("publishMyoData",myodata);
-		log.info("roll {}", myodata.roll);
-		
+		rollW = Math.round((roll + Math.PI) / (Math.PI * 2.0) * scale);
+		pitchW = Math.round((pitch + Math.PI / 2.0) / Math.PI * scale);
+		yawW = Math.round((yaw + Math.PI) / (Math.PI * 2.0) * scale);
+
+		delta = (myodata.roll - rollW != 0) || (myodata.pitch - pitchW != 0) || (myodata.yaw - yawW != 0);
+
+		if (delta) {
+			myodata.roll = rollW;
+			myodata.pitch = pitchW;
+			myodata.yaw = yawW;
+
+			myodata.timestamp = timestamp;
+
+			invoke("publishMyoData", myodata);
+		}
+		// log.info("roll {}", myodata.roll);
+
 	}
 
 	@Override
@@ -157,14 +166,14 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 			myo.vibrate(VibrationType.VIBRATION_MEDIUM);
 		}
 		invoke("publishPose", pose);
-		invoke("publishMyoData",myodata);
+		invoke("publishMyoData", myodata);
 	}
-	
-	public void addPoseListener(Service service){
+
+	public void addPoseListener(Service service) {
 		addListener("publishPose", service.getName(), "onPose");
 	}
-	
-	public Pose publishPose(Pose pose){
+
+	public Pose publishPose(Pose pose) {
 		return pose;
 	}
 
@@ -182,9 +191,9 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 	public String toString() {
 		StringBuilder builder = new StringBuilder("\r");
 
-		String xDisplay = String.format("[%s%s]", repeatCharacter('*', (int) rollW), repeatCharacter(' ', (int) (SCALE - rollW)));
-		String yDisplay = String.format("[%s%s]", repeatCharacter('*', (int) pitchW), repeatCharacter(' ', (int) (SCALE - pitchW)));
-		String zDisplay = String.format("[%s%s]", repeatCharacter('*', (int) yawW), repeatCharacter(' ', (int) (SCALE - yawW)));
+		String xDisplay = String.format("[%s%s]", repeatCharacter('*', (int) rollW), repeatCharacter(' ', (int) (scale - rollW)));
+		String yDisplay = String.format("[%s%s]", repeatCharacter('*', (int) pitchW), repeatCharacter(' ', (int) (scale - pitchW)));
+		String zDisplay = String.format("[%s%s]", repeatCharacter('*', (int) yawW), repeatCharacter(' ', (int) (scale - yawW)));
 
 		String armString = null;
 		if (whichArm != null) {
@@ -195,7 +204,7 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 		String poseString = null;
 		if (currentPose != null) {
 			String poseTypeString = currentPose.getType().toString();
-			poseString = String.format("[%s%" + (SCALE - poseTypeString.length()) + "s]", poseTypeString, " ");
+			poseString = String.format("[%s%" + (scale - poseTypeString.length()) + "s]", poseTypeString, " ");
 		} else {
 			poseString = String.format("[%14s]", " ");
 		}
@@ -218,80 +227,78 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 	@Override
 	public void onPair(Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onUnpair(Myo myo, long timestamp) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onConnect(Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onDisconnect(Myo myo, long timestamp) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onUnlock(Myo myo, long timestamp) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onLock(Myo myo, long timestamp) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onAccelerometerData(Myo myo, long timestamp, Vector3 accel) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onGyroscopeData(Myo myo, long timestamp, Vector3 gyro) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onRssi(Myo myo, long timestamp, int rssi) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onEmgData(Myo myo, long timestamp, byte[] emg) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	public void lock() {
 		myo.lock();
 	}
-	
-	public void unlock(){
+
+	public void unlock() {
 		myo.unlock(UnlockType.UNLOCK_TIMED);
 	}
-	
+
 	/*
-	public void setLockingPolicy(String policy){
-		myo.setL
-		myo.setLockingPolicy("none") ;
-	}
-	*/
-	
-	////
-	
+	 * public void setLockingPolicy(String policy){ myo.setL
+	 * myo.setLockingPolicy("none") ; }
+	 */
+
+	// //
+
 	@Override
 	public MyoData onMyoData(MyoData myodata) {
 		// TODO Auto-generated method stub
@@ -300,14 +307,14 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 
 	@Override
 	public MyoData publishMyoData(MyoData myodata) {
-		
+
 		return myodata;
 	}
-	
-    public void addMyoDataListener(Service service) {
-    	addListener("publishMyoData",service.getName(),"onMyoData");
+
+	public void addMyoDataListener(Service service) {
+		addListener("publishMyoData", service.getName(), "onMyoData");
 	}
-    
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -316,37 +323,34 @@ public class MyoThalmic extends Service implements DeviceListener , MyoDataListe
 
 			MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
 			myo.connect();
-			
+
 			/*
-			Hub hub = new Hub("com.example.hello-myo");
-
-			log.info("Attempting to find a Myo...");
-			log.info("Attempting to find a Myo");
-
-			Myo myodevice = hub.waitForMyo(10000);
-
-			if (myodevice == null) {
-				throw new RuntimeException("Unable to find a Myo!");
-			}
-
-			log.info("Connected to a Myo armband!");
-			log.info("Connected to a Myo armband");
-			
-			//DeviceListener dataCollector = new DataCollector();
-			//hub.addListener(myo);
-
-			while (true) {
-				hub.run(1000 / 20);
-				//System.out.print(dataCollector);
-
-				
-
-			}
-			*/
+			 * Hub hub = new Hub("com.example.hello-myo");
+			 * 
+			 * log.info("Attempting to find a Myo...");
+			 * log.info("Attempting to find a Myo");
+			 * 
+			 * Myo myodevice = hub.waitForMyo(10000);
+			 * 
+			 * if (myodevice == null) { throw new
+			 * RuntimeException("Unable to find a Myo!"); }
+			 * 
+			 * log.info("Connected to a Myo armband!");
+			 * log.info("Connected to a Myo armband");
+			 * 
+			 * //DeviceListener dataCollector = new DataCollector();
+			 * //hub.addListener(myo);
+			 * 
+			 * while (true) { hub.run(1000 / 20);
+			 * //System.out.print(dataCollector);
+			 * 
+			 * 
+			 * 
+			 * }
+			 */
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 	}
-
 
 }

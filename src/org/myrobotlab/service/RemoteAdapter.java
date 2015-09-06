@@ -886,8 +886,8 @@ public class RemoteAdapter extends Service implements Gateway {
 			//Runtime.start("python", "Python");
 			//Runtime.start("mac.clock", "Clock");
 			// Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			Arduino Arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			//Servo servo = (Servo) Runtime.start("servo", "Servo");
+			//Arduino Arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start("remote", "RemoteAdapter");
 			remote1.startListening();
 			//remote1.setTCPPort(6868);

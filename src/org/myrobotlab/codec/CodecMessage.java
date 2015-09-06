@@ -3,19 +3,16 @@ package org.myrobotlab.codec;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class CodecMessage implements Codec {
-	/**
-	 * Result set to JSON - this is a fluid definition, except for the family
-	 * qualifier will always be 'd'
-	 * 
-	 * @param name
-	 * @param result
-	 * @return
-	 */
-
+	
+	public final static Logger log = LoggerFactory.getLogger(CodecMessage.class);
+	
 	private transient static Gson mapper = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
 	public static final byte[] FQ_D = "d".getBytes();
@@ -44,6 +41,10 @@ public class CodecMessage implements Codec {
 	@Override
 	public Object decode(Object data, Class<?> type) throws Exception {
 		// data has to be a String !! .. just has to be
+		if (data == null){
+			log.error("trying to decode null data");
+			return null;
+		}
 		return mapper.fromJson(data.toString(), type);
 	}
 

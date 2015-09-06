@@ -1602,12 +1602,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			//arduino.setBoardMega();
 			//arduino.connect("COM15");
 			// Runtime.start("python", "Python");			
-			Runtime.start("raspi", "Runtime");	
+			//Runtime.start("raspi", "Runtime");	
 			RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote", "RemoteAdapter");	
 			remote.startListening();
-			Runtime.start("cli", "CLI");				
-			Runtime.start("servo", "Servo");				
-			Runtime.start("gui", "GUIService");
+			//Runtime.start("cli", "CLI");				
+			//Runtime.start("servo", "Servo");				
+			//Runtime.start("gui", "GUIService");
 			//Runtime.start("python", "Python");
 			//Runtime.broadcastStates();
 

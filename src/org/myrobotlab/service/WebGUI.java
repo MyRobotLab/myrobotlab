@@ -613,7 +613,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			si.out(msg.method, retobj);
 		} else {
 			log.info("{} is remote", si.getName());
-			send(msg.name, msg.method, msg.data);
+			// send(msg.name, msg.method, msg.data);
+			send(msg.name, msg.method, params);
 			// out(msg); LETHAL !
 		}
 
@@ -714,14 +715,27 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		try {
 
+			
+			//Runtime.start("python", "Python");
+			
+			
+			
 			// Runtime.start("gui", "GUIService");
-			Runtime.start("webgui2", "WebGUI");
-			// RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote2",
-			// "RemoteAdapter");
-			// remote.startListening();
-			// remote.connect("tcp://127.0.0.1:6767");
-			Runtime.start("python", "Python");
-			Runtime.start("remote", "RemoteAdapter");
+			//RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote","RemoteAdapter");
+			//remote.startListening();
+			//remote.setDefaultPrefix("raspi");
+			//remote.connect("tcp://127.0.0.1:6767");
+
+			
+			Runtime.start("webgui", "WebGUI");
+			
+			MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
+			//myo.connect();
+			
+			// myo.addMyoDataListener(python);
+
+			// Runtime.start("python", "Python");
+			// Runtime.start("remote", "RemoteAdapter");
 			// Runtime.start("arduino", "Arduino");// Runtime.start("clock01",
 			// "Clock"); Runtime.start("clck3", "Clock");
 			// Runtime.start("gui", "GUIService");
@@ -746,5 +760,4 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			Logging.logError(e);
 		}
 	}
-
 }
