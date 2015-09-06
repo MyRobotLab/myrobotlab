@@ -788,11 +788,11 @@ public class GUIService extends Service implements WindowListener, ActionListene
 			logging.setLevel(Level.INFO);
 
 			//Runtime.start("i01", "InMoov");
-			Runtime.start("mac", "Runtime");
+			// Runtime.start("mac", "Runtime");
 			Runtime.start("python", "Python");
 			RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote", "RemoteAdapter");
 			remote.setDefaultPrefix("raspi");
-			remote.connect("tcp://127.0.0.1:6767");
+	//		remote.connect("tcp://127.0.0.1:6767");
 			GUIService gui = (GUIService) Runtime.start("gui", "GUIService");
 			gui.startService();
 

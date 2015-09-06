@@ -9,6 +9,8 @@ import com.thalmic.myo.enums.PoseType;
  * 
  */
 public class MyoData {
+	
+	public long timestamp;
 
 	public double roll = 0;
 	public double pitch = 0;
@@ -20,7 +22,8 @@ public class MyoData {
 	}
 	
 	// constructor with initial values for roll/pitch/yaw
-	public MyoData(double roll, double pitch, double yaw, PoseType currentPose) {
+	public MyoData(long timestamp, double roll, double pitch, double yaw, PoseType currentPose) {
+		this.timestamp = timestamp;
 		this.roll = roll;
 		this.pitch = pitch;
 		this.yaw = yaw;
