@@ -77,7 +77,7 @@ public interface ServiceInterface extends Messaging, LoggingSink, NameProvider {
 
 	public void setInstanceId(URI uri);
 
-	public void setPrefix(String prefix);
+	public void setName(String prefix);
 
 	public void startService();
 

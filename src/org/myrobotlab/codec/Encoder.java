@@ -288,7 +288,7 @@ public class Encoder {
 	// public static Object encode(Object, encoding) - dispatches appropriately
 
 	static final public String getMsgKey(Message msg) {
-		return String.format("msg %s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, Encoder.getParameterSignature(msg.data), msg.msgID);
+		return String.format("msg %s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, Encoder.getParameterSignature(msg.data), msg.msgId);
 	}
 
 	static final public String getMsgTypeKey(Message msg) {

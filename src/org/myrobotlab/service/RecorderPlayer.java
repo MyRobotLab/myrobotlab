@@ -103,7 +103,7 @@ public class RecorderPlayer extends Service {
 
 			if (i + 1 < msgs.size()) {
 				Message nextMsg = msgs.get(i + 1);
-				deltaMsgTime = nextMsg.timeStamp - m.timeStamp;
+				deltaMsgTime = nextMsg.msgId - m.msgId;
 			}
 
 			try {
@@ -163,7 +163,7 @@ public class RecorderPlayer extends Service {
 						// out.write(params[j].toString());
 						d += "|" + params[j].toString();
 					}
-					out.write(msgs.get(i).timeStamp + "|" + Encoder.getParameterSignature(msgs.get(i).data) + d + "\n");
+					out.write(msgs.get(i).msgId + "|" + Encoder.getParameterSignature(msgs.get(i).data) + d + "\n");
 				}
 				out.close();
 				outfile.close();

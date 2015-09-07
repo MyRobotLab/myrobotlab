@@ -47,21 +47,15 @@ public class Message implements Serializable {
 	public final static String RETURN = "R";
 
 	/**
-	 * unique identifier for this message - TODO remove
+	 * unique identifier for this message
 	 */
 
-	public long msgID;
+	public long msgId;
 	/**
-	 * datetimestamp when message is created GMT - hashCode?
+	 * destination name of the message
 	 */
 
-	public long timeStamp;
-	/**
-	 * globally unique name of destination Service. This will be the Service
-	 * endpoint of this Message.
-	 */
-
-	public String name;
+	public  String name;
 	/**
 	 * name of the sending Service which sent this Message
 	 */
@@ -146,7 +140,7 @@ public class Message implements Serializable {
 		Message msg = new Message();
 		msg.method = "myMethod";
 		msg.sendingMethod = "publishImage";
-		msg.timeStamp = System.currentTimeMillis();
+		msg.msgId = System.currentTimeMillis();
 		msg.data = new Object[] { "hello" };
 
 		try {
@@ -157,9 +151,7 @@ public class Message implements Serializable {
 	}
 
 	public Message() {
-		timeStamp = System.currentTimeMillis();
-		msgID = timeStamp; // currently just a timestamp - but it can be more
-							// unique if needed
+		msgId = System.currentTimeMillis();
 		name = new String(); // FIXME - allow NULL !
 		sender = new String(); // FIXME - allow NULL !
 		sendingMethod = new String();
@@ -180,9 +172,7 @@ public class Message implements Serializable {
 	}
 
 	final public void set(final Message other) {
-		msgID = other.msgID;
-
-		timeStamp = System.currentTimeMillis();// other.timeStamp;
+		msgId = other.msgId;
 		name = other.getName();
 		sender = other.sender;
 		sendingMethod = other.sendingMethod;

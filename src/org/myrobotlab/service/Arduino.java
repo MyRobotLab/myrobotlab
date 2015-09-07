@@ -1580,6 +1580,9 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
+			Runtime.start("servo", "Servo");
+			Runtime.start("clock", "Clock");
+			//Runtime.start("serial", "Serial");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			
 			/*
@@ -1598,12 +1601,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			arduino.connect("vport");
 			*/
 			
+			//Runtime.start("serial", "Serial");	
+			
 
 			//arduino.setBoardMega();
 			//arduino.connect("COM15");
 			// Runtime.start("python", "Python");			
 			//Runtime.start("raspi", "Runtime");	
-			RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote", "RemoteAdapter");	
+			RemoteAdapter remote = (RemoteAdapter)Runtime.start("rasremote", "RemoteAdapter");	
 			remote.startListening();
 			//Runtime.start("cli", "CLI");				
 			//Runtime.start("servo", "Servo");				

@@ -505,6 +505,9 @@ angular
             getService: function(name) {
                 return _self.getService(name);
             },
+            updateState: function(service){
+                _self.addService(service);
+            },
             init: function() {
                 if (connected) {
                     return true;

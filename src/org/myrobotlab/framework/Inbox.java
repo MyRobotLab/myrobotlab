@@ -59,7 +59,7 @@ public class Inbox implements Serializable {
 
 	public void add(Message msg) {
 		if ((msg.historyList.contains(name))) {
-			log.error(String.format("* %s dumping duplicate message %s.%s msgid - %d %s", name, msg.name, msg.method, msg.msgID, msg.historyList));
+			log.error(String.format("* %s dumping duplicate message %s.%s msgid - %d %s", name, msg.name, msg.method, msg.msgId, msg.historyList));
 			return;
 		}
 
@@ -144,8 +144,8 @@ public class Inbox implements Serializable {
 					// --- sendBlocking support begin --------------------
 					// TODO - possible safety check msg.status == Message.RETURN
 					// &&
-					if (blockingList.containsKey(msg.msgID)) {
-						Object[] returnContainer = blockingList.get(msg.msgID);
+					if (blockingList.containsKey(msg.msgId)) {
+						Object[] returnContainer = blockingList.get(msg.msgId);
 						if (msg.data == null) // TODO - don't know if this is
 												// correct but this works for
 												// null data now
@@ -156,7 +156,7 @@ public class Inbox implements Serializable {
 																// return data !
 						}
 						synchronized (returnContainer) {
-							blockingList.remove(msg.msgID);
+							blockingList.remove(msg.msgId);
 							returnContainer.notify(); // addListener sender
 						}
 						msg = null; // do not invoke this msg - sendBlocking has
