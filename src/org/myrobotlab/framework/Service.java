@@ -135,9 +135,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 */
 	private URI instanceId = null;
 
-	protected String prefix = null; // if foreign - this will be name prefix -
-									// set by Gateway
-
 	private String name;
 
 	private String simpleName; // used in gson encoding for getSimpleName()
@@ -1196,7 +1193,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		Object retobj = null;
 
 		if (log.isDebugEnabled()) {
-			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method, Encoder.getParameterSignature(msg.data), msg.timeStamp));
+			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method, Encoder.getParameterSignature(msg.data), msg.msgId));
 		}
 
 		// recently added - to support "nameless" messages - concept you may get
@@ -1675,7 +1672,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 					// msg id
 					Message msg = createMessage(m.sender, m.method, ret);
 					msg.sender = this.getName();
-					msg.msgID = m.msgID;
+					msg.msgId = m.msgId;
 					// msg.status = Message.BLOCKING;
 					msg.status = Message.RETURN;
 
@@ -1839,14 +1836,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		Message msg = createMessage(name, method, data);
 		msg.sender = this.getName();
 		msg.status = Message.BLOCKING;
-		msg.msgID = Runtime.getUniqueID();
+		msg.msgId = Runtime.getUniqueID();
 
 		Object[] returnContainer = new Object[1];
 		/*
 		 * if (inbox.blockingList.contains(msg.msgID)) { log.error("DUPLICATE");
 		 * }
 		 */
-		inbox.blockingList.put(msg.msgID, returnContainer);
+		inbox.blockingList.put(msg.msgId, returnContainer);
 
 		try {
 			// block until message comes back
@@ -1890,23 +1887,25 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return level;
 	}
 
+	/**
+	 * rarely should this be used.
+	 * Gateways use it to provide x-route natting services by
+	 * re-writing names with prefixes
+	 * @param name
+	 */
+	
 	@Override
-	public void setPrefix(String prefix) {
-		this.name = String.format("%s%s", prefix, name);
+	public void setName(String name) {
+		//this.name = String.format("%s%s", prefix, name);
+		this.name = name;
 	}
 
 	@Override
 	public String getName() {
-		// prefix is set by Gateway
-		/*
-		 * if (prefix == null) { return name; } else { return
-		 * String.format("%s%s", prefix, name); }
-		 */
-
 		return name;
-
 	}
 
+	
 	/**
 	 * 
 	 * @param s

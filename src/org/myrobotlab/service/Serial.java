@@ -52,7 +52,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * hardware library for non-Android
+	 * deprecated hardware library
 	 */
 	final public static String HARDWARE_LIBRARY_RXTX = "org.myrobotlab.serial.PortRXTX";
 
@@ -66,7 +66,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 */
 	final public static String HARDWARE_LIBRARY_ANDROID_BLUETOOTH = "android.somethin";
 
-	public final static Logger log = LoggerFactory.getLogger(Serial.class);
+	transient public final static Logger log = LoggerFactory.getLogger(Serial.class);
 
 	/**
 	 * cached list of portnames on the system

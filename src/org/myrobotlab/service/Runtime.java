@@ -91,12 +91,14 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	// gson only serializes - non static & non transient fields
 	// has to be HashMap - because null is self
 	/**
-	 * environments of running mrl instances - the null environment is the current local
+	 * environments of running mrl instances - the null environment is the
+	 * current local
 	 */
 	static private final HashMap<URI, ServiceEnvironment> environments = new HashMap<URI, ServiceEnvironment>();
 
 	/**
-	 * a registry of all services regardless of which environment they came from - each must have a unique name
+	 * a registry of all services regardless of which environment they came from
+	 * - each must have a unique name
 	 */
 	static private final TreeMap<String, ServiceInterface> registry = new TreeMap<String, ServiceInterface>();
 
@@ -251,7 +253,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 */
 	static public synchronized ServiceInterface create(String name, String type) {
 		String fullTypeName;
-		if (name.indexOf("/") != -1){
+		if (name.indexOf("/") != -1) {
 			throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
 		}
 		if (type.indexOf(".") == -1) {
@@ -276,7 +278,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			s.startService();
 		} catch (Exception e) {
 			String error = e.getMessage();
-			if (error == null){
+			if (error == null) {
 				error = "error";
 			}
 			Runtime.getInstance().error(String.format("createAndStart(%s, %s) %s", name, type, error));
@@ -826,10 +828,10 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	/**
-	 * Return the named service - 
-	 * 		- if name is not null, but service is not found - return null (for re-entrant Service creation)
-	 *  	- if the name IS null, return Runtime - to support api/getServiceNames
-	 *    	- if the is not null, and service is found - return the Service
+	 * Return the named service - - if name is not null, but service is not
+	 * found - return null (for re-entrant Service creation) - if the name IS
+	 * null, return Runtime - to support api/getServiceNames - if the is not
+	 * null, and service is found - return the Service
 	 * 
 	 * @param name
 	 * @return
@@ -888,7 +890,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	public static ArrayList<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
 		return getServiceNamesFromInterface(Class.forName(interfaze));
 	}
-	
+
 	/**
 	 * @param interfaceName
 	 * @return service names which match
@@ -940,7 +942,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	static public Set<Thread> getThreads() {
 		return Thread.getAllStackTraces().keySet();
 	}
-	
+
 	/**
 	 * dorky pass-throughs to the real JVM Runtime
 	 * 
@@ -1049,7 +1051,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 */
 
 	static public boolean isAgent() {
-		if (cmdline == null){
+		if (cmdline == null) {
 			return false;
 		}
 		return cmdline.containsKey("-isAgent");
@@ -1161,7 +1163,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 				mainHelp();
 				return;
 			}
-			
+
 			// logging.addAppender(Appender.CONSOLE); hopefully it still worky
 			// after removing this ! :)
 
@@ -1284,6 +1286,17 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	public static boolean needsRestart() {
 		return needsRestart;
 	}
+	
+	public void onState(ServiceInterface updatedService){
+		log.info("runtime updating registry info for remote service {}", updatedService.getName());
+		registry.put(updatedService.getName(), updatedService);
+		ServiceEnvironment se = environments.get(updatedService.getInstanceId());
+		if (se != null){
+			se.serviceDirectory.put(updatedService.getName(), updatedService);
+		} else {
+			error("onState ServiceEnvironment null");
+		}
+	}
 
 	// ---------- Java Runtime wrapper functions end --------
 	/**
@@ -1303,78 +1316,82 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			se = environments.get(url);
 		}
 
-		if (s != null) {
-			// x-forward encoding begin FIXME - should be in Encoder
-			String name = s.getName();
-			/*
-			 * if (prefix != null){ name = String.format("%s%s", prefix,
-			 * s.getName()); //< FIXME FYI - bug occured because I had %s.%s :P
-			 * - not normalized !!! } else { name = s.getName(); }
-			 */
-			// x-forward encoding end FIXME - should be in Encoder
+		if (s == null) {
+			// register null is how
+			// initial communication starts
+			// between two instances
+			return null;
+		}
+		
+		String name = s.getName();
 
-			if (se.serviceDirectory.containsKey(name)) {
-				log.info(String.format("attempting to register %1$s which is already registered in %2$s", name, url));
-				if (runtime != null) {
-					runtime.invoke("collision", name);
-					runtime.warn("collision registering %s", name);
-					runtime.error(String.format(" name collision with %s", name));
-				}
-				return s;// <--- BUG ?!?!? WHAT ABOUT THE REMOTE GATEWAYS !!!
-			}
-
-			// REMOTE BROADCAST to all foreign environments
-			// FIXME - Security determines what to export
-			// for each gateway
-
-			// NEW PART !!!
-
-			ArrayList<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
-			for (int ri = 0; ri < remoteGateways.size(); ++ri) {
-				String n = remoteGateways.get(ri);
-				// Communicator gateway = (Communicator)registry.get(n);
-				ServiceInterface gateway = registry.get(n);
-
-				// for each JVM this gateway is is attached too
-				for (Map.Entry<URI, ServiceEnvironment> o : environments.entrySet()) {
-					// Map.Entry<String,SerializableImage> pairs = o;
-					URI uri = o.getKey();
-					// if its a foreign JVM & the gateway responsible for the
-					// remote
-					// connection and
-					// the foreign JVM is not the host which this service
-					// originated
-					// from - send it....
-					if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getInstanceId())) {
-						log.info(String.format("gateway %s sending registration of %s remote to %s", gateway.getName(), name, uri));
-						// FIXME - Security determines what to export
-						Message msg = runtime.createMessage("", "register", s);
-						// ((Communicator) gateway).sendRemote(uri, msg);
-						// //mrl://remote2/tcp://127.0.0.1:50488 <-- wrong
-						// sendingRemote is wrong
-						// FIXME - optimize gateway.send(msg) && URI TO URI MAP
-						// IN
-						// RUNTIME !!!
-						gateway.in(msg);
-					}
-				}
-			}
-
-			// ServiceInterface sw = new ServiceInterface(s, se.accessURL);
-			se.serviceDirectory.put(name, s);
-			// WARNING - SHOULDN'T THIS BE DONE FIRST AVOID DEADLOCK / RACE
-			// CONDITION ????
-			registry.put(name, s); // FIXME FIXME FIXME FIXME !!!!!!
-									// pre-pend
-									// URI if not NULL !!!
+		if (se.serviceDirectory.containsKey(name)) {
+			log.info(String.format("attempting to register %1$s which is already registered in %2$s", name, url));
 			if (runtime != null) {
-				runtime.invoke("registered", s);
+				runtime.invoke("collision", name);
+				runtime.warn("collision registering %s", name);
+				runtime.error(String.format(" name collision with %s", name));
 			}
-
-			return s;
+			return s;// <--- BUG ?!?!? WHAT ABOUT THE REMOTE GATEWAYS !!!
 		}
 
-		return null;
+		// REMOTE BROADCAST to all foreign environments
+		// FIXME - Security determines what to export
+		// for each gateway
+
+		// NEW PART !!!
+
+		ArrayList<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
+		for (int ri = 0; ri < remoteGateways.size(); ++ri) {
+			String n = remoteGateways.get(ri);
+			// Communicator gateway = (Communicator)registry.get(n);
+			ServiceInterface gateway = registry.get(n);
+
+			// for each JVM this gateway is is attached too
+			for (Map.Entry<URI, ServiceEnvironment> o : environments.entrySet()) {
+				// Map.Entry<String,SerializableImage> pairs = o;
+				URI uri = o.getKey();
+				// if its a foreign JVM & the gateway responsible for the
+				// remote
+				// connection and
+				// the foreign JVM is not the host which this service
+				// originated
+				// from - send it....
+				if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getInstanceId())) {
+					log.info(String.format("gateway %s sending registration of %s remote to %s", gateway.getName(), name, uri));
+					// FIXME - Security determines what to export
+					Message msg = runtime.createMessage("", "register", s);
+					// ((Communicator) gateway).sendRemote(uri, msg);
+					// //mrl://remote2/tcp://127.0.0.1:50488 <-- wrong
+					// sendingRemote is wrong
+					// FIXME - optimize gateway.send(msg) && URI TO URI MAP
+					// IN
+					// RUNTIME !!!
+					gateway.in(msg);
+				}
+			}
+		}
+
+		// ServiceInterface sw = new ServiceInterface(s, se.accessURL);
+		se.serviceDirectory.put(name, s);
+		// WARNING - SHOULDN'T THIS BE DONE FIRST AVOID DEADLOCK / RACE
+		// CONDITION ????
+		registry.put(name, s); // FIXME FIXME FIXME FIXME !!!!!!
+								// pre-pend
+								// URI if not NULL !!!
+		if (runtime != null) {
+			runtime.invoke("registered", s);
+		}
+		
+		// new --------
+		// we want to subscribe to state changes
+		if (!s.isLocal()){
+			runtime.subscribe(name, "publishState");
+		}		
+		// end new ----
+
+		return s;
+
 	}
 
 	/**
@@ -2304,43 +2321,43 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 	public static void clearErrors() {
 		ServiceEnvironment se = getLocalServices();
-		for (String name : se.serviceDirectory.keySet()){
+		for (String name : se.serviceDirectory.keySet()) {
 			se.serviceDirectory.get(name).clearLastError();
 		}
 	}
-	
+
 	public static boolean hasErrors() {
 		ServiceEnvironment se = getLocalServices();
 
-		for (String name : se.serviceDirectory.keySet()){
-			if(se.serviceDirectory.get(name).hasError()){
+		for (String name : se.serviceDirectory.keySet()) {
+			if (se.serviceDirectory.get(name).hasError()) {
 				return true;
 			}
-		}	
+		}
 		return false;
 	}
-	
+
 	/**
 	 * remove all subscriptions from all local Services
 	 */
-	static public void removeAllSubscriptions(){
+	static public void removeAllSubscriptions() {
 		ServiceEnvironment se = getEnvironment(null);
 		Set<String> keys = se.serviceDirectory.keySet();
-		for(String name : keys){
+		for (String name : keys) {
 			ServiceInterface si = getService(name);
-			ArrayList<String> nlks =  si.getNotifyListKeySet();
-			for (int i = 0; i < nlks.size(); ++i){
+			ArrayList<String> nlks = si.getNotifyListKeySet();
+			for (int i = 0; i < nlks.size(); ++i) {
 				si.getOutbox().notifyList.clear();
 			}
 		}
 	}
-	
+
 	public static ArrayList<Status> getErrors() {
 		ArrayList<Status> stati = new ArrayList<Status>();
 		ServiceEnvironment se = getLocalServices();
-		for (String name : se.serviceDirectory.keySet()){
+		for (String name : se.serviceDirectory.keySet()) {
 			Status status = se.serviceDirectory.get(name).getLastError();
-			if (status != null && status.isError()){
+			if (status != null && status.isError()) {
 				log.info(status.toString());
 				stati.add(status);
 			}
@@ -2351,16 +2368,16 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	public static void broadcastStates() {
 		ServiceEnvironment se = getLocalServices();
 
-		for (String name : se.serviceDirectory.keySet()){
+		for (String name : se.serviceDirectory.keySet()) {
 			se.serviceDirectory.get(name).broadcastState();
-		}	
+		}
 	}
-	
-	public static Runtime get(){
+
+	public static Runtime get() {
 		return Runtime.getInstance();
 	}
 
-	public static String getRuntimeName(){
+	public static String getRuntimeName() {
 		return Runtime.getInstance().getName();
 	}
 

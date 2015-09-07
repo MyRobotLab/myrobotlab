@@ -548,6 +548,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		// get the service
 		ServiceInterface si = Runtime.getService(msg.name);
+		if(si == null){
+			error("could not get service %s for msg %s", msg.name, msg);
+			return;
+		}
 		Class<?> clazz = si.getClass();
 
 		Class<?>[] paramTypes = null;
@@ -721,15 +725,15 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			
 			
 			// Runtime.start("gui", "GUIService");
-			//RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote","RemoteAdapter");
+			RemoteAdapter remote = (RemoteAdapter)Runtime.start("macremote","RemoteAdapter");
 			//remote.startListening();
-			//remote.setDefaultPrefix("raspi");
-			//remote.connect("tcp://127.0.0.1:6767");
+			remote.setDefaultPrefix("x-");
+			remote.connect("tcp://127.0.0.1:6767");
 
 			
 			Runtime.start("webgui", "WebGUI");
 			
-			MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
+			// MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
 			//myo.connect();
 			
 			// myo.addMyoDataListener(python);

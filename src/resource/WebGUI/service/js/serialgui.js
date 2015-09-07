@@ -76,7 +76,7 @@ angular.module('mrlapp.service.serialgui', [])
         mrl.subscribe($scope.service.name, 'publishState');
         mrl.subscribe($scope.service.name, 'refresh');
         
-        mrl.sendTo($scope.service.name, 'publishState');
+        mrl.sendTo($scope.service.name, 'broadcastState');
         mrl.sendTo($scope.service.name, 'getPortNames');
         
         $scope.refresh = function() {

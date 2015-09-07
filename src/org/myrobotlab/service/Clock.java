@@ -136,6 +136,8 @@ public class Clock extends Service {
 		} else {
 			log.warn("clock already started");
 		}
+		
+		broadcastState();
 	}
 
 	public void stopClock() {
@@ -155,6 +157,7 @@ public class Clock extends Service {
 		}
 
 		isClockRunning = false;
+		broadcastState();
 	}
 
 	@Override

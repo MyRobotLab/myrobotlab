@@ -1,5 +1,6 @@
 package org.myrobotlab.net;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -8,6 +9,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 
+import org.myrobotlab.codec.Encoder;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.ServiceEnvironment;
@@ -24,6 +26,7 @@ public class TCPThread2 extends Thread {
 	public final static Logger log = LoggerFactory.getLogger(TCPThread2.class);
 
 	// FIXME - should be Gateway not Service
+	// FIXME - Communication interface - with logMsgs(bool)
 	RemoteAdapter myService;
 	public Socket socket;
 	public Connection data;
@@ -33,8 +36,12 @@ public class TCPThread2 extends Thread {
 	URI protocolKey;
 	URI uri; // mrl uri
 
+	// debug / logging
+	private transient FileOutputStream msgLog = null;
+
 	public TCPThread2(RemoteAdapter service, URI uri, Socket socket) throws UnknownHostException, IOException {
 		super(String.format("%s_%s", service.getName(), uri));
+
 		this.myService = service;
 		this.data = new Connection(service.getName(), uri);
 		if (socket == null) {
@@ -45,6 +52,8 @@ public class TCPThread2 extends Thread {
 		out.flush();
 		in = new ObjectInputStream(socket.getInputStream());
 		this.start();
+
+		msgLog = new FileOutputStream(String.format("%s.%d.json", service.getName(), System.currentTimeMillis()));
 	}
 
 	// FIXME - prepare for re-init / or completely de-init
@@ -84,6 +93,10 @@ public class TCPThread2 extends Thread {
 				o = in.readObject();
 				msg = (Message) o;
 				++data.rx;
+				if (msgLog != null) {
+					msgLog.write(String.format("%s <-- %s - %s\n", myService.getName(), uri, Encoder.toJson(msg)).getBytes());
+				}
+
 				data.rxSender = msg.sender;
 				data.rxSendingMethod = msg.sendingMethod;
 				data.rxName = msg.name;
@@ -95,8 +108,19 @@ public class TCPThread2 extends Thread {
 					uri = new URI(mrlURI);
 				}
 
+				/**
+				 * mrl works similar to - router x-forwarded in that it
+				 * re-writes names in order to provide an abstraction to a
+				 * remote system. This can prevent name collision and add
+				 * clarity to remote system names - msg sender / name re-write
+				 * are trivial - the danger & difficulty comes when names are
+				 * embedded in the data payload - such as register, addListener
+				 * and other(?) methods
+				 */
+				String xForwardSender = String.format("%s%s", myService.getPrefix(protocolKey), msg.sender);
+
 				// router x-forwarded inbound proxy begin
-				msg.sender = String.format("%s%s", myService.getPrefix(protocolKey), msg.sender);
+				msg.sender = xForwardSender;
 				// router x-forwarded inbound proxy end
 
 				// FIXME - SCARY ! - anywhere address (name) info is in the data
@@ -115,16 +139,43 @@ public class TCPThread2 extends Thread {
 					ServiceInterface si = null;
 
 					if (msgData != null) {
+						if (msg.data.length == 0) {
+							log.error("*** a publishState was sent without a service - you probably want to send broadcastState ! {} {}**", msg.sender, msg.data.length);
+							return;
+						}
+
 						si = (ServiceInterface) msg.data[0];
 						si.setInstanceId(uri);
-						si.setPrefix(myService.getPrefix(protocolKey));
+						String xForwardDataName = String.format("%s%s", myService.getPrefix(protocolKey), si.getName());
+						si.setName(xForwardDataName);
+					}
+					// router x-forwarded inbound proxy end
+				}
+				
+				if ("onState".equals(msg.method)) {
+					// FIXME - normalize
+					// router x-forwarded inbound proxy begin
+					Object[] msgData = msg.data;
+					ServiceInterface si = null;
+
+					if (msgData != null) {
+						if (msg.data.length == 0) { 
+							log.error("*** a publishState was sent without a service - you probably want to send broadcastState ! {} {}**", msg.sender, msg.data.length);
+							return;
+						}
+
+						si = (ServiceInterface) msg.data[0];
+						si.setInstanceId(uri);
+						String xForwardDataName = String.format("%s%s", myService.getPrefix(protocolKey), si.getName());
+						si.setName(xForwardDataName);
 					}
 					// router x-forwarded inbound proxy end
 				}
 
+
 				if ("addListener".equals(msg.method)) {
 					MRLListener listener = (MRLListener) msg.data[0];
-					listener.callbackName = String.format("%s%s", myService.getPrefix(protocolKey), listener.callbackName);
+					listener.callbackName = xForwardSender;
 				}
 
 				// FIXME - THIS NEEDS TO BE NORMALIZED - WILL BE THE SAME IN
@@ -156,7 +207,9 @@ public class TCPThread2 extends Thread {
 					if (msgData != null) {
 						si = (ServiceInterface) msg.data[0];
 						si.setInstanceId(uri);
-						si.setPrefix(myService.getPrefix(protocolKey));
+						String xForwardDataName = String.format("%s%s", myService.getPrefix(protocolKey), si.getName());
+						si.setName(xForwardDataName);
+						
 					}
 
 					// HMMM a vote for String vs URI here - since we need to
@@ -241,16 +294,22 @@ public class TCPThread2 extends Thread {
 			// router x-forwarded outbound proxy begin
 			// TODO - optimize - set once ! same with prefix .. +1 for the
 			// String.format("%s.", n) period !
-			if (!"".equals(msg.name)) // FIXME - broadcast "should" be null -
+			// FIXME - broadcast "should" be null -
+			if (!"".equals(msg.name)) 
 			{
 				msg.name = msg.name.substring(myService.getPrefix(protocolKey).length());
 			}
 			// router x-forwarded outbound proxy end
 
+			if (msgLog != null) {
+				msgLog.write(String.format("%s --> %s - %s\n", myService.getName(), uri, Encoder.toJson(msg)).getBytes());
+			}
+
 			out.writeObject(msg);
 			out.flush();
-			out.reset(); // magic line OMG - that took WAY TO LONG TO FIGURE
-							// OUT !!!!!!!
+			// MAKE NOTE !!! : 
+			// a reset is necessary after every object !
+			out.reset(); 
 			data.txSender = msg.sender;
 			data.txSendingMethod = msg.sendingMethod;
 			data.txName = msg.name;

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.StreamGobbler;
 import org.myrobotlab.logging.LoggerFactory;
@@ -303,8 +304,16 @@ public class CLI extends Service {
 			log.info(path);
 			try {
 				
-				// New Way
-				Object ret = Encoder.invoke(path);
+				// if service is local - we can trasact
+				Message msg = Encoder.decodePathInfo(path);
+				Object ret = null;
+				if (Runtime.getService(msg.name).isLocal()){
+					ret = Encoder.invoke(path);
+				} else {
+					// FIXME - sendBlocking is not getting a return 
+					ret = sendBlocking(msg.name, msg.method, msg.data);
+				}
+				
 				if (ret != null && ret instanceof Serializable) {
 					// configurable use log or system.out ?
 					// FIXME - make getInstance configurable
