@@ -55,7 +55,9 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		for (DHLink l : currentArm.getLinks()) {
 			String jointName = l.getName();
 			double theta = l.getTheta();
-			angleMap.put(jointName, (float)MathUtils.radToDeg(theta));
+			// angles between 0 - 360 degrees..  not sure what people will really want?
+			// - 180 to  + 180 ?
+			angleMap.put(jointName, (float)MathUtils.radToDeg(theta)%360.0F);
 		}
 		invoke("publishJointAngles", angleMap);
 		
