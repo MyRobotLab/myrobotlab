@@ -53,7 +53,7 @@ public class TCPThread2 extends Thread {
 		in = new ObjectInputStream(socket.getInputStream());
 		this.start();
 
-		msgLog = new FileOutputStream(String.format("%s.%d.json", service.getName(), System.currentTimeMillis()));
+		//msgLog = new FileOutputStream(String.format("%s.%d.json", service.getName(), System.currentTimeMillis()));
 	}
 
 	// FIXME - prepare for re-init / or completely de-init
@@ -93,9 +93,11 @@ public class TCPThread2 extends Thread {
 				o = in.readObject();
 				msg = (Message) o;
 				++data.rx;
+				/* nice for debugging
 				if (msgLog != null) {
 					msgLog.write(String.format("%s <-- %s - %s\n", myService.getName(), uri, Encoder.toJson(msg)).getBytes());
 				}
+				*/
 
 				data.rxSender = msg.sender;
 				data.rxSendingMethod = msg.sendingMethod;
@@ -301,9 +303,11 @@ public class TCPThread2 extends Thread {
 			}
 			// router x-forwarded outbound proxy end
 
+			/* nice for debugging
 			if (msgLog != null) {
 				msgLog.write(String.format("%s --> %s - %s\n", myService.getName(), uri, Encoder.toJson(msg)).getBytes());
 			}
+			*/
 
 			out.writeObject(msg);
 			out.flush();
