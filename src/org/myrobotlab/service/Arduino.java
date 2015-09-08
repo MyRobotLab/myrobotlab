@@ -1581,7 +1581,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			Runtime.start("servo", "Servo");
-			Runtime.start("clock", "Clock");
+			//Runtime.start("clock", "Clock");
 			//Runtime.start("serial", "Serial");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			

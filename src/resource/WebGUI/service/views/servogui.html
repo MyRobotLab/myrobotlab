@@ -1,7 +1,9 @@
+
 <div class="row">
-  <h3>Servo GUI</h3>
+  <div class="col-lg-12">
+
   
-  <button name="attach" ng-click="attachDetach(controller,pin)" ng-init="">{{attachButtonLabel}}</button>
+  <button class="btn btn-default" name="attach" ng-click="attachDetach(controller,pin)" ng-init="">{{attachButtonLabel}}</button>
   
   <input type="text" name="controller" ng-model="controller" />
   <!--TODO: make this a dynamic dropdown <select name="controller" ng-model="controller">
@@ -27,7 +29,9 @@
   <input type="range" name="angle" min="0" max="180" ng-type="number" ng-model="angle"  ng-change="moveTo(angle)" />
   {{angle}}
   <br/>
-  <button name="updateLimits" ng-click="updateLimits(min,max)">Update limits</button>
+  <div ui-slider="angle" ng-model="angle" min="0" max="180" ng-type="number"  ng-change="moveTo(angle)" name="angle" class="ng-pristine ng-valid ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all" aria-disabled="false"><a class="ui-slider-handle ui-state-default ui-corner-all" href="#" style="left: 50%;"></a></div>
+  <br/>
+  <button class="btn btn-default" name="updateLimits" ng-click="updateLimits(min,max)">Update limits</button>
   Min
   <input type="text" name="min" ng-model="min" value="0"/>
   Max
@@ -35,4 +39,5 @@
   <br/>
   Status:{{status}}
   <br/>
+  </div>
 </div>

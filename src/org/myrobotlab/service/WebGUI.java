@@ -732,6 +732,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			
 			Runtime.start("webgui", "WebGUI");
+			Runtime.start("python", "Python");
+			Runtime.start("myo", "MyoThalmic");
 			
 			// MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
 			//myo.connect();
