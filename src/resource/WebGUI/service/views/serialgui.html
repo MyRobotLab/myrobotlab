@@ -16,9 +16,18 @@
     <input type="text" ng-disabled="isConnected" ng-model="service.portName" typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
   </div>
   <div class="col-lg-7">
+  <div class="btn-group">
     <button class="btn btn-default"  ng-click="refresh()">refresh</button>
     <button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button>
     <button class="btn btn-default" ng-show="!isConnected" ng-click="connect(service.portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button>
+   </div>
+
+    monitor
+   <div class="btn-group">
+        <label class="btn btn-default" ng-model="monitorModel.Tx" btn-checkbox ng-click="monitorTx()">Tx</label>
+        <label class="btn btn-default" ng-model="monitorModel.Rx" btn-checkbox>Rx</label>
+    </div>
+    
     <!-- <button popover-placement="right" popover-template="dynamicPopover.templateUrl" popover-title="{{dynamicPopover.title}}" class="btn btn-default">options</button> -->
   </div>
 </div>

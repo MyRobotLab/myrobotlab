@@ -1580,7 +1580,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			Runtime.start("servo", "Servo");
+			//Runtime.start("servo", "Servo");
 			//Runtime.start("clock", "Clock");
 			//Runtime.start("serial", "Serial");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -1608,13 +1608,23 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			//arduino.connect("COM15");
 			// Runtime.start("python", "Python");			
 			//Runtime.start("raspi", "Runtime");	
-			RemoteAdapter remote = (RemoteAdapter)Runtime.start("rasremote", "RemoteAdapter");	
-			remote.startListening();
+			// Runtime.start("raspi","Runtime");
+			// RemoteAdapter remote = (RemoteAdapter)Runtime.start("rasremote", "RemoteAdapter");	
+			// remote.setDefaultPrefix("mac-");
+			//remote.setDefaultPrefix("");
+			Runtime.start("gui", "GUIService");
+			// remote.startListening();
 			//Runtime.start("cli", "CLI");				
 			//Runtime.start("servo", "Servo");				
 			//Runtime.start("gui", "GUIService");
 			//Runtime.start("python", "Python");
 			//Runtime.broadcastStates();
+			
+			/*
+			WebGUI webgui = (WebGUI)Runtime.create("webgui", "WebGUI");
+			webgui.setPort(8989);
+			webgui.startService();
+			*/
 
 			//arduino.analogReadPollingStart(68);
 			boolean done = true;

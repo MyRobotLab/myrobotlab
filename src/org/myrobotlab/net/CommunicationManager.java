@@ -24,7 +24,7 @@ import org.slf4j.Logger;
  * remote) a good test of this goal is for this
  * class to be used outside of MRL process.
  * 
- * e.g. - the goal is the design of a very small lib - using only native
+ * e.g. - the goal is the design of a very small library - using only native
  * dependencies can do all of the necessary messaging MRL supports with very
  * little work
  * 

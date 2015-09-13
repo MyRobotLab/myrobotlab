@@ -40,7 +40,7 @@ public class TCPThread2 extends Thread {
 	private transient FileOutputStream msgLog = null;
 
 	public TCPThread2(RemoteAdapter service, URI uri, Socket socket) throws UnknownHostException, IOException {
-		super(String.format("%s_%s", service.getName(), uri));
+		super(String.format("%s:%s", service.getName(), uri));
 
 		this.myService = service;
 		this.data = new Connection(service.getName(), uri);
@@ -53,7 +53,7 @@ public class TCPThread2 extends Thread {
 		in = new ObjectInputStream(socket.getInputStream());
 		this.start();
 
-		//msgLog = new FileOutputStream(String.format("%s.%d.json", service.getName(), System.currentTimeMillis()));
+		msgLog = new FileOutputStream(String.format("%s.%d.json", service.getName(), System.currentTimeMillis()));
 	}
 
 	// FIXME - prepare for re-init / or completely de-init
@@ -93,11 +93,11 @@ public class TCPThread2 extends Thread {
 				o = in.readObject();
 				msg = (Message) o;
 				++data.rx;
-				/* nice for debugging
+				// nice for debugging
 				if (msgLog != null) {
 					msgLog.write(String.format("%s <-- %s - %s\n", myService.getName(), uri, Encoder.toJson(msg)).getBytes());
 				}
-				*/
+				
 
 				data.rxSender = msg.sender;
 				data.rxSendingMethod = msg.sendingMethod;
@@ -117,7 +117,8 @@ public class TCPThread2 extends Thread {
 				 * clarity to remote system names - msg sender / name re-write
 				 * are trivial - the danger & difficulty comes when names are
 				 * embedded in the data payload - such as register, addListener
-				 * and other(?) methods
+				 * and other(?) methods - 
+				 * for example - service names as parameters !
 				 */
 				String xForwardSender = String.format("%s%s", myService.getPrefix(protocolKey), msg.sender);
 
@@ -184,18 +185,31 @@ public class TCPThread2 extends Thread {
 				// XMPP & WEBGUI & REMOTEADAPTER
 				// FIXME - normalize to single method - check for data
 				// type too ? !!!
+				if (msg.method.equals("onRegistered")){
+					Object[] msgData = msg.data;
+					ServiceInterface si = null;
+
+					// ALLOWED TO BE NULL - establishes initial contact & a
+					// ServiceEnvironment
+					if (msgData != null) {
+						si = (ServiceInterface) msg.data[0];
+						si.setInstanceId(uri);
+						String xForwardDataName = String.format("%s%s", myService.getPrefix(protocolKey), si.getName());
+						si.setName(xForwardDataName);
+						myService.send(Runtime.getInstance().getName(), "register", si, uri); // <!!! better register it in the right Service Environment !!!
+					}
+					
+					
+				}
 				if (msg.method.equals("register")) {
-					// BEGIN ENCAPSULATION --- ENCODER BEGIN -------------
-					// IMPORTANT - (should be in Encoder) - create the key
-					// for foreign service environment
+					// create the URI key for foreign service environment
 
 					// IMPORTANT - this is an optimization and probably
 					// should be in the Comm interface defintion
 					CommunicationInterface cm = myService.getComm();
 					cm.addRemote(uri, protocolKey);
 
-					// check if the URI is already defined - if not - we
-					// will
+					// check if the URI is already defined - if not - we will
 					// send back the services which we want to export -
 					// Security will filter appropriately
 					ServiceEnvironment foreignProcess = Runtime.getEnvironment(uri);
@@ -220,7 +234,9 @@ public class TCPThread2 extends Thread {
 					// if security ... msg within msg
 					// getOutbox().add(createMessage(Runtime.getInstance().getName(),
 					// "register", inboundMsg));
-					Runtime.register(si, uri);// <-- not an INVOKE !!! // -
+					// Runtime.register(si, uri);// <-- not an INVOKE !!! // -  RECENTLY REMOVED !!!!!!
+					
+					myService.send(Runtime.getInstance().getName(), "register", si, uri);
 					// no security ! :P
 
 					// if is a foreign process - send our registration
@@ -303,11 +319,11 @@ public class TCPThread2 extends Thread {
 			}
 			// router x-forwarded outbound proxy end
 
-			/* nice for debugging
+			// nice for debugging
 			if (msgLog != null) {
 				msgLog.write(String.format("%s --> %s - %s\n", myService.getName(), uri, Encoder.toJson(msg)).getBytes());
 			}
-			*/
+			
 
 			out.writeObject(msg);
 			out.flush();
