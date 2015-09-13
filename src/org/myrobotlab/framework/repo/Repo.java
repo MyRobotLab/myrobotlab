@@ -729,6 +729,7 @@ public class Repo implements Serializable {
 			if (!ivychain.exists()) {
 				try {
 					String xml = FileIO.resourceToString("framework/ivychain.xml");
+					xml = xml.replace("{release}", release);
 					FileOutputStream fos = new FileOutputStream(ivychain);
 					fos.write(xml.getBytes());
 					fos.close();
