@@ -5,8 +5,8 @@
    	  <chain name="public">
 	  	  	
 		<url name="public-remote">
-		  <ivy pattern="https://raw.githubusercontent.com/MyRobotLab/repo/master/[organisation]/[revision]/ivy.xml"/>
-		  <artifact pattern="https://raw.githubusercontent.com/MyRobotLab/repo/master/[organisation]/[revision]/[artifact].[ext]"/>
+		  <ivy pattern="https://raw.githubusercontent.com/MyRobotLab/repo/{release}/[organisation]/[revision]/ivy.xml"/>
+		  <artifact pattern="https://raw.githubusercontent.com/MyRobotLab/repo/{release}/[organisation]/[revision]/[artifact].[ext]"/>
 		</url>
 	  </chain>
 	</resolvers>
