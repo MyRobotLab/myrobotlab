@@ -1330,7 +1330,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			if (runtime != null) {
 				runtime.invoke("collision", name);
 				runtime.warn("collision registering %s", name);
-				runtime.error(String.format(" name collision with %s", name));
+				runtime.error(String.format(" name collision or already registered with %s", name));
 			}
 			return s;// <--- BUG ?!?!? WHAT ABOUT THE REMOTE GATEWAYS !!!
 		}
@@ -1339,17 +1339,14 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		// FIXME - Security determines what to export
 		// for each gateway
 
-		// NEW PART !!!
-
 		ArrayList<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
 		for (int ri = 0; ri < remoteGateways.size(); ++ri) {
 			String n = remoteGateways.get(ri);
 			// Communicator gateway = (Communicator)registry.get(n);
 			ServiceInterface gateway = registry.get(n);
 
-			// for each JVM this gateway is is attached too
+			// for each JVM this gateway is attached too
 			for (Map.Entry<URI, ServiceEnvironment> o : environments.entrySet()) {
-				// Map.Entry<String,SerializableImage> pairs = o;
 				URI uri = o.getKey();
 				// if its a foreign JVM & the gateway responsible for the
 				// remote
@@ -2379,6 +2376,14 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 	public static String getRuntimeName() {
 		return Runtime.getInstance().getName();
+	}
+	
+	public void setRelease(String branch){
+		repo.release = branch;
+	}
+	
+	public String getRelease(){
+		return repo.release;
 	}
 
 }

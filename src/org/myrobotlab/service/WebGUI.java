@@ -66,6 +66,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	public final static Logger log = LoggerFactory.getLogger(WebGUI.class);
 
 	Integer port = 8888;
+
 	transient Nettosphere nettosphere;
 	transient Broadcaster broadcaster;
 	transient BroadcasterFactory broadcastFactory;
@@ -268,6 +269,11 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// subscribe to the status events
 		subscribe(si.getName(), "publishStatus");
 		subscribe(si.getName(), "publishState");
+		
+		// for distributed Runtimes
+		if (si.isRuntime()){
+			subscribe(si.getName(), "registered");
+		}
 
 		// broadcast it too
 		// repackage message
@@ -713,6 +719,13 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		return null;
 	}
 
+	public Integer getPort() {
+		return port;
+	}
+
+	public void setPort(Integer port) {
+		this.port = port;
+	}
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -720,20 +733,18 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		try {
 
 			
-			//Runtime.start("python", "Python");
-			
-			
-			
+			//Runtime.start("python", "Python");			
 			// Runtime.start("gui", "GUIService");
 			RemoteAdapter remote = (RemoteAdapter)Runtime.start("macremote","RemoteAdapter");
 			//remote.startListening();
 			remote.setDefaultPrefix("x-");
-			remote.connect("tcp://127.0.0.1:6767");
-
-			
+			//remote.setDefaultPrefix("");
 			Runtime.start("webgui", "WebGUI");
-			Runtime.start("python", "Python");
-			Runtime.start("myo", "MyoThalmic");
+			//Runtime.start("python", "Python");
+			//Runtime.start("myo", "MyoThalmic");
+			remote.connect("tcp://127.0.0.1:6767");
+			
+			//Runtime.start("macgui", "GUIService");
 			
 			// MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
 			//myo.connect();

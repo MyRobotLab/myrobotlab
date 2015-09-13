@@ -6,6 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
@@ -83,19 +84,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		return uart.connectVirtualNullModem(portName);
 	}
 	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-
-			VirtualDevice template = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-			Runtime.start("gui", "GUIService");
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	public String createVirtualArduino(String portName) throws IOException {
 		createVirtualPort(portName);
@@ -193,5 +181,41 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		log.info(String.format("returned %d msgs in %s ms", ret.size(), now - start));
 		return ret;
 	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+			
+			String portName = "vport";
+
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			Serial serial = arduino.getSerial();
+
+			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+			virtual.createVirtualArduino(portName);
+			Python logic = virtual.getLogic();
+
+
+			Serial uart = virtual.getUART();
+			uart.setCodec("arduino");
+			Codec codec = uart.getRXCodec();
+			codec.setTimeout(1000);
+			uart.setTimeout(100); // don't want to hang when decoding results...
+
+			arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
+			arduino.connect(portName);
+		
+			//Runtime.start("gui", "GUIService");
+			
+			Runtime.start("webgui", "WebGUI");
+			
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 	
 }

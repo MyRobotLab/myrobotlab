@@ -1341,6 +1341,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public boolean isLocal() {
 		return instanceId == null;
 	}
+	
+	@Override
+	public boolean isRuntime(){
+		return Runtime.class == this.getClass();
+	}
 
 	/**
 	 * 

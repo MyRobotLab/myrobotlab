@@ -61,7 +61,9 @@ public class Repo implements Serializable {
 
 	public HashSet<String> nativeFileExt = new HashSet<String>(Arrays.asList("dll", "so", "dylib", "jnilib"));
 
-	public final String REPO_BASE_URL = "https://raw.githubusercontent.com/MyRobotLab/repo/master";
+	public String release = "develop";
+	
+	public String REPO_BASE_URL = "https://raw.githubusercontent.com/MyRobotLab/repo/" + release;
 	public static final Filter NO_FILTER = NoFilter.INSTANCE;
 
 	ArrayList<String> errors = new ArrayList<String>();
@@ -527,7 +529,7 @@ public class Repo implements Serializable {
 	public ServiceData getServiceDataFromRepo() {
 		try {
 
-			remoteServiceData = ServiceData.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/master/serviceData.json");
+			remoteServiceData = ServiceData.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/" + release + "/serviceData.json");
 			if (remoteServiceData == null) {
 				error("could not get remote service data");
 				return null;
