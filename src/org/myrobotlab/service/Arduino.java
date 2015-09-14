@@ -457,13 +457,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return sketch;
 	}
 	
+	// FIXME this is silly - should have a regular getVersion publishVersion 
 	public Integer refreshVersion(){
 		mrlCommVersion = null;
 		return getVersion();
 	}
 
 	/**
-	 * GOOD DESIGN !! - blocking version of getVersion - blocks on
+	 * GOOD DESIGN (for Arduino hardware Async) !! - blocking version of getVersion - blocks on
 	 * publishVersion method returns null if 1 second timeout is reached.
 	 * 
 	 * This is a good pattern for future blocking methods.

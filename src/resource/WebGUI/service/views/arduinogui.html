@@ -57,15 +57,19 @@ http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
 		<option>Arduino NG or older w/ ATmega8</option>
 	</select>
 
+	version {{version}}
+
  </div>
  <div class="col-lg-4"> 
  </div>
  <div class="col-lg-2"> 
   <div popover-placement="right" popover-template="'arduinoMenu.html'" class="glyphicon glyphicon-cog pull-right"></div>
  </div>
+<!-- TODO - make connect com -->
     
                 <!-- options begin ---->
                 <script type="text/ng-template" id="arduinoMenu.html">
+
                     <div class="form-group">
                     Before attaching to an Arduino you must load MRLComm.ino into your board.  This needs to be done only once. 
                     copy button
