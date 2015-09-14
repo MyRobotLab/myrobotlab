@@ -1,5 +1,7 @@
 package org.myrobotlab.service.data;
 
+import java.io.Serializable;
+
 import com.thalmic.myo.enums.PoseType;
 
 /**
@@ -8,8 +10,10 @@ import com.thalmic.myo.enums.PoseType;
  *         
  * 
  */
-public class MyoData {
+public class MyoData implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	public long timestamp;
 
 	public double roll = 0;

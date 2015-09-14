@@ -2,19 +2,25 @@ angular.module('mrlapp.service.arduinogui', [])
 .controller('ArduinoGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
         $log.info('ArduinoGuiCtrl');
         _self = this;
+        $scope.version = "unknown";
         
-        var onMsg = function(msg) {
+        //var onMsg = function(msg) {
+                $scope.panel.onMsg = function(msg) {  // THIS IS NOT GOOD !
             //$log.info('CALLBACK - ' + msg.method);
             switch (msg.method) {
                 case 'onPortNames':
                     $scope.possiblePorts = msg.data[0];
                     $scope.$apply();
                     break;
+                case 'onVersion':
+                    $scope.version = msg.data[0];
+                    $scope.$apply();
+                    break;
                 case 'onRefresh':
                     $scope.possiblePorts = msg.data[0];
                     $scope.$apply();
                     break;
-                case 'onState':
+                case 'onStatus':
                     // backend update 
                     $scope.updateState(msg.data[0]);
                     $scope.$apply();
@@ -81,4 +87,9 @@ angular.module('mrlapp.service.arduinogui', [])
         // mrl.sendTo(name, 'unsubscribe', board);
         
         $scope.panel.initDone();
+
+
+        mrl.subscribe($scope.service.name, 'publishVersion');
+
+
     }]);

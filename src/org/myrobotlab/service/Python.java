@@ -272,11 +272,7 @@ public class Python extends Service {
 	}
 
 	public static final String getSafeReferenceName(String name) {
-		return name.replaceAll("[/ .]", "_");
-	}
-
-	public static String makeSafeName(String name) {
-		return name.replaceAll("[\\-/ .]", "");
+		return name.replaceAll("[/ .-]", "_");
 	}
 
 	/**
