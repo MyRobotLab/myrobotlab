@@ -48,7 +48,7 @@ import org.myrobotlab.control.widget.JoystickButtonsPanel;
 import org.myrobotlab.control.widget.JoystickCompassPanel;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Joystick;
-import org.myrobotlab.service.Joystick.Button;
+import org.myrobotlab.service.Joystick.Input;
 import org.myrobotlab.service.Runtime;
 
 public class JoystickGUI extends ServiceGUI implements ActionListener {
@@ -299,14 +299,14 @@ public class JoystickGUI extends ServiceGUI implements ActionListener {
 		myJoy = (Joystick) Runtime.getService(boundServiceName);
 	}
 
-	public void onButton(final Button button) {
-		log.info(String.format("onButton %s", button));
-		if (button.value == null) {
-			outputValues.get(button.id).setText("null");
+	public void onInput(final Input input) {
+		log.info(String.format("onButton %s", input));
+		if (input.value == null) {
+			outputValues.get(input.id).setText("null");
 			return;
 		}
-		if (outputValues.containsKey(button.id)) {
-			outputValues.get(button.id).setText(button.value.toString());
+		if (outputValues.containsKey(input.id)) {
+			outputValues.get(input.id).setText(input.value.toString());
 		}
 	}
 

@@ -19,7 +19,7 @@ import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -28,11 +28,7 @@ import org.myrobotlab.service.WebGUI.WebMsg;
 import org.myrobotlab.service.XMPP.XMPPMsg;
 import org.slf4j.Logger;
 
-/**
- * 
- * Shoutbox - This service powers the shoutbox on MyRobotLab.org.
- *
- */
+// FIXME - use Peers !
 public class Shoutbox extends Service {
 	public static class Connection implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -47,147 +43,6 @@ public class Shoutbox extends Service {
 		public String xmpp;
 		public boolean xmppSystemMsgs = false;
 	}
-
-	// key to ---> User???
-	/*
-	static public class Connections implements Serializable {
-		private static final long serialVersionUID = 1L;
-		HashMap<WebSocket, String> wsToKey = new HashMap<WebSocket, String>();
-		HashMap<String, Connection> keyToConn = new HashMap<String, Connection>();
-
-		// HashMap<String, Integer> userConnCnts = new HashMap<String,
-		// Integer>();
-
-		// handles xmpp - our reference is always a jabberID
-		public Connection addConnection(String jabberID, String userid) {
-			if (!keyToConn.containsKey(jabberID)) {
-				Connection conn = new Connection();
-				conn.user = userid;
-				conn.xmpp = jabberID;
-				keyToConn.put(jabberID, conn);
-				return conn;
-			} else {
-				return keyToConn.get(jabberID);
-			}
-		}
-
-		public Connection addConnection(WebSocket ws) {
-			// "real" ip address Yay! - no reverse host lookup
-			String ip = ws.getRemoteSocketAddress().getAddress().getHostAddress();
-			String port = ws.getRemoteSocketAddress().getPort() + "";
-			// new socket - might be a user who already has a session
-			// doubt if DrupalNameProvider is returning appropriate information
-
-			// return HashMap of properties userid user# email etc ...
-			String userid = nameProvider.getName(ip);
-			Connection conn = new Connection();
-
-			if (keyToConn.containsKey(ws)) {
-				log.error("adding Websocket which is already in index %s", ws);
-			}
-
-			// populate user with new data on the "connect"
-			// FIXME - change user.ip & port to user.key
-
-			conn.ip = ip;
-			conn.port = port;
-			conn.clientID = ws;
-			conn.user = userid;
-
-			keyToConn.put(makeKey(ws), conn);
-			wsToKey.put(ws, makeKey(ws));
-			if (!ip.equals(userid)) {// / ??
-				// userToUser.put(userid, user);
-			}
-			return conn;
-		}
-
-		public Connection getConnection(String key) {
-			// String key = makeKey(ws);
-			if (keyToConn.containsKey(key)) {
-				return keyToConn.get(key);
-			}
-			return null;
-		}
-
-		public int getConnectionCount() {
-			return keyToConn.size();
-		}
-
-		public int getGuestCount() {
-			return getConnectionCount() - getUserCount();
-		}
-
-		// FIXME - finish
-		public HashMap<String, Integer> getUserConnCnts() {
-			HashMap<String, Integer> ret = new HashMap<String, Integer>();
-
-			for (Map.Entry<String, Connection> entry : keyToConn.entrySet()) {
-				// WebSocket ws = entry.getKey();
-				Connection conn = entry.getValue();
-
-				// user is in key - get it out and count it
-				if (conn.clientID != null) {
-
-				} else if (conn.xmpp != null) {
-
-				} else {
-					// mr.turing .. ???
-				}
-			}
-
-			return ret;
-
-		}
-
-		public int getUserCount() {
-			// FIXME
-			// should do a "reduce"
-			// but if that is the case - normalize users accross ws & xmpp :P
-			// return userToUser.size();
-			return 7;
-		}
-
-		public String[] listConnections() {
-			// INFO - not thread safe if wsToUser changes
-			String[] conns = new String[keyToConn.entrySet().size()];
-			int i = 0;
-
-			for (Map.Entry<String, Connection> entry : keyToConn.entrySet()) {
-				// WebSocket ws = entry.getKey();
-				Connection conn = entry.getValue();
-				conns[i] = String.format("%s@%s", conn.user, entry.getKey());
-				++i;
-			}
-			Arrays.sort(conns);
-			return conns;
-		}
-
-		public void remove(String jabberID) {
-			log.info(String.format("remove %s", jabberID));
-			String match = null;
-			for (Map.Entry<String, Connection> o : keyToConn.entrySet()) {
-				if (o.getKey().startsWith(jabberID)) {
-					match = o.getKey();
-				}
-			}
-			if (match != null) {
-				keyToConn.remove(match);
-				log.info(String.format("removed %s", match));
-			} else {
-				log.error(String.format("remove %s not found", jabberID));
-			}
-		}
-
-		public void remove(WebSocket ws) {
-			String key = wsToKey.get(ws);
-			keyToConn.remove(key);
-			// userToUser.remove(user.user);
-		}
-
-	} // end class Connections
-	
-	*/
 
 	// FIXME - do not allow double entries on quickStart - make re-entrant
 	// FIXME if link = youtube.com - then embedd (at least with hyperlink &
@@ -948,5 +803,19 @@ public class Shoutbox extends Service {
 		Message out = createMessage("shoutclient", "onShout", Encoder.toJson(shout));
 		onShout("mr.turing", out);
 	}
+	
+	public static void main(String args[]) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+			Runtime.start("shoutbox", "Shoutbox");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 
 }

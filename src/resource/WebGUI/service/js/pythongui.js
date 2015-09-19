@@ -7,11 +7,21 @@ angular.module('mrlapp.service.pythongui', [])
     var name = $scope.service.name;
     $scope.service = mrl.getService($scope.service.name);
     $scope.name = name;
-
-    $scope.output='';
-
+    
+    $scope.output = '';
+    
     // the awesome ace editor 1
     var editor = null ;
+    
+    // FIXME needs a prototype to update the mrl service    
+    // GOOD TEMPLATE TO FOLLOW
+    this.updateState = function(service) {
+        $scope.service = service;
+        // TODO make something like "files"
+    
+    }
+    ;
+    
     
     //you can access two objects
     //$scope.panel & $scope.service
@@ -24,17 +34,13 @@ angular.module('mrlapp.service.pythongui', [])
     //-> you will receive all messages routed to your service here
     $scope.panel.onMsg = function(msg) {
         switch (msg.method) {
+        case 'onState':
+            _self.updateState(msg.data[0]);
+            $scope.$apply();
+            break;        
         case 'onStdOut':
             $scope.output = msg.data[0] + $scope.output;
             // $scope.output = $scope.output + msg.data[0];
-            $scope.$apply();
-            break;
-        case 'onClockStarted':
-            $scope.label = "Stop";
-            $scope.$apply();
-            break;
-        case 'onClockStopped':
-            $scope.label = "Start";
             $scope.$apply();
             break;
         default:
@@ -68,10 +74,11 @@ angular.module('mrlapp.service.pythongui', [])
     mrl.subscribe(name, 'publishStdOut');
     mrl.subscribe(name, 'clockStarted');
     mrl.subscribe(name, 'clockStopped');
-
+    
     // FIXME re-entrant?
     mrl.sendTo(name, "attachPythonConsole");
-
+    
+    mrl.sendTo(name, "broadcastState");
     
     //after you're done with setting up your service-panel, call this method
     $scope.panel.initDone();
