@@ -17,6 +17,7 @@ angular.module('mrlapp', [
     'sticky', //sticky elements
     'ngClipboard',
     'ui.ace', //funky editor
+//    'ui.slider', grr 
     'mrlapp.mrl', //mrl.js (/mrl.js) - the really really core
     'mrlapp.main.mrlLogger', //custom logger! (it extends the default angular one ($log))
     'mrlapp.main.mainCtrl',
