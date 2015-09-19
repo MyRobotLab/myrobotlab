@@ -2,6 +2,7 @@ package org.myrobotlab.audio;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,14 +15,11 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
-import org.eclipse.jetty.util.log.Log;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.AudioFile.AudioData;
 import org.slf4j.Logger;
-
-import com.sun.tools.javac.util.List;
 
 // FIXME - make runnable
 public class AudioProcessor extends Thread {
