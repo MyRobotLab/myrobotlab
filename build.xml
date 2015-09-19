@@ -366,7 +366,7 @@
 
 	<!-- TODO: Consider moving this ... and get rid of it , but it will require dep management -->
 	<target name="repoClone">
-		<echo message="git clone --branch=develop https://github.com/MyRobotLab/repo.git ${repo}" />
+		<echo message="git clone --depth=50 --branch=develop https://github.com/MyRobotLab/repo.git ${repo}" />
 		<exec executable="git">
 			<arg value="clone" />
 			<arg value="https://github.com/MyRobotLab/repo.git" />
