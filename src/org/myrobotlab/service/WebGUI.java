@@ -384,6 +384,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			 * interesting .... switch (r.transport()) { case JSONP: case
 			 * LONG_POLLING: event.getResource().resume(); break; case
 			 * WEBSOCKET: case STREAMING: res.getWriter().flush(); break; }
+			 * 
 			 */
 
 			response.addHeader("Content-Type", codec.getMimeType());
