@@ -225,6 +225,7 @@
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-sv-5.1.2.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-te-5.1.2.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-tr-5.1.2.jar"/>
+		<pathelement location="${repo}/org.atmosphere.nettosphere/2.3.0/wasync-2.1.3-SNAPSHOT-all.jar"/>
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
 
