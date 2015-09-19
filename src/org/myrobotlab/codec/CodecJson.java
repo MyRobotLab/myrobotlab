@@ -11,6 +11,7 @@ public class CodecJson implements Codec {
 	 * Result set to JSON - this is a fluid definition, except for the family
 	 * qualifier will always be 'd'
 	 * 
+	 * 
 	 * @param name
 	 * @param result
 	 * @return
