@@ -35,3 +35,6 @@
 /src/resource/WebGUI/service/js/*.tmp
 /__MACOSX/
 /MRLComm/
+/*.log
+/*.json
+/notifyEntries.runtime.xml
