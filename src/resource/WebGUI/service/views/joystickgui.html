@@ -1,0 +1,45 @@
+<div class="row">
+  <div class="btn-group" dropdown>
+      <button id="single-button" type="button" class="btn btn-default" dropdown-toggle ng-disabled="disabled">
+        {{controller}} <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
+        <li ng-repeat="(key, value) in service.controllerNames">
+          <a href="" ng-click="setController(value)">{{key}}}</a> 
+        </li>
+      </ul>
+  </div>  
+   <h3 class="text-center">{{input.id}} {{input.value}}</h3> 
+</div>
+
+<h3>Axis</h3>
+<table>
+<tr>
+<!-- <div class="row">   -->
+   <td class="text-center" ng-repeat="component in axis">
+    {{ component.id }} 0.0 &nbsp;
+    <!-- <canvas width="200" height="200" id="{{ component.id }}"></canvas> -->
+    <!-- <img src="http://www.playblackpool.com/wp-content/uploads/2013/11/black-square.jpg" width=200 height=200 /> -->
+    <!--
+    	<div class="vertical-container">
+			<div ui-slider="{orientation: 'vertical', range: 'min'}"  min="0" max="25" step="5" ng-model="demoVals.sliderExample2"></div>
+		</div>
+		-->
+    </td>
+<!-- </div> -->
+</tr>
+</table>
+<div class="row">
+  <h3 class="text-center">Buttons</h3>
+
+  <span class="text-center" ng-repeat="component in buttons">
+  <!--
+    <span class="text-center" >{{ component.id }}</span>
+    -->
+    <!--
+    <button type="button" ng-class="{'button-default':btn0.state == 'One','button-some':btn0.state == 'Two','button-else':btn0.state == 'Three'}"  class="btn btn-default">{{ component.id }}</button>
+    -->
+   <button type="button" ng-class="component.id == 4 ? 'btn btn-default' : 'btn btn-primary'" >{{ component.id }}</button>
+
+  </span>    
+</div>

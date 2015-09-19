@@ -350,6 +350,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// String httpMethod = request.getMethod();
 
 			// get default encoder
+			// FIXME FIXME FIXME - this IS A CODEC !!! NOT AN API-TYPE !!! - CHANGE to MIME_TYPE_APPLICATION_JSON !!!
 			codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
 
 			if (pathInfo != null) {
@@ -357,12 +358,11 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			}
 
 			if (parts == null || parts.length < 3) {
+				// http://host:port/api
 				response.addHeader("Content-Type", codec.getMimeType());
-				handleError(httpMethod, out, codec, "API", "http(s)://{host}:{port}/api/{api-type}/{Object}/{Method}");
+				handleError(httpMethod, out, codec, "API", "http(s)://{host}:{port}/api/{api-type}");
 				return;
 			}
-
-			// set specified encoder
 
 			String apiTypeKey = parts[2];
 
@@ -372,6 +372,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				}
 			}
 
+			// FIXME - this is currently useless
+			// simple - from apiType - get the mime type - if you want to mess with headers <--==--> encoding then do that...
 			String codecMimeType = Encoder.getKeyToMimeType(apiTypeKey);
 			if (!codecMimeType.equals(codec.getMimeType())) {
 				// request to switch codec types on
@@ -386,12 +388,12 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 			response.addHeader("Content-Type", codec.getMimeType());
 
-			ArrayList<MethodEntry> info = null;
 			if (parts.length == 3) {
 				// ========================================
-				// POST http://{host}:{port}/api/messages
+				// POST || GET  http://{host}:{port}/api/messages
+				// POST || GET  http://{host}:{port}/api/services
 				// ========================================
-				// posted message api
+				// if message api-type - we only have/need 3 URI parts
 				if ("messages".equals(parts[2]) && "POST".equals(httpMethod)) {
 					Body body = request.body();
 					processMessageAPI(codec, body);
@@ -413,7 +415,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				return;
 			}
 
-			String name = parts[2];
+			String name = parts[3];
 
 			ServiceInterface si = Runtime.getService(name);
 			Class<?> clazz = si.getClass();
@@ -449,7 +451,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// 2. "attempt" to get method
 			// 3. (optional) - if failure - scan methods - find one with
 			// signature - cache it - call it
-			String methodName = String.format("%s", parts[3]);
+			String methodName = String.format("%s", parts[4]);
 
 			// decoded array of encoded parameters
 			Object[] encodedArray = new Object[0];
@@ -466,7 +468,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// WE NOW HAVE ORDINAL
 
 				// URI - PARAMETERS - TODO - define added encoding spec > 5 ?
-			} else if (parts.length > 4) {
+			} else if (parts.length > 5) {
 				// REQUIREMENT must be in an encoded array - even binary
 				// 1. array is URI /
 				// 2. will need to decode contents of each parameter later based
@@ -476,10 +478,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// difference is initial state regardless of encoding we are
 				// guaranteed the URI parts are strings
 				// encodedArray = new Object[parts.length - 3];
-				encodedArray = new Object[parts.length - 4];
+				encodedArray = new Object[parts.length - 5];
 
 				for (int i = 0; i < encodedArray.length; ++i) {
-					String result = URLDecoder.decode(parts[i + 4], "UTF-8");
+					String result = URLDecoder.decode(parts[i + 5], "UTF-8");
 					encodedArray[i] = result;
 				}
 

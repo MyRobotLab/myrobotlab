@@ -30,14 +30,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
-import java.net.Socket;
+//import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
@@ -50,7 +52,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.codec.Encoder;
+import org.atmosphere.wasync.Client;
+import org.atmosphere.wasync.ClientFactory;
+import org.atmosphere.wasync.Decoder;
+import org.atmosphere.wasync.Encoder;
+import org.atmosphere.wasync.Event;
+import org.atmosphere.wasync.Function;
+import org.atmosphere.wasync.Request;
+import org.atmosphere.wasync.RequestBuilder;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -113,7 +122,7 @@ public class RemoteAdapter extends Service implements Gateway {
 					// "DISCOVER_FUIFSERVER_REQUEST".getBytes();
 					//
 					Message msg = myService.createMessage("", "getConnections", null);
-					byte[] msgBuf = Encoder.getBytes(msg);
+					byte[] msgBuf = org.myrobotlab.codec.Encoder.getBytes(msg);
 
 					DatagramPacket sendPacket;
 					// Try the 255.255.255.255 first
@@ -256,7 +265,7 @@ public class RemoteAdapter extends Service implements Gateway {
 			myService = s;
 		}
 
-		public void addTCPClient(Socket clientSocket, RemoteAdapter myService) {
+		public void addTCPClient(java.net.Socket clientSocket, RemoteAdapter myService) {
 			try {
 				String clientKey = String.format("tcp://%s:%d", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
 				URI uri = new URI(clientKey);
@@ -281,7 +290,7 @@ public class RemoteAdapter extends Service implements Gateway {
 				while (isRunning()) {
 					// FIXME - on contact register the "environment" regardless
 					// if a service registers !!!
-					Socket clientSocket = serverSocket.accept();
+					java.net.Socket clientSocket = serverSocket.accept();
 					// inbound connection FIXME - all keys constructed in
 					// Encoder
 					addTCPClient(clientSocket, myService);
@@ -353,7 +362,7 @@ public class RemoteAdapter extends Service implements Gateway {
 							// send them back
 							for (int i = 0; i < conn.size(); ++i) {
 								Message newConnMsg = createMessage("", "publishNewConnection", conn);
-								byte[] msgBuf = Encoder.getBytes(newConnMsg);
+								byte[] msgBuf = org.myrobotlab.codec.Encoder.getBytes(newConnMsg);
 								DatagramPacket dgp = new DatagramPacket(msgBuf, msgBuf.length, dgram.getAddress(), dgram.getPort());
 								socket.send(dgp);
 							}
@@ -496,6 +505,8 @@ public class RemoteAdapter extends Service implements Gateway {
 	 * will report stats and states
 	 */
 	private HashMap<URI, Connection> connections = new HashMap<URI, Connection>();
+
+	boolean listenOnStartup = false;
 
 	static public ArrayList<InetAddress> getLocalAddresses() {
 		ArrayList<InetAddress> ret = new ArrayList<InetAddress>();
@@ -867,6 +878,61 @@ public class RemoteAdapter extends Service implements Gateway {
 			udpListener = null;
 		}
 	}
+	
+	public void startService(){
+		super.startService();
+		if (listenOnStartup){
+			startListening();
+		}
+	}
+	
+	public void listenOnStartup(boolean b){
+		listenOnStartup = b;
+	}
+	
+	
+	public void websocket(String url) throws IOException{
+		   Client client = ClientFactory.getDefault().newClient();
+		   
+		   // "http://async-io.org"
+		   // http://localhost:8888/api/messages
+
+	        RequestBuilder request = client.newRequestBuilder()
+	                .method(Request.METHOD.GET)
+	                .uri(url)
+	                .encoder(new Encoder<String, Reader>() {        // Stream the request body
+	                    @Override
+	                    public Reader encode(String s) {
+	                        return new StringReader(s);
+	                    }
+	                })
+	                .decoder(new Decoder<String, Reader>() {
+	                    @Override
+	                    public Reader decode(Event type, String s) {
+	                        return new StringReader(s);
+	                    }
+	                })
+	                .transport(Request.TRANSPORT.WEBSOCKET)                        // Try WebSocket
+	                .transport(Request.TRANSPORT.LONG_POLLING);                    // Fallback to Long-Polling
+
+	        org.atmosphere.wasync.Socket socket = client.create();
+	        socket.on(new Function<Reader>() {
+	            @Override
+	            public void on(Reader r) {
+	                // Read the response
+	            }
+	        }).on(new Function<IOException>() {
+
+				@Override
+				public void on(IOException arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+	        }).open(request.build())	        	
+	            .fire("/api/")
+	            .fire("bong");
+	}
 
 
 	public static void main(String[] args) {
@@ -887,8 +953,9 @@ public class RemoteAdapter extends Service implements Gateway {
 			// Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 			//Servo servo = (Servo) Runtime.start("servo", "Servo");
 			//Arduino Arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			RemoteAdapter remote1 = (RemoteAdapter) Runtime.start("remote", "RemoteAdapter");
-			remote1.startListening();
+			RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote", "RemoteAdapter");
+			remote.websocket("http://localhost:8888/api/messages");
+			//remote1.startListening();
 			//remote1.setTCPPort(6868);
 			//remote1.setUDPPort(6868);
 			// remote1.startListening();

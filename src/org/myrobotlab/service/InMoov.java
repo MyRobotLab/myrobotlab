@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 
+import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -22,11 +23,13 @@ import org.slf4j.Logger;
 /**
  * InMoov - The InMoov Service.
  * 
- * The InMoov service allows control of the InMoov robot.  This robot was created by hairygael.  
- * It's an open source 3D printable robot.  
- * All of the parts and instructions to build are on his blog (http://inmoov.blogspot.com/ and http://www.inmoov.fr/).
- * InMoov is a composite of servos, Arduinos, microphone, camera, kinect and computer.  
- * The InMoov service is composed of many other peer services, and allows easy initialization and control of these sub systems.
+ * The InMoov service allows control of the InMoov robot. This robot was created
+ * by hairygael. It's an open source 3D printable robot. All of the parts and
+ * instructions to build are on his blog (http://inmoov.blogspot.com/ and
+ * http://www.inmoov.fr/). InMoov is a composite of servos, Arduinos,
+ * microphone, camera, kinect and computer. The InMoov service is composed of
+ * many other peer services, and allows easy initialization and control of these
+ * sub systems.
  *
  */
 public class InMoov extends Service {
@@ -179,89 +182,6 @@ public class InMoov extends Service {
 		return peers;
 	}
 
-	public static void main(String[] args) {
-		try {
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
-
-			Runtime.start("gui", "GUIService");
-
-			InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-			i01.test();
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		// i01.copyGesture(true);
-
-		// i01.test();
-
-		/*
-		 * 
-		 * Runtime.createAndStart("gui", "GUIService");
-		 * Runtime.createAndStart("python", "Python");
-		 * 
-		 * InMoov i01 = (InMoov)Runtime.createAndStart("i01","InMoov");
-		 * 
-		 * i01.startOpenNI();
-		 */
-
-		// InMoovTorso torso = (InMoovTorso)i01.startTorso("COM4");
-
-		// i01.startMouth();
-		// i01.startLeftArm("COM4");
-		// i01.copyGesture(true);
-
-		// Create two virtual ports for UART and user and null them together:
-		// create 2 virtual ports
-		/*
-		 * VirtualSerialPort vp0 = new VirtualSerialPort("UART15");
-		 * VirtualSerialPort vp1 = new VirtualSerialPort("COM15");
-		 * 
-		 * // make null modem cable ;) VirtualSerialPort.makeNullModem(vp0,
-		 * vp1);
-		 * 
-		 * 
-		 * // add virtual ports to the serial device factory
-		 * SerialDeviceFactory.add(vp0); SerialDeviceFactory.add(vp1);
-		 */
-
-		// create the UART serial service
-		// log.info("Creating a LIDAR UART Serial service named: " + getName() +
-		// "SerialService");
-		// String serialName = getName() + "SerialService";
-		/*
-		 * Serial serial0 = new Serial("UART15"); serial0.startService();
-		 * serial0.connect("UART15");
-		 * 
-		 * Runtime.createAndStart("gui", "GUIService");
-		 * Runtime.createAndStart("python", "Python");
-		 * 
-		 * InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
-		 * i01.startMouth(); // i01.power(120); InMoovHand lefthand =
-		 * i01.startLeftHand("COM15"); i01.leftHand.setRest(10, 10, 10, 10, 10);
-		 * i01.beginCheckingOnInactivity(10);
-		 */
-
-		/*
-		 * log.info("inactivity {}", i01.checkInactivity());
-		 * 
-		 * lefthand.moveTo(5, 10, 30, 40, 50);
-		 * 
-		 * log.info("inactivity {}", i01.checkInactivity());
-		 * 
-		 * lefthand.rest();
-		 * 
-		 * log.info("inactivity {}", i01.checkInactivity());
-		 */
-
-		/*
-		 * 
-		 * Tracking neck = i01.startHeadTracking(leftPort); i01.detach();
-		 */
-
-	}
-
 	public InMoov(String n) {
 		super(n);
 		// addRoutes();
@@ -274,10 +194,10 @@ public class InMoov extends Service {
 	 * subscribe to the runtime for any new services
 	 */
 	public void addRoutes() {
-		
+
 		Runtime r = Runtime.getInstance();
 		subscribe(r.getName(), "registered");
-		
+
 		// handle my own error the same way too
 		subscribe(getName(), "publishError");
 	}
@@ -1016,7 +936,6 @@ public class InMoov extends Service {
 		return false;
 	}
 
-
 	public boolean speakErrors(boolean b) {
 		speakErrors = b;
 		return b;
@@ -1370,41 +1289,6 @@ public class InMoov extends Service {
 	 * return true; }
 	 */
 
-	public void test() throws FileNotFoundException {
-
-		String rightPort = "COM7";
-		String leftPort = "COM20";
-		String rightUART = "COM7_UART";
-		String leftUART = "COM20_UART";
-
-		Serial luart = (Serial) Runtime.start(leftUART, "Serial");
-		Serial ruart = (Serial) Runtime.start(rightUART, "Serial");
-
-		luart.record();
-		ruart.record();
-
-		luart.connect(leftUART);
-		ruart.connect(rightUART);
-
-		GUIService gui = (GUIService) Runtime.start("gui", "GUIService");
-
-		// get online script
-		String script = new String(HTTPClient.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov2.full3.byGael.Langevin.1.py"));
-		log.info(script);
-		python = (Python) Runtime.start("python", "Python");
-		python.exec(script);
-
-		log.info("done");
-		// i01.startHead(leftPort);
-		// i01.systemCheck();
-
-		luart.releaseService();
-		ruart.releaseService();
-
-		// Runtime.releaseAll();
-
-	}
-
 	public void track() {
 		if (headTracking == null) {
 			error("attach head before tracking");
@@ -1442,6 +1326,90 @@ public class InMoov extends Service {
 		moveArm("right", 0, 73, 30, 17);
 		moveHand("left", 170, 0, 0, 168, 167, 0);
 		moveHand("right", 98, 37, 34, 67, 118, 166);
+	}
+
+	public static void main(String[] args) {
+		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
+
+			Runtime.start("webgui", "WebGUI");
+
+			// InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+		
+			Blender blender =  (Blender) Runtime.start("blender", "Blender");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		// i01.copyGesture(true);
+
+		// i01.test();
+
+		/*
+		 * 
+		 * Runtime.createAndStart("gui", "GUIService");
+		 * Runtime.createAndStart("python", "Python");
+		 * 
+		 * InMoov i01 = (InMoov)Runtime.createAndStart("i01","InMoov");
+		 * 
+		 * i01.startOpenNI();
+		 */
+
+		// InMoovTorso torso = (InMoovTorso)i01.startTorso("COM4");
+
+		// i01.startMouth();
+		// i01.startLeftArm("COM4");
+		// i01.copyGesture(true);
+
+		// Create two virtual ports for UART and user and null them together:
+		// create 2 virtual ports
+		/*
+		 * VirtualSerialPort vp0 = new VirtualSerialPort("UART15");
+		 * VirtualSerialPort vp1 = new VirtualSerialPort("COM15");
+		 * 
+		 * // make null modem cable ;) VirtualSerialPort.makeNullModem(vp0,
+		 * vp1);
+		 * 
+		 * 
+		 * // add virtual ports to the serial device factory
+		 * SerialDeviceFactory.add(vp0); SerialDeviceFactory.add(vp1);
+		 */
+
+		// create the UART serial service
+		// log.info("Creating a LIDAR UART Serial service named: " + getName() +
+		// "SerialService");
+		// String serialName = getName() + "SerialService";
+		/*
+		 * Serial serial0 = new Serial("UART15"); serial0.startService();
+		 * serial0.connect("UART15");
+		 * 
+		 * Runtime.createAndStart("gui", "GUIService");
+		 * Runtime.createAndStart("python", "Python");
+		 * 
+		 * InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
+		 * i01.startMouth(); // i01.power(120); InMoovHand lefthand =
+		 * i01.startLeftHand("COM15"); i01.leftHand.setRest(10, 10, 10, 10, 10);
+		 * i01.beginCheckingOnInactivity(10);
+		 */
+
+		/*
+		 * log.info("inactivity {}", i01.checkInactivity());
+		 * 
+		 * lefthand.moveTo(5, 10, 30, 40, 50);
+		 * 
+		 * log.info("inactivity {}", i01.checkInactivity());
+		 * 
+		 * lefthand.rest();
+		 * 
+		 * log.info("inactivity {}", i01.checkInactivity());
+		 */
+
+		/*
+		 * 
+		 * Tracking neck = i01.startHeadTracking(leftPort); i01.detach();
+		 */
+
 	}
 
 }

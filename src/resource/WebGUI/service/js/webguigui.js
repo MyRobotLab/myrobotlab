@@ -36,9 +36,9 @@ angular.module('mrlapp.service.webguigui', [])
                 };
 
                 //you can subscribe to methods
-                mrl.subscribe($scope.service.name, 'pulse');
-                mrl.subscribe($scope.service.name, 'clockStarted');
-                mrl.subscribe($scope.service.name, 'clockStopped');
+                //mrl.subscribe($scope.service.name, 'pulse');
+                //mrl.subscribe($scope.service.name, 'clockStarted');
+                //mrl.subscribe($scope.service.name, 'clockStopped');
 
                 //after you're done with setting up your service-panel, call this method
                 $scope.panel.initDone();

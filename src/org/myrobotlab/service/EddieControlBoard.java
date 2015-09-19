@@ -10,8 +10,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.service.Joystick.Button;
-import org.myrobotlab.service.interfaces.ButtonListener;
+import org.myrobotlab.service.Joystick.Input;
+import org.myrobotlab.service.interfaces.InputListener;
 import org.myrobotlab.service.interfaces.KeyListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -22,7 +22,7 @@ import org.slf4j.Logger;
  * It can publish sensor data , control motors and more! 
  *
  */
-public class EddieControlBoard extends Service implements KeyListener, ButtonListener, SerialDataListener {
+public class EddieControlBoard extends Service implements KeyListener, SerialDataListener, InputListener {
 
 	class SensorPoller extends Thread {
 
@@ -225,7 +225,7 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 	}
 
 	@Override
-	public void onButton(Button button) throws Exception {
+	public void onInput(Input input) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -408,8 +408,8 @@ public class EddieControlBoard extends Service implements KeyListener, ButtonLis
 
 	public void startJoystick() throws Exception {
 		joystick = (Joystick) startPeer("joystick");
-		joystick.addYListener(getName(), "onY");
-		joystick.addRYListener(getName(), "onRY");
+		joystick.addAxisListener(getName(), "onY");
+		joystick.addAxisListener(getName(), "onRY");
 	}
 
 	public void startRemoteAdapter() throws Exception {

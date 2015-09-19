@@ -36,6 +36,7 @@ public class JoystickButtonsPanel extends JPanel {
 	public JoystickButtonsPanel() {
 		setBackground(Color.white);
 
+		/*
 		// initialize buttonTFs[]
 		buttonTFs = new JTextField[Joystick.NUM_BUTTONS];
 		for (int i = 0; i < Joystick.NUM_BUTTONS; i++) {
@@ -48,6 +49,7 @@ public class JoystickButtonsPanel extends JPanel {
 
 		makeRow(0, Joystick.NUM_BUTTONS / 2); // 1st row
 		makeRow(Joystick.NUM_BUTTONS / 2, Joystick.NUM_BUTTONS); // 2nd row
+		*/
 	} // end of ButtonsPanel()
 
 	private void makeRow(int start, int end)
@@ -70,8 +72,11 @@ public class JoystickButtonsPanel extends JPanel {
 	} // end of makeRow()
 
 	public void setButton(int buttonNum, Float value) {
+		/*
 		Color c = (value == Joystick.BUTTON_ON) ? ON_COLOUR : OFF_COLOUR;
 		buttonTFs[buttonNum].setBackground(c);
+		*
+		*/
 		repaint();
 	}
 
@@ -80,7 +85,7 @@ public class JoystickButtonsPanel extends JPanel {
 	 * Use the bVals[] array to switch the buttonTFs on/off by changing the
 	 * background colour of their textfields.
 	 */
-	{
+	{/*
 		if (bVals.length != Joystick.NUM_BUTTONS)
 			System.out.println("Wring number of button values");
 		else {
@@ -91,6 +96,7 @@ public class JoystickButtonsPanel extends JPanel {
 			}
 			repaint();
 		}
+		*/
 	} // end of setButtons()
 
 } // end of ButtonsPanel class

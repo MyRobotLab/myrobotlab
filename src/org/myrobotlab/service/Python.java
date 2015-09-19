@@ -748,16 +748,17 @@ public class Python extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		Runtime.start("gui", "GUIService");
+		//Runtime.start("gui", "GUIService");
 		// String f = "C:\\Program Files\\blah.1.py";
 		// log.info(getName(f));
 		Python python = (Python) Runtime.start("python", "Python");
+		
 		// python.error("this is an error");
 		// python.loadScriptFromResource("VirtualDevice/Arduino.py");
 		// python.execAndWait();
 		// python.releaseService();
 
-		Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("webgui", "WebGUI");
 
 	}
 
