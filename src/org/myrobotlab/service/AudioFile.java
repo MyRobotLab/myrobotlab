@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.audio.AudioProcessor;
@@ -39,8 +40,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-import com.sun.tools.javac.util.List;
-
+/**
+ * 
+ * AudioFile - This service can be used to play an audio file such as an mp3.
+ *
+ */
 public class AudioFile extends Service {
 	static final long serialVersionUID = 1L;
 	static Logger log = LoggerFactory.getLogger(AudioFile.class);
