@@ -356,7 +356,7 @@
 		</exec>
 	</target>
 	<target name="repoDoesNotExists" depends="repoCheck" if="git.clone">
-		<echo message="git clone https://github.com/MyRobotLab/repo.git ${repo}" />
+		<echo message="git clone --branch=develop https://github.com/MyRobotLab/repo.git ${repo}" />
 		<exec executable="git">
 			<arg value="clone" />
 			<arg value="https://github.com/MyRobotLab/repo.git" />
