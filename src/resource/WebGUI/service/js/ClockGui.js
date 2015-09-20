@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.clockgui', [])
+angular.module('mrlapp.service.ClockGui', [])
 .controller('ClockGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('ClockGuiCtrl');
     var _self = this;

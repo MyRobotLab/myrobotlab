@@ -24,7 +24,7 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 /**
- * CLI - This is a command line interface to MyRobotLab.
+ * Cli - This is a command line interface to MyRobotLab.
  * It supports some shell like commands such as "cd", and "ls"
  * Use the command "help" to display help.
  *
@@ -35,10 +35,10 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class CLI extends Service {
+public class Cli extends Service {
 	
 	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(CLI.class);
+	public final static Logger log = LoggerFactory.getLogger(Cli.class);
 	public final static HashSet<String> cmdSet = new HashSet<String>();
 
 	
@@ -77,19 +77,19 @@ public class CLI extends Service {
 	// - its a Central Point Controller - where input (any InputStream) can send
 	// data to be decoded on a very common API e.g. (proto
 	// scheme)(host)/api/inputEncoding/responseEncoding/instance/(method)/(params...)
-	// Agent + (RemoteAdapter/WebGUI/Netosphere) + CLI(command processor part
+	// Agent + (RemoteAdapter/WebGUI/Netosphere) + Cli(command processor part
 	// with InStream/OutStream) - is most Big-Fu !
 	public class Decoder extends Thread {
 		// public String cwd = "/"; CHANGED THIS - it now is GLOBAL - :P
 		String name;
-		transient CLI cli;
+		transient Cli cli;
 		transient InputStream is;
 		// TODO ecoding defaults & methods to change
 		// FIXME - need reference to OutputStream to return
 		String inputEncoding = Encoder.TYPE_REST; // REST JSON
 		String outputEncoding = Encoder.TYPE_JSON; // REST JSON
 
-		public Decoder(CLI cli, String name, InputStream is) {
+		public Decoder(Cli cli, String name, InputStream is) {
 			super(String.format("Decoder_%s", name));
 			this.cli = cli;
 			this.name = name;
@@ -379,7 +379,7 @@ public class CLI extends Service {
 	 * 
 	 * @param n
 	 */
-	public CLI(String n) {
+	public Cli(String n) {
 		super(n);
 	}
 
@@ -395,7 +395,7 @@ public class CLI extends Service {
 	}
 
 	/**
-	 * attach to another processes' CLI
+	 * attach to another processes' Cli
 	 * 
 	 * @param name
 	 * @return
@@ -429,7 +429,7 @@ public class CLI extends Service {
 		// grab input output from foreign process
 
 		// introduce - hello - get response check with
-		// timer - because if a CLI is not there
+		// timer - because if a Cli is not there
 		// we cant attach to it
 
 		return true;
@@ -506,7 +506,7 @@ public class CLI extends Service {
 	 */
 
 	/**
-	 * FIXME !!! return Object[] and let CLI command processor handle encoding
+	 * FIXME !!! return Object[] and let Cli command processor handle encoding
 	 * for return
 	 * 
 	 * path is always absolute never relative
@@ -592,7 +592,7 @@ public class CLI extends Service {
 
 		try {
 
-			CLI cli = (CLI) Runtime.start("cli", "CLI");
+			Cli cli = (Cli) Runtime.start("cli", "Cli");
 			/*
 			 * cli.ls("/"); cli.ls("/cli"); cli.ls("/cli/");
 			 */

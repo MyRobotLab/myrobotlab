@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.arduinogui', [])
+angular.module('mrlapp.service.ArduinoGui', [])
 .controller('ArduinoGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
         $log.info('ArduinoGuiCtrl');
         _self = this;

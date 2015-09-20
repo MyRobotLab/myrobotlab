@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +32,6 @@ import org.myrobotlab.codec.MethodCache;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.Status;
@@ -57,7 +55,7 @@ import org.slf4j.Logger;
 /**
  * 
  * WebGUI - This service is the AngularJS based GUI
- *
+ * TODO - messages & services are already APIs - perhaps a data API - same as service without the message wrapper
  */
 public class WebGUI extends Service implements AuthorizationProvider, Gateway, Handler {
 

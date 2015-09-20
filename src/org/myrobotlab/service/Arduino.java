@@ -1615,7 +1615,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			//remote.setDefaultPrefix("");
 			Runtime.start("gui", "GUIService");
 			// remote.startListening();
-			//Runtime.start("cli", "CLI");				
+			//Runtime.start("cli", "Cli");				
 			//Runtime.start("servo", "Servo");				
 			//Runtime.start("gui", "GUIService");
 			//Runtime.start("python", "Python");

@@ -137,7 +137,7 @@ public class Agent extends Service {
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
-		peers.put("cli", "CLI", "Command line processor");
+		peers.put("cli", "Cli", "Command line processor");
 		return peers;
 	}
 
@@ -227,7 +227,7 @@ public class Agent extends Service {
 		 * skipTest.add("org.myrobotlab.service.InMoov"); // just too big and
 		 * complicated at the moment
 		 * skipTest.add("org.myrobotlab.service.Test");
-		 * skipTest.add("org.myrobotlab.service.CLI"); // ?? No ?
+		 * skipTest.add("org.myrobotlab.service.Cli"); // ?? No ?
 		 */
 
 		long installTime = 0;
@@ -522,7 +522,7 @@ public class Agent extends Service {
 		processes.put(runtimeName, new ProcessData(this, runtimeName, process));
 
 		// attach our cli to the latest instance
-		CLI cli = Runtime.getCLI();
+		Cli cli = Runtime.getCLI();
 		if (cli != null) {
 			cli.add(runtimeName, process.getInputStream(), process.getOutputStream());
 			cli.attach(runtimeName);

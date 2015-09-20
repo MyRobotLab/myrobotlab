@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.joystickgui', [])
+angular.module('mrlapp.service.JoystickGui', [])
 .controller('JoystickGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('JoystickGuiCtrl');
     var _self = this;

@@ -1,7 +1,8 @@
-angular.module('mrlapp.service.pythongui', [])
+angular.module('mrlapp.service.PythonGui', [])
 .controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
     $log.info('PythonGuiCtrl');
     
+    _self = this;
     // get fresh copy
     // basic data set
     var name = $scope.service.name;

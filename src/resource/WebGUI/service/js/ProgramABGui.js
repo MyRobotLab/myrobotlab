@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.programabgui', [])
+angular.module('mrlapp.service.ProgramABGui', [])
         .controller('ProgramABGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
     $log.info('ProgramABGuiCtrl');
     // when to use $scope or anything?!

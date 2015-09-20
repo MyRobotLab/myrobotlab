@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.runtimegui', [])
+angular.module('mrlapp.service.RuntimeGui', [])
 
 .controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
         $log.info('RuntimeGuiCtrl');

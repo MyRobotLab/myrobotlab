@@ -32,7 +32,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.CLI;
+import org.myrobotlab.service.Cli;
 import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
@@ -67,7 +67,7 @@ public class CLIGUI extends ServiceGUI implements ActionListener {
 		// unsubscribe("publishState", "getState", _TemplateService.class);
 	}
 
-	public void getState(CLI cli) {
+	public void getState(Cli cli) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {

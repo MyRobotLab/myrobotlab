@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.serialgui', [])
+angular.module('mrlapp.service.SerialGui', [])
 .controller('SerialGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('SerialGuiCtrl');
     var _self = this;
