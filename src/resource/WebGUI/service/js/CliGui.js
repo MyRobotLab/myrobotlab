@@ -12,14 +12,6 @@ angular.module('mrlapp.service.CliGui', [])
             $scope.cli = $scope.cli + '\n' + msg.data[0];
             $scope.$apply();
             break;
-        case 'onClockStarted':
-            $scope.label = "Stop";
-            $scope.$apply();
-            break;
-        case 'onClockStopped':
-            $scope.label = "Start";
-            $scope.$apply();
-            break;
         default:
             $log.error("ERROR - unhandled method " + msg.method);
             break;

@@ -31,7 +31,7 @@ angular.module('mrlapp.service')
         return {
             //inject template into the service-panel
             templateUrl: function(element, attr) {
-                return 'service/views/' + attr.type + 'gui.html';
+                return 'service/views/' + attr.type + 'Gui.html';
             }
         };
     }]);
