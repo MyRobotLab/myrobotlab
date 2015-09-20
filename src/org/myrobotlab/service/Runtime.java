@@ -169,7 +169,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 	private boolean shutdownAfterUpdate = false;
 
-	static transient CLI cli;
+	static transient Cli cli;
 
 	/**
 	 * global startingArgs - whatever came into main each runtime will have its
@@ -520,7 +520,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		java.lang.Runtime.getRuntime().gc();
 	}
 
-	public static CLI getCLI() {
+	public static Cli getCLI() {
 		return cli;
 	}
 
@@ -790,7 +790,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
-		peers.put("cli", "CLI", "command line interpreter for this process");
+		peers.put("cli", "Cli", "command line interpreter for this process");
 		return peers;
 	}
 
@@ -1234,7 +1234,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			/*
 			 * if (process != null){
 			 * 
-			 * CLI cli = (CLI)start("cli", "CLI"); cli.attach(process);
+			 * Cli cli = (Cli)start("cli", "Cli"); cli.attach(process);
 			 * 
 			 * process.waitFor();
 			 * 
@@ -1643,12 +1643,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return createAndStart(name, type);
 	}
 
-	static public CLI startCLI() {
+	static public Cli startCLI() {
 		// FIXME !!! - query registry by type
-		// we want 1 and only 1 CLI
+		// we want 1 and only 1 Cli
 		// peer start ?
 		if (cli == null) {
-			cli = (CLI) start("cli", "CLI");
+			cli = (Cli) start("cli", "Cli");
 		} else {
 			log.error("one and only cli already created");
 		}

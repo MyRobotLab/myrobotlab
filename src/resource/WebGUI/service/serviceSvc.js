@@ -250,7 +250,7 @@ angular.module('mrlapp.service')
         // creating new PANEL !!!
         var panel = {
             name: name,
-            type: service.simpleName.toLowerCase(),
+            type: service.simpleName,
             simpleName: service.simpleName,
             panelsize: panelsize,
             panelindex: 0,

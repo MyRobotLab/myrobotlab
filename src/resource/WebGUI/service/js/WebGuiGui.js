@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.webguigui', [])
+angular.module('mrlapp.service.WebGUIGui', [])
 
         .controller('WebGUIGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
                 $log.info('WebGUIGuiCtrl');

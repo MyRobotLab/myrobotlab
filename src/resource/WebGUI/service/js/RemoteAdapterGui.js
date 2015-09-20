@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.remoteadaptergui', [])
+angular.module('mrlapp.service.RemoteAdapterGui', [])
 .controller('RemoteAdapterGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('RemoteAdapterGuiCtrl');
     // get latest copy of a services

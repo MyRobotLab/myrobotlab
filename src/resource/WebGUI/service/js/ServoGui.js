@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.servogui', [])
+angular.module('mrlapp.service.ServoGui', [])
 .controller('ServoGuiCtrl', ['$log','$scope', 'mrl', function($log, $scope, mrl) {
         $log.info('ServoGuiCtrl');
         

@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.myothalmicgui', [])
+angular.module('mrlapp.service.MyoThalmicGui', [])
 .controller('MyoThalmicGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('MyoThalmicGuiCtrl');
     // get latest copy of a services

@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.templategui', [])
+angular.module('mrlapp.service.TemplateGui', [])
         .controller('TemplateGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
                 $log.info('TemplateGuiCtrl');
 

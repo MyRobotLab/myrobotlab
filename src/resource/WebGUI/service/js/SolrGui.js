@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.solrgui', [])
+angular.module('mrlapp.service.SolrGui', [])
   .controller('SolrGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
                 $log.info('SolrGuiCtrl');
                 // TODO: something useful?!

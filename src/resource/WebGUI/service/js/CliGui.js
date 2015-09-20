@@ -1,6 +1,6 @@
-angular.module('mrlapp.service.cligui', [])
-.controller('CLIGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
-    $log.info('CLIGuiCtrl');
+angular.module('mrlapp.service.CliGui', [])
+.controller('CliGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
+    $log.info('CliGuiCtrl');
     
     // get fresh copy
     var service = mrl.getService($scope.service.name);

@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.inversekinematics3dgui', [])
+angular.module('mrlapp.service.InverseKinematics3DGui', [])
 .controller('InverseKinematics3DGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
         $log.info('InverseKinematics3D');
         // get latest copy of a services
