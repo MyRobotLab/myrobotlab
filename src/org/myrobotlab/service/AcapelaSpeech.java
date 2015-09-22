@@ -59,7 +59,7 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 
 	String pathPrefix = null;
 
-	PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
+	transient PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
 
 	// FIXME - PEER notation
 	transient AudioFile audioFile = new AudioFile("audioFile");

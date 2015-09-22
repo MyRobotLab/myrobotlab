@@ -70,11 +70,11 @@ public class InMoovGestureCreator extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(InMoovGestureCreator.class);
 
-	ServoItemHolder[][] servoitemholder;
+	transient ServoItemHolder[][] servoitemholder;
 
-	ArrayList<FrameItemHolder> frameitemholder;
+	transient ArrayList<FrameItemHolder> frameitemholder;
 
-	ArrayList<PythonItemHolder> pythonitemholder;
+	transient ArrayList<PythonItemHolder> pythonitemholder;
 
 	boolean[] tabs_main_checkbox_states;
 

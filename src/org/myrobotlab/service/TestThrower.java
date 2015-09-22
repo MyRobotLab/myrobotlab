@@ -42,7 +42,7 @@ public class TestThrower extends Service {
 	public final static Logger log = LoggerFactory.getLogger(TestThrower.class);
 	public int cnt = 0;
 	public int pulseLimit = 20;
-	public ArrayList<RapidThrower> pitchers = new ArrayList<RapidThrower>();
+	public transient ArrayList<RapidThrower> pitchers = new ArrayList<RapidThrower>();
 
 	public class RapidThrower extends Thread {
 		Service myService;

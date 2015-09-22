@@ -188,7 +188,6 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
 	@Override
 	public LeapData publishLeapData(LeapData data) {
-		// TODO Auto-generated method stub
 		return data;
 	}
 

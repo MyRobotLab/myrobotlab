@@ -49,7 +49,7 @@ public class Cli extends Service {
 	public final static String help = "help";
 	public final static String question = "?";
 
-	private HashMap<String, Pipe> pipes = new HashMap<String, Pipe>();
+	transient private HashMap<String, Pipe> pipes = new HashMap<String, Pipe>();
 	// my "real" in & out
 	transient Decoder in;
 	transient OutputStream os;
