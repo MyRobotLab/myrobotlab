@@ -68,7 +68,7 @@ public class ServoOrchestrator extends Service {
 	private static final long serialVersionUID = 1L;
 
 	public final static Logger log = LoggerFactory.getLogger(ServoOrchestrator.class);
-	org.myrobotlab.control.ServoOrchestratorGUI sogui_ref;
+	transient org.myrobotlab.control.ServoOrchestratorGUI sogui_ref;
 
 	int sizex = 5;
 

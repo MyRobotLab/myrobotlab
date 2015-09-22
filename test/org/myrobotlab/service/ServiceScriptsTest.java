@@ -17,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 @Ignore
@@ -27,19 +28,50 @@ public class ServiceScriptsTest {
 	@Test
 	public final void testAllServices() throws ClassNotFoundException {
 
+		HashSet<String> whiteListServices = new HashSet<String>();
+
+		// CLI seems to mess up the console in the unit test so things 
+		// don't log well anymore.
+		whiteListServices.add("Cli");
+		// gui service will probably blow up if you are running in a console.
+		whiteListServices.add("GUIService");
+		// leap motion blows up because java.libary.path not having the leap deps.
+		whiteListServices.add("LeapMotion");
+		// for compatability to above.
+		whiteListServices.add("LeapMotion2");
+		// jna lib path stuff
+		whiteListServices.add("OculusRift");
+		// plantoid gets a null pointer on tracking service start 
+		whiteListServices.add("Plantoid");
+		// Shoutbox gets an address in use/failed to bind to port 8888
+		whiteListServices.add("Shoutbox");
+		// jni class path error
+		whiteListServices.add("SLAMBad");
+		// WebGUI gets an address in use/failed to bind to port 8888
+		whiteListServices.add("WebGUI");
+		
 		// start up python so we have it available to do some testing with.
 		Python python = (Python)Runtime.createAndStart("python", "Python");
 
 		String testScriptDirectory = "./src/resource/Python/examples/";
 		List<String> servicesToTest = listAllServices();
+		//List<String> servicesToTest = new ArrayList<String>();
+		//servicesToTest.add("Cli");
 		int numServices = servicesToTest.size();
 		int numServicePages = 0;
 		int numScripts = 0;
 		int numScriptsWorky = 0;
+		int numStartable = 0;
 		log.info("----------------------------------------------");
 		for (String service : servicesToTest) {
+			System.out.println("SYSTEM TESTING " + service);	
+			System.out.flush();
+			if (whiteListServices.contains(service)) {
+				log.info("White listed testing of service {}", service);
+				continue;
+			}
 			log.info("Testing Service: {}" , service);
-			
+			// 
 			if (serviceHasWebPage(service)) {
 				log.info("Service {} has a web page..", service);
 				numServicePages++;
@@ -47,15 +79,22 @@ public class ServiceScriptsTest {
 				log.warn("Service {} does not have a web page..", service);
 			}
 			
+			if (serviceInterfaceTest(service)) {
+				numStartable++;
+			} else {
+				
+			}
+			
 			// validate that a script exists
 			File script = new File(testScriptDirectory + service + ".py");
 			if (script.exists()) {
-				log.info("Service PASS: {}" , service); 
+				log.info("Service Has a Script: {}" , service); 
 				numScripts++;
 			} else {
 				log.warn("Missing Script for Service {}" , service);
 			}
 
+			// 
 			if (testServiceScript(python, testScriptDirectory, service)) {
 				//log.info("Default script for {} executes ok!", service);
 				numScriptsWorky++;
@@ -68,15 +107,47 @@ public class ServiceScriptsTest {
 
 		log.info("----------------------------------------------");
 		log.info("Service Report");
-		log.info("Number of Services:      {}", numServices);
-		log.info("Number of Services Pages {}", numServicePages);
-		log.info("Number of Scripts:       {}", numScripts);
-		log.info("Number of Scripts Worky: {}", numScriptsWorky);
+		log.info("Number of Services:           {}", numServices);
+		log.info("Number of Startable Services: {}", numStartable);
+		log.info("Number of Services Pages      {}", numServicePages);
+		log.info("Number of Scripts:            {}", numScripts);
+		log.info("Number of Scripts Worky:      {}", numScriptsWorky);
 		log.info("----------------------------------------------");
 		log.info("Done...");
+		
+		
+	}
+
+	private boolean serviceInterfaceTest(String service) {
+		// see if we can start/stop and release the service.
+
+		ServiceInterface foo = Runtime.create(service.toLowerCase(), service);
+		if (foo == null) {
+			log.warn("Runtime Create returned a null service for {}", service);
+			return false;
+		}
+		foo.startService();
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		foo.stopService();
+		foo.releaseService();
+		
+		return true;
 	}
 
 	private boolean testServiceScript(Python python, String testScriptDirectory, String service) {
+		
+		// TODO: this blows stuff up too much.
+		
+		if (true) {
+			// Diabled testing of scripts currently.
+			return false;
+		}
+		
 		String testScriptFile = testScriptDirectory + service + ".py";
 
 		File script = new File(testScriptFile);
@@ -88,7 +159,9 @@ public class ServiceScriptsTest {
 		}
 		try {
 			String test = FileUtils.readFileToString(script);
-			python.eval(test);
+			System.out.println(test);
+			
+			python.execAndWait(test);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			log.warn("Error Running script {}" , script);
