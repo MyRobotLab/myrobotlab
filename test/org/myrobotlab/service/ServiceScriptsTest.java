@@ -29,7 +29,6 @@ public class ServiceScriptsTest {
 	public final void testAllServices() throws ClassNotFoundException {
 
 		HashSet<String> whiteListServices = new HashSet<String>();
-
 		// CLI seems to mess up the console in the unit test so things 
 		// don't log well anymore.
 		whiteListServices.add("Cli");
@@ -37,8 +36,6 @@ public class ServiceScriptsTest {
 		whiteListServices.add("GUIService");
 		// leap motion blows up because java.libary.path not having the leap deps.
 		whiteListServices.add("LeapMotion");
-		// for compatability to above.
-		whiteListServices.add("LeapMotion2");
 		// jna lib path stuff
 		whiteListServices.add("OculusRift");
 		// plantoid gets a null pointer on tracking service start 
@@ -49,10 +46,9 @@ public class ServiceScriptsTest {
 		whiteListServices.add("SLAMBad");
 		// WebGUI gets an address in use/failed to bind to port 8888
 		whiteListServices.add("WebGUI");
-		
+
 		// start up python so we have it available to do some testing with.
 		Python python = (Python)Runtime.createAndStart("python", "Python");
-
 		String testScriptDirectory = "./src/resource/Python/examples/";
 		List<String> servicesToTest = listAllServices();
 		//List<String> servicesToTest = new ArrayList<String>();
