@@ -118,7 +118,7 @@ public class MessageTest {
 		catcher.clear();
 		TestCatcher catcher2 = null;
 		try {
-			Runtime.start("myName/isGeorge", "TestCatcher");
+			Runtime.create("myName/isGeorge", "TestCatcher");
 		} catch (Exception e) {
 			// Logging.logError(e);
 			log.info("good bad name threw");
