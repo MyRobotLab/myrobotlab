@@ -22,6 +22,9 @@ angular.module('mrlapp.service')
                 } catch (err) {
                     $log.error("serviceBodyDirective threw compiling ", ctrl, err);
                 }
+
+                _self = this;
+                $log.info(_self);
             }
         };
     }])

@@ -148,8 +148,6 @@
 		<pathelement location="${repo}/org.tritonus.share.sampled.floatsamplebuffer/0.3.6/tritonus_share-0.3.6.jar"/>
 		<pathelement location="${repo}/simbad.gui/1.4/simbad-1.4.jar"/>
 		<pathelement location="${repo}/wiiuse.wiimote/0.12b/wiiusej.jar"/>
-		<pathelement location="${repo}/org.slf4j/1.6.1/slf4j-log4j12-1.6.1.jar"/>
-		<pathelement location="${repo}/org.slf4j/1.6.1/slf4j-api-1.6.1.jar"/>
 		<pathelement location="${repo}/com.sun.mail/1.4.5/dsn.jar"/>
 		<pathelement location="${repo}/com.sun.mail/1.4.5/imap.jar"/>
 		<pathelement location="${repo}/com.sun.mail/1.4.5/mail.jar"/>
@@ -232,8 +230,6 @@
 	<!-- additional jars required to compile unit tests -->
 	<path id="test.classpath">
 		<pathelement location="${repo}/org.apache.log4j/1.2.14/log4j-1.2.14.jar" />
-		<pathelement location="${repo}/org.slf4j/1.6.1/slf4j-log4j12-1.6.1.jar" />
-		<pathelement location="${repo}/org.slf4j/1.6.1/slf4j-api-1.6.1.jar" />
 		<pathelement location="${repo}/org.junit/4.11/junit-4.11.jar" />
 		<pathelement location="${repo}/org.junit/4.11/hamcrest-core-1.3.jar" />
                 <!-- TODO: why is the normal compile classpath omitted? -->

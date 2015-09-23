@@ -108,7 +108,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 		try {
 
 			Object object = new Object();
-			Class c = Object.class;
+			Class<Object> c = Object.class;
 
 			int loops = 1000000;
 
@@ -117,23 +117,10 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 				object.toString();
 			}
 			System.out.println(loops + " regular method calls:" + (System.currentTimeMillis() - start) + " milliseconds.");
-			java.lang.reflect.Method method = c.getMethod("toString", null);
+			java.lang.reflect.Method method = c.getMethod("toString", (Class<?>[])null);
 			HashMap<String, Method> mcache = new HashMap<String, Method>();
 			mcache.put("toString", method);
-			
-			Blah blah = null;
-
-			Integer xx = 7;
-			Integer yy = 5;
-			start = System.currentTimeMillis();
-			for (int i = 0; i < loops; i++) {
-				//method.invoke(object, null);
-				//blah = new Blah();
-				//blah.pos = i;
-				xx = i;
-				yy = i;
-				method.invoke(mcache.get("toString"), null);
-			}
+		
 			
 			
 
@@ -142,7 +129,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 			for (int i = 0; i < loops; i++) {
 				//Integer x = new Integer(7);
 				method = c.getMethod(String.format("%s","toString"), null);
-				method.invoke(object, null);
+				method.invoke(object, (Object[])null);
 			}
 			System.out.println(loops + " reflective method calls with lookup:" + (System.currentTimeMillis() - start) + " milliseconds.");
 
