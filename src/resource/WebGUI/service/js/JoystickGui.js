@@ -3,6 +3,8 @@ angular.module('mrlapp.service.JoystickGui', [])
     $log.info('JoystickGuiCtrl');
     var _self = this;
 
+    
+
     $scope.controller = 'controllers';
 
     $scope.btn0 = 1;
