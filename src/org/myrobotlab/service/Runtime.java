@@ -752,17 +752,19 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	/**
+	 * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its
+	 * Class definition info - Runtime should return based on ClassName 
 	 * 
 	 * @param serviceName
 	 * @return
 	 */
-	public static HashMap<String, MethodEntry> getMethodMap(String serviceName) {
+	public static Map<String, MethodEntry> getMethodMap(String serviceName) {
 		if (!registry.containsKey(serviceName)) {
 			runtime.error(String.format("%1$s not in registry - can not return method map", serviceName));
 			return null;
 		}
 
-		HashMap<String, MethodEntry> ret = new HashMap<String, MethodEntry>();
+		Map<String, MethodEntry> ret = new TreeMap<String, MethodEntry>();
 		ServiceInterface sw = registry.get(serviceName);
 
 		Class<?> c = sw.getClass();
@@ -777,11 +779,10 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			if (hideMethods.contains(m.getName())) {
 				continue;
 			}
-			me = new MethodEntry();
-			me.methodName = m.getName();
+			me = new MethodEntry(m);
 			me.parameterTypes = m.getParameterTypes();
 			me.returnType = m.getReturnType();
-			s = MethodEntry.getSignature(me.methodName, me.parameterTypes, me.returnType);
+			s = me.getSignature();
 			ret.put(s, me);
 		}
 
@@ -2273,6 +2274,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	// GAH !!! retrieveAll / updateAll / UpdateReport / ResolveReport :P
+	// FIXME - should be "install all" - for services - regardless of what Ivy calls it
 	public UpdateReport updateAll() {
 
 		UpdateReport report = new UpdateReport();

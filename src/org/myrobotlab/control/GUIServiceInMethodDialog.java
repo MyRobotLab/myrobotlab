@@ -145,7 +145,7 @@ public class GUIServiceInMethodDialog extends JDialog implements ActionListener 
 
 	public String formatOutMethod(MethodEntry me) {
 		StringBuffer ret = new StringBuffer();
-		ret.append(me.methodName);
+		ret.append(me.getName());
 		if (me.parameterTypes != null) {
 			ret.append(" (");
 			for (int i = 0; i < me.parameterTypes.length; ++i) {

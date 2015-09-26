@@ -408,6 +408,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				return;
 			} else if (parts.length == 4) {
 				// *** /api/messages/runtime ***
+				// FIXME ! - uh .. FORGOT SOMETHING !?!?!? :P
 				ServiceInterface si = Runtime.getService(parts[3]);
 				Method[] methods = si.getDeclaredMethods();
 				respond(out, codec, "getDeclaredMethods", si);

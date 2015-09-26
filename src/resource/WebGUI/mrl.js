@@ -50,6 +50,8 @@ angular
     
     var deferred = null ;
     
+    var msgInterfaces = {};
+    
     // connectivity related begins
     // required by AtmosphereJS
     // https://github.com/Atmosphere/atmosphere/wiki/jQuery.atmosphere.js-atmosphere.js-API
@@ -72,6 +74,10 @@ angular
     var typeCallbackMap = {};
     // map of method names to callbacks
     var methodCallbackMap = {};
+    
+    // specific name & method callback 
+    // will be used by framework
+    var nameMethodCallbackMap = {};
     
     if (typeof String.prototype.startsWith != 'function') {
         // see below for better implementation!
@@ -113,6 +119,17 @@ angular
             nameCallbackMap[serviceName] = [];
         }
         nameCallbackMap[serviceName].push(callback);
+    }
+    ;
+    
+    // NEW !!! - subscribe to a specific instance.method callback
+    // will be used by the framework
+    this.subscribeToServiceMethod = function(callback, serviceName, methodName) {
+        var key = serviceName + "." + _self.getCallBackName(methodName);
+        if (!(key in nameMethodCallbackMap)) {
+            nameMethodCallbackMap[key] = [];
+        }
+        nameMethodCallbackMap[key].push(callback);
     }
     ;
     
@@ -246,19 +263,32 @@ angular
             try {
                 msg = jQuery.parseJSON(body);
                 
+                // THE CENTER OF ALL CALLBACKS
                 // process name callbacks - most common
-                if (msg.sender in nameCallbackMap) {
+                if (nameCallbackMap.hasOwnProperty(msg.sender)) {
                     cbs = nameCallbackMap[msg.sender];
                     for (var i = 0; i < cbs.length; i++) {
                         cbs[i](msg);
                     }
                 }
                 
+                // serviceName.methodName callback    
+                // framework subscribes to (name).onMethodMap to build all
+                // underlying structured methods based on Java reflected descriptions        
+                var key = msg.sender + '.' + msg.method;
+                if (nameMethodCallbackMap.hasOwnProperty(key)) {
+                    cbs = nameMethodCallbackMap[key];
+                    for (var i = 0; i < cbs.length; i++) {
+                        cbs[i](msg);
+                    }
+                }
+                
+                
                 // TODO - type based callbacks - rare, except for Runtime
                 
                 // process method callbacks - rare - possible collisions
                 // 'onHandleError' might be worthwhile - mrl managed error
-                if (msg.method in methodCallbackMap) {
+                if (methodCallbackMap.hasOwnProperty(msg.method)) {
                     cbs = methodCallbackMap[msg.method];
                     for (var i = 0; i < cbs.length; i++) {
                         cbs[i](msg);
@@ -347,6 +377,23 @@ angular
         delete registry[name];
     }
     ;
+    
+    this.capitalize = function(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    
+    this.getCallBackName = function(topicMethod) {
+        // replacements
+        if (topicMethod.startsWith("publish")) {
+            return 'on' + _self.capitalize(topicMethod.substring("publish".length));
+        } else if (topicMethod.startsWith("get")) {
+            return 'on' + _self.capitalize(topicMethod.substring("get".length));
+        }
+        
+        // no replacement - just pefix and capitalize
+        // FIXME - subscribe to onMethod --- gets ---> onOnMethod :P
+        return 'on' + capitalize(topicMethod);
+    }
     
     this.sendTo = function(name, method, data) {
         //console.log(arguments[0]);
@@ -449,6 +496,7 @@ angular
             // FIXME - make a hello() protocol !!                       
             // setting up initial callback - this possibly will change
             // when the framework creates a "hello()" method
+            // FIXME - optimize and subscribe on {gatewayName}.onLocalService ???
             this.subscribeToMethod(this.onLocalServices, 'onLocalServices');
             
             socket = $.atmosphere.subscribe(this.request);
@@ -482,6 +530,124 @@ angular
             getLocalServices: function() {
                 return environments["null"];
             },
+            createMsgInterface: function(name, scope) {
+                if (!msgInterfaces.hasOwnProperty(name)) {
+                    //console.log(name + ' getMsgInterface ');               
+                    msgInterfaces[name] = {
+                        "name": name,
+                        "scope": scope,
+                        send: function(method, data) {
+                            var args = Array.prototype.slice.call(arguments, 1);
+                            var msg = _self.createMessage(name, method, args);
+                            msg.sendingMethod = 'sendTo';
+                            _self.sendMessage(msg);
+                        },
+                        // framework routed callbacks come here
+                        onMsg: function(msg) {
+                            console.log("framework onMsg" + msg);
+                            
+                            switch (msg.method) {
+                                // FIXME - bury it ?
+                            case 'onState':
+                                _self.updateState(msg.data[0]);
+                                $scope.$apply();
+                                break;
+                            case 'onMethodMap':
+                                console.log('onMethodMap Yay !!');
+                                try {
+                                    var methodMap = msg.data[0];
+                                    for (var method in methodMap) {
+                                        if (methodMap.hasOwnProperty(method)) {
+                                            var m = methodMap[method];
+                                            // do stuff
+                                            $log.info(method);
+                                            // build interface method
+                                            var dynaFn = "(function (";
+                                            var argList = "";
+                                            for (i = 0; i < m.parameterTypeNames.length; ++i) {
+                                                if (i != 0) {
+                                                    argList += ',';
+                                                }
+                                                argList += "arg" + i;
+                                            }
+                                            dynaFn += argList + "){";
+                                            //dynaFn += "console.log(this);";
+                                            if (argList.length > 0) {
+                                                dynaFn += "this._interface.send('" + m.name + "'," + argList + ");";
+                                            } else {
+                                                dynaFn += "this._interface.send('" + m.name + "');";
+                                            }
+                                            dynaFn += "})";
+                                            console.log("msg." + m.name + " = " + dynaFn);
+                                            msgInterfaces[msg.sender].scope.msg[m.name] = eval(dynaFn);
+                                        }
+                                    }
+                                    msgInterfaces[msg.sender].scope.methodMap = methodMap;
+                                } catch (e) {
+                                    $log.error("onMethodMap blew up - " + e)
+                                }
+                                
+                                break;
+                            default:
+                                console.log("ERROR - unhandled method " + msg.method);
+                                break;
+                            }
+                            // end switch
+                        },
+                        subscribe: function(data) {
+                            if ((typeof arguments[0]) == "string") {
+                                // regular subscribe when used - e.g. msg.subscribe('publishData')
+                                if (arguments.length == 1) {
+                                    _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0]);
+                                } else if (arguments.length == 4) {
+                                    _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0], arguments[1], arguments[2]);
+                                }
+                            } else {
+                                // controller registering for framework subscriptions
+                                console.log("here");
+                                
+                                // expected 'framework' level subscriptions - we should at a minimum
+                                // be interested in state and status changes of the services
+                                _self.sendTo(_self.gateway.name, "subscribe", name, 'publishStatus');
+                                _self.sendTo(_self.gateway.name, "subscribe", name, 'publishState');
+                                _self.sendTo(_self.gateway.name, "subscribe", name, 'getMethodMap');
+                                _self.sendTo(name, "broadcastState");
+                                
+                                // below we subscribe to the Angular callbacks - where anything sent
+                                // back from the webgui with our service's name on the message - send 
+                                // it to our onMsg method
+                                var controller = arguments[0];
+                                //console.log(this);
+                                _self.subscribeToService(controller.onMsg, name);
+                                // this is an 'optimization' - rather than subscribing to all service callbacks
+                                // framework is only subscribing to one {name}.getMethodMap
+                                _self.subscribeToServiceMethod(this.onMsg, name, 'getMethodMap');
+                                
+                                // TODO - a method subscription who's callback is assigned here
+                                
+                                // get methodMap
+                                msgInterfaces[name].getMethodMap();
+                                console.log('here');
+                            }
+                        
+                        },
+                        getMethodMap: function() {
+                            _self.sendTo(name, "getMethodMap");
+                        }
+                    }
+                }
+                
+                // Yikes ! circular reference ...
+                // you can do sh*t like this in Js !
+                // the point of this is to make a msg interface like
+                // structure in the scope similar to the msg interface
+                // we created for the controller - they start the same
+                msgInterfaces[name].scope.msg = {};
+                msgInterfaces[name].scope.msg._interface = msgInterfaces[name];
+                
+                return msgInterfaces[name];
+            },
+            
             getPlatform: function() {
                 return _self.platform;
             },
@@ -505,7 +671,7 @@ angular
             getService: function(name) {
                 return _self.getService(name);
             },
-            updateState: function(service){
+            updateState: function(service) {
                 _self.addService(service);
             },
             init: function() {

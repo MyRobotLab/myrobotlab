@@ -525,7 +525,12 @@
 	<!-- TODO - upload/publish javadoc -->
 
 	<target name="test" depends="compiletests, dist">
-		<junit printsummary="withOutAndErr" fork="true" haltonfailure="no">
+		<!-- junit options description="Main  Integration/Unit Tests"
+		               showoutput="true"
+		               printsummary="true"
+		               printsummary="withOutAndErr"
+		               outputtoformatters="true" -->
+		<junit printsummary="on" fork="true" haltonfailure="no">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
 			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			

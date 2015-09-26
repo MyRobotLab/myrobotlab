@@ -3,7 +3,8 @@ angular.module('mrlapp.service.JoystickGui', [])
     $log.info('JoystickGuiCtrl');
     var _self = this;
 
-    
+    // FUTURE
+    // var msgs = mrl.getMsgInterface(this);
 
     $scope.controller = 'controllers';
 
@@ -102,5 +103,7 @@ angular.module('mrlapp.service.JoystickGui', [])
     
     // mrl.sendTo($scope.service.name, "broadcastState");
     $scope.panel.initDone();
+
+    // msg.subscribe();
 }
 ]);
