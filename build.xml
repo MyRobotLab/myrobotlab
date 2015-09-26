@@ -251,7 +251,8 @@
 	<!-- ================ init begin ================= -->
 	<target name="init" depends="repoClone">
 		<echo message="compiling with ${ant.java.version}" />
-		<echoproperties />
+		<!-- good for debugging -->
+		<!-- echoproperties / -->
 		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
 
 		<!-- mail task properties -->
