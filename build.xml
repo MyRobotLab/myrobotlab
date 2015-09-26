@@ -268,7 +268,8 @@
 		<property name="mail.from" value="build@myrobotlab.org" />
 		<property name="mail.tolist" value="" />
 
-		<echoproperties />
+		<!-- nice for debugging -->
+		<!-- echoproperties / -->
 
 		<!-- TODO - get repo's comment -->
 
