@@ -15,6 +15,7 @@ angular.module('mrlapp.service')
                 $log.info('serviceBodyDirective.link');
                 var ctrl = "";
                 try {
+                    scope.name = scope.service.name;
                     ctrl = scope.panel.simpleName + "GuiCtrl";
                     var html = '<div ng-controller=\"' + ctrl + '\"><div service-body-second type="' + attr.type + '"></div></div>';
                     elem.html(html).show();
@@ -23,8 +24,8 @@ angular.module('mrlapp.service')
                     $log.error("serviceBodyDirective threw compiling ", ctrl, err);
                 }
 
-                _self = this;
-                $log.info(_self);
+                // _self = this;
+                // $log.(_self); - wow the whole thing
             }
         };
     }])

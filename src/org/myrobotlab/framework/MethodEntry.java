@@ -26,6 +26,7 @@
 package org.myrobotlab.framework;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -38,7 +39,6 @@ import org.slf4j.Logger;
 public class MethodEntry implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
 	public final static Logger log = LoggerFactory.getLogger(MethodEntry.class);
 
 	/**
@@ -50,27 +50,39 @@ public class MethodEntry implements Serializable {
 	/**
 	 * string information for serialization
 	 */
-	public String[] parameterNames;
-	public String className;
-	public String methodName;
-	public String[] parameterTypeInfo;
-	public String returnTypeInfo;
+	String[] parameterTypeNames;
+	String name;
+	String returnTypeName;
 	
+	/**
+	 * from doclet
+	 */
 	public String javaDocString;
 	
-	public MethodEntry(){
-		
+	
+	public String getName(){
+		return name;
 	}
 
-	public MethodEntry(String clazz, String methodName){
+	/**
+	 * transfer the non serializable java.reflect.Method to a serializable object
+	 * @param m
+	 */
+	public MethodEntry(Method m) {
+		this.name = m.getName();
+		Class<?>[] paramTypes = m.getParameterTypes();
+		this.parameterTypeNames = new String[paramTypes.length];
+		for (int i = 0; i < paramTypes.length; ++i){
+			parameterTypeNames[i] = paramTypes[i].getCanonicalName();
+		}
+		this.parameterTypes = m.getParameterTypes();
+		this.returnType = m.getReturnType();
+		this.returnTypeName = returnType.getCanonicalName();
 		
 	}
-	
-	// TODO - add IDL info
 
 	final static public String getPrettySignature(String methodName, Class<?>[] parameterTypes, Class<?> returnType) {
-	
-
+		
 		StringBuffer sb = new StringBuffer();
 		sb.append(methodName);
 		sb.append("(");
@@ -95,12 +107,12 @@ public class MethodEntry implements Serializable {
 		return sb.toString();
 	}
 
-	/*
+	/**
 	 * getSignature provides a way to create a stringified method signature the
 	 * simplest way is to get the results from Class.getName() - this is a bit
 	 * different/arbitrary from the JNA format of method signatures
 	 */
-	final static public String getSignature(String name, Class<?>[] parameterTypes, Class<?> returnType) {
+	final public String getSignature() {
 
 		StringBuffer sb = new StringBuffer();
 		sb.append(name);
@@ -122,7 +134,7 @@ public class MethodEntry implements Serializable {
 
 	@Override
 	public String toString() {
-		return getSignature(methodName, parameterTypes, returnType);
+		return getSignature();
 	}
 
 }

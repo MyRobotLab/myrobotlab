@@ -41,5 +41,9 @@ angular.module('mrlapp.service.RuntimeGui', [])
         $scope.start = function(newName, newTypeModel) {
             mrl.sendTo($scope.service.name, "start", newName, newTypeModel.name);
         }
+         
+        $scope.install = function() {
+            mrl.sendTo($scope.service.name, "updateAll");
+        }
     
     }]);

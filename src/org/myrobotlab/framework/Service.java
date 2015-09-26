@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SimpleTimeZone;
@@ -2158,6 +2159,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	@Override
 	public String toString() {
 		return getName();
+	}
+	
+	public Map<String, MethodEntry> getMethodMap() {
+		return Runtime.getMethodMap(getName());
 	}
 
 }
