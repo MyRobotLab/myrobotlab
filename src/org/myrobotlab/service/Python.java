@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,14 +31,16 @@ import org.python.modules.thread.thread;
 import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 /**
  * 
- * Python - This service provides python scripting support.
- * It uses the jython integration and provides python 2.7 syntax compliance.
+ * Python - This service provides python scripting support. It uses the jython
+ * integration and provides python 2.7 syntax compliance.
  * 
- * More Info at :
- * https://www.python.org/
- * http://www.jython.org/
+ * More Info at : https://www.python.org/ http://www.jython.org/
  * 
  * @author GroG
  * 
@@ -44,6 +48,22 @@ import org.slf4j.Logger;
 public class Python extends Service {
 
 	int interpreterThreadCount = 0;
+
+	List<File> currentFileList = new ArrayList<File>();
+	/**
+	 * current working directory root there are multiple filesystems we can load
+	 * scripts from github urls | jar:file /resources | /resource exploded |
+	 * .myrobotlab directory | workind directory | root of file system this
+	 * variable is to tell which root to begin with
+	 */
+	// String cwdRoot = "pyrobotlab";
+	// String cwdRoot = "local";
+	String cwdRoot = "examples";
+
+	/**
+	 * current working directory
+	 */
+	String cwd = null;
 
 	/**
 	 * this thread handles all callbacks to Python process all input and sets
@@ -311,6 +331,23 @@ public class Python extends Service {
 		// TODO subscribe("/registered");
 		subscribe(Runtime.getInstance().getName(), "registered");
 		log.info(String.format("created python %s", getName()));
+
+		// get file references from Python resources
+		// FIXME - add root defintions - like below
+		/*
+		currentFileList.add(new File("examples"));
+		currentFileList.add(new File("local"));
+		currentFileList.add(new File("pyrobotlab"));
+		*/
+		/*
+		 * currentFileList[3] = new File("home"); currentFileList[4] = new
+		 * File("pyrobotlab");
+		 */
+		try {
+			setCwd("examples");
+		} catch(Exception e){
+			error(e);
+		}
 	}
 
 	// PyObject interp.eval(String s) - for verifying?
@@ -427,10 +464,10 @@ public class Python extends Service {
 			} else {
 				interp.exec(code);
 			}
-		} catch(PyException pe){
+		} catch (PyException pe) {
 			error(pe.toString());
 		} catch (Exception e) {
-			// PyException - very nice - but we'll handle it all 
+			// PyException - very nice - but we'll handle it all
 			// the same way at the moment
 			// broadcast msg only
 			error(e.getMessage());
@@ -479,7 +516,7 @@ public class Python extends Service {
 		PyObject o = interp.eval(jsonMethod);
 		String ret = o.toString();
 		return ret;
-	}	
+	}
 
 	public void execResource(String filename) {
 		String script = FileIO.resourceToString(filename);
@@ -596,8 +633,11 @@ public class Python extends Service {
 	 *            name of file to load
 	 * @return true if successfully loaded
 	 */
-	public boolean loadScriptFromResource(String filename) {
-		log.info(String.format("loadScriptFromResource %s", filename));
+	public boolean loadExample(String filename) {
+		log.info(String.format("loadExample %s", filename));
+		if (!filename.startsWith("Python/examples/")){
+			filename = String.format("Python/examples/%s", filename);
+		}
 		String newCode = FileIO.resourceToString(filename);
 		return loadScript(filename, newCode);
 	}
@@ -744,15 +784,61 @@ public class Python extends Service {
 		stop();// release the interpeter
 	}
 
+	public void setCwd(String path) throws IOException {
+		if ("examples".equals(cwdRoot)) {
+			currentFileList = new ArrayList<File>(Arrays.asList(FileIO.getPackageContent("resource/Python/examples")));
+		} else if ("local".equals(cwdRoot)) {
+
+			ArrayList<File> localFiles = new ArrayList<File>();
+
+			File dir = new File(".");
+			// String[] list = dir.list(filter); - FIXME - make a
+			// GenericFileFilter in FileIO
+
+			String[] list = dir.list();
+
+			for (String file : list) {
+				if (file.endsWith(".py")) {
+					localFiles.add(new File(file));
+				}
+			}
+
+			currentFileList = localFiles;
+		} else if ("pyrobotlab".equals(cwdRoot)) {
+			// FIXME implement
+			// 1. Encoder.fromJson - needs an option to return JsonElement
+			// 2. Makit nice so you can submit xpath like target and just get the data you want
+			byte[] data = FileIO.getURL(new URL("https://api.github.com/repos/MyRobotLab/pyrobotlab/contents/home"));
+			if (data != null) {
+				String json = new String(data);
+
+				JsonElement jse = new JsonParser().parse(json);
+				// jse.getAsJsonObject();
+
+				JsonArray types = jse.getAsJsonArray();//.getAsJsonObject("waypoints").getAsJsonObject("ship").getAsJsonArray("first_type");
+
+				for (final JsonElement type : types) {
+					final JsonArray coords = type.getAsJsonArray();
+				}
+
+				// Encoder.fromJson(json, clazz)
+				log.info(json);
+			}
+
+		}
+
+		// broadcastState();
+	}
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-		//Runtime.start("gui", "GUIService");
+		// Runtime.start("gui", "GUIService");
 		// String f = "C:\\Program Files\\blah.1.py";
 		// log.info(getName(f));
 		Python python = (Python) Runtime.start("python", "Python");
-		
+
 		// python.error("this is an error");
 		// python.loadScriptFromResource("VirtualDevice/Arduino.py");
 		// python.execAndWait();

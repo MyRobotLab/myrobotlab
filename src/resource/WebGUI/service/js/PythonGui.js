@@ -35,6 +35,7 @@ angular.module('mrlapp.service.PythonGui', [])
         $scope.editor.setValue(service.currentScript.code);
         $scope.tabName = service.currentScript.name;
         
+        
         // TODO show current local files
         
         // TODO show example files (perhaps just once)
@@ -64,6 +65,18 @@ angular.module('mrlapp.service.PythonGui', [])
         }
     }
     ;
+    
+    // utility methods //
+    // gets filename from full path name
+    $scope.getName = function(path) {
+        if (path.indexOf("/") >= 0){
+            return(path.split("/").pop());
+        }
+        if (path.indexOf("\\") >= 0){
+            return(path.split("\\").pop());
+        }
+        return path;
+    }
     
     ////// ace editor related callbacks begin ///////
     $scope.aceLoaded = function(e) {
