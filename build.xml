@@ -79,7 +79,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="report" basedir=".">
+<project name="myrobotlab" default="report" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
@@ -105,6 +105,9 @@
 	<property name="build" location="build" />
 	<!-- location for the unit test reports to go into -->
 	<property name="report" location="dist/report" />
+	<!-- location for the jacoco reports -->
+	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
+	<property name="result.report.dir" location="${report}/jacoco" />
 	<!-- directory for the distrbituion to go into -->
 	<property name="dist" location="dist" />
 	<available file="${build}/classes/resource/license" property="license.present" />
@@ -118,6 +121,11 @@
 			<pathelement location="build-lib/ant-contrib-0.6.jar" />
 		</classpath>
 	</taskdef>
+
+	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+        	<classpath path="build-lib/jacocoant.jar"/>
+	</taskdef>
+
 
 	<!-- FIXME - fixme with ivy -->
 	<path id="compile.classpath">
@@ -270,6 +278,7 @@
 
 		<!-- nice for debugging -->
 		<!-- echoproperties / -->
+
 
 		<!-- TODO - get repo's comment -->
 
@@ -503,11 +512,33 @@
 	</target>
 
 	<target name="report" depends="test">
+		<!-- junit reports -->
 		<junitreport todir="${report}">
 			<fileset dir="${build}/report" includes="TEST-*.xml" />
 			<report todir="${report}" format="noframes">
 			</report>
 		</junitreport>
+		<!-- jacoco report stuff -->
+               <echo message="JACOCO RESULTS FILE ${result.jacoco.file}" />
+		<jacoco:report>
+			<!-- This task needs the collected execution data and ... -->
+			<executiondata>
+				<file file="${result.jacoco.file}" />
+			</executiondata>
+			<!-- the class files and optional source files ... -->
+			<structure name="JaCoCo MyRobotLab Report">
+				<classfiles>
+					<fileset dir="${build}/classes" />
+				</classfiles>
+				<sourcefiles encoding="UTF-8">
+					<fileset dir="${src}" />
+				</sourcefiles>
+			</structure>
+			<!-- to produce reports in different formats. -->
+			<html destdir="${result.report.dir}" />
+			<csv destfile="${result.report.dir}/report.csv" />
+			<xml destfile="${result.report.dir}/report.xml" />
+		</jacoco:report>
 	</target>
 
 	<target name="mail" depends="report">
@@ -538,7 +569,8 @@
 		               printsummary="true"
 		               printsummary="withOutAndErr"
 		               outputtoformatters="true" -->
-		<junit printsummary="on" fork="true" haltonfailure="no">
+                <jacoco:coverage destfile="${result.jacoco.file}">
+		    <junit printsummary="on" fork="true" haltonfailure="no">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
 			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			
@@ -565,14 +597,15 @@
 			</classpath>
 			<formatter type="xml" />
 
-			<batchtest fork="yes" todir="${build}/report">
+			<batchtest fork="true" todir="${build}/report" >
 				<fileset dir="${test}">
 					<include name="**/*Test.java" />
 					<exclude name="**/JFugueTest.java" />
 				</fileset>
 			</batchtest>
 
-		</junit>
+		    </junit>
+        	</jacoco:coverage>
 	</target>
 
 	<!-- Incubator -->
