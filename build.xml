@@ -257,7 +257,7 @@
 	<fail unless="foo.path">No foo.path set for this OS!</fail>
 
 	<!-- ================ init begin ================= -->
-	<target name="init" depends="repoClone">
+	<target name="init" depends="clean,repoClone">
 		<echo message="compiling with ${ant.java.version}" />
 		<!-- good for debugging -->
 		<!-- echoproperties / -->
@@ -503,6 +503,8 @@
 		<!-- Delete the ${build} and ${temp} directory trees -->
 		<delete dir="${build}" />
 		<delete dir="${temp}" />
+		<delete dir="${dist}" />
+		<delete file="myrobotlab.jar" />
 	</target>
 	
 	<target name="cleanRepo" description="clean up">
