@@ -539,7 +539,18 @@
 			<csv destfile="${result.report.dir}/report.csv" />
 			<xml destfile="${result.report.dir}/report.xml" />
 		</jacoco:report>
-	</target>
+  
+               	 <!-- helper task to facilitate moving the jacoco report to s3 because
+                      hidden directories aren't copied with the local_dir task in travis s3 task --> 
+		<!-- replace and rename the .resources directory to resources -->
+		<replace dir="${result.report.dir}" value="resources">
+			<include name="**/*.html"/>
+  			<replacetoken>.resources</replacetoken>
+		</replace>
+                <move todir="${result.report.dir}/resources">
+    			<fileset dir="${result.report.dir}/.resources"/>
+  		</move>
+        </target>
 
 	<target name="mail" depends="report">
 		<mail mailhost="${mail.host}" mailport="${mail.port}" subject="${mail.subjectalert}" ssl="${mail.ssl}" user="${mail.username}" password="${mail.password}" tolist="${mail.tolist}">
