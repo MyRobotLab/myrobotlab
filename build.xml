@@ -256,8 +256,21 @@
 
 	<fail unless="foo.path">No foo.path set for this OS!</fail>
 
+	<target name="help">
+                <echo message="" />
+                <echo message="-----------------------------" />
+                <echo message="My RobotLab Build System Help" />
+                <echo message="-----------------------------" />
+                <echo message="" />
+		<java fork="false" classname="org.apache.tools.ant.Main" taskname="-">
+			<arg value="-projecthelp"/>
+			<arg value="-f"/>
+			<arg value="${ant.file}"/>
+		</java>
+	</target>
+
 	<!-- ================ init begin ================= -->
-	<target name="init" depends="clean,repoClone">
+	<target name="init" depends="clean,repoClone" description="initialize things for the build">
 		<echo message="compiling with ${ant.java.version}" />
 		<!-- good for debugging -->
 		<!-- echoproperties / -->
@@ -334,7 +347,7 @@
 	<!-- FIXME !!!- manage proxy for ivy -->
 	<!-- =============== repo begin  =============== -->
 	<!-- repo added if not already cloned - does update to head -->
-	<target name="repoCheck">
+	<target name="repoCheck" description="Check the repo if network is available, and pull if so">
 		<available file="${repo}" property="repo.present" />
 
 		<!-- http://stackoverflow.com/questions/18097555/execute-ant-task-if-two-conditions-are-met -->
@@ -384,7 +397,7 @@
 	</target>
 	<!-- =============== repo end  =============== -->
 	<!-- TODO - work on removing these 3rd party dependencies -->
-	<target name="unzip" unless="${license.present}">
+	<target name="unzip" unless="${license.present}" description="unzip various jar files to be included into the myrobotlab.jar">
 		<echo>unzipping dependencies</echo>
 		<echo message="${license.present}" />
 
@@ -513,7 +526,7 @@
 		<delete dir="${temp}" />
 	</target>
 
-	<target name="report" depends="test">
+	<target name="report" description="generate the junit and jacoco reports on the build." depends="test">
 		<!-- junit reports -->
 		<junitreport todir="${report}">
 			<fileset dir="${build}/report" includes="TEST-*.xml" />
@@ -580,7 +593,7 @@
 		</mail>
 	</target>
 
-	<target name="javadoc" depends="compile">
+	<target name="javadoc" depends="compile" description="Create the javadocs from the source code" >
 		<javadoc access="public" packagenames="org.myrobotlab.*" author="true" destdir="javadoc" doctitle="myrobotlab" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.7" sourcepath="src" splitindex="true" use="true" version="true">
 			<arg value="-notimestamp" />
 			<classpath refid="compile.classpath" />
@@ -589,7 +602,7 @@
 
 	<!-- TODO - upload/publish javadoc -->
 
-	<target name="test" depends="compiletests, dist">
+	<target name="test" depends="compiletests, dist" description="Run the unit tests">
 		<!-- junit options description="Main  Integration/Unit Tests"
 		               showoutput="true"
 		               printsummary="true"
