@@ -109,4 +109,9 @@
     </template>
   </category> 
   
+  <!-- this is here to support the unit test. validate that it loads the aiml correctly -->
+  <category>
+    <pattern>UNIT TEST PATTERN</pattern>
+    <template>Unit Test Pattern Passed</template>
+  </category>
 </aiml>
