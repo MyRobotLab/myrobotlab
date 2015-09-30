@@ -560,7 +560,7 @@
 				<patternset id="mrlonly">
     					<exclude name="**/resources/**"/>
     					<exclude name="**/index.html"/>
-    					<exclude name="**/org.myrobotlab*"/>
+    					<exclude name="**/org.myrobotlab*/**"/>
 				</patternset>
 			</fileset>
 		</delete>
