@@ -528,7 +528,7 @@
 			<!-- the class files and optional source files ... -->
 			<structure name="JaCoCo MyRobotLab Report">
 				<classfiles>
-					<fileset dir="${build}/classes" />
+					<fileset dir="${build}/classes/org/myrobotlab" />
 				</classfiles>
 				<sourcefiles encoding="UTF-8">
 					<fileset dir="${src}" />
@@ -550,6 +550,19 @@
                 <move todir="${result.report.dir}/resources">
     			<fileset dir="${result.report.dir}/.resources"/>
   		</move>
+		<!-- we only care about code coverage from org.myrobotlab ... not sure how to easily make sure
+                     the report only contains that stuff.. so time to delete everything we don't care about.. -->
+		<delete>
+			<fileset dir="${result.report.dir}">
+                                <!-- delete everything from the resources , index.html and the stuff from org.myrobotlab -->
+				<patternset id="mrlonly">
+    					<exclude name="**/resources/**"/>
+    					<exclude name="**/index.html"/>
+    					<exclude name="**/org.myrobotlab*"/>
+				</patternset>
+			</fileset>
+		</delete>
+
         </target>
 
 	<target name="mail" depends="report">
