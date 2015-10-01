@@ -173,6 +173,31 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	// ================ AuthorizationProvider end ===========================
 
 	// ================ Broadcaster begin ===========================
+	
+	/**
+	 * FIXME - needs to be LogListener interface with LogListener.onLogEvent(String logEntry) !!!!
+	 * THIS SHALL LOG NO ENTRIES OR ABANDON ALL HOPE !!!
+	 * 
+	 * This is completely out of band - it does not use the regular queues inbox or outbox
+	 * 
+	 * We want to broadcast this - but THERE CAN NOT BE ANY log.info/warn/error etc !!!! or 
+	 * there will be an infinite loop and you will be at the gates of hell !
+	 * @param logEntry
+	 */
+	public void onLogEvent(Message msg){
+		try {
+			if (broadcaster != null) {
+				Codec codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				codec.encode(bos, msg);
+				bos.close();
+				broadcaster.broadcast(new String(bos.toByteArray())); // wtf
+			}
+		} catch (Exception e) {
+			System.out.print(e.getMessage());
+		}
+	}
+	
 	public void broadcast(Message msg) {
 		try {
 			if (broadcaster != null) {

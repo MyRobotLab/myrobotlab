@@ -124,7 +124,5 @@ angular.module('mrlapp.service.PythonGui', [])
     // <button type="button" class="btn btn-default" ng-click="msg.loadScriptFromFile('test.py')">
     
     msg.subscribe(this);
-
-
 }
 ]);

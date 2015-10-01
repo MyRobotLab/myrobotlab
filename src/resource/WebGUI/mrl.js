@@ -265,6 +265,7 @@ angular
                 
                 // THE CENTER OF ALL CALLBACKS
                 // process name callbacks - most common
+                // console.log('nameCallbackMap');
                 if (nameCallbackMap.hasOwnProperty(msg.sender)) {
                     cbs = nameCallbackMap[msg.sender];
                     for (var i = 0; i < cbs.length; i++) {
@@ -275,6 +276,7 @@ angular
                 // serviceName.methodName callback    
                 // framework subscribes to (name).onMethodMap to build all
                 // underlying structured methods based on Java reflected descriptions        
+                // console.log('nameMethodCallbackMap');
                 var key = msg.sender + '.' + msg.method;
                 if (nameMethodCallbackMap.hasOwnProperty(key)) {
                     cbs = nameMethodCallbackMap[key];
@@ -288,6 +290,7 @@ angular
                 
                 // process method callbacks - rare - possible collisions
                 // 'onHandleError' might be worthwhile - mrl managed error
+                // console.log('methodCallbackMap');
                 if (methodCallbackMap.hasOwnProperty(msg.method)) {
                     cbs = methodCallbackMap[msg.method];
                     for (var i = 0; i < cbs.length; i++) {
