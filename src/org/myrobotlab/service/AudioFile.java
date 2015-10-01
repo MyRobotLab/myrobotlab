@@ -64,31 +64,21 @@ public class AudioFile extends Service {
 	// http://docs.oracle.com/javase/7/docs/api/javax/sound/sampled/Clip.html
 	public static final String MODE_BLOCKING = "blocking";
 	public static final String MODE_QUEUED = "queued";
-
 	static String globalFileCacheDir = "audioFile";
-
 	//Map<String, BlockingQueue<AudioData>> tracks = new HashMap<String, BlockingQueue<AudioData>>();// new
-																									// LinkedBlockingQueue<AudioData>();
-
 	String currentTrack = "default";
-
 	transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
-
 	//Map<String, Object> locks = new HashMap<String, Object>();
 	Map<String, Object> waitForLocks = new HashMap<String, Object>();
-
 	static public class AudioData {
-
 		/**
 		 * mode can be either QUEUED MULTI PRIORITY INTERRUPT OR BLOCKING
 		 */
 		String mode = MODE_QUEUED;
 		public String fileName = null;
 		// public float volume = 1.0f; DONE ON TRACK
-		//public float balance = 0.0f; SHOULD BE DONE ON TRACK
-
+		// public float balance = 0.0f; SHOULD BE DONE ON TRACK
 		// public String track = "default"; // default track
-
 		public AudioData(String fileName) {
 			this.fileName = fileName;
 		}
@@ -99,8 +89,7 @@ public class AudioFile extends Service {
 	}
 
 	public void track(String trackName) {
-		currentTrack = trackName;
-		
+		currentTrack = trackName;		
 		if (!processors.containsKey(trackName)) {
 			AudioProcessor processor = new AudioProcessor(this, trackName);
 			processors.put(trackName, processor);
@@ -109,7 +98,17 @@ public class AudioFile extends Service {
 	}
 
 	// TODO test with jar://resource/AudioFile/tick.mp3 & https://host/mp3 : localfile
+	// 
 	public int play(String filename) {
+		if (filename == null) {
+			log.warn("asked to play a null filename!  error");
+			return -1;
+		}
+		File f = new File(filename);
+		if (!f.exists()) {
+			log.warn("Tried to play file " + f.getAbsolutePath() + " but it was not found.");
+			return -1;
+		}
 		// use File interface such that filename is preserved
 		// but regardless of location (e.g. url, local, resource)
 		// or type (mp3 wav) a stream is opened and the
@@ -129,7 +128,6 @@ public class AudioFile extends Service {
 		// the currentTrack and its
 		// created if necessary
 		track(currentTrack);
-
 		if (MODE_QUEUED.equals(data.mode)) {
 			// stick it on top of queue and let our default player play it
 			return processors.get(currentTrack).add(data);
@@ -141,8 +139,8 @@ public class AudioFile extends Service {
 		return -1;
 	}
 
-	public void playBlocking(String string) {
-
+	public void playBlocking(String filename) {
+		playFile(filename, true);
 	}
 
 	public void pause() {
@@ -162,29 +160,16 @@ public class AudioFile extends Service {
 	}
 
 	public void playFile(String filename, Boolean isBlocking) {
-		/*
-		 * try {
-		 * 
-		 * InputStream is; if (isResource) { is =
-		 * AudioFile.class.getResourceAsStream(filename); } else { is = new
-		 * FileInputStream(filename); }
-		 * 
-		 * if (!isBlocking) { BufferedInputStream bis = new
-		 * BufferedInputStream(is); AdvancedPlayerThread player = new
-		 * AdvancedPlayerThread(filename, bis); // players.put(filename,
-		 * player); // players.add(player); player.start();
-		 * 
-		 * } else { invoke("started"); audioDevice.close(); // audioDevice = new
-		 * MRLSoundAudioDevice(); // audioDevice.setGain(this.getVolume()); //
-		 * TODO: figure out how to properly just reuse the same sound // audio
-		 * device. // for now, it seems we need to pass a new one each time.
-		 * resetAudioDevice(); AdvancedPlayer player = new AdvancedPlayer(is,
-		 * audioDevice); player.setPlayBackListener(playbackListener);
-		 * player.play(); invoke("stopped"); invoke("stoppedFile", filename); }
-		 * 
-		 * } catch (Exception e) { Logging.logError(e);
-		 * error("Problem playing file ", filename); return; }
-		 */
+		
+		
+		
+		AudioData data = new AudioData(filename);
+		if (isBlocking) {
+			data.mode = AudioFile.MODE_BLOCKING;
+		} else {
+			data.mode = AudioFile.MODE_QUEUED;
+		}
+		play(data);
 	}
 
 	public void playFileBlocking(String filename) {
@@ -196,7 +181,9 @@ public class AudioFile extends Service {
 	};
 
 	public void playResource(String filename, Boolean isBlocking) {
-		// playFile(filename, isBlocking, true);
+		// TODO: what/who uses this?  should we use the class loader to 
+		//playFile(filename, isBlocking, true);
+		log.warn("Audio File playResource not implemented yet.");
 	}
 
 	public void silence() {
@@ -234,6 +221,10 @@ public class AudioFile extends Service {
 		processors.get(currentTrack).setVolume(volume);
 	}
 
+	public void setVolume(double volume) {
+		processors.get(currentTrack).setVolume((float)volume);
+	}
+	
 	public float getVolume() {
 		return processors.get(currentTrack).getVolume();
 	}
