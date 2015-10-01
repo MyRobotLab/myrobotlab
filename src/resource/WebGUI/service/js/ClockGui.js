@@ -2,12 +2,17 @@ angular.module('mrlapp.service.ClockGui', [])
 .controller('ClockGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('ClockGuiCtrl');
     var _self = this;
+    
+    var name = $scope.name;
+    var msg = mrl.createMsgInterface(name, $scope);
+    
+    // init scope variables
     $scope.pulseData = '';
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
+        // FIXME let the framework 
         mrl.updateState(service);
-        // $scope.service = service; // probably should not do this - propegates stale data
         $scope.interval = service.interval;
         if (service.isClockRunning == true) {
             $scope.label = "Stop";
@@ -19,34 +24,19 @@ angular.module('mrlapp.service.ClockGui', [])
     
     }
     ;
-
-    // get latest copy of a services - it will be stale
-    _self.updateState(mrl.getService($scope.service.name));
     
-    $scope.panel.onMsg = function(msg) {
+    _self.updateState($scope.service);
+    
+    this.onMsg = function(msg) {
         
         switch (msg.method) {
         case 'onState':
-            _self.updateState(msg.data[0]);           
+            _self.updateState(msg.data[0]);
             $scope.$apply();
             break;
         case 'onPulse':
             $scope.pulseData = msg.data[0];
             $scope.$apply();
-            break;
-        case 'onClockStarted':
-        /*
-            $scope.label = "Stop";
-            $scope.intervalDisabled = true;
-            $scope.$apply();
-            */
-            break;
-        case 'onClockStopped':
-        /*
-            $scope.label = "Start";
-            $scope.intervalDisabled = false;
-            $scope.$apply();
-            */
             break;
         default:
             $log.error("ERROR - unhandled method " + $scope.name + " " + msg.method);
@@ -54,10 +44,6 @@ angular.module('mrlapp.service.ClockGui', [])
         }
     }
     ;
-    
-    $scope.broadcastState = function() {
-        mrl.sendTo($scope.service.name, "broadcastState");
-    }
     
     $scope.toggle = function(label, interval) {
         if (label == "Start") {
@@ -70,13 +56,6 @@ angular.module('mrlapp.service.ClockGui', [])
     ;
     
     mrl.subscribe($scope.service.name, 'pulse');
-    mrl.subscribe($scope.service.name, 'clockStarted');
-    mrl.subscribe($scope.service.name, 'clockStopped');
-    mrl.subscribe($scope.service.name, 'publishState');
-    
-    
-    
-    // mrl.sendTo($scope.service.name, "broadcastState");
-    $scope.panel.initDone();
+    msg.subscribe(this);
 }
 ]);
