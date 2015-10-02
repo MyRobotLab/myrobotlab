@@ -263,6 +263,89 @@ public class AudioFile extends Service {
 		return "Plays back audio file. Can block or multi-thread play";
 	}
 
+
+	
+	public String getTrack() {
+		return currentTrack;
+	}
+
+	public void setVolume(float volume, String track) {
+		track(track);
+		setVolume(volume);
+	}
+
+	public int repeat(String filename, String track) {
+		track(track);
+		int ret = play(filename);
+		repeat();
+		return ret;
+	}
+	/* TODO IMPLEMENT ???
+	private AudioProcessor getOrCreateTrack(String track){
+		
+	}
+	
+	*/
+	
+	// vs waitFor(String track, String waitingOn) 
+	public void waitFor(String waitingTrack, String track, int trackId) {
+		
+		AudioProcessor processor = null;
+		if (!processors.containsKey(waitingTrack)) {
+			processor = new AudioProcessor(this, waitingTrack);
+			processors.put(waitingTrack, processor);			
+		} else {
+			processor = processors.get(waitingTrack);
+		}
+	
+		processors.get(waitingTrack).waitForKey = String.format("%s:%d", track, trackId);
+		
+		//processors.get(currentTrack)
+		/*
+		synchronized (locks.get(currentTrack)) {
+			locks.get(currentTrack).wait();
+		}
+		*/
+		if (!processor.isRunning()){
+			processor.start();
+		}
+		
+	} 
+	
+	public Object getWaitForLock(String key){
+		if (waitForLocks.containsKey(key)){
+			return waitForLocks.get(key);
+		}
+		return null;
+	}
+
+	public void repeat() {
+		// TODO Auto-generated method stub
+		processors.get(currentTrack).repeat = true;
+	}
+
+	public void stop() {
+		// dump the current song
+		processors.get(currentTrack).isPlaying = false;
+		// pause the next one if queued
+		processors.get(currentTrack).pause = true;
+	}
+
+	/*
+	public AudioData getNextAudioData(String track) throws InterruptedException {
+		return tracks.get(track).take();
+	}
+	*/
+/*
+	public Object getLock(String track) {
+		return locks.get(track);
+	}
+*/
+	public List<Object> getLocksWaitingFor(String queueName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
@@ -417,85 +500,4 @@ public class AudioFile extends Service {
 	}
 
 	
-	public String getTrack() {
-		return currentTrack;
-	}
-
-	public void setVolume(float volume, String track) {
-		track(track);
-		setVolume(volume);
-	}
-
-	public int repeat(String filename, String track) {
-		track(track);
-		int ret = play(filename);
-		repeat();
-		return ret;
-	}
-	/* TODO IMPLEMENT ???
-	private AudioProcessor getOrCreateTrack(String track){
-		
-	}
-	
-	*/
-	
-	// vs waitFor(String track, String waitingOn) 
-	public void waitFor(String waitingTrack, String track, int trackId) {
-		
-		AudioProcessor processor = null;
-		if (!processors.containsKey(waitingTrack)) {
-			processor = new AudioProcessor(this, waitingTrack);
-			processors.put(waitingTrack, processor);			
-		} else {
-			processor = processors.get(waitingTrack);
-		}
-	
-		processors.get(waitingTrack).waitForKey = String.format("%s:%d", track, trackId);
-		
-		//processors.get(currentTrack)
-		/*
-		synchronized (locks.get(currentTrack)) {
-			locks.get(currentTrack).wait();
-		}
-		*/
-		if (!processor.isRunning()){
-			processor.start();
-		}
-		
-	} 
-	
-	public Object getWaitForLock(String key){
-		if (waitForLocks.containsKey(key)){
-			return waitForLocks.get(key);
-		}
-		return null;
-	}
-
-	public void repeat() {
-		// TODO Auto-generated method stub
-		processors.get(currentTrack).repeat = true;
-	}
-
-	public void stop() {
-		// dump the current song
-		processors.get(currentTrack).isPlaying = false;
-		// pause the next one if queued
-		processors.get(currentTrack).pause = true;
-	}
-
-	/*
-	public AudioData getNextAudioData(String track) throws InterruptedException {
-		return tracks.get(track).take();
-	}
-	*/
-/*
-	public Object getLock(String track) {
-		return locks.get(track);
-	}
-*/
-	public List<Object> getLocksWaitingFor(String queueName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

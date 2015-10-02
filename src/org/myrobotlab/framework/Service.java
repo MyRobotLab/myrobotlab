@@ -146,11 +146,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	private boolean isRunning = false;
 
-	protected transient Thread thisThread = null;
+	transient protected Thread thisThread = null;
 
-	transient Outbox outbox = null;
+	transient protected Outbox outbox = null;
 
-	transient Inbox inbox = null;
+	transient protected Inbox inbox = null;
 
 	transient Timer timer = null;
 
@@ -848,7 +848,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		msg.sender = this.getName();
 		msg.data = data;
 		msg.method = method;
-
 		return msg;
 	}
 

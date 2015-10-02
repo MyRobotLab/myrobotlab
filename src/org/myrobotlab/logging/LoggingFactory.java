@@ -11,9 +11,6 @@ public class LoggingFactory {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			Logging.logError(e); //
-			// Logging.loge
-			// TODO Auto-generated catch block
-			// FIXME - log it
 			e.printStackTrace();
 		}
 

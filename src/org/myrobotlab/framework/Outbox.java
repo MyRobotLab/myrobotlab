@@ -76,7 +76,7 @@ public class Outbox implements Runnable, Serializable {
 		// myService.getName(), msg.sender, msg.sendingMethod, msg.name,
 		// msg.method));
 		synchronized (msgBox) {
-			while (blocking && msgBox.size() == maxQueue)
+			while (blocking && msgBox.size() == maxQueue){
 				// queue "full"
 				try {
 					// log.debug("outbox enque msg WAITING ");
@@ -84,6 +84,7 @@ public class Outbox implements Runnable, Serializable {
 				} catch (InterruptedException ex) {
 					log.debug("outbox add enque msg INTERRUPTED ");
 				}
+			}
 
 			// we warn if over 10 messages are in the queue - but we will still
 			// process them
@@ -204,6 +205,14 @@ public class Outbox implements Runnable, Serializable {
 			outboxThreadPool.remove(i);
 			t = null;
 		}
+	}
+
+	public LinkedList<Message> getMsgBox() {
+		return msgBox;
+	}
+
+	public int getMaxQueueSize() {
+		return maxQueue;
 	}
 
 }
