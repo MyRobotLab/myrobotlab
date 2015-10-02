@@ -1,6 +1,7 @@
 package org.myrobotlab.logging;
 
 import org.myrobotlab.framework.Platform;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 public class LoggerFactory {
@@ -21,6 +22,10 @@ public class LoggerFactory {
 		} else {
 			return org.slf4j.LoggerFactory.getLogger(name);
 		}
+	}
+
+	public static ILoggerFactory getILoggerFactory() {
+		return org.slf4j.LoggerFactory.getILoggerFactory();
 	}
 
 }
