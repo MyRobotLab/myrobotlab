@@ -30,7 +30,7 @@ import org.myrobotlab.service.interfaces.TextPublisher;
 /**
  * Program AB service for MyRobotLab Uses AIML 2.0 to create a ChatBot This is a
  * reboot of the Old AIML spec to be more 21st century.
- * 
+ *
  * More Info at http://aitools.org/ProgramAB
  * 
  * @author kwatters
@@ -503,6 +503,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	 *            - The name of the bot to load. (example: alice2)
 	 */
 	public void startSession(String path, String session, String botName) {
+		
+		// TODO: this is probably not the right thing to do.
+		// means all sessions and bots are loaded from the same directory...
+		this.path = path;
+		this.botName = botName;
 		if (session == null) {
 			session = "default";
 		}
@@ -525,9 +530,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		// load session specific predicates, these override the default ones.
 		String sessionPredicateFilename = createSessionPredicateFilename(session);
 		chat.predicates.getPredicateDefaults(sessionPredicateFilename);
+		
 		sessions.put(session, chat);
-
-
 		// lets test if the robot knows the name of the person in the session
 		String name = chat.predicates.get("name").trim();
 		// TODO: this implies that the default value for "name" is default
