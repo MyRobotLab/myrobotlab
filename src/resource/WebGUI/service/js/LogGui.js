@@ -25,6 +25,7 @@ angular.module('mrlapp.service.LogGui', [])
         }
         
         // set level
+        $scope.logLevel = service.logLevel;
     
     }
     ;

@@ -22,6 +22,7 @@ import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
+import org.atmosphere.cpr.SessionSupport;
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
@@ -54,8 +55,9 @@ import org.slf4j.Logger;
 
 /**
  * 
- * WebGUI - This service is the AngularJS based GUI
- * TODO - messages & services are already APIs - perhaps a data API - same as service without the message wrapper
+ * WebGUI - This service is the AngularJS based GUI TODO - messages & services
+ * are already APIs - perhaps a data API - same as service without the message
+ * wrapper
  */
 public class WebGUI extends Service implements AuthorizationProvider, Gateway, Handler {
 
@@ -76,17 +78,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	public String startURL = "http://localhost:%d/index.html";
 
 	// FIXME might need to change to HashMap<String, HashMap<String,String>> to
-	// add
-	// client session
+	// add client session
 	public HashMap<String, String> servicePanels = new HashMap<String, String>();
-
-	// FIXME - shim for Shoutbox
-	// deprecate ???
-	public static class WebMsg {
-		String clientid;
-		// socket
-		Message msg;
-	}
 
 	// SHOW INTERFACE
 	// FIXME - allowAPI1(true|false)
@@ -173,18 +166,22 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	// ================ AuthorizationProvider end ===========================
 
 	// ================ Broadcaster begin ===========================
-	
+
 	/**
-	 * FIXME - needs to be LogListener interface with LogListener.onLogEvent(String logEntry) !!!!
-	 * THIS SHALL LOG NO ENTRIES OR ABANDON ALL HOPE !!!
+	 * FIXME - needs to be LogListener interface with
+	 * LogListener.onLogEvent(String logEntry) !!!! THIS SHALL LOG NO ENTRIES OR
+	 * ABANDON ALL HOPE !!!
 	 * 
-	 * This is completely out of band - it does not use the regular queues inbox or outbox
+	 * This is completely out of band - it does not use the regular queues inbox
+	 * or outbox
 	 * 
-	 * We want to broadcast this - but THERE CAN NOT BE ANY log.info/warn/error etc !!!! or 
-	 * there will be an infinite loop and you will be at the gates of hell !
+	 * We want to broadcast this - but THERE CAN NOT BE ANY log.info/warn/error
+	 * etc !!!! or there will be an infinite loop and you will be at the gates
+	 * of hell !
+	 * 
 	 * @param logEntry
 	 */
-	public void onLogEvent(Message msg){
+	public void onLogEvent(Message msg) {
 		try {
 			if (broadcaster != null) {
 				Codec codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
@@ -197,7 +194,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			System.out.print(e.getMessage());
 		}
 	}
-	
+
 	public void broadcast(Message msg) {
 		try {
 			if (broadcaster != null) {
@@ -255,6 +252,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// "100000")
 				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
 				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build();
+		
+		//SessionSupport ss = new SessionSupport();
 
 		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
 		s.start();
@@ -292,9 +291,9 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// subscribe to the status events
 		subscribe(si.getName(), "publishStatus");
 		subscribe(si.getName(), "publishState");
-		
+
 		// for distributed Runtimes
-		if (si.isRuntime()){
+		if (si.isRuntime()) {
 			subscribe(si.getName(), "registered");
 		}
 
@@ -354,6 +353,10 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			out = r.getResponse().getOutputStream();
 
 			r.setBroadcaster(broadcaster);
+			
+			log.info("sessionId {}", r);
+			String sessionId = r.getAtmosphereResourceEvent().getResource().getRequest().getSession().getId();
+			log.info("sessionId {}", sessionId);
 
 			Map<String, String> headers = getHeadersInfo(request);
 
@@ -373,7 +376,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// String httpMethod = request.getMethod();
 
 			// get default encoder
-			// FIXME FIXME FIXME - this IS A CODEC !!! NOT AN API-TYPE !!! - CHANGE to MIME_TYPE_APPLICATION_JSON !!!
+			// FIXME FIXME FIXME - this IS A CODEC !!! NOT AN API-TYPE !!! -
+			// CHANGE to MIME_TYPE_APPLICATION_JSON !!!
 			codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
 
 			if (pathInfo != null) {
@@ -396,7 +400,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			}
 
 			// FIXME - this is currently useless
-			// simple - from apiType - get the mime type - if you want to mess with headers <--==--> encoding then do that...
+			// simple - from apiType - get the mime type - if you want to mess
+			// with headers <--==--> encoding then do that...
 			String codecMimeType = Encoder.getKeyToMimeType(apiTypeKey);
 			if (!codecMimeType.equals(codec.getMimeType())) {
 				// request to switch codec types on
@@ -407,15 +412,14 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			 * interesting .... switch (r.transport()) { case JSONP: case
 			 * LONG_POLLING: event.getResource().resume(); break; case
 			 * WEBSOCKET: case STREAMING: res.getWriter().flush(); break; }
-			 * 
 			 */
 
 			response.addHeader("Content-Type", codec.getMimeType());
 
 			if (parts.length == 3) {
 				// ========================================
-				// POST || GET  http://{host}:{port}/api/messages
-				// POST || GET  http://{host}:{port}/api/services
+				// POST || GET http://{host}:{port}/api/messages
+				// POST || GET http://{host}:{port}/api/services
 				// ========================================
 				// if message api-type - we only have/need 3 URI parts
 				if ("messages".equals(parts[2]) && "POST".equals(httpMethod)) {
@@ -581,7 +585,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 		// get the service
 		ServiceInterface si = Runtime.getService(msg.name);
-		if(si == null){
+		if (si == null) {
 			error("could not get service %s for msg %s", msg.name, msg);
 			return;
 		}
@@ -753,30 +757,31 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	public void setPort(Integer port) {
 		this.port = port;
 	}
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
 
-			
-			//Runtime.start("python", "Python");			
+			// Runtime.start("python", "Python");
 			// Runtime.start("gui", "GUIService");
-			//RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote","RemoteAdapter");
-			//remote.startListening();
+			// RemoteAdapter remote =
+			// (RemoteAdapter)Runtime.start("remote","RemoteAdapter");
+			// remote.startListening();
 			// remote.setDefaultPrefix("x-");
-			//remote.setDefaultPrefix("");
+			// remote.setDefaultPrefix("");
 			Runtime.start("python", "Python");
 			Runtime.start("webgui", "WebGUI");
-			//Runtime.start("python", "Python");
-			//Runtime.start("myo", "MyoThalmic");
+			// Runtime.start("python", "Python");
+			// Runtime.start("myo", "MyoThalmic");
 			// remote.connect("tcp://127.0.0.1:6767");
-			
-			//Runtime.start("macgui", "GUIService");
-			
+
+			// Runtime.start("macgui", "GUIService");
+
 			// MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
-			//myo.connect();
-			
+			// myo.connect();
+
 			// myo.addMyoDataListener(python);
 
 			// Runtime.start("python", "Python");

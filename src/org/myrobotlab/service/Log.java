@@ -60,6 +60,8 @@ import ch.qos.logback.core.status.Status;
  *
  */
 
+// TODO - add non Root log level changing ability - Service.setLogLevel
+
 public class Log extends Service implements Appender<ILoggingEvent>, NameProvider, CommunicationInterface {
 
 	private static final long serialVersionUID = 1L;
@@ -72,6 +74,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 	public HashMap<String, ArrayList<MRLListener>> publishLogEventNotifyList = new HashMap<String, ArrayList<MRLListener>>();
 
 	boolean isLogging = false;
+	String logLevel = "info";
 
 	/*
 	 * TODO - allow options to record and playback message log - serialize to
@@ -322,12 +325,16 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 			return;
 		} else if ("debug".equalsIgnoreCase(level)) {
 			root.setLevel(ch.qos.logback.classic.Level.DEBUG);
+			logLevel = "debug";
 		} else if ("info".equalsIgnoreCase(level)) {
 			root.setLevel(ch.qos.logback.classic.Level.INFO);
+			logLevel = "info";
 		} else if ("warn".equalsIgnoreCase(level)) {
 			root.setLevel(ch.qos.logback.classic.Level.WARN);
+			logLevel = "warn";
 		} else if ("error".equalsIgnoreCase(level)) {
 			root.setLevel(ch.qos.logback.classic.Level.ERROR);
+			logLevel = "error";
 		} else {
 			log.error("unknown logging level {}", level);
 		}
@@ -335,6 +342,8 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 		if (!isLogging) {
 			root.addAppender(this);
 		}
+		
+		broadcastState();
 	}
 
 	public void startLogging() {
