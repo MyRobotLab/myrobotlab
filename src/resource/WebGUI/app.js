@@ -9,7 +9,7 @@
 // http://tylermcginnis.com/angularjs-factory-vs-service-vs-provider/
 // http://odetocode.com/blogs/scott/archive/2014/05/20/using-resolve-in-angularjs-routes.aspx
 
-angular.module('mrlapp', [
+var app = angular.module('mrlapp', [
     'ngRoute',
     'ng',
     'ui.bootstrap', //BootstrapUI (in Angular style)
@@ -53,3 +53,10 @@ angular.module('mrlapp', [
             redirectTo: '/main'
         });
     }]);
+
+app.filter('reverse', function() {
+  return function(items) {
+    return items.slice().reverse();
+  };
+});
+
