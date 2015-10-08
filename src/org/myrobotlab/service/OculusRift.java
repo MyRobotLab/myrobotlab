@@ -1,65 +1,22 @@
 package org.myrobotlab.service;
 
-import static com.oculusvr.capi.OvrLibrary.OVR_DEFAULT_EYE_HEIGHT;
-import static com.oculusvr.capi.OvrLibrary.OVR_DEFAULT_IPD;
-import static com.oculusvr.capi.OvrLibrary.ovrProjectionModifier.ovrProjection_ClipRangeOpenGL;
-import static com.oculusvr.capi.OvrLibrary.ovrProjectionModifier.ovrProjection_RightHanded;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_RGBA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glClearColor;
-import static org.lwjgl.opengl.GL11.glGetError;
-import static org.lwjgl.opengl.GL11.glScissor;
-import static org.lwjgl.opengl.GL11.glViewport;
-
-import java.awt.Rectangle;
-
-import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.ContextAttribs;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GLContext;
-import org.lwjgl.opengl.PixelFormat;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.headtracking.OculusHeadTracking;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.oculus.OculusDisplay;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
-import org.saintandreas.gl.FrameBuffer;
-import org.saintandreas.gl.MatrixStack;
-// import org.saintandreas.gl.SceneHelpers;
-import org.saintandreas.math.Matrix4f;
-import org.saintandreas.math.Vector3f;
-import org.saintandreas.vr.RiftUtils;
-// import org.saintandreas.vr.RiftUtils;
 import org.slf4j.Logger;
 
-import com.oculusvr.capi.EyeRenderDesc;
-import com.oculusvr.capi.FovPort;
-import com.oculusvr.capi.GLTexture;
 import com.oculusvr.capi.Hmd;
 import com.oculusvr.capi.HmdDesc;
-import com.oculusvr.capi.LayerEyeFov;
-import com.oculusvr.capi.OvrLibrary;
-import com.oculusvr.capi.OvrMatrix4f;
-import com.oculusvr.capi.OvrRecti;
-import com.oculusvr.capi.OvrSizei;
-import com.oculusvr.capi.OvrVector2i;
 import com.oculusvr.capi.OvrVector3f;
-import com.oculusvr.capi.Posef;
-import com.oculusvr.capi.SwapTextureSet;
 import com.oculusvr.capi.TrackingState;
-import com.oculusvr.capi.ViewScaleDesc;
-import static org.lwjgl.opengl.GL30.*;
 
 /**
  * The OculusRift service for MyRobotLab.
@@ -97,6 +54,7 @@ public class OculusRift extends Service implements OculusDataPublisher {
 	// Two OpenCV services, one for the left eye, one for the right eye.
 	transient public OpenCV leftOpenCV;
 	transient public OpenCV rightOpenCV;
+	private OculusDisplay display;
 
 	// TODO: make these configurable...
 	private int leftCameraIndex = 0;
@@ -158,14 +116,6 @@ public class OculusRift extends Service implements OculusDataPublisher {
 		hmdDesc = hmd.getDesc();
 
 		hmd.configureTracking();
-
-
-
-
-
-
-
-
 
 
 	}
@@ -246,6 +196,13 @@ public class OculusRift extends Service implements OculusDataPublisher {
 			rightOpenCV.capture();
 			// Now turn on the camras.
 			// set camera index
+			
+			// Now that the Rift and OpenCV has been setup.
+			display = new OculusDisplay();
+			// on publish frame we'll update the current frame in the rift..
+			// synchronization issues maybe?
+			display.run();
+			
 		} else {
 			log.info("Rift interface already initialized.");
 		}
@@ -355,6 +312,9 @@ public class OculusRift extends Service implements OculusDataPublisher {
 	}
 
 	public RiftFrame publishRiftFrame(RiftFrame frame){
+		
+		// copy the left & right buffered images to the rift display
+		display.setCurrentFrame(frame);
 		return frame;
 	}
 
