@@ -248,6 +248,7 @@
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/math-1.0.4.jar"/>
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/guava-17.0.jar"/>
 		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jscience-4.3.1.jar"/>
+                <!-- end oculus stuff.. TODO: clean it up! -->
 
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
