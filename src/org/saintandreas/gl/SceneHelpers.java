@@ -152,6 +152,7 @@ public class SceneHelpers {
 //			ModelTexture texture = new ModelTexture(loader.loadTexture(bi));
 //			texturedModel.setTexture(texture);
 //		}
+		
 		shader.start();
 		renderer.render(texturedModel);
 		shader.stop();
