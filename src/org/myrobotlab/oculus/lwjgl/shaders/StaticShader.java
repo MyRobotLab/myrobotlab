@@ -1,12 +1,27 @@
 package org.myrobotlab.oculus.lwjgl.shaders;
 
+import java.io.IOException;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+
 public class StaticShader extends ShaderProgram {
 
-	private static final String VERTEX_FILE = "src/org/myrobotlab/oculus/lwjgl/shaders/vertexShader.txt";
-	private static final String FRAGMENT_FILE = "src/org/myrobotlab/oculus/lwjgl/shaders/fragmentShader.txt";
+	
+	private static final String VERTEX_SHADER;
+	private static final String FRAGMENT_SHADER;
+	static {
+		try {
+			VERTEX_SHADER = Resources.toString(Resources.getResource("resource/oculus/vertexShader.txt"), Charsets.UTF_8);
+			FRAGMENT_SHADER = Resources.toString(Resources.getResource("resource/oculus/fragmentShader.txt"), Charsets.UTF_8);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 	
 	public StaticShader() {
-		super(VERTEX_FILE, FRAGMENT_FILE);
+		// TODO: figure out how to load these from the jar or something...	
+		super(VERTEX_SHADER, FRAGMENT_SHADER);
 		
 	}
 

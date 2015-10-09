@@ -59,8 +59,8 @@ public class SceneHelpers {
 	private static final String UNIT_QUAD_FS;
 	static {
 		try {
-			UNIT_QUAD_VS = Resources.toString(Resources.getResource("resource/unitQuad.vs"), Charsets.UTF_8);
-			UNIT_QUAD_FS = Resources.toString(Resources.getResource("resource/unitQuad.fs"), Charsets.UTF_8);
+			UNIT_QUAD_VS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.vs"), Charsets.UTF_8);
+			UNIT_QUAD_FS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.fs"), Charsets.UTF_8);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
