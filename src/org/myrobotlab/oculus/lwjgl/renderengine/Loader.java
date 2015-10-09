@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ import org.myrobotlab.oculus.lwjgl.models.RawModel;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.BufferedImageUtil;
+
+import com.google.common.io.Resources;
 
 public class Loader {
 	
@@ -52,8 +55,9 @@ public class Loader {
 	public int loadTexture(String fileName) {
 		Texture texture  = null;
 		try {
-			FileInputStream is = new FileInputStream("src/resource/" + fileName + ".png");
+			//FileInputStream is = new FileInputStream("src/resource/" + fileName + ".png");
 			//InputStream is = new URL("https://upload.wikimedia.org/wikipedia/en/2/24/Lenna.png").openStream();
+			InputStream is = Resources.getResource("resource/" + fileName + ".png").openStream();
 			texture = TextureLoader.getTexture("PNG", is);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

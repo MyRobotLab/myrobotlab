@@ -65,6 +65,7 @@ public class SceneHelpers {
 			throw new IllegalStateException(e);
 		}
 	}
+	
 
 	public static void renderTexturedQuad(int texture) {
 		if (null == unitQuadProgram) {
@@ -121,7 +122,10 @@ public class SceneHelpers {
 			};
 			// TODO: maybe I shouldn't do this each time ? 
 			RawModel model = loader.loadToVAO(verticies, textureCoords, indicies);
-			ModelTexture texture = new ModelTexture(loader.loadTexture("agent"));
+			
+			// TODO: load the image first.
+			
+			ModelTexture texture = new ModelTexture(loader.loadTexture("OculusRift"));
 			texturedModel = new TexturedModel(model, texture);
 
 		} 
