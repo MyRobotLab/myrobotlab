@@ -8,6 +8,9 @@ import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+
 public abstract class ShaderProgram {
 
 	private int programID;
@@ -15,8 +18,10 @@ public abstract class ShaderProgram {
 	private int fragmentShaderID;
 
 	public ShaderProgram(String vertexFile, String fragmentFile) {
-		vertexShaderID = loadShader(vertexFile,  GL20.GL_VERTEX_SHADER);
-		fragmentShaderID = loadShader(fragmentFile, GL20.GL_FRAGMENT_SHADER);
+		
+		
+		vertexShaderID = loadShader(vertexFile,  GL20.GL_VERTEX_SHADER, false);
+		fragmentShaderID = loadShader(fragmentFile, GL20.GL_FRAGMENT_SHADER, false);
 		programID = GL20.glCreateProgram();
 		GL20.glAttachShader(programID, vertexShaderID);
 		GL20.glAttachShader(programID,  fragmentShaderID);
@@ -28,11 +33,11 @@ public abstract class ShaderProgram {
 	public void start() {
 		GL20.glUseProgram(programID);
 	}
-	
+
 	public void stop() {
 		GL20.glUseProgram(0);
 	}
-	
+
 	public void cleanUp() {
 		stop();
 		GL20.glDetachShader(programID, vertexShaderID);
@@ -41,29 +46,38 @@ public abstract class ShaderProgram {
 		GL20.glDeleteShader(fragmentShaderID);
 		GL20.glDeleteProgram(programID);
 	};
-	
+
 	protected abstract void bindAttributes();
-	
+
 	protected void bindAttribute(int attribute, String variableName) {
 		GL20.glBindAttribLocation(programID,  attribute,  variableName);
 	}
-	
-	private static int loadShader(String file, int type) {
+
+	// if isFile = true , load the file name. o/w first arg is the actual source for the shader.
+	private static int loadShader(String file, int type, boolean isFile) {
+
 		// load the shader from the file
-		StringBuilder shaderSource = new StringBuilder();
-		BufferedReader reader;
-		try {
-			reader = new BufferedReader(new FileReader(file));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				shaderSource.append(line).append("\n");
-			};
-			reader.close();
-		} catch (IOException e) {
-			System.err.println("Could not read file!");
-			e.printStackTrace();
-			System.exit(-1);
+		String shaderSource = null;
+		if (isFile) {
+			StringBuilder shaderSourceBuilder = new StringBuilder();
+			BufferedReader reader;
+			try {
+				reader = new BufferedReader(new FileReader(file));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					shaderSourceBuilder.append(line).append("\n");
+				};
+				reader.close();
+				shaderSource = shaderSourceBuilder.toString();
+			} catch (IOException e) {
+				System.err.println("Could not read file!");
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		} else {
+			shaderSource = file;
 		}
+
 		int shaderID = GL20.glCreateShader(type);
 		GL20.glShaderSource(shaderID, shaderSource);
 		// compile the shader
@@ -75,7 +89,7 @@ public abstract class ShaderProgram {
 			System.exit(-1);
 		}
 		return shaderID;
-		
+
 	}
 
 
