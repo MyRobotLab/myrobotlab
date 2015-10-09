@@ -186,11 +186,20 @@ public class OculusDisplay implements Runnable {
 
 	public final void drawFrame() {
 		// System.out.println("Draw Frame called.");
+		// TODO: synchronize the current frame updating..
+		if (currentFrame == null) {
+			return;
+		}
+		if (currentFrame.left == null || currentFrame.right == null) {
+			return;
+		}
+		
 		width = hmdDesc.Resolution.w / 4;
 		height = hmdDesc.Resolution.h / 4;
 		++frameCount;
 
 		// here it is folks!
+		
 		Posef eyePoses[] = hmd.getEyePoses(frameCount, eyeOffsets);
 
 		frameBuffer.activate();

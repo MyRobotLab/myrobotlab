@@ -229,9 +229,13 @@ public class OculusRift extends Service implements OculusDataPublisher {
 			}
 		}
 
+		// update the oculus display with the last rift frame
+		if (display != null) {
+			display.setCurrentFrame(lastRiftFrame);
+		} else {
+			log.warn("The Oculus Display was null.");
+		}
 		invoke("publishRiftFrame", lastRiftFrame);
-
-
 	}
 
 
@@ -312,9 +316,6 @@ public class OculusRift extends Service implements OculusDataPublisher {
 	}
 
 	public RiftFrame publishRiftFrame(RiftFrame frame){
-		
-		// copy the left & right buffered images to the rift display
-		display.setCurrentFrame(frame);
 		return frame;
 	}
 
