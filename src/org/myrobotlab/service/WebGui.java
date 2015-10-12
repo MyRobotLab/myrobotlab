@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 
 import org.atmosphere.cpr.ApplicationConfig;
@@ -22,7 +24,6 @@ import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
-import org.atmosphere.cpr.SessionSupport;
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
@@ -43,6 +44,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
+import org.myrobotlab.opencv.OpenCVFilterFFMEG;
 //import org.myrobotlab.service.WebGUI3.Error;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -55,15 +57,15 @@ import org.slf4j.Logger;
 
 /**
  * 
- * WebGUI - This service is the AngularJS based GUI TODO - messages & services
+ * WebGui - This service is the AngularJS based GUI TODO - messages & services
  * are already APIs - perhaps a data API - same as service without the message
  * wrapper
  */
-public class WebGUI extends Service implements AuthorizationProvider, Gateway, Handler {
+public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(WebGUI.class);
+	public final static Logger log = LoggerFactory.getLogger(WebGui.class);
 
 	Integer port = 8888;
 
@@ -87,7 +89,63 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 	// FIXME - allow Protobuf/Thrift/Avro
 	// FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
-	public WebGUI(String n) {
+	LiveVideoStreamHandler test = new LiveVideoStreamHandler();
+
+	
+	
+	public static class LiveVideoStreamHandler implements Handler {
+
+		@Override
+		public void handle(AtmosphereResource r) {
+			// TODO Auto-generated method stub
+			log.info("here");
+			try {
+
+				/*
+				OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");				
+				OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
+				opencv.addFilter(ffmpeg);
+				opencv.capture();
+				sleep(1000);
+				opencv.removeFilters();
+				ffmpeg.stopRecording();
+				*/
+				
+				
+				AtmosphereResponse response = r.getResponse();
+				//response.setContentType("video/mp4");
+				response.setContentType("video/x-flv");
+				
+				ServletOutputStream out = response.getOutputStream();
+				//response.addHeader(name, value);
+
+				//byte[] data = FileIO.fileToByteArray(new File("src/resource/WebGUI/video/ffmpeg.1443989700495.mp4"));
+
+				byte[] data = FileIO.fileToByteArray(new File("mp4Test.mp4"));
+				
+				//byte[] data = FileIO.fileToByteArray(new File("flvTest.flv"));
+				
+				log.info("bytes {}", data.length);
+				out.write(data);
+				out.flush();
+				log.info("here");
+				log.info("here");
+				//out.close();
+				//r.write(data);
+				log.info("here");
+				//r.writeOnTimeout(arg0)
+				//r.forceBinaryWrite();
+				// r.close();
+				
+			} catch (Exception e) {
+				Logging.logError(e);
+			}
+
+		}
+
+	}
+
+	public WebGui(String n) {
 		super(n);
 	}
 
@@ -228,15 +286,18 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				 * did not work :( .resource(
 				 * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource")
 				 * .resource(
-				 * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGUI"
+				 * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGui"
 				 * )
 				 */
 
+				.resource("/video", test)
+				// .resource("/video/ffmpeg.1443989700495.mp4", test)
+
 				// for debugging
-				.resource("./src/resource/WebGUI")
+				.resource("./src/resource/WebGui")
 				.resource("./src/resource")
 				// for runtime - after extractions
-				.resource("./resource/WebGUI")
+				.resource("./resource/WebGui")
 				.resource("./resource")
 
 				// Support 2 APIs
@@ -252,8 +313,8 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 				// "100000")
 				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
 				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build();
-		
-		//SessionSupport ss = new SessionSupport();
+
+		// SessionSupport ss = new SessionSupport();
 
 		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
 		s.start();
@@ -353,7 +414,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			out = r.getResponse().getOutputStream();
 
 			r.setBroadcaster(broadcaster);
-			
+
 			log.info("sessionId {}", r);
 			String sessionId = r.getAtmosphereResourceEvent().getResource().getRequest().getSession().getId();
 			log.info("sessionId {}", sessionId);
@@ -692,7 +753,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 
 	public void extract() {
 		try {
-			Zip.extractFromFile("./myrobotlab.jar", "root", "resource/WebGUI");
+			Zip.extractFromFile("./myrobotlab.jar", "root", "resource/WebGui");
 		} catch (IOException e) {
 			error(e);
 		}
@@ -727,7 +788,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 		// broadcast
 		broadcast(m);
 
-		// if the method name is == to a method in the WebGUI
+		// if the method name is == to a method in the WebGui
 		// process it
 		if (methodSet.contains(m.method)) {
 			// process the message like a regular service
@@ -772,7 +833,7 @@ public class WebGUI extends Service implements AuthorizationProvider, Gateway, H
 			// remote.setDefaultPrefix("x-");
 			// remote.setDefaultPrefix("");
 			Runtime.start("python", "Python");
-			Runtime.start("webgui", "WebGUI");
+			Runtime.start("webgui", "WebGui");
 			// Runtime.start("python", "Python");
 			// Runtime.start("myo", "MyoThalmic");
 			// remote.connect("tcp://127.0.0.1:6767");

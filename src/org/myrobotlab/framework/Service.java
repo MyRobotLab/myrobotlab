@@ -1107,9 +1107,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	// TODO Clock example - roles
 	// no - security (internal) Role - default access - ALLOW
-	// WebGUI - public - no security header - default access DISALLOW +
+	// WebGui - public - no security header - default access DISALLOW +
 	// exception
-	// WebGUI (remote in genera) - user / group ALLOW
+	// WebGui (remote in genera) - user / group ALLOW
 
 	/*
 	 * private boolean hasAccess(Message msg) { // turn into single key ??? //
@@ -1216,7 +1216,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		// Level
 		// 2. authentication & authorization
 		// 3. transport mechanism (needs implementation on each type of remote
-		// Communicator e.g. XMPP RemoteAdapter WebGUI etc...)
+		// Communicator e.g. XMPP RemoteAdapter WebGui etc...)
 
 		// check for access
 		// if access FAILS ! - check for authenticated access

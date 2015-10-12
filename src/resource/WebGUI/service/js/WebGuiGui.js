@@ -1,7 +1,7 @@
-angular.module('mrlapp.service.WebGUIGui', [])
+angular.module('mrlapp.service.WebGuiGui', [])
 
-        .controller('WebGUIGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
-                $log.info('WebGUIGuiCtrl');
+        .controller('WebGuiGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+                $log.info('WebGuiGuiCtrl');
                 // get fresh copy
                 $scope.service = mrl.getService($scope.service.name);
 

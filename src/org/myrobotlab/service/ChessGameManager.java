@@ -22,7 +22,7 @@ public class ChessGameManager extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(ChessGameManager.class);
 
-	transient WebGUI webgui;
+	transient WebGui webgui;
 	transient Serial serial;
 	transient SpeechSynthesis speech;
 
@@ -30,7 +30,7 @@ public class ChessGameManager extends Service {
 		Peers peers = new Peers(name);
 
 		// put peer definitions in
-		peers.put("webgui", "WebGUI", "webgui");
+		peers.put("webgui", "WebGui", "webgui");
 		peers.put("serial", "Serial", "serial");
 		peers.put("speech", "Speech", "speech");
 		return peers;

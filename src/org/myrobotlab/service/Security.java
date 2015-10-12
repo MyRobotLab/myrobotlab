@@ -327,7 +327,7 @@ public class Security extends Service implements AuthorizationProvider {
 		 * FIXME - set predefined levels - high security medium low
 		 * allowExportByType.put("XMPP", false);
 		 * allowExportByType.put("RemoteAdapter", false);
-		 * allowExportByType.put("WebGUI", false);
+		 * allowExportByType.put("WebGui", false);
 		 * allowExportByType.put("GUIService", false);
 		 * 
 		 * allowExportByType.put("Java", false); allowExportByType.put("Python",

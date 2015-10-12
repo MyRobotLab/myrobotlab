@@ -23,7 +23,7 @@ public class Sprinkler extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Sprinkler.class);
 
-	WebGUI webgui;
+	WebGui webgui;
 	Arduino arduino;
 	Cron cron;
 
@@ -34,7 +34,7 @@ public class Sprinkler extends Service {
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
-		peers.put("webgui", "WebGUI", "WebGUI service");
+		peers.put("webgui", "WebGui", "WebGui service");
 		peers.put("arduino", "Arduino", "Arduino service");
 		peers.put("cron", "Cron", "Cron service");
 		return peers;
@@ -172,7 +172,7 @@ public class Sprinkler extends Service {
 		// cron.addTask("* * * * *", this.getName(), "onTimeToWater");
 		// cron.addTask("*/2 * * * *", this.getName(), "stop");
 
-		webgui = (WebGUI) startPeer("webgui");
+		webgui = (WebGui) startPeer("webgui");
 
 	}
 

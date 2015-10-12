@@ -844,7 +844,7 @@ public class Python extends Service {
 		// python.execAndWait();
 		// python.releaseService();
 
-		Runtime.createAndStart("webgui", "WebGUI");
+		Runtime.createAndStart("webgui", "WebGui");
 
 	}
 

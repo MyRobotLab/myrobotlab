@@ -15,7 +15,7 @@ import com.google.gson.Gson;
 
 /**
  * JSON TypeConverter - used in general REST api to convert url JSON parameters
- * appropriately to hard types for method invoking used in WebGUI and Cli
+ * appropriately to hard types for method invoking used in WebGui and Cli
  * 
  * @author GroG
  *

@@ -397,7 +397,7 @@ public class Joystick extends Service {
 			remote.connect("tcp://127.0.0.1:6767");
 			*/
 
-			Runtime.start("webgui", "WebGUI");
+			Runtime.start("webgui", "WebGui");
 
 			// joy.setController(7);
 			// joy.setController(5);

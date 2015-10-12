@@ -41,7 +41,7 @@ public class Incubator extends Service {
 
 	// transient public XMPP xmpp;
 
-	// transient public WebGUI webgui;
+	// transient public WebGui webgui;
 	// transient public Python python;
 
 	// transient Index<Object> cache = new Index<Object>();
@@ -65,7 +65,7 @@ public class Incubator extends Service {
 		// "shared python instance");
 
 		peers.put("xmpp", "XMPP", "XMPP service");
-		// peers.put("webgui", "WebGUI", "WebGUI service");
+		// peers.put("webgui", "WebGui", "WebGui service");
 		// peers.put("python", "Python", "Python service");
 
 		return peers;
@@ -158,7 +158,7 @@ public class Incubator extends Service {
 			XMPP xmpp = (XMPP) startPeer("xmpp");
 			// python = (Python) startPeer("python");
 			/*
-			 * webgui = (WebGUI) createPeer("webgui"); webgui.port = 4321;
+			 * webgui = (WebGui) createPeer("webgui"); webgui.port = 4321;
 			 * webgui.startService();
 			 */
 			xmpp.startService();

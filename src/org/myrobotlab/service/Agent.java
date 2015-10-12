@@ -566,7 +566,7 @@ public class Agent extends Service {
 	/**
 	 * First method JVM executes when myrobotlab.jar is in jar form.
 	 * 
-	 * -agent "-logLevel DEBUG -service webgui WebGUI"
+	 * -agent "-logLevel DEBUG -service webgui WebGui"
 	 * 
 	 * @param args
 	 */

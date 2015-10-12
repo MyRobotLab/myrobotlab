@@ -280,7 +280,7 @@ public class Shoutbox extends Service {
 	 * @param myName
 	 */
 	public void setNickName(String nickname){
-		//WebGUI web
+		//WebGui web
 		log.info("setNickName {}", nickname);
 	}
 
@@ -541,7 +541,7 @@ public class Shoutbox extends Service {
 
 			Runtime.start("cli", "Cli");
 
-			Runtime.start("webgui", "WebGUI");
+			Runtime.start("webgui", "WebGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);

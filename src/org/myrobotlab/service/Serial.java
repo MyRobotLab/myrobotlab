@@ -1197,7 +1197,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 				int timeout = 500;// 500 ms serial timeout
 
 				// Runtime.start("gui", "GUIService");
-				// Runtime.start("webgui", "WebGUI");
+				// Runtime.start("webgui", "WebGui");
 
 				// get serial handle and creates a uart & virtual null modem cable
 				Serial serial = (Serial) Runtime.start("serial", "Serial");

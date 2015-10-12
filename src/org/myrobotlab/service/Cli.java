@@ -77,7 +77,7 @@ public class Cli extends Service {
 	// - its a Central Point Controller - where input (any InputStream) can send
 	// data to be decoded on a very common API e.g. (proto
 	// scheme)(host)/api/inputEncoding/responseEncoding/instance/(method)/(params...)
-	// Agent + (RemoteAdapter/WebGUI/Netosphere) + Cli(command processor part
+	// Agent + (RemoteAdapter/WebGui/Netosphere) + Cli(command processor part
 	// with InStream/OutStream) - is most Big-Fu !
 	public class Decoder extends Thread {
 		// public String cwd = "/"; CHANGED THIS - it now is GLOBAL - :P

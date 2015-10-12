@@ -13,7 +13,7 @@
   </div>
   <div class="col-lg-3">    
     <label for="service.portName">port</label>
-    <input type="text" ng-disabled="isConnected" ng-model="service.portName" typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
+    <input type="text" ng-model="service.portName" typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
   </div>
   <div class="col-lg-7">
   <div class="btn-group">

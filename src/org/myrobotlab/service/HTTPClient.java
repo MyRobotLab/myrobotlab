@@ -292,21 +292,10 @@ public class HTTPClient extends Service {
 			client.addFormField("browserlang", "");
 			client.addFormField("GLOGOLOGIN", "");
 			client.addFormField("g_UserLang", "");
-			//client.addFormField("GLANGUAGEINSTALL",
-			//		"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++%3BENG%7CInglese%7C..%2Fimages%2Fflag%2FUnitedKingdom.png%3BITA%7CItaliano%7C..%2Fimages%2Fflag%2FItaly.png");
+
 			client.addFormField("GERMNAME", "HRPortal");
 
-			// String login = new String(client.get("https://servizizucchetti.decathlon.com/portale/jsp/login.jsp?cpccchk=0.030970328487455845"));
-			// log.info(login);
-
-			// 
-			/*
-			 * DID NOT WORK - WHY NOT ENCODED ??? WRONG HEADER ??? data =
-			 * client.post(
-			 * "https://servizizucchetti.decathlon.com/portale/servlet/cp_login"
-			 * , "BLAH BLAH");
-			 */
-
+		
 			String response = client.post("https://servizizucchetti.decathlon.com/portale/servlet/cp_login");
 			int code = client.getStatusCode();
 			log.info("code " + code);;
