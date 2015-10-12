@@ -66,7 +66,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 			Runtime.createAndStart("gui", "GUIService");
 			rightHand.connect("COM12");
 			rightHand.startService();
-			Runtime.createAndStart("webgui", "WebGUI");
+			Runtime.createAndStart("webgui", "WebGui");
 			// rightHand.connect("COM12"); TEST RECOVERY !!!
 			rightHand.close();
 			rightHand.open();

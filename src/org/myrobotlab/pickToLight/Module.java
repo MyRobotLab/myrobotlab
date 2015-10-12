@@ -301,7 +301,7 @@ public class Module {
 		return selector;
 	}
 
-	// TODO - should only have to wrap the highest level transaction (WebGUI
+	// TODO - should only have to wrap the highest level transaction (WebGui
 	// Thread) -
 	// such that smaller transaction handling is not necessary
 	public int ledOn() {

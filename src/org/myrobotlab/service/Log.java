@@ -371,7 +371,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 
 			Runtime.start("log", "Log");
 			Runtime.start("python", "Python");
-			Runtime.start("webgui", "WebGUI");
+			Runtime.start("webgui", "WebGui");
 			log.info("this is an info test");
 			log.warn("this is an warn test");
 			log.error("this is an error test");

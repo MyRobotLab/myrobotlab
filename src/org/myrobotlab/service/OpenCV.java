@@ -60,6 +60,7 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.opencv.OpenCVFilterFFMEG;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
@@ -692,14 +693,14 @@ public class OpenCV extends VideoSource {
 
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
 
-		/*
+		
 		OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
 		opencv.addFilter(ffmpeg);
 		opencv.capture();
 		
 		opencv.removeFilters();
 		ffmpeg.stopRecording();
-		*/
+		
 
 		// opencv.setCameraIndex(0);
 

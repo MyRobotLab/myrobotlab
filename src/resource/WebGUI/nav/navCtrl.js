@@ -70,7 +70,7 @@ function($scope, $log, $filter, $location, $anchorScroll, mrl, StateSvc, service
     ;
     
     $scope.hideAll = function() {
-        $log.info('help');
+        $log.info('hideAll');
         serviceSvc.hideAll();
     }
     ;

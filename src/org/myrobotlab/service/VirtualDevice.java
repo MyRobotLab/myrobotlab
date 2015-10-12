@@ -209,7 +209,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		
 			//Runtime.start("gui", "GUIService");
 			
-			Runtime.start("webgui", "WebGUI");
+			Runtime.start("webgui", "WebGui");
 			
 
 		} catch (Exception e) {

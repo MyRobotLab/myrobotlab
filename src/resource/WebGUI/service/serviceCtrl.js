@@ -23,7 +23,6 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
     $log.info('lazy-loading:', type);
     $ocLazyLoad.load("service/js/" + type + "Gui.js").then(function() {
         $scope.serviceloaded = true;
-        // FIXME why is this needed?
     }
     , function(e) {
         $log.info('lazy-loading wasnt successful:', type);

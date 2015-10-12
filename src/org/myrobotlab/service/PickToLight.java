@@ -234,7 +234,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
 	transient public RasPi raspi;
 
-	transient public WebGUI webgui;
+	transient public WebGui webgui;
 	transient public Worker cycleWorker;
 	transient public Worker pollingWorker;
 
@@ -286,7 +286,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		peers.put("raspi", "RasPi", "raspi");
-		peers.put("webgui", "WebGUI", "web server interface");
+		peers.put("webgui", "WebGui", "web server interface");
 		return peers;
 	}
 
@@ -363,9 +363,9 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 			 * pickToLight.display(binList, "1234 ");
 			 */
 
-			// Runtime.createAndStart("web", "WebGUI");
+			// Runtime.createAndStart("web", "WebGui");
 
-			// Runtime.createAndStart("webgui", "WebGUI");
+			// Runtime.createAndStart("webgui", "WebGui");
 			/*
 			 * GUIService gui = new GUIService("gui"); gui.startService();
 			 */
@@ -377,7 +377,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
 	public PickToLight(String n) {
 		super(n);
-		webgui = (WebGUI) createPeer("webgui");
+		webgui = (WebGui) createPeer("webgui");
 		webgui.autoStartBrowser(false);
 		webgui.useLocalResources(true);
 		raspi = (RasPi) createPeer("raspi");

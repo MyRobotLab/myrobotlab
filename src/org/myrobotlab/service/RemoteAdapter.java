@@ -947,7 +947,7 @@ public class RemoteAdapter extends Service implements Gateway {
 			// Runtime.start(String.format("remote%d", 0), "RemoteAdapter");
 			//Runtime.start("mac", "Runtime");
 			//Runtime.start("gui", "GUIService");
-			//Runtime.start("webgui", "WebGUI");
+			//Runtime.start("webgui", "WebGui");
 			//Runtime.start("python", "Python");
 			//Runtime.start("mac.clock", "Clock");
 			// Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");

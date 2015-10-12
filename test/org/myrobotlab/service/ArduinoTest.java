@@ -660,7 +660,7 @@ public class ArduinoTest {
 			ArduinoTest.setUpBeforeClass();
 			ArduinoTest test = new ArduinoTest();
 			
-			WebGUI gui = (WebGUI)Runtime.start("webgui", "WebGUI");
+			WebGui gui = (WebGui)Runtime.start("webgui", "WebGui");
 			//ServiceInterface gui = Runtime.start("gui", "GUIService");
 			
 			Runtime.dumpToFile();

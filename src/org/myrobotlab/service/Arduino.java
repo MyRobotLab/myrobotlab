@@ -1622,7 +1622,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			//Runtime.broadcastStates();
 			
 			/*
-			WebGUI webgui = (WebGUI)Runtime.create("webgui", "WebGUI");
+			WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
 			webgui.setPort(8989);
 			webgui.startService();
 			*/

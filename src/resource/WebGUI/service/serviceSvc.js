@@ -1,7 +1,7 @@
 /*
   responsible for: loading {{serviceType}}controller
   keeps all servicePanel specific infomation (state, position, size, etc)
-  can save all this information to the WebGUI service
+  can save all this information to the WebGui service
 
   creates the initial service panels
 
@@ -61,7 +61,6 @@ angular.module('mrlapp.service')
         return arrayOfPanels;
     }
     ;
-    
     
     this.hideAll = function() {
         for (var name in servicePanels) {
@@ -215,6 +214,7 @@ angular.module('mrlapp.service')
         //TODO - refactor this !!! (and make it work better)
         var panelsarray = _self.getPanelList();
         var posy = 0;
+        /* - simply don't do it :)
         for (var i = 0; i < panelsarray.length; i++) {
             var value = panelsarray[i];
             var height = 300;
@@ -235,6 +235,8 @@ angular.module('mrlapp.service')
                 i = 0;
             }
         }
+        */
+        
         //zindex
         var zindex = 1;
         angular.forEach(servicePanels, function(value, key) {
@@ -393,6 +395,7 @@ angular.module('mrlapp.service')
             panelindex: panelindex,
             panelname: panelname,
             showpanelname: showpanelname,
+            show:true,
             panelsize: panelsize,
             height: 0,
             posx: 15,
@@ -434,7 +437,7 @@ angular.module('mrlapp.service')
     
     
     /**
-    * save a panel to the WebGUI - it will keep the object in memory allowing 
+    * save a panel to the WebGui - it will keep the object in memory allowing 
     * it to be loaded back into the correct size, position, state, etc
     */
     this.savePanel = function(name) {
@@ -443,7 +446,7 @@ angular.module('mrlapp.service')
     }
     
     /**
-    * load a panel from the WebGUI
+    * load a panel from the WebGui
     */
     this.loadPanel = function(name) {
         var gateway = mrl.getGateway();

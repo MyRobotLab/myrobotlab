@@ -96,7 +96,7 @@ public class Plantoid extends Service {
 
 	// FIXME make part of ServoControl
 
-	transient private WebGUI webgui;
+	transient private WebGui webgui;
 
 	transient private XMPP xmpp;
 
@@ -134,7 +134,7 @@ public class Plantoid extends Service {
 		peers.put("audioFile", "AudioFile", "audio file service");
 		peers.put("jFugue", "JFugue", "jfugue service");
 
-		peers.put("webgui", "WebGUI", "WebGUI service");
+		peers.put("webgui", "WebGui", "WebGui service");
 		peers.put("xmpp", "XMPP", "xmpp service");
 		peers.put("leg1", "Servo", "leg1");
 		peers.put("leg2", "Servo", "leg2");
@@ -159,7 +159,7 @@ public class Plantoid extends Service {
 			plantoid.connect("COM12");
 			plantoid.startService();
 			// Runtime.createAndStart("python", "Python");
-			// Runtime.createAndStart("webgui", "WebGUI");
+			// Runtime.createAndStart("webgui", "WebGui");
 			/*
 			 * GUIService gui = new GUIService("gui"); gui.startService();
 			 */
@@ -182,7 +182,7 @@ public class Plantoid extends Service {
 
 		arduino = (Arduino) createPeer("arduino");
 		xmpp = (XMPP) createPeer("xmpp");
-		webgui = (WebGUI) createPeer("webgui");
+		webgui = (WebGui) createPeer("webgui");
 		leg1 = (Servo) createPeer("leg1");
 		leg2 = (Servo) createPeer("leg2");
 		leg3 = (Servo) createPeer("leg3");

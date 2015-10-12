@@ -70,7 +70,7 @@ public class Pingdar extends Service {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		Runtime.createAndStart("gui", "GUIService");
-		// Runtime.createAndStart("webgui", "WebGUI");
+		// Runtime.createAndStart("webgui", "WebGui");
 		/*
 		 * Serial.createNullModemCable("uart", "COM10"); Serial serial =
 		 * (Serial)Runtime.createAndStart("uart", "Serial");

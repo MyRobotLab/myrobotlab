@@ -28,20 +28,11 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
-
-import java.util.ArrayList;
-
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
+import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.helper.opencv_core.CvArr;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.data.Point2Df;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFFMEG extends OpenCVFilter {
@@ -78,15 +69,25 @@ public class OpenCVFilterFFMEG extends OpenCVFilter {
 		try {
 			log.info(String.format("initRecorder %s", filename));
 
+			//filename = "rtp"
+			//filename = "rtmp://0.0.0.0:1888/video/test.flv";
+			
+			//filename = "rtmp://live:live@128.122.151.108:1935/live/test.flv";
+			
+			filename = "rtmp://live:live@54.158.155.69:1935/live/test.flv";
+			
 			recorder = new FFmpegFrameRecorder(filename, imageSize.width(), imageSize.height(), 1);
 
 			//recorder.setFormat("flv");
 			// recorder.setFormat("mjpeg");
 			recorder.setFormat("mp4");
-			 
+
 			recorder.setSampleRate(sampleAudioRateInHz);
 			recorder.setImageWidth(imageSize.width());
 			recorder.setImageHeight(imageSize.height());
+			//avcodec.AV_CODEC_ID_FLV1;
+			recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+			//recorder.s
 
 			// re-set in the surface changed method as well
 			recorder.setFrameRate(frameRate);
@@ -106,6 +107,17 @@ public class OpenCVFilterFFMEG extends OpenCVFilter {
 			 * recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
 			 */
 
+			/*
+			 * FrameRecorder recorder = new FFmpegFrameRecorder(
+			 * 'newvideo.mp4",grabber.getImageWidth(),grabber.getImageHeight());
+			 * recorder.setFormat("mp4");
+			 * recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+			 * recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+			 * recorder.setFrameRate(5); int height=grabber.getImageHeight();
+			 * int width=grabber.getImageWidth(); int bitrate=(int)
+			 * (height*width*5*0.07); recorder.setVideoBitrate(bitrate);
+			 * System.out.println("Grabber videoprocess Bitrate::"+bitrate);
+			 */
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -114,7 +126,7 @@ public class OpenCVFilterFFMEG extends OpenCVFilter {
 	// Start the capture
 	public void startRecording() {
 		try {
-			if (recorder == null){
+			if (recorder == null) {
 				initRecorder(name);
 			}
 			recorder.start();
@@ -147,7 +159,6 @@ public class OpenCVFilterFFMEG extends OpenCVFilter {
 	public IplImage process(IplImage image, OpenCVData data) {
 
 		boolean runAudioThread = true;
-		
 
 		// Set the thread priority
 		// android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
@@ -195,7 +206,7 @@ public class OpenCVFilterFFMEG extends OpenCVFilter {
 				 * bufferReadResult));
 				 */
 
-				//recorder.stop();
+				// recorder.stop();
 
 			} catch (FFmpegFrameRecorder.Exception e) {
 				log.info(e.getMessage());

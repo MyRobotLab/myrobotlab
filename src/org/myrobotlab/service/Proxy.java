@@ -38,7 +38,7 @@ public class Proxy extends Service {
 		
 		// FIXME - invoke the real proxied service !!!
 
-		// if the method name is == to a method in the WebGUI
+		// if the method name is == to a method in the WebGui
 		// process it
 		if (methodSet.contains(m.method)) {
 			// process the message like a regular service

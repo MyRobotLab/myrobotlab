@@ -101,7 +101,7 @@ public class InMoov extends Service {
 	boolean saveSkeletonFrame = false;
 
 	// reflective or non-interactive peers
-	// transient public WebGUI webgui;
+	// transient public WebGui webgui;
 	// transient public XMPP xmpp;
 	// transient public Security security;
 
@@ -1333,7 +1333,7 @@ public class InMoov extends Service {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			Runtime.start("webgui", "WebGUI");
+			Runtime.start("webgui", "WebGui");
 
 			// InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
 		

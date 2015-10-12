@@ -33,7 +33,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.WebGUI;
+import org.myrobotlab.service.WebGui;
 import org.slf4j.Logger;
 
 public class WebGUIGUI extends ServiceGUI implements ActionListener {
@@ -53,16 +53,16 @@ public class WebGUIGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-		subscribe("publishState", "getState", WebGUI.class);
+		subscribe("publishState", "getState", WebGui.class);
 		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishState", "getState", WebGUI.class);
+		unsubscribe("publishState", "getState", WebGui.class);
 	}
 
-	public void getState(WebGUI template) {
+	public void getState(WebGui template) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {

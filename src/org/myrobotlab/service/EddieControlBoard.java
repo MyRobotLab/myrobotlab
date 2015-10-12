@@ -65,7 +65,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 	transient Serial serial;
 
 	transient Keyboard keyboard;
-	transient WebGUI webgui;
+	transient WebGui webgui;
 	transient Joystick joystick;
 	transient RemoteAdapter remote;
 
@@ -93,7 +93,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 		// put peer definitions in
 		peers.put("serial", "Serial", "serial");
 		peers.put("keyboard", "Keyboard", "serial");
-		peers.put("webgui", "WebGUI", "webgui");
+		peers.put("webgui", "WebGui", "webgui");
 		peers.put("remote", "RemoteAdapter", "remote interface");
 		peers.put("joystick", "Joystick", "joystick");
 		return peers;
@@ -439,7 +439,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 	}
 
 	public void startWebGUI() throws Exception {
-		webgui = (WebGUI) startPeer("webgui");
+		webgui = (WebGui) startPeer("webgui");
 	}
 
 	public void stop() throws Exception {

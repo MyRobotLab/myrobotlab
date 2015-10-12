@@ -1,4 +1,4 @@
-webgui = Runtime.create("webgui","WebGUI")
+webgui = Runtime.create("webgui","WebGui")
 
 # if you don't want the browser to 
 # autostart to homepage
