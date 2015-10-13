@@ -180,7 +180,7 @@ public class Tracking extends Service {
 		// createPeer("X","Servo") <-- create peer of default type
 		x = (Servo) createPeer("x");
 		y = (Servo) createPeer("y");
-		pid = (PID2) createPeer("pid");
+		pid = (PID2) createPeer("pid2");
 		opencv = (OpenCV) createPeer("opencv");
 		arduino = (Arduino) createPeer("arduino");
 

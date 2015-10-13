@@ -25,7 +25,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 	public final static Logger log = LoggerFactory.getLogger(MarySpeech.class);
 	private static final long serialVersionUID = 1L;
 	
-	MaryInterface marytts = null;
+	transient MaryInterface marytts = null;
 	
 	public MarySpeech(String reservedKey) {
 		super(reservedKey);
