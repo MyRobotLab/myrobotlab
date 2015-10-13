@@ -48,7 +48,7 @@ public class Test extends Service {
 
 	List<Status> status = new ArrayList<Status>();
 
-	BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
+	LinkedBlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
 	public static void logThreadNames() {
 		
