@@ -25,9 +25,6 @@
 
 package org.myrobotlab.service;
 
-import java.io.File;
-import java.net.URL;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -55,17 +52,8 @@ public class Arm extends Service {
 
 	// TODO - do in Service
 	public static void main(String[] args) {
-		
-		
 
 		try {
-			
-
-			// URL url = new File("http://www.google.com").toURI().toURL();
-			
-			//URL url = new File("http://www.google.com").toURI().toURL();
-			
-			
 			Arm arm = new Arm("arm");
 			arm.startService();
 			arm.startRobot();
@@ -87,7 +75,7 @@ public class Arm extends Service {
 	@Override
 	public String getDescription() {
 		// TODO Auto-generated method stub
-		return null;
+		return "robot arm service";
 	}
 
 	public void startRobot() {

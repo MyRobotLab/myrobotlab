@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.codec.Encoder;
@@ -24,7 +26,7 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 
-@Ignore
+// @Ignore
 public class ServiceInterfaceTest {
 
 	public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
@@ -57,6 +59,23 @@ public class ServiceInterfaceTest {
 		// WebGUI gets an address in use/failed to bind to port 8888
 		whiteListServices.add("WebGui");
 
+		// dependencies missing in repo
+		whiteListServices.add("MyoThalmic");
+		// NPE exception.
+		whiteListServices.add("Tracking");
+
+		// NPE Exception in serial service?
+		whiteListServices.add("EddieControlBoard");
+		// NPE in serial
+		whiteListServices.add("GPS");
+		// NPE in regex
+		whiteListServices.add("LIDAR");
+		// starts a webgui and gets bind error
+		whiteListServices.add("PickToLight");		
+		// NPE in serial
+		whiteListServices.add("Sabertooth");
+		// NPE in serial
+		whiteListServices.add("VirtualDevice");
 		// start up python so we have it available to do some testing with.
 		Python python = (Python)Runtime.createAndStart("python", "Python");
 		String testScriptDirectory = "./src/resource/Python/examples/";
@@ -191,12 +210,23 @@ public class ServiceInterfaceTest {
 			log.warn("Runtime Create returned a null service for {}", service);
 			return false;
 		}
+		System.out.println("Service Test:" + service);
+		System.out.flush();
+		Assert.assertNotNull(foo.getCategories());
+		Assert.assertNotNull(foo.getDescription());
+		Assert.assertNotNull(foo.getName());
+		Assert.assertNotNull(foo.getSimpleName());
+		Assert.assertNotNull(foo.getType());
 		
 		// TODO: add a bunch more tests here!
 		foo.startService();
 		foo.stopService();
 		foo.releaseService();
 		
+		foo.startService();
+		foo.save();
+		foo.load();
+		foo.stopService();
 		
 		return true;
 	}
@@ -205,13 +235,9 @@ public class ServiceInterfaceTest {
 		
 		// TODO: this blows stuff up too much.
 		
-		if (true) {
-			// Diabled testing of scripts currently.
-			return false;
-		}
+
 		
 		String testScriptFile = testScriptDirectory + service + ".py";
-
 		File script = new File(testScriptFile);
 		if (!script.exists()) {
 			log.warn("No default script for Service {}", script);
@@ -219,6 +245,13 @@ public class ServiceInterfaceTest {
 		} else {
 			log.info("Default Script Exists for {}" , service);
 		}
+		
+		
+		if (true) {
+			// Diabled testing of scripts currently.
+			return false;
+		}
+		
 		try {
 			String test = FileUtils.readFileToString(script);
 			System.out.println(test);

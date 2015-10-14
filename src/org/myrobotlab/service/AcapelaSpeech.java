@@ -42,6 +42,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -50,7 +51,7 @@ import org.myrobotlab.service.interfaces.TextListener;
  * AcapelaSpeech
  * 
  */
-public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesis {
+public class AcapelaSpeech extends Service implements TextListener, SpeechSynthesis {
 
 	private static final long serialVersionUID = 1L;
 
@@ -324,6 +325,18 @@ public class AcapelaSpeech extends Proxy implements TextListener, SpeechSynthesi
 	public int speak(String voice, String toSpeak) {
 		setVoice(voice);
 		return speak(toSpeak);
+	}
+
+	@Override
+	public String[] getCategories() {
+		// TODO Auto-generated method stub
+		return new String[]{"speech"};
+	}
+
+	@Override
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return "Acapela group speech syntesis service.";
 	}
 
 }

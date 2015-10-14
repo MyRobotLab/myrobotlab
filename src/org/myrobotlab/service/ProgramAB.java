@@ -247,11 +247,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		invoke("publishText", response.msg);
 		info("to: %s - %s", session, res);
 
-		if (log.isDebugEnabled()) {
-			for (String key : sessions.get(session).predicates.keySet()) {
-				log.debug(session + " " + key + " " + sessions.get(session).predicates.get(key));
-			}
-		}
+		//		if (log.isDebugEnabled()) {
+		//			for (String key : sessions.get(session).predicates.keySet()) {
+		//				log.debug(session + " " + key + " " + sessions.get(session).predicates.get(key));
+		//			}
+		//		}
 
 		// TODO: wire this in so the gui updates properly. ??
 		// broadcastState();
@@ -489,10 +489,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		startSession(path, session, botName);
 	}
 
-	public void startSession(String progABPath, String botName) {
-		startSession(progABPath, null, botName);
-	}
-
 	/**
 	 * Load the AIML 2.0 Bot config and start a chat session. This must be
 	 * called after the service is created.
@@ -502,6 +498,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	 * @param botName
 	 *            - The name of the bot to load. (example: alice2)
 	 */
+	public void startSession(String progABPath, String botName) {
+		startSession(progABPath, null, botName);
+	}
+
+
 	public void startSession(String path, String session, String botName) {
 		
 		// TODO: this is probably not the right thing to do.
@@ -521,11 +522,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		if (bot == null) {
 			bot = new Bot(botName, path);
 		}
-		if (log.isDebugEnabled()) {
-			for (Category c : bot.brain.getCategories()) {
-				log.debug(c.getPattern());
-			}
-		}
+		//if (log.isDebugEnabled()) {
+			//for (Category c : bot.brain.getCategories()) {
+			//	log.debug(c.getPattern());
+			//}
+		//}
 		Chat chat = new Chat(bot);
 		// load session specific predicates, these override the default ones.
 		String sessionPredicateFilename = createSessionPredicateFilename(session);
