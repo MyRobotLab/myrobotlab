@@ -4,6 +4,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
     // when to use $scope or anything?!
     $scope.currResponse = '';
     $scope.utterance = '';
+    $scope.username = 'default';
     $scope.current_text = '';
     // start info status
     $scope.status = 'Click on the microphone icon and begin speaking.';
@@ -105,20 +106,26 @@ angular.module('mrlapp.service.ProgramABGui', [])
             $scope.$apply();
         };
     }; 
-    $scope.askProgramAB = function (utterance) {
+    $scope.askProgramAB = function (username,utterance) {
     	$scope.service = mrl.getService($scope.service.name);
-    	mrl.sendTo($scope.service.name, "getResponse", utterance);
+    	mrl.sendTo($scope.service.name, "getResponse", username, utterance);
     	$scope.rows.unshift({ name:"User" , response:utterance} );
+    	// $scope.$apply();
     	// $scope.utterance = '';
     	// TODO: clear the text box.
     	// $scope.utterance = '';
     };
-    $scope.startSession = function (botname,botpath) {
+    $scope.startSession = function (botpath,username,botname) {
     	$scope.rows.unshift("Reload Session for Bot " + botname);
     	$scope.startSessionLabel = 'Reload Session';
-    	$scope.$apply();
     	$scope.service = mrl.getService($scope.service.name);
-    	mrl.sendTo($scope.service.name, "startSession", botpath, botname);
+    	$log.info("BOT PATH" + botpath);
+    	mrl.sendTo($scope.service.name, "startSession", botpath, username, botname);
+    	// $scope.$apply();
+    };
+    $scope.savePredicates = function () {
+    	$scope.service = mrl.getService($scope.service.name);
+    	mrl.sendTo($scope.service.name, "savePredicates");
     }
     // toggle type of button for starting/stopping speech $scope.recognition.
 	$scope.startRecognition = function () {
