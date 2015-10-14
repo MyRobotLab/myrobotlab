@@ -16,18 +16,28 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
-@Ignore
-public class ServiceScriptsTest {
 
-	public final static Logger log = LoggerFactory.getLogger(ServiceScriptsTest.class);
+@Ignore
+public class ServiceInterfaceTest {
+
+	public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
 
 	@Test
 	public final void testAllServices() throws ClassNotFoundException {
 
+		ArrayList<String> servicesWithoutWebPages = new ArrayList<String>();
+		ArrayList<String> servicesWithoutScripts = new ArrayList<String>();
+		ArrayList<String> servicesThatDontStartProperly = new ArrayList<String>();
+		
+		ArrayList<String> servicesNotInServiceDataJson = new ArrayList<String>();
+		
 		HashSet<String> whiteListServices = new HashSet<String>();
 		// CLI seems to mess up the console in the unit test so things 
 		// don't log well anymore.
@@ -45,7 +55,7 @@ public class ServiceScriptsTest {
 		// jni class path error
 		whiteListServices.add("SLAMBad");
 		// WebGUI gets an address in use/failed to bind to port 8888
-		whiteListServices.add("WebGUI");
+		whiteListServices.add("WebGui");
 
 		// start up python so we have it available to do some testing with.
 		Python python = (Python)Runtime.createAndStart("python", "Python");
@@ -53,6 +63,20 @@ public class ServiceScriptsTest {
 		List<String> servicesToTest = listAllServices();
 		//List<String> servicesToTest = new ArrayList<String>();
 		//servicesToTest.add("Cli");
+		
+		// Load the service data file
+		
+		// TODO: read this from the repo at build time?
+		ServiceData sd = null;
+		try {
+			sd = Encoder.fromJson(FileUtils.readFileToString(new File("../repo/serviceData.json")), ServiceData.class);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(sd);
+		
+		
 		int numServices = servicesToTest.size();
 		int numServicePages = 0;
 		int numScripts = 0;
@@ -67,18 +91,36 @@ public class ServiceScriptsTest {
 				continue;
 			}
 			log.info("Testing Service: {}" , service);
+			
+			
+			ServiceType st = sd.getServiceType("org.myrobotlab.service." + service);
+			if (st == null) {
+				System.out.println("NO SERVICE TYPE FOUND!");
+				servicesNotInServiceDataJson.add(service);
+			} else {
+				System.out.println("Service Type Found!");
+			}
+//			System.out.flush();
+//			try {
+//				System.in.read();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}			
+			
 			// 
 			if (serviceHasWebPage(service)) {
 				log.info("Service {} has a web page..", service);
 				numServicePages++;
 			} else {
 				log.warn("Service {} does not have a web page..", service);
+				servicesWithoutWebPages.add(service);
 			}
 			
 			if (serviceInterfaceTest(service)) {
 				numStartable++;
 			} else {
-				
+				servicesThatDontStartProperly.add(service);
 			}
 			
 			// validate that a script exists
@@ -88,6 +130,7 @@ public class ServiceScriptsTest {
 				numScripts++;
 			} else {
 				log.warn("Missing Script for Service {}" , service);
+				servicesWithoutScripts.add(service);
 			}
 
 			// 
@@ -96,8 +139,17 @@ public class ServiceScriptsTest {
 				numScriptsWorky++;
 			} else {
 				//log.warn("Default script for {} blows up!", service);
+				//servicesWithoutWorkyScript(service);
 			}
+//			log.info("SERVICE TESTED WAS :" + service);
 			log.info("----------------------------------------------");
+//			System.out.println("Next?");
+//			try {
+//				System.in.read();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 
 		}
 
@@ -109,8 +161,25 @@ public class ServiceScriptsTest {
 		log.info("Number of Scripts:            {}", numScripts);
 		log.info("Number of Scripts Worky:      {}", numScriptsWorky);
 		log.info("----------------------------------------------");
-		log.info("Done...");
 		
+		
+		for (String s :servicesThatDontStartProperly) {
+			log.info("FAILED ON START:" + s );
+		}
+
+		for (String s :servicesWithoutWebPages) {
+			log.info("NO WEB PAGE    :" + s );
+		}
+
+		for (String s :servicesWithoutScripts) {
+			log.info("NO SCRIPT      :" + s );
+		}
+		
+		for (String s :servicesNotInServiceDataJson) {
+			log.info("NOT IN SERVICE DATA :" + s );
+		}
+		
+		log.info("Done...");
 		
 	}
 
@@ -122,15 +191,12 @@ public class ServiceScriptsTest {
 			log.warn("Runtime Create returned a null service for {}", service);
 			return false;
 		}
+		
+		// TODO: add a bunch more tests here!
 		foo.startService();
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		foo.stopService();
 		foo.releaseService();
+		
 		
 		return true;
 	}
@@ -197,7 +263,7 @@ public class ServiceScriptsTest {
 
 	private List<String> listAllServices() throws ClassNotFoundException {
 		// TODO: should this be replaced with a call to Runtime ?
-		List<Class> classes = ServiceScriptsTest.getClassesForPackage("org.myrobotlab.service");
+		List<Class> classes = ServiceInterfaceTest.getClassesForPackage("org.myrobotlab.service");
 		List<String> services = new ArrayList<String>();
 		for (Class c : classes) {
 			// System.out.println("CLASS:" + c.toString());
