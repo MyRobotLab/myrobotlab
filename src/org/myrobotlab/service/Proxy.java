@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 
 /**
  * simple Java class which allows interaction of classes which can not be
- * instanciated on local platform
+ * instantiated on local platform
  * 
  */
 public class Proxy extends Service {
@@ -71,13 +71,13 @@ public class Proxy extends Service {
 	@Override
 	public String[] getCategories() {
 		// TODO Auto-generated method stub
-		return null;
+		return new String[]{"framework"};
 	}
 
 	@Override
 	public String getDescription() {
 		// TODO Auto-generated method stub
-		return null;
+		return "A proxy service to proxy messages";
 	}
 
 	/* 

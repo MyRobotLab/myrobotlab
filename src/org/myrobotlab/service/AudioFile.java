@@ -161,7 +161,16 @@ public class AudioFile extends Service {
 
 	public void playFile(String filename, Boolean isBlocking) {
 		
+		if (filename == null) {
+			log.warn("Asked to play a null file, sorry can't do that");
+			return;
+		}
 		
+		File f = new File(filename);
+		if (!f.exists()) {
+			log.warn("File not found to play back " + f.getAbsolutePath());
+			return;
+		}
 		
 		AudioData data = new AudioData(filename);
 		if (isBlocking) {
