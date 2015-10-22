@@ -417,6 +417,11 @@ angular
         _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod);
     }
     ;
+
+   this.unsubscribe = function(topicName, topicMethod) {
+        _self.sendTo(_self.gateway.name, "unsubscribe", topicName, topicMethod);
+    }
+    ;
     
     this.invoke = function(functionName, context) {
         var args = [].slice.call(arguments).splice(2);
@@ -596,7 +601,7 @@ angular
                                 break;
                             }
                             // end switch
-                        },
+                        },                        
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
                                 // regular subscribe when used - e.g. msg.subscribe('publishData')
@@ -712,6 +717,7 @@ angular
             },
             sendTo: _self.sendTo,
             subscribe: _self.subscribe,
+            unsubscribe: _self.unsubscribe,
             subscribeToService: _self.subscribeToService,
             subscribeOnClose: _self.subscribeOnClose,
             subscribeOnOpen: _self.subscribeOnOpen,

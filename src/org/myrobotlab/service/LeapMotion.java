@@ -47,33 +47,6 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
 	public LeapData lastLeapData = null;
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-		try {
-
-			LeapMotion leap = new LeapMotion("leap");
-			leap.startService();
-
-			Runtime.start("gui", "GUIService");
-			leap.startTracking();
-
-			// Have the sample listener receive events from the controller
-
-			// Keep this process running until Enter is pressed
-			log.info("Press Enter to quit...");
-			try {
-				System.in.read();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			// Remove the sample listener when done
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
-
 	public LeapMotion(String n) {
 		super(n);
 	}
@@ -204,5 +177,34 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 	public void stopTracking() {
 		controller.removeListener(listener);
 	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
+
+			LeapMotion leap = new LeapMotion("leap");
+			leap.startService();
+
+			
+			Runtime.start("gui", "GUIService");
+			leap.startTracking();
+
+			// Have the sample listener receive events from the controller
+
+			// Keep this process running until Enter is pressed
+			log.info("Press Enter to quit...");
+			try {
+				System.in.read();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			// Remove the sample listener when done
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 
 }

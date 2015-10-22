@@ -12,6 +12,12 @@ function($log, $rootScope, $compile, $scope, $modal, $ocLazyLoad, mrl, serviceSv
     // $scope.anker = name + '_-_' + $scope.service.panelname + '_-_';
     var name = $scope.service.name;
     var panel = serviceSvc.getServicePanel(name);
+
+    // FIXME FIXME FIXME
+    // FIXME FIXME FIXME 
+    // document the different scopes
+    // name them appropriately
+    panel.myScope2 = $scope;
     
     $scope.anker = name;
     $scope.panel = panel;

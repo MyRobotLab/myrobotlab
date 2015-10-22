@@ -12,11 +12,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
-public class LIDAR extends Service implements SerialDataListener {
+public class Lidar extends Service implements SerialDataListener {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(LIDAR.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Lidar.class.getCanonicalName());
 	public static final String MODEL_SICK_LMS200 = "SICK LMS200";
 	public String serialName;
 	public transient Serial serial;
@@ -49,11 +49,11 @@ public class LIDAR extends Service implements SerialDataListener {
 
 		try {
 
-			LIDAR template = new LIDAR("Lidar");
+			Lidar template = new Lidar("Lidar");
 			template.startService();
 
-			// LIDAR lidar01 = (LIDAR) Runtime.createAndStart("lidar01",
-			// "LIDAR");
+			// Lidar lidar01 = (Lidar) Runtime.createAndStart("lidar01",
+			// "Lidar");
 			// creates and runs a serial service
 			// lidar01.connect("dev/lidar01");
 			// send a command
@@ -64,7 +64,7 @@ public class LIDAR extends Service implements SerialDataListener {
 			// this setMode command catches the reply from the LMS in the
 			// listener
 			// within the
-			// LIDAR service and returns a bool stating if it was successful or
+			// Lidar service and returns a bool stating if it was successful or
 			// not.
 
 			// an array of floats holding ranges (after the LDIAR service strips
@@ -85,9 +85,9 @@ public class LIDAR extends Service implements SerialDataListener {
 		}
 	}
 
-	public LIDAR(String n) {
+	public Lidar(String n) {
 		super(n);
-		reserve(String.format("%s_serial", n), "Serial", "serial port for LIDAR");
+		reserve(String.format("%s_serial", n), "Serial", "serial port for Lidar");
 	}
 
 	@Override
@@ -162,7 +162,7 @@ public class LIDAR extends Service implements SerialDataListener {
 
 	@Override
 	public String getDescription() {
-		return "The LIDAR service";
+		return "The Lidar service";
 	}
 
 	public Serial getSerial() {
@@ -288,7 +288,7 @@ public class LIDAR extends Service implements SerialDataListener {
 	}// end of setMode
 
 	/*
-	 * Set LIDAR to use centimeters
+	 * Set Lidar to use centimeters
 	 */
 	public boolean setToCM() {
 
@@ -300,7 +300,7 @@ public class LIDAR extends Service implements SerialDataListener {
 	}
 
 	/*
-	 * Set LIDAR to use millimeters
+	 * Set Lidar to use millimeters
 	 */
 	public boolean setToMM() {
 
@@ -332,7 +332,7 @@ public class LIDAR extends Service implements SerialDataListener {
 				model = MODEL_SICK_LMS200;
 			}
 
-			// start LIDAR hardware initialization here
+			// start Lidar hardware initialization here
 			// data coming back from the hardware will be in byteRecieved
 			if (MODEL_SICK_LMS200.equals(model)) {
 				serial.write(new byte[] { 1, 38, 32, 43 });

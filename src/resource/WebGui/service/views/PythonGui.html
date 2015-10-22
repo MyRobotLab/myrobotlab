@@ -1,17 +1,11 @@
 <!-- file menu button bar begin -->
-
 <div class="btn-group">
-  <div class="dropdown">
     <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-      <span class="glyphicon glyphicon-open">open</span><span class="caret"></span>
-      </button>
+      <span class="glyphicon glyphicon-open">open</span><!-- span class="caret"></span-->
+    </button>
 
+	<!-- python example resource files -->
     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-<!--      <li><a href="#">home</a></li>
-      <li><a href="#">examples</a></li>
-      <li><a href="#">local</a></li>
-      <li><a href="#">pyrobotlab</a></li>
-      -->
       <li ng-repeat="file in service.currentFileList" ng-class="navClass('{{file.type}}')"> <a href='' ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a> 
         </li>
     </ul>
@@ -20,14 +14,7 @@
   <button type="button" class="btn btn-default" ng-click="msg.exec(editor.getValue())"><span class="glyphicon glyphicon-play"></span>execute</button>
   <button type="button" class="btn btn-default"                        ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
   <button type="button" class="btn btn-default"                        ng-click="msg.saveCurrentScript()"><span class="glyphicon glyphicon-save"></span>save</button>
-  <!-- <button type="button" class="btn btn-default"                        ng-click="copy()"><span class="glyphicon glyphicon-copy"></span>copy</button> -->
-
-  <!--
-  <button type="button" class="btn btn-default" ng-click="msg.setCwd('test.py')">test</button>
-  <button type="button" class="btn btn-default" ng-click="msg.loadScriptFromFile('test.py')">
-  <span class="glyphicon glyphicon-copy"></span>load</button>
-  -->
-  </div><!-- FIXME - something is wrong - this end div is the dropdown !!! -->
+  
 </div>
 
 <!-- file menu button bar end theme:'twilight',-->

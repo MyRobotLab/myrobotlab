@@ -54,9 +54,10 @@ public class PortQueue extends Port {
 		return in.take();
 	}
 
-	public void setParams(int rate, int databits, int stopbits, int parity) {
+	public boolean setParams(int rate, int databits, int stopbits, int parity) {
 
 		log.debug(String.format("setSerialPortParams %d %d %d %d", rate, databits, stopbits, parity));
+		return true;
 	}
 
 	@Override

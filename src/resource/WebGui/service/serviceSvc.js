@@ -17,6 +17,7 @@ angular.module('mrlapp.service')
     var _self = this;
     var servicePanels = {};
     var zIndexMax = 0;
+    var globalY = 0;
     
     var isUndefinedOrNull = function(val) {
         return angular.isUndefined(val) || val === null ;
@@ -66,7 +67,8 @@ angular.module('mrlapp.service')
         for (var name in servicePanels) {
             if (servicePanels.hasOwnProperty(name)) {
                 var panel = servicePanels[name];
-                panel.setShow(false);
+                panel.myScope.show = false;
+                panel.myScope2.show = false;
             }
         }
     }
@@ -83,7 +85,8 @@ angular.module('mrlapp.service')
         for (var name in servicePanels) {
             if (servicePanels.hasOwnProperty(name)) {
                 var panel = servicePanels[name];
-                panel.setShow(true);
+                panel.myScope2.show = true;
+                //panel.setShow(true);
             }
         }
     }
@@ -210,32 +213,9 @@ angular.module('mrlapp.service')
         panelsize.order.push('min');
         panelsize.oldsize = null ;
         $log.info('ServiceSvc-panelsize', panelsize);
-        //posy
-        //TODO - refactor this !!! (and make it work better)
+
         var panelsarray = _self.getPanelList();
-        var posy = 0;
-        /* - simply don't do it :)
-        for (var i = 0; i < panelsarray.length; i++) {
-            var value = panelsarray[i];
-            var height = 300;
-            var spacing = 30;
-            var comp1 = value.posy;
-            var comp2 = value.posy + value.height;
-            if (posy <= comp1 && posy + height >= comp1) {
-                posy = comp2 + spacing;
-                i = 0;
-            } else if (posy <= comp2 && posy + height >= comp2) {
-                posy = comp2 + spacing;
-                i = 0;
-            } else if (posy >= comp1 && posy <= comp2) {
-                posy = comp2 + spacing;
-                i = 0;
-            } else if (posy + height >= comp1 && posy + height <= comp2) {
-                posy = comp2 + spacing;
-                i = 0;
-            }
-        }
-        */
+        var posy = globalY;
         
         //zindex
         var zindex = 1;
@@ -247,8 +227,7 @@ angular.module('mrlapp.service')
         }
         );
         zindex = zindex + 1;
-        
-        
+       
         // creating new PANEL !!!
         var panel = {
             name: name,
@@ -267,6 +246,8 @@ angular.module('mrlapp.service')
         
         // adding it to our map of panels
         servicePanels[name] = panel;
+
+        globalY += 40;
     
     }
     ;

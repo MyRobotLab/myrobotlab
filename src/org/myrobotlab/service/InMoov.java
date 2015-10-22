@@ -1377,7 +1377,7 @@ public class InMoov extends Service {
 		 */
 
 		// create the UART serial service
-		// log.info("Creating a LIDAR UART Serial service named: " + getName() +
+		// log.info("Creating a Lidar UART Serial service named: " + getName() +
 		// "SerialService");
 		// String serialName = getName() + "SerialService";
 		/*
