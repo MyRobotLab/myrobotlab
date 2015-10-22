@@ -118,6 +118,12 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	String portName = null;
 
 	/**
+	 * last port name which was connected to - still has name when portName is
+	 * null and disconnected
+	 */
+	public String lastPortName;
+
+	/**
 	 * "the" port - there is only one although we can fork and multiplex others.
 	 * This is the port which we determine if this Serial service is connected
 	 * or not
@@ -282,6 +288,24 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return connect(name, baudrate, databits, stopbits, parity);
 	}
 
+	public boolean setParams(int baudRate, int dataBits, int stopBits, int parity) throws IOException {
+		try {
+			log.info("setParams {} {} {} {}", baudRate, dataBits, stopBits, parity);
+			if (port == null || !port.isOpen()) {
+				log.error("port is null or not opened");
+				return false;
+			}
+
+			if (port.setParams(baudRate, dataBits, stopBits, parity)) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
+
 	/**
 	 * The main simple connect - it attempts to connect to one of the known
 	 * ports in memory if that fails it will try to connect to a hardware port
@@ -313,8 +337,9 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			// on the static resource - or just check to see if its on the
 			// "connectedPort" set
 
-			// #1 check to see if were already connected a port 
-			//if (this.portName != null && this.portName.equals(portName) && ports.containsKey(portName)) {
+			// #1 check to see if were already connected a port
+			// if (this.portName != null && this.portName.equals(portName) &&
+			// ports.containsKey(portName)) {
 			if (this.portName != null) {
 				Port port = ports.get(portName);
 				if (port.isOpen() && port.isListening()) {
@@ -326,6 +351,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			// #2 connect to a pre-existing
 			if (ports.containsKey(inPortName)) {
 				connectPort(ports.get(inPortName), null);
+				lastPortName = portName;
 				return true;
 			}
 
@@ -338,7 +364,8 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 			}
 
 			connectPort(port, null);
-			
+
+			lastPortName = portName;
 			// even when the JNI says it is connected
 			// rarely is everything ready to go
 			// give us half a second for all the buffers
@@ -392,7 +419,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		port.open();
 		port.listen(listeners);
 		connectedPorts.put(portName, newPort);
-		
+
 		// FYI !!!
 		// give us a second before we advertise the port
 		// is open - often the hardware or JNI buffers
@@ -679,7 +706,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public String getRXCodecKey() {
-		if (outRX == null){
+		if (outRX == null) {
 			return null;
 		}
 		return outRX.getKey();
@@ -694,14 +721,14 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	}
 
 	public Codec getTXCodec() {
-		if (outTX == null){
+		if (outTX == null) {
 			return null;
 		}
 		return outTX.getCodec();
 	}
 
 	public String getTXCodecKey() {
-		if (outTX == null){
+		if (outTX == null) {
 			return null;
 		}
 		return outTX.getKey();
@@ -1136,7 +1163,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	public void write(String data) throws Exception {
 		write(data.getBytes());
 	}
-	
+
 	public void writeString(String data) throws Exception {
 		write(data.getBytes());
 	}
@@ -1164,220 +1191,220 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		}
 	}
 
-	
 	public static void main(String[] args) {
 
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			Runtime.start("gui", "GUIService");
-			//Serial serial = (Serial) Runtime.start("serial", "Serial");
-			
+		Runtime.start("webgui", "WebGui");
+		Serial serial = (Serial) Runtime.start("serial", "Serial");
 
+		boolean done = true;
+		if (done) {
+			return;
+		}
 
-			// TODO - test blocking / non blocking / time-out blocking / reading an
-			// array (or don't bother?) or do with length? num bytes to block or
-			// timeout
-			// TODO - if I am connected to a different serial port
-			// get that name - disconnect - and then reconnect when done
-			// FIXME - very little functionality for a combined tx rx file
-			// TODO - test sendFile & record
-			// TODO - speed test
-			// TODO use utility methods to help parse read data types
-			// because we should not assume we know the details of ints longs etc
-			// nor
-			// the endianess
-			// utility methods - ascii
-			// FIXME - // test case write(-1) as display becomes -1 ! - file is
-			// different than gui !?!?!
+		// TODO - test blocking / non blocking / time-out blocking / reading an
+		// array (or don't bother?) or do with length? num bytes to block or
+		// timeout
+		// TODO - if I am connected to a different serial port
+		// get that name - disconnect - and then reconnect when done
+		// FIXME - very little functionality for a combined tx rx file
+		// TODO - test sendFile & record
+		// TODO - speed test
+		// TODO use utility methods to help parse read data types
+		// because we should not assume we know the details of ints longs etc
+		// nor
+		// the endianess
+		// utility methods - ascii
+		// FIXME - // test case write(-1) as display becomes -1 ! - file is
+		// different than gui !?!?!
 
-	
-			try {
+		try {
 
-				int timeout = 500;// 500 ms serial timeout
+			int timeout = 500;// 500 ms serial timeout
 
-				// Runtime.start("gui", "GUIService");
-				// Runtime.start("webgui", "WebGui");
+			// Runtime.start("gui", "GUIService");
+			// Runtime.start("webgui", "WebGui");
 
-				// get serial handle and creates a uart & virtual null modem cable
-				Serial serial = (Serial) Runtime.start("serial", "Serial");
-				serial.setTimeout(timeout);
-				
-				String port = "COM15";
-				
-				// EASY VIRTUAL SWITCH
+			// get serial handle and creates a uart & virtual null modem cable
+			// Serial serial = (Serial) Runtime.start("serial", "Serial");
+			serial.setTimeout(timeout);
 
-				// ---- Virtual Begin -----
-				VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-				virtual.createVirtualPort(port);
-				Serial uart = virtual.getUART();
-				uart.setTimeout(300);
-				// ---- Virtual End -----
-				
-				serial.connect(port);
+			String port = "COM15";
 
+			// EASY VIRTUAL SWITCH
 
-				// verify the null modem cable is connected
-				if (!serial.isConnected()) {
-					throw new IOException(String.format("%s not connected", serial.getName()));
-				}
+			// ---- Virtual Begin -----
+			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
+			virtual.createVirtualPort(port);
+			Serial uart = virtual.getUART();
+			uart.setTimeout(300);
+			// ---- Virtual End -----
 
-				if (!uart.isConnected()) {
-					throw new IOException(String.format("%s not connected", uart.getName()));
-				}
+			serial.connect(port);
 
-				// start binary recording
-				serial.record("serial");
-				uart.record("uart");
+			// verify the null modem cable is connected
+			if (!serial.isConnected()) {
+				throw new IOException(String.format("%s not connected", serial.getName()));
+			}
 
-				// test blocking on exact size
-				serial.write(10);
-				serial.write(20);
-				serial.write(30);
-				serial.write(40);
-				serial.write(50);
-				serial.write(60);
-				serial.write(70);
-				uart.write("000D\r");
-				// read back
-				log.info(serial.readString(5));
+			if (!uart.isConnected()) {
+				throw new IOException(String.format("%s not connected", uart.getName()));
+			}
 
-				// blocking read with timeout
-				String data = "HELLO";
-				uart.write(data);
-				String hello = serial.readString(data.length());
+			// start binary recording
+			serial.record("serial");
+			uart.record("uart");
 
-				if (!data.equals(hello)) {
-					throw new IOException("data not equal");
-				}
+			// test blocking on exact size
+			serial.write(10);
+			serial.write(20);
+			serial.write(30);
+			serial.write(40);
+			serial.write(50);
+			serial.write(60);
+			serial.write(70);
+			uart.write("000D\r");
+			// read back
+			log.info(serial.readString(5));
 
-				serial.info("read back [%s]", hello);
+			// blocking read with timeout
+			String data = "HELLO";
+			uart.write(data);
+			String hello = serial.readString(data.length());
 
-				serial.info("array write");
-				serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 127, (byte) 128, (byte) 254, (byte) 255 });
-				uart.clear();
-				serial.write("this is the end of the line \n");
-				serial.clear();
-				byte[] blah = serial.readLine();
-				byte[] readBackArray = uart.readLine();
-				log.info(Arrays.toString(readBackArray));
+			if (!data.equals(hello)) {
+				throw new IOException("data not equal");
+			}
 
-				// FIXME !!! - bug - we wrote a big array to serial -
-				// then immediately cleared the uart buffer
-				// in fact we cleared it so fast - that the serial data ---going
-				// to----> uart
-				// has not reached uart (because there is some overhead in moving,
-				// reading and formatting the incoming data)
-				// then we start checking values in "test blocking" this by that
-				// time the serial data above has hit the
-				// uart
+			serial.info("read back [%s]", hello);
 
-				// with a virtual null modem cable I could "cheat" and flush() could
-				// look at the serial's tx buffer size
-				// and block until its cleared - but this would not be typical of
-				// "real" serial ports
-				// but it could stabilize the test
+			serial.info("array write");
+			serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 127, (byte) 128, (byte) 254, (byte) 255 });
+			uart.clear();
+			serial.write("this is the end of the line \n");
+			serial.clear();
+			byte[] blah = serial.readLine();
+			byte[] readBackArray = uart.readLine();
+			log.info(Arrays.toString(readBackArray));
 
-				// in the real world we don't know when the sender to
-				// our receiver is done - so we'll sleep here
-				sleep(300);
-				serial.info("clear buffers");
-				serial.clear();
-				uart.clear();
+			// FIXME !!! - bug - we wrote a big array to serial -
+			// then immediately cleared the uart buffer
+			// in fact we cleared it so fast - that the serial data ---going
+			// to----> uart
+			// has not reached uart (because there is some overhead in moving,
+			// reading and formatting the incoming data)
+			// then we start checking values in "test blocking" this by that
+			// time the serial data above has hit the
+			// uart
 
-				if (serial.available() != 0) {
-					throw new IOException("available data after clear");
-				}
+			// with a virtual null modem cable I could "cheat" and flush() could
+			// look at the serial's tx buffer size
+			// and block until its cleared - but this would not be typical of
+			// "real" serial ports
+			// but it could stabilize the test
 
-				// support write(int) kill pill or not ?
-				// I say yes
-				serial.info("testing blocking");
-				for (int i = 255; i > -1; --i) {
-					serial.write(i);
-					int readBack = uart.read();
-					log.info(String.format("written %d read back %d", i, readBack));
-					if (i < 256 && i > -1) {
-						if (readBack != i) {
-							throw new IOException(String.format("read back not the same as written for value %d %d !", i, readBack));
-						}
+			// in the real world we don't know when the sender to
+			// our receiver is done - so we'll sleep here
+			sleep(300);
+			serial.info("clear buffers");
+			serial.clear();
+			uart.clear();
+
+			if (serial.available() != 0) {
+				throw new IOException("available data after clear");
+			}
+
+			// support write(int) kill pill or not ?
+			// I say yes
+			serial.info("testing blocking");
+			for (int i = 255; i > -1; --i) {
+				serial.write(i);
+				int readBack = uart.read();
+				log.info(String.format("written %d read back %d", i, readBack));
+				if (i < 256 && i > -1) {
+					if (readBack != i) {
+						throw new IOException(String.format("read back not the same as written for value %d %d !", i, readBack));
 					}
 				}
-
-				// FIXME - test the -1 write(int) kill pill
-				// serial.write(-1) -> should close port !!!
-
-				// in the real world we don't know when the sender to
-				// our receiver is done - so we'll sleep here
-				sleep(300);
-				serial.info("clear buffers");
-				serial.clear();
-				uart.clear();
-
-				// test publish/subscribe nonblocking
-				serial.addByteListener(serial); // <-- FIXME CREATES INFINITE LOOP BUG
-				uart.write(64);
-				
-				// TODO - low level details of strings & timeouts
-				// TODO - filename
-				serial.clear();
-				serial.setCodec("ascii");
-				uart.setCodec("ascii");
-
-				// basic record
-				String inRecord = "this is a short ascii row\n";
-				uart.write(inRecord);
-				String record = serial.readString();
-
-				serial.clear();
-				uart.clear();
-				
-				serial.record("serialASC");
-				uart.record("uartASC");
-
-				serial.stopRecording();
-				uart.stopRecording();
-
-				// ======= decimal format begin ===========
-				serial.setCodec("decimal");
-				uart.setCodec("decimal");
-
-				// default non-binary format is ascii decimal
-				serial.record("serial.2");
-				uart.record("uart.2");
-				// uart.record("test/Serial/uart.2");
-				serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
-				// we have to pause here momentarily
-				// so the data can be written and read from the virtual null modem
-				// cable (on different threads)
-				// before we close the file streams
-				sleep(30);
-				// uart.stopRecording();
-				serial.stopRecording();
-				// ======= decimal format end ===========
-
-				// ======= hex format begin ===========
-				serial.setCodec("hex");
-				serial.record("hex.3");
-				// uart.record("test/Serial/uart.3");
-				serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
-				sleep(30);
-				serial.broadcastState();
-				serial.stopRecording();
-				// uart.stopRecording();
-				// ======= hex format begin ===========
-
-				// parsing of files based on extension check
-
-				// TODO flush & close tests ?
-				serial.disconnect();
-				uart.disconnect();
-
-				//log.info(status.flatten().toString());
-
-			} catch (Exception e) {
-				Logging.logError(e);
 			}
-		
+
+			// FIXME - test the -1 write(int) kill pill
+			// serial.write(-1) -> should close port !!!
+
+			// in the real world we don't know when the sender to
+			// our receiver is done - so we'll sleep here
+			sleep(300);
+			serial.info("clear buffers");
+			serial.clear();
+			uart.clear();
+
+			// test publish/subscribe nonblocking
+			serial.addByteListener(serial); // <-- FIXME CREATES INFINITE LOOP
+											// BUG
+			uart.write(64);
+
+			// TODO - low level details of strings & timeouts
+			// TODO - filename
+			serial.clear();
+			serial.setCodec("ascii");
+			uart.setCodec("ascii");
+
+			// basic record
+			String inRecord = "this is a short ascii row\n";
+			uart.write(inRecord);
+			String record = serial.readString();
+
+			serial.clear();
+			uart.clear();
+
+			serial.record("serialASC");
+			uart.record("uartASC");
+
+			serial.stopRecording();
+			uart.stopRecording();
+
+			// ======= decimal format begin ===========
+			serial.setCodec("decimal");
+			uart.setCodec("decimal");
+
+			// default non-binary format is ascii decimal
+			serial.record("serial.2");
+			uart.record("uart.2");
+			// uart.record("test/Serial/uart.2");
+			serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
+			// we have to pause here momentarily
+			// so the data can be written and read from the virtual null modem
+			// cable (on different threads)
+			// before we close the file streams
+			sleep(30);
+			// uart.stopRecording();
+			serial.stopRecording();
+			// ======= decimal format end ===========
+
+			// ======= hex format begin ===========
+			serial.setCodec("hex");
+			serial.record("hex.3");
+			// uart.record("test/Serial/uart.3");
+			serial.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte) 255 });
+			sleep(30);
+			serial.broadcastState();
+			serial.stopRecording();
+			// uart.stopRecording();
+			// ======= hex format begin ===========
+
+			// parsing of files based on extension check
+
+			// TODO flush & close tests ?
+			serial.disconnect();
+			uart.disconnect();
+
+			// log.info(status.flatten().toString());
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 
 	}
 

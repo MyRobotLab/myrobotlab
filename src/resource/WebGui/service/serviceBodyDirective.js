@@ -19,6 +19,8 @@ angular.module('mrlapp.service')
                     ctrl = scope.panel.simpleName + "GuiCtrl";
                     var html = '<div ng-controller=\"' + ctrl + '\"><div service-body-second type="' + attr.type + '"></div></div>';
                     elem.html(html).show();
+                    // TODO add controller's scope to serviceSvc - attach it to the panel
+                    scope.panel.myScope = scope;
                     $compile(elem.contents())(scope);
                 } catch (err) {
                     $log.error("serviceBodyDirective threw compiling ", ctrl, err);

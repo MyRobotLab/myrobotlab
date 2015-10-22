@@ -223,10 +223,16 @@ public class PortRXTX extends Port implements PortSource, SerialPortEventListene
 		port.setDTR(state);
 	}
 
-	public void setParams(int rate, int databits, int stopbits, int parity) throws UnsupportedCommOperationException {
-
+	@Override
+	public boolean setParams(int rate, int databits, int stopbits, int parity) throws IOException {
 		log.debug(String.format("setSerialPortParams %d %d %d %d", rate, databits, stopbits, parity));
-		port.setSerialPortParams(rate, databits, stopbits, parity);
+		try {
+			port.setSerialPortParams(rate, databits, stopbits, parity);
+			return true;
+		} catch (UnsupportedCommOperationException e) {
+			new IOException(e);
+		}
+		return false;
 	}
 
 	public void setRTS(boolean state) {

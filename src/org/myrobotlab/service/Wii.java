@@ -128,7 +128,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 			start = System.currentTimeMillis();
 			for (int i = 0; i < loops; i++) {
 				//Integer x = new Integer(7);
-				method = c.getMethod(String.format("%s","toString"), null);
+				method = c.getMethod(String.format("%s","toString"));
 				method.invoke(object, (Object[])null);
 			}
 			System.out.println(loops + " reflective method calls with lookup:" + (System.currentTimeMillis() - start) + " milliseconds.");

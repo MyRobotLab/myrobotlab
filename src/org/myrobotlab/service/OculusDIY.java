@@ -12,8 +12,6 @@ import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
 import org.slf4j.Logger;
 
-import com.leapmotion.leap.Frame;
-
 /**
  * 
  * OculusDIY - This service is the DIY oculus service.
@@ -151,10 +149,10 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 
 		try {
 
-			OculusDIY oculus = (OculusDIY) Runtime.start("oculus", "OculusDIY");
+			//OculusDIY oculus = (OculusDIY) Runtime.start("oculus", "OculusDIY");
 			Runtime.start("python", "Python");
 			Runtime.start("gui", "GUIService");
-			oculus.connect("COM15");
+			//oculus.connect("COM15");
 
 		} catch (Exception e) {
 			Logging.logError(e);

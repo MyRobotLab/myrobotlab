@@ -300,17 +300,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				int modifiers = f.getModifiers();
 
 				// if (Modifier.isPublic(mod)
-
-				if (!(Modifier.isPublic(f.getModifiers()) && !(f.getName().equals("log")) && !Modifier.isTransient(f.getModifiers()))) {
+				// !(Modifier.isPublic(f.getModifiers())
+				// Hmmm JSON mappers do hacks to get by IllegalAccessExceptions.... Hmmmmm
+				if (!Modifier.isPublic(f.getModifiers()) || f.getName().equals("log") || Modifier.isTransient(f.getModifiers()) || Modifier.isStatic(f.getModifiers()) || Modifier.isFinal(f.getModifiers())) {
 					log.debug(String.format("skipping %s", f.getName()));
 					continue;
 				}
 				Type t = f.getType();
 
 				log.info(String.format("setting %s", f.getName()));
+				/*
 				if (Modifier.isStatic(f.getModifiers()) || Modifier.isFinal(f.getModifiers())) {
 					continue;
 				}
+				*/
 
 				if (t.equals(java.lang.Boolean.TYPE)) {
 					targetClass.getDeclaredField(f.getName()).setBoolean(target, f.getBoolean(source));
@@ -1380,9 +1383,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	public boolean load(Object o, String inCfgFileName) {
 		String filename = null;
 		if (inCfgFileName == null) {
-			filename = String.format("%s%s%s.json", cfgDir, File.separator, this.getName(), ".xml");
+			filename = String.format("%s%s%s.json", cfgDir, File.separator, this.getName());
 		} else {
-			filename = String.format("%s%s%s", cfgDir, File.separator, inCfgFileName);
+			filename = inCfgFileName;
 		}
 		if (o == null) {
 			o = this;

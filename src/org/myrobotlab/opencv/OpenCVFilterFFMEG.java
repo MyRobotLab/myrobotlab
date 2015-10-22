@@ -75,13 +75,17 @@ public class OpenCVFilterFFMEG extends OpenCVFilter {
 			//filename = "rtmp://live:live@128.122.151.108:1935/live/test.flv";
 			
 			filename = "rtmp://live:live@54.158.155.69:1935/live/test.flv";
+			filename = "test2.mp4";
+			filename = "rtmp://127.0.0.1:1935/test.flv";
+			filename = "test2.avi.h264.mp4";
 			
-			recorder = new FFmpegFrameRecorder(filename, imageSize.width(), imageSize.height(), 1);
+			recorder = new FFmpegFrameRecorder(filename, imageSize.width(), imageSize.height(), 0);
 
 			//recorder.setFormat("flv");
-			// recorder.setFormat("mjpeg");
-			recorder.setFormat("mp4");
-
+			//recorder.setFormat("mp4");
+			//recorder.setFormat("3gp"); // h263
+			recorder.setFormat("avi");
+	
 			recorder.setSampleRate(sampleAudioRateInHz);
 			recorder.setImageWidth(imageSize.width());
 			recorder.setImageHeight(imageSize.height());

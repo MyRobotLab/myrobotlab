@@ -18,8 +18,10 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- *         A necessary class to wrap references to rxtxLib in something which can be dynamically loaded. Without this abstraction any platform which did was not supported for by
- *         rxtx would not be able to use the Serial service or ports.
+ *         A necessary class to wrap references to rxtxLib in something which
+ *         can be dynamically loaded. Without this abstraction any platform
+ *         which did was not supported for by rxtx would not be able to use the
+ *         Serial service or ports.
  * 
  */
 public class PortJSSC extends Port implements PortSource, SerialPortEventListener, Serializable {
@@ -44,14 +46,15 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 	}
 
 	/*
-	 * public int available() throws IOException { port. return in.available(); }
+	 * public int available() throws IOException { port. return in.available();
+	 * }
 	 */
-	
-	public boolean isOpen(){
-		if (port != null){
+
+	public boolean isOpen() {
+		if (port != null) {
 			return port.isOpened();
 		}
-		
+
 		return false;
 	}
 
@@ -113,12 +116,12 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 
 	public void close() {
 		try {
-			
+
 			listening = false;
 			readingThread = null;// is dead anyway
 			port.closePort();
 			// port.notifyOnDataAvailable(false);
-			
+
 			port.removeEventListener();
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -132,16 +135,9 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 	public int read() throws Exception {
 		return port.readIntArray(1)[0];
 		/*
-		if (port == null) {
-			return -1;
-		}
-		int[] ret = port.readIntArray(1);
-		if (ret != null) {
-			return ret[0];
-		} else {
-			return -1;
-		}
-		*/
+		 * if (port == null) { return -1; } int[] ret = port.readIntArray(1); if
+		 * (ret != null) { return ret[0]; } else { return -1; }
+		 */
 	}
 
 	@Override
@@ -153,10 +149,19 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 		}
 	}
 
-	public void setParams(int rate, int dataBits, int stopBits, int parity) throws Exception {
-
+	@Override
+	public boolean setParams(int rate, int dataBits, int stopBits, int parity) throws Exception {
 		log.debug(String.format("setSerialPortParams %d %d %d %d", rate, dataBits, stopBits, parity));
-		port.setParams(rate, dataBits, stopBits, parity);
+		try {
+			if (port == null || !port.isOpened()) {
+				log.error("port not opened or is null");
+				return false;
+			}
+
+			return port.setParams(rate, dataBits, stopBits, parity);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
 	}
 
 	public void setRTS(boolean state) {
@@ -186,12 +191,15 @@ public class PortJSSC extends Port implements PortSource, SerialPortEventListene
 	}
 
 	/*
-	 * @Override public void run() { // we don't use countDown - because rxtx manages its own threads(sortof :P) log.info("no port thread in rxtxlib"); try { Thread.sleep(300); }
-	 * catch (InterruptedException e) { } // allow the .listen() in Port // to proceed // opened.countDown(); }
+	 * @Override public void run() { // we don't use countDown - because rxtx
+	 * manages its own threads(sortof :P) log.info("no port thread in rxtxlib");
+	 * try { Thread.sleep(300); } catch (InterruptedException e) { } // allow
+	 * the .listen() in Port // to proceed // opened.countDown(); }
 	 */
 
 	/**
-	 * rxtxlib's "serial event handling" - would be more simple if they just implemented InputStream correctly :P
+	 * rxtxlib's "serial event handling" - would be more simple if they just
+	 * implemented InputStream correctly :P
 	 */
 	@Override
 	public void serialEvent(SerialPortEvent event) {

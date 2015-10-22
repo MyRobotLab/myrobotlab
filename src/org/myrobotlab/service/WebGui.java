@@ -89,7 +89,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	// FIXME - allow Protobuf/Thrift/Avro
 	// FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
-	LiveVideoStreamHandler test = new LiveVideoStreamHandler();
+	LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
 
 	
 	
@@ -114,16 +114,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				
 				AtmosphereResponse response = r.getResponse();
 				//response.setContentType("video/mp4");
-				response.setContentType("video/x-flv");
+				// response.setContentType("video/x-flv"); 
+				response.setContentType("video/avi"); 
+				// FIXME - mime type of avi ??
 				
 				ServletOutputStream out = response.getOutputStream();
 				//response.addHeader(name, value);
 
-				//byte[] data = FileIO.fileToByteArray(new File("src/resource/WebGUI/video/ffmpeg.1443989700495.mp4"));
-
-				byte[] data = FileIO.fileToByteArray(new File("mp4Test.mp4"));
-				
 				//byte[] data = FileIO.fileToByteArray(new File("flvTest.flv"));
+				//byte[] data = FileIO.fileToByteArray(new File("src/resource/WebGUI/video/ffmpeg.1443989700495.mp4"));
+				//byte[] data = FileIO.fileToByteArray(new File("mp4Test.mp4"));
+				byte[] data = FileIO.fileToByteArray(new File("test.avi.h264.mp4"));
+				
+				
 				
 				log.info("bytes {}", data.length);
 				out.write(data);
@@ -290,7 +293,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				 * )
 				 */
 
-				.resource("/video", test)
+				.resource("/stream", stream)
 				// .resource("/video/ffmpeg.1443989700495.mp4", test)
 
 				// for debugging
@@ -832,7 +835,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// remote.startListening();
 			// remote.setDefaultPrefix("x-");
 			// remote.setDefaultPrefix("");
-			Runtime.start("python", "Python");
+			// Runtime.start("python", "Python");
 			Runtime.start("webgui", "WebGui");
 			// Runtime.start("python", "Python");
 			// Runtime.start("myo", "MyoThalmic");

@@ -3,11 +3,19 @@ angular.module('mrlapp.service.SerialGui', [])
     $log.info('SerialGuiCtrl');
     var _self = this;
     
+    $scope.monitorModel = false;
+    
+    
     this.updateState = function(service) {
         $scope.service = service;
         $scope.isConnected = ($scope.service.portName != null );
         $scope.isConnectedImage = ($scope.service.portName != null ) ? "connected" : "disconnected";
         $scope.connectText = ($scope.service.portName == null ) ? "connect" : "disconnect";
+        if ($scope.isConnected) {
+            $scope.portName = $scope.service.portName;
+        } else {
+            $scope.portName = $scope.service.lastPortName;
+        }
     }
     
     // initialization
@@ -18,6 +26,7 @@ angular.module('mrlapp.service.SerialGui', [])
     $scope.txData = "";
     $scope.possiblePorts = [];
     $scope.possibleBaud = ['600', '1200', '2400', '4800', '9600', '19200', '38400', '57600', '115200'];
+    $scope.portName = "";
     
     
     $scope.dynamicPopover = {
@@ -70,10 +79,6 @@ angular.module('mrlapp.service.SerialGui', [])
     }
     ;
     
-    $scope.monitorModel = {        
-        Tx: false,
-        Rx: false
-    };
     
     // FIXME - need a button for actively "monitoring" which adds or removes subscriptions !!!!
     // mrl.subscribe($scope.service.name, 'publishRX'); testing ...
@@ -84,16 +89,18 @@ angular.module('mrlapp.service.SerialGui', [])
     mrl.sendTo($scope.service.name, 'broadcastState');
     mrl.sendTo($scope.service.name, 'refresh');
     
-     $scope.monitorTx = function() {
-       // mrl.sendTo($scope.service.name, 'refresh');
-       $log.info('monitorTx', $scope.monitorModel.Tx);
-       if ($scope.monitorModel.Tx){
-           mrl.subscribe($scope.service.name, 'publishTX');
-       } else {
-           mrl.unsubscribe($scope.service.name, 'publishTX');
-       }
+    $scope.monitor = function() {
+        // mrl.sendTo($scope.service.name, 'refresh');
+        $log.info('monitor', $scope.monitorModel);
+        if (!$scope.monitorModel) {
+            mrl.subscribe($scope.service.name, 'publishTX');
+            mrl.subscribe($scope.service.name, 'publishRX');
+        } else {
+            mrl.unsubscribe($scope.service.name, 'publishTX');
+            mrl.unsubscribe($scope.service.name, 'publishRX');
+        }
     }
-
+    
     $scope.refresh = function() {
         mrl.sendTo($scope.service.name, 'refresh');
     }

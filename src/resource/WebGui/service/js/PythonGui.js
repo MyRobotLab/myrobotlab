@@ -27,7 +27,7 @@ angular.module('mrlapp.service.PythonGui', [])
     // For example the Serial service calls broadcast state when
     // it connects or disconnects from a serial port
     // FIXME - framework level update of mrl's registry
-    this.updateState = function(service) {
+    _self.updateState = function(service) {
         // this is where we update all gui components through the scope
         // which will show on the html service body
         $scope.service = service;

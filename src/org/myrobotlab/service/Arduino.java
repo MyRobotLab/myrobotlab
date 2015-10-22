@@ -247,8 +247,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	public static final int MOTOR_BACKWARD = 0;
 
-	
-	String board;
+	/** 
+	 * board type - UNO Mega etc..
+	 */
+	public String board;	
 
 	/**
 	 * blocking queues to support blocking methods
@@ -1585,6 +1587,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			//Runtime.start("clock", "Clock");
 			//Runtime.start("serial", "Serial");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			Runtime.start("python", "Python");
 			
 			/*
 			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
@@ -1613,7 +1616,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			// RemoteAdapter remote = (RemoteAdapter)Runtime.start("rasremote", "RemoteAdapter");	
 			// remote.setDefaultPrefix("mac-");
 			//remote.setDefaultPrefix("");
-			Runtime.start("gui", "GUIService");
+			//Runtime.start("gui", "GUIService");
+			Runtime.start("webgui", "WebGui");
 			// remote.startListening();
 			//Runtime.start("cli", "Cli");				
 			//Runtime.start("servo", "Servo");				

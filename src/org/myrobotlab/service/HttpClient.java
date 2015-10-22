@@ -36,7 +36,7 @@ import java.util.Map;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
+//import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -57,15 +57,15 @@ import org.slf4j.Logger;
  * 
  * @author greg (at) myrobotlab.org wrapper service for Apache HTTPClient
  */
-public class HTTPClient extends Service {
+public class HttpClient extends Service {
 
-	public final static Logger log = LoggerFactory.getLogger(HTTPClient.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(HttpClient.class.getCanonicalName());
 
 	private static final long serialVersionUID = 1L;
 	Map<String, HttpData> clients = new HashMap<String, HttpData>();
 
 	public class HttpData {
-		public HttpClient client = null;
+		public org.apache.http.client.HttpClient client = null;
 		public HttpResponse response = null;
 		public HttpUriRequest request;
 		public HashMap<String, String> formFields;
@@ -166,7 +166,7 @@ public class HTTPClient extends Service {
 		return getResponse(name);
 	}
 
-	public HTTPClient(String n) {
+	public HttpClient(String n) {
 		super(n);
 	}
 
@@ -253,7 +253,7 @@ public class HTTPClient extends Service {
 
 		try {
 
-			HTTPClient client = (HTTPClient) Runtime.start("client", "HTTPClient");
+			HttpClient client = (HttpClient) Runtime.start("client", "HTTPClient");
 
 			// TODO - getByteArray(...)
 			String index = client.get("https://servizizucchetti.decathlon.com/portale/index.htm");
