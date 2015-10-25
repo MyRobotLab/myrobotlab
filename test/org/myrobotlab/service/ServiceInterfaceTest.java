@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -30,6 +31,23 @@ import org.slf4j.Logger;
 public class ServiceInterfaceTest {
 
 	public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
+	
+	
+	@Test
+	public final void testInstallAllServices() throws ClassNotFoundException, ParseException, IOException {
+		// TODO: this probably is going to take longer but it's worth while!
+		
+		ServiceData sd = Encoder.fromJson(FileUtils.readFileToString(new File("../repo/serviceData.json")), ServiceData.class);
+		for (ServiceType st : sd.getServiceTypes()) {
+			if (!st.isAvailable()) {
+				log.info("Installing Service:" + st.getName());
+				Runtime.install(st.getName());
+			} else {
+				log.info("already installed.");
+			}
+		}
+		
+	}
 
 	@Test
 	public final void testAllServices() throws ClassNotFoundException {
@@ -69,7 +87,7 @@ public class ServiceInterfaceTest {
 		// NPE in serial
 		whiteListServices.add("GPS");
 		// NPE in regex
-		whiteListServices.add("LIDAR");
+		whiteListServices.add("Lidar");
 		// starts a webgui and gets bind error
 		whiteListServices.add("PickToLight");		
 		// NPE in serial
@@ -294,7 +312,7 @@ public class ServiceInterfaceTest {
 		return true;
 	}
 
-	private List<String> listAllServices() throws ClassNotFoundException {
+	public static List<String> listAllServices() throws ClassNotFoundException {
 		// TODO: should this be replaced with a call to Runtime ?
 		List<Class> classes = ServiceInterfaceTest.getClassesForPackage("org.myrobotlab.service");
 		List<String> services = new ArrayList<String>();
