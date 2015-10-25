@@ -75,31 +75,18 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	private boolean enableAutoConversation = false;
 
 	private static final long serialVersionUID = 1L;
-
-	public static void main(String s[]) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("INFO");
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
-		String sessionName = null;
-		if (true) {
-			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
-			alice.setEnableAutoConversation(false);
-			alice.startSession(sessionName);
-			Response response = alice.getResponse(sessionName, "CONVERSATION_SEED_STRING");
-			log.info("Alice " + response.msg);
-		} else {
-			ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
-			lloyd.startSession("ProgramAB", sessionName, "lloyd");
-			Response response = lloyd.getResponse(sessionName, "Hello.");
-			log.info("Lloyd " + response.msg);
-		}
-	}
+	
+	private static int savePredicatesInterval = 10000;
 
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
 		// we started..
 		serviceStartTime = new Date();
+		
+		// Tell programAB to persist it's learned predicates about people
+		// every 30 seconds.
+		addLocalTask(savePredicatesInterval, "savePredicates");
+		
 	}
 
 	public void addOOBTextListener(TextListener service) {
@@ -167,6 +154,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		// TODO: sanitize the session label so it can be safely used as a
 		// filename
 		String predicatePath = path + File.separator + "bots" + File.separator + botName + File.separator + "config";
+		
+		// just in case the directory doesn't exist.. make it.
+		File predDir = new File(predicatePath);
+		if (!predDir.exists()) {
+			predDir.mkdirs();
+		}
+		
 		predicatePath += File.separator + session + ".predicates.txt";
 		return predicatePath;
 	}
@@ -596,4 +590,25 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		bot.writeQuit();
 	}
 
+
+	public static void main(String s[]) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("INFO");
+		Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
+		String sessionName = null;
+		if (true) {
+			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
+			alice.setEnableAutoConversation(false);
+			alice.startSession(sessionName);
+			Response response = alice.getResponse(sessionName, "CONVERSATION_SEED_STRING");
+			log.info("Alice " + response.msg);
+		} else {
+			ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
+			lloyd.startSession("ProgramAB", sessionName, "lloyd");
+			Response response = lloyd.getResponse(sessionName, "Hello.");
+			log.info("Lloyd " + response.msg);
+		}
+	}
+	
 }
