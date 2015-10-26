@@ -114,4 +114,30 @@
     <pattern>UNIT TEST PATTERN</pattern>
     <template>Unit Test Pattern Passed</template>
   </category>
+  
+  <category>
+    <pattern>OOB TEST</pattern>
+    <template>OOB Tag Test<oob>
+        <mrl>
+          <service>runtime</service>
+          <method>createAndStart</method>
+          <param>python</param>
+          <param>Python</param>
+        </mrl>
+      </oob>
+    </template>
+  </category>
+  
+  <category>
+    <pattern>SET FOO *</pattern>
+    <template><set name="foo"><star/></set></template>
+  </category>
+  
+  <category>
+    <pattern>GET FOO</pattern>
+    <template>FOO IS <get name="foo"/></template>
+  </category>
+   
+  
+  
 </aiml>
