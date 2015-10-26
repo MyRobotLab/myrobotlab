@@ -44,22 +44,17 @@ package org.myrobotlab.opencv;
  import org.bytedeco.javacpp.opencv_core.CvSeq;
  import org.bytedeco.javacpp.opencv_core.IplImage;
  */
-
+import static org.bytedeco.javacpp.helper.opencv_objdetect.cvHaarDetectObjects;
 import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
 import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
-import static org.bytedeco.javacpp.opencv_core.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
 import static org.bytedeco.javacpp.opencv_core.cvLoad;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
 import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_FIND_BIGGEST_OBJECT;
-import static org.bytedeco.javacpp.opencv_objdetect.cvHaarDetectObjects;
 
 import java.util.ArrayList;
-
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.data.Rectangle;
-import org.slf4j.Logger;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_core.CvMemStorage;
@@ -69,6 +64,9 @@ import org.bytedeco.javacpp.opencv_core.CvSeq;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_objdetect;
 import org.bytedeco.javacpp.opencv_objdetect.CvHaarClassifierCascade;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.data.Rectangle;
+import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetect extends OpenCVFilter {
 

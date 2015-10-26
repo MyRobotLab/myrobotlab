@@ -3,16 +3,17 @@ package org.myrobotlab.service;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.bytedeco.javacv.IPCameraFrameGrabber;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.opencv.IPCameraFrameGrabber;
 import org.slf4j.Logger;
 
 /**
@@ -149,7 +150,7 @@ public class IPCamera extends Service {
 	}
 
 	// "http://" + host + "/videostream.cgi?user=" + user + "&pwd=" + password
-	public boolean connectVideoStream(String url) {
+	public boolean connectVideoStream(String url) throws MalformedURLException {
 		grabber = new IPCameraFrameGrabber(url);
 		// invoke("getStatus");
 		capture();

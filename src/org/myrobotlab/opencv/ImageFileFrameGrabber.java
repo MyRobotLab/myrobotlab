@@ -1,12 +1,27 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_highgui.cvLoadImage;
+import static org.bytedeco.javacpp.opencv_imgproc.*;
+import static org.bytedeco.javacpp.opencv_calib3d.*;
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_features2d.*;
+import static org.bytedeco.javacpp.opencv_flann.*;
+import static org.bytedeco.javacpp.opencv_highgui.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.*;
+import static org.bytedeco.javacpp.opencv_ml.*;
+import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_photo.*;
+import static org.bytedeco.javacpp.opencv_shape.*;
+import static org.bytedeco.javacpp.opencv_stitching.*;
+import static org.bytedeco.javacpp.opencv_video.*;
+import static org.bytedeco.javacpp.opencv_videostab.*;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class ImageFileFrameGrabber extends FrameGrabber {
 
@@ -17,6 +32,7 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 	private IplImage cache;
 	private int frameCounter = 0;
 	String path;
+	transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
 
 	public ImageFileFrameGrabber(String path) {
 		this.path = path;
@@ -25,7 +41,7 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 	}
 
 	@Override
-	public IplImage grab() {
+	public Frame grab() {
 
 
 		if (cache == null) {
@@ -41,7 +57,7 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 		}
 
 		lastImage = image;
-		return image;
+		return converter.convert(image);
 	}
 
 	@Override

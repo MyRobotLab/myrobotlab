@@ -25,18 +25,16 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_AA;
+
+import static org.bytedeco.javacpp.helper.opencv_core.CV_RGB;
 import static org.bytedeco.javacpp.opencv_core.CV_L1;
-import static org.bytedeco.javacpp.opencv_core.CV_RGB;
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_32F;
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvAbsDiff;
-import static org.bytedeco.javacpp.opencv_core.cvCircle;
 import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
 import static org.bytedeco.javacpp.opencv_core.cvCvtScale;
-import static org.bytedeco.javacpp.opencv_core.cvLine;
 import static org.bytedeco.javacpp.opencv_core.cvMerge;
 import static org.bytedeco.javacpp.opencv_core.cvNorm;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
@@ -46,17 +44,13 @@ import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
 import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_core.cvZero;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_AA;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_THRESH_BINARY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCircle;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.javacpp.opencv_imgproc.cvLine;
 import static org.bytedeco.javacpp.opencv_imgproc.cvThreshold;
-import static org.bytedeco.javacpp.opencv_video.cvCalcGlobalOrientation;
-import static org.bytedeco.javacpp.opencv_video.cvCalcMotionGradient;
-import static org.bytedeco.javacpp.opencv_video.cvSegmentMotion;
-import static org.bytedeco.javacpp.opencv_video.cvUpdateMotionHistory;
-
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
 
 import org.bytedeco.javacpp.opencv_core.CvMemStorage;
 import org.bytedeco.javacpp.opencv_core.CvPoint;
@@ -65,6 +59,8 @@ import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.CvSeq;
 import org.bytedeco.javacpp.opencv_core.CvSize;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class OpenCVFilterMotionTemplate extends OpenCVFilter {
 

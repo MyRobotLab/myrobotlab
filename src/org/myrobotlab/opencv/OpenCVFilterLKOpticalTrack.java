@@ -33,13 +33,13 @@ import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_EPS;
 import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_ITER;
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_32F;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvLine;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_core.cvTermCriteria;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
+import static org.bytedeco.javacpp.opencv_imgproc.cvLine;
 import static org.bytedeco.javacpp.opencv_video.cvCalcOpticalFlowPyrLK;
 
 import java.util.ArrayList;

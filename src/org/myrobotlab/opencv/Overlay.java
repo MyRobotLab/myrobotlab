@@ -1,8 +1,8 @@
 package org.myrobotlab.opencv;
 
-import org.bytedeco.javacpp.opencv_core.CvFont;
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 
 public class Overlay {
 

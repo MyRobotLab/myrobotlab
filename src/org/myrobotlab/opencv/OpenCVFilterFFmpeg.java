@@ -30,26 +30,32 @@ package org.myrobotlab.opencv;
 
 import org.bytedeco.javacpp.avcodec;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
-public class OpenCVFilterFFMEG extends OpenCVFilter {
+public class OpenCVFilterFFmpeg extends OpenCVFilter {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFFMEG.class);
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFFmpeg.class);
+	FFmpegFrameRecorder z = null;
+	FFmpegFrameGrabber x = null;
 	FFmpegFrameRecorder recorder = null;
 	boolean recording = true;
 	int sampleAudioRateInHz = 44100;
 	int frameRate = 30;
+	
+	transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
 
-	public OpenCVFilterFFMEG() {
+	public OpenCVFilterFFmpeg() {
 		super();
 	}
 
-	public OpenCVFilterFFMEG(String name) {
+	public OpenCVFilterFFmpeg(String name) {
 		super(name);
 	}
 
@@ -77,25 +83,61 @@ public class OpenCVFilterFFMEG extends OpenCVFilter {
 			filename = "rtmp://live:live@54.158.155.69:1935/live/test.flv";
 			filename = "test2.mp4";
 			filename = "rtmp://127.0.0.1:1935/test.flv";
-			filename = "test2.avi.h264.mp4";
+			filename = "test2.mp4.h264.mp4";
+			filename = "rtmp://demo.myrobotlab.org:8090/feed1.ffm";
+			filename = "http://demo.myrobotlab.org:8090/feed1.ffm";
 			
 			recorder = new FFmpegFrameRecorder(filename, imageSize.width(), imageSize.height(), 0);
 
 			//recorder.setFormat("flv");
 			//recorder.setFormat("mp4");
 			//recorder.setFormat("3gp"); // h263
-			recorder.setFormat("avi");
-	
-			recorder.setSampleRate(sampleAudioRateInHz);
-			recorder.setImageWidth(imageSize.width());
-			recorder.setImageHeight(imageSize.height());
+			//recorder.setFormat("avi");
+			//recorder.setVideoOption("preset", "ultrafast");
+			//recorder.setSampleRate(sampleAudioRateInHz);
+			//recorder.setImageWidth(imageSize.width());
+			//recorder.setImageHeight(imageSize.height());
+			//recorder.
 			//avcodec.AV_CODEC_ID_FLV1;
-			recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+			//recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
 			//recorder.s
 
 			// re-set in the surface changed method as well
-			recorder.setFrameRate(frameRate);
+			//recorder.setFrameRate(frameRate);
+			
+			//recorder.setVideoBitrate(16384);
+			//recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+			
+			
+			recorder.setFormat("flv");
+		    recorder.setSampleRate(sampleAudioRateInHz);
+		    recorder.setFrameRate(30);
+		    recorder.setVideoBitrate(30 * 640 * 480);
+		    recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+		    recorder.setVideoOption("preset", "ultrafast");
+		    
+		    /*
+		    
+		    recorder = new FFmpegFrameRecorder(rtmplink, 320, 568, 2);
+		    recorder.setInterleaved(true);
+		    recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+		    recorder.setVideoBitrate(videoBitRate);
+		    recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+		    recorder.setFormat("flv");
+		    recorder.setVideoOption("preset", "veryfast");
+		    recorder.setVideoOption("tune", "zerolatency");
+		    recorder.setGopSize(GOP_LENGTH_IN_FRAMES);
+		    recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+		    recorder.setSampleRate(sampleAudioRateInHz);
+		    recorder.setAudioBitrate(audioBitRate);
+		    recorder.setFrameRate(frameRate);
+			*/
+			
 			recorder.start();
+			
+			
+			
+			
 			log.info("recorder.setFrameRate(frameRate)");
 
 			// Create audio recording thread
@@ -199,7 +241,7 @@ public class OpenCVFilterFFMEG extends OpenCVFilter {
 
 				// recorder.setTimestamp(videoTimestamp);
 
-				recorder.record(image);
+				recorder.record(converter.convert(image));
 
 				/*
 				 * Buffer[] buffer = {ShortBuffer.wrap(audioData, 0,

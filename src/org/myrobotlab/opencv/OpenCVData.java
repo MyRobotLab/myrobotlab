@@ -1,6 +1,6 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_highgui.cvEncodeImage;
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvEncodeImage;
 import static org.myrobotlab.opencv.VideoProcessor.INPUT_KEY;
 
 import java.awt.image.BufferedImage;
@@ -18,14 +18,14 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import org.bytedeco.javacpp.opencv_core.CvMat;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.data.Rectangle;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.CvMat;
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 /**
  * This is the data returned from a single pass of an OpenCV pipeline of
@@ -90,6 +90,7 @@ public class OpenCVData implements Serializable {
 	public static final String KEY_WIDTH = "width";
 	public static final String KEY_HEIGHT = "height";
 	public static final String KEY_BUFFERED_IMAGE = "bufferedImage";
+	
 
 	/**
 	 * return type - an ArrayList<Rectangles>
@@ -197,8 +198,9 @@ public class OpenCVData implements Serializable {
 			}
 
 			IplImage img = (IplImage) data.get(imgKey);
-
-			BufferedImage image = img.getBufferedImage();
+			
+			BufferedImage image = OpenCV.IplImageToBufferedImage(img);
+			
 			data.put(bufferedImageKey, image);
 			return image;
 		}
@@ -207,7 +209,7 @@ public class OpenCVData implements Serializable {
 	// -------- ByteBuffer begin ----------------
 	public ByteBuffer getByteBufferImage(String filtername) {
 		IplImage img = getImage(filtername);
-		return img.getByteBuffer();
+		return img.asByteBuffer();
 	}
 
 	public IplImage getDepthImage() {

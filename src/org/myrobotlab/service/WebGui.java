@@ -44,7 +44,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
-import org.myrobotlab.opencv.OpenCVFilterFFMEG;
+import org.myrobotlab.opencv.OpenCVFilterFFmpeg;
 //import org.myrobotlab.service.WebGUI3.Error;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -837,7 +837,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// remote.setDefaultPrefix("");
 			// Runtime.start("python", "Python");
 			Runtime.start("webgui", "WebGui");
-			// Runtime.start("python", "Python");
+			Runtime.start("python", "Python");
 			// Runtime.start("myo", "MyoThalmic");
 			// remote.connect("tcp://127.0.0.1:6767");
 

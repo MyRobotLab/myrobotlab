@@ -6,7 +6,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
-
+import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 
@@ -14,9 +14,9 @@ public class BlockingQueueGrabber extends FrameGrabber {
 
 	public final static Logger log = LoggerFactory.getLogger(BlockingQueueGrabber.class.getCanonicalName());
 
-	BlockingQueue<IplImage> blockingData;
+	BlockingQueue<Frame> blockingData;
 
-	public BlockingQueueGrabber(BlockingQueue<IplImage> queue) {
+	public BlockingQueueGrabber(BlockingQueue<Frame> queue) {
 		blockingData = queue;
 	}
 
@@ -26,12 +26,12 @@ public class BlockingQueueGrabber extends FrameGrabber {
 	public BlockingQueueGrabber(String filename) {
 	}
 
-	public void add(IplImage image) {
+	public void add(Frame image) {
 		blockingData.add(image);
 	}
 
 	@Override
-	public IplImage grab() {
+	public Frame grab() {
 		try {
 			return blockingData.take();
 		} catch (InterruptedException e) {
@@ -44,14 +44,14 @@ public class BlockingQueueGrabber extends FrameGrabber {
 	public void release() throws Exception {
 	}
 
-	public void setQueue(BlockingQueue<IplImage> queue) {
+	public void setQueue(BlockingQueue<Frame> queue) {
 		blockingData = queue;
 	}
 
 	@Override
 	public void start() {
 		if (blockingData == null) {
-			blockingData = new LinkedBlockingQueue<IplImage>();
+			blockingData = new LinkedBlockingQueue<Frame>();
 		}
 	}
 

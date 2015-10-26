@@ -48,7 +48,10 @@ import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.ColoredPoint;
@@ -60,7 +63,7 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.opencv.OpenCVFilterFFMEG;
+import org.myrobotlab.opencv.OpenCVFilterFFmpeg;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
@@ -68,17 +71,24 @@ import org.myrobotlab.service.data.Point2Df;
 import org.myrobotlab.service.interfaces.VideoSource;
 import org.slf4j.Logger;
 
-/*import static org.bytedeco.javacpp.opencv_flann.*;
- import static org.bytedeco.javacpp.opencv_highgui.*;
- import static org.bytedeco.javacpp.opencv_imgproc.*;
- import static org.bytedeco.javacpp.opencv_legacy.*;
- import static org.bytedeco.javacpp.opencv_ml.*;
- import static org.bytedeco.javacpp.opencv_nonfree.*;
- import static org.bytedeco.javacpp.opencv_objdetect.*;
- import static org.bytedeco.javacpp.opencv_photo.*;
- import static org.bytedeco.javacpp.opencv_stitching.*;
- import static org.bytedeco.javacpp.opencv_video.*;
- import static org.bytedeco.javacpp.opencv_videostab.*; */
+/*
+
+import static org.bytedeco.javacpp.opencv_imgproc.*;
+import static org.bytedeco.javacpp.opencv_calib3d.*;
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_features2d.*;
+import static org.bytedeco.javacpp.opencv_flann.*;
+import static org.bytedeco.javacpp.opencv_highgui.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.*;
+import static org.bytedeco.javacpp.opencv_ml.*;
+import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_photo.*;
+import static org.bytedeco.javacpp.opencv_shape.*;
+import static org.bytedeco.javacpp.opencv_stitching.*;
+import static org.bytedeco.javacpp.opencv_video.*;
+import static org.bytedeco.javacpp.opencv_videostab.*;
+
+*/
 
 /**
  * 
@@ -174,6 +184,40 @@ public class OpenCV extends VideoSource {
 		videoProcessor.publishDisplay = b;
 		return b;
 	}
+	
+	/**
+	 * new way of converting IplImages to BufferedImages
+	 * @param src
+	 * @return
+	 */
+	public static BufferedImage IplImageToBufferedImage(IplImage src) {
+	    OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
+	    Java2DFrameConverter converter = new Java2DFrameConverter();	    
+	    Frame frame = grabberConverter.convert(src);
+	    return converter.getBufferedImage(frame,1);
+	}
+	
+	/**
+	 * new way of converting BufferedImages to IplImages
+	 * @param src
+	 * @return
+	 */
+	public static IplImage BufferedImageToIplImage(BufferedImage src) {
+	    OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
+	    Java2DFrameConverter jconverter = new Java2DFrameConverter();
+	    return grabberConverter.convert(jconverter.convert(src));	    
+	}
+	
+	/**
+	 * new way of converting BufferedImages to IplImages
+	 * @param src
+	 * @return
+	 */
+	public static Frame BufferedImageToFrame(BufferedImage src) {
+	    Java2DFrameConverter jconverter = new Java2DFrameConverter();
+	    return jconverter.convert(src);	    
+	}
+
 
 	/**
 	 * FIXME - input needs to be OpenCVData THIS IS NOT USED ! VideoProcessor
@@ -228,7 +272,8 @@ public class OpenCV extends VideoSource {
 	}
 
 	public OpenCVData add(SerializableImage image) {
-		IplImage src = IplImage.createFrom(image.getImage());
+		Frame src = BufferedImageToFrame(image.getImage());
+		// IplImage src = IplImage.createFrom(image.getImage());
 		// return new SerializableImage(dst.getBufferedImage(),
 		// image.getSource());
 		return add(src);
@@ -240,7 +285,7 @@ public class OpenCV extends VideoSource {
 	 * 
 	 * @param image
 	 */
-	public OpenCVData add(IplImage image) {
+	public OpenCVData add(Frame image) {
 		FrameGrabber grabber = videoProcessor.getGrabber();
 		if (grabber == null || grabber.getClass() != BlockingQueueGrabber.class) {
 			error("can't add an image to the video processor - grabber must be not null and BlockingQueueGrabber");
@@ -694,12 +739,17 @@ public class OpenCV extends VideoSource {
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
 
 		
-		OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
+		OpenCVFilterFFmpeg ffmpeg = new OpenCVFilterFFmpeg("ffmpeg");
 		opencv.addFilter(ffmpeg);
 		opencv.capture();
 		
+		boolean leave = true;
+		if (leave){
+			return;
+		}
+		
 		opencv.removeFilters();
-		ffmpeg.stopRecording();
+//		ffmpeg.stopRecording();
 		
 
 		// opencv.setCameraIndex(0);

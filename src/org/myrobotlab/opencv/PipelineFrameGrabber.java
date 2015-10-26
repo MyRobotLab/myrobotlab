@@ -4,12 +4,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 /**
  * @author GroG
@@ -22,10 +22,10 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
 public class PipelineFrameGrabber extends FrameGrabber {
 
 	public final static Logger log = LoggerFactory.getLogger(PipelineFrameGrabber.class.getCanonicalName());
-	BlockingQueue<IplImage> blockingData;
+	BlockingQueue<Frame> blockingData;
 	String sourceKey = "";
 
-	public PipelineFrameGrabber(BlockingQueue<IplImage> queue) {
+	public PipelineFrameGrabber(BlockingQueue<Frame> queue) {
 		blockingData = queue;
 	}
 
@@ -37,16 +37,16 @@ public class PipelineFrameGrabber extends FrameGrabber {
 		this.sourceKey = sourceKey;
 	}
 
-	public void add(IplImage image) {
+	public void add(Frame image) {
 		blockingData.add(image);
 	}
 
 	@Override
-	public IplImage grab() {
+	public Frame grab() {
 
 		try {
 			// added non blocking allowing thread to terminate
-			IplImage image = blockingData.poll(1000, TimeUnit.MILLISECONDS);
+			Frame image = blockingData.poll(1000, TimeUnit.MILLISECONDS);
 			return image;
 		} catch (InterruptedException e) {
 			Logging.logError(e);
@@ -59,14 +59,14 @@ public class PipelineFrameGrabber extends FrameGrabber {
 	public void release() throws Exception {
 	}
 
-	public void setQueue(BlockingQueue<IplImage> queue) {
+	public void setQueue(BlockingQueue<Frame> queue) {
 		blockingData = queue;
 	}
 
 	@Override
 	public void start() {
 		if (blockingData == null) {
-			blockingData = new LinkedBlockingQueue<IplImage>();
+			blockingData = new LinkedBlockingQueue<Frame>();
 		}
 	}
 
