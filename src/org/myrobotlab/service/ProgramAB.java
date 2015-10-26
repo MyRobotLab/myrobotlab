@@ -75,31 +75,18 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	private boolean enableAutoConversation = false;
 
 	private static final long serialVersionUID = 1L;
-
-	public static void main(String s[]) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("INFO");
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
-		String sessionName = null;
-		if (true) {
-			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
-			alice.setEnableAutoConversation(false);
-			alice.startSession(sessionName);
-			Response response = alice.getResponse(sessionName, "CONVERSATION_SEED_STRING");
-			log.info("Alice " + response.msg);
-		} else {
-			ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
-			lloyd.startSession("ProgramAB", sessionName, "lloyd");
-			Response response = lloyd.getResponse(sessionName, "Hello.");
-			log.info("Lloyd " + response.msg);
-		}
-	}
+	
+	private static int savePredicatesInterval = 10000;
 
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
 		// we started..
 		serviceStartTime = new Date();
+		
+		// Tell programAB to persist it's learned predicates about people
+		// every 30 seconds.
+		addLocalTask(savePredicatesInterval, "savePredicates");
+		
 	}
 
 	public void addOOBTextListener(TextListener service) {
@@ -167,6 +154,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		// TODO: sanitize the session label so it can be safely used as a
 		// filename
 		String predicatePath = path + File.separator + "bots" + File.separator + botName + File.separator + "config";
+		
+		// just in case the directory doesn't exist.. make it.
+		File predDir = new File(predicatePath);
+		if (!predDir.exists()) {
+			predDir.mkdirs();
+		}
+		
 		predicatePath += File.separator + session + ".predicates.txt";
 		return predicatePath;
 	}
@@ -225,7 +219,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
 		// OOB text should not be published as part of the response text.
 		Matcher matcher = oobPattern.matcher(res);
-		res = matcher.replaceAll("");
+		res = matcher.replaceAll("").trim();
 
 		Response response = new Response(session, res, payloads, lastResponseTime);
 		// Now that we've said something, lets create a timer task to wait for N
@@ -328,21 +322,52 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	}
 
 	private OOBPayload parseOOB(String oobPayload) {
-		JAXBContext jaxbContext;
-		try {
-			jaxbContext = JAXBContext.newInstance(OOBPayload.class);
-			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			log.info("OOB PAYLOAD :" + oobPayload);
-			Reader r = new StringReader(oobPayload);
-			OOBPayload oobMsg = (OOBPayload) jaxbUnmarshaller.unmarshal(r);
-			return oobMsg;
-		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-		log.info("OOB tag found, but it's not an MRL tag. {}", oobPayload);
-		return null;
+		// TODO: fix the damn double encoding issue.
+		// we have user entered text in the service/method 
+		// and params values.
+		// grab the service
+		Pattern servicePattern = Pattern.compile("<service>(.*?)</service>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+		Matcher serviceMatcher = servicePattern.matcher(oobPayload);
+		serviceMatcher.find();
+		String serviceName = serviceMatcher.group(1);
+		
+		Pattern methodPattern = Pattern.compile("<method>(.*?)</method>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+		Matcher methodMatcher = methodPattern.matcher(oobPayload);
+		methodMatcher.find();
+		String methodName = methodMatcher.group(1);
+
+		
+		Pattern paramPattern = Pattern.compile("<param>(.*?)</param>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+		Matcher paramMatcher = paramPattern.matcher(oobPayload);
+		ArrayList<String> params = new ArrayList<String>();
+		while (paramMatcher.find()) {
+			// We found some OOB text.
+			// assume only one OOB in the text?
+			String param = paramMatcher.group(1);
+			params.add(param);
+		}
+		OOBPayload payload = new OOBPayload(serviceName, methodName, params);
+		// log.info(payload.toString());
+		return payload;
+		
+		// JAXB stuff blows up because the response from program ab is already xml decoded!  
+		//
+//		JAXBContext jaxbContext;
+//		try {
+//			jaxbContext = JAXBContext.newInstance(OOBPayload.class);
+//			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+//			log.info("OOB PAYLOAD :" + oobPayload);
+//			Reader r = new StringReader(oobPayload);
+//			OOBPayload oobMsg = (OOBPayload) jaxbUnmarshaller.unmarshal(r);
+//			return oobMsg;
+//		} catch (JAXBException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+//		log.info("OOB tag found, but it's not an MRL tag. {}", oobPayload);
+//		return null;
 	}
 
 	private List<OOBPayload> processOOB(String text) {
@@ -565,4 +590,25 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		bot.writeQuit();
 	}
 
+
+	public static void main(String s[]) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("INFO");
+		Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
+		String sessionName = null;
+		if (true) {
+			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
+			alice.setEnableAutoConversation(false);
+			alice.startSession(sessionName);
+			Response response = alice.getResponse(sessionName, "CONVERSATION_SEED_STRING");
+			log.info("Alice " + response.msg);
+		} else {
+			ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
+			lloyd.startSession("ProgramAB", sessionName, "lloyd");
+			Response response = lloyd.getResponse(sessionName, "Hello.");
+			log.info("Lloyd " + response.msg);
+		}
+	}
+	
 }
