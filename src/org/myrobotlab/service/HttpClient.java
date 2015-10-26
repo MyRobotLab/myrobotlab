@@ -53,9 +53,9 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * HTTPClient - ability to send a http post.
+ * HttpClient - wrapper for Apache HttpClient
  * 
- * @author greg (at) myrobotlab.org wrapper service for Apache HTTPClient
+ * @author greg (at) myrobotlab.org wrapper service for Apache HttpClient
  */
 public class HttpClient extends Service {
 
@@ -253,14 +253,14 @@ public class HttpClient extends Service {
 
 		try {
 
-			HttpClient client = (HttpClient) Runtime.start("client", "HTTPClient");
+			HttpClient client = (HttpClient) Runtime.start("client", "HttpClient");
 
 			// TODO - getByteArray(...)
 			String index = client.get("https://servizizucchetti.decathlon.com/portale/index.htm");
 			log.info(index);
 
-			String username = "UserName";
-			String password = "Password";
+			String username = "ADIDON26";
+			String password = "CRICETO4";
 			
 			client.addFormField("m_cUserName", username);
 			client.addFormField("m_cPassword", password);
@@ -292,32 +292,58 @@ public class HttpClient extends Service {
 			client.addFormField("browserlang", "");
 			client.addFormField("GLOGOLOGIN", "");
 			client.addFormField("g_UserLang", "");
-
 			client.addFormField("GERMNAME", "HRPortal");
-
 		
 			String response = client.post("https://servizizucchetti.decathlon.com/portale/servlet/cp_login");
 			int code = client.getStatusCode();
-			log.info("code " + code);;
+			log.info("code " + code);
 			log.info(new String(response));
+			
+			client.addFormField("m_cID","e2b5dc19ab1f1a933d1beb7e734a340d");
+			client.addFormField("verso","E");
+			response = client.post("https://servizizucchetti.decathlon.com/portale/servlet/cp_login");
+			code = client.getStatusCode();
+			log.info("code " + code);
+			log.info(new String(response));
+			
+
+			client.addFormField("ADATE","2015-10-26");
+			client.addFormField("cmdhash","5ddbddb9d57dc9644e08bc3ff5d13446");
+			client.addFormField("count","false");
+			client.addFormField("rows","16");
+			client.addFormField("sqlcmd","ushp_qtimbrus");
+			client.addFormField("startrow","0");
+			response = client.post("https://servizizucchetti.decathlon.com/portale/servlet/SQLDataProviderServer");
+			code = client.getStatusCode();
+			log.info("code " + code);
+			log.info(new String(response));
+			
+			client.addFormField("m_cID","d9b7ccef224f3dc50a12895fd036fd90");
+			response = client.post("https://servizizucchetti.decathlon.com/portale/servlet/SPPostinCount");
+			code = client.getStatusCode();
+			log.info("code " + code);
+			log.info(new String(response));
+
+			
+			
 
 			log.info("---------------------------------------HERE----------------------------------------------");
 
 			/*
 			 * String google = new
-			 * String(HTTPClient.get("http://www.google.com/"));
+			 * String(HttpClient.get("http://www.google.com/"));
 			 * log.info(google);
 			 * 
-			 * // String ntest = new String(HTTPClient.get("nullTest")); //
+			 * // String ntest = new String(HttpClient.get("nullTest")); //
 			 * log.info(ntest);
 			 * 
-			 * String script = new String(HTTPClient.get(
+			 * String script = new String(HttpClient.get(
 			 * "https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov2.full3.byGael.Langevin.1.py"
 			 * )); log.info(script);
 			 * 
 			 * HashMap<String, String> params = new HashMap<String, String>();
 			 * params.put("p", "apple"); google = new
-			 * String(HTTPClient.post("http://www.google.com", params));
+			 * String(HttpClient.post("http://www.google.com", params));
 			 * log.info(google);
 			 */
 

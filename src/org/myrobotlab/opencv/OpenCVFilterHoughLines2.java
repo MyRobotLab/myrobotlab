@@ -25,28 +25,28 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_core.CV_RGB;
+import static org.bytedeco.javacpp.helper.opencv_core.CV_RGB;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvDrawLine;
 import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_HOUGH_PROBABILISTIC;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCanny;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.javacpp.opencv_imgproc.cvDrawLine;
 import static org.bytedeco.javacpp.opencv_imgproc.cvHoughLines2;
 
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
-
 import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.opencv_core.CvFont;
 import org.bytedeco.javacpp.opencv_core.CvMemStorage;
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvSeq;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.javacpp.helper.opencv_core.CvArr;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 
@@ -59,7 +59,8 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 	double lowThreshold = 0.0;
 	double highThreshold = 50.0;
 	int apertureSize = 5;
-	CvMemStorage storage = null;
+	//CvMemStorage storage = null;
+	Pointer storage = null;
 	IplImage inlines = null;
 
 	CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
@@ -118,7 +119,10 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 		// explanation of hough transform parameters
 
 		// CV_HOUGH_MULTI_SCALE || CV_HOUGH_STANDARD
-		CvSeq lines = cvHoughLines2(inlines, storage, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 10, 40, 10);
+		CvSeq lines = cvHoughLines2(inlines, storage, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 10);//, 40, 10);
+		
+		Pointer p = null;
+		//cvHoughLines2(inlines, p, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 10, 40, 10);
 
 		for (int i = 0; i < lines.total(); i++) {
 

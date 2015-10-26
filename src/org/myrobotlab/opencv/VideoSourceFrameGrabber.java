@@ -2,12 +2,13 @@ package org.myrobotlab.opencv;
 
 import java.util.LinkedList;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class VideoSourceFrameGrabber extends FrameGrabber {
 
@@ -47,9 +48,9 @@ public class VideoSourceFrameGrabber extends FrameGrabber {
 	}
 
 	@Override
-	public IplImage grab() {
+	public Frame grab() {
 
-		IplImage image = null;
+		Frame image = null;
 		synchronized (imgq) {
 
 			while (image == null) { // while no messages && no messages that are
@@ -60,7 +61,8 @@ public class VideoSourceFrameGrabber extends FrameGrabber {
 					} catch (InterruptedException e) {
 					} // must own the lock
 				} else {
-					image = IplImage.createFrom(imgq.removeLast().getImage());
+					image = OpenCV.BufferedImageToFrame(imgq.removeLast().getImage());
+					//image = IplImage.createFrom(imgq.removeLast().getImage());
 				}
 			}
 			imgq.notifyAll();

@@ -1,21 +1,13 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_core.cvPutText;
 import static org.bytedeco.javacpp.opencv_core.cvScalar;
-import static org.bytedeco.javacpp.opencv_core.cvInitFont;
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.FrameRecorder;
-import org.bytedeco.javacv.OpenCVFrameRecorder;
-import org.bytedeco.javacv.OpenKinectFrameGrabber;
-import org.bytedeco.javacpp.opencv_core.CvFont;
-import org.bytedeco.javacpp.opencv_core.CvPoint;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_imgproc.cvInitFont;
+import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -27,6 +19,15 @@ import java.util.SimpleTimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.bytedeco.javacpp.opencv_core.CvPoint;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.FrameRecorder;
+import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameRecorder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
@@ -51,6 +52,8 @@ public class VideoProcessor implements Runnable, Serializable {
 	public String grabberType = "org.bytedeco.javacv.OpenCVFrameGrabber";
 
 
+	transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
+	
 	HashMap<String, Overlay> overlays = new HashMap<String, Overlay>(); 
 
 	// grabber cfg
@@ -108,7 +111,7 @@ public class VideoProcessor implements Runnable, Serializable {
 	 */
 	public String displayFilterName = INPUT_KEY;
 
-	transient IplImage frame;
+	transient Frame frame;
 
 	private int minDelay = 0;
 
@@ -225,7 +228,7 @@ public class VideoProcessor implements Runnable, Serializable {
 				// (String.format("%s.avi",filename), frame.width(),
 				// frame.height());
 
-				FrameRecorder recorder = new OpenCVFrameRecorder(String.format("%s.avi", recordingSource), frame.width(), frame.height());
+				FrameRecorder recorder = new OpenCVFrameRecorder(String.format("%s.avi", recordingSource), frame.imageWidth, frame.imageHeight);
 				// recorder.setCodecID(CV_FOURCC('M','J','P','G'));
 				// TODO - set frame rate to framerate
 				recorder.setFrameRate(15);
@@ -235,7 +238,7 @@ public class VideoProcessor implements Runnable, Serializable {
 			}
 
 			// TODO - add input, filter & display
-			outputFileStreams.get(recordingSource).record(data.getImage(recordingSource));
+			outputFileStreams.get(recordingSource).record(converter.convert(data.getImage(recordingSource)));
 
 			if (closeOutputs) {
 				OpenCVFrameRecorder output = (OpenCVFrameRecorder) outputFileStreams.get(recordingSource);
@@ -410,9 +413,11 @@ public class VideoProcessor implements Runnable, Serializable {
 					continue;
 				}
 
+				/*
 				if (getDepth && grabber.getClass() == OpenKinectFrameGrabber.class) {
 					sources.put(boundServiceName, OpenCV.SOURCE_KINECT_DEPTH, ((OpenKinectFrameGrabber) grabber).grabDepth());
 				}
+				*/
 
 				// TODO - option to accumulate? - e.g. don't new
 				data = new OpenCVData(boundServiceName, frameIndex);
@@ -425,8 +430,8 @@ public class VideoProcessor implements Runnable, Serializable {
 					Iterator<OpenCVFilter> itr = filters.iterator();
 
 					// setting up INPUT filter
-					sources.put(boundServiceName, INPUT_KEY, frame);
-					sources.put(boundServiceName, INPUT_KEY, OpenCVData.KEY_DISPLAY, frame);
+					sources.put(boundServiceName, INPUT_KEY, converter.convert(frame));
+					sources.put(boundServiceName, INPUT_KEY, OpenCVData.KEY_DISPLAY, converter.convert(frame));
 
 					while (capturing && itr.hasNext()) {
 

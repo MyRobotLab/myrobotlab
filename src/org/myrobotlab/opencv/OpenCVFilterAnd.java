@@ -29,16 +29,16 @@ import static org.bytedeco.javacpp.opencv_core.cvAnd;
 import static org.bytedeco.javacpp.opencv_core.cvRect;
 import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
 import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
-import static org.bytedeco.javacpp.opencv_highgui.CV_LOAD_IMAGE_GRAYSCALE;
-import static org.bytedeco.javacpp.opencv_highgui.cvLoadImage;
+import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class OpenCVFilterAnd extends OpenCVFilter {
 
@@ -63,7 +63,7 @@ public class OpenCVFilterAnd extends OpenCVFilter {
 	}
 
 	public void loadMask(BufferedImage mask) {
-		this.and = IplImage.createFrom(mask);
+		this.and = OpenCV.BufferedImageToIplImage(mask);//IplImage.createFrom(mask);
 	}
 
 	public void loadMask(IplImage mask) {

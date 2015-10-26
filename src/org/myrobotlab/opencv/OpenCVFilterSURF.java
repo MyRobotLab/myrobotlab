@@ -27,24 +27,23 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvLine;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_core.cvRect;
 import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
 import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
-import static org.bytedeco.javacpp.opencv_highgui.CV_LOAD_IMAGE_GRAYSCALE;
-import static org.bytedeco.javacpp.opencv_highgui.cvLoadImage;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_GRAY2BGR;
+import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_GRAY2BGR;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.javacpp.opencv_imgproc.cvLine;
 
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.ObjectFinder;
 import org.bytedeco.javacv.ObjectFinder.Settings;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.CvSize;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class OpenCVFilterSURF extends OpenCVFilter {
 
@@ -123,7 +122,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
 			settings.setObjectImage(object);
 			settings.setUseFLANN(true);
 			settings.setRansacReprojThreshold(5);
-			settings.setHessianThreshold(50);
+			//settings.setHessianThreshold(50);
 		}
 		ObjectFinder finder = new ObjectFinder(settings);
 

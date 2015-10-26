@@ -25,27 +25,25 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_core.CV_RGB;
+import static org.bytedeco.javacpp.helper.opencv_core.CV_RGB;
 import static org.bytedeco.javacpp.opencv_core.cvAvg;
-import static org.bytedeco.javacpp.opencv_core.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_core.cvFont;
-import static org.bytedeco.javacpp.opencv_core.cvPutText;
 import static org.bytedeco.javacpp.opencv_core.cvRect;
 import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
 import static org.bytedeco.javacpp.opencv_core.cvScalar;
 import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
-import static org.bytedeco.javacpp.opencv_core.cvInitFont;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
+import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
-
-import org.bytedeco.javacpp.opencv_core.CvFont;
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class OpenCVFilterAverageColor extends OpenCVFilter {
 

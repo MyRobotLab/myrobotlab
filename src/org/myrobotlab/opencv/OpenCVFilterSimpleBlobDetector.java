@@ -26,23 +26,24 @@
 // http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_core.cvCircle;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_core.cvPutText;
-import static org.bytedeco.javacpp.opencv_core.cvInitFont;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCircle;
+import static org.bytedeco.javacpp.opencv_imgproc.cvInitFont;
+import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.util.ArrayList;
 
+import org.bytedeco.javacpp.opencv_core.CvScalar;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.KeyPoint;
+import org.bytedeco.javacpp.opencv_core.KeyPointVector;
+import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_features2d.SimpleBlobDetector;
+import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.Point2Df;
 import org.slf4j.Logger;
-import org.bytedeco.javacpp.opencv_core.CvFont;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_features2d.KeyPoint;
-import org.bytedeco.javacpp.opencv_features2d.SimpleBlobDetector;
 
 public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 
@@ -73,14 +74,24 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 		
 		// TODO: track an array of blobs , not just one.
 		SimpleBlobDetector o = new SimpleBlobDetector();
-		KeyPoint point = new KeyPoint();
+		//KeyPoint point = new KeyPoint();
+		KeyPointVector pv = new KeyPointVector();
 
 		// TODO: i'd like to detect all the points at once..  
 		// can i pass an array or something like that?  hmm.
 		// TODO: this is null?! we blow up! (after javacv upgrade)
-		o.detect(new Mat(image), point);
+
+		o.detect(new Mat(image), pv);
 		
 		//System.out.println(point.toString());
+		if (pv.size() == 0){
+			log.error("no key points");
+			return image;
+		}
+		
+		// FIXME - go through for loop to get them all ?
+		KeyPoint point = pv.get(0);
+		
 		float x = point.pt().x();
 		float y = point.pt().y();
 		if (x == 0 && y == 0) {

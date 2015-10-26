@@ -25,29 +25,29 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_core.cvCircle;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_core.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCircle;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
+import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.data.Point2Df;
-import org.slf4j.Logger;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.opencv_core.CvFont;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.data.Point2Df;
+import org.slf4j.Logger;
 
 import com.sun.jna.ptr.IntByReference;
 

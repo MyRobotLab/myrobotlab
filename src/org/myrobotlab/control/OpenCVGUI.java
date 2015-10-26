@@ -83,9 +83,9 @@ import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.slf4j.Logger;
-
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 
 public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, VideoGUISource, ActionListener {
 
@@ -93,6 +93,8 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 	public final static Logger log = LoggerFactory.getLogger(OpenCVGUI.class.toString());
 	public String prefixPath = "org.bytedeco.javacv.";
 
+	transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
+	
 	BasicArrowButton addFilterButton = new BasicArrowButton(BasicArrowButton.EAST);
 	BasicArrowButton removeFilterButton = new BasicArrowButton(BasicArrowButton.WEST);
 
@@ -719,7 +721,7 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 		// GRRR BufferedImage - should have been a Serialized Image;
 
 		if (cframe != null) {
-			cframe.showImage(data.getImage());
+			cframe.showImage(converter.convert(data.getImage()));
 		} else {
 			video0.displayFrame(new SerializableImage(data.getDisplayBufferedImage(), data.getDisplayFilterName()));
 		}

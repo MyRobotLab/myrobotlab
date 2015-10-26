@@ -26,15 +26,13 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.helper.opencv_imgproc.cvFindContours;
 import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
-import static org.bytedeco.javacpp.opencv_core.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_core.cvInRangeS;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_core.cvPutText;
 import static org.bytedeco.javacpp.opencv_core.cvRect;
 import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
 import static org.bytedeco.javacpp.opencv_core.cvScalar;
@@ -43,32 +41,33 @@ import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_core.cvZero;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_CHAIN_APPROX_SIMPLE;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_POLY_APPROX_DP;
 import static org.bytedeco.javacpp.opencv_imgproc.cvApproxPoly;
 import static org.bytedeco.javacpp.opencv_imgproc.cvBoundingRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCheckContourConvexity;
 import static org.bytedeco.javacpp.opencv_imgproc.cvContourPerimeter;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.cvFindContours;
+import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
-import org.myrobotlab.image.KinectImageNode;
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.OpenCV;
-import org.slf4j.Logger;
-
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_core.CvContour;
-import org.bytedeco.javacpp.opencv_core.CvFont;
 import org.bytedeco.javacpp.opencv_core.CvMemStorage;
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.CvSeq;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.myrobotlab.image.KinectImageNode;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
+import org.slf4j.Logger;
 
 public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 	private static final long serialVersionUID = 1L;
@@ -202,9 +201,9 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 		cvResetImageROI(black);
 		cvCopy(itemp, itemp2, black);
 
-		invoke("publishDisplay", "input", itemp.getBufferedImage());
-		invoke("publishDisplay", "kinectDepth", ktemp.getBufferedImage());
-		invoke("publishDisplay", "kinectMask", mask.getBufferedImage());
+		invoke("publishDisplay", "input", OpenCV.IplImageToBufferedImage(itemp));
+		invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(ktemp));
+		invoke("publishDisplay", "kinectMask", OpenCV.IplImageToBufferedImage(mask));
 
 		// TODO - publish KinectImageNode ArrayList
 		// find contours ---- begin ------------------------------------

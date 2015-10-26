@@ -69,7 +69,8 @@ public class OpenCVFilterDetector extends OpenCVFilter {
 	public void imageChanged(IplImage image) {
 		foreground = IplImage.create(image.width(), image.height(), IPL_DEPTH_8U, 1);
 
-		mog = new BackgroundSubtractorMOG2(history, threshold, shadowDetection);
+		//mog = new BackgroundSubtractorMOG2(history, threshold, shadowDetection);
+		mog = new BackgroundSubtractorMOG2();
 	}
 
 	public void learn() {
