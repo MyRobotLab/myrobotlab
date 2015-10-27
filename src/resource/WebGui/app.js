@@ -9,7 +9,7 @@
 // http://tylermcginnis.com/angularjs-factory-vs-service-vs-provider/
 // http://odetocode.com/blogs/scott/archive/2014/05/20/using-resolve-in-angularjs-routes.aspx
 
-var app = angular.module('mrlapp', [
+angular.module('mrlapp', [
     'ngRoute',
     'ng',
     'ui.bootstrap', //BootstrapUI (in Angular style)
@@ -22,7 +22,7 @@ var app = angular.module('mrlapp', [
     'mrlapp.mrl', //mrl.js (/mrl.js) - the really really core
     'mrlapp.main.mrlLogger', //custom logger! (it extends the default angular one ($log))
     'mrlapp.main.mainCtrl',
-    'mrlapp.main.statesvc', //very basic service for storing "statuses"
+    'mrlapp.main.statussvc', //very basic service for storing "statuses"
     'mrlapp.main.filter',
     'mrlapp.nav', //Navbar & Co. (/nav)
     'mrlapp.service' //Service & Co. (/service)
@@ -52,9 +52,11 @@ var app = angular.module('mrlapp', [
         }).otherwise({
             redirectTo: '/main'
         });
-    }]);
+    }])
 
-app.filter('reverse', function() {
+//FIXME - why is it here as well? (/main/filter.js)
+//DESIGN-STRATEGY - shouldn't be in app.js
+.filter('reverse', function() {
   return function(items) {
     return items.slice().reverse();
   };
