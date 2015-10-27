@@ -2,13 +2,14 @@ angular.module('mrlapp.service.PythonGui', [])
 .controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
     $log.info('PythonGuiCtrl');
     _self = this;
+    var msg = this.msg;
     
     // The all powerful name !
     var name = $scope.name;
     // create our msg interface to our service
     // this also initalizes a data structure which
     // will hold "ALL" of public stubbed out methods from the Service
-    var msg = mrl.createMsgInterface(name, $scope);
+//    var msg = mrl.createMsgInterface(name, $scope);
     
     // init scope values
     $scope.output = '';
@@ -27,7 +28,7 @@ angular.module('mrlapp.service.PythonGui', [])
     // For example the Serial service calls broadcast state when
     // it connects or disconnects from a serial port
     // FIXME - framework level update of mrl's registry
-    _self.updateState = function(service) {
+    this.updateState = function(service) {
         // this is where we update all gui components through the scope
         // which will show on the html service body
         $scope.service = service;
