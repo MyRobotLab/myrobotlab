@@ -13,62 +13,59 @@
 
             <ul class="nav navbar-nav">
                 <li><li><a href="http://www.myrobotlab.org">{{platform}}</a></li>
-                <!--<li><a href="/b">/b</a></li>
-                <li><a href="/c">/c</a></li>
-                <li><a href="/d">/d</a></li>
-                <li><a href="/e">/e</a></li>-->
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
-
+                <!--TODO: Do something! Too many elements in the navbar! -> navbar stacks! -> occupying screen-space! (not everyone has a very big screen)-->
+                <!--quick-start a service-->
                 <li>
                 <form class="navbar-form">
-                <!-- pre>Model: {{searchSelectedService | json}}</pre-->
-                    <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" typeahead="state as state.name for state in possibleServices | filter:{name:$viewValue}" typeahead-template-url="customTemplate.html">
-                    <script type="text/ng-template" id="customTemplate.html">
+                        <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-template-url="serviceSearchTemplate.html">
+                    <script type="text/ng-template" id="serviceSearchTemplate.html">
                         <a>
                             <img ng-src="/{{match.model.img}}" width="16">
                             <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
                         </a>
                     </script>
-                        
                          <input class="form-control" type="text" ng-model="newName" placeholder="name">
                             <button class="btn btn-default" ng-click="start(newName, newType)">start</button>
-                        
                 </form>
                 </li>
-
                 <!--Status-->
-                <!--TODO: (maybe) integrate a glyphicon (or picture) before the status (status-type, from which service the status came, ...(or something even better))-->                
                 <li>
                     <form class="navbar-form">
                         <img src="../../{{connected}}.png" alt="">
                         <div class="input-group" dropdown>
-                            <input type="text" class="form-control"
-                                   placeholder="Status" ng-model="statuslist[statuslist.length - 1]" readonly>
+                            <input type="text" class="form-control" style="width: 200px"
+                                   placeholder="Status" ng-model="firststatus" readonly>
                             <div class="input-group-btn" dropdown-toggle>
                                 <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Status">
                                     <i class="glyphicon glyphicon-dashboard"></i>
                                 </button>
                             </div>
-                            <ul class="dropdown-menu">
-                                <li ng-repeat="status in statuslist| reverse track by $index " ng-style="{{statusStyle}}"><a href="">{{status}}</a></li>
+                            <ul class="dropdown-menu" style="width: 240px">
+                                <li ng-repeat="status in statuslist| reverse track by $index">
+                                    <a href="">
+                                        <div ng-if="status.level == 'debug'"><i class="glyphicon glyphicon-record"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-primary">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                        <div ng-if="status.level == 'info'"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-info">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                        <div ng-if="status.level == 'warn'"><i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-warning">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                        <div ng-if="status.level == 'error'"><i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-danger">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                        <div ng-if="status.level != 'debug' && status.level != 'info' && status.level != 'warn' && status.level != 'error'"><i class="glyphicon glyphicon-question-sign"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-default">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </form>
                 </li>
-                <!--Minimize all / Expand all / Toggle minlist-->
+                <!--Hide all / Show all / Toggle minlist-->
                 <li>
                     <form class="navbar-form">
                         <div class="btn-group">
-
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Hide All" ng-click="hideAll()">
+                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Hide All" ng-click="showAll(false)">
                             <i class="glyphicon glyphicon-eye-close"></i>
                         </button>
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Show All" ng-click="showAll()">
+                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Show All" ng-click="showAll(true)">
                             <i class="glyphicon glyphicon-eye-open"></i>
-                        </button>
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Show All" ng-click="test()">test                            
                         </button>
                         <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Toggle minlist" ng-click="toggleMinList()">
                                 <i class="glyphicon glyphicon-th"></i>
@@ -78,13 +75,12 @@
                 </li>
                 <!--Search-->
                 <li>
-                <!-- pre>Model: {{searchSelectedService | json}}</pre-->
                     <form class="navbar-form" role="search">
                         <div class="input-group">
                             <input type="text" class="form-control"
                                    placeholder="Search"
-                                   ng-model="searchSelectedService"
-                                   typeahead="name.name as name for name in searchPanels | filter:{name:$viewValue}"
+                                   ng-model="searchSelectedPanel"
+                                   typeahead="panel as panel.name for panel in allpanels | filter:{name:$viewValue}"
                                    typeahead-template-url="nav/searchtemplate.html"
                                    typeahead-on-select='searchOnSelect($item, $model, $label)'>
                             <div class="input-group-btn">

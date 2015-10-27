@@ -417,7 +417,7 @@ angular
         _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod);
     }
     ;
-
+    
    this.unsubscribe = function(topicName, topicMethod) {
         _self.sendTo(_self.gateway.name, "unsubscribe", topicName, topicMethod);
     }
@@ -538,12 +538,17 @@ angular
             getLocalServices: function() {
                 return environments["null"];
             },
-            createMsgInterface: function(name, scope) {
+            createMsgInterface: function(name) {
+                //TODO - clean up here !!!
+                //left kind of a mess here (e.g. temp and mod below), MaVo
+                
+                var deferred = $q.defer();
+                
                 if (!msgInterfaces.hasOwnProperty(name)) {
                     //console.log(name + ' getMsgInterface ');               
                     msgInterfaces[name] = {
                         "name": name,
-                        "scope": scope,
+                        "temp": {},
                         send: function(method, data) {
                             var args = Array.prototype.slice.call(arguments, 1);
                             var msg = _self.createMessage(name, method, args);
@@ -558,7 +563,7 @@ angular
                                 // FIXME - bury it ?
                             case 'onState':
                                 _self.updateState(msg.data[0]);
-                                $scope.$apply();
+//                                $scope.$apply(); scope is context related !!!
                                 break;
                             case 'onMethodMap':
                                 console.log('onMethodMap Yay !!');
@@ -587,13 +592,15 @@ angular
                                             }
                                             dynaFn += "})";
                                             console.log("msg." + m.name + " = " + dynaFn);
-                                            msgInterfaces[msg.sender].scope.msg[m.name] = eval(dynaFn);
+                                            msgInterfaces[msg.sender].temp.msg[m.name] = eval(dynaFn);
                                         }
                                     }
-                                    msgInterfaces[msg.sender].scope.methodMap = methodMap;
+                                    msgInterfaces[msg.sender].temp.methodMap = methodMap;
                                 } catch (e) {
-                                    $log.error("onMethodMap blew up - " + e)
+                                    $log.error("onMethodMap blew up - " + e);
                                 }
+                                
+                                deferred.resolve(msgInterfaces[msg.sender]);
                                 
                                 break;
                             default:
@@ -601,7 +608,7 @@ angular
                                 break;
                             }
                             // end switch
-                        },                        
+                        },
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
                                 // regular subscribe when used - e.g. msg.subscribe('publishData')
@@ -642,7 +649,7 @@ angular
                         getMethodMap: function() {
                             _self.sendTo(name, "getMethodMap");
                         }
-                    }
+                    };
                 }
                 
                 // Yikes ! circular reference ...
@@ -650,10 +657,15 @@ angular
                 // the point of this is to make a msg interface like
                 // structure in the scope similar to the msg interface
                 // we created for the controller - they start the same
-                msgInterfaces[name].scope.msg = {};
-                msgInterfaces[name].scope.msg._interface = msgInterfaces[name];
+                msgInterfaces[name].temp.msg = {};
+                msgInterfaces[name].temp.msg._interface = msgInterfaces[name];
                 
-                return msgInterfaces[name];
+                //FIXME - hacked here @GroG: please look at this
+                _self.sendTo(_self.gateway.name, "subscribe", name, 'getMethodMap');
+                _self.subscribeToServiceMethod(msgInterfaces[name].onMsg, name, 'getMethodMap');
+                msgInterfaces[name].getMethodMap();
+                
+                return deferred.promise;
             },
             
             getPlatform: function() {
