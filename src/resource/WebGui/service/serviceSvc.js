@@ -128,31 +128,31 @@ angular.module('mrlapp.service')
                     //posy
                     //TODO - come back here
                     //liked this more, but ...
-//                    var panelsarray = _self.getPanelsList();
-//                    var posy = 0;
-//                    for (var i = 0; i < panelsarray.length; i++) {
-//                        var value = panelsarray[i];
-//                        var height = 300;
-//                        var spacing = 30;
-//                        var comp1 = value.posy;
-//                        var comp2 = value.posy + value.height;
-//                        if (posy <= comp1 && posy + height >= comp1) {
-//                            posy = comp2 + spacing;
-//                            i = 0;
-//                        } else if (posy <= comp2 && posy + height >= comp2) {
-//                            posy = comp2 + spacing;
-//                            i = 0;
-//                        } else if (posy >= comp1 && posy <= comp2) {
-//                            posy = comp2 + spacing;
-//                            i = 0;
-//                        } else if (posy + height >= comp1 && posy + height <= comp2) {
-//                            posy = comp2 + spacing;
-//                            i = 0;
-//                        }
-//                    }
-                    //... this is working better atm
-                    lastPosY += 30;
-                    var posy = lastPosY;
+                    var panelsarray = _self.getPanelsList();
+                    var posy = 0;
+                    for (var i = 0; i < panelsarray.length; i++) {
+                        var value = panelsarray[i];
+                        var height = 300;
+                        var spacing = 30;
+                        var comp1 = value.posy;
+                        var comp2 = value.posy + value.height;
+                        if (posy <= comp1 && posy + height >= comp1) {
+                            posy = comp2 + spacing;
+                            i = 0;
+                        } else if (posy <= comp2 && posy + height >= comp2) {
+                            posy = comp2 + spacing;
+                            i = 0;
+                        } else if (posy >= comp1 && posy <= comp2) {
+                            posy = comp2 + spacing;
+                            i = 0;
+                        } else if (posy + height >= comp1 && posy + height <= comp2) {
+                            posy = comp2 + spacing;
+                            i = 0;
+                        }
+                    }
+                    //... this is working better atm <-WRONG!!! NoWorky in chrome !!!
+//                    lastPosY += 30;
+//                    var posy = lastPosY;
                     //zindex
                     var zindex = 1;
                     angular.forEach(panels, function (value, key) {

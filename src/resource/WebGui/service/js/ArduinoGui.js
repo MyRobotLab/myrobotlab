@@ -5,7 +5,7 @@ angular.module('mrlapp.service.ArduinoGui', [])
         $scope.version = "unknown";
         
         //var onMsg = function(msg) {
-                $scope.panel.onMsg = function(msg) {  // THIS IS NOT GOOD !
+                this.onMsg = function(msg) {  // THIS IS NOT GOOD !
             //$log.info('CALLBACK - ' + msg.method);
             switch (msg.method) {
                 case 'onPortNames':
@@ -86,7 +86,7 @@ angular.module('mrlapp.service.ArduinoGui', [])
         // mrl.getPeerName()
         // mrl.sendTo(name, 'unsubscribe', board);
         
-        $scope.panel.initDone();
+//        $scope.panel.initDone();
 
 
         mrl.subscribe($scope.service.name, 'publishVersion');

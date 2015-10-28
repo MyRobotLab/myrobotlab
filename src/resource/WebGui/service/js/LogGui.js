@@ -2,9 +2,10 @@ angular.module('mrlapp.service.LogGui', [])
 .controller('LogGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('LogGuiCtrl');
     var _self = this;
+    var msg = this.msg;
     
     var name = $scope.name;
-    var msg = mrl.createMsgInterface(name, $scope);
+//    var msg = mrl.createMsgInterface(name, $scope);
     // TODO singleton -  clear log / log level / appenderes / format
     
     // init scope variables
