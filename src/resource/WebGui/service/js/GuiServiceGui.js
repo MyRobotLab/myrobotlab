@@ -13,7 +13,7 @@ angular.module('mrlapp.service.GUIServiceGui', [])
                 //you HAVE TO define this method &
                 //it is the ONLY exception of writing into .gui
                 //-> you will receive all messages routed to your service here
-                this.onMsg = function (msg) {
+                $scope.panel.onMsg = function (msg) {
                     switch (msg.method) {
                         case 'onPulse':
                             $scope.pulseData = msg.data[0];
@@ -39,5 +39,5 @@ angular.module('mrlapp.service.GUIServiceGui', [])
                 mrl.subscribe($scope.service.name, 'clockStopped');
 
                 //after you're done with setting up your service-panel, call this method
-//                $scope.panel.initDone();
+                $scope.panel.initDone();
             }]);
