@@ -64,7 +64,7 @@ angular.module('mrlapp.nav')
                 $scope.showAll = function (value) {
                     //hide or show all panels
                     $log.info('showAll', value);
-                    serviceSvc.hideAll(value);
+                    serviceSvc.showAll(value);
                 };
 
                 $scope.showminlist = false;
