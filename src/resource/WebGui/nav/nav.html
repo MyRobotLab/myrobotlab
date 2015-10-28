@@ -20,7 +20,7 @@
                 <!--quick-start a service-->
                 <li>
                 <form class="navbar-form">
-                        <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-template-url="serviceSearchTemplate.html">
+                        <input class="form-control" typeahead-min-length="0" type="text" ng-model="newType" placeholder="Service Type" typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-template-url="serviceSearchTemplate.html">
                     <script type="text/ng-template" id="serviceSearchTemplate.html">
                         <a>
                             <img ng-src="/{{match.model.img}}" width="16">
@@ -79,6 +79,7 @@
                         <div class="input-group">
                             <input type="text" class="form-control"
                                    placeholder="Search"
+                                   typeahead-min-length="0"
                                    ng-model="searchSelectedPanel"
                                    typeahead="panel as panel.name for panel in allpanels | filter:{name:$viewValue}"
                                    typeahead-template-url="nav/searchtemplate.html"
