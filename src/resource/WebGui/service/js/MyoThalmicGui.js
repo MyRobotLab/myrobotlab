@@ -11,7 +11,7 @@ angular.module('mrlapp.service.MyoThalmicGui', [])
         $scope.connectText = "connect";
     }
     
-    $scope.panel.onMsg = function(msg) {
+    this.onMsg = function(msg) {
         
         switch (msg.method) {
         case 'onPose':
@@ -55,6 +55,6 @@ angular.module('mrlapp.service.MyoThalmicGui', [])
     mrl.subscribe($scope.service.name, 'publishMyoData');
     mrl.subscribe($scope.service.name, 'publishPose');
     
-    $scope.panel.initDone();
+//    $scope.panel.initDone();
 }
 ]);

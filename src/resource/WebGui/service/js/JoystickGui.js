@@ -45,7 +45,7 @@ angular.module('mrlapp.service.JoystickGui', [])
         "value": ""
     };
     
-    $scope.panel.onMsg = function(msg) {
+    this.onMsg = function(msg) {
         
         switch (msg.method) {
         case 'onState':
@@ -102,7 +102,7 @@ angular.module('mrlapp.service.JoystickGui', [])
     mrl.sendTo($scope.service.name, 'broadcastState');
     
     // mrl.sendTo($scope.service.name, "broadcastState");
-    $scope.panel.initDone();
+//    $scope.panel.initDone();
 
     // msg.subscribe();
 }

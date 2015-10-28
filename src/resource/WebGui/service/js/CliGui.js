@@ -6,7 +6,7 @@ angular.module('mrlapp.service.CliGui', [])
     var service = mrl.getService($scope.service.name);
     var name = $scope.service.name;
     
-    $scope.panel.onMsg = function(msg) {
+    this.onMsg = function(msg) {
         switch (msg.method) {
         case 'onStdout':
             $scope.cli = $scope.cli + '\n' + msg.data[0];
@@ -40,6 +40,6 @@ angular.module('mrlapp.service.CliGui', [])
     mrl.subscribe($scope.service.name, 'stdout');
     
     //after you're done with setting up your service-panel, call this method
-    $scope.panel.initDone();
+//    $scope.panel.initDone();
 }
 ]);

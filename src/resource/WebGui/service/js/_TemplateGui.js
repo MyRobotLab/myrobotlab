@@ -1,6 +1,8 @@
 angular.module('mrlapp.service.TemplateGui', [])
         .controller('TemplateGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
                 $log.info('TemplateGuiCtrl');
+        
+        //WARNING this file doc is heavily outdated !!!
 
                 // get fresh copy
                 $scope.service = mrl.getService($scope.service.name);

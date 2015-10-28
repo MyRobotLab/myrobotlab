@@ -6,7 +6,7 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
         $scope.interval = $scope.service.interval;
         $scope.positions = '';
         $scope.angles = '';
-        $scope.panel.onMsg = function(msg) {
+        this.onMsg = function(msg) {
             $log.info("On Message IK3D!");
             $log.info(msg);
             switch (msg.method) {
@@ -151,5 +151,5 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
         };
         mrl.subscribe($scope.service.name, 'publishJointPositions');
         mrl.subscribe($scope.service.name, 'publishJointAngles');
-        $scope.panel.initDone();
+//        $scope.panel.initDone();
     }]);

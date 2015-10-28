@@ -17,7 +17,7 @@ angular.module('mrlapp.service.ServoGui', [])
         $scope.status = "No Status";
         $scope.$apply();
         
-        $scope.panel.onMsg = function(msg) {
+        this.onMsg = function(msg) {
         	$log.info("SERVO MSG: " + msg);
             switch (msg.method) {
                 case 'onState':
@@ -79,5 +79,5 @@ angular.module('mrlapp.service.ServoGui', [])
         };
         
         // mrl.subscribe($scope.service.name, 'publishServoEvent');  ??
-        $scope.panel.initDone();
+//        $scope.panel.initDone();
     }]);

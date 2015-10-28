@@ -11,7 +11,7 @@ angular.module('mrlapp.service.RemoteAdapterGui', [])
     // onNewConnection - callback & results from scan
     
     
-    $scope.panel.onMsg = function(msg) {
+    this.onMsg = function(msg) {
         
         switch (msg.method) {
         case 'onPulse':
@@ -39,6 +39,6 @@ angular.module('mrlapp.service.RemoteAdapterGui', [])
     mrl.subscribe($scope.service.name, 'remoteadapterStarted');
     mrl.subscribe($scope.service.name, 'remoteadapterStopped');
     
-    $scope.panel.initDone();
+//    $scope.panel.initDone();
 }
 ]);
