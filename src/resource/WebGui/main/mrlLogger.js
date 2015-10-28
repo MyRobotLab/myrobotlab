@@ -189,7 +189,7 @@ angular.module('mrlapp.main.mrlLogger', [])
                     return loglist;
                 };
 
-//                this.clearLogMessages = function () {
-//                    loglist = [];
-//                };
+//                    this.clearLogMessages = function () {
+//                        loglist = [];
+//                    };
             }]);

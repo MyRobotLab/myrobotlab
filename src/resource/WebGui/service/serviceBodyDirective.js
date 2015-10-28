@@ -1,80 +1,43 @@
+ /*
+  from: serviceCtrl + service.html     
+*/
 angular.module('mrlapp.service')
-        .directive('serviceBody', ['$compile', '$templateCache', '$log', 'mrl', function ($compile, $templateCache, $log, mrl) {
-                return {
-                    scope: {
-                        panel: '=',
-                        ctrlfunctions: '='
-                    },
-                    link: function (scope, elem, attr) {
+.directive('serviceBody', ['$log', '$compile', function($log, $compile) {
+        $log.info('serviceBodyDirective');
+        return {
+            scope: {
+                panel: '=',
+                service: '=',
+                        size: '=',
+                panelname: '='
+            },
+            link: function(scope, elem, attr) {
+                $log.info('serviceBodyDirective.link');
+                var ctrl = "";
+                try {
+                    scope.name = scope.service.name;
+                    ctrl = scope.panel.simpleName + "GuiCtrl";
+                    var html = '<div ng-controller=\"' + ctrl + '\"><div service-body-second type="' + attr.type + '"></div></div>';
+                    elem.html(html).show();
+                    // TODO add controller's scope to serviceSvc - attach it to the panel
+                    scope.panel.myScope = scope;
+                    $compile(elem.contents())(scope);
+                } catch (err) {
+                    $log.error("serviceBodyDirective threw compiling ", ctrl, err);
+                }
 
-                        //prepare dynamic controller injection
-//                        var html = '<div service-body-next '
-//                                + 'controller-name="' + scope.panel.simpleName + 'GuiCtrl" '
-//                                + 'name="' + scope.panel.name + '" '
-//                                + 'size="panel.size" panelname="panel.panelname" cb="cb" '
-//                                + 'get-service="ctrlfunctions.getService" '
-//                                + 'subscribe="ctrlfunctions.subscribe" '
-//                                + 'send="ctrlfunctions.send" '
-//                                + 'set-panel-count="ctrlfunctions.setPanelCount" '
-//                                + 'set-panel-names="ctrlfunctions.setPanelNames" '
-//                                + 'set-panel-show-names="ctrlfunctions.setPanelShowNames" '
-//                                + 'set-panel-sizes="ctrlfunctions.setPanelSizes"'
-//                                + '></div>';
-//                        elem.html(html).show();
-//                        $compile(elem.contents())(scope);
+                // _self = this;
+                // $log.(_self); - wow the whole thing
+            }
+        };
+    }])
 
-                        var isUndefinedOrNull = function (val) {
-                            return angular.isUndefined(val) || val === null;
-                        };
-
-                        var watch = scope.$watch(function () {
-                            return scope.panel.scope;
-                        }, function () {
-                            if (!isUndefinedOrNull(scope.panel.scope)) {
-                                watch();
-                                $log.info('got scope! using it', scope.panel.name, scope.panel.panelname);
-                                var newscope = scope.panel.scope;
-                                var html = $templateCache.get(scope.panel.simpleName + 'gui.html');
-                                elem.html(html).show();
-                                $compile(elem.contents())(newscope);
-                            }
-                        });
-                    }
-                };
-            }]);
-//        .directive('serviceBodyNext', ['mrl', function (mrl) {
-//                //dynamic controller & dynamic view
-//                return {
-//                    scope: {
-//                        size: '=',
-//                        panelname: '='
-//                    },
-//                    bindToController: {
-//                        getService: '&',
-//                        subscribe: '&',
-//                        send: '&',
-//                        setPanelCount: '&',
-//                        setPanelNames: '&',
-//                        setPanelShowNames: '&',
-//                        setPanelSizes: '&'
-//                    },
-//                    controller: "@",
-//                    controllerAs: "guictrl",
-//                    name: "controllerName",
-//                    templateUrl: function (element, attr) {
-//                        return 'service/views/' + attr.type + 'gui.html';
-//                    },
-//                    link: function (scope, elem, attr) {
-//                        //register service-subscription
-//                        mrl.subscribeToService(scope.guictrl.onMsg, attr.name);
-//                    }
-//                };
-//            }]);
-//        .directive('serviceBodySecond', [function () {
-//                return {
-//                    //inject template into the service-panel
-//                    templateUrl: function (element, attr) {
-//                        return 'service/views/' + attr.type + 'gui.html';
-//                    }
-//                };
-//            }]);
+.directive('serviceBodySecond', ['$log', function($log) {
+        $log.info('serviceBodyDirective - serviceBodySecond');
+        return {
+            //inject template into the service-panel
+            templateUrl: function(element, attr) {
+                return 'service/views/' + attr.type + 'Gui.html';
+            }
+        };
+    }]);

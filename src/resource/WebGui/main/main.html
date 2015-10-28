@@ -3,22 +3,17 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-12">
-            <div ng-repeat="panel in allpanels"
-                 service-ctrl-directive
-                 panel="panel">
-                <!--maybe move this in the navbar?-->
-            </div>
-            <div ng-repeat="panel in panels"
+        <div id="serviceList" class="col-md-12" style="min-height: 200px">
+            <div ng-repeat="service in services"
                  service-directive
-                 panel="panel">
+                 service="service">
             </div>
-        </div>
-        <div class="col-md-12">
-            <!--TODO remove that at some point-->
-            <div>DEBUG-SECTION</div>
+        </div><!--
+        <div class="col-md-6">
+            <div>DEBUG-SECTION not assigned yet</div>
             <pre>Model: {{searchSelectedService| json}}</pre>
             <pre>{{log| json}}</pre>
         </div>
-    </div>       
+        -->
+    </div>
 </div>       
