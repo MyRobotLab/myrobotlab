@@ -58,7 +58,7 @@
         <div class="panel-body" ng-show="panel.panelsize.sizes[panel.panelsize.aktsize].body != 'collapse'">
             <!--body-->
             <div ng-if="panel.templatestatus == 'loaded'">
-                <div service-body panel="panel" ctrlfunctions="ctrlfunctions"></div>
+                <div service-body panel="panel"></div>
             </div>
             <div ng-if="panel.templatestatus == 'notfound'">
                 <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;service not found
