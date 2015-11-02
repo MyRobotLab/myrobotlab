@@ -7,39 +7,6 @@ angular.module('mrlapp.service')
                     return angular.isUndefined(val) || val === null;
                 };
 
-                //only here for compability reasons
-                $scope.ctrlfunctions = {};
-                $scope.ctrlfunctions.getService = function () {
-                    return mrl.getService($scope.panel.name);
-                };
-                $scope.ctrlfunctions.subscribe = function (method) {
-                    return mrl.subscribe($scope.panel.name, method);
-                };
-                $scope.ctrlfunctions.send = function (method, data) {
-                    //TODO & FIXME !important! - what if it is has more than one data?
-                    if (isUndefinedOrNull(data)) {
-                        return mrl.sendTo($scope.panel.name, method);
-                    } else {
-                        return mrl.sendTo($scope.panel.name, method, data);
-                    }
-                };
-                $scope.ctrlfunctions.setPanelCount = function (number) {
-                    $log.info('setting panelcount', number);
-                    serviceSvc.notifyPanelCountChanged($scope.panel.name, number);
-                };
-                $scope.ctrlfunctions.setPanelNames = function (names) {
-                    $log.info('setting panelnames', names);
-                    serviceSvc.notifyPanelNamesChanged($scope.panel.name, names);
-                };
-                $scope.ctrlfunctions.setPanelShowNames = function (show) {
-                    $log.info('setting panelshownames', show);
-                    serviceSvc.notifyPanelShowNamesChanged($scope.panel.name, show);
-                };
-                $scope.ctrlfunctions.setPanelSizes = function (sizes) {
-                    $log.info('setting panelsizes', sizes);
-                    serviceSvc.notifyPanelSizesChanged($scope.panel.name, sizes);
-                };
-
                 //service-menu-size-change-buttons
                 $scope.changesize = function (size) {
                     $log.info("change size", $scope.panel.name, size);
