@@ -126,5 +126,10 @@
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/opencv.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/opencv-windows-x86_64.jar"/>
 	<classpathentry kind="lib" path="/repo/org.bytedeco.javacv/1.1/opencv-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.19/BoofCV-WebcamCapture-0.19.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.19/BoofCV-xuggler-0.19.jar"/>
+	<classpathentry kind="lib" path="/repo/net.sourceforge.boofcv/0.19/core-0.28.jar"/>
+	<classpathentry kind="lib" path="/repo/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
+	<classpathentry kind="lib" path="/repo/pl.sarxos.webcam/0.3.10/bridj-0.6.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
