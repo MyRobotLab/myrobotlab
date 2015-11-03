@@ -158,6 +158,7 @@ angular.module('mrlapp.service')
                     _self.ctx.closePath();
                     if (pinData.posX == scope.width) {
                         pinData.posX = 0;
+                        scope.clearScreen();
                     }
                     break;
                 case 'onTX':
@@ -171,6 +172,16 @@ angular.module('mrlapp.service')
                 }
             }
             ;
+            
+            scope.clearScreen = function() {
+                _self.ctx = screen.getContext('2d');
+                // ctx.scale(1, -1); // flip y around for cartesian - bad idea :P
+                // scope.width = screen.width;
+                //scope.height = screen.height;
+                _self.ctx.rect(0, 0, scope.width, scope.height);
+                _self.ctx.fillStyle = "black";
+                _self.ctx.fill();
+            }
             
             scope.toggleTrace = function(pin) {
                 
@@ -243,13 +254,13 @@ angular.module('mrlapp.service')
                 $log.error("could not find oscope screen")
             }
             
-            this.ctx = screen.getContext('2d');
+            _self.ctx = screen.getContext('2d');
             // ctx.scale(1, -1); // flip y around for cartesian - bad idea :P
             scope.width = screen.width;
             scope.height = screen.height;
-            ctx.rect(0, 0, screen.width, screen.height);
-            ctx.fillStyle = "black";
-            ctx.fill();
+            _self.ctx.rect(0, 0, screen.width, screen.height);
+            _self.ctx.fillStyle = "black";
+            _self.ctx.fill();
             
             // variable that decides if something should be drawn on mousemove
             var drawing = false;

@@ -1,0 +1,12 @@
+    <div class="col-xs-3">controller
+    	<select ng-model="newController" ng-options="controller for controller in controllers" class="btn btn-default">
+        </select>
+
+        <button class="btn btn-default" ng-if="!service.isClockRunning" ng-click="msg.setInterval(service.interval);msg.startClock()">Start</button>
+        <button class="btn btn-default" ng-if="service.isClockRunning" ng-click="msg.stopClock()">Stop</button>
+    </div>       
+    <div class="col-xs-3">type
+        <input type="text" class="form-control" ng-type="number" ng-model="service.interval" ng-disabled="service.isClockRunning"/>
+    </div>       
+    <div class="col-xs-3">ms
+    </div>       

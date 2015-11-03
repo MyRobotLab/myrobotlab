@@ -2,6 +2,8 @@ angular.module('mrlapp.service.SerialGui', [])
 .controller('SerialGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('SerialGuiCtrl');
     var _self = this;
+    var msg = this.msg;
+    
     
     $scope.monitorModel = false;
     
@@ -121,6 +123,8 @@ angular.module('mrlapp.service.SerialGui', [])
     ;
     
     //after you're done with setting up your service-panel, call this method
-//    $scope.panel.initDone();
+    //    $scope.panel.initDone();
+
+    msg.subscribe(this);
 }
 ]);

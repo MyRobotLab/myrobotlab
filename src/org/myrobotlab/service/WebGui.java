@@ -44,7 +44,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
-import org.myrobotlab.opencv.OpenCVFilterFFmpeg;
 //import org.myrobotlab.service.WebGUI3.Error;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;

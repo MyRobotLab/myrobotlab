@@ -195,9 +195,20 @@ public class VirtualDevice extends Service implements SerialDataListener {
 
 			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
 			virtual.createVirtualArduino(portName);
+			
+			Runtime.start("webgui", "WebGui");
+			
+			boolean done = true;
+			if (done){
+				return;
+			}
+			
 			Python logic = virtual.getLogic();
 
 
+			
+			
+			
 			Serial uart = virtual.getUART();
 			uart.setCodec("arduino");
 			Codec codec = uart.getRXCodec();

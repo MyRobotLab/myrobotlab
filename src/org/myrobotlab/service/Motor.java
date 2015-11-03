@@ -26,7 +26,6 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -146,64 +145,6 @@ public class Motor extends Service implements MotorControl {
 	// destroying
 	transient Object lock = new Object();
 
-	public static void main(String[] args) {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-			String port = "COM15";
-
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			Runtime.createAndStart("gui", "GUIService");
-			arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
-			arduino.connect(port);
-			arduino.broadcastState();
-
-			for (int i = 0; i < 100; ++i) {
-
-			}
-			// Runtime.createAndStart("python", "Python");
-
-			Motor m1 = (Motor) Runtime.createAndStart("m1", "Motor");
-			// arduino.motorAttach("m1", 8, 7, 54);
-			arduino.motorAttach("m1", 7, 6);
-			arduino.setSampleRate(8000);
-			m1.setSpeed(0.95);
-
-			// with encoder
-			// m1.moveTo(600);
-
-			m1.stop();
-			m1.move(0.94);
-			m1.stop();
-			m1.move(-0.94);
-			m1.stop();
-
-			// arduino.motorAttach("m1", 8, 7, 54) ;
-
-			m1.moveTo(600f);
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		/*
-		 * 
-		 * leftHand.moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
-		 * 
-		 * moveHand("left", 61, 49, 14, 38, 15, 64);
-		 * 
-		 * m1.move(1.0); m1.move(0.5f); m1.move(0.0); m1.move(-0.5f);
-		 * 
-		 * 
-		 * m1.stopAndLock();
-		 * 
-		 * m1.move(0.5f);
-		 * 
-		 * m1.unlock(); m1.stop();
-		 */
-
-	}
 
 	public Motor(String n) {
 		super(n);
@@ -396,6 +337,66 @@ public class Motor extends Service implements MotorControl {
 	public void unlock() {
 		log.info("unLock");
 		locked = false;
+	}
+	
+
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+			String port = "COM15";
+
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			Runtime.createAndStart("gui", "GUIService");
+			arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
+			arduino.connect(port);
+			arduino.broadcastState();
+
+			for (int i = 0; i < 100; ++i) {
+
+			}
+			// Runtime.createAndStart("python", "Python");
+
+			Motor m1 = (Motor) Runtime.createAndStart("m1", "Motor");
+			// arduino.motorAttach("m1", 8, 7, 54);
+			arduino.motorAttach("m1", 7, 6);
+			arduino.setSampleRate(8000);
+			m1.setSpeed(0.95);
+
+			// with encoder
+			// m1.moveTo(600);
+
+			m1.stop();
+			m1.move(0.94);
+			m1.stop();
+			m1.move(-0.94);
+			m1.stop();
+
+			// arduino.motorAttach("m1", 8, 7, 54) ;
+
+			m1.moveTo(600f);
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		/*
+		 * 
+		 * leftHand.moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
+		 * 
+		 * moveHand("left", 61, 49, 14, 38, 15, 64);
+		 * 
+		 * m1.move(1.0); m1.move(0.5f); m1.move(0.0); m1.move(-0.5f);
+		 * 
+		 * 
+		 * m1.stopAndLock();
+		 * 
+		 * m1.move(0.5f);
+		 * 
+		 * m1.unlock(); m1.stop();
+		 */
+
 	}
 
 }

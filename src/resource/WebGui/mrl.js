@@ -408,11 +408,14 @@ angular
     }
     ;
     
-    // the "real" subscribe - this creates a subscription
-    // from the Java topicName service, such that every time the
-    // topicMethod is invoked a message comes back to the gateway(webgui),
-    // from there it is relayed to the Angular app - and will be sent
-    // to all the callbacks which have been registered to it
+    /*
+        The "real" subscribe - this creates a subscription
+        from the Java topicName service, such that every time the
+        topicMethod is invoked a message comes back to the gateway(webgui),
+        from there it is relayed to the Angular app - and will be sent
+        to all the callbacks which have been registered to it
+        topicName.topicMethod ---> webgui gateway --> angular callback
+    */
     this.subscribe = function(topicName, topicMethod) {
         _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod);
     }
@@ -612,11 +615,21 @@ angular
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
                                 // regular subscribe when used - e.g. msg.subscribe('publishData')
+                                
+                                /* we could handle var args this way ...
+
+                                var args = Array.prototype.slice.call(arguments, 0);
+                                _self.sendTo(_self.gateway.name, "subscribe", name, args);
+                                but subscribe is a frozen interface of  either 1 or 4 args
+                                */
+                               
                                 if (arguments.length == 1) {
                                     _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0]);
                                 } else if (arguments.length == 4) {
                                     _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0], arguments[1], arguments[2]);
                                 }
+                                
+
                             } else {
                                 // controller registering for framework subscriptions
                                 console.log("here");
@@ -734,6 +747,7 @@ angular
             subscribeOnClose: _self.subscribeOnClose,
             subscribeOnOpen: _self.subscribeOnOpen,
             subscribeToMethod: _self.subscribeToMethod,
+            subscribeToServiceMethod: _self.subscribeToServiceMethod,
             promise: _self.promise
             
             // FIXME - no sql like interface

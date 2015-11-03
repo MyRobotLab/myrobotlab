@@ -738,9 +738,11 @@ public class OpenCV extends VideoSource {
 
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
 
+		/*
 		
 		OpenCVFilterFFmpeg ffmpeg = new OpenCVFilterFFmpeg("ffmpeg");
 		opencv.addFilter(ffmpeg);
+		*/
 		opencv.capture();
 		
 		boolean leave = true;

@@ -9,17 +9,7 @@ angular.module('mrlapp.service.ClockGui', [])
 
                 // GOOD TEMPLATE TO FOLLOW
                 this.updateState = function (service) {
-                    // FIXME let the framework 
-//        mrl.updateState(service);
                     $scope.service = service;
-//                    $scope.interval = service.interval;
-//                    if (service.isClockRunning == true) {
-//                        $scope.label = "Stop";
-//                        $scope.intervalDisabled = true;
-//                    } else {
-//                        $scope.label = "Start";
-//                        $scope.intervalDisabled = false;
-//                    }
                 };
 
                 _self.updateState($scope.service);

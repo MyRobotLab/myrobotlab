@@ -884,7 +884,6 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		for (int i = 0; i < ret.length; ++i) {
 			ret[i] = si.get(i).getName();
 		}
-
 		return ret;
 	}
 
