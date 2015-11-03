@@ -15,18 +15,18 @@ angular.module('mrlapp.service.MotorGui', [])
 
                 _self.updateState($scope.service);
 
-                this.onMsg = function (msg) {
-                    switch (msg.method) {
+                this.onMsg = function (inMsg) {
+                    switch (inMsg.method) {
                         case 'onState':
-                            _self.updateState(msg.data[0]);
+                            _self.updateState(inMsg.data[0]);
                             $scope.$apply();
                             break;
                         case 'onServiceNamesFromInterface':
-                            $scope.controllers = msg.data[0];
+                            $scope.controllers = inMsg.data[0];
                             $scope.$apply();
                             break;
                         default:
-                            $log.error("ERROR - unhandled method " + $scope.name + " " + msg.method);
+                            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
                             break;
                     }
                 };
