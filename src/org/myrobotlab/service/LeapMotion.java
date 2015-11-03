@@ -29,6 +29,9 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 		public double palmNormalX;
 		public double palmNormalY;
 		public double palmNormalZ;
+		public double posX;
+		public double posY;
+		public double posZ;
 	}
 
 	public static class LeapData {
