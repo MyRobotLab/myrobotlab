@@ -11,7 +11,7 @@ angular.module('mrlapp.main.mainCtrl', ['mrlapp.mrl'])
                         $log.info('panels-main', $scope.panels);
                     });
                 };
-                panelsUpdated();
+                panelsUpdated(serviceSvc.getPanelsList());
                 serviceSvc.subscribeToUpdates(panelsUpdated);
 
                 //access the array containing all log-messages logged using $log

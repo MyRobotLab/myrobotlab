@@ -24,41 +24,50 @@ angular.module('mrlapp', [
     'mrlapp.main.mainCtrl',
     'mrlapp.main.statussvc', //very basic service for storing "statuses"
     'mrlapp.main.filter',
+    'mrlapp.singleservice.singleserviceCtrl',
     'mrlapp.nav', //Navbar & Co. (/nav)
     'mrlapp.service' //Service & Co. (/service)
 ])
         .config(['$provide', '$routeProvider', 'mrlProvider', 'ngClipProvider',
             function ($provide, $routeProvider, mrlProvider, ngClipProvider) {
 
-        ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
+                ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
 
                 //set the logger up (extend the angular default one)
-/*                
-                $provide.decorator('$log', function ($delegate, mrlLogger) {
-                    return mrlLogger($delegate);
-                });
-*/                
+                /*                
+                 $provide.decorator('$log', function ($delegate, mrlLogger) {
+                 return mrlLogger($delegate);
+                 });
+                 */
 
-        $routeProvider.when('/main', {
-            templateUrl: 'main/main.html',
-            controller: 'mainCtrl',
-            resolve: {
-                message: function(mrl) {
-                    return mrl.init();
-                }
-            }
+                $routeProvider.when('/main', {
+                    templateUrl: 'main/main.html',
+                    controller: 'mainCtrl',
+                    resolve: {
+                        message: function (mrl) {
+                            return mrl.init();
+                        }
+                    }
+                }).when('/service/:servicename', {
+                    templateUrl: 'singleservice/singleservice.html',
+                    controller: 'singleserviceCtrl',
+                    resolve: {
+                        message: function (mrl) {
+                            return mrl.init();
+                        }
+                    }
 //        }).when('/workpace', {
 //            templateUrl: 'workpace/index.html',
-        }).otherwise({
-            redirectTo: '/main'
-        });
-    }])
+                }).otherwise({
+                    redirectTo: '/main'
+                });
+            }])
 
 //FIXME - why is it here as well? (/main/filter.js)
 //DESIGN-STRATEGY - shouldn't be in app.js
-.filter('reverse', function() {
-  return function(items) {
-    return items.slice().reverse();
-  };
-});
+        .filter('reverse', function () {
+            return function (items) {
+                return items.slice().reverse();
+            };
+        });
 
