@@ -192,11 +192,11 @@ angular.module('mrlapp.service')
                         panels: {}
                     };
                     $log.info('lazy-loading:', services[name].simpleName);
-                    $ocLazyLoad.load("service/js/" + services[name].simpleName + "gui.js").then(function () {
+                    $ocLazyLoad.load('service/js/' + services[name].simpleName + 'Gui.js').then(function () {
                         $log.info('lazy-loading successful:', services[name].simpleName);
-                        $http.get('service/views/' + services[name].simpleName + 'gui.html').
+                        $http.get('service/views/' + services[name].simpleName + 'Gui.html').
                                 then(function (response) {
-                                    $templateCache.put(services[name].simpleName + 'gui.html', response.data);
+                                    $templateCache.put(services[name].simpleName + 'Gui.html', response.data);
                                     services[name].templatestatus = 'loaded';
                                     addPanel(services[name], 0);
                                     notifyAllOfUpdate();

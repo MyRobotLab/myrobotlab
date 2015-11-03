@@ -17,7 +17,7 @@ angular.module('mrlapp.service')
                                 watch();
                                 $log.info('got scope! using it', scope.panel.name, scope.panel.panelname);
                                 var newscope = scope.panel.scope;
-                                var html = $templateCache.get(scope.panel.simpleName + 'gui.html');
+                                var html = $templateCache.get(scope.panel.simpleName + 'Gui.html');
                                 elem.html(html).show();
                                 $compile(elem.contents())(newscope);
                             }

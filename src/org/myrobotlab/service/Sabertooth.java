@@ -21,10 +21,11 @@ import org.slf4j.Logger;
 /**
  * 
  * SaberTooth - SaberTooth service for the sabertooth motor controller command
- *  
+ * 
  * More Info: http://www.dimensionengineering.com/datasheets/Sabertooth2x25.pdf
  * 
- * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 + speed) & 0b01111111);
+ * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 +
+ * speed) & 0b01111111);
  * 
  * @author GroG
  * 
@@ -64,7 +65,7 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	private float minY = 0;
 
 	private float maxY = 180;
-	
+
 	public static final int INPUT = 0x0;
 
 	public static final int OUTPUT = 0x1;
@@ -98,14 +99,13 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	// ----------Sabertooth Packetized Serial Mode Interface Begin
 	// --------------
 
-
 	public Sabertooth(String n) {
 		super(n);
 	}
 
 	public boolean connect(String port) {
 		// The valid baud rates are 2400, 9600, 19200 and 38400 baud
-		return serial.connect(port, 38400, 8, 1, 0);
+		return serial.connect(port, 9600, 8, 1, 0);
 	}
 
 	public void disconnect() {
@@ -255,15 +255,18 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 				return;
 			}
 
+			// 9600
+
 			if (!setSaberToothBaud) {
 				serial.write(170);
+				sleep(500);
 				setSaberToothBaud = true;
 			}
 
 			serial.write(address);
 			serial.write(command);
 			serial.write(data);
-			serial.write((address + 0 + data) & 0x7F);
+			serial.write((address + command + data) & 0x7F);
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -315,11 +318,10 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 		info("%s disconnected from %s", getName(), portName);
 		return portName;
 	}
-	
-	public Serial getSerial(){
+
+	public Serial getSerial() {
 		return serial;
 	}
-	
 
 	// --- MotorController interface begin ----
 	@Override
@@ -337,34 +339,86 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	@Override
 	public void motorMoveTo(String name, double position) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	void setBaudRate(int baudRate) {
+
+		int value;
+		switch (baudRate) {
+		case 2400:
+			value = 1;
+			break;
+		case 9600:
+		default:
+			value = 2;
+			break;
+		case 19200:
+			value = 3;
+			break;
+		case 38400:
+			value = 4;
+			break;
+		case 115200:
+			value = 5;
+			break;
+		}
+
+		sendPacket(15, value);
+
+		// (1) flush() does not seem to wait until transmission is complete.
+		// As a result, a Serial.end() directly after this appears to
+		// not always transmit completely. So, we manually add a delay.
+		// (2) Sabertooth takes about 200 ms after setting the baud rate to
+		// respond to commands again (it restarts).
+		// So, this 500 ms delay should deal with this.
+		sleep(500);
 	}
 
 	// --- MotorController interface end ----
-	
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.WARN);
 
 		try {
-			
-			String port = "COM15";
-			
+
+			String port = "COM19";
+
 			// ---- Virtual Begin -----
-			VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-			virtual.createVirtualPort(port);
-			Serial uart = virtual.getUART();
-			uart.setTimeout(300);
+			/*
+			 * VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual",
+			 * "VirtualDevice"); virtual.createVirtualPort(port); Serial uart =
+			 * virtual.getUART(); uart.setTimeout(300);
+			 */
 			// ---- Virtual End -----
 
-			Sabertooth sabertooth = (Sabertooth)Runtime.start("sabertooth", "Sabertooth");
-			sabertooth.connect(port);
+			Runtime.start("python", "Python");
+
+			Sabertooth saber = (Sabertooth) Runtime.start("saber", "Sabertooth");
+			boolean connected = saber.connect(port);
+			log.info(connected + "");
+			saber.driveForwardMotor1(20);
+			saber.driveForwardMotor1(30);
+			saber.driveForwardMotor1(60);
+			saber.driveForwardMotor1(110);
+			saber.driveForwardMotor1(0);
 			
-			Motor m1 = (Motor) Runtime.start("m1", "Motor");
-			
+			saber.driveForwardMotor2(20);
+			saber.driveForwardMotor2(30);
+			saber.driveForwardMotor2(60);
+			saber.driveForwardMotor2(110);
+			saber.driveForwardMotor2(0);
+
+			// Motor m1 = (Motor) Runtime.start("m1", "Motor");
+
 			// Motor m2 = (Motor) Runtime.createAndStart("m2", "Motor");
 
 			Runtime.start("gui", "GUIService");
+			Runtime.start("webgui", "WebGui");
+
+			saber.driveForwardMotor1(100);
+
 			/*
 			 * GUIService gui = new GUIService("gui"); gui.startService();
 			 */
