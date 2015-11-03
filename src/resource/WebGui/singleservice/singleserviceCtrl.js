@@ -1,0 +1,33 @@
+angular.module('mrlapp.singleservice.singleserviceCtrl', ['mrlapp.mrl'])
+        .controller('singleserviceCtrl', ['$scope', '$log', '$routeParams', '$filter', '$timeout', 'mrl', 'serviceSvc', 'mrlLog',
+            function ($scope, $log, $routeParams, $filter, $timeout, mrl, serviceSvc, mrlLog) {
+                $log.info('singleserviceCtrl');
+                
+                $scope.servicename = $routeParams.servicename;
+                
+                var isUndefinedOrNull = function (val) {
+                    return angular.isUndefined(val) || val === null;
+                };
+
+                //service-panel(s) & update-routine
+                var panelsUpdated = function (panels) {
+                    $scope.allpanels = panels;
+                    $timeout(function () {
+                        var temp;
+                        angular.forEach($scope.allpanels, function (value, key) {
+                            if (value.name == $scope.servicename) {
+                                temp = value;
+                            }
+                        });
+                        if (!isUndefinedOrNull(temp)) {
+                            $scope.panel = temp;
+                            $scope.panelfound = true;
+                        } else {
+                            $scope.panelfound = false;
+                        }
+                        $log.info('panel-singleservice', $scope.panel);
+                    });
+                };
+                panelsUpdated(serviceSvc.getPanelsList());
+                serviceSvc.subscribeToUpdates(panelsUpdated);
+            }]);
