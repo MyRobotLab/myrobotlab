@@ -2,9 +2,10 @@ angular.module('mrlapp.service.ShoutboxGui', [])
 .controller('ShoutboxGuiCtrl', ['$scope', '$log', 'mrl', '$sce', function($scope, $log, mrl, $sce) {
     $log.info('ShoutboxGuiCtrl');
     var _self = this;
+    var msg = this.msg;
     
     var name = $scope.name;
-    var msg = mrl.createMsgInterface(name, $scope);
+    // var msg = mrl.createMsgInterface(name, $scope);
     
     // TODO - Directive for connected
     $scope.shoutMsg = '';
@@ -24,31 +25,31 @@ angular.module('mrlapp.service.ShoutboxGui', [])
     
     _self.updateState($scope.service);
     
-    this.onMsg = function(msg) {
+    this.onMsg = function(inMsg) {
         
-        switch (msg.method) {
+        switch (inMsg.method) {
         case 'onState':
-            var service = msg.data[0];
+            var service = inMsg.data[0];
             _self.updateState(service);
             $scope.shouts = service.shouts;
             $scope.$apply();
             break;
         case 'onShout':
-            var shout = msg.data[0];
+            var shout = inMsg.data[0];
             $scope.shouts.push(shout);
             $scope.$apply();
             break;
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + "." + msg.method);
+            $log.error("ERROR - unhandled method " + $scope.name + "." + inMsg.method);
             break;
         }
     }
     ;
-
-    $scope.getHtml = function(shout){
+    
+    $scope.getHtml = function(shout) {
         return shout.from + ':' + shout.msg;
     }
-
+    
     $scope.trustAsHtml = $sce.trustAsHtml;
     
     // client shouting ...
@@ -57,14 +58,14 @@ angular.module('mrlapp.service.ShoutboxGui', [])
             $log.info("empty shout");
             return;
         }
-
-        if($scope.nickname == ''){
+        
+        if ($scope.nickname == '') {
             $scope.nickname = $scope.shoutMsg;
             $scope.placeholder = 'Message';
             $scope.shoutMsg = '';
             return;
         }
-
+        
         msg.send("shout", $scope.nickname, $scope.shoutMsg);
         $scope.shoutMsg = '';
     }
@@ -83,5 +84,6 @@ angular.module('mrlapp.service.ShoutboxGui', [])
     msg.subscribe('publishShout')
     //mrl.subscribe($scope.service.name, 'pulse');
     msg.subscribe(this);
+
 }
 ]);
