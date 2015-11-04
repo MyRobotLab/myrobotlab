@@ -18,6 +18,11 @@ jdk:
 #    
 # release deployment section end
 
+addons:
+    apt:
+        packages:
+            - sshpass
+
 deploy:
   provider: s3
   access_key_id: AKIAJGL6AEN37LDO3N7A
