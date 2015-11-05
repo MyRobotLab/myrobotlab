@@ -1,6 +1,6 @@
 language: java
 sudo: false
-script: ant report
+script: ant dist
 jdk:
 - openjdk7
 
