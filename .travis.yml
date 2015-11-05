@@ -38,10 +38,6 @@ deploy:
 #  local_dir: build/report
   acl: 'public_read'
   # s3 deploy end
-  # ssh deploy begin
-  export SSHPASS=$DEPLOY_PASS
-  sshpass -e scp dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-  # ssh deploy end
   
   on:
     repo: MyRobotLab/myrobotlab
@@ -57,3 +53,9 @@ env:
 # after_success:
 #    - export SSHPASS=$DEPLOY_PASS
 #    - sshpass -e scp dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+
+after_success:
+  # ssh deploy begin
+  export SSHPASS=$DEPLOY_PASS
+  sshpass -e scp dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+  # ssh deploy end
