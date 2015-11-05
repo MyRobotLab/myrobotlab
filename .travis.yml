@@ -24,6 +24,7 @@ addons:
             sshpass
 
 deploy:
+  # s3 deploy begin
   provider: s3
   access_key_id: AKIAJGL6AEN37LDO3N7A
   secret_access_key:
@@ -36,6 +37,12 @@ deploy:
   local_dir: dist
 #  local_dir: build/report
   acl: 'public_read'
+  # s3 deploy end
+  # ssh deploy begin
+  export SSHPASS=$DEPLOY_PASS
+  sshpass -e scp dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+  # ssh deploy end
+  
   on:
     repo: MyRobotLab/myrobotlab
     branch: develop
