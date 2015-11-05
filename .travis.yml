@@ -21,7 +21,7 @@ jdk:
 addons:
     apt:
         packages:
-            - sshpass
+            sshpass
 
 deploy:
   provider: s3
@@ -47,6 +47,6 @@ env:
   - secure: fHS+7vwDFOdjI7OgI1JnCh2thbn9JtQVvsKlD2V73q2rwH69u7Db4eHDRqIlIz/6zk1xrPr5PT4jIrRHovR9X8g0v8s+LSadke3dd84G1ey47YEwwefAOM3A+w/QHz1OVRJcc6YdOTWgGHJLswOPbSbCEhbdl2fe14YoNAaUw8U=
   - secure: iwn5D2wJvZyK8x+9caOQ5WFB9QYA8OWD1l535mcWURAQseHSS4vkxJT5/rhzpaB+5wSAl2DhEJWpIIaZBxIos9ogGsDkH4h9KSsTZ3X17PsUM81v+spMntocBtREkfigNbjccg4B8s1tnU8UKNADjXmT1P1Q1FpHpnJXrTHMk/0=
  
- after_success:
-    - export SSHPASS=$DEPLOY_PASS
-    - sshpass -e scp dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+# after_success:
+#    - export SSHPASS=$DEPLOY_PASS
+#    - sshpass -e scp dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
