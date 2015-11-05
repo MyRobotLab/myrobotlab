@@ -50,11 +50,9 @@ deploy:
     repo: MyRobotLab/myrobotlab
     branch: develop
   
-
 after_success:
   # ssh deploy begin
   # export SSHPASS=$DEPLOY_PASS
   # sshpass -e scp -P 10022 dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:/opt/mrl
   sshpass -p $DEPLOY_PASS scp -v -P 10022 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:/opt/mrl
-  
   # ssh deploy end
