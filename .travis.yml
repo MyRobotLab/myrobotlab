@@ -49,4 +49,4 @@ env:
  
  after_success:
     - export SSHPASS=$DEPLOY_PASS
-    - sshpass -e scp package.tgz $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - sshpass -e scp dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
