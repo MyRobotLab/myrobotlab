@@ -28,6 +28,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.myrobotlab.framework.Peers;
@@ -36,8 +37,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
-
-import com.sun.tools.javac.util.List;
 
 public class Speech extends Proxy implements TextListener, SpeechSynthesis {
 
