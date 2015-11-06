@@ -292,6 +292,10 @@ public class Joystick extends Service {
 	public void addAxisListener(String service, String method) {
 		addListener("publish0", service, method);
 	}
+	
+	public void addInputListener(Service service) {
+		addListener("publishInput", service.getName(), "onJoystickInput");
+	}
 
 	// // listeners begin ////////////////////////
 
