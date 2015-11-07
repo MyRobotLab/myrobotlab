@@ -31,10 +31,12 @@
                             <button class="btn btn-default" ng-click="start(newName, newType)">start</button>
                 </form>
                 </li>
-                <!--Status-->
+                <!--Status (incl. LED)-->
                 <li>
                     <form class="navbar-form">
-                        <img src="../../{{connected}}.png" alt="">
+                        <!--TODO - green png if connected - if not re-connect button-->
+                        <span ng-if="connected"><img src="../../connected.png" alt=""></span>
+                        <span ng-if="!connected"><img src="../../disconnected.png" alt=""></span>
                         <div class="input-group" dropdown>
                             <input type="text" class="form-control" style="width: 200px"
                                    placeholder="Status" ng-model="firststatus" readonly>
