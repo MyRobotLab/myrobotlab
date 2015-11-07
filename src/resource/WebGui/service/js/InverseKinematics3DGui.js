@@ -1,11 +1,34 @@
 angular.module('mrlapp.service.InverseKinematics3DGui', [])
 .controller('InverseKinematics3DGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
         $log.info('InverseKinematics3D');
+        
+        
+        
+        var _self = this;
+        var msg = this.msg;
+
+        // init scope variables
+
+
+
+        
+        
+        
         // get latest copy of a services
         $scope.service = mrl.getService($scope.service.name);
         $scope.interval = $scope.service.interval;
         $scope.positions = '';
         $scope.angles = '';
+        
+        
+        // GOOD TEMPLATE TO FOLLOW
+        this.updateState = function (service) {
+            $scope.service = service;
+        };
+
+        _self.updateState($scope.service);
+
+        
         this.onMsg = function(msg) {
             $log.info("On Message IK3D!");
             $log.info(msg);
@@ -146,10 +169,13 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
         
         $scope.moveTo = function(x,y,z) {
     	  // Invoke the moveTo..
+          $log.info("MOVETO! IK3D!");
           mrl.sendTo($scope.service.name, "moveTo", x, y, z);
           
         };
         mrl.subscribe($scope.service.name, 'publishJointPositions');
         mrl.subscribe($scope.service.name, 'publishJointAngles');
 //        $scope.panel.initDone();
+        
+        msg.subscribe(this);
     }]);
