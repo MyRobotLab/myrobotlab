@@ -3,27 +3,18 @@ angular.module('mrlapp.nav')
             function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, StatusSvc, serviceSvc) {
 
                 //START_green-/red-LED
-                // TODO - green png if connected - if not re-connect button
-                if (mrl.isConnected()) {
-                    $scope.connected = 'connected';
-                } else {
-                    $scope.connected = 'disconnected';
-                }
+                $scope.connected = mrl.isConnected();
 
-                var onOpen = function () {
+                mrl.subscribeOnOpen(function () {
                     $scope.$apply(function () {
-                        $scope.connected = 'connected';
+                        $scope.connected = true;
                     });
-                };
-
-                var onClose = function () {
+                });
+                mrl.subscribeOnClose(function () {
                     $scope.$apply(function () {
-                        $scope.connected = 'disconnected';
+                        $scope.connected = false;
                     });
-                };
-
-                mrl.subscribeOnOpen(onOpen);
-                mrl.subscribeOnClose(onClose);
+                });
                 //END_green-/red-LED
 
                 $scope.possibleServices = mrl.getPossibleServices();
