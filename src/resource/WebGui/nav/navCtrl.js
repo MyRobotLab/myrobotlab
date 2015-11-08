@@ -1,6 +1,6 @@
 angular.module('mrlapp.nav')
-        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', 'mrl', 'StatusSvc', 'serviceSvc',
-            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, StatusSvc, serviceSvc) {
+        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', 'mrl', 'statusSvc', 'serviceSvc',
+            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, statusSvc, serviceSvc) {
 
                 //START_green-/red-LED
                 $scope.connected = mrl.isConnected();
@@ -24,15 +24,13 @@ angular.module('mrlapp.nav')
                 $scope.platform = p.arch + "." + p.bitness + "." + p.os + " " + p.mrlVersion;
 
                 //START_Status
-                // FIXME - what does StateSvc have statuses GAH names all wrong
-                //FIXED - (partly) waiting for approval (needs lowercase-name)
-                $scope.statuslist = StatusSvc.getStatuses();
+                $scope.statuslist = statusSvc.getStatuses();
 
                 //TODO would make sense to move this to serviceSvc - question is what happens with firststatus
                 //don't think another notification-callback would be good
                 var onStatus = function (statusMsg) {
 //                    $timeout(function () {
-                    StatusSvc.addStatus(statusMsg.data[0]);
+                    statusSvc.addStatus(statusMsg.data[0]);
                     //TODO - think of a better solution (instead of firststatus) (and hopefully better styled)
                     var status = $scope.statuslist[$scope.statuslist.length - 1];
                     $scope.firststatus = status.name + " " + status.level + " " + status.detail;
@@ -59,10 +57,6 @@ angular.module('mrlapp.nav')
                 };
 
                 $scope.showminlist = false;
-                $scope.toggleMinList = function () {
-                    $log.info('toggling MinList');
-                    $scope.showminlist = !$scope.showminlist;
-                };
 
                 //service-panels & update-routine (also used for search)
                 var panelsUpdated = function (panels) {
@@ -103,7 +97,10 @@ angular.module('mrlapp.nav')
                 };
                 //END_Search
 
+                //quick-start a service
                 $scope.start = function (newName, newTypeModel) {
                     mrl.sendTo(mrl.getRuntime().name, "start", newName, newTypeModel.name);
+                    $scope.newName = '';
+                    $scope.newType = '';
                 };
             }]);

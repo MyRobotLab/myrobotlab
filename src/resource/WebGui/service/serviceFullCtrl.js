@@ -1,9 +1,7 @@
 angular.module('mrlapp.service')
-
+        //TODO - maybe move this controller to serviceCtrl.js
         .controller('serviceFullCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
-            //Controller for the modal (service-full)
+                //controller for the modal (service-full)
 
-            $scope.close = function () {
-                $modalInstance.close();
-            };
+                $scope.close = $modalInstance.close;
             }]);
