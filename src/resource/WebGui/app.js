@@ -61,13 +61,5 @@ angular.module('mrlapp', [
                 }).otherwise({
                     redirectTo: '/main'
                 });
-            }])
-
-//FIXME - why is it here as well? (/main/filter.js)
-//DESIGN-STRATEGY - shouldn't be in app.js
-        .filter('reverse', function () {
-            return function (items) {
-                return items.slice().reverse();
-            };
-        });
+            }]);
 

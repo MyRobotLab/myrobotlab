@@ -4,15 +4,14 @@ angular.module('mrlapp.service.ClockGui', [])
                 var _self = this;
                 var msg = this.msg;
 
-                // init scope variables
-                $scope.pulseData = '';
-
                 // GOOD TEMPLATE TO FOLLOW
                 this.updateState = function (service) {
                     $scope.service = service;
                 };
-
                 _self.updateState($scope.service);
+
+                // init scope variables
+                $scope.pulseData = '';
 
                 this.onMsg = function (inMsg) {
                     switch (inMsg.method) {
