@@ -178,6 +178,16 @@ public class InMoovHead extends Service {
 		jaw.moveTo(jaw.getRest() + 2);
 		return true;
 	}
+	
+	public void lookAt(Double x, Double y,Double z) {
+		Double distance = Math.sqrt(Math.pow(x, 2.0)+ Math.pow(y, 2.0) + Math.pow(z, 2.0));
+		Double rotation = Math.toDegrees(Math.atan(y/x));
+		Double colatitude = Math.toDegrees(Math.acos(z/distance));
+		System.out.println(distance);
+		System.out.println(rotation);
+		System.out.println(colatitude);
+		log.info(String.format("object distance is %f,rothead servo %f,neck servo %f ", distance, rotation, colatitude));
+	}
 
 	public void moveTo(Integer neck, Integer rothead) {
 		moveTo(neck, rothead, null, null, null);
