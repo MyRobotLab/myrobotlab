@@ -88,9 +88,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	// FIXME - allow Protobuf/Thrift/Avro
 	// FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
-	LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
-
-	
+	transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
 	
 	public static class LiveVideoStreamHandler implements Handler {
 
