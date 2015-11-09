@@ -408,8 +408,11 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
 	public void startJoystick() throws Exception {
 		joystick = (Joystick) startPeer("joystick");
+		joystick.addInputListener(this);
+		/*
 		joystick.addAxisListener(getName(), "onY");
 		joystick.addAxisListener(getName(), "onRY");
+		*/
 	}
 
 	public void startRemoteAdapter() throws Exception {

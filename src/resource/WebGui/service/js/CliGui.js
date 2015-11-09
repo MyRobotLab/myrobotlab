@@ -3,6 +3,7 @@ angular.module('mrlapp.service.CliGui', [])
                 $log.info('CliGuiCtrl');
                 var _self = this;
                 var msg = this.msg;
+    var buffer = "";
                 
                 this.updateState = function (service) {
                     $scope.service = service;

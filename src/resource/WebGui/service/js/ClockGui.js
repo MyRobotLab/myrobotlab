@@ -29,7 +29,8 @@ angular.module('mrlapp.service.ClockGui', [])
                     }
                 };
 
-                mrl.subscribe($scope.service.name, 'pulse');
+                //mrl.subscribe($scope.service.name, 'pulse');
+                msg.subscribe('pulse');
                 msg.subscribe(this);
             }
         ]);
