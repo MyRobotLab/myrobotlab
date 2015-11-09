@@ -2,24 +2,58 @@ angular.module('mrlapp.service.JoystickGui', [])
 .controller('JoystickGuiCtrl', ['$scope', '$log', 'mrl', '$controller', function($scope, $log, mrl, $controller) {
     $log.info('JoystickGuiCtrl');
     var _self = this;
-
-    // FUTURE
-    // var msgs = mrl.getMsgInterface(this);
-
-    $scope.controller = 'controllers';
-
-    $scope.btn0 = 1;
-    //$scope.bnt0.state = 1;
+    var msg = this.msg;
     
-
-    // FIXME needs a prototype to update the mrl service    
-    // GOOD TEMPLATE TO FOLLOW
+    $scope.controller = 'controllers';
+    $scope.input = {
+        "id": "",
+        "value": ""
+    };
+    
+    $scope.axisMapOrdinal = {};
+    $scope.axisValues = [];
+    $scope.axisObject = {
+        "key": "Series 1",
+        "values": $scope.axisValues //[['pov', 0], ['pov', -0.75], ['x', 0], ['x', 0.93]]
+    };
+    
+    $scope.axis = [$scope.axisObject];
+    
+    $scope.options = {
+        width: 500,
+        height: 300,
+        'bar': 'aaa'
+    };
+    
+    /*
+    $scope.hovered = function(d) {
+        $scope.barValue = d;
+        $scope.$apply();
+    }
+    ; */
+    $scope.barValue = 'None';
+    $scope.globalInt = 15;
+    
+    
     this.updateState = function(service) {
         $scope.service = service;
         $scope.buttons = {};
-        $scope.axis = {};
+        /*
+        $scope.axisMapOrdinal = {};
+        $scope.axisValues = [];
+        */
         $scope.other = {};
 
+        // re-initialize axis data
+        $scope.axisMapOrdinal = {};
+        $scope.axisValues = [];
+        $scope.axisObject = {
+            "key": "Series 1",
+            "values": $scope.axisValues //[['pov', 0], ['pov', -0.75], ['x', 0], ['x', 0.93]]
+        };
+        $scope.axis = [$scope.axisObject];
+        
+        
         $scope.controller = service.controller;
         
         for (var compId in service.components) {
@@ -28,7 +62,18 @@ angular.module('mrlapp.service.JoystickGui', [])
                 if (component.type == "Button" || component.type == "Key") {
                     $scope.buttons[component.id] = component;
                 } else if (component.type == "Axis") {
-                    $scope.axis[component.id] = component;
+                    //if ($scope.axisMapOrdinal.hasOwnProperty(input.id)) {
+                    // $scope.axisMapOrdinal[component.id] = [component.id, 0];
+                    // the 0 anchor
+                    $scope.axisValues.push([component.id, 0]);
+                    // set id to ordinal at next location
+                    var ordinal = $scope.axisValues.length;
+                    $scope.axisMapOrdinal[component.id] = ordinal;
+                    // the variable end - its changes..
+                    $scope.axisValues.push([component.id, 0]);
+                    // watch this variable
+                    // $scope.$watch(data, $scope.axisValues[ordinal][1]); 
+                    //}
                 } else {
                     $scope.other[component.id] = component;
                 }
@@ -37,73 +82,87 @@ angular.module('mrlapp.service.JoystickGui', [])
     }
     ;
     
-    // get latest copy of a services - it will be stale
-    _self.updateState(mrl.getService($scope.service.name));
-    
-    $scope.input = {
-        "id": "",
-        "value": ""
-    };
-    
-    this.onMsg = function(msg) {
+    _self.updateState($scope.service);
+    this.onMsg = function(inMsg) {
         
-        switch (msg.method) {
+        switch (inMsg.method) {
         case 'onState':
-            _self.updateState(msg.data[0]);
+            _self.updateState(inMsg.data[0]);
+            //$scope.update(); // FIXME update() just sets random data
             $scope.$apply();
             break;
         case 'onComponents':
-            $scope.pulseData = msg.data[0];
+            $scope.pulseData = inMsg.data[0];
             $scope.$apply();
-            break;
-        case 'onJoystickStarted':
-            /*
-            $scope.label = "Stop";
-            $scope.intervalDisabled = true;
-            $scope.$apply();
-            */
             break;
         case 'onInput':
-            $scope.input = msg.data[0];
+            input = inMsg.data[0];
+            $scope.input = input;
+            
+            // for buttons & maintaining values
+            var comp = $scope.service.components[input.id];
+            comp.value = input.value;            
+
+            if ($scope.axisMapOrdinal.hasOwnProperty(input.id)) 
+            {
+                $scope.axisValues[$scope.axisMapOrdinal[input.id]] = [input.id, input.value];
+            }
+            
             $scope.$apply();
             break;
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + msg.method);
+            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
             break;
         }
     }
     ;
     
     $scope.setController = function(index) {
-        // $log.info(index);
-        mrl.sendTo($scope.service.name, "setController", index);
+        msg.send("setController", index);
     }
     ;
     
+    msg.subscribe('publishInput');
+    msg.subscribe(this);
     
-    /*
-    $scope.toggle = function(label, interval) {
-        if (label == "Start") {
-            mrl.sendTo($scope.service.name, "setInterval", interval);
-            mrl.sendTo($scope.service.name, "startJoystick");
-        } else {
-            mrl.sendTo($scope.service.name, "stopJoystick");
+    $scope.xAxisTickFormatFunction = function() {
+        return function(d) {
+            //return d3.time.format('%b')(new Date(d));
+            return d;
         }
     }
-    ;
+    
+    var colorCategory = d3.scale.category20b();
+    
+    $scope.colorFunction = function() {
+        return function(d, i) {
+            // return colorCategory(i);
+            return '#CCC';
+        }
+        ;
+    }
+    
+    /*
+    $scope.dataObject = {
+        "key": "Series 1",
+        "values": [['pov', 0], ['pov', -0.75], ['x', 0], ['x', 0.9332]]
+    };
+    
+    $scope.exampleData = [
+    {
+        "key": "Series 1",
+        "values": [['pov', 0], ['pov', -0.75], ['x', 0], ['x', 0.9332]]
+    }
+    ];
     */
     
-    //mrl.subscribe($scope.service.name, 'setController');
-    //mrl.subscribe($scope.service.name, 'getComponents');
-    mrl.subscribe($scope.service.name, 'publishInput');
-    // mrl.subscribe($scope.service.name, 'publishState');
-    
-    //mrl.send($scope.service.name, 'broadcastState');
-    mrl.sendTo($scope.service.name, 'broadcastState');
-    
-    // mrl.sendTo($scope.service.name, "broadcastState");
-//    $scope.panel.initDone();
+    //$scope.axisLabels = ['2006', '2007', '2008', '2009', '2010', '2011', '2012'];
+    //$scope.series = ['Series A', 'Series B'];
+    //$scope.axisLabels = ["rx","rz"];
+    //$scope.axis = [
+    //[65, 59]//, 
+    //[28, 48, 40, 19, 86, 27, 90]
+    //];
 
-    // msg.subscribe();
 }
 ]);

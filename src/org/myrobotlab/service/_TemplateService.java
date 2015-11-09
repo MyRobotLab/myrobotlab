@@ -31,6 +31,7 @@ public class _TemplateService extends Service {
 		super(n);
 	}
 
+
 	@Override
 	public String[] getCategories() {
 		return new String[] { "general" };
