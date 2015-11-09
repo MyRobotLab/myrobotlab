@@ -1,4 +1,3 @@
-// GamePadController.java
 // Andrew Davison, October 2006, ad@fivedots.coe.psu.ac.th
 
 /* This controller supports a game pad with two
@@ -39,7 +38,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.slf4j.Logger;
 
-//import net.java.games.input.Component;
 
 /**
  * Joystick - The joystick service supports reading data from buttons and
@@ -49,18 +47,8 @@ import org.slf4j.Logger;
  */
 public class Joystick extends Service {
 
-	// WORKY !- C:\mrl\repo\net.java.games.jinput\2.0.5>java -Djava.library.path="./" -cp "./*" net.java.games.input.test.ControllerReadTest
-	/*
-	 * static public class Button implements Serializable { private static final
-	 * long serialVersionUID = 1L; public String id; public String type; public
-	 * Float value;
-	 * 
-	 * public Button(String id, String type, Float value) { this.id = id;
-	 * this.type = type; this.value = value; }
-	 * 
-	 * @Override public String toString() { return String.format("%s %s %f", id,
-	 * type, value); } }
-	 */
+	// To Test  java -Djava.library.path="./" -cp "./*" net.java.games.input.test.ControllerReadTest
+	
 
 	/**
 	 * Component is a general descriptor for any form of "Component" from
@@ -145,40 +133,20 @@ public class Joystick extends Service {
 					String id = hwComp.getIdentifier().toString();
 					Component component = components.get(id);
 
+					/*
 					if (input > 0) {
 						log.info("here");
 					}
+					*/
+					
 					// if delta enough
 					if (Math.abs(input - component.value) > 0.0001) {
 
 						if (mappers.containsKey(id)) {
 							input = (float) mappers.get(id).calc(input);
 						}
-
-						//
-						invoke("publishInput", new Input(id, input));
-
-						/*
-						 * Type type = controller.getType();
-						 * 
-						 * if (identifier.getClass() ==
-						 * Component.Identifier.Axis.class) { ctype = TYPE_AXIS;
-						 * } else if (identifier.getClass() ==
-						 * Component.Identifier.Key.class) { ctype = TYPE_KEY; }
-						 * 
-						 * // FIXME - change to "generalized" Component - not //
-						 * Button // FIXME - configuration to turn this on or
-						 * off invoke("publishButton", new Button(id.toString(),
-						 * ctype, output));
-						 * 
-						 * if ((type == Controller.Type.GAMEPAD) || (type ==
-						 * Controller.Type.STICK)) { invoke("publishStick",
-						 * output); } else if (type == Type.KEYBOARD) { //
-						 * invoke("publishKey", output); invoke("publishKey",
-						 * id); } else if (type == Type.MOUSE) {
-						 * invoke("publishMouse", output); } else { //
-						 * error("unsupported controller type"); }
-						 */
+						
+						invoke("publishInput", new Input(id, input));						
 
 					} // if (lastValue == null || Math.abs(input - lastValue) >
 						// 0.0001)
@@ -212,9 +180,10 @@ public class Joystick extends Service {
 																	// hwComponents
 	// array of "real" hardware non-serializable bumplers
 	transient Rumbler[] hardwareRumblers;
+	transient InputPollingThread pollingThread = null;
+
 	// these data structures are serializable
 	HashMap<String, Integer> controllerNames = new HashMap<String, Integer>();
-	transient InputPollingThread pollingThread = null;
 
 	// FIXME - lame not just last index :P
 	int rumblerIdx; // index for the rumbler being used
@@ -288,26 +257,30 @@ public class Joystick extends Service {
 		mappers.put(name, mapper);
 	}
 
-	// //listeners begin ////////////////////////
+	// ---add listeners begin---
+
+	/*  publish based on type ???
 	public void addAxisListener(String service, String method) {
 		addListener("publish0", service, method);
 	}
+	*/
 	
+	// or one publish to rule them all ? :)
 	public void addInputListener(Service service) {
 		addListener("publishInput", service.getName(), "onJoystickInput");
 	}
 
-	// // listeners begin ////////////////////////
+	// ---add listeners end---
 
-	// // listeners end ////////////////////////
 
-	// ////////// publishing begin /////////////////
+	// ---publishing begin---
 	public Input publishInput(final Input input) {
 		log.info(String.format("publishInput %s", input));
 		return input;
 	}
 
-	// ////////// publishing end /////////////////
+	// ---publishing end---
+
 
 	public boolean setController(int index) {
 		log.info(String.format("attaching controller %d", index));
@@ -337,10 +310,6 @@ public class Joystick extends Service {
 		error("setController - can't find %s", s);
 		return false;
 	}
-
-	// ---add listeners end---
-
-	// ----Component Publishing End ---------
 
 	public void setRumbler(boolean switchOn) {
 		if (rumblerIdx != -1) {
@@ -402,6 +371,7 @@ public class Joystick extends Service {
 			*/
 
 			Runtime.start("webgui", "WebGui");
+			//Runtime.start("python", "Python");
 
 			// joy.setController(7);
 			// joy.setController(5);

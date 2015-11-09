@@ -29,6 +29,9 @@ class Console:
       sys.stdout = self
       sys.stderr = self
    
+  def flush(self):
+    pass
+    
   def detach(self):
     if (self.stdout != None):
       sys.stdout = self.stdout
