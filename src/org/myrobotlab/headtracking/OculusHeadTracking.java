@@ -2,7 +2,9 @@ package org.myrobotlab.headtracking;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OculusRift;
 import org.myrobotlab.service.data.OculusData;
@@ -50,8 +52,20 @@ public class OculusHeadTracking implements Runnable, Serializable  {
 			// log.info("Roll: " + z*RAD_TO_DEGREES);
 			// log.info("Pitch:"+ x*RAD_TO_DEGREES);
 			// log.info("Yaw:"+ y*RAD_TO_DEGREES );
+
+	  		// TODO: remove the oculus data class and just use the point publisher stuff.
 	  		OculusData headTrackingData = new OculusData(roll, pitch, yaw);
 	  		oculus.invoke("publishOculusData", headTrackingData);
+	  		
+	  		// positional information.
+	  		double x = trackingState.HeadPose.Pose.Position.x;
+	  		double y = trackingState.HeadPose.Pose.Position.y;
+	  		double z = trackingState.HeadPose.Pose.Position.z;
+	  		
+	  		ArrayList<Point> points = new ArrayList<Point>();
+	  		points.add(new Point(x,y,z,roll,pitch,yaw));
+	  		oculus.invoke("publishPoints", points);
+	  		
 	  		try {
 	  			// There need to be polling interval here.
 				Thread.sleep(pollIntervalMS);
