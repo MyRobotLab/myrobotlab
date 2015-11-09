@@ -112,7 +112,7 @@ public class RemoteAdapter extends Service implements Gateway {
 		public void run() {
 			// Find the server using UDP broadcast
 			isScanning = true;
-			while (isScanning) {
+			while (isScanning && myService.isRunning()) {
 				try {
 					// Open a random port to send the package
 					DatagramSocket dsocket = new DatagramSocket();
@@ -953,8 +953,12 @@ public class RemoteAdapter extends Service implements Gateway {
 			// Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 			//Servo servo = (Servo) Runtime.start("servo", "Servo");
 			//Arduino Arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			
+			// Max frame length of 10240 has been exceeded. FIXME !!!!
 			RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote", "RemoteAdapter");
-			remote.websocket("http://localhost:8888/api/messages");
+			remote.connect("tcp://demo.myrobotlab.org:6767");
+			// remote.websocket("http://demo.myrobotlab.org:8888/api/messages");
+			Runtime.start("gui", "GUIService");
 			//remote1.startListening();
 			//remote1.setTCPPort(6868);
 			//remote1.setUDPPort(6868);
