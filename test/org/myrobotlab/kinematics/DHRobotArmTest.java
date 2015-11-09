@@ -62,7 +62,7 @@ public class DHRobotArmTest {
 		// compute the rate of change for this
 
 		// ok.		
-		testArm.moveToGoal(new Point(50,50,50));
+		testArm.moveToGoal(new Point(50,50,50,0,0,0));
 		
 		int i =0;
 		for (DHLink link : testArm.getLinks()) {

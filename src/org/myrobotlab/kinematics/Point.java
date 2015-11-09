@@ -5,7 +5,7 @@ import java.text.NumberFormat;
 
 /**
  * Represents a 3d point in space.
- * TODO: add rotation (pitch/roll/yaw - rx,ry,rz)
+ * TODO: add rotation (roll/pitch/yaw - rz,rx,ry)
  * @author kwatters
  *
  */
@@ -14,12 +14,21 @@ public class Point {
 	private final double y;
 	private final double z;
 
+	private final double roll;
+	private final double pitch;
+	private final double yaw;
+	
 	// TODO: consider rotation/orientation
-	public Point(double x, double y, double z) {
+	public Point(double x, double y, double z, double roll, double pitch, double yaw) {
 		super();
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		
+		this.roll = roll;
+		this.pitch = pitch;
+		this.yaw = yaw;
+		
 	}
 
 	@Override
@@ -37,6 +46,12 @@ public class Point {
 			return false;
 		if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
 			return false;
+		if (Double.doubleToLongBits(roll) != Double.doubleToLongBits(other.roll))
+			return false;
+		if (Double.doubleToLongBits(pitch) != Double.doubleToLongBits(other.pitch))
+			return false;
+		if (Double.doubleToLongBits(yaw) != Double.doubleToLongBits(other.yaw))
+			return false;
 		return true;
 	}
 
@@ -52,6 +67,18 @@ public class Point {
 		return z;
 	}
 
+	public double getRoll() {
+		return roll;
+	}
+
+	public double getPitch() {
+		return pitch;
+	}
+
+	public double getYaw() {
+		return yaw;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -62,6 +89,12 @@ public class Point {
 		temp = Double.doubleToLongBits(y);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(z);
+		result = prime * result + (int) (temp ^ (temp >>> 32));		
+		temp = Double.doubleToLongBits(roll);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(pitch);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(yaw);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
@@ -73,7 +106,7 @@ public class Point {
 
 	public Point subtract(Point p) {
 		// TODO Auto-generated method stub
-		Point newPoint = new Point(x - p.getX(), y - p.getY(), z - p.getZ());
+		Point newPoint = new Point(x - p.getX(), y - p.getY(), z - p.getZ(), roll - p.getRoll() , pitch - p.getPitch(), yaw - p.getYaw() );
 		return newPoint;
 	}
 
@@ -83,4 +116,6 @@ public class Point {
 		NumberFormat formatter = new DecimalFormat("#0.000000");
 		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + ")";
 	}
+
+
 }
