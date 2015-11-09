@@ -232,9 +232,13 @@ public class Cli extends Service {
 	}
 	
 	public void writePrompt() throws IOException {
-		out(String.format("%s:%s%s", Runtime.getInstance().getName(), cwd, prompt).getBytes());
+		out(getPrompt().getBytes());
 	}
 	
+	
+	public String getPrompt(){
+		return String.format("%s:%s%s ", Runtime.getInstance().getName(), cwd, prompt);
+	}
 	
 	public Object process(String line) throws IOException{
 		// FIXME - must read char by char to process up-arrow history commands 
