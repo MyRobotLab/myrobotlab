@@ -1,6 +1,9 @@
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
+
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -155,6 +158,11 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 			myodata.timestamp = timestamp;
 
 			invoke("publishMyoData", myodata);
+			
+			ArrayList<Point> points = new ArrayList<Point>();
+			points.add(new Point(0,0,0,rollW,pitchW,yawW));
+			invoke("publishPoints", points);
+			
 		}
 		// log.info("roll {}", myodata.roll);
 
