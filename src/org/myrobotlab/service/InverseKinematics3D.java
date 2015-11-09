@@ -6,6 +6,7 @@ import java.util.Map;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
+import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -34,7 +35,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
 	private DHRobotArm currentArm = null;
 	
-	
+	private Matrix inputMatrix = null;
 	
 	public InverseKinematics3D(String n) {
 		super(n);
@@ -42,14 +43,52 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	}
 
 	public Point currentPosition() {
-		return currentArm.getPalmPosition();		
+		return currentArm.getPalmPosition();
 	}
 	
 	public void moveTo(double x, double y, double z) {
 		moveTo(new Point(x,y,z));
 	}
 	
+	/**
+	 * This create a rotation and translation matrix that will be applied on the "moveTo" call.
+	 * 
+	 * @param dx - x axis translation
+	 * @param dy - y axis translation
+	 * @param dz - z axis translation
+	 * @param roll - rotation about z (in degrees)
+	 * @param pitch - rotation about x (in degrees)
+	 * @param yaw - rotation about y (in degrees)
+	 * @return
+	 */
+	public Matrix createInputMatrix(double dx, double dy, double dz, double roll, double pitch, double yaw) {		
+		roll = MathUtils.degToRad(roll);
+		pitch = MathUtils.degToRad(pitch);
+		yaw = MathUtils.degToRad(yaw);		
+		Matrix trMatrix = Matrix.translation(dx, dy, dz);
+	    Matrix rotMatrix = Matrix.zRotation(roll).multiply(Matrix.yRotation(yaw).multiply(Matrix.xRotation(pitch)));
+	    inputMatrix = trMatrix.multiply(rotMatrix);	
+		return inputMatrix;		
+	}
+	
+	public Point rotateAndTranslate(Point pIn) {
+		
+		Matrix m = new Matrix(4,1);
+		m.elements[0][0] = pIn.getX();
+		m.elements[1][0] = pIn.getY();
+		m.elements[2][0] = pIn.getZ();
+		m.elements[3][0] = 1;
+		Matrix pOM = inputMatrix.multiply(m);
+		Point pOut = new Point(pOM.elements[0][0],pOM.elements[1][0],pOM.elements[2][0]);
+		return pOut;		
+	}
+	
 	public void moveTo(Point p) {
+		
+		if (inputMatrix != null) {
+			p = rotateAndTranslate(p);
+		}
+		
 		currentArm.moveToGoal(p);
 		HashMap<String, Float> angleMap = new HashMap<String, Float>();
 		for (DHLink l : currentArm.getLinks()) {

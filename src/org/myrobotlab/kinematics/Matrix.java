@@ -40,9 +40,9 @@ public class Matrix {
 		T.elements[1][1] = 1;
 		T.elements[2][2] = 1;
 		T.elements[3][3] = 1;
-		T.elements[3][0] = tx;
-		T.elements[3][1] = ty;
-		T.elements[3][2] = tz;
+		T.elements[0][3] = tx;
+		T.elements[1][3] = ty;
+		T.elements[2][3] = tz;
 		return T;
 	}
 
@@ -113,7 +113,7 @@ public class Matrix {
 			}
 	}
 
-	Matrix(int rows, int cols) {
+	public Matrix(int rows, int cols) {
 		numRows = rows;
 		numCols = cols;
 		elements = new double[numRows][numCols];
