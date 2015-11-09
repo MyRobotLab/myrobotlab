@@ -1,8 +1,10 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.leap.LeapMotionListener;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -10,6 +12,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.LeapDataPublisher;
+import org.myrobotlab.service.interfaces.PointPublisher;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;
@@ -17,7 +20,7 @@ import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Vector;
 
-public class LeapMotion extends Service implements LeapDataListener, LeapDataPublisher {
+public class LeapMotion extends Service implements LeapDataListener, LeapDataPublisher, PointPublisher {
 
 	public static class Hand {
 		public String type;
@@ -207,6 +210,11 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+
+	@Override
+	public List<Point> publishPoints(List<Point> points) {
+		return points;
 	}
 
 

@@ -1,5 +1,8 @@
 package org.myrobotlab.leap;
 
+import java.util.ArrayList;
+
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.LeapMotion;
 import org.myrobotlab.service.LeapMotion.LeapData;
@@ -108,6 +111,24 @@ public class LeapMotionListener extends Listener {
 			myService.lastLeapData = data;
 			// only publish valid frames ?
 			myService.invoke("publishLeapData", data);
+			
+			ArrayList<Point> points = new ArrayList<Point>();
+			for (Hand h : data.frame.hands()) {
+				// position infomration
+				double x = h.arm().center().getX();
+				double y = h.arm().center().getY();
+				double z = h.arm().center().getZ();
+				// orientation information
+				double roll = h.palmNormal().roll();
+				double pitch = h.palmNormal().pitch();
+				double yaw = h.palmNormal().yaw();
+				// create the point to publish
+				Point palmPoint = new Point(x,y,z,roll,pitch,yaw);;
+				// add it to the list of points we publish
+				points.add(palmPoint);
+			}
+			// publish the points.
+			myService.invoke("publishPoints", points);
 		}
 
 	}
