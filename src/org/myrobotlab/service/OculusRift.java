@@ -1,9 +1,12 @@
 package org.myrobotlab.service;
 
+import java.util.List;
+
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.headtracking.OculusHeadTracking;
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.oculus.OculusDisplay;
@@ -11,6 +14,7 @@ import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
+import org.myrobotlab.service.interfaces.PointPublisher;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;
@@ -33,7 +37,7 @@ import com.oculusvr.capi.TrackingState;
  *
  */
 // TODO: implement publishOculusRiftData ... 
-public class OculusRift extends Service implements OculusDataPublisher {
+public class OculusRift extends Service implements OculusDataPublisher, PointPublisher {
 
 	public static final String RIGHT_OPEN_CV = "rightOpenCV";
 	public static final String LEFT_OPEN_CV = "leftOpenCV";
@@ -376,6 +380,12 @@ public class OculusRift extends Service implements OculusDataPublisher {
 		lastData = data;
 		// return the data to the mrl framework to be published.
 		return data;
+	}
+
+	@Override
+	public List<Point> publishPoints(List<Point> points) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
