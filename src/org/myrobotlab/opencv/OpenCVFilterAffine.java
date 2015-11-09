@@ -132,7 +132,7 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 	public void samplePoint(Integer x, Integer y) {
 		//
 		log.info("Affine clicked point called " + x + " " + y);
-		lastClicked = new Point(x, y, 0);
+		lastClicked = new Point(x, y, 0, 0, 0, 0);
 	}
 
 	public Point getLastClicked() {

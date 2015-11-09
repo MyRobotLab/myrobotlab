@@ -127,11 +127,15 @@ public class DHRobotArm {
 		double z = m.elements[2][3];
 		// double ws = m.elements[3][3];
 		// log.debug("World Scale : " + ws);
-		Point jointPosition = new Point(x, y, z);
+		Point jointPosition = new Point(x, y, z, 0, 0, 0);
 		return jointPosition;
 		
 	}
 	
+	/**
+	 *  Return the x,y,z of the palm.  roll,pitc, and yaw are not returned/computed with this function
+	 * @return
+	 */
 	public Point getPalmPosition() {
 		// TODO Auto-generated method stub
 		// return the position of the end effector wrt the base frame
@@ -167,7 +171,8 @@ public class DHRobotArm {
 		double z = m.elements[2][3];
 		// double ws = m.elements[3][3];
 		// log.debug("World Scale : " + ws);
-		Point palm = new Point(x, y, z);
+		// TODO: pass /compute the roll pitch and yaw .. 
+		Point palm = new Point(x, y, z, 0, 0, 0);
 		return palm;
 	}
 

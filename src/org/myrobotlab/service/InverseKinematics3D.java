@@ -47,7 +47,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	}
 	
 	public void moveTo(double x, double y, double z) {
-		moveTo(new Point(x,y,z));
+		// TODO: allow passing roll pitch and yaw
+		moveTo(new Point(x,y,z,0,0,0));
 	}
 	
 	/**
@@ -79,7 +80,13 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		m.elements[2][0] = pIn.getZ();
 		m.elements[3][0] = 1;
 		Matrix pOM = inputMatrix.multiply(m);
-		Point pOut = new Point(pOM.elements[0][0],pOM.elements[1][0],pOM.elements[2][0]);
+		
+		// TODO: compute the roll pitch yaw 
+		double roll = 0;
+		double pitch = 0;
+		double yaw = 0;
+		
+		Point pOut = new Point(pOM.elements[0][0],pOM.elements[1][0],pOM.elements[2][0], roll, pitch , yaw);
 		return pOut;		
 	}
 	
