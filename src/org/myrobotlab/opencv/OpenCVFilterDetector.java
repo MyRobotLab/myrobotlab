@@ -80,6 +80,7 @@ public class OpenCVFilterDetector extends OpenCVFilter {
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) {
 		// constructor changed to require Mat in javacv 0.10 
+		// mog.app
 		mog.apply(new Mat(image), new Mat(foreground), learningRate); // 0 trigger || -1 learn and
 		return foreground;
 	}

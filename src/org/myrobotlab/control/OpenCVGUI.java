@@ -512,7 +512,7 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 					currentFilters.repaint();
 
 					for (int i = 0; i < grabberTypeSelect.getItemCount(); ++i) {
-						String currentObject = prefixPath + grabberTypeSelect.getItemAt(i);
+						String currentObject = prefixPath + grabberTypeSelect.getItemAt(i) + "FrameGrabber";
 						if (currentObject.equals(vp.grabberType)) {
 							grabberTypeSelect.setSelectedIndex(i);
 							break;

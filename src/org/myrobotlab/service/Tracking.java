@@ -42,7 +42,6 @@ import java.util.Map;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -143,12 +142,6 @@ public class Tracking extends Service {
 
 	int faceLostFrameCount = 0;
 
-	/*
-	 * public void releaseService() { x.releaseService(); y.releaseService();
-	 * pid.releaseService(); ypid.releaseService(); arduino.releaseService();
-	 * opencv.releaseService(); }
-	 */
-
 	int faceLostFrameCountMin = 20;
 
 	// -------------- System Specific Initialization End --------------
@@ -162,8 +155,7 @@ public class Tracking extends Service {
 		Peers peers = new Peers(name);
 		peers.put("x", "Servo", "pan servo");
 		peers.put("y", "Servo", "tilt servo");
-		peers.put("pid", "PID", "pan PID");
-		peers.put("ypid", "PID", "tilt PID");
+		peers.put("pid", "PID2", "PID service - for all your pid needs");
 		peers.put("opencv", "OpenCV", "shared OpenCV instance");
 		peers.put("arduino", "Arduino", "shared Arduino instance");
 		return peers;
@@ -180,7 +172,7 @@ public class Tracking extends Service {
 		// createPeer("X","Servo") <-- create peer of default type
 		x = (Servo) createPeer("x");
 		y = (Servo) createPeer("y");
-		pid = (PID2) createPeer("pid2");
+		pid = (PID2) createPeer("pid");
 		opencv = (OpenCV) createPeer("opencv");
 		arduino = (Arduino) createPeer("arduino");
 
@@ -545,11 +537,11 @@ public class Tracking extends Service {
 	@Override
 	public void startService() {
 		super.startService();
-		x.startService();
-		y.startService();
-		pid.startService();
-		arduino.startService();
-		opencv.startService();
+		x = (Servo)startPeer("x");
+		y = (Servo)startPeer("y");
+		pid = (PID2)startPeer("pid");
+		arduino = (Arduino)startPeer("arduino");
+		opencv = (OpenCV)startPeer("opencv");		
 	}
 
 	public void stopScan() {
@@ -610,7 +602,7 @@ public class Tracking extends Service {
 		// if I'm at my min & and the target is further min - don't compute
 		// pid
 		if ((currentXServoPos <= x.getMin() && xSetpoint - targetPoint.x < 0) || (currentXServoPos >= x.getMax() && xSetpoint - targetPoint.x > 0)) {
-				error(String.format("%f x limit out of range", currentXServoPos));
+				error(String.format("%d x limit out of range", currentXServoPos));
 		} else {
 
 			if (pid.compute("x")) {
@@ -628,7 +620,7 @@ public class Tracking extends Service {
 		}
 
 		if ((currentYServoPos <= y.getMin() && ySetpoint - targetPoint.y < 0) || (currentYServoPos >= y.getMax() && ySetpoint - targetPoint.y > 0)) {
-				error(String.format("%f y limit out of range", currentYServoPos));
+				error(String.format("%d y limit out of range", currentYServoPos));
 		} else {
 			if (pid.compute("y")) {
 				currentYServoPos += (int) pid.getOutput("y");
@@ -723,14 +715,17 @@ public class Tracking extends Service {
 
 			Tracking tracker = new Tracking("tracker");
 			
-			tracker.getY().setMinMax(79, 127);
-			tracker.getX().setPin(5);
-			tracker.getY().setPin(6);
+			//tracker.getY().setMinMax(79, 127);
+			tracker.getX().setPin(11);
+			tracker.getY().setPin(10);
 			tracker.getOpenCV().setCameraIndex(1);
-			tracker.connect("COM12");
+			tracker.connect("COM18");
 			// tracker.connect("COM4");
 			tracker.startService();
 			tracker.faceDetect();
+			OpenCV opencv = tracker.getOpenCV();
+			//opencv.setFrameGrabberType(OpenCV.GR)
+			//		.capture();
 
 			GUIService gui = new GUIService("gui");
 			gui.startService();

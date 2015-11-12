@@ -28,14 +28,14 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameRecorder;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.OpenCV;
+import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
-
-
 public class VideoProcessor implements Runnable, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -49,7 +49,7 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	public String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
 
-	public String grabberType = "org.bytedeco.javacv.OpenCVFrameGrabber";
+	public String grabberType = getDefaultFrameGrabberType();
 
 
 	transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
@@ -134,6 +134,15 @@ public class VideoProcessor implements Runnable, Serializable {
 	 * the filter name does not exist - input will be displayed
 	 */
 	public boolean publishDisplay = true;	
+	
+	public static String getDefaultFrameGrabberType(){
+		Platform platform = Runtime.getInstance().getPlatform();
+		if (platform.isWindows()){
+			return "org.bytedeco.javacv.VideoInputFrameGrabber";
+		} else {
+			return "org.bytedeco.javacv.OpenCVFrameGrabber";
+		}
+	}
 
 	public VideoProcessor() {
 		cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1, 1);		
