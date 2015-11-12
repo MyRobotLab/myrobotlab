@@ -100,50 +100,6 @@ public class PID2 extends Service {
 
 	private HashMap<String, PIDData> data = new HashMap<String, PIDData>();
 
-	public static void main(String[] args) throws ClassNotFoundException {
-		// Logger root =
-		// (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		Logging logging = LoggingFactory.getInstance();
-		logging.configure();
-		logging.setLevel(Level.INFO);
-		// LoggingFactory.getInstance().setLevel(Level.INFO);
-		try {
-
-			int test = 35;
-			log.info("{}", test);
-
-			log.debug("hello");
-			log.trace("trace");
-			log.error("error");
-			log.info("info");
-
-			PID2 pid = new PID2("pid");
-			pid.startService();
-			String key = "test";
-			pid.setPID(key, 2.0, 5.0, 1.0);
-			pid.setControllerDirection(key, DIRECTION_DIRECT);
-			pid.setMode(key, MODE_AUTOMATIC);
-			pid.setOutputRange(key, 0, 255);
-			pid.setSetpoint(key, 100);
-			pid.setSampleTime(key, 40);
-
-			// GUIService gui = new GUIService("gui");
-			// gui.startService();
-
-			for (int i = 0; i < 200; ++i) {
-				pid.setInput(key, i);
-				Service.sleep(30);
-				if (pid.compute(key)) {
-					log.info(String.format("%d %f", i, pid.getOutput(key)));
-				} else {
-					log.warn("not ready");
-				}
-			}
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	public PID2(String n) {
 		super(n);
@@ -377,7 +333,8 @@ public class PID2 extends Service {
 			piddata.ki = (0 - piddata.ki);
 			piddata.kd = (0 - piddata.kd);
 		}
-
+		
+		data.put(key, piddata);
 		broadcastState();
 	}
 
@@ -404,5 +361,49 @@ public class PID2 extends Service {
 		PIDData piddata = data.get(key);
 		piddata.setpoint = setPoint;
 	}
+	
+	public static void main(String[] args) throws ClassNotFoundException {
+		Logging logging = LoggingFactory.getInstance();
+		logging.configure();
+		logging.setLevel(Level.INFO);
+
+		try {
+
+			int test = 35;
+			log.info("{}", test);
+
+			log.debug("hello");
+			log.trace("trace");
+			log.error("error");
+			log.info("info");
+
+			PID2 pid = new PID2("pid");
+			pid.startService();
+			String key = "test";
+			pid.setPID(key, 2.0, 5.0, 1.0);
+			pid.setControllerDirection(key, DIRECTION_DIRECT);
+			pid.setMode(key, MODE_AUTOMATIC);
+			pid.setOutputRange(key, 0, 255);
+			pid.setSetpoint(key, 100);
+			pid.setSampleTime(key, 40);
+
+			// GUIService gui = new GUIService("gui");
+			// gui.startService();
+
+			for (int i = 0; i < 200; ++i) {
+				pid.setInput(key, i);
+				Service.sleep(30);
+				if (pid.compute(key)) {
+					log.info(String.format("%d %f", i, pid.getOutput(key)));
+				} else {
+					log.warn("not ready");
+				}
+			}
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
 
 }
