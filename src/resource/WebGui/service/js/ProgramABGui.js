@@ -1,6 +1,7 @@
 angular.module('mrlapp.service.ProgramABGui', [])
 .controller('ProgramABGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('ProgramABGuiCtrl');
+    
     var _self = this;
     var msg = this.msg;
     
@@ -91,7 +92,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
                 
                 $scope.utterance = final_transcript;
                 $scope.$apply();
-                $scope.askProgramAB(final_transcript);
+                $scope.askProgramAB($scope.username,final_transcript);
                 final_transcript = '';
                 interm_transcript = '';
             } else {
@@ -185,3 +186,4 @@ angular.module('mrlapp.service.ProgramABGui', [])
 
 }
 ]);
+
