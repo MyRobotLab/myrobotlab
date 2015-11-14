@@ -167,6 +167,9 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
 	@Override
 	public LeapData publishLeapData(LeapData data) {
+		if (data != null) {
+			log.info("DATA" + data.leftHand.posX);
+		}
 		return data;
 	}
 
@@ -174,6 +177,8 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 	public void startService() {
 		super.startService();
 		listener = new LeapMotionListener(this);
+		// we've been asked to start.. we should start tracking !
+		this.startTracking();
 	}
 
 	public void startTracking() {
@@ -191,13 +196,12 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
 			LeapMotion leap = new LeapMotion("leap");
 			leap.startService();
-
-			
 			Runtime.start("gui", "GUIService");
-			leap.startTracking();
-
+			Runtime.start("webgui", "WebGui");
+			
 			// Have the sample listener receive events from the controller
 
+			//leap.startTracking();
 			// Keep this process running until Enter is pressed
 			log.info("Press Enter to quit...");
 			try {
