@@ -167,9 +167,9 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
 	@Override
 	public LeapData publishLeapData(LeapData data) {
-		if (data != null) {
-			log.info("DATA" + data.leftHand.posX);
-		}
+		// if (data != null) {
+			//log.info("DATA" + data.leftHand.posX);
+		// }
 		return data;
 	}
 
@@ -221,5 +221,9 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 		return points;
 	}
 
+	public void addPointsListener(Service s) {
+		// TODO - reflect on a public heard method - if doesn't exist error ?
+		addListener("publishPoints", s.getName(), "onPoints");
+	}
 
 }

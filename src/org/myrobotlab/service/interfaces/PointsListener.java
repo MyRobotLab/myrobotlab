@@ -1,11 +1,13 @@
 package org.myrobotlab.service.interfaces;
 
+import java.util.List;
+
 import org.myrobotlab.kinematics.Point;
 
-public interface PointListener {
+public interface PointsListener {
 
 	public String getName();
 	
-	public void onPoint(Point p);
+	public void onPoints(List<Point> p);
 	
 }

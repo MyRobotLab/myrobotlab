@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import org.junit.Test;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 
 public class InverseKinematics3DTest {
 
@@ -12,7 +11,7 @@ public class InverseKinematics3DTest {
 		InverseKinematics3D ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
 		
 		InMoovArm ia = new InMoovArm("foo");
-		ik3d.setCurrentArm(ia.getDHRobotArm());
+		ik3d.setCurrentArm(InMoovArm.getDHRobotArm());
 		
 		ik3d.moveTo(50,50,50);
 		

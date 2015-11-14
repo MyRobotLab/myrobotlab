@@ -21,6 +21,8 @@ public class LeapMotionListener extends Listener {
 	public final static Logger log = LoggerFactory.getLogger(LeapMotionListener.class);
 	LeapMotion myService = null;
 
+	int numFrames = 0;
+	
 	public LeapMotionListener(LeapMotion myService) {
 		this.myService = myService;
 	}
@@ -97,11 +99,19 @@ public class LeapMotionListener extends Listener {
 		data.frame = controller.frame();
 		myService.invoke("publishFrame", data.frame);
 		// grab left/right hands
+		
 		Hand lh = controller.frame().hands().leftmost();
 		Hand rh = controller.frame().hands().rightmost();
 		// map the data to the MRL Hand pojo
-		LeapMotion.Hand mrlLHand = mapLeapHandData(lh);
-		LeapMotion.Hand mrlRHand = mapLeapHandData(rh);
+		
+		LeapMotion.Hand mrlLHand = null;
+		LeapMotion.Hand mrlRHand = null;
+		if (lh.isLeft()) {
+			mrlLHand = mapLeapHandData(lh);
+		}
+		if (lh.isRight()) {
+			mrlRHand = mapLeapHandData(rh);
+		}
 		// set them to the LeapData obj
 		data.leftHand = mrlLHand;
 		data.rightHand = mrlRHand;
@@ -109,6 +119,7 @@ public class LeapMotionListener extends Listener {
 		// Track the last valid data frame.
 		// TODO: test and make sure this is worky?
 		if (data.frame.isValid()) {
+			numFrames++;
 			myService.lastLeapData = data;
 			// only publish valid frames ?
 			myService.invoke("publishLeapData", data);
@@ -129,7 +140,13 @@ public class LeapMotionListener extends Listener {
 				points.add(palmPoint);
 			}
 			// publish the points.
-			myService.invoke("publishPoints", points);
+			if (points.size() > 0 ) {
+				// TODO: gotta down sample for ik3d to keep up.
+				if (numFrames % 10 == 0) {
+					myService.invoke("publishPoints", points);
+				}
+			}
+			
 		}
 
 	}

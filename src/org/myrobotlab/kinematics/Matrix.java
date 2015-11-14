@@ -143,7 +143,7 @@ public class Matrix {
 	public Matrix addTo(Matrix m) {
 		if (numRows != m.numRows || numCols != m.numCols) {
 			System.out.println("dimensions bad in addTo()");
-			System.exit(1);
+			return null;
 		}
 		Matrix ret = new Matrix(numRows, numCols);
 
@@ -162,10 +162,10 @@ public class Matrix {
 	 *            A Matrix with the same dimensions
 	 * @returns the dot product (scalar product)
 	 */
-	public double dot(Matrix m) {
+	public Double dot(Matrix m) {
 		if (numRows != m.numRows || numCols != m.numCols) {
 			System.out.println("dimensions bad in dot()");
-			System.exit(1);
+			return null;
 		}
 		double sum = 0;
 
@@ -220,7 +220,7 @@ public class Matrix {
 	public Matrix multiply(Matrix m) {
 		if (numCols != m.numRows) {
 			System.out.println("dimensions bad in multiply()");
-			System.exit(1);
+			return null;
 		}
 
 		Matrix ret = new Matrix(numRows, m.numCols);
@@ -303,7 +303,7 @@ public class Matrix {
 	public Matrix subtractFrom(Matrix m) {
 		if (numRows != m.numRows || numCols != m.numCols) {
 			System.out.println("dimensions bad in addTo()");
-			System.exit(1);
+			return null;
 		}
 		Matrix ret = new Matrix(numRows, numCols);
 
