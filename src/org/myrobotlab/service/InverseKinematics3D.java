@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
@@ -13,6 +14,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
+import org.myrobotlab.service.interfaces.PointsListener;
 import org.slf4j.Logger;
 
 /**
@@ -28,7 +30,7 @@ import org.slf4j.Logger;
  * @author kwatters
  * 
  */
-public class InverseKinematics3D extends Service implements IKJointAnglePublisher {
+public class InverseKinematics3D extends Service implements IKJointAnglePublisher, PointsListener {
 
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(InverseKinematics3D.class.getCanonicalName());
@@ -153,12 +155,46 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-		InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
-
+		
+		
+		InverseKinematics3D inversekinematics = (InverseKinematics3D)Runtime.start("ik3d", "InverseKinematics3D");
+		// InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
+		inversekinematics.setCurrentArm(InMoovArm.getDHRobotArm());
+		
+		
+		// Create a new DH Arm.. simpler for initial testing.
+		// d , r, theta , alpha
+		//DHRobotArm testArm = new DHRobotArm();
+		//testArm.addLink(new DHLink("one"  ,400,0,0,90));
+		//testArm.addLink(new DHLink("two"  ,300,0,0,90));
+		//testArm.addLink(new DHLink("three",200,0,0,0));
+		//testArm.addLink(new DHLink("two", 0,0,0,0));
+		//inversekinematics.setCurrentArm(testArm);
+		
+		double dx = 0.0;
+		double dy = 0.0;
+		double dz = 0.0;
+		double roll = 0.0;
+		double pitch = 0.0;
+		double yaw = 0.0;
+		
+		// set up our input translation/rotation 
+		inversekinematics.createInputMatrix(dx, dy, dz, roll, pitch, yaw);
+		
+		LeapMotion lm = (LeapMotion)Runtime.start("leap", "LeapMotion");
+		
+		// Rest position... 
+		Point rest = new Point(100,-300,0,0,0,0);
+		// rest. 
+		inversekinematics.moveTo(rest);
+		lm.addPointsListener(inversekinematics);
+		
 		// Runtime.createAndStart("gui", "GUIService");
 		/*
 		 * GUIService gui = new GUIService("gui"); gui.startService();
 		 */
+		
+		Runtime.start("webgui", "WebGui");
 	}
 
 	@Override
@@ -169,6 +205,14 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
 	public double[][] publishJointPositions(double[][] jointPositionMap) {
 		return jointPositionMap;
+	}
+
+	@Override
+	public void onPoints(List<Point> points) {
+		// TODO : move input matrix translation to here? or somewhere?
+		// TODO: also don't like that i'm going to just say take the first point now.
+		// TODO: points should probably be a map, each point should have a name ?
+		moveTo(points.get(0));
 	}
 	
 }

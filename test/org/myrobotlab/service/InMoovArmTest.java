@@ -2,30 +2,50 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.AfterClass;
+import java.util.HashMap;
+
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class InMoovArmTest {
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
+	private InMoovArm testArm;
+	
 	@Before
 	public void setUp() throws Exception {
+		testArm = new InMoovArm("left");
+		
+	}
+	
+	@Test
+	public void testOnJointAngles() throws Exception {
+		
+		HashMap<String,Float> angleMap = new HashMap<String,Float>();
+
+		// this is the rest position from the DH model of the inmoov arm
+		angleMap.put("omoplate", -80F);
+		angleMap.put("shoulder", 60F);
+		angleMap.put("rotate", 180F);
+		angleMap.put("bicep", 90F);
+		
+		// they have some angle offsets that get mapped here
+		testArm.onJointAngles(angleMap);
+		
+		// the actual angles for the inmoov arm servos.
+		System.out.println("OMO: " + testArm.omoplate.getPos());
+		System.out.println("SHO: " + testArm.shoulder.getPos());
+		System.out.println("ROT: " + testArm.rotate.getPos());
+		System.out.println("BIC: " + testArm.bicep.getPos());
+		
+		assertEquals( 0, testArm.bicep.getPos());
+		assertEquals(90, testArm.rotate.getPos());
+		assertEquals(30, testArm.shoulder.getPos());
+		assertEquals(10, testArm.omoplate.getPos());
+		
+		
 	}
 
-	@After
-	public void tearDown() throws Exception {
-	}
-
+/*
 	@Test
 	public final void testBroadcastState() {
 		//fail("Not yet implemented");
@@ -181,6 +201,6 @@ public class InMoovArmTest {
 		//fail("Not yet implemented");
 	}
 	
-	
+	*/
 
 }

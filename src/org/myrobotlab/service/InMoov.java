@@ -1,11 +1,9 @@
 package org.myrobotlab.service;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 
-import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;

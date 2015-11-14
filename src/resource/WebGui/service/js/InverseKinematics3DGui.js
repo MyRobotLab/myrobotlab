@@ -2,24 +2,15 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
 .controller('InverseKinematics3DGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
         $log.info('InverseKinematics3D');
         
-        
-        
         var _self = this;
         var msg = this.msg;
-
         // init scope variables
-
-
-
-        
-        
         
         // get latest copy of a services
         $scope.service = mrl.getService($scope.service.name);
         $scope.interval = $scope.service.interval;
         $scope.positions = '';
         $scope.angles = '';
-        
         
         // GOOD TEMPLATE TO FOLLOW
         this.updateState = function (service) {
@@ -72,18 +63,13 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
 
             		// Initialize the scene.
             		var scene = new THREE.Scene();
-
             		var container = document.getElementById( 'canvas' );
             		// document.body.appendChild( container );
-
             		//  TODO: how do we tell it to use the container?
             		var renderer = new THREE.WebGLRenderer();
             		renderer.setSize( 400, 400 );
             		//container.appendChild( renderer.domElement );
-
             		// var renderer = new THREE.WebGLRenderer();
-
-
             		//renderer.setSize( window.innerWidth, window.innerHeight );
             		// renderer.setSize( 400,400);
             		if (container.hasChildNodes()) {
@@ -99,10 +85,10 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
             		 console.log($scope.positions);
             		 var linkPoints = [];
             		 for (i = 0 ; i < $scope.positions.length-1; i++) {
-            			 console.log("Push a point!");
-            			 console.log(i);
-            			 console.log($scope.positions.length);
-            			 console.log("Push a point 2!");
+            			 //console.log("Push a point!");
+            			 //console.log(i);
+            			 //console.log($scope.positions.length);
+            			 //console.log("Push a point 2!");
             			 var startStopPoint = [];
             			 startStopPoint.push($scope.positions[i]);
             			 startStopPoint.push($scope.positions[i+1]);
@@ -121,13 +107,13 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
             			
             			var startPoint = linkPoints[i][0];
             			var stopPoint = linkPoints[i][1];
-            			console.log("Here!" + startPoint + " TO " + stopPoint); 
+            			// console.log("Here!" + startPoint + " TO " + stopPoint); 
             			
             			var color = colorHex[i%numColors];
             			var start = new THREE.Vector3( startPoint[0], startPoint[1], startPoint[2] );
             			var stop = new THREE.Vector3( stopPoint[0], stopPoint[1], stopPoint[2] );
             			var lineGeom = new THREE.Geometry();
-            		    var lineMat = new THREE.LineBasicMaterial({ linewidth: 3, color: color });
+            		    var lineMat = new THREE.LineBasicMaterial({ linewidth: 5, color: color });
             		    lineGeom.vertices.push( start );
             		    lineGeom.vertices.push( stop );
             		    // lineGeom.computeLineDistances(); // This one is SUPER important, otherwise dashed lines will appear as simple plain lines
@@ -142,14 +128,11 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
 
             		//var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
             		var camera = new THREE.PerspectiveCamera( 75, 1, 0.1, 1000 );
-            		camera.position.x = 50;
-            		camera.position.y = 50;
+            		camera.position.x = 0;
+            		camera.position.y = 0;
             		camera.position.z = 500;
             		var render = function () {
             			requestAnimationFrame( render );
-            			//cube.rotation.x += 0.1;
-            			// cube.rotation.y += 0.1;
-            			//cube.position.x = 5;
             			renderer.render(scene, camera);
             		};
             		render();
