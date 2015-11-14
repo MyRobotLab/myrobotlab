@@ -130,7 +130,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
     ;
     $scope.askProgramAB = function(username, utterance) {
         $scope.service = mrl.getService($scope.service.name);
-        mrl.sendTo($scope.service.name, "getResponse", utterance, username);
+        mrl.sendTo($scope.service.name, "getResponse", username, utterance);
         $scope.rows.unshift({
             name: "User",
             response: utterance
