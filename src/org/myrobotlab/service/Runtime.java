@@ -1145,10 +1145,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 				logging.addAppender(Appender.FROM_AGENT);
 			} else if (cmdline.containsKey("-logToConsole")) {
 				logging.addAppender(Appender.CONSOLE);
+				/* DEPRECATED
 			} else if (cmdline.containsKey("-logToRemote")) {
 				String host = cmdline.getSafeArgument("-logToRemote", 0, "localhost");
 				String port = cmdline.getSafeArgument("-logToRemote", 1, "4445");
 				logging.addAppender(Appender.REMOTE, host, port);
+				*/
 			} else {
 				if (cmdline.containsKey("-multiLog")) {
 					logging.addAppender(Appender.FILE, "multiLog", null);
