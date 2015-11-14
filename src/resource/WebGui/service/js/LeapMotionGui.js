@@ -4,13 +4,13 @@ angular.module('mrlapp.service.LeapMotionGui', [])
                 var _self = this;
                 var msg = this.msg;
 
-                // GOOD TEMPLATE TO FOLLOW
+                // From template.
                 this.updateState = function (service) {
                     $scope.service = service;
                 };
                 _self.updateState($scope.service);
 
-                // init scope variables
+                // leap data is pretty much everything.
                 $scope.leapData = '';
 
                 this.onMsg = function (inMsg) {
@@ -30,7 +30,7 @@ angular.module('mrlapp.service.LeapMotionGui', [])
                 };
 
                 msg.subscribe('publishLeapData');
-                //msg.subscribt('publishPoints');
+                //msg.subscribe('publishPoints');
                 msg.subscribe(this);
             }
         ]);

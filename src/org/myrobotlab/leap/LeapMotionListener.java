@@ -8,6 +8,7 @@ import org.myrobotlab.service.LeapMotion;
 import org.myrobotlab.service.LeapMotion.LeapData;
 import org.slf4j.Logger;
 
+import com.leapmotion.leap.Arm;
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.Gesture;
@@ -42,9 +43,9 @@ public class LeapMotionListener extends Listener {
 		mrlHand.palmNormalY = palmNormal.getY();
 		mrlHand.palmNormalZ = palmNormal.getZ();
 
-		mrlHand.posX = lh.arm().center().getX();
-		mrlHand.posY = lh.arm().center().getY();
-		mrlHand.posZ = lh.arm().center().getZ();
+		mrlHand.posX = lh.palmPosition().getX();
+		mrlHand.posY = lh.palmPosition().getY();
+		mrlHand.posZ = lh.palmPosition().getZ();
 		
 		// handle the fingers.
 		for (Finger.Type t : Finger.Type.values()) {
