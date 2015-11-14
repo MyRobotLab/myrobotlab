@@ -89,7 +89,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	// FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
 	transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
-	
+
 	public static class LiveVideoStreamHandler implements Handler {
 
 		@Override
@@ -99,44 +99,41 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			try {
 
 				/*
-				OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");				
-				OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
-				opencv.addFilter(ffmpeg);
-				opencv.capture();
-				sleep(1000);
-				opencv.removeFilters();
-				ffmpeg.stopRecording();
-				*/
-				
-				
-				AtmosphereResponse response = r.getResponse();
-				//response.setContentType("video/mp4");
-				// response.setContentType("video/x-flv"); 
-				response.setContentType("video/avi"); 
-				// FIXME - mime type of avi ??
-				
-				ServletOutputStream out = response.getOutputStream();
-				//response.addHeader(name, value);
+				 * OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+				 * OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
+				 * opencv.addFilter(ffmpeg); opencv.capture(); sleep(1000);
+				 * opencv.removeFilters(); ffmpeg.stopRecording();
+				 */
 
-				//byte[] data = FileIO.fileToByteArray(new File("flvTest.flv"));
-				//byte[] data = FileIO.fileToByteArray(new File("src/resource/WebGUI/video/ffmpeg.1443989700495.mp4"));
-				//byte[] data = FileIO.fileToByteArray(new File("mp4Test.mp4"));
+				AtmosphereResponse response = r.getResponse();
+				// response.setContentType("video/mp4");
+				// response.setContentType("video/x-flv");
+				response.setContentType("video/avi");
+				// FIXME - mime type of avi ??
+
+				ServletOutputStream out = response.getOutputStream();
+				// response.addHeader(name, value);
+
+				// byte[] data = FileIO.fileToByteArray(new
+				// File("flvTest.flv"));
+				// byte[] data = FileIO.fileToByteArray(new
+				// File("src/resource/WebGUI/video/ffmpeg.1443989700495.mp4"));
+				// byte[] data = FileIO.fileToByteArray(new
+				// File("mp4Test.mp4"));
 				byte[] data = FileIO.fileToByteArray(new File("test.avi.h264.mp4"));
-				
-				
-				
+
 				log.info("bytes {}", data.length);
 				out.write(data);
 				out.flush();
 				log.info("here");
 				log.info("here");
-				//out.close();
-				//r.write(data);
+				// out.close();
+				// r.write(data);
 				log.info("here");
-				//r.writeOnTimeout(arg0)
-				//r.forceBinaryWrite();
+				// r.writeOnTimeout(arg0)
+				// r.forceBinaryWrite();
 				// r.close();
-				
+
 			} catch (Exception e) {
 				Logging.logError(e);
 			}
@@ -821,7 +818,22 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+		LoggingFactory.getInstance().setLevel(Level.ERROR);
+
+		// Call context.reset() to clear any previous configuration, e.g.
+		// default
+		// configuration. For multi-step configuration, omit calling
+		// context.reset().
+		// context.reset();
+		// configurator.doConfigure(args[0]);
+
+
+		// log.info(Logging.)
+		log.trace("trace");
+		log.debug("debug");
+		log.info("info");
+		log.warn("warn");
+		log.error("error");
 
 		try {
 

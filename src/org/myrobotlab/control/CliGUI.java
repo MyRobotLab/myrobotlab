@@ -36,12 +36,12 @@ import org.myrobotlab.service.Cli;
 import org.myrobotlab.service.GUIService;
 import org.slf4j.Logger;
 
-public class CLIGUI extends ServiceGUI implements ActionListener {
+public class CliGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(CLIGUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(CliGUI.class.getCanonicalName());
 
-	public CLIGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public CliGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 

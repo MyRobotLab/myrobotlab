@@ -64,7 +64,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	private transient Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 
 	private boolean processOOB = true;
-	private final Date serviceStartTime;
 
 	// TODO: this should be per session, and probably not global
 	private Date lastResponseTime = null;
@@ -81,7 +80,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
 		// we started..
-		serviceStartTime = new Date();
 		
 		// Tell programAB to persist it's learned predicates about people
 		// every 30 seconds.
