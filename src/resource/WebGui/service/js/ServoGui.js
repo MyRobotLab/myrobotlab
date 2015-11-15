@@ -1,9 +1,18 @@
 angular.module('mrlapp.service.ServoGui', [])
 .controller('ServoGuiCtrl', ['$log','$scope', 'mrl', function($log, $scope, mrl) {
         $log.info('ServoGuiCtrl');
+
+        var _self = this;
+        var msg = this.msg;
+
+        // GOOD TEMPLATE TO FOLLOW
+        this.updateState = function (service) {
+            $scope.service = service;
+        };
+        _self.updateState($scope.service);
         
         // Get a fresh copy!
-        $scope.service = mrl.getService($scope.service.name);
+        // $scope.service = mrl.getService($scope.service.name);
         $scope.controller = '';
         $scope.pin = '';
         $scope.min = 0;
@@ -15,12 +24,14 @@ angular.module('mrlapp.service.ServoGui', [])
         // get and initalize current state of servo
         $scope.attachButtonLabel = "Attach";
         $scope.status = "No Status";
-        $scope.$apply();
-        
+        // $scope.$apply();
+        $log.info('ServoGuiCtrl part 3 ');
         this.onMsg = function(msg) {
         	$log.info("SERVO MSG: " + msg);
+        	
             switch (msg.method) {
                 case 'onState':
+                    _self.updateState(inMsg.data[0]);
                     $scope.status = msg.data[0];
                     $scope.isAttached = $scope.status.isAttached;
                     $scope.angle = $scope.status.angle;
@@ -52,6 +63,7 @@ angular.module('mrlapp.service.ServoGui', [])
                     $log.info("ERROR - unhandled method " + $scope.name + " Method " + msg.method);
                     break;
             };
+            
         };
         
         $scope.attachDetach = function(controller,pin) {
@@ -79,5 +91,8 @@ angular.module('mrlapp.service.ServoGui', [])
         };
         
         // mrl.subscribe($scope.service.name, 'publishServoEvent');  ??
-//        $scope.panel.initDone();
+        msg.subscribe("servoEvent");
+        msg.subscribe(this);
+       
+        
     }]);
