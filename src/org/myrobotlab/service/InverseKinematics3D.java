@@ -13,6 +13,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PointsListener;
 import org.slf4j.Logger;
@@ -180,15 +181,14 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		//testArm.addLink(new DHLink("two", 0,0,0,0));
 		//inversekinematics.setCurrentArm(testArm);
 		
-		double dx = 100.0;
-		double dy = -300.0;
-		double dz = 0.0;
+		// set up our input translation/rotation 
+		double dx = 400.0;
+		double dy = -600.0;
+		double dz = -350.0;
 		double roll = 0.0;
 		double pitch = 0.0;
-		double yaw = 0.0;
-		
-		// set up our input translation/rotation 
-		//inversekinematics.createInputMatrix(dx, dy, dz, roll, pitch, yaw);
+		double yaw = 0.0;		
+		inversekinematics.createInputMatrix(dx, dy, dz, roll, pitch, yaw);
 		
 		// Rest position... 
 		//Point rest = new Point(100,-300,0,0,0,0);
@@ -199,17 +199,32 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		lm.addPointsListener(inversekinematics);
 		
 		// set up the left inmoov arm
-		//InMoovArm leftArm = (InMoovArm)Runtime.start("leftArm", "InMoovArm");
-		//leftArm.connect("COM30");
-		// attach the publish joint angles to the on JointAngles for the inmoov arm.
-		//inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
+		InMoovArm leftArm = (InMoovArm)Runtime.start("leftArm", "InMoovArm");
+		leftArm.connect("COM36");
+		leftArm.omoplate.setMinMax(90, 180);
 		
-		// Runtime.createAndStart("gui", "GUIService");
+		// attach the publish joint angles to the on JointAngles for the inmoov arm.
+		inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
+		
+		Runtime.createAndStart("gui", "GUIService");
+		OpenCV cv1 = (OpenCV)Runtime.createAndStart("cv1", "OpenCV");
+		OpenCVFilterAffine aff1 = new OpenCVFilterAffine("aff1");
+		aff1.setAngle(270);
+		aff1.setDx(-80);
+		aff1.setDy(-80);
+		cv1.addFilter(aff1);
+
+		cv1.setCameraIndex(0);
+		cv1.capture();
+		cv1.undockDisplay(true);
+		
+		
 		/*
 		 * GUIService gui = new GUIService("gui"); gui.startService();
 		 */
 		
 		Runtime.start("webgui", "WebGui");
+		Runtime.start("log", "Log");
 	}
 
 	@Override
