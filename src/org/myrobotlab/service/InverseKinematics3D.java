@@ -94,6 +94,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	
 	public void moveTo(Point p) {
 		
+		log.info("Move TO {}", p );
 		if (inputMatrix != null) {
 			p = rotateAndTranslate(p);
 		}
@@ -152,7 +153,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		this.currentArm = currentArm;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		
@@ -171,8 +172,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		//testArm.addLink(new DHLink("two", 0,0,0,0));
 		//inversekinematics.setCurrentArm(testArm);
 		
-		double dx = 0.0;
-		double dy = 0.0;
+		double dx = 100.0;
+		double dy = -300.0;
 		double dz = 0.0;
 		double roll = 0.0;
 		double pitch = 0.0;
@@ -188,6 +189,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		// rest. 
 		inversekinematics.moveTo(rest);
 		lm.addPointsListener(inversekinematics);
+		// set up the left inmoov arm
+		InMoovArm leftArm = (InMoovArm)Runtime.start("leftArm", "InMoovArm");
+		leftArm.connect("COM30");
+		// attach the publish joint angles to the on JointAngles for the inmoov arm.
+		inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
 		
 		// Runtime.createAndStart("gui", "GUIService");
 		/*

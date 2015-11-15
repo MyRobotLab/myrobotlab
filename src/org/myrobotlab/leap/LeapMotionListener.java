@@ -45,9 +45,9 @@ public class LeapMotionListener extends Listener {
 		mrlHand.palmNormalY = palmNormal.getY();
 		mrlHand.palmNormalZ = palmNormal.getZ();
 
-		mrlHand.posX = lh.palmPosition().getX();
-		mrlHand.posY = lh.palmPosition().getY();
-		mrlHand.posZ = lh.palmPosition().getZ();
+		mrlHand.posX = lh.arm().center().getX();
+		mrlHand.posY = lh.arm().center().getY();
+		mrlHand.posZ = lh.arm().center().getZ();
 		
 		// handle the fingers.
 		for (Finger.Type t : Finger.Type.values()) {
