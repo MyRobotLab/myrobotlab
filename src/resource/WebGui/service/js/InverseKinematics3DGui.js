@@ -154,8 +154,15 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
     	  // Invoke the moveTo..
           $log.info("MOVETO! IK3D!");
           mrl.sendTo($scope.service.name, "moveTo", x, y, z);
-          
         };
+        
+        $scope.createInputMatrix = function(dx,dy,dz,roll,pitch,yaw) {
+      	  // Invoke the moveTo..
+            $log.info("Calibrate!");
+            mrl.sendTo($scope.service.name, "createInputMatrix", dx, dy, dz, roll, pitch, yaw);
+          };
+        
+        
         mrl.subscribe($scope.service.name, 'publishJointPositions');
         mrl.subscribe($scope.service.name, 'publishJointAngles');
 //        $scope.panel.initDone();
