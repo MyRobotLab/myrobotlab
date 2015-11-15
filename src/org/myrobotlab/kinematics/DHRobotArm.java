@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
+import org.myrobotlab.service.InverseKinematics3D;
 import org.slf4j.Logger;
 
 public class DHRobotArm {
@@ -14,6 +15,9 @@ public class DHRobotArm {
 
 	private ArrayList<DHLink> links;
 
+	// for debugging ..
+	private transient InverseKinematics3D ik3D = null;
+	
 	public DHRobotArm() {
 		super();
 		links = new ArrayList<DHLink>();
@@ -27,7 +31,8 @@ public class DHRobotArm {
 	public Matrix getJInverse() {
 		// TODO Auto-generated method stub
 		// something small.
-		double delta = 0.000001;
+		//double delta = 0.000001;
+		double delta = 0.01;
 
 		int numLinks = this.getNumLinks();
 
@@ -176,11 +181,18 @@ public class DHRobotArm {
 		return palm;
 	}
 
+	public void centerAllJoints() {
+		for (DHLink link : links) {
+			double center = (link.getMax() + link.getMin())/2.0;
+			link.setTheta(center);
+		}
+	}
+	
 	public void moveToGoal(Point goal) {
 		// we know where we are.. we know where we want to go.
 		int numSteps = 0;
-		double iterStep = 0.01;
-		double errorThreshold = 0.01;
+		double iterStep = 0.04;
+		double errorThreshold = 0.05;
 		// what's the current point
 		while (true) {
 			numSteps++;
@@ -207,21 +219,36 @@ public class DHRobotArm {
 			for (int i = 0; i < dTheta.getNumRows(); i++) {
 				// update joint positions! move towards the goal!
 				double d = dTheta.elements[i][0];
+				// incr rotate needs to be min/max aware here!
 				this.getLink(i).incrRotate(d);
 			}
 			// delta point represents the direction we need to move in order to
 			// get there.
 			// we should figure out how to scale the steps.
+			// For debugging of trajectories we should publish  here?
+			
+			
+//			ik3D.publishTelemetry();
+//			try {
+//				Thread.sleep(2);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+			
 			if (deltaPoint.magnitude() < errorThreshold) {
-				log.info("We made it!  It took " + numSteps + " iterations to get there.");
+				log.info("Final Position {} Number of Iteratins {}" , getPalmPosition() , numSteps);
 				break;
 			}
 		}
-
 	}
 
 	public void setLinks(ArrayList<DHLink> links) {
 		this.links = links;
+	}
+
+	public void setIk3D(InverseKinematics3D ik3d) {
+		ik3D = ik3d;
 	}
 
 }

@@ -1,5 +1,8 @@
 package org.myrobotlab.kinematics;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * A link class to encapsulate the D-H parameters for a given link in a 
  * robotic arm.
@@ -26,7 +29,7 @@ public class DHLink {
 	// TODO: figure this out.
 	private String name;
 	
-
+	public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
 
 	// private Matrix m;
 	// TODO: add max/min angle
@@ -182,11 +185,19 @@ public class DHLink {
 	@Override
 	public String toString() {
 		return "DHLink [d=" + d + ", theta=" + theta + ", r=" + r + ", alpha="
-				+ alpha + "]";
+				+ alpha + " min=" + min + " max=" + max + "]";
 	}
 
 	public void incrRotate(double delta) {
-		this.theta += delta;
+		// we shouldn't go beyond the max
+		double destAngle = this.theta + delta;
+		// I suppose this means min/max are in radians..
+		if (destAngle > max || destAngle < min) {
+			// we're out of range
+			// log.info("Link {} angle out of range {} ", name, destAngle);
+		} else {
+			this.theta = destAngle;
+		}
 	}
 
 	public double getThetaDegrees() {
@@ -208,7 +219,6 @@ public class DHLink {
 	public void setMax(double max) {
 		this.max = max;
 	}
-	
 	
 	public String getName() {
 		return name;
