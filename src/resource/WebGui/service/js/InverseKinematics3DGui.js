@@ -128,8 +128,8 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
 
             		//var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
             		var camera = new THREE.PerspectiveCamera( 75, 1, 0.1, 1000 );
-            		camera.position.x = 0;
-            		camera.position.y = 0;
+            		camera.position.x = 50;
+            		camera.position.y = -200;
             		camera.position.z = 500;
             		var render = function () {
             			requestAnimationFrame( render );
@@ -149,6 +149,12 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
                     break;
             };
         };
+
+        
+        $scope.centerAllJoints = function() {
+      	  // Invoke the center all joints.
+            mrl.sendTo($scope.service.name, "centerAllJoints");
+          };
         
         $scope.moveTo = function(x,y,z) {
     	  // Invoke the moveTo..

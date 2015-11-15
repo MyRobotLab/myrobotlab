@@ -92,14 +92,22 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		return pOut;		
 	}
 	
+	public void centerAllJoints() {
+		currentArm.centerAllJoints();
+		publishTelemetry();		
+	}
+	
 	public void moveTo(Point p) {
 		
 		log.info("Move TO {}", p );
 		if (inputMatrix != null) {
 			p = rotateAndTranslate(p);
 		}
-		
 		currentArm.moveToGoal(p);
+		publishTelemetry();
+	}
+
+	public void publishTelemetry() {
 		HashMap<String, Float> angleMap = new HashMap<String, Float>();
 		for (DHLink l : currentArm.getLinks()) {
 			String jointName = l.getName();
@@ -161,8 +169,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		InverseKinematics3D inversekinematics = (InverseKinematics3D)Runtime.start("ik3d", "InverseKinematics3D");
 		// InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
 		inversekinematics.setCurrentArm(InMoovArm.getDHRobotArm());
-		
-		
+		// 
+		inversekinematics.getCurrentArm().setIk3D(inversekinematics);
 		// Create a new DH Arm.. simpler for initial testing.
 		// d , r, theta , alpha
 		//DHRobotArm testArm = new DHRobotArm();
@@ -180,20 +188,21 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		double yaw = 0.0;
 		
 		// set up our input translation/rotation 
-		inversekinematics.createInputMatrix(dx, dy, dz, roll, pitch, yaw);
-		
-		LeapMotion lm = (LeapMotion)Runtime.start("leap", "LeapMotion");
+		//inversekinematics.createInputMatrix(dx, dy, dz, roll, pitch, yaw);
 		
 		// Rest position... 
-		Point rest = new Point(100,-300,0,0,0,0);
+		//Point rest = new Point(100,-300,0,0,0,0);
 		// rest. 
-		inversekinematics.moveTo(rest);
+		//inversekinematics.moveTo(rest);
+
+		LeapMotion lm = (LeapMotion)Runtime.start("leap", "LeapMotion");
 		lm.addPointsListener(inversekinematics);
+		
 		// set up the left inmoov arm
-		InMoovArm leftArm = (InMoovArm)Runtime.start("leftArm", "InMoovArm");
-		leftArm.connect("COM30");
+		//InMoovArm leftArm = (InMoovArm)Runtime.start("leftArm", "InMoovArm");
+		//leftArm.connect("COM30");
 		// attach the publish joint angles to the on JointAngles for the inmoov arm.
-		inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
+		//inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
 		
 		// Runtime.createAndStart("gui", "GUIService");
 		/*
