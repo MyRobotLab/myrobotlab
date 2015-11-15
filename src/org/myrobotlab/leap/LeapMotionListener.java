@@ -142,7 +142,7 @@ public class LeapMotionListener extends Listener {
 			// publish the points.
 			if (points.size() > 0 ) {
 				// TODO: gotta down sample for ik3d to keep up.
-				if (numFrames % 10 == 0) {
+				if (numFrames % 20 == 0) {
 					myService.invoke("publishPoints", points);
 				}
 			}

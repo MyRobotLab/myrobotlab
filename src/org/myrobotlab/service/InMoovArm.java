@@ -333,15 +333,17 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		
 		// we map the servo 90 degrees to be 0 degrees.
 		HashMap<String, Float> phaseShiftMap = new HashMap<String, Float>();
-		phaseShiftMap.put("omoplate", 90F);
-		phaseShiftMap.put("shoulder", 90F);
-		phaseShiftMap.put("rotate", -90F);
+		// phaseShiftMap.put("omoplate", 90F);
+		// Harry's omoplate is +90 degrees from Gaels InMoov..
+		phaseShiftMap.put("omoplate", 180F);
+		phaseShiftMap.put("shoulder", 0F);
+		phaseShiftMap.put("rotate", 0F);
 		phaseShiftMap.put("bicep", 90F);
 		
 		HashMap<String, Float> gainMap = new HashMap<String, Float>();
 		gainMap.put("omoplate", 1F);
-		gainMap.put("shoulder", -1F);
-		gainMap.put("rotate", 1F);
+		gainMap.put("shoulder", 1F);
+		gainMap.put("rotate", -1F);
 		gainMap.put("bicep", -1F);
 		
 		ArrayList<String> servos = new ArrayList<String>();
