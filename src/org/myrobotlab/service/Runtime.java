@@ -32,8 +32,9 @@ import java.util.TreeMap;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.cmdline.CMDLine;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MessageListener;
@@ -380,7 +381,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			}
 
 			// create an instance
-			Object newService = Service.getNewInstance(fullTypeName, name);
+			Object newService = Instantiator.getNewInstance(fullTypeName, name);
 			log.info("returning {}", fullTypeName);
 			return (Service) newService;
 		} catch (Exception e) {
@@ -1634,7 +1635,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	public static boolean setJSONPrettyPrinting(boolean b) {
-		return Encoder.setJSONPrettyPrinting(b);
+		return CodecUtils.setJSONPrettyPrinting(b);
 	}
 
 	public static void setRuntimeName(String inName) {

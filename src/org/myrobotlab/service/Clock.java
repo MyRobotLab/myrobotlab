@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -229,7 +229,7 @@ public class Clock extends Service {
 			Message msg = null;
 
 			msg = xmpp1.createMessage("", "register", clock);
-			String base64 = Encoder.msgToBase64(msg);
+			String base64 = CodecUtils.msgToBase64(msg);
 			xmpp1.sendMessage(base64, "incubator incubator");
 
 			// XMPP CONNECT WORKS END ---------------------------------

@@ -28,6 +28,7 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameRecorder;
+import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
@@ -188,7 +189,7 @@ public class VideoProcessor implements Runnable, Serializable {
 		 * Object[] params = new Object[1]; params[0] = name;
 		 */
 
-		OpenCVFilter filter = (OpenCVFilter) Service.getNewInstance(type, name);
+		OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);
 		// returns filter if added - or if dupe returns actual
 		return addFilter(filter);
 	}

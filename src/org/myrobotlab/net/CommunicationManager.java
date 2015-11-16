@@ -4,15 +4,12 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 
-import org.myrobotlab.codec.Encoder;
-import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.TestCatcher;
-import org.myrobotlab.service.TestThrower;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.NameProvider;
@@ -56,7 +53,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 	 * mrl:/ get a gateway for remote communication
 	 */
 	public Gateway getComm(URI uri) {
-		if (uri.getScheme().equals(Encoder.SCHEME_MRL)) {
+		if (uri.getScheme().equals(CodecUtils.SCHEME_MRL)) {
 			Gateway gateway = (Gateway) Runtime.getService(uri.getHost());
 			return gateway;
 		} else {
@@ -141,10 +138,12 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 
 		// TODO - send a verify for service & another verify for method ?
 
+		/* FIXME PUT IN JUNIT
 		TestThrower thrower = (TestThrower)Runtime.start("thrower", "TestThrower");
 		TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
 		
 		CommunicationManager cm = new CommunicationManager("catcher");
+		*/
 		
 	
 	}

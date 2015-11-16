@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.jivesoftware.smack.Roster;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Message;
@@ -172,12 +172,12 @@ public class Shoutbox extends Service {
 				fw = new FileWriter(archive.getAbsoluteFile());
 				bw = new BufferedWriter(fw);
 
-				String d = String.format("%s", Encoder.toJson(shout));
+				String d = String.format("%s", CodecUtils.toJson(shout));
 				bw.write(d);
 				return;
 			}
 
-			String d = String.format(",%s", Encoder.toJson(shout));
+			String d = String.format(",%s", CodecUtils.toJson(shout));
 			bw.write(d);
 			bw.flush();
 
@@ -264,7 +264,7 @@ public class Shoutbox extends Service {
 
 			String json = String.format("[%s]", FileIO.fileToString(latest.getAbsoluteFile()));
 
-			Shout[] saved = Encoder.fromJson(json, Shout[].class);
+			Shout[] saved = CodecUtils.fromJson(json, Shout[].class);
 
 			for (int i = 0; i < saved.length; ++i) {
 				shouts.add(saved[i]);
@@ -357,7 +357,7 @@ public class Shoutbox extends Service {
 		}
 
 		shouts.add(shout);
-		Message out = createMessage("shoutclient", "publishShout", Encoder.toJson(shout));
+		Message out = createMessage("shoutclient", "publishShout", CodecUtils.toJson(shout));
 		//webgui.sendToAll(out);
 
 		if (xmpp != null && !TYPE_SYSTEM.equals(shout.type)) {
@@ -430,8 +430,8 @@ public class Shoutbox extends Service {
 	// String lastShoutMsg = null;
 
 	public void sendTo(String type, String key, Object data) {
-		Shout shout = createShout(TYPE_SYSTEM, Encoder.toJson(data));
-		String msgString = Encoder.toJson(shout);
+		Shout shout = createShout(TYPE_SYSTEM, CodecUtils.toJson(data));
+		String msgString = CodecUtils.toJson(shout);
 		Message sendTo = createMessage("shoutclient", "publishShout", msgString);
 
 	}

@@ -62,7 +62,6 @@ public class FileIO {
 
 	public static class FileComparisonException extends Exception {
 		private static final long serialVersionUID = 1L;
-
 		public FileComparisonException(String msg) {
 			super(msg);
 		}

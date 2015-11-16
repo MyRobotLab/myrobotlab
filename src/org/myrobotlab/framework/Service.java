@@ -25,20 +25,13 @@
 
 package org.myrobotlab.framework;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -50,7 +43,6 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -61,7 +53,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.codec.Recorder;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -87,7 +80,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service implements Runnable, Serializable, ServiceInterface, Invoker {
+public abstract class Service extends MessageService implements Runnable, Serializable, ServiceInterface, Invoker {
 
 	// FIXME upgrade to ScheduledExecutorService
 	protected class Task extends TimerTask {
@@ -148,15 +141,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	transient protected Thread thisThread = null;
 
-	transient protected Outbox outbox = null;
 
 	transient protected Inbox inbox = null;
 
 	transient Timer timer = null;
 
 	protected boolean allowDisplay = true;
-
-	transient protected CommunicationInterface cm = null;
 
 	public final static String cfgDir = FileIO.getCfgDir();
 
@@ -169,19 +159,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	transient protected Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
 
 	// recordings
-	static private boolean isRecording = false;
+	// static private boolean isRecording = false;
+	static private Recorder recorder = null;
 
 	transient public final String MESSAGE_RECORDING_FORMAT_XML = "MESSAGE_RECORDING_FORMAT_XML";
 
 	transient public final String MESSAGE_RECORDING_FORMAT_BINARY = "MESSAGE_RECORDING_FORMAT_BINARY";
 
-	private transient ObjectOutputStream recording;
-
-	private transient ObjectInputStream playback;
-
-	private transient OutputStream recordingXML;
-
-	private transient OutputStream recordingPython;
 
 	// FIXME SecurityProvider
 	protected static AuthorizationProvider security = null;
@@ -448,7 +432,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		}
 		return tip.value();
 	}
-
+/*  RECENTLY MOVED TO INSTANCIATOR !!!!
 	static public Object getNewInstance(Class<?> cast, String classname, Object... params) {
 		return getNewInstance(new Class<?>[] { cast }, classname, params);
 	}
@@ -477,7 +461,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	static public Object getThrowableNewInstance(Class<?>[] cast, String classname, Object... params) throws ClassNotFoundException, NoSuchMethodException, SecurityException,
 			InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Class<?> c;
+		Class<?> c;	
 
 		c = Class.forName(classname);
 		if (params == null) {
@@ -497,6 +481,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			return mc.newInstance(params); // Dynamically instantiate it
 		}
 	}
+	*/
 
 	/**
 	 * 
@@ -687,6 +672,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	 * @param inHost
 	 */
 	public Service(String reservedKey) {
+		super(reservedKey);
 
 		serviceClass = this.getClass().getCanonicalName();
 		simpleName = this.getClass().getSimpleName();
@@ -710,6 +696,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		} else {
 			name = reservedKey;
 		}
+		// keep MessageService name in sync
 
 		// comment ?
 		mergePeerDNA(reservedKey, serviceClass);
@@ -818,41 +805,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	}
 
-	// TODO - remove or reconcile - RemoteAdapter and Service are the only ones
-	// using this
-	/**
-	 * 
-	 * @param name
-	 * @param method
-	 * @param data
-	 * @return
-	 */
-	public Message createMessage(String name, String method, Object data) {
-		if (data == null) {
-			return createMessage(name, method, null);
-		}
-		Object[] d = new Object[1];
-		d[0] = data;
-		return createMessage(name, method, d);
-	}
 
-	// FIXME All parameter constructor
-	// TODO - Probably simplyfy to take array of object
-	/**
-	 * 
-	 * @param name
-	 * @param method
-	 * @param data
-	 * @return
-	 */
-	public Message createMessage(String name, String method, Object[] data) {
-		Message msg = new Message();
-		msg.name = name; // destination instance name
-		msg.sender = this.getName();
-		msg.data = data;
-		msg.method = method;
-		return msg;
-	}
 
 	public synchronized ServiceInterface createPeer(String reservedKey) {
 		String fullkey = Peers.getPeerKey(getName(), reservedKey);
@@ -1196,7 +1149,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		Object retobj = null;
 
 		if (log.isDebugEnabled()) {
-			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method, Encoder.getParameterSignature(msg.data), msg.msgId));
+			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId));
 		}
 
 		// recently added - to support "nameless" messages - concept you may get
@@ -1327,7 +1280,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				}
 			}
 
-			log.error(String.format("did not find method - %s(%s)", method, Encoder.getParameterSignature(params)));
+			log.error(String.format("did not find method - %s(%s)", method, CodecUtils.getParameterSignature(params)));
 		} catch (InvocationTargetException e) {
 			Throwable target = e.getTargetException();
 			error(String.format("%s %s", target.getClass().getSimpleName(), target.getMessage()));
@@ -1396,7 +1349,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 			if (cfg.exists()) {
 				// serializer.read(o, cfg);
 				String json = FileIO.fileToString(filename);
-				Object saved = Encoder.fromJson(json, o.getClass());
+				Object saved = CodecUtils.fromJson(json, o.getClass());
 				copyShallowFrom(o, saved);
 				return true;
 			}
@@ -1407,26 +1360,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		return false;
 	}
 
-	public void loadRecording(String filename) {
-		isRecording = false;
-
-		if (filename == null) {
-			filename = lastRecordingFilename;
-		}
-
-		try {
-			playback = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)));
-			while (true) {
-				Message msg = (Message) playback.readObject();
-				if (msg.name.startsWith("BORG")) {
-					msg.name = Runtime.getInstance().getName();
-				}
-				outbox.add(msg);
-			}
-		} catch (Exception e) {
-			logException(e);
-		}
-	}
 
 	/**
 	 * 
@@ -1710,7 +1643,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 				return false;
 			}
 
-			String s = Encoder.toJson(this);
+			String s = CodecUtils.toJson(this);
 			FileOutputStream out = new FileOutputStream(cfg);
 			out.write(s.getBytes());
 			out.close();
@@ -1731,7 +1664,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 		try {
 			File cfg = new File(String.format("%s%s%s", cfgDir, File.separator, cfgFileName));
-			String s = Encoder.toJson(o);
+			String s = CodecUtils.toJson(o);
 			FileOutputStream out = new FileOutputStream(cfg);
 			out.write(s.getBytes());
 			out.close();
@@ -1785,33 +1718,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		// here its hardcoded
 		msg.sendingMethod = "send";
 
-		if (isRecording) {
+		if (recorder != null) {
 			try {
-
-				// python
-				String msgName = (msg.name.equals(Runtime.getInstance().getName())) ? "runtime" : msg.name;
-				recordingPython.write(String.format("%s.%s(", msgName, msg.method).getBytes());
-				if (data != null) {
-					for (int i = 0; i < data.length; ++i) {
-						Object d = data[i];
-						if (d.getClass() == Integer.class || d.getClass() == Float.class || d.getClass() == Boolean.class || d.getClass() == Double.class
-								|| d.getClass() == Short.class || d.getClass() == Short.class) {
-							recordingPython.write(d.toString().getBytes());
-
-							// FIXME Character probably blows up
-						} else if (d.getClass() == String.class || d.getClass() == Character.class) {
-							recordingPython.write(String.format("\"%s\"", d).getBytes());
-						} else {
-							recordingPython.write("object".getBytes());
-						}
-						if (i < data.length - 1) {
-							recordingPython.write(",".getBytes());
-						}
-					}
-				}
-				recordingPython.write(")\n".getBytes());
-				recordingPython.flush();
-
+				recorder.write(msg);
 			} catch (IOException e) {
 				logException(e);
 			}
@@ -1935,30 +1844,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		// getComm().
 	}
 
-	public String startMsgRecording(String filename) {
-		String filenameXML = String.format("%s/%s_%s.xml", cfgDir, getName(), TSFormatter.format(new Date()));
-		String filenamePython = String.format("%s/%s_%s.py", cfgDir, getName(), TSFormatter.format(new Date()));
-		if (filename == null) {
-			filename = String.format("%s/%s_%s.msg", cfgDir, getName(), TSFormatter.format(new Date()));
-			lastRecordingFilename = filename;
-		}
-
-		log.info(String.format("started recording %s to file %s", getName(), filename));
-
-		try {
-			recording = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));
-			recordingXML = new BufferedOutputStream(new FileOutputStream(filenameXML), 8 * 1024);
-			recordingXML.write("<Messages>\n".getBytes());
-
-			recordingPython = new BufferedOutputStream(new FileOutputStream(filenamePython), 8 * 1024);
-
-			isRecording = true;
-		} catch (Exception e) {
-			logException(e);
-		}
-		return filenamePython;
-	}
-
 	public ServiceInterface startPeer(String reservedKey) {
 		ServiceInterface si = null;
 		try {
@@ -2009,28 +1894,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	public void stopMsgRecording() {
 		log.info("stopped recording");
-		isRecording = false;
-		if (recording == null) {
-			return;
+		if (recorder != null) {
+			try {
+			recorder.stop();
+			} catch(Exception e){
+				Logging.logError(e);
+			}
 		}
-		try {
-
-			recordingPython.flush();
-			recordingPython.close();
-			recordingPython = null;
-
-			recordingXML.write("\n</Messages>".getBytes());
-			recordingXML.flush();
-			recordingXML.close();
-			recordingXML = null;
-
-			recording.flush();
-			recording.close();
-			recording = null;
-		} catch (IOException e) {
-			logException(e);
-		}
-
 	}
 
 	/**
@@ -2050,12 +1920,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
 	// -------------- Messaging Begins -----------------------
 	public void subscribe(NameProvider topicName, String topicMethod) {
-		String callbackMethod = Encoder.getCallBackName(topicMethod);
+		String callbackMethod = CodecUtils.getCallBackName(topicMethod);
 		subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
 	}
 
 	public void subscribe(String topicName, String topicMethod) {
-		String callbackMethod = Encoder.getCallBackName(topicMethod);
+		String callbackMethod = CodecUtils.getCallBackName(topicMethod);
 		subscribe(topicName, topicMethod, getName(), callbackMethod);
 	}
 
@@ -2066,12 +1936,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 	}
 
 	public void unsubscribe(NameProvider topicName, String topicMethod) {
-		String callbackMethod = Encoder.getCallBackName(topicMethod);
+		String callbackMethod = CodecUtils.getCallBackName(topicMethod);
 		subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
 	}
 
 	public void unsubscribe(String topicName, String topicMethod) {
-		String callbackMethod = Encoder.getCallBackName(topicMethod);
+		String callbackMethod = CodecUtils.getCallBackName(topicMethod);
 		unsubscribe(topicName, topicMethod, getName(), callbackMethod);
 	}
 
@@ -2083,6 +1953,43 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 		 * "removeListener", listener));
 		 */
 		cm.send(createMessage(topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
+	}
+
+	// TODO - remove or reconcile - RemoteAdapter and Service are the only ones
+	// using this
+	/**
+	 * 
+	 * @param name
+	 * @param method
+	 * @param data
+	 * @return
+	 */
+	public Message createMessage(String name, String method, Object data) {
+		if (data == null) {
+			return createMessage(name, method, null);
+		}
+		Object[] d = new Object[1];
+		d[0] = data;
+		return createMessage(name, method, d);
+	}
+
+	// FIXME All parameter constructor
+	// TODO - Probably simplyfy to take array of object
+	/**
+	 * 
+	 * @param name
+	 * @param method
+	 * @param data
+	 * @return
+	 */
+	public Message createMessage(String name, String method, Object[] data) {
+		Message msg = new Message();
+		msg.name = name; // destination instance name
+		msg.sender = this.getName();
+		msg.data = data;
+		msg.method = method;
+
+		return msg;
 	}
 
 	// -------------- Messaging Ends -----------------------

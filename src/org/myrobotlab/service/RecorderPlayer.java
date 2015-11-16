@@ -33,7 +33,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
@@ -163,7 +163,7 @@ public class RecorderPlayer extends Service {
 						// out.write(params[j].toString());
 						d += "|" + params[j].toString();
 					}
-					out.write(msgs.get(i).msgId + "|" + Encoder.getParameterSignature(msgs.get(i).data) + d + "\n");
+					out.write(msgs.get(i).msgId + "|" + CodecUtils.getParameterSignature(msgs.get(i).data) + d + "\n");
 				}
 				out.close();
 				outfile.close();

@@ -18,7 +18,8 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Type;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.InvokerUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
@@ -396,9 +397,9 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		// "externally" there is an incoming id (which could map to an internal
 		// id?), msg.name, msg.method
 
-		if (body.startsWith(Encoder.SCHEME_BASE64)) {
+		if (body.startsWith(CodecUtils.SCHEME_BASE64)) {
 			// BASE 64 Messages
-			org.myrobotlab.framework.Message inboundMsg = Encoder.base64ToMsg(body);
+			org.myrobotlab.framework.Message inboundMsg = CodecUtils.base64ToMsg(body);
 
 			log.info(String.format("********* remote inbound message from %s -to-> %s.%s *********", inboundMsg.sender, inboundMsg.name, inboundMsg.method));
 
@@ -446,7 +447,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 							si = localProcess.serviceDirectory.get(name);
 
 							org.myrobotlab.framework.Message sendService = createMessage("", "register", si);
-							String base64 = Encoder.msgToBase64(sendService);
+							String base64 = CodecUtils.msgToBase64(sendService);
 							sendMessage(base64, from);
 						}
 
@@ -558,7 +559,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		Object o = null;
 		
 		try {
-			o = Encoder.invoke(uri);
+			o = InvokerUtils.invoke(uri);
 		} catch (Exception e) {
 			error(e);
 		}
@@ -573,7 +574,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		// (non-explicit) and pre-pended
 
 		if (o != null) {
-			broadcast(Encoder.toJson(o, o.getClass()));
+			broadcast(CodecUtils.toJson(o, o.getClass()));
 			// broadcast(o.toString());
 		} else {
 			broadcast(null);
@@ -692,7 +693,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 																			// "/"
 		// log.info(remoteURI);
 		msg.historyList.add(getName());
-		String base64 = Encoder.msgToBase64(msg);
+		String base64 = CodecUtils.msgToBase64(msg);
 		sendMessage(base64, remoteURI);
 	}
 

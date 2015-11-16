@@ -27,7 +27,7 @@ package org.myrobotlab.service.data;
 
 import java.io.Serializable;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 
 public class Pin implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -69,7 +69,7 @@ public class Pin implements Serializable {
 
 	@Override
 	public String toString() {
-		return Encoder.toJson(this);
+		return CodecUtils.toJson(this);
 	}
 
 }

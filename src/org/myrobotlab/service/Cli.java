@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUri;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.InvokerUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.StreamGobbler;
@@ -86,8 +88,8 @@ public class Cli extends Service {
 		transient InputStream is;
 		// TODO ecoding defaults & methods to change
 		// FIXME - need reference to OutputStream to return
-		String inputEncoding = Encoder.TYPE_REST; // REST JSON
-		String outputEncoding = Encoder.TYPE_JSON; // REST JSON
+		String inputEncoding = CodecUtils.TYPE_REST; // REST JSON
+		String outputEncoding = CodecUtils.TYPE_JSON; // REST JSON
 
 		public Decoder(Cli cli, String name, InputStream is) {
 			super(String.format("Decoder_%s", name));
@@ -169,22 +171,22 @@ public class Cli extends Service {
 
 						String path = null;
 						if (line.startsWith("/")) {
-							path = String.format("/%s%s", Encoder.PREFIX_API, line);
+							path = String.format("/%s%s", CodecUtils.PREFIX_API, line);
 						} else {
-							path = String.format("/%s%s%s", Encoder.PREFIX_API, cwd, line);
+							path = String.format("/%s%s%s", CodecUtils.PREFIX_API, cwd, line);
 						}
 
 						log.info(path);
 						try {
 							
 							// New Way
-							Object ret = Encoder.invoke(path);
+							Object ret = InvokerUtils.invoke(path);
 							if (ret != null && ret instanceof Serializable) {
 								// configurable use log or system.out ?
 								// FIXME - make getInstance configurable
 								// Encoder
 								// reference !!!
-								out(Encoder.toJson(ret).getBytes());
+								out(CodecUtils.toJson(ret).getBytes());
 							}
 							/* Old Way
 							Message msg = Encoder.decodePathInfo(path);
@@ -300,19 +302,19 @@ public class Cli extends Service {
 
 			String path = null;
 			if (line.startsWith("/")) {
-				path = String.format("/%s%s", Encoder.PREFIX_API, line);
+				path = String.format("/%s%s", CodecUtils.PREFIX_API, line);
 			} else {
-				path = String.format("/%s%s%s", Encoder.PREFIX_API, cwd, line);
+				path = String.format("/%s%s%s", CodecUtils.PREFIX_API, cwd, line);
 			}
 
 			log.info(path);
 			try {
 				
 				// if service is local - we can trasact
-				Message msg = Encoder.decodePathInfo(path);
+				Message msg = CodecUri.decodePathInfo(path);
 				Object ret = null;
 				if (Runtime.getService(msg.name).isLocal()){
-					ret = Encoder.invoke(path);
+					ret = InvokerUtils.invoke(path);
 				} else {
 					// FIXME - sendBlocking is not getting a return 
 					ret = sendBlocking(msg.name, msg.method, msg.data);
@@ -323,7 +325,7 @@ public class Cli extends Service {
 					// FIXME - make getInstance configurable
 					// Encoder
 					// reference !!!
-					out(Encoder.toJson(ret).getBytes());
+					out(CodecUtils.toJson(ret).getBytes());
 				}
 				/* Old Way
 				Message msg = Encoder.decodePathInfo(path);
@@ -523,14 +525,14 @@ public class Cli extends Service {
 
 		if (path.equals("/")) {
 			// FIXME don't do this here !!!
-			out(Encoder.toJson(Runtime.getServiceNames()).toString().getBytes());
+			out(CodecUtils.toJson(Runtime.getServiceNames()).toString().getBytes());
 		} else if (parts.length == 2 && !path.endsWith("/")) {
 			// FIXME don't do this here !!!
-			out(Encoder.toJson(Runtime.getService(parts[1])).toString().getBytes());
+			out(CodecUtils.toJson(Runtime.getService(parts[1])).toString().getBytes());
 		} else if (parts.length == 2 && path.endsWith("/")) {
 			ServiceInterface si = Runtime.getService(parts[1]);
 			// FIXME don't do this here !!!
-			out(Encoder.toJson(si.getDeclaredMethodNames()).toString().getBytes());
+			out(CodecUtils.toJson(si.getDeclaredMethodNames()).toString().getBytes());
 		}
 
 		// if path == /serviceName - json return ? Cool !

@@ -31,7 +31,7 @@ import org.apache.ivy.util.filter.NoFilter;
 import org.apache.ivy.util.url.URLHandler;
 import org.apache.ivy.util.url.URLHandlerDispatcher;
 import org.apache.ivy.util.url.URLHandlerRegistry;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Platform;
@@ -575,7 +575,7 @@ public class Repo implements Serializable {
 
 		info("parsing");
 
-		GitHubRelease[] releases = Encoder.fromJson(s, GitHubRelease[].class);
+		GitHubRelease[] releases = CodecUtils.fromJson(s, GitHubRelease[].class);
 		if (releases == null) {
 			error("Are you connected to intertoobs?");
 			throw new IOException("Are you connected to intertoobs?");

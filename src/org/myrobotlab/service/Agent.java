@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.cmdline.CMDLine;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
@@ -293,7 +293,7 @@ public class Agent extends Service {
 				byte[] data = FileIO.loadPartFile("test.json", 60000);
 				if (data != null) {
 					String test = new String(data);
-					Status testResult = Encoder.fromJson(test, Status.class);
+					Status testResult = CodecUtils.fromJson(test, Status.class);
 					if (testResult.isError()) {
 						ret.add(testResult);
 					}
@@ -318,7 +318,7 @@ public class Agent extends Service {
 		ret.add(info("endTime %d", System.currentTimeMillis()));
 
 		try {
-			FileIO.savePartFile("fullTest.json", Encoder.toJson(ret).getBytes());
+			FileIO.savePartFile("fullTest.json", CodecUtils.toJson(ret).getBytes());
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

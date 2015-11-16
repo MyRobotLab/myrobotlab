@@ -18,7 +18,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
@@ -411,7 +411,7 @@ public class Security extends Service implements AuthorizationProvider {
 	}
 
 	public Boolean allowExportByType(String type, Boolean access) {
-		return allowExportByType.put(Encoder.type(type), access);
+		return allowExportByType.put(CodecUtils.type(type), access);
 	}
 
 	public void createDefaultGroups() {

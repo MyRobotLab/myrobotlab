@@ -122,7 +122,7 @@ public class RemoteAdapter extends Service implements Gateway {
 					// "DISCOVER_FUIFSERVER_REQUEST".getBytes();
 					//
 					Message msg = myService.createMessage("", "getConnections", null);
-					byte[] msgBuf = org.myrobotlab.codec.Encoder.getBytes(msg);
+					byte[] msgBuf = org.myrobotlab.codec.CodecUtils.getBytes(msg);
 
 					DatagramPacket sendPacket;
 					// Try the 255.255.255.255 first
@@ -362,7 +362,7 @@ public class RemoteAdapter extends Service implements Gateway {
 							// send them back
 							for (int i = 0; i < conn.size(); ++i) {
 								Message newConnMsg = createMessage("", "publishNewConnection", conn);
-								byte[] msgBuf = org.myrobotlab.codec.Encoder.getBytes(newConnMsg);
+								byte[] msgBuf = org.myrobotlab.codec.CodecUtils.getBytes(newConnMsg);
 								DatagramPacket dgp = new DatagramPacket(msgBuf, msgBuf.length, dgram.getAddress(), dgram.getPort());
 								socket.send(dgp);
 							}
@@ -948,7 +948,7 @@ public class RemoteAdapter extends Service implements Gateway {
 			//Runtime.start("mac", "Runtime");
 			//Runtime.start("gui", "GUIService");
 			//Runtime.start("webgui", "WebGui");
-			//Runtime.start("python", "Python");
+			Runtime.start("python", "Python");
 			//Runtime.start("mac.clock", "Clock");
 			// Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 			//Servo servo = (Servo) Runtime.start("servo", "Servo");
@@ -956,9 +956,10 @@ public class RemoteAdapter extends Service implements Gateway {
 			
 			// Max frame length of 10240 has been exceeded. FIXME !!!!
 			RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote", "RemoteAdapter");
-			remote.connect("tcp://demo.myrobotlab.org:6767");
+//			remote.connect("tcp://demo.myrobotlab.org:6767");
 			// remote.websocket("http://demo.myrobotlab.org:8888/api/messages");
 			Runtime.start("gui", "GUIService");
+			remote.startListening();
 			//remote1.startListening();
 			//remote1.setTCPPort(6868);
 			//remote1.setUDPPort(6868);

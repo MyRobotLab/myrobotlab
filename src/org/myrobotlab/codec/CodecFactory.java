@@ -28,7 +28,7 @@ public class CodecFactory {
 		if (mimeTypeMap.containsKey(mimeType)){
 			clazz = mimeTypeMap.get(mimeType);
 		} else {
-			clazz = Encoder.MIME_TYPE_MESSAGES;
+			clazz = CodecUtils.MIME_TYPE_MESSAGES;
 		}
 		
 		Class<?> o = Class.forName(clazz);

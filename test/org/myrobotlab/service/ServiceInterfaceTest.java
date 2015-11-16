@@ -19,7 +19,7 @@ import org.junit.Assert;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -37,7 +37,7 @@ public class ServiceInterfaceTest {
 	public final void testInstallAllServices() throws ClassNotFoundException, ParseException, IOException {
 		// TODO: this probably is going to take longer but it's worth while!
 		
-		ServiceData sd = Encoder.fromJson(FileUtils.readFileToString(new File("../repo/serviceData.json")), ServiceData.class);
+		ServiceData sd = CodecUtils.fromJson(FileUtils.readFileToString(new File("../repo/serviceData.json")), ServiceData.class);
 		for (ServiceType st : sd.getServiceTypes()) {
 			if (!st.isAvailable()) {
 				log.info("Installing Service:" + st.getName());
@@ -106,7 +106,7 @@ public class ServiceInterfaceTest {
 		// TODO: read this from the repo at build time?
 		ServiceData sd = null;
 		try {
-			sd = Encoder.fromJson(FileUtils.readFileToString(new File("../repo/serviceData.json")), ServiceData.class);
+			sd = CodecUtils.fromJson(FileUtils.readFileToString(new File("../repo/serviceData.json")), ServiceData.class);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -232,7 +232,7 @@ public class ProcParser {
 			for (int i = 0; i < 4; i++) {
 				tempData = br.readLine().trim().split(SPACE);
 				for (String s : tempData) {
-					if (s.length() != 0 && Encoder.tryParseInt(s)) {
+					if (s.length() != 0 && CodecUtils.tryParseInt(s)) {
 						data.add(s);
 					}
 				}
@@ -292,7 +292,7 @@ public class ProcParser {
 
 		ArrayList<String> partitionsName = new ArrayList<String>();
 		for (String string : data) {
-			if (!Encoder.tryParseInt(string)) {
+			if (!CodecUtils.tryParseInt(string)) {
 				partitionsName.add(string);
 			}
 		}
