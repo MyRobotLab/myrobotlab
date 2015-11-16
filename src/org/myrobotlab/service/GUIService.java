@@ -65,6 +65,7 @@ import org.myrobotlab.control.TabControl2;
 import org.myrobotlab.control.Welcome;
 import org.myrobotlab.control.widget.AboutDialog;
 import org.myrobotlab.control.widget.Console;
+import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -222,6 +223,8 @@ public class GUIService extends Service implements WindowListener, ActionListene
 				recording.setText("start recording");
 			}
 		} else if (source == loadRecording) {
+			log.error("load recording no longer supported");
+			/*
 			JFileChooser c = new JFileChooser(cfgDir);
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("Message files", "msg");
 			c.setFileFilter(filter);
@@ -237,6 +240,7 @@ public class GUIService extends Service implements WindowListener, ActionListene
 			if (rVal == JFileChooser.CANCEL_OPTION) {
 
 			}
+			*/
 		} else {
 			log.info(String.format("unknown command %s", cmd));
 		}
@@ -372,11 +376,11 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		ServiceGUI gui = null;
 		ServiceInterface se = sw;
 
-		gui = (ServiceGUI) getNewInstance(guiClass, se.getName(), this, tabs);
+		gui = (ServiceGUI) Instantiator.getNewInstance(guiClass, se.getName(), this, tabs);
 
 		if (gui == null) {
 			log.info(String.format("could not construct a %s object - creating generic template", guiClass));
-			gui = (ServiceGUI) getNewInstance("org.myrobotlab.control._TemplateServiceGUI", se.getName(), this, tabs);
+			gui = (ServiceGUI) Instantiator.getNewInstance("org.myrobotlab.control._TemplateServiceGUI", se.getName(), this, tabs);
 		}
 
 		gui.init();

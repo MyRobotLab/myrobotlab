@@ -69,6 +69,7 @@ import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.control.opencv.ComboBoxModel;
 import org.myrobotlab.control.opencv.OpenCVFilterGUI;
+import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
@@ -396,10 +397,10 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 		OpenCVFilterGUI filtergui = null;
 
 		// try creating one based on type
-		filtergui = (OpenCVFilterGUI) Service.getNewInstance(guiType, name, boundServiceName, myService);
+		filtergui = (OpenCVFilterGUI) Instantiator.getNewInstance(guiType, name, boundServiceName, myService);
 		if (filtergui == null) {
 			log.info(String.format("filter %s does not have a gui defined", type));
-			filtergui = (OpenCVFilterGUI) Service.getNewInstance("org.myrobotlab.control.opencv.OpenCVFilterDefaultGUI", name, boundServiceName, myService);
+			filtergui = (OpenCVFilterGUI) Instantiator.getNewInstance("org.myrobotlab.control.opencv.OpenCVFilterDefaultGUI", name, boundServiceName, myService);
 			if (filtergui == null) {
 				log.error("could not create default filter gui");
 				return null;

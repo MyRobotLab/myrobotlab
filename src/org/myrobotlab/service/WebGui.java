@@ -29,7 +29,7 @@ import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
 import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.MethodCache;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.Zip;
@@ -239,7 +239,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	public void onLogEvent(Message msg) {
 		try {
 			if (broadcaster != null) {
-				Codec codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
+				Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MESSAGES);
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				codec.encode(bos, msg);
 				bos.close();
@@ -253,7 +253,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	public void broadcast(Message msg) {
 		try {
 			if (broadcaster != null) {
-				Codec codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
+				Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MESSAGES);
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				codec.encode(bos, msg);
 				bos.close();
@@ -436,7 +436,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// get default encoder
 			// FIXME FIXME FIXME - this IS A CODEC !!! NOT AN API-TYPE !!! -
 			// CHANGE to MIME_TYPE_APPLICATION_JSON !!!
-			codec = CodecFactory.getCodec(Encoder.MIME_TYPE_MESSAGES);
+			codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_MESSAGES);
 
 			if (pathInfo != null) {
 				parts = pathInfo.split("/");
@@ -460,7 +460,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// FIXME - this is currently useless
 			// simple - from apiType - get the mime type - if you want to mess
 			// with headers <--==--> encoding then do that...
-			String codecMimeType = Encoder.getKeyToMimeType(apiTypeKey);
+			String codecMimeType = CodecUtils.getKeyToMimeType(apiTypeKey);
 			if (!codecMimeType.equals(codec.getMimeType())) {
 				// request to switch codec types on
 				codec = CodecFactory.getCodec(codecMimeType);
@@ -631,7 +631,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// first decoding will give you an array of types in msg.data[]
 		// but they are un-coerced - we need the method signature candidate
 		// to determine what we should coerce them into
-		Message msg = Encoder.fromJson(body.asString(), Message.class);
+		Message msg = CodecUtils.fromJson(body.asString(), Message.class);
 		if (msg == null) {
 			log.error(String.format("msg is null %s", body.asString()));
 			return;
@@ -725,7 +725,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	// "lower layer encoders can strip down to the data" !!!
 	public void respond(OutputStream out, Codec codec, String method, Object ret) throws Exception {
 		// getName() ? -> should it be AngularJS client name ?
-		Message msg = createMessage(getName(), Encoder.getCallBackName(method), ret);
+		Message msg = createMessage(getName(), CodecUtils.getCallBackName(method), ret);
 		codec.encode(out, msg);
 	}
 
@@ -818,7 +818,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.ERROR);
+		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		// Call context.reset() to clear any previous configuration, e.g.
 		// default

@@ -3,7 +3,7 @@ package org.myrobotlab.service;
 import it.sauronsoftware.cron4j.Scheduler;
 import java.io.Serializable;
 import java.util.ArrayList;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -88,7 +88,7 @@ public class Cron extends Service {
 			// cron.addScheduledEvent(EVERY_MINUTE, "log", "log");
 			// west wall | back | east wall
 
-			String json = Encoder.toJson(cron.getTasks());
+			String json = CodecUtils.toJson(cron.getTasks());
 
 			log.info("here");
 

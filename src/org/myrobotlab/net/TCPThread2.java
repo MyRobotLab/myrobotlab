@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.ServiceEnvironment;
@@ -95,7 +95,7 @@ public class TCPThread2 extends Thread {
 				++data.rx;
 				// nice for debugging
 				if (msgLog != null) {
-					msgLog.write(String.format("%s <-- %s - %s\n", myService.getName(), uri, Encoder.toJson(msg)).getBytes());
+					msgLog.write(String.format("%s <-- %s - %s\n", myService.getName(), uri, CodecUtils.toJson(msg)).getBytes());
 				}
 				
 
@@ -321,7 +321,7 @@ public class TCPThread2 extends Thread {
 
 			// nice for debugging
 			if (msgLog != null) {
-				msgLog.write(String.format("%s --> %s - %s\n", myService.getName(), uri, Encoder.toJson(msg)).getBytes());
+				msgLog.write(String.format("%s --> %s - %s\n", myService.getName(), uri, CodecUtils.toJson(msg)).getBytes());
 			}
 			
 

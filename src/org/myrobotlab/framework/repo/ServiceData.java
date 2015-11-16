@@ -15,9 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
+import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
@@ -106,7 +107,7 @@ public class ServiceData implements Serializable {
 						 * if (sname.equals("LeapMotion2") ||
 						 * sname.equals("Test")) { continue; }
 						 */
-						ServiceInterface si = (ServiceInterface) Service.getNewInstance(fullClassName, sname);
+						ServiceInterface si = (ServiceInterface) Instantiator.getNewInstance(fullClassName, sname);
 						/*
 						 * if (si == null || sname.equals("AWTRobot") ||
 						 * sname.equals("LeapMotion2")) {
@@ -213,7 +214,7 @@ public class ServiceData implements Serializable {
 				log.warn("can not load serviceData - data is null");
 			}
 			log.info("loading serviceData");
-			ServiceData sd = Encoder.fromJson(data, ServiceData.class);
+			ServiceData sd = CodecUtils.fromJson(data, ServiceData.class);
 			sd.isValid();
 
 			return sd;
@@ -614,7 +615,7 @@ public class ServiceData implements Serializable {
 			// Serializer serializer = new Persister();
 
 			FileOutputStream fos = new FileOutputStream(filename);
-			String json = Encoder.toJson(this);
+			String json = CodecUtils.toJson(this);
 			fos.write(json.getBytes());
 			fos.close();
 
@@ -641,7 +642,7 @@ public class ServiceData implements Serializable {
 			String json = FileIO.fileToString(new File("serviceData.generated.json"));
 			ServiceData sd = ServiceData.load(json);
 			FileOutputStream fos = new FileOutputStream(new File("serviceData.compare.json"));
-			fos.write(Encoder.toJson(sd).getBytes());
+			fos.write(CodecUtils.toJson(sd).getBytes());
 			fos.close();
 
 			/*

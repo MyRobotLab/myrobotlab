@@ -30,9 +30,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
+import org.myrobotlab.service.interfaces.NameProvider;
 import org.slf4j.Logger;
 
 /*
@@ -53,7 +54,7 @@ public class Outbox implements Runnable, Serializable {
 	static public final String BROADCAST = "BROADCAST";
 	static public final String PROCESSANDBROADCAST = "PROCESSANDBROADCAST";
 
-	Service myService = null;
+	NameProvider myService = null;
 	LinkedList<Message> msgBox = new LinkedList<Message>();
 	boolean isRunning = false;
 	boolean blocking = false;
@@ -64,7 +65,7 @@ public class Outbox implements Runnable, Serializable {
 	public HashMap<String, ArrayList<MRLListener>> notifyList = new HashMap<String, ArrayList<MRLListener>>();
 	CommunicationInterface comm = null;
 
-	public Outbox(Service myService) {
+	public Outbox(NameProvider myService) {
 		this.myService = myService;
 	}
 
@@ -173,7 +174,7 @@ public class Outbox implements Runnable, Serializable {
 				}
 			} else {
 				if (log.isDebugEnabled()) {
-					log.debug(String.format("%s/%s(%s)", msg.getName(), msg.method, Encoder.getParameterSignature(msg.data) + " notifyList is empty"));
+					log.debug(String.format("%s/%s(%s)", msg.getName(), msg.method, CodecUtils.getParameterSignature(msg.data) + " notifyList is empty"));
 				}
 				continue;
 			}

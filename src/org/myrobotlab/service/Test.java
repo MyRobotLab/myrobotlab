@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Service;
@@ -61,7 +61,7 @@ public class Test extends Service {
 		}
 
 		Arrays.sort(tn);
-		log.warn(Encoder.toJson(tn));
+		log.warn(CodecUtils.toJson(tn));
 		/*
 		 * for (int i = 0; i < t.length; ++i){ log.warn(t[i]); }
 		 */
@@ -216,7 +216,7 @@ public class Test extends Service {
 			// check against current state for
 			// NOT NEEDED Regular save file - since Agent is process.waitFor
 			// FIXME - append states to file
-			FileIO.savePartFile("test.json", Encoder.toJson(status).getBytes());
+			FileIO.savePartFile("test.json", CodecUtils.toJson(status).getBytes());
 			// Runtime.releaseAll();
 			// TODO - should be all clean - if not someone left threads open -
 			// report them
@@ -287,7 +287,7 @@ public class Test extends Service {
 			out.close();
 
 			// json encoding
-			Encoder.toJson(s);
+			CodecUtils.toJson(s);
 
 			// TODO JAXB xml - since it comes with java 7
 

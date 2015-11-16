@@ -10,7 +10,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -187,8 +187,8 @@ public class Status implements Serializable {// extends Exception {
 
 		// test.add(subTest);
 
-		String json = Encoder.toJson(test);
-		Status z = Encoder.fromJson(json, Status.class);
+		String json = CodecUtils.toJson(test);
+		Status z = CodecUtils.fromJson(json, Status.class);
 		log.info(json);
 	}
 

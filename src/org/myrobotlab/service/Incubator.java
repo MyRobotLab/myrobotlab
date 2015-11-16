@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.ivy.core.report.ResolveReport;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
@@ -168,7 +168,7 @@ public class Incubator extends Service {
 
 			xmpp.addAuditor("Greg Perry");
 			// python.startService();
-			xmpp.sendMessage(Encoder.toJson(status), "Greg Perry");
+			xmpp.sendMessage(CodecUtils.toJson(status), "Greg Perry");
 			// xmpp.releaseService();
 			// TODO email
 		} catch (Exception e) {

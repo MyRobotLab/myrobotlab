@@ -29,9 +29,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 
 /**
@@ -143,11 +142,13 @@ public class Message implements Serializable {
 		msg.msgId = System.currentTimeMillis();
 		msg.data = new Object[] { "hello" };
 
+		/*
 		try {
-			Encoder.toJsonFile(msg, "msg.xml");
+			CodecUtils.toJsonFile(msg, "msg.xml");
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+		*/
 	}
 
 	public Message() {
@@ -198,6 +199,6 @@ public class Message implements Serializable {
 
 	@Override
 	public String toString() {
-		return Encoder.getMsgKey(this);
+		return CodecUtils.getMsgKey(this);
 	}
 }

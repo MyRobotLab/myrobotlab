@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeMap;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -49,7 +49,7 @@ public class ArduinoBindingsGenerator {
 
 		inoTemplate.append(methodSignatureComment);
 		pythonTemplate.append(pythonSignatureComment);
-		String underscore = Encoder.toUnderScore(method.getName());
+		String underscore = CodecUtils.toUnderScore(method.getName());
 		inoTemplate.append(String.format("#define %s\t\t%d\n\n", underscore, index));
 		pythonTemplate.append(String.format("  %s = %d\n\n", underscore, index));
 
@@ -217,8 +217,8 @@ public class ArduinoBindingsGenerator {
 			 * log.info(t.replaceAll(regex, replacement)); log.info(t);
 			 */
 
-			log.info(Encoder.toUnderScore(t));
-			log.info(Encoder.toCamelCase(Encoder.toUnderScore(t)));
+			log.info(CodecUtils.toUnderScore(t));
+			log.info(CodecUtils.toCamelCase(CodecUtils.toUnderScore(t)));
 
 			ArduinoBindingsGenerator.generateDefinitions();
 

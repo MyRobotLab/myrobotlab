@@ -3,7 +3,7 @@ package org.myrobotlab.memory;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -70,7 +70,7 @@ public class Node implements Serializable {
 			// File("opencv.4084.jpg")), "myImage");
 			// node2.put("img", img);
 
-			Encoder.toJsonFile(root, "node.json");
+			CodecUtils.toJsonFile(root, "node.json");
 			log.info("here");
 		} catch (Exception e) {
 			Logging.logError(e);

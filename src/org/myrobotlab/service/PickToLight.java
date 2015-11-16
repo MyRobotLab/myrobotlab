@@ -25,7 +25,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.myrobotlab.codec.Encoder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -978,7 +978,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 			email.setEmailServer(host, Integer.parseInt(port));
 			Controller c = getController();
 			String[] to = properties.getProperty("mail.smtp.to", "greg.perry@daimler.com,brett.hutton@daimler.com").split(",");
-			email.sendEmail(to, String.format("Hello from Controller %s %s", c.getMacAddress(), c.getIpAddress()), Encoder.toJson(c));
+			email.sendEmail(to, String.format("Hello from Controller %s %s", c.getMacAddress(), c.getIpAddress()), CodecUtils.toJson(c));
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -989,7 +989,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 	}
 
 	public String sendEvent(String eventType, Object data) {
-		String body = String.format(soapNotifyTemplate, plant, eventType, Encoder.toJson(data));
+		String body = String.format(soapNotifyTemplate, plant, eventType, CodecUtils.toJson(data));
 		return sendSoap("http://tempuri.org/SoapService/NotifyMES", body);
 	}
 

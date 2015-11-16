@@ -8,7 +8,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
@@ -22,7 +21,7 @@ import com.google.gson.Gson;
  */
 public class TypeConverter {
 
-	public final static Logger log = LoggerFactory.getLogger(TypeConverter.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(TypeConverter.class);
 
 	private static Gson gson = new Gson();
 
@@ -107,9 +106,11 @@ public class TypeConverter {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
+			/* FIXME PUT IN JUNIT TEST !!
 			org.myrobotlab.service.Runtime.createAndStart("clock", "Clock");
 
 			ServiceInterface si = org.myrobotlab.service.Runtime.getService("clock");
+			
 
 			String stringParams[] = new String[] { "13", "1" };
 			String method = "digitalWrite";
@@ -123,6 +124,7 @@ public class TypeConverter {
 
 			Object[] params2 = getTypedParamsFromJson(clazz, method, stringParams);
 			log.info("here");
+			*/
 		} catch (Exception e) {
 			Logging.logError(e);
 		}

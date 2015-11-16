@@ -32,7 +32,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.TestCatcher;
 import org.slf4j.Logger;
 
 /**
@@ -51,7 +50,7 @@ import org.slf4j.Logger;
 public final class MRLListener implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	public final static Logger log = LoggerFactory.getLogger(TestCatcher.class);
+	public final static Logger log = LoggerFactory.getLogger(MRLListener.class);
 	
 	/**
 	 * the keyed topic Method - when this method is invoked listeners are sent
