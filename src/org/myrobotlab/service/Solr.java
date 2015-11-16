@@ -3,12 +3,16 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.myrobotlab.service.interfaces.DocumentListener;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.myrobotlab.document.Document;
+import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
@@ -30,7 +34,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class Solr extends Service {
+public class Solr extends Service implements DocumentListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -260,6 +264,26 @@ public class Solr extends Service {
 	public void startService() {
 		super.startService();
 		solrServer = new HttpSolrServer(solrUrl);
+	}
+
+	@Override
+	public ProcessingStatus onDocument(Document doc) {
+		// Convert the input document to a solr input doc and send it!
+		SolrInputDocument solrDoc = new SolrInputDocument();
+		solrDoc.setField("id", doc.getId());
+		for (String fieldName : doc.getFields()) {
+			for (Object o : doc.getField(fieldName)) {
+				solrDoc.addField(fieldName, o);
+			}
+		}
+		try {
+			solrServer.add(solrDoc);
+			return ProcessingStatus.OK;
+		} catch (SolrServerException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return ProcessingStatus.DROP;
+		}		
 	}
 
 }

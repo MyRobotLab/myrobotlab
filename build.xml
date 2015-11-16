@@ -259,6 +259,13 @@
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-arch-x86_64-w64-mingw32.jar"/>
 		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-noarch-5.4.jar"/>
 		<pathelement location="${repo}/com.coobird.thumbnail/0.4.2/thumbnailator-0.4.2-all.jar"/>
+		
+		<!--feed4j stuff -->
+		<pathelement location="${repo}/feed4j/1.0/feed4j.jar"/>
+		<pathelement location="${repo}/feed4j/1.0/dom4j-1.6.1.jar"/>
+		<pathelement location="${repo}/feed4j/1.0/nekohtml.jar"/>
+		<pathelement location="${repo}/feed4j/1.0/xercesImpl.jar"/>
+		<pathelement location="${repo}/feed4j/1.0/xml-apis.jar"/>
 
 
 		<pathelement location="build-lib/tools.jar"/>

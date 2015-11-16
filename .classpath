@@ -136,5 +136,10 @@
 	<classpathentry kind="lib" path="/repo/com.xuggle.xuggler/5.4/xuggle-xuggler-arch-x86_64-w64-mingw32.jar"/>
 	<classpathentry kind="lib" path="/repo/com.xuggle.xuggler/5.4/xuggle-xuggler-noarch-5.4.jar"/>
 	<classpathentry kind="lib" path="/repo/com.coobird.thumbnail/0.4.2/thumbnailator-0.4.2-all.jar"/>
+	<classpathentry kind="lib" path="/repo/feed4j/1.0/feed4j.jar"/>
+	<classpathentry kind="lib" path="/repo/feed4j/1.0/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="/repo/feed4j/1.0/nekohtml.jar"/>
+	<classpathentry kind="lib" path="/repo/feed4j/1.0/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="/repo/feed4j/1.0/xml-apis.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
