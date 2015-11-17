@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.cmdline.CMDLine;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
@@ -372,7 +373,18 @@ public class Agent extends Service {
 		log.info("platform {}", platformId);
 
 		ArrayList<String> outArgs = new ArrayList<String>();
-		String classpath = String.format("./%s./myrobotlab.jar%s./libraries/jar/*", ps, ps);
+		String classpath = String.format("./%s./myrobotlab.jar%s./libraries/jar/*%s./bin", ps, ps, ps);
+		//List<File> debugBinDirs = FindFile.findDirs("./bin");
+		
+		/*
+		StringBuffer sb = new StringBuffer();
+		for(File file: debugBinDirs){
+			String path = String.format(":%s", file.getPath().replace("\\", "/"));
+			sb.append(path);
+		}
+		*/
+		
+		//classpath = String.format("%s%s", classpath, sb.toString());
 
 		String javaExe = platform.isWindows() ? "javaw" : "java";
 
@@ -527,6 +539,8 @@ public class Agent extends Service {
 			cli.add(runtimeName, process.getInputStream(), process.getOutputStream());
 			cli.attach(runtimeName);
 		}
+		
+		//FileUtils.
 
 		log.info("Agent finished spawn {}", formatter.format(new Date()));
 		return process;
