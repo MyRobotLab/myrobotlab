@@ -13,6 +13,9 @@ public class Android extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Android.class);
 	
+	// TODO FUTURE - LIST OF ALL SENSORS
+	// List<Sensor> sensors = null;
+	
 	public static class Motion {
 		public double x;
 		public double y;
@@ -36,10 +39,21 @@ public class Android extends Service {
 		//return publishMotion();
 	}
 	
+	public void proximity(Integer proximity)
+	{
+		log.info("proximity {}", proximity);
+		
+		invoke("publishProximity", proximity);
+		//return publishMotion();
+	}
+	
 	public Motion publishMotion(Motion m){
 		return m;
 	}
 	
+	public Integer publishProximity(Integer m){
+		return m;
+	}
 	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
