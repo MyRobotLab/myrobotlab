@@ -42,6 +42,7 @@ deploy:
 #  file: "dist/myrobotlab.jar"
   # travis will only copy 1 dir
   local_dir: dist
+  upload-dir: current
 #  local_dir: build/report
   acl: 'public_read'
   # s3 deploy end
