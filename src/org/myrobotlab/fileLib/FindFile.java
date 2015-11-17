@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -61,9 +62,33 @@ public final class FindFile { // implements FilenameFilter
 
 		File r = new File(root);
 		validateDirectory(r);
-		List<File> result = process(r, criteria, recurse, includeDirsInResult);
+		List<File> result = process(r, criteria, recurse, includeDirsInResult, false);
 		Collections.sort(result);
 		return result;
+	}
+
+	static public List<File> findDirs(String root) throws FileNotFoundException {
+		return findDirs(root, null, true);
+	}
+
+	static public List<File> findDirs(String root, String criteria, boolean recurse) throws FileNotFoundException {
+
+		if (criteria == null) {
+			criteria = ".*";
+		}
+		
+		List<File> ret = process(new File(root), criteria, recurse, true, true);
+		///List<File> ret = find(root, criteria, true, true);
+		/*
+		List<File> ret2 = new ArrayList<File>();
+		for (File file : ret) {
+			if (file.isDirectory()) {
+				ret2.add(file);
+			}
+		}
+		return ret2;
+		*/
+		return ret;
 	}
 
 	public static List<File> findByExtension(String extensions) throws FileNotFoundException {
@@ -77,27 +102,37 @@ public final class FindFile { // implements FilenameFilter
 
 	public static void main(String... aArgs) throws FileNotFoundException {
 		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		LoggingFactory.getInstance().setLevel(Level.ERROR);
 
-		// TODO - there was methods to do this already in java.io
-		List<File> files = FindFile.find(".ivy", "resolved.*\\.xml$");
+		try {
+			List<File> files = FindFile.findDirs("./bin");
+			for (File file : files) {
+				log.error("{}", file.getPath());
+			}
 
-		// List<File> files = FindFile.find("\\.(?i:)(?:xml)$");
-		// List<File> files = FindFile.find(".*\\.java$");
-		// List<File> files = FindFile.find(".*\\.svn$");
+			// TODO - there was methods to do this already in java.io
+			files = FindFile.find(".ivy", "resolved.*\\.xml$");
 
-		// print out all file names, in the the order of File.compareTo()
-		for (File file : files) {
-			String name = file.getName();
-			name = name.substring(name.indexOf("-") + 1);
-			name = name.substring(0, name.indexOf("-"));
-			System.out.println(name);
+			// List<File> files = FindFile.find("\\.(?i:)(?:xml)$");
+			// List<File> files = FindFile.find(".*\\.java$");
+			// List<File> files = FindFile.find(".*\\.svn$");
+
+			// print out all file names, in the the order of File.compareTo()
+			for (File file : files) {
+				String name = file.getName();
+				name = name.substring(name.indexOf("-") + 1);
+				name = name.substring(0, name.indexOf("-"));
+				System.out.println(name);
+			}
+
+		} catch (Exception e) {
+			Logging.logError(e);
 		}
 	}
 
 	// recursively go through ALL directories regardless of matching
 	// need to find all files before we can filter them
-	private static List<File> process(File rootPath, String criteria, boolean recurse, boolean includeDirsInResult) throws FileNotFoundException {
+	private static List<File> process(File rootPath, String criteria, boolean recurse, boolean includeDirsInResult, boolean dirsOnly) throws FileNotFoundException {
 		List<File> result = new ArrayList<File>();
 		File[] filesAndDirs = rootPath.listFiles();
 		List<File> filesDirs = Arrays.asList(filesAndDirs);
@@ -112,7 +147,7 @@ public final class FindFile { // implements FilenameFilter
 			Matcher matcher = pattern.matcher(file.getName());
 			if (matcher.find()) {
 				out.append(" matches");
-				if (file.isFile() || (!file.isFile() && includeDirsInResult)) {
+				if ((!dirsOnly && file.isFile()) || (dirsOnly && file.isDirectory()) || (!file.isFile() && includeDirsInResult)) {
 					out.append(" will be added");
 					result.add(file);
 				} else {
@@ -124,7 +159,7 @@ public final class FindFile { // implements FilenameFilter
 
 			if (!file.isFile() && recurse) {
 				log.debug("decending into " + file.getName());
-				List<File> deeperList = process(file, criteria, recurse, includeDirsInResult);
+				List<File> deeperList = process(file, criteria, recurse, includeDirsInResult, dirsOnly);
 				result.addAll(deeperList);
 			}
 
