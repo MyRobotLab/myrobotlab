@@ -472,14 +472,14 @@
 		<echo>compile end</echo>
 	</target>
 
-	<!-- create the onejar jar file for myrobotlab so it's one clicky worky for java execution -->
+	<!-- create myrobotlab.jar -->
 	<target name="jar" depends="compile" description="create the myrobotlab.jar file">
 		<!-- FIXME - use Ivy to get the files there ! filebase or url resolver -->
 		<!-- copy resource.root -->
 		<copy todir="${build}/classes/resource">
 			<fileset dir="${src}/resource" />
 		</copy>
-		<echo file="${build}/classes/resource/version.txt">${tag} ${env.TRAVIS_BUILD_NUMBER}</echo>
+		<echo file="${build}/classes/resource/version.txt">${tag}${env.TRAVIS_BUILD_NUMBER}</echo>
 		<!-- copy the latest serviceData.xml into package -->
 		<!-- TODO deprecate the xml -->
 		<copy file="${repo}/serviceData.xml" todir="${build}/classes/resource/framework" />
@@ -504,10 +504,10 @@
 	</target>
 
 	
-	<!-- create the onejar jar file for myrobotlab so it's one clicky worky for java execution -->
+	<!-- create myrobotlab-client.jar -->
 	<target name="myrobotlab-client" depends="compile" description="create the myrobotlab-client.jar file">
 
-		<echo file="${build}/classes/resource/version.txt">${tag} ${env.TRAVIS_BUILD_NUMBER}</echo>
+		<echo file="${build}/classes/resource/version.txt">${tag}${env.TRAVIS_BUILD_NUMBER}</echo>
 
 		<jar jarfile="${build}/lib/myrobotlab-client.jar">
 			
@@ -603,9 +603,10 @@
 	</target>
 	<!-- TODO: make this depend on test , gotta figure out why travis ci is failing on this now. -->
 	<target name="dist" depends="jar" description="generate the distribution">
-		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}.jar" />
+		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}${env.TRAVIS_BUILD_NUMBER}.jar" />
 		<!-- backwards compat .. TODO: review this.. -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
+		<copy file="${build}/classes/resource/version.txt" tofile="${dist}/version.txt"/>
 		<!-- for convienence of debugging spawn -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
 	</target>
