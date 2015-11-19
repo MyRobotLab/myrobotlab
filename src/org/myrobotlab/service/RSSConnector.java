@@ -2,14 +2,9 @@ package org.myrobotlab.service;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-
 import org.myrobotlab.document.Document;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.service.interfaces.DocumentConnector;
-import org.myrobotlab.service.interfaces.DocumentListener;
-import org.myrobotlab.service.interfaces.DocumentPublisher;
-
+import org.myrobotlab.document.connector.ConnectorState;
+import org.myrobotlab.service.interfaces.AbstractConnector;
 import it.sauronsoftware.feed4j.FeedIOException;
 import it.sauronsoftware.feed4j.FeedParser;
 import it.sauronsoftware.feed4j.FeedXMLParseException;
@@ -18,19 +13,21 @@ import it.sauronsoftware.feed4j.bean.Feed;
 import it.sauronsoftware.feed4j.bean.FeedHeader;
 import it.sauronsoftware.feed4j.bean.FeedItem;
 
-public class RSSConnector extends Service implements DocumentPublisher, DocumentConnector {
+public class RSSConnector extends AbstractConnector {
+
+	private static final long serialVersionUID = 1L;
 
 	private String rssUrl = "http://www.myrobotlab.org/rss.xml";
+	private boolean interrupted = false;
 	
 	public RSSConnector(String reservedKey) {
 		super(reservedKey);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
 	public String[] getCategories() {
 		// TODO Auto-generated method stub
-		return null;
+		return new String[]{"data"};
 	}
 
 	@Override
@@ -40,15 +37,9 @@ public class RSSConnector extends Service implements DocumentPublisher, Document
 	}
 	
 	@Override
-	public Document publishDocument(Document doc) {
-		// TODO Auto-generated method stub
-		return doc;
-	}
-
-	@Override
 	public void startCrawling() {
 		// TODO : make this cooler. :) for now.. fire and forget
-
+		this.state = ConnectorState.RUNNING;
 		URL url;
 		try {
 			url = new URL(rssUrl);
@@ -81,6 +72,11 @@ public class RSSConnector extends Service implements DocumentPublisher, Document
 		int items = feed.getItemCount();
 		
 		for (int i = 0; i < items; i++) {
+			if (interrupted) {
+				state = ConnectorState.INTERRUPTED;
+				// TODO: clean up after yourself!
+				return;
+			}
 			FeedItem item = feed.getItem(i);
 			// create an id for this as being url # item offset
 			Document feedItem = new Document(url + "#"+ i);
@@ -99,10 +95,9 @@ public class RSSConnector extends Service implements DocumentPublisher, Document
 			//System.out.println("Plain text description: " + item.getDescriptionAsText());
 			//System.out.println("HTML description: " + item.getDescriptionAsHTML());
 			//System.out.println("PubDate: " + item.getPubDate());
-			invoke("publishDocument", feedItem);
-			
+			feed(feedItem);			
 		}
-		
+		this.state = ConnectorState.STOPPED;
 	}
 
 	public String getRssUrl() {
@@ -113,19 +108,18 @@ public class RSSConnector extends Service implements DocumentPublisher, Document
 		this.rssUrl = rssUrl;
 	}
 
-	
 	public static void main(String[] args) throws Exception {
-		
 		RSSConnector connector = (RSSConnector)Runtime.start("rss", "RSSConnector");
-		connector.startCrawling();
-		
+		Solr solr = (Solr)Runtime.start("solr", "Solr");
+		solr.setSolrUrl("http://phobos:8983/solr/collection1");
+		connector.addDocumentListener(solr);
+		connector.startCrawling();		
 	}
 
 	@Override
-	public void addDocumentListener(DocumentListener listener) {
-		// TODO Auto-generated method stub
-		
-		this.addListener("publishDocument", listener.getName(), "onDocument");
-		
+	public void stopCrawling() {
+		// interrupt the current crawl gently.
+		interrupted = true;
 	}
+
 }
