@@ -20,7 +20,6 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 	private WorkflowServer workflowServer;
 	private String workflowName = "default";
 	
-	
 	public DocumentPipeline(String reservedKey) {
 		super(reservedKey);
 	}
