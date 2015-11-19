@@ -267,6 +267,8 @@
 		<pathelement location="${repo}/feed4j/1.0/xercesImpl.jar"/>
 		<pathelement location="${repo}/feed4j/1.0/xml-apis.jar"/>
 
+                <!-- for the document processing pipeline.. it'd be nice to refactor this out. -->
+		<pathelement location="${repo}/com.thoughtworks.xstream/1.4.7/xstream-1.4.7.jar"/>
 
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
