@@ -25,6 +25,13 @@ import java.text.ParseException;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.service.interfaces.AbstractConnector;
 
+/**
+ * 
+ * ImapEmailConnector - This connector can crawl the folders on an IMAP email server.
+ * you can provide the user/pass/email server hostname.  It publishes documents that
+ * represents the emails messages that were crawled.
+ *
+ */
 public class ImapEmailConnector extends AbstractConnector {
 
 	private static final String MESSAGE_ID_HEADER = "message_id";
@@ -35,16 +42,12 @@ public class ImapEmailConnector extends AbstractConnector {
 	private String docIdPrefix = "email_";
 	private Store store;
 
-	/**
-	 * 
-	 */
 	public ImapEmailConnector(String name) {
 		super(name);
 	}
 
 	private static final long serialVersionUID = 1L;
 
-	@Override
 	public void startCrawling() {
 		log.info("Sarting IMAP Email connector.");
 		// connect to the email store
@@ -98,7 +101,7 @@ public class ImapEmailConnector extends AbstractConnector {
 
 
 	private int processFolder(Folder folder) {
-		Message messages[];
+		log.info("Processing folder {}", folder.getName());
 		int numDocs = 0;
 		try {
 			numDocs = folder.getMessageCount();
@@ -110,25 +113,26 @@ public class ImapEmailConnector extends AbstractConnector {
 			return 0;
 		}
 		try {
-			messages = folder.getMessages();
+			for (Message m : folder.getMessages()) {
+				try {
+					Document doc = processMessage(m);
+					doc.setField("folder", folder.getName());
+					feed(doc);
+					numDocs++;
+				} catch (MessagingException | IOException e) {
+					log.warn("process message failed.  continuing to next message. {} ", e.getLocalizedMessage());
+					e.printStackTrace();
+					continue;
+				}
+				
+			} 
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			log.info("Messaging Exception getMessages {}", e.getLocalizedMessage());
 			e.printStackTrace();
 			return 0;
 		}
-		for (Message m : messages) {
-			try {
-				Document doc = processMessage(m);
-				doc.setField("folder", folder.getName());
-				feed(doc);
-				numDocs++;
-			} catch (MessagingException | IOException e) {
-				log.warn("process message failed.  continuing to next message. {} ", e.getLocalizedMessage());
-				e.printStackTrace();
-				continue;
-			}
-		} 
+
 		return numDocs;
 	};
 
@@ -331,8 +335,6 @@ public class ImapEmailConnector extends AbstractConnector {
 		return store;
 	}
 
-
-
 	@Override
 	public String getDescription() {
 		// TODO Auto-generated method stub
@@ -384,11 +386,13 @@ public class ImapEmailConnector extends AbstractConnector {
 		connector.setEmailServer("imap.gmail.com");
 		connector.setUsername("kwatters");
 		connector.setPassword("GraphQuery2");
-		
+		connector.setBatchSize(10);
 		Solr solr = (Solr)Runtime.start("solr", "Solr");
-		solr.setSolrUrl("http://phobos:8983/solr/collection1");
+		// for example...
+		String solrUrl = "http://phobos:8983/solr/collection1";
+		solr.setSolrUrl(solrUrl);
 		connector.addDocumentListener(solr);
-		connector.startCrawling();		
+		connector.startCrawling();
 	}
 	
 }
