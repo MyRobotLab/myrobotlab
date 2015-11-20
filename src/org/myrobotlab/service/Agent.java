@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.cmdline.CMDLine;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
@@ -373,7 +372,9 @@ public class Agent extends Service {
 		log.info("platform {}", platformId);
 
 		ArrayList<String> outArgs = new ArrayList<String>();
-		String classpath = String.format("./%s./myrobotlab.jar%s./libraries/jar/*%s./bin", ps, ps, ps);
+		// bin for debug - but its missing the <jar unzip files
+		// build its 'stale' but it has the missing <jar unzip files :P
+		String classpath = String.format("./%s./myrobotlab.jar%s./libraries/jar/*%s./bin%s./build/classes", ps, ps, ps, ps);
 		//List<File> debugBinDirs = FindFile.findDirs("./bin");
 		
 		/*

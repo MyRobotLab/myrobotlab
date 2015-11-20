@@ -399,6 +399,10 @@ public class Cli extends Service {
 	public void add(String name, InputStream out, OutputStream in) {
 		pipes.put(name, new Pipe(name, out, in));
 	}
+	
+	public boolean attach(){
+		return attach(null);
+	}
 
 	/**
 	 * attach to another processes' Cli
@@ -407,6 +411,14 @@ public class Cli extends Service {
 	 * @return
 	 */
 	public boolean attach(String name) {
+		
+		if (pipes.size() == 1){
+			// only 1 choice
+			for (String key: pipes.keySet()){
+				name = key;
+			}
+		}
+		
 		if (!pipes.containsKey(name)) {
 			error("%s not found", name);
 			return false;
@@ -542,11 +554,15 @@ public class Cli extends Service {
 	public void out(byte[] data) throws IOException {
 
 		// if (Runtime.isAgent()) {
-		if (os != null)
+		if (os != null){
 			os.write(data);
+			os.flush();
+		}
 
-		if (fos != null)
+		if (fos != null){
 			fos.write(data);
+			fos.flush();
+		}
 		// }
 		invoke("stdout", data);
 	}

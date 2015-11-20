@@ -1,9 +1,13 @@
 angular.module('mrlapp.service.MyoThalmicGui', [])
 .controller('MyoThalmicGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('MyoThalmicGuiCtrl');
-    // get latest copy of a services
-    $scope.service = mrl.getService($scope.service.name);
+    var _self = this;
+    var msg = this.msg;
     
+    // init vars from current service state
+    $scope.batteryLevel = $scope.service.batteryLevel;
+    $scope.locked = $scope.service.locked;
+
     // load data bindings for this type
     if ($scope.service.isConnected) {
         $scope.connectText = "disconnect";
@@ -11,22 +15,34 @@ angular.module('mrlapp.service.MyoThalmicGui', [])
         $scope.connectText = "connect";
     }
     
-    this.onMsg = function(msg) {
+    this.onMsg = function(inMsg) {
         
-        switch (msg.method) {
+        switch (inMsg.method) {
         case 'onPose':
-            $scope.pose = msg.data[0].type;
+            $scope.pose = inMsg.data[0].type;
             $scope.$apply();
             break;
         case 'onMyoData':
-            $scope.myoData = msg.data[0];
+            $scope.myoData = inMsg.data[0];
             // FIXME - it should be SENT THIS WAY - 
             // FIXME - DO FILTERING AS CLOSE TO THE SOURCE AS POSSIBLE !!!!
             // FIXME - ONLY SEND DATA IF THE CHANGE IS RELEVANT !!!
             $scope.$apply();
             break;
+        case 'onArmSync':
+            $scope.armSync = inMsg.data[0];
+            $scope.$apply();
+            break;
+        case 'onLocked':
+            $scope.locked = inMsg.data[0];
+            $scope.$apply();
+            break;
+        case 'onBatteryLevel':
+            $scope.batteryLevel = inMsg.data[0];
+            $scope.$apply();
+            break;
         case 'onState':
-            $scope.service = msg.data[0];
+            $scope.service = inMsg.data[0];
             if ($scope.service.isConnected) {
                 $scope.connectText = "disconnect";
             } else {
@@ -35,7 +51,7 @@ angular.module('mrlapp.service.MyoThalmicGui', [])
             $scope.$apply();
             break;
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + msg.method);
+            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
             break;
         }
     }
@@ -50,11 +66,13 @@ angular.module('mrlapp.service.MyoThalmicGui', [])
     }
     ;
     
+    msg.subscribe('publishState');
+    msg.subscribe('publishMyoData');
+    msg.subscribe('publishPose');
+    msg.subscribe('publishArmSync');
+    msg.subscribe('publishBatteryLevel');
+    msg.subscribe('publishLocked');
+    msg.subscribe(this);
     
-    mrl.subscribe($scope.service.name, 'publishState');
-    mrl.subscribe($scope.service.name, 'publishMyoData');
-    mrl.subscribe($scope.service.name, 'publishPose');
-    
-//    $scope.panel.initDone();
 }
 ]);

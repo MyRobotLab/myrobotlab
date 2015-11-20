@@ -79,7 +79,7 @@
 -->
 
 <!-- The MyRobotLab ant build.xml  -->
-<project name="myrobotlab" default="report" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="myrobotlab" default="dist" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<description>http://myrobotlab.org myrobotlab build file</description>
 
@@ -234,6 +234,9 @@
 		<pathelement location="${repo}/org.bytedeco.javacv/1.1/opencv.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.1/opencv-windows-x86_64.jar"/>
 		<pathelement location="${repo}/org.bytedeco.javacv/1.1/opencv-macosx-x86_64.jar"/>
+		
+		<pathelement location="${repo}/com.thalmic.myo/0.9.0/myo-java-0.9.1-SNAPSHOT.jar"/>
+		
 
 
                 <!-- oculus stuff for display.  TODO: clean and re-order these -->

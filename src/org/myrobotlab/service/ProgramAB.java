@@ -3,18 +3,12 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
@@ -75,7 +69,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static int savePredicatesInterval = 10000;
+	private static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
 
 	public ProgramAB(String reservedKey) {
 		super(reservedKey);
