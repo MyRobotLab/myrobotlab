@@ -20,7 +20,7 @@ public class Document {
 	private String id;
 	private HashMap<String, ArrayList<Object>> data;
 	private ProcessingStatus status;
-	
+
 	public Document(String id) {
 		this.id = id;
 		data = new HashMap<String, ArrayList<Object>>();
@@ -34,11 +34,11 @@ public class Document {
 			return null;
 		}
 	}
-	
+
 	public void setField(String fieldName, ArrayList<Object> value) {
 		data.put(fieldName, value);
 	}
-	
+
 	public void setField(String fieldName, Object value) {
 		// TODO Auto-generated method stub
 		if (data.containsKey(fieldName)) {
@@ -48,8 +48,11 @@ public class Document {
 			values.add(value);
 			data.put(fieldName, values);
 		}
-		
+
 	}
+
+
+
 
 
 	public void addToField(String fieldName, Object value) {
@@ -61,7 +64,7 @@ public class Document {
 			data.put(fieldName, values);
 		}
 	}
-	
+
 	public String getId() {
 		return id;
 	}
@@ -83,13 +86,13 @@ public class Document {
 	public Set<String> getFields() {
 		// TODO Auto-generated method stub
 		return data.keySet();
-//		return null;
+		//		return null;
 	}
 
 	public void removeField(String oldName) {
 		// TODO Auto-generated method stub
 		data.remove(oldName);
-		
+
 	}
 
 	public ProcessingStatus getStatus() {
@@ -100,6 +103,45 @@ public class Document {
 		this.status = status;
 	}
 
-	
-	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((data == null) ? 0 : data.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((status == null) ? 0 : status.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Document other = (Document) obj;
+		if (data == null) {
+			if (other.data != null)
+				return false;
+		} else if (!data.equals(other.data))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (status != other.status)
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Document [id=" + id + ", data=" + data + ", status=" + status
+				+ "]";
+	}
+
+
 }
