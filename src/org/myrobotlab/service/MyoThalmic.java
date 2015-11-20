@@ -1,9 +1,6 @@
 package org.myrobotlab.service;
 
-import java.util.ArrayList;
-
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -24,6 +21,8 @@ import com.thalmic.myo.enums.Arm;
 import com.thalmic.myo.enums.PoseType;
 import com.thalmic.myo.enums.UnlockType;
 import com.thalmic.myo.enums.VibrationType;
+import com.thalmic.myo.enums.WarmupResult;
+import com.thalmic.myo.enums.WarmupState;
 import com.thalmic.myo.enums.XDirection;
 
 /**
@@ -57,7 +56,8 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 	transient HubThread hubThread = null;
 	MyoData myodata = new MyoData();
 	boolean delta = false;
-
+	boolean locked = true;
+	int batterLevel = 0;
 
 	boolean isConnected = false;
 
@@ -111,6 +111,7 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 		}
 
 		isConnected = true;
+		myo.requestBatteryLevel();
 		broadcastState();
 	}
 
@@ -156,18 +157,11 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 			myodata.yaw = yawW;
 
 			myodata.timestamp = timestamp;
-
 			invoke("publishMyoData", myodata);
-			
-			ArrayList<Point> points = new ArrayList<Point>();
-			points.add(new Point(0,0,0,rollW,pitchW,yawW));
-			invoke("publishPoints", points);
-			
 		}
-		// log.info("roll {}", myodata.roll);
-
 	}
-
+	
+	
 	@Override
 	public void onPose(Myo myo, long timestamp, Pose pose) {
 		currentPose = pose;
@@ -187,10 +181,13 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 		return pose;
 	}
 
+	/*
 	@Override
 	public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection) {
 		whichArm = arm;
 	}
+	*/
+	
 
 	@Override
 	public void onArmUnsync(Myo myo, long timestamp) {
@@ -236,62 +233,60 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 
 	@Override
 	public void onPair(Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
-		// TODO Auto-generated method stub
-
+		info("onPair");
 	}
 
 	@Override
 	public void onUnpair(Myo myo, long timestamp) {
-		// TODO Auto-generated method stub
-
+		info("onUnpair");
 	}
 
 	@Override
 	public void onConnect(Myo myo, long timestamp, FirmwareVersion firmwareVersion) {
-		// TODO Auto-generated method stub
-
+		info("onConnect");
 	}
 
 	@Override
 	public void onDisconnect(Myo myo, long timestamp) {
-		// TODO Auto-generated method stub
-
+		info("onDisconnect");
 	}
 
 	@Override
 	public void onUnlock(Myo myo, long timestamp) {
-		// TODO Auto-generated method stub
-
+		//info("onUnlock");
+		locked = false;
+		invoke("publishLocked", locked);
 	}
 
 	@Override
 	public void onLock(Myo myo, long timestamp) {
-		// TODO Auto-generated method stub
-
+		//info("onLock");
+		locked = true;
+		invoke("publishLocked", locked);
+	}
+	
+	public Boolean publishLocked(Boolean b){
+		return b;
 	}
 
 	@Override
 	public void onAccelerometerData(Myo myo, long timestamp, Vector3 accel) {
-		// TODO Auto-generated method stub
-
+		//info("onAccelerometerData");
 	}
 
 	@Override
 	public void onGyroscopeData(Myo myo, long timestamp, Vector3 gyro) {
-		// TODO Auto-generated method stub
-
+		//info("onGyroscopeData");
 	}
 
 	@Override
 	public void onRssi(Myo myo, long timestamp, int rssi) {
-		// TODO Auto-generated method stub
-
+		info("onRssi");
 	}
 
 	@Override
 	public void onEmgData(Myo myo, long timestamp, byte[] emg) {
-		// TODO Auto-generated method stub
-
+		info("onEmgData");
 	}
 
 	public void lock() {
@@ -311,7 +306,6 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 
 	@Override
 	public MyoData onMyoData(MyoData myodata) {
-		// TODO Auto-generated method stub
 		return myodata;
 	}
 
@@ -333,6 +327,7 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 
 			MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
 			myo.connect();
+			Runtime.start("webgui", "WebGui");
 
 			/*
 			 * Hub hub = new Hub("com.example.hello-myo");
@@ -361,6 +356,34 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+
+	
+	@Override
+	public void onArmSync(Myo myo, long arg1, Arm arm, XDirection direction, WarmupState warmUpState) {
+		log.info("onArmSync {}", arm);
+		whichArm = arm;		
+		invoke("publishArmSync", arm);
+	}
+	
+	public Arm publishArmSync(Arm arm){
+		return arm;
+	}
+
+	@Override
+	public void onBatteryLevelReceived(Myo myo, long timestamp, int level) {
+		batterLevel = level;
+		log.info("onBatteryLevelReceived {} {}", timestamp, batterLevel);
+		invoke("publishBatteryLevel", batterLevel);
+	}
+
+	public Integer publishBatteryLevel(Integer level){
+		return level;
+	}
+	
+	@Override
+	public void onWarmupCompleted(Myo myo, long unkown, WarmupResult warmUpResult) {
+		log.info("onWarmupCompleted {} {}", unkown, warmUpResult);
 	}
 
 }
