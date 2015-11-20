@@ -384,9 +384,9 @@ public class ImapEmailConnector extends AbstractConnector {
 	public static void main(String[] args) throws Exception {
 		ImapEmailConnector connector = (ImapEmailConnector)Runtime.start("email", "ImapEmailConnector");
 		connector.setEmailServer("imap.gmail.com");
-		connector.setUsername("kwatters");
-		connector.setPassword("GraphQuery2");
-		connector.setBatchSize(10);
+		connector.setUsername("YYY");
+		connector.setPassword("XXX");
+		connector.setBatchSize(1);
 		Solr solr = (Solr)Runtime.start("solr", "Solr");
 		// for example...
 		String solrUrl = "http://phobos:8983/solr/collection1";
