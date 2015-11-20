@@ -45,4 +45,10 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 	public ConnectorState getConnectorState() {
 		return state;
 	}
+	
+	@Override
+	public String[] getCategories() {
+		return new String[]{"data"};
+	}
+	
 }
