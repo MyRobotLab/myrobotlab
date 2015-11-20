@@ -48,7 +48,6 @@ public class RSSConnector extends AbstractConnector {
 			e.printStackTrace();
 			return;
 		}
-		
 		Feed feed;
 		try {
 			feed = FeedParser.parse(url);
@@ -57,20 +56,9 @@ public class RSSConnector extends AbstractConnector {
 			e.printStackTrace();
 			return;
 		}
-		
-		
-		
-		System.out.println("** HEADER **");
+
 		FeedHeader header = feed.getHeader();
-//		System.out.println("Title: " + header.getTitle());
-//		System.out.println("Link: " + header.getLink());
-//		System.out.println("Description: " + header.getDescription());
-//		System.out.println("Language: " + header.getLanguage());
-//		System.out.println("PubDate: " + header.getPubDate());
-		
-		System.out.println("** ITEMS **");
 		int items = feed.getItemCount();
-		
 		for (int i = 0; i < items; i++) {
 			if (interrupted) {
 				state = ConnectorState.INTERRUPTED;
@@ -90,11 +78,6 @@ public class RSSConnector extends AbstractConnector {
 			feedItem.setField("description", item.getDescriptionAsText());
 			feedItem.setField("date", item.getPubDate());
 			feedItem.setField("html", item.getDescriptionAsHTML());
-			//System.out.println("Title: " + item.getTitle());
-			//System.out.println("Link: " + item.getLink());
-			//System.out.println("Plain text description: " + item.getDescriptionAsText());
-			//System.out.println("HTML description: " + item.getDescriptionAsHTML());
-			//System.out.println("PubDate: " + item.getPubDate());
 			feed(feedItem);			
 		}
 		this.state = ConnectorState.STOPPED;
@@ -104,7 +87,7 @@ public class RSSConnector extends AbstractConnector {
 		return rssUrl;
 	}
 
-	public void setUrl(String rssUrl) {
+	public void setRssUrl(String rssUrl) {
 		this.rssUrl = rssUrl;
 	}
 
