@@ -1,35 +1,9 @@
 env:
-  global:
-  - secure: c6xprHZwdNPMC9CQdgCxv5a4nPqxEpHA2Kn2rysqHRupYCWqBoTp6YH+sa1VCE+M++NwJFCUgWwPrnsf/90KJEPGqHCqdFOuyGVLMs0NUXWRN9Mr+vB9xJdRJ3dqhpAQQEcErjU20OaSOg7KIkULjX5YlmiNMbQoADnaZ1o3WnY=
-  - secure: ftgysLcPLEArLrD8behZrFJQejXdriWHYE68ClDh7bQLf1LYYLSC/v1U89zLvEJVqJO4S46uprFQEwcyRit647p9AtZym3q/+dnRmlS8XgFB3OeHKpddOOPTZUbxoBTlvToDE6SpFyRSWcIGdjxhC3HG9zUFGZ7HuTrdkd7/Sf4=
-  - secure: fHS+7vwDFOdjI7OgI1JnCh2thbn9JtQVvsKlD2V73q2rwH69u7Db4eHDRqIlIz/6zk1xrPr5PT4jIrRHovR9X8g0v8s+LSadke3dd84G1ey47YEwwefAOM3A+w/QHz1OVRJcc6YdOTWgGHJLswOPbSbCEhbdl2fe14YoNAaUw8U=
-  - secure: iwn5D2wJvZyK8x+9caOQ5WFB9QYA8OWD1l535mcWURAQseHSS4vkxJT5/rhzpaB+5wSAl2DhEJWpIIaZBxIos9ogGsDkH4h9KSsTZ3X17PsUM81v+spMntocBtREkfigNbjccg4B8s1tnU8UKNADjXmT1P1Q1FpHpnJXrTHMk/0=
- 
 language: java
 sudo: false
 script: ant dist
 jdk:
 - openjdk7
-
-# release deployment section begin
-# deploy:
-#  provider: releases
-#  api_key:
-#    secure: NsryAS1EG3aKtKedzYzDefHOsuYEQNAE15iNPk9yeFxJpWLbVsVl8AjGlI+D0Al3RLXqfenGz2SGJmxqKlvFSUovnZ23nyvHQ9+tKKMbSTUpBY/fffrXV97PU56DTZoZTXfnCCTnWFnvdjHQ5jwGIyY8R1EPJIa0v760EtK+oeY=
-#  file:
-#    - "dist/myrobotlab.jar"
-#  skip_cleanup: true
-#  on:
-#    tags: true
-#    all_branches: true - FIXME - change to master
-#    
-# release deployment section end
-
-#addons:
-#    apt:
-#        packages:
-#            sshpass
-
 deploy:
   # s3 deploy begin
   provider: s3
@@ -50,10 +24,3 @@ deploy:
   on:
     repo: MyRobotLab/myrobotlab
     branch: develop
-  
-after_success:
-  # ssh deploy begin
-  # export SSHPASS=$DEPLOY_PASS
-  # sshpass -e scp -P 10022 dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:/opt/mrl
-  # sshpass -p $DEPLOY_PASS scp -v -P 10022 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no dist/myrobotlab.jar $DEPLOY_USER@$DEPLOY_HOST:/opt/mrl
-  # ssh deploy end
