@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import org.myrobotlab.document.Document;
-import org.myrobotlab.service.interfaces.AbstractConnector;
+import org.myrobotlab.document.connector.AbstractConnector;
 
 /**
  * 

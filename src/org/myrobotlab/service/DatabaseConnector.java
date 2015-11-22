@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.myrobotlab.document.Document;
+import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
-import org.myrobotlab.service.interfaces.AbstractConnector;
 
 public class DatabaseConnector extends AbstractConnector {
 

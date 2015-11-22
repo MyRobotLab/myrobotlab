@@ -51,10 +51,6 @@ public class Document {
 
 	}
 
-
-
-
-
 	public void addToField(String fieldName, Object value) {
 		if (data.containsKey(fieldName) && (data.get(fieldName) != null)) {
 			data.get(fieldName).add(value);
@@ -89,9 +85,8 @@ public class Document {
 		//		return null;
 	}
 
-	public void removeField(String oldName) {
-		// TODO Auto-generated method stub
-		data.remove(oldName);
+	public void removeField(String fieldName) {
+		data.remove(fieldName);
 
 	}
 
