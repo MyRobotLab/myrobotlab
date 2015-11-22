@@ -165,7 +165,7 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 	@Override
 	public void onPose(Myo myo, long timestamp, Pose pose) {
 		currentPose = pose;
-		myodata.currentPose = pose.getType();
+		myodata.currentPose = pose.getType().toString();
 		if (currentPose.getType() == PoseType.FIST) {
 			myo.vibrate(VibrationType.VIBRATION_MEDIUM);
 		}
