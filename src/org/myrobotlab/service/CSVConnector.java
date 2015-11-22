@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.myrobotlab.document.Document;
-import org.myrobotlab.service.interfaces.AbstractConnector;
+import org.myrobotlab.document.connector.AbstractConnector;
 
 import au.com.bytecode.opencsv.CSVReader;
 

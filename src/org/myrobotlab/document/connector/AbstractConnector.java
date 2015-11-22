@@ -1,12 +1,14 @@
-package org.myrobotlab.service.interfaces;
+package org.myrobotlab.document.connector;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.myrobotlab.document.Document;
-import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.interfaces.DocumentConnector;
+import org.myrobotlab.service.interfaces.DocumentListener;
+import org.myrobotlab.service.interfaces.DocumentPublisher;
 import org.python.modules.synchronize;
 
 /**
@@ -22,6 +24,8 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 	private int batchSize = 1;
 	private List<Document> batch = Collections.synchronizedList(new ArrayList<Document>());
 
+	private String docIdPrefix = "";
+	
 	public AbstractConnector(String name) {
 		super(name);
 	}
@@ -48,6 +52,16 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 		invoke("publishDocuments", batch);
 		// reset/clear the batch.
 		batch = new ArrayList<Document>();
+//		while (getOutbox().size() > 0) {
+//			// TODO: wait until the outbox is empty.
+////			try {
+////				Thread.sleep(10);
+////			} catch (InterruptedException e) {
+////				// TODO Auto-generated catch block
+////				e.printStackTrace();
+////			}
+//			continue;
+//		}
 	}
 
 	public ConnectorState getState() {
@@ -85,6 +99,14 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 
 	public void setBatchSize(int batchSize) {
 		this.batchSize = batchSize;
+	}
+
+	public String getDocIdPrefix() {
+		return docIdPrefix;
+	}
+
+	public void setDocIdPrefix(String docIdPrefix) {
+		this.docIdPrefix = docIdPrefix;
 	}
 
 }

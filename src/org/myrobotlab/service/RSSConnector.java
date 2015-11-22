@@ -3,8 +3,9 @@ package org.myrobotlab.service;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.myrobotlab.document.Document;
+import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
-import org.myrobotlab.service.interfaces.AbstractConnector;
+
 import it.sauronsoftware.feed4j.FeedIOException;
 import it.sauronsoftware.feed4j.FeedParser;
 import it.sauronsoftware.feed4j.FeedXMLParseException;

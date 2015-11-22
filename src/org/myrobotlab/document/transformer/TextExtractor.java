@@ -104,6 +104,8 @@ public class TextExtractor extends AbstractStage {
 		}
 
 	}
+	
+	// TODO: this should go on a common utility interface or something.
 	private static String cleanFieldName(String name) {
 		String cleanName = name.trim().toLowerCase();
 		cleanName = cleanName.replaceAll(" ", "_");
