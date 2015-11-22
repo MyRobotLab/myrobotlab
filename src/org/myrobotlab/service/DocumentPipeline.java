@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.util.List;
+
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 import org.myrobotlab.document.Document;
@@ -141,6 +143,19 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		workflowServer.addWorkflow(config);
 		this.workflowName = config.getName();
 		
+	}
+
+	// TODO: put this on a base class or something?
+	public ProcessingStatus onDocuments(List<Document> docs) {
+		ProcessingStatus totalStat = ProcessingStatus.OK;
+		for (Document d : docs) {
+			ProcessingStatus stat = onDocument(d);
+			if (ProcessingStatus.ERROR.equals(stat)) {
+				totalStat = ProcessingStatus.ERROR; 
+			}
+			
+		}
+		return totalStat;
 	}
 	
 }

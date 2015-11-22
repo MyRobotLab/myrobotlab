@@ -28,8 +28,7 @@ public class XPathExtractor extends AbstractStage {
 	@Override
 	public void startStage(StageConfiguration config) {
 		// TODO Auto-generated method stub
-		 xpaths = loadConfig(configFile);
-		 
+		 xpaths = loadConfig(configFile);		 
 	}
 
 	@Override
@@ -48,6 +47,8 @@ public class XPathExtractor extends AbstractStage {
 	
     private void processXml(String xml, Document doc) {
 		// TODO Auto-generated method stub
+    	
+    	// GAH ! not implemented yet!
 		
 	}
 
@@ -118,8 +119,7 @@ public class XPathExtractor extends AbstractStage {
 
 	@Override
 	public void flush() {
-		// TODO Auto-generated method stub
-
+		// no batching in this transformer. no need to flush?
 	}
 
 }

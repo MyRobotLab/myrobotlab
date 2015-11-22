@@ -1,10 +1,11 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.myrobotlab.service.interfaces.DocumentListener;
-
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
@@ -14,7 +15,6 @@ import org.apache.solr.common.SolrInputDocument;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -47,27 +47,21 @@ public class Solr extends Service implements DocumentListener {
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-
 		try {
-
 			Solr solr = (Solr) Runtime.start("solr", "Solr");
 			Runtime.start("gui", "GUIService");
-
 			// Create a test document
 			SolrInputDocument doc = new SolrInputDocument();
 			doc.setField("id", "Doc1");
 			doc.setField("title", "My title");
 			doc.setField("content", "This is the text field, for a sample document in myrobotlab.  ");
-
 			// add the document to the index
 			solr.addDocument(doc);
 			// commit the index
 			solr.commit();
-
 			// search for the word myrobotlab
 			String queryString = "myrobotlab";
 			QueryResponse resp = solr.search(queryString);
-
 			for (int i = 0; i < resp.getResults().size(); i++) {
 				System.out.println("---------------------------------");
 				System.out.println("-- Printing Result number :" + i);
@@ -267,8 +261,23 @@ public class Solr extends Service implements DocumentListener {
 	}
 
 	@Override
-	public ProcessingStatus onDocument(Document doc) {
-		// Convert the input document to a solr input doc and send it!
+	public ProcessingStatus onDocuments(List<Document> docs) {
+		// Convert the input document to a solr input docs and send it!
+		ArrayList<SolrInputDocument> docsToSend = new ArrayList<SolrInputDocument>();
+		for (Document d : docs) {
+			docsToSend.add(convertDocument(d));
+		}
+		try {	
+			solrServer.add(docsToSend);
+			return ProcessingStatus.OK;
+		} catch (SolrServerException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return ProcessingStatus.DROP;
+		}		
+	}
+
+	private SolrInputDocument convertDocument(Document doc) {
 		SolrInputDocument solrDoc = new SolrInputDocument();
 		solrDoc.setField("id", doc.getId());
 		for (String fieldName : doc.getFields()) {
@@ -276,14 +285,14 @@ public class Solr extends Service implements DocumentListener {
 				solrDoc.addField(fieldName, o);
 			}
 		}
-		try {
-			solrServer.add(solrDoc);
-			return ProcessingStatus.OK;
-		} catch (SolrServerException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return ProcessingStatus.DROP;
-		}		
+		return solrDoc;
+	}
+
+	public ProcessingStatus onDocument(Document doc) {
+		// always be batching when sending docs.
+		ArrayList<Document> docs = new ArrayList<Document>();
+		docs.add(doc);
+		return onDocuments(docs);
 	}
 
 }

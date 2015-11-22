@@ -272,6 +272,8 @@
 
                 <!-- for the document processing pipeline.. it'd be nice to refactor this out. -->
 		<pathelement location="${repo}/com.thoughtworks.xstream/1.4.7/xstream-1.4.7.jar"/>
+		<pathelement location="${repo}/org.apache.tika/1.11/tika-core-1.11.jar"/>
+		<pathelement location="${repo}/net.sf.opencsv/2.3/opencsv-2.3.jar"/>
 
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
