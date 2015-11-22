@@ -10,12 +10,10 @@ public class RenameField extends AbstractStage {
 	@Override
 	public void startStage(StageConfiguration config) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void processDocument(Document doc) {
-
 		if (!doc.hasField(oldName)) {
 			return;
 		}

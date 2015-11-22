@@ -7,10 +7,10 @@ public class SetStaticFieldValue extends AbstractStage {
 
 	private String fieldName = null;
 	private String value = null;
+	
 	@Override
 	public void startStage(StageConfiguration config) {
 		
-		// TODO Auto-generated method stub
 		fieldName = config.getStringParam("fieldName");
 		value = config.getStringParam("value");
 	}
@@ -27,9 +27,23 @@ public class SetStaticFieldValue extends AbstractStage {
 
 	@Override
 	public void flush() {
-		// TODO Auto-generated method stub
-		
-		
+		// Only required if this stage does any batching.  NO-OP here.
+	}
+
+	public String getFieldName() {
+		return fieldName;
+	}
+
+	public void setFieldName(String fieldName) {
+		this.fieldName = fieldName;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 }
