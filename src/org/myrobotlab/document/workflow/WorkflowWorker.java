@@ -21,7 +21,8 @@ public class WorkflowWorker extends Thread {
 					running = false;
 				} else {
 					processing = true;
-					w.processDocumentInternal(doc);
+					// process from the start of the workflow
+					w.processDocumentInternal(doc, 0);
 					processing = false;
 				}
 			} catch (InterruptedException e) {

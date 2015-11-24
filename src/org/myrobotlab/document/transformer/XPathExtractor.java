@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import org.myrobotlab.document.transformer.StageConfiguration;
 import org.myrobotlab.document.Document;
@@ -32,7 +33,7 @@ public class XPathExtractor extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		// TODO Auto-generated method stub
 
 		for (Object o : doc.getField(xmlField)) {
@@ -41,6 +42,7 @@ public class XPathExtractor extends AbstractStage {
 		    processXml(xml, doc);
 		
 		}
+		return null;
 		
 	}
 

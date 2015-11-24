@@ -1,6 +1,9 @@
 package org.myrobotlab.document.transformer;
 
 import org.myrobotlab.document.transformer.StageConfiguration;
+
+import java.util.List;
+
 import org.myrobotlab.document.Document;
 
 public class RenameField extends AbstractStage {
@@ -13,12 +16,13 @@ public class RenameField extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		if (!doc.hasField(oldName)) {
-			return;
+			return null;
 		}
 		doc.addToField(newName, doc.getField(oldName));
 		doc.removeField(oldName);
+		return null;
 	}
 
 	@Override

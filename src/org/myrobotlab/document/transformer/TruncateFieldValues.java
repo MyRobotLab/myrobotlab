@@ -20,7 +20,7 @@ public class TruncateFieldValues extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		if (doc.hasField(inputField)) {
 			List<Object> values = doc.getField(inputField);
 			if (values.size() > numValues) {
@@ -33,6 +33,7 @@ public class TruncateFieldValues extends AbstractStage {
 				}
 			}			
 		}		
+		return null;
 	}
 
 	@Override

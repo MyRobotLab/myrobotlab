@@ -18,19 +18,20 @@ public class ZipFieldValues extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		// TODO : double check the logics here. is this what we actually want?
 		List<Object> a = doc.getField(fieldA);
 		List<Object> b = doc.getField(fieldB);		
 		if (a.size() != b.size()) {
 			// This isn't good!
 			//Log.warn("field a and field b are different lengths");
-			return;
+			return null;
 		}
 		for (int i = a.size(); i < a.size() ; i++) {
 			doc.addToField(outputField, a.get(i));
 			doc.addToField(outputField, b.get(i));
 		}
+		return null;
 		
 	}
 

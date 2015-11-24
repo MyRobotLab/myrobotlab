@@ -1,5 +1,7 @@
 package org.myrobotlab.document.transformer;
 
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.document.Document;
 
@@ -17,12 +19,13 @@ public class JoinFieldValues extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		// TODO Auto-generated method stub
 		if (doc.hasField(inputField)) {
 			String joinedValues = StringUtils.join(doc.getField(inputField), joinString);
 			doc.setField(outputField, joinedValues);
 		}
+		return null;
 	} 
 
 	@Override
