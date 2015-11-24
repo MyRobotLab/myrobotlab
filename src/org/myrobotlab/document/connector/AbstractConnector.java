@@ -52,16 +52,17 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 		invoke("publishDocuments", batch);
 		// reset/clear the batch.
 		batch = new ArrayList<Document>();
-//		while (getOutbox().size() > 0) {
-//			// TODO: wait until the outbox is empty.
-////			try {
-////				Thread.sleep(10);
-////			} catch (InterruptedException e) {
-////				// TODO Auto-generated catch block
-////				e.printStackTrace();
-////			}
-//			continue;
-//		}
+		while (getOutbox().size() > 0) {
+			// TODO: wait until the outbox is empty.
+			log.info("Draining out box Size: {}", getOutbox().size());
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			continue;
+		}
 	}
 
 	public ConnectorState getState() {

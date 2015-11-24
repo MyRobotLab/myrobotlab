@@ -21,7 +21,7 @@ public class FileConnectorTest extends AbstractConnectorTest {
 	@Override
 	public void validate(MockDocumentListener listener) {
 		// TODO: actually validate something here.
-		System.out.println(listener.getCount());
+		log.info("Final Count: {}" , listener.getCount());
 	}
 
 }
