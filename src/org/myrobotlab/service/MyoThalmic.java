@@ -120,7 +120,11 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 		
 		// FIXME - put in connect
 		currentPose = new Pose();
-		hub = new Hub("com.example.hello-myo");
+		try {
+			hub = new Hub("com.example.hello-myo");
+		} catch(Exception e){
+			Logging.logError(e);
+		}
 	}
 
 	@Override
