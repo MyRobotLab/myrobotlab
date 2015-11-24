@@ -12,6 +12,8 @@ public class MockDocumentListener extends Service implements DocumentListener {
 	private int count = 0;
 	public MockDocumentListener(String name) {
 		super(name);
+		this.inbox.setBlocking(true);
+		
 	}	
 
 	@Override
