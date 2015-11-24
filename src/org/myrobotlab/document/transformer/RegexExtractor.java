@@ -1,5 +1,6 @@
 package org.myrobotlab.document.transformer;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +21,7 @@ public class RegexExtractor extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		// TODO Auto-generated method stub
 		for (Object o : doc.getField(inputField)) {
 			String text = o.toString();
@@ -31,6 +32,8 @@ public class RegexExtractor extends AbstractStage {
 				doc.setField(outputField, match);
 			}
 		}
+		// this stage doesn't emit child docs.
+		return null;
 	}
 
 	@Override

@@ -41,7 +41,7 @@ public class SendToSolr extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		SolrInputDocument solrDoc = new SolrInputDocument();
 
 		// set the id field on the solr doc
@@ -89,7 +89,7 @@ public class SendToSolr extends AbstractStage {
 
 		// TODO: NO COMMITS HERE!
 		// solrServer.commit();
-
+		return null;
 
 	}
 

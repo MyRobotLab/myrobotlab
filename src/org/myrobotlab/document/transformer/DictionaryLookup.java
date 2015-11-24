@@ -2,6 +2,7 @@ package org.myrobotlab.document.transformer;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 import org.myrobotlab.document.Document;
 
@@ -26,7 +27,7 @@ public class DictionaryLookup extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		// TODO Auto-generated method stub
 		for (Object o : doc.getField(inputField)) {
 			String val = dictionary.get(o.toString());
@@ -34,6 +35,8 @@ public class DictionaryLookup extends AbstractStage {
 				doc.addToField(outputField, val);
 			}
 		}
+		// this stage doesn't emit child docs.
+		return null;
 	}
 
 	@Override
