@@ -1,6 +1,7 @@
 package org.myrobotlab.document.workflow;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.document.transformer.StageConfiguration;
@@ -97,10 +98,18 @@ public class Workflow {
 
 	}
 
-	public void processDocumentInternal(Document doc) {
+	public void processDocumentInternal(Document doc, int stageOffset) {
 		// TODO:
-		for (AbstractStage s : stages) {
-			s.processDocument(doc);
+		int i = 0;
+		for (AbstractStage s : stages.subList(i, stages.size())) {
+			List<Document> childDocs = s.processDocument(doc);
+			i++;
+			if (childDocs != null) {
+				// process each of the children docs down the rest of the pipeline
+				for (Document childDoc : childDocs) {
+					processDocumentInternal(childDoc, i);
+				}
+			}
 			// TODO:should I create a completely new concept for
 			// callbacks?
 			if (doc.getStatus().equals(ProcessingStatus.DROP)) {
@@ -109,7 +118,7 @@ public class Workflow {
 			}
 		}
 	}
-
+	
 	public void flush() {
 		// TODO Auto-generated method stub
 		// TODO: Make this wait for a particular message sequence id to finish.

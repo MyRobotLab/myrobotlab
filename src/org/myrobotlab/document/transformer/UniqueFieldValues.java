@@ -1,6 +1,7 @@
 package org.myrobotlab.document.transformer;
 
 import java.util.HashSet;
+import java.util.List;
 
 import org.myrobotlab.document.Document;
 
@@ -14,7 +15,7 @@ public class UniqueFieldValues extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		
 		HashSet<Object> unique = new HashSet<Object>();
 		for (Object o : doc.getField(fieldName)) {
@@ -25,6 +26,7 @@ public class UniqueFieldValues extends AbstractStage {
 			doc.addToField(fieldName, o);
 		}
 			
+		return null;
 	}
 
 	@Override

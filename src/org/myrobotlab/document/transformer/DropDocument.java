@@ -1,6 +1,9 @@
 package org.myrobotlab.document.transformer;
 
 import org.myrobotlab.document.transformer.StageConfiguration;
+
+import java.util.List;
+
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 
@@ -26,7 +29,7 @@ public class DropDocument extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		// TODO Auto-generated method stub
 		if (doc.hasField(field))  {
 			for (Object o : doc.getField(field)) {
@@ -36,6 +39,7 @@ public class DropDocument extends AbstractStage {
 				}
 			}
 		}
+		return null;
 	}
 
 	@Override

@@ -1,6 +1,9 @@
 package org.myrobotlab.document.transformer;
 
 import org.myrobotlab.document.transformer.StageConfiguration;
+
+import java.util.List;
+
 import org.myrobotlab.document.Document;
 
 public class SetStaticFieldValue extends AbstractStage {
@@ -16,8 +19,9 @@ public class SetStaticFieldValue extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		doc.addToField(fieldName, value);
+		return null;
 	}
 
 	@Override

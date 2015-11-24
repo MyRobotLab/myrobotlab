@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.List;
 
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
@@ -33,7 +34,7 @@ public class TextExtractor extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		// TODO Auto-generated method stub
 
 		// Create the parser..
@@ -45,7 +46,7 @@ public class TextExtractor extends AbstractStage {
 
 		// TODO how does the doc model support this?
 		if (!doc.hasField(filePathField)) {
-			return;
+			return null;
 		}
 
 		// we have the field populated
@@ -103,6 +104,7 @@ public class TextExtractor extends AbstractStage {
 			}
 		}
 
+		return null;
 	}
 	
 	// TODO: this should go on a common utility interface or something.

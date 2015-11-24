@@ -1,6 +1,9 @@
 package org.myrobotlab.document.transformer;
 
 import org.myrobotlab.document.transformer.StageConfiguration;
+
+import java.util.List;
+
 import org.myrobotlab.document.Document;
 
 public class CopyField extends AbstractStage {
@@ -16,7 +19,7 @@ public class CopyField extends AbstractStage {
 	}
 
 	@Override
-	public void processDocument(Document doc) {
+	public List<Document> processDocument(Document doc) {
 		if (doc.hasField(source)) {
 			for (Object o : doc.getField(source)) {
 				// TODO: Clone these objects?
@@ -24,9 +27,8 @@ public class CopyField extends AbstractStage {
 			}
 		} else {
 			// noop this doc doesn't have the field. ignore it.
-			
 		}
-
+		return null;
 	}
 
 	@Override
