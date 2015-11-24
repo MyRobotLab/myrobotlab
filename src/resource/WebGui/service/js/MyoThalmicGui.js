@@ -24,6 +24,7 @@ angular.module('mrlapp.service.MyoThalmicGui', [])
             break;
         case 'onMyoData':
             $scope.myoData = inMsg.data[0];
+            $scope.pose = $scope.myoData.currentPose;
             // FIXME - it should be SENT THIS WAY - 
             // FIXME - DO FILTERING AS CLOSE TO THE SOURCE AS POSSIBLE !!!!
             // FIXME - ONLY SEND DATA IF THE CHANGE IS RELEVANT !!!
