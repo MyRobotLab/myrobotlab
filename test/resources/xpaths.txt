@@ -1,0 +1,2 @@
+# sample xml config file to map from /foo/bar to the "text" field on a document object.
+text,/foo/bar
