@@ -56,8 +56,8 @@ public class Outbox implements Runnable, Serializable {
 
 	NameProvider myService = null;
 	LinkedList<Message> msgBox = new LinkedList<Message>();
-	boolean isRunning = false;
-	boolean blocking = false;
+	private boolean isRunning = false;
+	private boolean blocking = false;
 	int maxQueue = 1024;
 	int initialThreadCount = 1;
 	transient ArrayList<Thread> outboxThreadPool = new ArrayList<Thread>();
@@ -214,6 +214,18 @@ public class Outbox implements Runnable, Serializable {
 
 	public int getMaxQueueSize() {
 		return maxQueue;
+	}
+
+	public boolean isBlocking() {
+		return blocking;
+	}
+
+	public void setBlocking(boolean blocking) {
+		this.blocking = blocking;
+	}
+
+	public boolean isRunning() {
+		return isRunning;
 	}
 
 }

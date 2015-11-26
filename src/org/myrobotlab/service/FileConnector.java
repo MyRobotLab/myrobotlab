@@ -23,6 +23,8 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 
 	public FileConnector(String name) {
 		super(name);
+		// no overruns!
+		this.getOutbox().setBlocking(true);
 	}
 
 	@Override
