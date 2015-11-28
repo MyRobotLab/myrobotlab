@@ -12,6 +12,13 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will fetch a web page defined by the uriField and store
+ * its byte array in the bytesField.
+ * 
+ * @author kwatters
+ *
+ */
 public class FetchURI extends AbstractStage {
 
 	private String uriField = "uri";
@@ -19,15 +26,15 @@ public class FetchURI extends AbstractStage {
 
 	@Override
 	public void startStage(StageConfiguration config) {
-		// TODO Auto-generated method stub
-
+		if (config != null) {
+			uriField = config.getProperty("uriField", "uri");
+			bytesField = config.getProperty("bytesField", "bytes");
+		}
 	}
 
 	@Override
 	public List<Document> processDocument(Document doc) {
-		// TODO Auto-generated method stub
 		// TODO: support https and other protocols
-
 		for (Object o : doc.getField(uriField)) {
 			byte[] page;
 			try {
@@ -39,7 +46,6 @@ public class FetchURI extends AbstractStage {
 				continue;
 			}
 		}
-
 		return null;
 	}
 

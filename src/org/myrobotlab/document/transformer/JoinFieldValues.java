@@ -5,6 +5,13 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will join together a list of values into a single string value
+ * with a separator.  
+ * 
+ * @author kwatters
+ *
+ */
 public class JoinFieldValues extends AbstractStage {
 
 	private String inputField;
@@ -14,13 +21,15 @@ public class JoinFieldValues extends AbstractStage {
 	
 	@Override
 	public void startStage(StageConfiguration config) {
-		// TODO Auto-generated method stub
-
+		if (config != null) {
+			inputField = config.getProperty("inputField");
+			outputField = config.getProperty("outputField");
+			joinString = config.getProperty("joinString");
+		}
 	}
 
 	@Override
 	public List<Document> processDocument(Document doc) {
-		// TODO Auto-generated method stub
 		if (doc.hasField(inputField)) {
 			String joinedValues = StringUtils.join(doc.getField(inputField), joinString);
 			doc.setField(outputField, joinedValues);
@@ -31,7 +40,6 @@ public class JoinFieldValues extends AbstractStage {
 	@Override
 	public void stopStage() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

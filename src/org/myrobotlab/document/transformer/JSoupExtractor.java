@@ -7,6 +7,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will use a jsoup selection string on html and 
+ * store the resulting data int the output field
+ * @author kwatters
+ *
+ */
 public class JSoupExtractor extends AbstractStage {
 
 	private String htmlField = "html";
@@ -15,8 +21,11 @@ public class JSoupExtractor extends AbstractStage {
 
 	@Override
 	public void startStage(StageConfiguration config) {
-		// TODO Auto-generated method stub
-
+		if (config != null) {
+			htmlField = config.getProperty(htmlField, "html");
+			outputField = config.getProperty("outputField", "links");
+			jSoupSelector = config.getProperty("jSoupSelector", "a[href]");
+		}
 	}
 
 	@Override
