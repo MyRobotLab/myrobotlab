@@ -10,10 +10,23 @@ import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.common.SolrInputDocument;
 
 import org.myrobotlab.document.transformer.StageConfiguration;
+import org.myrobotlab.logging.LoggerFactory;
+import org.newdawn.slick.util.Log;
+import org.slf4j.Logger;
+import org.myrobotlab.control.widget.AboutDialog;
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will convert an MRL document to a solr document.  
+ * It then batches those documents and sends the batches to solr.
+ * Upon a flush call any partial batches will be flushed.
+ * 
+ * @author kwatters
+ *
+ */
 public class SendToSolr extends AbstractStage {
 
+	public final static Logger log = LoggerFactory.getLogger(SendToSolr.class);
 	private String idField = "id";
 	private String fieldsField = "fields";
 	private SolrServer solrServer = null;
@@ -30,13 +43,13 @@ public class SendToSolr extends AbstractStage {
 	@Override
 	public void startStage(StageConfiguration config) {
 		solrUrl = config.getProperty("solrUrl", solrUrl);
-		System.out.println("Init connection to solr at : " + solrUrl);
 		// Initialize a connection to the solr server on startup.
 		if (solrServer == null) {
 			// TODO: support an embeded solr instance
+			log.info("Connecting to Solr at {}", solrUrl);
 			solrServer = new HttpSolrServer( solrUrl );
 		} else {
-			System.out.println("Solr instance already created.");
+			log.info("Solr instance already created.");
 		}
 	}
 
@@ -70,8 +83,9 @@ public class SendToSolr extends AbstractStage {
 				batch.add(solrDoc);
 				if (batch.size() >= batchSize) {
 					//System.out.println("Solr Server Flush Batch...");
-					// you are blocking?!
+					// you are blocking?
 					solrServer.add(batch);
+					log.info("Sending Batch to Solr. Size: {}", batch.size());
 					//System.out.println("Solr batch sent..");
 					batch.clear();
 				} else {
@@ -105,7 +119,7 @@ public class SendToSolr extends AbstractStage {
 		// Is this where I should flush the last batch?
 		if (solrServer!=null && batch.size() > 0) {
 			try {
-				System.out.println("flushing last batch.");
+				log.info("flushing last batch. Size: {}", batch.size());
 				solrServer.add(batch);
 			} catch (SolrServerException e) {
 				// TODO Auto-generated catch block
@@ -121,7 +135,7 @@ public class SendToSolr extends AbstractStage {
 		// TODO: should we commit on flush?
 		try {
 			if (issueCommit) {
-				System.out.println("Committing solr");
+				log.info("Committing solr");
 				solrServer.commit();
 			}
 		} catch (SolrServerException e) {

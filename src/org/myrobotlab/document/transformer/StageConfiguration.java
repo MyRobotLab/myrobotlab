@@ -7,7 +7,7 @@ public class StageConfiguration extends Configuration {
  	// private HashMap<String, Object> config = null;
 
 	private String stageName = "defaultStage";
-	private String stageClass = "com.kmwllc.brigade.stage.AbstractStage";
+	private String stageClass = "org.myrobotlab.document.transformer.AbstractStage";
 	
 	public StageConfiguration() {
 		config = new HashMap<String, Object>();

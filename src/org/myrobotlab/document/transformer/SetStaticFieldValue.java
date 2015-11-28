@@ -6,6 +6,12 @@ import java.util.List;
 
 import org.myrobotlab.document.Document;
 
+/**
+ * This will set a field on a document with a value
+ * 
+ * @author kwatters
+ *
+ */
 public class SetStaticFieldValue extends AbstractStage {
 
 	private String fieldName = null;
@@ -14,8 +20,10 @@ public class SetStaticFieldValue extends AbstractStage {
 	@Override
 	public void startStage(StageConfiguration config) {
 		
-		fieldName = config.getStringParam("fieldName");
-		value = config.getStringParam("value");
+		if (config != null) {
+			fieldName = config.getStringParam("fieldName");
+			value = config.getStringParam("value");
+		}
 	}
 
 	@Override
