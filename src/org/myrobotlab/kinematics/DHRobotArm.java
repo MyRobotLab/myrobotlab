@@ -191,8 +191,8 @@ public class DHRobotArm {
 	public void moveToGoal(Point goal) {
 		// we know where we are.. we know where we want to go.
 		int numSteps = 0;
-		double iterStep = 0.04;
-		double errorThreshold = 0.05;
+		double iterStep = 0.5;
+		double errorThreshold = 0.9;
 		// what's the current point
 		while (true) {
 			numSteps++;
@@ -237,7 +237,7 @@ public class DHRobotArm {
 //			}
 			
 			if (deltaPoint.magnitude() < errorThreshold) {
-				log.info("Final Position {} Number of Iteratins {}" , getPalmPosition() , numSteps);
+				log.info("Final Position {} Number of Iterations {}" , getPalmPosition() , numSteps);
 				break;
 			}
 		}

@@ -11,7 +11,7 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
         $scope.interval = $scope.service.interval;
         $scope.positions = '';
         $scope.angles = '';
-        
+        $scope.tracking = '';
         // GOOD TEMPLATE TO FOLLOW
         this.updateState = function (service) {
             $scope.service = service;
@@ -144,6 +144,10 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
                 	$scope.angles = msg.data[0];
                 	$scope.$apply();
                 	break;
+                case 'onTracking':
+                	$log.info("On Tracking called.");
+                	$scope.tracking = msg.data[0];
+                	$scope.$apply();
                 default:
                     $log.error("ERROR - unhandled method " + $scope.name + " " + msg.method);
                     break;
@@ -171,6 +175,7 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
         
         mrl.subscribe($scope.service.name, 'publishJointPositions');
         mrl.subscribe($scope.service.name, 'publishJointAngles');
+        mrl.subscribe($scope.service.name, 'publishTracking');
 //        $scope.panel.initDone();
         
         msg.subscribe(this);

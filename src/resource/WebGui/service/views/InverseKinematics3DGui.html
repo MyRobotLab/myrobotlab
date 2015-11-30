@@ -1,6 +1,9 @@
 <div>
 	<h3>Inverse Kinematics 3D!</h3>
 	<!-- three js stuff in here? -->
+    <h4>Reset Configuration</h4>
+    <input type="submit" ng-click="centerAllJoints()" value="Center All Joints" />
+    <br/>
 	<div id='canvas' />
 	<br />
 	<form novalidate class="search-form">
@@ -57,11 +60,11 @@
 					ng-click="createInputMatrix(dx,dy,dz,roll,pitch,yaw)" value="Calibrate!" /></td>
 			</tr>
 		</table>
-    
-    
-    <h4>Reset Configuration</h4>
-    <input type="submit" ng-click="centerAllJoints()" value="Center All Joints" />
-
 	</form>
-	</br> That's All Folks!
+
+    <h4>TRACKING</h4>  
+    
+    {{tracking}}
+    
+	<br/> That's All Folks!
 </div>
