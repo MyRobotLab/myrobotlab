@@ -84,12 +84,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 			// that are being tracked with the joystick.
 			
 			// how many ms to wait between movements.
-			long pollInterval = 500;
+			long pollInterval = 250;
 			
 			isTracking = true;
 			long now = System.currentTimeMillis();
 			while (isTracking) {
-				log.info("Tracking Thread here.");
 				long pause = now + pollInterval - System.currentTimeMillis();
 				try {
 					// the number of milliseconds until we update the position
@@ -100,13 +99,14 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 					e.printStackTrace();
 					isTracking = false;
 				}
-				
 				// lets get the current position
 				// current position + velocity * time
 				Point current = currentPosition();
-				Point targetPoint = current.add(joystickLinearVelocity.multiplyXYZ(1000.0/pollInterval));
+				Point targetPoint = current.add(joystickLinearVelocity.multiplyXYZ(pollInterval/1000.0));
+				if (!targetPoint.equals(current)) {
+					log.info("Velocity: {} Old: {} New: {}", joystickLinearVelocity , current ,targetPoint);
+				}
 				
-				log.info("Velocity: {} Old: {} New: {}", joystickLinearVelocity , current ,targetPoint);
 				invoke("publishTracking",targetPoint);
 				moveTo(targetPoint); 
 				// update current timestamp to determine how long we should wait
@@ -181,7 +181,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	
 	public void moveTo(Point p) {
 		
-		log.info("Move TO {}", p );
+		// log.info("Move TO {}", p );
 		if (inputMatrix != null) {
 			p = rotateAndTranslate(p);
 		}
@@ -190,7 +190,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	}
 
 	public void publishTelemetry() {
-		HashMap<String, Float> angleMap = new HashMap<String, Float>();
+		Map<String, Float> angleMap = new HashMap<String, Float>();
 		for (DHLink l : currentArm.getLinks()) {
 			String jointName = l.getName();
 			double theta = l.getTheta();
@@ -308,7 +308,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		
 		Joystick joystick = (Joystick)Runtime.start("joystick", "Joystick");
 		joystick.setController(2);
-		joystick.startPolling();
+
+ 		// joystick.startPolling();
 
 		// attach the joystick input to the ik3d service.
 		joystick.addInputListener(inversekinematics);
@@ -318,7 +319,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	}
 
 	@Override
-	public Map<String, Float> publishJointAngles(Map<String, Float> angleMap) {
+	public Map<String, Float> publishJointAngles(HashMap<String, Float> angleMap) {
 		// TODO Auto-generated method stub
 		return angleMap;
 	}
@@ -370,7 +371,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 			input.value = 0.0F;
 		}
 		
-		double totalGain = 1.0;
+		double totalGain = 5.0;
 		double xGain = totalGain;
 		double yGain = totalGain;
 		double zGain = totalGain;
