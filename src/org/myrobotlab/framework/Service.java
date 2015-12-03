@@ -53,6 +53,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
+import org.myrobotlab.cache.LRUMethodCache;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.Recorder;
 import org.myrobotlab.fileLib.FileIO;
@@ -1248,6 +1249,32 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			// put return object onEvent
 			out(method, retobj);
 		} catch (NoSuchMethodException e) {
+			
+			
+			// cache key  compute
+			
+			// TODO: validate what "params.toString()" returns.
+			StringBuilder keyBuilder = new StringBuilder();
+			for (Object o : paramTypes) {
+				keyBuilder.append(o);
+			}
+			String methodCacheKey = c.toString() + "_" + keyBuilder.toString();
+			Method mC = LRUMethodCache.getInstance().getCacheEntry(methodCacheKey);
+			if (mC != null) {
+				// We found a cached hit!  lets invoke on that.
+				try {
+					retobj = mC.invoke(obj, params);
+					// put return object onEvent
+					out(method, retobj);
+					// return 
+					return retobj;
+				} catch (Exception e1) {
+					log.error(String.format("boom goes method %s", mC.getName()));
+					Logging.logError(e1);
+				}
+
+			}
+			
 			// TODO - build method cache map from errors
 			log.warn(String.format("%s.%s NoSuchMethodException - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null)));
 
@@ -1270,9 +1297,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				try {
 					log.debug("found appropriate method");
 					retobj = m.invoke(obj, params);
-
 					// put return object onEvent
 					out(method, retobj);
+					// we've found a match. put that in the cache.
+					LRUMethodCache.getInstance().addCacheEntry(methodCacheKey, m);
 					return retobj;
 				} catch (Exception e1) {
 					log.error(String.format("boom goes method %s", m.getName()));
