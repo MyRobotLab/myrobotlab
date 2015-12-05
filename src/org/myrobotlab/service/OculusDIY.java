@@ -118,7 +118,8 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		
 		//head =  (int) (180.0 +(((az - 9.82)/(-9.82 - 9.82))*(0.0 - 180.0)));
 		head = (int) mapperPitch.calc(pitch);
-		headingint = (int) mapperYaw.calc(yaw);
+		//headingint = (int) mapperYaw.calc(yaw);
+		headingint = (int)yaw;
 		
 		lastValue = headingint;
 		if (resetValue > 90 && lastValue < 0) {

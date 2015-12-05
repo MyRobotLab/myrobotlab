@@ -92,7 +92,7 @@ public class InMoov extends Service {
 
 	transient public OpenNI openni;
 
-	transient public PID pid;
+	transient public PID2 pid;
 
 	boolean copyGesture = false;
 	boolean firstSkeleton = true;
@@ -175,7 +175,7 @@ public class InMoov extends Service {
 		peers.put("mouthControl", "MouthControl", "MouthControl");
 		peers.put("opencv", "OpenCV", "InMoov OpenCV service");
 		peers.put("openni", "OpenNI", "Kinect service");
-		peers.put("pid", "PID", "PID service");
+		peers.put("pid", "PID2", "PID2 service");
 
 		return peers;
 	}
@@ -1116,12 +1116,12 @@ public class InMoov extends Service {
 		if (openni == null) {
 			speakBlocking("starting kinect");
 			openni = (OpenNI) startPeer("openni");
-			pid = (PID) startPeer("pid");
+			pid = (PID2) startPeer("pid");
 
-			pid.setMode(PID.MODE_AUTOMATIC);
-			pid.setOutputRange(-1, 1);
-			pid.setPID(10.0, 0.0, 1.0);
-			pid.setControllerDirection(0);
+			pid.setMode("kinect",PID.MODE_AUTOMATIC);
+			pid.setOutputRange("kinect",-1, 1);
+			pid.setPID("kinect",10.0, 0.0, 1.0);
+			pid.setControllerDirection("kinect",0);
 
 			// re-mapping of skeleton !
 			openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
