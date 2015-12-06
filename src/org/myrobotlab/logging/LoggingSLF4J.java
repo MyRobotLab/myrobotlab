@@ -53,18 +53,16 @@ public class LoggingSLF4J extends Logging {
 			// console.setLayout(layout); ???
 			console.setEncoder(ple);
 			console.setContext(lc);
+			console.start();
 			logger.addAppender(console);
 		} else if (Appender.FILE.equalsIgnoreCase(type)) {
-
 			FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
 			fileAppender.setName(type);
 			fileAppender.setFile("agent.log"); // my
 			fileAppender.setEncoder(ple);
 			fileAppender.setContext(lc);
 			fileAppender.start();
-
 			logger.addAppender(fileAppender);
-
 		} else if (Appender.IS_AGENT.equalsIgnoreCase(type)) {
 			// FROM_AGENT has only console - Agent has both console & file
 			// appender

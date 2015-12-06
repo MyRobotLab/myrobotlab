@@ -209,7 +209,7 @@ public class PythonGUI extends ServiceGUI implements ActionListener, MouseListen
 		statusInfo = new JLabel("Status:");
 		top = myService.getFrame();
 
-		Script s = new Script(String.format("%s%suntitled.%d.py", Service.getCFGDir(), File.separator, untitledCount), "");
+		Script s = new Script(String.format("%s%suntitled.swing.%d.py", Service.getCFGDir(), File.separator, untitledCount), "");
 		addNewEditorPanel(s);
 	}
 

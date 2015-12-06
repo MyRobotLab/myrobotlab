@@ -1,6 +1,9 @@
 package org.myrobotlab.control.widget;
 
 import java.awt.Component;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -9,10 +12,25 @@ import javax.swing.text.DefaultCaret;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.LoggingEvent;
+import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.interfaces.ServiceInterface;
+import org.slf4j.Logger;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.Context;
+import ch.qos.logback.core.LogbackException;
+import ch.qos.logback.core.filter.Filter;
+import ch.qos.logback.core.spi.FilterReply;
+import ch.qos.logback.core.status.Status;
+
 
 // http://www.javaworld.com/javaworld/jw-12-2004/jw-1220-toolbox.html?page=5
-public class Console extends AppenderSkeleton {
+public class Console extends AppenderSkeleton implements Appender<ILoggingEvent> {
 
 	public JTextArea textArea = null;
 	public JScrollPane scrollPane = null;
@@ -80,15 +98,125 @@ public class Console extends AppenderSkeleton {
 	 * by default logging is off
 	 */
 	public void startLogging() {
-		PatternLayout layout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
-		setLayout(layout);
-		setName("ConsoleGUI");
-		LoggingFactory.getInstance().addAppender(this);
+		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		root.setLevel(ch.qos.logback.classic.Level.INFO);
+		root.addAppender(this);
+//		PatternLayout layout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
+//		setLayout(layout);
+//		setName("ConsoleGUI");
+//		LoggingFactory.getInstance().addAppender(this);
 		logging = true;
 	}
 
 	public void stopLogging() {
 		LoggingFactory.getInstance().removeAppender(this);
 		logging = false;
+	}
+
+	@Override
+	public boolean isStarted() {
+		// logging interface stuff
+		return logging;
+	}
+
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stop() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addError(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addError(String arg0, Throwable arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addInfo(String info) {
+		//  TODO: should we publish this info / invoke something?!
+		//invoke("publishLogEvent", info);
+	}
+
+	@Override
+	public void addInfo(String info, Throwable arg1) {
+		// TODO : should we invoke this publish method?
+		//invoke("publishLogEvent", info);
+		
+	}
+
+	@Override
+	public void addStatus(Status arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addWarn(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addWarn(String arg0, Throwable arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Context getContext() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setContext(Context arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addFilter(Filter<ILoggingEvent> arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void clearAllFilters() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<Filter<ILoggingEvent>> getCopyOfAttachedFiltersList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FilterReply getFilterChainDecision(ILoggingEvent arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void doAppend(ILoggingEvent loggingEvent) throws LogbackException {
+		//append(loggingEvent);
+		if (logging) {
+			String msg = String.format("[%s] %s", loggingEvent.getThreadName(), loggingEvent.toString()).trim();
+			textArea.append(msg + "\n");
+		}
+		
 	}
 }
