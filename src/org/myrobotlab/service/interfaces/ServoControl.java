@@ -70,9 +70,9 @@ public interface ServoControl {
 	 * the servo, to be used directly.
 	 */
 
-	// FIXME - deprecate - part of attach !
 	public boolean setController(ServoController controller);
 
+	
 	public boolean setController(String controller);
 
 	/**
@@ -90,7 +90,11 @@ public interface ServoControl {
 	 * @return
 	 */
 	public boolean setPin(int pin);
-
+	
+	/**
+	 * fractional speed settings
+	 * @param speed
+	 */
 	public void setSpeed(int speed);
 	public void setSpeed(double speed);
 
@@ -100,26 +104,5 @@ public interface ServoControl {
 	 */
 	public void stop();
 
-	/**
-	 * published event of a successful attach
-	 * 
-	 * @return
-	 */
-	// public ServoControl attached(ServoControl sc);
-
-	/**
-	 * published detach event
-	 * 
-	 * @return
-	 */
-	// public ServoControl detached(ServoControl sc);
-
-	/**
-	 * published event when the pin is sent
-	 * 
-	 * @param pin
-	 * @return
-	 */
-	// public int pinSet(int pin);
 
 }
