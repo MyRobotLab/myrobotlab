@@ -60,7 +60,6 @@ public interface ServoControl {
 	 * @param newPos
 	 */
 	public void moveTo(int newPos);
-	public void moveTo(double newPos);
 
 	/**
 	 * Attach a servo controller to the servo. The servo and servo controller

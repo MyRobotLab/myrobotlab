@@ -355,19 +355,19 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 			if (angleMap.containsKey(s)) {
 				if ("omoplate".equals(s)) {
 					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
-					omoplate.moveTo(angle);
+					omoplate.moveTo(angle.intValue());
 				}
 				if ("shoulder".equals(s)) {
 					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
-					shoulder.moveTo(angle);
+					shoulder.moveTo(angle.intValue());
 				}
 				if ("rotate".equals(s)) {
 					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
-					rotate.moveTo(angle);
+					rotate.moveTo(angle.intValue());
 				}
 				if ("bicep".equals(s)) {
 					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
-					bicep.moveTo(angle);
+					bicep.moveTo(angle.intValue());
 				}
 			}
 		}

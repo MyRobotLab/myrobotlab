@@ -111,19 +111,19 @@ public class Sweety extends Service {
 	int leftHandMax = 150;
 	int leftWristMax = 180;
 
-	Double leftForearmNeutral = 150.0;
-	Double rightForearmNeutral = 5.0;
-	Double rightShoulderNeutral = 2.0;
-	Double leftShoulderNeutral = 160.0;
-	Double rightArmNeutral = 2.0;
-	Double neckNeutral = 75.0;
-	Double leftEyeNeutral = 75.0;
-	Double leftArmNeutral = 155.0;
-	Double rightEyeNeutral = 127.0;
-	Double rightHandNeutral = 10.0;
-	Double rightWristNeutral = 116.0;
-	Double leftHandNeutral = 150.0;
-	Double leftWristNeutral = 85.0;
+	int leftForearmNeutral = 150;
+	int rightForearmNeutral = 5;
+	int rightShoulderNeutral = 2;
+	int leftShoulderNeutral = 160;
+	int rightArmNeutral = 2;
+	int neckNeutral = 75;
+	int leftEyeNeutral = 75;
+	int leftArmNeutral = 155;
+	int rightEyeNeutral = 127;
+	int rightHandNeutral = 10;
+	int rightWristNeutral = 116;
+	int leftHandNeutral = 150;
+	int leftWristNeutral = 85;
 	
 	// variables for speak / mouth sync
 	public int delaytime = 50;
@@ -246,7 +246,7 @@ public class Sweety extends Service {
 	 * Move the head . Use : head(neckAngle, rightEyeAngle, leftEyeAngle
 	 * -1 mean "no change"
 	 */
-	public void setHeadPosition(Double neckAngle, Double rightEyeAngle, Double leftEyeAngle) {
+	public void setHeadPosition(Integer neckAngle, Integer rightEyeAngle, Integer leftEyeAngle) {
 		
 		if (neckAngle == -1) {
 			neckAngle = neck.getPos();
@@ -267,7 +267,7 @@ public class Sweety extends Service {
 	 * Move the right arm . Use : leftArm(shoulder angle, arm angle, forearm
 	 * angle, wrist angle, hand angle) -1 mean "no change"
 	 */
-	public void setRightArmPosition(Double shoulderAngle, Double armAngle, Double forearmAngle, Double wristAngle, Double handAngle) {
+	public void setRightArmPosition(Integer shoulderAngle, Integer armAngle, Integer forearmAngle, Integer wristAngle, Integer handAngle) {
 
 // TODO protect against self collision
 		if (shoulderAngle == -1) {
@@ -298,7 +298,7 @@ public class Sweety extends Service {
 	 * Move the left arm . Use : leftArm(shoulder angle, arm angle, forearm
 	 * angle, wrist angle, hand angle) -1 mean "no change"
 	 */
-	public void setLeftArmPosition(Double shoulderAngle, Double armAngle, Double forearmAngle, Double wristAngle, Double handAngle) {
+	public void setLeftArmPosition(Integer shoulderAngle, Integer armAngle, Integer forearmAngle, Integer wristAngle, Integer handAngle) {
 // TODO protect against self collision with -> servoName.getPos()
 		if (shoulderAngle == -1) {
 			shoulderAngle = leftShoulder.getPos();
@@ -472,29 +472,29 @@ public class Sweety extends Service {
 		 */
 		 // TODO correct angles for posture 
 		else if (pos == "yes") {
-			setLeftArmPosition(0.0, 95.0, 136.0, 85.0, 150.0);
-			setRightArmPosition(155.0, 55.0, 5.0, 116.0, 10.0);
-			setHeadPosition(75.0, 127.0, 75.0);
+			setLeftArmPosition(0, 95, 136, 85, 150);
+			setRightArmPosition(155, 55, 5, 116, 10);
+			setHeadPosition(75, 127, 75);
 		} else if (pos == "concenter") {
-			setLeftArmPosition(37.0, 116.0, 85.0, 85.0, 150.0);
-			setRightArmPosition(109.0, 43.0, 54.0, 116.0, 10.0);
-			setHeadPosition(97.0, 127.0, 75.0);
+			setLeftArmPosition(37, 116, 85, 85, 150);
+			setRightArmPosition(109, 43, 54, 116, 10);
+			setHeadPosition(97, 127, 75);
 		} else if (pos == "showLeft") {
-			setLeftArmPosition(68.0, 63.0, 160.0, 85.0, 150.0);
-			setRightArmPosition(2.0, 76.0, 40.0, 116.0, 10.0);
-			setHeadPosition(85.0, 127.0, 75.0);
+			setLeftArmPosition(68, 63, 160, 85, 150);
+			setRightArmPosition(2, 76, 40, 116, 10);
+			setHeadPosition(85, 127, 75);
 		} else if (pos == "showRight") {
-			setLeftArmPosition(145.0, 79.0, 93.0, 85.0, 150.0);
-			setRightArmPosition(80.0, 110.0, 5.0, 116.0, 10.0);
-			setHeadPosition(75.0, 127.0, 75.0);
+			setLeftArmPosition(145, 79, 93, 85, 150);
+			setRightArmPosition(80, 110, 5, 116, 10);
+			setHeadPosition(75, 127, 75);
 		} else if (pos == "handsUp") {
-			setLeftArmPosition(0.0, 79.0, 93.0, 85.0, 150.0);
-			setRightArmPosition(155.0, 76.0, 40.0, 116.0, 10.0);
-			setHeadPosition(75.0, 127.0, 75.0);
+			setLeftArmPosition(0, 79, 93, 85, 150);
+			setRightArmPosition(155, 76, 40, 116, 10);
+			setHeadPosition(75, 127, 75);
 		} else if (pos == "carryBags") {
-			setLeftArmPosition(145.0, 79.0, 93.0, 85.0, 150.0);
-			setRightArmPosition(2.0, 76.0, 40.0, 116.0, 10.0);
-			setHeadPosition(75.0, 127.0, 75.0);
+			setLeftArmPosition(145, 79, 93, 85, 150);
+			setRightArmPosition(2, 76, 40, 116, 10);
+			setHeadPosition(75, 127, 75);
 		}
 
 	}
@@ -783,18 +783,18 @@ public class Sweety extends Service {
 		}
 		// TODO correct angles for shoulders
 		
-		double LforeArm = Math.round(skeleton.leftElbow.getAngleXY()) - (180 - leftForearmMax);
-		double Larm = Math.round(skeleton.leftShoulder.getAngleXY()) - (180 - leftArmMax);
-		double Lshoulder = Math.round(skeleton.leftShoulder.getAngleYZ()) + leftShoulderMin;
-		double RforeArm = Math.round(skeleton.rightElbow.getAngleXY()) + rightForearmMin;
-		double Rarm = Math.round(skeleton.rightShoulder.getAngleXY()) + rightArmMin;
-		double Rshoulder = Math.round(skeleton.rightShoulder.getAngleYZ()) - (180 - rightShoulderMax);
+		int LforeArm = Math.round(skeleton.leftElbow.getAngleXY()) - (180 - leftForearmMax);
+		int Larm = Math.round(skeleton.leftShoulder.getAngleXY()) - (180 - leftArmMax);
+		int Lshoulder = Math.round(skeleton.leftShoulder.getAngleYZ()) + leftShoulderMin;
+		int RforeArm = Math.round(skeleton.rightElbow.getAngleXY()) + rightForearmMin;
+		int Rarm = Math.round(skeleton.rightShoulder.getAngleXY()) + rightArmMin;
+		int Rshoulder = Math.round(skeleton.rightShoulder.getAngleYZ()) - (180 - rightShoulderMax);
 		
 		// Move the left side
-		setLeftArmPosition(Lshoulder, Larm, LforeArm, -1.0, -1.0);
+		setLeftArmPosition(Lshoulder, Larm, LforeArm, -1, -1);
 
 		// Move the left side
-		setRightArmPosition(Rshoulder, Rarm, RforeArm, -1.0, -1.0);
+		setRightArmPosition(Rshoulder, Rarm, RforeArm, -1, -1);
 		}
 
 }
