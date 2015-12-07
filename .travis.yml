@@ -19,6 +19,7 @@ deploy:
   local_dir: dist
   # local_dir: build/report
   acl: 'public_read'
-  # s3 deploy end
-  # on:
-  # branch: develop
+  deployment_group: s3 group
+      on:
+        all_branches: true
+        # s3 deploy end
