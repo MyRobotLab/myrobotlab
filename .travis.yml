@@ -14,10 +14,11 @@ deploy:
     secure: W8HJgOUEt/d+C+1zeD+Znum0Yso8LLZ9eV8rUrYH2MIVl5dCcH+WaGwhLompNOAUbWYhjcr8Rn/SLqvCEcVWe651R4pwHiD0KNfDUwp907Ic/efluCd/T6RjCG7pjbE5bdPIeZjyupMcZMHU4aW7YN6QE1UlVPhDFKQlU84iGsc=
   bucket: mrl-bucket-01
   skip_cleanup: true
-  upload-dir: dist
+  upload-dir: current
   # travis will only copy 1 dir
   local_dir: dist
   # local_dir: build/report
   acl: 'public_read'
   # s3 deploy end
-  
+  on:
+  	branch: develop
