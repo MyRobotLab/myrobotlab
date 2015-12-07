@@ -1,10 +1,16 @@
 package org.myrobotlab.document.transformer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will remove all but the first value from a field
+ * on a document.  
+ * 
+ * @author kwatters
+ *
+ */
 public class TruncateFieldValues extends AbstractStage {
 
 	private int numValues = 1;
@@ -13,6 +19,13 @@ public class TruncateFieldValues extends AbstractStage {
 	
 	@Override
 	public void startStage(StageConfiguration config) {
+		
+		if (config != null) {
+			inputField = config.getProperty("inputField");
+			outputField = config.getProperty("outputField");
+			numValues = Integer.valueOf(config.getProperty("numValues", "1"));
+		}
+		
 		// no op
 		if (outputField == null) {
 			outputField = inputField;

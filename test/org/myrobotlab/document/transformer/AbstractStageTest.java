@@ -1,8 +1,10 @@
 package org.myrobotlab.document.transformer;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.document.Document;
 
+@Ignore
 public abstract class AbstractStageTest {
 	
 	public abstract Document createDocument();

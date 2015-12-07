@@ -15,7 +15,12 @@ public class DictionaryLookup extends AbstractStage {
 	
 	@Override
 	public void startStage(StageConfiguration config) {
-		// TODO Auto-generated method stub
+		
+		if (config != null) {
+			inputField = config.getProperty("inputField", "text");
+			outputField = config.getProperty("outputField", "entity");
+			dictionaryFile = config.getProperty("dictionaryFile", "mydict.csv");
+		}
 		try {
 			dictionary = DictionaryLoader.getInstance().loadDictionary(dictionaryFile);
 		} catch (IOException e) {

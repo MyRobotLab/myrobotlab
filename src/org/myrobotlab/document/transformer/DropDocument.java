@@ -23,9 +23,10 @@ public class DropDocument extends AbstractStage {
 	
 	@Override
 	public void startStage(StageConfiguration config) {
-		// TODO Auto-generated method stub
-		field = config.getProperty("field", null);
-		value = config.getProperty("value", null);
+		if (config != null) {
+			field = config.getProperty("field", null);
+			value = config.getProperty("value", null);
+		}
 	}
 
 	@Override

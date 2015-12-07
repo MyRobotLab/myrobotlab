@@ -16,10 +16,9 @@ import org.myrobotlab.framework.Service;
 public class DocumentPipeline extends Service implements DocumentListener,DocumentPublisher {
 
 	private static final long serialVersionUID = 1L;
-	private String rssUrl = "http://www.myrobotlab.org/rss.xml";
 	
 	private WorkflowConfiguration config;
-	private WorkflowServer workflowServer;
+	private transient WorkflowServer workflowServer;
 	private String workflowName = "default";
 	
 	public DocumentPipeline(String reservedKey) {
@@ -36,14 +35,6 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 	public String getDescription() {
 		// TODO Auto-generated method stub
 		return "This service will pass a document through a document processing pipeline made up of transformers.";
-	}
-
-	public String getRssUrl() {
-		return rssUrl;
-	}
-
-	public void setUrl(String rssUrl) {
-		this.rssUrl = rssUrl;
 	}
 
 	private void setConfig(WorkflowConfiguration workflowConfig) {

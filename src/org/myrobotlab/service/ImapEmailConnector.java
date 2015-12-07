@@ -40,7 +40,7 @@ public class ImapEmailConnector extends AbstractConnector {
 	private String password;
 	private String folderName = "INBOX";
 	private String docIdPrefix = "email_";
-	private Store store;
+	private transient Store store;
 
 	public ImapEmailConnector(String name) {
 		super(name);
