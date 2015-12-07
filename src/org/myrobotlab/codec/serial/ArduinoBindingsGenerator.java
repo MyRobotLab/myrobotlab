@@ -25,6 +25,8 @@ public class ArduinoBindingsGenerator {
 	static StringBuilder inoTemplate = new StringBuilder("///// INO GENERATED DEFINITION BEGIN //////\n");
 	static StringBuilder pythonTemplate = new StringBuilder("##### PYTHON GENERATED DEFINITION BEGIN ######\n");
 
+	static StringBuilder javaStaticImports = new StringBuilder("\t///// java static import definition - DO NOT MODIFY - Begin //////\n");
+
 	static StringBuilder javaDefines = new StringBuilder("\t///// java ByteToMethod generated definition - DO NOT MODIFY - Begin //////\n");
 	static StringBuilder javaBindingsInit = new StringBuilder();
 
@@ -44,6 +46,7 @@ public class ArduinoBindingsGenerator {
 			msb.append(String.format(" %s", params[j].getSimpleName()));
 		}
 
+		
 		String methodSignatureComment = String.format("// {%s} \n", msb.toString());
 		String pythonSignatureComment = String.format("  # {%s} \n", msb.toString());
 
@@ -53,6 +56,7 @@ public class ArduinoBindingsGenerator {
 		inoTemplate.append(String.format("#define %s\t\t%d\n\n", underscore, index));
 		pythonTemplate.append(String.format("  %s = %d\n\n", underscore, index));
 
+		javaStaticImports.append(String.format("\timport static org.myrobotlab.codec.serial.ArduinoMsgCodec.%s;\n", underscore));
 		javaDefines.append(String.format("\t%s", methodSignatureComment));
 		javaDefines.append(String.format("\tpublic final static int %s =\t\t%d;\n\n", underscore, index));
 		javaBindingsInit.append(String.format("\t\tbyteToMethod.put(%s,\"%s\");\n", underscore, method.getName()));
@@ -104,6 +108,7 @@ public class ArduinoBindingsGenerator {
 		exclude.add("disconnect");
 		exclude.add("getDescription");
 		exclude.add("createPinList");
+		exclude.add("getServoIndex");
 		exclude.add("getBoardType");
 		exclude.add("getCategories");
 		exclude.add("getPeers");
@@ -119,6 +124,8 @@ public class ArduinoBindingsGenerator {
 		exclude.add("setBoardType");
 		exclude.add("startService");
 		exclude.add("test");
+		exclude.add("attach");
+		exclude.add("detach");
 
 		// additionally force getversion and publishMRLCommError
 		// so that mis-matches of version are quickly reported...
@@ -170,6 +177,9 @@ public class ArduinoBindingsGenerator {
 		inoTemplate.append("///// INO GENERATED DEFINITION END //////\n");
 		inoTemplate.append("##### PYTHON GENERATED DEFINITION END #####\n");
 
+		
+		
+		snr.put("<%=javaStaticImports%>", javaStaticImports.toString());
 		snr.put("<%=java.defines%>", javaDefines.toString());
 		snr.put("<%=java.bindings.init%>", javaBindingsInit.toString());
 		snr.put("<%=mrlcomm.defines%>", inoTemplate.toString());

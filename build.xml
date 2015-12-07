@@ -96,6 +96,9 @@
 
 	<!-- set global properties for this build -->
 
+	<!-- the all powerful branch property -->
+	<property name="branch" value="develop"/>
+
 	<property name="fs" location="${file.separator}" />
 	<!-- the source code for release -->
 	<property name="src" location="src" />
@@ -109,7 +112,9 @@
 	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
 	<property name="result.report.dir" location="${report}/jacoco" />
 	<!-- directory for the distrbituion to go into -->
-	<property name="dist" location="dist" />
+	<property name="dist" location="dist/${branch}" />
+	
+	
 	<available file="${build}/classes/resource/license" property="license.present" />
 	<property name="repo" location="../repo" />
 	<tstamp />
@@ -425,7 +430,7 @@
 		</exec>
 	</target>
 	<target name="repoDoesNotExists" depends="repoCheck" if="git.clone">
-		<echo message="git clone --branch=develop https://github.com/MyRobotLab/repo.git ${repo}" />
+		<echo message="git clone --branch=${branch} https://github.com/MyRobotLab/repo.git ${repo}" />
 		<exec executable="git">
 			<arg value="clone" />
 			<arg value="https://github.com/MyRobotLab/repo.git" />
@@ -435,18 +440,18 @@
 
 	<!-- TODO: Consider moving this ... and get rid of it , but it will require dep management -->
 	<target name="repoClone">
-		<echo message="git clone --depth=1 --branch=develop https://github.com/MyRobotLab/repo.git ${repo}" />
+		<echo message="git clone --depth=1 --branch=${branch} https://github.com/MyRobotLab/repo.git ${repo}" />
 		<exec executable="git">
 			<arg value="clone" />
 			<arg value="--depth=1" />
-			<arg value="--branch=develop" />
+			<arg value="--branch=${branch}" />
 			<arg value="https://github.com/MyRobotLab/repo.git" />
 			<arg value="${repo}" />
 		</exec>
 	</target>
 	<!-- =============== repo end  =============== -->
 	<!-- TODO - work on removing these 3rd party dependencies -->
-	<target name="unzip" unless="${license.present}" description="unzip various jar files to be included into the myrobotlab.jar">
+	<target name="unzip" description="unzip various jar files to be included into the myrobotlab.jar">
 		<echo>unzipping dependencies</echo>
 		<echo message="${license.present}" />
 
@@ -593,6 +598,7 @@
 		<echo message="${upload_url}" />
 	</target>
 
+	<!-- release to github -->
 	<target name="release" depends="compile, getAssetsURL">
 		<echo message="creating tag" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">

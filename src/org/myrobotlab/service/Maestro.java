@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 
+import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -82,52 +83,69 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 	}
 
 	@Override
-	public boolean servoAttach(String servoName, Integer pin) {
+	public void attach(String name) throws MRLException {
 		// TODO Auto-generated method stub
-
-		return false;
+		
 	}
 
 	@Override
-	public boolean servoDetach(String servoName) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void servoSweepStart(String servoName, int min, int max, int step) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void servoSweepStop(String servoName) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void servoWrite(String servoName, Integer newPos) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void servoWriteMicroseconds(String name, Integer ms) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean setServoEventsEnabled(String servoName, boolean b) {
+	public boolean detach(String name) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public void setServoSpeed(String servoName, Float speed) {
+	public boolean connect(String port) {
 		// TODO Auto-generated method stub
+		return false;
+	}
 
+	@Override
+	public boolean servoAttach(Servo servo) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean servoDetach(Servo servo) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void servoSweepStart(Servo servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void servoSweepStop(Servo servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void servoWrite(Servo servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void servoWriteMicroseconds(Servo servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean setServoEventsEnabled(Servo servo) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setServoSpeed(Servo servo) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

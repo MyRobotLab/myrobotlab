@@ -98,8 +98,10 @@ public class Motor_ArduinoGUI extends MotorControllerPanel implements ActionList
 
 	@Override
 	public void set(Motor motor) {
+		/*
 		powerPin.setSelectedItem(String.format("%d", motor.pwmPin));
 		directionPin.setSelectedItem(String.format("%d", motor.dirPin));
+		*/
 	}
 
 	@Override

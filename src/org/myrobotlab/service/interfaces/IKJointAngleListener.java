@@ -6,6 +6,6 @@ public interface IKJointAngleListener {
 	
 	public String getName();
 
-	public void onJointAngles(Map<String, Float> angleMap);
+	public void onJointAngles(Map<String, Double> angleMap);
 	
 }

@@ -467,22 +467,22 @@ public class InMoov extends Service {
 
 	public void fullSpeed() {
 		if (head != null) {
-			head.setSpeed(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+			head.setSpeed(1.0, 1.0, 1.0, 1.0, 1.0);
 		}
 		if (rightHand != null) {
-			rightHand.setSpeed(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+			rightHand.setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 		}
 		if (leftHand != null) {
-			leftHand.setSpeed(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+			leftHand.setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 		}
 		if (rightArm != null) {
-			rightArm.setSpeed(1.0f, 1.0f, 1.0f, 1.0f);
+			rightArm.setSpeed(1.0, 1.0, 1.0, 1.0);
 		}
 		if (leftArm != null) {
-			leftArm.setSpeed(1.0f, 1.0f, 1.0f, 1.0f);
+			leftArm.setSpeed(1.0, 1.0, 1.0, 1.0);
 		}
 		if (torso != null) {
-			torso.setSpeed(1.0f, 1.0f, 1.0f);
+			torso.setSpeed(1.0, 1.0, 1.0);
 		}
 	}
 
@@ -601,11 +601,11 @@ public class InMoov extends Service {
 	// ------ composites servos begin -----------
 
 	public void hello() {
-		setHeadSpeed(1.0f, 1.0f);
-		setArmSpeed("left", 1.0f, 1.0f, 1.0f, 1.0f);
-		setArmSpeed("right", 1.0f, 1.0f, 1.0f, 1.0f);
-		setHandSpeed("left", 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-		setHandSpeed("right", 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		setHeadSpeed(1.0, 1.0);
+		setArmSpeed("left", 1.0, 1.0, 1.0, 1.0);
+		setArmSpeed("right", 1.0, 1.0, 1.0, 1.0);
+		setHandSpeed("left", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+		setHandSpeed("right", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 		moveHead(105, 78);
 		moveArm("left", 78, 48, 37, 10);
 		moveArm("right", 90, 144, 60, 75);
@@ -876,7 +876,7 @@ public class InMoov extends Service {
 		return true;
 	}
 
-	public void setArmSpeed(String which, Float bicep, Float rotate, Float shoulder, Float omoplate) {
+	public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
 		if (!arms.containsKey(which)) {
 			error("setArmSpeed %s does not exist", which);
 		} else {
@@ -884,11 +884,11 @@ public class InMoov extends Service {
 		}
 	}
 
-	public void setHandSpeed(String which, Float thumb, Float index, Float majeure, Float ringFinger, Float pinky) {
+	public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
 		setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
 	}
 
-	public void setHandSpeed(String which, Float thumb, Float index, Float majeure, Float ringFinger, Float pinky, Float wrist) {
+	public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
 		if (!hands.containsKey(which)) {
 			error("setHandSpeed %s does not exist", which);
 		} else {
@@ -896,11 +896,11 @@ public class InMoov extends Service {
 		}
 	}
 
-	public void setHeadSpeed(Float rothead, Float neck) {
+	public void setHeadSpeed(Double rothead, Double neck) {
 		setHeadSpeed(rothead, neck, null, null, null);
 	}
 
-	public void setHeadSpeed(Float rothead, Float neck, Float eyeXSpeed, Float eyeYSpeed, Float jawSpeed) {
+	public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
 		if (head != null) {
 			head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
 		} else {
@@ -912,7 +912,7 @@ public class InMoov extends Service {
 		this.mute = mute;
 	}
 
-	public void setTorsoSpeed(Float topStom, Float midStom, Float lowStom) {
+	public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
 		if (torso != null) {
 			torso.setSpeed(topStom, midStom, lowStom);
 		} else {
@@ -1291,7 +1291,7 @@ public class InMoov extends Service {
 		if (headTracking == null) {
 			error("attach head before tracking");
 		} else {
-			headTracking.trackPoint(0.5f, 0.5f);
+			headTracking.trackPoint(0.5, 0.5);
 		}
 	}
 
@@ -1309,12 +1309,12 @@ public class InMoov extends Service {
 
 		if (eyesTracking != null) {
 			eyesTracking.startLKTracking();
-			eyesTracking.trackPoint(0.5f, 0.5f);
+			eyesTracking.trackPoint(0.5, 0.5);
 		}
 
 		if (headTracking != null) {
 			headTracking.startLKTracking();
-			headTracking.trackPoint(0.5f, 0.5f);
+			headTracking.trackPoint(0.5, 0.5);
 		}
 	}
 

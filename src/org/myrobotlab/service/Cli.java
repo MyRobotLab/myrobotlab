@@ -72,7 +72,8 @@ public class Cli extends Service {
 
 	transient StreamGobbler attachedOut = null;
 	
-	
+	// =================  Decoder Begin ================= 
+
 
 	// FIXME - needs refactor / merge with StreamGobbler
 	// FIXME - THIS CONCEPT IS SOOOOOO IMPORTANT
@@ -152,7 +153,7 @@ public class Cli extends Service {
 						// TODO dump json command object
 						// which has a map of commands
 					} else if (line.startsWith(pwd)) {
-						out(cwd.getBytes());
+						out(String.format("%s\n", cwd).getBytes());
 					} else if (line.startsWith(ls)) {
 						String path = cwd; // <-- path =
 						if (line.length() > 3) {
@@ -232,6 +233,8 @@ public class Cli extends Service {
 
 
 	}
+	
+	// =================  Decoder End ================= 
 	
 	public void writePrompt() throws IOException {
 		out(getPrompt().getBytes());
@@ -537,14 +540,14 @@ public class Cli extends Service {
 
 		if (path.equals("/")) {
 			// FIXME don't do this here !!!
-			out(CodecUtils.toJson(Runtime.getServiceNames()).toString().getBytes());
+			out(String.format("%s\n", CodecUtils.toJson(Runtime.getServiceNames()).toString()).getBytes());
 		} else if (parts.length == 2 && !path.endsWith("/")) {
 			// FIXME don't do this here !!!
-			out(CodecUtils.toJson(Runtime.getService(parts[1])).toString().getBytes());
+			out(String.format("%s\n", CodecUtils.toJson(Runtime.getService(parts[1])).toString()).getBytes());
 		} else if (parts.length == 2 && path.endsWith("/")) {
 			ServiceInterface si = Runtime.getService(parts[1]);
 			// FIXME don't do this here !!!
-			out(CodecUtils.toJson(si.getDeclaredMethodNames()).toString().getBytes());
+			out(String.format("%s\n", CodecUtils.toJson(si.getDeclaredMethodNames()).toString()).getBytes());
 		}
 
 		// if path == /serviceName - json return ? Cool !

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -323,24 +324,6 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 		return serial;
 	}
 
-	// --- MotorController interface begin ----
-	@Override
-	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin, Integer encoderPin) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void motorMoveTo(String name, double position) {
-		// TODO Auto-generated method stub
-
-	}
 
 	void setBaudRate(int baudRate) {
 
@@ -426,4 +409,48 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 			Logging.logError(e);
 		}
 	}
+
+	@Override
+	public void attach(String name) throws MRLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean detach(String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void motorAttach(Motor motor) throws MRLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean motorDetach(Motor motor) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void motorMove(Motor motor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void motorMoveTo(Motor motor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void motorStop(Motor motor) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	///////////// start new methods /////////////////
 }

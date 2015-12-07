@@ -23,11 +23,11 @@ public class LoggingSLF4J extends Logging {
 
 	@Override
 	public void addAppender(String type) {
-		addAppender(type, null, null);
+		addAppender(type, null);
 	}
 
 	@Override
-	public void addAppender(String type, String host, String port) {
+	public void addAppender(String type, String filename) {
 
 		// OutputStreamAppender<E>
 		// ConsoleAppender, FileAppender

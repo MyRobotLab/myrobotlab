@@ -14,8 +14,6 @@ public abstract class Logging {
 
 	public static boolean performanceTiming = false;
 
-	// public static HashMap<String, Long> timerMap = null;
-
 	public final static String logError(final Throwable e) {
 		String ret = stackToString(e);
 		log.error(ret);
@@ -63,7 +61,7 @@ public abstract class Logging {
 
 	public abstract void addAppender(String type);
 
-	public abstract void addAppender(String type, String host, String port);
+	public abstract void addAppender(String type, String filename);
 
 	public abstract void configure(); // a basic configuration
 

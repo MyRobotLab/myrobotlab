@@ -87,33 +87,6 @@ public class XMPP extends Service implements Gateway, MessageListener {
 	HashSet<String> allowCommandsFrom = new HashSet<String>();
 	transient HashMap<String, Chat> chats = new HashMap<String, Chat>();
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-
-			int i = 1;
-			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
-			XMPP xmpp1 = (XMPP) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
-			Runtime.createAndStart(String.format("clock%d", i), "Clock");
-			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
-			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "xxxxxxx");
-			xmpp1.addAuditor("Ma. Vo.");
-			xmpp1.sendMessage("Ma. Vo. - xmpp test", "Ma. Vo.");
-			// xmpp1.send("Ma. Vo.", "xmpp test");
-			// xmpp1.sendMessage("hello from incubator by name " +
-			// System.currentTimeMillis(), "Greg Perry");
-			xmpp1.sendMessage("xmpp 2", "robot02 02");
-			if (true) {
-				return;
-			}
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
 
 	public XMPP(String n) {
 		super(n);
@@ -160,7 +133,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		try {
 
 			if (config == null) {
-				SASLAuthentication.supportSASLMechanism("PLAIN");
+				SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 				// SASLAuthentication.registerSASLMechanism("DIGEST-MD5",
 				// SASLDigestMD5Mechanism.class);
 				// SASLAuthentication.supportSASLMechanism("DIGEST-MD5", 0);
@@ -172,6 +145,12 @@ public class XMPP extends Service implements Gateway, MessageListener {
 				// "gmail.com");
 				// config.setTruststoreType("BKS");
 				// TODO - look for security keys "myName" user & myName password
+				
+				/*
+				SASLAuthentication.unBlacklistSASLMechanism("PLAIN");
+				SASLAuthentication.blacklistSASLMechanism("DIGEST-MD5");
+				*/
+				
 				config = new ConnectionConfiguration(hostname, 5222, "gmail.com");
 			}
 
@@ -714,5 +693,34 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		super.stopService();
 		disconnect();
 	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+
+			int i = 1;
+			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
+			XMPP xmpp1 = (XMPP) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
+			Runtime.createAndStart(String.format("clock%d", i), "Clock");
+			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
+			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "mrlRocks!");
+			xmpp1.addAuditor("Ma. Vo.");
+			xmpp1.sendMessage("Ma. Vo. - xmpp test", "Ma. Vo.");
+			// xmpp1.send("Ma. Vo.", "xmpp test");
+			// xmpp1.sendMessage("hello from incubator by name " +
+			// System.currentTimeMillis(), "Greg Perry");
+			xmpp1.sendMessage("xmpp 2", "robot02 02");
+			if (true) {
+				return;
+			}
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 
 }

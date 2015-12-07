@@ -111,8 +111,8 @@ public class Tracking extends Service {
 	// MRL points
 	public Point2Df lastPoint = new Point2Df();
 
-	private float lastXServoPos;
-	private float lastYServoPos;
+	private Double lastXServoPos;
+	private Double lastYServoPos;
 
 	// ----- INITIALIZATION DATA BEGIN -----
 	public double xSetpoint = 0.5;
@@ -359,8 +359,8 @@ public class Tracking extends Service {
 		x.rest();
 		y.rest();
 
-		lastXServoPos = x.getPosFloat();
-		lastYServoPos = y.getPosFloat();
+		lastXServoPos = x.getPos();
+		lastYServoPos = y.getPos();
 	}
 
 	public void scan() {
@@ -437,7 +437,7 @@ public class Tracking extends Service {
 				faceFoundFrameCount = 0;
 
 				if (scan) {
-					int xpos = x.getPos();
+					double xpos = x.getPos();
 
 					if (xpos + scanXStep >= x.getMax() && scanXStep > 0 || xpos + scanXStep <= x.getMin() && scanXStep < 0) {
 						scanXStep = scanXStep * -1;
@@ -459,7 +459,7 @@ public class Tracking extends Service {
 
 		// FIXME - remove not used
 		case STATE_FACE_DETECT_LOST_TRACK:
-			int xpos = x.getPos();
+			double xpos = x.getPos();
 
 			if (xpos >= x.getMax() && scanXStep > 0) {
 				scanXStep = scanXStep * -1;
@@ -559,10 +559,10 @@ public class Tracking extends Service {
 	}
 
 	public void trackPoint() {
-		trackPoint(0.5f, 0.5f);
+		trackPoint(0.5, 0.5);
 	}
 
-	public void trackPoint(float x, float y) {
+	public void trackPoint(Double x, Double y) {
 
 		if (!STATE_LK_TRACKING_POINT.equals(state)) {
 			startLKTracking();
@@ -594,8 +594,8 @@ public class Tracking extends Service {
 
 		pid.setInput("x", targetPoint.x);
 		pid.setInput("y", targetPoint.y);
-		int currentXServoPos = x.getPos();
-		int currentYServoPos = y.getPos();
+		double currentXServoPos = x.getPos();
+		double currentYServoPos = y.getPos();
 
 		// TODO - work on removing currentX/YServoPos - and use the servo's
 		// directly ???

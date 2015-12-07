@@ -1,5 +1,6 @@
 	/////// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
-	
+<%=javaStaticImports%>
+
 <%=java.defines%>
 	static {
 <%=java.bindings.init%>

@@ -25,25 +25,15 @@
 
 package org.myrobotlab.service.interfaces;
 
-import java.util.ArrayList;
+import org.myrobotlab.service.Servo;
 
-import org.myrobotlab.service.data.Pin;
 
-public interface ServoController {
+public interface ServoController extends NameProvider, MicrocontrollerPeripheral {
 
 	public final static String servoWrite = "servoWrite";
 	public final static String servoAttach = "servoAttach";
 	public final static String servoDetach = "servoDetach";
 
-	public String getName();
-
-	/**
-	 * a list of pins from the controller which might be applicable for
-	 * controlling a Servo
-	 * 
-	 * @return
-	 */
-	public ArrayList<Pin> getPinList();
 
 	/**
 	 * servoAttach - attach the servo to a specific pin on the controller
@@ -54,7 +44,7 @@ public interface ServoController {
 	 *            - pin number
 	 * @return boolean boolean
 	 */
-	public boolean servoAttach(String servoName, Integer pin);
+	public boolean servoAttach(Servo servo);
 
 	/**
 	 * servoDetach - detach the servo from a specific pin on the controller
@@ -63,11 +53,11 @@ public interface ServoController {
 	 *            - name of the servo
 	 * @return boolean
 	 */
-	boolean servoDetach(String servoName);
+	boolean servoDetach(Servo servo);
 
-	void servoSweepStart(String servoName, int min, int max, int step);
+	void servoSweepStart(Servo servo);
 
-	public void servoSweepStop(String servoName);
+	public void servoSweepStop(Servo servo);
 
 	/**
 	 * servoWrite - move the servo at an angle between 0 - 180
@@ -78,11 +68,11 @@ public interface ServoController {
 	 *            - positive or negative relative amount to move the servo
 	 * @return void
 	 */
-	void servoWrite(String servoName, Integer newPos);
+	void servoWrite(Servo servo);
 
-	public void servoWriteMicroseconds(String name, Integer ms);
+	public void servoWriteMicroseconds(Servo servo);
 
-	public boolean setServoEventsEnabled(String servoName, boolean b);
+	public boolean setServoEventsEnabled(Servo servo);
 
 	/**
 	 * return the current pin this servo is attached to
@@ -92,6 +82,6 @@ public interface ServoController {
 	 */
 	// public Integer getServoPin(String servoName);
 
-	public void setServoSpeed(String servoName, Float speed);
+	public void setServoSpeed(Servo servo);
 
 }

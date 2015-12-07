@@ -25,38 +25,26 @@
 
 package org.myrobotlab.service.interfaces;
 
-import java.util.ArrayList;
+import org.myrobotlab.framework.MRLException;
+import org.myrobotlab.service.Motor;
 
-import org.myrobotlab.service.data.Pin;
+public interface MotorController extends NameProvider, MicrocontrollerPeripheral {
 
-public interface MotorController {
-
-	public String getName();
-
+	
 	/**
-	 * This is basic information to request from a Controller. A list of pins on
-	 * the controller so GUIs or other services can figure out if there are any
-	 * appropriate
+	 * typed motorAttach, typed for a reason - the Motor's attach should always be used
+	 * any of the following methods expect the Motor to be valid and filled with the
+	 * appropriate data by the time it's "attached" to the motor controller, so....
+	 * the only parameter needed is the motor
 	 * 
-	 * @return
+	 * @param motor
+	 * @throws MRLException
 	 */
-	public ArrayList<Pin> getPinList();
+	public void motorAttach(Motor motor) throws MRLException;
+	
+	// ========  new interface end ===================
 
-	/**
-	 * Remote attachment activation - used by services not in the same instance
-	 * to attach a Motor to a MotorController
-	 * 
-	 * @param motorName
-	 * @param motorData
-	 */
-	// public boolean motorAttach(String motorName, Object... motorData);
-
-	public boolean motorAttach(String motorName, Integer pwmPin, Integer dirPin);
-
-	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin);
-
-	public boolean motorAttach(String motorName, String type, Integer pwmPin, Integer dirPin, Integer encoderPin);
-
+	
 	/**
 	 * MotorDetach - detach the Motor from a specific pin on the controller
 	 * 
@@ -64,7 +52,7 @@ public interface MotorController {
 	 *            - name of the Motor
 	 * @return void
 	 */
-	public boolean motorDetach(String name);
+	public boolean motorDetach(Motor motor);
 
 	/**
 	 * 
@@ -74,7 +62,7 @@ public interface MotorController {
 	 * 
 	 * @param name
 	 */
-	public void motorMove(String name);
+	public void motorMove(Motor motor);
 
 	/**
 	 * moveTo - move the Motor a relative amount the amount can be negative or
@@ -86,6 +74,9 @@ public interface MotorController {
 	 *            - positive or negative absolute amount to move the Motor
 	 * @return void
 	 */
-	public void motorMoveTo(String name, double position);
+	public void motorMoveTo(Motor motor);
+
+	void motorStop(Motor motor);
+
 
 }

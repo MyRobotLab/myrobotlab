@@ -11,6 +11,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -152,7 +153,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 			Stepper stepper1 = fruity.createStepper(200, 1);
 
 			// FIXME - needs to be cleaned up - tear down
-			fruity.releaseStepper(stepper1.getName());
+			//fruity.releaseStepper(stepper1.getName());
 
 			// Runtime.createAndStart("python", "Python");
 		} catch (Exception e) {
@@ -186,6 +187,8 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		// arduinoName; FIXME - get clear on diction Program Script or Sketch
 		StringBuffer newProgram = new StringBuffer();
 		newProgram.append(arduino.getSketch());
+		
+		/*
 
 		// modify the program
 		int insertPoint = newProgram.indexOf(Arduino.VENDOR_DEFINES_BEGIN);
@@ -217,7 +220,8 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 			// get info back to user
 			return false;
 		}
-
+		*/
+		
 		// set the program
 		Sketch sketch = new Sketch("AdafruitMotorShield", newProgram.toString());
 		arduino.setSketch(sketch);
@@ -304,105 +308,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		return arduino != null;
 	}
 
-	@Override
-	public boolean motorAttach(String motorName, Integer pwrPin, Integer dirPin) {
-		return motorAttach(motorName, Motor.TYPE_PWM_DIR, pwrPin, dirPin, null);
-	}
-
-	// ----------- AFMotor API End --------------
-
-	@Override
-	public boolean motorAttach(String motorName, String type, Integer pwrPin, Integer dirPin) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	// public static final String ADAFRUIT_SCRIPT_TYPE = "#define SCRIPT_TYPE "
-	// TODO
-
-	@Override
-	public boolean motorAttach(String motorName, String type, Integer pwrPin, Integer dirPin, Integer encoderPin) {
-		ServiceInterface sw = Runtime.getService(motorName);
-		if (!sw.isLocal()) {
-			error("motor needs to be in same instance of mrl as controller");
-			return false;
-		}
-
-		Motor m = (Motor) sw;
-		m.setController(this);
-		m.broadcastState();
-		return true;
-	}
-
-	@Override
-	public boolean motorDetach(String data) {
-		return false;
-
-	}
-
-	@Override
-	public void motorMove(String name) {
-
-		// a bit weird indirection - but this would support
-		// adafruit to be attached to motors defined outside of
-		// initialization
-		MotorControl mc = (MotorControl) Runtime.getService(name);
-		double pwr = mc.getPowerLevel();
-		int pwm = (int) (pwr * 255);
-		int motorPortNumber = deviceNameToNumber.get(name);
-
-		if (pwr > 0) {
-			runForward(motorPortNumber, pwm);
-		} else if (pwr < 0) {
-			runBackward(motorPortNumber, -1 * pwm);
-		} else {
-			stop(motorPortNumber);
-		}
-
-	}
-
-	@Override
-	public void motorMoveTo(String name, double position) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void releaseDCMotor(String motorName) {
-		if (!motors.containsKey(motorName)) {
-			error("motor %s does not exist", motorName);
-		}
-
-		Motor m = motors.remove(motorName);
-		m.releaseService();
-		deviceNameToNumber.remove(motorName);
-	}
-
-	// FIXME - release releases electrical connection
-	// detach remove object from memory and "releases" service
-	public void releaseStepper(String stepperName) {
-		if (!steppers.containsKey(stepperName)) {
-			error("stepper %s does not exist", stepperName);
-		}
-
-		Stepper m = steppers.remove(stepperName);
-		m.releaseService();
-		deviceNameToNumber.remove(stepperName);
-	}
-
-	public void run(Integer motorPortNumber, Integer command) {
-		arduino.sendMsg(AF_DCMOTOR_RUN_COMMAND, motorPortNumber - 1, command);
-	}
-
-	public void runBackward(Integer motorPortNumber, Integer speed) {
-		setSpeed(motorPortNumber, speed);
-		run(motorPortNumber, BACKWARD);
-	}
-
-	public void runForward(Integer motorPortNumber, Integer speed) {
-		setSpeed(motorPortNumber, speed);
-		run(motorPortNumber, FORWARD);
-	}
-
+	
 	// MotorController end ----
 	// StepperController begin ----
 
@@ -462,11 +368,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 
 	}
 
-	public void stop(Integer motorPortNumber) {
-		// setSpeed(motorNumber, speed);
-		run(motorPortNumber, RELEASE);
-	}
-
 	@Override
 	public void stepperMoveTo(String name, int pos, int style) {
 		// TODO Auto-generated method stub
@@ -475,6 +376,48 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 
 	@Override
 	public void stepperStop(String name) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void attach(String name) throws MRLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean detach(String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void motorAttach(Motor motor) throws MRLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean motorDetach(Motor motor) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void motorMove(Motor motor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void motorMoveTo(Motor motor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void motorStop(Motor motor) {
 		// TODO Auto-generated method stub
 		
 	}

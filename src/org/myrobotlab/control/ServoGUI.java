@@ -217,15 +217,15 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 					pin.setEnabled(true);
 				}
 
-				if (servo.getPosFloat() == null) {
+				if (servo.getPos() == null) {
 					boundPos.setText("");
 				} else {
-					boundPos.setText(servo.getPosFloat().toString());
-					slider.setValue(Math.round(servo.getPosFloat()));
+					boundPos.setText(servo.getPos().toString());
+					slider.setValue(servo.getPos().intValue());
 				}
 
-				slider.setMinimum((int) servo.getMinInput());
-				slider.setMaximum((int) servo.getMaxInput());
+				slider.setMinimum(servo.getMinInput().intValue());
+				slider.setMaximum(servo.getMaxInput().intValue());
 
 				posMin.setText(servo.getMin().toString());
 				posMax.setText(servo.getMax().toString());

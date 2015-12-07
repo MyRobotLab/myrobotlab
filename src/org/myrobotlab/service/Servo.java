@@ -27,13 +27,13 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.interfaces.NameProvider;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -67,42 +67,21 @@ public class Servo extends Service implements ServoControl {
 	 */
 	public class Sweeper extends Thread {
 
-		int min;
-		int max;
-		int delay; // depending on type - this is 2 different things COMPUTER
-		// its ms delay - CONTROLLER its modulus loop count
-		int step;
-		boolean oneWay;
+		/*
+		 * int min; int max; int delay; // depending on type - this is 2
+		 * different things COMPUTER // its ms delay - CONTROLLER its modulus
+		 * loop count int step; boolean sweepOneWay;
+		 */
 
-		public Sweeper(String name, int min, int max, int delay, int step) {
+		public Sweeper(String name) {
 			super(String.format("%s.sweeper", name));
-			this.min = min;
-			this.max = max;
-			this.delay = delay;
-			this.step = step;
-			this.oneWay = false;
-		}
-
-		public Sweeper(String name, int min, int max, int delay, int step, boolean oneWay) {
-			super(String.format("%s.sweeper", name));
-			this.min = min;
-			this.max = max;
-			this.delay = delay;
-			this.step = step;
-			this.oneWay = oneWay;
-		}
-
-		// for non-controller based sweeping,
-		// this is the delay for the sweeper thread.
-		public int getDelay() {
-			return delay;
 		}
 
 		@Override
 		public void run() {
 
-			if (inputX == null) {
-				inputX = (float) min;
+			if (targetPos == null) {
+				targetPos = (double) sweepMin;
 			}
 
 			isSweeping = true;
@@ -110,22 +89,22 @@ public class Servo extends Service implements ServoControl {
 			try {
 				while (isSweeping) {
 					// increment position that we should go to.
-					if (inputX < max && step >= 0) {
-						inputX += step;
-					} else if (inputX > min && step < 0) {
-						inputX += step;
+					if (targetPos < sweepMax && sweepStep >= 0) {
+						targetPos += sweepStep;
+					} else if (targetPos > sweepMin && sweepStep < 0) {
+						targetPos += sweepStep;
 					}
 
 					// switch directions or exit if we are sweeping 1 way
-					if ((inputX <= min && step < 0) || (inputX >= max && step > 0)) {
-						if (oneWay) {
+					if ((targetPos <= sweepMin && sweepStep < 0) || (targetPos >= sweepMax && sweepStep > 0)) {
+						if (sweepOneWay) {
 							isSweeping = false;
 							break;
 						}
-						step = step * -1;
+						sweepStep = sweepStep * -1;
 					}
-					moveTo(inputX.intValue());
-					Thread.sleep(delay);
+					moveTo(targetPos.intValue());
+					Thread.sleep(sweepDelay);
 				}
 
 			} catch (Exception e) {
@@ -138,9 +117,6 @@ public class Servo extends Service implements ServoControl {
 			}
 		}
 
-		public void setDelay(int delay) {
-			this.delay = delay;
-		}
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -149,27 +125,32 @@ public class Servo extends Service implements ServoControl {
 
 	transient ServoController controller;
 
-	// clipping
-
-	private Float inputX;
-
-	private float outputYMin = 0;
-
-	// range mapping
-
-	private float outputYMax = 180;
-
-	private float minX = 0;
-
-	private float maxX = 180;
-
-	private float minY = 0;
-
-	private float maxY = 180;
+	private Mapper mapper = new Mapper(0, 180, 0, 180);
 
 	private int rest = 90;
 
 	private long lastActivityTime = 0;
+
+	/**
+	 * the requested INPUT position of the servo
+	 */
+	Double targetPos;
+
+	/**
+	 * the actual positio nof the servo
+	 */
+	Double pos;
+
+	/**
+	 * the calculated output for the servo
+	 */
+	Double targetOutput;
+
+	/**
+	 * writeMicroseconds value
+	 */
+	Integer uS;
+
 	/**
 	 * the pin is a necessary part of servo - even though this is really
 	 * controller's information a pin is a integral part of a "servo" - so it is
@@ -180,42 +161,47 @@ public class Servo extends Service implements ServoControl {
 	 * that way pin does not need to be stored on the Servo
 	 */
 	private Integer pin;
+
+	/**
+	 * list of names of possible controllers
+	 */
 	ArrayList<String> controllers;
 
-	// computer thread based sweeping
+	/**
+	 * current speed of the servo
+	 */
+	Double speed = 1.0;
+
+	// FIXME - currently is only computer control - needs to be either
+	// microcontroller or computer
 	boolean isSweeping = false;
+	int sweepMin = 0;
+	int sweepMax = 180;
+	int sweepDelay = 1;
+	int sweepStep = 1;
+	boolean sweepOneWay = false;
 
 	// sweep types
 	// TODO - computer implemented speed control (non-sweep)
 	boolean speedControlOnUC = false;
 	transient Thread sweeper = null;
-	
+
 	/**
-	 * isAttached represents if the 
+	 * isAttached represents if the
 	 * 
 	 * usually isAttached would be determined by whether the controller != null
-	 * however detach() is a meaningful method on the micro-controller side
-	 * and many services want to be able to detach() and re-attach() without
-	 * a reference to the controller - that is why this boolean variable must
-	 * be kept in sync
+	 * however detach() is a meaningful method on the micro-controller side and
+	 * many services want to be able to detach() and re-attach() without a
+	 * reference to the controller - that is why this boolean variable must be
+	 * kept in sync
 	 */
 	private boolean isAttached = false;
 
-	private boolean inverted = false;
-
-	public static void main(String[] args) throws InterruptedException {
-
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-		try {
-
-			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			// servo.test();
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
+	/**
+	 * feedback of both incremental position and stops. would allow blocking
+	 * moveTo if desired
+	 */
+	boolean isEventsEnabled = false;
 
 	public Servo(String n) {
 		super(n);
@@ -223,15 +209,10 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	// uber good
-	public void addServoEventListener(Service service) {
+	public void addServoEventListener(NameProvider service) {
 		addListener("publishServoEvent", service.getName(), "onServoEvent");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.myrobotlab.service.interfaces.ServoControl#attach()
-	 */
 	@Override
 	public boolean attach() {
 		lastActivityTime = System.currentTimeMillis();
@@ -245,7 +226,7 @@ public class Servo extends Service implements ServoControl {
 			return false;
 		}
 
-		isAttached = controller.servoAttach(getName(), pin);
+		isAttached = controller.servoAttach(this);
 
 		if (isAttached) {
 			// changed state
@@ -265,20 +246,9 @@ public class Servo extends Service implements ServoControl {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.myrobotlab.service.interfaces.ServoControl#attach(java.lang.String,
-	 * int)
-	 */
 	@Override
 	public boolean attach(String controller, Integer pin) {
 		return attach((ServoController) Runtime.getService(controller), pin);
-	}
-
-	public int calc(float s) {
-		return Math.round(minY + ((s - minX) * (maxY - minY)) / (maxX - minX));
 	}
 
 	@Override
@@ -289,7 +259,7 @@ public class Servo extends Service implements ServoControl {
 		}
 
 		if (controller != null) {
-			if (controller.servoDetach(getName())) {
+			if (controller.servoDetach(this)) {
 				isAttached = false;
 				// changed state
 				broadcastState();
@@ -323,26 +293,22 @@ public class Servo extends Service implements ServoControl {
 		return lastActivityTime;
 	}
 
-	public Integer getMax() {
-		return (int) outputYMax;
+	public Double getMax() {
+		return mapper.getMaxY();
 	}
 
-	public float getMaxInput() {
-		return maxX;
+	public Double getMaxInput() {
+		return mapper.getMaxX();
 	}
 
-	public Integer getMin() {
-		return (int) outputYMin;
+	public Double getMin() {
+		return mapper.getMinY();
 	}
 
-	public float getMinInput() {
-		return minX;
+	public Double getMinInput() {
+		return mapper.getMinX();
 	}
 
-	// FIXME - really this could be normalized...
-	// attach / detach - the detach would not remove the ServoData from
-	// the controller only another attach with a different pin would
-	// change it
 	@Override
 	public Integer getPin() {
 		/*
@@ -356,13 +322,8 @@ public class Servo extends Service implements ServoControl {
 		return pin;
 	}
 
-	public int getPos() {
-		return Math.round(inputX);
-	}
-
-	@Override
-	public Float getPosFloat() {
-		return inputX;
+	public Double getPos() {
+		return targetPos;
 	}
 
 	public int getRest() {
@@ -374,7 +335,7 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public boolean isInverted() {
-		return inverted;
+		return mapper.isInverted();
 	}
 
 	// only if the sweep control is controled by computer and not arduino
@@ -382,47 +343,25 @@ public class Servo extends Service implements ServoControl {
 		return isSweeping;
 	}
 
-	public void map(float minX, float maxX, float minY, float maxY) {
-		this.minX = minX;
-		this.maxX = maxX;
-		this.minY = minY;
-		this.maxY = maxY;
+	public void map(double minX, double maxX, double minY, double maxY) {
+		mapper = new Mapper(minX, maxX, minY, maxY);
 		broadcastState();
 	}
 
-	public void map(int minX, int maxX, int minY, int maxY) {
-		this.minX = minX;
-		this.maxX = maxX;
-		this.minY = minY;
-		this.maxY = maxY;
-		broadcastState();
+	public void moveTo(int pos) {
+		moveTo((double) pos);
 	}
 
-	// FIXME - bs from gson encoding :P - or should it be Double :P
-	public void moveTo(Double pos) {
-		moveTo(pos.floatValue());
-	}
-
-	public void moveTo(Float pos) {
+	public void moveTo(double pos) {
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
 
-		inputX = pos;
+		targetPos = pos;
+		targetOutput = mapper.calc(targetPos);
 
-		// the magic mapping
-		int outputY = calc(inputX);
-
-		if (outputY > outputYMax || outputY < outputYMin) {
-			warn(String.format("%s.moveTo(%d) out of range", getName(), outputY));
-			return;
-		}
-
-		// FIXME - currently their is no timerPosition
-		// this could be gotten with 100 * outputY for some valid range
-		log.info("servoWrite({})", outputY);
-		controller.servoWrite(getName(), outputY);
+		controller.servoWrite(this);
 		lastActivityTime = System.currentTimeMillis();
 
 	}
@@ -435,16 +374,16 @@ public class Servo extends Service implements ServoControl {
 	 * response
 	 */
 
-	@Override
-	public void moveTo(Integer pos) {
-		moveTo((float) pos);
-	}
-
 	// uber good
 	public Integer publishServoEvent(Integer position) {
 		return position;
 	}
 
+	/**
+	 * FIXME - Hmmm good canidate for Microcontroller Peripheral
+	 * 
+	 * @return
+	 */
 	public ArrayList<String> refreshControllers() {
 		controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
 		return controllers;
@@ -491,24 +430,19 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public boolean setEventsEnabled(boolean b) {
-		controller.setServoEventsEnabled(getName(), b);
+		isEventsEnabled = b;
+		controller.setServoEventsEnabled(this);
 		return b;
 	}
 
 	public void setInverted(boolean invert) {
-		if (!inverted && invert) {
-			map(maxX, minX, minY, maxY);
-			inverted = true;
-		} else {
-			inverted = false;
-		}
-
+		mapper.setInverted(invert);
 	}
 
 	@Override
 	public void setMinMax(int min, int max) {
-		outputYMin = min;
-		outputYMax = max;
+		mapper.setMin(min);
+		mapper.setMax(max);
 		broadcastState();
 	}
 
@@ -534,17 +468,19 @@ public class Servo extends Service implements ServoControl {
 		return rest;
 	}
 
-	@Override
-	public void setSpeed(Float speed) {
-		if (speed == null) {
-			return;
-		}
+	public void setSpeed(int speed) {
+		setSpeed((double)speed);
+	}
+
+	public void setSpeed(double speed) {
+
+		this.speed = speed;
 
 		if (controller == null) {
 			error("setSpeed - controller not set");
 			return;
 		}
-		controller.setServoSpeed(getName(), speed);
+		controller.setServoSpeed(this);
 	}
 
 	// choose to handle sweep on arduino or in MRL on host computer thread.
@@ -552,8 +488,8 @@ public class Servo extends Service implements ServoControl {
 		speedControlOnUC = b;
 	}
 
-	public void setSweeperDelay(int delay) {
-		((Sweeper) sweeper).setDelay(delay);
+	public void setSweepDelay(int delay) {
+		sweepDelay = delay;
 	}
 
 	/*
@@ -565,11 +501,11 @@ public class Servo extends Service implements ServoControl {
 	public void stop() {
 		isSweeping = false;
 		sweeper = null;
-		controller.servoSweepStop(getName());
+		controller.servoSweepStop(this);
 	}
 
 	public void sweep() {
-		sweep(Math.round(minX), Math.round(maxX), 1, 1);
+		sweep(mapper.getMinX().intValue(), mapper.getMaxX().intValue(), 1, 1);
 	}
 
 	public void sweep(int min, int max) {
@@ -583,46 +519,102 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public void sweep(int min, int max, int delay, int step, boolean oneWay) {
-		// CONTROLLER TYPE SWITCH
+
+		this.sweepMin = min;
+		this.sweepMax = max;
+		this.sweepDelay = delay;
+		this.sweepStep = step;
+		this.sweepOneWay = oneWay;
+
+		// FIXME - CONTROLLER TYPE SWITCH
 		if (speedControlOnUC) {
-			controller.servoSweepStart(getName(), min, max, step); // delay &
-																	// step
-																	// implemented
+			controller.servoSweepStart(this); // delay &
+												// step
+												// implemented
 		} else {
 			if (isSweeping) {
 				stop();
 			}
 
-			sweeper = new Sweeper(getName(), min, max, delay, step, oneWay);
+			sweeper = new Sweeper(getName());
 			sweeper.start();
 		}
 	}
 
-	public void writeMicroseconds(Integer pos) {
+	/**
+	 * Writes a value in microseconds (uS) to the servo, controlling the shaft
+	 * accordingly. On a standard servo, this will set the angle of the shaft.
+	 * On standard servos a parameter value of 1000 is fully counter-clockwise,
+	 * 2000 is fully clockwise, and 1500 is in the middle.
+	 * 
+	 * Note that some manufactures do not follow this standard very closely so
+	 * that servos often respond to values between 700 and 2300. Feel free to
+	 * increase these endpoints until the servo no longer continues to increase
+	 * its range. Note however that attempting to drive a servo past its
+	 * endpoints (often indicated by a growling sound) is a high-current state,
+	 * and should be avoided.
+	 * 
+	 * Continuous-rotation servos will respond to the writeMicrosecond function
+	 * in an analogous manner to the write function.
+	 * 
+	 * @param pos
+	 */
+	public void writeMicroseconds(Integer uS) {
+		log.info("writeMicroseconds({})", uS);
+		this.uS = uS;
+
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
 
-		inputX = pos.floatValue();
-
-		// the magic mapping
-		int outputY = calc(inputX);
-
-		if (outputY > outputYMax || outputY < outputYMin) {
-			warn(String.format("%s.moveTo(%d) out of range", getName(), outputY));
-			return;
-		}
+		// TODO -
 
 		// FIXME - currently their is no timerPosition
 		// this could be gotten with 100 * outputY for some valid range
-		log.info("servoWrite({})", outputY);
-		controller.servoWriteMicroseconds(getName(), outputY);
+
+		controller.servoWriteMicroseconds(this);
 		lastActivityTime = System.currentTimeMillis();
 
 		// trying out broadcast after
 		// position change
 		broadcastState();
+	}
+
+	public static void main(String[] args) throws InterruptedException {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+		try {
+			
+			Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+			arduino.connect("COM18");
+			Servo servo = (Servo) Runtime.start("servo", "Servo");
+			servo.attach(arduino, 10);
+			servo.moveTo(90);
+			servo.setRest(30);
+			servo.moveTo(10);
+			servo.moveTo(90);
+			servo.moveTo(180);
+			
+			servo.setMinMax(30, 160);
+			
+			servo.moveTo(40);
+			servo.moveTo(140);
+			
+			servo.moveTo(180);
+
+			servo.setSpeed(0.5);
+			servo.moveTo(31);
+			servo.setSpeed(0.2);
+			servo.moveTo(90);
+			servo.moveTo(180);
+			
+			// servo.test();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 	}
 
 }

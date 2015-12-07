@@ -2,21 +2,26 @@ package org.myrobotlab.math;
 
 import java.io.Serializable;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Servo;
+import org.slf4j.Logger;
+
 public final class Mapper implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
 	// input range
-	double minX;
-	double maxX;
+	Double minX;
+	Double maxX;
 
 	// output range
-	double minY;
-	double maxY;
+	Double minY;
+	Double maxY;
 
 	// clipping
-	double minOutput;
-	double maxOutput;
+	Double minOutput;
+	Double maxOutput;
 
 	boolean inverted = false;
 
@@ -33,9 +38,11 @@ public final class Mapper implements Serializable {
 	final public double calc(double in) {
 		double c = minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
 		if (c < minOutput) {
+			log.warn("clipping {} to {}", c, minOutput);
 			return minOutput;
 		}
 		if (c > maxOutput) {
+			log.warn("clipping {} to {}", c, maxOutput);
 			return maxOutput;
 		}
 		return c;
@@ -45,19 +52,19 @@ public final class Mapper implements Serializable {
 		return (int) calc(in);
 	}
 
-	public double getMaxX() {
+	public Double getMaxX() {
 		return maxX;
 	}
 
-	public double getMaxY() {
+	public Double getMaxY() {
 		return maxY;
 	}
 
-	public double getMinX() {
+	public Double getMinX() {
 		return minX;
 	}
 
-	public double getMinY() {
+	public Double getMinY() {
 		return minY;
 	}
 

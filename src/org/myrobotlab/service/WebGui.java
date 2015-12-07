@@ -412,17 +412,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			r.setBroadcaster(broadcaster);
 
-			log.info("sessionId {}", r);
+			// good debug material
+			// log.info("sessionId {}", r);
 			String sessionId = r.getAtmosphereResourceEvent().getResource().getRequest().getSession().getId();
-			log.info("sessionId {}", sessionId);
+			//log.info("sessionId {}", sessionId);
 
 			Map<String, String> headers = getHeadersInfo(request);
 
 			if (headers.containsKey("content-type")) {
-				log.info(String.format(String.format("in encoding : content-type %s", headers.get("content-type"))));
+				log.debug(String.format(String.format("in encoding : content-type %s", headers.get("content-type"))));
 			}
 			if (headers.containsKey("accept")) {
-				log.info(String.format(String.format("out encoding : accept %s", headers.get("accept"))));
+				log.debug(String.format(String.format("out encoding : accept %s", headers.get("accept"))));
 			}
 
 			// FIXME reconstruct REST request & log
@@ -845,9 +846,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// remote.setDefaultPrefix("x-");
 			// remote.setDefaultPrefix("");
 			// Runtime.start("python", "Python");
-			Runtime.start("webgui", "WebGui");
+			WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+			//webgui.autoStartBrowser(false);
+			
 			Runtime.start("python", "Python");
-			// Runtime.start("myo", "MyoThalmic");
+			Runtime.start("myo", "MyoThalmic");
 			// remote.connect("tcp://127.0.0.1:6767");
 
 			// Runtime.start("macgui", "GUIService");

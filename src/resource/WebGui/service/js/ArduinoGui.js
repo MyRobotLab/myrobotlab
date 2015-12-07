@@ -8,6 +8,7 @@ angular.module('mrlapp.service.ArduinoGui', [])
 
                 this.updateState = function (service) {
                     $scope.service = service;
+                    //$scope.version = service.mrlCommVersion;
                 };
                 _self.updateState($scope.service);
 
@@ -91,7 +92,8 @@ angular.module('mrlapp.service.ArduinoGui', [])
                 // mrl.sendTo(name, 'unsubscribe', board);
 
 
-                mrl.subscribe($scope.service.name, 'publishVersion');
+                msg.subscribe('publishVersion');
+                msg.send("getVersion");
 
                 msg.subscribe(this);
             }]);

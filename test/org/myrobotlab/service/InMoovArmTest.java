@@ -20,13 +20,13 @@ public class InMoovArmTest {
 	@Test
 	public void testOnJointAngles() throws Exception {
 		
-		HashMap<String,Float> angleMap = new HashMap<String,Float>();
+		HashMap<String,Double> angleMap = new HashMap<String,Double>();
 
 		// this is the rest position from the DH model of the inmoov arm
-		angleMap.put("omoplate", -80F);
-		angleMap.put("shoulder", 60F);
-		angleMap.put("rotate", 180F);
-		angleMap.put("bicep", 90F);
+		angleMap.put("omoplate", -80.0);
+		angleMap.put("shoulder", 60.0);
+		angleMap.put("rotate", 180.0);
+		angleMap.put("bicep", 90.0);
 		
 		// they have some angle offsets that get mapped here
 		testArm.onJointAngles(angleMap);
@@ -37,10 +37,10 @@ public class InMoovArmTest {
 		System.out.println("ROT: " + testArm.rotate.getPos());
 		System.out.println("BIC: " + testArm.bicep.getPos());
 		
-		assertEquals( 0, testArm.bicep.getPos());
-		assertEquals(90, testArm.rotate.getPos());
-		assertEquals(30, testArm.shoulder.getPos());
-		assertEquals(10, testArm.omoplate.getPos());
+		assertEquals(Double.valueOf(0), testArm.bicep.getPos());
+		assertEquals(Double.valueOf(90), testArm.rotate.getPos());
+		assertEquals(Double.valueOf(30), testArm.shoulder.getPos());
+		assertEquals(Double.valueOf(10), testArm.omoplate.getPos());
 		
 		
 	}

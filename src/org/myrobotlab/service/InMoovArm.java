@@ -122,10 +122,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		}
 
 		attach();
-		setSpeed(0.7f, 0.7f, 0.7f, 0.7f);
+		setSpeed(0.7, 0.7, 0.7, 0.7);
 		rest();
 		sleep(4000);
-		setSpeed(1.0f, 1.0f, 1.0f, 1.0f);
+		setSpeed(1.0, 1.0, 1.0, 1.0);
 		broadcastState();
 		return true;
 	}
@@ -233,7 +233,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
 	public void rest() {
 
-		setSpeed(1.0f, 1.0f, 1.0f, 1.0f);
+		setSpeed(1.0, 1.0, 1.0, 1.0);
 
 		bicep.rest();
 		rotate.rest();
@@ -293,7 +293,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		this.side = side;
 	}
 
-	public void setSpeed(Float bicep, Float rotate, Float shoulder, Float omoplate) {
+	public void setSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
 		this.bicep.setSpeed(bicep);
 		this.rotate.setSpeed(rotate);
 		this.shoulder.setSpeed(shoulder);
@@ -325,26 +325,26 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 	}
 
 	@Override
-	public void onJointAngles(Map<String, Float> angleMap) {
+	public void onJointAngles(Map<String, Double> angleMap) {
 		// We should walk though our list of servos and see if 
 		// the map has it.. if so .. move to it!
 		//Peers p = InMoovArm.getPeers(getName()).getPeers("Servo");
 		// TODO: look up the mapping for all the servos in the arm.
 		
 		// we map the servo 90 degrees to be 0 degrees.
-		HashMap<String, Float> phaseShiftMap = new HashMap<String, Float>();
-		// phaseShiftMap.put("omoplate", 90F);
+		HashMap<String, Double> phaseShiftMap = new HashMap<String, Double>();
+		// phaseShiftMap.put("omoplate", 90);
 		// Harry's omoplate is +90 degrees from Gaels InMoov..
-		phaseShiftMap.put("omoplate", 180F);
-		phaseShiftMap.put("shoulder", 0F);
-		phaseShiftMap.put("rotate", 0F);
-		phaseShiftMap.put("bicep", 90F);
+		phaseShiftMap.put("omoplate", 180.0);
+		phaseShiftMap.put("shoulder", 0.0);
+		phaseShiftMap.put("rotate", 0.0);
+		phaseShiftMap.put("bicep", 90.0);
 		
-		HashMap<String, Float> gainMap = new HashMap<String, Float>();
-		gainMap.put("omoplate", 1F);
-		gainMap.put("shoulder", 1F);
-		gainMap.put("rotate", -1F);
-		gainMap.put("bicep", -1F);
+		HashMap<String, Double> gainMap = new HashMap<String, Double>();
+		gainMap.put("omoplate", 1.0);
+		gainMap.put("shoulder", 1.0);
+		gainMap.put("rotate", -1.0);
+		gainMap.put("bicep", -1.0);
 		
 		ArrayList<String> servos = new ArrayList<String>();
 		servos.add("omoplate");
@@ -354,19 +354,19 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		for (String s: servos) {
 			if (angleMap.containsKey(s)) {
 				if ("omoplate".equals(s)) {
-					Float angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
+					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
 					omoplate.moveTo(angle);
 				}
 				if ("shoulder".equals(s)) {
-					Float angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
+					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
 					shoulder.moveTo(angle);
 				}
 				if ("rotate".equals(s)) {
-					Float angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
+					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
 					rotate.moveTo(angle);
 				}
 				if ("bicep".equals(s)) {
-					Float angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
+					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360;
 					bicep.moveTo(angle);
 				}
 			}

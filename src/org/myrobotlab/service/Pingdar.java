@@ -233,7 +233,7 @@ public class Pingdar extends Service {
 		sensor.addRangeListener(this);
 		servo.addServoEventListener(this);
 
-		servo.setSpeed(0.20f);
+		servo.setSpeed(0.20);
 		servo.setEventsEnabled(true);
 		// STEP ???
 		servo.sweep(sweepMin, sweepMax, 1, step);

@@ -114,10 +114,10 @@ public class InMoovHead extends Service {
 		arduino.connect(port);
 		
 		attach();
-		setSpeed(0.5f, 0.5f, 0.5f, 0.5f, 0.5f);
+		setSpeed(0.5, 0.5, 0.5, 0.5, 0.5);
 		rest();
 		sleep(1000);
-		setSpeed(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		setSpeed(1.0, 1.0, 1.0, 1.0, 1.0);
 		broadcastState();
 		return true;
 	}
@@ -222,7 +222,7 @@ public class InMoovHead extends Service {
 
 	public void rest() {
 		// initial positions
-		setSpeed(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		setSpeed(1.0, 1.0, 1.0, 1.0, 1.0);
 		rothead.rest();
 		neck.rest();
 		eyeX.rest();
@@ -261,7 +261,7 @@ public class InMoovHead extends Service {
 		jaw.setPin(jawPin);
 	}
 
-	public void setSpeed(Float headXSpeed, Float headYSpeed, Float eyeXSpeed, Float eyeYSpeed, Float jawSpeed) {
+	public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
 		if (log.isDebugEnabled()) {
 			log.debug(String.format("%s setSpeed %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed));
 		}

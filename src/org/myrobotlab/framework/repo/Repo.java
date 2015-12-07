@@ -61,9 +61,9 @@ public class Repo implements Serializable {
 
 	public HashSet<String> nativeFileExt = new HashSet<String>(Arrays.asList("dll", "so", "dylib", "jnilib"));
 
-	public String release = "develop";
+	public String branch = "develop";
 	
-	public String REPO_BASE_URL = "https://raw.githubusercontent.com/MyRobotLab/repo/" + release;
+	public String REPO_BASE_URL = "https://raw.githubusercontent.com/MyRobotLab/repo/" + branch;
 	public static final Filter NO_FILTER = NoFilter.INSTANCE;
 
 	ArrayList<String> errors = new ArrayList<String>();
@@ -250,10 +250,21 @@ public class Repo implements Serializable {
 	public Repo() {
 
 		// get my local platform
-		platform = Platform.getLocalInstance();
+		this.platform = Platform.getLocalInstance();
 
 		// load local file
-		localServiceData = getServiceDataFile();
+		this.localServiceData = getServiceDataFile();
+	}
+
+	public Repo(String branch) {
+
+		this.branch = branch;
+		
+		// get my local platform
+		this.platform = Platform.getLocalInstance();
+
+		// load local file
+		this.localServiceData = getServiceDataFile();
 	}
 
 	public void addRepoUpdateListener(RepoUpdateListener listener) {
@@ -529,7 +540,7 @@ public class Repo implements Serializable {
 	public ServiceData getServiceDataFromRepo() {
 		try {
 
-			remoteServiceData = ServiceData.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/" + release + "/serviceData.json");
+			remoteServiceData = ServiceData.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/" + branch + "/serviceData.json");
 			if (remoteServiceData == null) {
 				error("could not get remote service data");
 				return null;
@@ -729,7 +740,7 @@ public class Repo implements Serializable {
 			if (!ivychain.exists()) {
 				try {
 					String xml = FileIO.resourceToString("framework/ivychain.xml");
-					xml = xml.replace("{release}", release);
+					xml = xml.replace("{release}", branch);
 					FileOutputStream fos = new FileOutputStream(ivychain);
 					fos.write(xml.getBytes());
 					fos.close();

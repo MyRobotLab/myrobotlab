@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -128,6 +129,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		StringBuffer newProgram = new StringBuffer();
 		newProgram.append(arduino.getSketch().data);
 
+		/*
 		// modify the program
 		int insertPoint = newProgram.indexOf(Arduino.VENDOR_DEFINES_BEGIN);
 
@@ -158,7 +160,8 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 			// get info back to user
 			return false;
 		}
-
+		*/
+		
 		// set the program
 		Sketch sketch = new Sketch("Adafruit16CServoDriver", newProgram.toString());
 		arduino.setSketch(sketch);
@@ -231,46 +234,7 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		return arduino != null;
 	}
 
-	@Override
-	// string based method calls typed method
-	public boolean servoAttach(String servoName, Integer pin) {
-		Servo servo = (Servo) Runtime.createAndStart(servoName, "Servo");
-		// FIXME ??? WRONG RIGHT?? DUNNO do I have an index ? prolly not :)
-		return attach(servo, pin);
-	}
-
-	@Override
-	public boolean servoDetach(String servoName) {
-		servoNameToPinMap.remove(servoName);
-		return true;
-	}
-
-	@Override
-	public void servoSweepStart(String servoName, int min, int max, int step) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void servoSweepStop(String servoName) {
-		super.stopService();
-		arduino.servoSweepStop(servoName);
-	}
-
-	@Override
-	public void servoWrite(String servoName, Integer newPos) {
-		// this library uses pulse widths versus "degree" positioning
-		// need to maintain the same interface
-		int pulseWidthOff = (SERVOMAX - SERVOMIN) * newPos / 180 + SERVOMIN;
-		arduino.sendMsg(AF_SET_SERVO, servoNameToPinMap.get(servoName), pulseWidthOff >> 8, pulseWidthOff & 0xFF);
-	}
-
-	@Override
-	public void servoWriteMicroseconds(String name, Integer ms) {
-		// TODO Auto-generated method stub
-
-	}
-
+	
 	// drive the servo
 	public void setPWM(Integer servoNum, Integer pulseWidthOn, Integer pulseWidthOff) {
 		if (!pwmFreqSet) {
@@ -293,22 +257,71 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 	}
 
 	@Override
-	public boolean setServoEventsEnabled(String servoName, boolean b) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setServoSpeed(String servoName, Float speed) {
-		arduino.setServoSpeed(servoName, speed); // FIXME - is this correct?
-	}
-
-	@Override
 	public void startService() {
 		super.startService();
 		attach(arduino);
 		arduino.startService();
 		// TODO - request myArduino - re connect
+	}
+
+	@Override
+	public void attach(String name) throws MRLException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean detach(String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean servoAttach(Servo servo) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean servoDetach(Servo servo) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void servoSweepStart(Servo servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void servoSweepStop(Servo servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void servoWrite(Servo servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void servoWriteMicroseconds(Servo servo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean setServoEventsEnabled(Servo servo) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setServoSpeed(Servo servo) {
+		// TODO Auto-generated method stub
+		
 	}
 
 
