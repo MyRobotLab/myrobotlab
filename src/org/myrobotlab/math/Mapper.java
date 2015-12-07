@@ -47,6 +47,10 @@ public final class Mapper implements Serializable {
 		}
 		return c;
 	}
+	
+	final public int calcInt(int in){
+		return (int)calc(in);
+	}
 
 	final public int calcInt(double in) {
 		return (int) calc(in);

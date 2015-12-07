@@ -24,11 +24,11 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
 	public static class Hand {
 		public String type;
-		public double thumb;
-		public double index;
-		public double middle;
-		public double ring;
-		public double pinky;
+		public int thumb;
+		public int index;
+		public int middle;
+		public int ring;
+		public int pinky;
 		public double palmNormalX;
 		public double palmNormalY;
 		public double palmNormalZ;

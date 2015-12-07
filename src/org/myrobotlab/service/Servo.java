@@ -81,7 +81,7 @@ public class Servo extends Service implements ServoControl {
 		public void run() {
 
 			if (targetPos == null) {
-				targetPos = (double) sweepMin;
+				targetPos = sweepMin;
 			}
 
 			isSweeping = true;
@@ -134,17 +134,17 @@ public class Servo extends Service implements ServoControl {
 	/**
 	 * the requested INPUT position of the servo
 	 */
-	Double targetPos;
+	Integer targetPos;
 
 	/**
 	 * the actual positio nof the servo
 	 */
-	Double pos;
+	Integer pos;
 
 	/**
 	 * the calculated output for the servo
 	 */
-	Double targetOutput;
+	Integer targetOutput;
 
 	/**
 	 * writeMicroseconds value
@@ -322,7 +322,7 @@ public class Servo extends Service implements ServoControl {
 		return pin;
 	}
 
-	public Double getPos() {
+	public Integer getPos() {
 		return targetPos;
 	}
 
@@ -349,17 +349,13 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	public void moveTo(int pos) {
-		moveTo((double) pos);
-	}
-
-	public void moveTo(double pos) {
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
 
 		targetPos = pos;
-		targetOutput = mapper.calc(targetPos);
+		targetOutput = mapper.calcInt(targetPos);
 
 		controller.servoWrite(this);
 		lastActivityTime = System.currentTimeMillis();

@@ -52,7 +52,7 @@ public class LeapMotionListener extends Listener {
 		// handle the fingers.
 		for (Finger.Type t : Finger.Type.values()) {
 			Finger f = lh.fingers().get(t.ordinal());
-			double angle = computeAngleDegrees(f, palmNormal);
+			int angle = (int)computeAngleDegrees(f, palmNormal);
 			if (t.equals(Finger.Type.TYPE_INDEX))
 				mrlHand.index = angle;
 			else if (t.equals(Finger.Type.TYPE_MIDDLE))
