@@ -617,10 +617,12 @@
 	</target>
 	<!-- TODO: make this depend on test , gotta figure out why travis ci is failing on this now. -->
 	<target name="dist" depends="jar" description="generate the distribution">
-		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}${env.TRAVIS_BUILD_NUMBER}.jar" />
+		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}${env.TRAVIS_BUILD_NUMBER}.jar" / -->
 		<!-- backwards compat .. TODO: review this.. -->
-		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
-		<copy file="${build}/classes/resource/version.txt" tofile="${dist}/version.txt"/>
+		<mkdir dir="current" />
+		<mkdir dir="current/${dist}" />
+		<copy file="${build}/lib/myrobotlab.jar" tofile="current/${dist}/myrobotlab.jar" />
+		<copy file="${build}/classes/resource/version.txt" tofile="current/${dist}/version.txt"/>
 		<!-- for convienence of debugging spawn -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
 	</target>
