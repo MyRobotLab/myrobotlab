@@ -626,7 +626,7 @@
 	</target>
 
 	<target name="clean" description="clean up">
-		<!-- Delete the ${build} and ${temp} directory trees -->
+		<!-- Delete the ${build} and ${temp} directory trees  -->
 		<delete dir="${build}" />
 		<delete dir="${temp}" />
 		<delete dir="${dist}" />
