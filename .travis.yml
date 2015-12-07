@@ -20,5 +20,5 @@ deploy:
   # local_dir: build/report
   acl: 'public_read'
   # s3 deploy end
-  on:
-  	branch: develop
+  # on:
+  # branch: develop
