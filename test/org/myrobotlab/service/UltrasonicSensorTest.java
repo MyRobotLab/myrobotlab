@@ -49,7 +49,7 @@ public class UltrasonicSensorTest {
 
 		//Runtime.start("gui", "GUIService");
 		sensor = (UltrasonicSensor) Runtime.start("arduino", "UltrasonicSensor");
-		arduino = sensor.getArduino();
+		arduino = sensor.getController();
 		serial = arduino.getSerial();
 
 		catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");

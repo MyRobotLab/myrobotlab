@@ -7,7 +7,7 @@ package org.myrobotlab.service.data;
  *         data
  * 
  */
-public class SensorData {
+public class KinectSensorData {
 
 	public short[] data = new short[307200];
 }

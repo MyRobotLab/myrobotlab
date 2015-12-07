@@ -117,10 +117,10 @@ public class InMoovTorso extends Service {
 		}
 
 		attach();
-		setSpeed(0.7f, 0.7f, 0.7f);
+		setSpeed(0.7, 0.7, 0.7);
 		rest();
 		sleep(4000);
-		setSpeed(1.0f, 1.0f, 1.0f);
+		setSpeed(1.0, 1.0, 1.0);
 		broadcastState();
 		return true;
 	}
@@ -193,7 +193,7 @@ public class InMoovTorso extends Service {
 
 	public void rest() {
 
-		setSpeed(1.0f, 1.0f, 1.0f);
+		setSpeed(1.0, 1.0, 1.0);
 
 		topStom.rest();
 		midStom.rest();
@@ -223,7 +223,7 @@ public class InMoovTorso extends Service {
 		this.lowStom.setPin(lowStom);
 	}
 
-	public void setSpeed(Float topStom, Float midStom, Float lowStom) {
+	public void setSpeed(Double topStom, Double midStom, Double lowStom) {
 		this.topStom.setSpeed(topStom);
 		this.midStom.setSpeed(midStom);
 		this.lowStom.setSpeed(lowStom);

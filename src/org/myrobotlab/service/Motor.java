@@ -25,6 +25,14 @@
 
 package org.myrobotlab.service;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.myrobotlab.framework.MRLException;
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -34,6 +42,7 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
+import org.myrobotlab.service.interfaces.SensorDataSink;
 import org.slf4j.Logger;
 
 /**
@@ -46,7 +55,14 @@ import org.slf4j.Logger;
  *         H-bridges output
  * 
  */
-public class Motor extends Service implements MotorControl {
+public class Motor extends Service implements MotorControl, SensorDataSink {
+	
+	
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		peers.put("controller", "Arduino", "controller");
+		return peers;
+	}
 
 	/**
 	 * FIXME - REMOVE - do low level counting and encoder triggers on the
@@ -56,13 +72,11 @@ public class Motor extends Service implements MotorControl {
 		public double power = 0.0;
 		public double duration = 0;
 
-		Motor instance = null;
-
-		EncoderTimer(double power, double duration, Motor instance) {
-			super(instance.getName() + "_duration");
+		EncoderTimer(String name, double power, double duration) {
+			super(name + "_duration");
 			this.power = power;
 			this.duration = duration;
-			this.instance = instance;
+
 		}
 
 		@Override
@@ -73,7 +87,7 @@ public class Motor extends Service implements MotorControl {
 					try {
 						lock.wait();
 
-						instance.move(this.power);
+						move(this.power);
 						/*
 						 * inMotion = true;
 						 * 
@@ -94,13 +108,16 @@ public class Motor extends Service implements MotorControl {
 
 	public final static Logger log = LoggerFactory.getLogger(Motor.class.toString());
 
+	// //////////////// Motor Types Begin
+	// ////////////////////////////////////////
+
 	/**
 	 * TYPE_PWM_DIR is the type of motor controller which has a digital
 	 * direction pin. If this pin is high the motor travels in one direction if
 	 * the pin is low the motor travels in the reverse direction
 	 * 
 	 */
-	public final static String TYPE_PWM_DIR = "TYPE_PWM_DIR";
+	public final static String TYPE_SIMPLE = "simple pwm dir";
 
 	/**
 	 * TYPE_LPWM_RPWM - is a motor controller which one pin is pulsed to go one
@@ -108,7 +125,35 @@ public class Motor extends Service implements MotorControl {
 	 * high invalid? Does one pin need to be held high or low while the other is
 	 * pulsed.
 	 */
-	public final static String TYPE_LPWM_RPWM = "TYPE_LPWM_RPWM";
+	public final static String TYPE_2_PWM = "2 pwm";
+
+	/**
+	 * motor with psuedo (fake) encoder. Pulses are done by
+	 * the micro-controller with something like a Arduino digitalWrite 0/1 the
+	 * pulses are sent both to the pin & back through the serial line as a
+	 * "control not feedback" encoder
+	 */
+	public final static String TYPE_PULSE_STEP = "pulse step";
+	
+	
+	/**
+	 * Ya - we'll be supporting stepper soon
+	 */
+	public final static String TYPE_STEPPER = "stepper";
+	
+	
+	// pin "types" - to used in different motor "types"
+	public final static String PIN_TYPE_PWM = "pwm";
+	public final static String PIN_TYPE_DIR = "dir";
+	public final static String PIN_TYPE_PWM_LEFT = "pwm left";
+	public final static String PIN_TYPE_PWM_RIGHT = "pwm right";
+	
+	
+	// SENSOR INFO BEGI 
+	
+	public final static String ENCODER_TYPE_NONE = "none";
+	public final static String ENCODER_TYPE_SIMPLE = "simple";
+
 	// control
 	/**
 	 * FIXME - move motor - pin driver logic into Motor (it is common across all
@@ -116,48 +161,62 @@ public class Motor extends Service implements MotorControl {
 	 * 
 	 * Make "named" Peer versus direct controller reference
 	 */
-	transient private MotorController controller = null;
-	boolean locked = false;
-	private boolean isAttached = false;
-	public Integer pwmPin;
-	public Integer dirPin;
-	public Integer pwmLeft;
-	public Integer pwmRight;
 
-	public Integer encoderPin;
+	// //////////////// Motor Types End ////////////////////////////////////////
+
+	transient private MotorController controller = null;
+	String controllerName = null;
+
+	boolean locked = false;
+
+	Map<String,Integer> pinMap = new TreeMap<String,Integer>();
+
+	Integer encoderPin;
 	// power
-	public double powerOutput = 0;
+	double powerLevel = 1;
+	double powerOutput = 0;
 
 	Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
 	// position
-	public double currentPos = 0.0;
-	public double targetPos = 0.0;
+	int currentPos = 0;
+	int targetPos = 0;
+	
 	Mapper encoderMap = new Mapper(-800.0, 800.0, -800.0, 800.0);
+	
 	transient MotorEncoder encoder = null;
 
 	// FIXME - REMOVE !!! DEPRECATE - just a "type" of encoder
 	transient EncoderTimer durationThread = null;
 
-	public String type = TYPE_PWM_DIR;
+	String type = TYPE_SIMPLE;
+	String encoderType = ENCODER_TYPE_NONE;
+
+	Set<String> types = new HashSet<String>();
+	Set<String> encoderTypes = new HashSet<String>();
 
 	// FIXME - implements an Encoder interface
-	// get a named instance - stopping and starting should not be creating &
+	// get a named instance - stopping and tarting should not be creating &
 	// destroying
 	transient Object lock = new Object();
 
-
 	public Motor(String n) {
 		super(n);
-	}
-
-	private void attached(boolean isAttached) {
-		this.isAttached = isAttached;
-		broadcastState();
+		types.add(TYPE_SIMPLE);
+		types.add(TYPE_2_PWM);
+		types.add(TYPE_PULSE_STEP);
+		encoderTypes.add(ENCODER_TYPE_NONE);
+		encoderTypes.add(ENCODER_TYPE_SIMPLE);
 	}
 
 	@Override
 	public boolean detach() {
-		return controller.motorDetach(getName());
+		boolean ret = controller.motorDetach(this);
+		controllerName = null; // FIXME - should only have controllerName and
+								// not isAttached - test for null
+		controller = null;
+		broadcastState();
+		return ret;
+
 	}
 
 	@Override
@@ -179,7 +238,7 @@ public class Motor extends Service implements MotorControl {
 
 	@Override
 	public double getPowerLevel() {
-		return powerOutput;
+		return powerLevel;
 	}
 
 	public Mapper getPowerMap() {
@@ -188,7 +247,7 @@ public class Motor extends Service implements MotorControl {
 
 	@Override
 	public boolean isAttached() {
-		return isAttached;
+		return controllerName != null;
 	}
 
 	@Override
@@ -217,12 +276,13 @@ public class Motor extends Service implements MotorControl {
 	@Override
 	// not relative ! - see moveStep
 	public void move(double power) {
+		powerLevel = power;
 		if (locked) {
 			log.warn("motor locked");
 			return;
 		}
-		powerOutput = powerMap.calc(power);
-		controller.motorMove(getName());
+		powerOutput = powerMap.calc(powerLevel);
+		controller.motorMove(this);
 	}
 
 	/**
@@ -247,7 +307,7 @@ public class Motor extends Service implements MotorControl {
 		if (!block) {
 			// non-blocking call to move for a duration
 			if (durationThread == null) {
-				durationThread = new EncoderTimer(power, duration, this);
+				durationThread = new EncoderTimer(getName(), power, duration);
 				durationThread.start();
 			} else {
 				/*
@@ -275,35 +335,84 @@ public class Motor extends Service implements MotorControl {
 
 	}
 
+	/**
+	 * GOOD - future of complicated attaching - supply all data in one horrific function signature - overload and default appropriately
+	 * this sets all necessary data in the Motor - at the end of this method the controller is called, and it uses this service
+	 * to pull out any necessary data to complete the attachment 
+	 * 
+	 * @param controllerName
+	 * @param type
+	 * @param pwmPin
+	 * @param dirPin
+	 * @param encoderType
+	 * @param encoderPin
+	 * @throws MRLException
+	 * 
+	 * TODO - encoder perhaps should be handled different where an array of data is passed in Motor.setEncoder(int[] sensorConfig)
+	 */
+	public void attach(String port, String type, int... pins) throws MRLException {
+		log.info("{}.attach({},{},{})", getName(), port, type, Arrays.toString(pins));
+		controller = (MotorController) startPeer("controller");
+		controllerName = controller.getName();
+		controller.connect(port);
+		
+		if (type == null){
+			this.type = Motor.TYPE_SIMPLE;
+		} else {
+			this.type = type;
+		}
+		
+		if (!types.contains(type)) {
+			throw new MRLException(String.format("invalid type %s", type));
+		}
+	
+		// TODO - support steppers too
+		// put array of pins into more intelligent container
+		// check "typical" 2 pin variety motors
+		if ((type.equals(Motor.TYPE_2_PWM) || type.equals(Motor.TYPE_SIMPLE) || type.equals(Motor.TYPE_PULSE_STEP))  && pins.length != 2){
+			throw new MRLException("motor type {} requires exactly 2 pins", type);
+		}			
+			
+		if (type.equals(Motor.TYPE_SIMPLE) || type.equals(Motor.TYPE_PULSE_STEP)) {
+			pinMap.put(PIN_TYPE_PWM, pins[0]);
+			pinMap.put(PIN_TYPE_DIR, pins[1]);
+		} else if (type.equals(Motor.TYPE_2_PWM)) {
+			pinMap.put(PIN_TYPE_PWM_LEFT, pins[0]);
+			pinMap.put(PIN_TYPE_PWM_RIGHT, pins[1]);
+		} else {
+			throw new MRLException(String.format("motor type %s currently not supported", type));
+		}
+
+		// finally the call to the controller
+		// with a fully loaded and verified motor
+		controller.motorAttach(this);
+		broadcastState();
+	}
+	
+	public Integer getPin(String name){
+		return pinMap.get(name);
+	}
+
 	@Override
-	public void moveTo(double newPos) {
+	public void moveTo(int newPos) {
 		if (controller == null) {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
 
-		targetPos = encoderMap.calc(newPos);
-		controller.motorMoveTo(getName(), targetPos);
+		// targetPos = encoderMap.calc(newPos);
+		targetPos = newPos;
+		controller.motorMoveTo(this);
 	}
 
-	public double publishChangePos(Double newValue) {
-		return newValue;
-	}
-
+	// FIXME - DEPRECATE !!!
 	@Override
 	public boolean setController(MotorController controller) {
 		this.controller = controller;
-		attached(true);
+		this.controllerName = controller.getName();
 		return true;
 	}
 
-	public double setCurrentPos(double value) {
-		if (currentPos != value) {
-			currentPos = value;
-			invoke("publishChangePos", value);
-		}
-		return value;
-	}
 
 	@Override
 	public void setInverted(boolean invert) {
@@ -317,13 +426,16 @@ public class Motor extends Service implements MotorControl {
 		broadcastState();
 	}
 
-	public void setSpeed(double power) {
-		powerOutput = powerMap.calc(power);
+	public void setPowerLevel(double power) {
+		powerLevel = power;
+		powerOutput = powerMap.calc(powerLevel);
 	}
 
 	@Override
 	public void stop() {
-		move(0.0);
+		//move(0.0);
+		powerLevel = 0.0;
+		controller.motorStop(this);
 	}
 
 	@Override
@@ -338,8 +450,93 @@ public class Motor extends Service implements MotorControl {
 		log.info("unLock");
 		locked = false;
 	}
-	
 
+	public void setType(String type) throws MRLException {
+		if (!types.contains(type)){
+			throw new MRLException("%s not valid", type);
+		}
+		this.type = type;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public String getEncoderType() {
+		return encoderType;
+	}
+	
+	public void setEncoderType(String type) {
+		encoderType = type;
+	}
+	
+		
+	public Integer updatePosition(Integer position){
+		currentPos = position;
+		return position;
+	}
+	
+	// Perhaps shoulb be updateSensor
+	@Override
+	public void update(Object data) {		
+		invoke("updatePosition", data);
+	}
+
+	@Override
+	public String getDataSinkType() {
+		// other data types available if needed
+		return "java.lang.Integer";
+	}
+	
+	@Override
+	public int getSensorType() {
+		if (type != null && type.equals(TYPE_PULSE_STEP)){
+			return SENSOR_PULSE;
+		} else {
+			return SENSOR_PIN;
+		}
+	}
+
+
+	public MotorController getController() {
+		return controller;
+	}
+
+	@Override
+	public int[] getSensorConfig() {
+		if (type.equals(TYPE_PULSE_STEP)){
+			// pulse step only needs the pwm pin
+			return new int[]{pinMap.get(PIN_TYPE_PWM)};
+		}
+		return new int[]{};
+	}
+
+	@Override
+	public boolean hasSensor() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public int[] getControlPins() {
+		log.info("getControlPins");
+		int[] ret = new int[pinMap.size()];
+		int index = 0;
+		for (String pin: pinMap.keySet()){
+			Integer x = pinMap.get(pin);
+			log.info(String.format("[%d] = %s (%d)", index, pin, x));
+			ret[index] = x;
+			++index;
+		}
+		return ret;
+	}
+
+	@Override
+	public String[] getTypes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	public static void main(String[] args) {
 
 		LoggingFactory.getInstance().configure();
@@ -348,35 +545,56 @@ public class Motor extends Service implements MotorControl {
 		try {
 			String port = "COM15";
 
-			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			Runtime.createAndStart("gui", "GUIService");
-			arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
-			arduino.connect(port);
-			arduino.broadcastState();
+			//Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			// Runtime.createAndStart("gui", "GUIService");
+			//arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
+			//arduino.connect(port);
+			// arduino.broadcastState();
 
-			for (int i = 0; i < 100; ++i) {
-
-			}
 			// Runtime.createAndStart("python", "Python");
 
-			Motor m1 = (Motor) Runtime.createAndStart("m1", "Motor");
-			// arduino.motorAttach("m1", 8, 7, 54);
-			arduino.motorAttach("m1", 7, 6);
-			arduino.setSampleRate(8000);
-			m1.setSpeed(0.95);
+			int pwmPin= 13;
+			int dirPin = 8;
+			
+			//int encoderPin= 7;
+			
+			Motor m1 = (Motor)Runtime.start("m1", "Motor");
+			Runtime.start("webgui", "WebGui");
+			m1.attach(port, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);//(port, Motor.TYPE_SIMPLE, pwmPin, dirPin);
+			
+			m1.moveTo(250);
+			m1.moveTo(700);
+			m1.moveTo(250);
+			m1.moveTo(250);
+			
+			Arduino arduino = (Arduino)m1.getController();
+			arduino.setLoadTimingEnabled(true);
+			arduino.setLoadTimingEnabled(false);
+			m1.stop();
+			m1.moveTo(200);
+			m1.stop();
 
+			//Runtime.start("webgui", "WebGui");
+
+			// arduino.motorAttach("m1", 8, 7, 54);
+			// m1.setType(Motor.TYPE_PWM_DIR_FE);
+			// arduino.setSampleRate(8000);
+			// m1.setSpeed(0.95);
+			/*
+			 * arduino.motorAttach("m1", Motor.TYPE_FALSE_ENCODER, 8, 7);
+			 * m1.moveTo(30); m1.moveTo(230); m1.moveTo(430); m1.moveTo(530);
+			 * m1.moveTo(130); m1.moveTo(330);
+			 */
 			// with encoder
 			// m1.moveTo(600);
 
-			m1.stop();
-			m1.move(0.94);
-			m1.stop();
-			m1.move(-0.94);
-			m1.stop();
-
-			// arduino.motorAttach("m1", 8, 7, 54) ;
-
-			m1.moveTo(600f);
+			/*
+			 * m1.stop(); m1.move(0.94); m1.stop(); m1.move(-0.94); m1.stop();
+			 * 
+			 * // arduino.motorAttach("m1", 8, 7, 54) ;
+			 * 
+			 * m1.moveTo(600f);
+			 */
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -398,5 +616,8 @@ public class Motor extends Service implements MotorControl {
 		 */
 
 	}
+	
+
+
 
 }

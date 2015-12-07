@@ -38,12 +38,12 @@ public class InMoovGestureCreator extends Service {
 		int lbicep, lrotate, lshoulder, lomoplate;
 		int neck, rothead, eyeX, eyeY, jaw;
 		int topStom, midStom, lowStom;
-		float rthumbspeed, rindexspeed, rmajeurespeed, rringfingerspeed, rpinkyspeed, rwristspeed;
-		float rbicepspeed, rrotatespeed, rshoulderspeed, romoplatespeed;
-		float lthumbspeed, lindexspeed, lmajeurespeed, lringfingerspeed, lpinkyspeed, lwristspeed;
-		float lbicepspeed, lrotatespeed, lshoulderspeed, lomoplatespeed;
-		float neckspeed, rotheadspeed, eyeXspeed, eyeYspeed, jawspeed;
-		float topStomspeed, midStomspeed, lowStomspeed;
+		double rthumbspeed, rindexspeed, rmajeurespeed, rringfingerspeed, rpinkyspeed, rwristspeed;
+		double rbicepspeed, rrotatespeed, rshoulderspeed, romoplatespeed;
+		double lthumbspeed, lindexspeed, lmajeurespeed, lringfingerspeed, lpinkyspeed, lwristspeed;
+		double lbicepspeed, lrotatespeed, lshoulderspeed, lomoplatespeed;
+		double neckspeed, rotheadspeed, eyeXspeed, eyeYspeed, jawspeed;
+		double topStomspeed, midStomspeed, lowStomspeed;
 		int sleep;
 		String speech;
 		String name;
@@ -1152,16 +1152,16 @@ public class InMoovGestureCreator extends Service {
 						}
 					}
 
-					int min = servo.getMin();
+					Double min = servo.getMin();
 					int res = servo.getRest();
-					int max = servo.getMax();
+					Double max = servo.getMax();
 
 					servoitemholder[i1][i2].min.setText(min + "");
 					servoitemholder[i1][i2].res.setText(res + "");
 					servoitemholder[i1][i2].max.setText(max + "");
 					// servoitemholder[i1][i2].sli.setMinimum(min);
 					// servoitemholder[i1][i2].sli.setMaximum(max);
-					servoitemholder[i1][i2].sli.setValue(res);
+					//servoitemholder[i1][i2].sli.setValue(res);
 				}
 			}
 		}

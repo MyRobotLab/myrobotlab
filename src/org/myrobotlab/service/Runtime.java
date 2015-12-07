@@ -753,8 +753,8 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	/**
-	 * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its
-	 * Class definition info - Runtime should return based on ClassName 
+	 * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its Class
+	 * definition info - Runtime should return based on ClassName
 	 * 
 	 * @param serviceName
 	 * @return
@@ -1145,19 +1145,9 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			} else if (cmdline.containsKey("-fromAgent")) {
 				logging.addAppender(Appender.FROM_AGENT);
 			} else if (cmdline.containsKey("-logToConsole")) {
-				logging.addAppender(Appender.CONSOLE);
-				/* DEPRECATED
-			} else if (cmdline.containsKey("-logToRemote")) {
-				String host = cmdline.getSafeArgument("-logToRemote", 0, "localhost");
-				String port = cmdline.getSafeArgument("-logToRemote", 1, "4445");
-				logging.addAppender(Appender.REMOTE, host, port);
-				*/
+				logging.addAppender(Appender.CONSOLE);				
 			} else {
-				if (cmdline.containsKey("-multiLog")) {
-					logging.addAppender(Appender.FILE, "multiLog", null);
-				} else {
-					logging.addAppender(Appender.FILE);
-				}
+				logging.addAppender(Appender.FILE, String.format("%s.log", runtimeName));
 			}
 
 			log.info(cmdline.toString());
@@ -1185,7 +1175,9 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			if (cmdline.containsKey("-install")) {
 				// force all updates
 				ArrayList<String> services = cmdline.getArgumentList("-install");
-				Repo repo = new Repo();
+				Repo repo = new Repo(); // FIXME new Repo(branch) .. default
+										// branch is master ? - does this mean
+										// anything - if so what?
 				if (services.size() == 0) {
 					repo.retrieveAll();
 					return;
@@ -1206,43 +1198,6 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			if (cmdline.containsKey("-service")) {
 				createAndStartServices(cmdline);
 			}
-
-			/*
-			 * DEPRECATE - AGENT MUST PREPARE ENV if
-			 * (cmdline.containsKey("-test")) { // force console to be logged to
-			 * when testing logging.addAppender(Appender.CONSOLE); // check
-			 * incoming state .. // no additional params means -test Test ||
-			 * Test.test() // Test.test will do its own Bootstrap call //
-			 * additional param means -test Service1 Service2 ??? // -test (no
-			 * params) -> clean and bootstrap { -test Test } // -test Test -> //
-			 * "I'm in loaded clean environment - ServiceInterface.test("
-			 * test").test()
-			 * 
-			 * ArrayList<String> testArgs = cmdline.getArgumentList("-test");
-			 * 
-			 * if (testArgs.size() == 0) {
-			 * 
-			 * // No Args - I'm in dirty Environment // need to clean
-			 * Environment - prepare & respawn Repo repo = new Repo("install");
-			 * cleanCache(); repo.retrieveServiceType("Test"); // start clean
-			 * environment process = Bootstrap.spawn(new String[] { "-test",
-			 * "Test"});
-			 * 
-			 * } else { // clean environment - start the testing process for
-			 * (int i = 0; i < testArgs.size(); ++i) { String serviceType =
-			 * testArgs.get(0); ServiceInterface si = start(serviceType,
-			 * serviceType); si.test(); } } }
-			 */
-
-			/*
-			 * if (process != null){
-			 * 
-			 * Cli cli = (Cli)start("cli", "Cli"); cli.attach(process);
-			 * 
-			 * process.waitFor();
-			 * 
-			 * }
-			 */
 
 			if (cmdline.containsKey("-invoke")) {
 				invokeCommands(cmdline);
@@ -1289,12 +1244,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	public static boolean needsRestart() {
 		return needsRestart;
 	}
-	
-	public void onState(ServiceInterface updatedService){
+
+	public void onState(ServiceInterface updatedService) {
 		log.info("runtime updating registry info for remote service {}", updatedService.getName());
 		registry.put(updatedService.getName(), updatedService);
 		ServiceEnvironment se = environments.get(updatedService.getInstanceId());
-		if (se != null){
+		if (se != null) {
 			se.serviceDirectory.put(updatedService.getName(), updatedService);
 		} else {
 			error("onState ServiceEnvironment null");
@@ -1325,7 +1280,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			// between two instances
 			return null;
 		}
-		
+
 		String name = s.getName();
 
 		if (se.serviceDirectory.containsKey(name)) {
@@ -1382,12 +1337,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		if (runtime != null) {
 			runtime.invoke("registered", s);
 		}
-		
+
 		// new --------
 		// we want to subscribe to state changes
-		if (!s.isLocal()){
+		if (!s.isLocal()) {
 			runtime.subscribe(name, "publishState");
-		}		
+		}
 		// end new ----
 
 		return s;
@@ -1751,7 +1706,9 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		log.info(String.format("total physical mem [%d] Mb", Runtime.getTotalPhysicalMemory() / 1048576));
 
 		log.info("getting local repo");
-		repo = new Repo();
+		repo = new Repo();// FIXME NOW - needs to be defaulted somehow -
+							// probably defaulted to the branch version of the
+							// Agent !
 		repo.addRepoUpdateListener(this);
 
 		hideMethods.add("main");
@@ -1761,7 +1718,6 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		hideMethods.add("access$0");
 
 		// TODO - check for updates on startup ???
-		// repo = new Repo();
 
 		// starting this
 		try {
@@ -2277,7 +2233,8 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	// GAH !!! retrieveAll / updateAll / UpdateReport / ResolveReport :P
-	// FIXME - should be "install all" - for services - regardless of what Ivy calls it
+	// FIXME - should be "install all" - for services - regardless of what Ivy
+	// calls it
 	public UpdateReport updateAll() {
 
 		UpdateReport report = new UpdateReport();
@@ -2382,13 +2339,13 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	public static String getRuntimeName() {
 		return Runtime.getInstance().getName();
 	}
-	
-	public void setRelease(String branch){
-		repo.release = branch;
+
+	public void setRelease(String branch) {
+		repo.branch = branch;
 	}
-	
-	public String getRelease(){
-		return repo.release;
+
+	public String getRelease() {
+		return repo.branch;
 	}
 
 }

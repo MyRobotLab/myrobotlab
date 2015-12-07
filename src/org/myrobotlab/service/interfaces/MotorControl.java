@@ -100,7 +100,7 @@ public interface MotorControl {
 	 * 
 	 * @param newPos
 	 */
-	public void moveTo(double newPos);
+	public void moveTo(int newPos);
 
 	/**
 	 * Attach a motor controller to the motor. The motor and motor controller
@@ -140,5 +140,12 @@ public interface MotorControl {
 	 * @param max
 	 */
 	// public void setMaxPower(float max);
+	
+	boolean hasSensor();
+	
+	int[] getControlPins();
+	
+	String getType();
+	String[] getTypes();
 
 }

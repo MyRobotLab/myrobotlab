@@ -187,10 +187,10 @@ public class InMoovHand extends Service implements LeapDataListener {
 		}
 
 		attach();
-		setSpeed(0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f);
+		setSpeed(0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
 		rest();
 		sleep(2000);
-		setSpeed(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 		broadcastState();
 		return true;
 	}
@@ -409,7 +409,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 
 	public void rest() {
 		// initial positions
-		setSpeed(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 
 		thumb.rest();
 		index.rest();
@@ -461,7 +461,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 		this.side = side;
 	}
 
-	public void setSpeed(Float thumb, Float index, Float majeure, Float ringFinger, Float pinky, Float wrist) {
+	public void setSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
 		this.thumb.setSpeed(thumb);
 		this.index.setSpeed(index);
 		this.majeure.setSpeed(majeure);

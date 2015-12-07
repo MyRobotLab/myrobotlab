@@ -27,6 +27,8 @@ package org.myrobotlab.service.interfaces;
 
 public interface ServoControl {
 
+	// FIXME - add sweep and other fun methods
+	// extend Motor ???
 	/**
 	 * re-attaches servo to controller it was last attached to
 	 * 
@@ -49,12 +51,7 @@ public interface ServoControl {
 
 	public Integer getPin();
 
-	/**
-	 * gets the current position of the servo position is owned by the Servo
-	 * 
-	 * @return
-	 */
-	public Float getPosFloat();
+	
 
 	/**
 	 * moveTo moves the servo to a specific location. Typically, a servo has 0
@@ -62,7 +59,8 @@ public interface ServoControl {
 	 * 
 	 * @param newPos
 	 */
-	public void moveTo(Integer newPos);
+	public void moveTo(int newPos);
+	public void moveTo(double newPos);
 
 	/**
 	 * Attach a servo controller to the servo. The servo and servo controller
@@ -94,7 +92,8 @@ public interface ServoControl {
 	 */
 	public boolean setPin(int pin);
 
-	public void setSpeed(Float speed);
+	public void setSpeed(int speed);
+	public void setSpeed(double speed);
 
 	/**
 	 * stops the servo if currently in motion servo must be moving at

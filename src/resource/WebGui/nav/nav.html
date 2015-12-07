@@ -20,6 +20,7 @@
                 <!--quick-start a service-->
                 <li>
                 <form class="navbar-form">
+                         <input class="form-control" type="text" ng-model="newName" placeholder="name">
                         <input class="form-control" typeahead-min-length="0" type="text" ng-model="newType" placeholder="Service Type" typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-template-url="serviceSearchTemplate.html">
                     <script type="text/ng-template" id="serviceSearchTemplate.html">
                         <a>
@@ -27,7 +28,6 @@
                             <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
                         </a>
                     </script>
-                         <input class="form-control" type="text" ng-model="newName" placeholder="name">
                             <button class="btn btn-default" ng-click="start(newName, newType)">start</button>
                 </form>
                 </li>

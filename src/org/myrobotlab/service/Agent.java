@@ -125,6 +125,9 @@ public class Agent extends Service {
 	private Set<String> clientJVMArgs = new HashSet<String>();
 
 	private List<String> agentJVMArgs = new ArrayList<String>();
+	
+	
+	String lastBranch = null;
 
 	static public String formatList(ArrayList<String> args) {
 		StringBuilder sb = new StringBuilder();
@@ -324,6 +327,12 @@ public class Agent extends Service {
 		}
 
 		return ret;
+	}
+	
+	
+	// FIXME - spawn the current version
+	public Process spawn() throws IOException, URISyntaxException, InterruptedException {
+		return spawn(new String[] { "-runtimeName", "runtime" }); // FIXME - do latest version
 	}
 
 	/**
@@ -548,7 +557,8 @@ public class Agent extends Service {
 	}
 
 	public void terminate() {
-		terminateProcesses();
+		log.info("terminating others");
+		terminateAll();
 		log.info("terminating self ... goodbye...");
 		System.exit(0);
 	}
@@ -566,7 +576,7 @@ public class Agent extends Service {
 		return null;
 	}
 
-	public void terminateProcesses() {
+	public void terminateAll() {
 		for (String name : processes.keySet()) {
 			terminate(name);
 		}
@@ -624,7 +634,7 @@ public class Agent extends Service {
 
 			// FIXME -isAgent identifier sent -- default to setting log name to
 			// agent.log !!!
-			Runtime.setRuntimeName("smith");
+			Runtime.setRuntimeName("bootstrap");
 			Runtime.main(agentArgs);
 			Agent agent = (Agent) Runtime.start("agent", "Agent");
 			
