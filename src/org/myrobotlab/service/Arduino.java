@@ -1331,7 +1331,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	@Override
 	public void servoWrite(Servo servo) {
 		int index = getServoIndex(servo.getPin());
-		log.info(String.format("servoWrite %s %f index %d", servo.getName(), servo.targetOutput, index));
+		log.info(String.format("servoWrite %s %d index %d", servo.getName(), servo.targetOutput, index));
 		sendMsg(SERVO_WRITE, index, servo.targetOutput.intValue());
 	}
 
