@@ -62,9 +62,16 @@ public class InMoovHand extends Service implements LeapDataListener {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
+			
+			InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
+			InMoovHand hand =i01.startRightHand("COM15");
+			Arduino arduino = (Arduino)Runtime.getService("i01.right");
+			arduino.pinMode(13, Arduino.OUTPUT);
+			arduino.digitalWrite(13, 1);
+			
 			InMoovHand rightHand = new InMoovHand("r01");
 			Runtime.createAndStart("gui", "GUIService");
-			rightHand.connect("COM12");
+			rightHand.connect("COM15");
 			rightHand.startService();
 			Runtime.createAndStart("webgui", "WebGui");
 			// rightHand.connect("COM12"); TEST RECOVERY !!!
@@ -507,7 +514,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 		return;
 	}
 
-	public void test(){
+	public void test() {
 
 		if (arduino == null) {
 			error("arduino is null");
@@ -523,6 +530,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 		ringFinger.moveTo(ringFinger.getPos() + 2);
 		pinky.moveTo(pinky.getPos() + 2);
 		wrist.moveTo(wrist.getPos() + 2);
+			
 
 		info("test completed");
 	}
