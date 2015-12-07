@@ -10,25 +10,35 @@ import java.text.NumberFormat;
  *
  */
 public class Point {
-	private final double x;
-	private final double y;
-	private final double z;
+	private double x;
+	private double y;
+	private double z;
 
-	private final double roll;
-	private final double pitch;
-	private final double yaw;
+	private double roll;
+	private double pitch;
+	private double yaw;
 	
-	// TODO: consider rotation/orientation
+	/**
+	 * A 6 dimensional vector representing the 6 degrees of freedom in space.
+	 * 
+	 * @param x - left / right axis
+	 * @param y - up / down axis
+	 * @param z - forward / backward axis
+	 * @param roll - rotation about the z axis
+	 * @param pitch - rotation about the x axis
+	 * @param yaw - rotation about the y axis
+	 * 
+	 */
 	public Point(double x, double y, double z, double roll, double pitch, double yaw) {
 		super();
+		// linear information
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		
+		// angular information
 		this.roll = roll;
 		this.pitch = pitch;
 		this.yaw = yaw;
-		
 	}
 
 	@Override
@@ -113,9 +123,57 @@ public class Point {
 	@Override
 	public String toString() {
 		// TODO: round this out
-		NumberFormat formatter = new DecimalFormat("#0.000000");
-		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + ")";
+		NumberFormat formatter = new DecimalFormat("#0.000");
+		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + " roll=" + formatter.format(roll) + " , pitch=" + formatter.format(pitch) + ", yaw=" + formatter.format(yaw) + ")";
 	}
 
+	public void setX(double x) {
+		this.x = x;
+	}
 
+	public void setY(double y) {
+		this.y = y;
+	}
+
+	public void setZ(double z) {
+		this.z = z;
+	}
+
+	public void setRoll(double roll) {
+		this.roll = roll;
+	}
+
+	public void setPitch(double pitch) {
+		this.pitch = pitch;
+	}
+
+	public void setYaw(double yaw) {
+		this.yaw = yaw;
+	}
+
+	/**
+	 * add the x,y,z,roll,pitch,yaw of the point passed in, to the current point.
+	 * return a new point with the individual components summed. 
+	 * @param p
+	 * @return
+	 */
+	public Point add(Point p) {
+		// add the linear and angular parts and return the resulting sum.
+		// TODO: move this to a utils class and keep this a POJO.
+		Point p2 = new Point(p.x+x, p.y+y, p.z+z, p.roll+roll,p.pitch+pitch,p.yaw+yaw);
+		return p2;
+	}
+	
+	/**
+	 *  return a new point with the x,y,z values multipled by the xyzScale
+	 * @param xyzScale
+	 * @return
+	 */
+	public Point multiplyXYZ(double xyzScale) {
+		// add the linear and angular parts and return the resulting sum.
+		// TODO: move this to a utils class and keep this a POJO.
+		Point p2 = new Point(xyzScale*x, xyzScale*y, xyzScale*z, roll,pitch,yaw);
+		return p2;
+	}
+	
 }

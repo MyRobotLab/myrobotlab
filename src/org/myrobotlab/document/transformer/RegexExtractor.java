@@ -6,6 +6,13 @@ import java.util.regex.Pattern;
 
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will use a regex to find a pattern in a string field and store the
+ * matched text into the output field.
+ * 
+ * @author kwatters
+ *
+ */
 public class RegexExtractor extends AbstractStage {
 
 	private String inputField = null;
@@ -17,6 +24,11 @@ public class RegexExtractor extends AbstractStage {
 	@Override
 	public void startStage(StageConfiguration config) {
 		// TODO Much more stuff like group support and field mapping for the groups
+		if (config != null) {
+			inputField = config.getProperty("inputField", "text");
+			outputField = config.getProperty("outputField", "entity");
+			regex = config.getProperty("regex");			
+		}
 		pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 	}
 

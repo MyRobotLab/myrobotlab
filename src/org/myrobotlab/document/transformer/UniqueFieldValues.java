@@ -5,6 +5,12 @@ import java.util.List;
 
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will remove all duplicate values for a given field on a document.
+ * 
+ * @author kwatters
+ *
+ */
 public class UniqueFieldValues extends AbstractStage {
 
 	private String fieldName;
@@ -12,6 +18,7 @@ public class UniqueFieldValues extends AbstractStage {
 	@Override
 	public void startStage(StageConfiguration config) {
 		// NoOp
+		fieldName = config.getProperty("fieldName");
 	}
 
 	@Override

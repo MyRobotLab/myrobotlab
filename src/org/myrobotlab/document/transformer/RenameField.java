@@ -6,6 +6,11 @@ import java.util.List;
 
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will rename the field on a document.
+ * @author kwatters
+ *
+ */
 public class RenameField extends AbstractStage {
 
 	private String oldName = "fielda";
@@ -13,6 +18,10 @@ public class RenameField extends AbstractStage {
 	@Override
 	public void startStage(StageConfiguration config) {
 		// TODO Auto-generated method stub
+		if (config != null) {
+			oldName = config.getProperty("oldName");
+			newName = config.getProperty("newName");
+		}
 	}
 
 	@Override

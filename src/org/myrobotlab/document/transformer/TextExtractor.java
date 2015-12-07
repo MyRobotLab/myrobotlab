@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -21,6 +20,14 @@ import org.apache.tika.metadata.Metadata;
 import org.myrobotlab.document.transformer.StageConfiguration;
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will use Apache Tika to perform text and metadata extraction
+ * on many different types of documents including, but not limited to,
+ * pdf, office documents, html, etc..
+ * 
+ * @author kwatters
+ *
+ */
 public class TextExtractor extends AbstractStage {
 
 	private String textField = "text";
@@ -28,15 +35,17 @@ public class TextExtractor extends AbstractStage {
 
 	@Override
 	public void startStage(StageConfiguration config) {
-		// TODO Auto-generated method stub
-
+		// TODO: support processing a byte array on a document.
+		// rather than just a reference for on disk
+		if (config != null) {
+			textField = config.getProperty("textField", "text");
+			filePathField = config.getProperty("filePathField", "filepath");
+		}
 
 	}
 
 	@Override
 	public List<Document> processDocument(Document doc) {
-		// TODO Auto-generated method stub
-
 		// Create the parser..
 		// not sure if the parser is thread safe, so we create a new one here
 		// each time.  probably not effecient to do this.

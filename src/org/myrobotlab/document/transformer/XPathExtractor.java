@@ -32,29 +32,39 @@ import javax.xml.xpath.XPathConstants;
 import org.hsqldb.lib.StringInputStream;
 import org.myrobotlab.document.Document;
 
+/**
+ * This stage will load a config file that contains a field name to xpath expression mapping.
+ * The xpaths will be applied to xml data on the document and the extracted values will be 
+ * mapped to the appropriate fields on the document based on the config
+ * 
+ * @author kwatters
+ *
+ */
 public class XPathExtractor extends AbstractStage {
 
 
 	protected String xmlField = "xml";
 	protected String configFile = "config/xpaths.txt";
-	protected final String TRIM_OUTPUT_KEY_VALUE = "xpath_vars_to_exclude_trim";
-	protected final String TRIM_OUTPUT_KEY_VALUE_SEPARATOR = ",";
 	// mapping of field name to the xpaths that evaluate for its extraction
 	protected HashMap<XPathExpression, ArrayList<String>> xpaths = new HashMap<XPathExpression, ArrayList<String>>();
-	protected HashSet<String> xpathFilterList = new HashSet<String>();
 	protected boolean useNamespaces = true;
-
 	private DocumentBuilderFactory factory;
 	private DocumentBuilder builder;
 	private XPathFactory xpathFactory;
 	private XPath xpath;
-
+	// TODO: move this to the base class.
 	private boolean debug = false;
 	@Override
 	public void startStage(StageConfiguration config) {
 
-		// TODO: remove the whole start/stage with the config .. 
-
+		if (config != null) {
+			xmlField = config.getProperty("xmlField", "xml");
+			configFile = config.getProperty("configFile", "config/xpaths.txt");
+			useNamespaces = Boolean.valueOf(config.getProperty("useNamespaces", "true"));			
+		}
+		
+		
+		
 		factory = DocumentBuilderFactory.newInstance();
 		// TODO: do we really care about name spaces (they can be a pain sometimes)
 		factory.setNamespaceAware(useNamespaces);

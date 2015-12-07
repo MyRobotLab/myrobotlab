@@ -11,7 +11,7 @@ import org.myrobotlab.service.interfaces.CustomMsgListener;
 import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
 import org.slf4j.Logger;
-
+import org.myrobotlab.math.Mapper;
 /**
  * 
  * OculusDIY - This service is the DIY oculus service.
@@ -26,6 +26,10 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	public final static Logger log = LoggerFactory.getLogger(OculusDIY.class);
 
 	transient public Arduino arduino;
+	
+	OculusData oculus = new OculusData();
+	Mapper mapperPitch = new Mapper(-180,0,0,180);
+	Mapper mapperYaw = new Mapper(-180,180,0,360);
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
@@ -44,6 +48,7 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	Integer maxHead = 500;
 	Integer lastValue2 = 200;
 	Integer bicep = 5;
+	Integer headingint = 90;
 	
 	public OculusDIY(String n) {
 		super(n);
@@ -62,7 +67,7 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		Integer mx = (Integer) data[1];
 		Integer headingint = (Integer) data[2];
 		this.computeAngles(mx, headingint,ay);
-		OculusData oculus = new OculusData();
+		
 		oculus.yaw = Double.valueOf(rothead);
 		oculus.pitch = Double.valueOf(head);
 		oculus.roll = Double.valueOf(bicep);
@@ -107,6 +112,37 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	    x = (85 +(((y - 20)/(-16000 - 20))*(5 - 85)));
 	    bicep = (int)x;
 	    
+	}
+	
+	public void computeAnglesAndroid(float yaw, float roll, float pitch){
+		
+		//head =  (int) (180.0 +(((az - 9.82)/(-9.82 - 9.82))*(0.0 - 180.0)));
+		head = (int) mapperPitch.calc(pitch);
+		//headingint = (int) mapperYaw.calc(yaw);
+		headingint = (int)yaw;
+		
+		lastValue = headingint;
+		if (resetValue > 90 && lastValue < 0) {
+			rothead = (offSet + headingint + 360);
+		} else if (resetValue < -90 && lastValue > 0) {
+			rothead = (offSet + headingint - 360);
+		} else {
+			rothead = (offSet + headingint);
+		}
+		System.out.println("difference is" + Math.abs(rothead - lastrotheadvalue));
+		if (Math.abs(rothead - lastrotheadvalue) > 2) {
+			lastrotheadvalue = rothead;
+		}
+		else { rothead = lastrotheadvalue;
+		}
+		
+		oculus.pitch = Double.valueOf(head);
+		oculus.yaw = Double.valueOf(rothead);
+		oculus.roll = Double.valueOf(roll);
+		invoke("publishOculusData", oculus);
+
+		System.out.println("pitch is "+ head + "yaw is " + rothead);
+		
 	}
 
 	public OculusData publishOculusData(OculusData oculus) {
