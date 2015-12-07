@@ -112,8 +112,7 @@
 	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
 	<property name="result.report.dir" location="${report}/jacoco" />
 	<!-- directory for the distrbituion to go into -->
-	<property name="dist" location="dist/${branch}" />
-	
+	<property name="dist" location="dist/current/${branch}" />
 	
 	<available file="${build}/classes/resource/license" property="license.present" />
 	<property name="repo" location="../repo" />
@@ -619,10 +618,9 @@
 	<target name="dist" depends="jar" description="generate the distribution">
 		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}${env.TRAVIS_BUILD_NUMBER}.jar" / -->
 		<!-- backwards compat .. TODO: review this.. -->
-		<mkdir dir="current" />
-		<mkdir dir="current/${dist}" />
-		<copy file="${build}/lib/myrobotlab.jar" tofile="current/${dist}/myrobotlab.jar" />
-		<copy file="${build}/classes/resource/version.txt" tofile="current/${dist}/version.txt"/>
+		<mkdir dir="${dist}" />
+		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
+		<copy file="${build}/classes/resource/version.txt" tofile="${dist}/version.txt"/>
 		<!-- for convienence of debugging spawn -->
 		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
 	</target>
