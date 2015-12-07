@@ -18,6 +18,6 @@ deploy:
   skip_cleanup: true
   # upload-dir: current
   # travis will only copy 1 dir
-  local_dir: dist/current
+  local_dir: dist
   # local_dir: build/report
   acl: 'public_read'
