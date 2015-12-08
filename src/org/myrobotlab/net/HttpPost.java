@@ -32,7 +32,7 @@ import java.util.Random;
  * @version 1.1
  */
 @SuppressWarnings({ "JavaDoc" })
-public class ClientHttpRequest {
+public class HttpPost {
 	private URLConnection mConnection;
 
 	private OutputStream mOutput = null;
@@ -62,7 +62,7 @@ public class ClientHttpRequest {
 	 * @param url
 	 *            the URL to send request to
 	 */
-	public ClientHttpRequest(URL url) throws IOException {
+	public HttpPost(URL url) throws IOException {
 		this(url.openConnection());
 	}
 
@@ -73,7 +73,7 @@ public class ClientHttpRequest {
 	 * @param connection
 	 *            an already open URL connection
 	 */
-	public ClientHttpRequest(URLConnection connection) {
+	public HttpPost(URLConnection connection) {
 		mConnection = connection;
 		((HttpURLConnection) mConnection).setInstanceFollowRedirects(true);
 		connection.setDoOutput(true);

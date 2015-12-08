@@ -1006,6 +1006,14 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return version;
 	}
 
+	public static String getBranch() {
+		String branch = FileIO.resourceToString("branch.txt");
+		if (branch == null || branch.length() == 0) {
+			branch = "unknown";
+		}
+		return branch;
+	}
+
 	static public ArrayList<ResolveReport> install(String serviceType) throws ParseException, IOException {
 		String fullTypeName = null;
 		if (serviceType.indexOf(".") == -1) {
@@ -2340,12 +2348,5 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return Runtime.getInstance().getName();
 	}
 
-	public void setRelease(String branch) {
-		repo.branch = branch;
-	}
-
-	public String getRelease() {
-		return repo.branch;
-	}
 
 }

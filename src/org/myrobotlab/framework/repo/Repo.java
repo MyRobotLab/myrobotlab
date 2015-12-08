@@ -60,10 +60,12 @@ public class Repo implements Serializable {
 	public transient final static Logger log = LoggerFactory.getLogger(Repo.class);
 
 	public HashSet<String> nativeFileExt = new HashSet<String>(Arrays.asList("dll", "so", "dylib", "jnilib"));
-
-	public String branch = "develop";
 	
-	public String REPO_BASE_URL = "https://raw.githubusercontent.com/MyRobotLab/repo/" + branch;
+	String repoDir = "repo";
+
+	// public String branch = "develop";
+	
+	public String REPO_BASE_URL = "https://raw.githubusercontent.com/MyRobotLab/repo/";// + branch;
 	public static final Filter NO_FILTER = NoFilter.INSTANCE;
 
 	ArrayList<String> errors = new ArrayList<String>();
@@ -256,17 +258,6 @@ public class Repo implements Serializable {
 		this.localServiceData = getServiceDataFile();
 	}
 
-	public Repo(String branch) {
-
-		this.branch = branch;
-		
-		// get my local platform
-		this.platform = Platform.getLocalInstance();
-
-		// load local file
-		this.localServiceData = getServiceDataFile();
-	}
-
 	public void addRepoUpdateListener(RepoUpdateListener listener) {
 		this.listener = listener;
 	}
@@ -343,7 +334,8 @@ public class Repo implements Serializable {
 	public boolean clearRepoCache(Set<File> exclude) {
 
 		boolean ret = true;
-		String cacheDir = String.format("%s%s.repo", System.getProperty("user.home"), File.separator);
+		// GAP20151208		String cacheDir = String.format("%s%s.repo", System.getProperty("user.home"), File.separator);
+		String cacheDir = repoDir;
 		log.info(String.format("cleanCache [%s]", cacheDir));
 
 		File cache = new File(cacheDir);
@@ -540,7 +532,7 @@ public class Repo implements Serializable {
 	public ServiceData getServiceDataFromRepo() {
 		try {
 
-			remoteServiceData = ServiceData.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/" + branch + "/serviceData.json");
+			remoteServiceData = ServiceData.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/" + platform.getBranch() + "/serviceData.json");
 			if (remoteServiceData == null) {
 				error("could not get remote service data");
 				return null;
@@ -558,7 +550,7 @@ public class Repo implements Serializable {
 	}
 
 	public String getServiceDataURL() {
-		return String.format("%s/serviceData.json", REPO_BASE_URL);
+		return String.format("%s/serviceData.json", REPO_BASE_URL + platform.getBranch());
 	}
 
 	public ArrayList<ServiceType> getServiceTypes() {
@@ -740,7 +732,7 @@ public class Repo implements Serializable {
 			if (!ivychain.exists()) {
 				try {
 					String xml = FileIO.resourceToString("framework/ivychain.xml");
-					xml = xml.replace("{release}", branch);
+					xml = xml.replace("{release}", platform.getBranch());
 					FileOutputStream fos = new FileOutputStream(ivychain);
 					fos.write(xml.getBytes());
 					fos.close();
@@ -754,7 +746,8 @@ public class Repo implements Serializable {
 		}
 
 		IvySettings settings = ivy.getSettings();
-		settings.setDefaultCache(new File(System.getProperty("user.home"), ".repo"));
+// GAP20151208		settings.setDefaultCache(new File(System.getProperty("user.home"), ".repo"));
+		settings.setDefaultCache(new File(repoDir));
 		settings.addAllVariables(System.getProperties());
 
 		File cache = new File(settings.substitute(settings.getDefaultCache().getAbsolutePath()));
