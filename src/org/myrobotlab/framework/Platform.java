@@ -6,6 +6,8 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.myrobotlab.net.HttpGet;
+
 //import org.myrobotlab.logging.Logging;
 
 public class Platform implements Serializable {
@@ -33,6 +35,7 @@ public class Platform implements Serializable {
 	private String vmName;
 	private String mrlVersion;
 	private String instanceId;
+	private String branch; // TODO - should be "baked" in
 
 	static Platform localInstance = getLocalInstance();
 
@@ -113,6 +116,24 @@ public class Platform implements Serializable {
 				SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
 				platform.mrlVersion = format.format(new Date());
 			}
+			
+			try {
+				sb.setLength(0);
+				BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/branch.txt"), "UTF-8"));
+				for (int c = br.read(); c != -1; c = br.read()) {
+					sb.append((char) c);
+				}
+				if (sb.length() > 0) {
+					platform.branch = sb.toString();
+				}
+			} catch (Exception e) {
+				// no logging silently die
+			}
+
+			if (platform.branch == null) {
+				platform.branch = "unknown";
+			}
+
 
 			// TODO - ProcParser
 
@@ -122,6 +143,18 @@ public class Platform implements Serializable {
 		}
 
 		return localInstance;
+	}
+	
+	static public String getCurrentVersion(String branch){
+		byte[] data = HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/version.txt", branch));
+		if (data != null){
+			return new String(data);
+		}
+		return null;
+	}
+
+	public String getBranch() {
+		return branch;
 	}
 
 	public Platform() {

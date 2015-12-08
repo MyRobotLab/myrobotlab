@@ -492,6 +492,7 @@
 			<fileset dir="${src}/resource" />
 		</copy>
 		<echo file="${build}/classes/resource/version.txt">${tag}${env.TRAVIS_BUILD_NUMBER}</echo>
+		<echo file="${build}/classes/resource/branch.txt">${branch}</echo>
 		<!-- copy the latest serviceData.xml into package -->
 		<!-- TODO deprecate the xml -->
 		<copy file="${repo}/serviceData.xml" todir="${build}/classes/resource/framework" />

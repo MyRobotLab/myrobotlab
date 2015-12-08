@@ -165,7 +165,6 @@ public class Agent extends Service {
 		return ret;
 	}
 
-
 	public Agent(String n) {
 		super(n);
 		log.info("Agent {} PID {} is alive", n, Runtime.getPID());
