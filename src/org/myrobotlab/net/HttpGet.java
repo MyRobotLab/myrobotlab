@@ -1,6 +1,7 @@
 package org.myrobotlab.net;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -10,6 +11,11 @@ import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 public class HttpGet {
+	/**
+	 * FIXME - offer proxy
+	 * Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("my.proxy.example.com", 3128));
+	 * URLConnection yc = url.openConnection(proxy);
+	 */
 	
 	public final static Logger log = LoggerFactory.getLogger(HttpGet.class);
 

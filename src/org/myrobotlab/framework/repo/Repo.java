@@ -728,6 +728,9 @@ public class Repo implements Serializable {
 			dispatcher.setDownloader("https", httpHandler);
 			URLHandlerRegistry.setDefault(dispatcher);
 
+			// File communication is used
+			// for ivy - the url branch info is in ivychain.xml
+			// theoretically this would never change
 			File ivychain = new File("ivychain.xml");
 			if (!ivychain.exists()) {
 				try {
