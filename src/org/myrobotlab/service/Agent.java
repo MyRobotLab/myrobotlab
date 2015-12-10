@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -28,6 +30,7 @@ import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.net.HttpGet;
 import org.slf4j.Logger;
 
 /**
@@ -585,6 +588,41 @@ public class Agent extends Service {
 	public void terminateSelfOnly() {
 		log.info("goodbye .. cruel world");
 		System.exit(0);
+	}
+	
+	static public String getLatestVersionNumber(String branch){
+		byte[] data = HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/version.txt", branch));
+		if (data != null){
+			return new String(data);
+		}
+		return null;
+	}
+	
+	static public byte[] getLatest(){
+		return getLatest(Platform.getLocalInstance().getBranch());
+	}
+
+	static public byte[] getLatest(String branch){
+		return HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/myrobotlab.jar", branch));
+	}
+	
+	
+	static public void downloadLatest(String branch) throws IOException{
+		String version = getLatestVersionNumber(branch);
+		log.info("downloading version {} /{}", version, branch);
+		byte[] myrobotlabjar = getLatest(branch);	
+		log.info("{} bytes", myrobotlabjar.length);
+		
+		File archive = new File(String.format("%s/archive", branch));
+		archive.mkdirs();
+		
+		FileOutputStream fos = new FileOutputStream(String.format("%s/archive/myrobotlab.%s.jar", branch, version));
+		fos.write(myrobotlabjar);
+		fos.close();
+		
+		fos = new FileOutputStream(String.format("%s/myrobotlab.jar", branch));
+		fos.write(myrobotlabjar);
+		fos.close();
 	}
 
 	/**

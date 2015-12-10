@@ -6,8 +6,6 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.myrobotlab.net.HttpGet;
-
 //import org.myrobotlab.logging.Logging;
 
 public class Platform implements Serializable {
@@ -35,7 +33,7 @@ public class Platform implements Serializable {
 	private String vmName;
 	private String mrlVersion;
 	private String instanceId;
-	private String branch; // TODO - should be "baked" in
+	private String branch;
 
 	static Platform localInstance = getLocalInstance();
 
@@ -145,13 +143,6 @@ public class Platform implements Serializable {
 		return localInstance;
 	}
 	
-	static public String getCurrentVersion(String branch){
-		byte[] data = HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/version.txt", branch));
-		if (data != null){
-			return new String(data);
-		}
-		return null;
-	}
 
 	public String getBranch() {
 		return branch;

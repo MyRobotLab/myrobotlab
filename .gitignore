@@ -1,5 +1,6 @@
 /bin
 /dist
+/repo
 /.ivy
 /.myrobotlab
 /.settings
