@@ -37,13 +37,14 @@ public class ProcessData implements Serializable {
 	}
 
 	private static final long serialVersionUID = 1L;
+	public String branch;
 	public String name;
 	transient public Process process;
-	public boolean isRunning = false;
+	boolean isRunning = false;
 	transient Monitor monitor;
 	transient public Invoker service;
 
-	public ProcessData(Invoker service, String name, Process process) {
+	public ProcessData(Invoker service, String branch, String name, Process process) {
 		this.service = service;
 		this.name = name;
 		this.process = process;

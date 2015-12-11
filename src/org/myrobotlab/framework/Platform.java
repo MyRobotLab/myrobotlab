@@ -144,10 +144,6 @@ public class Platform implements Serializable {
 	}
 	
 
-	public String getBranch() {
-		return branch;
-	}
-
 	public Platform() {
 	}
 
@@ -157,7 +153,18 @@ public class Platform implements Serializable {
 	 * 
 	 * @return hardware architecture
 	 */
-	// FIXME ! non-static !!!!
+
+	/**
+	 * Non static methods here are very important
+	 * when a Platform is serialized from a different process - and can be
+	 * inspected - for local platform info the static methods can be used
+	 * @return
+	 */
+	
+	public String getBranch() {
+		return branch;
+	}
+	
 	public String getArch() {
 		return arch;
 	}
@@ -226,5 +233,5 @@ public class Platform implements Serializable {
 	public String toString() {
 		return String.format("%s.%d.%s", arch, bitness, os);
 	}
-
+	
 }

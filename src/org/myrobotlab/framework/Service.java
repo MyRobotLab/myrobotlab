@@ -146,6 +146,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	transient protected Inbox inbox = null;
 
 	transient Timer timer = null;
+	
+	/**
+	 * a more capable task handler
+	 */
+	transient HashMap<String, Timer> tasks = new HashMap<String, Timer>();
 
 	protected boolean allowDisplay = true;
 
@@ -760,6 +765,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	// -------------------------------- new createPeer end
 	// -----------------------------------
 
+	/**
+	 * DEPRECATE - use addTask
+	 * @param interval
+	 * @param method
+	 * @param params
+	 */
+	@Deprecated
 	public void addLocalTask(int interval, String method, Object... params) {
 		if (timer == null) {
 			timer = new Timer(String.format("%s.timer", getName()));
@@ -767,6 +779,67 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 		Task task = new Task(interval, getName(), method, params);
 		timer.schedule(task, 0);
+	}
+	
+	/**
+	 * a stronger bigger better task handler !
+	 * @param name
+	 */
+	public void addTask(String name, int interval, String method, Object... params){
+		Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), name)));
+		Task task = new Task(interval, getName(), method, params);
+		timer.schedule(task, 0);
+		tasks.put(name, timer);
+	}
+	
+	public void purgeTask(String taskName){
+		if (tasks.containsKey(taskName)){
+			Timer timer = tasks.get(taskName);
+			if (timer != null) {
+				try {
+					timer.cancel();
+					timer.purge();
+					timer = null;
+				} catch (Exception e) {
+					log.info(e.getMessage());
+				}
+			}
+		} else {
+			log.warn("purgeTask - task {} does not exist", taskName);
+		}
+	}
+	
+	public void purgeTasks(){
+		for (String taskName : tasks.keySet()){
+			Timer timer = tasks.get(taskName);
+			if (timer != null) {
+				try {
+					timer.cancel();
+					timer.purge();
+					timer = null;
+				} catch (Exception e) {
+					log.info(e.getMessage());
+				}
+			}
+		}
+		tasks.clear();
+	}
+	
+	/**
+	 * DEPRECATED - use purgeTasks
+	 */
+	@Deprecated
+	public void purgeAllTasks() {
+		info("purgeAllTasks");
+		if (timer != null) {
+			try {
+				timer.cancel();
+				timer.purge();
+				timer = null;
+			} catch (Exception e) {
+				log.info(e.getMessage());
+			}
+		}
 	}
 
 	public boolean allowDisplay() {
@@ -1450,18 +1523,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		return this;
 	}
 
-	public void purgeAllTasks() {
-		info("purgeAllTasks");
-		if (timer != null) {
-			try {
-				timer.cancel();
-				timer.purge();
-				timer = null;
-			} catch (Exception e) {
-				log.info(e.getMessage());
-			}
-		}
-	}
+	
 
 	@Override
 	public void releasePeers() {
