@@ -2056,7 +2056,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	static public boolean noWorky(String userId) {
 		String ret = null;
 		try {
-			ret = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("agent.log"));
+			ret = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("../agent.log"));
 			if (ret.contains("Upload:")) {
 				log.info("noWorky successfully sent - our crack team of experts will check it out !");
 				return true;
