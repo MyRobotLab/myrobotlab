@@ -44,6 +44,7 @@ import java.util.Enumeration;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 
 import org.myrobotlab.logging.Level;
@@ -53,7 +54,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * class of useful utility functions we do not use nio - for portability reasons e.g. Android
+ * class of useful utility functions we do not use nio - for portability reasons
+ * e.g. Android
  * 
  * @author GroG
  *
@@ -62,6 +64,7 @@ public class FileIO {
 
 	public static class FileComparisonException extends Exception {
 		private static final long serialVersionUID = 1L;
+
 		public FileComparisonException(String msg) {
 			super(msg);
 		}
@@ -347,7 +350,9 @@ public class FileIO {
 	}
 
 	/**
-	 * similar to ls - when running in jar form will return contents of path in an array list of files when running in the ide will return the contents of /bin + path
+	 * similar to ls - when running in jar form will return contents of path in
+	 * an array list of files when running in the ide will return the contents
+	 * of /bin + path
 	 * 
 	 * @param path
 	 * @return
@@ -374,7 +379,8 @@ public class FileIO {
 				File file = new File(targetDir + path + "/" + tmp[i]);
 				ret.add(file);
 				/*
-				 * if (dirCheck.isDirectory()) { ret.add(tmp[i] + "/"); } else { ret.add(tmp[i]); }
+				 * if (dirCheck.isDirectory()) { ret.add(tmp[i] + "/"); } else {
+				 * ret.add(tmp[i]); }
 				 */
 			}
 			dir.list();
@@ -398,8 +404,10 @@ public class FileIO {
 	}
 
 	/**
-	 * inter process file communication - default is to wait and attempt to load a file in the next second - it comes from savePartFile - then the writing of the file from a
-	 * different process should be an atomic move regardless of file size
+	 * inter process file communication - default is to wait and attempt to load
+	 * a file in the next second - it comes from savePartFile - then the writing
+	 * of the file from a different process should be an atomic move regardless
+	 * of file size
 	 * 
 	 * @param filename
 	 * @throws IOException
@@ -598,33 +606,30 @@ public class FileIO {
 				}
 			}
 		}
-		
+
 		FileOutputStream fos = new FileOutputStream(new File(outFile));
-		/* apparently size is not correct or is compressed size ? dunno something aint right !
-		byte[] buffer = new byte[(int) size];
-		is.read(buffer);
-		FileOutputStream fos = new FileOutputStream(new File(outFile));
-		fos.write(buffer);
-		fos.close();
-		is.close();
-		*/
-		
+		/*
+		 * apparently size is not correct or is compressed size ? dunno
+		 * something aint right ! byte[] buffer = new byte[(int) size];
+		 * is.read(buffer); FileOutputStream fos = new FileOutputStream(new
+		 * File(outFile)); fos.write(buffer); fos.close(); is.close();
+		 */
+
 		// some files are big - nice to have a big buffer
 		byte[] byteArray = new byte[262144];
-        int i;
-        
-        while ((i = is.read(byteArray)) > 0) 
-        {
-            fos.write(byteArray, 0, i);
-        }
-        is.close();
-        fos.close();
+		int i;
+
+		while ((i = is.read(byteArray)) > 0) {
+			fos.write(byteArray, 0, i);
+		}
+		is.close();
+		fos.close();
 	}
 
 	static public final boolean extractResources() {
 		try {
 			return extractResources(false);
-		} catch(Exception e){
+		} catch (Exception e) {
 			Logging.logError(e);
 		}
 		return false;
@@ -647,7 +652,7 @@ public class FileIO {
 	}
 
 	static public final boolean extract(String jarFile, String from, String to) throws IOException {
-		//extract(/C:/mrl/myrobotlab/dist/myrobotlab.jar, resource, )
+		// extract(/C:/mrl/myrobotlab/dist/myrobotlab.jar, resource, )
 		log.info(String.format("extract(%s, %s, %s)", jarFile, from, to));
 
 		boolean contents = false;
@@ -658,14 +663,14 @@ public class FileIO {
 		Enumeration<JarEntry> enumEntries = jar.entries();
 
 		// normalize slash
-		if (from != null){
+		if (from != null) {
 			from = from.replace("\\", "\\\\");
 		}
-		
+
 		if (to != null) {
 			to = to.replace("\\", "\\\\");
 		}
-		
+
 		// normalize [from | from/ | from/*]
 		String fromRoot = null;
 		if (from != null && (from.endsWith("/") || from.endsWith("/*"))) {
@@ -676,7 +681,7 @@ public class FileIO {
 		}
 
 		// normalize [to , to/]
-		if (to == null || to.equals("") || to.equals("./")){
+		if (to == null || to.equals("") || to.equals("./")) {
 			to = ".";
 		}
 
@@ -738,6 +743,40 @@ public class FileIO {
 
 		return found;
 	}
+	
+	/**
+	 * 
+	 * Yet Another Way
+
+	public void extractFromJar(String jarFile, String fileToExtract, String dest) {
+		try {
+
+			
+			  String home = getClass().getProtectionDomain().
+			  getCodeSource().getLocation().toString(). substring(6);
+			 
+			JarFile jar = new JarFile(jarFile);
+			ZipEntry entry = jar.getEntry(fileToExtract);
+			File efile = new File(dest, entry.getName());
+
+			InputStream in = new BufferedInputStream(jar.getInputStream(entry));
+			OutputStream out = new BufferedOutputStream(new FileOutputStream(efile));
+			byte[] buffer = new byte[2048];
+			for (;;) {
+				int nBytes = in.read(buffer);
+				if (nBytes <= 0)
+					break;
+				out.write(buffer, 0, nBytes);
+			}
+			out.flush();
+			out.close();
+			in.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	*/
 
 	// FIXME - UNIT TESTS !!!
 	public static void main(String[] args) throws ZipException, IOException {
@@ -747,39 +786,60 @@ public class FileIO {
 
 		try {
 			/*
-			 * final URL jarUrl = new URL("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource"); final JarURLConnection connection = (JarURLConnection)
-			 * jarUrl.openConnection(); final URL url = connection.getJarFileURL();
+			 * final URL jarUrl = new
+			 * URL("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource");
+			 * final JarURLConnection connection = (JarURLConnection)
+			 * jarUrl.openConnection(); final URL url =
+			 * connection.getJarFileURL();
 			 * 
 			 * System.out.println(url.getFile());
 			 */
 
-			//extract("/C:/mrl/myrobotlab/dist/myrobotlab.jar", "resource", "");
+			extract("develop/myrobotlab.jar", "resource/version.txt", "./version.txt");
+			
+			// extract("/C:/mrl/myrobotlab/dist/myrobotlab.jar", "resource",
+			// "");
 			extract("dist/myrobotlab.jar", "resource", "");
 			// extractResources();
 			/*
-			 * // extract directory to a non existent directory // result should be test7 extract("dist/myrobotlab.jar", "resource/AdafruitMotorShield/*", "test66");
+			 * // extract directory to a non existent directory // result should
+			 * be test7 extract("dist/myrobotlab.jar",
+			 * "resource/AdafruitMotorShield/*", "test66");
 			 * 
-			 * // file to file extract("dist/myrobotlab.jar", "module.properties", "module.txt");
+			 * // file to file extract("dist/myrobotlab.jar",
+			 * "module.properties", "module.txt");
 			 * 
-			 * // file to file extract("dist/myrobotlab.jar", "resource/ACEduinoMotorShield.png", "ACEduinoMotorShield.png");
+			 * // file to file extract("dist/myrobotlab.jar",
+			 * "resource/ACEduinoMotorShield.png", "ACEduinoMotorShield.png");
 			 * 
-			 * // file to file extract("dist/myrobotlab.jar", "resource/ACEduinoMotorShield.png", "test2/deeper/ACEduinoMotorShield.png");
+			 * // file to file extract("dist/myrobotlab.jar",
+			 * "resource/ACEduinoMotorShield.png",
+			 * "test2/deeper/ACEduinoMotorShield.png");
 			 * 
-			 * // extract directory to a non existent directory // result should be test7 extract("dist/myrobotlab.jar", "resource/*", "test7");
+			 * // extract directory to a non existent directory // result should
+			 * be test7 extract("dist/myrobotlab.jar", "resource/*", "test7");
 			 * 
-			 * // extract directory to a non existent directory // result should be test8/testdeeper/(contents of resource) extract("dist/myrobotlab.jar", "resource/",
-			 * "test8/testdeeper");
+			 * // extract directory to a non existent directory // result should
+			 * be test8/testdeeper/(contents of resource)
+			 * extract("dist/myrobotlab.jar", "resource/", "test8/testdeeper");
 			 * 
-			 * // extract directory to a non existent directory // result should be test3/deep/deeper/resource extract("dist/myrobotlab.jar", "resource", "test3/deep/deeper");
+			 * // extract directory to a non existent directory // result should
+			 * be test3/deep/deeper/resource extract("dist/myrobotlab.jar",
+			 * "resource", "test3/deep/deeper");
 			 * 
-			 * String t = "this is a test"; FileIO.savePartFile("save.txt", t.getBytes()); byte[] data = FileIO.loadPartFile("save.txt", 10000); if (data != null) { log.info(new
-			 * String(data)); }
+			 * String t = "this is a test"; FileIO.savePartFile("save.txt",
+			 * t.getBytes()); byte[] data = FileIO.loadPartFile("save.txt",
+			 * 10000); if (data != null) { log.info(new String(data)); }
 			 */
 
 			/*
-			 * String data = resourceToString("version.txt"); data = resourceToString("framework/ivychain.xml"); data = resourceToString("framework/serviceData.xml");
+			 * String data = resourceToString("version.txt"); data =
+			 * resourceToString("framework/ivychain.xml"); data =
+			 * resourceToString("framework/serviceData.xml");
 			 * 
-			 * byte[] ba = resourceToByteArray("version.txt"); ba = resourceToByteArray("framework/version.txt"); ba = resourceToByteArray("framework/serviceData.xml");
+			 * byte[] ba = resourceToByteArray("version.txt"); ba =
+			 * resourceToByteArray("framework/version.txt"); ba =
+			 * resourceToByteArray("framework/serviceData.xml");
 			 * 
 			 * String hello = resourceToString("blah.txt");
 			 * 

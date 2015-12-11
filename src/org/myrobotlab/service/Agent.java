@@ -124,12 +124,14 @@ public class Agent extends Service {
 	public final static Logger log = LoggerFactory.getLogger(Agent.class);
 
 	private static HashMap<String, ProcessData> processes = new HashMap<String, ProcessData>();
+	private static HashMap<String, HashMap<String, ProcessData>> branchIndex = new HashMap<String, HashMap<String, ProcessData>>();
 
 	private Set<String> clientJVMArgs = new HashSet<String>();
 
 	private List<String> agentJVMArgs = new ArrayList<String>();
-	
-	
+
+	private HashMap<String, ArrayList<String>> history = new HashMap<String, ArrayList<String>>();
+
 	String lastBranch = null;
 
 	static public String formatList(ArrayList<String> args) {
@@ -146,12 +148,35 @@ public class Agent extends Service {
 		peers.put("cli", "Cli", "Command line processor");
 		return peers;
 	}
+	
+	public void add(ProcessData p){
+		
+		processes.put(p.name, p);
+		HashMap<String, ProcessData> h = null;
+		if (!branchIndex.containsKey(p.branch)){
+			h = new HashMap<String, ProcessData>();
+		} else {
+			h = branchIndex.get(p.name);
+		}
+		branchIndex.put(p.name, h);
+	}
+	
+	public void remove(ProcessData p){
+		processes.remove(p.name);
+		if (branchIndex.containsKey(p.branch)){
+			HashMap<String, ProcessData> h = branchIndex.get(p.branch);
+			if (h.containsKey(p.name)){
+				h.remove(p.name);
+				
+			}
+		} 
+	}
 
 	public static List<Status> install(String fullType) {
 		List<Status> ret = new ArrayList<Status>();
 		ret.add(Status.info("install %s", fullType));
 		try {
-			Repo repo = new Repo();
+			Repo repo = new Repo();    
 
 			if (!repo.isServiceTypeInstalled(fullType)) {
 				repo.install(fullType);
@@ -211,7 +236,7 @@ public class Agent extends Service {
 	}
 
 	public List<Status> serviceTest() {
-		
+
 		List<Status> ret = new ArrayList<Status>();
 		// CLEAN FOR TEST METHOD
 
@@ -309,14 +334,14 @@ public class Agent extends Service {
 				terminate("testEnv");
 
 			} catch (Exception e) {
-				
+
 				ret.add(Status.error(e));
 				continue;
 			}
 		}
-		
+
 		ret.add(info("installTime", "%d", installTime));
-		
+
 		ret.add(info("installTime %d", installTime));
 		ret.add(info("testTimeMs %d", System.currentTimeMillis() - startTime));
 		ret.add(info("testTimeMinutes %d", TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime)));
@@ -330,11 +355,12 @@ public class Agent extends Service {
 
 		return ret;
 	}
-	
-	
+
 	// FIXME - spawn the current version
 	public Process spawn() throws IOException, URISyntaxException, InterruptedException {
-		return spawn(new String[] { "-runtimeName", "runtime" }); // FIXME - do latest version
+		return spawn(new String[] { "-runtimeName", "runtime" }); // FIXME - do
+																	// latest
+																	// version
 	}
 
 	/**
@@ -359,6 +385,11 @@ public class Agent extends Service {
 		// get runtimeName
 		CMDLine cmdline = new CMDLine(in);
 		String runtimeName = cmdline.getSafeArgument("-runtimeName", 0, "runtime");
+		String branch = cmdline.getSafeArgument("-branch", 0, Platform.getLocalInstance().getBranch());
+
+		if (cmdline.hasSwitch("-autoUpdate")) {
+			autoUpdate(true);
+		}
 
 		if (processes.containsKey(runtimeName)) {
 			error("%s already in processes - rejecting spawn request", runtimeName);
@@ -386,17 +417,15 @@ public class Agent extends Service {
 		// bin for debug - but its missing the <jar unzip files
 		// build its 'stale' but it has the missing <jar unzip files :P
 		String classpath = String.format("./%s./myrobotlab.jar%s./libraries/jar/*%s./bin%s./build/classes", ps, ps, ps, ps);
-		//List<File> debugBinDirs = FindFile.findDirs("./bin");
-		
+		// List<File> debugBinDirs = FindFile.findDirs("./bin");
+
 		/*
-		StringBuffer sb = new StringBuffer();
-		for(File file: debugBinDirs){
-			String path = String.format(":%s", file.getPath().replace("\\", "/"));
-			sb.append(path);
-		}
-		*/
-		
-		//classpath = String.format("%s%s", classpath, sb.toString());
+		 * StringBuffer sb = new StringBuffer(); for(File file: debugBinDirs){
+		 * String path = String.format(":%s", file.getPath().replace("\\",
+		 * "/")); sb.append(path); }
+		 */
+
+		// classpath = String.format("%s%s", classpath, sb.toString());
 
 		String javaExe = platform.isWindows() ? "javaw" : "java";
 
@@ -524,8 +553,22 @@ public class Agent extends Service {
 
 		String cmd = formatList(outArgs);
 		log.info(String.format("spawning -> [%s]", cmd));
-
+		
 		ProcessBuilder builder = new ProcessBuilder(outArgs);// .inheritIO();
+
+		// create branch directory if one does not exist
+		File b = new File(branch);
+		b.mkdirs();
+
+		// check to see if myrobotlab.jar is in the directory
+		File m = new File(String.format("%s/myrobotlab.jar", branch));
+		if (!m.exists()) {
+			log.info(String.format("%s/myrobotlab.jar cloning self", branch));
+			FileIO.copy("myrobotlab.jar", String.format("%s/myrobotlab.jar", branch));
+		}
+
+		// move process to start in that directory
+		builder.directory(b);
 
 		// environment variables setup
 		Map<String, String> env = builder.environment();
@@ -543,19 +586,33 @@ public class Agent extends Service {
 		}
 
 		Process process = builder.start();
-		processes.put(runtimeName, new ProcessData(this, runtimeName, process));
-
+		history.put(runtimeName, outArgs);
+		add(new ProcessData(this, branch, runtimeName, process));
+		
 		// attach our cli to the latest instance
 		Cli cli = Runtime.getCLI();
 		if (cli != null) {
 			cli.add(runtimeName, process.getInputStream(), process.getOutputStream());
 			cli.attach(runtimeName);
 		}
-		
-		//FileUtils.
+
+		// FileUtils.
 
 		log.info("Agent finished spawn {}", formatter.format(new Date()));
 		return process;
+	}
+
+	/**
+	 * start or stop the autoUpdate process
+	 */
+	public void autoUpdate(boolean b) {
+		/*
+		if (b) {
+			addTask("updater", 10000, update, params);
+		} else {
+			purgeTask("updater");                                                
+		}
+		*/
 	}
 
 	public void terminate() {
@@ -569,7 +626,7 @@ public class Agent extends Service {
 		if (processes.containsKey(name)) {
 			info("terminating %s", name);
 			processes.get(name).process.destroy();
-			processes.remove(name);
+			remove(processes.get(name));
 			info("%s haz beeen terminated", name);
 			return name;
 		}
@@ -589,37 +646,68 @@ public class Agent extends Service {
 		log.info("goodbye .. cruel world");
 		System.exit(0);
 	}
-	
-	static public String getLatestVersionNumber(String branch){
+
+	static public String getLatestVersionNumber(String branch) {
 		byte[] data = HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/version.txt", branch));
-		if (data != null){
+		if (data != null) {
 			return new String(data);
 		}
 		return null;
 	}
-	
-	static public byte[] getLatest(){
-		return getLatest(Platform.getLocalInstance().getBranch());
+
+	static public byte[] getLatest() {
+		Platform platform = Platform.getLocalInstance();
+		return getLatest(platform.getBranch());
 	}
 
-	static public byte[] getLatest(String branch){
+	static public byte[] getLatest(String branch) {
 		return HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/myrobotlab.jar", branch));
 	}
-	
-	
-	static public void downloadLatest(String branch) throws IOException{
+
+	static public void update() throws IOException {
+		Platform platform = Platform.getLocalInstance();
+		update(platform.getBranch());
+	}
+
+	static public void update(String branch) throws IOException {
+		log.info("update({})", branch);
+		// so we need to get the version of the jar contained in the {branch} directory ..
+		FileIO.extract(String.format("%s/myrobotlab.jar", branch), "resource/version.txt", String.format("%s/version.txt", branch));
+		
+		String currentVersion = FileIO.fileToString(String.format("%s/version.txt", branch));
+		if (currentVersion == null){
+			log.error("{}/version.txt current version is null", branch);
+		}
+		// compare that with the latest http://s3/current/{branch}/version.txt 
+		// and figure
+		
+		String latestVersion = getLatestVersionNumber(branch);
+		if (latestVersion == null){
+			log.error("s3 version.txt current version is null", branch);
+		}
+				
+		// !!! kill all of "these branch" processes !!!
+		
+ 		if (!latestVersion.equals(currentVersion)){
+			downloadLatest(branch);
+		}
+
+
+	}
+
+	static public void downloadLatest(String branch) throws IOException {
 		String version = getLatestVersionNumber(branch);
 		log.info("downloading version {} /{}", version, branch);
-		byte[] myrobotlabjar = getLatest(branch);	
+		byte[] myrobotlabjar = getLatest(branch);
 		log.info("{} bytes", myrobotlabjar.length);
-		
+
 		File archive = new File(String.format("%s/archive", branch));
 		archive.mkdirs();
-		
+
 		FileOutputStream fos = new FileOutputStream(String.format("%s/archive/myrobotlab.%s.jar", branch, version));
 		fos.write(myrobotlabjar);
 		fos.close();
-		
+
 		fos = new FileOutputStream(String.format("%s/myrobotlab.jar", branch));
 		fos.write(myrobotlabjar);
 		fos.close();
@@ -674,8 +762,8 @@ public class Agent extends Service {
 			Runtime.setRuntimeName("bootstrap");
 			Runtime.main(agentArgs);
 			Agent agent = (Agent) Runtime.start("agent", "Agent");
-			
-			// FIXME - if "-install" - then install a version ??  minecraft way ?
+
+			// FIXME - if "-install" - then install a version ?? minecraft way ?
 
 			if (agentCmd.containsKey("-test")) {
 				agent.serviceTest();
@@ -693,6 +781,5 @@ public class Agent extends Service {
 			// System.exit(0);
 		}
 	}
-
 
 }
