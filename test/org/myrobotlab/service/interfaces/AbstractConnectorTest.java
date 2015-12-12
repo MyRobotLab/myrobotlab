@@ -1,6 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
@@ -8,6 +9,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+@Ignore
 public abstract class AbstractConnectorTest {
 
 	public final static Logger log = LoggerFactory.getLogger(AbstractConnectorTest.class);
