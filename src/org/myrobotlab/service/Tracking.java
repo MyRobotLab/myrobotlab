@@ -71,7 +71,7 @@ public class Tracking extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Tracking.class.getCanonicalName());
 
-	public ArrayList<OpenCVFilter> preFilters = new ArrayList<OpenCVFilter>();
+	transient public ArrayList<OpenCVFilter> preFilters = new ArrayList<OpenCVFilter>();
 
 	long lastTimestamp = 0;
 	long waitInterval = 5000;
@@ -707,7 +707,7 @@ public class Tracking extends Service {
 
 		try {
 			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.ERROR);
+			LoggingFactory.getInstance().setLevel(Level.INFO);
 
 			// Speech speech = new Speech("speech");
 
