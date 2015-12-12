@@ -42,7 +42,7 @@ public class Speech extends Proxy implements TextListener, SpeechSynthesis {
 
 	private static final long serialVersionUID = 1L;
 
-	SpeechSynthesis proxy;
+	transient SpeechSynthesis proxy;
 
 	public Speech(String n) {
 		super(n);
