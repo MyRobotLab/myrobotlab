@@ -576,7 +576,7 @@ angular
                                         if (methodMap.hasOwnProperty(method)) {
                                             var m = methodMap[method];
                                             // do stuff
-                                            $log.info(method);
+//                                            $log.info(method);
                                             // build interface method
                                             var dynaFn = "(function (";
                                             var argList = "";
@@ -594,7 +594,7 @@ angular
                                                 dynaFn += "this._interface.send('" + m.name + "');";
                                             }
                                             dynaFn += "})";
-                                            console.log("msg." + m.name + " = " + dynaFn);
+//                                            console.log("msg." + m.name + " = " + dynaFn);
                                             msgInterfaces[msg.sender].temp.msg[m.name] = eval(dynaFn);
                                         }
                                     }
@@ -632,7 +632,7 @@ angular
 
                             } else {
                                 // controller registering for framework subscriptions
-                                console.log("here");
+//                                console.log("here");
                                 
                                 // expected 'framework' level subscriptions - we should at a minimum
                                 // be interested in state and status changes of the services
@@ -655,7 +655,7 @@ angular
                                 
                                 // get methodMap
                                 msgInterfaces[name].getMethodMap();
-                                console.log('here');
+//                                console.log('here');
                             }
                         
                         },

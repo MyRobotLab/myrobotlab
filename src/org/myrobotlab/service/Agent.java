@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import opennlp.tools.cmdline.TerminateToolException;
+
 import org.myrobotlab.cmdline.CMDLine;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
@@ -123,10 +125,10 @@ public class Agent extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Agent.class);
 
-	private static HashMap<String, ProcessData> processes = new HashMap<String, ProcessData>();
-	private static HashMap<String, HashMap<String, ProcessData>> branchIndex = new HashMap<String, HashMap<String, ProcessData>>();
+	private HashMap<String, ProcessData> processes = new HashMap<String, ProcessData>();
+	private HashMap<String, HashMap<String, ProcessData>> branchIndex = new HashMap<String, HashMap<String, ProcessData>>();
 
-	private Set<String> clientJVMArgs = new HashSet<String>();
+	//private Set<String> clientJVMArgs = new HashSet<String>();
 
 	private List<String> agentJVMArgs = new ArrayList<String>();
 
@@ -134,7 +136,9 @@ public class Agent extends Service {
 
 	String lastBranch = null;
 
-	static public String formatList(ArrayList<String> args) {
+	boolean updateRestartProcesses = false;
+
+	public String formatList(ArrayList<String> args) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < args.size(); ++i) {
 			log.info(args.get(i));
@@ -172,7 +176,7 @@ public class Agent extends Service {
 		} 
 	}
 
-	public static List<Status> install(String fullType) {
+	public List<Status> install(String fullType) {
 		List<Status> ret = new ArrayList<Status>();
 		ret.add(Status.info("install %s", fullType));
 		try {
@@ -196,14 +200,7 @@ public class Agent extends Service {
 	public Agent(String n) {
 		super(n);
 		log.info("Agent {} PID {} is alive", n, Runtime.getPID());
-		agentJVMArgs = Runtime.getJVMArgs();
-		log.info("jvmArgs {}", Arrays.toString(agentJVMArgs.toArray()));
-		for (int i = 0; i < agentJVMArgs.size(); ++i) {
-			String agentJVMArg = agentJVMArgs.get(i);
-			if (!agentJVMArg.startsWith("-agent") && !agentJVMArg.startsWith("-Dfile.encoding")) {
-				clientJVMArgs.add(agentJVMArg);
-			}
-		}
+		agentJVMArgs = Runtime.getJVMArgs();		
 	}
 
 	@Override
@@ -444,6 +441,15 @@ public class Agent extends Service {
 		}
 
 		outArgs.add(javaPath);
+		
+		Set<String> clientJVMArgs = new HashSet<String>();
+		log.info("jvmArgs {}", Arrays.toString(agentJVMArgs.toArray()));
+		for (int i = 0; i < agentJVMArgs.size(); ++i) {
+			String agentJVMArg = agentJVMArgs.get(i);
+			if (!agentJVMArg.startsWith("-agent") && !agentJVMArg.startsWith("-Dfile.encoding")) {
+				clientJVMArgs.add(agentJVMArg);
+			}
+		}
 
 		// jvm args relayed to clients
 		for (String jvmArg : clientJVMArgs) {
@@ -647,7 +653,7 @@ public class Agent extends Service {
 		System.exit(0);
 	}
 
-	static public String getLatestVersionNumber(String branch) {
+	public String getLatestVersionNumber(String branch) {
 		byte[] data = HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/version.txt", branch));
 		if (data != null) {
 			return new String(data);
@@ -655,47 +661,64 @@ public class Agent extends Service {
 		return null;
 	}
 
-	static public byte[] getLatest() {
+	public byte[] getLatest() {
 		Platform platform = Platform.getLocalInstance();
 		return getLatest(platform.getBranch());
 	}
 
-	static public byte[] getLatest(String branch) {
+	public byte[] getLatest(String branch) {
 		return HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/myrobotlab.jar", branch));
 	}
 
-	static public void update() throws IOException {
+	public void update() throws IOException {
 		Platform platform = Platform.getLocalInstance();
 		update(platform.getBranch());
 	}
 
-	static public void update(String branch) throws IOException {
-		log.info("update({})", branch);
+	public void update(String branch) throws IOException {
+		info("update({})", branch);
 		// so we need to get the version of the jar contained in the {branch} directory ..
 		FileIO.extract(String.format("%s/myrobotlab.jar", branch), "resource/version.txt", String.format("%s/version.txt", branch));
 		
 		String currentVersion = FileIO.fileToString(String.format("%s/version.txt", branch));
 		if (currentVersion == null){
-			log.error("{}/version.txt current version is null", branch);
+			error("{}/version.txt current version is null", branch);
+			return;
 		}
 		// compare that with the latest http://s3/current/{branch}/version.txt 
 		// and figure
 		
 		String latestVersion = getLatestVersionNumber(branch);
 		if (latestVersion == null){
-			log.error("s3 version.txt current version is null", branch);
-		}
-				
-		// !!! kill all of "these branch" processes !!!
-		
- 		if (!latestVersion.equals(currentVersion)){
-			downloadLatest(branch);
+			error("s3 version.txt current version is null", branch);
+			return;
 		}
 
+		Map<String, ProcessData> dead = new HashMap<String, ProcessData>();
+		
+		info(String.format("terminating %d processes on %s", branchIndex.size(), branch));
+		// FIXME - implement
+		if (branchIndex.containsKey(branch)){
+			HashMap<String, ProcessData> b =  branchIndex.get(branch);
+			for (String processName : b.keySet()){
+				dead.put(processName, b.get(processName));
+				terminate(processName);
+			}
+		}
+		
+ 		if (!latestVersion.equals(currentVersion)){
+ 			info("latest %s > current %s - updating", latestVersion, currentVersion);
+			downloadLatest(branch);
+		}
+ 		
+ 		// FIXME - restart processes
+ 		if (updateRestartProcesses){
+ 			
+ 		}
 
 	}
 
-	static public void downloadLatest(String branch) throws IOException {
+	public void downloadLatest(String branch) throws IOException {
 		String version = getLatestVersionNumber(branch);
 		log.info("downloading version {} /{}", version, branch);
 		byte[] myrobotlabjar = getLatest(branch);

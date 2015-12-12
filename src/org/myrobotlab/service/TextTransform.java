@@ -56,5 +56,9 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 		return text;
 	}
 
+	@Override
+	public void addTextListener(TextListener service) {
+		addListener("publishText", service.getName(), "onText");
+	}
 
 }

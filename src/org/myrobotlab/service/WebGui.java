@@ -275,7 +275,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// extract all resources
 		// if resource directory exists - do not overwrite !
 		// could whipe out user mods
-		FileIO.extractResources();
+		try {
+			extract();
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 
 		Config.Builder configBuilder = new Config.Builder();
 		configBuilder
@@ -415,7 +419,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// good debug material
 			// log.info("sessionId {}", r);
 			String sessionId = r.getAtmosphereResourceEvent().getResource().getRequest().getSession().getId();
-			//log.info("sessionId {}", sessionId);
+			// log.info("sessionId {}", sessionId);
 
 			Map<String, String> headers = getHeadersInfo(request);
 
@@ -749,12 +753,20 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		}
 	}
 
-	public void extract() {
-		try {
-			Zip.extractFromFile("./myrobotlab.jar", "root", "resource/WebGui");
-		} catch (IOException e) {
-			error(e);
-		}
+	public void extract() throws IOException {
+		extract(true);
+	}
+
+	public void extract(boolean overwrite) throws IOException {
+
+		// FIXME - check resource version vs self version
+		// overwrite if different ?
+
+		FileIO.extractResources(overwrite);
+		/*
+		 * try { Zip.extractFromFile("./myrobotlab.jar", "root",
+		 * "resource/WebGui"); } catch (IOException e) { error(e); }
+		 */
 	}
 
 	/**
@@ -828,7 +840,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// context.reset();
 		// configurator.doConfigure(args[0]);
 
-
 		// log.info(Logging.)
 		log.trace("trace");
 		log.debug("debug");
@@ -846,9 +857,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// remote.setDefaultPrefix("x-");
 			// remote.setDefaultPrefix("");
 			// Runtime.start("python", "Python");
-			WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
-			//webgui.autoStartBrowser(false);
-			
+			WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
+			// webgui.autoStartBrowser(false);
+
 			Runtime.start("python", "Python");
 			Runtime.start("myo", "MyoThalmic");
 			// remote.connect("tcp://127.0.0.1:6767");

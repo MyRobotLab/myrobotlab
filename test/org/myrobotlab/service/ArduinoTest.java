@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.codec.serial.Codec;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
+@Ignore
 public class ArduinoTest {
 
 	public final static Logger log = LoggerFactory.getLogger(SerialTest.class);
