@@ -5,6 +5,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
+import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 
 /**
@@ -78,45 +79,18 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
-
 			
 			Runtime.start("webgui", "WebGui");
 			Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
-			// Runtime.start("myo", "MyoThalmic");
-			// remote.connect("tcp://127.0.0.1:6767");
-
-			// Runtime.start("macgui", "GUIService");
-
-			// MyoThalmic myo = (MyoThalmic) Runtime.start("myo", "MyoThalmic");
-			// myo.connect();
-
-			// myo.addMyoDataListener(python);
-
-			// Runtime.start("python", "Python");
-			// Runtime.start("remote", "RemoteAdapter");
-			// Runtime.start("arduino", "Arduino");// Runtime.start("clock01",
-			// "Clock"); Runtime.start("clck3", "Clock");
-			// Runtime.start("gui", "GUIService");
-
-			// webgui.extract();
-			/*
-			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock");
-			 * Runtime.start("clck3", "Clock");
-			 * 
-			 * Runtime.start("clck", "Clock"); Runtime.start("clck2", "Clock");
-			 * Runtime.start("clck3", "Clock");
-			 */
-
-			/*
-			 * Message msg = webgui.createMessage("runtime", "start", new
-			 * Object[]{"arduino", "Arduino"}); String json =
-			 * Encoder.toJson(msg); log.info(json); // Runtime.start("gui",
-			 * "GUIService"); log.info(json);
-			 */
 
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+
+	@Override
+	public void addTextListener(TextListener service) {
+		addListener("publishText", service.getName(), "onText");
 	}
 	
 
