@@ -1,0 +1,32 @@
+<input type="text" class="form-control" ng-model="text"/>
+<button class="btn btn-default" ng-disabled="service.isSpeaking" ng-click="msg.speakBlocking(text)">Speak</button>
+<input type="text" class="form-control" ng-model="voice"/>
+<button class="btn btn-default" ng-click="msg.setVoice(voice)">Set Voice</button>
+<button type="button" class="btn btn-default" ng-click="collapse = !collapse">Toggle Component Installer</button>
+<div collapse="collapse">
+    <div accordion>
+        <div accordion-group is-open="status.open" ng-repeat="voice in service.possibleVoices">
+            <div accordion-heading>
+                <div>
+                    {{voice.name}}
+                    <span class="pull-right">
+                        <span ng-if="voice.install">install!</span>&nbsp;&nbsp;
+                        {{voice.status}}&nbsp;&nbsp;{{voice.gender}}&nbsp;&nbsp;{{voice.locale}}&nbsp;&nbsp;
+                        <i class="glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                    </span>
+                </div>
+            </div>
+            Description: {{voice.description}}<br>
+            Type: {{voice.type}}<br>
+            Version: {{voice.version}}<br>
+            Size: {{voice.packageSize / 1024 / 1024| number:2}}MB<br>
+            <button type="button" class="btn btn-primary" ng-model="voice.install" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
+                <span ng-if="install">install!</span>
+                <span ng-if="!install">don't install!</span>
+            </button>
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary" ng-click="install()">
+        Install!
+    </button>
+</div>
