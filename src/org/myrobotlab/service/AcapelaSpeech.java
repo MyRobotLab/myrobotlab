@@ -358,5 +358,11 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	public void onRequestConfirmation(String text) {
 		speakBlocking(String.format("did you say. %s", text));
 	}
+
+	@Override
+	public List<String> getLanguages() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

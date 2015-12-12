@@ -7,7 +7,7 @@ import java.util.List;
  * SpeechSynthesis - This is the interface that services that provide text to speech should implement. 
  * 
  */
-public interface SpeechSynthesis {
+public interface SpeechSynthesis extends NameProvider {
 
 	public abstract List<String> getVoices();
 
@@ -16,6 +16,12 @@ public interface SpeechSynthesis {
 	public abstract void setLanguage(String l);
 
 	public abstract String getLanguage();
+
+	/**
+	 * returns a list of current possible languages
+	 * @return
+	 */
+	public abstract List<String> getLanguages();
 
 	/**
 	 * Begin speaking something and return immediately
@@ -55,10 +61,6 @@ public interface SpeechSynthesis {
 	 * @return
 	 */
 	public abstract String publishEndSpeaking(String utterance);
-	
-	//public boolean speakQueued(String toSpeak);
-
-	public String getName();
 	
 	public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException;
 	

@@ -1,6 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
-public interface SpeechRecognizer {
+public interface SpeechRecognizer extends NameProvider {
 
 	/**
 	 * Event is sent when the listening Service is actually listening. There is
@@ -27,9 +27,6 @@ public interface SpeechRecognizer {
 
 	// This method should listen for 
 	public void addMouth(SpeechSynthesis mouth);
-	
-	// the name of the ear
-	public String getName();
 	
 	public void onStartSpeaking();
 	public void onEndSpeaking();
