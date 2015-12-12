@@ -635,15 +635,15 @@ public class FileIO {
 		return false;
 	}
 
-	static public final boolean extractResources(boolean force) throws IOException {
+	static public final boolean extractResources(boolean overwrite) throws IOException {
 		String resourceName = "resource";
 		File check = new File(resourceName);
-		if (check.exists() && !force) {
+		if (check.exists() && !overwrite) {
 			log.warn("{} aleady exists - not extracting", resourceName);
 			return false;
 		}
 
-		if (!inJar() && !force) {
+		if (!inJar() && !overwrite) {
 			log.warn("mrl is not operating in a jar - not extracting");
 			return false;
 		}

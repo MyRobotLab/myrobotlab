@@ -11,6 +11,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
@@ -196,6 +197,11 @@ public class AndroidSpeechRecognition extends Service implements TextPublisher {
 	@Override
 	public String publishText(String text) {
 		return text;
+	}
+	
+	@Override
+	public void addTextListener(TextListener service) {
+		addListener("publishText", service.getName(), "onText");
 	}
 
 	public String recognized(String text) {
