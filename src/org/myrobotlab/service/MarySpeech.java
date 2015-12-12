@@ -12,12 +12,10 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.sound.sampled.AudioInputStream;
@@ -413,6 +411,12 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 		addListener("publishStartSpeaking",ear.getName(), "onStartSpeaking");
 		addListener("publishEndSpeaking",ear.getName(), "onEndSpeaking");
 				
+	}
+
+	@Override
+	public List<String> getLanguages() {
+		// TODO Auto-generated method stub
+		return null;
 	}
     
 }
