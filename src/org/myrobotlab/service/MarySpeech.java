@@ -61,6 +61,11 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 	public boolean speakInternal(String toSpeak, boolean blocking) {
 		AudioInputStream audio;
 		try {
+			log.info("speakInternal {}", toSpeak);
+			if (toSpeak == null || toSpeak.length() == 0){
+				log.info("speech null or empty");
+				return false;
+			}
 			audio = marytts.generateAudio(toSpeak);
 			AudioPlayer player = new AudioPlayer(audio);
 			player.start();
