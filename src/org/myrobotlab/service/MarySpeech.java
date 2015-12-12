@@ -4,8 +4,11 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,9 +19,11 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+
 import marytts.LocalMaryInterface;
 import marytts.MaryInterface;
 import marytts.exceptions.SynthesisException;
@@ -31,11 +36,14 @@ import marytts.tools.install.ProgressPanel;
 import marytts.tools.install.VoiceComponentDescription;
 import marytts.util.MaryUtils;
 import marytts.util.data.audio.AudioPlayer;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
@@ -60,18 +68,22 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 	public boolean speakInternal(String toSpeak, boolean blocking) {
 		AudioInputStream audio;
 		try {
-			log.info("speakInternal {}", toSpeak);
+			log.info("speakInternal Blocking {} Text: {}", blocking, toSpeak);
 			if (toSpeak == null || toSpeak.length() == 0){
 				log.info("speech null or empty");
 				return false;
 			}
 			audio = marytts.generateAudio(toSpeak);
+			invoke("publishStartSpeaking", toSpeak);
 			AudioPlayer player = new AudioPlayer(audio);
 			player.start();
 			// To make this blocking you can join the player thread.
 			if (blocking) {
 				player.join();
 			}
+			// TODO: if this isn't blocking, we might just return immediately, rather than
+			// saying when the player has finished.
+			invoke("publishEndSpeaking", toSpeak);
 			return true;
 		} catch (SynthesisException | InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -108,7 +120,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     public int speak(String toSpeak) {
         // TODO: handle the isSpeaking logic/state
-        speakInternal(toSpeak, false);
+    	speakInternal(toSpeak, false);
         return -1;
     }
 
@@ -128,8 +140,8 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     // TODO IMPLEMENT !!!! --------- WHEEEEE !
     @Override
     public Boolean isSpeaking(Boolean b) {
-        // TODO Auto-generated method stub
-        return null;
+        // if we're speaking, return true! if not, false. 
+    	return b;
     }
 
     @Override
@@ -157,6 +169,10 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     }
 
+	public void onRequestConfirmation(String text) {
+		speakBlocking(String.format("did you say. %s", text));
+	}
+	
     @Override
     public String getLanguage() {
         // TODO Auto-generated method stub
@@ -184,13 +200,13 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     @Override
     public String publishStartSpeaking(String utterance) {
         // TODO Auto-generated method stub
-        return null;
+        return utterance;
     }
 
     @Override
     public String publishEndSpeaking(String utterance) {
         // TODO Auto-generated method stub
-        return null;
+        return utterance;
     }
 
     public static void main(String[] args) {
@@ -397,4 +413,19 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         dialog.setVisible(true);
         new Thread(pp).start();
     }
+    
+    public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException{
+		return  provider.getClass().getSimpleName() 
+				+ File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") 
+				+ File.separator + DigestUtils.md5Hex(toSpeak) + "." + audioFileType;
+	}
+
+	@Override
+	public void addEar(SpeechRecognizer ear) {
+		// when we add the ear, we need to listen for request confirmation
+		addListener("publishStartSpeaking",ear.getName(), "onStartSpeaking");
+		addListener("publishEndSpeaking",ear.getName(), "onEndSpeaking");
+				
+	}
+    
 }

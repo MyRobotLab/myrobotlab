@@ -25,10 +25,14 @@
 
 package org.myrobotlab.service;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -44,6 +48,7 @@ import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 
@@ -305,7 +310,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	public int speak(String toSpeak) {
 		try {
 
-			String filename = Speech.getLocalFileName(this, toSpeak, "mp3");
+			String filename = this.getLocalFileName(this, toSpeak, "mp3");
 
 			if (audioFile.cacheContains(filename)) {
 				return audioFile.playCachedFile(filename);
@@ -339,4 +344,28 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		return "Acapela group speech syntesis service.";
 	}
 
+	@Override
+    public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException{
+		// TODO: make this a base class sort of thing.
+		return  provider.getClass().getSimpleName() 
+				+ File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") 
+				+ File.separator + DigestUtils.md5Hex(toSpeak) + "." + audioFileType;
+	}
+
+	@Override
+	public void addEar(SpeechRecognizer ear) {
+		
+		// TODO: implement the appropriate subscribe methods.
+		// TODO Auto-generated method stub
+		// subscribe to publishText 
+		// subscribe to request confirmation.
+		// this.subscribe(ear.getName(), topicMethod, callbackName, callbackMethod);
+		
+		
+	}
+
+	public void onRequestConfirmation(String text) {
+		speakBlocking(String.format("did you say. %s", text));
+	}
+	
 }

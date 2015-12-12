@@ -5,6 +5,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 
@@ -91,6 +92,24 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	@Override
 	public void addTextListener(TextListener service) {
 		addListener("publishText", service.getName(), "onText");
+	}
+
+	@Override
+	public void addMouth(SpeechSynthesis mouth) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStartSpeaking() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onEndSpeaking() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 
