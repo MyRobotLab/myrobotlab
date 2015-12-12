@@ -130,10 +130,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		return audioFile;
 	}
 
-	@Override
-	public Boolean isSpeaking(Boolean b) {
-		return b;
-	}
 
 	@Override
 	public ArrayList<String> getVoices() {
@@ -149,11 +145,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	public boolean setVoice(String voice) {
 		this.voice = voice;
 		return voices.contains(voice);
-	}
-
-	@Override
-	public String saying(String speech) {
-		return speech;
 	}
 
 	@Override
@@ -289,7 +280,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	@Override
 	public String publishStartSpeaking(String utterance) {
-		return null;
+		return utterance;
 	}
 
 	@Override

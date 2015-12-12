@@ -137,13 +137,6 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         return "Speech synthesis based on MaryTTS";
     }
 
-    // TODO IMPLEMENT !!!! --------- WHEEEEE !
-    @Override
-    public Boolean isSpeaking(Boolean b) {
-        // if we're speaking, return true! if not, false. 
-    	return b;
-    }
-
     @Override
     public List<String> getVoices() {
         List<String> list = new ArrayList<String>(marytts.getAvailableVoices());
@@ -155,12 +148,6 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         // TODO Auto-generated method stub
         marytts.setVoice(voice);
         return false;
-    }
-
-    @Override
-    public String saying(String t) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
