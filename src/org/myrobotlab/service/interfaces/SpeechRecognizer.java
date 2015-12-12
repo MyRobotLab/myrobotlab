@@ -28,7 +28,7 @@ public interface SpeechRecognizer extends NameProvider {
 	// This method should listen for 
 	public void addMouth(SpeechSynthesis mouth);
 	
-	public void onStartSpeaking();
-	public void onEndSpeaking();
+	public void onStartSpeaking(String utterance);
+	public void onEndSpeaking(String utterance);
 	
 }
