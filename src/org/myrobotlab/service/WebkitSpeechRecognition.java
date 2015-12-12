@@ -101,13 +101,13 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	}
 
 	@Override
-	public void onStartSpeaking() {
+	public void onStartSpeaking(String utterance) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onEndSpeaking() {
+	public void onEndSpeaking(String utterance) {
 		// TODO Auto-generated method stub
 		
 	}

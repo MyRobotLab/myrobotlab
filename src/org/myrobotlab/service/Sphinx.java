@@ -628,13 +628,13 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	}
 
 	@Override
-	public void onStartSpeaking() {
+	public void onStartSpeaking(String utterance) {
 		stopListening();
 		
 	}
 
 	@Override
-	public void onEndSpeaking() {
+	public void onEndSpeaking(String utterance) {
 		startListening();
 	}
 }
