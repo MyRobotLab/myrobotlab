@@ -80,7 +80,7 @@ public class InMoov extends Service {
 
 	// peers
 	transient public Sphinx ear;
-	transient public Speech mouth;
+	transient public SpeechSynthesis mouth;
 	transient public Tracking eyesTracking;
 	transient public Tracking headTracking;
 	transient public OpenCV opencv;
@@ -1070,7 +1070,7 @@ public class InMoov extends Service {
 	// gestures begin ---------------
 
 	public SpeechSynthesis startMouth() throws Exception {
-		mouth = (Speech) startPeer("mouth");
+		mouth = (SpeechSynthesis) startPeer("mouth");
 		speakBlocking("starting mouth");
 
 		if (ear != null) {
