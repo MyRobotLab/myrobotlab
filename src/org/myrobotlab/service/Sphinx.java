@@ -48,6 +48,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -153,7 +154,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 									send(currentCommand.name, currentCommand.method, currentCommand.params);
 									// command finished
 									currentCommand = null;
-									invoke("confirmed", "ok");
+									invoke("publishText", "ok");
 
 								} else if (currentCommand != null && negations.containsKey(resultText)) {
 									// negation has happened... recognized the
@@ -161,7 +162,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 									// reset command
 									currentCommand = null;
 									// apologee
-									invoke("negated", "sorry");
+									invoke("publishText", "sorry");
 								} else if (commands.containsKey(resultText) && (confirmations != null || negations != null)) {
 									if (bypass != null && bypass.containsKey(resultText)) {
 										// we have confirmation and/or negations
@@ -172,7 +173,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 										// either confirmations or negations
 										Command cmd = commands.get(resultText);
 										currentCommand = cmd;
-										invoke("requestConfirmation", resultText);
+										invoke("publishRequestConfirmation", resultText);
 									}
 								} else if (commands.containsKey(resultText)) {
 									// no confirmations or negations are being
@@ -234,8 +235,8 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		try {
 			Sphinx ear = (Sphinx) Runtime.createAndStart("ear", "Sphinx");
-			Speech speech = new Speech("speech");
-			speech.startService();
+			SpeechSynthesis speech = new MarySpeech("speech");
+			((MarySpeech)speech).startService();
 
 			// attache speech to ear -
 			// auto subscribes to "request confirmation"
@@ -332,17 +333,19 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	}
 
 	// TODO - make "Speech" interface if desired
-	public boolean attach(Speech mouth) {
+	public boolean attach(SpeechSynthesis mouth) {
 		if (mouth == null) {
 			warn("can not attach mouth is null");
 			return false;
 		}
 		// if I'm speaking - I shouldn't be listening
-		subscribe(mouth, "isSpeaking");
-		// TODO - make config drive whether confirmation is desired
-		mouth.subscribe(getName(), "requestConfirmation");
-		mouth.subscribe(getName(), "confirmed", mouth.getName(), "speak");
-		mouth.subscribe(getName(), "negated", mouth.getName(), "speak");
+		mouth.addEar(this);
+		this.addListener("publishText", mouth.getName(), "publishText");
+		this.addListener("publishRequestConfirmation", mouth.getName(), "onRequestConfirmation");
+//		
+//		mouth.subscribe(getName(), "requestConfirmation");
+//		mouth.subscribe(getName(), "publishText", mouth.getName(), "speak");
+//		
 		log.info(String.format("attached Speech service %s to Sphinx service %s with default message routes", mouth.getName(), getName()));
 		return true;
 	}
@@ -372,9 +375,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		lockPhrases.clear();
 	}
 
-	public String confirmed(String txt) {
-		return txt;
-	}
+
 
 	/**
 	 * createGrammar must be called before the Service starts if a new grammar
@@ -507,9 +508,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	 * commandMap.put(command, msg); }
 	 */
 
-	public String negated(String txt) {
-		return txt;
-	}
+
 
 	/**
 	 * method to suppress recognition listening events This is important when
@@ -539,7 +538,8 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		return word;
 	}
 
-	public String onRequestConfirmation(String txt) {
+	public String publishRequestConfirmation(String txt) {
+		// TODO: rename this to publishRequestConfirmation
 		return txt;
 	}
 
@@ -619,5 +619,22 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 			microphone.stopRecording();
 			microphone = null;
 		}
+	}
+
+	@Override
+	public void addMouth(SpeechSynthesis mouth) {
+		attach(mouth);
+		addListener("requestConfirmation", mouth.getName(), "onRequestConfirmation");
+	}
+
+	@Override
+	public void onStartSpeaking() {
+		stopListening();
+		
+	}
+
+	@Override
+	public void onEndSpeaking() {
+		startListening();
 	}
 }

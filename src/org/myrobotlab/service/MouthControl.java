@@ -6,6 +6,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**
@@ -28,7 +29,7 @@ public class MouthControl extends Service {
 
 	transient Servo jaw;
 	transient Arduino arduino;
-	transient Speech mouth;
+	transient SpeechSynthesis mouth;
 
 	public boolean autoAttach = true;
 	
@@ -62,7 +63,7 @@ public class MouthControl extends Service {
 		super(n);
 		jaw = (Servo) createPeer("jaw");
 		arduino = (Arduino) createPeer("arduino");
-		mouth = (Speech) createPeer("mouth");
+		mouth = (SpeechSynthesis) createPeer("mouth");
 
 		jaw.setPin(7);
 		jaw.setController(arduino);
@@ -191,7 +192,7 @@ public class MouthControl extends Service {
 		super.startService();
 		jaw.startService();
 		arduino.startService();
-		mouth.startService();
+		// mouth.startService();
 	}
 
 }

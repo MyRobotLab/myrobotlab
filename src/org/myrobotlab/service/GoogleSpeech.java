@@ -287,7 +287,7 @@ public class GoogleSpeech extends Service implements TextListener {
 	 * 
 	 * @param text
 	 */
-	public void requestConfirmation(String text) {
+	public void onRequestConfirmation(String text) {
 		speak(String.format("did you say. %s", text));
 	}
 
