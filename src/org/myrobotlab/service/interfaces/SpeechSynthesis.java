@@ -9,18 +9,9 @@ import java.util.List;
  */
 public interface SpeechSynthesis {
 
-	// kept for legacy - use publishStartSpeaking & publishEndSpeaking
-	// for event handlers  - previously isSpeaking event would happen with a true or false
-	public abstract Boolean isSpeaking(Boolean b);
-
 	public abstract List<String> getVoices();
 
 	public boolean setVoice(String voice);
-
-	// kept for legacy - use publishStartSpeaking & publishEndSpeaking
-	// for event handlers - previously speak event would happen with the 
-	// utterance
-	public abstract String saying(String t);
 
 	public abstract void setLanguage(String l);
 
