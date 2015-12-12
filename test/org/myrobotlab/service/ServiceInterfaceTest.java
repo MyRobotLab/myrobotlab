@@ -94,6 +94,9 @@ public class ServiceInterfaceTest {
 		whiteListServices.add("Sabertooth");
 		// NPE in serial
 		whiteListServices.add("VirtualDevice");
+		whiteListServices.add("OpenNI");
+
+		
 		// start up python so we have it available to do some testing with.
 		Python python = (Python)Runtime.createAndStart("python", "Python");
 		String testScriptDirectory = "./src/resource/Python/examples/";
