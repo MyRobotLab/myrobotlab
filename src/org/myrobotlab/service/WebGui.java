@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.AtmosphereRequest;
-import org.atmosphere.cpr.AtmosphereRequest.Body;
+import org.atmosphere.cpr.AtmosphereRequestImpl.Body;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
@@ -32,7 +32,6 @@ import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.MethodCache;
 import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
@@ -754,7 +753,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	}
 
 	public void extract() throws IOException {
-		extract(true);
+		extract(false);
 	}
 
 	public void extract(boolean overwrite) throws IOException {

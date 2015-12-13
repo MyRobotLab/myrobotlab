@@ -40,7 +40,7 @@ public interface MotorController extends NameProvider, MicrocontrollerPeripheral
 	 * @param motor
 	 * @throws MRLException
 	 */
-	public void motorAttach(Motor motor) throws MRLException;
+	public void motorAttach(Motor motor) throws Exception;
 	
 	// ========  new interface end ===================
 
@@ -76,7 +76,9 @@ public interface MotorController extends NameProvider, MicrocontrollerPeripheral
 	 */
 	public void motorMoveTo(Motor motor);
 
-	void motorStop(Motor motor);
+	public void motorStop(Motor motor);
+	
+	public boolean isConnected();
 
 
 }
