@@ -26,16 +26,16 @@ public interface SpeechSynthesis extends NameProvider {
 	/**
 	 * Begin speaking something and return immediately
 	 * @param toSpeak - the string of text to speak.
-	 * @return
+	 * @return TODO
 	 */
-	public abstract int speak(String toSpeak);
+	public abstract int speak(String toSpeak) throws Exception;
 
 	/**
 	 * Begin speaking and wait until all speech has been played back/
 	 * @param toSpeak - the string of text to speak.
 	 * @return
 	 */
-	public abstract boolean speakBlocking(String toSpeak);
+	public abstract boolean speakBlocking(String toSpeak) throws Exception;
 
 	public abstract void setVolume(float volume);
 

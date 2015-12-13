@@ -171,7 +171,7 @@ public class SpeechTest {
 	}
 
 	@Test
-	public final void testSpeakGoogle() {
+	public final void testSpeakGoogle() throws Exception {
 		log.info("starting testSpeakGoogle");
 
 		// speech.speak("Light scattering is a form of scattering in which light is the form of propagating energy which is scattered. Light scattering can be thought of as the deflection of a ray from a straight path, for example by irregularities in the propagation medium, particles, or in the interface between two media. Deviations from the law of reflection due to irregularities on a surface are also usually considered to be a form of scattering. When these irregularities are considered to be random and dense enough that their individual effects average out, this kind of scattered reflection is commonly referred to as diffuse reflection.");

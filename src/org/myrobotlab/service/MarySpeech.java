@@ -59,13 +59,13 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     private List<VoiceComponentDescription> possibleVoices;
 
 
-	public boolean speakBlocking(String toSpeak) {
+	public boolean speakBlocking(String toSpeak) throws SynthesisException, InterruptedException {
 		return speakInternal(toSpeak, true);
 	}
 	
-	public boolean speakInternal(String toSpeak, boolean blocking) {
+	public boolean speakInternal(String toSpeak, boolean blocking) throws SynthesisException, InterruptedException {
 		AudioInputStream audio;
-		try {
+		
 			log.info("speakInternal Blocking {} Text: {}", blocking, toSpeak);
 			if (toSpeak == null || toSpeak.length() == 0){
 				log.info("speech null or empty");
@@ -83,12 +83,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 			// saying when the player has finished.
 			invoke("publishEndSpeaking", toSpeak);
 			return true;
-		} catch (SynthesisException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			log.error("Speech synth failed", e);
-			return false;
-		}
+		
 	}
 	
     public MarySpeech(String reservedKey) {
@@ -112,14 +107,18 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     @Override
     public void onText(String text) {
-        // TODO Auto-generated method stub
+       try {
         speak(text);
+       } catch(Exception e){
+    	   Logging.logError(e);
+       }
     }
 
-    public int speak(String toSpeak) {
+    public int speak(String toSpeak) throws SynthesisException, InterruptedException {
         // TODO: handle the isSpeaking logic/state
     	speakInternal(toSpeak, false);
-        return -1;
+    	// FIXME - play cache track
+    	return -1;
     }
 
  
@@ -143,7 +142,6 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     @Override
     public boolean setVoice(String voice) {
-        // TODO Auto-generated method stub
         marytts.setVoice(voice);
         return false;
     }
@@ -155,7 +153,12 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     }
 
 	public void onRequestConfirmation(String text) {
-		speakBlocking(String.format("did you say. %s", text));
+		try {
+			// FIXME - not exactly language independent
+			speakBlocking(String.format("did you say. %s", text));
+		} catch(Exception e){
+			Logging.logError(e);
+		}
 	}
 	
     @Override
@@ -198,13 +201,19 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         LoggingFactory.getInstance().configure();
         LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
+        try {
         Runtime.start("webgui", "WebGui");
         MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
+        mary.speak("hello");
+        mary.speak("world");
 //        mary.speakBlocking("Hello world");
 //        mary.speakBlocking("I am Mary TTS and I am open source");
 //        mary.speakBlocking("and I will evolve quicker than any closed source application if not in a short window of time");
 //        mary.speakBlocking("then in the long term evolution of software");
 //        mary.speak("Hello world");
+        } catch(Exception e){
+        	Logging.logError(e);
+        }
     }
 
     @Override
