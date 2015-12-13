@@ -58,7 +58,39 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     private List<LanguageComponentDescription> possibleLanguages;
     private List<VoiceComponentDescription> possibleVoices;
 
+    
+    // we need to subclass the audio player class here, so we know when the run method exits and we can invoke
+    // publish end speaking from it.
+    private class MRLAudioPlayer extends AudioPlayer {
+    	private final String utterance;
+    	public MRLAudioPlayer(AudioInputStream ais, String utterance) {
+			super(ais);
+			this.utterance = utterance;
+		}
 
+		@Override
+    	public void run() {
+			invoke("publishStartSpeaking", utterance);
+			// give a small pause for sphinx to stop listening?
+			try {
+				Thread.sleep(100);
+				log.info("Ok.. here we go.");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		super.run();
+    		
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			invoke("publishEndSpeaking", utterance);
+    	}
+    }
+    
 	public boolean speakBlocking(String toSpeak) throws SynthesisException, InterruptedException {
 		return speakInternal(toSpeak, true);
 	}
@@ -72,8 +104,10 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 				return false;
 			}
 			audio = marytts.generateAudio(toSpeak);
-			invoke("publishStartSpeaking", toSpeak);
-			AudioPlayer player = new AudioPlayer(audio);
+			//invoke("publishStartSpeaking", toSpeak);
+			
+			MRLAudioPlayer player = new MRLAudioPlayer(audio, toSpeak);
+			//player.setAudio(audio);
 			player.start();
 			// To make this blocking you can join the player thread.
 			if (blocking) {
@@ -81,7 +115,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 			}
 			// TODO: if this isn't blocking, we might just return immediately, rather than
 			// saying when the player has finished.
-			invoke("publishEndSpeaking", toSpeak);
+			//invoke("publishEndSpeaking", toSpeak);
 			return true;
 		
 	}
@@ -107,6 +141,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     @Override
     public void onText(String text) {
+    	log.info("ON Text Called: {}" , text );
        try {
         speak(text);
        } catch(Exception e){
@@ -188,12 +223,14 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     @Override
     public String publishStartSpeaking(String utterance) {
         // TODO Auto-generated method stub
+    	log.info("Starting to speak: {}", utterance);
         return utterance;
     }
 
     @Override
     public String publishEndSpeaking(String utterance) {
         // TODO Auto-generated method stub
+    	log.info("End speaking: {}", utterance);
         return utterance;
     }
 
