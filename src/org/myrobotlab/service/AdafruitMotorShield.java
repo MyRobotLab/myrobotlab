@@ -422,4 +422,10 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 		
 	}
 
+	@Override
+	public boolean isConnected() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
