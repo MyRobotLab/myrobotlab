@@ -48,7 +48,8 @@ import org.slf4j.Logger;
 public class AudioFile extends Service {
 	static final long serialVersionUID = 1L;
 	static Logger log = LoggerFactory.getLogger(AudioFile.class);
-
+	
+	static public final String DEFAULT_TRACK = "default";
 	// FIXME -
 	// http://www.javalobby.org/java/forums/t18465.html
 	// http://sourcecodebrowser.com/libjlayer-java/1.0/classjavazoom_1_1jl_1_1player_1_1_audio_device_base__coll__graph.png
@@ -66,7 +67,7 @@ public class AudioFile extends Service {
 	public static final String MODE_QUEUED = "queued";
 	static String globalFileCacheDir = "audioFile";
 	//Map<String, BlockingQueue<AudioData>> tracks = new HashMap<String, BlockingQueue<AudioData>>();// new
-	String currentTrack = "default";
+	String currentTrack = DEFAULT_TRACK;
 	transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
 	//Map<String, Object> locks = new HashMap<String, Object>();
 	Map<String, Object> waitForLocks = new HashMap<String, Object>();
@@ -78,7 +79,7 @@ public class AudioFile extends Service {
 		public String fileName = null;
 		// public float volume = 1.0f; DONE ON TRACK
 		// public float balance = 0.0f; SHOULD BE DONE ON TRACK
-		// public String track = "default"; // default track
+		// public String track = DEFAULT_TRACK; // default track
 		public AudioData(String fileName) {
 			this.fileName = fileName;
 		}
@@ -391,7 +392,8 @@ public class AudioFile extends Service {
 			// FIXME all use the same single AudioFile
 			// basic dialog - they are all on the same track so stacked up and
 			// interleaved 
-			audio.track("default"); // FIXME - Acapela - needs to create robot1 Track !!
+			// audio.track(DEFAULT_TRACK); // FIXME - Acapela - needs to create robot1 Track !!
+			audio.track(); // FIXME - Acapela - needs to create robot1 Track !!
 			robot1.speak("Rhona","sir.. I believe we are under attack from inter-bots");
 			robot1.speak("Tyler", "big deal, its just a bunch of inter-bots..  i really dont think it is a problem... I mean we are");
 			robot1.speak("Rhona", "what? how can you just sit there on your metal butt and do nothing");
@@ -506,6 +508,10 @@ public class AudioFile extends Service {
 		// player.playBlockingWavFile("I am ready.wav");
 		// player.play("hello my name is audery");
 		// player.playWAV("hello my name is momo");
+	}
+
+	public void track() {
+		track(DEFAULT_TRACK);
 	}
 
 	

@@ -525,7 +525,11 @@ public class Sweety extends Service {
 	 */
 	public synchronized void saying(String text) { // Adapt mouth leds to words
 		log.info("Saying :" + text);
-		mouth.speak(text);
+		try {
+			mouth.speak(text);
+		} catch(Exception e){
+			Logging.logError(e);
+		}
 		sleep(50);
 		boolean ison = false;
 		String testword;

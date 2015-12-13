@@ -357,8 +357,12 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 	}
 
 	public void sayBatterLevel(Float buttonValue) {
+		try{
 		Float bl = getBatteryLevel();
 		mouth.speak(String.format("current battery level is %d", bl.intValue()));
+		} catch(Exception e){
+			Logging.logError(e);
+		}
 	}
 
 	public String sendCmd(String cmd, int expectedResponseLength) throws Exception {

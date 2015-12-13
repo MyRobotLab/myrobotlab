@@ -44,7 +44,6 @@ import java.util.Enumeration;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 
 import org.myrobotlab.logging.Level;
@@ -257,8 +256,10 @@ public class FileIO {
 		while (urls.hasMoreElements()) {
 			URL url = urls.nextElement();
 			File dir = new File(url.getFile());
-			for (File f : dir.listFiles()) {
-				list.add(f);
+			if (dir != null) {
+				for (File f : dir.listFiles()) {
+					list.add(f);
+				}
 			}
 		}
 		return list.toArray(new File[] {});
@@ -743,40 +744,28 @@ public class FileIO {
 
 		return found;
 	}
-	
+
 	/**
 	 * 
 	 * Yet Another Way
-
-	public void extractFromJar(String jarFile, String fileToExtract, String dest) {
-		try {
-
-			
-			  String home = getClass().getProtectionDomain().
-			  getCodeSource().getLocation().toString(). substring(6);
-			 
-			JarFile jar = new JarFile(jarFile);
-			ZipEntry entry = jar.getEntry(fileToExtract);
-			File efile = new File(dest, entry.getName());
-
-			InputStream in = new BufferedInputStream(jar.getInputStream(entry));
-			OutputStream out = new BufferedOutputStream(new FileOutputStream(efile));
-			byte[] buffer = new byte[2048];
-			for (;;) {
-				int nBytes = in.read(buffer);
-				if (nBytes <= 0)
-					break;
-				out.write(buffer, 0, nBytes);
-			}
-			out.flush();
-			out.close();
-			in.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	*/
+	 * 
+	 * public void extractFromJar(String jarFile, String fileToExtract, String
+	 * dest) { try {
+	 * 
+	 * 
+	 * String home = getClass().getProtectionDomain().
+	 * getCodeSource().getLocation().toString(). substring(6);
+	 * 
+	 * JarFile jar = new JarFile(jarFile); ZipEntry entry =
+	 * jar.getEntry(fileToExtract); File efile = new File(dest,
+	 * entry.getName());
+	 * 
+	 * InputStream in = new BufferedInputStream(jar.getInputStream(entry));
+	 * OutputStream out = new BufferedOutputStream(new FileOutputStream(efile));
+	 * byte[] buffer = new byte[2048]; for (;;) { int nBytes = in.read(buffer);
+	 * if (nBytes <= 0) break; out.write(buffer, 0, nBytes); } out.flush();
+	 * out.close(); in.close(); } catch (Exception e) { e.printStackTrace(); } }
+	 */
 
 	// FIXME - UNIT TESTS !!!
 	public static void main(String[] args) throws ZipException, IOException {
@@ -796,7 +785,7 @@ public class FileIO {
 			 */
 
 			extract("develop/myrobotlab.jar", "resource/version.txt", "./version.txt");
-			
+
 			// extract("/C:/mrl/myrobotlab/dist/myrobotlab.jar", "resource",
 			// "");
 			extract("dist/myrobotlab.jar", "resource", "");

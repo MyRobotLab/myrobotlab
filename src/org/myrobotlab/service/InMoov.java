@@ -929,7 +929,11 @@ public class InMoov extends Service {
 
 	public boolean speakBlocking(String toSpeak) {
 		if (mouth != null && !mute) {
+			try {
 			return mouth.speakBlocking(toSpeak);
+			} catch (Exception e){
+				Logging.logError(e);
+			}
 		}
 		return false;
 	}

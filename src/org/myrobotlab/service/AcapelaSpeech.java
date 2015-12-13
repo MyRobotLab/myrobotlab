@@ -26,6 +26,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -253,13 +254,14 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	}
 
 	@Override
-	public boolean speakBlocking(String toSpeak) {
-
-		invoke("isSpeaking", true);
-		invoke("saying", toSpeak);
-		// audioFile.playFile(audioFileName, true);
+	public boolean speakBlocking(String toSpeak) throws IOException {
+		invoke("publishStartSpeaking", toSpeak);
+		// FIXME !!
+		speak(toSpeak);
+		// audioFile.playFile(to, true);
 		// sleep(afterSpeechPause);// important pause after speech
-		invoke("isSpeaking", false);
+		invoke("publishStartSpeaking", toSpeak);
+		
 		return false;
 	}
 
@@ -298,9 +300,8 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		return null;
 	}
 
-	public int speak(String toSpeak) {
-		try {
-
+	public int speak(String toSpeak) throws IOException {
+	
 			String filename = this.getLocalFileName(this, toSpeak, "mp3");
 
 			if (audioFile.cacheContains(filename)) {
@@ -310,15 +311,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 			byte[] b = getRemoteFile(toSpeak);
 			audioFile.cache(filename, b);
 			return audioFile.playCachedFile(filename);
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-		return -1;
 	}
 
-	public int speak(String voice, String toSpeak) {
+	public int speak(String voice, String toSpeak) throws IOException {
 		setVoice(voice);
 		return speak(toSpeak);
 	}
@@ -356,7 +351,11 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	}
 
 	public void onRequestConfirmation(String text) {
-		speakBlocking(String.format("did you say. %s", text));
+		try {
+			speakBlocking(String.format("did you say. %s", text));
+		} catch(Exception e){
+			Logging.logError(e);
+		}
 	}
 
 	@Override

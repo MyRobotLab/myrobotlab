@@ -861,7 +861,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// webgui.autoStartBrowser(false);
 
 			Runtime.start("python", "Python");
-			Runtime.start("myo", "MyoThalmic");
+			//Runtime.start("myo", "MyoThalmic");
 			// remote.connect("tcp://127.0.0.1:6767");
 
 			// Runtime.start("macgui", "GUIService");

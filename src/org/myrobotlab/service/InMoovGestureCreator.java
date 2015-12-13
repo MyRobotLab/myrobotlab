@@ -763,7 +763,11 @@ public class InMoovGestureCreator extends Service {
 				if (fih.sleep != -1) {
 					sleep(fih.sleep);
 				} else if (fih.speech != null) {
-					i01.mouth.speakBlocking(fih.speech);
+					try {
+						i01.mouth.speakBlocking(fih.speech);
+					} catch(Exception e){
+						Logging.logError(e);
+					}
 				} else if (fih.name != null) {
 					if (tabs_main_checkbox_states[0]) {
 						i01.moveHead(fih.neck, fih.rothead, fih.eyeX, fih.eyeY, fih.jaw);
@@ -1275,7 +1279,11 @@ public class InMoovGestureCreator extends Service {
 			if (fih.sleep != -1) {
 				sleep(fih.sleep);
 			} else if (fih.speech != null) {
-				i01.mouth.speakBlocking(fih.speech);
+				try {
+					i01.mouth.speakBlocking(fih.speech);
+				} catch(Exception e){
+					Logging.logError(e);
+				}
 			} else if (fih.name != null) {
 				if (tabs_main_checkbox_states[0]) {
 					i01.moveHead(fih.neck, fih.rothead, fih.eyeX, fih.eyeY, fih.jaw);
