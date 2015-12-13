@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.framework.MRLException;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -57,12 +56,13 @@ import org.slf4j.Logger;
  */
 public class Motor extends Service implements MotorControl, SensorDataSink {
 	
-	
+	/*
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		peers.put("controller", "Arduino", "controller");
 		return peers;
 	}
+	*/
 
 	/**
 	 * FIXME - REMOVE - do low level counting and encoder triggers on the
@@ -341,7 +341,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink {
 	 * to pull out any necessary data to complete the attachment 
 	 * 
 	 * @param controllerName
-	 * @param type
+	 * @param motorType
 	 * @param pwmPin
 	 * @param dirPin
 	 * @param encoderType
@@ -350,37 +350,40 @@ public class Motor extends Service implements MotorControl, SensorDataSink {
 	 * 
 	 * TODO - encoder perhaps should be handled different where an array of data is passed in Motor.setEncoder(int[] sensorConfig)
 	 */
-	public void attach(String port, String type, int... pins) throws MRLException {
-		log.info("{}.attach({},{},{})", getName(), port, type, Arrays.toString(pins));
-		controller = (MotorController) startPeer("controller");
-		controllerName = controller.getName();
-		controller.connect(port);
+	public void attach(MotorController controller, String motorType, int... pins) throws Exception {
+		log.info("{}.attach({},{})", getName(), motorType, Arrays.toString(pins));
 		
-		if (type == null){
-			this.type = Motor.TYPE_SIMPLE;
-		} else {
-			this.type = type;
+		controllerName = controller.getName();
+
+		if (!controller.isConnected()){
+			throw new IllegalArgumentException(String.format("%s is not connected", controller.getName()));
 		}
 		
-		if (!types.contains(type)) {
-			throw new MRLException(String.format("invalid type %s", type));
+		if (motorType == null){
+			this.type = Motor.TYPE_SIMPLE;
+		} else {
+			this.type = motorType;
+		}
+		
+		if (!types.contains(motorType)) {
+			throw new MRLException(String.format("invalid type %s", motorType));
 		}
 	
 		// TODO - support steppers too
 		// put array of pins into more intelligent container
 		// check "typical" 2 pin variety motors
-		if ((type.equals(Motor.TYPE_2_PWM) || type.equals(Motor.TYPE_SIMPLE) || type.equals(Motor.TYPE_PULSE_STEP))  && pins.length != 2){
-			throw new MRLException("motor type {} requires exactly 2 pins", type);
+		if ((motorType.equals(Motor.TYPE_2_PWM) || motorType.equals(Motor.TYPE_SIMPLE) || motorType.equals(Motor.TYPE_PULSE_STEP))  && pins.length != 2){
+			throw new MRLException("motor type {} requires exactly 2 pins", motorType);
 		}			
 			
-		if (type.equals(Motor.TYPE_SIMPLE) || type.equals(Motor.TYPE_PULSE_STEP)) {
+		if (motorType.equals(Motor.TYPE_SIMPLE) || motorType.equals(Motor.TYPE_PULSE_STEP)) {
 			pinMap.put(PIN_TYPE_PWM, pins[0]);
 			pinMap.put(PIN_TYPE_DIR, pins[1]);
-		} else if (type.equals(Motor.TYPE_2_PWM)) {
+		} else if (motorType.equals(Motor.TYPE_2_PWM)) {
 			pinMap.put(PIN_TYPE_PWM_LEFT, pins[0]);
 			pinMap.put(PIN_TYPE_PWM_RIGHT, pins[1]);
 		} else {
-			throw new MRLException(String.format("motor type %s currently not supported", type));
+			throw new MRLException(String.format("motor type %s currently not supported", motorType));
 		}
 
 		// finally the call to the controller
@@ -557,17 +560,17 @@ public class Motor extends Service implements MotorControl, SensorDataSink {
 			int dirPin = 8;
 			
 			//int encoderPin= 7;
-			
+			Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+			arduino.connect(port);
 			Motor m1 = (Motor)Runtime.start("m1", "Motor");
 			Runtime.start("webgui", "WebGui");
-			m1.attach(port, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);//(port, Motor.TYPE_SIMPLE, pwmPin, dirPin);
+			m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);//(port, Motor.TYPE_SIMPLE, pwmPin, dirPin);
 			
 			m1.moveTo(250);
 			m1.moveTo(700);
 			m1.moveTo(250);
 			m1.moveTo(250);
-			
-			Arduino arduino = (Arduino)m1.getController();
+	
 			arduino.setLoadTimingEnabled(true);
 			arduino.setLoadTimingEnabled(false);
 			m1.stop();
