@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -54,79 +55,86 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     transient MaryInterface marytts = null;
 
-    private final static String INSTALLFILEURL = "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml";
+    String INSTALLFILEURL = "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml";
     private List<LanguageComponentDescription> possibleLanguages;
     private List<VoiceComponentDescription> possibleVoices;
 
-    
+    String installationstate = "noinstallationstarted";
+    String installationstateparam1;
+    String installationstateparam2;
+    List<ComponentDescription> installation_toInstall;
+
     // we need to subclass the audio player class here, so we know when the run method exits and we can invoke
     // publish end speaking from it.
     private class MRLAudioPlayer extends AudioPlayer {
-    	private final String utterance;
-    	public MRLAudioPlayer(AudioInputStream ais, String utterance) {
-			super(ais);
-			this.utterance = utterance;
-		}
 
-		@Override
-    	public void run() {
-			invoke("publishStartSpeaking", utterance);
-			// give a small pause for sphinx to stop listening?
-			try {
-				Thread.sleep(100);
-				log.info("Ok.. here we go.");
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-    		super.run();
-    		
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			invoke("publishEndSpeaking", utterance);
-    	}
+        private final String utterance;
+
+        public MRLAudioPlayer(AudioInputStream ais, String utterance) {
+            super(ais);
+            this.utterance = utterance;
+        }
+
+        @Override
+        public void run() {
+            invoke("publishStartSpeaking", utterance);
+            // give a small pause for sphinx to stop listening?
+            try {
+                Thread.sleep(100);
+                log.info("Ok.. here we go.");
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            super.run();
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            invoke("publishEndSpeaking", utterance);
+        }
     }
-    
-	public boolean speakBlocking(String toSpeak) throws SynthesisException, InterruptedException {
-		return speakInternal(toSpeak, true);
-	}
-	
-	public boolean speakInternal(String toSpeak, boolean blocking) throws SynthesisException, InterruptedException {
-		AudioInputStream audio;
-		
-			log.info("speakInternal Blocking {} Text: {}", blocking, toSpeak);
-			if (toSpeak == null || toSpeak.length() == 0){
-				log.info("speech null or empty");
-				return false;
-			}
-			audio = marytts.generateAudio(toSpeak);
-			//invoke("publishStartSpeaking", toSpeak);
-			
-			MRLAudioPlayer player = new MRLAudioPlayer(audio, toSpeak);
-			//player.setAudio(audio);
-			player.start();
-			// To make this blocking you can join the player thread.
-			if (blocking) {
-				player.join();
-			}
-			// TODO: if this isn't blocking, we might just return immediately, rather than
-			// saying when the player has finished.
-			//invoke("publishEndSpeaking", toSpeak);
-			return true;
-		
-	}
-	
+
+    @Override
+    public boolean speakBlocking(String toSpeak) throws SynthesisException, InterruptedException {
+        return speakInternal(toSpeak, true);
+    }
+
+    public boolean speakInternal(String toSpeak, boolean blocking) throws SynthesisException, InterruptedException {
+        AudioInputStream audio;
+
+        log.info("speakInternal Blocking {} Text: {}", blocking, toSpeak);
+        if (toSpeak == null || toSpeak.length() == 0) {
+            log.info("speech null or empty");
+            return false;
+        }
+        audio = marytts.generateAudio(toSpeak);
+        //invoke("publishStartSpeaking", toSpeak);
+
+        MRLAudioPlayer player = new MRLAudioPlayer(audio, toSpeak);
+        //player.setAudio(audio);
+        player.start();
+        // To make this blocking you can join the player thread.
+        if (blocking) {
+            player.join();
+        }
+        // TODO: if this isn't blocking, we might just return immediately, rather than
+        // saying when the player has finished.
+        //invoke("publishEndSpeaking", toSpeak);
+        return true;
+
+    }
+
     public MarySpeech(String reservedKey) {
         super(reservedKey);
-        
+
         System.setProperty("mary.base", "mary");
 
         try {
-            updateFromComponentUrl();
+//            updateFromComponentUrl();
 
             marytts = new LocalMaryInterface();
         } catch (Exception e) {
@@ -141,22 +149,21 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     @Override
     public void onText(String text) {
-    	log.info("ON Text Called: {}" , text );
-       try {
-        speak(text);
-       } catch(Exception e){
-    	   Logging.logError(e);
-       }
+        log.info("ON Text Called: {}", text);
+        try {
+            speak(text);
+        } catch (Exception e) {
+            Logging.logError(e);
+        }
     }
 
+    @Override
     public int speak(String toSpeak) throws SynthesisException, InterruptedException {
         // TODO: handle the isSpeaking logic/state
-    	speakInternal(toSpeak, false);
-    	// FIXME - play cache track
-    	return -1;
+        speakInternal(toSpeak, false);
+        // FIXME - play cache track
+        return -1;
     }
-
- 
 
     @Override
     public String[] getCategories() {
@@ -165,41 +172,39 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     @Override
     public String getDescription() {
-        // TODO Auto-generated method stub
         return "Speech synthesis based on MaryTTS";
     }
 
     @Override
     public List<String> getVoices() {
-        List<String> list = new ArrayList<String>(marytts.getAvailableVoices());
+        List<String> list = new ArrayList<>(marytts.getAvailableVoices());
         return list;
     }
 
     @Override
     public boolean setVoice(String voice) {
         marytts.setVoice(voice);
-        return false;
+        return true; //setVoice is void - if voice isn't available it throws an exception
     }
 
     @Override
     public void setLanguage(String l) {
-        // TODO Auto-generated method stub
-
+        marytts.setLocale(Locale.forLanguageTag(l));
     }
 
-	public void onRequestConfirmation(String text) {
-		try {
-			// FIXME - not exactly language independent
-			speakBlocking(String.format("did you say. %s", text));
-		} catch(Exception e){
-			Logging.logError(e);
-		}
-	}
-	
+    @Override
+    public void onRequestConfirmation(String text) {
+        try {
+            // FIXME - not exactly language independent
+            speakBlocking(String.format("did you say. %s", text));
+        } catch (Exception e) {
+            Logging.logError(e);
+        }
+    }
+
     @Override
     public String getLanguage() {
-        // TODO Auto-generated method stub
-        return null;
+        return marytts.getLocale().getLanguage();
     }
 
     @Override
@@ -223,34 +228,15 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     @Override
     public String publishStartSpeaking(String utterance) {
         // TODO Auto-generated method stub
-    	log.info("Starting to speak: {}", utterance);
+        log.info("Starting to speak: {}", utterance);
         return utterance;
     }
 
     @Override
     public String publishEndSpeaking(String utterance) {
         // TODO Auto-generated method stub
-    	log.info("End speaking: {}", utterance);
+        log.info("End speaking: {}", utterance);
         return utterance;
-    }
-
-    public static void main(String[] args) {
-        LoggingFactory.getInstance().configure();
-        LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-        try {
-        Runtime.start("webgui", "WebGui");
-        MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
-        mary.speak("hello");
-        mary.speak("world");
-//        mary.speakBlocking("Hello world");
-//        mary.speakBlocking("I am Mary TTS and I am open source");
-//        mary.speakBlocking("and I will evolve quicker than any closed source application if not in a short window of time");
-//        mary.speakBlocking("then in the long term evolution of software");
-//        mary.speak("Hello world");
-        } catch(Exception e){
-        	Logging.logError(e);
-        }
     }
 
     @Override
@@ -258,10 +244,54 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         return marytts.getVoice();
     }
 
-    public void updateFromComponentUrl() throws IOException, SAXException {
-        InstallFileParser p = new InstallFileParser(new URL(INSTALLFILEURL));
+    @Override
+    public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
+        return provider.getClass().getSimpleName()
+                + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8")
+                + File.separator + DigestUtils.md5Hex(toSpeak) + "." + audioFileType;
+    }
+
+    @Override
+    public void addEar(SpeechRecognizer ear) {
+        // when we add the ear, we need to listen for request confirmation
+        addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
+        addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
+    }
+
+    @Override
+    public List<String> getLanguages() {
+        List<String> ret = new ArrayList<>();
+        marytts.getAvailableLocales().stream().forEach((l) -> {
+            ret.add(l.getLanguage());
+        });
+        return ret;
+    }
+
+    public static void main(String[] args) {
+        LoggingFactory.getInstance().configure();
+        LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+        try {
+            Runtime.start("webgui", "WebGui");
+            MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
+            mary.speak("hello");
+            mary.speak("world");
+//        mary.speakBlocking("Hello world");
+//        mary.speakBlocking("I am Mary TTS and I am open source");
+//        mary.speakBlocking("and I will evolve quicker than any closed source application if not in a short window of time");
+//        mary.speakBlocking("then in the long term evolution of software");
+//        mary.speak("Hello world");
+        } catch (Exception e) {
+            Logging.logError(e);
+        }
+    }
+
+    public void updateFromComponentUrl(String url) throws IOException, SAXException {
+//        InstallFileParser p = new InstallFileParser(new URL(INSTALLFILEURL));
+        InstallFileParser p = new InstallFileParser(new URL(url));
         possibleLanguages = p.getLanguageDescriptions();
         possibleVoices = p.getVoiceDescriptions();
+        broadcastState();
     }
 
     public void installSelectedLanguagesAndVoices(String[] toInstall_) {
@@ -280,23 +310,17 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
         long downloadSize = 0;
         List<ComponentDescription> toInstall = new ArrayList<>();
-        for (VoiceComponentDescription voice : possibleVoices) {
-
-            if (voice.isSelected() && (voice.getStatus() != ComponentDescription.Status.INSTALLED || voice.isUpdateAvailable())) {
-//                for (String toInstallVoice : toInstall_) {
-//                    if (toInstallVoice.equals(voice.getName())) {
-                toInstall.add(voice);
-//                        break;
-//                    }
-//                }
-            }
-        }
+        possibleVoices.stream().filter((voice) -> (voice.isSelected() && (voice.getStatus() != ComponentDescription.Status.INSTALLED || voice.isUpdateAvailable()))).forEach((voice) -> {
+            toInstall.add(voice);
+        });
         if (toInstall.isEmpty()) {
             //move to WebGui
-            JOptionPane.showMessageDialog(null, "You have not selected any installable components");
+            installationstate = "nothingselected";
+            broadcastState();
             return;
         }
 
+        //TODO - would be nice to enable this, but would require more hacking of InstallerGUI
 //        // Verify if all dependencies are met
 //        // There are the following ways of meeting a dependency:
 //        // - the component with the right name and version number is already installed;
@@ -358,14 +382,17 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
                 }
             }
         }
-        int returnValue = JOptionPane
-                .showConfirmDialog(null,
-                        "Install " + toInstall.size() + " components?\n(" + MaryUtils.toHumanReadableSize(downloadSize)
-                        + " to download)", "Proceed with installation?", JOptionPane.YES_NO_OPTION);
-        if (returnValue != JOptionPane.YES_OPTION) {
-            System.err.println("Aborting installation.");
-            return;
-        }
+
+        installation_toInstall = toInstall;
+
+        installationstate = "installcomponents";
+        installationstateparam1 = toInstall.size() + "";
+        installationstateparam2 = MaryUtils.toHumanReadableSize(downloadSize);
+        broadcastState();
+    }
+
+    public void installSelectedLanguagesAndVoices2() {
+        List<ComponentDescription> toInstall = installation_toInstall;
         System.out.println("Check license(s)");
         boolean accepted = showLicenses(toInstall);
         if (accepted) {
@@ -444,25 +471,4 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         dialog.setVisible(true);
         new Thread(pp).start();
     }
-    
-    public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException{
-		return  provider.getClass().getSimpleName() 
-				+ File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") 
-				+ File.separator + DigestUtils.md5Hex(toSpeak) + "." + audioFileType;
-	}
-
-	@Override
-	public void addEar(SpeechRecognizer ear) {
-		// when we add the ear, we need to listen for request confirmation
-		addListener("publishStartSpeaking",ear.getName(), "onStartSpeaking");
-		addListener("publishEndSpeaking",ear.getName(), "onEndSpeaking");
-				
-	}
-
-	@Override
-	public List<String> getLanguages() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-    
 }
