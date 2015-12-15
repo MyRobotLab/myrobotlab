@@ -1,5 +1,5 @@
 language: java
-script: ant report
+script: ant compile
 jdk:
 - openjdk7
 deploy:
