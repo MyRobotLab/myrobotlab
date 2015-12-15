@@ -22,10 +22,11 @@ import org.myrobotlab.service.Arduino.Sketch;
 import org.slf4j.Logger;
 
 /**
- * 
+ *
  * @author GroG
  *
  */
+@Ignore
 public class ArduinoTest {
 
 	public final static Logger log = LoggerFactory.getLogger(SerialTest.class);
@@ -184,7 +185,7 @@ public class ArduinoTest {
 
 		/*
 		 * uart.decode(); codec.decode(newByte)
-		 * 
+		 *
 		 * catcher.checkMsg("bla");
 		 */
 	}
@@ -423,27 +424,27 @@ public class ArduinoTest {
 	@Test
 	public final void testServoAttachServoInteger() {
 		Servo servo = (Servo) Runtime.start("servo", "Servo");
-		
+
 		// NOT THE WAY TO ATTACH SERVOS !!
 		// isAttached will not get set
 		// dont know a good fix - asside from not using it !
 		// arduino.servoAttach(servo, servoPin);
 		// re-entrant test
 		// arduino.servoAttach(servo, servoPin);
-		
+
 		// common way
 		servo.attach(arduino, servoPin);
-		
+
 		// another way
 		// servo.setPin(servoPin);
 		// servo.setController(arduino);
-		
+
 		assertTrue(servo.isAttached());
-		
+
 		//re-entrant test
 		servo.attach(arduino, servoPin);
 
-		assertTrue(servo.isAttached());	
+		assertTrue(servo.isAttached());
 		assertEquals(servoPin, servo.getPin().intValue());
 		assertEquals(arduino.getName(), servo.getControllerName());
 
@@ -460,21 +461,21 @@ public class ArduinoTest {
 		// detach
 		servo.detach();
 		assertEquals("servoDetach/7/0\n", uart.decode());
-		
+
 		servo.moveTo(10);
 		String shouldBeNull = uart.decode();
 		assertNull(shouldBeNull);
-		
+
 		// re-attach
 		servo.attach();
 		assertEquals("servoAttach/7/9/5/115/101/114/118/111\n", uart.decode());
-		assertTrue(servo.isAttached());	
+		assertTrue(servo.isAttached());
 		assertEquals(servoPin, servo.getPin().intValue());
 		assertEquals(arduino.getName(), servo.getControllerName());
-		
+
 		servo.moveTo(90);
 		assertEquals("servoWrite/7/90\n", uart.decode());
-		
+
 		servo.releaseService();
 	}
 
