@@ -155,7 +155,7 @@ public class InMoov extends Service {
 		peers.suggestAs("headTracking.y", "head.neck", "Servo", "shared servo");
 
 		peers.suggestAs("mouthControl.arduino", "left", "Arduino", "shared head Arduino");
-		peers.suggestAs("mouthControl.mouth", "mouth", "Speech", "shared Speech");
+		peers.suggestAs("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
 		peers.suggestAs("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
 
 		peers.suggestRootAs("python", "python", "Python", "shared Python service");
@@ -171,7 +171,7 @@ public class InMoov extends Service {
 		peers.put("eyesTracking", "Tracking", "Tracking for the eyes");
 		peers.put("head", "InMoovHead", "the head");
 		peers.put("headTracking", "Tracking", "Head tracking system");
-		peers.put("mouth", "Speech", "InMoov speech service");
+		peers.put("mouth", "MarySpeech", "InMoov speech service");
 		peers.put("mouthControl", "MouthControl", "MouthControl");
 		peers.put("opencv", "OpenCV", "InMoov OpenCV service");
 		peers.put("openni", "OpenNI", "Kinect service");
