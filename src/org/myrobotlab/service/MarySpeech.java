@@ -261,9 +261,9 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     @Override
     public List<String> getLanguages() {
         List<String> ret = new ArrayList<>();
-        marytts.getAvailableLocales().stream().forEach((l) -> {
-            ret.add(l.getLanguage());
-        });
+        for (Locale locale : marytts.getAvailableLocales()) {
+            ret.add(locale.getLanguage());
+        };
         return ret;
     }
 
@@ -310,9 +310,11 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
         long downloadSize = 0;
         List<ComponentDescription> toInstall = new ArrayList<>();
-        possibleVoices.stream().filter((voice) -> (voice.isSelected() && (voice.getStatus() != ComponentDescription.Status.INSTALLED || voice.isUpdateAvailable()))).forEach((voice) -> {
-            toInstall.add(voice);
-        });
+        for (VoiceComponentDescription voice : possibleVoices) {
+        	if (voice.isSelected() && (voice.getStatus() != ComponentDescription.Status.INSTALLED || voice.isUpdateAvailable())) {
+        		toInstall.add(voice);
+        	}
+        }
         if (toInstall.isEmpty()) {
             //move to WebGui
             installationstate = "nothingselected";
