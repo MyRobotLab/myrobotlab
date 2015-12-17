@@ -63,7 +63,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	private static final long serialVersionUID = 1L;
 
-	String voice = "Tyler";
+	String voice = "Ryan";
 	HashSet<String> voices = new HashSet<String>();
 
 	String pathPrefix = null;
@@ -121,6 +121,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		voices.add("Kal");
 		voices.add("Mia");
 		voices.add("Ipek");
+		voices.add("Ryan");
 	}
 
 	public void startService() {
@@ -380,6 +381,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			// Runtime.createAndStart("gui", "GUIService");
 			AcapelaSpeech speech = (AcapelaSpeech)Runtime.start("speech", "AcapelaSpeech");
+			speech.speak("hello there my name is ryan");
 			speech.speak("hello world");
 			speech.speak("one two three four");
 			// arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
