@@ -4,6 +4,12 @@
 <button class="btn btn-default" ng-click="msg.setVoice(voice)">Set Voice</button>
 <button type="button" class="btn btn-default" ng-click="collapse = !collapse">Toggle Component Installer</button>
 <div collapse="collapse">
+    <div class="form-group">
+        <input type="text" class="form-control" ng-model="componenturl"/>
+        <button class="btn btn-default" ng-click="msg.updateFromComponentUrl(componenturl)">Update Components</button>
+    </div>
+    <!--TODO - fix automatic disabling if there are components-->
+    <div ng-show="{{service.possibleVoices === undefined}}">Please try to (re-)load the components file if list is empty</div>
     <div accordion>
         <div accordion-group is-open="status.open" ng-repeat="voice in service.possibleVoices">
             <div accordion-heading>
@@ -30,3 +36,29 @@
         Install!
     </button>
 </div>
+
+<script type="text/ng-template" id="MarySpeechInstallationNothingSelected.html">
+    <div class="modal-header">
+    <h3 class="modal-title">
+    <div ng-if="service.installationstate=='nothingselected'" class="text-color:'red'">ERROR</div>
+    <div ng-if="service.installationstate=='installcomponents'">Continue?</div>
+    </h3>
+    </div>
+    <div class="modal-body">
+    <div ng-if="service.installationstate=='nothingselected'">You have not selected any installable components</div>
+    <div ng-if="service.installationstate=='installcomponents'">
+    Install {{service.isntallationstateparam1}} components?<br>
+    ({{service.installationstateparam2}} to download)<br>
+    Proceed with installation?
+    </div>
+    </div>
+    <div class="modal-footer">
+    <div ng-if="service.installationstate=='nothingselected'">
+    <button class="btn btn-primary" ng-click="close();">OK</button>
+    </div>
+    <div ng-if="service.installationstate=='installcomponents'">
+    <button class="btn btn-primary" ng-click="msg.installSelectedLanguagesAndVoices2();close();">YES</button>
+    <button class="btn btn-primary" ng-click="close();">NO</button>
+    </div>
+    </div>
+</script>

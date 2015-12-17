@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -132,12 +133,23 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
 					info("listening");
 					invoke("listeningEvent");
-
 					Result result = recognizer.recognize();
-
+					
+					if (!isListening) {
+						// we could have stopped listening
+						Thread.sleep(250);
+						continue;
+					}
+					
+					log.info("Recognized Loop: {}  Listening: {}", result, isListening);
 					// log.error(result.getBestPronunciationResult());
+					
 					if (result != null) {
 						String resultText = result.getBestFinalResultNoFiller();
+						if (StringUtils.isEmpty(resultText)) {
+							// nothing heard?
+							continue;
+						}
 						log.info("recognized: " + resultText + '\n');
 						if (resultText.length() > 0 && isListening) {
 							if (lockPhrases.size() > 0 && !lockPhrases.contains(resultText) && !confirmations.containsKey(resultText)) {
@@ -155,6 +167,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 									// command finished
 									currentCommand = null;
 									invoke("publishText", "ok");
+									continue;
 
 								} else if (currentCommand != null && negations.containsKey(resultText)) {
 									// negation has happened... recognized the
@@ -163,6 +176,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 									currentCommand = null;
 									// apologee
 									invoke("publishText", "sorry");
+									continue;
 								} else if (commands.containsKey(resultText) && (confirmations != null || negations != null)) {
 									if (bypass != null && bypass.containsKey(resultText)) {
 										// we have confirmation and/or negations
@@ -174,6 +188,9 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 										Command cmd = commands.get(resultText);
 										currentCommand = cmd;
 										invoke("publishRequestConfirmation", resultText);
+										// continue in the loop, we should stop listening, and we 
+										// shouldn't publish the text becuase we just asked for confirmation.
+										continue;
 									}
 								} else if (commands.containsKey(resultText)) {
 									// no confirmations or negations are being
@@ -192,7 +209,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
 					} else {
 						try {
-							Thread.sleep(300);
+							Thread.sleep(250);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							logException(e);
@@ -340,7 +357,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		}
 		// if I'm speaking - I shouldn't be listening
 		mouth.addEar(this);
-		this.addListener("publishText", mouth.getName(), "publishText");
+		this.addListener("publishText", mouth.getName(), "onText");
 		this.addListener("publishRequestConfirmation", mouth.getName(), "onRequestConfirmation");
 //		
 //		mouth.subscribe(getName(), "requestConfirmation");
@@ -518,8 +535,16 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	 * recreate the speech processor - so its not as heavy handed
 	 */
 	@Override
-	public void pauseListening() {
+	public synchronized void pauseListening() {
+		log.info("Pausing Listening");
 		isListening = false;
+		if (microphone != null && recognizer != null) {
+			// TODO: what does reset monitors do? maybe clear the microphone?
+			// maybe neither of these do anything useful
+			microphone.stopRecording();
+			//microphone.clear();
+			//recognizer.resetMonitors();
+		}
 	}
 
 	@Override
@@ -545,7 +570,13 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
 	@Override
 	public void resumeListening() {
+		log.info("resuming listening");
 		isListening = true;
+		if (microphone != null) {
+			// TODO: no idea if this does anything useful.
+			microphone.clear();
+			microphone.startRecording();
+		}
 	}
 
 	// FYI - grammar must be created BEFORE we start to listen
