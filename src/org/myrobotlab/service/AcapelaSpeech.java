@@ -48,7 +48,9 @@ import org.apache.http.util.EntityUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -362,6 +364,31 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	public List<String> getLanguages() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public static void main(String[] args) {
+
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+
+			// FIXME - all testing or replacing of main code should be new JUnit
+			// tests - with virtual arduino !!!)
+			String port = "COM15";
+
+			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			// Runtime.createAndStart("gui", "GUIService");
+			AcapelaSpeech speech = (AcapelaSpeech)Runtime.start("speech", "AcapelaSpeech");
+			speech.speak("hello world");
+			speech.speak("one two three four");
+			// arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
+			// arduino.connect(port);
+			// arduino.broadcastState();
+		} catch(Exception e){
+			Logging.logError(e);
+		}
+		
 	}
 	
 }

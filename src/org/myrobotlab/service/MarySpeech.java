@@ -272,8 +272,9 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
         try {
-            Runtime.start("webgui", "WebGui");
+           // Runtime.start("webgui", "WebGui");
             MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
+            mary.setVoice("dfki-spike en_GB male unitselection general");
             mary.speak("hello");
             mary.speak("world");
 //        mary.speakBlocking("Hello world");
