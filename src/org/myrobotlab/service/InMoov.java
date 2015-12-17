@@ -1335,11 +1335,13 @@ public class InMoov extends Service {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 
-			Runtime.start("webgui", "WebGui");
+			//Runtime.start("webgui", "WebGui");
 
-			// InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+			InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+			InMoovHead h = i01.startHead("COM15");
+			i01.speakErrors(true);
 		
-			Blender blender =  (Blender) Runtime.start("blender", "Blender");
+			// Blender blender =  (Blender) Runtime.start("blender", "Blender");
 
 		} catch (Exception e) {
 			Logging.logError(e);
