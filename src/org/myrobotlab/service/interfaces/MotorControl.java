@@ -25,6 +25,8 @@
 
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.sensor.Encoder;
+
 public interface MotorControl {
 
 	/**
@@ -74,25 +76,12 @@ public interface MotorControl {
 	public void move(double power);
 
 	/**
-	 * moveFor move for a duration of time. Sub-second movement can be expressed
-	 * as a float value. E.g. 0.01 s
+	 * moveTo moves the motor to a specific location. Typically, an encoder is
+	 * needed in order to provide feedback data
 	 * 
-	 * @param power
-	 *            with range of -1.0 <-> 0.0 <-> 1.0
-	 * @param duration
-	 *            - in seconds
+	 * @param newPos
 	 */
-	public void moveFor(double power, double duration);
-
-	/**
-	 * moveFor with the option to block on the thread and wait for the movement
-	 * to be done
-	 * 
-	 * @param power
-	 * @param duration
-	 * @param block
-	 */
-	public void moveFor(double power, double duration, Boolean block);
+	public void moveTo(int newPos);
 
 	/**
 	 * moveTo moves the motor to a specific location. Typically, an encoder is
@@ -100,7 +89,7 @@ public interface MotorControl {
 	 * 
 	 * @param newPos
 	 */
-	public void moveTo(int newPos);
+	public void moveTo(int newPos, Double power);
 
 	/**
 	 * Attach a motor controller to the motor. The motor and motor controller
@@ -110,7 +99,10 @@ public interface MotorControl {
 	 * The motor controller uses this method to pass a reference of itself to
 	 * the motor, to be used directly
 	 */
-	public boolean setController(MotorController controller);
+	public void setController(MotorController controller);
+	
+	
+	public void setEncoder(Encoder encoder);
 
 	/**
 	 * change the motors direction such that negative power levels become
@@ -147,5 +139,7 @@ public interface MotorControl {
 	
 	String getType();
 	String[] getTypes();
+
+	double getPowerOutput();
 
 }

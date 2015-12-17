@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 
@@ -373,5 +374,17 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
 	public String onDisconnect(String portName) {
 		log.info(String.format("%s disconnected from %s", getName(), portName));
 		return portName;
+	}
+
+	@Override
+	public QueueStats publishStats(QueueStats stats) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateStats(QueueStats stats) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -247,8 +247,8 @@ public class Servo extends Service implements ServoControl {
 	}
 
 	@Override
-	public boolean attach(String controller, Integer pin) {
-		return attach((ServoController) Runtime.getService(controller), pin);
+	public boolean attach(String controllerName, Integer pin) {
+		return attach((ServoController) Runtime.getService(controllerName), pin);
 	}
 
 	@Override

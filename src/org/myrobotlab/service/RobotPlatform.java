@@ -54,7 +54,7 @@ public class RobotPlatform extends Service {
 		boolean isRunning = true;
 		int feedback = 0;
 		float power = 0.13f;
-		float estimatedTime = 0;
+		long estimatedTime = 0;
 		int lagTime = 700;
 
 		PIDThread() {
@@ -91,13 +91,10 @@ public class RobotPlatform extends Service {
 					float rightPower = 0.12f;
 					if (headingDelta > 0) {
 						// correct right - don't block
-						right.moveFor(-rightPower, estimatedTime);
-						left.moveFor(leftPower, estimatedTime);
-
+						
 					} else if (headingDelta < 0) {
 						// correct left - don't block
-						right.moveFor(rightPower, estimatedTime);
-						left.moveFor(-leftPower, estimatedTime);
+						
 					}
 
 					estimatedTime += 700; // add lag time

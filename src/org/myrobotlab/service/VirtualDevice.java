@@ -7,6 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.serial.Codec;
+import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
@@ -87,7 +88,8 @@ public class VirtualDevice extends Service implements SerialDataListener {
 
 	public String createVirtualArduino(String portName) throws IOException {
 		createVirtualPort(portName);
-		logic.loadExample("VirtualDevice/Arduino.py");
+		String newCode = FileIO.resourceToString("VirtualDevice/Arduino.py");
+		logic.loadScript("Arduino.py", newCode);
 		logic.execAndWait();
 		return portName;
 	}
@@ -203,10 +205,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
 				return;
 			}
 			
-			Python logic = virtual.getLogic();
-
-
-			
+			Python logic = virtual.getLogic();			
 			
 			
 			Serial uart = virtual.getUART();
