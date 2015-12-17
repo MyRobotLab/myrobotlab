@@ -155,7 +155,7 @@ public class InMoov extends Service {
 		peers.suggestAs("headTracking.y", "head.neck", "Servo", "shared servo");
 
 		peers.suggestAs("mouthControl.arduino", "left", "Arduino", "shared head Arduino");
-		peers.suggestAs("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
+		peers.suggestAs("mouthControl.mouth", "mouth", "AcapelaSpeech", "shared Speech");
 		peers.suggestAs("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
 
 		peers.suggestRootAs("python", "python", "Python", "shared Python service");
