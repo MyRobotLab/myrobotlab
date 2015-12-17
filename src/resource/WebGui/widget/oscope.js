@@ -29,6 +29,7 @@ angular.module('mrlapp.service')
             scope.pinData = [];
             scope.width = 0;
             scope.height = 0;
+            scope.hscale = 0.5;
             
             var gradient = tinygradient([
             // tinycolor('#ff0000'),       // tinycolor object
@@ -131,6 +132,7 @@ angular.module('mrlapp.service')
                     // FIXME - nice to have an offset to 0 so the value 0 is visible
                     var y = 0;
                     
+                    // FIXME - should be pinType - and pinType is sent only once
                     if (button.type == 1) {
                         // digital
                         y = scope.height - inPin.value * 35 - 10 * inPin.pin;
@@ -148,7 +150,7 @@ angular.module('mrlapp.service')
                     // to
                     
                     pinData.posX++;
-                    pinData.posY = y;
+                    pinData.posY = y * scope.hscale;
                     
                     _self.ctx.lineTo(pinData.posX, pinData.posY);
                     // color
@@ -178,7 +180,7 @@ angular.module('mrlapp.service')
                 // ctx.scale(1, -1); // flip y around for cartesian - bad idea :P
                 // scope.width = screen.width;
                 //scope.height = screen.height;
-                _self.ctx.rect(0, 0, scope.width, scope.height);
+                _self.ctx.rect(0, 0, scope.width, scope.height * scope.hscale);
                 _self.ctx.fillStyle = "black";
                 _self.ctx.fill();
             }

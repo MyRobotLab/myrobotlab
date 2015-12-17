@@ -10,6 +10,11 @@
             <td>type</td>
             <td><select ng-model="newType" ng-disabled="isAttached" ng-options="possibleType for possibleType in service.types" class="btn btn-default pull-right"></select></td>
         </tr>
+
+        <tr ng-repeat="(key, value) in service.pinMap">
+            <td> {{key}} </td> <td> {{ value }} </td>
+        </tr>
+
         <tr>
             <td>pwm pin</td>
             <td><select ng-model="newPin0" ng-disabled="isAttached" ng-options="pin for pin in pins" class="btn btn-default pull-right"></select></td>

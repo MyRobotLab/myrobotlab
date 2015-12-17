@@ -8,5 +8,10 @@ public class QueueStats {
 	public int interval;
 	public long ts;
 	public long lastTS;
+	public long delta;
+	
+	public String getName(){
+		return name;
+	}
 
 }

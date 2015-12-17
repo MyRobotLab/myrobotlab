@@ -11,8 +11,9 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 import org.myrobotlab.codec.serial.ArduinoMsgCodec;
 import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.framework.Service;
@@ -28,10 +29,10 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-@Ignore
+
 public class ArduinoTest {
 
-	public final static Logger log = LoggerFactory.getLogger(SerialTest.class);
+	public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
 	static Arduino arduino = null;
 	static Serial serial = null;
@@ -652,11 +653,15 @@ public class ArduinoTest {
 		// fail("Not yet implemented"); // TODO
 	}
 
+	
 	public static void main(String[] args) {
 		try {
 
 			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
+			LoggingFactory.getInstance().setLevel(Level.DEBUG);
+			
+			JUnitCore junit = new JUnitCore();
+			Result result = junit.run(ArduinoTest.class);
 			
 			ArduinoTest.setUpBeforeClass();
 			ArduinoTest test = new ArduinoTest();
@@ -673,10 +678,10 @@ public class ArduinoTest {
 			Runtime.dumpToFile();
 			
 			
-			
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 	}
+	
 
 }

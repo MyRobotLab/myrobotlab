@@ -543,7 +543,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		
 		int[] controlPins = motor.getControlPins();
 		for (int i = 0; i < controlPins.length; ++i){
-			sendMsg(PIN_MODE, controlPins[i], OUTPUT);
+			pinMode(controlPins[i], OUTPUT);
+		}
+		
+		String type = motor.getType();
+		
+		if (type == null){
+			throw new IllegalArgumentException("");
 		}
 		
 		// if we have a pulse step - we can do a form
@@ -551,7 +557,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		if (motor.getType().equals(Motor.TYPE_PULSE_STEP)){ // TODO - add other "real" encoders
 			// the pwm pin in a pulse step motor "is" the encoder
 			sensorAttach(motor);
-		}
+		} 
+		
+		
+		motor.setController(this);
 		
 		/*
 		FIXME - implement "real" encoder later
@@ -611,25 +620,25 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	@Override
 	public void motorMove(Motor motor) {
 
-		double powerLevel = motor.getPowerLevel();
+		double powerOutput = motor.getPowerOutput();
 		String type = motor.getType();
 		
 		if (Motor.TYPE_SIMPLE.equals(type)) {
-			sendMsg(DIGITAL_WRITE, motor.getPin(Motor.PIN_TYPE_DIR), (powerLevel < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
-			sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM), (int)Math.abs(powerLevel));
+			sendMsg(DIGITAL_WRITE, motor.getPin(Motor.PIN_TYPE_DIR), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
+			sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM), (int)Math.abs(powerOutput));
 
 		} else if (Motor.TYPE_2_PWM.equals(type)) {
-			if (powerLevel < 0) {
+			if (powerOutput < 0) {
 				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_LEFT), 0);
-				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT), (int)Math.abs(powerLevel));
+				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT), (int)Math.abs(powerOutput));
 			} else {
 				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT), 0);
-				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_LEFT), (int)Math.abs(powerLevel));
+				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_LEFT), (int)Math.abs(powerOutput));
 			}
 		} else if (Motor.TYPE_PULSE_STEP.equals(type)) {
 				//sdsendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT), 0);
 			// TODO implement with a -1 for "endless" pulses or a different command parameter :P
-				sendMsg(PULSE, motor.getPin(Motor.PIN_TYPE_PWM_LEFT), (int)Math.abs(powerLevel));
+				sendMsg(PULSE, motor.getPin(Motor.PIN_TYPE_PULSE), (int)Math.abs(powerOutput));
 		} else {
 			error("motorMove for motor type %s not supported", type);
 		}
@@ -1659,7 +1668,20 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			// Runtime.start("clock", "Clock");
 			// Runtime.start("serial", "Serial");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			Runtime.start("python", "Python");
+			//Runtime.start("gui", "GUIService");
+			//Runtime.start("python", "Python");
+			//arduino.connect("COM18");
+			arduino.connect("COM28");
+			
+			arduino.getVersion();
+			Servo servo = (Servo)Runtime.start("servo", "Servo");
+			servo.attach(arduino, 10);
+			
+			servo.moveTo(10);
+			servo.moveTo(90);
+			servo.moveTo(180);
+			servo.moveTo(90);
+			servo.moveTo(10);
 
 			/*
 			 * VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual",
@@ -1732,5 +1754,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Logging.logError(e);
 		}
 	}
+
 
 }

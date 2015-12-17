@@ -67,6 +67,7 @@ import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.Invoker;
 import org.myrobotlab.service.interfaces.NameProvider;
+import org.myrobotlab.service.interfaces.QueueReporter;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
@@ -81,7 +82,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service extends MessageService implements Runnable, Serializable, ServiceInterface, Invoker {
+public abstract class Service extends MessageService implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
 
 	// FIXME upgrade to ScheduledExecutorService
 	protected class Task extends TimerTask {
@@ -2163,5 +2164,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	public Map<String, MethodEntry> getMethodMap() {
 		return Runtime.getMethodMap(getName());
 	}
+	
+	@Override
+	public void updateStats(QueueStats stats) {
+		invoke("publishStats", stats);		
+	}
+
+	@Override
+	public QueueStats publishStats(QueueStats stats) {
+		log.error(String.format("===stats - dequeued total %d - %d bytes in %d ms %d Kbps", stats.total, stats.interval, stats.ts - stats.lastTS, 8 * stats.interval
+				/ (stats.delta)));
+
+		return stats;
+	}
+
 
 }
