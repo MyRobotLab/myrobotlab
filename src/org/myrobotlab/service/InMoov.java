@@ -171,7 +171,7 @@ public class InMoov extends Service {
 		peers.put("eyesTracking", "Tracking", "Tracking for the eyes");
 		peers.put("head", "InMoovHead", "the head");
 		peers.put("headTracking", "Tracking", "Head tracking system");
-		peers.put("mouth", "MarySpeech", "InMoov speech service");
+		peers.put("mouth", "AcapelaSpeech", "InMoov speech service");
 		peers.put("mouthControl", "MouthControl", "MouthControl");
 		peers.put("opencv", "OpenCV", "InMoov OpenCV service");
 		peers.put("openni", "OpenNI", "Kinect service");
