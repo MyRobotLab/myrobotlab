@@ -141,5 +141,9 @@ public interface MotorControl {
 	String[] getTypes();
 
 	double getPowerOutput();
+	
+	public void attach(String controllerName) throws Exception;
+	
+	public void attach(MotorController uC) throws Exception;
 
 }
