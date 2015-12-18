@@ -156,6 +156,10 @@ public class AudioProcessor extends Thread {
 				line.stop();
 				line.close();
 				din.close();
+				
+				// notifiy that we've finished playing
+				
+				myService.finishedPlaying(null);
 			}
 
 		} catch (Exception e) {
