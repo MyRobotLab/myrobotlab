@@ -674,6 +674,7 @@ public class Roomba extends Service {
 
 	@Override
 	public void startService() {
+		super.startService();
 		serial = (Serial) startPeer("serial");
 	}
 
