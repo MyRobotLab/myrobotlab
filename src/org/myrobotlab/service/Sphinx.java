@@ -131,7 +131,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 				isListening = true;
 				while (isRunning) {
 
-					info("listening");
+					info("listening: %b", isListening);
 					invoke("listeningEvent");
 					Result result = recognizer.recognize();
 					

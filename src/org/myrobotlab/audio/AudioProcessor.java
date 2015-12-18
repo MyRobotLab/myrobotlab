@@ -159,7 +159,8 @@ public class AudioProcessor extends Thread {
 				
 				// notifiy that we've finished playing
 				
-				myService.finishedPlaying(null);
+				myService.invoke("finishedPlaying", "acapela done");
+				
 			}
 
 		} catch (Exception e) {
