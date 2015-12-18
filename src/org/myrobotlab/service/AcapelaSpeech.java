@@ -128,6 +128,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		super.startService();
 		startPeer("audioFile");
 		audioFile.startService();
+		// attach a listener when the audio file ends playing.
+		audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
+		
 	}
 
 	public AudioFile getAudioFile() {
@@ -258,12 +261,25 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	@Override
 	public boolean speakBlocking(String toSpeak) throws IOException {
-		invoke("publishStartSpeaking", toSpeak);
+
+		
 		// FIXME !!
 		speak(toSpeak);
 		// audioFile.playFile(to, true);
 		// sleep(afterSpeechPause);// important pause after speech
-		invoke("publishStartSpeaking", toSpeak);
+
+		
+		
+		// invoke("publishEndSpeaking", toSpeak);
+		
+	 try {
+	      Thread.sleep(100);
+	      log.info("Done speaking pause 100 ms.");
+	  } catch (InterruptedException e) {
+	      // TODO Auto-generated catch block
+	      e.printStackTrace();
+	  }
+		
 		
 		return false;
 	}
@@ -290,12 +306,18 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	@Override
 	public String publishEndSpeaking(String utterance) {
-		return null;
+		log.info("Acapela Speech publishing End Speaking");
+		return utterance;
 	}
 
 	@Override
 	public void onText(String text) {
-
+        log.info("ON Text Called: {}", text);
+        try {
+            speak(text);
+        } catch (Exception e) {
+            Logging.logError(e);
+        }
 	}
 
 	@Override
@@ -305,6 +327,16 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	public int speak(String toSpeak) throws IOException {
 	
+		invoke("publishStartSpeaking", toSpeak);
+		
+		try {
+            Thread.sleep(100);
+            log.info("Ok.. starting to speak.");
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+		
 			String filename = this.getLocalFileName(this, toSpeak, "mp3");
 
 			if (audioFile.cacheContains(filename)) {
@@ -313,6 +345,8 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 			byte[] b = getRemoteFile(toSpeak);
 			audioFile.cache(filename, b);
+			
+			// TODO: gotta pass a callback down so we know when the file finishes playing.
 			return audioFile.playCachedFile(filename);
 	}
 

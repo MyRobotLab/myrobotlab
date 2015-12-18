@@ -129,6 +129,9 @@ public class InMoov extends Service {
 
 	boolean useEyesForTracking = false;
 
+	//static String speechService = "MarySpeech";
+	static String speechService = "AcapelaSpeech";
+	
 	// static in Java are not overloaded but overwritten - there is no
 	// polymorphism for statics
 	public static Peers getPeers(String name) {
@@ -155,7 +158,7 @@ public class InMoov extends Service {
 		peers.suggestAs("headTracking.y", "head.neck", "Servo", "shared servo");
 
 		peers.suggestAs("mouthControl.arduino", "left", "Arduino", "shared head Arduino");
-		peers.suggestAs("mouthControl.mouth", "mouth", "AcapelaSpeech", "shared Speech");
+		peers.suggestAs("mouthControl.mouth", "mouth", speechService, "shared Speech");
 		peers.suggestAs("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
 
 		peers.suggestRootAs("python", "python", "Python", "shared Python service");
@@ -171,7 +174,7 @@ public class InMoov extends Service {
 		peers.put("eyesTracking", "Tracking", "Tracking for the eyes");
 		peers.put("head", "InMoovHead", "the head");
 		peers.put("headTracking", "Tracking", "Head tracking system");
-		peers.put("mouth", "AcapelaSpeech", "InMoov speech service");
+		peers.put("mouth", speechService, "InMoov speech service");
 		peers.put("mouthControl", "MouthControl", "MouthControl");
 		peers.put("opencv", "OpenCV", "InMoov OpenCV service");
 		peers.put("openni", "OpenNI", "Kinect service");

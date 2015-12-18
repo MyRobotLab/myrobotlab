@@ -213,7 +213,7 @@ public class AudioFile extends Service {
 	}
 
 	public void stopped() {
-		log.info("stopped");
+		log.info("Audio File Stopped");
 	}
 
 	public String stoppedFile(String filename) {
@@ -514,5 +514,11 @@ public class AudioFile extends Service {
 		track(DEFAULT_TRACK);
 	}
 
+	
+	public String finishedPlaying(String utterance) {
+		// TODO: maybe wire though the utterance?
+		log.info("Finished playing called");
+		return null;
+	}
 	
 }
