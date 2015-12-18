@@ -217,22 +217,7 @@ public class Tracking extends Service {
 	}
 
 	// -------------- System Specific Initialization Begin --------------
-	// FIXME make interface
-	public boolean connect(String port) throws IOException {
-
-		arduino.connect(port);
-
-		x.attach();
-		y.attach();
-		// TODO - think of a "validate" method
-		x.moveTo(x.getRest() + 2);
-		sleep(300);
-		y.moveTo(y.getRest() + 2);
-		sleep(300);
-		rest();
-		return true;
-	}
-
+	
 	public void faceDetect() {
 		// opencv.addFilter("Gray"); needed ?
 		opencv.removeFilters();
@@ -703,12 +688,52 @@ public class Tracking extends Service {
 
 	}
 
+
+	public boolean connect(String port) throws IOException {
+
+		if (getX().getPin() == null){
+			error("x pin not set");
+			return false;
+		}
+		if (getY().getPin() == null){
+			error("y pin not set");
+			return false;
+		}
+		return connect("COM18", getX().getPin(), getY().getPin(), getOpenCV().getCameraIndex());
+	}
+	
+	public boolean connect(String port, int xPin, int yPin) throws IOException {
+		return connect(port, xPin, yPin, 0);
+	}
+
+
+	public boolean connect(String port, int xPin, int yPin, int cameraIndex) {
+		boolean ret = arduino.connect(port);
+		
+		x.setPin(xPin);
+		y.setPin(yPin);
+		opencv.setCameraIndex(cameraIndex);
+		
+		x.attach();
+		y.attach();
+		// TODO - think of a "validate" method
+		x.moveTo(x.getRest() + 2);
+		sleep(300);
+		y.moveTo(y.getRest() + 2);
+		sleep(300);
+		rest();
+		
+		return ret;		
+	}
+	
 	public static void main(String[] args) {
 
 		try {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
-
+			int xPin = 7;
+			int yPin = 10;
+			int cameraIndex = 1;
 			// Speech speech = new Speech("speech");
 
 			// Y min max 79 - 127
@@ -716,10 +741,12 @@ public class Tracking extends Service {
 			Tracking tracker = new Tracking("tracker");
 			
 			//tracker.getY().setMinMax(79, 127);
-			tracker.getX().setPin(11);
-			tracker.getY().setPin(10);
+			/*
+			tracker.getX().setPin(7);
+			tracker.getY().setPin(8);
 			tracker.getOpenCV().setCameraIndex(1);
-			tracker.connect("COM18");
+			*/
+			tracker.connect("COM18", xPin, yPin, cameraIndex);
 			// tracker.connect("COM4");
 			tracker.startService();
 			tracker.faceDetect();
@@ -736,4 +763,5 @@ public class Tracking extends Service {
 		}
 
 	}
+
 }
