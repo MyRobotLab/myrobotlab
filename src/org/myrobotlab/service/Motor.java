@@ -40,6 +40,7 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.sensor.EncoderTimer;
+import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
@@ -568,4 +569,6 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 		// TODO Auto-generated method stub
 		
 	}
+
+	
 }
