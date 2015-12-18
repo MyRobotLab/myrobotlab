@@ -829,6 +829,7 @@ public class InMoov extends Service {
 	}
 
 	public void rest() {
+		log.info("InMoov Native Rest Gesture Called");
 		if (head != null) {
 			head.rest();
 		}
@@ -1188,6 +1189,7 @@ public class InMoov extends Service {
 
 	@Override
 	public void startService() {
+		super.startService();
 		python = getPython();
 	}
 
