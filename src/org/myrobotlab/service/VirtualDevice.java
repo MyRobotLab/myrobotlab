@@ -56,6 +56,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
 	}
 	
 	public void startService(){
+		super.startService();
 		uart = (Serial)startPeer("uart");
 		logic = (Python)startPeer("logic");
 		
