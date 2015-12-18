@@ -518,7 +518,7 @@ public class AudioFile extends Service {
 	public String finishedPlaying(String utterance) {
 		// TODO: maybe wire though the utterance?
 		log.info("Finished playing called");
-		return null;
+		return utterance;
 	}
 	
 }

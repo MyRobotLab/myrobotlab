@@ -306,7 +306,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	@Override
 	public String publishEndSpeaking(String utterance) {
-		log.info("Acapela Speech publishing End Speaking");
+		log.info("Acapela Speech publishing End Speaking: {}", utterance);
 		return utterance;
 	}
 
@@ -377,13 +377,10 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	@Override
 	public void addEar(SpeechRecognizer ear) {
-		
-		// TODO: implement the appropriate subscribe methods.
-		// TODO Auto-generated method stub
-		// subscribe to publishText 
-		// subscribe to request confirmation.
-		// this.subscribe(ear.getName(), topicMethod, callbackName, callbackMethod);
-		
+		// TODO: move this to a base class. it's basically the same for all mouths/ speech synth stuff.
+        // when we add the ear, we need to listen for request confirmation
+        addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
+        addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
 		
 	}
 
