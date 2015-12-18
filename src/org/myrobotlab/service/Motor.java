@@ -238,6 +238,10 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 		}
 		controller.motorMove(this);
 	}
+	
+	public void attach(String controllerName) throws Exception {
+		attach((MotorController)Runtime.getService(controllerName));
+	}
 
 	/**
 	 * GOOD - future of complicated attaching - supply all data in one horrific
