@@ -265,24 +265,30 @@ public class InMoovHead extends Service {
 		if (log.isDebugEnabled()) {
 			log.debug(String.format("%s setSpeed %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed));
 		}
-
 		rothead.setSpeed(headXSpeed);
 		neck.setSpeed(headYSpeed);
-		eyeX.setSpeed(eyeXSpeed);
-		eyeY.setSpeed(eyeYSpeed);
-		jaw.setSpeed(jawSpeed);
-
+		// it's possible to pass null for the eye and jaw speeds
+		if (eyeXSpeed != null) {
+			eyeX.setSpeed(eyeXSpeed);
+		}
+		if (eyeYSpeed != null) {
+			eyeY.setSpeed(eyeYSpeed);
+		} 
+		if (jawSpeed != null) {
+			jaw.setSpeed(jawSpeed);
+		}
+		
 	}
 
 	@Override
 	public void startService() {
 		super.startService();
+		arduino.startService();
 		jaw.startService();
 		eyeX.startService();
 		eyeY.startService();
 		rothead.startService();
 		neck.startService();
-		arduino.startService();
 	}
 
 	/*
