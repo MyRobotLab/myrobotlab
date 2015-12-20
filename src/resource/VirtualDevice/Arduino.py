@@ -32,7 +32,8 @@ def work():
     	
     	for pinx in analogReadPollingPins:
     	  #retcmd = "publishPin/" + str(pinx) + "/4/"+ str(y) +"\n"
-    	  retcmd = "publishPin/" + str(pinx) + "/" + str(int(pinx)%4) + "/"+ str(y) +"\n"
+    	  #retcmd = "publishPin/" + str(pinx) + "/" + str(int(pinx)%4) + "/"+ str(y) +"\n"
+    	  retcmd = "publishPin/" + str(pinx) + "/1/"+ str(y) +"\n"
     	  uart.write(codec.encode(retcmd))
     	
     	sleep(0.001)
@@ -67,7 +68,7 @@ def onRX(b):
     clist = command.split('/')
     
     if command == "getVersion":
-      uart.write(codec.encode("publishVersion/24\n"))
+      uart.write(codec.encode("publishVersion/"+ str(ArduinoMsgCodec.MRLCOMM_VERSION) +"\n"))
 
     elif command.startswith("digitalReadPollingStart"):
       print("digitalReadPollingStart")

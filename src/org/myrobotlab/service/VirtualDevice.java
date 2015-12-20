@@ -208,14 +208,16 @@ public class VirtualDevice extends Service implements SerialDataListener {
 			
 			Python logic = virtual.getLogic();			
 			
-			
+			/*
 			Serial uart = virtual.getUART();
 			uart.setCodec("arduino");
 			Codec codec = uart.getRXCodec();
 			codec.setTimeout(1000);
 			uart.setTimeout(100); // don't want to hang when decoding results...
-
+			*/
+			
 			arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
+
 			arduino.connect(portName);
 		
 			//Runtime.start("gui", "GUIService");

@@ -1,6 +1,7 @@
 <div class="row">
   <div class="col-lg-2">
     <img ng-src="../{{isConnectedImage}}.png" /> <!-- TODO - make directive -->
+     <label ng-show="isConnected">{{stats.lineSpeed}} Kbps</label>
   </div>
   <div class="col-lg-3">    
     <label for="service.portName">port</label>
@@ -8,22 +9,22 @@
   </div>
   <div class="col-lg-7">
   <div class="btn-group">
-    <button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</button>
-    <button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button>
-    <button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button>
-    <label class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</label>
-    </div>
+    <label class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</label>
+    <label class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</label>
+    <label class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</label>
+    <label class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</label>   
+  </div>
   </div>
 </div>
 
 <div class="row">
 <div class="col-lg-3">
     <label for="service.baudrate">rate</label>
-    <input type="text" ng-disabled="isConnected" ng-model="service.baudrate" typeahead="baudrate for baudrate in possibleBaud | filter:$viewValue | limitTo:8" class="form-control">
+    <input type="text" class="form-control input-sm" ng-disabled="isConnected" ng-model="service.baudrate" typeahead="baudrate for baudrate in possibleBaud | filter:$viewValue | limitTo:8" class="form-control">
 </div>
 <div class="col-lg-3">    
     <label for="service.databits">data bits</label>
-    <input type="text" ng-disabled="isConnected" ng-model="service.databits" class="form-control">
+    <input type="text" size="3" ng-disabled="isConnected" ng-model="service.databits" class="form-control">
 </div>
 <div class="col-lg-3">
     <label for="service.stopbits">stop bits</label>

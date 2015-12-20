@@ -326,7 +326,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	}
 
 	public int speak(String toSpeak) throws IOException {
-	
+		log.info(String.format("speak %s", toSpeak));
 		invoke("publishStartSpeaking", toSpeak);
 		
 		try {

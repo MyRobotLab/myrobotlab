@@ -9,6 +9,7 @@ public class QueueStats {
 	public long ts;
 	public long lastTS;
 	public long delta;
+	public long lineSpeed;
 	
 	public String getName(){
 		return name;
