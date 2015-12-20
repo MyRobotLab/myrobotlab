@@ -75,7 +75,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	boolean useLocalResources = false;
 	boolean autoStartBrowser = true;
 
-	public String startURL = "http://localhost:%d/index.html";
+	public String startURL = "http://localhost:%d";
 
 	// FIXME might need to change to HashMap<String, HashMap<String,String>> to
 	// add client session

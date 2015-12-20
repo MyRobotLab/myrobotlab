@@ -19,10 +19,19 @@ angular.module('mrlapp.service.MarySpeechGui', [])
                             case 'installcomponents':
                                 var modalInstance = $modal.open({
                                     animation: true,
-                                    templateUrl: 'MarySpeechInstallationNothingSelected.html',
+                                    templateUrl: 'MarySpeechInstallation' + service.installationstate + '.html',
                                     controller: 'MarySpeechInstalltionNothingSelectedCtrl',
                                     size: 'sm',
                                     scope: $scope
+                                });
+                                break;
+                            case 'showlicenses':
+                                var modalInstance = $modal.open({
+                                    animation: true,
+                                    templateUrl: 'MarySpeechInstallation' + service.installationstate + '.html',
+                                    controller: 'MarySpeechInstalltionNothingSelectedCtrl',
+                                    scope: $scope,
+                                    size: 'lg'
                                 });
                                 break;
                         }
@@ -50,7 +59,7 @@ angular.module('mrlapp.service.MarySpeechGui', [])
                 $scope.install = function () {
                     var toInstall = [];
                     angular.forEach($scope.service.possibleVoices, function (value, key) {
-                        if (value.install) {
+                        if (value.isSelected) {
                             toInstall.push(value.name);
                         }
                     });
@@ -61,8 +70,39 @@ angular.module('mrlapp.service.MarySpeechGui', [])
             }
         ])
 
-        .controller('MarySpeechInstalltionNothingSelectedCtrl', function ($scope, $modalInstance) {
+        .controller('MarySpeechInstalltionNothingSelectedCtrl', function ($scope, $modalInstance, $http, $sce) {
             $scope.close = function () {
                 $modalInstance.close();
             };
+
+            $scope.isUndefinedOrNull = function (val) {
+                return angular.isUndefined(val) || val === null;
+            };
+
+            if ($scope.service.installationstate == 'showlicenses') {
+                $scope.alllicenses = [];
+                angular.forEach($scope.service.installationstateparam1, function (value, key) {
+                    $scope.alllicenses.push(key);
+                });
+                $scope.counter = -1;
+
+                $scope.showNextLicense = function () {
+                    $scope.counter++;
+                    console.log($scope.counter, $scope.alllicenses.length);
+                    if ($scope.counter >= $scope.alllicenses.length) {
+                        $scope.msg.installSelectedLanguagesAndVoices3();
+                        $scope.close();
+                    } else {
+                        $scope.license = 'Loading license';
+                        console.log($scope.alllicenses[$scope.counter]);
+                        if (!$scope.isUndefinedOrNull($scope.alllicenses[$scope.counter])) {
+                            $scope.license = $sce.trustAsHtml($scope.service.installationstateparam2[$scope.alllicenses[$scope.counter]]);
+                        } else {
+                            $scope.license = 'No license found';
+                        }
+                    }
+                };
+
+                $scope.showNextLicense();
+            }
         });

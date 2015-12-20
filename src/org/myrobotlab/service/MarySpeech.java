@@ -1,14 +1,16 @@
 package org.myrobotlab.service;
 
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +31,6 @@ import marytts.exceptions.SynthesisException;
 import marytts.tools.install.ComponentDescription;
 import marytts.tools.install.InstallFileParser;
 import marytts.tools.install.LanguageComponentDescription;
-import marytts.tools.install.LicensePanel;
 import marytts.tools.install.LicenseRegistry;
 import marytts.tools.install.ProgressPanel;
 import marytts.tools.install.VoiceComponentDescription;
@@ -60,8 +61,8 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     private List<VoiceComponentDescription> possibleVoices;
 
     String installationstate = "noinstallationstarted";
-    String installationstateparam1;
-    String installationstateparam2;
+    Object installationstateparam1;
+    Object installationstateparam2;
     List<ComponentDescription> installation_toInstall;
 
     // we need to subclass the audio player class here, so we know when the run method exits and we can invoke
@@ -130,8 +131,31 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     public MarySpeech(String reservedKey) {
         super(reservedKey);
+        
+        File file = new File("mary");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        file = new File("mary\\download");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        file = new File("mary\\installed");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        file = new File("mary\\lib");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        file = new File("mary\\log");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
 
         System.setProperty("mary.base", "mary");
+        System.setProperty("mary.downloadDir", "mary\\download");
+        System.setProperty("mary.installedDir", "mary\\installed");
 
         try {
 //            updateFromComponentUrl();
@@ -263,7 +287,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         List<String> ret = new ArrayList<>();
         for (Locale locale : marytts.getAvailableLocales()) {
             ret.add(locale.getLanguage());
-        };
+        }
         return ret;
     }
 
@@ -272,11 +296,11 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         LoggingFactory.getInstance().setLevel(Level.DEBUG);
 
         try {
-           // Runtime.start("webgui", "WebGui");
+            Runtime.start("webgui", "WebGui");
             MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
-            mary.setVoice("dfki-spike en_GB male unitselection general");
-            mary.speak("hello");
-            mary.speak("world");
+//            mary.setVoice("dfki-spike en_GB male unitselection general");
+//            mary.speak("hello");
+//            mary.speak("world");
 //        mary.speakBlocking("Hello world");
 //        mary.speakBlocking("I am Mary TTS and I am open source");
 //        mary.speakBlocking("and I will evolve quicker than any closed source application if not in a short window of time");
@@ -301,10 +325,10 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         System.out.println("toInstall" + Arrays.toString(toInstall_));
 
         for (VoiceComponentDescription voice : possibleVoices) {
+            voice.setSelected(false);
             for (String toInstallVoice : toInstall_) {
                 if (toInstallVoice.equals(voice.getName())) {
                     voice.setSelected(true);
-                    break;
                 }
             }
         }
@@ -312,9 +336,9 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         long downloadSize = 0;
         List<ComponentDescription> toInstall = new ArrayList<>();
         for (VoiceComponentDescription voice : possibleVoices) {
-        	if (voice.isSelected() && (voice.getStatus() != ComponentDescription.Status.INSTALLED || voice.isUpdateAvailable())) {
-        		toInstall.add(voice);
-        	}
+            if (voice.isSelected() && (voice.getStatus() != ComponentDescription.Status.INSTALLED || voice.isUpdateAvailable())) {
+                toInstall.add(voice);
+            }
         }
         if (toInstall.isEmpty()) {
             //move to WebGui
@@ -397,60 +421,51 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     public void installSelectedLanguagesAndVoices2() {
         List<ComponentDescription> toInstall = installation_toInstall;
         System.out.println("Check license(s)");
-        boolean accepted = showLicenses(toInstall);
-        if (accepted) {
-            System.out.println("Starting installation");
-            showProgressPanel(toInstall, true);
-        }
-    }
 
-    private boolean showLicenses(List<ComponentDescription> toInstall) {
-        Map<URL, SortedSet<ComponentDescription>> licenseGroups = new HashMap<URL, SortedSet<ComponentDescription>>();
+        Map<URL, SortedSet<ComponentDescription>> licenseGroups = new HashMap<>();
         // Group components by their license:
         for (ComponentDescription cd : toInstall) {
             URL licenseURL = cd.getLicenseURL(); // may be null
             // null is an acceptable key for HashMaps, so it's OK.
             SortedSet<ComponentDescription> compsUnderLicense = licenseGroups.get(licenseURL);
             if (compsUnderLicense == null) {
-                compsUnderLicense = new TreeSet<ComponentDescription>();
+                compsUnderLicense = new TreeSet<>();
                 licenseGroups.put(licenseURL, compsUnderLicense);
             }
             assert compsUnderLicense != null;
             compsUnderLicense.add(cd);
         }
-        // Now show license for each group
+
+        Map<URL, String> licenseContents = new HashMap<>();
         for (URL licenseURL : licenseGroups.keySet()) {
             if (licenseURL == null) {
                 continue;
             }
             URL localURL = LicenseRegistry.getLicense(licenseURL);
-            SortedSet<ComponentDescription> comps = licenseGroups.get(licenseURL);
-            System.out.println("Showing license " + licenseURL + " for " + comps.size() + " components");
-            LicensePanel licensePanel = new LicensePanel(localURL, comps);
-            final JOptionPane optionPane = new JOptionPane(licensePanel, JOptionPane.PLAIN_MESSAGE, JOptionPane.YES_NO_OPTION,
-                    null, new String[]{"Reject", "Accept"}, "Reject");
-            optionPane.setPreferredSize(new Dimension(800, 600));
-            final JDialog dialog = new JDialog((Frame) null, "Do you accept the following license?", true);
-            dialog.setContentPane(optionPane);
-            optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    String prop = e.getPropertyName();
-
-                    if (dialog.isVisible() && (e.getSource() == optionPane) && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
-                        dialog.setVisible(false);
-                    }
-                }
-            });
-            dialog.pack();
-            dialog.setVisible(true);
-
-            if (!"Accept".equals(optionPane.getValue())) {
-                System.out.println("License not accepted. Installation of component cannot proceed.");
-                return false;
+            File file;
+            try {
+                file = new File(localURL.toURI());
+            } catch (URISyntaxException e) {
+                file = new File(localURL.getPath());
             }
-            System.out.println("License accepted.");
+            try {
+                byte[] encoded = Files.readAllBytes(Paths.get(file.getPath()));
+                String content = new String(encoded, "UTF-8");
+                licenseContents.put(licenseURL, content);
+            } catch (IOException ex) {
+            }
         }
-        return true;
+
+        installationstate = "showlicenses";
+        installationstateparam1 = licenseGroups;
+        installationstateparam2 = licenseContents;
+        broadcastState();
+    }
+
+    public void installSelectedLanguagesAndVoices3() {
+        List<ComponentDescription> toInstall = installation_toInstall;
+        System.out.println("Starting installation");
+        showProgressPanel(toInstall, true);
     }
 
     private void showProgressPanel(List<ComponentDescription> comps, boolean install) {
