@@ -16,7 +16,7 @@
                 <div>
                     {{voice.name}}
                     <span class="pull-right">
-                        <span ng-if="voice.install">install!</span>&nbsp;&nbsp;
+                        <span ng-if="voice.isSelected">install!</span>&nbsp;&nbsp;
                         {{voice.status}}&nbsp;&nbsp;{{voice.gender}}&nbsp;&nbsp;{{voice.locale}}&nbsp;&nbsp;
                         <i class="glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
                     </span>
@@ -26,9 +26,9 @@
             Type: {{voice.type}}<br>
             Version: {{voice.version}}<br>
             Size: {{voice.packageSize / 1024 / 1024| number:2}}MB<br>
-            <button type="button" class="btn btn-primary" ng-model="voice.install" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
-                <span ng-if="install">install!</span>
-                <span ng-if="!install">don't install!</span>
+            <button type="button" class="btn btn-primary" ng-model="voice.isSelected" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
+                <span ng-if="!voice.isSelected">install!</span>
+                <span ng-if="voice.isSelected">don't install!</span>
             </button>
         </div>
     </div>
@@ -37,28 +37,46 @@
     </button>
 </div>
 
-<script type="text/ng-template" id="MarySpeechInstallationNothingSelected.html">
+<script type="text/ng-template" id="MarySpeechInstallationnothingselected.html">
     <div class="modal-header">
-    <h3 class="modal-title">
-    <div ng-if="service.installationstate=='nothingselected'" class="text-color:'red'">ERROR</div>
-    <div ng-if="service.installationstate=='installcomponents'">Continue?</div>
-    </h3>
+        <h3 class="modal-title">ERROR</h3>
     </div>
     <div class="modal-body">
-    <div ng-if="service.installationstate=='nothingselected'">You have not selected any installable components</div>
-    <div ng-if="service.installationstate=='installcomponents'">
-    Install {{service.isntallationstateparam1}} components?<br>
-    ({{service.installationstateparam2}} to download)<br>
-    Proceed with installation?
-    </div>
+        You have not selected any installable components
     </div>
     <div class="modal-footer">
-    <div ng-if="service.installationstate=='nothingselected'">
-    <button class="btn btn-primary" ng-click="close();">OK</button>
+        <button class="btn btn-primary" ng-click="close();">OK</button>
     </div>
-    <div ng-if="service.installationstate=='installcomponents'">
-    <button class="btn btn-primary" ng-click="msg.installSelectedLanguagesAndVoices2();close();">YES</button>
-    <button class="btn btn-primary" ng-click="close();">NO</button>
+</script>
+<script type="text/ng-template" id="MarySpeechInstallationinstallcomponents.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Continue?</h3>
     </div>
+    <div class="modal-body">
+        Install {{service.installationstateparam1}} components?<br>
+        ({{service.installationstateparam2}} to download)<br>
+        Proceed with installation?
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="msg.installSelectedLanguagesAndVoices2();close();">YES</button>
+        <button class="btn btn-primary" ng-click="close();">NO</button>
+    </div>
+</script>
+<script type="text/ng-template" id="MarySpeechInstallationshowlicenses.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Licenses</h3>
+    </div>
+    <div class="modal-body">
+        Used by:
+        <div ng-repeat="voice in service.installationstateparam1[alllicenses[counter]]">
+            <li>{{voice.name}}</li>
+        </div>
+        <br>
+        Do you accept the following license?
+        <div ng-bind-html="license"></div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="showNextLicense();">ACCEPT</button>
+        <button class="btn btn-primary" ng-click="close();">CANCEL</button>
     </div>
 </script>
