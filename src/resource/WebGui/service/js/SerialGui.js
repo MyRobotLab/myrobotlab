@@ -6,6 +6,17 @@ angular.module('mrlapp.service.SerialGui', [])
     
     
     $scope.monitorModel = false;
+
+    // TODO - make global - part of ServiceGui
+    // because any service can have queue speed
+    $scope.stats = {
+        "total":0,
+        "interval":0,
+        "ts":0,
+        "lastTS":0,
+        "delta":0,
+        "lineSpeed":0
+    };
     
     
     this.updateState = function(service) {
@@ -61,6 +72,12 @@ angular.module('mrlapp.service.SerialGui', [])
             _self.updateState(msg.data[0]);
             $scope.$apply();
             break;
+        case 'onStats':
+            // backend update 
+            //_self.updateState(msg.data[0]);
+            $scope.stats = msg.data[0];
+            $scope.$apply();
+            break;
         case 'onRX':
             $scope.rx += ' ' + msg.data[0];
             ++$scope.rxCount;
@@ -87,6 +104,7 @@ angular.module('mrlapp.service.SerialGui', [])
     // mrl.subscribe($scope.service.name, 'publishTX');
     mrl.subscribe($scope.service.name, 'publishState');
     mrl.subscribe($scope.service.name, 'refresh');
+    mrl.subscribe($scope.service.name, 'publishStats');
     
     mrl.sendTo($scope.service.name, 'broadcastState');
     mrl.sendTo($scope.service.name, 'refresh');

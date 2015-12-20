@@ -156,6 +156,7 @@ public abstract class Port implements Runnable, PortSource {
 
 					stats.ts = System.currentTimeMillis();
 					stats.delta = stats.ts - stats.lastTS;
+					stats.lineSpeed = (8 * stats.interval) /stats.delta;
 					for (String key : listeners.keySet()) {
 						listeners.get(key).updateStats(stats);
 					}

@@ -2172,9 +2172,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 	@Override
 	public QueueStats publishStats(QueueStats stats) {
-		log.error(String.format("===stats - dequeued total %d - %d bytes in %d ms %d Kbps", stats.total, stats.interval, stats.ts - stats.lastTS, 8 * stats.interval
-				/ (stats.delta)));
-
+		// log.error(String.format("===stats - dequeued total %d - %d bytes in %d ms %d Kbps", stats.total, stats.interval, stats.ts - stats.lastTS, 8 * stats.interval/ (stats.delta)));
 		return stats;
 	}
 

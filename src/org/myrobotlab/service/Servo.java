@@ -584,7 +584,7 @@ public class Servo extends Service implements ServoControl {
 		try {
 			
 			Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-			arduino.connect("COM18");
+			arduino.connect("COM4");
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
 			servo.attach(arduino, 10);
 			servo.moveTo(90);
@@ -592,6 +592,7 @@ public class Servo extends Service implements ServoControl {
 			servo.moveTo(10);
 			servo.moveTo(90);
 			servo.moveTo(180);
+			servo.rest();
 			
 			servo.setMinMax(30, 160);
 			
