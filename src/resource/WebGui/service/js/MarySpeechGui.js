@@ -6,7 +6,8 @@ angular.module('mrlapp.service.MarySpeechGui', [])
 
                 this.updateState = function (service) {
                     var installationstatechanged = false;
-                    if (service.installationstate != $scope.service.state) {
+                    if (service.installationstate != $scope.service.state
+                            || service.installationstate == 'installationprogress') {
                         installationstatechanged = true;
                     }
                     $scope.service = service;
@@ -17,6 +18,7 @@ angular.module('mrlapp.service.MarySpeechGui', [])
                                 break;
                             case 'nothingselected':
                             case 'installcomponents':
+                            case 'installationprogress':
                                 var modalInstance = $modal.open({
                                     animation: true,
                                     templateUrl: 'MarySpeechInstallation' + service.installationstate + '.html',
