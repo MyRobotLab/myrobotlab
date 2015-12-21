@@ -22,7 +22,7 @@ angular.module('mrlapp.service.MarySpeechGui', [])
                                 var modalInstance = $modal.open({
                                     animation: true,
                                     templateUrl: 'MarySpeechInstallation' + service.installationstate + '.html',
-                                    controller: 'MarySpeechInstalltionNothingSelectedCtrl',
+                                    controller: 'MarySpeechInstallationNothingSelectedCtrl',
                                     size: 'sm',
                                     scope: $scope
                                 });
@@ -72,10 +72,8 @@ angular.module('mrlapp.service.MarySpeechGui', [])
             }
         ])
 
-        .controller('MarySpeechInstalltionNothingSelectedCtrl', function ($scope, $modalInstance, $http, $sce) {
-            $scope.close = function () {
-                $modalInstance.close();
-            };
+        .controller('MarySpeechInstallationNothingSelectedCtrl', function ($scope, $modalInstance, $http, $sce) {
+            $scope.close = $modalInstance.close();
 
             $scope.isUndefinedOrNull = function (val) {
                 return angular.isUndefined(val) || val === null;

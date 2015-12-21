@@ -1,6 +1,6 @@
 angular.module('mrlapp.nav')
-        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', 'mrl', 'statusSvc', 'serviceSvc',
-            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, mrl, statusSvc, serviceSvc) {
+        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$modal', 'mrl', 'statusSvc', 'serviceSvc',
+            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, $modal, mrl, statusSvc, serviceSvc) {
 
                 //START_green-/red-LED
                 $scope.connected = mrl.isConnected();
@@ -40,9 +40,14 @@ angular.module('mrlapp.nav')
                 //END_Status
 
                 $scope.about = function () {
-                    // modal display of all contributors & link to myobotlab.org
-                    // & version & platform
                     $log.info('about');
+                    var modalInstance = $modal.open({
+                        animation: true,
+                        templateUrl: 'nav/about.html',
+                        controller: 'aboutCtrl',
+//                        size: 'sm',
+//                        scope: $scope
+                    });
                 };
 
                 $scope.help = function () {
