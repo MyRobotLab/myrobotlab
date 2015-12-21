@@ -11,5 +11,6 @@ public interface DocumentListener {
 
 	public ProcessingStatus onDocument(Document doc);
 	public ProcessingStatus onDocuments(List<Document> docs);
+	public boolean onFlush();
 	
 }
