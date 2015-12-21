@@ -81,6 +81,8 @@ public class RSSConnector extends AbstractConnector {
 			feedItem.setField("html", item.getDescriptionAsHTML());
 			feed(feedItem);			
 		}
+		// flush the last partial batch of documents if we are batching.
+		flush();
 		this.state = ConnectorState.STOPPED;
 	}
 
