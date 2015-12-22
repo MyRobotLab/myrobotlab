@@ -1,3 +1,19 @@
+<!-- noWorky begin -->
+<div>
+  <modal-dialog show='modalShown' width='400px' height='450px'>
+    <h2>It No Worky!</h2>
+    <div ng-class="noWorkyClass">{{noWorkyResult}}<br>{{noWorkyKey}}</div>
+    <p>don't panic, our team of crack engineers will evaluate your log file...<p>
+    <img src="../expert.jpg" />
+    <table><tr><td>
+     <input class="form-control" type="text" ng-model="userId" placeholder="user id"></td><td>
+    <button class="btn btn-default"  ng-click='noWorky(userId)' tooltip-placement="bottom" tooltip="send log file"><i class="glyphicon glyphicon-alert"></i> send no worky</button>
+     </td></tr>
+     </table>
+  </modal-dialog>
+</div>
+<!-- noWorky begin -->
+
 <div class="navbar navbar-inverse" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -59,7 +75,7 @@
                         </div>
                     </form>
                 </li>
-                <!--Hide all / Show all / Toggle minlist-->
+                <!--Hide all / Show all / Toggle minlist / no Worky -->
                 <li>
                     <form class="navbar-form">
                         <div class="btn-group">
@@ -72,6 +88,9 @@
                         <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Toggle minlist" ng-click="showminlist = !showminlist">
                                 <i class="glyphicon glyphicon-th"></i>
                         </button>
+                        <!-- FIXME - generalized modal with modal(templateUrl) -->
+                        <button class="btn btn-default"  ng-click='toggleModal()' tooltip-placement="bottom" tooltip="No Worky!"><i class="glyphicon glyphicon-alert"></i></button>
+
                         </div>
                     </form>
                 </li>
@@ -106,8 +125,9 @@
                                 </button>
                             </div>
                             <ul class="dropdown-menu">
-                                <li><a href="http://myrobotlab.org"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;&nbsp;About</a></li>
+                                <li><a href="" ng-click="about()"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;&nbsp;About</a></li>
                                 <li><a href="" ng-click="help()"><i class="glyphicon glyphicon-question-sign"></i>&nbsp;&nbsp;Help</a></li>
+                                <li><a href="" ng-click="noWorky()"><i class="glyphicon glyphicon-alert"></i>&nbsp;&nbsp;No Worky !</a></li>
                             </ul>
                         </div>
                     </form>
