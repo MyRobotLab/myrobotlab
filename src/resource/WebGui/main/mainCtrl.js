@@ -1,6 +1,6 @@
 angular.module('mrlapp.main.mainCtrl', ['mrlapp.mrl'])
-        .controller('mainCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', 'serviceSvc', 'mrlLog',
-            function ($scope, $log, $filter, $timeout, mrl, serviceSvc, mrlLog) {
+        .controller('mainCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', 'serviceSvc',
+            function ($scope, $log, $filter, $timeout, mrl, serviceSvc) {
                 $log.info('mainCtrl');
 
                 //service-panels & update-routine
@@ -13,7 +13,4 @@ angular.module('mrlapp.main.mainCtrl', ['mrlapp.mrl'])
                 };
                 panelsUpdated(serviceSvc.getPanelsList());
                 serviceSvc.subscribeToUpdates(panelsUpdated);
-
-                //access the array containing all log-messages logged using $log
-                $scope.log = mrlLog.getLogMessages();
             }]);

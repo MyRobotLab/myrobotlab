@@ -425,7 +425,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 	}
 
 	public void setType2Pwm(Integer leftPwm, Integer rightPwm) throws MRLException {
-		this.type = TYPE_PULSE_STEP;
+		this.type = TYPE_2_PWM;
 		pinMap.clear();
 		pinMap.put(PIN_TYPE_PWM_LEFT, leftPwm);
 		pinMap.put(PIN_TYPE_PWM_RIGHT, rightPwm);

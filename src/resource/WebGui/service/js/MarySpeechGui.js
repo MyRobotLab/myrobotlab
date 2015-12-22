@@ -6,7 +6,8 @@ angular.module('mrlapp.service.MarySpeechGui', [])
 
                 this.updateState = function (service) {
                     var installationstatechanged = false;
-                    if (service.installationstate != $scope.service.state) {
+                    if (service.installationstate != $scope.service.state
+                            || service.installationstate == 'installationprogress') {
                         installationstatechanged = true;
                     }
                     $scope.service = service;
@@ -17,10 +18,11 @@ angular.module('mrlapp.service.MarySpeechGui', [])
                                 break;
                             case 'nothingselected':
                             case 'installcomponents':
+                            case 'installationprogress':
                                 var modalInstance = $modal.open({
                                     animation: true,
                                     templateUrl: 'MarySpeechInstallation' + service.installationstate + '.html',
-                                    controller: 'MarySpeechInstalltionNothingSelectedCtrl',
+                                    controller: 'MarySpeechInstallationNothingSelectedCtrl',
                                     size: 'sm',
                                     scope: $scope
                                 });
@@ -29,7 +31,7 @@ angular.module('mrlapp.service.MarySpeechGui', [])
                                 var modalInstance = $modal.open({
                                     animation: true,
                                     templateUrl: 'MarySpeechInstallation' + service.installationstate + '.html',
-                                    controller: 'MarySpeechInstalltionNothingSelectedCtrl',
+                                    controller: 'MarySpeechInstallationNothingSelectedCtrl',
                                     scope: $scope,
                                     size: 'lg'
                                 });
@@ -70,9 +72,9 @@ angular.module('mrlapp.service.MarySpeechGui', [])
             }
         ])
 
-        .controller('MarySpeechInstalltionNothingSelectedCtrl', function ($scope, $modalInstance, $http, $sce) {
-            $scope.close = function () {
-                $modalInstance.close();
+        .controller('MarySpeechInstallationNothingSelectedCtrl', function ($scope, $modalInstance, $http, $sce) {
+            $scope.close = function() {
+                $modalInstance.close()
             };
 
             $scope.isUndefinedOrNull = function (val) {

@@ -50,4 +50,10 @@ public class MockDocumentListener extends Service implements DocumentListener {
 		return "A Mock document listener for testing";
 	}
 
+	@Override
+	public boolean onFlush() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

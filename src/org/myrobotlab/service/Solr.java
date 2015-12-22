@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.swing.plaf.metal.MetalBorders.Flush3DBorder;
+
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -44,6 +46,8 @@ public class Solr extends Service implements DocumentListener {
 
 	transient private HttpSolrServer solrServer;
 
+	public boolean commitOnFlush = true;
+	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -293,6 +297,25 @@ public class Solr extends Service implements DocumentListener {
 		ArrayList<Document> docs = new ArrayList<Document>();
 		docs.add(doc);
 		return onDocuments(docs);
+	}
+
+	@Override
+	public boolean onFlush() {
+		// NoOp currently, but at some point if we change how this service batches it's 
+		// add messages to solr, we could revisit this.
+		// or maybe issue a commit here?  I hate committing the index so frequently, but maybe it's ok.
+		if (commitOnFlush) {
+			commit();
+		}
+		return false;
+	}
+
+	public boolean isCommitOnFlush() {
+		return commitOnFlush;
+	}
+
+	public void setCommitOnFlush(boolean commitOnFlush) {
+		this.commitOnFlush = commitOnFlush;
 	}
 
 }

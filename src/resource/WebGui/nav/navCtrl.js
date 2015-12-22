@@ -1,6 +1,7 @@
 angular.module('mrlapp.nav')
         .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$modal', 'mrl', 'statusSvc', 'serviceSvc',
             function ($scope, $log, $filter, $timeout, $location, $anchorScroll, $modal, mrl, statusSvc, serviceSvc) {
+<<<<<<< HEAD
     
     $scope.noWorkyResult = "";
     $scope.noWorkyKey = "";
@@ -59,7 +60,10 @@ angular.module('mrlapp.nav')
             $scope.noWorkyClass = 'alert alert-success';
             $scope.noWorkyResult = 'noWorky sent !'
         }
+=======
+>>>>>>> branch 'develop' of https://github.com/MyRobotLab/myrobotlab.git
 
+<<<<<<< HEAD
         $scope.$apply();
     
     }
@@ -77,6 +81,46 @@ angular.module('mrlapp.nav')
     // ==== status history end ========= 
     
                    $scope.about = function () {
+=======
+                //START_green-/red-LED
+                $scope.connected = mrl.isConnected();
+
+                mrl.subscribeOnOpen(function () {
+                    $scope.$apply(function () {
+                        $scope.connected = true;
+                    });
+                });
+                mrl.subscribeOnClose(function () {
+                    $scope.$apply(function () {
+                        $scope.connected = false;
+                    });
+                });
+                //END_green-/red-LED
+
+                $scope.possibleServices = mrl.getPossibleServices();
+                console.log('possibleServices', $scope.possibleServices);
+
+                var p = mrl.getPlatform();
+                $scope.platform = p.arch + "." + p.bitness + "." + p.os + " " + p.mrlVersion;
+
+                //START_Status
+                $scope.statuslist = statusSvc.getStatuses();
+
+                //TODO would make sense to move this to serviceSvc - question is what happens with firststatus
+                //don't think another notification-callback would be good
+                var onStatus = function (statusMsg) {
+//                    $timeout(function () {
+                    statusSvc.addStatus(statusMsg.data[0]);
+                    //TODO - think of a better solution (instead of firststatus) (and hopefully better styled)
+                    var status = $scope.statuslist[$scope.statuslist.length - 1];
+                    $scope.firststatus = status.name + " " + status.level + " " + status.detail;
+//                    });
+                };
+                mrl.subscribeToMethod(onStatus, "onStatus");
+                //END_Status
+
+                $scope.about = function () {
+>>>>>>> branch 'develop' of https://github.com/MyRobotLab/myrobotlab.git
                     $log.info('about');
                     var modalInstance = $modal.open({
                         animation: true,
@@ -84,6 +128,30 @@ angular.module('mrlapp.nav')
                         controller: 'aboutCtrl',
 //                        size: 'sm',
 //                        scope: $scope
+<<<<<<< HEAD
+=======
+                    });
+                };
+
+                $scope.help = function () {
+                    // modal display of no worky 
+                    $log.info('help');
+                };
+
+                $scope.showAll = function (value) {
+                    //hide or show all panels
+                    $log.info('showAll', value);
+                    serviceSvc.showAll(value);
+                };
+
+                $scope.showminlist = false;
+
+                //service-panels & update-routine (also used for search)
+                var panelsUpdated = function (panels) {
+                    $scope.allpanels = panels;
+                    $timeout(function () {
+                        $scope.minlist = $filter('panellist')($scope.allpanels, 'min');
+>>>>>>> branch 'develop' of https://github.com/MyRobotLab/myrobotlab.git
                     });
                 };
  

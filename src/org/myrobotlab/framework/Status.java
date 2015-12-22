@@ -100,7 +100,6 @@ public class Status implements Serializable {// extends Exception {
 
 	public Status(Exception e) {
 		this.level = ERROR;
-		this.key = e.getClass().getSimpleName();
 		StringWriter sw;
 		try {
 			sw = new StringWriter();
@@ -109,7 +108,7 @@ public class Status implements Serializable {// extends Exception {
 			detail = sw.toString();
 		} catch (Exception e2) {
 		}
-		this.key = e.getMessage();
+		this.key = String.format("%s - %s", e.getClass().getSimpleName(), e.getMessage());
 	}
 
 	public Status(Status s) {
