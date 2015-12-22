@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -29,6 +31,7 @@ import marytts.LocalMaryInterface;
 import marytts.MaryInterface;
 import marytts.exceptions.SynthesisException;
 import marytts.tools.install.ComponentDescription;
+import marytts.tools.install.ComponentDescription.Status;
 import marytts.tools.install.InstallFileParser;
 import marytts.tools.install.LanguageComponentDescription;
 import marytts.tools.install.LicenseRegistry;
@@ -63,7 +66,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     String installationstate = "noinstallationstarted";
     Object installationstateparam1;
     Object installationstateparam2;
-    List<ComponentDescription> installation_toInstall;
+    transient List<ComponentDescription> installation_toInstall;
 
     // we need to subclass the audio player class here, so we know when the run method exits and we can invoke
     // publish end speaking from it.
@@ -131,7 +134,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 
     public MarySpeech(String reservedKey) {
         super(reservedKey);
-        
+
         File file = new File("mary");
         if (!file.exists()) {
             file.mkdirs();
@@ -465,7 +468,10 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     public void installSelectedLanguagesAndVoices3() {
         List<ComponentDescription> toInstall = installation_toInstall;
         System.out.println("Starting installation");
-        showProgressPanel(toInstall, true);
+        InstallationThread installthread = new InstallationThread(toInstall, true);
+        new Thread(installthread).start();
+        
+//        showProgressPanel(toInstall, true);
     }
 
     private void showProgressPanel(List<ComponentDescription> comps, boolean install) {
@@ -488,5 +494,190 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         dialog.pack();
         dialog.setVisible(true);
         new Thread(pp).start();
+    }
+
+    private class InstallationThread extends javax.swing.JPanel implements Runnable, Observer {
+
+        private List<ComponentDescription> allComponents;
+        private ComponentDescription currentComponent = null;
+        private boolean install;
+        private boolean exitRequested = false;
+        
+        private int oldprogress;
+
+        /**
+         * Creates new form ProgressPanel
+         *
+         * @param componentsToProcess componentsToProcess
+         * @param install install
+         */
+        public InstallationThread(List<ComponentDescription> componentsToProcess, boolean install) {
+            this.allComponents = componentsToProcess;
+            this.install = install;
+        }
+
+        public synchronized void requestExit() {
+            this.exitRequested = true;
+            if (currentComponent != null) {
+                currentComponent.cancel();
+            }
+        }
+
+        private synchronized boolean isExitRequested() {
+            return exitRequested;
+        }
+
+        private void setCurrentComponent(ComponentDescription desc) {
+            if (currentComponent != null) {
+                currentComponent.deleteObserver(this);
+            }
+            currentComponent = desc;
+            if (currentComponent != null) {
+                currentComponent.addObserver(this);
+            }
+            verifyCurrentComponentDisplay();
+        }
+
+        @Override
+        public void run() {
+            boolean error = false;
+            ComponentDescription problematic = null;
+            int i = 0;
+            int max = allComponents.size();
+            installationstate = "installationprogress";
+            installationstateparam1 = new OverallProgress(-1, max);
+            installationstateparam2 = null;
+            broadcastState();
+            String action = install ? "install" : "uninstall";
+            for (ComponentDescription comp : allComponents) {
+                if (isExitRequested()) {
+                    return;
+                }
+                System.out.println("Now " + action + "ing " + comp.getName() + "...");
+                installationstate = "installationprogress";
+                installationstateparam1 = new OverallProgress(i, max);
+                installationstateparam2 = null;
+                broadcastState();
+                setCurrentComponent(comp);
+                if (install) {
+                    ComponentDescription orig = null;
+                    if (comp.getStatus() == Status.INSTALLED) { // Installing an installed component really means replacing it with
+                        // its updated version
+                        assert comp.isUpdateAvailable();
+                        // 1. uninstall current version; 2. install replacement
+                        comp.uninstall();
+                        if (comp.getStatus() == Status.ERROR) {
+                            error = true;
+                        } else if (comp.isUpdateAvailable()) {
+                            comp.replaceWithUpdate();
+                        }
+                        // And from here on, treat comp like any other component to install
+                    }
+                    if (!error && comp.getStatus() == Status.AVAILABLE || comp.getStatus() == Status.CANCELLED) {
+                        comp.download(true);
+                        if (comp.getStatus() == Status.ERROR) {
+                            error = true;
+                        }
+                    }
+                    if (!error && comp.getStatus() == Status.DOWNLOADED) {
+                        try {
+                            comp.install(true);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            error = true;
+                        }
+                        if (comp.getStatus() == Status.ERROR) {
+                            error = true;
+                        }
+                    }
+                } else // uninstall
+                if (comp.getStatus() == Status.INSTALLED) {
+                    comp.uninstall();
+                    if (comp.getStatus() == Status.ERROR) {
+                        error = true;
+                    } else if (comp.isUpdateAvailable()) {
+                        comp.replaceWithUpdate();
+                    }
+                }
+                if (error) {
+                    problematic = comp;
+                    System.err.println("Could not " + action + " " + comp.getName());
+                    break;
+                }
+                comp.setSelected(false);
+                i++;
+            }
+            if (error) {
+                assert problematic != null;
+                JOptionPane.showMessageDialog(this, "Could not " + action + " " + problematic.getName());
+            } else {
+                installationstate = "installationprogress";
+                installationstateparam1 = new OverallProgress(max, max);
+                installationstateparam2 = null;
+                broadcastState();
+                // JOptionPane.showMessageDialog(this, max + " components "+action+"ed successfully.");
+            }
+            this.setCurrentComponent(null);
+            this.getTopLevelAncestor().setVisible(false);
+        }
+
+        @Override
+        public void update(Observable o, Object arg) {
+            if (o != currentComponent) {
+                throw new IllegalStateException("We are observing " + o + " but the currentComponent is " + currentComponent);
+            }
+            verifyCurrentComponentDisplay();
+        }
+
+        private void verifyCurrentComponentDisplay() {
+            if (currentComponent == null) {
+                return;
+            }
+            String name = currentComponent.getName();
+            String status = currentComponent.getStatus().toString();
+            int progress = currentComponent.getProgress();
+            if (progress < 0) {
+                installationstate = "installationprogress";
+                installationstateparam1 = null;
+                installationstateparam2 = new CurrentProgress(name, status, 0);
+//                broadcastState();
+            } else {
+                installationstate = "installationprogress";
+                installationstateparam1 = null;
+                installationstateparam2 = new CurrentProgress(name, status, progress);
+//                broadcastState();
+                if (oldprogress != progress) {
+                    oldprogress = progress;
+                    //StackOverflow in webgui somewhere here - dunno why
+                    //-seems unrelated yet related
+//                    System.out.println("MarySpeech - downloading|update" + progress);
+                }
+            }
+
+        }
+
+        private class OverallProgress {
+
+            int current;
+            int max;
+
+            public OverallProgress(int current, int max) {
+                this.current = current;
+                this.max = max;
+            }
+        }
+
+        private class CurrentProgress {
+
+            String name;
+            String status;
+            int progress;
+
+            public CurrentProgress(String name, String status, int progress) {
+                this.name = name;
+                this.status = status;
+                this.progress = progress;
+            }
+        }
     }
 }

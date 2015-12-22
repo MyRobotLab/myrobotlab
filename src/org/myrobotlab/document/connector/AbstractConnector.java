@@ -46,10 +46,16 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 		}
 	}
 
+	public void publishFlush() {
+		// NoOp
+		// Here for the framework to invoke it on the down stream services.
+	};
+	
 	public void flush() {
 		// flush any partial batch
 		// TODO: make this thread safe!
 		invoke("publishDocuments", batch);
+		invoke("publishFlush");
 		// reset/clear the batch.
 		batch = new ArrayList<Document>();
 		while (getOutbox().size() > 0) {
@@ -83,6 +89,7 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 	public void addDocumentListener(DocumentListener listener) {
 		addListener("publishDocument", listener.getName(), "onDocument");
 		addListener("publishDocuments", listener.getName(), "onDocuments");
+		addListener("publishFlush", listener.getName(), "onFlush");
 	}
 
 	public ConnectorState getConnectorState() {

@@ -37,7 +37,7 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		return "This service will pass a document through a document processing pipeline made up of transformers.";
 	}
 
-	private void setConfig(WorkflowConfiguration workflowConfig) {
+	public void setConfig(WorkflowConfiguration workflowConfig) {
 		this.config = workflowConfig;
 	}
 
@@ -50,6 +50,8 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 	@Override
 	public void addDocumentListener(DocumentListener listener) {
 		// TODO Auto-generated method stub
+		// ??
+		// subscribe("publishDocument", topicMethod, callbackName, callbackMethod);
 		
 	}
 
@@ -126,13 +128,13 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		
 	}
 
-	private void initalize() throws ClassNotFoundException {
+	public void initalize() throws ClassNotFoundException {
 		// init the workflow server and load the pipeline config.
 		if (workflowServer == null) {
 			workflowServer = WorkflowServer.getInstance();
 		}
 		workflowServer.addWorkflow(config);
-		this.workflowName = config.getName();
+		workflowName = config.getName();
 		
 	}
 
@@ -147,6 +149,13 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 			
 		}
 		return totalStat;
+	}
+
+	@Override
+	public boolean onFlush() {
+		// here we need to pass a flush message to the workflow server 
+		workflowServer.flush(workflowName);
+		return true;
 	}
 	
 }

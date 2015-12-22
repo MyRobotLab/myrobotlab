@@ -80,3 +80,22 @@
         <button class="btn btn-primary" ng-click="close();">CANCEL</button>
     </div>
 </script>
+<script type="text/ng-template" id="MarySpeechInstallationinstallationprogress.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Installing ...</h3>
+    </div>
+    <div class="modal-body">
+    {{service}}
+        Used by:
+        <div ng-repeat="voice in service.installationstateparam1[alllicenses[counter]]">
+            <li>{{voice.name}}</li>
+        </div>
+        <br>
+        Do you accept the following license?
+        <div ng-bind-html="license"></div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="showNextLicense();">ACCEPT</button>
+        <button class="btn btn-primary" ng-click="close();">CANCEL</button>
+    </div>
+</script>

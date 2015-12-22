@@ -1,6 +1,6 @@
 angular.module('mrlapp.singleservice.singleserviceCtrl', ['mrlapp.mrl'])
-        .controller('singleserviceCtrl', ['$scope', '$log', '$routeParams', '$filter', '$timeout', 'mrl', 'serviceSvc', 'mrlLog',
-            function ($scope, $log, $routeParams, $filter, $timeout, mrl, serviceSvc, mrlLog) {
+        .controller('singleserviceCtrl', ['$scope', '$log', '$routeParams', '$filter', '$timeout', 'mrl', 'serviceSvc',
+            function ($scope, $log, $routeParams, $filter, $timeout, mrl, serviceSvc) {
                 $log.info('singleserviceCtrl');
                 
                 $scope.servicename = $routeParams.servicename;
