@@ -28,7 +28,8 @@ public class ProgramABTest {
 		// load the bot brain for the chat with the user
 		testService.startSession(path, session, botName);
 		
-		// Thread.sleep(120000);
+		// TODO: clean out any aimlif or existing predicates for the bot that might
+		// have been saved in a previous test run!
 
 	}
 
@@ -51,7 +52,6 @@ public class ProgramABTest {
 	
 	@Test
 	public void testSavePredicates() throws IOException {
-		
 		long uniqueVal = System.currentTimeMillis();
 		String testValue = String.valueOf(uniqueVal);
 		Response resp = testService.getResponse(session, "SET FOO " + testValue);
@@ -60,6 +60,16 @@ public class ProgramABTest {
 		testService.reloadSession(path, session, botName);
 		resp = testService.getResponse(session, "GET FOO");
 		assertEquals("FOO IS " + testValue, resp.msg);		
+	}
+	
+	@Test
+	public void testLearn() throws IOException {
+		//Response resp1 = testService.getResponse(session, "SET FOO BAR");
+		//System.out.println(resp1.msg);
+		Response resp = testService.getResponse(session, "LEARN AAA IS BBB");
+		System.out.println(resp.msg);
+		resp = testService.getResponse(session, "WHAT IS AAA");
+		assertEquals("BBB", resp.msg);		
 	}
 	
 	@After
