@@ -1,6 +1,6 @@
 angular.module('mrlapp.nav')
-        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$modal', 'mrl', 'statusSvc', 'serviceSvc',
-            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, $modal, mrl, statusSvc, serviceSvc) {
+        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$modal', 'mrl', 'statusSvc', 'serviceSvc', 'noWorkySvc',
+            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, $modal, mrl, statusSvc, serviceSvc, noWorkySvc) {
 
                 //START_green-/red-LED
                 $scope.connected = mrl.isConnected();
@@ -44,7 +44,7 @@ angular.module('mrlapp.nav')
                     var modalInstance = $modal.open({
                         animation: true,
                         templateUrl: 'nav/about.html',
-                        controller: 'aboutCtrl',
+                        controller: 'aboutCtrl'
 //                        size: 'sm',
 //                        scope: $scope
                     });
@@ -53,6 +53,7 @@ angular.module('mrlapp.nav')
                 $scope.help = function () {
                     // modal display of no worky 
                     $log.info('help');
+                    noWorkySvc.openNoWorkyModal('');
                 };
 
                 $scope.showAll = function (value) {

@@ -1,6 +1,6 @@
 angular.module('mrlapp.service')
-        .controller('serviceCtrl', ['$scope', '$log', '$modal', 'mrl', 'serviceSvc',
-            function ($scope, $log, $modal, mrl, serviceSvc) {
+        .controller('serviceCtrl', ['$scope', '$log', '$modal', 'mrl', 'serviceSvc', 'noWorkySvc',
+            function ($scope, $log, $modal, mrl, serviceSvc, noWorkySvc) {
                 $log.info('serviceCtrl', $scope.panel.name);
 
 //                var isUndefinedOrNull = function (val) {
@@ -9,6 +9,10 @@ angular.module('mrlapp.service')
                 
                 $scope.release = function () {
                     //TODO - important - send message to release service
+                };
+                
+                $scope.noworky = function () {
+                    noWorkySvc.openNoWorkyModal($scope.panel.name);
                 };
 
                 //service-menu-size-change-buttons
