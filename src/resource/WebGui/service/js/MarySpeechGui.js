@@ -73,9 +73,7 @@ angular.module('mrlapp.service.MarySpeechGui', [])
         ])
 
         .controller('MarySpeechInstallationNothingSelectedCtrl', function ($scope, $modalInstance, $http, $sce) {
-            $scope.close = function() {
-                $modalInstance.close()
-            };
+            $scope.close = $modalInstance.close;
 
             $scope.isUndefinedOrNull = function (val) {
                 return angular.isUndefined(val) || val === null;
