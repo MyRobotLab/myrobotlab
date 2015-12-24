@@ -729,6 +729,9 @@ angular
             isUndefinedOrNull: function(val) {
                 return angular.isUndefined(val) || val === null ;
             },
+            noWorky:function(userId){
+                _self.sendTo(_self.runtime.name, "noWorky", userId);
+            },
             
             getRegistry: function() {
                 return registry;

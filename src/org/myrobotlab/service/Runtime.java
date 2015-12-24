@@ -2053,19 +2053,34 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	// FIXME THIS IS NOT NORMALIZED !!!
-	static public boolean noWorky(String userId) {
-		String ret = null;
+	static public Status noWorky(String userId) {
+		Status status = null;
 		try {
-			ret = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("../agent.log"));
-			if (ret.contains("Upload:")) {
+			String retStr = HTTPRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File("../agent.log"));
+			if (retStr.contains("Upload:")) {
 				log.info("noWorky successfully sent - our crack team of experts will check it out !");
-				return true;
+				status = Status.info("no worky sent");
+			} else {
+				status = Status.error("could not send");
 			}
 		} catch (Exception e) {
-			Logging.logError(e);
+			log.error("the noWorky didn't worky !");
+			status = Status.error(e);
 		}
-		log.error("the noWorky didn't worky !");
-		return false;
+		
+		// this makes the 'static' of this method pointless
+		// perhaps the webgui should invoke rather than call directly .. :P
+		Runtime.getInstance().invoke("publishNoWorky", status);
+		return status;
+	}
+	
+	/**
+	 * published results of sending a noWorky
+	 * @param status
+	 * @return
+	 */
+	static public Status publishNoWorky(Status status){
+		return status;
 	}
 
 	// -------- network begin ------------------------
