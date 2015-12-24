@@ -389,5 +389,10 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 	public void onWarmupCompleted(Myo myo, long unkown, WarmupResult warmUpResult) {
 		log.info("onWarmupCompleted {} {}", unkown, warmUpResult);
 	}
+	
+	public void startService() {
+		super.startService();
+		return;
+	}
 
 }

@@ -22,7 +22,6 @@ angular.module('mrlapp', [
 //    'ui.slider', grr 
     'luegg.directives',
     'mrlapp.mrl', //mrl.js (/mrl.js) - the really really core
-    'mrlapp.main.mrlLogger', //custom logger! (it extends the default angular one ($log))
     'mrlapp.main.mainCtrl',
     'mrlapp.main.statusSvc', //very basic service for storing "statuses"
     'mrlapp.main.noWorkySvc', //send a noWorky !
@@ -35,13 +34,6 @@ angular.module('mrlapp', [
             function ($provide, $routeProvider, mrlProvider, ngClipProvider) {
 
                 ngClipProvider.setPath("lib/zeroclipboard/ZeroClipboard.swf");
-
-                //set the logger up (extend the angular default one)
-                /*                
-                 $provide.decorator('$log', function ($delegate, mrlLogger) {
-                 return mrlLogger($delegate);
-                 });
-                 */
 
                 $routeProvider.when('/main', {
                     templateUrl: 'main/main.html',
