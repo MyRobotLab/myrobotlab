@@ -1,4 +1,4 @@
-angular.module('mrlapp.main.statussvc', [])
+angular.module('mrlapp.main.statusSvc', [])
         .service('statusSvc', [function () {
 
                 var statuslist = [];
