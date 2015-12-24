@@ -1,10 +1,17 @@
 <div class="modal-header">
-    <h3 class="modal-title">No Worky</h3>
+    <h3 class="modal-title">It No Worky!</h3>
 </div>
 <div class="modal-body">
-    TODO - create the No Worky
+    don't panic, our team of crack engineers will evaluate your log file...<br>
+    <img src="../expert.jpg" alt="an expert developer"/><br><br>
+    <div class="input-group">
+      <input type="text" class="form-control" ng-model="usedId" placeholder="user id">
+      <span class="input-group-btn">
+        <button type="button" class="btn btn-default" ng-click='noWorky(userId);close();' tooltip="send log file" tooltip-placement="bottom">send no worky</button>
+      </span>
+    </div>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-primary" ng-click="close();">CLOSE</button>
-    <button class="btn btn-primary" ng-click="send();">SEND</button>
+    <button class="btn btn-primary" ng-click="close();">CANCEL</button>
+    <!--<button class="btn btn-primary" ng-click="send();">SEND</button>-->
 </div>
