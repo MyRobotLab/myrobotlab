@@ -142,3 +142,6 @@
          panel="panel">
     </div>
 </div>
+<div style="height: 80vh; width: 500px; z-index: 200; position: fixed; right: 10px;" sticky offset="50">
+    <div alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</div>
+</div>
