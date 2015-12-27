@@ -69,6 +69,26 @@ angular.module('mrlapp.nav')
                 mrl.subscribe(mrl.getRuntime().name, 'publishNoWorky');
                 // ==== status history end ========= 
 
+                //START_Alerts
+                $scope.alerts = [
+//                    {type: 'danger', msg: 'Oh snap! Change a few things up and try submitting again.'},
+//                    {type: 'success', msg: 'Well done! You successfully read this important alert message.'}
+                ];
+
+                $scope.addAlert = function (type, msg) {
+                    $scope.alerts.push({
+                        type: type,
+                        msg: msg
+                    });
+                };
+
+                $scope.closeAlert = function (index) {
+                    $scope.alerts.splice(index, 1);
+                };
+                
+                statusSvc.registerAddAlertCallback($scope.addAlert);
+                //END_Alerts
+
                 $scope.showAll = function (value) {
                     //hide or show all panels
                     $log.info('showAll', value);

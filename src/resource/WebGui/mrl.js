@@ -730,6 +730,7 @@ angular
                 return angular.isUndefined(val) || val === null ;
             },
             noWorky:function(userId){
+                $log.info('mrl-noWorky', userId);
                 _self.sendTo(_self.runtime.name, "noWorky", userId);
             },
             

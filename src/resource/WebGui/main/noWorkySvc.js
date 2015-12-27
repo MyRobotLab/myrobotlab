@@ -1,5 +1,5 @@
 angular.module('mrlapp.main.noWorkySvc', [])
-        .service('noWorkySvc', ['$modal', function ($modal) {
+        .service('noWorkySvc', ['$modal', 'mrl', 'statusSvc', function ($modal, mrl, statusSvc) {
                 //own service might be overheat,
                 //but it is used in more than one place
                 //e.g. navbar & in every service UI
@@ -19,4 +19,17 @@ angular.module('mrlapp.main.noWorkySvc', [])
                         }
                     });
                 };
+                
+                var onNoWorky = function (noWorkyResultssMsg) {
+                    var status = noWorkyResultssMsg.data[0];
+//                    console.log('noWorkySvc-onNoWorky', status);
+                    if (status.level == 'error') {
+                        statusSvc.addAlert('danger', 'the noWorky did not worky !');
+                    } else {
+                        statusSvc.addAlert('success', 'noWorky sent !');
+                    }
+                };
+                
+                mrl.subscribeToServiceMethod(onNoWorky, mrl.getRuntime().name, 'publishNoWorky');
+                mrl.subscribe(mrl.getRuntime().name, 'publishNoWorky');
             }]);
