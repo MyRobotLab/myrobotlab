@@ -33,6 +33,7 @@ public class Sweety extends Service {
 	transient public ProgramAB chatBot;
 	transient public OpenNI openni;
 	transient public PID pid;
+	transient public HtmlFilter htmlFilter;
 	
 	transient Servo leftForearm;
 	transient Servo rightForearm;
@@ -135,11 +136,12 @@ public class Sweety extends Service {
 
 		// put peer definitions in
 		peers.put("arduino", "Arduino", "arduino");
-		peers.put("mouth", "Speech", "sweetys mouth");
+		peers.put("mouth", "AcapelaSpeech", "sweetys mouth");
 		peers.put("ear", "Sphinx", "ear");
 		peers.put("chatBot", "ProgramAB", "chatBot");
 		peers.put("leftTracker", "Tracking", "leftTracker");
 		peers.put("rightTracker", "Tracking", "rightTracker");
+		peers.put("htmlFilter", "HtmlFilter", "htmlfilter");
 
 		peers.put("USfront", "UltrasonicSensor", "USfront");
 		peers.put("USfrontRight", "UltrasonicSensor", "USfrontRight");
@@ -597,17 +599,18 @@ public class Sweety extends Service {
 		reserveRootAs("sweety.USbackLeft.arduino", "sweety.arduino");
 
 		chatBot = (ProgramAB) startPeer("chatBot");
-
+		htmlFilter = (HtmlFilter) startPeer("htmlFilter");
+		
 		mouth = (SpeechSynthesis) startPeer("mouth");
-		mouth.setLanguage("fr");
-		// Hi Beetlejuice - Google is BORKED
-		// We are using MaryTTS which is Open Source (YAY!), Runs locally & speaks French I think,
-		// but we have to figure it out !  
-		// Cheers !
+		mouth.setLanguage("FR");
+		mouth.setVoice("Antoine");
+		
 		// mouth.setBackendType("GOOGLE");
 
 		ear = (Sphinx) startPeer("ear");
+	}
 
+	public void startServos() {
 		leftForearm = (Servo) startPeer("leftForearm");
 		rightForearm = (Servo) startPeer("rightForearm");
 		rightShoulder = (Servo) startPeer("rightShoulder");
