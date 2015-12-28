@@ -174,12 +174,13 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 			post = new HttpPost(url);
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-			nvps.add(new BasicNameValuePair("MyLanguages", "sonid8"));
+			nvps.add(new BasicNameValuePair("MyLanguages", "sonid10"));
 			nvps.add(new BasicNameValuePair("MySelectedVoice", voice));
 			nvps.add(new BasicNameValuePair("MyTextForTTS", toSpeak));
 			nvps.add(new BasicNameValuePair("t", "1"));
 			nvps.add(new BasicNameValuePair("SendToVaaS", ""));
-			post.setEntity(new UrlEncodedFormEntity(nvps));
+			UrlEncodedFormEntity formData = new UrlEncodedFormEntity(nvps, "UTF-8");
+			post.setEntity(formData);
 			HttpResponse response = client.execute(post);
 
 			log.info(response.getStatusLine().toString());
@@ -404,17 +405,11 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
-
-			// FIXME - all testing or replacing of main code should be new JUnit
-			// tests - with virtual arduino !!!)
-			String port = "COM15";
-
-			// Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			// Runtime.createAndStart("gui", "GUIService");
 			AcapelaSpeech speech = (AcapelaSpeech)Runtime.start("speech", "AcapelaSpeech");
-			speech.speak("hello there my name is ryan");
-			speech.speak("hello world");
-			speech.speak("one two three four");
+			speech.speakBlocking("Répète après moi");
+			//speech.speak("hello there my name is ryan");
+			//speech.speak("hello world");
+			//speech.speak("one two three four");
 			// arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
 			// arduino.connect(port);
 			// arduino.broadcastState();
