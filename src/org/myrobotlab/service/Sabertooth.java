@@ -457,6 +457,12 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public void motorReset(Motor motor) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	///////////// start new methods /////////////////
 }

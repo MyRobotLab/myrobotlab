@@ -21,10 +21,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ArduinoShield;
-import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.ServiceInterface;
-import org.myrobotlab.service.interfaces.StepperController;
 import org.slf4j.Logger;
 
 /**
@@ -35,7 +32,7 @@ import org.slf4j.Logger;
  *         References : http://www.ladyada.net/make/mshield/use.html
  */
 
-public class AdafruitMotorShield extends Service implements MotorController, StepperController, ArduinoShield {
+public class AdafruitMotorShield extends Service implements MotorController, ArduinoShield {
 	/** version of the library */
 	static public final String VERSION = "0.9";
 
@@ -65,7 +62,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	HashMap<String, Integer> deviceNameToNumber = new HashMap<String, Integer>();
 
 	transient public HashMap<String, Motor> motors = new HashMap<String, Motor>();
-	transient public HashMap<String, Stepper> steppers = new HashMap<String, Stepper>();
 	transient public HashMap<String, Servo> servos = new HashMap<String, Servo>();
 
 	transient public Arduino arduino = null;
@@ -150,7 +146,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 			motor1.move(0.4f);
 
 			// create a 200 step stepper on adafruitsheild port 1
-			Stepper stepper1 = fruity.createStepper(200, 1);
+			//Stepper stepper1 = fruity.createStepper(200, 1);
 
 			// FIXME - needs to be cleaned up - tear down
 			//fruity.releaseStepper(stepper1.getName());
@@ -266,7 +262,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	 * 
 	 * @param stepperPort
 	 */
-	public Stepper createStepper(Integer steps, Integer stepperPort) {
+	public Motor createStepper(Integer steps, Integer stepperPort) {
 		if (stepperPort == null || stepperPort < 1 || stepperPort > 2) {
 			error(String.format("stepper number should 1 or 2 not %d", stepperPort));
 			return null;
@@ -274,17 +270,14 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 
 		String stepperName = String.format("%s_stepper%d", getName(), stepperPort);
 
+		/*
 		if (steppers.containsKey(stepperName)) {
 			warn("%s alreaady exists", stepperName);
 			return steppers.get(stepperName);
 		}
+		*/
 
-		Stepper s = (Stepper) Runtime.createAndStart(stepperName, "Stepper");
-		if (!stepperAttach(s)) {
-			return null;
-		}
-
-		return s;
+		return null;
 	}
 
 	@Override
@@ -324,12 +317,6 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	}
 
 	@Override
-	public void setStepperSpeed(Integer speed) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void startService() {
 		super.startService();
 		arduino.startService();
@@ -341,44 +328,7 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 
 	}
 
-	@Override
-	public boolean stepperAttach(Stepper stepper) {
-		// TODO - USE "PURE" MRLCOMM.INO - nothing gained with Adafruit's library
-
-		return true;
-	}
-
 	// StepperController end ----
-
-	@Override
-	public boolean stepperAttach(String stepperName) {
-		Stepper stepper = (Stepper) Runtime.createAndStart(stepperName, "Stepper");
-		return stepperAttach(stepper);
-	}
-
-	@Override
-	public boolean stepperDetach(String name) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void stepperReset(String stepper) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void stepperMoveTo(String name, int pos, int style) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void stepperStop(String name) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void attach(String name) throws MRLException {
@@ -426,6 +376,12 @@ public class AdafruitMotorShield extends Service implements MotorController, Ste
 	public boolean isConnected() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void motorReset(Motor motor) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

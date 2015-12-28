@@ -24,7 +24,7 @@ angular.module('mrlapp.main.noWorkySvc', [])
                     var status = noWorkyResultssMsg.data[0];
 //                    console.log('noWorkySvc-onNoWorky', status);
                     if (status.level == 'error') {
-                        statusSvc.addAlert('danger', 'the noWorky did not worky !');
+                        statusSvc.addAlert('danger', 'the noWorky did not worky ! ' + status.key);
                     } else {
                         statusSvc.addAlert('success', 'noWorky sent !');
                     }

@@ -76,8 +76,25 @@ public interface MotorController extends NameProvider, MicrocontrollerPeripheral
 	 */
 	public void motorMoveTo(Motor motor);
 
+	/**
+	 * stops the motor
+	 * @param motor
+	 */
 	public void motorStop(Motor motor);
 	
+	/**
+	 * method for resetting all the variables of a motor
+	 * this will reset counters if the motor is a stepper
+	 * and / or other variables for other sorts of motors
+	 * 
+	 * @param motor
+	 */
+	public void motorReset(Motor motor);
+	
+	/**
+	 * tests if this controller is connected & ready
+	 * @return
+	 */
 	public boolean isConnected();
 
 
