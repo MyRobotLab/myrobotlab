@@ -42,10 +42,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_SPEED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.STEPPER_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.STEPPER_MOVE_TO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.STEPPER_RESET;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.STEPPER_STOP;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -65,7 +62,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Stepper.StepperEvent;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.CustomMsgListener;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -75,7 +71,6 @@ import org.myrobotlab.service.interfaces.SensorDataSink;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.StepperController;
 import org.slf4j.Logger;
 
 /**
@@ -146,7 +141,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, StepperController {
+public class Arduino extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController {
 
 	/**
 	 * MotorData is the combination of a Motor and any controller data needed to
@@ -231,11 +226,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * pin description of board
 	 */
 	ArrayList<Pin> pinList = null;
-
-	// data and mapping for data going from MRL ---to---> Arduino
-	HashMap<String, Stepper> steppers = new HashMap<String, Stepper>();
-	// index for data mapping going from Arduino ---to---> MRL
-	HashMap<Integer, Stepper> stepperIndex = new HashMap<Integer, Stepper>();
 
 	// needed to dynamically adjust PWM rate (D. only?)
 	public static final int TCCR0B = 0x25; // register for pins 6,7
@@ -866,33 +856,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					break;
 				}
 
-				case PUBLISH_STEPPER_EVENT: {
-
-					int index = msg[1];
-					int eventType = msg[2];
-					int currentPos = (msg[3] << 8) + (msg[4] & 0xff);
-
-					log.info(String.format(" index %d type %d cur pos %d", index, eventType, currentPos));
-					// uber good -
-					// TODO - stepper ServoControl interface - not
-					// needed Servo is abstraction enough
-					Stepper stepper = (Stepper) stepperIndex.get(index);
-					// stepper.invoke("publishStepperEvent", currentPos);
-					// LOCAL !!! - Remote from Arduino or Stepper ?!?!?
-					// ?? stepper.publishStepperEvent(currentPos);
-					// GOOD - model this pattern
-					// set service data directly
-					// not having a local call back seems ridiculous ! ie.
-					// controller separated from controlled periphery
-					// should not be supported - after updating data directly
-					// invoke the event on the stepper
-					stepper.setPos(currentPos);
-					// based on config of stepper - invoke or don't
-					stepper.invoke("publishStepperEvent", new StepperEvent(eventType, currentPos));
-					//
-					break;
-				}
-
+			
 				case PUBLISH_CUSTOM_MSG: {
 
 					// msg or data is of size byteCount
@@ -1550,106 +1514,16 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		}
 	}
 
-	public boolean stepperAttach(Stepper stepper) {
-		String stepperName = stepper.getName();
-		log.info(String.format("stepperAttach %s", stepperName));
-
-		if (!isConnected()) {
-			error("%s must be connected to serial port before attaching stepper", getName());
-			return false;
-		}
-
-		int index = 0;
-
-		if (steppers.containsKey(stepperName)) {
-			warn("stepper already attach - detach first");
-			return true;
-		}
-
-		stepper.setController(this);
-
-		if (Stepper.STEPPER_TYPE_SIMPLE == stepper.getStepperType()) {
-
-			// simple count = index mapping
-			index = steppers.size();
-
-			// attach index pin - FIXME - add number of steps and other
-			// paramters - initial speed - pause timings
-			sendMsg(STEPPER_ATTACH, index, stepper.getStepperType(), stepper.getDirPin(), stepper.getStepPin());
-
-			stepper.setIndex(index);
-
-			steppers.put(stepperName, stepper);
-			stepperIndex.put(index, stepper);
-
-			log.info(String.format("stepper STEPPER_TYPE_SIMPLE index %d pin direction %d step %d attached ", index, stepper.getDirPin(), stepper.getStepPin()));
-		} else {
-			error("unkown type of stepper");
-			return false;
-		}
-
-		return true;
-	}
-
-	@Override
-	public boolean stepperAttach(String stepperName) {
-		Stepper stepper = (Stepper) Runtime.getService(stepperName);
-		if (stepper == null) {
-			log.error("Stepper {} not valid", stepperName);
-			return false;
-		}
-		return stepperAttach(stepper);
-	}
-
-	@Override
-	public boolean stepperDetach(String stepperName) {
-		Stepper stepper = null;
-		if (steppers.containsKey(stepperName)) {
-			stepper = steppers.remove(stepperName);
-			if (stepperIndex.containsKey(stepper.getIndex())) {
-				stepperIndex.remove(stepper.getIndex());
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public void stepperMoveTo(String name, int newPos, int style) {
-		if (!steppers.containsKey(name)) {
-			error("%s stepper not found", name);
-			return;
-		}
-
-		Stepper stepper = steppers.get(name);
-		if (Stepper.STEPPER_TYPE_SIMPLE != stepper.getStepperType()) {
-			error("unknown stepper type");
-			return;
-		}
-
-		int lsb = newPos & 0xff;
-		int msb = (newPos >> 8) & 0xff;
-
-		sendMsg(STEPPER_MOVE_TO, stepper.getIndex(), msb, lsb, style);
-
-		// TODO - call back event - to say arrived ?
-
-		// TODO - blocking method
-
-	}
-
 	public Object publishSensorData(Object data) {
 		return data;
 	}
 
 	@Override
-	public void stepperReset(String stepperName) {
-		Stepper stepper = steppers.get(stepperName);
-		sendMsg(STEPPER_RESET, stepper.getIndex());
-	}
-
-	public void stepperStop(String name) {
-		Stepper stepper = steppers.get(name);
-		sendMsg(STEPPER_STOP, stepper.getIndex());
+	public void motorReset(Motor motor) {
+		// perhaps this should be in the motor control
+		// motor.reset();
+		// opportunity to reset variables on the controller
+		// sendMsg(MOTOR_RESET, motor.getind);
 	}
 
 	@Override

@@ -127,6 +127,12 @@ public class ArduinoBindingsGenerator {
 		exclude.add("attach");
 		exclude.add("detach");
 
+		exclude.add("publishStepperEvent");
+		exclude.add("setStepperSpeed");
+		exclude.add("stepperAttach");
+		
+		
+		
 		// additionally force getversion and publishMRLCommError
 		// so that mis-matches of version are quickly reported...
 		exclude.add("getVersion");
