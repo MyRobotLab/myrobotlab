@@ -19,17 +19,4 @@ angular.module('mrlapp.main.noWorkySvc', [])
                         }
                     });
                 };
-                
-                var onNoWorky = function (noWorkyResultssMsg) {
-                    var status = noWorkyResultssMsg.data[0];
-//                    console.log('noWorkySvc-onNoWorky', status);
-                    if (status.level == 'error') {
-                        statusSvc.addAlert('danger', 'the noWorky did not worky ! ' + status.key);
-                    } else {
-                        statusSvc.addAlert('success', 'noWorky sent !');
-                    }
-                };
-                
-                mrl.subscribeToServiceMethod(onNoWorky, mrl.getRuntime().name, 'publishNoWorky');
-                mrl.subscribe(mrl.getRuntime().name, 'publishNoWorky');
             }]);
