@@ -10,7 +10,7 @@
              * @returns {*}
              */
             $delegate.filesLoader = function filesLoader(config) {
-                var params = arguments[1] === undefined ? {} : arguments[1];
+                var params = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
                 var cssFiles = [],
                     templatesFiles = [],
@@ -44,7 +44,7 @@
                             if ((m = /[.](css|less|html|htm|js)?((\?|#).*)?$/.exec(path)) !== null) {
                                 // Detect file type via file extension
                                 file_type = m[1];
-                            } else if (!$delegate.jsLoader.hasOwnProperty('ocLazyLoadLoader') && $delegate.jsLoader.hasOwnProperty('load')) {
+                            } else if (!$delegate.jsLoader.hasOwnProperty('ocLazyLoadLoader') && $delegate.jsLoader.hasOwnProperty('requirejs')) {
                                 // requirejs
                                 file_type = 'js';
                             } else {
@@ -104,7 +104,7 @@
                 if (jsFiles.length > 0) {
                     var jsDeferred = $q.defer();
                     $delegate.jsLoader(jsFiles, function (err) {
-                        if (angular.isDefined(err) && $delegate.jsLoader.hasOwnProperty('ocLazyLoadLoader')) {
+                        if (angular.isDefined(err) && ($delegate.jsLoader.hasOwnProperty("ocLazyLoadLoader") || $delegate.jsLoader.hasOwnProperty("requirejs"))) {
                             $delegate._$log.error(err);
                             jsDeferred.reject(err);
                         } else {
@@ -116,7 +116,7 @@
 
                 if (promises.length === 0) {
                     var deferred = $q.defer(),
-                        err = 'Error: no file to load has been found, if you\'re trying to load an existing module you should use the \'inject\' method instead of \'load\'.';
+                        err = "Error: no file to load has been found, if you're trying to load an existing module you should use the 'inject' method instead of 'load'.";
                     $delegate._$log.error(err);
                     deferred.reject(err);
                     return deferred.promise;
@@ -139,7 +139,7 @@
              * @returns promise
              */
             $delegate.load = function (originalModule) {
-                var originalParams = arguments[1] === undefined ? {} : arguments[1];
+                var originalParams = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
                 var self = this,
                     config = null,
@@ -211,7 +211,7 @@
 
                 // if someone used an external loader and called the load function with just the module name
                 if (angular.isUndefined(config.files) && angular.isDefined(config.name) && $delegate.moduleExists(config.name)) {
-                    return $delegate.inject(config.name, localParams);
+                    return $delegate.inject(config.name, localParams, true);
                 }
 
                 $delegate.filesLoader(config, localParams).then(function () {

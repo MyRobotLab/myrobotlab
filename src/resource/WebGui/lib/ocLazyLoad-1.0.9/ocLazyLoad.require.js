@@ -1,6 +1,6 @@
 /**
  * oclazyload - Load modules on demand (lazy load) with angularJS
- * @version v1.0.1
+ * @version v1.0.9
  * @link https://github.com/ocombe/ocLazyLoad
  * @license MIT
  * @author Olivier Combe <olivier.combe@gmail.com>
@@ -12,7 +12,10 @@
         regInvokes = {},
         regConfigs = [],
         modulesToLoad = [],
-        recordDeclarations = [],
+        // modules to load from angular.module or other sources
+    realModules = [],
+        // real modules called from angular.module
+    recordDeclarations = [],
         broadcast = angular.noop,
         runBlocks = {},
         justLoaded = [];
@@ -31,7 +34,8 @@
         },
             debug = false,
             events = false,
-            moduleCache = [];
+            moduleCache = [],
+            modulePromises = {};
 
         moduleCache.push = function (value) {
             if (this.indexOf(value) === -1) {
@@ -78,7 +82,7 @@
                     names[name] = true;
                     append(document.getElementById(name));
                     name = name.replace(':', '\\:');
-                    if (element[0].querySelectorAll) {
+                    if (typeof element[0] !== 'undefined' && element[0].querySelectorAll) {
                         angular.forEach(element[0].querySelectorAll('.' + name), append);
                         angular.forEach(element[0].querySelectorAll('.' + name + '\\:'), append);
                         angular.forEach(element[0].querySelectorAll('[' + name + ']'), append);
@@ -133,18 +137,22 @@
          * @param obj
          */
         var stringify = function stringify(obj) {
-            var cache = [];
-            return JSON.stringify(obj, function (key, value) {
-                if (angular.isObject(value) && value !== null) {
-                    if (cache.indexOf(value) !== -1) {
-                        // Circular reference found, discard key
-                        return;
+            try {
+                return JSON.stringify(obj);
+            } catch (e) {
+                var cache = [];
+                return JSON.stringify(obj, function (key, value) {
+                    if (angular.isObject(value) && value !== null) {
+                        if (cache.indexOf(value) !== -1) {
+                            // Circular reference found, discard key
+                            return;
+                        }
+                        // Store value in our collection
+                        cache.push(value);
                     }
-                    // Store value in our collection
-                    cache.push(value);
-                }
-                return value;
-            });
+                    return value;
+                });
+            }
         };
 
         var hashCode = function hashCode(str) {
@@ -174,13 +182,13 @@
                     if (!angular.isString(moduleName)) {
                         moduleName = getModuleName(moduleName);
                     }
-                    if (!moduleName || justLoaded.indexOf(moduleName) !== -1) {
+                    if (!moduleName || justLoaded.indexOf(moduleName) !== -1 || modules[moduleName] && realModules.indexOf(moduleName) === -1) {
                         continue;
                     }
+                    // new if not registered
                     var newModule = regModules.indexOf(moduleName) === -1;
                     moduleFn = ngModuleFct(moduleName);
                     if (newModule) {
-                        // new module
                         regModules.push(moduleName);
                         _register(providers, moduleFn.requires, params);
                     }
@@ -218,16 +226,28 @@
             if (angular.isUndefined(regInvokes[moduleName][type])) {
                 regInvokes[moduleName][type] = {};
             }
-            var onInvoke = function onInvoke(invokeName, signature) {
+            var onInvoke = function onInvoke(invokeName, invoke) {
                 if (!regInvokes[moduleName][type].hasOwnProperty(invokeName)) {
                     regInvokes[moduleName][type][invokeName] = [];
                 }
-                if (regInvokes[moduleName][type][invokeName].indexOf(signature) === -1) {
+                if (checkHashes(invoke, regInvokes[moduleName][type][invokeName])) {
                     newInvoke = true;
-                    regInvokes[moduleName][type][invokeName].push(signature);
+                    regInvokes[moduleName][type][invokeName].push(invoke);
                     broadcast('ocLazyLoad.componentLoaded', [moduleName, type, invokeName]);
                 }
             };
+
+            function checkHashes(potentialNew, invokes) {
+                var isNew = true,
+                    newHash;
+                if (invokes.length) {
+                    newHash = signature(potentialNew);
+                    angular.forEach(invokes, function (invoke) {
+                        isNew = isNew && signature(invoke) !== newHash;
+                    });
+                }
+                return isNew;
+            }
 
             function signature(data) {
                 if (angular.isArray(data)) {
@@ -247,15 +267,15 @@
             }
 
             if (angular.isString(invokeList)) {
-                onInvoke(invokeList, signature(args[2][1]));
+                onInvoke(invokeList, args[2][1]);
             } else if (angular.isObject(invokeList)) {
                 angular.forEach(invokeList, function (invoke, key) {
                     if (angular.isString(invoke)) {
                         // decorators for example
-                        onInvoke(invoke, signature(invokeList[1]));
+                        onInvoke(invoke, invokeList[1]);
                     } else {
                         // components registered as object lists {"componentName": function() {}}
-                        onInvoke(key, signature(invoke));
+                        onInvoke(key, invoke);
                     }
                 });
             } else {
@@ -288,10 +308,10 @@
                     } else {
                         // config block
                         var callInvoke = function callInvoke(fct) {
-                            var invoked = regConfigs.indexOf('' + moduleName + '-' + fct);
+                            var invoked = regConfigs.indexOf(moduleName + '-' + fct);
                             if (invoked === -1 || reconfig) {
                                 if (invoked === -1) {
-                                    regConfigs.push('' + moduleName + '-' + fct);
+                                    regConfigs.push(moduleName + '-' + fct);
                                 }
                                 if (angular.isDefined(provider)) {
                                     provider[args[1]].apply(provider, args[2]);
@@ -526,6 +546,8 @@
                                 return;
                             }
                             requireEntry = config;
+                            // ignore the name because it's probably not a real module name
+                            config.name = undefined;
                         }
 
                         // Check if this dependency has been loaded previously
@@ -551,9 +573,21 @@
                             }
                             return;
                         } else if (angular.isArray(requireEntry)) {
-                            requireEntry = {
-                                files: requireEntry
-                            };
+                            var files = [];
+                            angular.forEach(requireEntry, function (entry) {
+                                // let's check if the entry is a file name or a config name
+                                var config = self.getModuleConfig(entry);
+                                if (config === null) {
+                                    files.push(entry);
+                                } else if (config.files) {
+                                    files = files.concat(config.files);
+                                }
+                            });
+                            if (files.length > 0) {
+                                requireEntry = {
+                                    files: files
+                                };
+                            }
                         } else if (angular.isObject(requireEntry)) {
                             if (requireEntry.hasOwnProperty('name') && requireEntry['name']) {
                                 // The dependency doesn't exist in the module cache and is a new configuration, so store and push it.
@@ -583,9 +617,11 @@
                  * Inject new modules into Angular
                  * @param moduleName
                  * @param localParams
+                 * @param real
                  */
                 inject: function inject(moduleName) {
-                    var localParams = arguments[1] === undefined ? {} : arguments[1];
+                    var localParams = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+                    var real = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
                     var self = this,
                         deferred = $q.defer();
@@ -593,17 +629,18 @@
                         if (angular.isArray(moduleName)) {
                             var promisesList = [];
                             angular.forEach(moduleName, function (module) {
-                                promisesList.push(self.inject(module));
+                                promisesList.push(self.inject(module, localParams, real));
                             });
                             return $q.all(promisesList);
                         } else {
-                            self._addToLoadList(self._getModuleName(moduleName), true);
+                            self._addToLoadList(self._getModuleName(moduleName), true, real);
                         }
                     }
                     if (modulesToLoad.length > 0) {
                         var res = modulesToLoad.slice(); // clean copy
                         var loadNext = function loadNext(moduleName) {
                             moduleCache.push(moduleName);
+                            modulePromises[moduleName] = deferred.promise;
                             self._loadDependencies(moduleName, localParams).then(function success() {
                                 try {
                                     justLoaded = [];
@@ -617,8 +654,8 @@
                                 if (modulesToLoad.length > 0) {
                                     loadNext(modulesToLoad.shift()); // load the next in list
                                 } else {
-                                    deferred.resolve(res); // everything has been loaded, resolve
-                                }
+                                        deferred.resolve(res); // everything has been loaded, resolve
+                                    }
                             }, function error(err) {
                                 deferred.reject(err);
                             });
@@ -626,6 +663,8 @@
 
                         // load the first in list
                         loadNext(modulesToLoad.shift());
+                    } else if (localParams && localParams.name && modulePromises[localParams.name]) {
+                        return modulePromises[localParams.name];
                     } else {
                         deferred.resolve();
                     }
@@ -680,7 +719,21 @@
                  * @param force
                  * @private
                  */
-                _addToLoadList: _addToLoadList
+                _addToLoadList: _addToLoadList,
+
+                /**
+                 * Unregister modules (you shouldn't have to use this)
+                 * @param modules
+                 */
+                _unregister: function _unregister(modules) {
+                    if (angular.isDefined(modules)) {
+                        if (angular.isArray(modules)) {
+                            angular.forEach(modules, function (module) {
+                                regInvokes[module] = undefined;
+                            });
+                        }
+                    }
+                }
             };
         }];
 
@@ -692,20 +745,23 @@
     angular.bootstrap = function (element, modules, config) {
         // we use slice to make a clean copy
         angular.forEach(modules.slice(), function (module) {
-            _addToLoadList(module, true);
+            _addToLoadList(module, true, true);
         });
         return bootstrapFct(element, modules, config);
     };
 
-    var _addToLoadList = function _addToLoadList(name, force) {
+    var _addToLoadList = function _addToLoadList(name, force, real) {
         if ((recordDeclarations.length > 0 || force) && angular.isString(name) && modulesToLoad.indexOf(name) === -1) {
             modulesToLoad.push(name);
+            if (real) {
+                realModules.push(name);
+            }
         }
     };
 
     var ngModuleFct = angular.module;
     angular.module = function (name, requires, configFn) {
-        _addToLoadList(name);
+        _addToLoadList(name, false, true);
         return ngModuleFct(name, requires, configFn);
     };
 
@@ -717,7 +773,7 @@
 (function (angular) {
     'use strict';
 
-    angular.module('oc.lazyLoad').directive('ocLazyLoad', ["$ocLazyLoad", "$compile", "$animate", "$parse", function ($ocLazyLoad, $compile, $animate, $parse) {
+    angular.module('oc.lazyLoad').directive('ocLazyLoad', ["$ocLazyLoad", "$compile", "$animate", "$parse", "$timeout", function ($ocLazyLoad, $compile, $animate, $parse, $timeout) {
         return {
             restrict: 'A',
             terminal: true,
@@ -734,14 +790,12 @@
                     }, function (moduleName) {
                         if (angular.isDefined(moduleName)) {
                             $ocLazyLoad.load(moduleName).then(function () {
+                                // Attach element contents to DOM and then compile them.
+                                // This prevents an issue where IE invalidates saved element objects (HTMLCollections)
+                                // of the compiled contents when attaching to the parent DOM.
                                 $animate.enter(content, $element);
-                                var contents = element.contents();
-                                angular.forEach(contents, function (content) {
-                                    if (content.nodeType !== 3) {
-                                        // 3 is a text node
-                                        $compile(content)($scope);
-                                    }
-                                });
+                                // get the new content & compile it
+                                $compile($element.contents())($scope);
                             });
                         }
                     }, true);
@@ -775,11 +829,11 @@
                     var dc = new Date().getTime();
                     if (url.indexOf('?') >= 0) {
                         if (url.substring(0, url.length - 1) === '&') {
-                            return '' + url + '_dc=' + dc;
+                            return url + '_dc=' + dc;
                         }
-                        return '' + url + '&_dc=' + dc;
+                        return url + '&_dc=' + dc;
                     } else {
-                        return '' + url + '?_dc=' + dc;
+                        return url + '?_dc=' + dc;
                     }
                 };
 
@@ -844,9 +898,9 @@
                             var v = $window.navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/);
                             var iOSVersion = parseFloat([parseInt(v[1], 10), parseInt(v[2], 10), parseInt(v[3] || 0, 10)].join('.'));
                             useCssLoadPatch = iOSVersion < 6;
-                        } else if (ua.indexOf('android') > -1) {
+                        } else if (ua.indexOf("android") > -1) {
                             // Android < 4.4
-                            var androidVersion = parseFloat(ua.slice(ua.indexOf('android') + 8));
+                            var androidVersion = parseFloat(ua.slice(ua.indexOf("android") + 8));
                             useCssLoadPatch = androidVersion < 4.4;
                         } else if (ua.indexOf('safari') > -1) {
                             var versionMatch = ua.match(/version\/([\.\d]+)/i);
@@ -889,7 +943,7 @@
              * @returns {*}
              */
             $delegate.filesLoader = function filesLoader(config) {
-                var params = arguments[1] === undefined ? {} : arguments[1];
+                var params = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
                 var cssFiles = [],
                     templatesFiles = [],
@@ -923,7 +977,7 @@
                             if ((m = /[.](css|less|html|htm|js)?((\?|#).*)?$/.exec(path)) !== null) {
                                 // Detect file type via file extension
                                 file_type = m[1];
-                            } else if (!$delegate.jsLoader.hasOwnProperty('ocLazyLoadLoader') && $delegate.jsLoader.hasOwnProperty('load')) {
+                            } else if (!$delegate.jsLoader.hasOwnProperty('ocLazyLoadLoader') && $delegate.jsLoader.hasOwnProperty('requirejs')) {
                                 // requirejs
                                 file_type = 'js';
                             } else {
@@ -983,7 +1037,7 @@
                 if (jsFiles.length > 0) {
                     var jsDeferred = $q.defer();
                     $delegate.jsLoader(jsFiles, function (err) {
-                        if (angular.isDefined(err) && $delegate.jsLoader.hasOwnProperty('ocLazyLoadLoader')) {
+                        if (angular.isDefined(err) && ($delegate.jsLoader.hasOwnProperty("ocLazyLoadLoader") || $delegate.jsLoader.hasOwnProperty("requirejs"))) {
                             $delegate._$log.error(err);
                             jsDeferred.reject(err);
                         } else {
@@ -995,7 +1049,7 @@
 
                 if (promises.length === 0) {
                     var deferred = $q.defer(),
-                        err = 'Error: no file to load has been found, if you\'re trying to load an existing module you should use the \'inject\' method instead of \'load\'.';
+                        err = "Error: no file to load has been found, if you're trying to load an existing module you should use the 'inject' method instead of 'load'.";
                     $delegate._$log.error(err);
                     deferred.reject(err);
                     return deferred.promise;
@@ -1018,7 +1072,7 @@
              * @returns promise
              */
             $delegate.load = function (originalModule) {
-                var originalParams = arguments[1] === undefined ? {} : arguments[1];
+                var originalParams = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
                 var self = this,
                     config = null,
@@ -1090,7 +1144,7 @@
 
                 // if someone used an external loader and called the load function with just the module name
                 if (angular.isUndefined(config.files) && angular.isDefined(config.name) && $delegate.moduleExists(config.name)) {
-                    return $delegate.inject(config.name, localParams);
+                    return $delegate.inject(config.name, localParams, true);
                 }
 
                 $delegate.filesLoader(config, localParams).then(function () {
@@ -1155,17 +1209,9 @@
              * because the user can overwrite jsLoader and it will probably not use promises :(
              */
             $delegate.jsLoader = function (paths, callback, params) {
-                var promises = [];
-                angular.forEach(paths, function (path) {
-                    promises.push($delegate.buildElement('js', path, params));
-                });
-                $q.all(promises).then(function () {
-                    callback();
-                }, function (err) {
-                    callback(err);
-                });
+                require(paths, callback.bind(null, undefined), callback, params);
             };
-            $delegate.jsLoader.ocLazyLoadLoader = true;
+            $delegate.jsLoader.requirejs = true;
 
             return $delegate;
         }]);
@@ -1221,65 +1267,64 @@
 })(angular);
 // Array.indexOf polyfill for IE8
 if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function (searchElement, fromIndex) {
-                var k;
+    Array.prototype.indexOf = function (searchElement, fromIndex) {
+        var k;
 
-                // 1. Let O be the result of calling ToObject passing
-                //    the this value as the argument.
-                if (this == null) {
-                        throw new TypeError('"this" is null or not defined');
-                }
+        // 1. Let O be the result of calling ToObject passing
+        //    the this value as the argument.
+        if (this == null) {
+            throw new TypeError('"this" is null or not defined');
+        }
 
-                var O = Object(this);
+        var O = Object(this);
 
-                // 2. Let lenValue be the result of calling the Get
-                //    internal method of O with the argument "length".
-                // 3. Let len be ToUint32(lenValue).
-                var len = O.length >>> 0;
+        // 2. Let lenValue be the result of calling the Get
+        //    internal method of O with the argument "length".
+        // 3. Let len be ToUint32(lenValue).
+        var len = O.length >>> 0;
 
-                // 4. If len is 0, return -1.
-                if (len === 0) {
-                        return -1;
-                }
+        // 4. If len is 0, return -1.
+        if (len === 0) {
+            return -1;
+        }
 
-                // 5. If argument fromIndex was passed let n be
-                //    ToInteger(fromIndex); else let n be 0.
-                var n = +fromIndex || 0;
+        // 5. If argument fromIndex was passed let n be
+        //    ToInteger(fromIndex); else let n be 0.
+        var n = +fromIndex || 0;
 
-                if (Math.abs(n) === Infinity) {
-                        n = 0;
-                }
+        if (Math.abs(n) === Infinity) {
+            n = 0;
+        }
 
-                // 6. If n >= len, return -1.
-                if (n >= len) {
-                        return -1;
-                }
+        // 6. If n >= len, return -1.
+        if (n >= len) {
+            return -1;
+        }
 
-                // 7. If n >= 0, then Let k be n.
-                // 8. Else, n<0, Let k be len - abs(n).
-                //    If k is less than 0, then let k be 0.
-                k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+        // 7. If n >= 0, then Let k be n.
+        // 8. Else, n<0, Let k be len - abs(n).
+        //    If k is less than 0, then let k be 0.
+        k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
 
-                // 9. Repeat, while k < len
-                while (k < len) {
-                        // a. Let Pk be ToString(k).
-                        //   This is implicit for LHS operands of the in operator
-                        // b. Let kPresent be the result of calling the
-                        //    HasProperty internal method of O with argument Pk.
-                        //   This step can be combined with c
-                        // c. If kPresent is true, then
-                        //    i.  Let elementK be the result of calling the Get
-                        //        internal method of O with the argument ToString(k).
-                        //   ii.  Let same be the result of applying the
-                        //        Strict Equality Comparison Algorithm to
-                        //        searchElement and elementK.
-                        //  iii.  If same is true, return k.
-                        if (k in O && O[k] === searchElement) {
-                                return k;
-                        }
-                        k++;
-                }
-                return -1;
-        };
+        // 9. Repeat, while k < len
+        while (k < len) {
+            // a. Let Pk be ToString(k).
+            //   This is implicit for LHS operands of the in operator
+            // b. Let kPresent be the result of calling the
+            //    HasProperty internal method of O with argument Pk.
+            //   This step can be combined with c
+            // c. If kPresent is true, then
+            //    i.  Let elementK be the result of calling the Get
+            //        internal method of O with the argument ToString(k).
+            //   ii.  Let same be the result of applying the
+            //        Strict Equality Comparison Algorithm to
+            //        searchElement and elementK.
+            //  iii.  If same is true, return k.
+            if (k in O && O[k] === searchElement) {
+                return k;
+            }
+            k++;
+        }
+        return -1;
+    };
 }
-//# sourceMappingURL=ocLazyLoad.js.map
