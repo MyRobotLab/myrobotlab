@@ -510,7 +510,7 @@ angular
             // FIXME - optimize and subscribe on {gatewayName}.onLocalService ???
             this.subscribeToMethod(this.onLocalServices, 'onLocalServices');
             
-            socket = $.atmosphere.subscribe(this.request);
+            socket = atmosphere.subscribe(this.request);
             
             deferred = $q.defer();
             deferred.promise.then(function(result) {
@@ -527,7 +527,7 @@ angular
         ;
         
         this.onError = function(response) {
-            log.error('onError, can not connect');
+            $log.error('onError, can not connect');
             deferred.reject('onError, can not connect');
             return deferred.promise;
         }
