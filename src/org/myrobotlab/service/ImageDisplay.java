@@ -124,7 +124,7 @@ public class ImageDisplay extends Service {
     
     //builds a JFrame for the FullScreen sized image.
     private void buildFrameFS(DisplayedImage image){
-    	JFrame f = new JFrame();
+    	final JFrame f = new JFrame();
     	// Exit program on mouse click 
     	f.addMouseListener(new MouseListener() { 
             public void mouseClicked(MouseEvent e) { gd.setFullScreenWindow(null);f.dispose();; } 
