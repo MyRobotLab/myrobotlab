@@ -1,7 +1,6 @@
-package org.myrobotlab.service;
+package org.myrobotlab.image;
 import java.awt.AlphaComposite;
 import java.awt.Graphics;
-
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,6 +11,8 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
+import org.myrobotlab.service.ImageDisplay;
 
 public class DisplayedImage extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
