@@ -5,7 +5,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.DisplayedImage;
