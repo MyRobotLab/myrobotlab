@@ -5,10 +5,10 @@
             <h3 class="panel-title">
                 <img src="{{::panel.simpleName}}.png" alt="" width="16">
                 <b>{{::panel.name}}</b><div style="display:inline;" ng-if="panel.showpanelname">&nbsp;&nbsp;{{panel.panelname}}</div>
-                <div class="pull-right" dropdown dropdown-append-to-body>
+                <div class="pull-right" uib-dropdown dropdown-append-to-body>
                     {{::panel.simpleName}}&nbsp;&nbsp;
-                    <span style="cursor: pointer;" tooltip-placement="right" tooltip="Menu"><i dropdown-toggle class="glyphicon glyphicon-list"></i></span>
-                    <ul class="dropdown-menu">
+                    <span style="cursor: pointer;" tooltip-placement="right" uib-tooltip="Menu"><i uib-dropdown-toggle class="glyphicon glyphicon-list"></i></span>
+                    <ul class="uib-dropdown-menu">
                         <li>
                             <a href="http://myrobotlab.org/service/{{::panel.simpleName}}" target="_blank">
                                 <i class="glyphicon glyphicon-question-sign"></i>

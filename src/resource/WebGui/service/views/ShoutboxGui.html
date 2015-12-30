@@ -4,9 +4,9 @@
    <input class="form-control" type="text" ng-model="shoutMsg" placeholder="{{placeholder}}" />
 </form>
 
-  <accordion close-others="oneAtATime">
+  <div uib-accordion>
   <!-- is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled" -->
-    <accordion-group heading="menu" >
+    <div uib-accordion-group heading="menu" >
       <ul>
       <li>/listConnections - list all current connections to shoutbox</li>
       <li>/version - return current version</li>
@@ -14,12 +14,11 @@
       <li>/addXMPPRelay/(xmpp buddy name) - add buddy as an xmpp relay</li>
       <li>/removeXMPPRelay/(xmpp buddy name) - remove buddy as xmpp relay</li>
       </ul>
-    </accordion-group>
-    <accordion-group heading="shouts" is-open="true" >
-    <div ng-repeat="shout in shouts | reverse" ng-bind-html="trustAsHtml(getHtml(shout))" > <!--<a href='' ng-bind-html="trustAsHtml(shout.msg)" ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a> {{shout.from}}: {{trustAsHtml(shout.msg)}} --> 
-        {{shout.msg}} 
-        
+    </div>
+    <div accordion-group heading="shouts" is-open="true" >
+        <div ng-repeat="shout in shouts | reverse" ng-bind-html="trustAsHtml(getHtml(shout))" > <!--<a href='' ng-bind-html="trustAsHtml(shout.msg)" ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a> {{shout.from}}: {{trustAsHtml(shout.msg)}} --> 
+            {{shout.msg}} 
         </div>
-    </accordion>
-  </accordion>
+    </div>
+  </div>
 </div>

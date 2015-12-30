@@ -18,7 +18,7 @@ http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
   </div>
   <div class="col-lg-3">    
     <label for="service.portName">port</label>
-    <input type="text" ng-disabled="isConnected" ng-model="service.portName" typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
+    <input type="text" ng-disabled="isConnected" ng-model="service.portName" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
   </div>
   <div class="col-lg-7">
     <button class="btn btn-default"  ng-click="refresh()">refresh</button>
@@ -63,7 +63,7 @@ http://fritzing.googlecode.com/svn/trunk/fritzing/parts/svg/core/icon/
  <div class="col-lg-4"> 
  </div>
  <div class="col-lg-2"> 
-  <div popover-placement="right" popover-template="'arduinoMenu.html'" class="glyphicon glyphicon-cog pull-right"></div>
+  <div popover-placement="right" uib-popover-template="'arduinoMenu.html'" class="glyphicon glyphicon-cog pull-right"></div>
  </div>
 <!-- TODO - make connect com -->
     
