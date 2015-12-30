@@ -4,10 +4,11 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
 import javax.swing.*;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.service.DisplayedImage;
+import org.myrobotlab.image.DisplayedImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -54,7 +55,7 @@ public class ImageDisplay extends Service {
 	//@param source = path.
     public void display(String source){
         DisplayedImage image = new DisplayedImage(source,1.0f);
-        System.out.println("Loading image done");
+        log.info("Loading image done");
         buildFrame(image);
     }
     
@@ -62,7 +63,7 @@ public class ImageDisplay extends Service {
     //@param source = path.
     public void displayFullScreen(String source){
         DisplayedImage image = new DisplayedImage(source,1.0f,true);
-        System.out.println("Loading image done");
+        log.info("Loading image done");
         buildFrameFS(image);
     }
     
@@ -70,7 +71,7 @@ public class ImageDisplay extends Service {
     //@param source = path.
     public void displayFadeIn(String source){
         DisplayedImage image = new DisplayedImage(source);
-        System.out.println("Loading image done");
+        log.info("Loading image done");
         buildFrame(image);
     }
     
@@ -79,7 +80,7 @@ public class ImageDisplay extends Service {
     //@param alpha = Value how much the image is faded float from 0.0 to 1.0.
     public void display(String source, float alpha){
         DisplayedImage image = new DisplayedImage(source, alpha);
-        System.out.println("Loading image done");
+        log.info("Loading image done");
         buildFrame(image);
     }
     
@@ -88,7 +89,7 @@ public class ImageDisplay extends Service {
     //@param alpha = Value how much the image is faded float from 0.0 to 1.0.
     public void displayFullScreen(String source, float alpha){
         DisplayedImage image = new DisplayedImage(source, alpha, true);
-        System.out.println("Loading image done");
+        log.info("Loading image done");
         buildFrameFS(image);
     }
     
@@ -97,7 +98,7 @@ public class ImageDisplay extends Service {
     //@param scaling = scale factor to resize the image.
     public void displayScaled(String source, float scaling){
     	DisplayedImage image = new DisplayedImage(source, 1, scaling);
-        System.out.println("Loading image done");
+        log.info("Loading image done");
         buildFrame(image);
     }
     
@@ -107,7 +108,7 @@ public class ImageDisplay extends Service {
     //@param scaling = scale factor to resize the image.
     public void displayScaled(String source, float alpha, float scaling){
     	DisplayedImage image = new DisplayedImage(source, 1, scaling);
-        System.out.println("Loading image done");
+        log.info("Loading image done");
         buildFrame(image);
     }
     
@@ -151,7 +152,7 @@ public class ImageDisplay extends Service {
     public static void getResolution(){
     w = gd.getDisplayMode().getWidth();
     h = gd.getDisplayMode().getHeight();
-    System.out.println("Display resolution: " + w + "x" + String.valueOf(h));
+    log.info("Display resolution: " + w + "x" + String.valueOf(h));
     }
     
     //Returns the Width-factor of the DisplayResolution.
