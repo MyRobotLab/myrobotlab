@@ -1,5 +1,5 @@
 angular.module('mrlapp.service.MarySpeechGui', [])
-        .controller('MarySpeechGuiCtrl', ['$scope', '$log', 'mrl', '$modal', function ($scope, $log, mrl, $modal) {
+        .controller('MarySpeechGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function ($scope, $log, mrl, $uibModal) {
                 $log.info('MarySpeechGuiCtrl');
                 var _self = this;
                 var msg = this.msg;
@@ -19,7 +19,7 @@ angular.module('mrlapp.service.MarySpeechGui', [])
                             case 'nothingselected':
                             case 'installcomponents':
                             case 'installationprogress':
-                                var modalInstance = $modal.open({
+                                var modalInstance = $uibModal.open({
                                     animation: true,
                                     templateUrl: 'MarySpeechInstallation' + service.installationstate + '.html',
                                     controller: 'MarySpeechInstallationNothingSelectedCtrl',
@@ -28,7 +28,7 @@ angular.module('mrlapp.service.MarySpeechGui', [])
                                 });
                                 break;
                             case 'showlicenses':
-                                var modalInstance = $modal.open({
+                                var modalInstance = $uibModal.open({
                                     animation: true,
                                     templateUrl: 'MarySpeechInstallation' + service.installationstate + '.html',
                                     controller: 'MarySpeechInstallationNothingSelectedCtrl',
@@ -72,8 +72,8 @@ angular.module('mrlapp.service.MarySpeechGui', [])
             }
         ])
 
-        .controller('MarySpeechInstallationNothingSelectedCtrl', function ($scope, $modalInstance, $http, $sce) {
-            $scope.close = $modalInstance.close;
+        .controller('MarySpeechInstallationNothingSelectedCtrl', function ($scope, $uibModalInstance, $http, $sce) {
+            $scope.close = $uibModalInstance.close;
 
             $scope.isUndefinedOrNull = function (val) {
                 return angular.isUndefined(val) || val === null;

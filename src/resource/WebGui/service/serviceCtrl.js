@@ -1,6 +1,6 @@
 angular.module('mrlapp.service')
-        .controller('serviceCtrl', ['$scope', '$log', '$modal', 'mrl', 'serviceSvc', 'noWorkySvc',
-            function ($scope, $log, $modal, mrl, serviceSvc, noWorkySvc) {
+        .controller('serviceCtrl', ['$scope', '$log', '$uibModal', 'mrl', 'serviceSvc', 'noWorkySvc',
+            function ($scope, $log, $uibModal, mrl, serviceSvc, noWorkySvc) {
                 $log.info('serviceCtrl', $scope.panel.name);
 
 //                var isUndefinedOrNull = function (val) {
@@ -33,7 +33,7 @@ angular.module('mrlapp.service')
                         $scope.panel.notifySizeChanged();
                         if ($scope.panel.panelsize.sizes[$scope.panel.panelsize.aktsize].fullscreen) {
                             //launch the service as a modal ('full')
-                            var modalInstance = $modal.open({
+                            var modalInstance = $uibModal.open({
                                 animation: true,
                                 templateUrl: 'service/servicefulltemplate.html',
                                 controller: 'serviceFullCtrl',

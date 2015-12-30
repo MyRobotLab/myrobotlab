@@ -1,6 +1,6 @@
 angular.module('mrlapp.nav')
-        .controller('noWorkyCtrl', ['$scope', '$modalInstance', 'reason', 'mrl', 'statusSvc', function ($scope, $modalInstance, reason, mrl, statusSvc) {
-                $scope.close = $modalInstance.close;
+        .controller('noWorkyCtrl', ['$scope', '$uibModalInstance', 'reason', 'mrl', 'statusSvc', function ($scope, $uibModalInstance, reason, mrl, statusSvc) {
+                $scope.close = $uibModalInstance.close;
         
                 $scope.status = 'waitingforinformation';
                 
