@@ -1,4 +1,4 @@
 angular.module('mrlapp.nav')
-        .controller('aboutCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
-                $scope.close = $modalInstance.close;
+        .controller('aboutCtrl', ['$scope', '$uibModalInstance', function ($scope, $uibModalInstance) {
+                $scope.close = $uibModalInstance.close;
             }]);
