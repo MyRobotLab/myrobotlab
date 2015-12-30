@@ -1,6 +1,6 @@
 angular.module('mrlapp.nav')
-        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$modal', 'mrl', 'statusSvc', 'serviceSvc', 'noWorkySvc',
-            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, $modal, mrl, statusSvc, serviceSvc, noWorkySvc) {
+        .controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$uibModal', 'mrl', 'statusSvc', 'serviceSvc', 'noWorkySvc',
+            function ($scope, $log, $filter, $timeout, $location, $anchorScroll, $uibModal, mrl, statusSvc, serviceSvc, noWorkySvc) {
 
                 //START_green-/red-LED
                 $scope.connected = mrl.isConnected();
@@ -79,7 +79,7 @@ angular.module('mrlapp.nav')
                 serviceSvc.subscribeToUpdates(panelsUpdated);
                 
                 $scope.about = function () {
-                    var modalInstance = $modal.open({
+                    var modalInstance = $uibModal.open({
                         animation: true,
                         templateUrl: 'nav/about.html',
                         controller: 'aboutCtrl'
