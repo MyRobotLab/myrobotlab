@@ -1,11 +1,11 @@
 <!-- file menu button bar begin -->
 <div class="btn-group">
-    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <button class="btn btn-default uib-dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
       <span class="glyphicon glyphicon-open">open</span><!-- span class="caret"></span-->
     </button>
 
 	<!-- python example resource files -->
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <ul class="uib-dropdown-menu" aria-labelledby="dropdownMenu1">
       <li ng-repeat="file in service.currentFileList" ng-class="navClass('{{file.type}}')"> <a href='' ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a> 
         </li>
     </ul>
@@ -18,8 +18,8 @@
 </div>
 
 <!-- file menu button bar end theme:'twilight',-->
-<tabset justified="true">
-    <tab heading="{{tabName}}">	    
+<div uib-tabset justified="true">
+    <div uib-tab heading="{{tabName}}">	    
 		<div style="height: 300px;width: 100%;" ui-ace="{
 		                                       useWrapMode : true,
 		                                       showGutter: true,		                                       
@@ -29,12 +29,12 @@
 		                                       onLoad: aceLoaded,
 		                                       onChange: aceChanged}">
 		</div>
-    </tab>
+    </div>
 
-    <tab heading="new file"> 		
-    </tab>
+    <div uib-tab heading="new file"> 		
+    </div>
     
-</tabset>
+</div>
 <!-- FIXME - make debug window directive -->
 <hr/>
 

@@ -1,13 +1,13 @@
    <div class="col-xs-6">
    <div class="btn-group">
-    <div class="btn-group" dropdown>
+    <div class="btn-group" uib-dropdown>
       <button id="split-button" type="button" class="btn btn-default">level - {{logLevel}}</button>
-      <button type="button" class="btn btn-default" dropdown-toggle>
+      <button type="button" class="btn btn-default" uib-dropdown-toggle>
         <span class="caret"></span>
         <span class="sr-only">Split button!</span>
       </button>
 
-      <ul class="dropdown-menu" role="menu" aria-labelledby="split-button">
+      <ul class="uib-dropdown-menu" role="menu" aria-labelledby="split-button">
         <li><a href="" ng-click="msg.setRootLogLevel('debug')">debug</a></li>
         <li><a href="" ng-click="msg.setRootLogLevel('info')">info</a></li>
         <li><a href="" ng-click="msg.setRootLogLevel('warn')">warn</a></li>

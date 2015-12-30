@@ -3,16 +3,16 @@
 <input type="text" class="form-control" ng-model="voice"/>
 <button class="btn btn-default" ng-click="msg.setVoice(voice)">Set Voice</button>
 <button type="button" class="btn btn-default" ng-click="collapse = !collapse">Toggle Component Installer</button>
-<div collapse="collapse">
+<div uib-collapse="collapse">
     <div class="form-group">
         <input type="text" class="form-control" ng-model="componenturl"/>
         <button class="btn btn-default" ng-click="msg.updateFromComponentUrl(componenturl)">Update Components</button>
     </div>
     <!--TODO - fix automatic disabling if there are components-->
     <div ng-show="{{service.possibleVoices === undefined}}">Please try to (re-)load the components file if list is empty</div>
-    <div accordion>
-        <div accordion-group is-open="status.open" ng-repeat="voice in service.possibleVoices">
-            <div accordion-heading>
+    <div uib-accordion>
+        <div uib-accordion-group is-open="status.open" ng-repeat="voice in service.possibleVoices">
+            <div uib-accordion-heading>
                 <div>
                     {{voice.name}}
                     <span class="pull-right">
@@ -25,7 +25,7 @@
             Description: {{voice.description}}<br>
             Type: {{voice.type}}<br>
             Version: {{voice.version}}<br>
-            Size: {{voice.packageSize / 1024 / 1024| number:2}}MB<br>
+            Size: {{voice.packageSize / 1024 / 1024 | number:2}}MB<br>
             <button type="button" class="btn btn-primary" ng-model="voice.isSelected" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
                 <span ng-if="!voice.isSelected">install!</span>
                 <span ng-if="voice.isSelected">don't install!</span>

@@ -20,12 +20,12 @@
                 <!--quick-start a service-->
                 <li>
                 <form class="navbar-form">
-                         <input class="form-control" type="text" ng-model="newName" placeholder="name">
-                        <input class="form-control" typeahead-min-length="0" type="text" ng-model="newType" placeholder="Service Type" typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-template-url="serviceSearchTemplate.html">
+                        <input class="form-control" type="text" ng-model="newName" placeholder="name">
+                        <input class="form-control" typeahead-min-length="0" type="text" ng-model="newType" placeholder="Service Type" uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-template-url="serviceSearchTemplate.html">
                     <script type="text/ng-template" id="serviceSearchTemplate.html">
                         <a>
                             <img ng-src="/{{match.model.img}}" width="16">
-                            <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+                            <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
                         </a>
                     </script>
                             <button class="btn btn-default" ng-click="start(newName, newType)">start</button>
@@ -37,15 +37,15 @@
                         <!--TODO - green png if connected - if not re-connect button-->
                         <span ng-if="connected"><img src="../../connected.png" alt=""></span>
                         <span ng-if="!connected"><img src="../../disconnected.png" alt=""></span>
-                        <div class="input-group" dropdown>
+                        <div class="input-group" uib-dropdown>
                             <input type="text" class="form-control" style="width: 200px"
                                    placeholder="Status" ng-model="firststatus" readonly>
-                            <div class="input-group-btn" dropdown-toggle>
-                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Status">
+                            <div class="input-group-btn" uib-dropdown-toggle>
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Status">
                                     <i class="glyphicon glyphicon-dashboard"></i>
                                 </button>
                             </div>
-                            <ul class="dropdown-menu" style="width: 240px">
+                            <ul class="uib-dropdown-menu" style="width: 240px">
                                 <li ng-repeat="status in statuslist| reverse track by $index">
                                     <a href="">
                                         <div ng-if="status.level == 'debug'"><i class="glyphicon glyphicon-record"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-primary">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
@@ -63,13 +63,13 @@
                 <li>
                     <form class="navbar-form">
                         <div class="btn-group">
-                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Hide All" ng-click="showAll(false)">
+                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Hide All" ng-click="showAll(false)">
                             <i class="glyphicon glyphicon-eye-close"></i>
                         </button>
-                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Show All" ng-click="showAll(true)">
+                            <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Show All" ng-click="showAll(true)">
                             <i class="glyphicon glyphicon-eye-open"></i>
                         </button>
-                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Toggle minlist" ng-click="showminlist = !showminlist">
+                        <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Toggle minlist" ng-click="showminlist = !showminlist">
                                 <i class="glyphicon glyphicon-th"></i>
                         </button>
                         </div>
@@ -83,11 +83,11 @@
                                    placeholder="Search"
                                    typeahead-min-length="0"
                                    ng-model="searchSelectedPanel"
-                                   typeahead="panel as panel.name for panel in allpanels | filter:{name:$viewValue}"
+                                   uib-typeahead="panel as panel.name for panel in allpanels | filter:{name:$viewValue}"
                                    typeahead-template-url="nav/searchtemplate.html"
                                    typeahead-on-select='searchOnSelect($item, $model, $label)'>
                             <div class="input-group-btn">
-                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="Search">
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="Search">
                                     <i class="glyphicon glyphicon-search"></i>
                                 </button>
                             </div>
@@ -99,13 +99,13 @@
                 <!-- - Help-->
                 <li>
                     <form class="navbar-form">
-                        <div class="btn-group" dropdown>
-                            <div dropdown-toggle>
-                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" tooltip="More features">
+                        <div class="btn-group" uib-dropdown>
+                            <div uib-dropdown-toggle>
+                                <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="More features">
                                     <i class="glyphicon glyphicon-option-horizontal"></i>
                                 </button>
                             </div>
-                            <ul class="dropdown-menu">
+                            <ul class="uib-dropdown-menu">
                                 <li><a href="" ng-click="about()"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;&nbsp;About</a></li>
                                 <li><a href="" ng-click="help()"><i class="glyphicon glyphicon-question-sign"></i>&nbsp;&nbsp;Help</a></li>
                                 <li><a href="" ng-click="noWorky()"><i class="glyphicon glyphicon-alert"></i>&nbsp;&nbsp;No Worky !</a></li>
@@ -124,5 +124,5 @@
     </div>
 </div>
 <div style="height: 1px; width: 500px; z-index: 200; position: fixed; right: 10px;" sticky offset="50">
-    <div alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</div>
+    <div uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</div>
 </div>

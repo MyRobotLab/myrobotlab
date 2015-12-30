@@ -1,11 +1,11 @@
 <div class="row">
   <div class="col-lg-6">
-    <div class="dropdown">
-      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <div uib-dropdown>
+      <button class="btn btn-default uib-dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
        set sample rate
       <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+      <ul class="uib-dropdown-menu" aria-labelledby="dropdownMenu1">
         <li>
           <input type="text" ng-disabled="isConnected" ng-model="service.databits" class="form-control"/> 
         </li>
@@ -13,7 +13,7 @@
     </div>
   </div>
   <div class="col-lg-6">
-      <button class="btn btn-default dropdown-toggle" type="button" ng-click="clearScreen()" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <button class="btn btn-default uib-dropdown-toggle" type="button" ng-click="clearScreen()" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
        clear screen </button>
     </div>
 </div>
