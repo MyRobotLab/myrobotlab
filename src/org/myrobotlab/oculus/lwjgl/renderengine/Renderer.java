@@ -9,18 +9,22 @@ import org.myrobotlab.oculus.lwjgl.models.RawModel;
 import org.myrobotlab.oculus.lwjgl.models.TexturedModel;
 import org.newdawn.slick.util.Log;
 
+/**
+ * An OpenGL renderer class to render textured models in the viewport.
+ * @author kwatters
+ *
+ */
 public class Renderer {
 
+	// prepare the frame for rendering.
 	public void prepare() {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-		GL11.glClearColor(1, 0, 0, 1);
-		
+		GL11.glClearColor(1, 0, 0, 1);		
 	};
 	
+	// render the model 
 	public void render(TexturedModel texturedModel) {
-		
 		RawModel model = texturedModel.getRawModel();
-		
 		try {
 			GL30.glBindVertexArray(model.getVaoID());
 			GL20.glEnableVertexAttribArray(0);
@@ -37,6 +41,5 @@ public class Renderer {
 			//log.error("OPEN GL EXCEPTION");
 			e.printStackTrace();
 		}
-	};
-	
+	}	
 }

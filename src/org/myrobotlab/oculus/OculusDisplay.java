@@ -5,17 +5,25 @@ import static com.oculusvr.capi.OvrLibrary.OVR_DEFAULT_IPD;
 import static com.oculusvr.capi.OvrLibrary.ovrProjectionModifier.ovrProjection_ClipRangeOpenGL;
 import static com.oculusvr.capi.OvrLibrary.ovrProjectionModifier.ovrProjection_RightHanded;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_RGBA;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLE_STRIP;
+import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL11.glScissor;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glFramebufferTexture2D;
+
+import java.io.IOException;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -23,15 +31,27 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
+import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.oculus.lwjgl.models.RawModel;
+import org.myrobotlab.oculus.lwjgl.models.TexturedModel;
+import org.myrobotlab.oculus.lwjgl.renderengine.Loader;
+import org.myrobotlab.oculus.lwjgl.renderengine.Renderer;
+import org.myrobotlab.oculus.lwjgl.shaders.StaticShader;
+import org.myrobotlab.oculus.lwjgl.textures.ModelTexture;
 import org.myrobotlab.service.OculusRift.RiftFrame;
 import org.saintandreas.gl.FrameBuffer;
 import org.saintandreas.gl.MatrixStack;
-import org.saintandreas.gl.SceneHelpers;
+import org.saintandreas.gl.buffers.VertexArray;
+import org.saintandreas.gl.shaders.Program;
+import org.saintandreas.gl.textures.Texture;
 import org.saintandreas.math.Matrix4f;
 import org.saintandreas.math.Vector3f;
-import org.saintandreas.vr.RiftUtils;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import com.oculusvr.capi.EyeRenderDesc;
 import com.oculusvr.capi.FovPort;
 import com.oculusvr.capi.GLTexture;
@@ -88,6 +108,28 @@ public class OculusDisplay implements Runnable {
 	// The last image captured from the OpenCV services (left&right)
 	private RiftFrame currentFrame;
 
+	private static Program unitQuadProgram;
+	private static VertexArray unitQuadVao;
+
+	private static final String UNIT_QUAD_VS;
+	private static final String UNIT_QUAD_FS;
+	static {
+		try {
+			UNIT_QUAD_VS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.vs"), Charsets.UTF_8);
+			UNIT_QUAD_FS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.fs"), Charsets.UTF_8);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	
+	private static TexturedModel texturedModel = null;
+	private static Loader loader = new Loader();
+	private static Renderer renderer = new Renderer();
+	private static StaticShader shader = new StaticShader();
+
+
+	
 	public OculusDisplay() {
 		// constructor
 		// start up hmd libs
@@ -111,7 +153,7 @@ public class OculusDisplay implements Runnable {
 			fovPorts[eye] = hmdDesc.DefaultEyeFov[eye];
 			OvrMatrix4f m = Hmd.getPerspectiveProjection(fovPorts[eye], 0.1f, 1000000f, ovrProjection_RightHanded
 					| ovrProjection_ClipRangeOpenGL);
-			projections[eye] = RiftUtils.toMatrix4f(m);
+			projections[eye] = toMatrix4f(m);
 			textureSizes[eye] = hmd.getFovTextureSize(eye, fovPorts[eye], 1.0f);
 		}
 
@@ -205,7 +247,7 @@ public class OculusDisplay implements Runnable {
 		frameBuffer.activate();
 
 		MatrixStack pr = MatrixStack.PROJECTION;
-		MatrixStack mv = MatrixStack.MODELVIEW;
+		// MatrixStack mv = MatrixStack.MODELVIEW;
 		GLTexture texture = swapTexture.getTexture(swapTexture.CurrentIndex);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.ogl.TexId, 0);
 
@@ -240,11 +282,11 @@ public class OculusDisplay implements Runnable {
 			if (eye == 0) {
 				// left screen
 				if (currentFrame.left != null) 
-					SceneHelpers.renderScreen(currentFrame.left);
+					renderScreen(currentFrame.left);
 			} else {
 				// right screen
 				if (currentFrame.right != null)
-					SceneHelpers.renderScreen(currentFrame.right);	        	
+					renderScreen(currentFrame.right);	        	
 			}
 		}
 
@@ -264,7 +306,8 @@ public class OculusDisplay implements Runnable {
 		glViewport(0, 0, width, height);
 		glClearColor(0.5f, 0.5f, System.currentTimeMillis() % 1000 / 1000.0f, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		SceneHelpers.renderTexturedQuad(mirrorTexture.ogl.TexId);
+		// SceneHelpers.renderTexturedQuad(mirrorTexture.ogl.TexId);
+		renderTexturedQuad(mirrorTexture.ogl.TexId);
 
 
 	}
@@ -339,5 +382,106 @@ public class OculusDisplay implements Runnable {
 	public void setCurrentFrame(RiftFrame currentFrame) {
 		this.currentFrame = currentFrame;
 	}
+	
+	// helper function from saintandreas !
+	public static Matrix4f toMatrix4f(OvrMatrix4f m) {
+		if (null == m) {
+			return new Matrix4f();
+		}
+		return new Matrix4f(m.M).transpose();
+	}
+	
+	public static void renderTexturedQuad(int texture) {
+		if (null == unitQuadProgram) {
+			unitQuadProgram = new Program(UNIT_QUAD_VS, UNIT_QUAD_FS);
+			unitQuadProgram.link();
+		}
+		if (null == unitQuadVao) {
+			unitQuadVao = new VertexArray();
+		}
+		unitQuadProgram.use();
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+		unitQuadVao.bind();
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		Texture.unbind(GL_TEXTURE_2D);
+		Program.clear();
+		VertexArray.unbind();
+	}
+
+
+	/**
+	 * helper function to render an image on the current bound texture. 
+	 */
+	public static void renderScreen(SerializableImage img) {
+
+		float size = 1.0f;
+
+		if (texturedModel == null) {
+
+			float[] verticies = {
+					// left bottom triangle
+					-size, size, 0f, // V0
+					-size, -size, 0f, // V1
+					size, -size, 0f, // V2
+					size,size,0f, // V3
+			};
+			int[] indicies = { 
+					0,1,3,
+					3,1,2
+			};
+
+			// TODO: calculate the texture scaling (probably depends on the power of 2 size thing for a texture.)
+			// What's the power of 2 here?
+			float xMax = 1.0f;
+			float yMax = 0.63f;
+			// something like this?
+			//			float xMax = img.getWidth()/1024.0f;
+			//			float yMax = img.getHeight()/512.0f;
+			float[] textureCoords = {
+					0,0,  //V0
+					0,yMax,  //V1
+					xMax,yMax,  //V2
+					xMax,0   //V3
+			};
+			// TODO: maybe I shouldn't do this each time ? 
+			RawModel model = loader.loadToVAO(verticies, textureCoords, indicies);
+
+			// TODO: load the image first.
+
+			ModelTexture texture = new ModelTexture(loader.loadTexture("OculusRift"));
+			texturedModel = new TexturedModel(model, texture);
+
+		} 
+
+		if (img != null ) {
+			System.out.println("WIDTH AND HEIGHT " + img.getWidth() + " " + img.getHeight());
+			// clean up the texture as we're about to replace it?
+			GL11.glDeleteTextures(texturedModel.getTexture().getID());
+			ModelTexture texture = new ModelTexture(loader.loadTexture(img.getImage()));
+			//ModelTexture texture = new ModelTexture(loader.loadTexture("agent"));
+			texturedModel.setTexture(texture);
+		}
+
+		// grab the latest opencv image
+		//  TODO: get this on a separate thread/via callback from mrl.
+		//		if (opencv.videoProcessor.getData() != null) {
+		//			// TODO: you'll run out of textures! need to free up the old texture before 
+		//			// creating a new one i guess.
+		//		
+		//			// maybe this cleans up the old texture?
+		//			//GL11.glDeleteTextures(texturedModel.getTexture().getID());
+		//			BufferedImage bi = opencv.videoProcessor.getData().getBufferedImage();
+		//			ModelTexture texture = new ModelTexture(loader.loadTexture(bi));
+		//			texturedModel.setTexture(texture);
+		//		}
+
+		shader.start();
+		renderer.render(texturedModel);
+		shader.stop();
+	}
+
+
 
 }

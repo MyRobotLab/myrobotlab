@@ -2,6 +2,11 @@ package org.myrobotlab.oculus.lwjgl.models;
 
 import org.myrobotlab.oculus.lwjgl.textures.ModelTexture;
 
+/**
+ * the base model of an object that has a texture.
+ * @author kwatters
+ *
+ */
 public class TexturedModel {
 	private RawModel rawModel;
 	private ModelTexture texture;

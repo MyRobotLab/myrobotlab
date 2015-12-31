@@ -11,6 +11,11 @@ import org.lwjgl.opengl.GL20;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
+/**
+ * Very simple shader program 
+ * @author kwatters
+ *
+ */
 public abstract class ShaderProgram {
 
 	private int programID;
@@ -18,8 +23,6 @@ public abstract class ShaderProgram {
 	private int fragmentShaderID;
 
 	public ShaderProgram(String vertexFile, String fragmentFile) {
-		
-		
 		vertexShaderID = loadShader(vertexFile,  GL20.GL_VERTEX_SHADER, false);
 		fragmentShaderID = loadShader(fragmentFile, GL20.GL_FRAGMENT_SHADER, false);
 		programID = GL20.glCreateProgram();

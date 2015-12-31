@@ -15,10 +15,12 @@ import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
 import org.myrobotlab.service.interfaces.PointPublisher;
+import org.saintandreas.math.Matrix4f;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;
 import com.oculusvr.capi.HmdDesc;
+import com.oculusvr.capi.OvrMatrix4f;
 import com.oculusvr.capi.OvrVector3f;
 import com.oculusvr.capi.TrackingState;
 
@@ -200,13 +202,13 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 			rightOpenCV.capture();
 			// Now turn on the camras.
 			// set camera index
-			
+
 			// Now that the Rift and OpenCV has been setup.
 			display = new OculusDisplay();
 			// on publish frame we'll update the current frame in the rift..
 			// synchronization issues maybe?
 			display.run();
-			
+
 		} else {
 			log.info("Rift interface already initialized.");
 		}
@@ -387,6 +389,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 
 }
 
