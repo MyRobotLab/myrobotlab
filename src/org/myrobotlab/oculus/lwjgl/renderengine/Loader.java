@@ -25,12 +25,26 @@ import org.newdawn.slick.util.BufferedImageUtil;
 
 import com.google.common.io.Resources;
 
+/**
+ * This is an openGL loader class.  It will load stuff into opengl land.
+ * 
+ * @author kwatters
+ *
+ */
 public class Loader {
-	
+	// list of all vaos that have been loaded
 	private List<Integer> vaos = new ArrayList<Integer>();
+	// list of all vbos that have been loaded
 	private List<Integer> vbos = new ArrayList<Integer>();
-	private List<Integer> textures = new ArrayList<Integer>();
-	
+	// list of all textures that have been loaded
+	private List<Integer> textures = new ArrayList<Integer>();	
+	/**
+	 * create a VAO and store the values, return the raw model that represents it.
+	 * @param positions
+	 * @param textureCoords
+	 * @param indicies
+	 * @return
+	 */
 	public RawModel loadToVAO(float[] positions, float[] textureCoords, int[] indicies) {
 		int vaoID = createVAO();
 		bindIndiciesBuffer(indicies);
@@ -39,7 +53,11 @@ public class Loader {
 		unbindVAO();
 		return new RawModel(vaoID, indicies.length);
 	};
-	
+	/**
+	 * Load a texture from a buffered image and return the texture id
+	 * @param bi
+	 * @return
+	 */
 	public int loadTexture(BufferedImage bi) {
 		Texture texture = null;
 		try {
@@ -50,8 +68,12 @@ public class Loader {
 		int textureID = texture.getTextureID();
 		textures.add(textureID);
 		return textureID;
-	};
-	
+	};	
+	/**
+	 * load a texture from a filename and return the texture id
+	 * @param fileName
+	 * @return
+	 */
 	public int loadTexture(String fileName) {
 		Texture texture  = null;
 		try {
@@ -71,6 +93,9 @@ public class Loader {
 		return textureID;
 	}
 	
+	/**
+	 * clean up and release the loaded VAO/VBO and textures
+	 */
 	public void cleanUp() {
 		// clean up vaos
 		for (int vao : vaos) {
