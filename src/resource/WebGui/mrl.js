@@ -150,11 +150,19 @@ angular
     ;
     
     this.sendMessage = function(msg) {
-        
-        if (msg.data != null ) {
-            for (i = 0; i < msg.data.length; ++i) {
-                // encode the data parameters
-                msg.data[i] = JSON.stringify(msg.data[i]);
+        var cleanJsonData = [];
+        if (msg.data != null && msg.data.length > 0) {
+            // reverse encoding - pop off undefined
+            // to shrink paramter length
+            // js implementation - 
+            var pos = msg.data.length - 1;
+            for (i = pos; i > -1; --i) {
+                
+                if (typeof msg.data[i]  == 'undefined'){
+                    msg.data.pop();
+                } else{
+                    msg.data[i] = JSON.stringify(msg.data[i]);
+                }
             }
         }
         
