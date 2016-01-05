@@ -405,11 +405,13 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
+			Runtime.start("webgui","WebGui");
 			AcapelaSpeech speech = (AcapelaSpeech)Runtime.start("speech", "AcapelaSpeech");
+			speech.speak("what is going on");
 			speech.speakBlocking("Répète après moi");
-			//speech.speak("hello there my name is ryan");
-			//speech.speak("hello world");
-			//speech.speak("one two three four");
+			speech.speak("hello there my name is ryan");
+			speech.speak("hello world");
+			speech.speak("one two three four");
 			// arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
 			// arduino.connect(port);
 			// arduino.broadcastState();
