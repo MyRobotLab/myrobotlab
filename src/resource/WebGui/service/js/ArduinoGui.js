@@ -4,20 +4,43 @@ angular.module('mrlapp.service.ArduinoGui', [])
     var _self = this;
     var msg = this.msg;
     
+    $scope.statusLine = "";
     $scope.version = "unknown";
     $scope.board = "";
+    $scope.image = "service/arduino/Uno.png";
     
     this.updateState = function(service) {
         $scope.service = service;
         $scope.board = service.board;
+        $scope.image = "service/arduino/" + service.board + ".png";
+        
+        // === service.serial begin ===
+        $scope.serialName = service.serial.name;
+        $scope.isConnected = ($scope.service.serial.portName != null );
+        $scope.isConnectedImage = ($scope.service.serial.portName != null ) ? "connected" : "disconnected";
+        $scope.connectText = ($scope.service.serial.portName == null ) ? "connect" : "disconnect";
+        if ($scope.isConnected) {
+            $scope.portName = $scope.service.serial.portName;
+        } else {
+            $scope.portName = $scope.service.serial.lastPortName;
+        }
+        // === service.serial begin ===
+
+        $scope.statusLine = $scope.board;
+        if ($scope.isConnected){
+            $scope.statusLine += ' connected to ' + $scope.portName + ' version ' + $scope.version;
+        } else {
+            $scope.statusLine += ' disconnected'
+        }
+        
         //$scope.version = service.mrlCommVersion;
     }
     ;
     _self.updateState($scope.service);
     
     this.onMsg = function(inMsg) {
-        // THIS IS NOT GOOD !
-        //$log.info('CALLBACK - ' + inMsg.method);
+        // TODO - make "super call" as below
+        // this.constructor.prototype.onMsg.call(this, inMsg);
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(inMsg.data[0]);
@@ -28,16 +51,21 @@ angular.module('mrlapp.service.ArduinoGui', [])
             break;
         case 'onVersion':
             $scope.version = inMsg.data[0];
+            if ($scope.version != service.mrlCommVersion) {
+                $scope.version = "expected version or MRLComm.c is " + service.mrlCommVersion + " board returned " + $scope.version + " please upload version " + service.mrlCommVersion;
+            }
             $scope.$apply();
             break;
         case 'onRefresh':
             $scope.possiblePorts = inMsg.data[0];
             $scope.$apply();
             break;
+            // FIXME - this should be in a prototype    
         case 'onStatus':
             // backend update 
-            $scope.updateState(inMsg.data[0]);
-            $scope.$apply();
+            // FIXME - SHOULD BE MODIFYING PARENT'S STATUS
+            // $scope.updateState(inMsg.data[0]);
+            // $scope.$apply();
             break;
         case 'onPin':
             
@@ -48,33 +76,17 @@ angular.module('mrlapp.service.ArduinoGui', [])
             $scope.$apply();
             break;
         default:
-            $log.error("ERROR - unhandled method " + inMsg.method);
+            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);            
             break;
         }
     }
     ;
     
-    $scope.showMRLComm = true;
-    
-    $scope.updateState = function(service) {
-        $scope.service = service;
-        $scope.board = $scope.service.board;
-        $scope.isConnected = ($scope.service.portName != null );
-        $scope.isConnectedImage = ($scope.service.portName != null ) ? "connected" : "disconnected";
-        $scope.connectText = ($scope.service.portName == null ) ? "connect" : "disconnect";
-    }
-    ;
-    
     // $scope display methods
     $scope.onBoardChange = function(board) {
-        if ($scope.service.board != $scope.board) {
+        if ($scope.service.board != board) {
             msg.send('setBoard', board);
         }
-    }
-    ;
-    
-    $scope.toggleShowMRLComm = function() {
-        $scope.showMRLComm = ($scope.showMRLComm) ? false : true;
     }
     ;
     
@@ -91,22 +103,9 @@ angular.module('mrlapp.service.ArduinoGui', [])
     }
     ;
     
-    // initial update
-    $scope.service = mrl.getService($scope.service.name);
-    $scope.updateState($scope.service);
-    
-    
-    // subsumption !!! - we want to repress serial messages they are
-    // WAY TO MANY AND NOT INTEREsTING !!
-    // we want to unregister tx & rx events !!
-    // now the tricky part of finding "real" name of a peer ?
-    // mrl.getPeerName()
-    // mrl.sendTo(name, 'unsubscribe', board);
-    
-    
+    // get version
     msg.subscribe('publishVersion');
     msg.send("getVersion");
-    
     msg.subscribe(this);
 }
 ]);

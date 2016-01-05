@@ -82,9 +82,7 @@ public class Servo extends Service implements ServoControl {
 
 			if (targetPos == null) {
 				targetPos = sweepMin;
-			}
-
-			isSweeping = true;
+			}			
 
 			try {
 				while (isSweeping) {
@@ -124,6 +122,8 @@ public class Servo extends Service implements ServoControl {
 	public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
 	transient ServoController controller;
+	
+	String controllerName = null;
 
 	private Mapper mapper = new Mapper(0, 180, 0, 180);
 
@@ -135,11 +135,6 @@ public class Servo extends Service implements ServoControl {
 	 * the requested INPUT position of the servo
 	 */
 	Integer targetPos;
-
-	/**
-	 * the actual positio nof the servo
-	 */
-	Integer pos;
 
 	/**
 	 * the calculated output for the servo
@@ -230,6 +225,7 @@ public class Servo extends Service implements ServoControl {
 
 		if (isAttached) {
 			// changed state
+			controllerName = controller.getName();
 			broadcastState();
 		}
 
@@ -425,9 +421,9 @@ public class Servo extends Service implements ServoControl {
 		return setController(sc);
 	}
 
-	public boolean setEventsEnabled(boolean b) {
+	public boolean eventsEnabled(boolean b) {
 		isEventsEnabled = b;
-		controller.setServoEventsEnabled(this);
+		controller.servoEventsEnabled(this);
 		return b;
 	}
 
@@ -464,10 +460,6 @@ public class Servo extends Service implements ServoControl {
 		return rest;
 	}
 
-	public void setSpeed(int speed) {
-		setSpeed((double)speed);
-	}
-
 	public void setSpeed(double speed) {
 
 		this.speed = speed;
@@ -498,10 +490,13 @@ public class Servo extends Service implements ServoControl {
 		isSweeping = false;
 		sweeper = null;
 		controller.servoSweepStop(this);
+		broadcastState();
 	}
 
 	public void sweep() {
-		sweep(mapper.getMinX().intValue(), mapper.getMaxX().intValue(), 1, 1);
+		int min = mapper.getMinX().intValue();
+		int max = mapper.getMaxX().intValue();
+		sweep(min, max, 1, 1);
 	}
 
 	public void sweep(int min, int max) {
@@ -535,6 +530,9 @@ public class Servo extends Service implements ServoControl {
 			sweeper = new Sweeper(getName());
 			sweeper.start();
 		}
+		
+		isSweeping = true;
+		broadcastState();
 	}
 
 	/**
@@ -582,11 +580,11 @@ public class Servo extends Service implements ServoControl {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		try {
-			
+			Runtime.start("webgui", "WebGui");
 			Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-			arduino.connect("COM4");
+			arduino.connect("COM18");
 			Servo servo = (Servo) Runtime.start("servo", "Servo");
-			servo.attach(arduino, 10);
+			servo.attach(arduino, 8);
 			servo.moveTo(90);
 			servo.setRest(30);
 			servo.moveTo(10);

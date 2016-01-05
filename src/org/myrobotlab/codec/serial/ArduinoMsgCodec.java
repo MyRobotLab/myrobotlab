@@ -60,8 +60,6 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 
 
-	/////// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
-	
 	///// java ByteToMethod generated definition - DO NOT MODIFY - Begin //////
 	// {publishMRLCommError Integer} 
 	public final static int PUBLISH_MRLCOMM_ERROR =		1;
@@ -102,119 +100,101 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 	// {motorMoveTo Motor} 
 	public final static int MOTOR_MOVE_TO =		13;
 
+	// {motorReset Motor} 
+	public final static int MOTOR_RESET =		14;
+
+	// {motorStop Motor} 
+	public final static int MOTOR_STOP =		15;
+
 	// {pinMode Integer Integer} 
-	public final static int PIN_MODE =		14;
+	public final static int PIN_MODE =		16;
 
 	// {publishCustomMsg Object[]} 
-	public final static int PUBLISH_CUSTOM_MSG =		15;
+	public final static int PUBLISH_CUSTOM_MSG =		17;
 
 	// {publishLoadTimingEvent Long} 
-	public final static int PUBLISH_LOAD_TIMING_EVENT =		16;
+	public final static int PUBLISH_LOAD_TIMING_EVENT =		18;
 
 	// {publishPin Pin} 
-	public final static int PUBLISH_PIN =		17;
+	public final static int PUBLISH_PIN =		19;
 
 	// {publishPulse Long} 
-	public final static int PUBLISH_PULSE =		18;
+	public final static int PUBLISH_PULSE =		20;
 
 	// {publishPulseStop Integer} 
-	public final static int PUBLISH_PULSE_STOP =		19;
+	public final static int PUBLISH_PULSE_STOP =		21;
 
 	// {publishSensorData Object} 
-	public final static int PUBLISH_SENSOR_DATA =		20;
+	public final static int PUBLISH_SENSOR_DATA =		22;
 
 	// {publishServoEvent Integer} 
-	public final static int PUBLISH_SERVO_EVENT =		21;
-
-	// {publishStepperEvent Integer} 
-	public final static int PUBLISH_STEPPER_EVENT =		22;
+	public final static int PUBLISH_SERVO_EVENT =		23;
 
 	// {publishTrigger Pin} 
-	public final static int PUBLISH_TRIGGER =		23;
+	public final static int PUBLISH_TRIGGER =		24;
 
 	// {pulse int int int int} 
-	public final static int PULSE =		24;
+	public final static int PULSE =		25;
 
 	// {pulseStop} 
-	public final static int PULSE_STOP =		25;
+	public final static int PULSE_STOP =		26;
 
-	// {sensorAttach UltrasonicSensor} 
-	public final static int SENSOR_ATTACH =		26;
+	// {sensorAttach SensorDataSink} 
+	public final static int SENSOR_ATTACH =		27;
 
 	// {sensorPollingStart String int} 
-	public final static int SENSOR_POLLING_START =		27;
+	public final static int SENSOR_POLLING_START =		28;
 
 	// {sensorPollingStop String} 
-	public final static int SENSOR_POLLING_STOP =		28;
+	public final static int SENSOR_POLLING_STOP =		29;
 
 	// {servoAttach Servo Integer} 
-	public final static int SERVO_ATTACH =		29;
+	public final static int SERVO_ATTACH =		30;
 
 	// {servoDetach Servo} 
-	public final static int SERVO_DETACH =		30;
+	public final static int SERVO_DETACH =		31;
+
+	// {servoEventsEnabled Servo} 
+	public final static int SERVO_EVENTS_ENABLED =		32;
 
 	// {servoSweepStart Servo} 
-	public final static int SERVO_SWEEP_START =		31;
+	public final static int SERVO_SWEEP_START =		33;
 
 	// {servoSweepStop Servo} 
-	public final static int SERVO_SWEEP_STOP =		32;
+	public final static int SERVO_SWEEP_STOP =		34;
 
 	// {servoWrite Servo} 
-	public final static int SERVO_WRITE =		33;
+	public final static int SERVO_WRITE =		35;
 
 	// {servoWriteMicroseconds Servo} 
-	public final static int SERVO_WRITE_MICROSECONDS =		34;
+	public final static int SERVO_WRITE_MICROSECONDS =		36;
 
 	// {setDebounce int} 
-	public final static int SET_DEBOUNCE =		35;
+	public final static int SET_DEBOUNCE =		37;
 
 	// {setDigitalTriggerOnly Boolean} 
-	public final static int SET_DIGITAL_TRIGGER_ONLY =		36;
+	public final static int SET_DIGITAL_TRIGGER_ONLY =		38;
 
 	// {setLoadTimingEnabled boolean} 
-	public final static int SET_LOAD_TIMING_ENABLED =		37;
+	public final static int SET_LOAD_TIMING_ENABLED =		39;
 
 	// {setPWMFrequency Integer Integer} 
-	public final static int SET_PWMFREQUENCY =		38;
+	public final static int SET_PWMFREQUENCY =		40;
 
 	// {setSampleRate int} 
-	public final static int SET_SAMPLE_RATE =		39;
+	public final static int SET_SAMPLE_RATE =		41;
 
 	// {setSerialRate int} 
-	public final static int SET_SERIAL_RATE =		40;
-
-	// {setServoEventsEnabled Servo} 
-	public final static int SET_SERVO_EVENTS_ENABLED =		41;
+	public final static int SET_SERIAL_RATE =		42;
 
 	// {setServoSpeed Servo} 
-	public final static int SET_SERVO_SPEED =		42;
-
-	// {setStepperSpeed Integer} 
-	public final static int SET_STEPPER_SPEED =		43;
+	public final static int SET_SERVO_SPEED =		43;
 
 	// {setTrigger int int int} 
 	public final static int SET_TRIGGER =		44;
 
 	// {softReset} 
 	public final static int SOFT_RESET =		45;
-
-	// {stepperAttach String} 
-	public final static int STEPPER_ATTACH =		46;
-
-	// {stepperDetach String} 
-	public final static int STEPPER_DETACH =		47;
-
-	// {stepperMoveTo String int int} 
-	public final static int STEPPER_MOVE_TO =		48;
-
-	// {stepperReset String} 
-	public final static int STEPPER_RESET =		49;
-
-	// {stepperStop String} 
-	public final static int STEPPER_STOP =		50;
-
-	// {stopService} 
-	public final static int STOP_SERVICE =		51;
 
 
 	static {
@@ -257,6 +237,12 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		byteToMethod.put(MOTOR_MOVE_TO,"motorMoveTo");
 		methodToByte.put("motorMoveTo",MOTOR_MOVE_TO);
 
+		byteToMethod.put(MOTOR_RESET,"motorReset");
+		methodToByte.put("motorReset",MOTOR_RESET);
+
+		byteToMethod.put(MOTOR_STOP,"motorStop");
+		methodToByte.put("motorStop",MOTOR_STOP);
+
 		byteToMethod.put(PIN_MODE,"pinMode");
 		methodToByte.put("pinMode",PIN_MODE);
 
@@ -281,9 +267,6 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		byteToMethod.put(PUBLISH_SERVO_EVENT,"publishServoEvent");
 		methodToByte.put("publishServoEvent",PUBLISH_SERVO_EVENT);
 
-		byteToMethod.put(PUBLISH_STEPPER_EVENT,"publishStepperEvent");
-		methodToByte.put("publishStepperEvent",PUBLISH_STEPPER_EVENT);
-
 		byteToMethod.put(PUBLISH_TRIGGER,"publishTrigger");
 		methodToByte.put("publishTrigger",PUBLISH_TRIGGER);
 
@@ -307,6 +290,9 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 
 		byteToMethod.put(SERVO_DETACH,"servoDetach");
 		methodToByte.put("servoDetach",SERVO_DETACH);
+
+		byteToMethod.put(SERVO_EVENTS_ENABLED,"servoEventsEnabled");
+		methodToByte.put("servoEventsEnabled",SERVO_EVENTS_ENABLED);
 
 		byteToMethod.put(SERVO_SWEEP_START,"servoSweepStart");
 		methodToByte.put("servoSweepStart",SERVO_SWEEP_START);
@@ -338,14 +324,8 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		byteToMethod.put(SET_SERIAL_RATE,"setSerialRate");
 		methodToByte.put("setSerialRate",SET_SERIAL_RATE);
 
-		byteToMethod.put(SET_SERVO_EVENTS_ENABLED,"setServoEventsEnabled");
-		methodToByte.put("setServoEventsEnabled",SET_SERVO_EVENTS_ENABLED);
-
 		byteToMethod.put(SET_SERVO_SPEED,"setServoSpeed");
 		methodToByte.put("setServoSpeed",SET_SERVO_SPEED);
-
-		byteToMethod.put(SET_STEPPER_SPEED,"setStepperSpeed");
-		methodToByte.put("setStepperSpeed",SET_STEPPER_SPEED);
 
 		byteToMethod.put(SET_TRIGGER,"setTrigger");
 		methodToByte.put("setTrigger",SET_TRIGGER);
@@ -353,28 +333,10 @@ public class ArduinoMsgCodec extends Codec implements Serializable {
 		byteToMethod.put(SOFT_RESET,"softReset");
 		methodToByte.put("softReset",SOFT_RESET);
 
-		byteToMethod.put(STEPPER_ATTACH,"stepperAttach");
-		methodToByte.put("stepperAttach",STEPPER_ATTACH);
-
-		byteToMethod.put(STEPPER_DETACH,"stepperDetach");
-		methodToByte.put("stepperDetach",STEPPER_DETACH);
-
-		byteToMethod.put(STEPPER_MOVE_TO,"stepperMoveTo");
-		methodToByte.put("stepperMoveTo",STEPPER_MOVE_TO);
-
-		byteToMethod.put(STEPPER_RESET,"stepperReset");
-		methodToByte.put("stepperReset",STEPPER_RESET);
-
-		byteToMethod.put(STEPPER_STOP,"stepperStop");
-		methodToByte.put("stepperStop",STEPPER_STOP);
-
-		byteToMethod.put(STOP_SERVICE,"stopService");
-		methodToByte.put("stopService",STOP_SERVICE);
-
 
 	}
-	
 	///// JAVA GENERATED DEFINITION END - DO NOT MODIFY //////
+	
 	
 	
 	static public String byteToMethod(int m) {

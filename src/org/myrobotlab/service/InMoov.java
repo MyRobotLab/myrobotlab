@@ -498,7 +498,7 @@ public class InMoov extends Service {
 			return Arduino.BOARD_TYPE_UNO;
 		}
 
-		return Arduino.BOARD_TYPE_ATMEGA2560;
+		return Arduino.BOARD_TYPE_MEGA;
 	}
 
 	@Override
@@ -1033,7 +1033,7 @@ public class InMoov extends Service {
 		head = (InMoovHead) startPeer("head");
 
 		if (type == null) {
-			type = Arduino.BOARD_TYPE_ATMEGA2560;
+			type = Arduino.BOARD_TYPE_MEGA;
 		}
 
 		head.arduino.setBoard(type);
@@ -1204,7 +1204,7 @@ public class InMoov extends Service {
 		torso = (InMoovTorso) startPeer("torso");
 
 		if (type == null) {
-			type = Arduino.BOARD_TYPE_ATMEGA2560;
+			type = Arduino.BOARD_TYPE_MEGA;
 		}
 
 		torso.arduino.setBoard(type);

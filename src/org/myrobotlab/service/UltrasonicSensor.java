@@ -106,9 +106,10 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 	 * method for the controller to get the data type we want
 	 */
 	@Override
-	public String getDataSinkType() {
+	public int getDataSinkType() {
 		// we want an Integer
-		return Integer.class.getCanonicalName();
+		//return Integer.class.getCanonicalName();
+		return DATA_SINK_TYPE_INTEGER;
 	}
 
 	@Override
@@ -199,7 +200,7 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 
 	@Override
 	public int getSensorType() {
-		return SENSOR_ULTRASONIC;
+		return SENSOR_TYPE_ULTRASONIC;
 	}
 
 	@Override

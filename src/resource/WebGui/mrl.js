@@ -575,6 +575,10 @@ angular
                                     for (var method in methodMap) {
                                         if (methodMap.hasOwnProperty(method)) {
                                             var m = methodMap[method];
+
+                                            if (method == 'sweep'){
+                                                console.log('sweep Yay !!');
+                                            }
                                             // do stuff
 //                                            $log.info(method);
                                             // build interface method

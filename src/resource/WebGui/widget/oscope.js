@@ -29,7 +29,8 @@ angular.module('mrlapp.service')
             scope.pinData = [];
             scope.width = 0;
             scope.height = 0;
-            scope.hscale = 0.5;
+            //scope.hscale = 0.5;
+            scope.hscale = 1.0;
             
             var gradient = tinygradient([
             // tinycolor('#ff0000'),       // tinycolor object
@@ -114,25 +115,27 @@ angular.module('mrlapp.service')
             
             }
             
-            scope.onMsg = function(msg) {
+            // FIXME this should be _self.onMsg = function(inMsg)
+            this.onMsg = function(inMsg) {
                 //console.log('CALLBACK - ' + msg.method);
-                switch (msg.method) {
+                switch (inMsg.method) {
                 case 'onState':
                     // backend update 
-                    setTraceButtons(msg.data[0].pinList);
+                    setTraceButtons(inMsg.data[0].pinList);
                     scope.$apply();
                     break;
                 case 'onPin':
                     // FIXME - (optimization) pin should not have to send pintype - its known
                     // when pinButtonList is built
-                    inPin = msg.data[0];
+                    inPin = inMsg.data[0];
                     pinData = scope.pinData[inPin.pin];
                     button = scope.pinButtonList[inPin.pin];
                     
                     // FIXME - nice to have an offset to 0 so the value 0 is visible
-                    var y = 0;
+                    // var y = 0;
                     
                     // FIXME - should be pinType - and pinType is sent only once
+                    /*
                     if (button.type == 1) {
                         // digital
                         y = scope.height - inPin.value * 35 - 10 * inPin.pin;
@@ -140,6 +143,9 @@ angular.module('mrlapp.service')
                         // analog
                         y = scope.height - inPin.value - 10;
                     }
+                    */
+
+                    var y = scope.height - inPin.value;
                     
                     // this certainly did not work
                     // ctx.putImageData(id, pinData.posX, pinData.posY);
@@ -165,11 +171,11 @@ angular.module('mrlapp.service')
                     break;
                 case 'onTX':
                     ++scope.txCount;
-                    scope.tx += msg.data[0];
+                    scope.tx += inMsg.data[0];
                     scope.$apply();
                     break;
                 default:
-                    console.log("ERROR - unhandled method " + msg.method);
+                    console.log("ERROR - unhandled method " + inMsg.method);
                     break;
                 }
             }
@@ -228,13 +234,13 @@ angular.module('mrlapp.service')
             
             // FIXME - get name through attribute
             // FIXME - create isolated scope !
-            var serviceScope = scope.$parent.$parent;
+            var serviceScope = scope.$parent.$parent; // FIXME - this is a bit 'wack'
             var name = serviceScope.service.name;
             var service = mrl.getService(name);
             
             // this sends everything which is sent to angular
             // here for this service
-            mrl.subscribeToService(scope.onMsg, name);
+            mrl.subscribeToService(_self.onMsg, name);
             
             // this siphons off a single subscribe to the webgui
             // so it will be broadcasted back to angular

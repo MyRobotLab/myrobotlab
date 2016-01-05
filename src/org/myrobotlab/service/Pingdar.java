@@ -209,7 +209,7 @@ public class Pingdar extends Service {
 	public void stop() {
 		super.stopService();
 		sensor.stopRanging();
-		servo.setEventsEnabled(false);
+		servo.eventsEnabled(false);
 		servo.stop();
 	}
 
@@ -234,7 +234,7 @@ public class Pingdar extends Service {
 		servo.addServoEventListener(this);
 
 		servo.setSpeed(0.20);
-		servo.setEventsEnabled(true);
+		servo.eventsEnabled(true);
 		// STEP ???
 		servo.sweep(sweepMin, sweepMax, 1, step);
 

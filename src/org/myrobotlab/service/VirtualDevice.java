@@ -214,7 +214,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
 			uart.setTimeout(100); // don't want to hang when decoding results...
 			*/
 			
-			arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
+			arduino.setBoardMega();
 
 			arduino.connect(portName);
 		

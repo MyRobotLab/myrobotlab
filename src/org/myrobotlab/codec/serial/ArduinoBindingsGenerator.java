@@ -21,6 +21,8 @@ public class ArduinoBindingsGenerator {
 	public transient final static Logger log = LoggerFactory.getLogger(ArduinoBindingsGenerator.class);
 
 	static TreeMap<String, Method> sorted = new TreeMap<String, Method>();
+	static TreeMap<String, Integer> sensorTypes = new TreeMap<String, Integer>();
+	static TreeMap<String, Integer> errorTypes = new TreeMap<String, Integer>();
 
 	static StringBuilder inoTemplate = new StringBuilder("///// INO GENERATED DEFINITION BEGIN //////\n");
 	static StringBuilder pythonTemplate = new StringBuilder("##### PYTHON GENERATED DEFINITION BEGIN ######\n");
@@ -53,7 +55,7 @@ public class ArduinoBindingsGenerator {
 		inoTemplate.append(methodSignatureComment);
 		pythonTemplate.append(pythonSignatureComment);
 		String underscore = CodecUtils.toUnderScore(method.getName());
-		inoTemplate.append(String.format("#define %s\t\t%d\n\n", underscore, index));
+		inoTemplate.append(String.format("#define %s\t\t%d\n", underscore, index));
 		pythonTemplate.append(String.format("  %s = %d\n\n", underscore, index));
 
 		javaStaticImports.append(String.format("\timport static org.myrobotlab.codec.serial.ArduinoMsgCodec.%s;\n", underscore));
@@ -97,6 +99,9 @@ public class ArduinoBindingsGenerator {
 			} else {
 				sorted.put(method.getName(), method);
 			}
+			// FIXME non Arduino service method protocol defitions added
+			// like errorTypes
+			// and sensorTypes
 		}
 
 		HashSet<String> exclude = new HashSet<String>();
@@ -152,12 +157,19 @@ public class ArduinoBindingsGenerator {
 		exclude.add("onConnect");	
 		exclude.add("onDisconnect");	
 		exclude.add("setBoard");	
-		exclude.add("setBoard");	
 		exclude.add("setSketch");	
 
+		// stuff which never gets down to the uC
+		exclude.add("getDataSinkType");	
+		exclude.add("getSensorConfig");	
+		exclude.add("getSensorType");	
+		exclude.add("update");	
+		exclude.add("stopService");	
+		
 		exclude.add("refreshVersion");	
 		exclude.add("getPortName");	
 		exclude.add("setBoardMega");	
+		exclude.add("setBoardUno");			
 		
 		int index = 0;
 
@@ -181,7 +193,7 @@ public class ArduinoBindingsGenerator {
 		}
 
 		inoTemplate.append("///// INO GENERATED DEFINITION END //////\n");
-		inoTemplate.append("##### PYTHON GENERATED DEFINITION END #####\n");
+		pythonTemplate.append("##### PYTHON GENERATED DEFINITION END #####\n");
 
 		
 		
