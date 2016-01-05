@@ -234,8 +234,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * Uno & Duemilanove have 14 digital pins (6 PWM) & 6 analog - total 20
 	 * Mini & Pro have 14 digital pins (8 PWM) & 6 analog - total 20
 	 * 
-	 * ATmega328 Boards — 32kB Program Space // 1 UART // 6 PWM // 4-8 Analog Inputs // 9-14 Digital I/O
-	 * ATmega2560 Arduino Mega's — 256kB Program Space // 4 UARTs // 14 PWM // 16 Analog Inputs // 54 Digital I/O - 
+	 * ATmega328 Boards 32kB Program Space // 1 UART // 6 PWM // 4-8 Analog Inputs // 9-14 Digital I/O
+	 * ATmega2560 Arduino Mega's 256kB Program Space // 4 UARTs // 14 PWM // 16 Analog Inputs // 54 Digital I/O - 
 	 * 
 	 * So at the moment .. there is only Uno & Mega !!!
 	 * 
