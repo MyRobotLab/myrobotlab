@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 
@@ -59,7 +60,27 @@ public class ProgramABTest {
 		testService.savePredicates();
 		testService.reloadSession(path, session, botName);
 		resp = testService.getResponse(session, "GET FOO");
-		assertEquals("FOO IS " + testValue, resp.msg);		
+		assertEquals("FOO IS " + testValue, resp.msg);	
+		
+	}
+	
+	@Test
+	public void testPredicates() {
+		// test removing the predicate if it exists
+		testService.setPredicate(session, "name", "foo1");
+		String name = testService.getPredicate(session, "name");
+		// validate it's set properly
+		assertEquals("foo1", name);
+		testService.removePredicate(session, "name");
+		// validate the predicate doesn't exist
+		name = testService.getPredicate(session, "name");
+		// TODO: is this valid?  one would expect it would return null.
+		assertEquals("unknown",name);
+		// set a predicate
+		testService.setPredicate(session, "name", "foo2");
+		name = testService.getPredicate(session, "name");
+		// validate it's set properly
+		assertEquals("foo2", name);
 	}
 	
 	@Test
