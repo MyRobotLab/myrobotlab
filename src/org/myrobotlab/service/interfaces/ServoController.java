@@ -72,7 +72,7 @@ public interface ServoController extends NameProvider, MicrocontrollerPeripheral
 
 	public void servoWriteMicroseconds(Servo servo);
 
-	public boolean setServoEventsEnabled(Servo servo);
+	public boolean servoEventsEnabled(Servo servo);
 
 	/**
 	 * return the current pin this servo is attached to

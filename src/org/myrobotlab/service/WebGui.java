@@ -19,7 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.AtmosphereRequest;
-import org.atmosphere.cpr.AtmosphereRequestImpl.Body;
+// import org.atmosphere.cpr.AtmosphereRequestImpl.Body;
+import org.atmosphere.cpr.AtmosphereRequest.Body;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
@@ -413,7 +414,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			InputStream in = r.getRequest().getInputStream();
 			out = r.getResponse().getOutputStream();
 
-			r.setBroadcaster(broadcaster);
+			// Broadcaster bc = r.getBroadcaster();
+			// if (bc != null || r.getBroadcaster() != broadcaster){
+				r.setBroadcaster(broadcaster);
+			//}
 
 			// good debug material
 			// log.info("sessionId {}", r);
@@ -485,6 +489,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				// ========================================
 				// if message api-type - we only have/need 3 URI parts
 				if ("messages".equals(parts[2]) && "POST".equals(httpMethod)) {
+					request.body();
 					Body body = request.body();
 					processMessageAPI(codec, body);
 					return;

@@ -4,9 +4,13 @@ package org.myrobotlab.service.interfaces;
 public interface SensorDataSink {
 	
 	// FYI - these are NOT Arduino specific !!!
-	public static final int SENSOR_PIN = 0;
-	public static final int SENSOR_ULTRASONIC = 1;
-	public static final int SENSOR_PULSE = 2;
+	public static final int SENSOR_TYPE_PIN          = 0;
+	public static final int SENSOR_TYPE_ULTRASONIC   = 1;
+	public static final int SENSOR_TYPE_PULSE        = 2;
+	
+	// return types
+	public static final int DATA_SINK_TYPE_INTEGER   = 0; // 16 bit ?
+	public static final int DATA_SINK_TYPE_PIN       = 1;
 	
 	/**
 	 * callback method from controller - updates the Sensor with data
@@ -16,12 +20,13 @@ public interface SensorDataSink {
 	public void update(Object data);
 	
 	/**
-	 * gets the type of data the sensor expects
+	 * gets the IDL id type of data the sensor expects
 	 * from the Object data callback
 	 * @return
 	 */
 	// public Class<?> getDataSinkType(); - Gson won't serialize this
-	public String getDataSinkType();
+	// PUBLISH_SENSOR_DATA - return datatype - non Java IDL !!!
+	public int getDataSinkType();
 	
 	/**
 	 * high level identifier - for languages which handle

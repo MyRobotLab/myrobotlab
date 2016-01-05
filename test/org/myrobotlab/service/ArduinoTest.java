@@ -76,7 +76,7 @@ public class ArduinoTest {
 		codec.setTimeout(1000);
 		uart.setTimeout(100); // don't want to hang when decoding results...
 
-		arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
+		arduino.setBoardMega();
 		arduino.connect(vport);
 		
 		//serial.removeListener("onByte", serviceName, inMethod);

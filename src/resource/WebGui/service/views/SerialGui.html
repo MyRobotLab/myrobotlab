@@ -1,17 +1,44 @@
+<!-- FIXME - this should be a portDirective begin -->
 <div class="row">
-  <div class="col-lg-2">
-    <img ng-src="../{{isConnectedImage}}.png" /> <!-- TODO - make directive -->
+  <div class="col-md-4">
+   <label>port</label>
+    <div class="input-group">
+       <input class="form-control" type="text" ng-model="portName" ng-disabled="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8"/>
+       <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</button></span>
+       <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button></span>
+       <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button></span>
+       <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
+     </div>
+  </div>
+  <div class="col-md-4">
+     <img ng-src="../{{isConnectedImage}}.png" /> <!-- TODO - make directive -->
      <label ng-show="isConnected">{{stats.lineSpeed}} Kbps</label>
   </div>
-  <div class="col-lg-3">    
+  <div class="col-md-4">
+  </div>
+</div>
+<!-- FIXME - this should be a portDirective end -->
+
+<div class="row">
+  <div class="col-md-4">
+  <!--
     <label for="service.portName">port</label>
     <input type="text" ng-model="portName" ng-disabled="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8" class="form-control">
+    -->
   </div>
-  <div class="col-lg-7">
+  <div class="col-md-4">
+  <!--
+    <img ng-src="../{{isConnectedImage}}.png" /> 
+     <label ng-show="isConnected">{{stats.lineSpeed}} Kbps</label>
+     -->
+  </div>
+  <div class="col-md-4">
   <div class="btn-group">
+  <!--
     <label class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</label>
     <label class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</label>
     <label class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</label>
+  -->    
     <label class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</label>   
   </div>
   </div>

@@ -18,7 +18,7 @@ angular.module('mrlapp.nav')
 
                 // load type ahead service types
                 $scope.possibleServices = mrl.getPossibleServices();
-                console.log('possibleServices', $scope.possibleServices);
+                // console.log('possibleServices', $scope.possibleServices);
 
                 // get platform information for display
                 var p = mrl.getPlatform();

@@ -1,98 +1,122 @@
 angular.module('mrlapp.service.ServoGui', [])
-.controller('ServoGuiCtrl', ['$log','$scope', 'mrl', function($log, $scope, mrl) {
-        $log.info('ServoGuiCtrl');
+.controller('ServoGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
+    $log.info('ServoGuiCtrl');
+    var _self = this;
+    var msg = this.msg;
+    
+    // init
+    //$scope.controller = '';
+    $scope.controllerName = '';
+    $scope.controllers = [];
+    $scope.pins = [];
+    $scope.pin = '';
+    $scope.min = 0;
+    $scope.max = 180;
+    $scope.angle = 0;
+    
+    for (i = 2; i < 54; ++i) {
+        $scope.pins.push(i);
+    }
+    
+    //Slider config with callbacks
+    $scope.pos = {
+        value: 0,
+        options: {
+            floor: 0,
+            ceil: 180,
+            onStart: function() {
+            },
+            onChange: function() {
+                msg.send('moveTo', $scope.pos.value);
+            },
+            onEnd: function() {
+            }
+        }
+    };
+    
+    
+    // GOOD TEMPLATE TO FOLLOW
+    this.updateState = function(service) {
+        $scope.service = service;
+        $scope.pos.value = service.targetOutput;
+        $scope.controllerName = service.controllerName;
+        $scope.speed = service.speed;
+        $scope.isAttached = service.isAttached;
+        $scope.pin = service.pin;
+        $scope.rest = service.rest;
+        //$scope.pos.value = service.pos;
+        $scope.min = service.mapper.minOutput;
+        $scope.max = service.mapper.maxOutput;
+    }
+    ;
+    
+    _self.updateState($scope.service);
+    
+    this.onMsg = function(inMsg) {
+        var data = inMsg.data[0];
+        switch (inMsg.method) {
+        case 'onState':
+            _self.updateState(data);
+            $scope.$apply();
+            break;
+        case 'onServoEvent':
+            $scope.pin.value = data;
+            $scope.$apply();
+            break;
+        case 'onStatus':
+            $scope.status = data;
+            $scope.$apply();
+            break;
+        case 'addListener':
+            // wtf?
+            $log.info("Add listener called");
+            $scope.status = data;
+            $scope.$apply();
+            break;
+        case 'onServiceNamesFromInterface':
+            $scope.controllers = data;
+            $scope.$apply();
+            break;
+        default:
+            $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method);
+            break;
+        }
+        ;
+    
+    }
+    ;
+    
+    $scope.update = function(speed, rest, min, max) {
+        msg.send("setSpeed", speed);
+        msg.send("setRest", rest);
+        msg.send("setMinMax", min, max);
+    }
+    ;
+    
+    $scope.setControllerName = function(name) {
+        $scope.controllerName = name;
+    }
+    
+    $scope.setPin = function(inPin) {
+        $scope.pin = inPin;
+    }
 
-        var _self = this;
-        var msg = this.msg;
+    // regrettably the onMethodMap dynamic
+    // generation of methods failed on this overloaded
+    // sweep method - there are several overloads in the
+    // Java service - although msg.sweep() was tried for ng-click
+    // for some reason Js resolved msg.sweep(null, null, null, null) :P
+    $scope.sweep = function() {
+        msg.send('sweep');
+    }
 
-        // GOOD TEMPLATE TO FOLLOW
-        this.updateState = function (service) {
-            $scope.service = service;
-        };
-        _self.updateState($scope.service);
-        
-        // Get a fresh copy!
-        // $scope.service = mrl.getService($scope.service.name);
-        $scope.controller = '';
-        $scope.pin = '';
-        $scope.min = 0;
-        $scope.max = 180;
-        $scope.angle = 0;
-        $scope.isAttached = $scope.service.isAttached;
-        // get latest copy of a services
-        
-        // get and initalize current state of servo
-        $scope.attachButtonLabel = "Attach";
-        $scope.status = "No Status";
-        // $scope.$apply();
-        $log.info('ServoGuiCtrl part 3 ');
-        this.onMsg = function(msg) {
-        	$log.info("SERVO MSG: " + msg);
-        	
-            switch (msg.method) {
-                case 'onState':
-                    _self.updateState(inMsg.data[0]);
-                    $scope.status = msg.data[0];
-                    $scope.isAttached = $scope.status.isAttached;
-                    $scope.angle = $scope.status.angle;
-                    $scope.min = $scope.status.outputYMin;
-                    $scope.max = $scope.status.outputYMax;
-                    if ($scope.isAttached === true) {
-                    	$scope.attachButtonLabel = "Detach";
-                    } else {
-                    	$scope.attachButtonLabel = "Attach";
-                    };
-                    $scope.$apply();
-                    break;
-                case 'onServoEvent':
-                    $scope.status = msg.data[0];
-                    $scope.$apply();
-                    break;
-                case 'onStatus':
-                    $scope.status = msg.data[0];
-                    $scope.$apply();
-                    break;
-                case 'addListener':
-                	$log.info("Add listener called");
-                	$scope.status = msg.data[0];
-                    $scope.$apply();
-                    break;
-                default:
-                	$scope.status = msg.data[0];
-                    $scope.$apply();
-                    $log.info("ERROR - unhandled method " + $scope.name + " Method " + msg.method);
-                    break;
-            };
-            
-        };
-        
-        $scope.attachDetach = function(controller,pin) {
-        	if ($scope.status.isAttached === true) {
-        		$log.info("Detach Servo");
-            	mrl.sendTo($scope.service.name, "detach");
-            	$scope.attachButtonLabel = "Detach";
-            	$scope.$apply();
-        	} else {
-        		$log.info("Attach Servo");
-            	mrl.sendTo($scope.service.name, "attach", controller, pin);
-            	$scope.attachButtonLabel = "Attach";
-            	$scope.$apply();
-        	};
-        };
-        
-        $scope.moveTo = function(angle) {
-        	$log.info("Move TO " + angle);
-        	mrl.sendTo($scope.service.name, "moveTo", angle);
-        };
-        
-        $scope.updateLimits = function(min,max) {
-        	$log.info("Update Limits");
-        	mrl.sendTo($scope.service.name, "setMinMax", min, max);
-        };
-        
-        // mrl.subscribe($scope.service.name, 'publishServoEvent');  ??
-        msg.subscribe("servoEvent");
-        msg.subscribe(this);
-       
-        
-    }]);
+    
+    msg.subscribe("publishServoEvent");
+    msg.subscribe(this);
+    
+    var runtimeName = mrl.getRuntime().name;
+    mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
+    mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface');
+    mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.ServoController');
+}
+]);

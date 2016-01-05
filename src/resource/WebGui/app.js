@@ -16,6 +16,7 @@ angular.module('mrlapp', [
     'oc.lazyLoad', //lazyload
     'sticky', //sticky elements
     'ngClipboard',
+    'rzModule',
     //'charts',
     'nvd3ChartDirectives',
     'ui.ace', //funky editor

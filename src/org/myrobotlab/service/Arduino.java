@@ -1,27 +1,37 @@
 package org.myrobotlab.service;
 
+// FIXME - need to add this to the generator !
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
+
+
+/////// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
+///// java static import definition - DO NOT MODIFY - Begin //////
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_ATTACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_DETACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE_TO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_RESET;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_CUSTOM_MSG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_LOAD_TIMING_EVENT;
-/////// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
-///// java static import definition - DO NOT MODIFY - Begin //////
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PIN;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SENSOR_DATA;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_STEPPER_EVENT;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_TRIGGER;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_ATTACH;
@@ -29,6 +39,7 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_ATTACH;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_DETACH;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_EVENTS_ENABLED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_SWEEP_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SERVO_WRITE;
@@ -39,10 +50,9 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_LOAD_TIMING_ENABLE
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_PWMFREQUENCY;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SAMPLE_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_EVENTS_ENABLED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_SPEED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.STEPPER_MOVE_TO;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SOFT_RESET;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -141,7 +151,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class Arduino extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController {
+public class Arduino extends Service implements SensorDataPublisher, SerialDataListener, ServoController, MotorController, SensorDataSink {
 
 	/**
 	 * MotorData is the combination of a Motor and any controller data needed to
@@ -151,10 +161,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	class MotorData implements Serializable {
 		private static final long serialVersionUID = 1L;
 		Motor motor = null;
-		/*
-		 * String type = null; int PWMPin = -1; int dirPin0 = -1; int dirPin1 =
-		 * -1;
-		 */
 	}
 
 	// ---------- MRLCOMM FUNCTION INTERFACE BEGIN -----------
@@ -215,12 +221,27 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	Integer mrlCommVersion = null;
 
-	public transient static final String BOARD_TYPE_UNO = "uno";
-	public transient static final String BOARD_TYPE_ATMEGA168 = "atmega168";
-	public transient static final String BOARD_TYPE_ATMEGA328P = "atmega328p";
-	public transient static final String BOARD_TYPE_ATMEGA2560 = "atmega2560";
-	public transient static final String BOARD_TYPE_ATMEGA1280 = "atmega1280";
-	public transient static final String BOARD_TYPE_ATMEGA32U4 = "atmega32u4";
+	/**
+	 * FIXME ! - these processor types ! - something we are not interested in
+	 * and do not have to deal with - we are far more interested in NUM_DIGITAL_PINS
+	 * and "board pin layouts" - 
+	 * 
+	 * As far as I can tell board types are in variants
+	 * 1.0.5 Arduino IDE includes 
+	 * 
+	 * This is the best reference I have found regarding actual pin capabilities
+	 * https://learn.sparkfun.com/tutorials/arduino-comparison-guide#totally-tabular 
+	 * Uno & Duemilanove have 14 digital pins (6 PWM) & 6 analog - total 20
+	 * Mini & Pro have 14 digital pins (8 PWM) & 6 analog - total 20
+	 * 
+	 * ATmega328 Boards — 32kB Program Space // 1 UART // 6 PWM // 4-8 Analog Inputs // 9-14 Digital I/O
+	 * ATmega2560 Arduino Mega's — 256kB Program Space // 4 UARTs // 14 PWM // 16 Analog Inputs // 54 Digital I/O - 
+	 * 
+	 * So at the moment .. there is only Uno & Mega !!!
+	 * 
+	 */
+	public transient static final String BOARD_TYPE_UNO = "Uno";
+	public transient static final String BOARD_TYPE_MEGA = "Mega";
 
 	/**
 	 * pin description of board
@@ -287,7 +308,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		/**
 		 * the sensor
 		 */
-		public SensorDataSink sensor;
+		transient public SensorDataSink sensor;
+
 		/**
 		 * index of the sensor on the MRLComm.ino side
 		 */
@@ -307,7 +329,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	/**
 	 * Serial service - the Arduino's serial connection
 	 */
-	transient Serial serial;
+	Serial serial;
 
 	int error_arduino_to_mrl_rx_cnt;
 	int error_mrl_to_arduino_rx_cnt;
@@ -332,8 +354,10 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		super(n);
 		serial = (Serial) createPeer("serial");
 		createPinList();
-		String mrlcomm = FileIO.resourceToString("Arduino/MRLComm.ino");
+		String mrlcomm = FileIO.resourceToString("Arduino/MRLComm.c");
 		setSketch(new Sketch("MRLComm", mrlcomm));
+		// add self as Pin Array Sensor Listener
+		sensorAttach(this);
 	}
 
 	public void addCustomMsgListener(CustomMsgListener service) {
@@ -346,7 +370,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @param pin
 	 */
 	public void analogReadPollingStart(Integer pin) {
-		sendMsg(PIN_MODE, pin, INPUT);
+		// check pin type - if not analog then change PIN_MODE
+		// sendMsg(PIN_MODE, pin, INPUT);  DUH - not needed !
+		// sendMsg(ANALOG_READ_POLLING_START, pin);
+		// sendMsg(SENSOR_ATTACH, pin, );
+		// sensorAttachPin = pin;
+		// sensorAttach(this);
+		
 		sendMsg(ANALOG_READ_POLLING_START, pin);
 	}
 
@@ -530,42 +560,41 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		if (!motor.isLocal()) {
 			throw new MRLException("motor is not in the same MRL instance as the motor controller");
 		}
-		
+
 		int[] controlPins = motor.getControlPins();
-		for (int i = 0; i < controlPins.length; ++i){
+		for (int i = 0; i < controlPins.length; ++i) {
 			pinMode(controlPins[i], OUTPUT);
 		}
-		
+
 		String type = motor.getType();
-		
-		if (type == null){
+
+		if (type == null) {
 			throw new IllegalArgumentException("");
 		}
-		
+
 		// if we have a pulse step - we can do a form
 		// of false encoding :P
-		if (motor.getType().equals(Motor.TYPE_PULSE_STEP)){ // TODO - add other "real" encoders
+		if (motor.getType().equals(Motor.TYPE_PULSE_STEP)) { // TODO - add other
+																// "real"
+																// encoders
 			// the pwm pin in a pulse step motor "is" the encoder
 			sensorAttach(motor);
-		} 
-		
-		
-		motor.setController(this);
-		
-		/*
-		FIXME - implement "real" encoder later
-		String encoderType = motor.getEncoderType();
-		if (encoderType != null && !encoderType.equals(Motor.ENCODER_TYPE_NONE) 
-				|| (motor.getType() != null && motor.getType().equals(Motor.TYPE_PULSE_STEP))) {
-			// encoderPins.put(motor.encoderPin, motor);
-			sensorIndex.put(motor.pwmPin, new SensorData(motor.pwmPin, motor));
-			// FIXME - based on type - real encoder...
-			// analogReadPollingStart(motor.encoderPin);
-			sensorAttach(motor);
-		} //  FIXME else if ( 
+		}
 
-		*/
-		
+		motor.setController(this);
+
+		/*
+		 * FIXME - implement "real" encoder later String encoderType =
+		 * motor.getEncoderType(); if (encoderType != null &&
+		 * !encoderType.equals(Motor.ENCODER_TYPE_NONE) || (motor.getType() !=
+		 * null && motor.getType().equals(Motor.TYPE_PULSE_STEP))) { //
+		 * encoderPins.put(motor.encoderPin, motor);
+		 * sensorIndex.put(motor.pwmPin, new SensorData(motor.pwmPin, motor));
+		 * // FIXME - based on type - real encoder... //
+		 * analogReadPollingStart(motor.encoderPin); sensorAttach(motor); } //
+		 * FIXME else if (
+		 */
+
 		motor.broadcastState();
 	}
 
@@ -612,23 +641,25 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 		double powerOutput = motor.getPowerOutput();
 		String type = motor.getType();
-		
+
 		if (Motor.TYPE_SIMPLE.equals(type)) {
 			sendMsg(DIGITAL_WRITE, motor.getPin(Motor.PIN_TYPE_DIR), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
-			sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM), (int)Math.abs(powerOutput));
+			sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM), (int) Math.abs(powerOutput));
 
 		} else if (Motor.TYPE_2_PWM.equals(type)) {
 			if (powerOutput < 0) {
 				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_LEFT), 0);
-				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT), (int)Math.abs(powerOutput));
+				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT), (int) Math.abs(powerOutput));
 			} else {
 				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT), 0);
-				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_LEFT), (int)Math.abs(powerOutput));
+				sendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_LEFT), (int) Math.abs(powerOutput));
 			}
 		} else if (Motor.TYPE_PULSE_STEP.equals(type)) {
-				//sdsendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT), 0);
-			// TODO implement with a -1 for "endless" pulses or a different command parameter :P
-				sendMsg(PULSE, motor.getPin(Motor.PIN_TYPE_PULSE), (int)Math.abs(powerOutput));
+			// sdsendMsg(ANALOG_WRITE, motor.getPin(Motor.PIN_TYPE_PWM_RIGHT),
+			// 0);
+			// TODO implement with a -1 for "endless" pulses or a different
+			// command parameter :P
+			sendMsg(PULSE, motor.getPin(Motor.PIN_TYPE_PULSE), (int) Math.abs(powerOutput));
 		} else {
 			error("motorMove for motor type %s not supported", type);
 		}
@@ -654,12 +685,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			// FIXME !!! - this will have to send a Long for targetPos at some
 			// point !!!!
 			double target = Math.abs(motor.targetPos);
-			
-			int b0 = (int)target & 0xff;
-			int b1 = ((int)target >> 8) & 0xff;
-			int b2 = ((int)target >> 16) & 0xff;
-			int b3 = ((int)target >> 24) & 0xff;
-			
+
+			int b0 = (int) target & 0xff;
+			int b1 = ((int) target >> 8) & 0xff;
+			int b2 = ((int) target >> 16) & 0xff;
+			int b3 = ((int) target >> 24) & 0xff;
+
 			sendMsg(PULSE, sensors.get(motor.getName()).index, b3, b2, b1, b0, (int) motor.getPowerLevel(), feedbackRate);
 		}
 
@@ -772,16 +803,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					break;
 				}
 
-				case PUBLISH_PIN: {
-					// Pin p = new Pin(msg[1], msg[0], (((msg[2] & 0xFF)
-					// << 8) + (msg[3] & 0xFF)), getName());
-					// FIXME
-					// Pin pin = pinList.get(msg[1]); BIG BUG - if a reference
-					// is sent and
-					// the same reference whic his trying to be displayed is
-					// changed underneath
-					// Pin pin = new Pin(pinList.get(msg[1]));
-
+				// DEPRECATED - handled by PUBLISH_SENSOR_DATA
+				case PUBLISH_PIN: {					
 					Pin pin = pinList.get(msg[1]);
 					pin.value = ((msg[2] & 0xFF) << 8) + (msg[3] & 0xFF);
 					// TODO ? local callback - no thread single invoke -
@@ -815,23 +838,40 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				}
 
 				case PUBLISH_SENSOR_DATA: {
-					int index = (int) msg[1];
-					SensorDataSink sensor = indexToSensor.get(index).sensor;
 
-					String clazz = sensor.getDataSinkType();
+					// get the sensor callback index
+					int sensorIndex = (int) msg[1];
+
+					// get the sensor
+					SensorDataSink sensor = indexToSensor.get(sensorIndex).sensor;
+
+					// find its needed datatype
+					int clazz = sensor.getDataSinkType();
 
 					Object data = null;
-					if (clazz == "java.lang.Integer") {
-						data = Serial.bytesToInt(msg, 2, 4);
-					} else if (clazz == "java.lang.Long") {
-						// a bit silly because Arduino long is equivalent to
-						// an int :P
-						data = Serial.bytesToLong(msg, 2, 4);
-					}
 
+					// convert all return types from
+					// asynchronous callbacks of sensors
+					switch (clazz) {
+					case DATA_SINK_TYPE_INTEGER: {
+						data = Serial.bytesToInt(msg, 3, 2); // 16 bit - 2 byte int
+					}
+						break;
+					case DATA_SINK_TYPE_PIN: {
+						Pin pin = pinList.get(msg[2]);
+						pin.value = ((msg[3] & 0xFF) << 8) + (msg[4] & 0xFF);
+						data = pin;
+					}
+						break;
+					default: {
+						error("unknown return type %d", clazz);
+					}	
+					break;
+					}
+					
 					sensor.update(data);
 					break;
-				}
+				} // PUBLISH_SENSOR_DATA
 
 				// could be deprecated
 				/*
@@ -856,7 +896,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					break;
 				}
 
-			
 				case PUBLISH_CUSTOM_MSG: {
 
 					// msg or data is of size byteCount
@@ -921,6 +960,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 				// reset msg buffer
 				msgSize = 0;
 				byteCount = 0;
+				Arrays.fill(msg, 0); // optimize remove
 			}
 			// } // while (serial.isOpen() && (newByte =
 			// serial.read()) > -1
@@ -946,10 +986,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	public String getPortName() {
 		return serial.getPortName();
-	}
-
-	public int publishStepperEvent(Integer pos) {
-		return pos;
 	}
 
 	public void onCustomMsg(Integer ax, Integer ay, Integer az) {
@@ -1011,8 +1047,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public Pin publishTrigger(Pin pin) {
 		return pin;
 	}
-
-	// -- StepperController begin ----
 
 	public Integer publishVersion(Integer version) {
 		info("publishVersion %d", version);
@@ -1113,9 +1147,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public synchronized boolean sensorAttach(SensorDataSink sensor) {
 		String sensorName = sensor.getName();
 		log.info(String.format("%s/sensorAttach/%s", getName(), sensorName));
-		int index = -1;
+		
+		// simple count = index mapping
+		int sensorIndex = sensors.size();
 
-		if (serial == null) {
+		// assume all other SensorSinks need connectivity (besides) Arduino ...
+		if (serial == null && sensorIndex != 0) {
 			error("could not attach sensor - no serial device!");
 			return false;
 		}
@@ -1125,31 +1162,38 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			return false;
 		}
 
-		// simple count = index mapping
-		index = sensors.size();
-
-		// attach index pin
+		// attach sensor index
 		int[] config = sensor.getSensorConfig();
-		int[] payload = new int[config.length + 2];
+		int[] payload = new int[config.length + 3];
 
-		payload[0] = index;
+		payload[0] = sensorIndex;
 		payload[1] = sensor.getSensorType();
+		payload[2] = config.length;
 		for (int i = 0; i < config.length; ++i) {
-			payload[i + 2] = config[i];
+			payload[i + 3] = config[i];
 		}
+		
+		// SENSOR_ATTACH Format
+		// SENSOR_ATTACH | sensorIndex | sensorType | pinCount | pins ...
 
 		log.info(String.format("sensor index %d type %d config %s", payload[0], payload[1], Arrays.toString(config)));
-		sendMsg(SENSOR_ATTACH, payload);
+		
+		// FIXME - interface should have - requiresConnection to attach vs if (sensorIndex == 0)
+		if (getName().equals(sensorName) /* || !sensor.requiresConnectionToAttach() */){
+			log.info("{} attach self as SensorSink with sensorIndex {}", getName(), sensorIndex);
+		} else {
+			sendMsg(SENSOR_ATTACH, payload);
+		}
 
 		// sendMsg(SENSOR_ATTACH, index, sensor.getSensorType(),
 		// sensor.getTriggerPin(), sensor.getEchoPin());
 
-		SensorData sd = new SensorData(index, sensor);
+		SensorData sd = new SensorData(sensorIndex, sensor);
 
 		sensors.put(sensorName, sd);
-		indexToSensor.put(index, sd);
+		indexToSensor.put(sensorIndex, sd);
 
-		info(String.format("sensor index %d type %d config payload %s ", index, sensor.getSensorType(), Arrays.toString(payload)));
+		info(String.format("sensor index %d type %d config payload %s ", sensorIndex, sensor.getSensorType(), Arrays.toString(payload)));
 
 		return true;
 	}
@@ -1328,7 +1372,14 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 * @return
 	 */
 	public String setBoardMega() {
-		board = BOARD_TYPE_ATMEGA2560;
+		board = BOARD_TYPE_MEGA;
+		createPinList();
+		broadcastState();
+		return board;
+	}
+
+	public String setBoardUno() {
+		board = BOARD_TYPE_UNO;
 		createPinList();
 		broadcastState();
 		return board;
@@ -1429,13 +1480,13 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	}
 
 	@Override
-	public boolean setServoEventsEnabled(Servo servo) {
+	public boolean servoEventsEnabled(Servo servo) {
 		log.info(String.format("setServoEventsEnabled %s %b", servo.getName(), servo.isEventsEnabled));
 		int index = getServoIndex(servo.getPin());
 		if (servo.isEventsEnabled) {
-			sendMsg(SET_SERVO_EVENTS_ENABLED, index, TRUE);
+			sendMsg(SERVO_EVENTS_ENABLED, index, TRUE);
 		} else {
-			sendMsg(SET_SERVO_EVENTS_ENABLED, index, FALSE);
+			sendMsg(SERVO_EVENTS_ENABLED, index, FALSE);
 		}
 
 		return true;
@@ -1457,11 +1508,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public void setSketch(Sketch sketch) {
 		this.sketch = sketch;
 		broadcastState();
-	}
-
-	public void setStepperSpeed(Integer speed) {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**
@@ -1537,25 +1583,32 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
+			
+			for (int i = 0; i < 100; ++i){
+				System.out.println(i%1);
+			}
 
 			// Runtime.start("servo", "Servo");
 			// Runtime.start("clock", "Clock");
 			// Runtime.start("serial", "Serial");
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-			//Runtime.start("gui", "GUIService");
-			//Runtime.start("python", "Python");
-			//arduino.connect("COM18");
-			arduino.connect("COM28");
-			
-			arduino.getVersion();
-			Servo servo = (Servo)Runtime.start("servo", "Servo");
-			servo.attach(arduino, 10);
-			
-			servo.moveTo(10);
-			servo.moveTo(90);
-			servo.moveTo(180);
-			servo.moveTo(90);
-			servo.moveTo(10);
+			arduino.setBoardUno();
+			arduino.connect("COM18");
+			Runtime.start("webgui", "WebGui");
+
+			arduino.analogReadPollingStart(14);
+			// Runtime.start("gui", "GUIService");
+			// Runtime.start("python", "Python");
+			// arduino.connect("COM18");
+			/*
+			 * 
+			 * 
+			 * arduino.getVersion(); Servo servo = (Servo)
+			 * Runtime.start("servo", "Servo"); servo.attach(arduino, 10);
+			 * 
+			 * servo.moveTo(10); servo.moveTo(90); servo.moveTo(180);
+			 * servo.moveTo(90); servo.moveTo(10);
+			 */
 
 			/*
 			 * VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual",
@@ -1585,7 +1638,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			// remote.setDefaultPrefix("mac-");
 			// remote.setDefaultPrefix("");
 			// Runtime.start("gui", "GUIService");
-			Runtime.start("webgui", "WebGui");
 			// remote.startListening();
 			// Runtime.start("cli", "Cli");
 			// Runtime.start("servo", "Servo");
@@ -1629,5 +1681,25 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		}
 	}
 
+	@Override
+	public void update(Object data) {
+		invoke("publishPin", data);
+	}
+
+	@Override
+	public int getDataSinkType() {
+		return DATA_SINK_TYPE_PIN;
+	}
+
+	@Override
+	public int getSensorType() {
+		return SENSOR_TYPE_PIN;
+	}
+
+	@Override
+	public int[] getSensorConfig() {
+		// is a Pin sensor
+		return new int[]{};
+	}
 
 }

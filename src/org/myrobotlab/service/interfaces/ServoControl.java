@@ -95,7 +95,7 @@ public interface ServoControl {
 	 * fractional speed settings
 	 * @param speed
 	 */
-	public void setSpeed(int speed);
+	// public void setSpeed(int speed);
 	public void setSpeed(double speed);
 
 	/**

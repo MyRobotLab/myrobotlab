@@ -360,17 +360,17 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 	}
 
 	@Override
-	public String getDataSinkType() {
+	public int getDataSinkType() {
 		// other data types available if needed
-		return "java.lang.Integer";
+		return DATA_SINK_TYPE_INTEGER;
 	}
 
 	@Override
 	public int getSensorType() {
 		if (type != null && type.equals(TYPE_PULSE_STEP)) {
-			return SENSOR_PULSE;
+			return SENSOR_TYPE_PULSE;
 		} else {
-			return SENSOR_PIN;
+			return SENSOR_TYPE_PIN;
 		}
 	}
 

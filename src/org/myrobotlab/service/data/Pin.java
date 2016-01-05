@@ -28,7 +28,18 @@ package org.myrobotlab.service.data;
 import java.io.Serializable;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggingFactory;
 
+/**
+ * A generalized Pin
+ * 
+ * consider definition being separate from data
+ * 
+ * interestingly - at the moment gson does not serialize statics 
+ * - e.g. - {"pin":5,"type":0,"value":1,"source":"here"}
+ *
+ */
 public class Pin implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -40,11 +51,12 @@ public class Pin implements Serializable {
 												// from
 												// Adruino.ANALOG_READ_POLLING_START
 
-	// pin attributes
+	// TODO - make pin attributes !
 	public static final int TYPE_DIGITAL_MASK = 1;
 	public static final int TYPE_PWM_MASK = 2;
 	public static final int TYPE_ANALOG_MASK = 4;
 
+	// FIXME - change pin to address sometime
 	public int pin;
 	public int type;
 	public int value;
@@ -71,5 +83,22 @@ public class Pin implements Serializable {
 	public String toString() {
 		return CodecUtils.toJson(this);
 	}
+	
+	public static void main(String[] args) {
+		try {
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.INFO);
+			Pin pin = new Pin();
+			pin.pin = 5;
+			pin.source = "here";
+			pin.value = 1;
+			System.out.print(pin);
+		} catch(Exception e){
+			System.out.print(e.getMessage());
+		}
+	}
+	
+	
+	
 
 }
