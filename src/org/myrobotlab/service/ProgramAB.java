@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
+import org.alicebot.ab.Predicates;
 import org.apache.commons.io.IOUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
@@ -245,6 +246,23 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		return response;
 	}
 
+	public void removePredicate(String session, String predicateName) {
+		Predicates preds = sessions.get(session).predicates;
+		preds.remove(predicateName);
+	}
+
+	public void setPredicate(String session, String predicateName, String predicateValue) {
+		Predicates preds = sessions.get(session).predicates;
+		preds.put(predicateName, predicateValue);
+	}
+
+	public String getPredicate(String session, String predicateName) {
+		Predicates preds = sessions.get(session).predicates;
+		return preds.get(predicateName);
+	}
+
+	
+	
 	/**
 	 * Only respond if the last response was longer than delay ms ago
 	 * 
@@ -601,6 +619,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 			Response response = lloyd.getResponse(sessionName, "Hello.");
 			log.info("Lloyd " + response.msg);
 		}
+		
+	
 	}
 	
 }
