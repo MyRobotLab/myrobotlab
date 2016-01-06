@@ -26,7 +26,8 @@ public class Sweety extends Service {
 	public final static Logger log = LoggerFactory.getLogger(Sweety.class);
 
 	transient public Arduino arduino;
-	transient public Sphinx ear;
+	transient public WebkitSpeechRecognition ear; 
+	transient public WebGui webGui;
 	transient public SpeechSynthesis mouth;
 	transient public Tracking leftTracker;
 	transient public Tracking rightTracker;
@@ -137,11 +138,12 @@ public class Sweety extends Service {
 		// put peer definitions in
 		peers.put("arduino", "Arduino", "arduino");
 		peers.put("mouth", "AcapelaSpeech", "sweetys mouth");
-		peers.put("ear", "Sphinx", "ear");
+		peers.put("ear", "WebkitSpeechRecognition", "ear");
 		peers.put("chatBot", "ProgramAB", "chatBot");
 		peers.put("leftTracker", "Tracking", "leftTracker");
 		peers.put("rightTracker", "Tracking", "rightTracker");
 		peers.put("htmlFilter", "HtmlFilter", "htmlfilter");
+		peers.put("webGui", "WebGui", "webGui");
 
 		peers.put("USfront", "UltrasonicSensor", "USfront");
 		peers.put("USfrontRight", "UltrasonicSensor", "USfrontRight");
@@ -213,7 +215,7 @@ public class Sweety extends Service {
 	}
 
 	/**
-	 * detach the servos to arduino pins
+	 * detach the servos from arduino pins
 	 */
 	public void detach() {
 		rightForearm.detach();
@@ -243,8 +245,8 @@ public class Sweety extends Service {
 	public String getDescription() {
 		return "Service for the robot Sweety";
 	}
-
-	/**
+// TODO Correct the head function for new head
+	/** 
 	 * Move the head . Use : head(neckAngle, rightEyeAngle, leftEyeAngle
 	 * -1 mean "no change"
 	 */
@@ -600,14 +602,12 @@ public class Sweety extends Service {
 
 		chatBot = (ProgramAB) startPeer("chatBot");
 		htmlFilter = (HtmlFilter) startPeer("htmlFilter");
-		
 		mouth = (SpeechSynthesis) startPeer("mouth");
 		mouth.setLanguage("FR");
 		mouth.setVoice("Antoine");
+		ear = (WebkitSpeechRecognition) startPeer("ear");
+		webGui = (WebGui) startPeer("webGui");
 		
-		// mouth.setBackendType("GOOGLE");
-
-		ear = (Sphinx) startPeer("ear");
 	}
 
 	public void startServos() {
