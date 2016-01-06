@@ -465,7 +465,7 @@ public class ArduinoGUI extends ServiceGUI implements ActionListener, TabControl
 			@Override
 			public void run() {
 				//editor.setEnabled(false);
-				String resourcePath = "Arduino/MRLComm.ino";
+				String resourcePath = "Arduino/MRLComm.c";
 				log.info(String.format("loadResourceFile %s", resourcePath));
 				String sketch = FileIO.resourceToString(resourcePath);
 				
