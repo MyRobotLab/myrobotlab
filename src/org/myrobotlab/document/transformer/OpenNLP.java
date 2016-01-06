@@ -4,14 +4,18 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.namefind.TokenNameFinderModel;
+import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.Span;
+
 import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.logging.LoggerFactory;
@@ -24,12 +28,16 @@ public class OpenNLP extends AbstractStage {
 	private String personModelFile = "./opennlp/en-ner-person.bin";
 	private String sentenceModelFile = "./opennlp/en-sent.bin";
 	private String tokenModelFile = "./opennlp/en-token.bin";
+	private String posModelFile = "./opennlp/en-pos-maxent.bin";
+	
 	private SentenceDetectorME sentenceDetector;
 	private Tokenizer tokenizer;
 	private NameFinderME nameFinder;
+	private POSTaggerME posTagger;
 
 	private String textField = "text";
 	private String peopleField = "people";
+	private String postTextField = "pos_text";
 	private String sep = " ";
 	
 	@Override
@@ -44,6 +52,8 @@ public class OpenNLP extends AbstractStage {
 			// person name finder
 			TokenNameFinderModel nameModel = new TokenNameFinderModel(new FileInputStream(personModelFile));
 			nameFinder = new NameFinderME(nameModel);
+			// load the part of speech tagger.
+			posTagger = new POSTaggerME(new POSModel(new FileInputStream(posModelFile)));
 		} catch (IOException e) {
 			log.info("Error loading up OpenNLP Models. {}", e.getLocalizedMessage());
 			e.printStackTrace();
@@ -63,6 +73,9 @@ public class OpenNLP extends AbstractStage {
 				for (String sentence : sentences) {
 					String tokens[] = tokenizer.tokenize(sentence);
 					Span[] spans = nameFinder.find(tokens);
+					// part of speech tagging
+					String posText = posTagger.tag(text);
+					doc.addToField(postTextField, posText);
 					for (Span span : spans) {
 						String[] terms = Arrays.copyOfRange(tokens, span.getStart(), span.getEnd());
 						String entity = StringUtils.join(terms, sep);
@@ -126,6 +139,14 @@ public class OpenNLP extends AbstractStage {
 
 	public void setPeopleField(String peopleField) {
 		this.peopleField = peopleField;
+	}
+
+	public String getPostTextField() {
+		return postTextField;
+	}
+
+	public void setPostTextField(String postTextField) {
+		this.postTextField = postTextField;
 	}
 
 }
