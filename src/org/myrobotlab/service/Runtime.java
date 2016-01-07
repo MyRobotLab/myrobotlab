@@ -495,7 +495,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * big hammer - exits no ifs ands or butts
 	 */
 	public static final void exit() {
-		java.lang.Runtime.getRuntime().exit(-1);
+		exit(-1);
 	}
 
 	/**
@@ -507,7 +507,21 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * @param status
 	 */
 	public static final void exit(int status) {
-		java.lang.Runtime.getRuntime().exit(status);
+		try {
+			releaseAll();
+		} catch(Exception e){
+			Logging.logError(e);
+		}
+		
+		try {
+			java.lang.Runtime.getRuntime().exit(status);
+		} catch(Exception e){
+			Logging.logError(e);
+		}
+		//
+		// In unusual situations, System.exit(int) might not actually stop the program.
+		// Runtime.getRuntime().halt(int) on the other hand, always does.
+		java.lang.Runtime.getRuntime().halt(status);
 	}
 
 	static public boolean fromAgent() {
@@ -1012,6 +1026,11 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			branch = "unknown";
 		}
 		return branch;
+	}
+	
+	static public void install(){
+		Repo repo = new Repo();
+		repo.retrieveAll();
 	}
 
 	static public ArrayList<ResolveReport> install(String serviceType) throws ParseException, IOException {
