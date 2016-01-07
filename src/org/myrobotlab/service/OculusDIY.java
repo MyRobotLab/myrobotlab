@@ -28,7 +28,7 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	transient public Arduino arduino;
 	
 	OculusData oculus = new OculusData();
-	Mapper mapperPitch = new Mapper(-180,0,180,0);
+	Mapper mapperPitch = new Mapper(-180,0,0,180);
 	Mapper mapperYaw = new Mapper(-180,180,0,360);
 
 	public static Peers getPeers(String name) {
