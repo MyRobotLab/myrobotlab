@@ -79,7 +79,7 @@ public class VideoStreamer extends VideoSink {
 	}
 
 	@Override
-	public void publishDisplay(SerializableImage si) {
+	public void onDisplay(SerializableImage si) {
 		/*
 		 * if (mergeSteams) { si.setSource("output"); }
 		 */

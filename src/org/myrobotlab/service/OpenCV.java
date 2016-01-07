@@ -53,6 +53,7 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
@@ -163,6 +164,11 @@ public class OpenCV extends VideoSource {
 
 	public boolean undockDisplay = false;
 
+	
+	// TODO: a peer, but in the future , we should use WebGui and it's http container for this
+	// if possible.
+	transient public VideoStreamer streamer;
+	
 	public OpenCV(String n) {
 		super(n);
 		// load(); // FIXME - go into service frame work .. after construction
@@ -171,6 +177,14 @@ public class OpenCV extends VideoSource {
 		videoProcessor.setOpencv(this);
 	}
 
+	// TODO: currently we're using the video streamer service
+	// in the future we s
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		peers.suggestAs("streamer", "streamer", "VideoStreamer", "video streaming service for webgui.");
+		return peers;
+	}
+	
 	@Override
 	public void stopService() {
 		if (videoProcessor != null) {
@@ -369,6 +383,8 @@ public class OpenCV extends VideoSource {
 
 	public void capture() {
 		save();
+		streamer = (VideoStreamer) startPeer("streamer");
+		streamer.attach(this);
 		// stopCapture(); // restart?
 		videoProcessor.start();
 	}
@@ -730,13 +746,18 @@ public class OpenCV extends VideoSource {
 		// lkoptical disparity motion Time To Contact
 		// https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
 		//
+		WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+		GUIService gui = (GUIService)Runtime.start("gui", "GUIService");
+		
 		org.apache.log4j.BasicConfigurator.configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		Runtime.start("gui", "GUIService");
-
+		
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+		//VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
+		//vs.attach(opencv);
+		opencv.capture();
 
+		
 		/*
 		OpenCVFilterFFmpeg ffmpeg = new OpenCVFilterFFmpeg("ffmpeg");
 		opencv.addFilter(ffmpeg);
@@ -750,9 +771,7 @@ public class OpenCV extends VideoSource {
 		}
 		
 		opencv.removeFilters();
-//		ffmpeg.stopRecording();
-		
-
+		// ffmpeg.stopRecording();
 		// opencv.setCameraIndex(0);
 
 		// opencv.setInputSource("file");
@@ -797,6 +816,8 @@ public class OpenCV extends VideoSource {
 		// o.detect(image1, point, null);
 		//
 		// System.out.println(point.toString());
+		
+		
 
 	}
 }
