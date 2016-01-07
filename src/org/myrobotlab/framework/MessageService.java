@@ -10,6 +10,12 @@ public abstract class MessageService {
 	transient protected Outbox outbox = null;
 
 	transient protected CommunicationInterface cm = null;
+
+	
+	public MessageService(){
+		//this.name = name;
+	}
+
 	
 	public MessageService(String name){
 		//this.name = name;
