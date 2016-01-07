@@ -2,9 +2,18 @@
   <h3>OpenCV Gui!</h3>
   Here we go!
   <div>
-  Input Control Widget<br/>
+  Input Control Widget
+  <br/>
   Camera Index: {{cameraIndex}}
   <br/>
+  Frame Grabber: {{frameGrabber}}
+  <br/>
+  <select name="frameGrabber" ng-model="frameGrabber" ng-change="selectFrameGrabber(frameGrabber)" >
+    <option value="org.bytedeco.javacv.VideoInputFrameGrabber">Video Input</option>
+    <option value="org.bytedeco.javacv.OpenCVFrameGrabber">OpenCV</option>
+  </select>
+  <br/>
+  Select Camera: <br/>
   <select name="cameraSelect" ng-model="cameraIndex" ng-change="selectCameraIndex(cameraIndex)">
     <option value="0">0</option>
     <option value="1">1</option>
@@ -15,10 +24,12 @@
     <option value="6">6</option>
     <option value="7">7</option>
   </select>
-  <button id="startCapture" class="btn btn-default"  ng-click="startCapture()" ng-init="startSessionLabel = 'Start Capture'">{{startCaptureLabel}}</button>
+  <br/>
+  <button id="startCapture" class="btn btn-default"  ng-click="startCapture()" ng-init="startCaptureLabel = 'Start Capture'">{{startCaptureLabel}}</button>
   </div>
   <div>
-    Video Widget Here <img src="logo.png" />
+    Video Widget Here<br/>
+    <img src="http://localhost:9090/input" />
   </div>
   <div>
   Filter Control

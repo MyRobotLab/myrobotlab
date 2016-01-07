@@ -16,12 +16,17 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 // init scope variables
                 $scope.cameraIndex = 1;
                 $scope.startCaptureLabel = "Start Capture";
+                $scope.frameGrabber = "VideoInput";
+                $scope.selectFrameGrabber = function selectFrameGrabber(frameGrabber) {
+                	$log.info("Updating Frame Grabber ");
+                	$scope.frameGrabber = frameGrabber;
+                	mrl.sendTo($scope.service.name, "setFrameGrabberType" , frameGrabber);                	
+                }
                 
                 $scope.selectCameraIndex = function(cameraIndex) {
                 	$log.info("Updating Camera Index ..." + cameraIndex);
                 	$scope.cameraIndex = cameraIndex;
                 	mrl.sendTo($scope.service.name, "setCameraIndex", cameraIndex);
-                	//  ??  $scope.$apply();
                 }
                 
                 // start capture button click.

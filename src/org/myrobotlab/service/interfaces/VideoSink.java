@@ -41,5 +41,5 @@ public abstract class VideoSink extends Service {
 		return false;
 	}
 
-	public abstract void publishDisplay(SerializableImage img);
+	public abstract void onDisplay(SerializableImage img);
 }
