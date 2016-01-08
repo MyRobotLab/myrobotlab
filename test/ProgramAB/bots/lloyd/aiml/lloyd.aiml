@@ -157,4 +157,13 @@
     <template><srai><star/></srai></template>
   </category>
   
+  <category>
+    <pattern>SETTEST <set>animal</set></pattern>
+    <template>An Animal.</template>
+  </category>
+  
+  <category>
+    <pattern>DO YOU LIKE <set>starwarsnames</set></pattern>
+    <template><map name="starwars"><star/></map> is awesome.</template>
+  </category>
 </aiml>
