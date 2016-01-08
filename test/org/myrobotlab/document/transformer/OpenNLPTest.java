@@ -10,7 +10,10 @@ public class OpenNLPTest extends AbstractStageTest {
 		// 
 		Document testDoc = new Document("doc_1");
 		testDoc.setField("title", "This is my document title.");
-		testDoc.setField("text", "This is my text field.  It mentions stuff about Greg Perry and Kevin Watters.");
+		testDoc.setField("text", "This is my text field.  It mentions stuff about Greg Perry and Kevin Watters.  The FAA can regulate the skies, but they don't own the airspace inside of buildings.");
+		
+		
+		
 		return testDoc;
 	}
 
@@ -33,6 +36,7 @@ public class OpenNLPTest extends AbstractStageTest {
 	public void validate(Document doc) {
 		Assert.assertEquals("Greg Perry", doc.getField("people").get(0).toString());
 		Assert.assertEquals("Kevin Watters", doc.getField("people").get(1).toString());
+		System.out.println(doc);
 	}
 
 }

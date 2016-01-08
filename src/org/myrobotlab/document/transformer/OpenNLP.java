@@ -2,6 +2,7 @@ package org.myrobotlab.document.transformer;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class OpenNLP extends AbstractStage {
 
 	private String textField = "text";
 	private String peopleField = "people";
-	private String postTextField = "pos_text";
+	private String posTextField = "pos_text";
 	private String sep = " ";
 	
 	@Override
@@ -62,6 +63,7 @@ public class OpenNLP extends AbstractStage {
 
 	@Override
 	public List<Document> processDocument(Document doc) {
+		ArrayList<Document> children = new ArrayList<Document>();
 		for (Object o :doc.getField(textField)) {
 			if (o instanceof String) {
 				String text = o.toString();
@@ -74,8 +76,10 @@ public class OpenNLP extends AbstractStage {
 					String tokens[] = tokenizer.tokenize(sentence);
 					Span[] spans = nameFinder.find(tokens);
 					// part of speech tagging
-					String posText = posTagger.tag(text);
-					doc.addToField(postTextField, posText);
+					String posText = posTagger.tag(sentence);
+					// extract a triple from the sentence.
+					children.addAll(createTripleDocuments(doc.getId(), posText));					
+					doc.addToField(posTextField, posText);
 					for (Span span : spans) {
 						String[] terms = Arrays.copyOfRange(tokens, span.getStart(), span.getEnd());
 						String entity = StringUtils.join(terms, sep);
@@ -83,10 +87,136 @@ public class OpenNLP extends AbstractStage {
 					}
 				}
 			} else {
-				log.info("Only Strings will be processed not %s", o.getClass());
+				log.info("Only Strings will be processed not {}", o.getClass());
 			}
 		}
-		return null;
+		// TODO: move this into it's own stage. but for now, this is just to poc it.
+		children.addAll(createEntityMentionDocs(doc));
+		log.info("Extracted {} children records from that document.", children.size());
+		for (Document d : children) {
+			log.info(d.toString());
+		}
+		return children;
+	}
+
+	private List<Document> createTripleDocuments(String parentId, String posText) {
+		// TODO Auto-generated method stub
+		
+		ArrayList<Document> childrenDocs = new ArrayList<Document>();
+		
+		// we'll look for the nouns, then the verbs, then the nouns again. (add an end element to the sentence)
+		String[] parts = (posText + " END/END").split(" ");
+		System.out.println("#######################################");
+		
+		// we want to find the runs of n* and v* ...
+		ArrayList<String> subjects = new ArrayList<String>();
+		ArrayList<String> verbs = new ArrayList<String>();
+		ArrayList<String> objects = new ArrayList<String>();
+
+		StringBuilder currentSubject = new StringBuilder();
+		StringBuilder currentVerb = new StringBuilder();
+		StringBuilder currentObject = new StringBuilder();
+
+		// state info for the iteration
+		String prevPOS = "";
+		boolean seenFirstVerb = false;
+		for (String part : parts) {
+			part = part.trim();
+			if (StringUtils.isEmpty(part) || !part.contains("/")) {
+				continue;
+			}
+			String[] subpart = part.split("/");
+			String word = subpart[0];
+			String pos = subpart[1];
+			System.out.println("WORD: " + word + " POS: " + pos + " PREV: " + prevPOS);
+			// NN to not NN ends nouns
+			// not NN to NN starts nouns.
+			if (pos.startsWith("N")) {
+				if (seenFirstVerb) {
+					currentObject.append(word + " ");
+				} else {
+					currentSubject.append(word + " ");
+				}
+			} 
+			if (prevPOS.startsWith("N") && !pos.startsWith("N")) {
+				if (!seenFirstVerb) {
+					String subjectName = currentSubject.toString().trim();
+					if (!StringUtils.isEmpty(subjectName)) {
+						subjects.add(subjectName);
+					}
+					currentSubject = new StringBuilder();
+				} else {
+					String objName = currentObject.toString().trim();
+					if (!StringUtils.isEmpty(objName)) { 
+						objects.add(objName);
+					}
+					currentObject = new StringBuilder();
+				}
+				
+				
+			}
+			
+			// now for verb phrases.
+			if (pos.startsWith("V") || "JJ".equals(pos)) {
+				seenFirstVerb = true;
+				currentVerb.append(word + " ");
+			}
+			if (prevPOS.startsWith("V") && !pos.startsWith("V")) {
+				String verbName = currentVerb.toString().trim();
+				if (!StringUtils.isEmpty(verbName)) {
+					verbs.add(verbName);
+				}
+				currentVerb = new StringBuilder();
+			}
+			
+			prevPOS = pos;
+		}
+		
+		
+		// now we want to see what all the verbs/nouns we found are.
+		// carteasean expansion.. just for fun!
+		for (String subject : subjects) {
+			for (String verb : verbs) {
+				for (String object : objects) {
+					if (!subject.equals(object)) {
+						// System.out.println("Subject:" + subject + " VERB:" + verb + " OBJECT:" + object);
+						// lets create a child document for each of these combindations.
+						// TODO: something better than this..
+						String childId = "triple_" + parentId + "_" + subject + " " + verb + " " + object;
+						Document child = new Document(childId);
+						child.setField("table", "triple");
+						child.setField("subject", subject);
+						child.setField("verb", verb);
+						child.setField("object", object);
+						// TODO: sanitized this fieldname
+						child.setField(verb + "_verb", object);
+						// add it to the list of docs that we've created.
+						childrenDocs.add(child);
+					}
+				}
+			}
+		}		
+		return childrenDocs;
+	}
+
+	private List<Document> createEntityMentionDocs(Document doc) {
+		// TODO Auto-generated method stub
+		ArrayList<Document> docs = new ArrayList<Document>();
+		// we have the fact that certain people are actually people.
+		for (Object o : doc.getField(peopleField)) {
+			// the unique id for this, is the doc id and the person
+			// TODO: handle person name collisions.
+			// TODO: something better, but for now this is good enough.
+			String docId = "person_" + doc.getId() + "_" + o.toString();
+			Document personDoc = new Document(docId);
+			personDoc.setField("person", o.toString());
+			// TODO: consider some better ideas for how to set these for each person.
+			personDoc.setField("parent_id", doc.getId());
+			personDoc.setField("node_id", o.toString());
+			// maybe copy some other field from the parent doc?
+			personDoc.setField("is_verb", "person");
+		}
+		return docs;
 	}
 
 	@Override
@@ -141,12 +271,12 @@ public class OpenNLP extends AbstractStage {
 		this.peopleField = peopleField;
 	}
 
-	public String getPostTextField() {
-		return postTextField;
+	public String getPosTextField() {
+		return posTextField;
 	}
 
-	public void setPostTextField(String postTextField) {
-		this.postTextField = postTextField;
+	public void setPostTextField(String posTextField) {
+		this.posTextField = posTextField;
 	}
 
 }
