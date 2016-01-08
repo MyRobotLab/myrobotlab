@@ -93,6 +93,24 @@ public class ProgramABTest {
 		assertEquals("BBB", resp.msg);		
 	}
 	
+	@Test
+	public void testSets() {
+		Response resp = testService.getResponse(session, "SETTEST CAT");
+		assertEquals("An Animal.", resp.msg);
+		resp = testService.getResponse(session, "SETTEST MOUSE");
+		assertEquals("An Animal.", resp.msg);
+		resp = testService.getResponse(session, "SETTEST DOG");
+		System.out.println(resp.msg);
+		assertEquals("An Animal.", resp.msg);
+	}
+	
+	@Test
+	public void testSetsAndMaps() {
+		Response resp = testService.getResponse(session, "DO YOU LIKE Leah?");
+		assertEquals("Princess Leia Organa is awesome.", resp.msg);
+
+	}
+	
 	@After
 	public void tearDown() throws Exception {
 		testService.stopService();
