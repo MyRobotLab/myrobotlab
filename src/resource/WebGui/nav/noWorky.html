@@ -3,8 +3,15 @@
 </div>
 <div class="modal-body">
     <div ng-if="status == 'waitingforinformation'">
-        don't panic, our team of crack engineers will evaluate your log file...<br>
-        <img src="../expert.jpg" alt="an expert developer"/><br><br>
+        <div class="media">
+            <span class="media-body">
+                don't panic, our team of crack engineers will evaluate your log file...
+            </span>
+            <span class="media-right">
+                <img src="../expert.jpg" alt="an expert developer"/>
+            </span>
+            <br>
+        </div>
         <div class="input-group">
             <input type="text" class="form-control" ng-model="userId" placeholder="user id">
             <span class="input-group-btn">
