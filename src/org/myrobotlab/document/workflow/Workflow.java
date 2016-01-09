@@ -12,7 +12,8 @@ import org.myrobotlab.document.transformer.AbstractStage;
 
 public class Workflow {
 
-	private int numWorkerThreads = 10;
+	// TODO: make sure all stages are thread safe before increasing this!
+	private int numWorkerThreads = 1;
 	private int queueLength = 50;
 	private LinkedBlockingQueue<Document> queue = new LinkedBlockingQueue<Document>(queueLength);
 	private Document stopDoc;
