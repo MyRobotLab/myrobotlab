@@ -31,6 +31,8 @@ public class OpenNLP extends AbstractStage {
 	private String tokenModelFile = "./opennlp/en-token.bin";
 	private String posModelFile = "./opennlp/en-pos-maxent.bin";
 	
+	// TODO: These are NOT thread safe!!!!  WorkflowServer must be single threaded
+	// until we make these thread safe... :-/  
 	private SentenceDetectorME sentenceDetector;
 	private Tokenizer tokenizer;
 	private NameFinderME nameFinder;
@@ -43,6 +45,12 @@ public class OpenNLP extends AbstractStage {
 	
 	@Override
 	public void startStage(StageConfiguration config) {
+		
+		// parse the config to map the params properly
+		textField = config.getProperty("textField", textField);
+		peopleField = config.getProperty("peopleField", peopleField);
+		posTextField = config.getProperty("posTextField", posTextField);
+		
 		try {
 			// Sentence finder
 			SentenceModel sentModel = new SentenceModel(new FileInputStream(sentenceModelFile));
@@ -63,8 +71,18 @@ public class OpenNLP extends AbstractStage {
 
 	@Override
 	public List<Document> processDocument(Document doc) {
+		log.info("Processing Doc: {}", doc.getId());
 		ArrayList<Document> children = new ArrayList<Document>();
+		if (!doc.hasField(textField)) {
+			log.info("No Text Field On Document {}", doc.getId());
+			return null;
+		}
+		
 		for (Object o :doc.getField(textField)) {
+			if (o == null) {
+				log.info("Null field value! Field : {} Doc: {}", textField, doc.getId());
+				continue;
+			}
 			if (o instanceof String) {
 				String text = o.toString();
 				if (StringUtils.isEmpty(text)) {
@@ -73,6 +91,10 @@ public class OpenNLP extends AbstractStage {
 				}
 				String sentences[] = sentenceDetector.sentDetect(text);
 				for (String sentence : sentences) {
+					if (StringUtils.isEmpty(sentence)) {
+						log.info("Empty sentence...");
+						continue;
+					}
 					String tokens[] = tokenizer.tokenize(sentence);
 					Span[] spans = nameFinder.find(tokens);
 					// part of speech tagging
@@ -100,13 +122,13 @@ public class OpenNLP extends AbstractStage {
 	}
 
 	private List<Document> createTripleDocuments(String parentId, String posText) {
-		// TODO Auto-generated method stub
-		
+		// TODO : implement a much better tuned grammar for parsing subject/object/verb
+		// this is very likely language dependent.
 		ArrayList<Document> childrenDocs = new ArrayList<Document>();
 		
 		// we'll look for the nouns, then the verbs, then the nouns again. (add an end element to the sentence)
 		String[] parts = (posText + " END/END").split(" ");
-		System.out.println("#######################################");
+		// System.out.println("#######################################");
 		
 		// we want to find the runs of n* and v* ...
 		ArrayList<String> subjects = new ArrayList<String>();
@@ -128,7 +150,7 @@ public class OpenNLP extends AbstractStage {
 			String[] subpart = part.split("/");
 			String word = subpart[0];
 			String pos = subpart[1];
-			System.out.println("WORD: " + word + " POS: " + pos + " PREV: " + prevPOS);
+			// System.out.println("WORD: " + word + " POS: " + pos + " PREV: " + prevPOS);
 			// NN to not NN ends nouns
 			// not NN to NN starts nouns.
 			if (pos.startsWith("N")) {
@@ -171,8 +193,6 @@ public class OpenNLP extends AbstractStage {
 			
 			prevPOS = pos;
 		}
-		
-		
 		// now we want to see what all the verbs/nouns we found are.
 		// carteasean expansion.. just for fun!
 		for (String subject : subjects) {
@@ -188,21 +208,33 @@ public class OpenNLP extends AbstractStage {
 						child.setField("subject", subject);
 						child.setField("verb", verb);
 						child.setField("object", object);
+						child.setField("parent_id", parentId);
 						// TODO: sanitized this fieldname
-						child.setField(verb + "_verb", object);
+						String normVerb = normalizeFieldName(verb);
+						child.setField(normVerb + "_verb", object);
 						// add it to the list of docs that we've created.
 						childrenDocs.add(child);
 					}
 				}
 			}
-		}		
+		}
 		return childrenDocs;
+	}
+
+	private String normalizeFieldName(String verb) {
+		// TODO Auto-generated method stub
+		String cleanVerb = verb.replaceAll(" ", "_").toLowerCase();
+		return cleanVerb;
 	}
 
 	private List<Document> createEntityMentionDocs(Document doc) {
 		// TODO Auto-generated method stub
 		ArrayList<Document> docs = new ArrayList<Document>();
 		// we have the fact that certain people are actually people.
+		if (!doc.hasField(peopleField)) {
+			log.info("No people found...");
+			return docs;
+		}
 		for (Object o : doc.getField(peopleField)) {
 			// the unique id for this, is the doc id and the person
 			// TODO: handle person name collisions.
