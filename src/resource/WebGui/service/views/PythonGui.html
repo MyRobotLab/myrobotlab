@@ -6,7 +6,7 @@
     <button class="btn btn-default uib-dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
       <span class="glyphicon glyphicon-open">examples</span><!-- span class="caret"></span-->
     </button>	
-    <ul class="uib-dropdown-menu" aria-labelledby="dropdownMenu1">
+    <ul uib-dropdown-menu aria-labelledby="dropdownMenu1">
       <li ng-repeat="file in service.currentFileList" ng-class="navClass('{{file.type}}')"> <a href='' ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a> 
         </li>
     </ul>
