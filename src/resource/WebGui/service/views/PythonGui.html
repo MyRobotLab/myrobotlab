@@ -1,14 +1,29 @@
 <!-- file menu button bar begin -->
 <div class="btn-group">
-    <button class="btn btn-default uib-dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-      <span class="glyphicon glyphicon-open">open</span><!-- span class="caret"></span-->
-    </button>
 
-	<!-- python example resource files -->
+    <!-- python example resource files begin -->
+    <div class="btn-group" uib-dropdown is-open="status.isopen">
+    <button class="btn btn-default uib-dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
+      <span class="glyphicon glyphicon-open">examples</span><!-- span class="caret"></span-->
+    </button>	
     <ul class="uib-dropdown-menu" aria-labelledby="dropdownMenu1">
       <li ng-repeat="file in service.currentFileList" ng-class="navClass('{{file.type}}')"> <a href='' ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a> 
         </li>
     </ul>
+	</div>
+    <!-- python example resource files end -->
+
+    <!-- python example resource files begin -->
+    <div class="btn-group" uib-dropdown is-open="status.isopen">
+    <button class="btn btn-default uib-dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
+      <span class="glyphicon glyphicon-open">open</span><!-- span class="caret"></span-->
+    </button>	
+    <ul class="uib-dropdown-menu" aria-labelledby="dropdownMenu1">
+      <li ng-repeat="file in service.currentFileList" ng-class="navClass('{{file.type}}')"> <a href='' ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a> 
+        </li>
+    </ul>
+	</div>
+    <!-- python example resource files end -->
 
 
   <button type="button" class="btn btn-default" ng-click="msg.exec(editor.getValue())"><span class="glyphicon glyphicon-play"></span>execute</button>

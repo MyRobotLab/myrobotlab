@@ -1,0 +1,29 @@
+
+    <div class="col-md-12">
+        <table border="1" class="table table-hover table-condensed table-striped table-bordered">
+            <tr><td><h4>processes</h4></td><td><h4>actions</h4></td><td><h4>uptime</h4></td></tr>
+            <tr ng-repeat="(key, value) in service.processes">
+            <td nowrap>{{value.branch}} {{key}}</td>
+            <td>
+                <span class="input-group-btn">
+                <button class="btn btn-default" ng-show='{{!value.isRunning}}'  ng-click="msg.kill('key')">start</button>
+                <button class="btn btn-default" ng-show='{{value.isRunning}}'  ng-click="msg.kill('key')">stop</button>
+                <button class="btn btn-default" ng-click="msg.kill('key')">auto update</button>
+                <!-- <button class="btn btn-default"  ng-show='{{value.isRunning}}'  ng-click="msg.kill('key')">restart</button> -->
+                </span>
+            </td>
+            <!-- TODO http://siddii.github.io/angular-timer/ because a timer would be cool !!! -->
+            <td ng-init="uptime=tsDiff(value.startTs)" ng-show='{{value.isRunning}}' nowrap><!-- {{value.branch}} -->{{uptime}}</td>
+            </tr>
+        </table>
+
+    </div>       
+
+    <div class="col-md-12">
+     <span class="input-group-btn">
+          <button class="btn btn-default"  ng-click="msg.killAll()">start</button>
+          <button class="btn btn-default"  ng-click="msg.save()">save</button>
+          <button class="btn btn-default"  ng-click="msg.killAll()">kill all</button>
+          <button class="btn btn-default"  ng-click="msg.shutdown()">shutdown</button>
+     </span>
+    </div>       

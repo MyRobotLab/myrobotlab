@@ -435,6 +435,11 @@ public class Repo implements Serializable {
 		return sb.toString();
 	}
 
+	/**
+	 * this should probably be deprecated
+	 * both jar versions are pushed to S3
+	 * @return
+	 */
 	public boolean getLatestJar() {
 
 		try {

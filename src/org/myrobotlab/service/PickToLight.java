@@ -385,15 +385,15 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 	}
 
 	public void autoCheckForUpdates(int seconds) {
-		addLocalTask(seconds * 1000, "checkForUpdates");
+		addTask(seconds * 1000, "checkForUpdates");
 	}
 
 	public void autoRefreshI2CDisplay(int seconds) {
-		addLocalTask(seconds * 1000, "refreshI2CDisplay");
+		addTask(seconds * 1000, "refreshI2CDisplay");
 	}
 
 	public void autoRegister(int seconds) {
-		addLocalTask(seconds * 1000, "register");
+		addTask(seconds * 1000, "register");
 	}
 
 	public void blinkAllOn() {

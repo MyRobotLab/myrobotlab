@@ -78,7 +78,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		
 		// Tell programAB to persist it's learned predicates about people
 		// every 30 seconds.
-		addLocalTask(savePredicatesInterval, "savePredicates");
+		addTask("savePredicates", savePredicatesInterval, "savePredicates");
 		
 	}
 
@@ -225,7 +225,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 			// int numExecutions = 1;
 			// TODO: we need a way for the task to just execute one time
 			// it'd be good to have access to the timer here, but it's transient
-			addLocalTask(maxConversationDelay, "getResponse", session, text, new Long(maxConversationDelay));
+			addTask("getResponse", maxConversationDelay, "getResponse", session, text);
 		}
 
 		// EEK! clean up the API!

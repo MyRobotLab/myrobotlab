@@ -8,6 +8,7 @@ angular.module('mrlapp.service.ClockGui', [])
                 this.updateState = function (service) {
                     $scope.service = service;
                 };
+                
                 _self.updateState($scope.service);
 
                 // init scope variables

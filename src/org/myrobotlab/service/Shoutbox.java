@@ -392,7 +392,7 @@ public class Shoutbox extends Service {
 		addXMPPRelay("Greg Perry");
 		aliases.put("Greg Perry", "GroG");
 
-		addLocalTask(30 * 60 * 1000, "savePredicates");
+		addTask(30 * 60 * 1000, "savePredicates");
 	}
 
 	public String removeXMPPRelay(String user) {

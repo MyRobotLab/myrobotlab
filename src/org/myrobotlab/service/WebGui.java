@@ -317,10 +317,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 		// SessionSupport ss = new SessionSupport();
 
-		Nettosphere s = new Nettosphere.Builder().config(configBuilder.build()).build();
-		s.start();
+		nettosphere = new Nettosphere.Builder().config(configBuilder.build()).build();
+		nettosphere.start();
+		
 
-		broadcastFactory = s.framework().getBroadcasterFactory();
+		broadcastFactory = nettosphere.framework().getBroadcasterFactory();
 		// get default boadcaster
 		broadcaster = broadcastFactory.get("/*");
 
@@ -831,6 +832,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public void setPort(Integer port) {
 		this.port = port;
+	}
+	
+	public void stopService(){
+		super.stopService();
+		if (nettosphere != null){
+			nettosphere.stop();
+		}
 	}
 
 	public static void main(String[] args) {
