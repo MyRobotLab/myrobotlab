@@ -2,10 +2,13 @@ package org.myrobotlab.service;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
@@ -18,6 +21,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.InvokerUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.StreamGobbler;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -180,8 +184,17 @@ public class Cli extends Service {
 						log.info(path);
 						try {
 							
-							// New Way
-							Object ret = InvokerUtils.invoke(path);
+							Object ret = null;
+							// Object ret = InvokerUtils.invoke(path);
+							// InvokerUtils removed - need more access & control
+							Message msg = CodecUri.decodePathInfo(path);
+							ServiceInterface si = Runtime.getService(msg.name);
+							if (si == null){
+								ret = Status.error("could not find service %s", msg.name);
+							} else {
+								ret = si.invoke(msg.method, msg.data);
+							}
+							
 							if (ret != null && ret instanceof Serializable) {
 								// configurable use log or system.out ?
 								// FIXME - make getInstance configurable
@@ -618,6 +631,19 @@ public class Cli extends Service {
 		try {
 
 			Cli cli = (Cli) Runtime.start("cli", "Cli");
+			cli.load();
+			cli.save();
+			
+			FileOutputStream fos = new FileOutputStream("cli.dat");
+			ObjectOutputStream out = new ObjectOutputStream(fos);
+			out.writeObject(cli);
+			out.close();
+			
+			FileInputStream fis = new FileInputStream("cli.dat");
+			ObjectInputStream in = new ObjectInputStream(fis);
+			Object x = in.readObject();
+			in.close();
+			
 			/*
 			 * cli.ls("/"); cli.ls("/cli"); cli.ls("/cli/");
 			 */

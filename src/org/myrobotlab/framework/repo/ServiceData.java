@@ -20,7 +20,6 @@ import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Peers;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
@@ -638,9 +637,11 @@ public class ServiceData implements Serializable {
 
 			Repo repo = new Repo();
 			log.info(String.format("%b", repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")));
+			
+			ServiceData sd = generate("../repo");
 
 			String json = FileIO.fileToString(new File("serviceData.generated.json"));
-			ServiceData sd = ServiceData.load(json);
+			sd = ServiceData.load(json);
 			FileOutputStream fos = new FileOutputStream(new File("serviceData.compare.json"));
 			fos.write(CodecUtils.toJson(sd).getBytes());
 			fos.close();

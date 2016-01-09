@@ -60,6 +60,7 @@ import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.net.CommunicationManager;
 import org.myrobotlab.net.Heartbeat;
 import org.myrobotlab.service.Runtime;
@@ -83,16 +84,18 @@ import org.slf4j.Logger;
  * 
  */
 public abstract class Service extends MessageService implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
-
+	
 	// FIXME upgrade to ScheduledExecutorService
+	// http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
 	protected class Task extends TimerTask {
-
+		String taskName;
 		Message msg;
-		int interval = 0;
+		long interval = 0;
 
-		public Task(int interval, String name, String method, Object... data) {
+		public Task(String taskName, long interval, String name, String method, Object... data) {
 			this.msg = createMessage(name, method, data);
 			this.interval = interval;
+			this.taskName = taskName;
 		}
 
 		public Task(Task s) {
@@ -102,13 +105,16 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 		@Override
 		public void run() {
-
+			info("task %s running - next run %s", taskName, MathUtils.msToString(interval));
 			getInbox().add(msg);
 
 			if (interval > 0) {
 				Task t = new Task(this);
 				// clear history list - becomes "new" message
 				t.msg.historyList.clear();
+				if (timer == null) {
+					timer = new Timer(String.format("%s.timer", getName()));
+				}
 				timer.schedule(t, interval);
 			}
 		}
@@ -765,30 +771,18 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 	// -------------------------------- new createPeer end
 	// -----------------------------------
-
-	/**
-	 * DEPRECATE - use addTask
-	 * @param interval
-	 * @param method
-	 * @param params
-	 */
-	@Deprecated
-	public void addLocalTask(int interval, String method, Object... params) {
-		if (timer == null) {
-			timer = new Timer(String.format("%s.timer", getName()));
-		}
-
-		Task task = new Task(interval, getName(), method, params);
-		timer.schedule(task, 0);
-	}
 	
+	public void addTask(int interval, String method, Object... params){
+		addTask(method, interval, method, params);
+	}
+
 	/**
 	 * a stronger bigger better task handler !
 	 * @param name
 	 */
 	public void addTask(String name, int interval, String method, Object... params){
 		Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), name)));
-		Task task = new Task(interval, getName(), method, params);
+		Task task = new Task(name, interval, getName(), method, params);
 		timer.schedule(task, 0);
 		tasks.put(name, timer);
 	}
@@ -824,23 +818,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			}
 		}
 		tasks.clear();
-	}
-	
-	/**
-	 * DEPRECATED - use purgeTasks
-	 */
-	@Deprecated
-	public void purgeAllTasks() {
-		info("purgeAllTasks");
-		if (timer != null) {
-			try {
-				timer.cancel();
-				timer.purge();
-				timer = null;
-			} catch (Exception e) {
-				log.info(e.getMessage());
-			}
-		}
 	}
 
 	public boolean allowDisplay() {
@@ -1590,22 +1567,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 	/**
 	 * 
-	 * @param listener
-	 */
-	/*
-	 * DEPRECATE MRLListener Object interface - use String params public void
-	 * removeListener(MRLListener listener) { if
-	 * (!outbox.notifyList.containsKey(listener.outMethod.toString())) {
-	 * log.error(String.format(
-	 * "removeListener requested %s to be removed - but does not exist",
-	 * listener)); return; } ArrayList<MRLListener> nel =
-	 * outbox.notifyList.get(listener.outMethod.toString()); for (int i = 0; i <
-	 * nel.size(); ++i) { MRLListener target = nel.get(i); if
-	 * (target.name.compareTo(listener.name) == 0) { nel.remove(i); } } }
-	 */
-
-	/**
-	 * 
 	 * @param outMethod
 	 * @param serviceName
 	 * @param inMethod
@@ -2037,12 +1998,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	}
 
 	public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
-		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
-		/*
-		 * wa deprecated MRLListener listener = new MRLListener(topicMethod,
-		 * callbackName, callbackMethod); cm.send(createMessage(topicName,
-		 * "removeListener", listener));
-		 */
+		log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));		
 		cm.send(createMessage(topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
 	}
 

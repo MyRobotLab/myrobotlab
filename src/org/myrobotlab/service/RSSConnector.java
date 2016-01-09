@@ -97,7 +97,7 @@ public class RSSConnector extends AbstractConnector {
 	public static void main(String[] args) throws Exception {
 		RSSConnector connector = (RSSConnector)Runtime.start("rss", "RSSConnector");
 		Solr solr = (Solr)Runtime.start("solr", "Solr");
-		solr.setSolrUrl("http://phobos:8983/solr/collection1");
+		solr.setSolrUrl("http://www.skizatch.org:8983/solr/collection1");
 		connector.addDocumentListener(solr);
 		connector.startCrawling();		
 	}

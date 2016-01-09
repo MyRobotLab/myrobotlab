@@ -278,7 +278,7 @@ public class InMoov extends Service {
 		// speakBlocking("power down after %s seconds inactivity is on",
 		// this.maxInactivityTimeSeconds);
 		log.info("power down after %s seconds inactivity is on", this.maxInactivityTimeSeconds);
-		addLocalTask(5 * 1000, "checkInactivity");
+		addTask("checkInactivity", 5 * 1000, "checkInactivity");
 	}
 
 	@Override
@@ -757,7 +757,7 @@ public class InMoov extends Service {
 	public void powerDown() {
 
 		rest();
-		purgeAllTasks();
+		purgeTasks();
 		detach();
 
 		// TODO standard relay line ?
@@ -810,9 +810,9 @@ public class InMoov extends Service {
 	}
 
 	@Override
-	public void purgeAllTasks() {
+	public void purgeTasks() {
 		speakBlocking("purging all tasks");
-		super.purgeAllTasks();
+		super.purgeTasks();
 	}
 
 	/**

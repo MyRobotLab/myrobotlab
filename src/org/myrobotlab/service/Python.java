@@ -1,8 +1,11 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
@@ -833,6 +836,8 @@ public class Python extends Service {
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
+		
+		try {
 
 		// Runtime.start("gui", "GUIService");
 		// String f = "C:\\Program Files\\blah.1.py";
@@ -844,8 +849,29 @@ public class Python extends Service {
 		// python.execAndWait();
 		// python.releaseService();
 
+
+
+		python.load();
+		python.save();
+		
+		FileOutputStream fos = new FileOutputStream("python.dat");
+		ObjectOutputStream out = new ObjectOutputStream(fos);
+		out.writeObject(python);
+		out.close();
+		
+		FileInputStream fis = new FileInputStream("python.dat");
+		ObjectInputStream in = new ObjectInputStream(fis);
+		Object x = in.readObject();
+		in.close();
+		
+		
 		Runtime.createAndStart("webgui", "WebGui");
 
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+		
 	}
 
 }

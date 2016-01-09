@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -17,8 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import opennlp.tools.cmdline.TerminateToolException;
-
 import org.myrobotlab.cmdline.CMDLine;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
@@ -32,6 +29,7 @@ import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.net.HttpGet;
 import org.slf4j.Logger;
 
@@ -125,18 +123,33 @@ public class Agent extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Agent.class);
 
-	private HashMap<String, ProcessData> processes = new HashMap<String, ProcessData>();
-	private HashMap<String, HashMap<String, ProcessData>> branchIndex = new HashMap<String, HashMap<String, ProcessData>>();
+	HashMap<String, ProcessData> processes = new HashMap<String, ProcessData>();
+	// even more index .. you forgot mrl version ! :P
+	HashMap<String, HashMap<String, ProcessData>> branchIndex = new HashMap<String, HashMap<String, ProcessData>>();
 
-	//private Set<String> clientJVMArgs = new HashSet<String>();
+	
+	List<String> agentJVMArgs = new ArrayList<String>();
 
-	private List<String> agentJVMArgs = new ArrayList<String>();
-
-	private HashMap<String, ArrayList<String>> history = new HashMap<String, ArrayList<String>>();
+	
+	// proxy info
+	// CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().build();
+	// java -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=8000
+	String proxyHost = null;
+	Integer proxyPort = null;
+	
+	
+	// FIXME - all update functionality will need to be moved to Runtime 
+	// it should take parameters such that it will be possible at some point to do an update
+	// from a child process & update the agent :)
+	
+	String updateUrl = "http://mrl-bucket-01.s3.amazonaws.com/current/%s/";
 
 	String lastBranch = null;
+	WebGui webAdmin = null;
 
 	boolean updateRestartProcesses = false;
+
+	boolean autoUpdate = true;
 
 	public String formatList(ArrayList<String> args) {
 		StringBuilder sb = new StringBuilder();
@@ -149,38 +162,40 @@ public class Agent extends Service {
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
-		peers.put("cli", "Cli", "Command line processor");
+		// peers.put("cli", "Cli", "Command line processor");
+		peers.put("webAdmin", "WebGui", "web gui");
 		return peers;
 	}
-	
-	public void add(ProcessData p){
-		
+
+	public void add(ProcessData p) {
+
 		processes.put(p.name, p);
 		HashMap<String, ProcessData> h = null;
-		if (!branchIndex.containsKey(p.branch)){
+		if (!branchIndex.containsKey(p.branch)) {
 			h = new HashMap<String, ProcessData>();
 		} else {
 			h = branchIndex.get(p.name);
 		}
-		branchIndex.put(p.name, h);
+		h.put(p.name, p);
+		branchIndex.put(p.branch, h);
 	}
-	
-	public void remove(ProcessData p){
+
+	public void remove(ProcessData p) {
 		processes.remove(p.name);
-		if (branchIndex.containsKey(p.branch)){
+		if (branchIndex.containsKey(p.branch)) {
 			HashMap<String, ProcessData> h = branchIndex.get(p.branch);
-			if (h.containsKey(p.name)){
+			if (h.containsKey(p.name)) {
 				h.remove(p.name);
-				
+
 			}
-		} 
+		}
 	}
 
 	public List<Status> install(String fullType) {
 		List<Status> ret = new ArrayList<Status>();
 		ret.add(Status.info("install %s", fullType));
 		try {
-			Repo repo = new Repo();    
+			Repo repo = new Repo();
 
 			if (!repo.isServiceTypeInstalled(fullType)) {
 				repo.install(fullType);
@@ -200,7 +215,15 @@ public class Agent extends Service {
 	public Agent(String n) {
 		super(n);
 		log.info("Agent {} PID {} is alive", n, Runtime.getPID());
-		agentJVMArgs = Runtime.getJVMArgs();		
+		agentJVMArgs = Runtime.getJVMArgs();
+	}
+
+	public void startWebGui() {
+		webAdmin = (WebGui) createPeer("webAdmin");
+		if (webAdmin != null) {
+			webAdmin.setPort(8888); // 8887 for debugging
+			webAdmin.startService();
+		}
 	}
 
 	@Override
@@ -218,11 +241,18 @@ public class Agent extends Service {
 	 * 
 	 * @return
 	 */
-	public ProcessData[] getProcesses() {
-		Object[] objs = processes.values().toArray();
-		ProcessData[] pd = new ProcessData[objs.length];
+	public HashMap<String, ProcessData> getProcesses() {
+		return processes;
+	}
+
+	/**
+	 * list processes
+	 */
+	public String[] lp() {
+		Object[] objs = processes.keySet().toArray();
+		String[] pd = new String[objs.length];
 		for (int i = 0; i < objs.length; ++i) {
-			pd[i] = (ProcessData) objs[i];
+			pd[i] = (String) objs[i];
 		}
 		return pd;
 	}
@@ -328,7 +358,7 @@ public class Agent extends Service {
 					info("could not get results");
 				}
 				// destroy env
-				terminate("testEnv");
+				kill("testEnv");
 
 			} catch (Exception e) {
 
@@ -441,7 +471,7 @@ public class Agent extends Service {
 		}
 
 		outArgs.add(javaPath);
-		
+
 		Set<String> clientJVMArgs = new HashSet<String>();
 		log.info("jvmArgs {}", Arrays.toString(agentJVMArgs.toArray()));
 		for (int i = 0; i < agentJVMArgs.size(); ++i) {
@@ -559,7 +589,7 @@ public class Agent extends Service {
 
 		String cmd = formatList(outArgs);
 		log.info(String.format("spawning -> [%s]", cmd));
-		
+
 		ProcessBuilder builder = new ProcessBuilder(outArgs);// .inheritIO();
 
 		// create branch directory if one does not exist
@@ -592,9 +622,9 @@ public class Agent extends Service {
 		}
 
 		Process process = builder.start();
-		history.put(runtimeName, outArgs);
-		add(new ProcessData(this, branch, runtimeName, process));
-		
+		ProcessData pd = new ProcessData(this, branch, runtimeName, outArgs, process);
+		add(pd);
+
 		// attach our cli to the latest instance
 		Cli cli = Runtime.getCLI();
 		if (cli != null) {
@@ -613,22 +643,19 @@ public class Agent extends Service {
 	 */
 	public void autoUpdate(boolean b) {
 		/*
-		if (b) {
-			addTask("updater", 10000, update, params);
-		} else {
-			purgeTask("updater");                                                
-		}
-		*/
+		 * if (b) { addTask("updater", 10000, update, params); } else {
+		 * purgeTask("updater"); }
+		 */
 	}
 
-	public void terminate() {
+	public void shutdown() {
 		log.info("terminating others");
-		terminateAll();
+		killAll();
 		log.info("terminating self ... goodbye...");
-		System.exit(0);
+		Runtime.exit();
 	}
 
-	public String terminate(String name) {
+	public String kill(String name) {
 		if (processes.containsKey(name)) {
 			info("terminating %s", name);
 			processes.get(name).process.destroy();
@@ -641,11 +668,12 @@ public class Agent extends Service {
 		return null;
 	}
 
-	public void terminateAll() {
+	public void killAll() {
 		for (String name : processes.keySet()) {
-			terminate(name);
+			kill(name);
 		}
 		log.info("no survivors sir...");
+		broadcastState();
 	}
 
 	public void terminateSelfOnly() {
@@ -677,45 +705,85 @@ public class Agent extends Service {
 
 	public void update(String branch) throws IOException {
 		info("update({})", branch);
-		// so we need to get the version of the jar contained in the {branch} directory ..
+		// so we need to get the version of the jar contained in the {branch}
+		// directory ..
 		FileIO.extract(String.format("%s/myrobotlab.jar", branch), "resource/version.txt", String.format("%s/version.txt", branch));
-		
+
 		String currentVersion = FileIO.fileToString(String.format("%s/version.txt", branch));
-		if (currentVersion == null){
+		if (currentVersion == null) {
 			error("{}/version.txt current version is null", branch);
 			return;
 		}
-		// compare that with the latest http://s3/current/{branch}/version.txt 
+		// compare that with the latest http://s3/current/{branch}/version.txt
 		// and figure
-		
+
 		String latestVersion = getLatestVersionNumber(branch);
-		if (latestVersion == null){
+		if (latestVersion == null) {
 			error("s3 version.txt current version is null", branch);
 			return;
 		}
 
 		Map<String, ProcessData> dead = new HashMap<String, ProcessData>();
-		
+
 		info(String.format("terminating %d processes on %s", branchIndex.size(), branch));
 		// FIXME - implement
-		if (branchIndex.containsKey(branch)){
-			HashMap<String, ProcessData> b =  branchIndex.get(branch);
-			for (String processName : b.keySet()){
+		if (branchIndex.containsKey(branch)) {
+			HashMap<String, ProcessData> b = branchIndex.get(branch);
+			for (String processName : b.keySet()) {
 				dead.put(processName, b.get(processName));
-				terminate(processName);
+				kill(processName);
 			}
 		}
-		
- 		if (!latestVersion.equals(currentVersion)){
- 			info("latest %s > current %s - updating", latestVersion, currentVersion);
+
+		if (!latestVersion.equals(currentVersion)) {
+			info("latest %s > current %s - updating", latestVersion, currentVersion);
 			downloadLatest(branch);
 		}
- 		
- 		// FIXME - restart processes
- 		if (updateRestartProcesses){
- 			
- 		}
 
+		// FIXME - restart processes
+		if (updateRestartProcesses) {
+
+		}
+
+	}
+
+	public void startService() {
+		super.startService();
+		addTask(getName(), 100, "checkForUpdates");
+	}
+
+	public void checkForUpdates() {
+
+		for (String key : processes.keySet()) {
+			ProcessData process = processes.get(key);
+			if (process.autoUpdate) {
+				try {
+					String url = String.format(updateUrl, process.branch) + "/version.txt";
+					HTTPRequest v = new HTTPRequest(url);
+					byte[] ver = v.getBinary();
+					if (ver == null) {
+						error("checkForUpdates %s is null", url);
+					} else {
+						String remoteVersion = new String(ver);
+						if (compareGreater(remoteVersion, process.version)){
+							info("found update %s for process %s with version %s", remoteVersion, process.name, process.version);
+							info("stopping process");
+							// FIXME - it would be nice to send a SIG_TERM to the process before we kill the jvm
+							process.process.getOutputStream().write("/Runtime/releaseAll".getBytes());
+						}
+					}
+				} catch (Exception e) {
+					Logging.logError(e);
+				}
+			}
+		}
+
+		// Runtime.checkForUpdates();
+	}
+
+	private boolean compareGreater(String remoteVersion, String version) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	public void downloadLatest(String branch) throws IOException {
