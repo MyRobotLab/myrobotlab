@@ -7,7 +7,7 @@
   <div class="input-group">
   <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
       <a href id="simple-dropdown" uib-dropdown-toggle>controller<span class="caret"></span></a>
-      <ul class="uib-dropdown-menu" >
+      <ul uib-dropdown-menu>
         <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)"><a href>{{possibleController}}</a></li>
       </ul>
   </span>
@@ -16,7 +16,7 @@
 
   <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
       <a href id="simple-dropdown" uib-dropdown-toggle>pin<span class="caret"></span></a>
-      <ul class="uib-dropdown-menu">
+      <ul uib-dropdown-menu>
         <li ng-repeat="newPin in pins"><a href ng-click="setPin(newPin)">{{newPin}}</a></li>
       </ul>
   </span>

@@ -45,7 +45,7 @@
                                     <i class="glyphicon glyphicon-dashboard"></i>
                                 </button>
                             </div>
-                            <ul class="uib-dropdown-menu" style="width: 240px">
+                            <ul uib-dropdown-menu style="width: 240px">
                                 <li ng-repeat="status in statuslist| reverse track by $index">
                                     <a href="">
                                         <div ng-if="status.level == 'debug'"><i class="glyphicon glyphicon-record"></i>&nbsp;&nbsp;{{status.name}}&nbsp;&nbsp;<div class="label label-primary">{{status.level}}</div>&nbsp;&nbsp;{{status.detail}}</div>
@@ -105,7 +105,7 @@
                                     <i class="glyphicon glyphicon-option-horizontal"></i>
                                 </button>
                             </div>
-                            <ul class="uib-dropdown-menu">
+                            <ul uib-dropdown-menu>
                                 <li><a href="" ng-click="about()"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;&nbsp;About</a></li>
                                 <li><a href="" ng-click="help()"><i class="glyphicon glyphicon-question-sign"></i>&nbsp;&nbsp;Help</a></li>
                                 <li><a href="" ng-click="noWorky()"><i class="glyphicon glyphicon-alert"></i>&nbsp;&nbsp;No Worky !</a></li>
