@@ -3,14 +3,14 @@
         <div class="panel-heading" drag-directive>
             <!--header-->
             <h3 class="panel-title">
-                <img src="{{::panel.simpleName}}.png" alt="" width="16">
+                <img ng-src="{{::panel.simpleName}}.png" alt="" width="16">
                 <b>{{::panel.name}}</b><div style="display:inline;" ng-if="panel.showpanelname">&nbsp;&nbsp;{{panel.panelname}}</div>
-                <div class="pull-right" uib-dropdown dropdown-append-to-body>
+                <div class="pull-right" uib-dropdown dropdown-append-to-body auto-close="outsideClick" is-open="servicemenuDropdownOpen">
                     {{::panel.simpleName}}&nbsp;&nbsp;
                     <span style="cursor: pointer;" tooltip-placement="right" uib-tooltip="Menu"><i uib-dropdown-toggle class="glyphicon glyphicon-list"></i></span>
                     <ul class="uib-dropdown-menu">
                         <li>
-                            <a href="http://myrobotlab.org/service/{{::panel.simpleName}}" target="_blank">
+                            <a href="http://myrobotlab.org/service/{{::panel.simpleName}}" target="_blank" ng-click="servicemenuDropdownOpen = false">
                                 <i class="glyphicon glyphicon-question-sign"></i>
                                 &nbsp;&nbsp;help
                             </a>
@@ -28,7 +28,7 @@
                             </a>
                         </li>
                         <li ng-show="!panel.panelsize.sizes[panel.panelsize.aktsize].forcesize">
-                            <a href="" ng-click="panel.hide = !panel.hide">
+                            <a href="" ng-click="servicemenuDropdownOpen = false;panel.hide = !panel.hide">
                                 <span ng-show="!panel.hide">
                                     <i class="glyphicon glyphicon-eye-close"></i>
                                     &nbsp;&nbsp;hide
@@ -40,16 +40,40 @@
                             </a>
                         </li>
                         <li>
-                            <a href="" ng-click="release()">
+                            <a href="" ng-click="servicemenuDropdownOpen = false;release()">
                                 <i class="glyphicon glyphicon-remove"></i>
                                 &nbsp;&nbsp;release
                             </a>
                         </li>
                         <li>
-                            <a href="" ng-click="noworky()">
+                            <a href="" ng-click="servicemenuDropdownOpen = false;noworky()">
                                 <i class="glyphicon glyphicon-alert"></i>
                                 &nbsp;&nbsp;no worky
                             </a>
+                        </li>
+                        <li>
+                            <a href="" uib-popover-template="'listMethodsPopoverTemplate.html'" popover-title="Methods of this Service" popover-placement="right-bottom">
+                                <i class="glyphicon glyphicon-list-alt"></i>
+                                &nbsp;&nbsp;list methods
+                            </a>
+                            <script type="text/ng-template" id="listMethodsPopoverTemplate.html">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Function</th>
+                                            <th>Arguments</th>
+                                            <th>Return type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="(key, value) in panel.msg_.temp.methodMap track by $index">
+                                            <td>{{value.name}}</td>
+                                            <td><div ng-repeat="arg in value.parameterTypeNames track by $index">{{arg}}<br></div></td>
+                                            <td>{{value.returnTypeName}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </script>
                         </li>
                     </ul>
                 </div>
