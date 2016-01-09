@@ -8,7 +8,7 @@
                 <div class="pull-right" uib-dropdown dropdown-append-to-body auto-close="outsideClick" is-open="servicemenuDropdownOpen">
                     {{::panel.simpleName}}&nbsp;&nbsp;
                     <span style="cursor: pointer;" tooltip-placement="right" uib-tooltip="Menu"><i uib-dropdown-toggle class="glyphicon glyphicon-list"></i></span>
-                    <ul class="uib-dropdown-menu">
+                    <ul uib-dropdown-menu>
                         <li>
                             <a href="http://myrobotlab.org/service/{{::panel.simpleName}}" target="_blank" ng-click="servicemenuDropdownOpen = false">
                                 <i class="glyphicon glyphicon-question-sign"></i>
@@ -52,7 +52,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="" uib-popover-template="'listMethodsPopoverTemplate.html'" popover-title="Methods of this Service" popover-placement="right-bottom">
+                            <a href="" uib-popover-template="'listMethodsPopoverTemplate.html'" popover-title="Methods of this Service" popover-placement="right-top">
                                 <i class="glyphicon glyphicon-list-alt"></i>
                                 &nbsp;&nbsp;list methods
                             </a>
