@@ -74,6 +74,7 @@ angular.module('mrlapp.service')
 
                                 mrl.createMsgInterface(scope.panel.name).then(function (msg_) {
                                     $log.info('msgInterface received', scope.panel.name, scope.panel.panelname);
+                                    scope.panel.msg_ = msg_;
                                     scope.msginterface = msg_;
                                     scope.msgmethods = msg_.temp.msg;
 
