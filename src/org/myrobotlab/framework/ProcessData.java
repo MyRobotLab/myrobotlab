@@ -19,8 +19,9 @@ public class ProcessData implements Serializable {
 	public String version;
 	public Long startTs = null;
 	public Long stopTs = null;
-	boolean isRunning = false;
-	ArrayList<String> cmdLine = null;
+	public boolean isRunning = false;
+	public String state = null; // running | stopped | unknown | non responsive
+	public ArrayList<String> cmdLine = null;
 
 	transient public Process process;
 	transient Monitor monitor;
@@ -40,6 +41,7 @@ public class ProcessData implements Serializable {
 			try {
 				if (data.process != null) {
 					data.isRunning = true;
+					data.state = "running";
 					data.process.waitFor();
 				}
 			} catch (Exception e) {
@@ -48,15 +50,17 @@ public class ProcessData implements Serializable {
 			// FIXME - invoke("terminatedProcess(name))
 			data.service.invoke("publishTerminated", data.name);
 			data.isRunning = false;
+			data.state = "stopped";
 		}
 
 	}
 
 
-	public ProcessData(Invoker service, String branch, String name, ArrayList<String> cmdLine, Process process) {
+	public ProcessData(Invoker service, String branch, String version, String name, ArrayList<String> cmdLine, Process process) {
 		this.service = service;
 		this.name = name;
 		this.branch = branch;
+		this.version = version;
 		this.process = process;
 		this.cmdLine = cmdLine;
 		this.startTs = System.currentTimeMillis();
