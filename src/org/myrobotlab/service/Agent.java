@@ -125,7 +125,7 @@ public class Agent extends Service {
 
 	HashMap<String, ProcessData> processes = new HashMap<String, ProcessData>();
 	// even more index .. you forgot mrl version ! :P
-	HashMap<String, HashMap<String, ProcessData>> branchIndex = new HashMap<String, HashMap<String, ProcessData>>();
+	// HashMap<String, HashMap<String, ProcessData>> branchIndex = new HashMap<String, HashMap<String, ProcessData>>();
 
 	
 	List<String> agentJVMArgs = new ArrayList<String>();
@@ -142,10 +142,10 @@ public class Agent extends Service {
 	// it should take parameters such that it will be possible at some point to do an update
 	// from a child process & update the agent :)
 	
-	String updateUrl = "http://mrl-bucket-01.s3.amazonaws.com/current/%s/";
+	String updateUrl = "http://mrl-bucket-01.s3.amazonaws.com/current/%s";
 
 	String lastBranch = null;
-	WebGui webAdmin = null;
+	//WebGui webAdmin = null;
 
 	boolean updateRestartProcesses = false;
 
@@ -163,14 +163,15 @@ public class Agent extends Service {
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		// peers.put("cli", "Cli", "Command line processor");
-		peers.put("webAdmin", "WebGui", "web gui");
+		// peers.put("webAdmin", "WebGui", "web gui");
 		return peers;
 	}
 
 	public void add(ProcessData p) {
 
 		processes.put(p.name, p);
-		HashMap<String, ProcessData> h = null;
+		//HashMap<String, ProcessData> h = null;
+		/*
 		if (!branchIndex.containsKey(p.branch)) {
 			h = new HashMap<String, ProcessData>();
 		} else {
@@ -178,8 +179,10 @@ public class Agent extends Service {
 		}
 		h.put(p.name, p);
 		branchIndex.put(p.branch, h);
+		*/
 	}
 
+	/*
 	public void remove(ProcessData p) {
 		processes.remove(p.name);
 		if (branchIndex.containsKey(p.branch)) {
@@ -190,6 +193,7 @@ public class Agent extends Service {
 			}
 		}
 	}
+	*/
 
 	public List<Status> install(String fullType) {
 		List<Status> ret = new ArrayList<Status>();
@@ -218,6 +222,7 @@ public class Agent extends Service {
 		agentJVMArgs = Runtime.getJVMArgs();
 	}
 
+	/*
 	public void startWebGui() {
 		webAdmin = (WebGui) createPeer("webAdmin");
 		if (webAdmin != null) {
@@ -225,6 +230,7 @@ public class Agent extends Service {
 			webAdmin.startService();
 		}
 	}
+	*/
 
 	@Override
 	public String[] getCategories() {
@@ -527,6 +533,7 @@ public class Agent extends Service {
 		// FIXME - non-normal operation .. Agent is being
 		File update = new File("./update/myrobotlab.jar");
 
+		// FIXME !! - remove - updating Agent will be a special case of some worker version updating folder above..
 		if (update.exists()) {
 			// attempt to process the update
 			log.info("update exists archiving current");
@@ -602,6 +609,25 @@ public class Agent extends Service {
 			log.info(String.format("%s/myrobotlab.jar cloning self", branch));
 			FileIO.copy("myrobotlab.jar", String.format("%s/myrobotlab.jar", branch));
 		}
+		
+		String checkVersion = String.format("./checkVersion.%d.txt", System.currentTimeMillis()) ;
+		FileIO.extract(m.getAbsolutePath(), "resource/version.txt", checkVersion);
+		byte[] v = FileIO.fileToByteArray(new File(checkVersion));
+		File cv = new File(checkVersion);
+		if (!cv.delete()){
+			log.warn("could not delete {}", m.getAbsolutePath());
+		}
+		String version = null;
+		if (v == null){
+			error("failed attempt of checking version for %s", m.getAbsolutePath());
+		} else {
+			version = new String(v);
+			if (version.contains("TRAVIS")){
+				version = "local build";
+			}
+			info("found local version %s", version);
+		}
+		
 
 		// move process to start in that directory
 		builder.directory(b);
@@ -620,9 +646,11 @@ public class Agent extends Service {
 		} else {
 			log.error("unkown operating system");
 		}
+		
+		
 
 		Process process = builder.start();
-		ProcessData pd = new ProcessData(this, branch, runtimeName, outArgs, process);
+		ProcessData pd = new ProcessData(this, branch, version, runtimeName, outArgs, process);
 		add(pd);
 
 		// attach our cli to the latest instance
@@ -637,17 +665,8 @@ public class Agent extends Service {
 		log.info("Agent finished spawn {}", formatter.format(new Date()));
 		return process;
 	}
-
-	/**
-	 * start or stop the autoUpdate process
-	 */
-	public void autoUpdate(boolean b) {
-		/*
-		 * if (b) { addTask("updater", 10000, update, params); } else {
-		 * purgeTask("updater"); }
-		 */
-	}
-
+	
+	
 	public void shutdown() {
 		log.info("terminating others");
 		killAll();
@@ -658,9 +677,13 @@ public class Agent extends Service {
 	public String kill(String name) {
 		if (processes.containsKey(name)) {
 			info("terminating %s", name);
-			processes.get(name).process.destroy();
-			remove(processes.get(name));
+			ProcessData process = processes.get(name);
+			process.process.destroy();
+			process.isRunning = false;
+			process.state = "stopped";
+			//remove(processes.get(name));
 			info("%s haz beeen terminated", name);
+			broadcastState();
 			return name;
 		}
 
@@ -723,10 +746,11 @@ public class Agent extends Service {
 			return;
 		}
 
-		Map<String, ProcessData> dead = new HashMap<String, ProcessData>();
+		//Map<String, ProcessData> dead = new HashMap<String, ProcessData>();
 
-		info(String.format("terminating %d processes on %s", branchIndex.size(), branch));
+		//info(String.format("terminating %d processes on %s", branchIndex.size(), branch));
 		// FIXME - implement
+		/*
 		if (branchIndex.containsKey(branch)) {
 			HashMap<String, ProcessData> b = branchIndex.get(branch);
 			for (String processName : b.keySet()) {
@@ -734,6 +758,7 @@ public class Agent extends Service {
 				kill(processName);
 			}
 		}
+		*/
 
 		if (!latestVersion.equals(currentVersion)) {
 			info("latest %s > current %s - updating", latestVersion, currentVersion);
@@ -749,7 +774,7 @@ public class Agent extends Service {
 
 	public void startService() {
 		super.startService();
-		addTask(getName(), 100, "checkForUpdates");
+		addTask(getName(), 1000 * 60, "checkForUpdates");
 	}
 
 	public void checkForUpdates() {
@@ -765,11 +790,14 @@ public class Agent extends Service {
 						error("checkForUpdates %s is null", url);
 					} else {
 						String remoteVersion = new String(ver);
+						log.info("found remote version {}", remoteVersion);
 						if (compareGreater(remoteVersion, process.version)){
 							info("found update %s for process %s with version %s", remoteVersion, process.name, process.version);
 							info("stopping process");
 							// FIXME - it would be nice to send a SIG_TERM to the process before we kill the jvm
-							process.process.getOutputStream().write("/Runtime/releaseAll".getBytes());
+							// process.process.getOutputStream().write("/Runtime/releaseAll".getBytes());
+							
+							kill(process.name);
 						}
 					}
 				} catch (Exception e) {
@@ -780,10 +808,34 @@ public class Agent extends Service {
 
 		// Runtime.checkForUpdates();
 	}
+	
+	/**
+	 * start or stop the autoUpdate process for a process
+	 */
+	public void autoUpdate(String name, boolean b){
+		if (processes.containsKey(name)){
+			processes.get(name).autoUpdate = b;
+			broadcastState();
+		}		
+	}
+	
+	public void autoUpdate(boolean b){
+		for (String name: processes.keySet()){
+			autoUpdate(name, b);
+		}
+	}
 
-	private boolean compareGreater(String remoteVersion, String version) {
-		// TODO Auto-generated method stub
-		return false;
+	/**
+	 * FIXME - move to Runtime
+	 * compares various version formats of mrl
+	 * @param remoteVersion
+	 * @param version
+	 * @return
+	 */
+	public boolean compareGreater(String remoteVersion, String version) {
+		boolean result = false;
+		log.info(String.format(" remote [%s] > local [%s] = %b", remoteVersion, version, result));
+		return true;
 	}
 
 	public void downloadLatest(String branch) throws IOException {
