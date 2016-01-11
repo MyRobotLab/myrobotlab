@@ -78,6 +78,19 @@ angular.module('mrlapp.nav')
                 panelsUpdated();
                 serviceSvc.subscribeToUpdates(panelsUpdated);
                 
+                $scope.shutdown = function (type) {
+                    switch (type) {
+                        case 'shutdown':
+                            //TODO - important - send message to runtime!
+                            break;
+                        case 'restart':
+                            //TODO - important - send message to runtime!
+                            break;
+                        default:
+                            break;
+                    }
+                };
+                
                 $scope.about = function () {
                     var modalInstance = $uibModal.open({
                         animation: true,
