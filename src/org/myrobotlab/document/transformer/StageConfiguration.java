@@ -17,6 +17,34 @@ public class StageConfiguration extends Configuration {
 		config.put(name, value);
 	}
 	
+	public Integer getIntegerParam(String name, Integer defaultValue) {
+		if (config.containsKey(name)) {
+			Object val = config.get(name);
+			if (val instanceof Integer) {
+				return (Integer)val;
+			} else {
+				// TOOD: this value was not a string?
+				return Integer.valueOf(val.toString());
+			}
+		} else {
+			return defaultValue;
+		}
+	}
+	
+	public Boolean getBoolParam(String name, Boolean defaultValue) {
+		if (config.containsKey(name)) {
+			Object val = config.get(name);
+			if (val instanceof Boolean) {
+				return (Boolean)val;
+			} else {
+				// TOOD: this value was not a string?
+				return Boolean.valueOf(val.toString());
+			}
+		} else {
+			return defaultValue;
+		}
+	}
+	
 	public String getStringParam(String name) {
 		if (config.containsKey(name)) {
 			Object val = config.get(name);
