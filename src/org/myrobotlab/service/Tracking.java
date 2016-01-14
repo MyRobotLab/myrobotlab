@@ -699,7 +699,7 @@ public class Tracking extends Service {
 			error("y pin not set");
 			return false;
 		}
-		return connect("COM18", getX().getPin(), getY().getPin(), getOpenCV().getCameraIndex());
+		return connect(port, getX().getPin(), getY().getPin(), getOpenCV().getCameraIndex());
 	}
 	
 	public boolean connect(String port, int xPin, int yPin) throws IOException {
