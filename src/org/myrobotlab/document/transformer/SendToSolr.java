@@ -43,6 +43,9 @@ public class SendToSolr extends AbstractStage {
 	@Override
 	public void startStage(StageConfiguration config) {
 		solrUrl = config.getProperty("solrUrl", solrUrl);
+		issueCommit = config.getBoolParam("issueCommit", new Boolean(issueCommit));
+		batchSize = Integer.valueOf(config.getIntegerParam("batchSize", batchSize));
+		
 		// Initialize a connection to the solr server on startup.
 		if (solrServer == null) {
 			// TODO: support an embeded solr instance

@@ -14,6 +14,7 @@ import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.Predicates;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
@@ -385,7 +386,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		ArrayList<OOBPayload> payloads = new ArrayList<OOBPayload>();
 		Matcher oobMatcher = oobPattern.matcher(text);
 		while (oobMatcher.find()) {
-
 			// We found some OOB text.
 			// assume only one OOB in the text?
 			String oobPayload = oobMatcher.group(0);
@@ -405,12 +405,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 				}
 				// TODO: should you be able to be synchronous for this
 				// execution?
+				Object result = null;
 				if (payload.getParams() != null) {
-					s.invoke(payload.getMethodName(), payload.getParams().toArray());
+					result = s.invoke(payload.getMethodName(), payload.getParams().toArray());
 				} else {
-					s.invoke(payload.getMethodName());
+					result = s.invoke(payload.getMethodName());
 				}
-
+				log.info("OOB PROCESSING RESULT: {}", result);
 			}
 		}
 		if (payloads.size() > 0) {
@@ -600,25 +601,30 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		bot.writeQuit();
 	}
 
-
-	public static void main(String s[]) {
+	public static void main(String s[]) throws IOException {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel("INFO");
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
+		Python py = (Python)Runtime.createAndStart("python", "Python");
+		String script = FileUtils.readFileToString(new File("src/resource/Python/examples/Wordnet.py"));
+		py.exec(script);
 		String sessionName = null;
-		if (true) {
-			ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
-			alice.setEnableAutoConversation(false);
-			alice.startSession(sessionName);
-			Response response = alice.getResponse(sessionName, "CONVERSATION_SEED_STRING");
-			log.info("Alice " + response.msg);
-		} else {
-			ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
-			lloyd.startSession("ProgramAB", sessionName, "lloyd");
-			Response response = lloyd.getResponse(sessionName, "Hello.");
-			log.info("Lloyd " + response.msg);
+		if (false) {
+			Runtime.createAndStart("gui", "GUIService");
+			Runtime.createAndStart("webgui", "WebGui");
+			if (true) {
+				ProgramAB alice = (ProgramAB) Runtime.createAndStart("alice2", "ProgramAB");
+				alice.setEnableAutoConversation(false);
+				alice.startSession(sessionName);
+				Response response = alice.getResponse(sessionName, "CONVERSATION_SEED_STRING");
+				log.info("Alice " + response.msg);
+			} else {
+				ProgramAB lloyd = (ProgramAB) Runtime.createAndStart("lloyd", "ProgramAB");
+				lloyd.startSession("ProgramAB", sessionName, "lloyd");
+				Response response = lloyd.getResponse(sessionName, "Hello.");
+				log.info("Lloyd " + response.msg);
+			}
 		}
+		
 		
 	
 	}
