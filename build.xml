@@ -7,6 +7,11 @@
 	curl -i  -x http://webproxy:80 https://api.github.com/repos/MyRobotLab/myrobotlab/releases -H "Accept:application/vnd.github.manifold-preview+json"
 	
 	The goal is always to make the build more simple :)
+	
+	master's branch's build version is to be generated on a tag - will be 1.1.0
+	develop's build version is generated from the travis build number - would be nice to reset Travis' build number on release - but we can't do this
+	develop's build version is 1.0.(build version)
+	
 	Currently the only dependencies come with the git clone are in the build directory.
 	
 	Build Type - Goals
@@ -58,7 +63,6 @@
 	
 	definitions
 	${version} 	= ${rev}.${DSTAMP}.${TSTAMP}
-	${tag} 	= "myrobotlab.${version}
 	
 	publishBleedingEdge
 	publishRelease
@@ -90,13 +94,17 @@
 	<!-- backfill with the environment variables -->
 	<property environment="env" />
 	<!-- set the tag, if not already set in a local properties file -->
-	<property name="tag" value="${env.TRAVIS_TAG}" />
-	<echo message="env.TRAVIS_TAG=${env.TRAVIS_TAG}" />
-	<echo message="tag=${tag}" />
+	<echo message="TRAVIS_TAG=${env.TRAVIS_TAG}" />
+	<echo message="TRAVIS_BUILD_NUMBER=${env.TRAVIS_BUILD_NUMBER}" />
+	
+	<property name="developVersion" value="1.0.${env.TRAVIS_BUILD_NUMBER}" />
+	<property name="masterVersion" value="${env.TRAVIS_TAG}" />
+	<property name="version" value="${developVersion}" />
+	<echo message="version=${version}" />
 
 	<!-- set global properties for this build -->
 
-	<!-- the all powerful branch property -->
+	<!-- the all powerful branch property if copied to master - will need to be updated -->
 	<property name="branch" value="develop"/>
 
 	<property name="fs" location="${file.separator}" />
@@ -365,7 +373,6 @@
 		<propertyregex property="comment" input="${gitcomment}" regexp="\r|\n" replace=" " global="true" />
 		<echo message="Last commit comment [${comment}]" />
 		<!-- property name="comment" value="${DSTAMP}.${TSTAMP}" /-->
-		<!-- ============ tag end ================= -->
 
 		<!-- http://larrycai.wordpress.com/2013/02/22/publish-the-artifacts-inside-travis-ci-to-github/ -->
 		<property name="github.token" value="${env.GITHUB_TOKEN}" />
@@ -375,12 +382,9 @@
   		- git commit -a -m "Committed by Travis-CI build number: $TRAVIS_JOB_ID" 
 		-->
 
-		<!-- The tag determines the build number for the release... -->
-		<echo message="tag ${tag}" />
-
 		<!-- TODO set all subsequent directories or resources with appended tag -->
 		<!-- TODO branch on the tag in release -->
-		<property name="temp" location="${dist}/temp/${tag}" />
+		<property name="temp" location="${dist}/temp/${version}" />
 
 		<!-- Create the build directory structure used by compile -->
 		<!-- create all necessary directories -->
@@ -494,7 +498,7 @@
 		<copy todir="${build}/classes/resource">
 			<fileset dir="${src}/resource" />
 		</copy>
-		<echo file="${build}/classes/resource/version.txt">${tag}${env.TRAVIS_BUILD_NUMBER}</echo>
+		<echo file="${build}/classes/resource/version.txt">${version}</echo>
 		<echo file="${build}/classes/resource/branch.txt">${branch}</echo>
 		<!-- copy the latest serviceData.xml into package -->
 		<!-- TODO deprecate the xml -->
@@ -509,10 +513,10 @@
 				<!-- section name="myrobotlab" -->
 				<section name="compile">
 					<attribute name="Specification-Title" value="myrobotlab" />
-					<attribute name="Specification-Version" value="${tag}" />
+					<attribute name="Specification-Version" value="${version}" />
 					<attribute name="Specification-Vendor" value="myrobotlab" />
 					<attribute name="Implementation-Title" value="myrobotlab" />
-					<attribute name="Implementation-Version" value="${tag}" />
+					<attribute name="Implementation-Version" value="${version}" />
 					<attribute name="Implementation-Vendor" value="myrobotlab.org" />
 				</section>
 			</manifest>
@@ -523,7 +527,7 @@
 	<!-- create myrobotlab-client.jar -->
 	<target name="myrobotlab-client" depends="compile" description="create the myrobotlab-client.jar file">
 
-		<echo file="${build}/classes/resource/version.txt">${tag}${env.TRAVIS_BUILD_NUMBER}</echo>
+		<echo file="${build}/classes/resource/version.txt">${version}</echo>
 
 		<jar jarfile="${build}/lib/myrobotlab-client.jar">
 			
@@ -559,10 +563,10 @@
 				<!-- section name="myrobotlab" -->
 				<section name="compile">
 					<attribute name="Specification-Title" value="myrobotlab" />
-					<attribute name="Specification-Version" value="${tag}" />
+					<attribute name="Specification-Version" value="${version}" />
 					<attribute name="Specification-Vendor" value="myrobotlab" />
 					<attribute name="Implementation-Title" value="myrobotlab" />
-					<attribute name="Implementation-Version" value="${tag}" />
+					<attribute name="Implementation-Version" value="${version}" />
 					<attribute name="Implementation-Vendor" value="myrobotlab.org" />
 				</section>
 			</manifest>
@@ -585,13 +589,13 @@
 	<!-- FYI - HTTP STATUS 422 - MEANS YOU ALREADY HAVE THAT RELEASE MADE !!! -->
 	<target name="createGitHubRelease" depends="init">
 		<echo message="token = ${github.token}" />
-		<echo message="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${tag}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}" />
+		<echo message="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${version}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}" />
 
 		<http method="POST" url="https://api.github.com/repos/MyRobotLab/myrobotlab/releases" expected="201" printresponseheaders="true" printrequestheaders="true" printresponse="true" entityProperty="release.response">
 			<headers>
 				<header name="Authorization" value="token ${github.token}" />
 			</headers>
-			<entity value="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${tag}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}">
+			<entity value="{&quot;tag_name&quot;: &quot;${version}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${version}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}">
 			</entity>
 		</http>
 		<echo message="${release.response}" />
@@ -604,7 +608,7 @@
 
 	<!-- release to github -->
 	<target name="release" depends="compile, getAssetsURL">
-		<echo message="creating tag" />
+		<echo message="creating version" />
 		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
 			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
 			<headers>
@@ -620,7 +624,7 @@
 	</target>
 	<!-- TODO: make this depend on test , gotta figure out why travis ci is failing on this now. -->
 	<target name="dist" depends="jar" description="generate the distribution">
-		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${tag}${env.TRAVIS_BUILD_NUMBER}.jar" / -->
+		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${version}.jar" / -->
 		<!-- backwards compat .. TODO: review this.. -->
 		<mkdir dir="${dist}" />
 		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
