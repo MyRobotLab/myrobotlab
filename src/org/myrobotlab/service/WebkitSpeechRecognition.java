@@ -96,19 +96,24 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 
 	@Override
 	public void addMouth(SpeechSynthesis mouth) {
-		// TODO Auto-generated method stub
-		
+		mouth.addEar(this);
+		// TODO : we can implement the "did you say x?"
+		// logic like sphinx if we want here.		
+        // when we add the ear, we need to listen for request confirmation
+
 	}
 
 	@Override
 	public void onStartSpeaking(String utterance) {
-		// TODO Auto-generated method stub
+		// at this point we should subscribe to this in the webgui
+		// so we can pause listening.
 		
 	}
 
 	@Override
 	public void onEndSpeaking(String utterance) {
-		// TODO Auto-generated method stub
+		// need to subscribe to this in the webgui
+		// so we can resume listening.
 		
 	}
 	
