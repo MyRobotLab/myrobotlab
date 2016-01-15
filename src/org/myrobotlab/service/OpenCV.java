@@ -391,6 +391,15 @@ public class OpenCV extends VideoSource {
 		streamer.attach(this);
 		// stopCapture(); // restart?
 		videoProcessor.start();
+		try {
+			// there's a nasty race condition, 
+			// so we sleep here for 500 milliseconds to make sure
+			// the video stream is up and running before we publish our state.
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		capturing = true;
 		broadcastState(); // let everyone know
 	}
