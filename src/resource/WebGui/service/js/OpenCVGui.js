@@ -20,7 +20,7 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 	$scope.startCaptureLabel = "Start Capture";
                 	$scope.imgSource = "service/img/opencv.png";
                 }
-                
+                 
                 // Handle an update state call from OpenCV service.
                 this.updateState = function (service, $sce) {
                     $scope.service = service;
@@ -29,12 +29,11 @@ angular.module('mrlapp.service.OpenCVGui', [])
                     if ($scope.service.capturing) {
                     	$log.info("Started capturing");
                     	$scope.startCaptureLabel = "Stop Capture";
-                    	// $sce.trustAsResourceUrl ??
                     	$scope.imgSource = "http://localhost:9090/input";
                     } else {
                     	$log.info("Stopped capturing.");
                     	$scope.startCaptureLabel = "Start Capture";	
-                    	$scope.imgSource = "service/img/opencv.png";
+                    	$scope.imgSource = "service/img/OpenCV.png";
                     };
                 };
                 _self.updateState($scope.service);
@@ -61,9 +60,9 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 	$scope.service = mrl.getService($scope.service.name);
                 	if ($scope.startCaptureLabel === "Stop Capture") {
                 		// TODO: re-enable this.
-                	    // mrl.sendTo($scope.service.name, "stopCapture");
+                	    mrl.sendTo($scope.service.name, "stopCapture");
                 	} else {
-                	  mrl.sendTo($scope.service.name, "capture");
+                	    mrl.sendTo($scope.service.name, "capture");
                 	};
                 };
                 
