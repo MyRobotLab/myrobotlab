@@ -1,6 +1,6 @@
 <div>
   <h3>OpenCV Gui!</h3>
-  Here we go!
+  Here we go! {{service}}
   <div>
   Input Control Widget
   <br/>
@@ -28,8 +28,8 @@
   <button id="startCapture" class="btn btn-default"  ng-click="startCapture()" ng-init="startCaptureLabel = 'Start Capture'">{{startCaptureLabel}}</button>
   </div>
   <div>
-    Video Widget Here<br/>
-    <img src="http://localhost:9090/input" />
+    Video Widget <a href="http://localhost:9090/input">Here</a><br/>
+    <img ng-src="{{imgSource}}" />
   </div>
   <div>
   Filter Control

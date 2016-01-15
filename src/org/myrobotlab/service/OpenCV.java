@@ -164,6 +164,8 @@ public class OpenCV extends VideoSource {
 
 	public boolean undockDisplay = false;
 
+	// track the state of opencv. capturing  true/false?
+	public boolean capturing = false;
 	
 	// TODO: a peer, but in the future , we should use WebGui and it's http container for this
 	// if possible.
@@ -379,6 +381,8 @@ public class OpenCV extends VideoSource {
 
 	public void stopCapture() {
 		videoProcessor.stop();
+		capturing = false;
+		broadcastState(); // let everyone know
 	}
 
 	public void capture() {
@@ -387,6 +391,8 @@ public class OpenCV extends VideoSource {
 		streamer.attach(this);
 		// stopCapture(); // restart?
 		videoProcessor.start();
+		capturing = true;
+		broadcastState(); // let everyone know
 	}
 
 	public void stopRecording(String filename) {
@@ -755,7 +761,7 @@ public class OpenCV extends VideoSource {
 		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
 		//VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
 		//vs.attach(opencv);
-		opencv.capture();
+		//opencv.capture();
 
 		
 		/*

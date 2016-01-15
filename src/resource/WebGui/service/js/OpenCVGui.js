@@ -1,28 +1,52 @@
 angular.module('mrlapp.service.OpenCVGui', [])
-        .controller('OpenCVGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
+        .controller('OpenCVGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl, $sce) {
                 $log.info('OpenCVGuiCtrl');
+                // grab a refernce
                 var _self = this;
+                // grab the message
                 var msg = this.msg;
 
-                // GOOD TEMPLATE TO FOLLOW
-                this.updateState = function (service) {
+                // local scope variables
+                $scope.cameraIndex = 1;
+                $scope.frameGrabber = "VideoInput";
+
+                // initial state of service.
+                $scope.service = mrl.getService($scope.service.name);
+                if ($scope.service.capturing) {
+                	$scope.startCaptureLabel = "Stop Capture";
+                	// $sce.trustAsResourceUrl ?
+                	$scope.imgSource = "http://localhost:9090/input";
+                } else {
+                	$scope.startCaptureLabel = "Start Capture";
+                	$scope.imgSource = "service/img/opencv.png";
+                }
+                
+                // Handle an update state call from OpenCV service.
+                this.updateState = function (service, $sce) {
                     $scope.service = service;
-                    $log.info("State had been updated");
+                    $log.info("Open CV State had been updated");
                     $log.info(service);
-                    
+                    if ($scope.service.capturing) {
+                    	$log.info("Started capturing");
+                    	$scope.startCaptureLabel = "Stop Capture";
+                    	// $sce.trustAsResourceUrl ??
+                    	$scope.imgSource = "http://localhost:9090/input";
+                    } else {
+                    	$log.info("Stopped capturing.");
+                    	$scope.startCaptureLabel = "Start Capture";	
+                    	$scope.imgSource = "service/img/opencv.png";
+                    };
                 };
                 _self.updateState($scope.service);
 
-                // init scope variables
-                $scope.cameraIndex = 1;
-                $scope.startCaptureLabel = "Start Capture";
-                $scope.frameGrabber = "VideoInput";
+                // controls for select frame grabber
                 $scope.selectFrameGrabber = function selectFrameGrabber(frameGrabber) {
                 	$log.info("Updating Frame Grabber ");
                 	$scope.frameGrabber = frameGrabber;
                 	mrl.sendTo($scope.service.name, "setFrameGrabberType" , frameGrabber);                	
                 }
                 
+                // controls for select frame grabber                
                 $scope.selectCameraIndex = function(cameraIndex) {
                 	$log.info("Updating Camera Index ..." + cameraIndex);
                 	$scope.cameraIndex = cameraIndex;
@@ -33,15 +57,14 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 $scope.startCapture = function() {
                 	// send a message to open cv servce to start capture.
                 	$log.info("Start capture clicked.");
+                	// TODO: should i grab it here?
                 	$scope.service = mrl.getService($scope.service.name);
-                	// mrl.sendTo($scope.service.name, "setCameraIndex", cameraIndex);
                 	if ($scope.startCaptureLabel === "Stop Capture") {
-                		mrl.sendTo($scope.service.name, "stopCapture");
-                        $scope.startCaptureLabel = "Start Capture";
+                		// TODO: re-enable this.
+                	    // mrl.sendTo($scope.service.name, "stopCapture");
                 	} else {
                 	  mrl.sendTo($scope.service.name, "capture");
-                      $scope.startCaptureLabel = "Stop Capture";
-                	}
+                	};
                 };
                 
                 this.onMsg = function (inMsg) {
@@ -61,7 +84,8 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 };
                 // TODO: we're not going to publish the display.
                 // we will start a video stream and update the page to display that stream.
-                // msg.subscribe('publishDisplay');
+                // mrl.subscribe($scope.service.name, 'publishState');
+                msg.subscribe('publishState');
                 msg.subscribe(this);
             }
         ]);
