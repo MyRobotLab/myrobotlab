@@ -28,7 +28,7 @@ programab.startSession("c:/dev/workspace.kmw/mrl2/myrobotlab/test/ProgramAB/", "
 ######################################################################
 # Create the webkit speech recognition gui
 ######################################################################
-wksr = Runtime.createAndStart("webkitspeechrecognition", "WebkitSpeechRecognition")
+ear = Runtime.createAndStart("ear", "WebkitSpeechRecognition")
 ######################################################################
 # create the html filter to filter the output of program ab
 ######################################################################
@@ -38,8 +38,9 @@ htmlfilter = Runtime.createAndStart("htmlfilter", "HtmlFilter")
 ######################################################################
 mouth = Runtime.createAndStart("mouth", "AcapelaSpeech")
 
+mouth.addEar(ear)
 # add a link between the webkit speech to publish to ProgramAB
-wksr.addTextListener(programab)
+ear.addTextListener(programab)
 # Add route from Program AB to html filter
 programab.addTextListener(htmlfilter)
 # Add route from html filter to mouth
@@ -54,10 +55,32 @@ def isXY(x,y):
     print "QUERY STRING " + q
     response = solr.search(q)
     numFound = response.getResults().size()
-    gloss = response.getResults().get(0).getFieldValue("sense_gloss")
-    print "Found " + str(numFound)
-    if numFound > 0:
-        mouth.speak(str(gloss) + "Yes, a " + str(x) + " is a " + str(y))
+    if (numFound > 0):
+      gloss = response.getResults().get(0).getFieldValue("sense_gloss")
+      print "Found " + str(numFound)
+      #mouth.speak(str(gloss) + "Yes, a " + str(x) + " is a " + str(y))
+      programab.invoke("publishText", str(gloss) + "Yes, a " + str(x) + " is a " + str(y))
     else:
-        mouth.speak("No")
+      programab.invoke("publishText","No")
+      # mouth.speak("No")
     
+def whatIsA(x):
+    q = "sense_lemma:\"" + str(x.lower().replace(" ","_")) + "\""
+    response = solr.search(q)
+    numFound = response.getResults().size()
+    if (numFound > 0):
+      gloss = response.getResults().get(0).getFieldValue("sense_gloss")
+      programab.invoke("publishText",gloss[0])
+      # mouth.speak(str(gloss))
+    
+    
+# lets try a traversal of subject + verb , pick first facet of object.
+def xDoesYToZ(x, y):
+    q = "+subject:\"" + str(x) + "\" +verb:\""+str(y)+"\""
+    # TODO: pass a facet request in..   
+    response = solr.search(q)
+    numFound = response.getResults().size()
+    if (numFound > 0):
+        object = response.getResults().get(0).getFieldValue("object")
+        programab.invoke("publishText",object[0])
+             

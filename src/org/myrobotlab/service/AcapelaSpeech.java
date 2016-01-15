@@ -302,6 +302,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	@Override
 	public String publishStartSpeaking(String utterance) {
+		log.info("Acapela Speech publishing Start Speaking: {}", utterance);
 		return utterance;
 	}
 

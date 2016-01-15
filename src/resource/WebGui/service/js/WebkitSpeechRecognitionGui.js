@@ -1,6 +1,15 @@
 angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         .controller('WebkitSpeechRecognitionGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
     $log.info('WebkitSpeechRecognitionGuiCtrl');
+
+    this.updateState = function (service) {
+        $scope.service = service;
+    };
+
+    var _self = this;
+    var msg = this.msg;
+    _self.updateState($scope.service);
+    
     // when to use $scope or anything?!
     $scope.currResponse = '';
     $scope.utterance = '';
@@ -18,6 +27,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
 	// config properties on the webkit speech stuff.
 	$scope.recognition.continuous = true;
 	$scope.recognition.interimResults = true;
+	
 	// called when $scope.recognition starts.
 	$scope.recognition.onstart = function() {
 		$scope.recognizing = true;
@@ -100,17 +110,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
 			$log.info("show buttons should be called here for inline-block");
 		};
 	}; 
-	this.onMsg = function (msg) {
-        $log.info("Webkit Speech Msg !");
-        if (msg.method == "onText") {
-            var textData = msg.data[0];
-            //$scope.serviceDirectory[msg.sender].pulseData = pulseData;
-            $scope.currResponse = textData;
-            $scope.rows.unshift({name:"Bot:" , response:textData});
-            $log.info('currResponse', $scope.currResponse);
-            $scope.$apply();
-        };
-    }; 
+
     // toggle type of button for starting/stopping speech $scope.recognition.
 	$scope.startRecognition = function () {
 		$log.info("Start Recognition clicked.");
@@ -132,13 +132,30 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
 		// $scope.$apply();
 	};
 
-    // subscribe to the start/stop methods
-    mrl.subscribe($scope.service.name, 'startListening');
-    mrl.subscribe($scope.service.name, 'stopListening');
-    // TODO: maybe it's just start/stop 
-    mrl.subscribe($scope.service.name, 'resumeListening');
-    mrl.subscribe($scope.service.name, 'pauseListening');
-    // we're done.
-    // $scope.panel.initDone(); 
+	
+	this.onMsg = function (msg) {
+        $log.info("Webkit Speech Msg !");
+        $log.info(msg.method);
+        switch (msg.method) {
+          case 'onState':
+            _self.updateState(msg.data[0]);
+            $scope.$apply();
+            break;
+          case 'onOnStartSpeaking':
+        	$log.info("Started speaking, pausing listening.");
+        	$scope.startRecognition();
+        	break;
+          case 'onOnEndSpeaking':
+        	$log.info("Stopped speaking, resume listening.");
+        	if (!$scope.recognizing) {
+          	  $scope.startRecognition();
+            }
+        	break;
+        };
+    }; 
+	
+	msg.subscribe('onStartSpeaking');
+	msg.subscribe('onEndSpeaking');
+	msg.subscribe(this);
     
-  }]);
+}]);

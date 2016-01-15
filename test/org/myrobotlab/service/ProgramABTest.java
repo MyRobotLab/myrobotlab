@@ -108,7 +108,8 @@ public class ProgramABTest {
 	public void testSetsAndMaps() {
 		Response resp = testService.getResponse(session, "DO YOU LIKE Leah?");
 		assertEquals("Princess Leia Organa is awesome.", resp.msg);
-
+		resp = testService.getResponse(session, "DO YOU LIKE Princess Leah?");
+		assertEquals("Princess Leia Organa is awesome.", resp.msg);
 	}
 	
 	@After
