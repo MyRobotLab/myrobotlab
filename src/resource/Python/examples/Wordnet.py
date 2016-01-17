@@ -24,7 +24,7 @@ solr.setSolrUrl("http://phobos:8983/solr/graph")
 #start programab
 ######################################################################
 programab = Runtime.createAndStart("programab", "ProgramAB")
-programab.startSession("c:/dev/workspace.kmw/mrl2/myrobotlab/test/ProgramAB/", "username", "lloyd")
+programab.startSession("c:/dev/workspace.kmw/mrl2/myrobotlab/test/ProgramAB/", "kevin", "lloyd")
 ######################################################################
 # Create the webkit speech recognition gui
 ######################################################################

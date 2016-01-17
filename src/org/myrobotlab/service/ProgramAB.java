@@ -52,6 +52,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
 	private String path = "ProgramAB";
 	private String botName = "alice2";
+	private String currentUser = "default";
 
 	// private Chat chatSession=null;
 	private transient HashMap<String, Chat> sessions = new HashMap<String, Chat>();
@@ -190,7 +191,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	public Response getResponse(String session, String text) {
 		log.info("Get Response for : "  + text);
 		if (session == null) {
-			session = "default";
+			session = currentUser;
 		}
 		if (bot == null) {
 			String error = "ERROR: Core not loaded, please load core before chatting.";
@@ -252,6 +253,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		preds.remove(predicateName);
 	}
 
+	public void addToSet(String setName, String setValue) {
+		// add to the set for the bot.
+		bot.setMap.get(setName).add(setValue);
+		// TODO: persist this to disk!
+	}
+
+	public void addToMap(String mapName, String mapKey, String mapValue) {
+		// add an entry to the map.
+		bot.mapMap.get(mapName).put(mapKey, mapValue);
+		// TODO: persist this to disk!
+	}
+
+	
 	public void setPredicate(String session, String predicateName, String predicateValue) {
 		Predicates preds = sessions.get(session).predicates;
 		preds.put(predicateName, predicateValue);
@@ -469,7 +483,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
 	public void reloadSession(String path, String session, String botName) {
 		if (session == null) {
-			session = "default";
+			session = currentUser;
 		}
 		// kill the bot
 		bot = null;
@@ -546,8 +560,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		this.path = path;
 		this.botName = botName;
 		if (session == null) {
-			session = "default";
-		}
+			session = currentUser;
+		} 
+		// when we create a new session. lets assume that's the current
+		// default user. (this can also be used from the ui.
+		currentUser = session;
+		
 		if (sessions.containsKey(session)) {
 			warn("session %s already created", session);
 			return;

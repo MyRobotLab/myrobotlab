@@ -112,6 +112,11 @@ public class ProgramABTest {
 		assertEquals("Princess Leia Organa is awesome.", resp.msg);
 	}
 	
+	public void testAddEntryToSet() {
+		// TODO: ok. we want to see if we can add an entry to a set.
+		
+	}
+	
 	@After
 	public void tearDown() throws Exception {
 		testService.stopService();
