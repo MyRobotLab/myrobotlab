@@ -1,38 +1,76 @@
 angular.module('mrlapp.service.AgentGui', [])
-.controller('AgentGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
+.controller('AgentGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) {
     $log.info('AgentGuiCtrl');
     var _self = this;
     var msg = this.msg;
     
-    $scope.tsDiff = function(ts) {
-        var now = new Date();
-        var difference = now.getTime() - ts;
+    // init variables
+    $scope.processes = {};
+
+    $scope.isRunning = function(processData){
+        return (processData.state == 'running');
+    }
+    
+    $scope.start = function(size) {
         
-        var daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
-        difference -= daysDifference * 1000 * 60 * 60 * 24
+        var modalInstance = $uibModal.open({
+            animation: $scope.animationsEnabled,
+            template: "<div>start instances</div>",
+            // templateUrl: 'widget/start.html',
+            controller: 'startCtrl',
+            size: size,
+            resolve: {
+                items: function() {
+                    return $scope.items;
+                }
+            }
+        });
         
-        var hoursDifference = Math.floor(difference / 1000 / 60 / 60);
-        difference -= hoursDifference * 1000 * 60 * 60
-        
-        var minutesDifference = Math.floor(difference / 1000 / 60);
-        difference -= minutesDifference * 1000 * 60
-        
-        var secondsDifference = Math.floor(difference / 1000);
-        
-        var ret = (daysDifference + ' days ' + hoursDifference + ' hours ' + minutesDifference + ' minutes ' + secondsDifference + ' seconds ');
-        return ret;
+        modalInstance.result.then(function(selectedItem) {
+            $scope.selected = selectedItem;
+        }, function() {
+            $log.info('Modal dismissed at: ' + new Date());
+        });
+    }
+    ;
+    
+    $scope.stopTimer = function(sectionId) {
+        var section = document.getElementById(sectionId);
+        if (section != null ) {
+            section.getElementsByTagName('timer')[0].stop();
+        }
+    }
+    
+    $scope.startTimer = function(sectionId) {
+        //var x = angular.element( document.querySelector( '#blah' ) );
+        var section = document.getElementById(sectionId);
+        if (section != null ) {
+            section.getElementsByTagName('timer')[0].start();
+        }
+    }
+    
+    $scope.autoUpdate = function(name, b) {
+        msg.send('autoUpdate', name, !b);
     }
     
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
+        // debug service - with pretty print
+        $scope.dservice = JSON.stringify(service, null, 2); 
+        for (var prop in service.processes) {
+            if (service.processes.hasOwnProperty(prop)) {
+                if (!$scope.isRunning(service.processes[prop])){
+                    $scope.stopTimer(prop);
+                } else {
+                    $scope.startTimer(prop);
+                }
+            }
+        }
     }
     ;
     _self.updateState($scope.service);
-    
-    // init scope variables
-    $scope.pulseData = '';
     
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];
@@ -47,6 +85,7 @@ angular.module('mrlapp.service.AgentGui', [])
         }
     }
     ;
+    
     
     //mrl.subscribe($scope.service.name, 'pulse');
     msg.subscribe('pulse');

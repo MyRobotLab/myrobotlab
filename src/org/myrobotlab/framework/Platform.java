@@ -69,22 +69,23 @@ public class Platform implements Serializable {
 			}
 
 			if ("arm".equals(arch)) {
-				
+
 				// FIXME - procparser is unsafe and borked !!
 				// Integer armv = ProcParser.getArmInstructionVersion();
-				// Current work around: trigger off the os.version to choose arm6 or arm7
+				// Current work around: trigger off the os.version to choose
+				// arm6 or arm7
 
 				// assume ras pi 1 .
 				Integer armv = 6;
-				
-				// if the os version has "v7" in it, it's a pi 2  
-				// TODO: this is still pretty hacky.. 
+
+				// if the os version has "v7" in it, it's a pi 2
+				// TODO: this is still pretty hacky..
 				String osVersion = System.getProperty("os.version").toLowerCase();
 				if (osVersion.contains("v7")) {
 					armv = 7;
 				}
 				// TODO: revisit how we determine the architecture version
-				platform.arch = "armv"+armv+".hfp";
+				platform.arch = "armv" + armv + ".hfp";
 			}
 
 			if (platform.arch == null) {
@@ -114,7 +115,7 @@ public class Platform implements Serializable {
 				SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
 				platform.mrlVersion = format.format(new Date());
 			}
-			
+
 			try {
 				sb.setLength(0);
 				BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/branch.txt"), "UTF-8"));
@@ -132,7 +133,6 @@ public class Platform implements Serializable {
 				platform.branch = "unknown";
 			}
 
-
 			// TODO - ProcParser
 
 			System.out.println(sb.toString());
@@ -142,7 +142,6 @@ public class Platform implements Serializable {
 
 		return localInstance;
 	}
-	
 
 	public Platform() {
 	}
@@ -155,16 +154,17 @@ public class Platform implements Serializable {
 	 */
 
 	/**
-	 * Non static methods here are very important
-	 * when a Platform is serialized from a different process - and can be
-	 * inspected - for local platform info the static methods can be used
+	 * Non static methods here are very important when a Platform is serialized
+	 * from a different process - and can be inspected - for local platform info
+	 * the static methods can be used
+	 * 
 	 * @return
 	 */
-	
+
 	public String getBranch() {
 		return branch;
 	}
-	
+
 	public String getArch() {
 		return arch;
 	}
@@ -233,5 +233,5 @@ public class Platform implements Serializable {
 	public String toString() {
 		return String.format("%s.%d.%s", arch, bitness, os);
 	}
-	
+
 }

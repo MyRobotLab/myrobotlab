@@ -62,7 +62,7 @@ public class MethodCache {
 			if(methodScore.size() > 0){
 					return methodScore.get(methodScore.lastKey()).getParameterTypes();
 			} else {
-				throw new NoSuchMethodException(String.format("could not find %s.%s in declared methods", clazz.getSimpleName(), methodName));
+				throw new NoSuchMethodException(String.format("could not find %s.%s(ordinal %d) in declared methods", clazz.getSimpleName(), methodName, ordinal));
 			}
 		}
 

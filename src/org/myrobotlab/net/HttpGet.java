@@ -20,6 +20,7 @@ public class HttpGet {
 	public final static Logger log = LoggerFactory.getLogger(HttpGet.class);
 
 	public static byte[] get(String theUrl) {
+		log.info("get {}", theUrl);
 		ByteArrayOutputStream out = null;
 		InputStream in = null;
 		try {

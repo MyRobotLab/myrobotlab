@@ -20,7 +20,7 @@ angular.module('mrlapp', [
     //'charts',
     'nvd3ChartDirectives',
     'ui.ace', //funky editor
-//    'ui.slider', grr 
+    'timer',
     'luegg.directives',
     'mrlapp.mrl', //mrl.js (/mrl.js) - the really really core
     'mrlapp.main.mainCtrl',
@@ -28,6 +28,7 @@ angular.module('mrlapp', [
     'mrlapp.main.noWorkySvc', //send a noWorky !
     'mrlapp.main.filter',
     'mrlapp.singleservice.singleserviceCtrl',
+    'mrlapp.widget.startCtrl',
     'mrlapp.nav', //Navbar & Co. (/nav)
     'mrlapp.service' //Service & Co. (/service)
 ])
