@@ -28,7 +28,7 @@ package org.myrobotlab.cmdline;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class CMDLine extends HashMap<String, CcmdParam> {
+public class CmdLine extends HashMap<String, CcmdParam> {
 
 	private static final long serialVersionUID = 1560723637806853945L;
 
@@ -36,14 +36,14 @@ public class CMDLine extends HashMap<String, CcmdParam> {
 
 	public static void main(String[] args) {
 
-		CMDLine cmdline = new CMDLine(args);
+		CmdLine cmdline = new CmdLine(args);
 
 		if (cmdline.containsKey("-test")) {
 			String service = cmdline.getSafeArgument("-service", 0, "");
 		}
 	}
 
-	public CMDLine(String[] args) {
+	public CmdLine(String[] args) {
 		splitLine(args);
 	}
 

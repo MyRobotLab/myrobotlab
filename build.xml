@@ -62,7 +62,8 @@
 	javadoc
 	
 	definitions
-	${version} 	= ${rev}.${DSTAMP}.${TSTAMP}
+	${version} 	= if master branch then ${version} = travis tag e.g. 1.1.39  
+	              if develop branch then ${version} = 1.0. + travis build number
 	
 	publishBleedingEdge
 	publishRelease

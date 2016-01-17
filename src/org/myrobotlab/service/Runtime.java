@@ -31,7 +31,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.apache.ivy.core.report.ResolveReport;
-import org.myrobotlab.cmdline.CMDLine;
+import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Instantiator;
@@ -178,7 +178,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 */
 	static private String[] globalArgs;
 
-	static private CMDLine cmdline = null;
+	static private CmdLine cmdline = null;
 
 	/**
 	 * Returns the number of processors available to the Java virtual machine.
@@ -294,7 +294,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * @param cmdline
 	 *            data object from the cmd line
 	 */
-	public final static void createAndStartServices(CMDLine cmdline) {
+	public final static void createAndStartServices(CmdLine cmdline) {
 
 		System.out.println(String.format("createAndStartServices service count %1$d", cmdline.getArgumentCount("-service") / 2));
 
@@ -546,7 +546,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * 
 	 * @return
 	 */
-	static public CMDLine getCMDLine() {
+	static public CmdLine getCMDLine() {
 		return cmdline;
 	}
 
@@ -1012,20 +1012,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	}
 
 	public static String getVersion() {
-		String version = FileIO.resourceToString("version.txt");
-		if (version == null || version.length() == 0) {
-			SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
-			version = format.format(new Date());
-		}
-		return version;
+		return Platform.getLocalInstance().getVersion();//FileIO.resourceToString("version.txt");
 	}
 
+	// FIXME - shouldn't this be in platform ???
 	public static String getBranch() {
-		String branch = FileIO.resourceToString("branch.txt");
-		if (branch == null || branch.length() == 0) {
-			branch = "unknown";
-		}
-		return branch;
+		return Platform.getLocalInstance().getBranch();//FileIO.resourceToString("branch.txt");
 	}
 	
 	static public void install(){
@@ -1044,7 +1036,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return Runtime.getInstance().repo.install(fullTypeName);
 	}
 
-	static public void invokeCommands(CMDLine cmdline) {
+	static public void invokeCommands(CmdLine cmdline) {
 		int argCount = cmdline.getArgumentCount("-invoke");
 		if (argCount > 1) {
 
@@ -1151,7 +1143,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 		// sub-process if there is one
 
-		cmdline = new CMDLine(args);
+		cmdline = new CmdLine(args);
 
 		Logging logging = LoggingFactory.getInstance();
 

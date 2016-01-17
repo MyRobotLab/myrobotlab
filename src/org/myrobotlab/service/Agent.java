@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,10 +12,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.cmdline.CMDLine;
+import org.myrobotlab.cmdline.CmdLine;
+import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
@@ -29,9 +28,10 @@ import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.net.HttpGet;
 import org.slf4j.Logger;
+
+import com.google.gson.internal.LinkedTreeMap;
 
 /**
  * @author GroG
@@ -123,33 +123,197 @@ public class Agent extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Agent.class);
 
-	HashMap<String, ProcessData> processes = new HashMap<String, ProcessData>();
-	// even more index .. you forgot mrl version ! :P
-	// HashMap<String, HashMap<String, ProcessData>> branchIndex = new HashMap<String, HashMap<String, ProcessData>>();
+	public static Peers getPeers(String name) {
+		Peers peers = new Peers(name);
+		// peers.put("cli", "Cli", "Command line processor");
+		// peers.put("webAdmin", "WebGui", "web gui");
+		return peers;
+	}
 
-	
+	HashMap<Integer, ProcessData> processes = new HashMap<Integer, ProcessData>();
+
 	List<String> agentJVMArgs = new ArrayList<String>();
+	transient SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd:HH:mm:ss");
 
-	
 	// proxy info
-	// CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().build();
+	// CloseableHttpClient httpclient =
+	// HttpClients.custom().useSystemProperties().build();
 	// java -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=8000
 	String proxyHost = null;
 	Integer proxyPort = null;
-	
-	
-	// FIXME - all update functionality will need to be moved to Runtime 
-	// it should take parameters such that it will be possible at some point to do an update
+
+	String currentBranch = null;
+	String currentVersion = null;
+
+	Platform platform = Platform.getLocalInstance();
+
+	String agentBranch = platform.getBranch();
+	String agentVersion = platform.getVersion();
+
+	// FIXME - all update functionality will need to be moved to Runtime
+	// it should take parameters such that it will be possible at some point to
+	// do an update
 	// from a child process & update the agent :)
-	
+
+	HashSet<String> possibleBranches = new HashSet<String>();
+	HashSet<String> possibleVersions = new HashSet<String>();
+
+	// String lastBranch = null;
+	// WebGui webAdmin = null; can't have a peer untile nettosphere is part of
+	// base build
+	// boolean updateRestartProcesses = false;
+	boolean autoUpdate = false;
+
 	String updateUrl = "http://mrl-bucket-01.s3.amazonaws.com/current/%s";
+	String jarUrlTemplate = "http://mrl-bucket-01.s3.amazonaws.com/current/%s/myrobotlab.jar";
+	String versionUrlTemplate = "http://mrl-bucket-01.s3.amazonaws.com/current/%s/version.txt";
+	String versionsListUrlTemplate = "http://mrl-bucket-01.s3.amazonaws.com/";
 
-	String lastBranch = null;
-	//WebGui webAdmin = null;
+	boolean checkRemoteBranchesOnStartup = true;
 
-	boolean updateRestartProcesses = false;
+	String latestRemote;
 
-	boolean autoUpdate = true;
+	public Agent(String n) {
+		super(n);
+		log.info("Agent {} PID {} is alive", n, Runtime.getPID());
+		agentJVMArgs = Runtime.getJVMArgs();
+		if (currentBranch == null) {
+			currentBranch = platform.getBranch();
+		}
+		if (currentVersion == null) {
+			currentVersion = platform.getVersion();
+		}
+
+		// add my branch
+		possibleBranches.add(agentBranch);
+
+		if (checkRemoteBranchesOnStartup) {
+			// TODO - turn into asynchronous call
+			// so no connection will not lead to an irritating 'wait' timeout
+			getRemoteBranches();
+		}
+		setBranch(currentBranch);
+	}
+
+	// revert ! only 1 global autoUpdate - all processes - not Agent (yet)
+	public void autoUpdate(boolean b) {
+		/*
+		 * for (Integer id : processes.keySet()) { autoUpdate(id, b); }
+		 */
+		autoUpdate = b;
+	}
+
+	synchronized public void processUpdates() throws IOException {
+
+		if (autoUpdate) {
+			
+			String remoteVersion = getLatestRemoteVersion(currentBranch);
+			if (remoteVersion == null) {
+				error("checkForUpdates %s is null", currentBranch);
+			} else {
+				log.info("found remote version {}", remoteVersion);
+				File checkIfWeHaveJar = new File(String.format("%s/myrobotlab.%s.jar", currentBranch, remoteVersion));
+				if (!checkIfWeHaveJar.exists()) {
+					log.info("downloading remote version {}", remoteVersion);
+					downloadLatest(currentBranch);
+				}
+
+				for (Integer key : processes.keySet()) {
+					ProcessData process = processes.get(key);
+					if (!currentBranch.equals(process.branch)) {
+						log.info("skipping update of {} because its on branch {}", process.id, process.branch);
+						continue;
+					}
+
+					if (remoteVersion.equals(process.version)) {
+						log.info("skipping update of {} {} because its already version {}", process.id, process.name, process.version);
+						continue;
+					}
+
+					// FIXME - it would be nice to send a SIG_TERM to
+					// the process before we kill the jvm
+					// process.process.getOutputStream().write("/Runtime/releaseAll".getBytes());
+					process.version = remoteVersion;
+					if (process.isRunning()){
+						restart(process.id);
+					}
+				}
+			}
+		}
+	}
+	
+	public synchronized void restart(Integer id) throws IOException{
+		kill(id);
+		spawn2(processes.get(id));
+	}
+
+	/**
+	 * DEPRECATED - NO NEED - if the remote version is not local - then we need
+	 * an update !!! simple ! FIXME - move to Runtime compares various version
+	 * formats of mrl
+	 * 
+	 * @param remoteVersion
+	 * @param version
+	 * @return
+	 */
+	public boolean compareGreater(String remoteVersion, String version) {
+		boolean result = false;
+		log.info(String.format(" remote [%s] > local [%s] = %b", remoteVersion, version, result));
+		return true;
+	}
+
+	/**
+	 * return a non-running process structure from an existing one with a new id
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public ProcessData copy(Integer id) {
+		if (!processes.containsKey(id)) {
+			error("cannot copy %d does not exist", id);
+			return null;
+		}
+		ProcessData pd = processes.get(id);
+		ProcessData pd2 = new ProcessData(pd);
+		pd2.startTs = null;
+		pd2.stopTs = null;
+		pd2.id = getNextProcessId();
+		processes.put(pd2.id, pd2);
+		broadcastState();
+		return pd2;
+	}
+
+	public void copyAndStart(Integer id) throws IOException {
+		// returns a non running copy with new process id
+		// on the processes list
+		ProcessData pd2 = copy(id);
+		spawn2(pd2);
+		broadcastState();
+	}
+
+	public void downloadLatest(String branch) throws IOException {
+		String version = getLatestRemoteVersion(branch);
+		log.info("downloading version {} /{}", version, branch);
+		byte[] myrobotlabjar = getLatestRemoteJar(branch);
+		if (myrobotlabjar == null) {
+			throw new IOException("could not download");
+		}
+		log.info("{} bytes", myrobotlabjar.length);
+
+		/*
+		File archive = new File(String.format("%s/archive", branch));
+		archive.mkdirs();
+		*/
+
+		FileOutputStream fos = new FileOutputStream(String.format("%s/myrobotlab.%s.jar", branch, version));
+		fos.write(myrobotlabjar);
+		fos.close();
+	}
+
+	/*
+	 * public void start(String name) throws IOException, URISyntaxException,
+	 * InterruptedException{ start(getId(name)); }
+	 */
 
 	public String formatList(ArrayList<String> args) {
 		StringBuilder sb = new StringBuilder();
@@ -160,40 +324,195 @@ public class Agent extends Service {
 		return sb.toString();
 	}
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		// peers.put("cli", "Cli", "Command line processor");
-		// peers.put("webAdmin", "WebGui", "web gui");
-		return peers;
+	@Override
+	public String[] getCategories() {
+		return new String[] { "framework" };
 	}
 
-	public void add(ProcessData p) {
-
-		processes.put(p.name, p);
-		//HashMap<String, ProcessData> h = null;
-		/*
-		if (!branchIndex.containsKey(p.branch)) {
-			h = new HashMap<String, ProcessData>();
-		} else {
-			h = branchIndex.get(p.name);
-		}
-		h.put(p.name, p);
-		branchIndex.put(p.branch, h);
-		*/
+	@Override
+	public String getDescription() {
+		return "Agent (Smith) - responsible for creating the environment and maintaining, tracking and terminating all processes";
 	}
 
-	/*
-	public void remove(ProcessData p) {
-		processes.remove(p.name);
-		if (branchIndex.containsKey(p.branch)) {
-			HashMap<String, ProcessData> h = branchIndex.get(p.branch);
-			if (h.containsKey(p.name)) {
-				h.remove(p.name);
-
+	/**
+	 * gets id from name
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public Integer getId(String name) {
+		for (Integer pid : processes.keySet()) {
+			if (pid.equals(name)) {
+				return processes.get(pid).id;
 			}
 		}
+		return null;
 	}
-	*/
+
+	// FIXME - should just be be saveRemoteJar() - but shouldn't be from
+	// multiple threads
+	public byte[] getLatestRemoteJar(String branch) {
+		return HttpGet.get(String.format(jarUrlTemplate, branch));
+	}
+
+	public String getLatestRemoteVersion(String branch) {
+		
+		boolean debug = true;
+		if (debug){
+			return "1.0.988";
+		}
+		
+		byte[] data = HttpGet.get(String.format(versionUrlTemplate, branch));
+		if (data != null) {
+			return new String(data);
+		}
+		return null;
+	}
+
+	public ArrayList<String> getLocalVersions(String branch) throws IOException {
+		File m = new File(String.format("%s/myrobotlab.jar", branch));
+		String checkVersion = String.format("./checkVersion.%d.txt", System.currentTimeMillis());
+		FileIO.extract(m.getAbsolutePath(), "resource/version.txt", checkVersion);
+		byte[] v = FileIO.fileToByteArray(new File(checkVersion));
+		File cv = new File(checkVersion);
+		if (!cv.delete()) {
+			log.warn("could not delete {}", m.getAbsolutePath());
+		}
+
+		String version = null;
+		if (v == null) {
+			error("failed attempt of checking version for %s", m.getAbsolutePath());
+		} else {
+			version = new String(v);
+			/*
+			 * if (version.contains("TRAVIS")){ version = "local build"; }
+			 */
+			info("found local version %s", version);
+		}
+
+		return null;
+	}
+
+	/**
+	 * gets name from id
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public String getName(Integer id) {
+		for (Integer pid : processes.keySet()) {
+			if (pid.equals(id)) {
+				return processes.get(pid).name;
+			}
+		}
+
+		return null;
+	}
+
+	synchronized public Integer getNextProcessId() {
+		Integer ret = 0;
+		for (int i = 0; i < processes.size(); ++i) {
+			if (!processes.containsKey(ret)) {
+				return ret;
+			}
+			ret += 1;
+		}
+		return ret;
+	}
+
+	public HashSet<String> getRemoteBranches() {
+		try {
+			// TODO - all http gets use HttpClient static methods and promise
+			// for asynchronous
+			// get gitHub's branches
+			byte[] r = HttpGet.get("https://api.github.com/repos/MyRobotLab/myrobotlab/branches");
+			if (r != null) {
+				String branches = new String(r);
+				CodecJson decoder = new CodecJson();
+				// decoder.decodeArray(Branch)
+				Object[] array = decoder.decodeArray(branches);
+				for (int i = 0; i < array.length; ++i) {
+					LinkedTreeMap m = (LinkedTreeMap) array[i];
+					if (m.containsKey("name")) {
+						possibleBranches.add(m.get("name").toString());
+					}
+				}
+			}
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+		return possibleBranches;
+	}
+
+	synchronized public HashSet<String> getPossibleVersions() {
+		// only in the context of the currentBranch
+
+		// clear versions
+		possibleVersions.clear();
+
+		// get my version if i'm on same branch
+		if (agentBranch.equals(currentBranch)) {
+			possibleVersions.add(agentVersion);
+		}
+
+		// get local versions
+		File branchFolder = new File(currentBranch);
+		if (!branchFolder.isDirectory()) {
+			error("%s not a directory", currentBranch);
+		} else {
+			File[] listOfFiles = branchFolder.listFiles();
+			for (int i = 0; i < listOfFiles.length; ++i) {
+				File file = listOfFiles[i];
+				if (!file.isDirectory()) {
+					if (file.getName().startsWith("myrobotlab.")) {
+						String version = getFileVersion(file.getName());
+						if (version != null) {
+							possibleVersions.add(version);
+						}
+					}
+				}
+			}
+		}
+
+		// TODO !!! make asynchronous promise !!!!
+		String remote = getLatestRemoteVersion(currentBranch);
+		if (remote != null) {
+			if (!possibleVersions.contains(remote)) {
+				possibleVersions.add(remote);
+				invoke("newVersionAvailable", remote);
+				latestRemote = remote;
+			}
+		}
+		return possibleVersions;
+	}
+
+	public String newVersionAvailable() {
+		return latestRemote;
+	}
+
+	public String getFileVersion(String name) {
+		if (!name.startsWith("myrobotlab.")) {
+			return null;
+		}
+
+		String[] parts = name.split("\\.");
+		if (parts.length != 5) {
+			return null;
+		}
+
+		String version = String.format("%s.%s.%s", parts[1], parts[2], parts[3]);
+
+		return version;
+	}
+
+	/**
+	 * get a list of all the processes currently governed by this Agent
+	 * 
+	 * @return
+	 */
+	public HashMap<Integer, ProcessData> getProcesses() {
+		return processes;
+	}
 
 	public List<Status> install(String fullType) {
 		List<Status> ret = new ArrayList<Status>();
@@ -216,39 +535,46 @@ public class Agent extends Service {
 		return ret;
 	}
 
-	public Agent(String n) {
-		super(n);
-		log.info("Agent {} PID {} is alive", n, Runtime.getPID());
-		agentJVMArgs = Runtime.getJVMArgs();
+	public Integer kill(Integer id) {
+		if (processes.containsKey(id)) {
+			info("terminating %s", id);
+			ProcessData process = processes.get(id);
+			process.process.destroy();
+			process.state = ProcessData.STATE_STOPPED;
+
+			if (process.monitor != null) {
+				process.monitor.interrupt();
+				process.monitor = null;
+			}
+			// remove(processes.get(name));
+			info("%s haz beeen terminated", id);
+			broadcastState();
+			return id;
+		}
+
+		warn("%s? no sir, I don't know that punk...", id);
+		return null;
 	}
 
 	/*
-	public void startWebGui() {
-		webAdmin = (WebGui) createPeer("webAdmin");
-		if (webAdmin != null) {
-			webAdmin.setPort(8888); // 8887 for debugging
-			webAdmin.startService();
-		}
-	}
-	*/
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "framework" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "Agent (Smith) - responsible for creating the environment and maintaining, tracking and terminating all processes";
-	}
-
-	/**
-	 * get a list of all the processes currently governed by this Agent
-	 * 
-	 * @return
+	 * BAD IDEA - data type ambiguity is a drag public Integer kill(String name)
+	 * { return kill(getId(name)); }
 	 */
-	public HashMap<String, ProcessData> getProcesses() {
-		return processes;
+
+	public void killAll() {
+		for (Integer id : processes.keySet()) {
+			kill(id);
+		}
+		log.info("no survivors sir...");
+		broadcastState();
+	}
+
+	public void killAndRemove(Integer id) {
+		if (processes.containsKey(id)) {
+			kill(id);
+			processes.remove(id);
+			broadcastState();
+		}
 	}
 
 	/**
@@ -258,16 +584,27 @@ public class Agent extends Service {
 		Object[] objs = processes.keySet().toArray();
 		String[] pd = new String[objs.length];
 		for (int i = 0; i < objs.length; ++i) {
-			pd[i] = (String) objs[i];
+			Integer id = (Integer) objs[i];
+			ProcessData p = processes.get(id);
+			pd[i] = String.format("%d - %s [%s - %s]", id, p.name, p.branch, p.version);
 		}
 		return pd;
 	}
 
-	public String publishTerminated(String name) {
-		info("terminated %s", name);
-		return name;
+	public Integer publishTerminated(Integer id) {
+		info("terminated %d %s", id, getName(id));
+		broadcastState();
+		return id;
 	}
 
+	/**
+	 * This is a great idea & test - because we want complete control over
+	 * environment and dependencies - the ability to purge completely - and
+	 * start from the beginning - but it should be in another service and not
+	 * part of the Agent. The 'Test' service could use Agent as a peer
+	 * 
+	 * @return
+	 */
 	public List<Status> serviceTest() {
 
 		List<Status> ret = new ArrayList<Status>();
@@ -364,7 +701,7 @@ public class Agent extends Service {
 					info("could not get results");
 				}
 				// destroy env
-				kill("testEnv");
+				kill(getId("testEnv"));
 
 			} catch (Exception e) {
 
@@ -387,6 +724,38 @@ public class Agent extends Service {
 		}
 
 		return ret;
+	}
+
+	public String setBranch(String branch) {
+		currentBranch = branch;
+		getPossibleVersions();
+		return currentBranch;
+	}
+
+	public Map<String, String> setEnv(Map<String, String> env) {
+		Platform platform = Platform.getLocalInstance();
+		String platformId = platform.getPlatformId();
+		if (platform.isLinux()) {
+			String ldPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}", platformId);
+			env.put("LD_LIBRARY_PATH", ldPath);
+		} else if (platform.isMac()) {
+			String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
+			env.put("DYLD_LIBRARY_PATH", dyPath);
+		} else if (platform.isWindows()) {
+			String path = String.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%", platformId);
+			env.put("PATH", path);
+		} else {
+			log.error("unkown operating system");
+		}
+
+		return env;
+	}
+
+	public void shutdown() {
+		log.info("terminating others");
+		killAll();
+		log.info("terminating self ... goodbye...");
+		Runtime.exit();
 	}
 
 	// FIXME - spawn the current version
@@ -413,61 +782,18 @@ public class Agent extends Service {
 	 * Responsibility - This method will always call Runtime. To start Runtime
 	 * correctly environment must correctly be setup
 	 */
-	private synchronized Process spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
-		log.info("============== spawn begin ==============");
-		// get runtimeName
-		CMDLine cmdline = new CMDLine(in);
-		String runtimeName = cmdline.getSafeArgument("-runtimeName", 0, "runtime");
-		String branch = cmdline.getSafeArgument("-branch", 0, Platform.getLocalInstance().getBranch());
+	public synchronized Process spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
+		
+		ProcessData pd = new ProcessData(this, in, currentBranch, currentVersion);
 
+		CmdLine cmdline = new CmdLine(in);
 		if (cmdline.hasSwitch("-autoUpdate")) {
 			autoUpdate(true);
 		}
 
-		if (processes.containsKey(runtimeName)) {
-			error("%s already in processes - rejecting spawn request", runtimeName);
-			return null;
-		}
-
-		// step 1 - get current env data
-		String ps = File.pathSeparator;
-		String fs = System.getProperty("file.separator");
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd:HH:mm:ss");
 		log.info(String.format("Agent starting spawn %s", formatter.format(new Date())));
 		log.info("in args {}", Arrays.toString(in));
-
-		// FIXME - details on space / %20 decoding in URI
-		// http://stackoverflow.com/questions/320542/how-to-get-the-path-of-a-running-jar-file
-		String protectedDomain = URLDecoder.decode(Agent.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), "UTF-8");
-		log.info("protected domain {}", protectedDomain);
-
-		// platform id
-		Platform platform = Platform.getLocalInstance();
-		String platformId = platform.getPlatformId();
-		log.info("platform {}", platformId);
-
-		ArrayList<String> outArgs = new ArrayList<String>();
-		// bin for debug - but its missing the <jar unzip files
-		// build its 'stale' but it has the missing <jar unzip files :P
-		String classpath = String.format("./%s./myrobotlab.jar%s./libraries/jar/*%s./bin%s./build/classes", ps, ps, ps, ps);
-		// List<File> debugBinDirs = FindFile.findDirs("./bin");
-
-		/*
-		 * StringBuffer sb = new StringBuffer(); for(File file: debugBinDirs){
-		 * String path = String.format(":%s", file.getPath().replace("\\",
-		 * "/")); sb.append(path); }
-		 */
-
-		// classpath = String.format("%s%s", classpath, sb.toString());
-
-		String javaExe = platform.isWindows() ? "javaw" : "java";
-
-		String javaPath = System.getProperty("java.home") + fs + "bin" + fs + javaExe;
-		// JNI
-		String jniLibraryPath = String.format("-Djava.library.path=libraries/native%slibraries/native/%s", ps, platformId);
-
-		String jnaLibraryPath = "-Djna.library.path=libraries/native";
-
+	
 		// String jvmMemory = "-Xmx2048m -Xms256m";
 		long totalMemory = Runtime.getTotalPhysicalMemory();
 		if (totalMemory == 0) {
@@ -476,182 +802,72 @@ public class Agent extends Service {
 			log.info("total physical memory returned is {} Mb", totalMemory / 1048576);
 		}
 
-		outArgs.add(javaPath);
+		// need to fill it out as best you can before submitting to spawn2
+		return spawn2(pd);
+	}
 
-		Set<String> clientJVMArgs = new HashSet<String>();
-		log.info("jvmArgs {}", Arrays.toString(agentJVMArgs.toArray()));
-		for (int i = 0; i < agentJVMArgs.size(); ++i) {
-			String agentJVMArg = agentJVMArgs.get(i);
-			if (!agentJVMArg.startsWith("-agent") && !agentJVMArg.startsWith("-Dfile.encoding")) {
-				clientJVMArgs.add(agentJVMArg);
-			}
-		}
+	public synchronized Process spawn2(ProcessData pd) throws IOException {
 
-		// jvm args relayed to clients
-		for (String jvmArg : clientJVMArgs) {
-			outArgs.add(jvmArg);
-		}
+		log.info("============== spawn begin ==============");
 
-		outArgs.add(jniLibraryPath);
-		outArgs.add(jnaLibraryPath);
-		outArgs.add("-cp");
-		outArgs.add(classpath);
+		String runtimeName = pd.name; // cmdline.getSafeArgument("-runtimeName",
+										// 0, "runtime");
+		// String branch = pd.branch;// = cmdline.getSafeArgument("-branch", 0,
+		// Platform.getLocalInstance().getBranch());
+		// String version = pd.version;
+		// currentBranch = (pd.branch != null) ? pd.branch : currentBranch;
+		// currentVersion = (pd.version != null) ? pd.version : currentVersion;
 
-		boolean hasService = false;
-		/*
-		 * BUG - when specifying an "-invoke test test
-		 * org.myrobotlab.service.Clock for (int i = 0; i < in.length; ++i) {
-		 * String arg = in[i]; if (arg.startsWith("org.myrobotlab.service")) {
-		 * hasService = true; } }
-		 */
+		// this needs cmdLine
+		String[] cmdLine = pd.buildCmdLine();
+		log.info(String.format("spawning -> %s", Arrays.toString(cmdLine)));
+		ProcessBuilder builder = new ProcessBuilder(cmdLine);// .inheritIO();
 
-		if (!hasService) {
-			outArgs.add("org.myrobotlab.service.Runtime");
-		}
-
-		// TODO preserve/serialize command line parameters
-		if (in.length > 0) {
-			for (int i = 0; i < in.length; ++i) {
-				outArgs.add(in[i]);
-			}
-		} else {
-			// (default) - no parameters supplied
-
-			outArgs.add("-service");
-			outArgs.add("gui");
-			outArgs.add("GUIService");
-			outArgs.add("python");
-			outArgs.add("Python");
-		}
-
-		// to get appropriate appenders and logging format
-		outArgs.add("-fromAgent");
-
-		// ProcessBuilder builder = new ProcessBuilder(path, "-Xmx1024m", "-cp",
-		// classpath, ReSpawner.class.getName());
-
-		// FIXME - non-normal operation .. Agent is being
-		File update = new File("./update/myrobotlab.jar");
-
-		// FIXME !! - remove - updating Agent will be a special case of some worker version updating folder above..
-		if (update.exists()) {
-			// attempt to process the update
-			log.info("update exists archiving current");
-
-			try {
-				// if thrown - "file locked" then createBootstrapJar
-				// IF THAT THROWS - GIVE UP !!!
-
-				// update available - archive old file
-				// Path source = Paths.get("./myrobotlab.jar");
-				File archiveDir = new File("./archive");
-				archiveDir.mkdirs();
-
-				File source = new File("./myrobotlab.jar");
-				File target = new File(String.format("./archive/myrobotlab.%s.jar", Runtime.getVersion()));
-				FileIO.copy(source, target);
-
-				// copy update
-				log.info("moving update");
-				source = new File("./update/myrobotlab.jar");
-				target = new File("./myrobotlab.jar");
-				FileIO.copy(source, target);
-				log.info("deleting update");
-				if (!source.delete()) {
-					log.error("could not delete update");
-				}
-				log.info("completed update !");
-			} catch (Exception e) {
-				try {
-					// FIXME FIXME - normalize the start !!!!
-					log.info("file myrobotlab.jar is locked - ejecting agent.jar - {}", e.getMessage());
-
-					File source = new File("./myrobotlab.jar");
-					File target = new File("./agent.jar");
-					FileIO.copy(source, target);
-
-					ArrayList<String> bootArgs = new ArrayList<String>();
-
-					bootArgs.add(javaPath);
-					bootArgs.add("-jar");
-					bootArgs.add("./agent.jar"); // -jar uses manifest
-					// bootArgs.add("org.myrobotlab.framework.Bootstrap");
-					for (int i = 0; i < in.length; ++i) {
-						bootArgs.add(in[i]);
-					}
-					String cmd = formatList(bootArgs);
-					log.info(String.format("agent.jar spawning -> [%s]", cmd));
-					ProcessBuilder builder = new ProcessBuilder(bootArgs);
-					Process process = builder.start();
-
-					log.info(String.format("terminating - good luck new agent & update :)"));
-					System.exit(0);
-					return process;
-				} catch (Exception ex) {
-					log.error("PANIC - failed to create agent - terminating - bye :(");
-					log.error(ex.getMessage());
-				}
-			}
-		}
-
-		String cmd = formatList(outArgs);
-		log.info(String.format("spawning -> [%s]", cmd));
-
-		ProcessBuilder builder = new ProcessBuilder(outArgs);// .inheritIO();
-
-		// create branch directory if one does not exist
-		File b = new File(branch);
+		File b = new File(pd.branch);
 		b.mkdirs();
 
 		// check to see if myrobotlab.jar is in the directory
-		File m = new File(String.format("%s/myrobotlab.jar", branch));
+		String filename = String.format("%s/myrobotlab.%s.jar", pd.branch, pd.version);
+		File m = new File(filename);
 		if (!m.exists()) {
-			log.info(String.format("%s/myrobotlab.jar cloning self", branch));
-			FileIO.copy("myrobotlab.jar", String.format("%s/myrobotlab.jar", branch));
+			log.info(String.format("cloning self to %s", filename));
+			FileIO.copy("myrobotlab.jar", filename);
 		}
-		
-		String checkVersion = String.format("./checkVersion.%d.txt", System.currentTimeMillis()) ;
-		FileIO.extract(m.getAbsolutePath(), "resource/version.txt", checkVersion);
-		byte[] v = FileIO.fileToByteArray(new File(checkVersion));
-		File cv = new File(checkVersion);
-		if (!cv.delete()){
-			log.warn("could not delete {}", m.getAbsolutePath());
-		}
-		String version = null;
-		if (v == null){
-			error("failed attempt of checking version for %s", m.getAbsolutePath());
-		} else {
-			version = new String(v);
-			if (version.contains("TRAVIS")){
-				version = "local build";
-			}
-			info("found local version %s", version);
-		}
-		
 
 		// move process to start in that directory
 		builder.directory(b);
 
 		// environment variables setup
-		Map<String, String> env = builder.environment();
-		if (platform.isLinux()) {
-			String ldPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}", platformId);
-			env.put("LD_LIBRARY_PATH", ldPath);
-		} else if (platform.isMac()) {
-			String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
-			env.put("DYLD_LIBRARY_PATH", dyPath);
-		} else if (platform.isWindows()) {
-			String path = String.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%", platformId);
-			env.put("PATH", path);
-		} else {
-			log.error("unkown operating system");
-		}
-		
-		
+		setEnv(builder.environment());
+
+		// kill pd.process if not null ?
 
 		Process process = builder.start();
-		ProcessData pd = new ProcessData(this, branch, version, runtimeName, outArgs, process);
-		add(pd);
+		// ProcessData pd = new ProcessData(this, branch,
+		// getLocalVersion(branch), runtimeName, outArgs, process);
+		pd.process = process;
+		pd.startTs = System.currentTimeMillis();
+		// FIXME - break out inner class defintion
+		/*
+		if (pd.monitor == null) {
+			pd.monitor = new ProcessData.Monitor(pd);
+		}
+		pd.monitor.start();
+		*/
+		
+		pd.monitor = new ProcessData.Monitor(pd);
+		pd.monitor.start();
+		
+		pd.state = ProcessData.STATE_RUNNING;
+		if (pd.id == null){
+			pd.id = getNextProcessId();
+		}
+		if (processes.containsKey(pd.id)) {
+			info("restarting %d %s", pd.id, pd.name);
+		} else {
+			info("starting new %d %s", pd.id, pd.name);
+			processes.put(pd.id, pd);
+		}
 
 		// attach our cli to the latest instance
 		Cli cli = Runtime.getCLI();
@@ -663,62 +879,47 @@ public class Agent extends Service {
 		// FileUtils.
 
 		log.info("Agent finished spawn {}", formatter.format(new Date()));
-		return process;
-	}
-	
-	
-	public void shutdown() {
-		log.info("terminating others");
-		killAll();
-		log.info("terminating self ... goodbye...");
-		Runtime.exit();
-	}
-
-	public String kill(String name) {
-		if (processes.containsKey(name)) {
-			info("terminating %s", name);
-			ProcessData process = processes.get(name);
-			process.process.destroy();
-			process.isRunning = false;
-			process.state = "stopped";
-			//remove(processes.get(name));
-			info("%s haz beeen terminated", name);
-			broadcastState();
-			return name;
-		}
-
-		warn("%s? no sir, I don't know that punk...", name);
-		return null;
-	}
-
-	public void killAll() {
-		for (String name : processes.keySet()) {
-			kill(name);
-		}
-		log.info("no survivors sir...");
 		broadcastState();
+		return process;
+
+	}
+
+	/*
+	 * public void autoUpdate(String name, boolean b){ autoUpdate(getId(name),
+	 * b); }
+	 */
+
+	/**
+	 * DEPRECATE ?  spawn2 should do this checking ?
+	 * @param id
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws InterruptedException
+	 */
+	public void start(Integer id) throws IOException, URISyntaxException, InterruptedException {
+		if (!processes.containsKey(id)) {
+			error("start process %s can not start - process does not exist", id);
+			return;
+		}
+
+		ProcessData p = processes.get(id);
+		if (p.isRunning()) {
+			warn("process %s already started", id);
+			return;
+		}
+
+		spawn2(p);
+		// spawn(p.cmdLine.toArray(new String[p.cmdLine.size()]));
+	}
+
+	public void startService() {
+		super.startService();
+		addTask(getName(), 1000 * 60, "processUpdates");
 	}
 
 	public void terminateSelfOnly() {
 		log.info("goodbye .. cruel world");
 		System.exit(0);
-	}
-
-	public String getLatestVersionNumber(String branch) {
-		byte[] data = HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/version.txt", branch));
-		if (data != null) {
-			return new String(data);
-		}
-		return null;
-	}
-
-	public byte[] getLatest() {
-		Platform platform = Platform.getLocalInstance();
-		return getLatest(platform.getBranch());
-	}
-
-	public byte[] getLatest(String branch) {
-		return HttpGet.get(String.format("http://mrl-bucket-01.s3.amazonaws.com/current/%s/myrobotlab.jar", branch));
 	}
 
 	public void update() throws IOException {
@@ -740,25 +941,11 @@ public class Agent extends Service {
 		// compare that with the latest http://s3/current/{branch}/version.txt
 		// and figure
 
-		String latestVersion = getLatestVersionNumber(branch);
+		String latestVersion = getLatestRemoteVersion(branch);
 		if (latestVersion == null) {
 			error("s3 version.txt current version is null", branch);
 			return;
 		}
-
-		//Map<String, ProcessData> dead = new HashMap<String, ProcessData>();
-
-		//info(String.format("terminating %d processes on %s", branchIndex.size(), branch));
-		// FIXME - implement
-		/*
-		if (branchIndex.containsKey(branch)) {
-			HashMap<String, ProcessData> b = branchIndex.get(branch);
-			for (String processName : b.keySet()) {
-				dead.put(processName, b.get(processName));
-				kill(processName);
-			}
-		}
-		*/
 
 		if (!latestVersion.equals(currentVersion)) {
 			info("latest %s > current %s - updating", latestVersion, currentVersion);
@@ -766,94 +953,10 @@ public class Agent extends Service {
 		}
 
 		// FIXME - restart processes
-		if (updateRestartProcesses) {
+		// if (updateRestartProcesses) {
 
-		}
+		// }
 
-	}
-
-	public void startService() {
-		super.startService();
-		addTask(getName(), 1000 * 60, "checkForUpdates");
-	}
-
-	public void checkForUpdates() {
-
-		for (String key : processes.keySet()) {
-			ProcessData process = processes.get(key);
-			if (process.autoUpdate) {
-				try {
-					String url = String.format(updateUrl, process.branch) + "/version.txt";
-					HTTPRequest v = new HTTPRequest(url);
-					byte[] ver = v.getBinary();
-					if (ver == null) {
-						error("checkForUpdates %s is null", url);
-					} else {
-						String remoteVersion = new String(ver);
-						log.info("found remote version {}", remoteVersion);
-						if (compareGreater(remoteVersion, process.version)){
-							info("found update %s for process %s with version %s", remoteVersion, process.name, process.version);
-							info("stopping process");
-							// FIXME - it would be nice to send a SIG_TERM to the process before we kill the jvm
-							// process.process.getOutputStream().write("/Runtime/releaseAll".getBytes());
-							
-							kill(process.name);
-						}
-					}
-				} catch (Exception e) {
-					Logging.logError(e);
-				}
-			}
-		}
-
-		// Runtime.checkForUpdates();
-	}
-	
-	/**
-	 * start or stop the autoUpdate process for a process
-	 */
-	public void autoUpdate(String name, boolean b){
-		if (processes.containsKey(name)){
-			processes.get(name).autoUpdate = b;
-			broadcastState();
-		}		
-	}
-	
-	public void autoUpdate(boolean b){
-		for (String name: processes.keySet()){
-			autoUpdate(name, b);
-		}
-	}
-
-	/**
-	 * FIXME - move to Runtime
-	 * compares various version formats of mrl
-	 * @param remoteVersion
-	 * @param version
-	 * @return
-	 */
-	public boolean compareGreater(String remoteVersion, String version) {
-		boolean result = false;
-		log.info(String.format(" remote [%s] > local [%s] = %b", remoteVersion, version, result));
-		return true;
-	}
-
-	public void downloadLatest(String branch) throws IOException {
-		String version = getLatestVersionNumber(branch);
-		log.info("downloading version {} /{}", version, branch);
-		byte[] myrobotlabjar = getLatest(branch);
-		log.info("{} bytes", myrobotlabjar.length);
-
-		File archive = new File(String.format("%s/archive", branch));
-		archive.mkdirs();
-
-		FileOutputStream fos = new FileOutputStream(String.format("%s/archive/myrobotlab.%s.jar", branch, version));
-		fos.write(myrobotlabjar);
-		fos.close();
-
-		fos = new FileOutputStream(String.format("%s/myrobotlab.jar", branch));
-		fos.write(myrobotlabjar);
-		fos.close();
 	}
 
 	/**
@@ -871,7 +974,7 @@ public class Agent extends Service {
 			// String[] agentArgs = new String[0];
 			ArrayList<String> inArgs = new ArrayList<String>();
 			// -agent \"-params -service ... \" string encoded
-			CMDLine runtimeArgs = new CMDLine(args);
+			CmdLine runtimeArgs = new CmdLine(args);
 			// -service for Runtime -process a b c d :)
 			if (runtimeArgs.containsKey("-agent")) {
 				// List<String> list = runtimeArgs.getArgumentList("-agent");
@@ -898,7 +1001,7 @@ public class Agent extends Service {
 			inArgs.add("-isAgent");
 
 			String[] agentArgs = inArgs.toArray(new String[inArgs.size()]);
-			CMDLine agentCmd = new CMDLine(agentArgs);
+			CmdLine agentCmd = new CmdLine(agentArgs);
 
 			// FIXME -isAgent identifier sent -- default to setting log name to
 			// agent.log !!!
