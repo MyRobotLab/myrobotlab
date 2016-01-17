@@ -166,4 +166,32 @@
     <pattern>DO YOU LIKE <set>starwarsnames</set></pattern>
     <template><map name="starwars"><star/></map> is awesome.</template>
   </category>
+  
+  <category>
+    <pattern>ADD * TO THE * SET</pattern>
+    <template>Ok...<oob>
+      <mrl>
+        <service>lloyd</service>
+        <method>addToSet</method>
+        <param><star index="2"/></param>
+        <param><star/></param>
+      </mrl>
+    </oob>
+    </template>
+  </category>
+
+  <category>
+    <pattern>ADD * EQUALS * TO THE * MAP</pattern>
+    <template>Ok...<oob>
+      <mrl>
+        <service>lloyd</service>
+        <method>addToMap</method>
+        <param><star index="3"/></param>
+        <param><star/></param>        
+        <param><star index="2"/></param>
+      </mrl>
+    </oob>
+    </template>
+  </category>
+  
 </aiml>

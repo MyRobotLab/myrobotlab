@@ -23,6 +23,8 @@ public class ProgramABTest {
 	public void setUp() throws Exception {
 		// Load the service under test
 		// a test robot
+		// TODO: this should probably be created by Runtime,
+		// OOB tags might not know what the service name is ?!
 		testService = new ProgramAB("lloyd");
 		// start the service.
 		testService.startService();
@@ -112,9 +114,15 @@ public class ProgramABTest {
 		assertEquals("Princess Leia Organa is awesome.", resp.msg);
 	}
 	
-	public void testAddEntryToSet() {
-		// TODO: ok. we want to see if we can add an entry to a set.
-		
+	// @Test
+	public void testAddEntryToSetAndMaps() {
+		// TODO: This does NOT work yet!
+		Response resp = testService.getResponse(session, "Add Jabba to the starwarsnames set");
+		assertEquals("Ok...", resp.msg);
+		resp = testService.getResponse(session, "Add jabba equals Jabba the Hut to the starwars map");
+		assertEquals("Ok...", resp.msg);
+		resp = testService.getResponse(session, "DO YOU LIKE Jabba?");
+		assertEquals("Jabba the Hut is awesome.", resp.msg);
 	}
 	
 	@After
