@@ -357,10 +357,12 @@ public class Agent extends Service {
 
 	public String getLatestRemoteVersion(String branch) {
 		
+		/*
 		boolean debug = true;
 		if (debug){
 			return "1.0.988";
 		}
+		*/
 		
 		byte[] data = HttpGet.get(String.format(versionUrlTemplate, branch));
 		if (data != null) {
