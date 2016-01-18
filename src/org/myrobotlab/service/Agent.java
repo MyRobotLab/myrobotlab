@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.document.transformer.SendToSolr;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
