@@ -1,15 +1,15 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
+import java.io.File;
 import java.io.IOException;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB.Response;
+import org.slf4j.Logger;
 
 public class ProgramABTest {
 	
@@ -18,6 +18,7 @@ public class ProgramABTest {
 	private String botName = "lloyd";
 	private String path = "test/ProgramAB";
 
+	public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
 	
 	@Before
 	public void setUp() throws Exception {
@@ -25,14 +26,26 @@ public class ProgramABTest {
 		// a test robot
 		// TODO: this should probably be created by Runtime,
 		// OOB tags might not know what the service name is ?!
-		testService = new ProgramAB("lloyd");
+		testService = new ProgramAB(botName);
 		// start the service.
 		testService.startService();
 		// load the bot brain for the chat with the user
 		testService.startSession(path, session, botName);
-		
-		// TODO: clean out any aimlif or existing predicates for the bot that might
+		// clean out any aimlif the bot that might
 		// have been saved in a previous test run!
+		String aimlIFPath = path + "/bots/"+botName+"/aimlif";
+		File aimlIFPathF = new File(aimlIFPath);
+		if (aimlIFPathF.isDirectory()) {
+			for (File f : aimlIFPathF.listFiles()) {
+				// if there's a file here.
+				log.info("Deleting pre-existing AIMLIF files : {}", f.getAbsolutePath());
+				f.delete();
+				
+			}
+		}
+		// TODO: same thing for predicates! (or other artifacts from a previous aiml test run)
+		
+		
 
 	}
 
@@ -114,7 +127,7 @@ public class ProgramABTest {
 		assertEquals("Princess Leia Organa is awesome.", resp.msg);
 	}
 	
-	// @Test
+	@Test
 	public void testAddEntryToSetAndMaps() {
 		// TODO: This does NOT work yet!
 		Response resp = testService.getResponse(session, "Add Jabba to the starwarsnames set");
