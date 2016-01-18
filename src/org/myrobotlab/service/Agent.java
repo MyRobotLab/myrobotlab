@@ -820,7 +820,13 @@ public class Agent extends Service {
 
 		// this needs cmdLine
 		String[] cmdLine = pd.buildCmdLine();
-		log.info(String.format("spawning -> %s", Arrays.toString(cmdLine)));
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < cmdLine.length; ++i){
+			sb.append(cmdLine[i]);
+			sb.append(" ");
+		}
+		
+		log.info(String.format("spawning -> [%s]", sb.toString()));
 		ProcessBuilder builder = new ProcessBuilder(cmdLine);// .inheritIO();
 
 		File b = new File(pd.branch);
