@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.alicebot.ab.AIMLMap;
+import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
@@ -255,14 +257,30 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
 	public void addToSet(String setName, String setValue) {
 		// add to the set for the bot.
-		bot.setMap.get(setName).add(setValue);
-		// TODO: persist this to disk!
+		AIMLSet updateSet = bot.setMap.get(setName);
+		if (updateSet != null) {
+			setValue = setValue.toUpperCase().trim();
+			updateSet.add(setValue);
+			// persist to disk.
+			updateSet.writeAIMLSet();
+		} else {
+			log.warn("Unknown AIML set: {} was attempted to be updated. ", setName);
+			// TODO: should we create a new set ? or just log this warning?
+		}
 	}
 
 	public void addToMap(String mapName, String mapKey, String mapValue) {
 		// add an entry to the map.
-		bot.mapMap.get(mapName).put(mapKey, mapValue);
-		// TODO: persist this to disk!
+		AIMLMap updateMap = bot.mapMap.get(mapName);
+		if (updateMap != null) {
+			mapKey = mapKey.toUpperCase().trim();
+			updateMap.put(mapKey, mapValue);
+			// persist to disk!
+			updateMap.writeAIMLMap();
+		} else {
+			log.warn("Unknown AIML map: {} was attempted to be updated. ", mapName);
+			// dynamically create new maps?!
+		}
 	}
 
 	
