@@ -9,7 +9,14 @@ public class StageConfiguration extends Configuration {
 	private String stageName = "defaultStage";
 	private String stageClass = "org.myrobotlab.document.transformer.AbstractStage";
 	
+	public StageConfiguration(String stageName, String stageClass) {
+		config = new HashMap<String, Object>();
+		this.stageName = stageName;
+		this.stageClass = stageClass;
+	}
+	
 	public StageConfiguration() {
+		// depricate this constructor?
 		config = new HashMap<String, Object>();
 	}
 	
