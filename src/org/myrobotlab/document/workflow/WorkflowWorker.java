@@ -1,9 +1,11 @@
 package org.myrobotlab.document.workflow;
 
 import org.myrobotlab.document.Document;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class WorkflowWorker extends Thread {
-
+	public final static Logger log = LoggerFactory.getLogger(WorkflowWorker.class);
 	private Workflow w;
 	boolean processing = false;
 	
@@ -27,7 +29,9 @@ public class WorkflowWorker extends Thread {
 				}
 			} catch (InterruptedException e) {
 				// TODO: handle these properly
+				log.warn("Workflow Worker Died! {}", e.getMessage());
 				e.printStackTrace();
+				
 			} 
 		}
 	}

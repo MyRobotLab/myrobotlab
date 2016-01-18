@@ -1,2 +1,13 @@
 # sample xml config file to map from /foo/bar to the "text" field on a document object.
-text,/foo/bar
+title,/page/title
+ns,/page/ns
+text,/page/revision/text
+revision_id,/page/revision/id
+contributor_ip,/page/contributor/ip
+contributor_name,/page/contirbutor/username
+comment,/page/revision/comment
+model,/page/revision/model
+format,/page/revision/format
+timestamp,/page/revision/timestamp
+parentid,/page/revision/parentid
+

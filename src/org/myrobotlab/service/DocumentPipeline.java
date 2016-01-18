@@ -101,15 +101,12 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		StageConfiguration stage2Config = new StageConfiguration();
 		stage2Config.setStageClass("org.myrobotlab.document.transformer.SendToSolr");
 		stage2Config.setStageName("SendToSolr");
-		stage2Config.setStringParam("solrUrl", "http://phobos:8983/solr/collection1");
+		stage2Config.setStringParam("solrUrl", "http://phobos:8983/solr/graph");
 		workflowConfig.addStage(stage2Config);
 		
 		pipeline.setConfig(workflowConfig);
 		pipeline.initalize();
 		
-		//Solr solr = (Solr)Runtime.start("solr", "Solr");
-		//solr.setSolrUrl("http://phobos:8983/solr/sagewell");
-		//
 		RSSConnector connector = (RSSConnector)Runtime.start("rss", "RSSConnector");
 		connector.addDocumentListener(pipeline);
 		connector.startCrawling();
@@ -135,6 +132,9 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		}
 		workflowServer.addWorkflow(config);
 		workflowName = config.getName();
+		
+		// We can't drop messages! apply back pressure if the inbox is full!
+		this.inbox.setBlocking(true);
 		
 	}
 
