@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.document.transformer.SendToSolr;
 import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
@@ -203,10 +204,25 @@ public class Agent extends Service {
 		autoUpdate = b;
 	}
 
+	public void startWebGui() {
+		try {
+			Runtime.install("WebGui");
+			// no reference at all to WebGui
+			// look ma no reference !
+			Runtime.create("webAdmin", "WebGui");
+			send("webAdmin", "setPort", 8887);
+			Runtime.start("webAdmin", "WebGui");
+			
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 	synchronized public void processUpdates() throws IOException {
 
 		if (autoUpdate) {
-			
+
 			String remoteVersion = getLatestRemoteVersion(currentBranch);
 			if (remoteVersion == null) {
 				error("checkForUpdates %s is null", currentBranch);
@@ -234,15 +250,15 @@ public class Agent extends Service {
 					// the process before we kill the jvm
 					// process.process.getOutputStream().write("/Runtime/releaseAll".getBytes());
 					process.version = remoteVersion;
-					if (process.isRunning()){
+					if (process.isRunning()) {
 						restart(process.id);
 					}
 				}
 			}
 		}
 	}
-	
-	public synchronized void restart(Integer id) throws IOException{
+
+	public synchronized void restart(Integer id) throws IOException {
 		kill(id);
 		spawn2(processes.get(id));
 	}
@@ -301,9 +317,9 @@ public class Agent extends Service {
 		log.info("{} bytes", myrobotlabjar.length);
 
 		/*
-		File archive = new File(String.format("%s/archive", branch));
-		archive.mkdirs();
-		*/
+		 * File archive = new File(String.format("%s/archive", branch));
+		 * archive.mkdirs();
+		 */
 
 		FileOutputStream fos = new FileOutputStream(String.format("%s/myrobotlab.%s.jar", branch, version));
 		fos.write(myrobotlabjar);
@@ -777,7 +793,7 @@ public class Agent extends Service {
 	 * correctly environment must correctly be setup
 	 */
 	public synchronized Process spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
-		
+
 		ProcessData pd = new ProcessData(this, in, currentBranch, currentVersion);
 
 		CmdLine cmdline = new CmdLine(in);
@@ -787,7 +803,7 @@ public class Agent extends Service {
 
 		log.info(String.format("Agent starting spawn %s", formatter.format(new Date())));
 		log.info("in args {}", Arrays.toString(in));
-	
+
 		// String jvmMemory = "-Xmx2048m -Xms256m";
 		long totalMemory = Runtime.getTotalPhysicalMemory();
 		if (totalMemory == 0) {
@@ -815,11 +831,11 @@ public class Agent extends Service {
 		// this needs cmdLine
 		String[] cmdLine = pd.buildCmdLine();
 		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < cmdLine.length; ++i){
+		for (int i = 0; i < cmdLine.length; ++i) {
 			sb.append(cmdLine[i]);
 			sb.append(" ");
 		}
-		
+
 		log.info(String.format("spawning -> [%s]", sb.toString()));
 		ProcessBuilder builder = new ProcessBuilder(cmdLine);// .inheritIO();
 
@@ -849,17 +865,15 @@ public class Agent extends Service {
 		pd.startTs = System.currentTimeMillis();
 		// FIXME - break out inner class defintion
 		/*
-		if (pd.monitor == null) {
-			pd.monitor = new ProcessData.Monitor(pd);
-		}
-		pd.monitor.start();
-		*/
-		
+		 * if (pd.monitor == null) { pd.monitor = new ProcessData.Monitor(pd); }
+		 * pd.monitor.start();
+		 */
+
 		pd.monitor = new ProcessData.Monitor(pd);
 		pd.monitor.start();
-		
+
 		pd.state = ProcessData.STATE_RUNNING;
-		if (pd.id == null){
+		if (pd.id == null) {
 			pd.id = getNextProcessId();
 		}
 		if (processes.containsKey(pd.id)) {
@@ -890,7 +904,8 @@ public class Agent extends Service {
 	 */
 
 	/**
-	 * DEPRECATE ?  spawn2 should do this checking ?
+	 * DEPRECATE ? spawn2 should do this checking ?
+	 * 
 	 * @param id
 	 * @throws IOException
 	 * @throws URISyntaxException
