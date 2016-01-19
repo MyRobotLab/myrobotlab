@@ -1,39 +1,15 @@
+<div class="pull-right">{{service.botName}}</div>
+<div class="col-md-12">          
+<form ui-keypress="{13:'askProgramAB(username,utterance)'}">
+<div class="input-group">       
+   <input class="form-control" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" placeholder="ask"/>
+   <span class="input-group-btn"><button class="btn btn-default" ng-click="askProgramAB(username,utterance)" ng-init="">Ask</button></span>
+   <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.startSession(username,utterance)" ng-init="">Start</button></span>
+ </div>
+</form>
+</div>
+
 <div>
-
-<!-- {{service}} -->
-
-<br/>
-    Service   : {{service.name}} of type {{service.simpleName}}<br/>
-    <!--  Bot   Name: {{service.botName}}<br/>  -->
-    Start Time: {{service.serviceStartTime}}<br/>
-<br/>
-<table>
- <tr>
-    <td>Your Name </td>
-    <td> <input ng-model="username" class="form-control"  name="username" id="usernmae" ng-init="username='default'"/></td>
-  </tr>
-  <tr>
-    <td>Bot Name </td>
-    <td> <input ng-model="botname" class="form-control"  name="botname" id="botname" ng-init="botname='alice2'"/></td>
-  </tr>
-  <tr>
-    <td>ProgramAB Path </td>
-    <td> <input ng-model="botpath"  class="form-control"  name="botpath" id="botpath" ng-init="botpath='ProgramAB'"/></td>
-  </tr>
-  <tr>
-    <td><button id="startSession" class="btn btn-default"  ng-click="startSession(botpath,username,botname)" ng-init="startSessionLabel = 'Start Session'">{{startSessionLabel}}</button></td>
-    <td><button id="savePredicates" class="btn btn-default"  ng-click="savePredicates()" ng-init="">Save Predicates</button></td>
-  </tr>
-</table>
-
-<br/>
-Status: {{status}}
-<br/>
-	<form>
-		<input class="form-control" ng-model="utterance" name="utterance" id="utterance" ng-init=""/>  
-		<button type="submit" class="btn btn-default" id="askProgramAB" ng-click="askProgramAB(username,utterance)" ng-init="">Ask Program AB</button>
-    </form>
-    <br/>
     <!--  the conversation history/log table -->
     <table>
       <thead>
@@ -47,5 +23,7 @@ Status: {{status}}
         </tr>
       </tbody>
     </table>    
+</div>    
+    <!-- <pre>{{service}}</pre> -->
  
-</div>
+

@@ -1,6 +1,19 @@
 <div class="row">
-  <div class="col-lg-12">
-    <label for="service.port">port</label>
+ <div class="col-md-4">
+   <label>port</label>
+    <div class="input-group">
+       <input class="form-control" type="text" ng-model="port" placeholder="{{service.port}}"/>
+       <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.setPort(port)">update</button></span>
+       <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.save()">save</button></span>
+       <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
+     </div>
+  </div>
+</div>
+
+<!--
+<pre>{{service}}</pre>
+-->
+    
     <!-- <input type="text" ng-disabled="isConnected" ng-model="service.port" class="form-control"> -->
 
 <!--
@@ -45,6 +58,4 @@
 </stream>
 -->
 
-    {{service.port}}
-  </div>
-</div>
+   

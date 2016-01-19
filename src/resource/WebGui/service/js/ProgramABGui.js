@@ -4,23 +4,23 @@ angular.module('mrlapp.service.ProgramABGui', [])
     // grab the self and message
     var _self = this;
     var msg = this.msg;
-    // when to use $scope or anything?!
+    
+    // use $scope only when the variable
+    // needs to interract with the display
     $scope.currResponse = '';
     $scope.utterance = '';
     $scope.username = 'default';
     $scope.current_text = '';
     // start info status
     $scope.rows = [];
-    // current state for the button i guess?
-    // always grab the right service!
-    $scope.service = mrl.getService($scope.service.name);
     
     // following the template.
     this.updateState = function (service) {
-        $scope.service = service;
-        $scope.botname = $scope.service.botName;
-        $scope.username = $scope.service.currentUser;
+        $scope.service  = service;
+        $scope.botname  = service.botName;
+        $scope.username = service.currentUser;
     };
+    
     _self.updateState($scope.service);
     
     this.onMsg = function(inMsg) {
@@ -47,20 +47,20 @@ angular.module('mrlapp.service.ProgramABGui', [])
     };
     
     $scope.askProgramAB = function(username, utterance) {
-        $scope.service = mrl.getService($scope.service.name);
-        mrl.sendTo($scope.service.name, "getResponse", username, utterance);
+        msg.send("getResponse", username, utterance);
         $scope.rows.unshift({
             name: "User",
             response: utterance
         });
+
+        $scope.utterance = "";
     };
     
     $scope.startSession = function(botpath, username, botname) {
         $scope.rows.unshift("Reload Session for Bot " + botname);
         $scope.startSessionLabel = 'Reload Session';
-        $scope.service = mrl.getService($scope.service.name);
         $log.info("BOT PATH" + botpath);
-        mrl.sendTo($scope.service.name, "startSession", botpath, username, botname);
+        msg.send("startSession", botpath, username, botname);
         // $scope.$apply();
     };
     
@@ -70,7 +70,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
     };
         
     // subscribe to the response from programab.
-    mrl.subscribe($scope.service.name, 'publishText');
+    msg.subscribe('publishText');
     msg.subscribe(this);
     // we're done.
 
