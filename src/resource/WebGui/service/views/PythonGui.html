@@ -1,3 +1,5 @@
+
+
 <!-- file menu button bar begin -->
 <div class="btn-group">
 
@@ -13,18 +15,7 @@
 	</div>
     <!-- python example resource files end -->
 
-    <!-- python example resource files begin -->
-    <div class="btn-group" uib-dropdown is-open="status.isopen">
-    <button class="btn btn-default uib-dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
-      <span class="glyphicon glyphicon-open">open</span><!-- span class="caret"></span-->
-    </button>	
-    <ul class="uib-dropdown-menu" aria-labelledby="dropdownMenu1">
-      <li ng-repeat="file in service.currentFileList" ng-class="navClass('{{file.type}}')"> <a href='' ng-click="msg.loadExample(getName(file.path))">{{getName(file.path)}}</a> 
-        </li>
-    </ul>
-	</div>
     <!-- python example resource files end -->
-
 
   <button type="button" class="btn btn-default" ng-click="msg.exec(editor.getValue())"><span class="glyphicon glyphicon-play"></span>execute</button>
   <button type="button" class="btn btn-default"                        ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
@@ -32,7 +23,10 @@
   
 </div>
 
+ <hr />
+
 <!-- file menu button bar end theme:'twilight',-->
+
 <div uib-tabset justified="true">
     <div uib-tab heading="{{tabName}}">	    
 		<div style="height: 300px;width: 100%;" ui-ace="{
@@ -46,9 +40,11 @@
 		</div>
     </div>
 
-    <div uib-tab heading="new file"> 		
+    <div uib-tab heading="new file">
     </div>
     
+    <div uib-tab heading="new file 2">
+    </div
 </div>
 <!-- FIXME - make debug window directive -->
 <hr/>
