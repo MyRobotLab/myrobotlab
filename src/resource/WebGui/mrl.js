@@ -314,8 +314,7 @@ angular
     }
     ;
     
-    this.onTransportFailure = function(errorMsg, request) {
-        jQuery.atmosphere.info(errorMsg);
+    this.onTransportFailure = function(errorMsg, request) {        
         if (window.EventSource) {
             request.fallbackTransport = "sse";
         } else {
