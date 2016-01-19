@@ -2,44 +2,38 @@ angular.module('mrlapp.service.WebGuiGui', [])
 
         .controller('WebGuiGuiCtrl', ['$scope', '$log', 'mrl', function ($scope, $log, mrl) {
                 $log.info('WebGuiGuiCtrl');
-                // get fresh copy
-                $scope.service = mrl.getService($scope.service.name);
+                var _self = this;
+                var msg = this.msg;
 
-                //you can access two objects
-                //$scope.panel & $scope.service
-                //$scope.panel contains some framwork functions related to your service panel
-                //-> you can call functions on it, but NEVER write in it
-                //$scope.service is your service-object, it is the representation of the service running in mrl
+                // GOOD TEMPLATE TO FOLLOW
+                this.updateState = function (service) {
+                    $scope.service = service;
+                    $scope.port = service.port;
+                };
+                
+                _self.updateState($scope.service);
 
+                // init scope variables
+                $scope.pulseData = '';
 
-                //you HAVE TO define this method &
-                //it is the ONLY exception of writing into .panel
-                //-> you will receive all messages routed to your service here
-                this.onMsg = function (msg) {
-                    switch (msg.method) {
+                this.onMsg = function (inMsg) {
+                    switch (inMsg.method) {
+                        case 'onState':
+                            _self.updateState(inMsg.data[0]);
+                            $scope.$apply();
+                            break;
                         case 'onPulse':
-                            $scope.pulseData = msg.data[0];
-                            $scope.$apply();
-                            break;
-                        case 'onClockStarted':
-                            $scope.label = "Stop";
-                            $scope.$apply();
-                            break;
-                        case 'onClockStopped':
-                            $scope.label = "Start";
+                            $scope.pulseData = inMsg.data[0];
                             $scope.$apply();
                             break;
                         default:
-                            $log.error("ERROR - unhandled method " + msg.method);
+                            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
                             break;
                     }
                 };
 
-                //you can subscribe to methods
                 //mrl.subscribe($scope.service.name, 'pulse');
-                //mrl.subscribe($scope.service.name, 'clockStarted');
-                //mrl.subscribe($scope.service.name, 'clockStopped');
-
-                //after you're done with setting up your service-panel, call this method
-//                $scope.panel.initDone();
-            }]);
+                //msg.subscribe('pulse');
+                msg.subscribe(this);
+            }
+        ]);

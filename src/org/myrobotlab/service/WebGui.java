@@ -66,7 +66,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public final static Logger log = LoggerFactory.getLogger(WebGui.class);
 
-	Integer port = 8888;
+	public Integer port;
 
 	transient Nettosphere nettosphere;
 	transient Broadcaster broadcaster;
@@ -264,23 +264,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		}
 	}
 
+	/**
+	 * redirects browser to new url
+	 * 
+	 * @param url
+	 * @return
+	 */
+	public String redirect(String url) {
+		return url;
+	}
+
 	// ================ Broadcaster end ===========================
 
-	public void startService() {
-		super.startService();
-		// Broadcaster b = broadcasterFactory.get();
-		// a session "might" be nice - but for now we are stateless
-		// SessionSupport ss = new SessionSupport();
-
-		// extract all resources
-		// if resource directory exists - do not overwrite !
-		// could whipe out user mods
-		try {
-			extract();
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
+	public Config.Builder getConfig() {
 		Config.Builder configBuilder = new Config.Builder();
 		configBuilder
 				/*
@@ -313,40 +309,101 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				// .initParam("org.atmosphere.websocket.maxBinaryMessageSize",
 				// "100000")
 				.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
-				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build();
+				.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0").build(); // all
+																													// ips
 
 		// SessionSupport ss = new SessionSupport();
+		return configBuilder;
+	}
 
-		nettosphere = new Nettosphere.Builder().config(configBuilder.build()).build();
-		nettosphere.start();
-		
+	public boolean save() {
+		return super.save();
+	}
 
-		broadcastFactory = nettosphere.framework().getBroadcasterFactory();
-		// get default boadcaster
-		broadcaster = broadcastFactory.get("/*");
+	public void startNettosphere() {
+		try {
+			
+			if (port == null){
+				port = 8888;
+			}
+			
+			// Broadcaster b = broadcasterFactory.get();
+			// a session "might" be nice - but for now we are stateless
+			// SessionSupport ss = new SessionSupport();
+			boolean wasRunning = (nettosphere != null && nettosphere.isStarted());
 
-		log.info("WebGUI2 {} started on port {}", getName(), port);
+			if (wasRunning) {
+				sleep(1000);
+				
+				log.info("stopping nettosphere");
+				// Must not be called from a I/O-Thread to prevent deadlocks!
+				(new Thread("stopping nettophere") {
+					public void run() {
+						/*
+						nettosphere.framework().removeAllAtmosphereHandler();
+						nettosphere.framework().resetStates();
+						nettosphere.framework().destroy();
+						*/
+						nettosphere.stop();
+					}
+				}).start();
+				sleep(1000);
+			}
 
-		if (autoStartBrowser) {
-			log.info("auto starting default browser");
-			BareBonesBrowserLaunch.openURL(String.format(startURL, port));
+			nettosphere = new Nettosphere.Builder().config(getConfig().build()).build();
+			sleep(1000);
+			
+			try {
+				nettosphere.start();
+			} catch(Exception e){
+				Logging.logError(e);
+			}
+
+			broadcastFactory = nettosphere.framework().getBroadcasterFactory();
+			// get default boadcaster
+			broadcaster = broadcastFactory.get("/*");
+
+			log.info("WebGUI2 {} started on port {}", getName(), port);
+
+			if (autoStartBrowser) {
+				log.info("auto starting default browser");
+				BareBonesBrowserLaunch.openURL(String.format(startURL, port));
+			}
+
+			// get all instances
+
+			// we want all onState & onStatus events from all services
+			ServiceEnvironment se = Runtime.getLocalServices();
+			for (String name : se.serviceDirectory.keySet()) {
+				ServiceInterface si = se.serviceDirectory.get(name);
+				onRegistered(si);
+			}
+
+			// additionally we will want onState & onStatus events from all
+			// services
+			// from all new services which were created "after" the webgui
+			// so susbcribe to our Runtimes methods of interest
+			Runtime runtime = Runtime.getInstance();
+			subscribe(runtime.getName(), "registered");
+			subscribe(runtime.getName(), "released");
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
+
+	public void startService() {
+		super.startService();
+		// extract all resources
+		// if resource directory exists - do not overwrite !
+		// could whipe out user mods
+		try {
+			extract();
+		} catch (Exception e) {
+			Logging.logError(e);
 		}
 
-		// get all instances
-
-		// we want all onState & onStatus events from all services
-		ServiceEnvironment se = Runtime.getLocalServices();
-		for (String name : se.serviceDirectory.keySet()) {
-			ServiceInterface si = se.serviceDirectory.get(name);
-			onRegistered(si);
-		}
-
-		// additionally we will want onState & onStatus events from all services
-		// from all new services which were created "after" the webgui
-		// so susbcribe to our Runtimes methods of interest
-		Runtime runtime = Runtime.getInstance();
-		subscribe(runtime.getName(), "registered");
-		subscribe(runtime.getName(), "released");
+		startNettosphere();
 	}
 
 	public void onRegistered(ServiceInterface si) {
@@ -417,8 +474,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			// Broadcaster bc = r.getBroadcaster();
 			// if (bc != null || r.getBroadcaster() != broadcaster){
-				r.setBroadcaster(broadcaster);
-			//}
+			r.setBroadcaster(broadcaster);
+			// }
 
 			// good debug material
 			// log.info("sessionId {}", r);
@@ -832,11 +889,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public void setPort(Integer port) {
 		this.port = port;
+		startNettosphere();
 	}
-	
-	public void stopService(){
+
+	public void stopService() {
 		super.stopService();
-		if (nettosphere != null){
+		if (nettosphere != null) {
 			nettosphere.stop();
 		}
 	}
@@ -869,11 +927,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// remote.setDefaultPrefix("x-");
 			// remote.setDefaultPrefix("");
 			// Runtime.start("python", "Python");
+			ProgramAB ai = (ProgramAB) Runtime.start("ai", "ProgramAB");
+			ai.startSession("alice2");
+			ai.getResponse("hello ");
+			
 			WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
 			// webgui.autoStartBrowser(false);
 
-			Runtime.start("python", "Python");
-			//Runtime.start("myo", "MyoThalmic");
+			// Runtime.start("python", "Python");
+			// Runtime.start("myo", "MyoThalmic");
 			// remote.connect("tcp://127.0.0.1:6767");
 
 			// Runtime.start("macgui", "GUIService");
