@@ -136,6 +136,14 @@ public class ProgramABTest {
 		assertEquals("Ok...", resp.msg);
 		resp = testService.getResponse(session, "DO YOU LIKE Jabba?");
 		assertEquals("Jabba the Hut is awesome.", resp.msg);
+		
+		
+		// now test creating a new set.
+		resp = testService.getResponse(session, "Add bourbon to the whiskey set");
+		assertEquals("Ok...", resp.msg);
+		
+		
+		
 	}
 	
 	@After

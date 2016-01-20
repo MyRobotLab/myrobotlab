@@ -257,28 +257,35 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	public void addToSet(String setName, String setValue) {
 		// add to the set for the bot.
 		AIMLSet updateSet = bot.setMap.get(setName);
+		setValue = setValue.toUpperCase().trim();
 		if (updateSet != null) {
-			setValue = setValue.toUpperCase().trim();
 			updateSet.add(setValue);
 			// persist to disk.
 			updateSet.writeAIMLSet();
 		} else {
-			log.warn("Unknown AIML set: {} was attempted to be updated. ", setName);
+			log.info("Unknown AIML set: {}.  A new set will be created. ", setName);
 			// TODO: should we create a new set ? or just log this warning?
+			// The AIML Set doesn't exist.  Lets create a new one
+			AIMLSet newSet = new AIMLSet(setName, bot);
+			newSet.add(setValue);
+			newSet.writeAIMLSet();
 		}
 	}
 
 	public void addToMap(String mapName, String mapKey, String mapValue) {
 		// add an entry to the map.
 		AIMLMap updateMap = bot.mapMap.get(mapName);
+		mapKey = mapKey.toUpperCase().trim();
 		if (updateMap != null) {
-			mapKey = mapKey.toUpperCase().trim();
 			updateMap.put(mapKey, mapValue);
 			// persist to disk!
 			updateMap.writeAIMLMap();
 		} else {
-			log.warn("Unknown AIML map: {} was attempted to be updated. ", mapName);
+			log.info("Unknown AIML map: {}.  A new MAP will be created. ", mapName);
 			// dynamically create new maps?!
+			AIMLMap newMap = new AIMLMap(mapName, bot);
+			newMap.put(mapKey, mapValue);
+			newMap.writeAIMLMap();
 		}
 	}
 
