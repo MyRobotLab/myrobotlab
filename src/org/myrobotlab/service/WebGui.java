@@ -928,8 +928,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// remote.setDefaultPrefix("");
 			// Runtime.start("python", "Python");
 			ProgramAB ai = (ProgramAB) Runtime.start("ai", "ProgramAB");
-			ai.startSession("alice2");
-			ai.getResponse("hello ");
+//			ai.startSession("alice2");
+//			ai.getResponse("hello ");
 			
 			WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
 			// webgui.autoStartBrowser(false);

@@ -54,9 +54,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
 	private String path = "ProgramAB";
 	private String botName = "alice2";
-	private String currentUser = "default";
+	private String currentUser = "default"; // this 'becomes' the session name
 
-	// private Chat chatSession=null;
 	private transient HashMap<String, Chat> sessions = new HashMap<String, Chat>();
 	// TODO: better parsing than a regex...
 	private transient Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
@@ -76,8 +75,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	
 	private static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
 
-	public ProgramAB(String reservedKey) {
-		super(reservedKey);
+	public ProgramAB(String name) {
+		super(name);
 		// we started..
 		
 		// Tell programAB to persist it's learned predicates about people
