@@ -571,7 +571,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
 
 	public void startSession(String path, String session, String botName) {
-		
+		info("starting path %s session %s botname %s", path, session, botName);
 		// TODO: this is probably not the right thing to do.
 		// means all sessions and bots are loaded from the same directory...
 		this.path = path;
