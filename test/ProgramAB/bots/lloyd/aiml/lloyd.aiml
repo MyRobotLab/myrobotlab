@@ -180,8 +180,8 @@
     <think>
       <learn>
         <category>
-           <pattern>NEWSETTEST <eval><star/></eval></pattern>
-           <template><eval><star/></eval> is a <eval><star index="2"/></eval></template>
+           <pattern>NEWSETTEST <set><eval><star index="2"/></eval></set></pattern>
+           <template><star/> is a <eval><star index="2"/></eval></template>
         </category>
       </learn>
     </think>
@@ -201,5 +201,6 @@
     </oob>
     </template>
   </category>
+
   
 </aiml>
