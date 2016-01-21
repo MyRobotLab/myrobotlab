@@ -27,10 +27,12 @@ public class ProgramABTest {
 		// TODO: this should probably be created by Runtime,
 		// OOB tags might not know what the service name is ?!
 		testService = new ProgramAB(botName);
+		testService.setPath(path);
+		
 		// start the service.
 		testService.startService();
 		// load the bot brain for the chat with the user
-		testService.startSession(path, session, botName);
+		testService.startSession(session, botName);
 		// clean out any aimlif the bot that might
 		// have been saved in a previous test run!
 		String aimlIFPath = path + "/bots/"+botName+"/aimlif";
@@ -57,7 +59,7 @@ public class ProgramABTest {
 		assertEquals("Unit Test Pattern Passed", resp.msg);
 	}
 	
-	@Test
+	@Test 
 	public void testOOBTags() throws Exception {
 		Response resp = testService.getResponse(session, "OOB TEST");
 		assertEquals("OOB Tag Test", resp.msg);		
@@ -73,7 +75,7 @@ public class ProgramABTest {
 		Response resp = testService.getResponse(session, "SET FOO " + testValue);
 		assertEquals(testValue, resp.msg);		
 		testService.savePredicates();
-		testService.reloadSession(path, session, botName);
+		testService.reloadSession(session, botName);
 		resp = testService.getResponse(session, "GET FOO");
 		assertEquals("FOO IS " + testValue, resp.msg);	
 		
@@ -136,6 +138,16 @@ public class ProgramABTest {
 		assertEquals("Ok...", resp.msg);
 		resp = testService.getResponse(session, "DO YOU LIKE Jabba?");
 		assertEquals("Jabba the Hut is awesome.", resp.msg);
+		
+		
+		// now test creating a new set.
+		resp = testService.getResponse(session, "Add bourbon to the whiskey set");
+		assertEquals("Ok...", resp.msg);
+		
+		resp = testService.getResponse(session, "NEWSETTEST bourbon");
+		assertEquals("bourbon is a whiskey", resp.msg);
+		
+		
 	}
 	
 	@After

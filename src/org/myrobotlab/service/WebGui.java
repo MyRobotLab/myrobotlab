@@ -51,8 +51,6 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 //import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
-//@ManagedService(path = "/api")
-//@ManagedService(path = "/snake")
 
 /**
  * 
