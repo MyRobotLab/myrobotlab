@@ -1,7 +1,9 @@
 package org.myrobotlab.document.xml;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Stack;
+
 import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
@@ -18,13 +20,15 @@ public class MRLChunkingXMLHandler implements ContentHandler {
 	transient public final static Logger log = LoggerFactory.getLogger(Service.class);
 	
 	Stack<String> currentPath = new Stack<String>();
-	private StringBuilder pageBuffer = new StringBuilder();
 	private AbstractConnector connector;
 	private String documentRootPath;
 	private String documentIDPath;
 	private String docIDPrefix = "";
 	private boolean inDocID = false;
+	private boolean inDoc = false;
 	private StringBuilder docIDBuilder = new StringBuilder();
+	private RecordingInputStream ris;
+	
 	
 	@Override
 	public void setDocumentLocator(Locator locator) {
@@ -66,8 +70,17 @@ public class MRLChunkingXMLHandler implements ContentHandler {
 		String path = "/" + StringUtils.join(currentPath.toArray(),"/");
 		if (documentRootPath.equals(path)) {
 			// this is the start of our page.
-			pageBuffer = new StringBuilder();
+			inDoc = true;
 			docIDBuilder = new StringBuilder();
+			// ok we should clear our input buffer up to the current offset for this start element.
+			try {
+				ris.clearUpTo("<"+qName);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
 		}
 		if (documentIDPath.equals(path)) {
 			// this is the start of the document id field.
@@ -76,7 +89,7 @@ public class MRLChunkingXMLHandler implements ContentHandler {
 		// append to the current current page the tag and it's attributes.
 		
 		
-		pageBuffer.append("<" + qName);
+		
 		// TODO: properly encode/escape these!!  could
 		// cause xml parsing errors!?! eek.
 //		for (int i = 0; i<atts.getLength(); i++) {
@@ -88,19 +101,32 @@ public class MRLChunkingXMLHandler implements ContentHandler {
 //			attrBuilder.append("\"");
 //			pageBuffer.append(attrBuilder.toString());
 //		}
-		pageBuffer.append(">");
+		
 	}
 
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
-		// close out the tag
-		pageBuffer.append("</" + qName + ">");
 		// we just finished a path. see if it's the doc root that we're looking for.
 		String path = "/" + StringUtils.join(currentPath.toArray(),"/");
 		if (documentRootPath.equals(path)) {
+			
+			// ok, now we want the buffer up to the close tag.
+			String xml = "Malformed";
+			try {
+				xml = ris.returnUpTo("</"+qName+">");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			//System.out.println("------------------------------------");
+			//System.out.println(xml);
+			//System.out.println("------------------------------------");
+			
 			// this is the end of our page send the buffer as a document
 			Document doc = new Document(docIDPrefix + docIDBuilder.toString());
-			doc.setField("xml", pageBuffer.toString());
+			// doc.setField("xml", pageBuffer.toString());
+			doc.setField("xml", xml);
 			internalPublishDocument(doc);
 		}
 		if (documentIDPath.equals(path)) {
@@ -121,7 +147,6 @@ public class MRLChunkingXMLHandler implements ContentHandler {
 
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
-		pageBuffer.append(Arrays.copyOfRange(ch, start, start+length));
 		if (inDocID) {
 			docIDBuilder.append(Arrays.copyOfRange(ch, start, start+length));
 		}
@@ -170,6 +195,14 @@ public class MRLChunkingXMLHandler implements ContentHandler {
 
 	public void setConnector(AbstractConnector connector) {
 		this.connector = connector;
+	}
+
+	public RecordingInputStream getRis() {
+		return ris;
+	}
+
+	public void setRis(RecordingInputStream ris) {
+		this.ris = ris;
 	}
 
 }
