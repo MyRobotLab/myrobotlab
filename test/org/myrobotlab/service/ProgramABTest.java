@@ -142,6 +142,8 @@ public class ProgramABTest {
 		resp = testService.getResponse(session, "Add bourbon to the whiskey set");
 		assertEquals("Ok...", resp.msg);
 		
+		resp = testService.getResponse(session, "NEWSETTEST bourbon");
+		assertEquals("bourbon is a whiskey", resp.msg);
 		
 		
 	}
