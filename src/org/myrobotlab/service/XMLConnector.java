@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -10,6 +11,8 @@ import javax.xml.parsers.SAXParserFactory;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.xml.MRLChunkingXMLHandler;
+import org.myrobotlab.document.xml.RecordingInputStream;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 /**
@@ -73,7 +76,14 @@ public class XMLConnector extends AbstractConnector {
 		    xmlHandler.setDocumentIDPath(xmlIDPath);
 		    xmlHandler.setDocIDPrefix(docIDPrefix);
 		    xmlReader.setContentHandler(xmlHandler);
-			xmlReader.parse(convertToFileURL(filename));
+		    
+		    FileInputStream fis = new FileInputStream(new File(filename));
+		    RecordingInputStream ris = new RecordingInputStream(fis);
+		    InputSource xmlSource = new InputSource(ris);
+		    xmlHandler.setRis(ris);
+		    
+		    xmlReader.parse(xmlSource);
+			// xmlReader.parse(convertToFileURL(filename));
 		} catch (IOException | SAXException e) {
 			// TODO Auto-generated catch block
 			log.warn("SAX Parser Error {}", e);
