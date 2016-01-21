@@ -1,15 +1,22 @@
-<div class="pull-right">{{service.botName}}</div>
 <div class="col-md-12">          
-<form ui-keypress="{13:'askProgramAB(username,utterance)'}">
+<!-- <form ui-keypress="{13:'askProgramAB(session,utterance)'}"> -->
 <div class="input-group">       
-   <input class="form-control" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" placeholder="ask"/>
-   <span class="input-group-btn"><button class="btn btn-default" ng-click="askProgramAB(username,utterance)">Ask</button></span>
-   <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.startSession(username,botName)">Start</button></span>
+   <select class="form-control"
+            ng-model="currentSession" 
+            ng-options="key as key for (key , value) in service.sessions">
+   </select>
+ 
+   <span class="input-group-btn"><button class="btn btn-default" ng-click="startDialog()">start session</button></span>
+   <input class="form-control" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getResponse(currentSession,utterance)" placeholder="type here"/>
+   <span class="input-group-btn"><button class="btn btn-default" ng-show="service.currentSession != null" ng-click="getResponse(currentSession,utterance)">Ask</button></span>
+   <!-- <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.startSession(username,botName)">Start</button></span> -->
+   <!-- <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.savePredicates()">Save Predicates</button></span> -->
+   
  </div>
-</form>
+<!-- </form> -->
 </div>
 
-<div>
+<div class="col-md-12" class="row">
     <!--  the conversation history/log table -->
     <table>
       <thead>
@@ -24,6 +31,31 @@
       </tbody>
     </table>    
 </div>    
-    <!-- <pre>{{service}}</pre> -->
+
+ <script type="text/ng-template" id="startDialog.html">
+  <div class="modal-header">
+        <button type="button" class="close" ng-click="cancel()" aria-hidden="true">&times;</button>
+        start session
+    </div>
+        <div class="modal-body">
+        <div class="input-group">     
+            session <input class="form-control" type="text" placeholder="{{newSession}}" ng-model="newSession"/><br>
+            bot name 
+
+            <select class="form-control"
+            ng-model="newBotName" 
+            ng-options="o as o for o in service.bots">
+            </select>
+ 
+ 
+        </div>
+        </div>
+        <div class="modal-footer">            
+            <span class="input-group-btn"><button class="btn btn-default" ng-click="startSession(newSession,newBotName)">start</button></span>        
+            <!-- <button ng-click="cancel()" class="btn btn-primary">Close</button> -->
+        </div>
+  </script>
+<!-- TODO - MAKE THIS A GLOBAL SERVICE WITH FORMATED -->
+<!-- <pre>{{service}}</pre> -->
  
 

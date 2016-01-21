@@ -157,9 +157,10 @@ angular
             // js implementation - 
             var pos = msg.data.length - 1;
             for (i = pos; i > -1; --i) {
-                
+                // WTF? - why do this ? - it's a bug for overloaded method
+                // ProgramAB.getResponse(null, 'hello') --> resolves to --> ProgramAB.getResponse(null);
                 if (typeof msg.data[i]  == 'undefined'){
-                    msg.data.pop();
+                    // msg.data.pop(); RECENTLY CHANGED 2016-01-21 - popping changes signature !!!! - changing to NOOP
                 } else{
                     msg.data[i] = JSON.stringify(msg.data[i]);
                 }
