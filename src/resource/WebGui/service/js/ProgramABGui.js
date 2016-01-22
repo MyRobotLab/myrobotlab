@@ -58,7 +58,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
     ;
 
     $scope.test = function(session, utterance) {
-        msg.send("getCategories");
+        msg.send("getCategories","hello");
     }
     
     $scope.getResponse = function(session, utterance) {

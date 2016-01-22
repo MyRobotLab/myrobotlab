@@ -900,6 +900,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
+		
+		log.info("hello");
 
 		// Call context.reset() to clear any previous configuration, e.g.
 		// default
@@ -926,6 +928,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// remote.setDefaultPrefix("");
 			// Runtime.start("python", "Python");
 			ProgramAB ai = (ProgramAB) Runtime.start("ai", "ProgramAB");
+			Runtime.start("mouth", "AcapelaSpeech");
 //			ai.startSession("alice2");
 //			ai.getResponse("hello ");
 			
