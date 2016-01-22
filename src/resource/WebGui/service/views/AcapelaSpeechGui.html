@@ -7,7 +7,7 @@
           <select class="btn btn-default" id="v" ng-model="voice" ng-change="msg.setVoice(voice)" ng-options="o as o for o in service.voices">
           </select>
 
-          <button class="btn btn-default"  ng-click="msg.speak(text)">speak</button>
+          <button class="btn btn-default"  ng-click="msg.speak(voice, text)">speak</button>
      </span>
 
         {{speakingState}}

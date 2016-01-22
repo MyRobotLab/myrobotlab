@@ -151,7 +151,7 @@ angular
     
     this.sendMessage = function(msg) {
         var cleanJsonData = [];
-        if (msg.data != null && msg.data.length > 0) {
+        if (msg.data != null  && msg.data.length > 0) {
             // reverse encoding - pop off undefined
             // to shrink paramter length
             // js implementation - 
@@ -159,9 +159,9 @@ angular
             for (i = pos; i > -1; --i) {
                 // WTF? - why do this ? - it's a bug for overloaded method
                 // ProgramAB.getResponse(null, 'hello') --> resolves to --> ProgramAB.getResponse(null);
-                if (typeof msg.data[i]  == 'undefined'){
-                    // msg.data.pop(); RECENTLY CHANGED 2016-01-21 - popping changes signature !!!! - changing to NOOP
-                } else{
+                if (typeof msg.data[i] == 'undefined') {
+                // msg.data.pop(); RECENTLY CHANGED 2016-01-21 - popping changes signature !!!! - changing to NOOP
+                } else {
                     msg.data[i] = JSON.stringify(msg.data[i]);
                 }
             }
@@ -315,7 +315,7 @@ angular
     }
     ;
     
-    this.onTransportFailure = function(errorMsg, request) {        
+    this.onTransportFailure = function(errorMsg, request) {
         if (window.EventSource) {
             request.fallbackTransport = "sse";
         } else {
@@ -429,7 +429,7 @@ angular
     }
     ;
     
-   this.unsubscribe = function(topicName, topicMethod) {
+    this.unsubscribe = function(topicName, topicMethod) {
         _self.sendTo(_self.gateway.name, "unsubscribe", topicName, topicMethod);
     }
     ;
@@ -566,6 +566,21 @@ angular
                             msg.sendingMethod = 'sendTo';
                             _self.sendMessage(msg);
                         },
+                        /**
+                         *   sendArgs will be called by the dynamically generated code interface
+                         */
+                        sendArgs: function(method, obj) {
+                           // var args = Array.prototype.slice.call(arguments, 1);
+                            data = [];
+                            for (var key in obj) {
+                                if (obj.hasOwnProperty(key)) {
+                                    data.push(obj[key]);
+                                }
+                            }
+                            var msg = _self.createMessage(name, method, data);
+                            msg.sendingMethod = 'sendTo';
+                            _self.sendMessage(msg);
+                        },
                         // framework routed callbacks come here
                         onMsg: function(msg) {
                             console.log("framework onMsg" + msg);
@@ -574,7 +589,7 @@ angular
                                 // FIXME - bury it ?
                             case 'onState':
                                 _self.updateState(msg.data[0]);
-//                                $scope.$apply(); scope is context related !!!
+                                //                                $scope.$apply(); scope is context related !!!
                                 break;
                             case 'onMethodMap':
                                 console.log('onMethodMap Yay !!');
@@ -583,12 +598,8 @@ angular
                                     for (var method in methodMap) {
                                         if (methodMap.hasOwnProperty(method)) {
                                             var m = methodMap[method];
-
-                                            if (method == 'sweep'){
-                                                console.log('sweep Yay !!');
-                                            }
                                             // do stuff
-//                                            $log.info(method);
+                                            //                                            $log.info(method);
                                             // build interface method
                                             var dynaFn = "(function (";
                                             var argList = "";
@@ -600,13 +611,16 @@ angular
                                             }
                                             dynaFn += argList + "){";
                                             //dynaFn += "console.log(this);";
+                                            /*
                                             if (argList.length > 0) {
                                                 dynaFn += "this._interface.send('" + m.name + "'," + argList + ");";
                                             } else {
                                                 dynaFn += "this._interface.send('" + m.name + "');";
                                             }
+                                            */
+                                            dynaFn += "this._interface.sendArgs('" + m.name + "', arguments);";
                                             dynaFn += "})";
-//                                            console.log("msg." + m.name + " = " + dynaFn);
+                                            console.log("msg." + m.name + " = " + dynaFn);
                                             msgInterfaces[msg.sender].temp.msg[m.name] = eval(dynaFn);
                                         }
                                     }
@@ -634,17 +648,17 @@ angular
                                 _self.sendTo(_self.gateway.name, "subscribe", name, args);
                                 but subscribe is a frozen interface of  either 1 or 4 args
                                 */
-                               
+                                
                                 if (arguments.length == 1) {
                                     _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0]);
                                 } else if (arguments.length == 4) {
                                     _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0], arguments[1], arguments[2]);
                                 }
-                                
-
+                            
+                            
                             } else {
                                 // controller registering for framework subscriptions
-//                                console.log("here");
+                                //                                console.log("here");
                                 
                                 // expected 'framework' level subscriptions - we should at a minimum
                                 // be interested in state and status changes of the services
@@ -667,7 +681,7 @@ angular
                                 
                                 // get methodMap
                                 msgInterfaces[name].getMethodMap();
-//                                console.log('here');
+                                //                                console.log('here');
                             }
                         
                         },
@@ -741,7 +755,7 @@ angular
             isUndefinedOrNull: function(val) {
                 return angular.isUndefined(val) || val === null ;
             },
-            noWorky:function(userId){
+            noWorky: function(userId) {
                 $log.info('mrl-noWorky', userId);
                 _self.sendTo(_self.runtime.name, "noWorky", userId);
             },
