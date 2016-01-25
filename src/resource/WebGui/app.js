@@ -27,6 +27,7 @@ angular.module('mrlapp', [
     'mrlapp.main.statusSvc', //very basic service for storing "statuses"
     'mrlapp.main.noWorkySvc', //send a noWorky !
     'mrlapp.main.filter',
+    'mrlapp.main.parseHtml',
     'mrlapp.singleservice.singleserviceCtrl',
     'mrlapp.widget.startCtrl',
     'mrlapp.nav', //Navbar & Co. (/nav)
