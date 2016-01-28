@@ -22,6 +22,8 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	 */
 	private static final long serialVersionUID = 1L;
 
+	private String language = "en-US";
+	
 	public WebkitSpeechRecognition(String reservedKey) {
 		super(reservedKey);
 	}
@@ -75,18 +77,16 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	}
 	
 	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
-
-		try {
-			
-			Runtime.start("webgui", "WebGui");
-			Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
+	public void setLanguage(String language) {
+		// Here we want to set the language string and broadcast the update to the
+		// web gui so that it knows to update the language on webkit speech
+		this.language = language;
+		broadcastState();
+	}
+	
+	public String getLanguage() {
+		// a getter for it .. just in case.
+		return this.language;
 	}
 
 	@Override
@@ -117,5 +117,17 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 		
 	}
 	
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.INFO);
+
+		try {
+			Runtime.start("webgui", "WebGui");
+			Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
 }
