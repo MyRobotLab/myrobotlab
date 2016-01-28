@@ -1,117 +1,35 @@
 <div>
-<!--  TODO Move this stuff into angular land! -->
-<script>
-// handle it if a new country/language is selected.
-function updateCountry() {
-	  for (var i = select_dialect.options.length - 1; i >= 0; i--) {
-	    select_dialect.remove(i);
-	  }
-	  var list = langs[select_language.selectedIndex];
-	  for (var i = 1; i < list.length; i++) {
-	    select_dialect.options.add(new Option(list[i][1], list[i][0]));
-	  }
-	  select_dialect.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
-};
-// All of the supported languages that can be selected (and dialects)
-var langs =
-[['Afrikaans',       ['af-ZA']],
- ['Bahasa Indonesia',['id-ID']],
- ['Bahasa Melayu',   ['ms-MY']],
- ['CatalÃ ',          ['ca-ES']],
- ['ÄŒeÅ¡tina',         ['cs-CZ']],
- ['Deutsch',         ['de-DE']],
- ['English',         ['en-AU', 'Australia'],
-                     ['en-CA', 'Canada'],
-                     ['en-IN', 'India'],
-                     ['en-NZ', 'New Zealand'],
-                     ['en-ZA', 'South Africa'],
-                     ['en-GB', 'United Kingdom'],
-                     ['en-US', 'United States']],
- ['EspaÃ±ol',         ['es-AR', 'Argentina'],
-                     ['es-BO', 'Bolivia'],
-                     ['es-CL', 'Chile'],
-                     ['es-CO', 'Colombia'],
-                     ['es-CR', 'Costa Rica'],
-                     ['es-EC', 'Ecuador'],
-                     ['es-SV', 'El Salvador'],
-                     ['es-ES', 'EspaÃ±a'],
-                     ['es-US', 'Estados Unidos'],
-                     ['es-GT', 'Guatemala'],
-                     ['es-HN', 'Honduras'],
-                     ['es-MX', 'MÃ©xico'],
-                     ['es-NI', 'Nicaragua'],
-                     ['es-PA', 'PanamÃ¡'],
-                     ['es-PY', 'Paraguay'],
-                     ['es-PE', 'PerÃº'],
-                     ['es-PR', 'Puerto Rico'],
-                     ['es-DO', 'RepÃºblica Dominicana'],
-                     ['es-UY', 'Uruguay'],
-                     ['es-VE', 'Venezuela']],
- ['Euskara',         ['eu-ES']],
- ['FranÃ§ais',        ['fr-FR']],
- ['Galego',          ['gl-ES']],
- ['Hrvatski',        ['hr_HR']],
- ['IsiZulu',         ['zu-ZA']],
- ['Ã�slenska',        ['is-IS']],
- ['Italiano',        ['it-IT', 'Italia'],
-                     ['it-CH', 'Svizzera']],
- ['Magyar',          ['hu-HU']],
- ['Nederlands',      ['nl-NL']],
- ['Norsk bokmÃ¥l',    ['nb-NO']],
- ['Polski',          ['pl-PL']],
- ['PortuguÃªs',       ['pt-BR', 'Brasil'],
-                     ['pt-PT', 'Portugal']],
- ['RomÃ¢nÄƒ',          ['ro-RO']],
- ['SlovenÄ�ina',      ['sk-SK']],
- ['Suomi',           ['fi-FI']],
- ['Svenska',         ['sv-SE']],
- ['TÃ¼rkÃ§e',          ['tr-TR']],
- ['Ð±ÑŠÐ»Ð³Ð°Ñ€Ñ�ÐºÐ¸',       ['bg-BG']],
- ['PÑƒÑ�Ñ�ÐºÐ¸Ð¹',         ['ru-RU']],
- ['Ð¡Ñ€Ð¿Ñ�ÐºÐ¸',          ['sr-RS']],
- ['í•œêµ­ì–´',            ['ko-KR']],
- ['ä¸­æ–‡',             ['cmn-Hans-CN', 'æ™®é€šè¯� (ä¸­å›½å¤§é™†)'],
-                     ['cmn-Hans-HK', 'æ™®é€šè¯� (é¦™æ¸¯)'],
-                     ['cmn-Hant-TW', 'ä¸­æ–‡ (å�°ç�£)'],
-                     ['yue-Hant-HK', 'ç²µèªž (é¦™æ¸¯)']],
- ['æ—¥æœ¬èªž',           ['ja-JP']],
- ['Lingua latÄ«na',   ['la']]];
-// populate the languages control
-for (var i = 0; i < langs.length; i++) {
-  select_language.options[i] = new Option(langs[i][0], i);
-}
-// defaults.
-select_language.selectedIndex = 6;
-updateCountry();
-select_dialect.selectedIndex = 6;
-//updateCountry();
-</script>
-
-    Service   : {{service.name}} of type {{service.simpleName}}<br/>
-    Start Time: {{service.serviceStartTime}}<br/>
-<br/>
-    <!--  TODO: allow the user to upgrade ?
+  Service : {{service.name}} of type {{service.simpleName}}<br /> Start
+  Time: {{service.serviceStartTime}}<br /> <br />
+  <!--  TODO: allow the user to upgrade ?
 	<p id="info_upgrade">Web Speech API is not supported by this browser.
      Upgrade to <a href="//www.google.com/chrome">Chrome</a>
-     version 25 or later.</p>  -->	
-<br/>
-Status: {{status}}
-<br/>
-	<form>
-		<input class="form-control" ng-model="utterance" name="utterance" id="utterance"/>  
-	    <button id="startListening" class="btn btn-default" ng-click="startRecognition()" ng-init="listenbuttonimg ='service/img/mic.gif'" ng-src="listenbuttonimg">
-     		<img ng-src="{{listenbuttonimg}}"/>
-        </button>
-    </form>
-    <br/>
+     version 25 or later.</p>  -->
+  <br /> Status: {{status}} <br />
+  <form>
+    <input class="form-control" ng-model="utterance" name="utterance"
+      id="utterance" />
+    <button id="startListening" class="btn btn-default"
+      ng-click="startRecognition()"
+      ng-init="listenbuttonimg ='service/img/mic.gif'"
+      ng-src="listenbuttonimg">
+      <img ng-src="{{listenbuttonimg}}" />
+    </button>
+  </form>
+  <br />
+  <div class="center">
     <div class="center">
       <div id="div_language">
-        <select class="form-control" id="select_language" onchange="updateCountry()"></select>&nbsp;&nbsp;
-        <select class="form-control" id="select_dialect"></select>
+        <select class="form-control" id="select_language"
+          ng-model="lang.selectedOption" ng-change="updateLanguage()"
+          ng-options="option.name for option in lang.availableOptions track by option.id"></select>
       </div>
     </div>
-    <br/>
-	Recognition Results: {{current_text}} 
-   
- 
+  </div>
+  <br /> 
+  Recognition Results: {{current_text}} 
+  <br />
+
+
+
 </div>
