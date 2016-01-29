@@ -343,7 +343,7 @@ public class ServiceData implements Serializable {
 			boolean availableCat = false;
 			for (int i = 0; i < serviceNames.size(); ++i) {
 				ServiceType st = getServiceType(serviceNames.get(i));
-				if (st.available != null && st.available == true) {
+				if (st.available == null || st.available == true) {
 					availableCat = true;
 				}
 			}
