@@ -1,5 +1,5 @@
 angular.module('mrlapp.service.ProgramABGui', [])
-.controller('ProgramABGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) { // $modal ????
+.controller('ProgramABGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', '$sce', function($scope, $log, mrl, $uibModal, $sce) { // $modal ????
     $log.info('ProgramABGuiCtrl');
     // grab the self and message
     var _self = this;
@@ -44,7 +44,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
             $scope.currResponse = textData;
             $scope.rows.unshift({
                 name: "Bot:",
-                response: textData
+                response: $sce.trustAsHtml(textData)
             });
             $log.info('currResponse', $scope.currResponse);
             $scope.$apply();
@@ -65,7 +65,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
         msg.send("getResponse", session, utterance);
         $scope.rows.unshift({
             name: "User",
-            response: utterance
+            response: $sce.trustAsHtml(utterance)
         });
         
         $scope.utterance = "";
