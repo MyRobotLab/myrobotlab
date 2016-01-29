@@ -116,6 +116,7 @@ public class InMoov extends Service {
 	public static int attachPauseMs = 100;
 
 	public Integer pirPin = null;
+	public String pirPort = null;
 
 	// ---------- new getter interface begin ---------------------------
 
@@ -1155,6 +1156,7 @@ public class InMoov extends Service {
 			arduino.setSampleRate(8000);
 			arduino.digitalReadPollingStart(pin);
 			pirPin = pin;
+			pirPort = port;
 			arduino.addListener("publishPin", this.getName(), "publishPin");
 
 		} else {
@@ -1215,13 +1217,13 @@ public class InMoov extends Service {
 	}
 
 	public void stopPIR() {
-		/*
-		 * if (arduinos.containsKey(port)) { Arduino arduino =
-		 * arduinos.get(port); arduino.connect(port);
-		 * arduino.setSampleRate(8000); arduino.digitalReadPollStart(pin);
-		 * pirPin = pin; arduino.addListener("publishPin", this.getName(),
-		 * "publishPin"); }
-		 */
+
+		if (arduinos.containsKey(pirPort)) { 
+			Arduino arduino = arduinos.get(pirPort); 
+			arduino.digitalReadPollingStop(pirPin);
+			log.info("Stopping the PIR polling.");
+		}
+
 
 	}
 
