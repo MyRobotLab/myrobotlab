@@ -170,6 +170,7 @@ public class OpenCV extends VideoSource {
 	// TODO: a peer, but in the future , we should use WebGui and it's http container for this
 	// if possible.
 	transient public VideoStreamer streamer;
+	transient public int streamerPort = 9090;
 	
 	static public String[] getDependencies() {
 		return new String[] {"org.bytedeco.javacv"};
@@ -392,7 +393,9 @@ public class OpenCV extends VideoSource {
 
 	public void capture() {
 		save();
-		streamer = (VideoStreamer) startPeer("streamer");
+		streamer = (VideoStreamer) createPeer("streamer");
+		streamer.setPort(streamerPort);
+		streamer.startPeer("streamer");
 		streamer.attach(this);
 		// stopCapture(); // restart?
 		videoProcessor.start();
