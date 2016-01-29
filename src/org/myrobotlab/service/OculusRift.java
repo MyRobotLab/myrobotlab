@@ -61,8 +61,8 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 	private OculusDisplay display;
 
 	// TODO: make these configurable...
-	private int leftCameraIndex = 0;
-	private int rightCameraIndex = 1;
+	private int leftCameraIndex = 1;
+	private int rightCameraIndex = 0;
 
 
 	private HmdDesc hmdDesc;
@@ -133,22 +133,13 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 
 		if (!initialized) {
 
-			log.info("Init the rift.");
-
-
+			
+			
+			log.info("Init the rift HMD");
 			// Init the rift..
 			setupRift();
 
 
-
-			//OvrLibrary.INSTANCE.ovr_Initialize();
-			//hmd = Hmd.create(0); 
-
-			//int requiredSensorCaps = 0;
-			//int supportedSensorCaps = OvrLibrary.ovrSensorCaps.ovrSensorCap_Orientation;
-
-			// TODO: what errors/exceptions might be thrown here?  not sure how JNA exposes that info.
-			//hmd.startSensor(supportedSensorCaps, requiredSensorCaps);
 			log.info("Created HMD Oculus Rift Sensor");
 			initialized = true;
 
@@ -161,7 +152,9 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 
 			leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
 			rightOpenCV = new OpenCV(getName() + "." + RIGHT_OPEN_CV);
-
+			// avoid port conflict.  TODO: merge the streamer service with opencv ?
+			rightOpenCV.streamerPort = 9091;
+			
 			leftOpenCV.startService();
 			rightOpenCV.startService();
 
@@ -206,11 +199,14 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 			// Now turn on the camras.
 			// set camera index
 
+
 			// Now that the Rift and OpenCV has been setup.
+			log.info("Set up the oculus display.");
 			display = new OculusDisplay();
 			// on publish frame we'll update the current frame in the rift..
 			// synchronization issues maybe?
 			display.run();
+			
 
 		} else {
 			log.info("Rift interface already initialized.");
@@ -333,27 +329,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		return "The Oculus Rift Head Tracking Service";
 	}
 
-	public static void main(String s[]) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("INFO");
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
-		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 
-		while (true) {
-			float roll = rift.getRoll();
-			rift.leftAffine.setAngle(-roll+180);
-			rift.rightAffine.setAngle(-roll);
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				break;
-			}
-		}
-		rift.logOrientation();
-	}
 
 	@Override
 	public String[] getCategories() {
@@ -393,6 +369,29 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		return null;
 	}
 
+	
+	public static void main(String s[]) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("INFO");
+		Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
+		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
+		
+//		while (true) {
+//			float roll = rift.getRoll();
+//			rift.leftAffine.setAngle(-roll+180);
+//			rift.rightAffine.setAngle(-roll);
+//			try {
+//				Thread.sleep(250);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//				break;
+//			}
+//			rift.logOrientation();
+//		}
+		
+	}
 
 }
 
