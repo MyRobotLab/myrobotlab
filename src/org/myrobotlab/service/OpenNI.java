@@ -143,6 +143,11 @@ public class OpenNI extends Service // implements
 		return radians * RAD_TO_DEG;
 	}
 
+	static public String[] getDependencies() {
+		return new String[] {"com.googlecode.simpleopenni"};
+	}
+
+	
 	public OpenNI(String n) {
 		super(n);
 	}

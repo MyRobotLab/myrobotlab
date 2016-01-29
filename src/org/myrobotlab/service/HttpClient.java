@@ -63,6 +63,11 @@ public class HttpClient extends Service {
 
 	private static final long serialVersionUID = 1L;
 	Map<String, HttpData> clients = new HashMap<String, HttpData>();
+	
+
+	static public String[] getDependencies() {
+		return new String[] {"org.apache.commons.httpclient"};
+	}
 
 	public class HttpData {
 		public org.apache.http.client.HttpClient client = null;

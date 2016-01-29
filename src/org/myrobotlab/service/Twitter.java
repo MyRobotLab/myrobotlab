@@ -75,6 +75,17 @@ public class Twitter extends Service {
 			Logging.logError(e);
 		}
 	}
+	
+	/**
+	 * Static list of third party dependencies for this service.
+	 * The list will be consumed by Ivy to download and manage
+	 * the appropriate resources
+	 * @return
+	 */
+	static public String[] getDependencies() {
+		return new String[] { 
+				 "org.twitter4j.twitter"};
+	}
 
 	public Twitter(String n) {
 		super(n);

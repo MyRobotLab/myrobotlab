@@ -171,6 +171,11 @@ public class OpenCV extends VideoSource {
 	// if possible.
 	transient public VideoStreamer streamer;
 	
+	static public String[] getDependencies() {
+		return new String[] {"org.bytedeco.javacv"};
+	}
+
+	
 	public OpenCV(String n) {
 		super(n);
 		// load(); // FIXME - go into service frame work .. after construction

@@ -48,6 +48,17 @@ public class Solr extends Service implements DocumentListener {
 
 	public boolean commitOnFlush = true;
 	
+
+	/**
+	 * Static list of third party dependencies for this service.
+	 * The list will be consumed by Ivy to download and manage
+	 * the appropriate resources
+	 * @return
+	 */
+	static public String[] getDependencies() {
+		return new String[] { "org.apache.solr"};
+	}
+	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);

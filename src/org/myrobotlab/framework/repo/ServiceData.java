@@ -39,6 +39,7 @@ public class ServiceData implements Serializable {
 	TreeMap<String, Category> categoryTypes = new TreeMap<String, Category>();
 
 	TreeMap<String, Dependency> dependencyTypes = new TreeMap<String, Dependency>();
+	
 
 	/**
 	 * method to create a local cache file from the repo directories of all
@@ -59,7 +60,7 @@ public class ServiceData implements Serializable {
 				File f = dirs.get(i);
 				if (f.isDirectory()) {
 					try {
-						log.info("looking in {}", f.getAbsolutePath());
+						// log.info("looking in {}", f.getAbsolutePath());
 						List<File> subDirsList = FindFile.find(f.getAbsolutePath(), ".*", false, true);
 						ArrayList<File> filtered = new ArrayList<File>();
 						for (int z = 0; z < subDirsList.size(); ++z) {
@@ -83,6 +84,8 @@ public class ServiceData implements Serializable {
 					log.info("skipping file {}", f.getName());
 				}
 			}
+			
+			
 
 			// get all services
 			// all files from src
@@ -102,17 +105,12 @@ public class ServiceData implements Serializable {
 					ServiceType s = new ServiceType(fullClassName);
 
 					try {
-						/*
-						 * if (sname.equals("LeapMotion2") ||
-						 * sname.equals("Test")) { continue; }
-						 */
+
+						if (fullClassName.equals("org.myrobotlab.service.Motor")){
+							log.info("here");
+						}
 						ServiceInterface si = (ServiceInterface) Instantiator.getNewInstance(fullClassName, sname);
-						/*
-						 * if (si == null || sname.equals("AWTRobot") ||
-						 * sname.equals("LeapMotion2")) {
-						 * log.error("could not get service interface for {}",
-						 * sname); continue; }
-						 */
+						
 
 						s.description = si.getDescription();
 						String[] categories = si.getCategories();
@@ -126,6 +124,9 @@ public class ServiceData implements Serializable {
 								// ArrayList<String>
 								sd.categoryTypes.put(c.name, c);
 							} else {
+								if (newCat.equals("simple pwm dir")){
+									log.info("here");
+								}
 								Category c = sd.categoryTypes.get(newCat);
 								c.serviceTypes.add(si.getType());
 							}
@@ -154,6 +155,20 @@ public class ServiceData implements Serializable {
 						} catch (Exception e) {
 							// dont care
 						}
+						
+						/// dependencies begin ///////////////////////
+						try {
+							Class<?> theClass = Class.forName(fullClassName);
+							Method method = theClass.getMethod("getDependencies");
+							String[] dependencies = (String[])method.invoke(null);
+							for (int j = 0; j < dependencies.length; ++j){
+								s.addDependency(dependencies[j]);
+							}
+							
+						} catch (Exception e) {
+							// dont care
+						}
+						/// dependencies end ///////////////////////
 
 						sd.add(s);
 					} catch (Exception e) {
@@ -635,16 +650,20 @@ public class ServiceData implements Serializable {
 			LoggingFactory.getInstance().setLevel("INFO");
 			LoggingFactory.getInstance().addAppender(Appender.FILE);
 
+			/*
 			Repo repo = new Repo();
 			log.info(String.format("%b", repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")));
+			*/
 			
 			ServiceData sd = generate("../repo");
 
-			String json = FileIO.fileToString(new File("serviceData.generated.json"));
-			sd = ServiceData.load(json);
-			FileOutputStream fos = new FileOutputStream(new File("serviceData.compare.json"));
+			
+			FileOutputStream fos = new FileOutputStream("serviceData.compare.json");
 			fos.write(CodecUtils.toJson(sd).getBytes());
 			fos.close();
+
+			String json = FileIO.fileToString("serviceData.compare.json");
+			sd = ServiceData.load(json);
 
 			/*
 			 * ServiceData sd = generate("../repo"); json = Encoder.toJson(sd);

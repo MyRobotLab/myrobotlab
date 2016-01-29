@@ -58,6 +58,12 @@ public class JFugue extends Service {
 		jfugue.play("C7h");
 		jfugue.play("C5maj7w");
 	}
+	
+
+	static public String[] getDependencies() {
+		return new String[] {"org.jfugue.music"};
+	}
+	
 
 	public JFugue(String n) {
 		super(n);

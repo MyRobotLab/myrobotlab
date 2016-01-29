@@ -270,6 +270,11 @@ public class Python extends Service {
 
 	String modulesDir = "pythonModules";
 
+
+	static public String[] getDependencies() {
+		return new String[] {"org.python.core"};
+	}
+
 	/**
 	 * Get a compiled version of the python call.
 	 * 

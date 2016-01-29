@@ -84,6 +84,17 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 			this.params = params;
 		}
 	}
+	
+	/**
+	 * Static list of third party dependencies for this service.
+	 * The list will be consumed by Ivy to download and manage
+	 * the appropriate resources
+	 * @return
+	 */
+	static public String[] getDependencies() {
+		return new String[] { "javax.speech.recognition",
+		        "edu.cmu.sphinx"};
+	}
 
 	class SpeechProcessor extends Thread {
 		Sphinx myService = null;

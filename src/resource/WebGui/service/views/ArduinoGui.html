@@ -19,6 +19,7 @@
     <tab heading="Settings">
  		
 		<!-- FIXME - this should be a portDirective begin -->
+		<!--
 		<div class="row">
 		  <div class="col-md-4">
 		   <label>port</label>
@@ -28,11 +29,10 @@
 			   <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button></span>
 			   <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button></span>
 			   <span class="input-group-btn"><button class="btn btn-default"  ng-click="msg.digitalWrite(1,1)">test</button></span>
-			   <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
 			 </div>
 		  </div>
 		  <div class="col-md-4">
-			 <img ng-src="../{{isConnectedImage}}.png" /> <!-- TODO - make directive -->
+			 <img ng-src="../{{isConnectedImage}}.png" /> 
 			 <label ng-show="isConnected">{{stats.lineSpeed}} Kbps</label>
 		  </div>
 		  <div class="col-md-4">
@@ -52,7 +52,7 @@
     </tab><!-- end Settings -->
 
     <tab heading="Oscope">
- 		<oscope id="oscope" ng-model="service.name" ></oscope>
+ 		<!-- oscope id="oscope" ng-model="service.name" ></oscope -->
     </tab>
     <tab heading="Pins">
 		<img src="{{image}}" width="600"/>

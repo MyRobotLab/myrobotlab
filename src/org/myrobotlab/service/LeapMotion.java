@@ -52,6 +52,12 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 	transient Controller controller = new Controller();
 
 	public LeapData lastLeapData = null;
+	
+
+	static public String[] getDependencies() {
+		return new String[] {"com.leapmotion"};
+	}
+	
 
 	public LeapMotion(String n) {
 		super(n);

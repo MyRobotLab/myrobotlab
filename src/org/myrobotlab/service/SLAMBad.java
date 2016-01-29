@@ -61,6 +61,11 @@ public class SLAMBad extends Service {
 			}
 		}
 	}
+	
+	static public String[] getDependencies() {
+		return new String[] { "javax.vecmath",
+		        "com.sun.java3d"};
+	}
 
 	private static final long serialVersionUID = 1L;
 

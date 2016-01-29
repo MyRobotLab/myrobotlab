@@ -620,7 +620,7 @@ angular
                                             */
                                             dynaFn += "this._interface.sendArgs('" + m.name + "', arguments);";
                                             dynaFn += "})";
-                                            console.log("msg." + m.name + " = " + dynaFn);
+                                            //console.log("msg." + m.name + " = " + dynaFn);
                                             msgInterfaces[msg.sender].temp.msg[m.name] = eval(dynaFn);
                                         }
                                     }

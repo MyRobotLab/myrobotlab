@@ -26,6 +26,7 @@ package org.myrobotlab.service;
 import java.io.Serializable;
 import java.util.HashMap;
 
+
 //import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Rumbler;
@@ -79,6 +80,13 @@ public class Joystick extends Service {
 			return String.format("%d %s [%s] relative %b analog %b", index, type, id, isRelative, isAnalog);
 		}
 	}
+	
+
+	static public String[] getDependencies() {
+		return new String[] {"net.java.games.jinput"};
+	}
+	
+
 
 	/**
 	 * The value & id of a component. It is sent when the value changes.

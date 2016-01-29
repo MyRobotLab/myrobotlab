@@ -9,7 +9,6 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +50,6 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 //import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
-
 /**
  * 
  * WebGui - This service is the AngularJS based GUI TODO - messages & services
@@ -87,6 +85,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	// FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
 	transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
+
+	/**
+	 * Static list of third party dependencies for this service. The list will
+	 * be consumed by Ivy to download and manage the appropriate resources
+	 * 
+	 * @return
+	 */
+	static public String[] getDependencies() {
+		return new String[] { "io.netty", "org.atmosphere.nettosphere" };
+	}
 
 	public static class LiveVideoStreamHandler implements Handler {
 
@@ -320,11 +328,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 	public void startNettosphere() {
 		try {
-			
-			if (port == null){
+
+			if (port == null) {
 				port = 8888;
 			}
-			
+
 			// Broadcaster b = broadcasterFactory.get();
 			// a session "might" be nice - but for now we are stateless
 			// SessionSupport ss = new SessionSupport();
@@ -332,16 +340,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			if (wasRunning) {
 				sleep(1000);
-				
+
 				log.info("stopping nettosphere");
 				// Must not be called from a I/O-Thread to prevent deadlocks!
 				(new Thread("stopping nettophere") {
 					public void run() {
 						/*
-						nettosphere.framework().removeAllAtmosphereHandler();
-						nettosphere.framework().resetStates();
-						nettosphere.framework().destroy();
-						*/
+						 * nettosphere.framework().removeAllAtmosphereHandler();
+						 * nettosphere.framework().resetStates();
+						 * nettosphere.framework().destroy();
+						 */
 						nettosphere.stop();
 					}
 				}).start();
@@ -350,10 +358,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			nettosphere = new Nettosphere.Builder().config(getConfig().build()).build();
 			sleep(1000);
-			
+
 			try {
 				nettosphere.start();
-			} catch(Exception e){
+			} catch (Exception e) {
 				Logging.logError(e);
 			}
 
@@ -438,12 +446,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 		Map<String, String> map = new HashMap<String, String>();
 
-		Enumeration<String> headerNames = request.getHeaderNames();
-		while (headerNames.hasMoreElements()) {
-			String key = (String) headerNames.nextElement();
-			String value = request.getHeader(key);
-			map.put(key.toLowerCase(), value);
-		}
+		/*
+		 * Atmosphere (nearly) always gives a ConcurrentModificationException
+		 * its supposed to be fixed in later versions - but later version have
+		 * proven very unstable
+		 * 
+		 * Enumeration<String> headerNames = request.getHeaderNames(); while
+		 * (headerNames.hasMoreElements()) { String key = (String)
+		 * headerNames.nextElement(); String value = request.getHeader(key);
+		 * map.put(key.toLowerCase(), value); }
+		 */
 
 		return map;
 	}
@@ -900,7 +912,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-		
+
 		log.info("hello");
 
 		// Call context.reset() to clear any previous configuration, e.g.
@@ -927,11 +939,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// remote.setDefaultPrefix("x-");
 			// remote.setDefaultPrefix("");
 			// Runtime.start("python", "Python");
-			ProgramAB ai = (ProgramAB) Runtime.start("ai", "ProgramAB");
-			Runtime.start("mouth", "AcapelaSpeech");
-//			ai.startSession("alice2");
-//			ai.getResponse("hello ");
-			
+			// ProgramAB ai = (ProgramAB) Runtime.start("ai", "ProgramAB");
+			// Runtime.start("mouth", "AcapelaSpeech");
+			Runtime.start("head", "InMoovHead");
+			// Runtime.start("head", "InMoovHead");
+			// Runtime.start("arduino", "Arduino");
+			// ai.startSession("alice2");
+			// ai.getResponse("hello ");
+
 			WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
 			// webgui.autoStartBrowser(false);
 
