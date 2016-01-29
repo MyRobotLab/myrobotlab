@@ -1,5 +1,6 @@
-han:Han Solo
-leah:Princess Leia Organa
-princess leah:Princess Leia Organa
-3po:C-3PO
-luke:Luke Skywalker
+LEAH:Princess Leia Organa
+JABBA:Jabba the Hut
+LUKE:Luke Skywalker
+3PO:C-3PO
+PRINCESS LEAH:Princess Leia Organa
+HAN:Han Solo

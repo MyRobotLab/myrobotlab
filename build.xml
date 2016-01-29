@@ -116,7 +116,8 @@
 	<!-- directory for the build to go into -->
 	<property name="build" location="build" />
 	<!-- location for the unit test reports to go into -->
-	<property name="report" location="dist/report" />
+        <property name="report" location="dist/current/${branch}/report" />
+
 	<!-- location for the jacoco reports -->
 	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
 	<property name="result.report.dir" location="${report}/jacoco" />
@@ -226,8 +227,17 @@
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-server-7.6.13.v20130916.jar"/>
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
 		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/marytts-client-5.1.2-jar-with-dependencies.jar"/>
-		<pathelement location="${repo}/marytts/5.1.2/marytts-runtime-5.1.2-jar-with-dependencies.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-runtime-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-common-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/marytts-signalproc-5.1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/emotionml-checker-java-1.1.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/jtok-core-1.9.1.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/commons-colleciton-3.2.1.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/commons-lang-2.6.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/hsqldb-2.0.0.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/log4j-1.2.16.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/freetts-de-1.0.jar"/>
+		<pathelement location="${repo}/marytts/5.1.2/freetts-en_us-1.0.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/icu4j-54.1.1.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/voice-cmu-slt-hsmm-5.1.2.jar"/>
 		<pathelement location="${repo}/marytts/5.1.2/marytts-lang-en-5.1.2.jar"/>
@@ -288,7 +298,10 @@
 		<pathelement location="${repo}/com.thoughtworks.xstream/1.4.7/xstream-1.4.7.jar"/>
 		<pathelement location="${repo}/org.apache.tika/1.11/tika-core-1.11.jar"/>
 		<pathelement location="${repo}/net.sf.opencsv/2.3/opencsv-2.3.jar"/>
-		<pathelement location="${repo}/org.jsoup/1.8.3/jsoup-1.8.3.jar"/>
+		<pathelement location="${repo}/org.jsoup/1.8.3/jsoup-1.8.3.jar"/> 
+                <!-- for OpenNLP stage in pipeline -->  
+                <pathelement location="${repo}/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
+
 
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
