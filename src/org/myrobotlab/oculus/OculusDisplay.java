@@ -124,9 +124,9 @@ public class OculusDisplay implements Runnable {
 
 	
 	private static TexturedModel texturedModel = null;
-	private static Loader loader = new Loader();
-	private static Renderer renderer = new Renderer();
-	private static StaticShader shader = new StaticShader();
+	private static Loader loader;
+	private static Renderer renderer;
+	private static StaticShader shader;
 
 
 	
@@ -160,6 +160,32 @@ public class OculusDisplay implements Runnable {
 		ipd = hmd.getFloat(OvrLibrary.OVR_KEY_IPD, OVR_DEFAULT_IPD);
 		eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT, OVR_DEFAULT_EYE_HEIGHT);
 		// TODO: do i need to center this?
+		
+		
+		try {
+			contextAttributes = new ContextAttribs(4, 1).withProfileCore(true).withDebug(true);
+			setupDisplay();
+			Display.create(pixelFormat, contextAttributes);
+			// This supresses a strange error where when using 
+			// the Oculus Rift in direct mode on Windows, 
+			// there is an OpenGL GL_INVALID_FRAMEBUFFER_OPERATION 
+			// error present immediately after the context has been created.  
+			@SuppressWarnings("unused")
+			int err = glGetError();
+			GLContext.useContext(glContext, false);
+			// TODO: maybe get rid of these?
+			Mouse.create();
+			Keyboard.create();
+		} catch (LWJGLException e) {
+			throw new RuntimeException(e);
+		}
+
+		initGl();
+		
+		loader = new Loader();
+		renderer = new Renderer();
+		shader = new StaticShader();
+		
 		recenterView();
 	}
 
@@ -196,24 +222,7 @@ public class OculusDisplay implements Runnable {
 
 
 	public void run() {
-		try {
-			contextAttributes = new ContextAttribs(4, 1).withProfileCore(true).withDebug(true);
-			setupDisplay();
-			Display.create(pixelFormat, contextAttributes);
-			// This supresses a strange error where when using 
-			// the Oculus Rift in direct mode on Windows, 
-			// there is an OpenGL GL_INVALID_FRAMEBUFFER_OPERATION 
-			// error present immediately after the context has been created.  
-			@SuppressWarnings("unused")
-			int err = glGetError();
-			GLContext.useContext(glContext, false);
-			// TODO: maybe get rid of these?
-			Mouse.create();
-			Keyboard.create();
-		} catch (LWJGLException e) {
-			throw new RuntimeException(e);
-		}
-		initGl();
+
 		while (!Display.isCloseRequested()) {
 			if (Display.wasResized()) {
 				onResize(Display.getWidth(), Display.getHeight());
@@ -371,8 +380,8 @@ public class OculusDisplay implements Runnable {
 
 	public static void main(String[] args) {
 		// TODO : noop
-		//OculusDisplay test = new OculusDisplay();
-		//test.run();
+		OculusDisplay test = new OculusDisplay();
+		test.run();
 	}
 
 	public RiftFrame getCurrentFrame() {
