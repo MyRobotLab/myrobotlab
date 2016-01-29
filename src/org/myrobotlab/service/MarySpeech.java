@@ -68,6 +68,11 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     Object installationstateparam2;
     transient List<ComponentDescription> installation_toInstall;
 
+	static public String[] getDependencies() {
+		return new String[] {"marytts"};
+	}
+
+
     // we need to subclass the audio player class here, so we know when the run method exits and we can invoke
     // publish end speaking from it.
     private class MRLAudioPlayer extends AudioPlayer {
@@ -655,6 +660,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
             }
 
         }
+        
 
         private class OverallProgress {
 

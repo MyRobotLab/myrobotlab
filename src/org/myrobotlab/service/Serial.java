@@ -232,6 +232,17 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		return ret;
 	}
 
+	/**
+	 * Static list of third party dependencies for this service.
+	 * The list will be consumed by Ivy to download and manage
+	 * the appropriate resources
+	 * @return
+	 */
+	static public String[] getDependencies() {
+		return new String[] { "gnu.io.rxtx",
+		        "com.googlecode.jssc"};
+	}
+	
 	public Serial(String n) {
 		super(n);
 		listeners.put(n, this);

@@ -15,12 +15,10 @@ import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
 import org.myrobotlab.service.interfaces.PointPublisher;
-import org.saintandreas.math.Matrix4f;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;
 import com.oculusvr.capi.HmdDesc;
-import com.oculusvr.capi.OvrMatrix4f;
 import com.oculusvr.capi.OvrVector3f;
 import com.oculusvr.capi.TrackingState;
 
@@ -73,6 +71,11 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 	private OculusData lastData = null;
 
 
+	static public String[] getDependencies() {
+		return new String[] {"org.saintandreas.jovr"};
+	}
+
+	
 	public static class RiftFrame{
 		public SerializableImage left;	
 		public SerializableImage right;	

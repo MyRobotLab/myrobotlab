@@ -262,6 +262,10 @@ public class AudioFile extends Service {
 	public static String getGlobalFileCacheDir() {
 		return globalFileCacheDir;
 	}
+	
+	static public String[] getDependencies() {
+		return new String[] {"javazoom.spi","javazoom.jl.player"};
+	}
 
 	@Override
 	public String[] getCategories() {
@@ -272,7 +276,6 @@ public class AudioFile extends Service {
 	public String getDescription() {
 		return "Plays back audio file. Can block or multi-thread play";
 	}
-
 
 	
 	public String getTrack() {

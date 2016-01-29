@@ -57,6 +57,17 @@ public class WiiDAR extends Service {
 		// int latency = 0;
 		// int error = 0;
 
+		/**
+		 * Static list of third party dependencies for this service. The list will
+		 * be consumed by Ivy to download and manage the appropriate resources
+		 * 
+		 * @return
+		 */
+		static public String[] getDependencies() {
+			return new String[] {  "wiiuse.wiimote" };
+		}
+
+		
 		Point(int id, int servoPos, int direction, long servoTime) {
 			this(id, servoPos, direction, servoTime, null);
 		}

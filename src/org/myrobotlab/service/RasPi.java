@@ -80,6 +80,11 @@ public class RasPi extends Service {
 		Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");
 	}
 
+
+	static public String[] getDependencies() {
+		return new String[] {"com.pi4j.pi4j"};
+	}
+	
 	/*
 	 * FIXME - make these methods createDigitalAndPwmPin public
 	 * GpioPinDigitalOutput provisionDigitalOutputPin

@@ -1,8 +1,10 @@
 package org.myrobotlab.service;
 
 import it.sauronsoftware.cron4j.Scheduler;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -59,6 +61,12 @@ public class Cron extends Service {
 	public final static String EVERY_MINUTE = "* * * * *";
 
 	public ArrayList<Task> tasks = new ArrayList<Task>();
+	
+
+	static public String[] getDependencies() {
+		return new String[] {"it.sauronsoftware.cron4j"};
+	}
+
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();

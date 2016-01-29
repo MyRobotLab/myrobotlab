@@ -336,7 +336,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 		locked = false;
 	}
 
-	public String getType() {
+	public String getMotorType() {
 		return type;
 	}
 
@@ -407,8 +407,7 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 		return ret;
 	}
 
-	@Override
-	public String[] getTypes() {
+	public String[] getMotorTypes() {
 		return types.toArray(new String[types.size()]);
 	}
 

@@ -83,6 +83,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 	static final long serialVersionUID = 1L;
 
 	static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
+	
+
+	static public String[] getDependencies() {
+		return new String[] {"org.alicebot.ab"};
+	}
+
 
 	public ProgramAB(String name) {
 		super(name);

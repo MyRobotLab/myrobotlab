@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -25,10 +26,15 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel("INFO");
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
-		HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
-		System.out.println(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));
+
+		try {
+			Runtime.createAndStart("gui", "GUIService");
+			Runtime.createAndStart("python", "Python");
+			HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
+			log.info(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
 	}
 
 	public HtmlFilter(String reservedKey) {

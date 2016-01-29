@@ -20,8 +20,8 @@ import com.wolfram.alpha.WASubpod;
 
 /**
  * 
- * WolframAlpha - This service allows you to send a query to WolframAlpha
- * and get the result.
+ * WolframAlpha - This service allows you to send a query to WolframAlpha and
+ * get the result.
  *
  */
 public class WolframAlpha extends Service {
@@ -47,6 +47,16 @@ public class WolframAlpha extends Service {
 		/*
 		 * GUIService gui = new GUIService("gui"); gui.startService();
 		 */
+	}
+
+	/**
+	 * Static list of third party dependencies for this service. The list will
+	 * be consumed by Ivy to download and manage the appropriate resources
+	 * 
+	 * @return
+	 */
+	static public String[] getDependencies() {
+		return new String[] { "com.wolfram.alpha", "org.apache.commons.httpclient" };
 	}
 
 	public WolframAlpha(String n) {

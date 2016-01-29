@@ -76,6 +76,17 @@ public class XMPP extends Service implements Gateway, MessageListener {
 
 	transient HashMap<String, RosterEntry> idToEntry = new HashMap<String, RosterEntry>();
 
+
+	/**
+	 * Static list of third party dependencies for this service. The list will
+	 * be consumed by Ivy to download and manage the appropriate resources
+	 * 
+	 * @return
+	 */
+	static public String[] getDependencies() {
+		return new String[] { "org.jivesoftware.smack"};
+	}
+	
 	/**
 	 * auditors chat buddies who can see what commands are being processed and
 	 * by who through the XMPP service TODO - audit full system ??? regardless

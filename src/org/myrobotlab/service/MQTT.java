@@ -79,6 +79,11 @@ public class MQTT extends Service implements MqttCallback {
 			}
 		}
 	}
+	
+
+	static public String[] getDependencies() {
+		return new String[] {"org.eclipse.paho"};
+	}
 
 	/**
 	 * Connect in a non-blocking way and then sit back and wait to be notified

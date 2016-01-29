@@ -138,6 +138,13 @@ public class GUIService extends Service implements WindowListener, ActionListene
 	boolean isDisplaying = false;
 	transient JLabel status = new JLabel("status");
 
+
+	static public String[] getDependencies() {
+		return new String[] {"org.fife.autocomplete",
+		        "org.fife.rsyntaxtextarea",
+		        "com.mxgraph.jgraph"};
+	}
+	
 	static public void attachJavaConsole() {
 		JFrame j = new JFrame("Java Console");
 		j.setSize(500, 550);

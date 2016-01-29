@@ -85,6 +85,10 @@ public class IPCamera extends Service {
 	public final static int FOSCAM_ALARM_MAIL_DISABLED = 0;
 
 	public final static int FOSCAM_ALARM_MAIL_ENABLED = 1;
+	
+	static public String[] getDependencies() {
+		return new String[] {"org.bytedeco.javacv"};
+	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();

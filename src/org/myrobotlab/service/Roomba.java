@@ -61,7 +61,8 @@ public class Roomba extends Service {
 	int stopBits = 1;
 
 	transient Serial serial;
-
+	
+	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 

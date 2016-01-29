@@ -61,6 +61,11 @@ public class ChessGame extends Service {
 		}
 
 	}
+	
+	static public String[] getDependencies() {
+		return new String[] {"org.op.chess"};
+	}
+
 
 	public ChessGame(String n) {
 		super(n);

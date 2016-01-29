@@ -61,7 +61,7 @@ public class CodecUtils {
 	// disableHtmlEscaping to prevent encoding or "=" -
 	// private transient static Gson gson = new
 	// GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+	private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 	// FIXME - switch to Jackson
 
 	private static boolean initialized = false;

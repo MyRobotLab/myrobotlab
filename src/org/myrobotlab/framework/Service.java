@@ -1554,6 +1554,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 		// recently added
 		releasePeers();
+		
+		purgeTasks();
 
 		Runtime.release(getName());
 	}

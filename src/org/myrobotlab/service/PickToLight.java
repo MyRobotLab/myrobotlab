@@ -281,6 +281,11 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
 	Properties properties = new Properties();
 
+
+	static public String[] getDependencies() {
+		return new String[] {"org.apache.commons.httpclient"};
+	}
+
 	// FIXME push Task add/remove/repeat into Service
 
 	public static Peers getPeers(String name) {

@@ -43,6 +43,12 @@ public class CleverBot extends Service {
 			Logging.logError(e);
 		}
 	}
+	
+
+	static public String[] getDependencies() {
+		return new String[] {"com.googlecode.chatterbot"};
+	}
+
 
 	public CleverBot(String n) {
 		super(n);

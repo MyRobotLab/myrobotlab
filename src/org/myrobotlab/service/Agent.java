@@ -123,6 +123,14 @@ public class Agent extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(Agent.class);
 
+	
+	HashSet<String> dependencies = new HashSet<String>();
+	
+	public HashSet<String> getDependencies(){
+		return dependencies;
+	}
+	
+	
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
 		// peers.put("cli", "Cli", "Command line processor");

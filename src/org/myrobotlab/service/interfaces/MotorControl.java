@@ -138,7 +138,7 @@ public interface MotorControl {
 	int[] getControlPins();
 	
 	String getType();
-	String[] getTypes();
+	String[] getMotorTypes();
 
 	double getPowerOutput();
 	
