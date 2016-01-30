@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.DHLink;
@@ -124,7 +125,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		attach();
 		setSpeed(0.7, 0.7, 0.7, 0.7);
 		rest();
-		sleep(4000);
+		sleep(1000);
 		setSpeed(1.0, 1.0, 1.0, 1.0);
 		broadcastState();
 		return true;
@@ -308,6 +309,16 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		shoulder.startService();
 		omoplate.startService();
 		arduino.startService();
+		// Go speed racer! GO! We need to wait until all of our peers are reported as started.
+		try {
+			// TODO: get rid of this and make sure all the other services have started before we return.
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// maybe we could wait on the arduino being connected or something?
+		
+		
 	}
 
 	public void test() {
