@@ -1,140 +1,107 @@
 package org.myrobotlab.document.workflow;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.myrobotlab.document.transformer.StageConfiguration;
 import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.document.Document;
-import org.myrobotlab.document.ProcessingStatus;
-import org.myrobotlab.document.transformer.AbstractStage;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
+/**
+ * 
+ * Workflow : top level workflow class that controls the thread that
+ * do the work of processing documents on each stage.
+ *
+ */
 public class Workflow {
-
-	// TODO: make sure all stages are thread safe before increasing this!
-	private int numWorkerThreads = 1;
-	private int queueLength = 50;
-	private LinkedBlockingQueue<Document> queue = new LinkedBlockingQueue<Document>(queueLength);
-	private Document stopDoc;
-
-	private String name = "defaultWorkflow";
-	// A workflow is a list of stages
-	private ArrayList<AbstractStage> stages;
-
+ 
+	private final int numWorkerThreads;
+	private final int queueLength;
+	private final LinkedBlockingQueue<Document> queue;
+	private String name = "defaultWorkflow"; 
+	// The workflow has it's own copy of each stage. to avoid thread safety issues when running
+	// with more than 1 thread. (todo:review this design pattern for something more thread poolesque?)
 	private WorkflowWorker[] workers;
+	private WorkflowConfiguration workflowConfig;
+	public final static Logger log = LoggerFactory.getLogger(Workflow.class);
+	
+	// constructor
+	public Workflow(WorkflowConfiguration workflowConfig) throws ClassNotFoundException {
+		// create each of the worker threads.  each with their own copy of the stages
+		numWorkerThreads = workflowConfig.getNumWorkerThreads();
+		queueLength = workflowConfig.getQueueLength();
+		queue = new LinkedBlockingQueue<Document>(queueLength);
+		this.workflowConfig = workflowConfig;
+		// We need to load a config
+		// then we need to create each of the stages for the config
+		// and add those to our stage list.
+		this.name = workflowConfig.getName();
+	}
 
+	// initialize the workflow 
 	public void initialize() {
-		// TODO: do this better?
-		stopDoc = new Document(null);
 		workers = new WorkflowWorker[numWorkerThreads];
 		for (int i = 0; i < numWorkerThreads; i++) {
 			initializeWorkerThread(i);
 		}
 	}
 
+	// init the worker threads
 	private void initializeWorkerThread(int threadNum) {
-		WorkflowWorker worker = new WorkflowWorker(this);
+		WorkflowWorker worker =null;
+		try {
+			worker = new WorkflowWorker(workflowConfig, queue);
+		} catch (ClassNotFoundException e) {
+			// TODO: better handling?
+			log.warn("Error starting the worker thread. {}", e.getLocalizedMessage());
+			e.printStackTrace();
+			return;
+		}
 		worker.start();
 		workers[threadNum] = worker;
 	}
 
-	public Workflow(WorkflowConfiguration workflowConfig) throws ClassNotFoundException {
-		ClassLoader classLoader = Workflow.class.getClassLoader();
-		// create a workflow
-		stages = new ArrayList<AbstractStage>();
-		for (StageConfiguration stageConf : workflowConfig.getStages()) {
-			String stageClass = stageConf.getStageClass();
-			System.out.println("Starting stage :"  + stageConf.getStageName() + " class=" + stageConf.getStageClass());
-			Class<?> sc = Workflow.class.getClassLoader().loadClass(stageClass);
-			try {
-				AbstractStage stageInst = (AbstractStage) sc.newInstance();
-				stageInst.startStage(stageConf);
-				addStage(stageInst);
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		// We need to load a config
-		// then we need to create each of the stages for the config
-		// and add those to our stage list.
-		
-		this.name = workflowConfig.getName();
-	}
 
 
-	public void addStage(AbstractStage stage) {
-		stages.add(stage);
-	}
 
 	public void processDocument(Document doc) throws InterruptedException {
-
 		// put the document on the processing queue.
 		if (doc != null) {
 			queue.put(doc);
 		} else {
 			queue.put(doc);
 		}
-
 	}
 
 	public Document getDocToProcess() throws InterruptedException {
-
 		Document doc = queue.take();
+		return doc;
 		// TODO: cleaner way to do this is have a queue of a new class, which
 		// has the Item in it and meta information to tell us when to stop / etc
-		if (doc.getId() == stopDoc.getId()) {
-			// For now, we push it back on, so that in multi-worker environment
-			// all of them get the stop notification.
-			queue.put(stopDoc);
-			return null;
-		} else {
-			// System.out.println("Pulled doc to process : " + doc.getId());
-			return doc;
-		}
-
+		//	if (doc.getId() == stopDoc.getId()) {
+		//		// For now, we push it back on, so that in multi-worker environment
+		//		// all of them get the stop notification.
+		//		queue.put(stopDoc);
+		//		return null;
+		//	} else {
+		//		// System.out.println("Pulled doc to process : " + doc.getId());
+		//		return doc;
+		//	}
 	}
 
-	public void processDocumentInternal(Document doc, int stageOffset) {
-		// TODO:
-		int i = 0;
-		for (AbstractStage s : stages.subList(i, stages.size())) {
-			List<Document> childDocs = s.processDocument(doc);
-			i++;
-			if (childDocs != null) {
-				// process each of the children docs down the rest of the pipeline
-				for (Document childDoc : childDocs) {
-					processDocumentInternal(childDoc, i);
-				}
-			}
-			// TODO:should I create a completely new concept for
-			// callbacks?
-			if (doc.getStatus().equals(ProcessingStatus.DROP)) {
-				// if it's a drop, break here.
-				break;
-			}
-		}
-	}
-	
+	// flush all the stages on each worker thread.
 	public void flush() {
-		// TODO Auto-generated method stub
-		// TODO: Make this wait for a particular message sequence id to finish.
 		// TODO: Or make it block here.
 		while (!queue.isEmpty()) {
 			try {
 				// TODO: give a logger object to this class.
 				// TODO: review this for threading issues and concurrency
-				System.out.println("Waiting for workflow flush.");
-				Thread.sleep(1000);
+				log.info("Waiting for workflow flush.");
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
+				log.info("Interrupted while waiting for queue to drain. {}", e.getMessage());
 				e.printStackTrace();
 			}
-
 		} 
 
 		// now wait for the threads to no longer be running
@@ -156,12 +123,12 @@ public class Workflow {
 
 		}
 
-		for (AbstractStage s : stages) {
-			s.flush();
+		// Each worker will get flushed. 
+		// (each worker flushes its stage)
+		for (WorkflowWorker worker : workers) {
+			worker.flush();
 		}
-		
-		System.out.println("Workflow flushed.");
-
+		log.info("Workflow {} flushed.", name);
 
 	}
 

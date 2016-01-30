@@ -4,9 +4,7 @@ import org.myrobotlab.document.transformer.StageConfiguration;
 import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.service.DocumentPipeline;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Solr;
 import org.myrobotlab.service.XMLConnector;
-import org.python.antlr.PythonParser.or_test_return;
 
 public class WikipediaIndexer {
 
@@ -43,6 +41,7 @@ public class WikipediaIndexer {
 		// build the pipeline.. assemble the stages.
 		// create our document processing pipeline workflow.
 		WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
+		workflowConfig.setNumWorkerThreads(8);
 		workflowConfig.setName("default");
 		workflowConfig.addStage(staticFieldStageConfig);
 		workflowConfig.addStage(xpathStageConfig);
@@ -56,10 +55,12 @@ public class WikipediaIndexer {
 		
 		// attach the doc proc to the connector
 		wikipediaConnector.addDocumentListener(docproc);
-		
+
+		wikipediaConnector.setBatchSize(10);
 		// start crawling...
 		wikipediaConnector.startCrawling();
 
 	}
 
 }
+

@@ -90,7 +90,8 @@ public class SendToSolr extends AbstractStage {
 					solrServer.add(batch);
 					log.info("Sending Batch to Solr. Size: {}", batch.size());
 					//System.out.println("Solr batch sent..");
-					batch.clear();
+					// batch.clear();
+					batch = Collections.synchronizedList(new ArrayList<SolrInputDocument>());
 				} else {
 					//System.out.println("Batch Size " + batch.size());
 				}

@@ -7,8 +7,11 @@ public class WorkflowConfiguration extends Configuration {
 	ArrayList<StageConfiguration> stages;
 	
 	private String name = "defaultWorkflow";
+	
+	private int numWorkerThreads = 1;
+	private int queueLength = 50;
+	
 	public WorkflowConfiguration() {
-		// TODO Auto-generated constructor stub
 		stages = new ArrayList<StageConfiguration>();
 		// default workflow static config
 	}
@@ -28,6 +31,22 @@ public class WorkflowConfiguration extends Configuration {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getNumWorkerThreads() {
+		return numWorkerThreads;
+	}
+
+	public void setNumWorkerThreads(int numWorkerThreads) {
+		this.numWorkerThreads = numWorkerThreads;
+	}
+
+	public int getQueueLength() {
+		return queueLength;
+	}
+
+	public void setQueueLength(int queueLength) {
+		this.queueLength = queueLength;
 	}
 
 }

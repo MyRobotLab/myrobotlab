@@ -83,6 +83,41 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		workflowServer.flush(workflowName);
 	}
 	
+
+
+	public void initalize() throws ClassNotFoundException {
+		// init the workflow server and load the pipeline config.
+		if (workflowServer == null) {
+			workflowServer = WorkflowServer.getInstance();
+		}
+		workflowServer.addWorkflow(config);
+		workflowName = config.getName();
+		
+		// We can't drop messages! apply back pressure if the inbox is full!
+		this.inbox.setBlocking(true);
+		
+	}
+
+	// TODO: put this on a base class or something?
+	public ProcessingStatus onDocuments(List<Document> docs) {
+		ProcessingStatus totalStat = ProcessingStatus.OK;
+		for (Document d : docs) {
+			ProcessingStatus stat = onDocument(d);
+			if (ProcessingStatus.ERROR.equals(stat)) {
+				totalStat = ProcessingStatus.ERROR; 
+			}
+			
+		}
+		return totalStat;
+	}
+
+	@Override
+	public boolean onFlush() {
+		// here we need to pass a flush message to the workflow server 
+		workflowServer.flush(workflowName);
+		return true;
+	}
+	
 	public static void main(String[] args) throws Exception {
 
 		// create the pipeline service in MRL
@@ -120,42 +155,9 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		}
 		// when the connector is done, tell the pipeline to flush/
 		pipeline.flush();
-		
 		//wee! news!
 		
 	}
-
-	public void initalize() throws ClassNotFoundException {
-		// init the workflow server and load the pipeline config.
-		if (workflowServer == null) {
-			workflowServer = WorkflowServer.getInstance();
-		}
-		workflowServer.addWorkflow(config);
-		workflowName = config.getName();
-		
-		// We can't drop messages! apply back pressure if the inbox is full!
-		this.inbox.setBlocking(true);
-		
-	}
-
-	// TODO: put this on a base class or something?
-	public ProcessingStatus onDocuments(List<Document> docs) {
-		ProcessingStatus totalStat = ProcessingStatus.OK;
-		for (Document d : docs) {
-			ProcessingStatus stat = onDocument(d);
-			if (ProcessingStatus.ERROR.equals(stat)) {
-				totalStat = ProcessingStatus.ERROR; 
-			}
-			
-		}
-		return totalStat;
-	}
-
-	@Override
-	public boolean onFlush() {
-		// here we need to pass a flush message to the workflow server 
-		workflowServer.flush(workflowName);
-		return true;
-	}
+	
 	
 }
