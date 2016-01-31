@@ -20,7 +20,7 @@ public class SpeechTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		speech = (SpeechSynthesis) Runtime.start("speech", "Speech");
+		speech = (SpeechSynthesis) Runtime.start("speech", "AcapelaSpeech");
 	}
 
 	@AfterClass

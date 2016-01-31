@@ -37,7 +37,7 @@ public class MouthControl extends Service {
 		Peers peers = new Peers(name);
 		peers.put("jaw", "Servo", "shared Jaw servo instance");
 		peers.put("arduino", "Arduino", "shared Arduino instance");
-		peers.put("mouth", "Speech", "shared Speech instance");
+		peers.put("mouth", "AcapelaSpeech", "shared Speech instance");
 
 		return peers;
 	}
