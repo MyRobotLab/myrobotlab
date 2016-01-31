@@ -17,7 +17,7 @@ from org.myrobotlab.service import Runtime
 
 # Create a running instance of the Speech Service.
 # Name it "speech".
-speech = Runtime.create("speech","Speech")
+speech = Runtime.create("speech","AcapelaSpeech")
 speech.startService()
 
 # Speak with initial defaults - Google en

@@ -32,7 +32,7 @@ public class ChessGameManager extends Service {
 		// put peer definitions in
 		peers.put("webgui", "WebGui", "webgui");
 		peers.put("serial", "Serial", "serial");
-		peers.put("speech", "Speech", "speech");
+		peers.put("speech", "AcapelaSpeech", "speech");
 		return peers;
 	}
 
