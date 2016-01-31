@@ -83,6 +83,11 @@ public class AudioFile extends Service {
 		public AudioData(String fileName) {
 			this.fileName = fileName;
 		}
+		
+		public String toString(){
+			return String.format("mode %s filename %s", mode, fileName);
+		}
+
 	}
 
 	public AudioFile(String n) {
