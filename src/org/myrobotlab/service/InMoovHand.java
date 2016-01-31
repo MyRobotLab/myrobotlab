@@ -51,7 +51,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 		peers.put("pinky", "Servo", "Pinky servo");
 		peers.put("wrist", "Servo", "Wrist servo");
 		peers.put("arduino", "Arduino", "Arduino controller for this arm");
-		peers.put("leap", "LeapMotion2", "Leap Motion Service");
+		peers.put("leap", "LeapMotion", "Leap Motion Service");
 		// peers.put("keyboard", "Keyboard", "Keyboard control");
 		// peers.put("xmpp", "XMPP", "XMPP control");
 		return peers;
