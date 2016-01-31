@@ -70,15 +70,12 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	transient PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
 
-	// FIXME - PEER notation
-	transient AudioFile audioFile = new AudioFile("audioFile");
+	transient AudioFile audioFile = null;// new AudioFile("audioFile");
 
 	public static Peers getPeers(String name) {
 		Peers peers = new Peers(name);
-
 		// put peer definitions in
-		peers.put("audioFile", "AudioFile", "audioFile");
-
+		peers.put("audioFile", "AudioFile", "audio file to play downloaded mp3s");
 		return peers;
 	}
 
@@ -126,7 +123,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	public void startService() {
 		super.startService();
-		startPeer("audioFile");
+		audioFile = (AudioFile)startPeer("audioFile");
 		audioFile.startService();
 		// attach a listener when the audio file ends playing.
 		audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
@@ -397,7 +394,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	@Override
 	public List<String> getLanguages() {
 		// TODO Auto-generated method stub
-		return null;
+		ArrayList<String> ret = new ArrayList<String>();
+		// FIXME - add iso language codes currently supported e.g. en en_gb de etc.. 
+		return ret;
 	}
 	
 	public static void main(String[] args) {
