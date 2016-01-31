@@ -7,6 +7,6 @@ public interface IKJointAnglePublisher {
 
 	public String getName();
 
-	public Map<String, Float> publishJointAngles(HashMap<String, Float> angleMap);
+	public Map<String, Double> publishJointAngles(HashMap<String, Double> angleMap);
 
 }
