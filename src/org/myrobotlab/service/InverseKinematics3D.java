@@ -190,13 +190,13 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	}
 
 	public void publishTelemetry() {
-		Map<String, Float> angleMap = new HashMap<String, Float>();
+		Map<String, Double> angleMap = new HashMap<String, Double>();
 		for (DHLink l : currentArm.getLinks()) {
 			String jointName = l.getName();
 			double theta = l.getTheta();
 			// angles between 0 - 360 degrees..  not sure what people will really want?
 			// - 180 to  + 180 ?
-			angleMap.put(jointName, (float)MathUtils.radToDeg(theta)%360.0F);
+			angleMap.put(jointName, (double)MathUtils.radToDeg(theta)%360.0F);
 		}
 		invoke("publishJointAngles", angleMap);
 		// we want to publish the joint positions 
@@ -319,7 +319,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	}
 
 	@Override
-	public Map<String, Float> publishJointAngles(HashMap<String, Float> angleMap) {
+	public Map<String, Double> publishJointAngles(HashMap<String, Double> angleMap) {
 		// TODO Auto-generated method stub
 		return angleMap;
 	}
