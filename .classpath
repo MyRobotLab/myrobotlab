@@ -107,7 +107,7 @@
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/jovr-0.7.0.0.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/jscience-4.3.1.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/lwjgl_util-2.9.3.jar"/>
-	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/lwjgl-2.9.3.jar"/>
+	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/lwjgl-2.9.3.jar" sourcepath="C:/Users/kwatters/.m2/repository/org/lwjgl/lwjgl/lwjgl/2.9.3/lwjgl-2.9.3-sources.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/lwjgl-platform-2.9.3-natives-windows.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/oria-resources-1.0.4.jar"/>
 	<classpathentry kind="lib" path="/repo/org.saintandreas.jovr/0.7/slick-util.jar"/>
@@ -154,5 +154,6 @@
 	<classpathentry kind="lib" path="/repo/com.sun.speech.freetts/1.2/freetts.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/freetts-de-1.0.jar"/>
 	<classpathentry kind="lib" path="/repo/marytts/5.1.2/freetts-en_us-1.0.jar"/>
+	<classpathentry kind="lib" path="/repo/org.wikidata.wdtk/0.5.0/wdtk-client-0.5.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
