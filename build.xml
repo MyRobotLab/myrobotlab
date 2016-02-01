@@ -144,6 +144,7 @@
 	<!-- FIXME - fixme with ivy -->
 	<path id="compile.classpath">
 		<pathelement location="bin" />
+		<pathelement location="${repo}/org.wikidata.wdtk/0.5.0/wdtk-client-0.5.0.jar"/>
 		<pathelement location="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar"/>
 		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dcore.jar"/>
 		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dutils.jar"/>
