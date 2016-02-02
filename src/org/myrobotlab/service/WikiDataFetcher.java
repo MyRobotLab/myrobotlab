@@ -201,8 +201,8 @@ public class WikiDataFetcher extends Service {
 	}
 	
 	public String getTime(String query, String ID, String what)throws MediaWikiApiErrorException{
-		TimeValue date =  (TimeValue)(getSnak(query,ID));
-	// TODO Avoid to crash when date isn't a TimeValue	
+		try {
+		TimeValue date =  (TimeValue)(getSnak(query,ID));	
 		String data ="";
 		switch (what) {
         	case "year":
@@ -233,7 +233,10 @@ public class WikiDataFetcher extends Service {
         		data = "ERROR";
      }
 		return data;
+		}
+		catch (Exception e){return  "Not a TimeValue !";}
 	}
+		
 	
 	
 }
