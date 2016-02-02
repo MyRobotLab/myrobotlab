@@ -14,6 +14,7 @@ import org.wikidata.wdtk.datamodel.json.jackson.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -134,14 +135,14 @@ public class WikiDataFetcher extends Service {
 		catch (Exception e){return  "Label by ID not found";}
 	}
 	
-	public String cutStart(String sentence) throws MediaWikiApiErrorException{
+	public String cutStart(String sentence) throws MediaWikiApiErrorException{// keep only the first word (The cat -> The)
 		try {
 			String answer =  sentence.substring(sentence.indexOf(" ")+1);
 			return answer;
 		}
 		catch (Exception e){return  sentence;}
 	}
-	public String grabStart(String sentence) throws MediaWikiApiErrorException{
+	public String grabStart(String sentence) throws MediaWikiApiErrorException{// Remove the first word (The cat -> cat)
 		try {
 			String answer =  sentence.substring(0,sentence.indexOf(" "));
 			return answer;
@@ -149,12 +150,16 @@ public class WikiDataFetcher extends Service {
 		catch (Exception e){return  sentence;}
 	}
 	
-	// TODO add other dataType
-	private Value getSnak(String query, String ID) throws MediaWikiApiErrorException{
+	private List<StatementGroup> getStatementGroup(String query, String ID) throws MediaWikiApiErrorException{
 		EntityDocument document = getWiki(query);
+		return  ((ItemDocument) document).getStatementGroups();
+	}
+	
+	private Value getSnak(String query, String ID) throws MediaWikiApiErrorException{
+		List<StatementGroup> document = getStatementGroup(query,ID);
 		String dataType = "error";
-		Value data = (Value)document.getEntityId();// If property is not found, return the value of document ID
-		for (StatementGroup sg : ((ItemDocument) document).getStatementGroups()) {
+		Value data = document.get(0).getProperty();
+		for (StatementGroup sg : document) {
 			if (ID.equals(sg.getProperty().getId())) { // Check if this ID exist for this document
 				
 				for (Statement s : sg.getStatements()) {
@@ -162,29 +167,32 @@ public class WikiDataFetcher extends Service {
 					System.out.println("DataType : " + ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString());
 					dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
 					 switch (dataType) {
-			         	case "wikibase-item"://
+			         	case "wikibase-item":
 			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getValue();
 			         		break;
-			         	case "time"://
+			         	case "time":
 			         		data = (TimeValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
 			         		break;
 			         	case "globe-coordinates":
 			         		data = (GlobeCoordinatesValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
 			         		break;
-			         	case "monolingualtext"://
+			         	case "monolingualtext":
 			         		data = (MonolingualTextValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
 			         		break;
-			         	case "quantity"://
+			         	case "quantity":
 			         		data = (QuantityValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
 			         		break;
 			         	case "propertyId":
 			         		data = (PropertyIdValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
 			         		break;
-			         	case "url"://
+			         	case "url":
 			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue();
 			         		break;
-			         	case "commonsMedia"://
+			         	case "commonsMedia":
 			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue();
+			         		break;
+			         	default:
+			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getValue();
 			         		break;
 			         }
 				} 	
@@ -263,6 +271,13 @@ public class WikiDataFetcher extends Service {
 				info+= " " + getLabelById(unit);
 			}
 		return info;
+		}	
+		catch (Exception e){return  "Not Found !";}
+	}
+	
+	public String getMonolingualValue(String query, String ID)throws MediaWikiApiErrorException{
+		try {
+		return (getSnak(query,ID)).toString();
 		}
 		catch (Exception e){return  "Not Found !";}
 	}
