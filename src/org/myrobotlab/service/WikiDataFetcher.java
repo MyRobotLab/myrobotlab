@@ -255,10 +255,13 @@ public class WikiDataFetcher extends Service {
 	public String getQuantity(String query, String ID)throws MediaWikiApiErrorException{
 		try {
 			QuantityValue data = (QuantityValue) (getSnak(query,ID));
+			String info = 	String.valueOf(data.getNumericValue());
 			String unit = data.toString();
 			int beginIndex = unit.indexOf('Q');
-	        unit = unit.substring(beginIndex);
-		String info = 	String.valueOf(data.getNumericValue()) + " " + getLabelById(unit);
+			if (beginIndex != -1){
+				unit = unit.substring(beginIndex);
+				info+= " " + getLabelById(unit);
+			}
 		return info;
 		}
 		catch (Exception e){return  "Not Found !";}
