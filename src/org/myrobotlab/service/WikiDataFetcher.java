@@ -6,25 +6,11 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
-import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
-import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
-import org.wikidata.wdtk.datamodel.interfaces.Snak;
-import org.wikidata.wdtk.datamodel.interfaces.Statement;
-import org.wikidata.wdtk.datamodel.interfaces.StatementGroup;
+import org.wikidata.wdtk.datamodel.interfaces.*;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
-import org.wikidata.wdtk.datamodel.interfaces.TimeValue;
-import org.wikidata.wdtk.datamodel.interfaces.Value;
-import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
-import org.wikidata.wdtk.datamodel.interfaces.SomeValueSnak;
-import org.wikidata.wdtk.datamodel.interfaces.DataObjectFactory;
 import org.wikidata.wdtk.datamodel.helpers.ToString;
 import org.wikidata.wdtk.datamodel.json.jackson.*;
-import org.wikidata.wdtk.datamodel.json.jackson.JacksonItemDocument;
-import org.wikidata.wdtk.datamodel.json.jackson.datavalues.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -68,7 +54,7 @@ public class WikiDataFetcher extends Service {
 
 	@Override
 	public String getDescription() {
-		return "used as a general template";
+		return "Used to collect datas from wikidata";
 	}
 	
 	public void setLanguage(String lang){
@@ -164,7 +150,7 @@ public class WikiDataFetcher extends Service {
 	}
 	
 	// TODO add other dataType
-	public Value getSnak(String query, String ID) throws MediaWikiApiErrorException{
+	private Value getSnak(String query, String ID) throws MediaWikiApiErrorException{
 		EntityDocument document = getWiki(query);
 		String dataType = "error";
 		Value data = (Value)document.getEntityId();// If property is not found, return the value of document ID
@@ -172,14 +158,33 @@ public class WikiDataFetcher extends Service {
 			if (ID.equals(sg.getProperty().getId())) { // Check if this ID exist for this document
 				
 				for (Statement s : sg.getStatements()) {
-				if (s.getClaim().getMainSnak() instanceof ValueSnak) {					
+				if (s.getClaim().getMainSnak() instanceof ValueSnak) {	
+					System.out.println("DataType : " + ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString());
 					dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
 					 switch (dataType) {
-			         	case "wikibase-item":
+			         	case "wikibase-item"://
 			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getValue();
 			         		break;
-			         	case "time":
+			         	case "time"://
 			         		data = (TimeValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
+			         		break;
+			         	case "globe-coordinates":
+			         		data = (GlobeCoordinatesValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
+			         		break;
+			         	case "monolingualtext"://
+			         		data = (MonolingualTextValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
+			         		break;
+			         	case "quantity"://
+			         		data = (QuantityValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
+			         		break;
+			         	case "propertyId":
+			         		data = (PropertyIdValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
+			         		break;
+			         	case "url"://
+			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue();
+			         		break;
+			         	case "commonsMedia"://
+			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue();
 			         		break;
 			         }
 				} 	
@@ -193,11 +198,14 @@ public class WikiDataFetcher extends Service {
 	}
 	
 	public String getProperty(String query, String ID)throws MediaWikiApiErrorException{
+		try {
 		String info = (getSnak(query,ID)).toString();
 		int beginIndex = info.indexOf('Q');
         int endIndex = info.indexOf("(") ;
         info = info.substring(beginIndex , endIndex-1);
 		return getLabelById(info);
+		}
+		catch (Exception e){return  "Not Found !";}
 	}
 	
 	public String getTime(String query, String ID, String what)throws MediaWikiApiErrorException{
@@ -236,7 +244,24 @@ public class WikiDataFetcher extends Service {
 		}
 		catch (Exception e){return  "Not a TimeValue !";}
 	}
-		
 	
+	public String getUrl(String query, String ID)throws MediaWikiApiErrorException{
+		try {
+		return (getSnak(query,ID)).toString();
+		}
+		catch (Exception e){return  "Not Found !";}
+	}
+		
+	public String getQuantity(String query, String ID)throws MediaWikiApiErrorException{
+		try {
+			QuantityValue data = (QuantityValue) (getSnak(query,ID));
+			String unit = data.toString();
+			int beginIndex = unit.indexOf('Q');
+	        unit = unit.substring(beginIndex);
+		String info = 	String.valueOf(data.getNumericValue()) + " " + getLabelById(unit);
+		return info;
+		}
+		catch (Exception e){return  "Not Found !";}
+	}
 	
 }
