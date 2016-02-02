@@ -82,43 +82,153 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	public AcapelaSpeech(String n) {
 		super(n);
 		connectionManager.setMaxTotal(10);
-
+		// Arabic
 		voices.add("Leila");
+		voices.add("Mehdi");
+		voices.add("Nizar");
+		voices.add("Salma");
+		// Catalan
 		voices.add("Laia");
+		// Czech
 		voices.add("Eliska");
+		// Danish
 		voices.add("Mette");
+		voices.add("Rasmus");
+		// Dutch ( Belgium )
 		voices.add("Zoe");
+		voices.add("Joeren");
+		voices.add("JoerenHappy");
+		voices.add("JoerenSad");
+		voices.add("Sofie");
+		// Dutch ( Netherlands )
 		voices.add("Jasmijn");
+		voices.add("Daan");
+		voices.add("Femke");
+		voices.add("Max");
+		// English (AU)
 		voices.add("Tyler");
+		voices.add("Lisa");
+		voices.add("Olivia");
+		voices.add("Liam");
+		// English ( India )
 		voices.add("Deepa");
+		// English ( Scottish )
 		voices.add("Rhona");
+		// English (UK)
 		voices.add("Rachel");
+		voices.add("Graham");
+		voices.add("Harry");
+		voices.add("Lucy");
+		voices.add("Nizareng");
+		voices.add("Peter");
+		voices.add("PeterHappy");
+		voices.add("PeterSad");
+		voices.add("QueenElizabeth");
+		voices.add("Rosie");
+		// English ( USA )
 		voices.add("Sharon");
-		voices.add("Hanna");
-		voices.add("Sanna");
-		voices.add("Justine");
-		voices.add("Louise");
-		voices.add("Manon");
-		voices.add("Claudia");
-		voices.add("Dimitris");
-		voices.add("Fabiana");
-		voices.add("Sakura");
-		voices.add("Minji");
-		voices.add("Lulu");
-		voices.add("Bente");
-		voices.add("Monika");
-		voices.add("Marcia");
-		voices.add("Celia");
-		voices.add("Alyona");
-		voices.add("Biera");
-		voices.add("Ines");
-		voices.add("Rodrigo");
-		voices.add("Elin");
-		voices.add("Samuel");
-		voices.add("Kal");
-		voices.add("Mia");
-		voices.add("Ipek");
+		voices.add("Ella");
+		voices.add("EmilioEnglish");
+		voices.add("Josh");
+		voices.add("Karen");
+		voices.add("Kenny");
+		voices.add("Laura");
+		voices.add("Micah");
+		voices.add("Nelly");
+		voices.add("Rod");
 		voices.add("Ryan");
+		voices.add("Saul");
+		voices.add("Scott");
+		voices.add("Tracy");
+		voices.add("ValeriaEnglish");
+		voices.add("Will");
+		voices.add("WillBadGuy");
+		voices.add("WillFromAfar");
+		voices.add("WillHappy");
+		voices.add("WillLittleCreature");
+		// Faroese
+		voices.add("Hanna");
+		voices.add("Hanus");
+		// Finnish
+		voices.add("Sanna");
+		// French ( Belgium )
+		voices.add("Justine");
+		// French ( Canada )
+		voices.add("Louise");
+		// French ( France )
+		voices.add("Manon");
+		voices.add("Alice");
+		voices.add("Antoine");
+		voices.add("AntoineFromFar");
+		voices.add("AntoineHappy");
+		voices.add("AntoineSad");
+		voices.add("Bruno");
+		voices.add("Claire");
+		voices.add("Manon");
+		voices.add("Julie");
+		voices.add("Margaux");
+		voices.add("MargauxHappy");
+		voices.add("MargauxSad");
+		// German
+		voices.add("Claudia");
+		voices.add("Andreas");
+		voices.add("Jonas");
+		voices.add("Julia");
+		voices.add("Klaus");
+		voices.add("Lea");
+		voices.add("Sarah");
+		// Greek
+		voices.add("Dimitris");
+		voices.add("DimitrisHappy");
+		voices.add("DimitrisSad");
+		// Italian
+		voices.add("Fabiana");
+		voices.add("Chiara");
+		voices.add("Vittorio");
+		// Japanese
+		voices.add("Sakura");
+		// Korean
+		voices.add("Minji");
+		// Mandarin
+		voices.add("Lulu");
+		// Norwegian
+		voices.add("Bente");
+		voices.add("Kari");
+		voices.add("Olav");
+		// Polish
+		voices.add("Monika");
+		voices.add("Ania");
+		// Portuguese ( Brazil )
+		voices.add("Marcia");
+		// Portuguese ( Portugal )
+		voices.add("Celia");
+		// Russian
+		voices.add("Alyona");
+		// Sami ( North )
+		voices.add("Biera");
+		voices.add("Elle");
+		// Spanish ( Spain )
+		voices.add("Ines");
+		voices.add("Antonio");
+		voices.add("Maria");
+		// Spanish ( US )
+		voices.add("Rodrigo");
+		voices.add("Emilio");
+		voices.add("Rosa");
+		voices.add("Valeria");
+		// Swedish
+		voices.add("Elin");
+		voices.add("Emil");
+		voices.add("Emma");
+		voices.add("Erik");
+		// Swedish ( Finland )
+		voices.add("Samuel");
+		// Swedish ( Gothenburg )
+		voices.add("Kal");
+		// Swedish ( Scanian ) 
+		voices.add("Mia");
+		// Turkish
+		voices.add("Ipek");
 	}
 
 	public void startService() {
