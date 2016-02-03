@@ -94,7 +94,11 @@ public class MouthControl extends Service {
 	public Arduino getArduino() {
 		return arduino;
 	}
-
+	
+	public Servo getJawServo() {
+		return jaw;
+	}
+	
 	@Override
 	public String[] getCategories() {
 		return new String[] { "control" };
