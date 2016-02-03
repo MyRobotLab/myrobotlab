@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.ArrayList;
 
 public class WikiDataFetcher extends Service {
 
@@ -172,114 +173,151 @@ public class WikiDataFetcher extends Service {
 		return  ((ItemDocument) document).getStatementGroups();
 	}
 	
-	private Value getSnak(String query, String ID) throws MediaWikiApiErrorException{;
+	private ArrayList getSnak(String query, String ID) throws MediaWikiApiErrorException{;
 		List<StatementGroup> document = getStatementGroup(query,ID);
 		String dataType = "error";
 		Value data = document.get(0).getProperty();
+		ArrayList al = new ArrayList();
 		for (StatementGroup sg : document) {
 			if (ID.equals(sg.getProperty().getId())) { // Check if this ID exist for this document
 				
 				for (Statement s : sg.getStatements()) {
 				if (s.getClaim().getMainSnak() instanceof ValueSnak) {	
-					System.out.println("DataType : " + ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString());
+					//System.out.println("DataType : " + ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString());
 					dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
-					 switch (dataType) {
-			         	case "wikibase-item":
-			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getValue();
-			         		break;
-			         	case "time":
-			         		data = (TimeValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
-			         		break;
-			         	case "globe-coordinates":
-			         		data = (GlobeCoordinatesValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
-			         		break;
-			         	case "monolingualtext":
-			         		data = (MonolingualTextValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
-			         		break;
-			         	case "quantity":
-			         		data = (QuantityValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
-			         		break;
-			         	case "propertyId":
-			         		data = (PropertyIdValue)(((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue());
-			         		break;
-			         	case "url":
-			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue();
-			         		break;
-			         	case "commonsMedia":
-			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatavalue();
-			         		break;
-			         	default:
-			         		data = ((JacksonValueSnak) s.getClaim().getMainSnak()).getValue();
-			         		break;
-			         }
-				} 	
+					al.add(dataType);
+					al.add((JacksonValueSnak) s.getClaim().getMainSnak());
+					 
+				} 
+				
 				}
 			}
 		
 		}
-		return data;
+		return al;
 	
 		
 	}
 	
+	public String getData(String query, String ID)throws MediaWikiApiErrorException{
+		try {
+			ArrayList al = getSnak(query,ID);
+			Value data = ((JacksonValueSnak) al.get(1)).getDatavalue();
+			String dataType = (String) al.get(0);
+			String answer = "";
+			switch (dataType) {
+         	case "wikibase-item"://
+         		String info = (String) data.toString();
+         		int beginIndex = info.indexOf('Q');
+                int endIndex = info.indexOf("(") ;
+                info = info.substring(beginIndex , endIndex-1);
+        		answer = getLabelById(info);
+         		break;
+         	case "time"://
+         		data = (TimeValue) data;
+         		answer =  String.valueOf(((TimeValue) data).getDay()) +"/" + String.valueOf(((TimeValue) data).getMonth()) +"/" + String.valueOf(((TimeValue) data).getYear()) +" - " + String.valueOf(((TimeValue) data).getHour()) +"H" + String.valueOf(((TimeValue) data).getMinute()) +"Mn";
+         		break;
+         	case "globe-coordinates":
+         		answer = ((GlobeCoordinatesValue)data).toString();
+         		break;
+         	case "monolingualtext"://
+         		data = (MonolingualTextValue)data;
+         		answer = data.toString();
+         		break;
+         	case "quantity"://
+         		data = (QuantityValue)data;
+         		String quantity = 	String.valueOf(((QuantityValue) data).getNumericValue());
+    			String unit = data.toString();
+    			int beginIndex2 = unit.indexOf('Q');
+    			if (beginIndex2 != -1){
+    				unit = unit.substring(beginIndex2);
+    				quantity += " " + getLabelById(unit);
+    			}
+    			System.out.println(answer);
+    			answer = quantity;
+         		break;
+         	case "propertyId":
+         		answer = ((PropertyIdValue)data).toString();
+         		break;
+         	case "url"://
+         		answer = data.toString();
+         		break;
+         	case "commonsMedia":
+         		data = ((JacksonValueSnak) data).getDatavalue();
+         		break;
+         	default:
+         		answer = "Not Found !";
+         		break;
+         }
+			return answer;
+		}
+		catch (Exception e){return  "Not Found !";}
+	}
+
+	
 	public String getProperty(String query, String ID)throws MediaWikiApiErrorException{
 		try {
-		String info = (getSnak(query,ID)).toString();
-		int beginIndex = info.indexOf('Q');
-        int endIndex = info.indexOf("(") ;
-        info = info.substring(beginIndex , endIndex-1);
-		return getLabelById(info);
+			ArrayList al = getSnak(query,ID);
+			String info = (((JacksonValueSnak) al.get(1)).getDatavalue()).toString();
+			int beginIndex = info.indexOf('Q');
+			int endIndex = info.indexOf("(") ;
+			info = info.substring(beginIndex , endIndex-1);
+			return getLabelById(info);
 		}
 		catch (Exception e){return  "Not Found !";}
 	}
 	
 	public String getTime(String query, String ID, String what)throws MediaWikiApiErrorException{
 		try {
-		TimeValue date =  (TimeValue)(getSnak(query,ID));	
-		String data ="";
-		switch (what) {
-        	case "year":
-        		data = String.valueOf(date.getYear());
-        		break;
-        	case "month":
-        		data = String.valueOf(date.getMonth());
-        		break;
-        	case "day":
-        		data = String.valueOf(date.getDay());
-        		break;
-        	case "hour":
-        		data = String.valueOf(date.getHour());
-        		break;
-        	case "minute":
-        		data = String.valueOf(date.getMinute());
-        		break;
-        	case "second":
-        		data = String.valueOf(date.getSecond());
-        		break;
-        	case "before":
-        		data = String.valueOf(date.getBeforeTolerance());
-        		break;
-        	case "after":
-        		data = String.valueOf(date.getAfterTolerance());
-        		break;
-        	default:
-        		data = "ERROR";
-     }
+			ArrayList al = getSnak(query,ID);
+			TimeValue date = (TimeValue) ((JacksonValueSnak) al.get(1)).getDatavalue();
+			String data ="";
+			switch (what) {
+        		case "year":
+        			data = String.valueOf(date.getYear());
+        			break;
+        		case "month":
+        			data = String.valueOf(date.getMonth());
+        			break;
+        		case "day":
+        			data = String.valueOf(date.getDay());
+        			break;
+        		case "hour":
+        			data = String.valueOf(date.getHour());
+        			break;
+        		case "minute":
+        			data = String.valueOf(date.getMinute());
+        			break;
+        		case "second":
+        			data = String.valueOf(date.getSecond());
+        			break;
+        		case "before":
+        			data = String.valueOf(date.getBeforeTolerance());
+        			break;
+        		case "after":
+        			data = String.valueOf(date.getAfterTolerance());
+        			break;
+        		default:
+        			data = "ERROR";
+     
+			}
 		return data;
 		}
+		
 		catch (Exception e){return  "Not a TimeValue !";}
 	}
 	
 	public String getUrl(String query, String ID)throws MediaWikiApiErrorException{
 		try {
-		return (getSnak(query,ID)).toString();
+			return (((JacksonValueSnak) getSnak(query,ID).get(1)).getDatavalue()).toString();
 		}
 		catch (Exception e){return  "Not Found !";}
 	}
 		
 	public String getQuantity(String query, String ID)throws MediaWikiApiErrorException{
 		try {
-			QuantityValue data = (QuantityValue) (getSnak(query,ID));
+			ArrayList al = getSnak(query,ID);
+			QuantityValue data = (QuantityValue) (((JacksonValueSnak) al.get(1)).getDatavalue());
 			String info = 	String.valueOf(data.getNumericValue());
 			String unit = data.toString();
 			int beginIndex = unit.indexOf('Q');
@@ -294,7 +332,7 @@ public class WikiDataFetcher extends Service {
 	
 	public String getMonolingualValue(String query, String ID)throws MediaWikiApiErrorException{
 		try {
-		return (getSnak(query,ID)).toString();
+			return (((JacksonValueSnak) getSnak(query,ID).get(1)).getDatavalue()).toString();
 		}
 		catch (Exception e){return  "Not Found !";}
 	}
