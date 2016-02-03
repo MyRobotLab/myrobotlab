@@ -68,7 +68,7 @@ public class WikiDataFetcher extends Service {
 	
 	private EntityDocument getWiki(String query) throws MediaWikiApiErrorException{
 		WikibaseDataFetcher wbdf =  WikibaseDataFetcher.getWikidataDataFetcher();
-		EntityDocument wiki = wbdf.getEntityDocumentByTitle(website,query);
+		EntityDocument wiki = wbdf.getEntityDocumentByTitle(website,upperCaseAllFirst(query));
 		if (wiki == null) {
 			System.out.println("ERROR ! Can't get the document : " + query);
 		 	} 	
@@ -77,7 +77,7 @@ public class WikiDataFetcher extends Service {
 	
 	private EntityDocument getWikiById(String query) throws MediaWikiApiErrorException{
 		WikibaseDataFetcher wbdf =  WikibaseDataFetcher.getWikidataDataFetcher();
-		EntityDocument wiki = wbdf.getEntityDocument(query);
+		EntityDocument wiki = wbdf.getEntityDocument(upperCaseAllFirst(query));
 		if (wiki == null) {
 			System.out.println("ERROR ! Can't get the document : " + query);
 		 	} 	
@@ -150,12 +150,29 @@ public class WikiDataFetcher extends Service {
 		catch (Exception e){return  sentence;}
 	}
 	
+	public static String upperCaseAllFirst(String value) {
+
+		char[] array = value.toCharArray();
+		// Uppercase first letter.
+		array[0] = Character.toUpperCase(array[0]);
+
+		// Uppercase all letters that follow a whitespace character.
+		for (int i = 1; i < array.length; i++) {
+		    if (Character.isWhitespace(array[i - 1])) {
+			array[i] = Character.toUpperCase(array[i]);
+		    }
+		}
+
+		// Result.
+		return new String(array);
+	    }
+	
 	private List<StatementGroup> getStatementGroup(String query, String ID) throws MediaWikiApiErrorException{
 		EntityDocument document = getWiki(query);
 		return  ((ItemDocument) document).getStatementGroups();
 	}
 	
-	private Value getSnak(String query, String ID) throws MediaWikiApiErrorException{
+	private Value getSnak(String query, String ID) throws MediaWikiApiErrorException{;
 		List<StatementGroup> document = getStatementGroup(query,ID);
 		String dataType = "error";
 		Value data = document.get(0).getProperty();
