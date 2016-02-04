@@ -184,6 +184,7 @@ public class DHRobotArm {
 	public void centerAllJoints() {
 		for (DHLink link : links) {
 			double center = (link.getMax() + link.getMin())/2.0;
+			log.info("Centering Servo {} to {} degrees", link.getName(), center);
 			link.setTheta(center);
 		}
 	}

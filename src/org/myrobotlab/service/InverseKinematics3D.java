@@ -13,9 +13,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.service.Joystick.Input;
-import org.myrobotlab.service.Joystick.InputPollingThread;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PointsListener;
 import org.slf4j.Logger;
@@ -176,7 +174,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	
 	public void centerAllJoints() {
 		currentArm.centerAllJoints();
-		publishTelemetry();		
+		publishTelemetry();
 	}
 	
 	public void moveTo(Point p) {
@@ -246,6 +244,9 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		
+		Python python = (Python)Runtime.createAndStart("python", "Python");
+		GUIService gui = (GUIService)Runtime.createAndStart("gui", "GUIService");
+		
 		InverseKinematics3D inversekinematics = (InverseKinematics3D)Runtime.start("ik3d", "InverseKinematics3D");
 		// InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
 		inversekinematics.setCurrentArm(InMoovArm.getDHRobotArm());
@@ -279,12 +280,12 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		//LeapMotion lm = (LeapMotion)Runtime.start("leap", "LeapMotion");
 		//lm.addPointsListener(inversekinematics);
 		
-		boolean attached = false;
+		boolean attached = true;
 		if (attached) {
 			// set up the left inmoov arm
 			InMoovArm leftArm = (InMoovArm)Runtime.start("leftArm", "InMoovArm");
-			leftArm.connect("COM36");
-			leftArm.omoplate.setMinMax(90, 180);
+			leftArm.connect("COM21");
+			// leftArm.omoplate.setMinMax(0, 180);
 			// attach the publish joint angles to the on JointAngles for the inmoov arm.
 			inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");		
 		}
@@ -371,7 +372,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 			input.value = 0.0F;
 		}
 		
-		double totalGain = 5.0;
+		double totalGain = 20.0;
 		double xGain = totalGain;
 		double yGain = totalGain;
 		double zGain = totalGain;

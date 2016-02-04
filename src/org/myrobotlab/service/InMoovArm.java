@@ -346,14 +346,16 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		HashMap<String, Double> phaseShiftMap = new HashMap<String, Double>();
 		// phaseShiftMap.put("omoplate", 90);
 		// Harry's omoplate is +90 degrees from Gaels InMoov..
+		// These are for the encoder offsets. 
+		// these map between the reference frames of the dh model & the actual arm.  (calibration)
 		phaseShiftMap.put("omoplate", 90.0);
-		phaseShiftMap.put("shoulder", 0.0);
-		phaseShiftMap.put("rotate", 0.0);
+		phaseShiftMap.put("shoulder", 90.0);
+		phaseShiftMap.put("rotate", -450.0);
 		phaseShiftMap.put("bicep", 90.0);
 		
 		HashMap<String, Double> gainMap = new HashMap<String, Double>();
 		gainMap.put("omoplate", 1.0);
-		gainMap.put("shoulder", 1.0);
+		gainMap.put("shoulder", -1.0);
 		gainMap.put("rotate", -1.0);
 		gainMap.put("bicep", -1.0);
 		
@@ -366,19 +368,31 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 			if (angleMap.containsKey(s)) {
 				if ("omoplate".equals(s)) {
 					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360.0;
+					if (angle < 0) {
+						angle += 360;
+					}
 					omoplate.moveTo(angle.intValue());
 				}
 				if ("shoulder".equals(s)) {
 					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360.0;
+					if (angle < 0) {
+						angle += 360;
+					}
 					shoulder.moveTo(angle.intValue());
 				}
 				if ("rotate".equals(s)) {
 					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360.0;
+					if (angle < 0) {
+						angle += 360;
+					}
 					rotate.moveTo(angle.intValue());
 				}
 				if ("bicep".equals(s)) {
 					Double angle = (gainMap.get(s)*angleMap.get(s) + phaseShiftMap.get(s))%360.0;
 					bicep.moveTo(angle.intValue());
+					if (angle < 0) {
+						angle += 360;
+					}
 				}
 			}
 		}
@@ -390,19 +404,22 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		DHRobotArm arm = new DHRobotArm();
 		// d , r, theta , alpha
 		
+		// TODO: the DH links should take into account the encoder offsets and calibration maps
 		DHLink link1 = new DHLink("omoplate", 0, 40, 0, MathUtils.degToRad(-90));
 		link1.setMin(MathUtils.degToRad(-80));
-		link1.setMax(MathUtils.degToRad(10));
+		link1.setMax(MathUtils.degToRad(0));
 		
 		DHLink link2 = new DHLink("shoulder", 80, 0, 0, MathUtils.degToRad(90));
-		link2.setMin(MathUtils.degToRad(0));
-		link2.setMax(MathUtils.degToRad(180));
+		// TODO: this is actually 90 to -90 ? validate if inverted.
+		link2.setMin(MathUtils.degToRad(-90));
+		link2.setMax(MathUtils.degToRad(90));
 		
 		DHLink link3 = new DHLink("rotate", 280, 0, 0, MathUtils.degToRad(90));
-		link3.setMin(MathUtils.degToRad(-90));
-		link3.setMax(MathUtils.degToRad(90));
+		link3.setMin(MathUtils.degToRad(90));
+		link3.setMax(MathUtils.degToRad(270));
 		
 		DHLink link4 = new DHLink("bicep", 0, 280, 0, MathUtils.degToRad(0));
+		// TODO: this is probably inverted? should be 90 to 0...
 		link4.setMin(MathUtils.degToRad(0));
 		link4.setMax(MathUtils.degToRad(90));
 		
