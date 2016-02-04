@@ -136,12 +136,23 @@ public class Platform implements Serializable {
 		return bitness;
 	}
 
-	public String getClassPathSeperator() {
+	public String getDirectorySeparator() {
+		return System.getProperties().getProperty("file.separator");
+	}
+	
+	public String getClassPathSeparator() {
+		return System.getProperties().getProperty("path.separator");
+	}
+/*	public String getClassPathSeperator() {
 		if (isWindows()) {
 			return ";";
 		} else {
 			return ":";
 		}
+	}*/
+	
+	public String getNewLineSeparator() {
+		return System.getProperties().getProperty("line.separator");
 	}
 
 	public String getInstanceId() {
