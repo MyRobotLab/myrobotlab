@@ -355,6 +355,9 @@ public class Servo extends Service implements ServoControl {
 
 		controller.servoWrite(this);
 		lastActivityTime = System.currentTimeMillis();
+		
+		// update the web gui that we've moved..
+		broadcastState();
 
 	}
 
