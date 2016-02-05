@@ -183,8 +183,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		if (inputMatrix != null) {
 			p = rotateAndTranslate(p);
 		}
-		currentArm.moveToGoal(p);
-		publishTelemetry();
+		boolean success = currentArm.moveToGoal(p);
+		
+		if (success) {
+			publishTelemetry();
+		}
 	}
 
 	public void publishTelemetry() {
@@ -372,9 +375,10 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 			input.value = 0.0F;
 		}
 		
-		double totalGain = 20.0;
+		double totalGain = 100.0;
 		double xGain = totalGain;
-		double yGain = totalGain;
+		// invert y control.
+		double yGain = -1.0 * totalGain;
 		double zGain = totalGain;
 		if ("x".equals(input.id)) {
 			// x axis control (left/right)
