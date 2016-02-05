@@ -21,7 +21,7 @@ public class MouthControl extends Service {
 
 	public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
 
-	public int moutClosedPos = 20;
+	public int mouthClosedPos = 20;
 	public int mouthOpenedPos = 4;
 	public int delaytime = 100;
 	public int delaytimestop = 200;
@@ -94,11 +94,25 @@ public class MouthControl extends Service {
 	public Arduino getArduino() {
 		return arduino;
 	}
-	
-	public Servo getJawServo() {
+	public Servo getJaw() {
 		return jaw;
 	}
-	
+
+	public void setJaw(Servo jaw) {
+		this.jaw = jaw;
+	}
+
+	public SpeechSynthesis getMouth() {
+		return mouth;
+	}
+
+	public void setMouth(SpeechSynthesis mouth) {
+		this.mouth = mouth;
+	}
+
+	public void setArduino(Arduino arduino) {
+		this.arduino = arduino;
+	}
 	@Override
 	public String[] getCategories() {
 		return new String[] { "control" };
@@ -146,7 +160,7 @@ public class MouthControl extends Service {
 						// open spot
 						ison = true;
 						sleep(delaytime);
-						jaw.moveTo(moutClosedPos);// #// close the servo
+						jaw.moveTo(mouthClosedPos);// #// close the servo
 					} else if (s == '.') {
 						ison = false;
 						sleep(delaytimestop);
@@ -181,7 +195,7 @@ public class MouthControl extends Service {
 
 	public void setmouth(Integer closed, Integer opened) {
 		// jaw.setMinMax(closed, opened);
-		moutClosedPos = closed;
+		mouthClosedPos = closed;
 		mouthOpenedPos = opened;
 
 		if (closed < opened) {
