@@ -189,7 +189,7 @@ public class DHRobotArm {
 		}
 	}
 	
-	public void moveToGoal(Point goal) {
+	public boolean moveToGoal(Point goal) {
 		// we know where we are.. we know where we want to go.
 		int numSteps = 0;
 		double iterStep = 0.25;
@@ -199,7 +199,8 @@ public class DHRobotArm {
 			numSteps++;
 			if (numSteps >= maxIterations) {
 				log.info("Attempted to iterate there, but didn't make it. giving up.");
-				break;
+				// we shouldn't publish  if we don't solve! 
+				return false;
 			}
 			// TODO: what if its unreachable!
 			Point currentPos = this.getPalmPosition();
@@ -242,6 +243,7 @@ public class DHRobotArm {
 				break;
 			}
 		}
+		return true;
 	}
 
 	public void setLinks(ArrayList<DHLink> links) {
