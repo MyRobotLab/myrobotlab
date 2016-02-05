@@ -79,6 +79,7 @@ public class WikiDataFetcher extends Service {
 	private EntityDocument getWikiById(String query) throws MediaWikiApiErrorException{
 		WikibaseDataFetcher wbdf =  WikibaseDataFetcher.getWikidataDataFetcher();
 		EntityDocument wiki = wbdf.getEntityDocument(upperCaseAllFirst(query));
+		//System.out.println( (String) wiki.getEntityId().getId());
 		if (wiki == null) {
 			System.out.println("ERROR ! Can't get the document : " + query);
 		 	} 	
@@ -231,9 +232,9 @@ public class WikiDataFetcher extends Service {
     			int beginIndex2 = unit.indexOf('Q');
     			if (beginIndex2 != -1){
     				unit = unit.substring(beginIndex2);
-    				quantity += " " + getLabelById(unit);
+    				if (Long.parseLong(quantity, 16) <2){quantity += " " + getLabelById(unit);}
+    				else {quantity += " " + getLabelById(unit) + "s";}
     			}
-    			System.out.println(answer);
     			answer = quantity;
          		break;
          	case "propertyId":
