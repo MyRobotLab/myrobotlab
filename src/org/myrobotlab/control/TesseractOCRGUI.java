@@ -33,7 +33,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.TesseractOCR;
+import org.myrobotlab.service.TesseractOcr;
 import org.slf4j.Logger;
 
 public class TesseractOCRGUI extends ServiceGUI implements ActionListener {
@@ -53,16 +53,16 @@ public class TesseractOCRGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-		subscribe("publishState", "getState", TesseractOCR.class);
+		subscribe("publishState", "getState", TesseractOcr.class);
 		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishState", "getState", TesseractOCR.class);
+		unsubscribe("publishState", "getState", TesseractOcr.class);
 	}
 
-	public void getState(TesseractOCR template) {
+	public void getState(TesseractOcr template) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {

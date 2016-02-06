@@ -1,20 +1,13 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
-
-import chess.ComputerPlayer;
-import chess.Game;
-import chess.HumanPlayer;
-import chess.Piece;
-import chess.Position;
 
 public class ChessGameManager extends Service {
 
@@ -26,15 +19,6 @@ public class ChessGameManager extends Service {
 	transient Serial serial;
 	transient SpeechSynthesis speech;
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		// put peer definitions in
-		peers.put("webgui", "WebGui", "webgui");
-		peers.put("serial", "Serial", "serial");
-		peers.put("speech", "AcapelaSpeech", "speech");
-		return peers;
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -55,14 +39,23 @@ public class ChessGameManager extends Service {
 		super(n);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "game" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(ChessGameManager.class.getCanonicalName());
+		meta.addDescription("manages multiple interfaces for a chess game");
+		meta.addCategory("game");	
+		meta.addPeer("webgui", "WebGui", "webgui");
+		meta.addPeer("serial", "Serial", "serial");
+		meta.addPeer("speech", "Speech", "speech");
+		return meta;		
 	}
 
 }

@@ -45,8 +45,8 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Wii.IRData;
-import org.myrobotlab.service.WiiDAR;
-import org.myrobotlab.service.WiiDAR.Point;
+import org.myrobotlab.service.WiiDar;
+import org.myrobotlab.service.WiiDar.Point;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.slf4j.Logger;
 
@@ -165,7 +165,7 @@ public class WiiDARGUI extends ServiceGUI implements ListSelectionListener, Vide
 
 			// get the first and last point
 			Point first = points.get(0);
-			String dir = (first.direction == WiiDAR.LEFT) ? "left" : "right";
+			String dir = (first.direction == WiiDar.LEFT) ? "left" : "right";
 
 			// set appropriate color
 			Color color = (dir.compareTo(leftstr) == 0) ? Color.green : Color.red;
@@ -213,7 +213,7 @@ public class WiiDARGUI extends ServiceGUI implements ListSelectionListener, Vide
 
 			int maxHistory = 3;
 
-			history.add(WiiDAR.copy(points));
+			history.add(WiiDar.copy(points));
 			p = history.get(0).get(0);
 			if (history.size() > maxHistory) {
 				history.remove(0);

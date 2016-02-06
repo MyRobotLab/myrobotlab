@@ -28,6 +28,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -74,16 +75,6 @@ public class TestThrower extends Service {
 		super(n);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "framework", "testing" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "service for test message sending";
-	}
-
 	public Integer pitch(Integer number) {
 		++cnt;
 		log.debug("noPitchInteger null ");
@@ -121,5 +112,22 @@ public class TestThrower extends Service {
 		send(nameOfTargetService, nameOfMethod, data);
 		return data;
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(TestThrower.class.getCanonicalName());
+		meta.addDescription("TestThrower is used with TestCatcher to test messaging");
+		meta.addCategory("testing","framework");		
+		return meta;
+	}
+
 
 }

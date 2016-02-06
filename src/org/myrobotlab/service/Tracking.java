@@ -40,8 +40,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -151,19 +151,8 @@ public class Tracking extends Service {
 	// ------------------- tracking & detecting methods begin
 	// ---------------------
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("x", "Servo", "pan servo");
-		peers.put("y", "Servo", "tilt servo");
-		peers.put("pid", "PID2", "PID service - for all your pid needs");
-		peers.put("opencv", "OpenCV", "shared OpenCV instance");
-		peers.put("arduino", "Arduino", "shared Arduino instance");
-		return peers;
-	}
 
-
-
-	// FIXME !! question remains does the act of creating peers update the
+	// FIXME !! question remains does the act of creating meta update the
 	// reservatinos ?
 	// e.g if I come to the party does the reservations get updated or do I
 	// crash the party ??
@@ -252,10 +241,6 @@ public class Tracking extends Service {
 		return arduino;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "video", "tracking", "control" };
-	}
 
 	// TODO - enhance with location - not just heading
 	// TODO - array of attributes expanded Object[] ... ???
@@ -268,10 +253,6 @@ public class Tracking extends Service {
 	// ------------------- tracking & detecting methods end
 	// ---------------------
 
-	@Override
-	public String getDescription() {
-		return "proportional control, tracking, and translation";
-	}
 
 	public OpenCV getOpenCV() {
 
@@ -764,4 +745,26 @@ public class Tracking extends Service {
 
 	}
 
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Tracking.class.getCanonicalName());
+		meta.addDescription("proportional control, tracking, and translation");
+		meta.addCategory("vision","video", "sensor", "control");		
+		meta.addPeer("x", "Servo", "pan servo");
+		meta.addPeer("y", "Servo", "tilt servo");
+		meta.addPeer("pid", "PID2", "PID service - for all your pid needs");
+		meta.addPeer("opencv", "OpenCV", "shared OpenCV instance");
+		meta.addPeer("arduino", "Arduino", "shared Arduino instance");
+		return meta;
+	}
+	
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Matrix;
@@ -13,7 +14,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.service.Joystick.Input;
+import org.myrobotlab.service.Joystick.InputPollingThread;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PointsListener;
 import org.slf4j.Logger;
@@ -174,7 +177,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 	
 	public void centerAllJoints() {
 		currentArm.centerAllJoints();
-		publishTelemetry();
+		publishTelemetry();		
 	}
 	
 	public void moveTo(Point p) {
@@ -186,8 +189,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		boolean success = currentArm.moveToGoal(p);
 		
 		if (success) {
-			publishTelemetry();
-		}
+		publishTelemetry();
+	}
 	}
 
 	public void publishTelemetry() {
@@ -225,15 +228,6 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		return jointPositionMap;
 	}
 	
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot", "control" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "a 3D kinematics service supporting D-H parameters";
-	}
 
 	public DHRobotArm getCurrentArm() {
 		return currentArm;
@@ -399,5 +393,23 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 		// we will allow translation, x,y,z 
 		// for the input point.
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(InverseKinematics3D.class.getCanonicalName());
+		meta.addDescription("a 3D kinematics service supporting D-H parameters");
+		meta.addCategory("robot", "control");
+		
+		return meta;
+	}
+
 	
 }

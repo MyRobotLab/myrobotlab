@@ -45,38 +45,38 @@ import org.myrobotlab.control.widget.DirectionWidget;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.IPCamera;
+import org.myrobotlab.service.IpCamera;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
-public class IPCameraGUI extends ServiceGUI implements ListSelectionListener {
+public class IpCameraGUI extends ServiceGUI implements ListSelectionListener {
 
 	public class DirectionEventListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent ae) {
 			log.info("{}", ae);
 			if ("n".equals(ae.getActionCommand())) {
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_UP);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_UP);
 			} else if ("listener".equals(ae.getActionCommand())) {
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_UP);
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_LEFT);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_UP);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_LEFT);
 			} else if ("e".equals(ae.getActionCommand())) {
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_LEFT);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_LEFT);
 			} else if ("se".equals(ae.getActionCommand())) {
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_DOWN);
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_LEFT);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_DOWN);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_LEFT);
 			} else if ("s".equals(ae.getActionCommand())) {
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_DOWN);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_DOWN);
 			} else if ("sw".equals(ae.getActionCommand())) {
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_DOWN);
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_RIGHT);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_DOWN);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_RIGHT);
 			} else if ("w".equals(ae.getActionCommand())) {
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_RIGHT);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_RIGHT);
 			} else if ("nw".equals(ae.getActionCommand())) {
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_UP);
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_RIGHT);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_UP);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_RIGHT);
 			} else if ("stop".equals(ae.getActionCommand())) {
-				myService.send(boundServiceName, "move", IPCamera.FOSCAM_MOVE_STOP_RIGHT);
+				myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_STOP_RIGHT);
 				// myService.send(boundServiceName, "move",
 				// IPCamera.FOSCAM_MOVE_CENTER);
 			} else if ("connect".equals(ae.getActionCommand())) {
@@ -123,7 +123,7 @@ public class IPCameraGUI extends ServiceGUI implements ListSelectionListener {
 
 	}
 
-	public final static Logger log = LoggerFactory.getLogger(IPCameraGUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(IpCameraGUI.class.getCanonicalName());
 	static final long serialVersionUID = 1L;
 
 	VideoWidget video0;
@@ -132,7 +132,7 @@ public class IPCameraGUI extends ServiceGUI implements ListSelectionListener {
 
 	// JPanel info;
 
-	IPCamera myIPCamera;
+	IpCamera myIPCamera;
 	JButton connect;
 	// JButton capture;
 	// JLabel connected;
@@ -151,9 +151,9 @@ public class IPCameraGUI extends ServiceGUI implements ListSelectionListener {
 
 	DirectionEventListener dirEventListener = new DirectionEventListener();
 
-	public IPCameraGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public IpCameraGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
-		myIPCamera = (IPCamera) Runtime.getService(boundServiceName);
+		myIPCamera = (IpCamera) Runtime.getService(boundServiceName);
 		direction.setDirectionListener(dirEventListener);
 	}
 

@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -45,11 +46,6 @@ public class CleverBot extends Service {
 	}
 	
 
-	static public String[] getDependencies() {
-		return new String[] {"com.googlecode.chatterbot"};
-	}
-
-
 	public CleverBot(String n) {
 		super(n);
 		init();
@@ -64,16 +60,6 @@ public class CleverBot extends Service {
 		}
 
 		return null;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "intellegence" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
 	}
 
 	public boolean init() {
@@ -115,5 +101,24 @@ public class CleverBot extends Service {
 
 		return input;
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(CleverBot.class.getCanonicalName());
+		meta.addDescription("chatbot service");
+		meta.addCategory("intellegence");	
+		meta.addDependency("com.googlecode.chatterbot");
+		return meta;		
+	}
+
 
 }

@@ -25,13 +25,9 @@ public interface ServiceInterface extends Messaging, LoggingSink, NameProvider {
 
 	public void removeListener(String localTopic, String otherService, String callback);
 
-	public String[] getCategories();
-
 	public String[] getDeclaredMethodNames();
 
 	public Method[] getDeclaredMethods();
-
-	public String getDescription();
 
 	public URI getInstanceId();
 
@@ -96,4 +92,7 @@ public interface ServiceInterface extends Messaging, LoggingSink, NameProvider {
 	public void out(String method, Object retobj);
 	
 	public boolean isRuntime();
+	
+	// FIXME - meta data needs to be infused into instance
+	public String getDescription();
 }

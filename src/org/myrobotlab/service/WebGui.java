@@ -31,12 +31,14 @@ import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.MethodCache;
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.StatusLevel;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -92,9 +94,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 	 * 
 	 * @return
 	 */
-	static public String[] getDependencies() {
-		return new String[] { "io.netty", "org.atmosphere.nettosphere" };
-	}
 
 	public static class LiveVideoStreamHandler implements Handler {
 
@@ -430,16 +429,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		 * "onRegistered", si); m.sender = Runtime.getInstance().getName();
 		 * broadcast(m);
 		 */
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "display" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "web enabled gui";
 	}
 
 	public Map<String, String> getHeadersInfo(HttpServletRequest request) {
@@ -908,12 +897,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			nettosphere.stop();
 		}
 	}
-
+	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
+		
+		/*
+		ServiceType meta = getMetaData(WebGui.class.getCanonicalName());
+		log.info(meta.toString());
+		*/
+		
 
-		log.info("hello");
+		//log.info("hello");
 
 		// Call context.reset() to clear any previous configuration, e.g.
 		// default
@@ -923,11 +918,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// configurator.doConfigure(args[0]);
 
 		// log.info(Logging.)
+		/*
 		log.trace("trace");
 		log.debug("debug");
 		log.info("info");
 		log.warn("warn");
 		log.error("error");
+		*/
 
 		try {
 
@@ -941,13 +938,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			// Runtime.start("python", "Python");
 			// ProgramAB ai = (ProgramAB) Runtime.start("ai", "ProgramAB");
 			// Runtime.start("mouth", "AcapelaSpeech");
-			Runtime.start("head", "InMoovHead");
+			// Runtime.start("head", "InMoovHead");
 			// Runtime.start("head", "InMoovHead");
 			// Runtime.start("arduino", "Arduino");
 			// ai.startSession("alice2");
 			// ai.getResponse("hello ");
 
+			Runtime.start("servo", "Servo");
 			WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
+			log.info(Service.getDNA().toString());
+			webgui.startPeer("tracker");
+			
+			log.info(Service.getDNA().toString());
 			// webgui.autoStartBrowser(false);
 
 			// Runtime.start("python", "Python");
@@ -986,5 +988,24 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(WebGui.class.getCanonicalName());
+		meta.addDescription("web display");
+		meta.addCategory("display");
+		// meta.addPeer("tracker", "Tracking", "test tracking");
+		meta.addDependency("io.netty", "org.atmosphere.nettosphere");
+		return meta;		
 	}
 }

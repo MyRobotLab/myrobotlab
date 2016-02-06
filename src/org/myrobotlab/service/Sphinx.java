@@ -42,8 +42,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -85,16 +86,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		}
 	}
 	
-	/**
-	 * Static list of third party dependencies for this service.
-	 * The list will be consumed by Ivy to download and manage
-	 * the appropriate resources
-	 * @return
-	 */
-	static public String[] getDependencies() {
-		return new String[] { "javax.speech.recognition",
-		        "edu.cmu.sphinx"};
-	}
+	
 
 	class SpeechProcessor extends Thread {
 		Sphinx myService = null;
@@ -455,16 +447,6 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		return true;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "speech recognition", "control" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "<html>speech recoginition service wrapping Sphinx 4</html>";
-	}
-
 	public boolean isRecording() {
 		return microphone.isRecording();
 	}
@@ -677,5 +659,22 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 	@Override
 	public void onEndSpeaking(String utterance) {
 		resumeListening();
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Sphinx.class.getCanonicalName());
+		meta.addDescription("open source pure Java speech recognition");
+		meta.addCategory("speech recognition", "control");
+		meta.addDependency("javax.speech.recognition", "edu.cmu.sphinx");		
+		return meta;
 	}
 }

@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -39,7 +40,7 @@ import org.slf4j.Logger;
 
 // TODO - BlockingQueue - + reference !
 
-public class WiiDAR extends Service {
+public class WiiDar extends Service {
 
 	public final static class Point implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -53,19 +54,6 @@ public class WiiDAR extends Service {
 		public int servoPos = 0;
 		public int direction = -1;
 		public long servoTime = 0;
-
-		// int latency = 0;
-		// int error = 0;
-
-		/**
-		 * Static list of third party dependencies for this service. The list will
-		 * be consumed by Ivy to download and manage the appropriate resources
-		 * 
-		 * @return
-		 */
-		static public String[] getDependencies() {
-			return new String[] {  "wiiuse.wiimote" };
-		}
 
 		
 		Point(int id, int servoPos, int direction, long servoTime) {
@@ -199,7 +187,7 @@ public class WiiDAR extends Service {
 	 * ------ END
 	 */
 
-	public final static Logger log = LoggerFactory.getLogger(WiiDAR.class);
+	public final static Logger log = LoggerFactory.getLogger(WiiDar.class);
 
 	// TODO - possibly initialize - must contend with gui as well as arduino wii
 	// & servo
@@ -324,7 +312,7 @@ public class WiiDAR extends Service {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		try {
 
-			WiiDAR wiidar = new WiiDAR("wiidar");
+			WiiDar wiidar = new WiiDar("wiidar");
 			wiidar.startService();
 			Runtime.createAndStart("gui", "GUIService");
 			// wiidar.startRobot();
@@ -335,7 +323,7 @@ public class WiiDAR extends Service {
 
 	}
 
-	public WiiDAR(String n) {
+	public WiiDar(String n) {
 		super(n);
 	}
 
@@ -367,16 +355,6 @@ public class WiiDAR extends Service {
 		a = (c * Math.sin(A)) / Math.sin(C);
 
 		return a;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor", "display" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "<html>service used in conjection with a wii camera a laser for inexpensive WiiDAR, a Lidar like system<br>" + "see http://myrobotlab.org/node/1";
 	}
 
 	public ArrayList<Point> publishArrayofPoints(ArrayList<Point> points) {
@@ -517,5 +495,21 @@ public class WiiDAR extends Service {
 
 		sweeperThread = null;
 	}
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		ServiceType meta = new ServiceType(WiiDar.class.getCanonicalName());
+		meta.addDescription("ranging using a wiimote");
+		meta.addDependency("wiiuse.wiimote");
+		meta.addCategory("sensor");
+		return meta;		
+	}	
 
 }

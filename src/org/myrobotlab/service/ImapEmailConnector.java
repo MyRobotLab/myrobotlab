@@ -24,12 +24,13 @@ import java.text.ParseException;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
+import org.myrobotlab.framework.repo.ServiceType;
 
 /**
  * 
- * ImapEmailConnector - This connector can crawl the folders on an IMAP email server.
- * you can provide the user/pass/email server hostname.  It publishes documents that
- * represents the emails messages that were crawled.
+ * ImapEmailConnector - This connector can crawl the folders on an IMAP email
+ * server. you can provide the user/pass/email server hostname. It publishes
+ * documents that represents the emails messages that were crawled.
  *
  */
 public class ImapEmailConnector extends AbstractConnector {
@@ -73,13 +74,13 @@ public class ImapEmailConnector extends AbstractConnector {
 		try {
 			count = processFolder(folder);
 			Folder[] folders = folder.list();
-			// process all sub folders. 
+			// process all sub folders.
 			// TODO: check the recursion here and do it properly.
-			for(Folder f: folders) {
+			for (Folder f : folders) {
 				f = openFolder(f);
 				count = count + processFolder(f);
 			}
-		} catch(MessagingException e) {
+		} catch (MessagingException e) {
 			log.warn("Message Exception processing subfolders : {}", e.getLocalizedMessage());
 			e.printStackTrace();
 		}
@@ -98,7 +99,6 @@ public class ImapEmailConnector extends AbstractConnector {
 		}
 		return folder;
 	}
-
 
 	private int processFolder(Folder folder) {
 		log.info("Processing folder {}", folder.getName());
@@ -124,8 +124,8 @@ public class ImapEmailConnector extends AbstractConnector {
 					e.printStackTrace();
 					continue;
 				}
-				
-			} 
+
+			}
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			log.info("Messaging Exception getMessages {}", e.getLocalizedMessage());
@@ -143,7 +143,7 @@ public class ImapEmailConnector extends AbstractConnector {
 		Enumeration<Header> headers = m.getAllHeaders();
 		// walk every header and copy them to fields...
 		String messageId = null;
-		while(headers.hasMoreElements()) {
+		while (headers.hasMoreElements()) {
 			Header header = headers.nextElement();
 			String fieldName = cleanFieldName(header.getName());
 			if (fieldName.equals(MESSAGE_ID_HEADER)) {
@@ -158,18 +158,19 @@ public class ImapEmailConnector extends AbstractConnector {
 		// TODO: grab the body of the email
 		// TODO: grab the attachments.
 
-
 		// specific stuff we really care about..
 		// We want to map all the From / To / CC / BCCs
-		// 
+		//
 		// the "from" field should be handled in the "addHeadersToItem" method.
 		//
 
 		// Specially handle the TO field as this is multivalued.
 		// not sure which other fields we care about this for.
 
-		// TODO: this might be much faster to call this directly.. just need to pass it
-		// the header that we already copied to the to / bcc /cc fields of the mime message.
+		// TODO: this might be much faster to call this directly.. just need to
+		// pass it
+		// the header that we already copied to the to / bcc /cc fields of the
+		// mime message.
 		// InternetAddress.parseHeader(toHeader, this.strict)
 		//
 		// Address[] recipients = m.getAllRecipients();
@@ -202,47 +203,49 @@ public class ImapEmailConnector extends AbstractConnector {
 		} else {
 			MailDateFormat mailDateFormat = new MailDateFormat();
 			try {
-				// parse the string version of the field and make it a proper java date object
+				// parse the string version of the field and make it a proper
+				// java date object
 				sentdate = mailDateFormat.parse(doc.getField("date").get(0).toString());
-				doc.setField("sent_date",sentdate);
+				doc.setField("sent_date", sentdate);
 			} catch (ParseException e) {
 				log.warn("Date Parse Exception {}", e.getLocalizedMessage());
 				e.printStackTrace();
-			}                       
+			}
 		}
 
 		Date receivedDate = m.getReceivedDate();
 		if (receivedDate != null) {
-			doc.setField("received_date",receivedDate);
-		} 
+			doc.setField("received_date", receivedDate);
+		}
 
 		Address[] replyTo = m.getReplyTo();
 		if (replyTo != null) {
 			for (Address replyAddr : replyTo) {
-				doc.addToField("reply_to",replyAddr.toString());
+				doc.addToField("reply_to", replyAddr.toString());
 			}
-		} 
+		}
 
 		String subject = m.getSubject();
 		if (subject != null) {
 			doc.setField("subject", subject);
-		} else { 
+		} else {
 			log.debug("No subject");
 		}
 
 		// the body of the email here
 		Object content = m.getContent();
-		if (content instanceof String)  { 
+		if (content instanceof String) {
 			// This is already a string! ok...
-			doc.addToField("text",(String)(content));
+			doc.addToField("text", (String) (content));
 		} else if (content instanceof MimeMultipart) {
 			// multi-part mime docs are a pain. we'll just accumulate the
 			// text from each part.
 			int numParts = ((MimeMultipart) content).getCount();
 			// Walk all parts of the mime message.
-			for (int i = 0; i < numParts ; i++) {
-				BodyPart bp =((MimeMultipart) content).getBodyPart(i);
-				// add the various metadata fields to the document for this body part.
+			for (int i = 0; i < numParts; i++) {
+				BodyPart bp = ((MimeMultipart) content).getBodyPart(i);
+				// add the various metadata fields to the document for this body
+				// part.
 				try {
 					parseBodyPart(bp, doc);
 				} catch (Exception e) {
@@ -253,30 +256,30 @@ public class ImapEmailConnector extends AbstractConnector {
 			}
 		} else {
 			log.info("Unknown Type of content returned : " + content.getClass());
-			doc.addToField("text",content.toString());
+			doc.addToField("text", content.toString());
 		}
-		doc.setField("size",m.getSize());
+		doc.setField("size", m.getSize());
 		return doc;
 	}
 
-
 	public void parseBodyPart(Part p, Document doc) throws Exception {
-		// 
-		// switch on ismimetype for processing. (avoid fetching if we don't need to!)
+		//
+		// switch on ismimetype for processing. (avoid fetching if we don't need
+		// to!)
 		// attachments can be large.
 		if (p.isMimeType("text/plain")) {
-			String body = (String)p.getContent();
+			String body = (String) p.getContent();
 			doc.addToField("text", "body");
 			return;
 		} else if (p.isMimeType("multipart/alternative")) {
-			MimeMultipart mmp = (MimeMultipart)p.getContent();
-			for (int i=0 ; i < mmp.getCount(); i++) {
+			MimeMultipart mmp = (MimeMultipart) p.getContent();
+			for (int i = 0; i < mmp.getCount(); i++) {
 				// TODO: check this recursion! nested body parts!
 				parseBodyPart(mmp.getBodyPart(i), doc);
 			}
 			return;
 		} else if (p.isMimeType("text/html")) {
-			String body = (String)p.getContent();
+			String body = (String) p.getContent();
 			// TODO: have the pipeline parse the html
 			doc.addToField("html", body);
 			return;
@@ -293,7 +296,8 @@ public class ImapEmailConnector extends AbstractConnector {
 	}
 
 	private String cleanFieldName(String name) {
-		// TODO : centralize this as a util or something. (maybe move it to the pipeline)
+		// TODO : centralize this as a util or something. (maybe move it to the
+		// pipeline)
 		String clean = name.trim().toLowerCase().replaceAll(" ", "_");
 		return clean;
 	}
@@ -301,7 +305,8 @@ public class ImapEmailConnector extends AbstractConnector {
 	@Override
 	public void stopCrawling() {
 		// TODO Auto-generated method stub
-		// TODO: this isn't implemented yet..  I'd like to move this sort of stuff to the base class.
+		// TODO: this isn't implemented yet.. I'd like to move this sort of
+		// stuff to the base class.
 	}
 
 	public void disconnect() {
@@ -333,12 +338,6 @@ public class ImapEmailConnector extends AbstractConnector {
 			return null;
 		}
 		return store;
-	}
-
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return "This connector will connect to an IMAP based email server and crawl the emails.";
 	}
 
 	public String getEmailServer() {
@@ -382,17 +381,34 @@ public class ImapEmailConnector extends AbstractConnector {
 	}
 
 	public static void main(String[] args) throws Exception {
-		ImapEmailConnector connector = (ImapEmailConnector)Runtime.start("email", "ImapEmailConnector");
+		ImapEmailConnector connector = (ImapEmailConnector) Runtime.start("email", "ImapEmailConnector");
 		connector.setEmailServer("imap.gmail.com");
 		connector.setUsername("YYY");
 		connector.setPassword("XXX");
 		connector.setBatchSize(1);
-		Solr solr = (Solr)Runtime.start("solr", "Solr");
+		Solr solr = (Solr) Runtime.start("solr", "Solr");
 		// for example...
 		String solrUrl = "http://phobos:8983/solr/collection1";
 		solr.setSolrUrl(solrUrl);
 		connector.addDocumentListener(solr);
 		connector.startCrawling();
 	}
-	
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(ImapEmailConnector.class.getCanonicalName());
+		meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
+		meta.addCategory("data", "ingest");
+
+		return meta;
+	}
+
 }

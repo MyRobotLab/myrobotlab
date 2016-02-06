@@ -7,8 +7,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 
+
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -161,16 +163,6 @@ public class Blender extends Service {
 			error(e);
 		}
 		return false;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "display", "simulator" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general blender";
 	}
 
 	// -------- publish api end --------
@@ -381,6 +373,24 @@ public class Blender extends Service {
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+	
+
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Blender.class.getCanonicalName());
+		meta.addDescription("interfaces Blender for simulation and display");
+		meta.addCategory("display");	
+		meta.addCategory("simulator");	
+		return meta;		
 	}
 
 

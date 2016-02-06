@@ -42,6 +42,7 @@ import marytts.util.data.audio.AudioPlayer;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -67,10 +68,6 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     Object installationstateparam1;
     Object installationstateparam2;
     transient List<ComponentDescription> installation_toInstall;
-
-	static public String[] getDependencies() {
-		return new String[] {"marytts"};
-	}
 
 
     // we need to subclass the audio player class here, so we know when the run method exits and we can invoke
@@ -197,15 +194,6 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
         return -1;
     }
 
-    @Override
-    public String[] getCategories() {
-        return new String[]{"speech", "sound"};
-    }
-
-    @Override
-    public String getDescription() {
-        return "Speech synthesis based on MaryTTS";
-    }
 
     @Override
     public List<String> getVoices() {
@@ -686,4 +674,21 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
             }
         }
     }
+    
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(MarySpeech.class.getCanonicalName());
+		meta.addDescription("Speech synthesis based on MaryTTS");
+		meta.addCategory("speech", "sound");
+		meta.addDependency("marytts");
+		return meta;
+	}
 }

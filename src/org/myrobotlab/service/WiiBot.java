@@ -26,12 +26,13 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Wii.IRData;
-import org.myrobotlab.service.WiiDAR.Point;
+import org.myrobotlab.service.WiiDar.Point;
 import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 
@@ -47,7 +48,7 @@ public class WiiBot extends Service {
 	transient Wii wii = new Wii("wii");
 	transient Servo servo = new Servo("servo");
 	transient OpenCV opencv = new OpenCV("opencv");
-	transient WiiDAR wiidar = new WiiDAR("wiidar");
+	transient WiiDar wiidar = new WiiDar("wiidar");
 	transient GUIService gui = new GUIService("gui");
 
 	int speedRight = 0;
@@ -73,17 +74,6 @@ public class WiiBot extends Service {
 		super(n);
 	}
 
-	// TODO - seperate left and right direction
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot", "sensor" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "(not implemented) - robot utilizing the wii mote and wiidar";
-	}
 
 	public void keyPressed(Integer i) {
 		log.warn("keyPressed " + i);
@@ -210,4 +200,23 @@ public class WiiBot extends Service {
 		arduino.addListener( "publishPin", wiidar.getName(), "onPin");
 
 	}
+		
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(WiiBot.class.getCanonicalName());
+		meta.addDescription("(not implemented) - robot utilizing the wii mote and wiidar");
+		meta.addCategory("robot");
+		meta.setAvailable(false);
+		return meta;		
+	}
+
+	
 }

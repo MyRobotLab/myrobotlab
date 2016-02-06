@@ -2,9 +2,8 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -39,23 +38,6 @@ public class InMoovHand extends Service implements LeapDataListener {
 	transient public Servo wrist;
 	transient public Arduino arduino;
 	private String side;
-
-	// static in Java are not overloaded but overwritten - there is no
-	// polymorphism for statics
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("thumb", "Servo", "Thumb servo");
-		peers.put("index", "Servo", "Index servo");
-		peers.put("majeure", "Servo", "Majeure servo");
-		peers.put("ringFinger", "Servo", "RingFinger servo");
-		peers.put("pinky", "Servo", "Pinky servo");
-		peers.put("wrist", "Servo", "Wrist servo");
-		peers.put("arduino", "Arduino", "Arduino controller for this arm");
-		peers.put("leap", "LeapMotion", "Leap Motion Service");
-		// peers.put("keyboard", "Keyboard", "Keyboard control");
-		// peers.put("xmpp", "XMPP", "XMPP control");
-		return peers;
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -240,15 +222,6 @@ public class InMoovHand extends Service implements LeapDataListener {
 		moveTo(150, 0, 0, 0, 0, 90);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "hand service for inmoov";
-	}
 
 	public long getLastActivityTime() {
 
@@ -549,6 +522,33 @@ public class InMoovHand extends Service implements LeapDataListener {
 
 	public void victory() {
 		moveTo(150, 0, 0, 180, 180, 90);
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(InMoovHand.class.getCanonicalName());
+		meta.addDescription("an easier way to create gestures for InMoov");
+		meta.addCategory("robot");
+		
+		meta.addPeer("thumb", "Servo", "Thumb servo");
+		meta.addPeer("index", "Servo", "Index servo");
+		meta.addPeer("majeure", "Servo", "Majeure servo");
+		meta.addPeer("ringFinger", "Servo", "RingFinger servo");
+		meta.addPeer("pinky", "Servo", "Pinky servo");
+		meta.addPeer("wrist", "Servo", "Wrist servo");
+		meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+		meta.addPeer("leap", "LeapMotion2", "Leap Motion Service");
+
+		
+		return meta;
 	}
 
 }

@@ -5,27 +5,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.fileLib.FindFile;
-import org.myrobotlab.framework.Instantiator;
-import org.myrobotlab.framework.Peers;
-import org.myrobotlab.framework.ServiceReservation;
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 public class ServiceData implements Serializable {
@@ -54,6 +47,7 @@ public class ServiceData implements Serializable {
 
 			// get all third party libraries
 			// give me all the first level directories of the repo
+			// this CAN BE DONE REMOTELY TOO !!! - using v3 githup json api !!!
 			List<File> dirs = FindFile.find(repoDir, "^[^.].*[^-_.]$", false, true);
 			log.info("found {} files", dirs.size());
 			for (int i = 0; i < dirs.size(); ++i) {
@@ -85,102 +79,46 @@ public class ServiceData implements Serializable {
 				}
 			}
 			
+			// get services - all this could be done during Runtime 
+			// although running through zip entries would be a bit of a pain
+			// epecially if you have to spin through 12 megs of data
+			List<String> services = FileIO.getPackageClassNames("org.myrobotlab.service");
 			
-
-			// get all services
-			// all files from src
-			File spath = new File("src/org/myrobotlab/service");
-			List<File> services = FindFile.find(spath.getAbsolutePath(), ".*", false, false);
 			log.info("found {} services", services.size());
 			for (int i = 0; i < services.size(); ++i) {
-				File sf = services.get(i);
-				if (!sf.isDirectory()) {
-					String n = sf.getName();
-					String sname = n.substring(0, n.lastIndexOf("."));
-					String fullClassName = String.format("org.myrobotlab.service.%s", sname);
-					// fullClassName = "org.myrobotlab.service.OculusRift";
-					log.info("adding {}", sname);
-
-					// TODO - add Peer dependencies
-					ServiceType s = new ServiceType(fullClassName);
-
-					try {
-
-						if (fullClassName.equals("org.myrobotlab.service.Motor")){
-							log.info("here");
-						}
-						ServiceInterface si = (ServiceInterface) Instantiator.getNewInstance(fullClassName, sname);
-						
-
-						s.description = si.getDescription();
-						String[] categories = si.getCategories();
-						for (int z = 0; z < categories.length; ++z) {
-							String newCat = categories[z];
-							if (!sd.categoryTypes.containsKey(newCat)) {
-								Category c = new Category();
-								c.name = newCat;
-								c.serviceTypes.add(si.getType());
-								// c.description =
-								// ArrayList<String>
-								sd.categoryTypes.put(c.name, c);
-							} else {
-								if (newCat.equals("simple pwm dir")){
-									log.info("here");
-								}
-								Category c = sd.categoryTypes.get(newCat);
-								c.serviceTypes.add(si.getType());
-							}
-						}
-
-						si.releaseService();
-						si.releasePeers();
-
-						// Class<?> theClass = Class.forName(fullClassName);
-						// TODO - add list of Peers (compile shapshot for
-						// documentation)
+				
+					String fullClassName = services.get(i);
+					log.info("querying {}", fullClassName);
 						try {
 							Class<?> theClass = Class.forName(fullClassName);
-							Method method = theClass.getMethod("getPeers", String.class);
-							Peers peers = (Peers) method.invoke(si, new Object[] { "" });
-							if (peers != null) {
-								log.info("has peers");
-								ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
-								// Repo r = new Repo();
-								for (int j = 0; j < peerList.size(); ++j) {
-									ServiceReservation sr = peerList.get(j);
-									s.addPeer(sr.key, sr.fullTypeName);
-								}
-								// add peers to serviceData serviceType
+							Method method = theClass.getMethod("getMetaData");
+							ServiceType serviceType = (ServiceType)method.invoke(null);
+							
+							if (!fullClassName.equals(serviceType.getName())){
+								log.error(String.format("Class name %s not equal to the ServiceType's name %s", fullClassName, serviceType.getName()));
 							}
-						} catch (Exception e) {
-							// dont care
-						}
-						
-						/// dependencies begin ///////////////////////
-						try {
-							Class<?> theClass = Class.forName(fullClassName);
-							Method method = theClass.getMethod("getDependencies");
-							String[] dependencies = (String[])method.invoke(null);
-							for (int j = 0; j < dependencies.length; ++j){
-								s.addDependency(dependencies[j]);
+							
+							sd.add(serviceType);
+							
+							for (String cat : serviceType.categories){
+								Category category = null;
+								if (sd.categoryTypes.containsKey(cat)){
+									category = sd.categoryTypes.get(cat);
+								} else {
+									category = new Category();
+									category.name = category.name;									
+								}
+								category.serviceTypes.add(serviceType.name);	
+								sd.categoryTypes.put(cat, category);
 							}
 							
 						} catch (Exception e) {
-							// dont care
+							log.error(String.format("%s does not have a static getMetaData method", fullClassName));
 						}
-						/// dependencies end ///////////////////////
-
-						sd.add(s);
-					} catch (Exception e) {
-						Logging.logError(e);
-						continue;
-					}
-
-					// TODO - rip bad threads down
-
-				} else {
-					log.info("skipping directory {}", sf);
-				}
+			}
+			
+			if (sd.getInvalidDependencies().length > 0){
+				log.error("invalid dependencies [{}]", Arrays.toString(sd.getInvalidDependencies()));
 			}
 
 			return sd;
@@ -190,6 +128,7 @@ public class ServiceData implements Serializable {
 		return null;
 	}
 
+	
 	static public ServiceData getLocal() throws IOException {
 		return getLocal(null);
 	}
@@ -202,6 +141,7 @@ public class ServiceData implements Serializable {
 		String data = FileIO.fileToString(filename);
 		return load(data);
 	}
+	
 
 	/**
 	 * long ass process to "not" be doing in a seperate thread ... :P should be
@@ -210,6 +150,7 @@ public class ServiceData implements Serializable {
 	 * @param url
 	 * @return
 	 */
+	/* NO LONGER NEEDED
 	public static ServiceData getRemote(String url) {
 		try {
 			log.info("getting {}", url);
@@ -221,6 +162,7 @@ public class ServiceData implements Serializable {
 		}
 		return null;
 	}
+	*/
 
 	public static ServiceData load(String data) {
 		try {
@@ -244,74 +186,6 @@ public class ServiceData implements Serializable {
 
 	public void add(ServiceType serviceType) {
 		serviceTypes.put(serviceType.name, serviceType);
-		if (serviceType.dependencies != null) {
-			for (int i = 0; i < serviceType.dependencies.size(); ++i) {
-				String org = serviceType.dependencies.get(i);
-				if (!containsDependency(org)) {
-					log.error(String.format("can %s not find %s in dependencies", org));
-				}
-			}
-		}
-	}
-
-	public void addCategory(String name, String description, String[] serviceTypes) {
-		Category category = null;
-		if (categoryTypes.containsKey(name)) {
-			category = categoryTypes.get(name);
-		} else {
-			category = new Category();
-		}
-
-		category.name = name;
-		category.description = description;
-		for (int i = 0; i < serviceTypes.length; ++i) {
-			boolean alreadyHasReference = false;
-			for (int j = 0; j < category.serviceTypes.size(); ++j) {
-				if (serviceTypes[i].equals(category.serviceTypes.get(j))) {
-					alreadyHasReference = true;
-					break;
-				}
-			}
-
-			if (!alreadyHasReference) {
-				category.serviceTypes.add(serviceTypes[i]);
-			}
-		}
-
-		categoryTypes.put(category.name, category);
-	}
-
-	public void addCategory(String name, String[] serviceTypes) {
-		addCategory(name, null, serviceTypes);
-	}
-
-	public void addServiceType(String className) {
-		addServiceType(className, null, null);
-	}
-
-	public void addServiceType(String className, String description) {
-		addServiceType(className, description, null);
-	}
-
-	public void addServiceType(String className, String description, String[] dependencies) {
-		if (serviceTypes.containsKey(className)) {
-			log.error(String.format("duplicate names %s - not adding service type", className));
-			return;
-		}
-		ServiceType st = new ServiceType(className);
-		st.description = description;
-		serviceTypes.put(st.getName(), st);
-		if (dependencies != null) {
-			for (int i = 0; i < dependencies.length; ++i) {
-				st.addDependency(dependencies[i]);
-			}
-		}
-
-	}
-
-	public void addServiceType(String className, String[] dependencies) {
-		addServiceType(className, null, dependencies);
-
 	}
 
 	// FIXME - change to addDependency
@@ -326,42 +200,6 @@ public class ServiceData implements Serializable {
 
 	public boolean containsServiceType(String fullServiceName) {
 		return serviceTypes.containsKey(fullServiceName);
-	}
-
-	/**
-	 * a category is available only if it references a service type which is
-	 * currently available
-	 * 
-	 * @return
-	 */
-	public ArrayList<Category> getAvailableCategories() {
-		ArrayList<Category> ret = new ArrayList<Category>();
-		for (Map.Entry<String, Category> o : categoryTypes.entrySet()) {
-			Category cat = o.getValue();
-			ArrayList<String> serviceNames = cat.serviceTypes;
-
-			boolean availableCat = false;
-			for (int i = 0; i < serviceNames.size(); ++i) {
-				ServiceType st = getServiceType(serviceNames.get(i));
-				if (st.available == null || st.available == true) {
-					availableCat = true;
-				}
-			}
-
-			if (availableCat) {
-				ret.add(cat);
-			}
-		}
-
-		Collections.sort(ret, new Comparator<Category>() {
-			@Override
-			public int compare(Category o1, Category o2) {
-				return o1.name.compareTo(o2.name);
-
-			}
-		});
-		// Collections.sort(ret);
-		return ret;
 	}
 
 	public ArrayList<ServiceType> getAvailableServiceTypes() {
@@ -408,8 +246,7 @@ public class ServiceData implements Serializable {
 		for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
 			ServiceType st = o.getValue();
 			if (st.dependencies != null) {
-				for (int j = 0; j < st.dependencies.size(); ++j) {
-					String org = st.dependencies.get(j);
+				for (String org : st.dependencies) {
 					if (!isValid(org)) {
 						unique.add(org);
 					}
@@ -443,8 +280,8 @@ public class ServiceData implements Serializable {
 		for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
 			ServiceType st = o.getValue();
 			if (st.dependencies != null) {
-				for (int j = 0; j < st.dependencies.size(); ++j) {
-					unique.add(st.dependencies.get(j));
+				for (String org : st.dependencies) {
+					unique.add(org);
 				}
 			}
 		}
@@ -521,8 +358,7 @@ public class ServiceData implements Serializable {
 			return false;
 		}
 
-		for (int i = 0; i < d.dependencies.size(); ++i) {
-			String org = d.dependencies.get(i);
+		for (String org : d.dependencies) {
 			if (!dependencyTypes.containsKey(org)) {
 				log.error(String.format("%s has dependency of %s, but it is does not have a defined version", fullServiceName, org));
 				return true;
@@ -542,8 +378,7 @@ public class ServiceData implements Serializable {
 		for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
 			ServiceType st = o.getValue();
 			if (st.dependencies != null) {
-				for (int j = 0; j < st.dependencies.size(); ++j) {
-					String d = st.dependencies.get(j);
+				for (String d : st.dependencies) {
 					if (org.equals(d)) {
 						return false;
 					}
@@ -643,6 +478,8 @@ public class ServiceData implements Serializable {
 
 		return false;
 	}
+	
+	
 	public static void main(String[] args) {
 		try {
 
@@ -662,8 +499,8 @@ public class ServiceData implements Serializable {
 			fos.write(CodecUtils.toJson(sd).getBytes());
 			fos.close();
 
-			String json = FileIO.fileToString("serviceData.compare.json");
-			sd = ServiceData.load(json);
+			// String json = FileIO.fileToString("serviceData.compare.json");
+			// sd = ServiceData.load(json);
 
 			/*
 			 * ServiceData sd = generate("../repo"); json = Encoder.toJson(sd);
@@ -705,6 +542,12 @@ public class ServiceData implements Serializable {
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+
+
+	public ArrayList<Category> getCategories() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

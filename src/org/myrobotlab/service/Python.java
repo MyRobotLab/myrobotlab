@@ -16,10 +16,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -201,6 +202,9 @@ public class Python extends Service {
 
 		}
 	}
+	
+	public void finishedExecutingScript(){		
+	}
 
 	public static class Script implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -270,10 +274,6 @@ public class Python extends Service {
 
 	String modulesDir = "pythonModules";
 
-
-	static public String[] getDependencies() {
-		return new String[] {"org.python.core"};
-	}
 
 	/**
 	 * Get a compiled version of the python call.
@@ -532,22 +532,6 @@ public class Python extends Service {
 	}
 
 	/**
-	 * event method when script has finished executing
-	 */
-	public void finishedExecutingScript() {
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "programming", "control" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "Python IDE";
-	}
-
-	/**
 	 * gets the listing of current example python scripts in the myrobotlab.jar
 	 * under /Python/examples
 	 * 
@@ -792,9 +776,9 @@ public class Python extends Service {
 		stop();// release the interpeter
 	}
 
-	public void setCwd(String path) throws IOException {
+	public void setCwd(String path) throws IOException, ClassNotFoundException {
 		if ("examples".equals(cwdRoot)) {
-			currentFileList = new ArrayList<File>(Arrays.asList(FileIO.getPackageContent("resource/Python/examples")));
+			currentFileList = FileIO.getPackageContent("resource.Python.examples");
 		} else if ("local".equals(cwdRoot)) {
 
 			ArrayList<File> localFiles = new ArrayList<File>();
@@ -878,5 +862,23 @@ public class Python extends Service {
 
 		
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Python.class.getCanonicalName());
+		meta.addDescription("Python ID");
+		meta.addCategory("programming","control");
+		meta.addDependency("org.python.core");
+		return meta;
+	}
+
 
 }

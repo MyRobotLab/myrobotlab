@@ -7,11 +7,12 @@ import java.util.HashMap;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.openni.OpenNIData;
+import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServiceInterface;
@@ -78,7 +79,7 @@ public class InMoov extends Service {
 	transient private HashMap<String, InMoovArm> arms = new HashMap<String, InMoovArm>();
 	transient private HashMap<String, InMoovHand> hands = new HashMap<String, InMoovHand>();
 
-	// peers
+	// meta
 	transient public Sphinx ear;
 	transient public SpeechSynthesis mouth;
 	transient public Tracking eyesTracking;
@@ -90,7 +91,7 @@ public class InMoov extends Service {
 	transient public final static String LEFT = "left";
 	transient public final static String RIGHT = "right";
 
-	transient public OpenNI openni;
+	transient public OpenNi openni;
 
 	transient public PID2 pid;
 
@@ -98,7 +99,7 @@ public class InMoov extends Service {
 	boolean firstSkeleton = true;
 	boolean saveSkeletonFrame = false;
 
-	// reflective or non-interactive peers
+	// reflective or non-interactive meta
 	// transient public WebGui webgui;
 	// transient public XMPP xmpp;
 	// transient public Security security;
@@ -116,7 +117,6 @@ public class InMoov extends Service {
 	public static int attachPauseMs = 100;
 
 	public Integer pirPin = null;
-	public String pirPort = null;
 
 	// ---------- new getter interface begin ---------------------------
 
@@ -133,56 +133,6 @@ public class InMoov extends Service {
 	//static String speechService = "MarySpeech";
 	static String speechService = "AcapelaSpeech";
 	
-	// static in Java are not overloaded but overwritten - there is no
-	// polymorphism for statics
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		// SHARING !!!
-		peers.suggestAs("head.arduino", "left", "Arduino", "shared left arduino");
-		peers.suggestAs("torso.arduino", "left", "Arduino", "shared left arduino");
-
-		peers.suggestAs("leftArm.arduino", "left", "Arduino", "shared left arduino");
-		peers.suggestAs("leftHand.arduino", "left", "Arduino", "shared left arduino");
-
-		peers.suggestAs("rightArm.arduino", "right", "Arduino", "shared right arduino");
-		peers.suggestAs("rightHand.arduino", "right", "Arduino", "shared right arduino");
-
-		peers.suggestAs("eyesTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-		peers.suggestAs("eyesTracking.arduino", "left", "Arduino", "shared head Arduino");
-		peers.suggestAs("eyesTracking.x", "head.eyeX", "Servo", "shared servo");
-		peers.suggestAs("eyesTracking.y", "head.eyeY", "Servo", "shared servo");
-
-		peers.suggestAs("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-		peers.suggestAs("headTracking.arduino", "left", "Arduino", "shared head Arduino");
-		peers.suggestAs("headTracking.x", "head.rothead", "Servo", "shared servo");
-		peers.suggestAs("headTracking.y", "head.neck", "Servo", "shared servo");
-
-		peers.suggestAs("mouthControl.arduino", "left", "Arduino", "shared head Arduino");
-		peers.suggestAs("mouthControl.mouth", "mouth", speechService, "shared Speech");
-		peers.suggestAs("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
-
-		peers.suggestRootAs("python", "python", "Python", "shared Python service");
-
-		// put peer definitions in
-		peers.put("torso", "InMoovTorso", "torso");
-		peers.put("leftArm", "InMoovArm", "left arm");
-		peers.put("leftHand", "InMoovHand", "left hand");
-		peers.put("rightArm", "InMoovArm", "right arm");
-		peers.put("rightHand", "InMoovHand", "right hand");
-
-		peers.put("ear", "Sphinx", "InMoov spech recognition service");
-		peers.put("eyesTracking", "Tracking", "Tracking for the eyes");
-		peers.put("head", "InMoovHead", "the head");
-		peers.put("headTracking", "Tracking", "Head tracking system");
-		peers.put("mouth", speechService, "InMoov speech service");
-		peers.put("mouthControl", "MouthControl", "MouthControl");
-		peers.put("opencv", "OpenCV", "InMoov OpenCV service");
-		peers.put("openni", "OpenNI", "Kinect service");
-		peers.put("pid", "PID2", "PID2 service");
-
-		return peers;
-	}
 
 	public InMoov(String n) {
 		super(n);
@@ -501,17 +451,6 @@ public class InMoov extends Service {
 
 		return Arduino.BOARD_TYPE_MEGA;
 	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "The InMoov service";
-	}
-
 	// ------ starts end ---------
 	// ------ composites begin ---------
 
@@ -713,7 +652,7 @@ public class InMoov extends Service {
 		}
 	}
 
-	public void onOpenNIData(OpenNIData data) {
+	public void onOpenNIData(OpenNiData data) {
 
 		Skeleton skeleton = data.skeleton;
 
@@ -1121,10 +1060,10 @@ public class InMoov extends Service {
 		return opencv;
 	}
 
-	public OpenNI startOpenNI() throws Exception {
+	public OpenNi startOpenNI() throws Exception {
 		if (openni == null) {
 			speakBlocking("starting kinect");
-			openni = (OpenNI) startPeer("openni");
+			openni = (OpenNi) startPeer("openni");
 			pid = (PID2) startPeer("pid");
 
 			pid.setMode("kinect",PID.MODE_AUTOMATIC);
@@ -1156,7 +1095,6 @@ public class InMoov extends Service {
 			arduino.setSampleRate(8000);
 			arduino.digitalReadPollingStart(pin);
 			pirPin = pin;
-			pirPort = port;
 			arduino.addListener("publishPin", this.getName(), "publishPin");
 
 		} else {
@@ -1217,13 +1155,13 @@ public class InMoov extends Service {
 	}
 
 	public void stopPIR() {
-
-		if (arduinos.containsKey(pirPort)) { 
-			Arduino arduino = arduinos.get(pirPort); 
-			arduino.digitalReadPollingStop(pirPin);
-			log.info("Stopping the PIR polling.");
-		}
-
+		/*
+		 * if (arduinos.containsKey(port)) { Arduino arduino =
+		 * arduinos.get(port); arduino.connect(port);
+		 * arduino.setSampleRate(8000); arduino.digitalReadPollStart(pin);
+		 * pirPin = pin; arduino.addListener("publishPin", this.getName(),
+		 * "publishPin"); }
+		 */
 
 	}
 
@@ -1422,5 +1360,71 @@ public class InMoov extends Service {
 		 */
 
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(InMoov.class.getCanonicalName());
+		meta.addDescription("The InMoov service");
+		meta.addCategory("robot");
+		
+		// SHARING !!! - modified key / actual name begin ------
+		meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
+		meta.sharePeer("torso.arduino", "left", "Arduino", "shared left arduino");
+
+		meta.sharePeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
+		meta.sharePeer("leftHand.arduino", "left", "Arduino", "shared left arduino");
+
+		meta.sharePeer("rightArm.arduino", "right", "Arduino", "shared right arduino");
+		meta.sharePeer("rightHand.arduino", "right", "Arduino", "shared right arduino");
+
+		meta.sharePeer("eyesTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
+		meta.sharePeer("eyesTracking.arduino", "left", "Arduino", "shared head Arduino");
+		meta.sharePeer("eyesTracking.x", "head.eyeX", "Servo", "shared servo");
+		meta.sharePeer("eyesTracking.y", "head.eyeY", "Servo", "shared servo");
+
+		meta.sharePeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
+		meta.sharePeer("headTracking.arduino", "left", "Arduino", "shared head Arduino");
+		meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
+		meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
+
+		meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared head Arduino");
+		meta.sharePeer("mouthControl.mouth", "mouth", speechService, "shared Speech");
+		meta.sharePeer("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
+		// SHARING !!! - modified key / actual name end ------
+		
+		// Global - undecorated by self name
+		meta.addRootPeer("python", "python", "Python", "shared Python service");
+
+
+		// put peer definitions in
+		meta.addPeer("torso", "InMoovTorso", "torso");
+		meta.addPeer("leftArm", "InMoovArm", "left arm");
+		meta.addPeer("leftHand", "InMoovHand", "left hand");
+		meta.addPeer("rightArm", "InMoovArm", "right arm");
+		meta.addPeer("rightHand", "InMoovHand", "right hand");
+
+		meta.addPeer("ear", "Sphinx", "InMoov spech recognition service");
+		meta.addPeer("eyesTracking", "Tracking", "Tracking for the eyes");
+		meta.addPeer("head", "InMoovHead", "the head");
+		meta.addPeer("headTracking", "Tracking", "Head tracking system");
+		meta.addPeer("mouth", speechService, "InMoov speech service");
+		meta.addPeer("mouthControl", "MouthControl", "MouthControl");
+		meta.addPeer("opencv", "OpenCV", "InMoov OpenCV service");
+		meta.addPeer("openni", "OpenNI", "Kinect service");
+		meta.addPeer("pid", "PID2", "PID2 service");
+
+
+		return meta;
+	}
+
 
 }

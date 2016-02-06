@@ -30,42 +30,47 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JTabbedPane;
 
-import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.Proxy;
-import org.slf4j.Logger;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.SlamBad;
 
-public class ProxyGUI extends ServiceGUI implements ActionListener {
+public class SlamBadGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(ProxyGUI.class.getCanonicalName());
 
-	public ProxyGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	SlamBad mySimbad = null;
+
+	public SlamBadGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
+	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 
 	}
 
+	// FIXME sendNotifyStateRequest("publishState", "getState", String type); <-
+	// Class.forName(type)
 	@Override
 	public void attachGUI() {
-		// subscribe("publishState", "getState", _TemplateServiceGUI.class);
+		subscribe("publishState", "getState", SlamBad.class);
 		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void detachGUI() {
-		// unsubscribe("publishState", "getState", _TemplateServiceGUI.class);
+		unsubscribe("publishState", "getState", SlamBad.class);
 	}
 
-	public void getState(Proxy template) {
+	// FIXME - is get/set state interact with Runtime registry ???
+	// it probably should
+	public void getState(SlamBad c) {
 	}
 
 	@Override
 	public void init() {
+		mySimbad = (SlamBad) Runtime.getService(boundServiceName);
 	}
 
 }

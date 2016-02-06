@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -49,28 +50,8 @@ public class WolframAlpha extends Service {
 		 */
 	}
 
-	/**
-	 * Static list of third party dependencies for this service. The list will
-	 * be consumed by Ivy to download and manage the appropriate resources
-	 * 
-	 * @return
-	 */
-	static public String[] getDependencies() {
-		return new String[] { "com.wolfram.alpha", "org.apache.commons.httpclient" };
-	}
-
 	public WolframAlpha(String n) {
 		super(n);
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "data", "connectivity" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "Wolfram Alpha Service";
 	}
 
 	public WAQueryResult getQueryResult(String query) {
@@ -213,5 +194,22 @@ public class WolframAlpha extends Service {
 		String get = wolframAlpha(query, pod);
 		return parseString(get);
 	}
+
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		ServiceType meta = new ServiceType(WolframAlpha.class.getCanonicalName());
+		meta.addDescription("Wolfram service");
+		meta.addCategory("intelligence", "data");
+		// TODO http should be removed as a dependency and added as a Peer
+		meta.addDependency("com.wolfram.alpha", "org.apache.commons.httpclient");
+		return meta;		
+	}	
 
 }

@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -61,14 +62,6 @@ public class Roomba extends Service {
 	int stopBits = 1;
 
 	transient Serial serial;
-	
-	
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		peers.put("serial", "Serial", "serial");
-		return peers;
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -250,16 +243,6 @@ public class Roomba extends Service {
 	 */
 	public void drive(int velocity, int radius) {
 		roombacomm.drive(velocity, radius);
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
 	}
 
 	public String getPortname() {
@@ -759,6 +742,24 @@ public class Roomba extends Service {
 	 */
 	public void wakeup() {
 		roombacomm.wakeup();
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Roomba.class.getCanonicalName());
+		meta.addDescription("Roomba control");
+		meta.addCategory("robot","control");
+		meta.addPeer("serial", "Serial", "serial");
+		
+		return meta;
 	}
 
 }

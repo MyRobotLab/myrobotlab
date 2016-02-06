@@ -9,17 +9,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -216,7 +215,7 @@ public class Test extends Service {
 			// check against current state for
 			// NOT NEEDED Regular save file - since Agent is process.waitFor
 			// FIXME - append states to file
-			FileIO.savePartFile("test.json", CodecUtils.toJson(status).getBytes());
+			FileIO.savePartFile(new File("test.json"), CodecUtils.toJson(status).getBytes());
 			// Runtime.releaseAll();
 			// TODO - should be all clean - if not someone left threads open -
 			// report them
@@ -227,15 +226,6 @@ public class Test extends Service {
 		System.exit(0);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "testing", "framework" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
 
 	/**
 	 * used to get state of the current service and runtime - so that the
@@ -456,6 +446,22 @@ public class Test extends Service {
 		}
 
 		return ret;
+	}
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Test.class.getCanonicalName());
+		meta.addDescription("Testing service");
+		meta.addCategory("testing","framework");		
+		return meta;
 	}
 
 }

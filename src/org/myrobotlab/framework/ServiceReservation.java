@@ -22,6 +22,8 @@ public class ServiceReservation {
 	public String actualName;
 	public String fullTypeName;
 	public String comment;
+	
+	public boolean isRoot = false;
 
 	public ServiceReservation(String key, String simpleTypeName, String comment) {
 		this.key = key;
@@ -35,6 +37,14 @@ public class ServiceReservation {
 		this.actualName = actualName;
 		this.fullTypeName = simpleTypeName;
 		this.comment = comment;
+	}
+
+	public ServiceReservation(String key, String actualName, String peerType, String comment, boolean isRoot) {
+		this.key = key;
+		this.actualName = actualName;
+		this.fullTypeName = peerType;
+		this.comment = comment;
+		this.isRoot = isRoot;
 	}
 
 	// FIXME - clean up data entry - so this doesnt need the logic !!

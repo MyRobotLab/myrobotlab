@@ -35,11 +35,11 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.myrobotlab.image.SerializableImage;
-import org.myrobotlab.openni.OpenNIData;
+import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.OpenNI;
+import org.myrobotlab.service.OpenNi;
 
-public class OpenNIGUI extends ServiceGUI implements ActionListener {
+public class OpenNiGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
 
@@ -60,7 +60,7 @@ public class OpenNIGUI extends ServiceGUI implements ActionListener {
 									// anything OpenNI has written to "frame") |
 									// depth | rgb
 
-	public OpenNIGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public OpenNiGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 		video = new VideoWidget(boundServiceName, myService, tabs);
 	}
@@ -98,18 +98,18 @@ public class OpenNIGUI extends ServiceGUI implements ActionListener {
 	@Override
 	public void attachGUI() {
 		// subscribe & ask for the initial state of the service
-		subscribe("publishState", "getState", OpenNI.class);
+		subscribe("publishState", "getState", OpenNi.class);
 		subscribe("publishOpenNIData", "publishOpenNIData");
 		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishState", "getState", OpenNI.class);
+		unsubscribe("publishState", "getState", OpenNi.class);
 		unsubscribe("publishOpenNIData", "publishOpenNIData");
 	}
 
-	public void getState(OpenNI openni) {
+	public void getState(OpenNi openni) {
 		// TODO - update state
 	}
 
@@ -140,7 +140,7 @@ public class OpenNIGUI extends ServiceGUI implements ActionListener {
 		video.displayFrame(si);
 	}
 
-	public void publishOpenNIData(OpenNIData data) {
+	public void publishOpenNIData(OpenNiData data) {
 		// TODO - display type based on config
 		if ("display".equals(displayType)) {
 			source.setImage(data.depth);

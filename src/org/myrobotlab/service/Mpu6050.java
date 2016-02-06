@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -18,30 +19,23 @@ import org.slf4j.Logger;
  * http://playground.arduino.cc/Main/MPU-6050
  *
  */
-public class MPU6050 extends Service implements SerialDataListener {
+public class Mpu6050 extends Service implements SerialDataListener {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(MPU6050.class);
+	public final static Logger log = LoggerFactory.getLogger(Mpu6050.class);
 
 	StringBuilder debugRX = new StringBuilder();
 
 	private transient Serial serial;
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		// put peer definitions in
-		peers.put("serial", "Serial", "Serial");
-		return peers;
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 
 		try {
 
-			MPU6050 mpu6050 = (MPU6050) Runtime.start("mpu6050", "MPU6050");
+			Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "MPU6050");
 
 			Runtime.start("gui", "GUIService");
 
@@ -50,7 +44,7 @@ public class MPU6050 extends Service implements SerialDataListener {
 		}
 	}
 
-	public MPU6050(String n) {
+	public Mpu6050(String n) {
 		super(n);
 	}
 
@@ -70,15 +64,7 @@ public class MPU6050 extends Service implements SerialDataListener {
 		return debugRX.toString();
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "microcontroller" };
-	}
 
-	@Override
-	public String getDescription() {
-		return "used as a general mpu6050";
-	}
 
 	@Override
 	public void startService() {
@@ -102,6 +88,23 @@ public class MPU6050 extends Service implements SerialDataListener {
 	public String onDisconnect(String portName) {
 		info("%s disconnected from %s", getName(), portName);
 		return portName;
+	}
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Mpu6050.class.getCanonicalName());
+		meta.addDescription("General MPU 6050");
+		meta.addCategory("microcontroller", "sensor");
+		meta.addPeer("serial", "Serial", "Serial");
+		return meta;
 	}
 
 }

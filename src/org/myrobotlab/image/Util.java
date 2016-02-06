@@ -49,7 +49,7 @@ import java.lang.reflect.Field;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;

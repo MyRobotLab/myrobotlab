@@ -23,6 +23,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.StreamGobbler;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -524,16 +525,6 @@ public class Cli extends Service {
 		return msg;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "framework" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general cli";
-	}
-
 	/*
 	 * public ArrayList<ProcessData> lp(){ return
 	 * Runtime.getAgent().getProcesses(); }
@@ -653,5 +644,23 @@ public class Cli extends Service {
 			Logging.logError(e);
 		}
 	}
+	
+
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Cli.class.getCanonicalName());
+		meta.addDescription("command line interpreter interface");
+		meta.addCategory("framework");	
+		return meta;		
+	}
+
 
 }

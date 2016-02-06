@@ -233,7 +233,7 @@ public class ServiceInterfaceTest {
 		}
 		System.out.println("Service Test:" + service);
 		System.out.flush();
-		Assert.assertNotNull(foo.getCategories());
+		//Assert.assertNotNull(foo.getCategories());
 		Assert.assertNotNull(foo.getDescription());
 		Assert.assertNotNull(foo.getName());
 		Assert.assertNotNull(foo.getSimpleName());

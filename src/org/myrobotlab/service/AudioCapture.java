@@ -46,6 +46,7 @@ import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -230,16 +231,6 @@ public class AudioCapture extends Service {
 		return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
 	}// end getAudioFormat
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sound" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "captures and stores audio from microphone";
-	}
-
 	// This method plays back the audio
 	// data that has been saved in the
 	// ByteArrayOutputStream
@@ -284,6 +275,23 @@ public class AudioCapture extends Service {
 
 	public void stopAudioCapture() {
 		stopCapture = true;
+	}
+
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(AudioCapture.class.getCanonicalName());
+		meta.addDescription("captures and stores audio from microphone");
+		meta.addCategory("sound");		
+		return meta;		
 	}
 
 }

@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.plaf.metal.MetalBorders.Flush3DBorder;
-
-import org.myrobotlab.service.interfaces.DocumentListener;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
@@ -17,10 +14,12 @@ import org.apache.solr.common.SolrInputDocument;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.DocumentListener;
 import org.slf4j.Logger;
 
 /**
@@ -55,9 +54,6 @@ public class Solr extends Service implements DocumentListener {
 	 * the appropriate resources
 	 * @return
 	 */
-	static public String[] getDependencies() {
-		return new String[] { "org.apache.solr"};
-	}
 	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -155,16 +151,6 @@ public class Solr extends Service implements DocumentListener {
 			// TODO better error handling/reporting?
 			log.warn("An exception occurred when deleting doc", e);
 		}
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "data", "search" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "Solr Service - Open source search engine.";
 	}
 
 	/**
@@ -327,6 +313,23 @@ public class Solr extends Service implements DocumentListener {
 
 	public void setCommitOnFlush(boolean commitOnFlush) {
 		this.commitOnFlush = commitOnFlush;
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Solr.class.getCanonicalName());
+		meta.addDescription("Solr Service - Open source search engine");
+		meta.addCategory("data", "search");
+		meta.addDependency("org.apache.solr");
+		return meta;
 	}
 
 }

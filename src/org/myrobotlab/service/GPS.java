@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -160,12 +161,6 @@ public class GPS extends Service implements SerialDataListener {
 
 	// peers
 	transient public Serial serial;
-
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("serial", "Serial", "serial port for GPS");
-		return peers;
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -400,16 +395,6 @@ public class GPS extends Service implements SerialDataListener {
 			}
 		}
 		return results;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor", "location" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "The GPS service";
 	}
 
 	public Serial getSerial() throws Exception {
@@ -877,4 +862,25 @@ public class GPS extends Service implements SerialDataListener {
 		info("%s disconnected from %s", getName(), portName);
 		return portName;
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(GPS.class.getCanonicalName());
+		meta.addDescription("THe Global Positioning Sensor");
+		meta.addCategory("location");
+		meta.addCategory("sensor");
+		meta.addPeer("serial", "Serial", "serial port for GPS");
+
+		return meta;
+	}
+
 }

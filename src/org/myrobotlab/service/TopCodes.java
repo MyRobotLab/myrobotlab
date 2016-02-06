@@ -8,8 +8,8 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -72,23 +72,9 @@ public class TopCodes extends Service {
 	 * the appropriate resources
 	 * @return
 	 */
-	static public String[] getDependencies() {
-		return new String[] { 
-				"edu.northwestern.topcodes"};
-	}
 
 	public TopCodes(String n) {
 		super(n);
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "video", "sensor" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general topcodes";
 	}
 
 	public List<TopCode> scan(BufferedImage img) {
@@ -107,4 +93,22 @@ public class TopCodes extends Service {
 
 		return null;
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(TopCodes.class.getCanonicalName());
+		meta.addDescription("Topcodes finds visual references and identifiers");
+		meta.addCategory("vision","video", "sensor");		
+		meta.addDependency("edu.northwestern.topcodes");
+		return meta;
+	}
+
 }

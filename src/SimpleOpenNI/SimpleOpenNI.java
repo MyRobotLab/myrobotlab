@@ -35,7 +35,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.openni.PImage;
 import org.myrobotlab.openni.PMatrix3D;
 import org.myrobotlab.openni.PVector;
-import org.myrobotlab.service.OpenNI;
+import org.myrobotlab.service.OpenNi;
 import org.slf4j.Logger;
 
 //import SimpleOpenNI.ContextWrapper;
@@ -143,7 +143,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
 	protected Method _focusSessionMethod;
 	protected String _filename;
-	protected OpenNI _parent;
+	protected OpenNi _parent;
 	protected PImage _depthImage;
 
 	protected int[] _depthRaw;
@@ -287,7 +287,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	 * @param parent
 	 *            PApplet
 	 */
-	public SimpleOpenNI(OpenNI parent) {
+	public SimpleOpenNI(OpenNi parent) {
 		initEnv(parent, RUN_MODE_SINGLE_THREADED, -1);
 	}
 
@@ -299,7 +299,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	 * @param recordPath
 	 *            String, path to the record file
 	 */
-	public SimpleOpenNI(OpenNI parent, String recordPath) {
+	public SimpleOpenNI(OpenNi parent, String recordPath) {
 		String path = parent.dataPath(recordPath);
 
 		String curPath = ContextWrapper.getcwd();
@@ -337,7 +337,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	 *            single thread - RunMode_MultiThreaded = Runs the openNI/NIITE
 	 *            in another thread than processing
 	 */
-	public SimpleOpenNI(OpenNI parent, String recordPath, int runMode) {
+	public SimpleOpenNI(OpenNi parent, String recordPath, int runMode) {
 		String path = parent.dataPath(recordPath);
 
 		String curPath = ContextWrapper.getcwd();
@@ -990,7 +990,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return userList;
 	}
 
-	protected void initEnv(OpenNI parent, int runMode, int deviceIndex) {
+	protected void initEnv(OpenNi parent, int runMode, int deviceIndex) {
 		String curPath = ContextWrapper.getcwd();
 		ContextWrapper.chdir(new String(nativDepLibPath));
 

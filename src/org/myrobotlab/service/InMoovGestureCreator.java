@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -1511,15 +1512,6 @@ public class InMoovGestureCreator extends Service {
 		framelist.setListData(listdata);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "an easier way to create gestures for InMoov";
-	}
 
 	public void parsescript(JList control_list) {
 		pythonitemholder.clear();
@@ -1735,5 +1727,25 @@ public class InMoovGestureCreator extends Service {
 		// checkbox states (on the main site) (for the services) changed
 		tabs_main_checkbox_states = tabs_main_checkbox_states2;
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(InMoovGestureCreator.class.getCanonicalName());
+		meta.addDescription("an easier way to create gestures for InMoov");
+		meta.addCategory("robot");
+
+		
+		return meta;
+	}
+
 
 }

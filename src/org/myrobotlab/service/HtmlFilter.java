@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -50,15 +51,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
 		addListener("publishText", service.getName(), "onText");
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "data", "filter" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "This service will strip html markup from the input text.";
-	}
 
 	public String getPostHtmlTag() {
 		return postHtmlTag;
@@ -124,5 +116,24 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
 		cleanText = cleanText.replaceAll("  ", " ");
 		return cleanText.trim();
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(HtmlFilter.class.getCanonicalName());
+		meta.addDescription("This service will strip html markup from the input text");
+		meta.addCategory("data", "filter");
+
+		return meta;
+	}
+
 
 }

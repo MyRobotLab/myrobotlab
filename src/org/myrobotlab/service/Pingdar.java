@@ -2,12 +2,10 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
@@ -54,16 +52,6 @@ public class Pingdar extends Service {
 
 	long rangeAvg = 0;
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		// put peer definitions in
-		peers.put("arduino", "Arduino", "arduino");
-		peers.put("sensor", "UltrasonicSensor", "sensor");
-		peers.put("servo", "Servo", "servo");
-
-		return peers;
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -142,15 +130,6 @@ public class Pingdar extends Service {
 
 	// ----------- interface end ----------------
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor", "display" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a ultra sonic radar";
-	}
 
 	public UltrasonicSensor getSensor() {
 		return sensor;
@@ -240,6 +219,27 @@ public class Pingdar extends Service {
 
 		sensor.startRanging();
 		return true;
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Pingdar.class.getCanonicalName());
+		meta.addDescription("used as a ultra sonic radar");
+		meta.addCategory("sensor", "display");
+		// put peer definitions in
+		meta.addPeer("arduino", "Arduino", "arduino");
+		meta.addPeer("sensor", "UltrasonicSensor", "sensor");
+		meta.addPeer("servo", "Servo", "servo");
+
+		return meta;
 	}
 
 

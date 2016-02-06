@@ -1,4 +1,4 @@
-package org.myrobotlab.fileLib;
+package org.myrobotlab.io;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

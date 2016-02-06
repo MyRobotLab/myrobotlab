@@ -22,7 +22,7 @@
  * Enjoy !
  * 
  * */
-package org.myrobotlab.fileLib;
+package org.myrobotlab.io;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -41,6 +41,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -71,26 +72,12 @@ public class FileIO {
 
 	public final static Logger log = LoggerFactory.getLogger(FileIO.class);
 
-	static public void byteArrayToFile(String filename, byte[] data) throws IOException {
+	static public void byteArrayToFile(File dst, byte[] data) throws IOException {
 		FileOutputStream fos = null;
-		fos = new FileOutputStream(filename);
+		fos = new FileOutputStream(dst);
 		fos.write(data);
 		fos.close();
 
-	}
-
-	static final public void close(InputStream in, OutputStream out) {
-		closeStream(in);
-		close(out);
-	}
-
-	static final public void close(OutputStream is) {
-		try {
-			if (is != null) {
-				is.close();
-			}
-		} catch (Exception e) {
-		}
 	}
 
 	static public void deleteRecursive(File path) {
@@ -110,20 +97,16 @@ public class FileIO {
 		path.delete();
 	}
 
-	/**
-	 * general purpose stream closer for single line closing
-	 * 
-	 * @param is
-	 */
-	static final public void closeStream(InputStream is) {
-		try {
-			if (is != null) {
-				is.close();
-			}
-		} catch (Exception e) {
-		}
-	}
 
+	/**
+	 * compares two files - throws if they are not identical, good to use in
+	 * testing
+	 * 
+	 * @param filename1
+	 * @param filename2
+	 * @throws FileComparisonException
+	 * @throws IOException
+	 */
 	public static void compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
 		File file1 = new File(filename1);
 		File file2 = new File(filename2);
@@ -141,30 +124,8 @@ public class FileIO {
 		}
 	}
 
-	static public void copy(File src, File dst) throws IOException {
-		InputStream in = new FileInputStream(src);
-		OutputStream out = new FileOutputStream(dst);
 
-		// Transfer bytes from in to out
-		byte[] buf = new byte[1024];
-		int len;
-		while ((len = in.read(buf)) > 0) {
-			out.write(buf, 0, len);
-		}
-		in.close();
-		out.close();
-	}
-
-	static public boolean copy(String from, String to) {
-		try {
-			byte[] b = fileToByteArray(new File(from));
-			byteArrayToFile(to, b);
-			return true;
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		return false;
-	}
+	
 
 	// --- string interface end --------------------
 
@@ -172,17 +133,16 @@ public class FileIO {
 	// rename getBytes getResourceBytes / String File InputStream
 
 	//
-	static public boolean copyResource(String fromFilename, String toFilename) {
+	static public boolean copyResource(File src, File dst) {
 		try {
-			byte[] b = resourceToByteArray(fromFilename);
-			File f = new File(toFilename);
-			String path = f.getParent();
+			byte[] b = resourceToByteArray(src);
+			String path = dst.getParent();
 			File dir = new File(path);
 			if (!dir.exists()) {
 				dir.mkdirs();
 			}
 
-			byteArrayToFile(toFilename, b);
+			byteArrayToFile(dst, b);
 			return true;
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -250,20 +210,16 @@ public class FileIO {
 		return null;
 	}
 
-	public static File[] getPackageContent(String packageName) throws IOException {
-		ArrayList<File> list = new ArrayList<File>();
-		Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(packageName);
-		while (urls.hasMoreElements()) {
-			URL url = urls.nextElement();
-			File dir = new File(url.getFile());
-			if (dir != null) {
-				for (File f : dir.listFiles()) {
-					list.add(f);
-				}
-			}
-		}
-		return list.toArray(new File[] {});
-	}
+	/*
+	 * public static File[] getPackageContent(String packageName) throws
+	 * IOException { ArrayList<File> list = new ArrayList<File>();
+	 * Enumeration<URL> urls =
+	 * Thread.currentThread().getContextClassLoader().getResources(packageName);
+	 * while (urls.hasMoreElements()) { URL url = urls.nextElement(); File dir =
+	 * new File(url.getFile()); if (dir != null) { for (File f :
+	 * dir.listFiles()) { list.add(f); } } } return list.toArray(new File[] {});
+	 * }
+	 */
 
 	// getBytes end ------------------
 
@@ -454,8 +410,8 @@ public class FileIO {
 		}
 	}
 
-	public static final byte[] resourceToByteArray(String resourceName) {
-		String filename = String.format("/resource/%s", resourceName);
+	public static final byte[] resourceToByteArray(File src) {
+		String filename = String.format("/resource/%s", src);
 
 		log.info(String.format("looking for %s", filename));
 		InputStream isr = null;
@@ -463,7 +419,7 @@ public class FileIO {
 			isr = FileIO.class.getResourceAsStream(filename);
 		} else {
 			try {
-				isr = new FileInputStream(String.format("%sresource/%s", getSource(), resourceName));
+				isr = new FileInputStream(String.format("%sresource/%s", getSource(), src));
 			} catch (Exception e) {
 				Logging.logError(e);
 				return null;
@@ -488,8 +444,12 @@ public class FileIO {
 		return data;
 	}
 
-	public final static String resourceToString(String filename) {
-		byte[] bytes = resourceToByteArray(filename);
+	public final static String resourceToString(String src) {
+		return resourceToString(new File(src));
+	}
+	
+	public final static String resourceToString(File src) {
+		byte[] bytes = resourceToByteArray(src);
 		if (bytes == null) {
 			return null;
 		}
@@ -526,9 +486,11 @@ public class FileIO {
 	 * @param data
 	 * @throws IOException
 	 */
-	static public void savePartFile(String filename, byte[] data) throws IOException {
+	static public void savePartFile(File file, byte[] data) throws IOException {
 		// first delete any part or filename file currently there
-		File file = new File(filename);
+
+		String filename = file.getName();
+		
 		if (file.exists()) {
 			if (!file.delete()) {
 				throw new IOException(String.format("%s exists but could not delete", filename));
@@ -542,7 +504,7 @@ public class FileIO {
 			}
 		}
 
-		byteArrayToFile(partFilename, data);
+		byteArrayToFile(new File(partFilename), data);
 
 		if (!partFile.renameTo(new File(filename))) {
 			throw new IOException(String.format("could not rename %s to %s ..  don't know why.. :(", partFilename, filename));
@@ -551,7 +513,7 @@ public class FileIO {
 	}
 
 	public static void stringToFile(String filename, String data) throws IOException {
-		byteArrayToFile(filename, data.getBytes());
+		byteArrayToFile(new File(filename), data.getBytes());
 	}
 
 	public static byte[] toByteArray(InputStream is) {
@@ -595,6 +557,11 @@ public class FileIO {
 			return false;
 		}
 		return true;
+	}
+
+	static public void copy(File src, File dst) throws IOException {		
+		byte[] b = fileToByteArray(src);
+		byteArrayToFile(dst, b);
 	}
 
 	static public void copyFile(InputStream is, long size, String outFile) throws IOException {
@@ -765,7 +732,109 @@ public class FileIO {
 	 * byte[] buffer = new byte[2048]; for (;;) { int nBytes = in.read(buffer);
 	 * if (nBytes <= 0) break; out.write(buffer, 0, nBytes); } out.flush();
 	 * out.close(); in.close(); } catch (Exception e) { e.printStackTrace(); } }
+	 * 
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
+
+	public static List<File> getPackageContent(String packageName) throws IOException {
+		return getPackageContent(packageName, false, null, null);
+	}
+
+	/** 
+	 * The "goal" of this method is to get the list of contents from a package REGARDLESS of the packaging :P
+	 * Regrettably, the implementation depends greatly on if the classes are on the file system vs if they are in a jar file
+	 * 
+	 * Step 1: find out if our application is running in a jar (runtime release) or running on classes on the file system (debug)
+	 * 
+	 * Step 2: if we are running from the file system with .class files - it becomes very simple file operations 
+	 * 
+	 * @param packageName
+	 * @param recurse
+	 * @param include
+	 * @param exclude
+	 * @return
+	 * @throws IOException
+	 */
+	public static List<File> getPackageContent(String packageName, boolean recurse, String[] include, String[] exclude) throws IOException {
+		
+		// FIXME - "if inJar()" must be done in a very different way !
+		
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		assert classLoader != null;
+		String path = packageName.replace('.', '/');
+		Enumeration<URL> resources = classLoader.getResources(path);
+		List<File> dirs = new ArrayList<File>();
+		log.info("resources.hassMoreElements {}", resources.hasMoreElements());
+		
+		while (resources.hasMoreElements()) {
+			URL resource = resources.nextElement();
+			log.info("resources.nextElement {}", resource);
+			dirs.add(new File(resource.getFile()));
+		}
+		
+		ArrayList<File> files = new ArrayList<File>();
+		// if (recurse) {
+		for (File directory : dirs) {
+			files.addAll(findPackageContents(directory, packageName, recurse, include, exclude));
+		}
+		// }
+		return files;// .toArray(new Class[classes.size()]);
+	}
+
+	/**
+	 * Recursive method used to find all classes in a given directory and
+	 * subdirs.
+	 *
+	 * @param directory
+	 *            The base directory
+	 * @param packageName
+	 *            The package name for classes found inside the base directory
+	 * @return The classes
+	 * @throws ClassNotFoundException
+	 */
+	public static List<File> findPackageContents(File directory, String packageName, boolean recurse, String[] include, String[] exclude) {
+		List<File> classes = new ArrayList<File>();
+		if (!directory.exists()) {
+			return classes;
+		}
+		File[] files = directory.listFiles();
+		for (File file : files) {
+			if (file.isDirectory() && recurse) {
+				assert !file.getName().contains(".");
+				classes.addAll(findPackageContents(file, packageName + "." + file.getName(), recurse, include, exclude));
+			} else { // if (file.getName().endsWith(".class")) {
+				String filename = file.getName();
+				boolean add = false;
+				if (include != null) {
+					for (int i = 0; i < include.length; ++i) {
+						if (filename.matches(include[i])) {
+							add = true;
+							break;
+						}
+					}
+				}
+
+				if (exclude != null) {
+					for (int i = 0; i < exclude.length; ++i) {
+						if (filename.matches(exclude[i])) {
+							add = false;
+							break;
+						}
+					}
+				}
+
+				if (include == null && exclude == null) {
+					add = true;
+				}
+
+				if (add) {
+					classes.add(file);
+				}
+			}
+		}
+		return classes;
+	}
 
 	// FIXME - UNIT TESTS !!!
 	public static void main(String[] args) throws ZipException, IOException {
@@ -774,21 +843,24 @@ public class FileIO {
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
-			/*
-			 * final URL jarUrl = new
-			 * URL("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource");
-			 * final JarURLConnection connection = (JarURLConnection)
-			 * jarUrl.openConnection(); final URL url =
-			 * connection.getJarFileURL();
-			 * 
-			 * System.out.println(url.getFile());
-			 */
 
-			extract("develop/myrobotlab.jar", "resource/version.txt", "./version.txt");
+			/*
+			final URL jarUrl = new URL("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource");
+			final JarURLConnection connection = (JarURLConnection) jarUrl.openConnection();
+			final URL url = connection.getJarFileURL();
+
+			System.out.println(url.getFile());
+			*/
+
+			List<File> c = getPackageContent("org.myrobotlab.service");
+
+			// File[] files = getPackageContent("org.myrobotlab.service");
+
+//			extract("develop/myrobotlab.jar", "resource/version.txt", "./version.txt");
 
 			// extract("/C:/mrl/myrobotlab/dist/myrobotlab.jar", "resource",
 			// "");
-			extract("dist/myrobotlab.jar", "resource", "");
+//			extract("dist/myrobotlab.jar", "resource", "");
 			// extractResources();
 			/*
 			 * // extract directory to a non existent directory // result should
@@ -848,6 +920,18 @@ public class FileIO {
 			Logging.logError(e);
 		}
 
+	}
+
+	public static List<String> getPackageClassNames(String packageName) throws ClassNotFoundException, IOException {
+		List<File> files = getPackageContent(packageName, false, new String[] { ".*\\.class" }, new String[] { ".*Test\\.class", ".*\\$.*" });
+		ArrayList<String> classes = new ArrayList<String>();
+		String path = packageName.replace('.', '/');
+		for (File file : files) {
+			String filename = file.getName();
+			String classname = String.format("%s.%s", packageName, filename.substring(0, filename.length() - 6));
+			classes.add(classname);
+		}
+		return classes;
 	}
 
 }

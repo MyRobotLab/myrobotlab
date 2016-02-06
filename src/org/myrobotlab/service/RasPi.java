@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -80,10 +81,6 @@ public class RasPi extends Service {
 		Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");
 	}
 
-
-	static public String[] getDependencies() {
-		return new String[] {"com.pi4j.pi4j"};
-	}
 	
 	/*
 	 * FIXME - make these methods createDigitalAndPwmPin public
@@ -143,16 +140,6 @@ public class RasPi extends Service {
 		}
 
 		return null;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "control", "i2c" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "Raspberry Pi service used for accessing specific RasPi hardware such as I2C";
 	}
 
 	public I2CDevice getDevice(int busAddress, int deviceAddress) {
@@ -286,5 +273,23 @@ public class RasPi extends Service {
 			Logging.logError(e);
 		}
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(RasPi.class.getCanonicalName());
+		meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware such as I2C");
+		meta.addCategory("i2c","control");
+		meta.addDependency("com.pi4j.pi4j");
+		return meta;
+	}
+
 
 }

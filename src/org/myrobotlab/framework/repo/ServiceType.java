@@ -1,9 +1,12 @@
 package org.myrobotlab.framework.repo;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeMap;
+
+import org.myrobotlab.framework.ServiceReservation;
 
 /**
  * list of relations from a Service type to a Dependency key the key is used to
@@ -26,9 +29,11 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public Integer workingLevel = null;
 	public String description = null;
 	public Boolean available = null;
-	public ArrayList<String> dependencies;
-	public TreeMap<String, String> peers;
-
+	public HashSet<String> dependencies = new HashSet<String>();
+	public HashSet<String> categories = new HashSet<String>();
+	
+	public TreeMap<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
+	
 	public ServiceType() {
 	}
 
@@ -36,28 +41,23 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 		this.name = name;
 	}
 
-	public void addDependency(String org) {
-		if (dependencies == null) {
-			dependencies = new ArrayList<String>();
+	public void addDependency(String... orgs) {
+		for (int i = 0; i < orgs.length; ++i){
+			dependencies.add(orgs[i]);
 		}
-		dependencies.add(org);
 	}
 
-	public void addPeer(String name, String peerType) {
-		if (peers == null) {
-			peers = new TreeMap<String, String>();
-		}
-		peers.put(name, peerType);
-	}
 
 	@Override
 	public int compare(ServiceType o1, ServiceType o2) {
 		return o1.name.compareTo(o2.name);
 	}
 
+	/*
 	public String get(int index) {
 		return dependencies.get(index);
 	}
+	*/
 
 	public String getName() {
 		return name;
@@ -74,7 +74,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	}
 
 	public boolean isAvailable() {
-		return (available == null || available == true);
+		return (available != null && available == true);
 	}
 
 	public int size() {
@@ -85,5 +85,41 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public String toString() {
 		return name;
 	}
+
+	public void addDescription(String description) {
+		this.description = description;
+	}
+	
+	public void addCategory(String...categories){
+		for (int i = 0; i < categories.length; ++i){
+			this.categories.add(categories[i]);
+		}
+	}
+	
+	public void addPeer(String name, String peerType, String comment) {
+		peers.put(name, new ServiceReservation(name, peerType, comment));
+	}
+	
+	public void sharePeer(String key, String actualName, String peerType, String comment) {		
+		peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
+	}
+	
+	public void addRootPeer(String key, String actualName, String peerType, String comment) {		
+		peers.put(key, new ServiceReservation(key, actualName, peerType, comment, true));
+	}
+
+	public void setAvailable(boolean b) {
+		this.available = b;
+	}
+
+	public Set<String> getDependencies() {
+		return dependencies;
+	}
+
+	public TreeMap<String, ServiceReservation> getPeers() {
+		return peers;
+	}
+	
+	
 
 }

@@ -9,7 +9,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.interfaces.DocumentConnector;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
-import org.python.modules.synchronize;
 
 /**
  * 
@@ -28,12 +27,9 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 	
 	public AbstractConnector(String name) {
 		super(name);
-		// connectors should have a blocking out box.
-		// to avoid OOM errors
-		this.outbox.setBlocking(true);		
 	}
 
-	public synchronized  void feed(Document doc) {
+	public void feed(Document doc) {
 		// System.out.println("Feeding document " + doc.getId());
 		// TODO: add batching and change this to publishDocuments (as a list)
 		// Batching for this sort of stuff is a very good thing.
@@ -44,11 +40,7 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 			// TODO: make this synchronized and thread safe!
 			batch.add(doc);
 			if (batch.size() >= batchSize) {
-				invoke("publishDocuments", batch);
-				// batch.clear();
-				batch = Collections.synchronizedList(new ArrayList<Document>());
-				// TODO: why the heck was I calling flush here before?
-				// flush();
+				flush();
 			}
 		}
 	}
@@ -101,11 +93,6 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
 
 	public ConnectorState getConnectorState() {
 		return state;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[]{"data"};
 	}
 
 	public int getBatchSize() {

@@ -45,9 +45,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -72,12 +72,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	transient AudioFile audioFile = null;// new AudioFile("audioFile");
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		// put peer definitions in
-		peers.put("audioFile", "AudioFile", "audio file to play downloaded mp3s");
-		return peers;
-	}
 
 	public AcapelaSpeech(String n) {
 		super(n);
@@ -233,7 +227,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	public void startService() {
 		super.startService();
-		audioFile = (AudioFile)startPeer("audioFile");
+		startPeer("audioFile");
 		audioFile.startService();
 		// attach a listener when the audio file ends playing.
 		audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
@@ -464,17 +458,11 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		return speak(toSpeak);
 	}
 
-	@Override
-	public String[] getCategories() {
+	static public String[] getCategories() {
 		// TODO Auto-generated method stub
 		return new String[]{"speech"};
 	}
 
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return "Acapela group speech syntesis service.";
-	}
 
 	@Override
     public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException{
@@ -507,6 +495,24 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		ArrayList<String> ret = new ArrayList<String>();
 		// FIXME - add iso language codes currently supported e.g. en en_gb de etc.. 
 		return ret;
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
+		meta.addDescription("Acapela group speech synthesis service.");
+		meta.addCategory("speech");		
+		meta.addPeer("audioFile", "AudioFile", "audioFile");
+		return meta;		
 	}
 	
 	public static void main(String[] args) {

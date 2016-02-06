@@ -32,6 +32,7 @@ import java.util.TreeMap;
 
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -39,8 +40,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.Encoder;
 import org.myrobotlab.sensor.EncoderListener;
-import org.myrobotlab.sensor.EncoderTimer;
-import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MotorEncoder;
@@ -170,21 +169,11 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "motor" };
-	}
-
 	public String getControllerName() {
 		if (controller != null) {
 			return controller.getName();
 		}
 		return null;
-	}
-
-	@Override
-	public String getDescription() {
-		return "general motor service";
 	}
 
 	@Override
@@ -567,6 +556,23 @@ public class Motor extends Service implements MotorControl, SensorDataSink, Enco
 	public void setEncoder(Encoder encoder) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
+		meta.addDescription("General Motor Service");
+		meta.addCategory("motor");
+		
+		return meta;
 	}
 
 	

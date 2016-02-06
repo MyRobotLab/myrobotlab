@@ -23,6 +23,7 @@ import org.myrobotlab.framework.InvokerUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -33,7 +34,7 @@ import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
-public class XMPP extends Service implements Gateway, MessageListener {
+public class Xmpp extends Service implements Gateway, MessageListener {
 
 	// GOOD ! - bundle message in single object for event return
 	public static class XMPPMsg {
@@ -48,7 +49,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(XMPP.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Xmpp.class.getCanonicalName());
 	static final int packetReplyTimeout = 500; // millis
 
 	// FIXME - sendMsg onMsg getMsg - GLOBAL INTERFACE FOR GATEWAYS
@@ -83,9 +84,6 @@ public class XMPP extends Service implements Gateway, MessageListener {
 	 * 
 	 * @return
 	 */
-	static public String[] getDependencies() {
-		return new String[] { "org.jivesoftware.smack"};
-	}
 	
 	/**
 	 * auditors chat buddies who can see what commands are being processed and
@@ -99,7 +97,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 	transient HashMap<String, Chat> chats = new HashMap<String, Chat>();
 
 
-	public XMPP(String n) {
+	public Xmpp(String n) {
 		super(n);
 		// defaultPrefix = n;
 	}
@@ -237,11 +235,6 @@ public class XMPP extends Service implements Gateway, MessageListener {
 	}
 
 	@Override
-	public String[] getCategories() {
-		return new String[] { "control", "connectivity" };
-	}
-
-	@Override
 	public HashMap<URI, Connection> getClients() {
 		// TODO Auto-generated method stub
 		return null;
@@ -253,10 +246,6 @@ public class XMPP extends Service implements Gateway, MessageListener {
 		return null;
 	}
 
-	@Override
-	public String getDescription() {
-		return "xmpp service to access the jabber network";
-	}
 
 	public RosterEntry getEntry(String userOrBuddyId) {
 		RosterEntry entry = null;
@@ -713,7 +702,7 @@ public class XMPP extends Service implements Gateway, MessageListener {
 
 			int i = 1;
 			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
-			XMPP xmpp1 = (XMPP) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
+			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
 			Runtime.createAndStart(String.format("clock%d", i), "Clock");
 			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
 			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "mrlRocks!");
@@ -733,5 +722,21 @@ public class XMPP extends Service implements Gateway, MessageListener {
 
 	}
 
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		ServiceType meta = new ServiceType(Xmpp.class.getCanonicalName());
+		meta.addDescription("xmpp service to access the jabber network");
+		meta.addCategory("connectivity");
+		meta.addDependency("org.jivesoftware.smack");
+		return meta;		
+	}	
 
+	
 }

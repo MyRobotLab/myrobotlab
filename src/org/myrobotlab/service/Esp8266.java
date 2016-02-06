@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -17,17 +18,6 @@ public class Esp8266 extends Service {
 	public Esp8266(String n) {
 		super(n);
 	}
-
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "general" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
 	
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -42,5 +32,28 @@ public class Esp8266 extends Service {
 			Logging.logError(e);
 		}
 	}
+	
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Esp8266.class.getCanonicalName());
+		meta.addDescription("wifi Arduino");
+		meta.addCategory("microcontroller");
+
+		// put peer definitions in
+		meta.addPeer("serial", "Serial", "serial");
+		meta.addPeer("webgui", "WebGui", "webgui");
+
+		return meta;
+	}
+
 
 }

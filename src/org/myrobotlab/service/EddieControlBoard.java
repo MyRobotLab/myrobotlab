@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -18,8 +19,8 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**
- * EddieControlBoard - This service will communicate with the parallax EddieControlBoard
- * It can publish sensor data , control motors and more! 
+ * EddieControlBoard - This service will communicate with the parallax
+ * EddieControlBoard It can publish sensor data , control motors and more!
  *
  */
 public class EddieControlBoard extends Service implements KeyListener, SerialDataListener, InputListener {
@@ -87,18 +88,6 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
 	public final static Logger log = LoggerFactory.getLogger(EddieControlBoard.class);
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		// put peer definitions in
-		peers.put("serial", "Serial", "serial");
-		peers.put("keyboard", "Keyboard", "serial");
-		peers.put("webgui", "WebGui", "webgui");
-		peers.put("remote", "RemoteAdapter", "remote interface");
-		peers.put("joystick", "Joystick", "joystick");
-		return peers;
-	}
-
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -106,7 +95,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 		try {
 
 			EddieControlBoard ecb = (EddieControlBoard) Runtime.start("ecb", "EddieControlBoard");
-	
+
 			// 129 -> 81
 			// 128 -> 80 (full reverse)
 			// 127 -> 7F (full forward)
@@ -153,16 +142,6 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 		sleep(1000);
 		stopSensors();
 		return lastSensorValues.get("BATTERY");
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "microcontroller" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
 	}
 
 	public String getGPIOHighValues() throws Exception {
@@ -357,10 +336,10 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 	}
 
 	public void sayBatterLevel(Float buttonValue) {
-		try{
-		Float bl = getBatteryLevel();
-		mouth.speak(String.format("current battery level is %d", bl.intValue()));
-		} catch(Exception e){
+		try {
+			Float bl = getBatteryLevel();
+			mouth.speak(String.format("current battery level is %d", bl.intValue()));
+		} catch (Exception e) {
 			Logging.logError(e);
 		}
 	}
@@ -414,9 +393,9 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 		joystick = (Joystick) startPeer("joystick");
 		joystick.addInputListener(this);
 		/*
-		joystick.addAxisListener(getName(), "onY");
-		joystick.addAxisListener(getName(), "onRY");
-		*/
+		 * joystick.addAxisListener(getName(), "onY");
+		 * joystick.addAxisListener(getName(), "onRY");
+		 */
 	}
 
 	public void startRemoteAdapter() throws Exception {
@@ -462,7 +441,6 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 		return false;
 	}
 
-
 	@Override
 	public final Integer onByte(Integer newByte) throws IOException {
 		info("%s onByte %s", getName(), newByte);
@@ -479,6 +457,31 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 	public String onDisconnect(String portName) {
 		info("%s disconnected from %s", getName(), portName);
 		return portName;
+	}
+
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(EddieControlBoard.class.getCanonicalName());
+		meta.addDescription("Special controller board for robotics");
+		meta.addCategory("microcontroller");
+
+		// put peer definitions in
+		meta.addPeer("serial", "Serial", "serial");
+		meta.addPeer("keyboard", "Keyboard", "serial");
+		meta.addPeer("webgui", "WebGui", "webgui");
+		meta.addPeer("remote", "RemoteAdapter", "remote interface");
+		meta.addPeer("joystick", "Joystick", "joystick");
+
+		return meta;
 	}
 
 }

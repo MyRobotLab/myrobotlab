@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -61,12 +62,6 @@ public class Cron extends Service {
 	public final static String EVERY_MINUTE = "* * * * *";
 
 	public ArrayList<Task> tasks = new ArrayList<Task>();
-	
-
-	static public String[] getDependencies() {
-		return new String[] {"it.sauronsoftware.cron4j"};
-	}
-
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -147,16 +142,6 @@ public class Cron extends Service {
 		return scheduler.schedule(cron, task);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "scheduling" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "A Cron like service capable of scheduling future actions";
-	}
-
 	public ArrayList<Task> getTasks() {
 		return tasks;
 	}
@@ -181,5 +166,22 @@ public class Cron extends Service {
 		log.info("data {}", data);
 		return data;
 	}
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Cron.class.getCanonicalName());
+		meta.addDescription("A Cron like service capable of scheduling future actions");
+		meta.addCategory("scheduling");
+		meta.addDependency("it.sauronsoftware.cron4j");
+		return meta;		
+	}	
 
 }

@@ -27,6 +27,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.chess.HMove;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -62,11 +63,6 @@ public class ChessGame extends Service {
 
 	}
 	
-	static public String[] getDependencies() {
-		return new String[] {"org.op.chess"};
-	}
-
-
 	public ChessGame(String n) {
 		super(n);
 	}
@@ -76,15 +72,6 @@ public class ChessGame extends Service {
 		return move;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "game" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used to generate pulses";
-	}
 
 	public HMove inputHMove(HMove s) {
 		return s;
@@ -226,6 +213,24 @@ public class ChessGame extends Service {
 		}
 
 		return hmoveMsg;
+	}
+
+
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(ChessGame.class.getCanonicalName());
+		meta.addDescription("interface to a Chess game");
+		meta.addCategory("game");
+		meta.addDependency("org.op.chess");
+		return meta;		
 	}
 
 }

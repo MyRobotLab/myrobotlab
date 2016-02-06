@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -30,15 +31,22 @@ public class _TemplateService extends Service {
 	public _TemplateService(String n) {
 		super(n);
 	}
-
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "general" };
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(_TemplateService.class.getCanonicalName());
+		meta.addDescription("used as a general template");
+		meta.addCategory("general");		
+		return meta;		
 	}
 
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
+	
 }

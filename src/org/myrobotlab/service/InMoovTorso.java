@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -24,17 +25,6 @@ public class InMoovTorso extends Service {
 	transient public Servo midStom;
 	transient public Servo lowStom;
 	transient public Arduino arduino;
-
-	// static in Java are not overloaded but overwritten - there is no
-	// polymorphism for statics
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("topStom", "Servo", "Top Stomach servo");
-		peers.put("midStom", "Servo", "Mid Stomach servo");
-		peers.put("lowStom", "Servo", "Low Stomach servo");
-		peers.put("arduino", "Arduino", "Arduino controller for this arm");
-		return peers;
-	}
 
 	static public void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -134,15 +124,6 @@ public class InMoovTorso extends Service {
 		sleep(InMoov.attachPauseMs);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "the InMoov Arm Service";
-	}
 
 	public long getLastActivityTime() {
 		long minLastActivity = Math.max(topStom.getLastActivityTime(), midStom.getLastActivityTime());
@@ -260,5 +241,28 @@ public class InMoovTorso extends Service {
 			moveTo(35, 45, 55);
 			String move = getScript("i01");
 			log.info(move);
+	}
+	
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(InMoovTorso.class.getCanonicalName());
+		meta.addDescription("InMoov Torso");
+		meta.addCategory("robot");
+		
+		meta.addPeer("topStom", "Servo", "Top Stomach servo");
+		meta.addPeer("midStom", "Servo", "Mid Stomach servo");
+		meta.addPeer("lowStom", "Servo", "Low Stomach servo");
+		meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+		
+		return meta;
 	}
 }

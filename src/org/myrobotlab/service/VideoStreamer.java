@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -66,16 +67,6 @@ public class VideoStreamer extends VideoSink {
 		VideoSource vs = (VideoSource) Runtime.getService(videoSource);
 		attach(vs);
 		return true;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "video", "sensor" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
 	}
 
 	@Override
@@ -152,5 +143,21 @@ public class VideoStreamer extends VideoSink {
 		stop();
 	}
 
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(VideoStreamer.class.getCanonicalName());
+		meta.addDescription("Video streaming service");
+		meta.addCategory("video","display");		
+		return meta;
+	}
+	
 
 }

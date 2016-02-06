@@ -8,6 +8,7 @@ import java.util.TooManyListenersException;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -98,7 +99,7 @@ public class Plantoid extends Service {
 
 	transient private WebGui webgui;
 
-	transient private XMPP xmpp;
+	transient private Xmpp xmpp;
 
 	transient public Scanner scanner = null;
 
@@ -119,35 +120,6 @@ public class Plantoid extends Service {
 
 	private int sampleRate = 8000;
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		// merge
-		/*
-		 * peers.suggestAs("tracking.x", "pan", "Servo", "shared x");
-		 * peers.suggestAs("tracking.y", "tilt", "Servo", "shared y");
-		 * peers.suggestAs("tracking.opencv", "opencv", "OpenCV",
-		 * "shared opencv");
-		 */
-
-		peers.put("arduino", "Arduino", "arduino service");
-		peers.put("audioFile", "AudioFile", "audio file service");
-		peers.put("jFugue", "JFugue", "jfugue service");
-
-		peers.put("webgui", "WebGui", "WebGui service");
-		peers.put("xmpp", "XMPP", "xmpp service");
-		peers.put("leg1", "Servo", "leg1");
-		peers.put("leg2", "Servo", "leg2");
-		peers.put("leg3", "Servo", "leg3");
-		peers.put("leg4", "Servo", "leg4");
-		peers.put("pan", "Servo", "pan");
-		peers.put("tilt", "Servo", "tilt");
-		peers.put("tracking", "Tracking", "tracking service");
-		peers.put("opencv", "OpenCV", "pilot camera");
-		peers.put("streamer", "VideoStreamer", "video streamer");
-
-		return peers;
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -181,7 +153,7 @@ public class Plantoid extends Service {
 		super(n);
 
 		arduino = (Arduino) createPeer("arduino");
-		xmpp = (XMPP) createPeer("xmpp");
+		xmpp = (Xmpp) createPeer("xmpp");
 		webgui = (WebGui) createPeer("webgui");
 		leg1 = (Servo) createPeer("leg1");
 		leg2 = (Servo) createPeer("leg2");
@@ -296,16 +268,7 @@ public class Plantoid extends Service {
 		detachPanTilt();
 		detachLegs();
 	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor", "display" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "the plantoid service";
-	}
+	
 
 	/**
 	 * current uptime of the plantoid server this represents the longevity and
@@ -582,6 +545,40 @@ public class Plantoid extends Service {
 			scanner.interrupt();
 			scanner = null;
 		}
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Plantoid.class.getCanonicalName());
+		meta.addDescription("The Plantoid Service");
+		meta.addCategory("robot");
+		// put peer definitions in
+		meta.addPeer("arduino", "Arduino", "arduino service");
+		meta.addPeer("audioFile", "AudioFile", "audio file service");
+		meta.addPeer("jFugue", "JFugue", "jfugue service");
+
+		meta.addPeer("webgui", "WebGui", "WebGui service");
+		meta.addPeer("xmpp", "XMPP", "xmpp service");
+		meta.addPeer("leg1", "Servo", "leg1");
+		meta.addPeer("leg2", "Servo", "leg2");
+		meta.addPeer("leg3", "Servo", "leg3");
+		meta.addPeer("leg4", "Servo", "leg4");
+		meta.addPeer("pan", "Servo", "pan");
+		meta.addPeer("tilt", "Servo", "tilt");
+		meta.addPeer("tracking", "Tracking", "tracking service");
+		meta.addPeer("opencv", "OpenCV", "pilot camera");
+		meta.addPeer("streamer", "VideoStreamer", "video streamer");
+
+		return meta;
 	}
 
 }

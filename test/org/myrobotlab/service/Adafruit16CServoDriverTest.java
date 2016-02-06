@@ -1,8 +1,7 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.fail;
-import static org.myrobotlab.service.Adafruit16CServoDriver.SERVOMIN;
 import static org.myrobotlab.service.Adafruit16CServoDriver.SERVOMAX;
+import static org.myrobotlab.service.Adafruit16CServoDriver.SERVOMIN;
 
 import java.io.IOException;
 
@@ -11,13 +10,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.fileLib.FileIO.FileComparisonException;
-import org.myrobotlab.framework.Status;
-import org.myrobotlab.service.Adafruit16CServoDriver;
-import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Serial;
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.FileIO.FileComparisonException;
 
 public class Adafruit16CServoDriverTest {
 

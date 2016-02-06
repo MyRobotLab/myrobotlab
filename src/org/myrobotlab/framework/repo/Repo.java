@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -32,10 +31,11 @@ import org.apache.ivy.util.url.URLHandler;
 import org.apache.ivy.util.url.URLHandlerDispatcher;
 import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.fileLib.Zip;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -81,6 +81,7 @@ public class Repo implements Serializable {
 	 * will be no Runtime running - but Repo requests are still desired.
 	 */
 
+	// FIXME - remove - not needed anymore
 	transient private ServiceData remoteServiceData = null;
 
 	private Platform platform;
@@ -199,11 +200,13 @@ public class Repo implements Serializable {
 
 		repo.install("org.myrobotlab.service.Arduino");
 
+		/*
 		Updates updates = repo.checkForUpdates();
 		log.info(String.format("updates %s", updates));
 		if (updates.hasJarUpdate()) {
 			repo.getLatestJar();
 		}
+		*/
 
 		// resolve All
 		repo.retrieveAll();
@@ -268,6 +271,9 @@ public class Repo implements Serializable {
 	 * compared the resulting Updates data can then be used to apply against
 	 * local repo to process updates
 	 */
+	// NOW THERE IS NO NEED TO CHECK FOR UPDATES - THE UPDATES WILL
+	// COME IN myrobotlab.jar completely
+	/*
 	public Updates checkForUpdates() {
 		Updates updates = new Updates();
 		try {
@@ -279,6 +285,7 @@ public class Repo implements Serializable {
 			info(String.format("current %s latest %s", updates.currentVersion, updates.repoVersion));
 
 			updates.localServiceData = localServiceData;
+			
 			remoteServiceData = ServiceData.getRemote(getServiceDataURL());
 			updates.remoteServiceData = remoteServiceData;
 
@@ -298,6 +305,7 @@ public class Repo implements Serializable {
 		return updates;
 
 	}
+	*/
 
 	public boolean clearLibraries() {
 		return clearLibraries(null);
@@ -400,23 +408,24 @@ public class Repo implements Serializable {
 		// these are immediate dependencies - not Peer
 		if (sd.containsServiceType(fullServiceName)) {
 			ServiceType st = sd.getServiceType(fullServiceName);
-			ArrayList<String> orgs = st.dependencies;
-			if (orgs != null) {
+			Set<String> orgs = st.getDependencies();
+			//if (orgs != null) {
 				// Dependency[] deps = new Dependency[orgs.size()];
-				for (int i = 0; i < orgs.size(); ++i) {
-					Dependency d = sd.getDependency(orgs.get(i));
+			for (String org : orgs){
+				//for (int i = 0; i < orgs.size(); ++i) {
+					Dependency d = sd.getDependency(org);
 					if (d != null) {
 						deps.add(d);
 					} else {
-						error("NO DEPENDENCY DEFINED FOR %s - %s", fullServiceName, orgs.get(i));
+						error("NO DEPENDENCY DEFINED FOR %s - %s", fullServiceName, org);
 					}
-				}
+				// }
 			}
 
 			// get all the dependencies of my peers
-			TreeMap<String, String> peers = st.peers;
+			TreeMap<String, ServiceReservation> peers = st.getPeers();
 			if (peers != null) {
-				for (String peerType : peers.values()) {
+				for (String peerType : peers.keySet()) {
 					deps.addAll(getDependencies(peerType));
 				}
 			}
@@ -537,7 +546,7 @@ public class Repo implements Serializable {
 	public ServiceData getServiceDataFromRepo() {
 		try {
 
-			remoteServiceData = ServiceData.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/" + platform.getBranch() + "/serviceData.json");
+			remoteServiceData = ServiceData.getLocal();//.getRemote("https://raw.githubusercontent.com/MyRobotLab/repo/" + platform.getBranch() + "/serviceData.json");
 			if (remoteServiceData == null) {
 				error("could not get remote service data");
 				return null;

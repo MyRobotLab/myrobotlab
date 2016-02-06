@@ -12,6 +12,7 @@ import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.xml.MRLChunkingXMLHandler;
 import org.myrobotlab.document.xml.RecordingInputStream;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -55,7 +56,7 @@ public class XMLConnector extends AbstractConnector {
 	@Override
 	public void startCrawling() {
 		// avoid buffer overruns on the outbox.. connectors shouldn't drop messages. (or run out of memory)
-		
+		this.outbox.setBlocking(true);
 		state = ConnectorState.RUNNING;
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 	    //spf.setNamespaceAware(false);  ?  Expose this?
@@ -76,6 +77,7 @@ public class XMLConnector extends AbstractConnector {
 		    xmlHandler.setDocumentIDPath(xmlIDPath);
 		    xmlHandler.setDocIDPrefix(docIDPrefix);
 		    xmlReader.setContentHandler(xmlHandler);
+		    
 		    FileInputStream fis = new FileInputStream(new File(filename));
 		    RecordingInputStream ris = new RecordingInputStream(fis);
 		    InputSource xmlSource = new InputSource(ris);
@@ -98,10 +100,6 @@ public class XMLConnector extends AbstractConnector {
 
 	}
 
-	@Override
-	public String getDescription() {
-		return "This is an XML Connector that will parse a large xml file into many small xml documents.";
-	}
 
 	public String getFilename() {
 		return filename;
@@ -135,4 +133,19 @@ public class XMLConnector extends AbstractConnector {
 		this.docIDPrefix = docIDPrefix;
 	}
 
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		ServiceType meta = new ServiceType(XMLConnector.class.getCanonicalName());
+		meta.addDescription("This is an XML Connector that will parse a large xml file into many small xml documents");
+		meta.addCategory("data");
+		return meta;		
+	}	
+	
 }

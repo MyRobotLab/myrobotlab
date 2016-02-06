@@ -64,10 +64,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -340,12 +341,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	int[] msg = new int[MAX_MSG_SIZE];
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		peers.put("serial", "Serial", "serial device for this Arduino");
-		return peers;
-	}
 
 	// ---------------------------- ServoController End -----------------------
 	// ---------------------- Protocol Methods Begin ------------------
@@ -489,15 +484,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return board;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "microcontroller" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "This service interfaces with an Arduino micro-controller.";
-	}
 
 	@Override
 	public ArrayList<Pin> getPinList() {
@@ -1700,6 +1686,24 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public int[] getSensorConfig() {
 		// is a Pin sensor
 		return new int[]{};
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Arduino.class.getCanonicalName());
+		meta.addDescription("This service interfaces with an Arduino micro-controller");
+		meta.addCategory("microcontroller");		
+		meta.addPeer("serial", "Serial", "serial device for this Arduino");
+		return meta;		
 	}
 
 }

@@ -46,7 +46,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.swing.Box;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -56,7 +55,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.myrobotlab.control.GUIServiceGUI;
 import org.myrobotlab.control.RuntimeGUI;
@@ -69,6 +67,7 @@ import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.Level;
@@ -138,12 +137,6 @@ public class GUIService extends Service implements WindowListener, ActionListene
 	boolean isDisplaying = false;
 	transient JLabel status = new JLabel("status");
 
-
-	static public String[] getDependencies() {
-		return new String[] {"org.fife.autocomplete",
-		        "org.fife.rsyntaxtextarea",
-		        "com.mxgraph.jgraph"};
-	}
 	
 	static public void attachJavaConsole() {
 		JFrame j = new JFrame("Java Console");
@@ -452,19 +445,10 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		}
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "display" };
-	}
-
 	public HashMap<String, mxCell> getCells() {
 		return guiServiceGUI.serviceCells;
 	}
 
-	@Override
-	public String getDescription() {
-		return "Service used to graphically display and control other services";
-	}
 
 	public String getDstMethodName() {
 		return guiServiceGUI.dstMethodName.getText();
@@ -812,6 +796,25 @@ public class GUIService extends Service implements WindowListener, ActionListene
 			Logging.logError(e);
 		}
 
+	}
+	
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(GUIService.class.getCanonicalName());
+		meta.addDescription("Service used to graphically display and control other services");
+		meta.addCategory("location");
+		meta.addCategory("display");
+		meta.addDependency("org.fife.autocomplete","org.fife.rsyntaxtextarea","com.mxgraph.jgraph");
+		return meta;
 	}
 
 }

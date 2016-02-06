@@ -33,7 +33,6 @@ import java.util.TreeMap;
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -46,8 +45,10 @@ import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.framework.repo.UpdateReport;
 import org.myrobotlab.framework.repo.Updates;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -239,12 +240,15 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * 
 	 * @return
 	 */
+	// FIXED - repo updates no longer needed... - info comes with myrobotlab.jar
+	/*
 	static public Updates checkForUpdates() {
 		runtime.invoke("checkingForUpdates");
 		Updates updates = runtime.repo.checkForUpdates();
 		runtime.invoke("publishUpdates", updates);
 		return updates;
 	}
+	*/
 
 	/**
 	 * 
@@ -804,12 +808,6 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return ret;
 	}
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("cli", "Cli", "command line interpreter for this process");
-		return peers;
-	}
-
 	public static String getPID() {
 
 		SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -1207,13 +1205,17 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 				}
 			}
 
+			/* No Longer needed - you can 'install' a service or simply update myrobotlab.jar
+			 * there is no longer the need to 'update' the repo - or service meta data
+			 
 			if (cmdline.containsKey("-update")) {
 				// update myrobotlab
 				runtime = Runtime.getInstance();
 				runtime.update();
 
 			}
-
+			*/
+			
 			if (cmdline.containsKey("-service")) {
 				createAndStartServices(cmdline);
 			}
@@ -1773,10 +1775,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * 
 	 * @return
 	 */
+	/* FIXME no longer needed
 	public UpdateReport applyUpdate() {
 		Updates updates = checkForUpdates();
 		return applyUpdates(updates);
 	}
+	*/
 
 	// ---------------- Runtime end --------------
 
@@ -1919,19 +1923,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return dep;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "framework" };
-	}
-
-	/**
-	 * Runtime singleton service
-	 */
-	@Override
-	public String getDescription() {
-		return "Runtime singleton service";
-	}
-
+	
 	/**
 	 * returns version string of MyRobotLab
 	 * 
@@ -2243,11 +2235,13 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * 
 	 * @return
 	 */
+	/* NO LONGER NEEDED
 	public UpdateReport update() {
 		// we are going to force a shutdown after the update
 		shutdownAfterUpdate = true;
 		return runtime.applyUpdate();
 	}
+	*/
 
 	/**
 	 * FIXME - if true - service data xml needs to be pulled from repo this
@@ -2372,6 +2366,25 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 	public static String getRuntimeName() {
 		return Runtime.getInstance().getName();
+	}
+
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Runtime.class.getCanonicalName());
+		meta.addDescription("Runtime singleton service responsible for the creation and registry of all other services");
+		meta.addCategory("framework");
+		meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
+		
+		return meta;
 	}
 
 

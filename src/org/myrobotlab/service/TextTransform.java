@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -36,16 +37,6 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 	}
 
 	@Override
-	public String[] getCategories() {
-		return new String[] { "data", "filter" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general textual transform - can be pipelined together";
-	}
-
-	@Override
 	public void onText(String text) {
 		// TODO Auto-generated method stub
 
@@ -61,4 +52,20 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 		addListener("publishText", service.getName(), "onText");
 	}
 
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(TextTransform.class.getCanonicalName());
+		meta.addDescription("TestThrower is used with TestCatcher to test messaging");
+		meta.addCategory("data","filter");		
+		return meta;
+	}
+	
 }

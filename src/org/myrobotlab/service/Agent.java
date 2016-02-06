@@ -17,8 +17,6 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
@@ -26,6 +24,7 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.HttpGet;
@@ -126,17 +125,6 @@ public class Agent extends Service {
 	
 	HashSet<String> dependencies = new HashSet<String>();
 	
-	public HashSet<String> getDependencies(){
-		return dependencies;
-	}
-	
-	
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		// peers.put("cli", "Cli", "Command line processor");
-		// peers.put("webAdmin", "WebGui", "web gui");
-		return peers;
-	}
 
 	HashMap<Integer, ProcessData> processes = new HashMap<Integer, ProcessData>();
 
@@ -347,15 +335,7 @@ public class Agent extends Service {
 		return sb.toString();
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "framework" };
-	}
 
-	@Override
-	public String getDescription() {
-		return "Agent (Smith) - responsible for creating the environment and maintaining, tracking and terminating all processes";
-	}
 
 	/**
 	 * gets id from name
@@ -636,7 +616,7 @@ public class Agent extends Service {
 		HashSet<String> skipTest = new HashSet<String>();
 
 		skipTest.add("org.myrobotlab.service.Runtime");
-		skipTest.add("org.myrobotlab.service.OpenNI");
+		skipTest.add("org.myrobotlab.service.OpenNi");
 
 		/*
 		 * skipTest.add("org.myrobotlab.service.Agent");
@@ -735,7 +715,7 @@ public class Agent extends Service {
 		ret.add(info("endTime %d", System.currentTimeMillis()));
 
 		try {
-			FileIO.savePartFile("fullTest.json", CodecUtils.toJson(ret).getBytes());
+			FileIO.savePartFile(new File("fullTest.json"), CodecUtils.toJson(ret).getBytes());
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -854,7 +834,7 @@ public class Agent extends Service {
 		File m = new File(filename);
 		if (!m.exists()) {
 			log.info(String.format("cloning self to %s", filename));
-			FileIO.copy("myrobotlab.jar", filename);
+			FileIO.copy(new File("myrobotlab.jar"), new File(filename));
 		}
 
 		// move process to start in that directory
@@ -1048,6 +1028,24 @@ public class Agent extends Service {
 			System.out.println("Agent.main leaving");
 			// System.exit(0);
 		}
+	}
+	
+
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Agent.class.getCanonicalName());
+		meta.addDescription("Agent - responsible for creating the environment and maintaining, tracking and terminating all processes");
+		meta.addCategory("framework");		
+		// meta.addPeer("webadmin", "WebGui", "webgui for the Agent");
+		return meta;		
 	}
 
 }

@@ -77,9 +77,9 @@ public class AudioProcessor extends Thread {
 
 	// FIXME play with this thread - but block incoming thread
 	public int play(AudioData data) {
-		
-		log.info(String.format("playing %s", data.toString()));
 
+		log.info(String.format("playing %s", data.toString()));
+		
 		AudioInputStream din = null;
 		try {
 			File file = new File(data.fileName);
@@ -144,6 +144,7 @@ public class AudioProcessor extends Thread {
 					if (pause) {
 						//Object lock = myService.getLock(queueName); // getLocks my lock
 						synchronized (lock) {
+							log.info("pausing");
 							// notify all waiting for me
 							List<Object> locks = myService.getLocksWaitingFor(queueName);
 							for (int i = 0; i < locks.size(); ++i){
@@ -159,10 +160,14 @@ public class AudioProcessor extends Thread {
 				line.close();
 				din.close();
 				
+				log.info(String.format("done playing %s", data.toString()));
+				
 				// notifiy that we've finished playing
 				
 				myService.invoke("finishedPlaying", "acapela done");
 				
+			} else {
+				log.error("line is null !");
 			}
 
 		} catch (Exception e) {
