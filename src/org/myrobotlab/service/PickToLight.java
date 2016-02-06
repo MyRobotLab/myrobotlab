@@ -28,6 +28,7 @@ import org.apache.http.util.EntityUtils;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -281,19 +282,6 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
 	Properties properties = new Properties();
 
-
-	static public String[] getDependencies() {
-		return new String[] {"org.apache.commons.httpclient"};
-	}
-
-	// FIXME push Task add/remove/repeat into Service
-
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("raspi", "RasPi", "raspi");
-		peers.put("webgui", "WebGui", "web server interface");
-		return peers;
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -610,11 +598,6 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 		return blinkDelayMs;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "industrial" };
-	}
-
 	public Controller getController() {
 
 		try {
@@ -665,10 +648,6 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 		return cycleDelayMs;
 	}
 
-	@Override
-	public String getDescription() {
-		return "Pick to light system";
-	}
 
 	public String getMode() {
 		return mode;
@@ -869,7 +848,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 			properties.load(input);
 
 			if ("true".equalsIgnoreCase(properties.getProperty("xmpp.enabled"))) {
-				XMPP xmpp = (XMPP) Runtime.createAndStart("xmpp", "XMPP");
+				Xmpp xmpp = (Xmpp) Runtime.createAndStart("xmpp", "XMPP");
 				xmpp.connect(properties.getProperty("xmpp.user"), properties.getProperty("xmpp.password"));
 				xmpp.addAuditor("Greg Perry");
 			}
@@ -1178,6 +1157,27 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(PickToLight.class.getCanonicalName());
+		meta.addDescription("Pick to light system");
+		meta.addCategory("industrial");
+		meta.addPeer("raspi", "RasPi", "raspi");
+		meta.addPeer("webgui", "WebGui", "web server interface");
+		// FIXME - should use static methos from HttpClient
+		meta.addDependency("org.apache.commons.httpclient");
+		return meta;
 	}
 
 }

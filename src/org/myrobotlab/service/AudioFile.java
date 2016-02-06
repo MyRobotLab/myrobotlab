@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.myrobotlab.audio.AudioProcessor;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -83,11 +84,6 @@ public class AudioFile extends Service {
 		public AudioData(String fileName) {
 			this.fileName = fileName;
 		}
-		
-		public String toString(){
-			return String.format("mode %s filename %s", mode, fileName);
-		}
-
 	}
 
 	public AudioFile(String n) {
@@ -267,21 +263,6 @@ public class AudioFile extends Service {
 	public static String getGlobalFileCacheDir() {
 		return globalFileCacheDir;
 	}
-	
-	static public String[] getDependencies() {
-		return new String[] {"javazoom.spi","javazoom.jl.player"};
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sound" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "Plays back audio file. Can block or multi-thread play";
-	}
-
 	
 	public String getTrack() {
 		return currentTrack;
@@ -521,12 +502,32 @@ public class AudioFile extends Service {
 	public void track() {
 		track(DEFAULT_TRACK);
 	}
-
 	
 	public String finishedPlaying(String utterance) {
 		// TODO: maybe wire though the utterance?
 		log.info("Finished playing called");
 		return utterance;
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(AudioFile.class.getCanonicalName());
+		meta.addDescription("Plays back audio file. Can block or multi-thread play");
+		meta.addCategory("sound");		
+		meta.addDependency("javazoom.spi");
+		meta.addDependency("javazoom.jl.player");
+		meta.addDependency("org.tritonus.share.sampled.floatsamplebuffer");
+		return meta;		
+	}
+
 	
 }

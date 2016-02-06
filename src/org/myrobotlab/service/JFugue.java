@@ -28,6 +28,7 @@ package org.myrobotlab.service;
 import org.jfugue.Player;
 import org.jfugue.Rhythm;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -53,31 +54,18 @@ public class JFugue extends Service {
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
 		JFugue jfugue = (JFugue)Runtime.start("jfugue", "JFugue");
 		jfugue.play("C");
-		jfugue.playRythm();
+		jfugue.playRythm("O..oO...O..oOO..");
 		jfugue.play("C");
 		jfugue.play("C7h");
 		jfugue.play("C5maj7w");
 	}
-	
-
-	static public String[] getDependencies() {
-		return new String[] {"org.jfugue.music"};
-	}
-	
+		
 
 	public JFugue(String n) {
 		super(n);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sound" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "service wrapping Jfugue - http://www.jfugue.org/ used for music and sound generation";
-	}
+	
 
 	public void play(Integer i) { // play tone
 		// player.play("[A" + i + "]w");
@@ -92,8 +80,10 @@ public class JFugue extends Service {
 		player.play(s);
 	}
 
-	public void playRythm() {
+	public void playRythm(String data) {
 		Rhythm rhythm = new Rhythm();
+		rhythm.setLayer(1, data);
+		play(rhythm);
 		/*
 		rhythm.setLayer(1, "O..oO...O..oOO..");
 		rhythm.setLayer(2, "..*...*...*...*.");
@@ -106,15 +96,23 @@ public class JFugue extends Service {
 		*/
 	}
 
-	@Override
-	public void stopService() {
-		/*
-		if (player.isPlaying()) {
-			player.pause();
-		}
-		player.finish();
-		*/
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(JFugue.class.getCanonicalName());
+		meta.addDescription("service wrapping Jfugue, used for music and sound generation");
+		meta.addCategory("sound");
+		meta.addDependency("org.jfugue.music");
+		return meta;
 	}
+
 
 
 }

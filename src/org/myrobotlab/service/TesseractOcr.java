@@ -2,20 +2,21 @@ package org.myrobotlab.service;
 
 import java.io.File;
 
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
-
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Environment.POSIX;
+import org.myrobotlab.service.TesseractOcr.Environment.POSIX;
 import org.slf4j.Logger;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 
 /**
  * 
@@ -24,11 +25,11 @@ import com.sun.jna.Native;
  * as a string.
  *
  */
-public class TesseractOCR extends Service {
+public class TesseractOcr extends Service {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(TesseractOCR.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(TesseractOcr.class.getCanonicalName());
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -36,7 +37,7 @@ public class TesseractOCR extends Service {
 
 		try {
 
-			TesseractOCR tesseract = new TesseractOCR("tesseract");
+			TesseractOcr tesseract = new TesseractOcr("tesseract");
 			tesseract.startService();
 
 			Runtime.createAndStart("gui", "GUIService");
@@ -54,13 +55,8 @@ public class TesseractOCR extends Service {
 	 * the appropriate resources
 	 * @return
 	 */
-	static public String[] getDependencies() {
-		return new String[] { 
-		        "net.sourceforge.tess4j",
-		        "com.sun.jna"};
-	}
 
-	public TesseractOCR(String n) {
+	public TesseractOcr(String n) {
 		super(n);
 		File file = new File(".");
 		String filed = file.getAbsolutePath();
@@ -70,16 +66,6 @@ public class TesseractOCR extends Service {
 		// System.out.println(g.getKey() + "=" + g.getValue());
 		//
 		// }
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "ocr" };
-	};
-
-	@Override
-	public String getDescription() {
-		return "Tesseract OCR Engine";
 	}
 
 	public String OCR(SerializableImage image) {
@@ -105,10 +91,27 @@ public class TesseractOCR extends Service {
 	public void stopService() {
 		super.stopService();
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+		
+		ServiceType meta = new ServiceType(TesseractOcr.class.getCanonicalName());
+		meta.addDescription("Optical character recognition - the ability to read");
+		meta.addCategory("intelligence");		
+		meta.addDependency("net.sourceforge.tess4j","com.sun.jna");
+		return meta;
+	}
+	
+	
 
-}
-
-class Environment {
+static class Environment {
 	public interface LinuxLibC extends Library {
 		public int setenv(String name, String value, int overwrite);
 
@@ -147,4 +150,12 @@ class Environment {
 	}
 
 	static POSIX libc = new POSIX();
+	
+
 }
+
+
+}
+
+
+

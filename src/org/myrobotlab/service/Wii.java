@@ -33,6 +33,7 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -107,9 +108,6 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 	 * 
 	 * @return
 	 */
-	static public String[] getDependencies() {
-		return new String[] {  "wiiuse.wiimote" };
-	}
 
 	public static void main(String[] args) {
 
@@ -192,16 +190,6 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 
 	public void activateMotionSensing() {
 		wiimote.activateMotionSensing();
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "<html>wrapper service for wiiusej</html>";
 	}
 
 	public Wiimote[] getWiimotes() {
@@ -416,6 +404,23 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 
 	public void setSensorBarBelowScreen() {
 		wiimote.setSensorBarBelowScreen();
+	}
+
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Wii.class.getCanonicalName());
+		meta.addDescription("Wii mote control and sensor info");
+		meta.addCategory("control","sensor");
+		meta.addDependency("wiiuse.wiimote");
+		return meta;		
 	}
 
 }

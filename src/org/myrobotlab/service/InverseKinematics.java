@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.kinematics.IKEngine;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -59,16 +60,6 @@ public class InverseKinematics extends Service {
 		return b;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot", "control" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
-
 	public void setDOF(int dof) {
 		ikEngine = new IKEngine(dof);
 		ikEngine.setMode(dof);
@@ -88,6 +79,25 @@ public class InverseKinematics extends Service {
 
 	public void setStructure(int nlink, double length) {
 		ikEngine.setLinkLength(nlink, length);
+	}
+	
+
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(InverseKinematics.class.getCanonicalName());
+		meta.addDescription("Inverse Kinematics");
+		meta.addCategory("robot", "control");
+		
+		return meta;
 	}
 
 }

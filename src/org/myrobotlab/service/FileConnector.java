@@ -11,6 +11,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 
 public class FileConnector extends AbstractConnector implements DocumentPublisher,FileVisitor<Path> {
@@ -45,12 +46,7 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 		interrupted = true;
 		state = ConnectorState.INTERRUPTED;
 	}
-
-	@Override
-	public String getDescription() {
-		return "This connector will scan all the files in a directory and production documents.";
-	}
-
+	
 	@Override
 	public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 		return FileVisitResult.CONTINUE;
@@ -93,6 +89,23 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 
 	public void setDirectory(String directory) {
 		this.directory = directory;
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(FileConnector.class.getCanonicalName());
+		meta.addDescription("This connector will scan all the files in a directory and production documents");
+		meta.addCategory("ingest");
+
+		return meta;
 	}
 
 

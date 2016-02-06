@@ -1,24 +1,29 @@
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
-import org.wikidata.wdtk.datamodel.interfaces.*;
+import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
+import org.wikidata.wdtk.datamodel.interfaces.GlobeCoordinatesValue;
+import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
+import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
+import org.wikidata.wdtk.datamodel.interfaces.QuantityValue;
+import org.wikidata.wdtk.datamodel.interfaces.Statement;
+import org.wikidata.wdtk.datamodel.interfaces.StatementGroup;
+import org.wikidata.wdtk.datamodel.interfaces.TimeValue;
+import org.wikidata.wdtk.datamodel.interfaces.Value;
+import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
+import org.wikidata.wdtk.datamodel.json.jackson.JacksonValueSnak;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
-import org.wikidata.wdtk.datamodel.helpers.ToString;
-import org.wikidata.wdtk.datamodel.json.jackson.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.ArrayList;
 
 public class WikiDataFetcher extends Service {
 
@@ -49,7 +54,6 @@ public class WikiDataFetcher extends Service {
 	}
 
 
-	@Override
 	public String[] getCategories() {
 		return new String[] { "general" };
 	}
@@ -337,5 +341,22 @@ public class WikiDataFetcher extends Service {
 		}
 		catch (Exception e){return  "Not Found !";}
 	}
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(WikiDataFetcher.class.getCanonicalName());
+		meta.addDescription("service interface for Wikipedia");
+		meta.addCategory("intelligence");		
+		return meta;		
+	}
+	
 	
 }

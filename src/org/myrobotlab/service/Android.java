@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -72,15 +73,21 @@ public class Android extends Service {
 	public Android(String n) {
 		super(n);
 	}
-
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "general" };
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Android.class.getCanonicalName());
+		meta.addDescription("Android service to accumulate all sensor data");
+		meta.addCategory("sensor");		
+		return meta;		
 	}
 
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
 }

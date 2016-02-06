@@ -110,7 +110,6 @@ angular.module('mrlapp.service.ServoGui', [])
         msg.send('sweep');
     }
 
-    
     msg.subscribe("publishServoEvent");
     msg.subscribe(this);
     

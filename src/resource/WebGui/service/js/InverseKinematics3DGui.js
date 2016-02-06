@@ -12,11 +12,6 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
         $scope.positions = '';
         $scope.angles = '';
         $scope.tracking = '';
-        
-        $scope.x = 100;
-        $scope.y = -350;
-        $scope.z = 100;
-        
         // GOOD TEMPLATE TO FOLLOW
         this.updateState = function (service) {
             $scope.service = service;

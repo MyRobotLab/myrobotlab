@@ -36,7 +36,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.myrobotlab.fileLib.FileIO;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;

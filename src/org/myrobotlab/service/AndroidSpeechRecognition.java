@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -130,15 +131,6 @@ public class AndroidSpeechRecognition extends Service implements TextPublisher {
 		// Should do something useful here in future
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "speech recognition" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "utilizing Android's Speech Recognition";
-	}
 
 	private void process(String mes) {
 		log.debug("received message: " + mes);
@@ -259,4 +251,22 @@ public class AndroidSpeechRecognition extends Service implements TextPublisher {
 			client.finish();
 		}
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(AndroidSpeechRecognition.class.getCanonicalName());
+		meta.addDescription("utilizing Android's Speech Recognition");
+		meta.addCategory("speech recognition");		
+		return meta;		
+	}
+
 }

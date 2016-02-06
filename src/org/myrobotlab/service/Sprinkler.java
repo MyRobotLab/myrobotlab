@@ -7,6 +7,7 @@ import java.util.Date;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -59,15 +60,6 @@ public class Sprinkler extends Service {
 		return arduino.connect(defaultPort);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "control", "home automation" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "uber sprinkler system";
-	}
 
 	public ArrayList<String> getHistory() {
 		return history;
@@ -203,5 +195,22 @@ public class Sprinkler extends Service {
 
 	public void on(int pin, int minutes){
 		
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Sprinkler.class.getCanonicalName());
+		meta.addDescription("sprinkler system");
+		meta.addCategory("control", "home automation");
+		
+		return meta;
 	}
 }

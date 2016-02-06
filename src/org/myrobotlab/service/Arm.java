@@ -26,6 +26,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
@@ -67,17 +68,23 @@ public class Arm extends Service {
 		super(n);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot" };
-	}
-
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return "robot arm service";
-	}
-
 	public void startRobot() {
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Arm.class.getCanonicalName());
+		meta.addDescription("robot arm service");
+		meta.addCategory("robot");		
+		return meta;		
 	}
 }

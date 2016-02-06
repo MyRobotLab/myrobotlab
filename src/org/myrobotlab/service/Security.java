@@ -19,9 +19,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -426,15 +427,6 @@ public class Security extends Service implements AuthorizationProvider {
 		groups.put("authenticated", g);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "framework", "security" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "security service";
-	}
 
 	@Override
 	public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
@@ -531,6 +523,23 @@ public class Security extends Service implements AuthorizationProvider {
 		User u = users.get(userId);
 		u.groupId = groupId;
 		return true;
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Security.class.getCanonicalName());
+		meta.addDescription("provides security");
+		meta.addCategory("framework", "security");
+		
+		return meta;
 	}
 
 }

@@ -11,6 +11,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -117,15 +118,23 @@ public class Mail extends Service {
 	public Mail(String n) {
 		super(n);
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "connectivity" };
+		ServiceType meta = new ServiceType(Mail.class.getCanonicalName());
+		meta.addDescription("General service for all your mail needs");
+		meta.addCategory("connectivity");
+		
+		return meta;
 	}
 
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
 
 }

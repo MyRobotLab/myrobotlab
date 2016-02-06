@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -155,15 +156,6 @@ public class Lidar extends Service implements SerialDataListener {
 		return serial.isConnected();
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "The Lidar service";
-	}
 
 	public Serial getSerial() {
 		if (serialName == null) {
@@ -360,5 +352,23 @@ public class Lidar extends Service implements SerialDataListener {
 	public String onDisconnect(String portName) {
 		info("%s disconnected from %s", getName(), portName);
 		return portName;
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Lidar.class.getCanonicalName());
+		meta.addDescription("The Lidar Service - Light Detection And Ranging");
+		meta.addCategory("sensor");
+		
+		return meta;
 	}
 }

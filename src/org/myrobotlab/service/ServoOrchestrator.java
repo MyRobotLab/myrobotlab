@@ -19,6 +19,7 @@ import javax.swing.event.DocumentListener;
 
 import org.myrobotlab.control.ServoOrchestratorGUI_middlemiddle_panel;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -196,16 +197,6 @@ public class ServoOrchestrator extends Service {
 		if (withgoal) {
 			sogui_ref.middlemiddle_ref.panels[x][y].servo_goal.setText(settingsitemholder[y].startvalue + "");
 		}
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "motor", "control", "display" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "organize your Servo-movements";
 	}
 
 	public void middleleft_channeladd_button() {
@@ -686,5 +677,24 @@ public class ServoOrchestrator extends Service {
 			Logging.logError(e);
 		}
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(ServoOrchestrator.class.getCanonicalName());
+		meta.addDescription("organize your Servo-movements");
+		meta.addCategory("motor", "control", "display");
+		
+		return meta;
+	}
+
 
 }

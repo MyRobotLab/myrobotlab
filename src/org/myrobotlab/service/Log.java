@@ -35,6 +35,7 @@ import java.util.List;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -125,16 +126,6 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 
 	public String publishLogEvent(String entry) {
 		return entry;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "testing" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "logging service";
 	}
 
 	public Message log(Message m) {
@@ -408,6 +399,30 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 	@Override
 	public void send(URI uri, Message msg) {
 		// no remote sending enabled
+	}
+	
+
+
+	static public String[] getCategories() {
+		return new String[] { "testing" };
+	}
+
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Log.class.getCanonicalName());
+		meta.addDescription("Logging Service helpful in diagnostics");
+		meta.addCategory("famework");
+		
+		return meta;
 	}
 
 }

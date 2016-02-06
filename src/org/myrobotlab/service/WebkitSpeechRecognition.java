@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -65,17 +66,6 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 	public void stopListening() {
 		// TODO Auto-generated method stub
 	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[]{"speech recognition"};
-	}
-
-	@Override
-	public String getDescription() {
-		return "Google Chrome webkit speech";
-	}
-	
 	
 	public void setLanguage(String language) {
 		// Here we want to set the language string and broadcast the update to the
@@ -130,4 +120,21 @@ public class WebkitSpeechRecognition extends Service implements SpeechRecognizer
 		}
 	}
 
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(WebkitSpeechRecognition.class.getCanonicalName());
+		meta.addDescription("Speech recognition using Google Chrome webkit");
+		meta.addCategory("speech recognition");
+		// meta.addPeer("tracker", "Tracking", "test tracking");
+		return meta;		
+	}
+	
 }

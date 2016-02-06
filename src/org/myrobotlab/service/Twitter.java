@@ -7,6 +7,7 @@ import java.io.File;
 import javax.imageio.ImageIO;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -82,10 +83,6 @@ public class Twitter extends Service {
 	 * the appropriate resources
 	 * @return
 	 */
-	static public String[] getDependencies() {
-		return new String[] { 
-				 "org.twitter4j.twitter"};
-	}
 
 	public Twitter(String n) {
 		super(n);
@@ -99,16 +96,7 @@ public class Twitter extends Service {
 		twitter = tf.getInstance();
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "connectivity" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
-
+	
 	@Override
 	public void releaseService() {
 		super.releaseService();
@@ -173,4 +161,21 @@ public class Twitter extends Service {
 		}).start();
 	}
 
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Twitter.class.getCanonicalName());
+		meta.addDescription("Service which can relay tweets");
+		meta.addCategory("cloud", "connectivity");		
+		meta.addDependency("org.twitter4j.twitter");
+		return meta;
+	}
+	
 }

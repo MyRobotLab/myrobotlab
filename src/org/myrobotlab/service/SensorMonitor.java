@@ -32,6 +32,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -120,16 +121,6 @@ public class SensorMonitor extends Service {
 		triggers_nameIndex.put(trigger.name, trigger);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor", "display" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "<html>sensor monitor - capable of displaying sensor information in a crude oscilliscope fasion</html>";
-	}
-
 	public int getLastValue(String source, Integer pin) {
 		String key = makeKey(source, pin);
 		if (lastValue.containsKey(key)) {
@@ -215,5 +206,24 @@ public class SensorMonitor extends Service {
 		invoke("publishSensorData", pinData);
 
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(SensorMonitor.class.getCanonicalName());
+		meta.addDescription("sensor monitor - capable of displaying sensor information in a crude oscilliscope fasion");
+		meta.addCategory("sensor", "display");
+		
+		return meta;
+	}
+
 
 }

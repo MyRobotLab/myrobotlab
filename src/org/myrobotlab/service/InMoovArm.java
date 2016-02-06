@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.logging.LoggerFactory;
@@ -34,18 +35,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 	transient public Servo omoplate;
 	transient public Arduino arduino;
 	String side;
-
-	// static in Java are not overloaded but overwritten - there is no
-	// polymorphism for statics
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("bicep", "Servo", "Bicep servo");
-		peers.put("rotate", "Servo", "Rotate servo");
-		peers.put("shoulder", "Servo", "Shoulder servo");
-		peers.put("omoplate", "Servo", "Omoplate servo");
-		peers.put("arduino", "Arduino", "Arduino controller for this arm");
-		return peers;
-	}
 
 	public InMoovArm(String n) {
 		super(n);
@@ -153,15 +142,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 	 * public boolean load(){ super.load(); bicep.load(); rotate.load();
 	 * shoulder.load(); omoplate.load(); return true; }
 	 */
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot" };
-	}
 
-	@Override
-	public String getDescription() {
-		return "the InMoov Arm Service";
-	}
 
 	public long getLastActivityTime() {
 		long lastActivityTime = Math.max(bicep.getLastActivityTime(), rotate.getLastActivityTime());
@@ -309,16 +290,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		shoulder.startService();
 		omoplate.startService();
 		arduino.startService();
-		// Go speed racer! GO! We need to wait until all of our peers are reported as started.
-		try {
-			// TODO: get rid of this and make sure all the other services have started before we return.
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		// maybe we could wait on the arduino being connected or something?
-		
-		
 	}
 
 	public void test() {
@@ -430,5 +401,30 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 		
 		return arm;
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(InMoovArm.class.getCanonicalName());
+		meta.addDescription("the InMoov Arm Service");
+		meta.addCategory("robot");
+
+		meta.addPeer("bicep", "Servo", "Bicep servo");
+		meta.addPeer("rotate", "Servo", "Rotate servo");
+		meta.addPeer("shoulder", "Servo", "Shoulder servo");
+		meta.addPeer("omoplate", "Servo", "Omoplate servo");
+		meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+		
+		return meta;
+	}
+
 	
 }

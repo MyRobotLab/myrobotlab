@@ -1,8 +1,7 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -25,20 +24,7 @@ public class InMoovHead extends Service {
 	transient public Servo neck;
 	transient public Arduino arduino;
 
-	// static in Java are not overloaded but overwritten - there is no
-	// polymorphism for statics
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		peers.put("jaw", "Servo", "Jaw servo");
-		peers.put("eyeX", "Servo", "Eyes pan servo");
-		peers.put("eyeY", "Servo", "Eyes tilt servo");
-		peers.put("rothead", "Servo", "Head pan servo");
-		peers.put("neck", "Servo", "Head tilt servo");
-		peers.put("arduino", "Arduino", "Arduino controller for this arm");
-
-		return peers;
-	}
+	
 
 	public InMoovHead(String n) {
 		super(n);
@@ -135,15 +121,6 @@ public class InMoovHead extends Service {
 		jaw.detach();
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "InMoov Head Service";
-	}
 
 	public long getLastActivityTime() {
 
@@ -311,6 +288,31 @@ public class InMoovHead extends Service {
 			eyeX.moveTo(eyeX.getPos() + 2);
 			eyeY.moveTo(eyeY.getPos() + 2);
 			jaw.moveTo(jaw.getPos() + 2);
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(InMoovHead.class.getCanonicalName());
+		meta.addDescription("InMoov Head Service");
+		meta.addCategory("robot");
+		
+		meta.addPeer("jaw", "Servo", "Jaw servo");
+		meta.addPeer("eyeX", "Servo", "Eyes pan servo");
+		meta.addPeer("eyeY", "Servo", "Eyes tilt servo");
+		meta.addPeer("rothead", "Servo", "Head pan servo");
+		meta.addPeer("neck", "Servo", "Head tilt servo");
+		meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+		
+		return meta;
 	}
 
 }

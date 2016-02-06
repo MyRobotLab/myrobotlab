@@ -12,16 +12,17 @@ import java.util.List;
 
 import org.jivesoftware.smack.Roster;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.fileLib.FindFile;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ProgramAB.Response;
-import org.myrobotlab.service.XMPP.XMPPMsg;
+import org.myrobotlab.service.Xmpp.XMPPMsg;
 import org.slf4j.Logger;
 
 // FIXME - use Peers !
@@ -87,7 +88,7 @@ public class Shoutbox extends Service {
 	}
 	transient ProgramAB chatbot;
 
-	transient XMPP xmpp;
+	transient Xmpp xmpp;
 	transient ArrayList<String> xmppRelays = new ArrayList<String>();
 	transient ArrayList<String> chatbotNames = new ArrayList<String>();
 
@@ -215,15 +216,6 @@ public class Shoutbox extends Service {
 		return null;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "connectivity" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "shoutbox server for myrobotlab";
-	}
 
 	public void getXMPPRelays() {
 		Shout shout = createShout(TYPE_USER, Arrays.toString(xmppRelays.toArray()));
@@ -504,7 +496,7 @@ public class Shoutbox extends Service {
 	// --------- XMPP BEGIN ------------
 	public boolean startXMPP(String user, String password) {
 		if (xmpp == null) {
-			xmpp = (XMPP) Runtime.start("xmpp", "XMPP");
+			xmpp = (Xmpp) Runtime.start("xmpp", "XMPP");
 		}
 		xmpp.connect(user, password);
 		if (xmpp.connect(user, password)) {
@@ -549,6 +541,22 @@ public class Shoutbox extends Service {
 
 	}
 
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Shoutbox.class.getCanonicalName());
+		meta.addDescription("shoutbox server");
+		meta.addCategory("connectivity");
+		
+		return meta;
+	}
 
 
 }

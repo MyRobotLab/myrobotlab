@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.myrobotlab.framework.MRLException;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -25,11 +26,6 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 
 	public final static Logger log = LoggerFactory.getLogger(Maestro.class);
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("serial", "Serial", "Serial service is needed for Pololu");
-		return peers;
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
@@ -58,16 +54,6 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 	public boolean attach(Arduino arduino) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "microcontroller" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
 	}
 
 	@Override
@@ -146,6 +132,24 @@ public class Maestro extends Service implements ArduinoShield, ServoController {
 	public void setServoSpeed(Servo servo) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Maestro.class.getCanonicalName());
+		meta.addDescription("Maestro USB Servo Controllers ");
+		meta.addCategory("microcontroller");
+		meta.addPeer("serial", "Serial", "Serial service is needed for Pololu");
+		
+		return meta;
 	}
 
 }

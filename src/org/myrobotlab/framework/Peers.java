@@ -7,7 +7,6 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class Peers {
@@ -44,7 +43,7 @@ public class Peers {
 		// Peers dna = Peers.getPeers("InMoov");
 		// Peers dna = Peers.getPeers("Plantoid");
 
-		Peers peers = Peers.getPeers("Plantoid");
+		Peers peers = Peers.getPeers("InMoov");
 		ArrayList<ServiceReservation> peerList = peers.getDNA().flatten();
 		Repo r = new Repo();
 		for (int i = 0; i < peerList.size(); ++i) {
@@ -54,7 +53,7 @@ public class Peers {
 
 		// log.info(tdna.toString());
 
-		Index<ServiceReservation> dna = Service.buildDNA("Plantoid");
+		Index<ServiceReservation> dna = Service.buildDNA("InMoov");
 		log.info(dna.toString());
 	}
 

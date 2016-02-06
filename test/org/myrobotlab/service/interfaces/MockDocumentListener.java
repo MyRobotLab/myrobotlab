@@ -39,7 +39,7 @@ public class MockDocumentListener extends Service implements DocumentListener {
 		return count;
 	}
 
-	@Override
+
 	public String[] getCategories() {
 		// TODO Auto-generated method stub
 		return new String[]{"testing"};

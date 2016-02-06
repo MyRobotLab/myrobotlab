@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -82,11 +83,6 @@ public class TestCatcher extends Service implements SerialDataListener {
 		super(n);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "testing", "framework" };
-	}
-
 	/**
 	 * some pub/sub interfaces do not use the Message queue to post their data -
 	 * but use a callback thread from the other service as an optimization
@@ -126,11 +122,6 @@ public class TestCatcher extends Service implements SerialDataListener {
 
 	public BlockingQueue<Message> getMsgs() {
 		return msgs;
-	}
-
-	@Override
-	public String getDescription() {
-		return "service for junit tests";
 	}
 
 	public Message getMsg(long timeout) throws InterruptedException {
@@ -301,4 +292,20 @@ public class TestCatcher extends Service implements SerialDataListener {
 
 	}
 
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(TestCatcher.class.getCanonicalName());
+		meta.addDescription("TestCatcher is used with TestThrower to test messaging");
+		meta.addCategory("testing","framework");		
+		return meta;
+	}
+	
 }

@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.MRLException;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -88,14 +88,6 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 
 	public final static int MOTOR2_BACKWARD = 5;
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		// put peer definitions in
-		peers.put("serial", "Serial", "Serial Port");
-
-		return peers;
-
-	}
 
 	// ----------Sabertooth Packetized Serial Mode Interface Begin
 	// --------------
@@ -147,15 +139,6 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 		sendPacket(MOTOR2_FORWARD, speed);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "motor", "control" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
 
 	public Object[] getMotorData(String motorName) {
 		return new Object[] { motors.get(motorName).port };
@@ -462,6 +445,24 @@ public class Sabertooth extends Service implements SerialDataListener, MotorCont
 	public void motorReset(Motor motor) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Sabertooth.class.getCanonicalName());
+		meta.addDescription("Interface for the powerful Sabertooth motor controller");
+		meta.addCategory("motor", "control");
+		meta.addPeer("serial", "Serial", "Serial Port");
+		
+		return meta;
 	}
 	
 	///////////// start new methods /////////////////

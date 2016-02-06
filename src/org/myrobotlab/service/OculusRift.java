@@ -2,8 +2,8 @@ package org.myrobotlab.service;
 
 import java.util.List;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.headtracking.OculusHeadTracking;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.kinematics.Point;
@@ -61,8 +61,8 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 	private OculusDisplay display;
 
 	// TODO: make these configurable...
-	private int leftCameraIndex = 1;
-	private int rightCameraIndex = 0;
+	private int leftCameraIndex = 0;
+	private int rightCameraIndex = 1;
 
 
 	private HmdDesc hmdDesc;
@@ -70,10 +70,6 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 	transient public OculusHeadTracking headTracker = null;
 	private OculusData lastData = null;
 
-
-	static public String[] getDependencies() {
-		return new String[] {"org.saintandreas.jovr"};
-	}
 
 	
 	public static class RiftFrame{
@@ -92,12 +88,6 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		initContext();
 	}
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("leftOpenCV", "OpenCV", "Left Eye Camera");
-		peers.put("rightOpenCV", "OpenCV", "Right Eye Camera");
-		return peers;		
-	}
 
 	// Boradcast the state of the peers to notify the gui.
 	public void broadcastState() {
@@ -133,13 +123,22 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 
 		if (!initialized) {
 
-			
-			
-			log.info("Init the rift HMD");
+			log.info("Init the rift.");
+
+
 			// Init the rift..
 			setupRift();
 
 
+
+			//OvrLibrary.INSTANCE.ovr_Initialize();
+			//hmd = Hmd.create(0); 
+
+			//int requiredSensorCaps = 0;
+			//int supportedSensorCaps = OvrLibrary.ovrSensorCaps.ovrSensorCap_Orientation;
+
+			// TODO: what errors/exceptions might be thrown here?  not sure how JNA exposes that info.
+			//hmd.startSensor(supportedSensorCaps, requiredSensorCaps);
 			log.info("Created HMD Oculus Rift Sensor");
 			initialized = true;
 
@@ -152,9 +151,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 
 			leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
 			rightOpenCV = new OpenCV(getName() + "." + RIGHT_OPEN_CV);
-			// avoid port conflict.  TODO: merge the streamer service with opencv ?
-			rightOpenCV.streamerPort = 9091;
-			
+
 			leftOpenCV.startService();
 			rightOpenCV.startService();
 
@@ -199,14 +196,11 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 			// Now turn on the camras.
 			// set camera index
 
-
 			// Now that the Rift and OpenCV has been setup.
-			log.info("Set up the oculus display.");
 			display = new OculusDisplay();
 			// on publish frame we'll update the current frame in the rift..
 			// synchronization issues maybe?
 			display.run();
-			
 
 		} else {
 			log.info("Rift interface already initialized.");
@@ -324,17 +318,29 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		return frame;
 	}
 
-	@Override
-	public String getDescription() {
-		return "The Oculus Rift Head Tracking Service";
+
+	public static void main(String s[]) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel("INFO");
+		Runtime.createAndStart("gui", "GUIService");
+		Runtime.createAndStart("python", "Python");
+		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
+
+		while (true) {
+			float roll = rift.getRoll();
+			rift.leftAffine.setAngle(-roll+180);
+			rift.rightAffine.setAngle(-roll);
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				break;
+			}
+		}
+		rift.logOrientation();
 	}
 
-
-
-	@Override
-	public String[] getCategories() {
-		return new String[] {"video","control","sensor"};
-	}
 
 	public int getLeftCameraIndex() {
 		return leftCameraIndex;
@@ -368,30 +374,26 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 	
-	public static void main(String s[]) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel("INFO");
-		Runtime.createAndStart("gui", "GUIService");
-		Runtime.createAndStart("python", "Python");
-		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
-		
-//		while (true) {
-//			float roll = rift.getRoll();
-//			rift.leftAffine.setAngle(-roll+180);
-//			rift.rightAffine.setAngle(-roll);
-//			try {
-//				Thread.sleep(250);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//				break;
-//			}
-//			rift.logOrientation();
-//		}
-		
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(OculusRift.class.getCanonicalName());
+		meta.addDescription("The Oculus Rift Head Tracking Service");
+		meta.addCategory("video","control", "sensor");
+		meta.addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
+		meta.addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
+		meta.addDependency("org.saintandreas.jovr");
+		return meta;
 	}
+
 
 }
 

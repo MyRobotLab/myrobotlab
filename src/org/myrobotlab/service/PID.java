@@ -37,6 +37,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -185,18 +186,8 @@ public class PID extends Service {
 		setControllerDirection(DIRECTION_DIRECT);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "control" };
-	}
-
 	public int getControllerDirection() {
 		return controllerDirection;
-	}
-
-	@Override
-	public String getDescription() {
-		return "<html>a PID control service from<br>" + "http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-introduction/</html>";
 	}
 
 	public double getKd() {
@@ -368,5 +359,22 @@ public class PID extends Service {
 	public void setSetpoint(double setPoint) {
 		setpoint = setPoint;
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(PID.class.getCanonicalName());
+		meta.addDescription("A proportional–integral–derivative controller (PID controller) commonly used in industrial control systems");
+		meta.addCategory("control", "industrial");
+		return meta;
+	}
+
 
 }

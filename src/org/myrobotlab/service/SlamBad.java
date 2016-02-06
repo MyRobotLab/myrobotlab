@@ -6,7 +6,7 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Vector3d;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -27,7 +27,7 @@ import org.slf4j.Logger;
  *         http://www.ibm.com/developerworks/java/library/j-robots/ - simbad &
  *         subsumption JMonkey
  */
-public class SLAMBad extends Service {
+public class SlamBad extends Service {
 	public static class MyEnv extends EnvironmentDescription {
 		public MyEnv() {
 			// you can initialize the environment here
@@ -62,14 +62,9 @@ public class SLAMBad extends Service {
 		}
 	}
 	
-	static public String[] getDependencies() {
-		return new String[] { "javax.vecmath",
-		        "com.sun.java3d"};
-	}
-
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(SLAMBad.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(SlamBad.class.getCanonicalName());
 
 	transient Simbad simbad;
 
@@ -79,7 +74,7 @@ public class SLAMBad extends Service {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.WARN);
 
-		SLAMBad slambad = (SLAMBad) Runtime.start("slambad", "SLAMBad");
+		SlamBad slambad = (SlamBad) Runtime.start("slambad", "SLAMBad");
 		
 		// slambad.addWall(3.0, 0.0, 0.0, 1.0f, 1.0f, 1.0f);
 
@@ -94,7 +89,7 @@ public class SLAMBad extends Service {
 
 	}
 
-	public SLAMBad(String n) {
+	public SlamBad(String n) {
 		super(n);
 	}
 
@@ -119,15 +114,6 @@ public class SLAMBad extends Service {
 		simbad.attach(wall);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "simulator", "display" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
 
 	@Override
 	public void startService() {
@@ -153,5 +139,23 @@ public class SLAMBad extends Service {
 			simbad = null;
 		}
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(SlamBad.class.getCanonicalName());
+		meta.addDescription("basic simulator based on Simbad");
+		meta.addCategory("simulation", "display");
+		meta.addDependency("javax.vecmath","com.sun.java3d");
+		return meta;
+	}
+
 
 }

@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -33,15 +34,6 @@ public class MouthControl extends Service {
 
 	public boolean autoAttach = true;
 	
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("jaw", "Servo", "shared Jaw servo instance");
-		peers.put("arduino", "Arduino", "shared Arduino instance");
-		peers.put("mouth", "AcapelaSpeech", "shared Speech instance");
-
-		return peers;
-	}
-
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.DEBUG);
@@ -113,7 +105,7 @@ public class MouthControl extends Service {
 	public void setArduino(Arduino arduino) {
 		this.arduino = arduino;
 	}
-	@Override
+
 	public String[] getCategories() {
 		return new String[] { "control" };
 	}
@@ -212,5 +204,28 @@ public class MouthControl extends Service {
 		arduino.startService();
 		// mouth.startService();
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(MouthControl.class.getCanonicalName());
+		meta.addDescription("Mouth movements based on spoken text");
+		meta.addCategory("control");
+		
+		meta.addPeer("jaw", "Servo", "shared Jaw servo instance");
+		meta.addPeer("arduino", "Arduino", "shared Arduino instance");
+		meta.addPeer("mouth", "Speech", "shared Speech instance");
+
+		return meta;
+	}
+
 
 }

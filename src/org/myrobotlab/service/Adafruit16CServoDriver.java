@@ -11,11 +11,9 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.MRLException;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -78,13 +76,6 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 
 	HashMap<String, Integer> servoNameToPinMap = new HashMap<String, Integer>();
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		// peers.suggestAs("tracking.x", "pan", "Servo", "shared x");
-		// peers.put("keyboard", "Keyboard", "Keyboard service");
-		peers.put("arduino", "Arduino", "our Arduino");
-		return peers;
-	}
 
 	public static void main(String[] args) {
 
@@ -205,16 +196,6 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		return arduino;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "shield", "motor" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "Adafruit Motor Shield Service";
-	}
-
 	// motor controller api
 
 	@Override
@@ -324,5 +305,22 @@ public class Adafruit16CServoDriver extends Service implements ArduinoShield, Se
 		
 	}
 
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
+		meta.addDescription("Adafruit Motor Shield Service");
+		meta.addCategory("shield", "motor");		
+		meta.addPeer("arduino", "Arduino", "our Arduino");
+		return meta;		
+	}
+	
 
 }

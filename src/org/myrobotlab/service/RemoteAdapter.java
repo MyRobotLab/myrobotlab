@@ -64,6 +64,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -567,10 +568,6 @@ public class RemoteAdapter extends Service implements Gateway {
 		sendRemote(uri, msg);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "connectivity", "framework" };
-	}
 
 	@Override
 	public HashMap<URI, Connection> getClients() {
@@ -639,10 +636,6 @@ public class RemoteAdapter extends Service implements Gateway {
 
 	}
 
-	@Override
-	public String getDescription() {
-		return "allows remote communication between applets, or remote instances of myrobotlab";
-	}
 
 	// @Override needs to be overriden - Gateway need implementation
 	public Platform getPlatform() {
@@ -1009,5 +1002,23 @@ public class RemoteAdapter extends Service implements Gateway {
 			Logging.logError(e);
 		}
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(RemoteAdapter.class.getCanonicalName());
+		meta.addDescription("allows remote communication between applets, or remote instances of myrobotlab");
+		meta.addCategory("connectivity","network","framework");
+
+		return meta;
+	}
+
 
 }

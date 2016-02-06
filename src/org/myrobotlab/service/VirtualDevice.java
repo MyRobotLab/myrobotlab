@@ -6,10 +6,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -38,15 +38,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
 	transient BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
 	//transient BlockingQueue<Object> data = new LinkedBlockingQueue<Object>();
 
-	
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		// put peer definitions in
-		peers.put("uart", "Serial", "uart");
-		peers.put("logic", "Python", "logic to implement");
-		return peers;
-	}
 
 	public VirtualDevice(String n) {
 		super(n);
@@ -60,16 +51,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		logic = (Python)startPeer("logic");
 		
 		uart.addByteListener(this);
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "testing" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "the virtual Arduino";
 	}
 	
 	public Python getLogic(){
@@ -228,5 +209,25 @@ public class VirtualDevice extends Service implements SerialDataListener {
 		}
 	}
 
-	
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(VirtualDevice.class.getCanonicalName());
+		meta.addDescription("A service which can create virtual devices, like the virtual Arduino");
+		meta.addCategory("testing");
+		// put peer definitions in
+		meta.addPeer("uart", "Serial", "uart");
+		meta.addPeer("logic", "Python", "logic to implement");
+
+		return meta;
+	}
+		
 }

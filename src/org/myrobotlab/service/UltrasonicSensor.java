@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -92,10 +93,6 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 		return controller.sensorAttach(this);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor" };
-	}
 
 	// FIXME - should be MicroController Interface ..
 	public Arduino getController() {
@@ -112,10 +109,6 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 		return DATA_SINK_TYPE_INTEGER;
 	}
 
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
 
 	public int getEchoPin() {
 		return echoPin;
@@ -271,4 +264,20 @@ public class UltrasonicSensor extends Service implements RangeListener, SensorDa
 		}
 	}
 
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(UltrasonicSensor.class.getCanonicalName());
+		meta.addDescription("Ranging sensor");
+		meta.addCategory("sensor");		
+		return meta;
+	}
+	
 }

@@ -46,6 +46,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicNameValuePair;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -64,11 +65,6 @@ public class HttpClient extends Service {
 	private static final long serialVersionUID = 1L;
 	Map<String, HttpData> clients = new HashMap<String, HttpData>();
 	
-
-	static public String[] getDependencies() {
-		return new String[] {"org.apache.commons.httpclient"};
-	}
-
 	public class HttpData {
 		public org.apache.http.client.HttpClient client = null;
 		public HttpResponse response = null;
@@ -173,16 +169,6 @@ public class HttpClient extends Service {
 
 	public HttpClient(String n) {
 		super(n);
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "connectivity" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "an HTTP client, used to fetch information on the web";
 	}
 
 	public byte[] post(String name, String uri, String data) throws ClientProtocolException, IOException {
@@ -356,6 +342,23 @@ public class HttpClient extends Service {
 			Logging.logError(e);
 		}
 
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
+		meta.addDescription("an HTTP client, used to fetch information on the web");
+		meta.addCategory("network");
+		meta.addDependency("org.apache.commons.httpclient");
+		return meta;
 	}
 	
 }

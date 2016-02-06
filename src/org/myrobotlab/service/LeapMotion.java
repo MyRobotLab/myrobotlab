@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.leap.LeapMotionListener;
 import org.myrobotlab.logging.Level;
@@ -54,11 +55,6 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 	public LeapData lastLeapData = null;
 	
 
-	static public String[] getDependencies() {
-		return new String[] {"com.leapmotion"};
-	}
-	
-
 	public LeapMotion(String n) {
 		super(n);
 	}
@@ -87,15 +83,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 		log.info("controller.policyFlags()");
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "sensor" };
-	}
 
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
 
 	/**
 	 * Return the angle of the finger for the hand specified This computes the
@@ -230,6 +218,24 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 	public void addPointsListener(Service s) {
 		// TODO - reflect on a public heard method - if doesn't exist error ?
 		addListener("publishPoints", s.getName(), "onPoints");
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(LeapMotion.class.getCanonicalName());
+		meta.addDescription("Leap Motion Service");
+		meta.addCategory("sensor");
+		meta.addDependency("com.leapmotion");
+		return meta;
 	}
 
 }

@@ -2,9 +2,11 @@ package org.myrobotlab.service;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
+import org.myrobotlab.framework.repo.ServiceType;
 
 import it.sauronsoftware.feed4j.FeedIOException;
 import it.sauronsoftware.feed4j.FeedParser;
@@ -23,18 +25,6 @@ public class RSSConnector extends AbstractConnector {
 	
 	public RSSConnector(String reservedKey) {
 		super(reservedKey);
-	}
-	
-	@Override
-	public String[] getCategories() {
-		// TODO Auto-generated method stub
-		return new String[]{"data"};
-	}
-
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return "This will crawl an rss feed at the given url and break apart the page into Documents";
 	}
 	
 	@Override
@@ -107,5 +97,23 @@ public class RSSConnector extends AbstractConnector {
 		// interrupt the current crawl gently.
 		interrupted = true;
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(RSSConnector.class.getCanonicalName());
+		meta.addDescription("This will crawl an rss feed at the given url and break apart the page into Documents");
+		meta.addCategory("data");
+		
+		return meta;
+	}
+
 
 }

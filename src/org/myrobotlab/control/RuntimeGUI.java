@@ -694,7 +694,7 @@ public class RuntimeGUI extends ServiceGUI implements ActionListener {
 		}
 
 		// category toolbar
-		ArrayList<Category> cats = serviceData.getAvailableCategories();
+		ArrayList<Category> cats = serviceData.getCategories();
 
 		JPanel flowLayout = new JPanel();
 		flowLayout.setPreferredSize(new Dimension(300, 160));

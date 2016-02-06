@@ -1,15 +1,13 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.openni.OpenNIData;
+import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
-import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
@@ -32,7 +30,7 @@ public class Sweety extends Service {
 	transient public Tracking leftTracker;
 	transient public Tracking rightTracker;
 	transient public ProgramAB chatBot;
-	transient public OpenNI openni;
+	transient public OpenNi openni;
 	transient public PID pid;
 	transient public HtmlFilter htmlFilter;
 	
@@ -132,45 +130,6 @@ public class Sweety extends Service {
 	public int delaytimestop = 200;
 	public int delaytimeletter = 50;
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		// put peer definitions in
-		peers.put("arduino", "Arduino", "arduino");
-		peers.put("mouth", "AcapelaSpeech", "sweetys mouth");
-		peers.put("ear", "WebkitSpeechRecognition", "ear");
-		peers.put("chatBot", "ProgramAB", "chatBot");
-		peers.put("leftTracker", "Tracking", "leftTracker");
-		peers.put("rightTracker", "Tracking", "rightTracker");
-		peers.put("htmlFilter", "HtmlFilter", "htmlfilter");
-		peers.put("webGui", "WebGui", "webGui");
-
-		peers.put("USfront", "UltrasonicSensor", "USfront");
-		peers.put("USfrontRight", "UltrasonicSensor", "USfrontRight");
-		peers.put("USfrontLeft", "UltrasonicSensor", "USfrontLeft");
-		peers.put("USback", "UltrasonicSensor", "USback");
-		peers.put("USbackRight", "UltrasonicSensor", "USbackRight");
-		peers.put("USbackLeft", "UltrasonicSensor", "USbackLeft");
-
-		peers.put("leftForearm", "Servo", "servo");
-		peers.put("rightForearm", "Servo", "servo");
-		peers.put("rightShoulder", "Servo", "servo");
-		peers.put("leftShoulder", "Servo", "servo");
-		peers.put("rightArm", "Servo", "servo");
-		peers.put("neck", "Servo", "servo");
-		peers.put("leftEye", "Servo", "servo");
-		peers.put("leftArm", "Servo", "servo");
-		peers.put("rightEye", "Servo", "servo");
-		peers.put("rightHand", "Servo", "servo");
-		peers.put("rightWrist", "Servo", "servo");
-		peers.put("leftHand", "Servo", "servo");
-		peers.put("leftWrist", "Servo", "servo");
-		peers.put("openni", "OpenNI", "openni");
-		peers.put("pid", "PID", "pid");
-
-		return peers;
-	}
-
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
@@ -231,19 +190,6 @@ public class Sweety extends Service {
 		rightWrist.detach();
 		leftHand.detach();
 		leftWrist.detach();
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "robot" };
-	}
-
-	/**
-	 * Return information about the service
-	 */
-	@Override
-	public String getDescription() {
-		return "Service for the robot Sweety";
 	}
 // TODO Correct the head function for new head
 	/** 
@@ -702,13 +648,13 @@ public class Sweety extends Service {
 		saying("the tracking if stopped.");
 	}
 	
-	public OpenNI startOpenNI() throws Exception {
+	public OpenNi startOpenNI() throws Exception {
 		/*
 		 * Start the Kinect service
 		 */
 		if (openni == null) {
 			System.out.println("starting kinect");
-			openni = (OpenNI) startPeer("openni");
+			openni = (OpenNi) startPeer("openni");
 			pid = (PID) startPeer("pid");
 
 			pid.setMode(PID.MODE_AUTOMATIC);
@@ -780,7 +726,7 @@ public class Sweety extends Service {
 		return script.toString();
 	}
 	
-	public void onOpenNIData(OpenNIData data) {
+	public void onOpenNIData(OpenNiData data) {
 
 		Skeleton skeleton = data.skeleton;
 
@@ -803,5 +749,56 @@ public class Sweety extends Service {
 		// Move the left side
 		setRightArmPosition(Rshoulder, Rarm, RforeArm, -1, -1);
 		}
+
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Sweety.class.getCanonicalName());
+		meta.addDescription("Service for the Sweety robot");
+		meta.addCategory("robot");
+		
+		// put peer definitions in
+		meta.addPeer("arduino", "Arduino", "arduino");
+		meta.addPeer("mouth", "AcapelaSpeech", "sweetys mouth");
+		meta.addPeer("ear", "WebkitSpeechRecognition", "ear");
+		meta.addPeer("chatBot", "ProgramAB", "chatBot");
+		meta.addPeer("leftTracker", "Tracking", "leftTracker");
+		meta.addPeer("rightTracker", "Tracking", "rightTracker");
+		meta.addPeer("htmlFilter", "HtmlFilter", "htmlfilter");
+		meta.addPeer("webGui", "WebGui", "webGui");
+
+		meta.addPeer("USfront", "UltrasonicSensor", "USfront");
+		meta.addPeer("USfrontRight", "UltrasonicSensor", "USfrontRight");
+		meta.addPeer("USfrontLeft", "UltrasonicSensor", "USfrontLeft");
+		meta.addPeer("USback", "UltrasonicSensor", "USback");
+		meta.addPeer("USbackRight", "UltrasonicSensor", "USbackRight");
+		meta.addPeer("USbackLeft", "UltrasonicSensor", "USbackLeft");
+
+		meta.addPeer("leftForearm", "Servo", "servo");
+		meta.addPeer("rightForearm", "Servo", "servo");
+		meta.addPeer("rightShoulder", "Servo", "servo");
+		meta.addPeer("leftShoulder", "Servo", "servo");
+		meta.addPeer("rightArm", "Servo", "servo");
+		meta.addPeer("neck", "Servo", "servo");
+		meta.addPeer("leftEye", "Servo", "servo");
+		meta.addPeer("leftArm", "Servo", "servo");
+		meta.addPeer("rightEye", "Servo", "servo");
+		meta.addPeer("rightHand", "Servo", "servo");
+		meta.addPeer("rightWrist", "Servo", "servo");
+		meta.addPeer("leftHand", "Servo", "servo");
+		meta.addPeer("leftWrist", "Servo", "servo");
+		meta.addPeer("openni", "OpenNi", "openni");
+		meta.addPeer("pid", "PID", "pid");
+		
+		return meta;
+	}
 
 }

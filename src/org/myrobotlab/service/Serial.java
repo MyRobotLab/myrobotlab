@@ -18,9 +18,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.serial.Codec;
 import org.myrobotlab.codec.serial.CodecOutputStream;
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -238,10 +239,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 	 * the appropriate resources
 	 * @return
 	 */
-	static public String[] getDependencies() {
-		return new String[] { "gnu.io.rxtx",
-		        "com.googlecode.jssc"};
-	}
+
 	
 	public Serial(String n) {
 		super(n);
@@ -639,15 +637,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		broadcastState();
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "control", "sensor", "microcontroller" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "reads and writes serial data";
-	}
+	
 
 	public String getHardwareLibrary() {
 		// if user has forced a specific library
@@ -1418,5 +1408,23 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		}
 
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Serial.class.getCanonicalName());
+		meta.addDescription("reads and writes data to a serial port");
+		meta.addCategory("sensor", "microcontroller", "control");
+		meta.addDependency("gnu.io.rxtx","com.googlecode.jssc");
+		return meta;
+	}
+
 
 }

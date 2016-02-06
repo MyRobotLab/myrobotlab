@@ -11,11 +11,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.openni.OpenNIData;
+import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.PImage;
 import org.myrobotlab.openni.PVector;
 import org.myrobotlab.openni.Skeleton;
@@ -44,7 +45,7 @@ import SimpleOpenNI.SimpleOpenNIConstants;
  *         http://shop.oreilly.com/product/0636920020684.do
  * 
  */
-public class OpenNI extends Service // implements
+public class OpenNi extends Service // implements
 // UserTracker.NewFrameListener,
 // HandTracker.NewFrameListener
 {
@@ -98,7 +99,7 @@ public class OpenNI extends Service // implements
 	 */
 
 	boolean enableIR = true;
-	public final static Logger log = LoggerFactory.getLogger(OpenNI.class);
+	public final static Logger log = LoggerFactory.getLogger(OpenNi.class);
 
 	transient SimpleOpenNI context;
 
@@ -142,13 +143,8 @@ public class OpenNI extends Service // implements
 	static public final float degrees(float radians) {
 		return radians * RAD_TO_DEG;
 	}
-
-	static public String[] getDependencies() {
-		return new String[] {"com.googlecode.simpleopenni"};
-	}
-
 	
-	public OpenNI(String n) {
+	public OpenNi(String n) {
 		super(n);
 	}
 
@@ -643,16 +639,11 @@ public class OpenNI extends Service // implements
 		return String.format("%d %d %d", Math.round(v.x), Math.round(v.y), Math.round(v.z));
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "video", "sensor" };
-	}
-
 	void getData() {
 
 		// a new container is used to preserved references in
 		// a multi-threaded environment
-		OpenNIData data = new OpenNIData();
+		OpenNiData data = new OpenNiData();
 
 		// update the camera
 		context.update();
@@ -706,10 +697,6 @@ public class OpenNI extends Service // implements
 
 	}
 
-	@Override
-	public String getDescription() {
-		return "OpenNI Service";
-	}
 
 	public void initContext() {
 
@@ -813,7 +800,7 @@ public class OpenNI extends Service // implements
 	}
 
 	// publishing the big kahuna <output>
-	public final OpenNIData publishOpenNIData(OpenNIData data) {
+	public final OpenNiData publishOpenNIData(OpenNiData data) {
 		return data;
 	}
 
@@ -915,10 +902,28 @@ public class OpenNI extends Service // implements
 		Runtime.createAndStart("gui", "GUIService");
 		Runtime.createAndStart("python", "Python");
 
-		OpenNI openni = (OpenNI) Runtime.createAndStart("openni", "OpenNI");
+		OpenNi openni = (OpenNi) Runtime.createAndStart("openni", "OpenNI");
 		openni.startUserTracking();
 		// openni.recordSingleFrame();
 		// openni.startHandTracking();
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(OpenNi.class.getCanonicalName());
+		meta.addDescription("OpenNI Service - 3D sensor");
+		meta.addCategory("video","vision","sensor");
+		meta.sharePeer("streamer", "streamer", "VideoStreamer", "video streaming service for webgui.");
+		meta.addDependency("com.googlecode.simpleopenni");
+		return meta;
 	}
 
 

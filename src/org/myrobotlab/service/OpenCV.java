@@ -40,6 +40,7 @@ import java.awt.Rectangle;
 //import static org.bytedeco.javacpp.opencv_superres.*;
 //import static org.bytedeco.javacpp.opencv_ts.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -52,11 +53,11 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.myrobotlab.fileLib.FileIO;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -170,12 +171,7 @@ public class OpenCV extends VideoSource {
 	// TODO: a peer, but in the future , we should use WebGui and it's http container for this
 	// if possible.
 	transient public VideoStreamer streamer;
-	transient public int streamerPort = 9090;
 	
-	static public String[] getDependencies() {
-		return new String[] {"org.bytedeco.javacv"};
-	}
-
 	
 	public OpenCV(String n) {
 		super(n);
@@ -183,14 +179,6 @@ public class OpenCV extends VideoSource {
 		// ..
 		// somewhere ...
 		videoProcessor.setOpencv(this);
-	}
-
-	// TODO: currently we're using the video streamer service
-	// in the future we s
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.suggestAs("streamer", "streamer", "VideoStreamer", "video streaming service for webgui.");
-		return peers;
 	}
 	
 	@Override
@@ -393,9 +381,7 @@ public class OpenCV extends VideoSource {
 
 	public void capture() {
 		save();
-		streamer = (VideoStreamer) createPeer("streamer");
-		streamer.setPort(streamerPort);
-		streamer.startPeer("streamer");
+		streamer = (VideoStreamer) startPeer("streamer");
 		streamer.attach(this);
 		// stopCapture(); // restart?
 		videoProcessor.start();
@@ -469,10 +455,7 @@ public class OpenCV extends VideoSource {
 		return videoProcessor.getFilter(name);
 	}
 
-	@Override
-	public String getDescription() {
-		return "OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV. ";
-	}
+
 
 	// filter dynamic data exchange begin ------------------
 	/*
@@ -733,7 +716,7 @@ public class OpenCV extends VideoSource {
 
 
 	public void captureFromResourceFile(String filename) {
-		FileIO.copyResource(filename, filename);
+		FileIO.copyResource(new File(filename), new File(filename));
 		captureFromImageFile(filename);
 	}
 
@@ -749,11 +732,6 @@ public class OpenCV extends VideoSource {
 		undockDisplay = b;
 		broadcastState();
 		return b;
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "video", "sensor" };
 	}
 
 	static public String[] getPossibleFilters() {
@@ -843,4 +821,24 @@ public class OpenCV extends VideoSource {
 		
 
 	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(OpenCV.class.getCanonicalName());
+		meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
+		meta.addCategory("video","vision","sensor");
+		meta.addPeer("streamer", "VideoStreamer", "video streaming service for webgui.");
+		meta.addDependency("org.bytedeco.javacv");
+		return meta;
+	}
+
 }

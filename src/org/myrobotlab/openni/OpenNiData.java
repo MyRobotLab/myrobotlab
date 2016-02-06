@@ -2,7 +2,7 @@ package org.myrobotlab.openni;
 
 import java.awt.image.BufferedImage;
 
-public class OpenNIData {
+public class OpenNiData {
 	public int frameNumber;
 	public Skeleton skeleton;
 	public PImage depthPImage;

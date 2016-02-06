@@ -21,6 +21,7 @@ import org.alicebot.ab.Predicates;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.OOBPayload;
@@ -84,10 +85,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
 	static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
 	
-
-	static public String[] getDependencies() {
-		return new String[] {"org.alicebot.ab"};
-	}
 
 
 	public ProgramAB(String name) {
@@ -188,15 +185,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		return predicatePath;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "intellegence" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "AIML 2.0 Reference interpreter based on Program AB";
-	}
 
 	public int getMaxConversationDelay() {
 		return sessions.get(currentSession).maxConversationDelay;
@@ -717,6 +705,23 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 			}
 		}
 
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(ProgramAB.class.getCanonicalName());
+		meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
+		meta.addCategory("intelligence");
+		meta.addDependency("org.alicebot.ab");
+		return meta;
 	}
 
 }

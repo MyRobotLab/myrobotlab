@@ -8,6 +8,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JFrame;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.image.DisplayedImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -165,15 +166,22 @@ public class ImageDisplay extends Service {
     	return gd.getDisplayMode().getHeight();
     }
     
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "general" };
-	}
+		ServiceType meta = new ServiceType(ImageDisplay.class.getCanonicalName());
+		meta.addDescription("Service to Display Images");
+		meta.addCategory("display");
 
-	@Override
-	public String getDescription() {
-		return "Service to Display Images";
+		return meta;
 	}
+	
 }
 

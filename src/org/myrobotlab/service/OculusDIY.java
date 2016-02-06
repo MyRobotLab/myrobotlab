@@ -1,17 +1,17 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.interfaces.CustomMsgListener;
 import org.myrobotlab.service.interfaces.OculusDataListener;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
 import org.slf4j.Logger;
-import org.myrobotlab.math.Mapper;
 /**
  * 
  * OculusDIY - This service is the DIY oculus service.
@@ -31,11 +31,6 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	Mapper mapperPitch = new Mapper(-180,0,0,180);
 	Mapper mapperYaw = new Mapper(-180,180,0,360);
 
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-		peers.put("arduino", "Arduino", "Arduino for DIYOculus and Myo");
-		return peers;
-	}
 
 	Integer lastrotheadvalue = 90;
 	Integer lastValue = 30;
@@ -53,11 +48,6 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 	public OculusDIY(String n) {
 		super(n);
 		arduino = (Arduino) createPeer("arduino");
-	}
-
-	@Override
-	public String getDescription() {
-		return "Service to receive and compute data from a DIY Oculus";
 	}
 
 	// public void onCustomMsg(Integer ay, Integer mx, Integer headingint) {
@@ -170,11 +160,6 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 		return arduino;
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "video", "control", "sensor" };
-	}
-
 	public boolean connect(String port) {
 		return arduino.connect(port);
 	}
@@ -194,5 +179,25 @@ public class OculusDIY extends Service implements CustomMsgListener, OculusDataP
 			Logging.logError(e);
 		}
 	}
+
+
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(OculusDIY.class.getCanonicalName());
+		meta.addDescription("Service to receive and compute data from a DIY Oculus");
+		meta.addCategory("video","control", "sensor");
+		meta.addPeer("arduino", "Arduino", "Arduino for DIYOculus and Myo");
+		return meta;
+	}
+
 
 }

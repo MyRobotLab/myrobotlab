@@ -13,12 +13,13 @@ import java.util.Set;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.fileLib.FileIO;
 import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.Repo;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.framework.repo.UpdateReport;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -55,21 +56,6 @@ public class Incubator extends Service {
 
 	// FIXME NEED TO AD SOME REPO MANAGEMENT ROUTINES TO RUNTIME - LIKE REMOVE
 	// REPO
-
-	public static Peers getPeers(String name) {
-		Peers peers = new Peers(name);
-
-		peers.suggestRootAs("python", "python", "Python", "shared python instance");
-
-		// peers.suggestAs("python", "python", "Python",
-		// "shared python instance");
-
-		peers.put("xmpp", "XMPP", "XMPP service");
-		// peers.put("webgui", "WebGui", "WebGui service");
-		// peers.put("python", "Python", "Python service");
-
-		return peers;
-	}
 
 	public static Status install(String fullType) {
 		try {
@@ -136,26 +122,13 @@ public class Incubator extends Service {
 		subscribe(getName(), "publishError");
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "testing" };
-	}
 
-	/*
-	 * public IndexNode<Object> get(String robotName) { return
-	 * cache.getNode(robotName); }
-	 */
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
 
 	public void onError(Status status) {
 		try {
 			// FIXME - remove - only add xmp if onError requires an error
 			// alert
-			XMPP xmpp = (XMPP) startPeer("xmpp");
+			Xmpp xmpp = (Xmpp) startPeer("xmpp");
 			// python = (Python) startPeer("python");
 			/*
 			 * webgui = (WebGui) createPeer("webgui"); webgui.port = 4321;
@@ -527,5 +500,25 @@ public class Incubator extends Service {
 
 		// test - instrumentation for
 	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Incubator.class.getCanonicalName());
+		meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
+		meta.addCategory("testing", "framework");
+		meta.addPeer("python", "Python", "shared python instance");
+		meta.addPeer("xmpp", "XMPP", "XMPP service");
+
+		return meta;
+	}
+
 
 }

@@ -33,7 +33,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.GUIService;
-import org.myrobotlab.service.XMPP;
+import org.myrobotlab.service.Xmpp;
 import org.slf4j.Logger;
 
 public class XMPPGUI extends ServiceGUI implements ActionListener {
@@ -53,16 +53,16 @@ public class XMPPGUI extends ServiceGUI implements ActionListener {
 
 	@Override
 	public void attachGUI() {
-		subscribe("publishState", "getState", XMPP.class);
+		subscribe("publishState", "getState", Xmpp.class);
 		myService.send(boundServiceName, "publishState");
 	}
 
 	@Override
 	public void detachGUI() {
-		unsubscribe("publishState", "getState", XMPP.class);
+		unsubscribe("publishState", "getState", Xmpp.class);
 	}
 
-	public void getState(XMPP template) {
+	public void getState(Xmpp template) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {

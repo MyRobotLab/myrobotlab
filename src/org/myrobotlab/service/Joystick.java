@@ -27,11 +27,13 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 
+
 //import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Rumbler;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -80,12 +82,7 @@ public class Joystick extends Service {
 			return String.format("%d %s [%s] relative %b analog %b", index, type, id, isRelative, isAnalog);
 		}
 	}
-	
-
-	static public String[] getDependencies() {
-		return new String[] {"net.java.games.jinput"};
-	}
-	
+		
 
 
 	/**
@@ -206,10 +203,6 @@ public class Joystick extends Service {
 		super(n);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "control" };
-	}
 
 	public HashMap<String, Component> getComponents() {
 		components = new HashMap<String, Component>();
@@ -245,11 +238,6 @@ public class Joystick extends Service {
 			controllerNames.put(String.format("%d - %s", i, hardwareControllers[i].getName()), i);
 		}
 		return controllerNames;
-	}
-
-	@Override
-	public String getDescription() {
-		return "used for interfacing with a Joystick";
 	}
 
 	public boolean isPolling() {
@@ -389,6 +377,24 @@ public class Joystick extends Service {
 			Logging.logError(e);
 		}
 
+	}
+
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Joystick.class.getCanonicalName());
+		meta.addDescription("used for interfacing with a Joystick");
+		meta.addCategory("control");
+		meta.addDependency("net.java.games.jinput");
+		return meta;
 	}
 
 }

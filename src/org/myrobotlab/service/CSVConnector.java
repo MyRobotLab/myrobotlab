@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
+import org.myrobotlab.framework.repo.ServiceType;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -96,11 +97,6 @@ public class CSVConnector extends AbstractConnector {
 		
 	}
 
-	@Override
-	public String getDescription() {
-		return "This service crawls a csv file and publishes each row as a document.";
-	}
-
 	public String getFilename() {
 		return filename;
 	}
@@ -156,6 +152,22 @@ public class CSVConnector extends AbstractConnector {
 	public void setIdColumn(int idColumn) {
 		this.idColumn = idColumn;
 	}
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(CSVConnector.class.getCanonicalName());
+		meta.addDescription("This service crawls a csv file and publishes each row as a document");
+		meta.addCategory("ingest");	
+		return meta;		
+	}	
 
 
 }

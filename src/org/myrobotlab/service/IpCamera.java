@@ -9,6 +9,7 @@ import java.net.URLConnection;
 
 import org.bytedeco.javacv.IPCameraFrameGrabber;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -22,7 +23,7 @@ import org.slf4j.Logger;
  * Android related - http://stackoverflow.com/questions/8301543/android-bitmap-to-bufferedimage
  * Bitmap to BufferedImage - conversion once Bitmap class is serialized
  */
-public class IPCamera extends Service {
+public class IpCamera extends Service {
 
 	public class VideoProcess implements Runnable {
 		@Override
@@ -57,7 +58,7 @@ public class IPCamera extends Service {
 
 	private boolean enableControls = true;
 
-	public final static Logger log = LoggerFactory.getLogger(IPCamera.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(IpCamera.class.getCanonicalName());
 	public final static int FOSCAM_MOVE_UP = 0;
 	public final static int FOSCAM_MOVE_STOP_UP = 1;
 	public final static int FOSCAM_MOVE_DOWN = 2;
@@ -86,16 +87,13 @@ public class IPCamera extends Service {
 
 	public final static int FOSCAM_ALARM_MAIL_ENABLED = 1;
 	
-	static public String[] getDependencies() {
-		return new String[] {"org.bytedeco.javacv"};
-	}
 
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 
 		try {
-			IPCamera foscam = new IPCamera("foscam");
+			IpCamera foscam = new IpCamera("foscam");
 			foscam.startService();
 
 			foscam.startService();
@@ -114,7 +112,7 @@ public class IPCamera extends Service {
 		return si;
 	}
 
-	public IPCamera(String n) {
+	public IpCamera(String n) {
 		super(n);
 	}
 
@@ -176,16 +174,6 @@ public class IPCamera extends Service {
 	 * ret.toString(); }
 	 */
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "video" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
-	}
-
 	public String move(Integer param) {
 		if (!enableControls) {
 			return null;
@@ -234,6 +222,24 @@ public class IPCamera extends Service {
 			capturing = false;
 			videoProcess = null;
 		}
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(IpCamera.class.getCanonicalName());
+		meta.addDescription("control and video stream capture for generic ip camera");
+		meta.addCategory("video");
+		// FIXME - should be webcam dependency not opencv !
+		meta.addDependency("org.bytedeco.javacv");
+		return meta;
 	}
 
 }

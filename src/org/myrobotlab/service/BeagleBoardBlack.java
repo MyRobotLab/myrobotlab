@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -38,15 +39,21 @@ public class BeagleBoardBlack extends Service {
 	public BeagleBoardBlack(String n) {
 		super(n);
 	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "microcontroller" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "service to access the beagle board black hardware";
+	
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(BeagleBoardBlack.class.getCanonicalName());
+		meta.addDescription("service to access the beagle board black hardware");
+		meta.addCategory("microcontroller");	
+		return meta;		
 	}
 
 }

@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -125,16 +126,6 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 		} catch(Exception e){
 			Logging.logError(e);
 		}
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "general" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used as a general template";
 	}
 
 
@@ -393,6 +384,23 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
 	public void startService() {
 		super.startService();
 		return;
+	}
+	
+
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(MyoThalmic.class.getCanonicalName());
+		meta.addDescription("Myo service to control with the Myo armband");
+		meta.addCategory("control","sensor");
+		return meta;
 	}
 
 }

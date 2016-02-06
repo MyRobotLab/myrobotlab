@@ -3,7 +3,7 @@ alice = Runtime.createAndStart("alice", "ProgramAB")
 alice.startSession()
 
 # create a Speech service
-mouth = Runtime.createAndStart("mouth", "AcapelaSpeech")
+mouth = Runtime.createAndStart("mouth", "Speech")
 
 # create a route which sends published Responses to the
 # mouth.speak(String) method

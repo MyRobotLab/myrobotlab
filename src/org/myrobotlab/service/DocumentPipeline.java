@@ -2,8 +2,6 @@ package org.myrobotlab.service;
 
 import java.util.List;
 
-import org.myrobotlab.service.interfaces.DocumentListener;
-import org.myrobotlab.service.interfaces.DocumentPublisher;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.document.connector.ConnectorState;
@@ -12,6 +10,9 @@ import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.document.workflow.WorkflowMessage;
 import org.myrobotlab.document.workflow.WorkflowServer;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.service.interfaces.DocumentListener;
+import org.myrobotlab.service.interfaces.DocumentPublisher;
 
 public class DocumentPipeline extends Service implements DocumentListener,DocumentPublisher {
 
@@ -25,16 +26,9 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		super(reservedKey);
 	}
 	
-	@Override
-	public String[] getCategories() {
+	static public String[] getCategories() {
 		// TODO Auto-generated method stub
 		return new String[]{"data"};
-	}
-
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return "This service will pass a document through a document processing pipeline made up of transformers.";
 	}
 
 	public void setConfig(WorkflowConfiguration workflowConfig) {
@@ -83,41 +77,6 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		workflowServer.flush(workflowName);
 	}
 	
-
-
-	public void initalize() throws ClassNotFoundException {
-		// init the workflow server and load the pipeline config.
-		if (workflowServer == null) {
-			workflowServer = WorkflowServer.getInstance();
-		}
-		workflowServer.addWorkflow(config);
-		workflowName = config.getName();
-		
-		// We can't drop messages! apply back pressure if the inbox is full!
-		this.inbox.setBlocking(true);
-		
-	}
-
-	// TODO: put this on a base class or something?
-	public ProcessingStatus onDocuments(List<Document> docs) {
-		ProcessingStatus totalStat = ProcessingStatus.OK;
-		for (Document d : docs) {
-			ProcessingStatus stat = onDocument(d);
-			if (ProcessingStatus.ERROR.equals(stat)) {
-				totalStat = ProcessingStatus.ERROR; 
-			}
-			
-		}
-		return totalStat;
-	}
-
-	@Override
-	public boolean onFlush() {
-		// here we need to pass a flush message to the workflow server 
-		workflowServer.flush(workflowName);
-		return true;
-	}
-	
 	public static void main(String[] args) throws Exception {
 
 		// create the pipeline service in MRL
@@ -155,9 +114,60 @@ public class DocumentPipeline extends Service implements DocumentListener,Docume
 		}
 		// when the connector is done, tell the pipeline to flush/
 		pipeline.flush();
+		
 		//wee! news!
 		
 	}
+
+	public void initalize() throws ClassNotFoundException {
+		// init the workflow server and load the pipeline config.
+		if (workflowServer == null) {
+			workflowServer = WorkflowServer.getInstance();
+		}
+		workflowServer.addWorkflow(config);
+		workflowName = config.getName();
+		
+		// We can't drop messages! apply back pressure if the inbox is full!
+		this.inbox.setBlocking(true);
+		
+	}
+
+	// TODO: put this on a base class or something?
+	public ProcessingStatus onDocuments(List<Document> docs) {
+		ProcessingStatus totalStat = ProcessingStatus.OK;
+		for (Document d : docs) {
+			ProcessingStatus stat = onDocument(d);
+			if (ProcessingStatus.ERROR.equals(stat)) {
+				totalStat = ProcessingStatus.ERROR; 
+			}
+			
+		}
+		return totalStat;
+	}
+
+	@Override
+	public boolean onFlush() {
+		// here we need to pass a flush message to the workflow server 
+		workflowServer.flush(workflowName);
+		return true;
+	}
 	
+
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(DocumentPipeline.class.getCanonicalName());
+		meta.addDescription("This service will pass a document through a document processing pipeline made up of transformers");
+		meta.addCategory("ingest");	
+		return meta;		
+	}	
+
 	
 }

@@ -26,6 +26,7 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -49,7 +50,7 @@ import org.slf4j.Logger;
  *   http://www.arduino.cc/playground/Main/RotaryEncoders
  *   
  */
-public class PICAXE extends Service // implements SerialPortEventListener,
+public class Picaxe extends Service // implements SerialPortEventListener,
 // DigitalIO, AnalogIO, ServoController
 {
 
@@ -93,7 +94,7 @@ public class PICAXE extends Service // implements SerialPortEventListener,
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(PICAXE.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Picaxe.class.getCanonicalName());
 	// fields
 	public int interval = 1000;
 	public PulseDataType pulseDataType = PulseDataType.none;
@@ -111,7 +112,7 @@ public class PICAXE extends Service // implements SerialPortEventListener,
 		// remote.startService();
 		// test
 
-		PICAXE PICAXE = new PICAXE("PICAXE");
+		Picaxe PICAXE = new Picaxe("PICAXE");
 		PICAXE.startService();
 
 		RemoteAdapter remote = new RemoteAdapter("remote");
@@ -145,27 +146,17 @@ public class PICAXE extends Service // implements SerialPortEventListener,
 
 	}
 
-	public PICAXE(String n) {
+	public Picaxe(String n) {
 		super(n);
 	}
 
-	@Override
-	public String[] getCategories() {
-		return new String[] { "microcontroller" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "(not implemented yet) used to interface PICAXE";
-	}
-
-	public PICAXE getState() {
+	public Picaxe getState() {
 		return this;
 	}
 
 	// new state functions begin --------------------------
 	@Override
-	public PICAXE publishState() {
+	public Picaxe publishState() {
 		return this;
 	}
 
@@ -205,7 +196,7 @@ public class PICAXE extends Service // implements SerialPortEventListener,
 	// a single container class "PICAXEData data = new PICAXEData()" could allow
 	// easy maintenance and extensibility - possibly even reflective sync if
 	// names are maintained
-	public PICAXE setState(PICAXE o) {
+	public Picaxe setState(Picaxe o) {
 		this.interval = o.interval;
 		this.pulseDataInteger = o.pulseDataInteger;
 		this.pulseDataString = o.pulseDataString;
@@ -259,6 +250,24 @@ public class PICAXE extends Service // implements SerialPortEventListener,
 	public void stopService() {
 		stopPICAXE();
 		super.stopService();
+	}
+	
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Picaxe.class.getCanonicalName());
+		meta.addDescription("Picaxe microcontroller");
+		meta.addCategory("microcontroller");
+		meta.addPeer("serial", "Serial", "serial service");
+		return meta;
 	}
 
 }

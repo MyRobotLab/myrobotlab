@@ -32,6 +32,7 @@ import java.util.Iterator;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -107,16 +108,6 @@ public class Clock extends Service {
 	}
 
 	public void clockStopped() {
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "scheduling" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "used to generate pulses";
 	}
 
 	public Date pulse(Date time) {
@@ -220,7 +211,7 @@ public class Clock extends Service {
 			security.allowExportByType("XMPP", false);
 			security.allowExportByType("Security", false);
 			security.allowExportByType("Runtime", false);
-			XMPP xmpp1 = (XMPP) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
+			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
 			Clock clock = (Clock) Runtime.createAndStart(String.format("clock%d", i), "Clock");
 			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
 
@@ -234,5 +225,22 @@ public class Clock extends Service {
 
 			// XMPP CONNECT WORKS END ---------------------------------
 		}
+	}
+	
+
+	/**
+	 * This static method returns all the details of the class without
+	 * it having to be constructed.  It has description, categories,
+	 * dependencies, and peer definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData(){
+		
+		ServiceType meta = new ServiceType(Clock.class.getCanonicalName());
+		meta.addDescription("used to generate pulses and recurring messages");
+		meta.addCategory("scheduling");	
+		return meta;		
 	}
 }

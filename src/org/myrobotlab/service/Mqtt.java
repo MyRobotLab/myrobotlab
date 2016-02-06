@@ -16,7 +16,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 //import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -36,7 +36,7 @@ import org.slf4j.Logger;
  * @author kmcgerald
  *
  */
-public class MQTT extends Service implements MqttCallback {
+public class Mqtt extends Service implements MqttCallback {
 	/**
 	 * Disconnect in a non-blocking way and then sit back and wait to be
 	 * notified that the action has completed.
@@ -80,10 +80,6 @@ public class MQTT extends Service implements MqttCallback {
 		}
 	}
 	
-
-	static public String[] getDependencies() {
-		return new String[] {"org.eclipse.paho"};
-	}
 
 	/**
 	 * Connect in a non-blocking way and then sit back and wait to be notified
@@ -273,7 +269,7 @@ public class MQTT extends Service implements MqttCallback {
 
 	String[] tokens;
 
-	public final static Logger log = LoggerFactory.getLogger(MQTT.class);
+	public final static Logger log = LoggerFactory.getLogger(Mqtt.class);
 
 	public static void main(String[] args) {
 		try {
@@ -281,7 +277,7 @@ public class MQTT extends Service implements MqttCallback {
 			LoggingFactory.getInstance().setLevel(Level.INFO);
 			Python python = new Python("python");
 			python.startService();
-			MQTT mqtt = (MQTT) Runtime.start("mqtt", "MQTT");
+			Mqtt mqtt = (Mqtt) Runtime.start("mqtt", "MQTT");
 			Runtime.start("gui", "GUIService");
 
 
@@ -291,7 +287,7 @@ public class MQTT extends Service implements MqttCallback {
 
 	}
 
-	public MQTT(String n) {
+	public Mqtt(String n) {
 		super(n);
 	}
 
@@ -327,16 +323,6 @@ public class MQTT extends Service implements MqttCallback {
 		// string
 		// before printing it on the console
 		log.info("Delivery complete callback: Publish Completed " + Arrays.toString(token.getTopics()));
-	}
-
-	@Override
-	public String[] getCategories() {
-		return new String[] { "data", "cloud" };
-	}
-
-	@Override
-	public String getDescription() {
-		return "This is an MQTT client based on the Paho MQTT client library. MQTT is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org";
 	}
 
 	/**
@@ -522,5 +508,22 @@ public class MQTT extends Service implements MqttCallback {
 			}
 			donext = false;
 		}
+	}
+	
+	/**
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+
+		ServiceType meta = new ServiceType(Mqtt.class.getCanonicalName());
+		meta.addDescription("This is an MQTT client based on the Paho MQTT client library. MQTT is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
+		meta.addCategory("data", "cloud");
+		meta.addDependency("org.eclipse.paho");
+		return meta;
 	}
 }
