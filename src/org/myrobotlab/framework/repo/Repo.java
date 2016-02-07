@@ -82,7 +82,7 @@ public class Repo implements Serializable {
 	 */
 
 	// FIXME - remove - not needed anymore
-	transient private ServiceData remoteServiceData = null;
+	// transient private ServiceData remoteServiceData = null;
 
 	private Platform platform;
 	transient Ivy ivy = null; // we'll never use remote ivy only local
@@ -91,8 +91,6 @@ public class Repo implements Serializable {
 	 * call back notification of progress
 	 */
 	transient RepoUpdateListener listener = null;
-
-	private boolean getRemoteRepo = false;
 
 	static public String getLatestVersion(String[] versions) {
 
@@ -515,12 +513,13 @@ public class Repo implements Serializable {
 			return localServiceData;
 		} catch (IOException e) {
 			info("local service data file not found - fetching remote");
-			getRemoteRepo = true;
+			//getRemoteRepo = true;
 		}
 
 		// FIXME FIXME FIXME - DO NOT AUTO GRAB THE LATEST !!!
 		// failed getting local - try remote
 		// return from remote - last attempt
+		/*
 		if (getRemoteRepo) {
 			remoteServiceData = getServiceDataFromRepo();
 
@@ -529,6 +528,7 @@ public class Repo implements Serializable {
 				return localServiceData;
 			}
 		}
+		*/
 
 		// all else fails - no local file - no remote - we will get
 		// the serviceData packaged with the jar
@@ -543,6 +543,7 @@ public class Repo implements Serializable {
 		return localServiceData;
 	}
 
+	/*
 	public ServiceData getServiceDataFromRepo() {
 		try {
 
@@ -566,6 +567,7 @@ public class Repo implements Serializable {
 	public String getServiceDataURL() {
 		return String.format("%s/serviceData.json", REPO_BASE_URL + platform.getBranch());
 	}
+	*/
 
 	public ArrayList<ServiceType> getServiceTypes() {
 		return localServiceData.getServiceTypes();
