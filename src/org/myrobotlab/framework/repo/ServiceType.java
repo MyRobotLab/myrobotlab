@@ -28,7 +28,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public String state = null;
 	public Integer workingLevel = null;
 	public String description = null;
-	public Boolean available = null;
+	public Boolean available = true; // why not ? :P
 	public HashSet<String> dependencies = new HashSet<String>();
 	public HashSet<String> categories = new HashSet<String>();
 	
