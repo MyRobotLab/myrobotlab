@@ -371,7 +371,7 @@ public class PID extends Service {
 	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(PID.class.getCanonicalName());
-		meta.addDescription("A proportional–integral–derivative controller (PID controller) commonly used in industrial control systems");
+		meta.addDescription("A proportional integral derivative controller (PID controller) commonly used in industrial control systems");
 		meta.addCategory("control", "industrial");
 		return meta;
 	}
