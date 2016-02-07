@@ -355,6 +355,7 @@ public class WikiDataFetcher extends Service {
 		ServiceType meta = new ServiceType(WikiDataFetcher.class.getCanonicalName());
 		meta.addDescription("service interface for Wikipedia");
 		meta.addCategory("intelligence");		
+		meta.addDependency("org.wikidata.wdtk");
 		return meta;		
 	}
 	
