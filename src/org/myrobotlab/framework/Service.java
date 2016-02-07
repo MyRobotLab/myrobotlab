@@ -84,7 +84,8 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service extends MessageService implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
+public abstract class Service extends MessageService
+		implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
 
 	// FIXME upgrade to ScheduledExecutorService
 	// http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -121,6 +122,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		}
 
 	}
+
+	/**
+	 * contains all the meta data about the service - pulled from the static
+	 * method getMetaData() each instance will call the method and populate the
+	 * data for an instance
+	 * 
+	 */
+	ServiceType serviceType;
 
 	/**
 	 * a radix-tree of data -"DNA" Description of Neighboring Automata ;)
@@ -185,19 +194,25 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	// FIXME - remove out of Peers, have Peers use this logic & pass in its
 	// index
 	/**
-	 * This method is used to add new dna to dna which is passed in.
-	 * Typically this method is called by mergePeerDNA - which sends the global static dna reference in
-	 * plus a class name of a class which is currently being constructed
+	 * This method is used to add new dna to dna which is passed in. Typically
+	 * this method is called by mergePeerDNA - which sends the global static dna
+	 * reference in plus a class name of a class which is currently being
+	 * constructed
 	 * 
-	 * @param myDNA - dna which information will be added to
-	 * @param myKey - key (name) instance of the class currently under construction
-	 * @param serviceClass - type of class being constructed
-	 * @param comment - added comment
+	 * @param myDNA
+	 *            - dna which information will be added to
+	 * @param myKey
+	 *            - key (name) instance of the class currently under
+	 *            construction
+	 * @param serviceClass
+	 *            - type of class being constructed
+	 * @param comment
+	 *            - added comment
 	 */
 	static public void buildDNA(Index<ServiceReservation> myDNA, String myKey, String serviceClass, String comment) {
-		
+
 		String fullClassName = CodecUtils.getServiceType(serviceClass);
-		
+
 		try {
 			// get the class
 			Class<?> theClass = Class.forName(fullClassName);
@@ -207,10 +222,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			Peers peers = (Peers) method.invoke(null, new Object[] { myKey });
 			Index<ServiceReservation> peerDNA = peers.getDNA();
 			ArrayList<ServiceReservation> flattenedPeerDNA = peerDNA.flatten();
-			
-			// getMetaData 
 
-			log.debug(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey, flattenedPeerDNA.size()));
+			// getMetaData
+
+			log.debug(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey,
+					flattenedPeerDNA.size()));
 
 			// Two loops are necessary - because recursion should not start
 			// until the entire level
@@ -233,7 +249,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				log.info(String.format("%d (%s) - [%s]", x, fullKey, peersr.actualName));
 
 				if (reservation == null) {
-					log.info(String.format("dna adding new key %s %s %s %s", fullKey, peersr.actualName, peersr.fullTypeName, comment));
+					log.info(String.format("dna adding new key %s %s %s %s", fullKey, peersr.actualName,
+							peersr.fullTypeName, comment));
 					myDNA.put(fullKey, peersr);
 				} else {
 					log.info(String.format("dna collision - replacing null values !!! %s", fullKey));
@@ -315,7 +332,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				// !(Modifier.isPublic(f.getModifiers())
 				// Hmmm JSON mappers do hacks to get by
 				// IllegalAccessExceptions.... Hmmmmm
-				if (!Modifier.isPublic(f.getModifiers()) || f.getName().equals("log") || Modifier.isTransient(f.getModifiers()) || Modifier.isStatic(f.getModifiers())
+				if (!Modifier.isPublic(f.getModifiers()) || f.getName().equals("log")
+						|| Modifier.isTransient(f.getModifiers()) || Modifier.isStatic(f.getModifiers())
 						|| Modifier.isFinal(f.getModifiers())) {
 					log.debug(String.format("skipping %s", f.getName()));
 					continue;
@@ -414,31 +432,23 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	 * @param clazz
 	 * @return
 	 */
-	/* NOT USED
-	static public Peers getLocalPeers(String name, Class<?> clazz) {
-		return getLocalPeers(name, clazz.getCanonicalName());
-	}
-
-	static public Peers getLocalPeers(String name, String serviceClass) {
-		String fullClassName;
-		if (!serviceClass.contains(".")) {
-			fullClassName = String.format("org.myrobotlab.service.%s", serviceClass);
-		} else {
-			fullClassName = serviceClass;
-		}
-		try {
-			Class<?> theClass = Class.forName(fullClassName);
-			Method method = theClass.getMethod("getPeers", String.class);
-			Peers peers = (Peers) method.invoke(null, new Object[] { name });
-			return peers;
-
-		} catch (Exception e) {
-			log.debug(String.format("%s does not have a getPeers", fullClassName));
-		}
-
-		return null;
-	}
-	*/
+	/*
+	 * NOT USED static public Peers getLocalPeers(String name, Class<?> clazz) {
+	 * return getLocalPeers(name, clazz.getCanonicalName()); }
+	 * 
+	 * static public Peers getLocalPeers(String name, String serviceClass) {
+	 * String fullClassName; if (!serviceClass.contains(".")) { fullClassName =
+	 * String.format("org.myrobotlab.service.%s", serviceClass); } else {
+	 * fullClassName = serviceClass; } try { Class<?> theClass =
+	 * Class.forName(fullClassName); Method method =
+	 * theClass.getMethod("getPeers", String.class); Peers peers = (Peers)
+	 * method.invoke(null, new Object[] { name }); return peers;
+	 * 
+	 * } catch (Exception e) { log.debug(String.format(
+	 * "%s does not have a getPeers", fullClassName)); }
+	 * 
+	 * return null; }
+	 */
 
 	/**
 	 * 
@@ -574,7 +584,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 					// could use it
 					reserveRoot(fullKey, peersr.fullTypeName, peersr.comment);
 				} else {
-					log.info(String.format("*found** key %s -> %s %s %s", fullKey, globalSr.actualName, globalSr.fullTypeName, globalSr.comment));
+					log.info(String.format("*found** key %s -> %s %s %s", fullKey, globalSr.actualName,
+							globalSr.fullTypeName, globalSr.comment));
 				}
 			}
 
@@ -700,6 +711,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		serviceClass = this.getClass().getCanonicalName();
 		simpleName = this.getClass().getSimpleName();
 
+		try {
+			serviceType = getMetaData(this.getClass().getCanonicalName());
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
 		// FIXME - this is 'sort-of' static :P
 		if (methodSet == null) {
 			methodSet = getMessageSet();
@@ -714,7 +731,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		// see if incoming key is my "actual" name
 		ServiceReservation sr = dna.get(reservedKey);
 		if (sr != null) {
-			log.info(String.format("found reservation exchanging reservedKey %s for actual name %s", reservedKey, sr.actualName));
+			log.info(String.format("found reservation exchanging reservedKey %s for actual name %s", reservedKey,
+					sr.actualName));
 			name = sr.actualName;
 		} else {
 			name = reservedKey;
@@ -768,13 +786,15 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				}
 			}
 			if (!found) {
-				log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
+				log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod,
+						listener.callbackName, listener.callbackMethod));
 				nes.add(listener);
 			}
 		} else {
 			ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
 			notifyList.add(listener);
-			log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
+			log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod,
+					listener.callbackName, listener.callbackMethod));
 			outbox.notifyList.put(listener.topicMethod.toString(), notifyList);
 		}
 	}
@@ -1020,7 +1040,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			// use the runtime to send a message
 			@SuppressWarnings("unchecked")
 			// FIXME - parameters !
-			ArrayList<MRLListener> remote = (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(), "getNotifyList", new Object[] { key });
+			ArrayList<MRLListener> remote = (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(),
+					"getNotifyList", new Object[] { key });
 			return remote;
 
 		} else {
@@ -1040,7 +1061,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			// and your in a skeleton
 			// use the runtime to send a message
 			@SuppressWarnings("unchecked")
-			ArrayList<String> remote = (ArrayList<String>) Runtime.getInstance().sendBlocking(getName(), "getNotifyListKeySet");
+			ArrayList<String> remote = (ArrayList<String>) Runtime.getInstance().sendBlocking(getName(),
+					"getNotifyListKeySet");
 			return remote;
 		} else {
 			ret.addAll(getOutbox().notifyList.keySet());
@@ -1201,7 +1223,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		Object retobj = null;
 
 		if (log.isDebugEnabled()) {
-			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId));
+			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method,
+					CodecUtils.getParameterSignature(msg.data), msg.msgId));
 		}
 
 		// recently added - to support "nameless" messages - concept you may get
@@ -1326,7 +1349,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			}
 
 			// TODO - build method cache map from errors
-			log.warn(String.format("%s.%s NoSuchMethodException - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null)));
+			log.warn(String.format("%s.%s NoSuchMethodException - attempting upcasting", c.getSimpleName(),
+					MethodEntry.getPrettySignature(method, paramTypes, null)));
 
 			// TODO - optimize with a paramter TypeConverter & Map
 			// c.getMethod - returns on EXACT match - not "Working" match
@@ -1522,7 +1546,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				// TODO -
 				if (globalSr != null) {
 
-					log.info(String.format("*releasing** key %s -> %s %s %s", fullKey, globalSr.actualName, globalSr.fullTypeName, globalSr.comment));
+					log.info(String.format("*releasing** key %s -> %s %s %s", fullKey, globalSr.actualName,
+							globalSr.fullTypeName, globalSr.comment));
 					ServiceInterface si = Runtime.getService(fullKey);
 					if (si == null) {
 						log.info(String.format("%s is not registered - skipping", fullKey));
@@ -1582,7 +1607,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				}
 			}
 		} else {
-			log.error(String.format("removeListener requested %s.%s to be removed - but does not exist", serviceName, outMethod));
+			log.error(String.format("removeListener requested %s.%s to be removed - but does not exist", serviceName,
+					outMethod));
 		}
 	}
 
@@ -2125,7 +2151,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 	@Override
 	public QueueStats publishStats(QueueStats stats) {
-		// log.error(String.format("===stats - dequeued total %d - %d bytes in %d ms %d Kbps",
+		// log.error(String.format("===stats - dequeued total %d - %d bytes in
+		// %d ms %d Kbps",
 		// stats.total, stats.interval, stats.ts - stats.lastTS, 8 *
 		// stats.interval/ (stats.delta)));
 		return stats;
@@ -2157,9 +2184,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	}
 
 	/**
-	 * Calls the static method getMetaData on the appropriate class.
-	 * The class static data is passed back as a template to be merged in
-	 * with the global static dna
+	 * Calls the static method getMetaData on the appropriate class. The class
+	 * static data is passed back as a template to be merged in with the global
+	 * static dna
 	 * 
 	 * @param serviceClass
 	 * @return
@@ -2172,7 +2199,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		} else {
 			serviceType = serviceClass;
 		}
-		
+
 		Class<?> theClass = Class.forName(serviceType);
 
 		// execute static method to get meta data
@@ -2188,9 +2215,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 		return null;
 	}
-	
+
 	// FIXME - meta data needs to be re-infused into instance
-	public String getDescription(){
+	public String getDescription() {
 		return "FIXME - meta data needs to be re-infused into instance";
 	}
 
