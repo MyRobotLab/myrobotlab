@@ -227,7 +227,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	public void startService() {
 		super.startService();
-		startPeer("audioFile");
+		audioFile = (AudioFile)startPeer("audioFile");
 		audioFile.startService();
 		// attach a listener when the audio file ends playing.
 		audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
@@ -430,6 +430,10 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	public int speak(String toSpeak) throws IOException {
 		log.info(String.format("speak %s", toSpeak));
+		if (voice == null){
+			log.warn("voice is null! setting to default");
+			voice = "Ryan";
+		}
 		invoke("publishStartSpeaking", toSpeak);
 		
 		try {
@@ -457,12 +461,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		setVoice(voice);
 		return speak(toSpeak);
 	}
-
-	static public String[] getCategories() {
-		// TODO Auto-generated method stub
-		return new String[]{"speech"};
-	}
-
 
 	@Override
     public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException{
@@ -523,11 +521,16 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		try {
 			Runtime.start("webgui","WebGui");
 			AcapelaSpeech speech = (AcapelaSpeech)Runtime.start("speech", "AcapelaSpeech");
+			// speech.setVoice("Ryan");
+			
+			speech.speak("i am saying something new once again");
+			/*
 			speech.speak("what is going on");
 			//speech.speakBlocking("Répète après moi");
 			speech.speak("hello there my name is ryan");
 			speech.speak("hello world");
 			speech.speak("one two three four");
+			*/
 			// arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
 			// arduino.connect(port);
 			// arduino.broadcastState();

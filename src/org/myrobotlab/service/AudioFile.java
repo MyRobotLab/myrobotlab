@@ -77,12 +77,16 @@ public class AudioFile extends Service {
 		 * mode can be either QUEUED MULTI PRIORITY INTERRUPT OR BLOCKING
 		 */
 		String mode = MODE_QUEUED;
-		public String fileName = null;
+		public String file = null;
 		// public float volume = 1.0f; DONE ON TRACK
 		// public float balance = 0.0f; SHOULD BE DONE ON TRACK
 		// public String track = DEFAULT_TRACK; // default track
 		public AudioData(String fileName) {
-			this.fileName = fileName;
+			this.file = fileName;
+		}
+		
+		public String toString(){
+			return String.format("file %s - mode %s", file, mode);
 		}
 	}
 

@@ -1569,10 +1569,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
-			
-			for (int i = 0; i < 100; ++i){
-				System.out.println(i%1);
-			}
+		
 
 			// Runtime.start("servo", "Servo");
 			// Runtime.start("clock", "Clock");

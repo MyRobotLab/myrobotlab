@@ -56,7 +56,7 @@ public class TypeConverter {
 			// TODO optimize getting name ??? why didn't Java reflect api
 			// use a HashMap ???
 			if (method.equals(m.getName()) && stringParams.length == types.length) {
-				log.info("method with same ordinal of params found {}.{} - building new converter", method, stringParams.length);
+				log.debug("method with same ordinal of params found {}.{} - building new converter", method, stringParams.length);
 
 				try {
 					Object[] newGSONTypedParamters = new Object[stringParams.length];
@@ -65,7 +65,7 @@ public class TypeConverter {
 						Class<?> pType = types[j];
 						String param = stringParams[j];
 
-						log.info(String.format("attempting conversion into %s from inbound data %s", pType.getSimpleName(), stringParams[j]));
+						log.debug(String.format("attempting conversion into %s from inbound data %s", pType.getSimpleName(), stringParams[j]));
 						if (pType == String.class) {
 							// escape quotes
 							param = param.replaceAll("\"", "\\\"");
@@ -76,7 +76,7 @@ public class TypeConverter {
 
 					}
 
-					log.info("successfully converted all types");
+					log.debug("successfully converted all types");
 					return newGSONTypedParamters;
 
 				} catch (Exception e) {
