@@ -84,8 +84,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service extends MessageService
-		implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
+public abstract class Service extends MessageService implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
 
 	// FIXME upgrade to ScheduledExecutorService
 	// http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -214,22 +213,31 @@ public abstract class Service extends MessageService
 		String fullClassName = CodecUtils.getServiceType(serviceClass);
 
 		try {
-			// get the class
+			
+			//// ------- this is static data which will never change ----------------------
+			// - the 'key' structure will never change - however the service reservations within
+			// - the dna CAN change - so the order of operations
+			// get the static keys
+			// query on keys
+			// if reservations exist then merge in data
 			Class<?> theClass = Class.forName(fullClassName);
 
 			// getPeers
 			Method method = theClass.getMethod("getMetaData");
-			//Peers peers = (Peers) method.invoke(null, new Object[] { myKey });
-			// ServiceType st = (ServiceType) method.invoke(null, new Object[] { myKey });
+			// Peers peers = (Peers) method.invoke(null, new Object[] { myKey
+			// });
+			// ServiceType st = (ServiceType) method.invoke(null, new Object[] {
+			// myKey });
 			ServiceType st = (ServiceType) method.invoke(null);
 			// Index<ServiceReservation> peerDNA = peers.getDNA();
-			//Index<ServiceReservation> peerDNA = st.getPeers();//peers.getDNA();
-			
+			// Index<ServiceReservation> peerDNA =
+			// st.getPeers();//peers.getDNA();
+
 			TreeMap<String, ServiceReservation> peers = st.getPeers();
 
 			// getMetaData
 
-			log.debug(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey, peers.size()));
+			log.info(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey, peers.size()));
 
 			// Two loops are necessary - because recursion should not start
 			// until the entire level
@@ -251,8 +259,10 @@ public abstract class Service extends MessageService
 				log.info(String.format("(%s) - [%s]", fullKey, sr.actualName));
 
 				if (reservation == null) {
-					log.info(String.format("dna adding new key %s %s %s %s", fullKey, sr.actualName,
-							sr.fullTypeName, comment));
+					// NO PREVIOUS DEFINITION - reservation is null !!
+					// so we set actualName to the key - which is (currentContext).(actualName)
+					sr.actualName = fullKey;
+					log.info(String.format("dna adding new key %s %s %s %s", fullKey, sr.actualName, sr.fullTypeName, comment));
 					myDNA.put(fullKey, sr);
 				} else {
 					log.info(String.format("dna collision - replacing null values !!! %s", fullKey));
@@ -274,20 +284,18 @@ public abstract class Service extends MessageService
 					}
 
 					log.info(sb.toString());
-					
+
 					buildDNA(myDNA, Peers.getPeerKey(myKey, sr.key), sr.fullTypeName, sr.comment);
 				}
-				
-				
+
 			}
 
 			// recursion loop
 			/*
-			for (int x = 0; x < peers.size(); ++x) {
-				ServiceReservation peersr = peers.get(x);
-				buildDNA(myDNA, Peers.getPeerKey(myKey, peersr.key), peersr.fullTypeName, peersr.comment);
-			}
-			*/
+			 * for (int x = 0; x < peers.size(); ++x) { ServiceReservation
+			 * peersr = peers.get(x); buildDNA(myDNA, Peers.getPeerKey(myKey,
+			 * peersr.key), peersr.fullTypeName, peersr.comment); }
+			 */
 		} catch (Exception e) {
 			Logging.logError(e);
 			log.debug(String.format("%s does not have a getMetaData ", fullClassName));
@@ -341,8 +349,7 @@ public abstract class Service extends MessageService
 				// !(Modifier.isPublic(f.getModifiers())
 				// Hmmm JSON mappers do hacks to get by
 				// IllegalAccessExceptions.... Hmmmmm
-				if (!Modifier.isPublic(f.getModifiers()) || f.getName().equals("log")
-						|| Modifier.isTransient(f.getModifiers()) || Modifier.isStatic(f.getModifiers())
+				if (!Modifier.isPublic(f.getModifiers()) || f.getName().equals("log") || Modifier.isTransient(f.getModifiers()) || Modifier.isStatic(f.getModifiers())
 						|| Modifier.isFinal(f.getModifiers())) {
 					log.debug(String.format("skipping %s", f.getName()));
 					continue;
@@ -593,8 +600,7 @@ public abstract class Service extends MessageService
 					// could use it
 					reserveRoot(fullKey, peersr.fullTypeName, peersr.comment);
 				} else {
-					log.info(String.format("*found** key %s -> %s %s %s", fullKey, globalSr.actualName,
-							globalSr.fullTypeName, globalSr.comment));
+					log.info(String.format("*found** key %s -> %s %s %s", fullKey, globalSr.actualName, globalSr.fullTypeName, globalSr.comment));
 				}
 			}
 
@@ -740,8 +746,7 @@ public abstract class Service extends MessageService
 		// see if incoming key is my "actual" name
 		ServiceReservation sr = dna.get(reservedKey);
 		if (sr != null) {
-			log.info(String.format("found reservation exchanging reservedKey %s for actual name %s", reservedKey,
-					sr.actualName));
+			log.info(String.format("found reservation exchanging reservedKey %s for actual name %s", reservedKey, sr.actualName));
 			name = sr.actualName;
 		} else {
 			name = reservedKey;
@@ -795,15 +800,13 @@ public abstract class Service extends MessageService
 				}
 			}
 			if (!found) {
-				log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod,
-						listener.callbackName, listener.callbackMethod));
+				log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
 				nes.add(listener);
 			}
 		} else {
 			ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
 			notifyList.add(listener);
-			log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod,
-					listener.callbackName, listener.callbackMethod));
+			log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
 			outbox.notifyList.put(listener.topicMethod.toString(), notifyList);
 		}
 	}
@@ -1049,8 +1052,7 @@ public abstract class Service extends MessageService
 			// use the runtime to send a message
 			@SuppressWarnings("unchecked")
 			// FIXME - parameters !
-			ArrayList<MRLListener> remote = (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(),
-					"getNotifyList", new Object[] { key });
+			ArrayList<MRLListener> remote = (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(), "getNotifyList", new Object[] { key });
 			return remote;
 
 		} else {
@@ -1070,8 +1072,7 @@ public abstract class Service extends MessageService
 			// and your in a skeleton
 			// use the runtime to send a message
 			@SuppressWarnings("unchecked")
-			ArrayList<String> remote = (ArrayList<String>) Runtime.getInstance().sendBlocking(getName(),
-					"getNotifyListKeySet");
+			ArrayList<String> remote = (ArrayList<String>) Runtime.getInstance().sendBlocking(getName(), "getNotifyListKeySet");
 			return remote;
 		} else {
 			ret.addAll(getOutbox().notifyList.keySet());
@@ -1232,8 +1233,7 @@ public abstract class Service extends MessageService
 		Object retobj = null;
 
 		if (log.isDebugEnabled()) {
-			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method,
-					CodecUtils.getParameterSignature(msg.data), msg.msgId));
+			log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId));
 		}
 
 		// recently added - to support "nameless" messages - concept you may get
@@ -1358,8 +1358,7 @@ public abstract class Service extends MessageService
 			}
 
 			// TODO - build method cache map from errors
-			log.warn(String.format("%s.%s NoSuchMethodException - attempting upcasting", c.getSimpleName(),
-					MethodEntry.getPrettySignature(method, paramTypes, null)));
+			log.warn(String.format("%s.%s NoSuchMethodException - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null)));
 
 			// TODO - optimize with a paramter TypeConverter & Map
 			// c.getMethod - returns on EXACT match - not "Working" match
@@ -1555,8 +1554,7 @@ public abstract class Service extends MessageService
 				// TODO -
 				if (globalSr != null) {
 
-					log.info(String.format("*releasing** key %s -> %s %s %s", fullKey, globalSr.actualName,
-							globalSr.fullTypeName, globalSr.comment));
+					log.info(String.format("*releasing** key %s -> %s %s %s", fullKey, globalSr.actualName, globalSr.fullTypeName, globalSr.comment));
 					ServiceInterface si = Runtime.getService(fullKey);
 					if (si == null) {
 						log.info(String.format("%s is not registered - skipping", fullKey));
@@ -1616,8 +1614,7 @@ public abstract class Service extends MessageService
 				}
 			}
 		} else {
-			log.error(String.format("removeListener requested %s.%s to be removed - but does not exist", serviceName,
-					outMethod));
+			log.error(String.format("removeListener requested %s.%s to be removed - but does not exist", serviceName, outMethod));
 		}
 	}
 
