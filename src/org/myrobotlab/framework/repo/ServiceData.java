@@ -34,6 +34,17 @@ public class ServiceData implements Serializable {
 	TreeMap<String, Dependency> dependencyTypes = new TreeMap<String, Dependency>();
 	
 
+	
+	static public ServiceData generate() throws IOException {
+		ServiceData sd = generate("../repo");
+		
+		FileOutputStream fos = new FileOutputStream("build/classes/resource/framework/serviceData.json");
+		fos.write(CodecUtils.toJson(sd).getBytes());
+		fos.close();
+		
+		return sd;
+	}
+	
 	/**
 	 * method to create a local cache file from the repo directories of all
 	 * libraries
@@ -486,11 +497,15 @@ public class ServiceData implements Serializable {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel("INFO");
 			LoggingFactory.getInstance().addAppender(Appender.FILE);
-
+			
+			// for ANT build 
+			ServiceData sd = generate();
 			/*
 			Repo repo = new Repo();
 			log.info(String.format("%b", repo.isServiceTypeInstalled("org.myrobotlab.service.InMoov")));
 			*/
+			
+			/*
 			
 			ServiceData sd = generate("../repo");
 
@@ -498,6 +513,7 @@ public class ServiceData implements Serializable {
 			FileOutputStream fos = new FileOutputStream("serviceData.compare.json");
 			fos.write(CodecUtils.toJson(sd).getBytes());
 			fos.close();
+			*/
 
 			// String json = FileIO.fileToString("serviceData.compare.json");
 			// sd = ServiceData.load(json);
@@ -546,8 +562,11 @@ public class ServiceData implements Serializable {
 
 
 	public ArrayList<Category> getCategories() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Category> categories = new ArrayList<Category>();
+		for (Category category : categoryTypes.values()){
+			categories.add(category);
+		}
+		return categories;
 	}
 
 }

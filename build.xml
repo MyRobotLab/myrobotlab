@@ -517,8 +517,19 @@
 		<echo file="${build}/classes/resource/branch.txt">${branch}</echo>
 		<!-- copy the latest serviceData.xml into package -->
 		<!-- TODO deprecate the xml -->
-		<copy file="${repo}/serviceData.xml" todir="${build}/classes/resource/framework" />
-		<copy file="${repo}/serviceData.json" todir="${build}/classes/resource/framework" />
+		<!-- copy file="${repo}/serviceData.xml" todir="${build}/classes/resource/framework" / -->
+		<!-- copy file="${repo}/serviceData.json" todir="${build}/classes/resource/framework" / -->
+		
+		<java classname="org.myrobotlab.framework.repo.ServiceData">
+		         <!-- arg value="-h"/ -->
+		         <classpath refid="compile.classpath">
+		           <!-- pathelement location="dist/test.jar"/ -->
+		         	<!--
+			           <pathelement refid="compile.classpath"/>
+			           <pathelement path="${build}/classes"/>
+		         	-->
+		         </classpath>
+		</java>
 
 		<jar jarfile="${build}/lib/myrobotlab.jar" basedir="${build}/classes">
 			<!-- excludes="org/myrobotlab/boot/" -->
