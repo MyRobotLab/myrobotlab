@@ -303,6 +303,8 @@
                 <!-- for OpenNLP stage in pipeline -->  
                 <pathelement location="${repo}/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
 
+		<pathelement location="${repo}/com.azure.translator/0.6.2/microsoft-translator-java-api-0.6.2-jar-with-dependencies.jar"/>	
+
 
 		<pathelement location="build-lib/tools.jar"/>
 	</path>
