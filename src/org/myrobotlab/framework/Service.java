@@ -218,15 +218,18 @@ public abstract class Service extends MessageService
 			Class<?> theClass = Class.forName(fullClassName);
 
 			// getPeers
-			Method method = theClass.getMethod("getPeers", String.class);
-			Peers peers = (Peers) method.invoke(null, new Object[] { myKey });
-			Index<ServiceReservation> peerDNA = peers.getDNA();
-			ArrayList<ServiceReservation> flattenedPeerDNA = peerDNA.flatten();
+			Method method = theClass.getMethod("getMetaData");
+			//Peers peers = (Peers) method.invoke(null, new Object[] { myKey });
+			// ServiceType st = (ServiceType) method.invoke(null, new Object[] { myKey });
+			ServiceType st = (ServiceType) method.invoke(null);
+			// Index<ServiceReservation> peerDNA = peers.getDNA();
+			//Index<ServiceReservation> peerDNA = st.getPeers();//peers.getDNA();
+			
+			TreeMap<String, ServiceReservation> peers = st.getPeers();
 
 			// getMetaData
 
-			log.debug(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey,
-					flattenedPeerDNA.size()));
+			log.debug(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey, peers.size()));
 
 			// Two loops are necessary - because recursion should not start
 			// until the entire level
@@ -236,52 +239,58 @@ public abstract class Service extends MessageService
 			// process first
 			// to influence the lower levels
 
-			for (int x = 0; x < flattenedPeerDNA.size(); ++x) {
-				ServiceReservation peersr = flattenedPeerDNA.get(x);
+			for (ServiceReservation sr : peers.values()) {
 
 				// FIXME A BIT LAME - THE Index.crawlForData should be returning
 				// Set<Map.Entry<?>>
-				String peerKey = peersr.key;
+				String peerKey = sr.key;
 
 				String fullKey = String.format("%s.%s", myKey, peerKey);
 				ServiceReservation reservation = myDNA.get(fullKey);
 
-				log.info(String.format("%d (%s) - [%s]", x, fullKey, peersr.actualName));
+				log.info(String.format("(%s) - [%s]", fullKey, sr.actualName));
 
 				if (reservation == null) {
-					log.info(String.format("dna adding new key %s %s %s %s", fullKey, peersr.actualName,
-							peersr.fullTypeName, comment));
-					myDNA.put(fullKey, peersr);
+					log.info(String.format("dna adding new key %s %s %s %s", fullKey, sr.actualName,
+							sr.fullTypeName, comment));
+					myDNA.put(fullKey, sr);
 				} else {
 					log.info(String.format("dna collision - replacing null values !!! %s", fullKey));
 					StringBuffer sb = new StringBuffer();
 					if (reservation.actualName == null) {
-						sb.append(String.format(" updating actualName to %s ", peersr.actualName));
-						reservation.actualName = peersr.actualName;
+						sb.append(String.format(" updating actualName to %s ", sr.actualName));
+						reservation.actualName = sr.actualName;
 					}
 
 					if (reservation.fullTypeName == null) {
 						// FIXME check for dot ?
-						sb.append(String.format(" updating peerType to %s ", peersr.fullTypeName));
-						reservation.fullTypeName = peersr.fullTypeName;
+						sb.append(String.format("updating peerType to %s ", sr.fullTypeName));
+						reservation.fullTypeName = sr.fullTypeName;
 					}
 
 					if (reservation.comment == null) {
 						sb.append(String.format(" updating comment to %s ", comment));
-						reservation.comment = peersr.comment;
+						reservation.comment = sr.comment;
 					}
 
 					log.info(sb.toString());
+					
+					buildDNA(myDNA, Peers.getPeerKey(myKey, sr.key), sr.fullTypeName, sr.comment);
 				}
+				
+				
 			}
 
 			// recursion loop
-			for (int x = 0; x < flattenedPeerDNA.size(); ++x) {
-				ServiceReservation peersr = flattenedPeerDNA.get(x);
+			/*
+			for (int x = 0; x < peers.size(); ++x) {
+				ServiceReservation peersr = peers.get(x);
 				buildDNA(myDNA, Peers.getPeerKey(myKey, peersr.key), peersr.fullTypeName, peersr.comment);
 			}
+			*/
 		} catch (Exception e) {
-			log.debug(String.format("%s does not have a getPeers", fullClassName));
+			Logging.logError(e);
+			log.debug(String.format("%s does not have a getMetaData ", fullClassName));
 		}
 	}
 
