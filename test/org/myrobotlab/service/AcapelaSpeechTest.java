@@ -7,14 +7,19 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
-public class SpeechTest {
+public class AcapelaSpeechTest {
 
-	public final static Logger log = LoggerFactory.getLogger(SpeechTest.class);
+	public final static Logger log = LoggerFactory.getLogger(AcapelaSpeechTest.class);
 
 	static private SpeechSynthesis speech = null;
 
@@ -208,5 +213,18 @@ public class SpeechTest {
 	public final void testGetVolume() {
 		// fail("Not yet implemented"); // TODO
 	}
+	
+	public static void main(String[] args) {
+		try {
 
+			LoggingFactory.getInstance().configure();
+			LoggingFactory.getInstance().setLevel(Level.DEBUG);
+			
+			JUnitCore junit = new JUnitCore();
+			Result result = junit.run(AcapelaSpeechTest.class);
+			
+		} catch(Exception e){
+			Logging.logError(e);
+		}
+	}
 }
