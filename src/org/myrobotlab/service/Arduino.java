@@ -1577,7 +1577,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.setBoardUno();
 			arduino.connect("COM18");
-			Runtime.start("webgui", "WebGui");
+			//Runtime.start("webgui", "WebGui");
+			Runtime.start("gui", "GUIService");
 
 			arduino.analogReadPollingStart(14);
 			// Runtime.start("gui", "GUIService");

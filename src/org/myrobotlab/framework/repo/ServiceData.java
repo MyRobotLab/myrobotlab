@@ -149,6 +149,13 @@ public class ServiceData implements Serializable {
 		if (filename == null) {
 			filename = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
 		}
+		
+		File check = new File (filename);
+		if (!check.exists()){
+			String serviceData = FileIO.resourceToString("framework/serviceData.json");
+			FileIO.stringToFile(filename, serviceData);
+		}
+		
 		String data = FileIO.fileToString(filename);
 		return load(data);
 	}
