@@ -876,7 +876,7 @@ public class Python extends Service {
 		ServiceType meta = new ServiceType(Python.class.getCanonicalName());
 		meta.addDescription("Python ID");
 		meta.addCategory("programming","control");
-		meta.addDependency("org.python.core");
+		meta.addDependency("org.python.core", "2.7.0");
 		return meta;
 	}
 

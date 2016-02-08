@@ -180,7 +180,7 @@ public class Cron extends Service {
 		ServiceType meta = new ServiceType(Cron.class.getCanonicalName());
 		meta.addDescription("A Cron like service capable of scheduling future actions");
 		meta.addCategory("scheduling");
-		meta.addDependency("it.sauronsoftware.cron4j");
+		meta.addDependency("it.sauronsoftware.cron4j","2.2.5");
 		return meta;		
 	}	
 

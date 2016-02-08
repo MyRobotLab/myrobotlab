@@ -813,7 +813,9 @@ public class GUIService extends Service implements WindowListener, ActionListene
 		meta.addDescription("Service used to graphically display and control other services");
 		meta.addCategory("location");
 		meta.addCategory("display");
-		meta.addDependency("org.fife.autocomplete","org.fife.rsyntaxtextarea","com.mxgraph.jgraph");
+		meta.addDependency("org.fife.autocomplete", "2.0.4");
+		meta.addDependency("org.fife.rsyntaxtextarea","2.0.4.1");
+		meta.addDependency("com.mxgraph.jgraph", "1.6.1.2");
 		return meta;
 	}
 

@@ -153,7 +153,8 @@ public class SlamBad extends Service {
 		ServiceType meta = new ServiceType(SlamBad.class.getCanonicalName());
 		meta.addDescription("basic simulator based on Simbad");
 		meta.addCategory("simulation", "display");
-		meta.addDependency("javax.vecmath","com.sun.java3d");
+		meta.addDependency("javax.vecmath", "1.5.1");
+		meta.addDependency("com.sun.java3d", "1.5.1" );
 		return meta;
 	}
 

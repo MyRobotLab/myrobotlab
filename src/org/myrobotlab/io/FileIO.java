@@ -133,16 +133,17 @@ public class FileIO {
 	// rename getBytes getResourceBytes / String File InputStream
 
 	//
-	static public boolean copyResource(File src, File dst) {
+	static public boolean copyResource(String src, String dst) {
 		try {
+			File dstF = new File(dst);
 			byte[] b = resourceToByteArray(src);
-			String path = dst.getParent();
+			String path = dstF.getParent();
 			File dir = new File(path);
 			if (!dir.exists()) {
 				dir.mkdirs();
 			}
 
-			byteArrayToFile(dst, b);
+			byteArrayToFile(dstF, b);
 			return true;
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -410,7 +411,7 @@ public class FileIO {
 		}
 	}
 
-	public static final byte[] resourceToByteArray(File src) {
+	public static final byte[] resourceToByteArray(String src) {
 		String filename = String.format("/resource/%s", src);
 
 		log.info(String.format("looking for %s", filename));
@@ -444,11 +445,13 @@ public class FileIO {
 		return data;
 	}
 
+	/*
 	public final static String resourceToString(String src) {
 		return resourceToString(new File(src));
 	}
+	*/
 	
-	public final static String resourceToString(File src) {
+	public final static String resourceToString(String src) {
 		byte[] bytes = resourceToByteArray(src);
 		if (bytes == null) {
 			return null;

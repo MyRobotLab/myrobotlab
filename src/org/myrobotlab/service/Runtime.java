@@ -38,7 +38,6 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MessageListener;
 import org.myrobotlab.framework.MethodEntry;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;

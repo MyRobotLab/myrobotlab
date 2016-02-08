@@ -688,7 +688,7 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
 		ServiceType meta = new ServiceType(MarySpeech.class.getCanonicalName());
 		meta.addDescription("Speech synthesis based on MaryTTS");
 		meta.addCategory("speech", "sound");
-		meta.addDependency("marytts");
+		meta.addDependency("marytts", "5.1.2");
 		return meta;
 	}
 }

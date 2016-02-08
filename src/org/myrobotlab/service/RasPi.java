@@ -287,7 +287,7 @@ public class RasPi extends Service {
 		ServiceType meta = new ServiceType(RasPi.class.getCanonicalName());
 		meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware such as I2C");
 		meta.addCategory("i2c","control");
-		meta.addDependency("com.pi4j.pi4j");
+		meta.addDependency("com.pi4j.pi4j", "0.0.5");
 		return meta;
 	}
 

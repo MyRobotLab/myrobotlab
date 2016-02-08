@@ -716,7 +716,7 @@ public class OpenCV extends VideoSource {
 
 
 	public void captureFromResourceFile(String filename) {
-		FileIO.copyResource(new File(filename), new File(filename));
+		FileIO.copyResource(filename, filename);
 		captureFromImageFile(filename);
 	}
 
@@ -837,7 +837,8 @@ public class OpenCV extends VideoSource {
 		meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
 		meta.addCategory("video","vision","sensor");
 		meta.addPeer("streamer", "VideoStreamer", "video streaming service for webgui.");
-		meta.addDependency("org.bytedeco.javacv");
+		meta.addDependency("org.bytedeco.javacpp","1.1");
+		meta.addDependency("org.bytedeco.javacv","1.1");
 		return meta;
 	}
 

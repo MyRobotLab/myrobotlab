@@ -720,7 +720,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 		ServiceType meta = new ServiceType(ProgramAB.class.getCanonicalName());
 		meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
 		meta.addCategory("intelligence");
-		meta.addDependency("org.alicebot.ab");
+		meta.addDependency("org.alicebot.ab", "0.0.6.26");
 		return meta;
 	}
 

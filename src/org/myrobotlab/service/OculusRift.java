@@ -390,7 +390,7 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		meta.addCategory("video","control", "sensor");
 		meta.addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
 		meta.addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
-		meta.addDependency("org.saintandreas.jovr");
+		meta.addDependency("org.saintandreas.jovr", "0.7");
 		return meta;
 	}
 

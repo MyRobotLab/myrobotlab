@@ -1176,7 +1176,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 		meta.addPeer("raspi", "RasPi", "raspi");
 		meta.addPeer("webgui", "WebGui", "web server interface");
 		// FIXME - should use static methos from HttpClient
-		meta.addDependency("org.apache.commons.httpclient");
+		meta.addDependency("org.apache.commons.httpclient", "4.2.5");
+
 		return meta;
 	}
 
