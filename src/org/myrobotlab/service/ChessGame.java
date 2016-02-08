@@ -229,7 +229,7 @@ public class ChessGame extends Service {
 		ServiceType meta = new ServiceType(ChessGame.class.getCanonicalName());
 		meta.addDescription("interface to a Chess game");
 		meta.addCategory("game");
-		meta.addDependency("org.op.chess");
+		meta.addDependency("org.op.chess","1.0.0");
 		return meta;		
 	}
 

@@ -393,7 +393,7 @@ public class Joystick extends Service {
 		ServiceType meta = new ServiceType(Joystick.class.getCanonicalName());
 		meta.addDescription("used for interfacing with a Joystick");
 		meta.addCategory("control");
-		meta.addDependency("net.java.games.jinput");
+		meta.addDependency("net.java.games.jinput", "20120914");
 		return meta;
 	}
 

@@ -116,7 +116,7 @@ public class CleverBot extends Service {
 		ServiceType meta = new ServiceType(CleverBot.class.getCanonicalName());
 		meta.addDescription("chatbot service");
 		meta.addCategory("intellegence");	
-		meta.addDependency("com.googlecode.chatterbot");
+		meta.addDependency("com.googlecode.chatterbot", "1.2.1");
 		return meta;		
 	}
 

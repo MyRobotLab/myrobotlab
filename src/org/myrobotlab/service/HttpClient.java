@@ -357,7 +357,7 @@ public class HttpClient extends Service {
 		ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
 		meta.addDescription("an HTTP client, used to fetch information on the web");
 		meta.addCategory("network");
-		meta.addDependency("org.apache.commons.httpclient");
+		meta.addDependency("org.apache.commons.httpclient", "4.2.5");
 		return meta;
 	}
 	

@@ -238,7 +238,8 @@ public class IpCamera extends Service {
 		meta.addDescription("control and video stream capture for generic ip camera");
 		meta.addCategory("video");
 		// FIXME - should be webcam dependency not opencv !
-		meta.addDependency("org.bytedeco.javacv");
+		meta.addDependency("org.bytedeco.javacpp","1.1");
+		meta.addDependency("org.bytedeco.javacv","1.1");
 		return meta;
 	}
 

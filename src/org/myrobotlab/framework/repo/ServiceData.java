@@ -26,14 +26,14 @@ public class ServiceData implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	transient public final static Logger log = LoggerFactory.getLogger(ServiceData.class);
+	
+	String version;
 
 	TreeMap<String, ServiceType> serviceTypes = new TreeMap<String, ServiceType>();
 
 	TreeMap<String, Category> categoryTypes = new TreeMap<String, Category>();
 
 	TreeMap<String, Dependency> dependencyTypes = new TreeMap<String, Dependency>();
-	
-
 	
 	static public ServiceData generate() throws IOException {
 		ServiceData sd = generate("../repo");
@@ -157,30 +157,11 @@ public class ServiceData implements Serializable {
 		}
 		
 		String data = FileIO.fileToString(filename);
+		
+		// FIXME - check version - see if you have to regen the file
+		
 		return load(data);
 	}
-	
-
-	/**
-	 * long ass process to "not" be doing in a seperate thread ... :P should be
-	 * asynchronous - but it would be a challenge to sync with the graphics
-	 * 
-	 * @param url
-	 * @return
-	 */
-	/* NO LONGER NEEDED
-	public static ServiceData getRemote(String url) {
-		try {
-			log.info("getting {}", url);
-			System.out.println(String.format("getting remote file from %s", url));
-			String data = new String(FileIO.getURL(new URL(url)));
-			return load(data);
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-		return null;
-	}
-	*/
 
 	public static ServiceData load(String data) {
 		try {
@@ -497,6 +478,17 @@ public class ServiceData implements Serializable {
 		return false;
 	}
 	
+
+
+	public ArrayList<Category> getCategories() {
+		ArrayList<Category> categories = new ArrayList<Category>();
+		for (Category category : categoryTypes.values()){
+			categories.add(category);
+		}
+		return categories;
+	}
+
+	
 	
 	public static void main(String[] args) {
 		try {
@@ -565,15 +557,6 @@ public class ServiceData implements Serializable {
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
-	}
-
-
-	public ArrayList<Category> getCategories() {
-		ArrayList<Category> categories = new ArrayList<Category>();
-		for (Category category : categoryTypes.values()){
-			categories.add(category);
-		}
-		return categories;
 	}
 
 }

@@ -84,7 +84,7 @@ public class AzureTranslator extends Service {
 		ServiceType meta = new ServiceType(AzureTranslator.class.getCanonicalName());
 		meta.addDescription("interface to Azure translation services");
 		meta.addCategory("translation", "cloud", "ai");		
-		meta.addDependency("com.azure.translator");
+		meta.addDependency("com.azure.translator","0.6.2");
 		return meta;		
 	}
 

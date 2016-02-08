@@ -29,6 +29,9 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	public Integer workingLevel = null;
 	public String description = null;
 	public Boolean available = true; // why not ? :P
+	/**
+	 * dependency keys of with key structure {org}-{version}
+	 */
 	public HashSet<String> dependencies = new HashSet<String>();
 	public HashSet<String> categories = new HashSet<String>();
 	
@@ -41,10 +44,13 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 		this.name = name;
 	}
 
-	public void addDependency(String... orgs) {
+	public void addDependency(String org, String version) {
+		dependencies.add(String.format("%s-%s", org, version));
+		/*
 		for (int i = 0; i < orgs.length; ++i){
 			dependencies.add(orgs[i]);
 		}
+		*/
 	}
 
 

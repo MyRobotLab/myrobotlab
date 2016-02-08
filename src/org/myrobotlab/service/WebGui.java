@@ -1004,7 +1004,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		meta.addDescription("web display");
 		meta.addCategory("display");
 		// meta.addPeer("tracker", "Tracking", "test tracking");
-		meta.addDependency("io.netty", "org.atmosphere.nettosphere");
+		meta.addDependency("io.netty", "3.10.0");
+		meta.addDependency("org.atmosphere.nettosphere", "2.3.0");
 		return meta;		
 	}
 }

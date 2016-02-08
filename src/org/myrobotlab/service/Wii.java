@@ -419,7 +419,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 		ServiceType meta = new ServiceType(Wii.class.getCanonicalName());
 		meta.addDescription("Wii mote control and sensor info");
 		meta.addCategory("control","sensor");
-		meta.addDependency("wiiuse.wiimote");
+		meta.addDependency("wiiuse.wiimote", "0.12b");
 		return meta;		
 	}
 
