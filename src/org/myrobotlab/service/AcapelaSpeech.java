@@ -90,9 +90,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		voices.add("Rasmus");
 		// Dutch ( Belgium )
 		voices.add("Zoe");
-		voices.add("Joeren");
-		voices.add("JoerenHappy");
-		voices.add("JoerenSad");
+		voices.add("Jeroen");
+		voices.add("JeroenHappy");
+		voices.add("JeroenSad");
 		voices.add("Sofie");
 		// Dutch ( Netherlands )
 		voices.add("Jasmijn");
@@ -153,7 +153,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		voices.add("Manon");
 		voices.add("Alice");
 		voices.add("Antoine");
-		voices.add("AntoineFromFar");
+		voices.add("AntoineFromAfar");
 		voices.add("AntoineHappy");
 		voices.add("AntoineSad");
 		voices.add("Bruno");
