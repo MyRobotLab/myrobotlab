@@ -5,6 +5,4 @@ voices = acapelaSpeech.getVoices()
 for voice in voices:
     acapelaSpeech.setVoice(voice)
     print(voice)
-    acapelaSpeech.speak("hello world")
-    
-
+    acapelaSpeech.speak("Hello world. I'm " + voice)
