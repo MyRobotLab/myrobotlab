@@ -423,12 +423,13 @@ public class Repo implements Serializable {
 			// get all the dependencies of my peers
 			TreeMap<String, ServiceReservation> peers = st.getPeers();
 			if (peers != null) {
-				for (String peerType : peers.keySet()) {
-					deps.addAll(getDependencies(peerType));
+				for (String peerName : peers.keySet()) {
+					ServiceReservation sr = peers.get(peerName);
+					deps.addAll(getDependencies(sr.fullTypeName));
 				}
 			}
 		} else {
-			error(String.format("getDepenencies %s not found", fullServiceName));
+			error(String.format("containsServiceType service type - %s not found", fullServiceName));
 		}
 		return deps;
 	}

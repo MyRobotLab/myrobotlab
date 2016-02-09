@@ -1,14 +1,21 @@
 <div class="col-md-12">     
-    <div class="input-group">
+    <div class="col-lg-4">
+     <input class="form-control" type="text" ng-model="clientID" placeholder="Client ID">
+<input class="form-control" type="text" ng-model="clientSecret" placeholder="Client Secret">
+  <button class="btn btn-default"  ng-click="msg.setCredentials(clientID,clientSectret)">Set credentials</button>
+</div>  
+   <div class="input-group">
         <textarea ng-model="text" class="form-control"  rows="4" cols="50"></textarea>     
     </div>
-
      <span class="input-group-btn">
-          <select class="btn btn-default" id="v" ng-model="voice" ng-change="msg.setVoice(voice)" ng-options="o as o for o in service.voices">
+          from <select class="btn btn-default" id="from" ng-model="from" ng-change="msg.fromLanguage(from)" ng-options="o as o for o in service.languages">
           </select>
-
-          <button class="btn btn-default"  ng-click="msg.speak(voice, text)">speak</button>
+           to <select class="btn btn-default" id="to" ng-model="to" ng-change="msg.toLanguage(to)" ng-options="o as o for o in service.languages">
+          </select>
+          <button class="btn btn-default"  ng-click="msg.translate(text)">Translate</button>
      </span>
-
-        {{speakingState}}
+        <div class="output-group">
+        <textarea ng-model="translatedText" id="translatedText"  rows="4" cols="50" readonly>
+</textarea>	 
+    </div>
 </div>       

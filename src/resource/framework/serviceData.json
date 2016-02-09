@@ -3,6 +3,7 @@
     "org.myrobotlab.service.AcapelaSpeech": {
       "name": "org.myrobotlab.service.AcapelaSpeech",
       "description": "Acapela group speech synthesis service.",
+      "available": true,
       "dependencies": [],
       "categories": [
         "speech"
@@ -11,7 +12,7 @@
         "audioFile": {
           "key": "audioFile",
           "actualName": "audioFile",
-          "fullTypeName": "AudioFile",
+          "fullTypeName": "org.myrobotlab.service.AudioFile",
           "comment": "audioFile",
           "isRoot": false
         }
@@ -20,6 +21,7 @@
     "org.myrobotlab.service.Adafruit16CServoDriver": {
       "name": "org.myrobotlab.service.Adafruit16CServoDriver",
       "description": "Adafruit Motor Shield Service",
+      "available": true,
       "dependencies": [],
       "categories": [
         "motor",
@@ -29,7 +31,7 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "our Arduino",
           "isRoot": false
         }
@@ -38,6 +40,7 @@
     "org.myrobotlab.service.AdafruitMotorShield": {
       "name": "org.myrobotlab.service.AdafruitMotorShield",
       "description": "Adafruit Motor Shield Service",
+      "available": true,
       "dependencies": [],
       "categories": [
         "motor",
@@ -47,7 +50,7 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "our Arduino",
           "isRoot": false
         }
@@ -56,6 +59,7 @@
     "org.myrobotlab.service.Agent": {
       "name": "org.myrobotlab.service.Agent",
       "description": "Agent - responsible for creating the environment and maintaining, tracking and terminating all processes",
+      "available": true,
       "dependencies": [],
       "categories": [
         "framework"
@@ -65,6 +69,7 @@
     "org.myrobotlab.service.Android": {
       "name": "org.myrobotlab.service.Android",
       "description": "Android service to accumulate all sensor data",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor"
@@ -74,6 +79,7 @@
     "org.myrobotlab.service.AndroidSpeechRecognition": {
       "name": "org.myrobotlab.service.AndroidSpeechRecognition",
       "description": "utilizing Android's Speech Recognition",
+      "available": true,
       "dependencies": [],
       "categories": [
         "speech recognition"
@@ -83,6 +89,7 @@
     "org.myrobotlab.service.Arduino": {
       "name": "org.myrobotlab.service.Arduino",
       "description": "This service interfaces with an Arduino micro-controller",
+      "available": true,
       "dependencies": [],
       "categories": [
         "microcontroller"
@@ -91,7 +98,7 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "serial device for this Arduino",
           "isRoot": false
         }
@@ -100,6 +107,7 @@
     "org.myrobotlab.service.Arm": {
       "name": "org.myrobotlab.service.Arm",
       "description": "robot arm service",
+      "available": true,
       "dependencies": [],
       "categories": [
         "robot"
@@ -109,6 +117,7 @@
     "org.myrobotlab.service.AudioCapture": {
       "name": "org.myrobotlab.service.AudioCapture",
       "description": "captures and stores audio from microphone",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sound"
@@ -118,19 +127,35 @@
     "org.myrobotlab.service.AudioFile": {
       "name": "org.myrobotlab.service.AudioFile",
       "description": "Plays back audio file. Can block or multi-thread play",
+      "available": true,
       "dependencies": [
-        "org.tritonus.share.sampled.floatsamplebuffer",
-        "javazoom.spi",
-        "javazoom.jl.player"
+        "org.tritonus.share.sampled.floatsamplebuffer/0.3.6",
+        "javazoom.jl.player/1.0.1",
+        "javazoom.spi/1.9.5"
       ],
       "categories": [
         "sound"
       ],
       "peers": {}
     },
+    "org.myrobotlab.service.AzureTranslator": {
+      "name": "org.myrobotlab.service.AzureTranslator",
+      "description": "interface to Azure translation services",
+      "available": true,
+      "dependencies": [
+        "com.azure.translator/0.6.2"
+      ],
+      "categories": [
+        "ai",
+        "translation",
+        "cloud"
+      ],
+      "peers": {}
+    },
     "org.myrobotlab.service.BeagleBoardBlack": {
       "name": "org.myrobotlab.service.BeagleBoardBlack",
       "description": "service to access the beagle board black hardware",
+      "available": true,
       "dependencies": [],
       "categories": [
         "microcontroller"
@@ -140,6 +165,7 @@
     "org.myrobotlab.service.Blender": {
       "name": "org.myrobotlab.service.Blender",
       "description": "interfaces Blender for simulation and display",
+      "available": true,
       "dependencies": [],
       "categories": [
         "simulator",
@@ -150,6 +176,7 @@
     "org.myrobotlab.service.CSVConnector": {
       "name": "org.myrobotlab.service.CSVConnector",
       "description": "This service crawls a csv file and publishes each row as a document",
+      "available": true,
       "dependencies": [],
       "categories": [
         "ingest"
@@ -159,8 +186,9 @@
     "org.myrobotlab.service.ChessGame": {
       "name": "org.myrobotlab.service.ChessGame",
       "description": "interface to a Chess game",
+      "available": true,
       "dependencies": [
-        "org.op.chess"
+        "org.op.chess/1.0.0"
       ],
       "categories": [
         "game"
@@ -170,6 +198,7 @@
     "org.myrobotlab.service.ChessGameManager": {
       "name": "org.myrobotlab.service.ChessGameManager",
       "description": "manages multiple interfaces for a chess game",
+      "available": true,
       "dependencies": [],
       "categories": [
         "game"
@@ -178,21 +207,21 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "serial",
           "isRoot": false
         },
         "speech": {
           "key": "speech",
           "actualName": "speech",
-          "fullTypeName": "Speech",
+          "fullTypeName": "org.myrobotlab.service.AcapelaSpeech",
           "comment": "speech",
           "isRoot": false
         },
         "webgui": {
           "key": "webgui",
           "actualName": "webgui",
-          "fullTypeName": "WebGui",
+          "fullTypeName": "org.myrobotlab.service.WebGui",
           "comment": "webgui",
           "isRoot": false
         }
@@ -201,8 +230,9 @@
     "org.myrobotlab.service.CleverBot": {
       "name": "org.myrobotlab.service.CleverBot",
       "description": "chatbot service",
+      "available": true,
       "dependencies": [
-        "com.googlecode.chatterbot"
+        "com.googlecode.chatterbot/1.2.1"
       ],
       "categories": [
         "intellegence"
@@ -212,6 +242,7 @@
     "org.myrobotlab.service.Cli": {
       "name": "org.myrobotlab.service.Cli",
       "description": "command line interpreter interface",
+      "available": true,
       "dependencies": [],
       "categories": [
         "framework"
@@ -221,6 +252,7 @@
     "org.myrobotlab.service.Clock": {
       "name": "org.myrobotlab.service.Clock",
       "description": "used to generate pulses and recurring messages",
+      "available": true,
       "dependencies": [],
       "categories": [
         "scheduling"
@@ -230,8 +262,9 @@
     "org.myrobotlab.service.Cron": {
       "name": "org.myrobotlab.service.Cron",
       "description": "A Cron like service capable of scheduling future actions",
+      "available": true,
       "dependencies": [
-        "it.sauronsoftware.cron4j"
+        "it.sauronsoftware.cron4j/2.2.5"
       ],
       "categories": [
         "scheduling"
@@ -241,6 +274,7 @@
     "org.myrobotlab.service.DatabaseConnector": {
       "name": "org.myrobotlab.service.DatabaseConnector",
       "description": "This service will run a select statement against a database and return the rows as documents to be published",
+      "available": true,
       "dependencies": [],
       "categories": [
         "ingest"
@@ -250,6 +284,7 @@
     "org.myrobotlab.service.DocumentPipeline": {
       "name": "org.myrobotlab.service.DocumentPipeline",
       "description": "This service will pass a document through a document processing pipeline made up of transformers",
+      "available": true,
       "dependencies": [],
       "categories": [
         "ingest"
@@ -259,6 +294,7 @@
     "org.myrobotlab.service.EddieControlBoard": {
       "name": "org.myrobotlab.service.EddieControlBoard",
       "description": "Special controller board for robotics",
+      "available": true,
       "dependencies": [],
       "categories": [
         "microcontroller"
@@ -267,35 +303,35 @@
         "joystick": {
           "key": "joystick",
           "actualName": "joystick",
-          "fullTypeName": "Joystick",
+          "fullTypeName": "org.myrobotlab.service.Joystick",
           "comment": "joystick",
           "isRoot": false
         },
         "keyboard": {
           "key": "keyboard",
           "actualName": "keyboard",
-          "fullTypeName": "Keyboard",
+          "fullTypeName": "org.myrobotlab.service.Keyboard",
           "comment": "serial",
           "isRoot": false
         },
         "remote": {
           "key": "remote",
           "actualName": "remote",
-          "fullTypeName": "RemoteAdapter",
+          "fullTypeName": "org.myrobotlab.service.RemoteAdapter",
           "comment": "remote interface",
           "isRoot": false
         },
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "serial",
           "isRoot": false
         },
         "webgui": {
           "key": "webgui",
           "actualName": "webgui",
-          "fullTypeName": "WebGui",
+          "fullTypeName": "org.myrobotlab.service.WebGui",
           "comment": "webgui",
           "isRoot": false
         }
@@ -304,6 +340,7 @@
     "org.myrobotlab.service.Esp8266": {
       "name": "org.myrobotlab.service.Esp8266",
       "description": "wifi Arduino",
+      "available": true,
       "dependencies": [],
       "categories": [
         "microcontroller"
@@ -312,14 +349,14 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "serial",
           "isRoot": false
         },
         "webgui": {
           "key": "webgui",
           "actualName": "webgui",
-          "fullTypeName": "WebGui",
+          "fullTypeName": "org.myrobotlab.service.WebGui",
           "comment": "webgui",
           "isRoot": false
         }
@@ -328,6 +365,7 @@
     "org.myrobotlab.service.FileConnector": {
       "name": "org.myrobotlab.service.FileConnector",
       "description": "This connector will scan all the files in a directory and production documents",
+      "available": true,
       "dependencies": [],
       "categories": [
         "ingest"
@@ -337,6 +375,7 @@
     "org.myrobotlab.service.GPS": {
       "name": "org.myrobotlab.service.GPS",
       "description": "THe Global Positioning Sensor",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor",
@@ -346,7 +385,7 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "serial port for GPS",
           "isRoot": false
         }
@@ -355,10 +394,11 @@
     "org.myrobotlab.service.GUIService": {
       "name": "org.myrobotlab.service.GUIService",
       "description": "Service used to graphically display and control other services",
+      "available": true,
       "dependencies": [
-        "org.fife.rsyntaxtextarea",
-        "com.mxgraph.jgraph",
-        "org.fife.autocomplete"
+        "org.fife.rsyntaxtextarea/2.0.4.1",
+        "org.fife.autocomplete/2.0.4",
+        "com.mxgraph.jgraph/1.6.1.2"
       ],
       "categories": [
         "location",
@@ -369,6 +409,7 @@
     "org.myrobotlab.service.HtmlFilter": {
       "name": "org.myrobotlab.service.HtmlFilter",
       "description": "This service will strip html markup from the input text",
+      "available": true,
       "dependencies": [],
       "categories": [
         "data",
@@ -379,8 +420,9 @@
     "org.myrobotlab.service.HttpClient": {
       "name": "org.myrobotlab.service.HttpClient",
       "description": "an HTTP client, used to fetch information on the web",
+      "available": true,
       "dependencies": [
-        "org.apache.commons.httpclient"
+        "org.apache.commons.httpclient/4.2.5"
       ],
       "categories": [
         "network"
@@ -390,6 +432,7 @@
     "org.myrobotlab.service.ImageDisplay": {
       "name": "org.myrobotlab.service.ImageDisplay",
       "description": "Service to Display Images",
+      "available": true,
       "dependencies": [],
       "categories": [
         "display"
@@ -399,6 +442,7 @@
     "org.myrobotlab.service.ImapEmailConnector": {
       "name": "org.myrobotlab.service.ImapEmailConnector",
       "description": "This connector will connect to an IMAP based email server and crawl the emails",
+      "available": true,
       "dependencies": [],
       "categories": [
         "ingest",
@@ -409,6 +453,7 @@
     "org.myrobotlab.service.InMoov": {
       "name": "org.myrobotlab.service.InMoov",
       "description": "The InMoov service",
+      "available": true,
       "dependencies": [],
       "categories": [
         "robot"
@@ -417,224 +462,224 @@
         "ear": {
           "key": "ear",
           "actualName": "ear",
-          "fullTypeName": "Sphinx",
+          "fullTypeName": "org.myrobotlab.service.Sphinx",
           "comment": "InMoov spech recognition service",
           "isRoot": false
         },
         "eyesTracking": {
           "key": "eyesTracking",
           "actualName": "eyesTracking",
-          "fullTypeName": "Tracking",
+          "fullTypeName": "org.myrobotlab.service.Tracking",
           "comment": "Tracking for the eyes",
           "isRoot": false
         },
         "eyesTracking.arduino": {
           "key": "eyesTracking.arduino",
           "actualName": "left",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared head Arduino",
           "isRoot": false
         },
         "eyesTracking.opencv": {
           "key": "eyesTracking.opencv",
           "actualName": "opencv",
-          "fullTypeName": "OpenCV",
+          "fullTypeName": "org.myrobotlab.service.OpenCV",
           "comment": "shared head OpenCV",
           "isRoot": false
         },
         "eyesTracking.x": {
           "key": "eyesTracking.x",
           "actualName": "head.eyeX",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "shared servo",
           "isRoot": false
         },
         "eyesTracking.y": {
           "key": "eyesTracking.y",
           "actualName": "head.eyeY",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "shared servo",
           "isRoot": false
         },
         "head": {
           "key": "head",
           "actualName": "head",
-          "fullTypeName": "InMoovHead",
+          "fullTypeName": "org.myrobotlab.service.InMoovHead",
           "comment": "the head",
           "isRoot": false
         },
         "head.arduino": {
           "key": "head.arduino",
           "actualName": "left",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared left arduino",
           "isRoot": false
         },
         "headTracking": {
           "key": "headTracking",
           "actualName": "headTracking",
-          "fullTypeName": "Tracking",
+          "fullTypeName": "org.myrobotlab.service.Tracking",
           "comment": "Head tracking system",
           "isRoot": false
         },
         "headTracking.arduino": {
           "key": "headTracking.arduino",
           "actualName": "left",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared head Arduino",
           "isRoot": false
         },
         "headTracking.opencv": {
           "key": "headTracking.opencv",
           "actualName": "opencv",
-          "fullTypeName": "OpenCV",
+          "fullTypeName": "org.myrobotlab.service.OpenCV",
           "comment": "shared head OpenCV",
           "isRoot": false
         },
         "headTracking.x": {
           "key": "headTracking.x",
           "actualName": "head.rothead",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "shared servo",
           "isRoot": false
         },
         "headTracking.y": {
           "key": "headTracking.y",
           "actualName": "head.neck",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "shared servo",
           "isRoot": false
         },
         "leftArm": {
           "key": "leftArm",
           "actualName": "leftArm",
-          "fullTypeName": "InMoovArm",
+          "fullTypeName": "org.myrobotlab.service.InMoovArm",
           "comment": "left arm",
           "isRoot": false
         },
         "leftArm.arduino": {
           "key": "leftArm.arduino",
           "actualName": "left",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared left arduino",
           "isRoot": false
         },
         "leftHand": {
           "key": "leftHand",
           "actualName": "leftHand",
-          "fullTypeName": "InMoovHand",
+          "fullTypeName": "org.myrobotlab.service.InMoovHand",
           "comment": "left hand",
           "isRoot": false
         },
         "leftHand.arduino": {
           "key": "leftHand.arduino",
           "actualName": "left",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared left arduino",
           "isRoot": false
         },
         "mouth": {
           "key": "mouth",
           "actualName": "mouth",
-          "fullTypeName": "AcapelaSpeech",
+          "fullTypeName": "org.myrobotlab.service.AcapelaSpeech",
           "comment": "InMoov speech service",
           "isRoot": false
         },
         "mouthControl": {
           "key": "mouthControl",
           "actualName": "mouthControl",
-          "fullTypeName": "MouthControl",
+          "fullTypeName": "org.myrobotlab.service.MouthControl",
           "comment": "MouthControl",
           "isRoot": false
         },
         "mouthControl.arduino": {
           "key": "mouthControl.arduino",
           "actualName": "left",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared head Arduino",
           "isRoot": false
         },
         "mouthControl.jaw": {
           "key": "mouthControl.jaw",
           "actualName": "head.jaw",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "shared servo",
           "isRoot": false
         },
         "mouthControl.mouth": {
           "key": "mouthControl.mouth",
           "actualName": "mouth",
-          "fullTypeName": "AcapelaSpeech",
+          "fullTypeName": "org.myrobotlab.service.AcapelaSpeech",
           "comment": "shared Speech",
           "isRoot": false
         },
         "opencv": {
           "key": "opencv",
           "actualName": "opencv",
-          "fullTypeName": "OpenCV",
+          "fullTypeName": "org.myrobotlab.service.OpenCV",
           "comment": "InMoov OpenCV service",
           "isRoot": false
         },
         "openni": {
           "key": "openni",
           "actualName": "openni",
-          "fullTypeName": "OpenNI",
+          "fullTypeName": "org.myrobotlab.service.OpenNi",
           "comment": "Kinect service",
           "isRoot": false
         },
         "pid": {
           "key": "pid",
           "actualName": "pid",
-          "fullTypeName": "PID2",
+          "fullTypeName": "org.myrobotlab.service.PID2",
           "comment": "PID2 service",
           "isRoot": false
         },
         "python": {
           "key": "python",
           "actualName": "python",
-          "fullTypeName": "Python",
+          "fullTypeName": "org.myrobotlab.service.Python",
           "comment": "shared Python service",
           "isRoot": true
         },
         "rightArm": {
           "key": "rightArm",
           "actualName": "rightArm",
-          "fullTypeName": "InMoovArm",
+          "fullTypeName": "org.myrobotlab.service.InMoovArm",
           "comment": "right arm",
           "isRoot": false
         },
         "rightArm.arduino": {
           "key": "rightArm.arduino",
           "actualName": "right",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared right arduino",
           "isRoot": false
         },
         "rightHand": {
           "key": "rightHand",
           "actualName": "rightHand",
-          "fullTypeName": "InMoovHand",
+          "fullTypeName": "org.myrobotlab.service.InMoovHand",
           "comment": "right hand",
           "isRoot": false
         },
         "rightHand.arduino": {
           "key": "rightHand.arduino",
           "actualName": "right",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared right arduino",
           "isRoot": false
         },
         "torso": {
           "key": "torso",
           "actualName": "torso",
-          "fullTypeName": "InMoovTorso",
+          "fullTypeName": "org.myrobotlab.service.InMoovTorso",
           "comment": "torso",
           "isRoot": false
         },
         "torso.arduino": {
           "key": "torso.arduino",
           "actualName": "left",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared left arduino",
           "isRoot": false
         }
@@ -643,6 +688,7 @@
     "org.myrobotlab.service.InMoovArm": {
       "name": "org.myrobotlab.service.InMoovArm",
       "description": "the InMoov Arm Service",
+      "available": true,
       "dependencies": [],
       "categories": [
         "robot"
@@ -651,35 +697,35 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "Arduino controller for this arm",
           "isRoot": false
         },
         "bicep": {
           "key": "bicep",
           "actualName": "bicep",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Bicep servo",
           "isRoot": false
         },
         "omoplate": {
           "key": "omoplate",
           "actualName": "omoplate",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Omoplate servo",
           "isRoot": false
         },
         "rotate": {
           "key": "rotate",
           "actualName": "rotate",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Rotate servo",
           "isRoot": false
         },
         "shoulder": {
           "key": "shoulder",
           "actualName": "shoulder",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Shoulder servo",
           "isRoot": false
         }
@@ -688,6 +734,7 @@
     "org.myrobotlab.service.InMoovGestureCreator": {
       "name": "org.myrobotlab.service.InMoovGestureCreator",
       "description": "an easier way to create gestures for InMoov",
+      "available": true,
       "dependencies": [],
       "categories": [
         "robot"
@@ -697,6 +744,7 @@
     "org.myrobotlab.service.InMoovHand": {
       "name": "org.myrobotlab.service.InMoovHand",
       "description": "an easier way to create gestures for InMoov",
+      "available": true,
       "dependencies": [],
       "categories": [
         "robot"
@@ -705,56 +753,56 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "Arduino controller for this arm",
           "isRoot": false
         },
         "index": {
           "key": "index",
           "actualName": "index",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Index servo",
           "isRoot": false
         },
         "leap": {
           "key": "leap",
           "actualName": "leap",
-          "fullTypeName": "LeapMotion2",
+          "fullTypeName": "org.myrobotlab.service.LeapMotion",
           "comment": "Leap Motion Service",
           "isRoot": false
         },
         "majeure": {
           "key": "majeure",
           "actualName": "majeure",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Majeure servo",
           "isRoot": false
         },
         "pinky": {
           "key": "pinky",
           "actualName": "pinky",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Pinky servo",
           "isRoot": false
         },
         "ringFinger": {
           "key": "ringFinger",
           "actualName": "ringFinger",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "RingFinger servo",
           "isRoot": false
         },
         "thumb": {
           "key": "thumb",
           "actualName": "thumb",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Thumb servo",
           "isRoot": false
         },
         "wrist": {
           "key": "wrist",
           "actualName": "wrist",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Wrist servo",
           "isRoot": false
         }
@@ -763,6 +811,7 @@
     "org.myrobotlab.service.InMoovHead": {
       "name": "org.myrobotlab.service.InMoovHead",
       "description": "InMoov Head Service",
+      "available": true,
       "dependencies": [],
       "categories": [
         "robot"
@@ -771,42 +820,42 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "Arduino controller for this arm",
           "isRoot": false
         },
         "eyeX": {
           "key": "eyeX",
           "actualName": "eyeX",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Eyes pan servo",
           "isRoot": false
         },
         "eyeY": {
           "key": "eyeY",
           "actualName": "eyeY",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Eyes tilt servo",
           "isRoot": false
         },
         "jaw": {
           "key": "jaw",
           "actualName": "jaw",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Jaw servo",
           "isRoot": false
         },
         "neck": {
           "key": "neck",
           "actualName": "neck",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Head tilt servo",
           "isRoot": false
         },
         "rothead": {
           "key": "rothead",
           "actualName": "rothead",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Head pan servo",
           "isRoot": false
         }
@@ -815,6 +864,7 @@
     "org.myrobotlab.service.InMoovTorso": {
       "name": "org.myrobotlab.service.InMoovTorso",
       "description": "InMoov Torso",
+      "available": true,
       "dependencies": [],
       "categories": [
         "robot"
@@ -823,28 +873,28 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "Arduino controller for this arm",
           "isRoot": false
         },
         "lowStom": {
           "key": "lowStom",
           "actualName": "lowStom",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Low Stomach servo",
           "isRoot": false
         },
         "midStom": {
           "key": "midStom",
           "actualName": "midStom",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Mid Stomach servo",
           "isRoot": false
         },
         "topStom": {
           "key": "topStom",
           "actualName": "topStom",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "Top Stomach servo",
           "isRoot": false
         }
@@ -853,6 +903,7 @@
     "org.myrobotlab.service.Incubator": {
       "name": "org.myrobotlab.service.Incubator",
       "description": "This connector will connect to an IMAP based email server and crawl the emails",
+      "available": true,
       "dependencies": [],
       "categories": [
         "testing",
@@ -862,15 +913,15 @@
         "python": {
           "key": "python",
           "actualName": "python",
-          "fullTypeName": "Python",
+          "fullTypeName": "org.myrobotlab.service.Python",
           "comment": "shared python instance",
           "isRoot": false
         },
         "xmpp": {
           "key": "xmpp",
           "actualName": "xmpp",
-          "fullTypeName": "XMPP",
-          "comment": "XMPP service",
+          "fullTypeName": "org.myrobotlab.service.Xmpp",
+          "comment": "Xmpp service",
           "isRoot": false
         }
       }
@@ -878,6 +929,7 @@
     "org.myrobotlab.service.InverseKinematics": {
       "name": "org.myrobotlab.service.InverseKinematics",
       "description": "Inverse Kinematics",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control",
@@ -888,6 +940,7 @@
     "org.myrobotlab.service.InverseKinematics3D": {
       "name": "org.myrobotlab.service.InverseKinematics3D",
       "description": "a 3D kinematics service supporting D-H parameters",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control",
@@ -898,8 +951,10 @@
     "org.myrobotlab.service.IpCamera": {
       "name": "org.myrobotlab.service.IpCamera",
       "description": "control and video stream capture for generic ip camera",
+      "available": true,
       "dependencies": [
-        "org.bytedeco.javacv"
+        "org.bytedeco.javacpp/1.1",
+        "org.bytedeco.javacv/1.1"
       ],
       "categories": [
         "video"
@@ -909,8 +964,9 @@
     "org.myrobotlab.service.JFugue": {
       "name": "org.myrobotlab.service.JFugue",
       "description": "service wrapping Jfugue, used for music and sound generation",
+      "available": true,
       "dependencies": [
-        "org.jfugue.music"
+        "org.jfugue.music/5.0"
       ],
       "categories": [
         "sound"
@@ -920,8 +976,9 @@
     "org.myrobotlab.service.Joystick": {
       "name": "org.myrobotlab.service.Joystick",
       "description": "used for interfacing with a Joystick",
+      "available": true,
       "dependencies": [
-        "net.java.games.jinput"
+        "net.java.games.jinput/20120914"
       ],
       "categories": [
         "control"
@@ -931,6 +988,7 @@
     "org.myrobotlab.service.Keyboard": {
       "name": "org.myrobotlab.service.Keyboard",
       "description": "keyboard interface",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control"
@@ -940,8 +998,9 @@
     "org.myrobotlab.service.LeapMotion": {
       "name": "org.myrobotlab.service.LeapMotion",
       "description": "Leap Motion Service",
+      "available": true,
       "dependencies": [
-        "com.leapmotion"
+        "com.leapmotion/2.1.3"
       ],
       "categories": [
         "sensor"
@@ -951,6 +1010,7 @@
     "org.myrobotlab.service.Lidar": {
       "name": "org.myrobotlab.service.Lidar",
       "description": "The Lidar Service - Light Detection And Ranging",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor"
@@ -960,6 +1020,7 @@
     "org.myrobotlab.service.Log": {
       "name": "org.myrobotlab.service.Log",
       "description": "Logging Service helpful in diagnostics",
+      "available": true,
       "dependencies": [],
       "categories": [
         "famework"
@@ -969,6 +1030,7 @@
     "org.myrobotlab.service.Maestro": {
       "name": "org.myrobotlab.service.Maestro",
       "description": "Maestro USB Servo Controllers ",
+      "available": true,
       "dependencies": [],
       "categories": [
         "microcontroller"
@@ -977,7 +1039,7 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "Serial service is needed for Pololu",
           "isRoot": false
         }
@@ -986,6 +1048,7 @@
     "org.myrobotlab.service.Mail": {
       "name": "org.myrobotlab.service.Mail",
       "description": "General service for all your mail needs",
+      "available": true,
       "dependencies": [],
       "categories": [
         "connectivity"
@@ -995,8 +1058,9 @@
     "org.myrobotlab.service.MarySpeech": {
       "name": "org.myrobotlab.service.MarySpeech",
       "description": "Speech synthesis based on MaryTTS",
+      "available": true,
       "dependencies": [
-        "marytts"
+        "marytts/5.1.2"
       ],
       "categories": [
         "speech",
@@ -1007,6 +1071,7 @@
     "org.myrobotlab.service.Motor": {
       "name": "org.myrobotlab.service.Motor",
       "description": "General Motor Service",
+      "available": true,
       "dependencies": [],
       "categories": [
         "motor"
@@ -1016,6 +1081,7 @@
     "org.myrobotlab.service.MouthControl": {
       "name": "org.myrobotlab.service.MouthControl",
       "description": "Mouth movements based on spoken text",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control"
@@ -1024,21 +1090,21 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared Arduino instance",
           "isRoot": false
         },
         "jaw": {
           "key": "jaw",
           "actualName": "jaw",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "shared Jaw servo instance",
           "isRoot": false
         },
         "mouth": {
           "key": "mouth",
           "actualName": "mouth",
-          "fullTypeName": "Speech",
+          "fullTypeName": "org.myrobotlab.service.AcapelaSpeech",
           "comment": "shared Speech instance",
           "isRoot": false
         }
@@ -1047,6 +1113,7 @@
     "org.myrobotlab.service.Mpu6050": {
       "name": "org.myrobotlab.service.Mpu6050",
       "description": "General MPU 6050",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor",
@@ -1056,7 +1123,7 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "Serial",
           "isRoot": false
         }
@@ -1065,8 +1132,9 @@
     "org.myrobotlab.service.Mqtt": {
       "name": "org.myrobotlab.service.Mqtt",
       "description": "This is an MQTT client based on the Paho MQTT client library. MQTT is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org",
+      "available": true,
       "dependencies": [
-        "org.eclipse.paho"
+        "org.eclipse.paho/1.0"
       ],
       "categories": [
         "data",
@@ -1077,6 +1145,7 @@
     "org.myrobotlab.service.MultiWii": {
       "name": "org.myrobotlab.service.MultiWii",
       "description": "MultiWii interface",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control"
@@ -1086,6 +1155,7 @@
     "org.myrobotlab.service.MyoThalmic": {
       "name": "org.myrobotlab.service.MyoThalmic",
       "description": "Myo service to control with the Myo armband",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor",
@@ -1096,6 +1166,7 @@
     "org.myrobotlab.service.OculusDIY": {
       "name": "org.myrobotlab.service.OculusDIY",
       "description": "Service to receive and compute data from a DIY Oculus",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor",
@@ -1106,7 +1177,7 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "Arduino for DIYOculus and Myo",
           "isRoot": false
         }
@@ -1115,8 +1186,9 @@
     "org.myrobotlab.service.OculusRift": {
       "name": "org.myrobotlab.service.OculusRift",
       "description": "The Oculus Rift Head Tracking Service",
+      "available": true,
       "dependencies": [
-        "org.saintandreas.jovr"
+        "org.saintandreas.jovr/0.7"
       ],
       "categories": [
         "sensor",
@@ -1127,14 +1199,14 @@
         "leftOpenCV": {
           "key": "leftOpenCV",
           "actualName": "leftOpenCV",
-          "fullTypeName": "OpenCV",
+          "fullTypeName": "org.myrobotlab.service.OpenCV",
           "comment": "Left Eye Camera",
           "isRoot": false
         },
         "rightOpenCV": {
           "key": "rightOpenCV",
           "actualName": "rightOpenCV",
-          "fullTypeName": "OpenCV",
+          "fullTypeName": "org.myrobotlab.service.OpenCV",
           "comment": "Right Eye Camera",
           "isRoot": false
         }
@@ -1143,8 +1215,10 @@
     "org.myrobotlab.service.OpenCV": {
       "name": "org.myrobotlab.service.OpenCV",
       "description": "OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV",
+      "available": true,
       "dependencies": [
-        "org.bytedeco.javacv"
+        "org.bytedeco.javacpp/1.1",
+        "org.bytedeco.javacv/1.1"
       ],
       "categories": [
         "sensor",
@@ -1155,7 +1229,7 @@
         "streamer": {
           "key": "streamer",
           "actualName": "streamer",
-          "fullTypeName": "VideoStreamer",
+          "fullTypeName": "org.myrobotlab.service.VideoStreamer",
           "comment": "video streaming service for webgui.",
           "isRoot": false
         }
@@ -1164,8 +1238,9 @@
     "org.myrobotlab.service.OpenNi": {
       "name": "org.myrobotlab.service.OpenNi",
       "description": "OpenNI Service - 3D sensor",
+      "available": true,
       "dependencies": [
-        "com.googlecode.simpleopenni"
+        "com.googlecode.simpleopenni/1.96"
       ],
       "categories": [
         "sensor",
@@ -1176,7 +1251,7 @@
         "streamer": {
           "key": "streamer",
           "actualName": "streamer",
-          "fullTypeName": "VideoStreamer",
+          "fullTypeName": "org.myrobotlab.service.VideoStreamer",
           "comment": "video streaming service for webgui.",
           "isRoot": false
         }
@@ -1185,6 +1260,7 @@
     "org.myrobotlab.service.PID": {
       "name": "org.myrobotlab.service.PID",
       "description": "A proportional integral derivative controller (PID controller) commonly used in industrial control systems",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control",
@@ -1195,6 +1271,7 @@
     "org.myrobotlab.service.PID2": {
       "name": "org.myrobotlab.service.PID2",
       "description": "A proportional integral derivative controller (PID controller) commonly used in industrial control systems",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control",
@@ -1205,6 +1282,7 @@
     "org.myrobotlab.service.Picaxe": {
       "name": "org.myrobotlab.service.Picaxe",
       "description": "Picaxe microcontroller",
+      "available": true,
       "dependencies": [],
       "categories": [
         "microcontroller"
@@ -1213,7 +1291,7 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "serial service",
           "isRoot": false
         }
@@ -1222,8 +1300,9 @@
     "org.myrobotlab.service.PickToLight": {
       "name": "org.myrobotlab.service.PickToLight",
       "description": "Pick to light system",
+      "available": true,
       "dependencies": [
-        "org.apache.commons.httpclient"
+        "org.apache.commons.httpclient/4.2.5"
       ],
       "categories": [
         "industrial"
@@ -1232,14 +1311,14 @@
         "raspi": {
           "key": "raspi",
           "actualName": "raspi",
-          "fullTypeName": "RasPi",
+          "fullTypeName": "org.myrobotlab.service.RasPi",
           "comment": "raspi",
           "isRoot": false
         },
         "webgui": {
           "key": "webgui",
           "actualName": "webgui",
-          "fullTypeName": "WebGui",
+          "fullTypeName": "org.myrobotlab.service.WebGui",
           "comment": "web server interface",
           "isRoot": false
         }
@@ -1248,6 +1327,7 @@
     "org.myrobotlab.service.Pingdar": {
       "name": "org.myrobotlab.service.Pingdar",
       "description": "used as a ultra sonic radar",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor",
@@ -1257,21 +1337,21 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "arduino",
           "isRoot": false
         },
         "sensor": {
           "key": "sensor",
           "actualName": "sensor",
-          "fullTypeName": "UltrasonicSensor",
+          "fullTypeName": "org.myrobotlab.service.UltrasonicSensor",
           "comment": "sensor",
           "isRoot": false
         },
         "servo": {
           "key": "servo",
           "actualName": "servo",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         }
@@ -1280,6 +1360,7 @@
     "org.myrobotlab.service.Plantoid": {
       "name": "org.myrobotlab.service.Plantoid",
       "description": "The Plantoid Service",
+      "available": true,
       "dependencies": [],
       "categories": [
         "robot"
@@ -1288,99 +1369,99 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "arduino service",
           "isRoot": false
         },
         "audioFile": {
           "key": "audioFile",
           "actualName": "audioFile",
-          "fullTypeName": "AudioFile",
+          "fullTypeName": "org.myrobotlab.service.AudioFile",
           "comment": "audio file service",
           "isRoot": false
         },
         "jFugue": {
           "key": "jFugue",
           "actualName": "jFugue",
-          "fullTypeName": "JFugue",
+          "fullTypeName": "org.myrobotlab.service.JFugue",
           "comment": "jfugue service",
           "isRoot": false
         },
         "leg1": {
           "key": "leg1",
           "actualName": "leg1",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "leg1",
           "isRoot": false
         },
         "leg2": {
           "key": "leg2",
           "actualName": "leg2",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "leg2",
           "isRoot": false
         },
         "leg3": {
           "key": "leg3",
           "actualName": "leg3",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "leg3",
           "isRoot": false
         },
         "leg4": {
           "key": "leg4",
           "actualName": "leg4",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "leg4",
           "isRoot": false
         },
         "opencv": {
           "key": "opencv",
           "actualName": "opencv",
-          "fullTypeName": "OpenCV",
+          "fullTypeName": "org.myrobotlab.service.OpenCV",
           "comment": "pilot camera",
           "isRoot": false
         },
         "pan": {
           "key": "pan",
           "actualName": "pan",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "pan",
           "isRoot": false
         },
         "streamer": {
           "key": "streamer",
           "actualName": "streamer",
-          "fullTypeName": "VideoStreamer",
+          "fullTypeName": "org.myrobotlab.service.VideoStreamer",
           "comment": "video streamer",
           "isRoot": false
         },
         "tilt": {
           "key": "tilt",
           "actualName": "tilt",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "tilt",
           "isRoot": false
         },
         "tracking": {
           "key": "tracking",
           "actualName": "tracking",
-          "fullTypeName": "Tracking",
+          "fullTypeName": "org.myrobotlab.service.Tracking",
           "comment": "tracking service",
           "isRoot": false
         },
         "webgui": {
           "key": "webgui",
           "actualName": "webgui",
-          "fullTypeName": "WebGui",
+          "fullTypeName": "org.myrobotlab.service.WebGui",
           "comment": "WebGui service",
           "isRoot": false
         },
         "xmpp": {
           "key": "xmpp",
           "actualName": "xmpp",
-          "fullTypeName": "XMPP",
-          "comment": "xmpp service",
+          "fullTypeName": "org.myrobotlab.service.Xmpp",
+          "comment": "Xmpp service",
           "isRoot": false
         }
       }
@@ -1388,8 +1469,9 @@
     "org.myrobotlab.service.ProgramAB": {
       "name": "org.myrobotlab.service.ProgramAB",
       "description": "AIML 2.0 Reference interpreter based on Program AB",
+      "available": true,
       "dependencies": [
-        "org.alicebot.ab"
+        "org.alicebot.ab/0.0.6.26"
       ],
       "categories": [
         "intelligence"
@@ -1399,8 +1481,9 @@
     "org.myrobotlab.service.Python": {
       "name": "org.myrobotlab.service.Python",
       "description": "Python ID",
+      "available": true,
       "dependencies": [
-        "org.python.core"
+        "org.python.core/2.7.0"
       ],
       "categories": [
         "control",
@@ -1411,6 +1494,7 @@
     "org.myrobotlab.service.RSSConnector": {
       "name": "org.myrobotlab.service.RSSConnector",
       "description": "This will crawl an rss feed at the given url and break apart the page into Documents",
+      "available": true,
       "dependencies": [],
       "categories": [
         "data"
@@ -1420,8 +1504,9 @@
     "org.myrobotlab.service.RasPi": {
       "name": "org.myrobotlab.service.RasPi",
       "description": "Raspberry Pi service used for accessing specific RasPi hardware such as I2C",
+      "available": true,
       "dependencies": [
-        "com.pi4j.pi4j"
+        "com.pi4j.pi4j/0.0.5"
       ],
       "categories": [
         "control",
@@ -1432,6 +1517,7 @@
     "org.myrobotlab.service.RemoteAdapter": {
       "name": "org.myrobotlab.service.RemoteAdapter",
       "description": "allows remote communication between applets, or remote instances of myrobotlab",
+      "available": true,
       "dependencies": [],
       "categories": [
         "connectivity",
@@ -1443,6 +1529,7 @@
     "org.myrobotlab.service.RobotPlatform": {
       "name": "org.myrobotlab.service.RobotPlatform",
       "description": "used to encapsulate many of the functions and formulas regarding 2 motor platforms encoders and other feedback mechanisms can be added to provide heading, location and other information",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control",
@@ -1453,6 +1540,7 @@
     "org.myrobotlab.service.Roomba": {
       "name": "org.myrobotlab.service.Roomba",
       "description": "Roomba control",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control",
@@ -1462,7 +1550,7 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "serial",
           "isRoot": false
         }
@@ -1471,6 +1559,7 @@
     "org.myrobotlab.service.Ros": {
       "name": "org.myrobotlab.service.Ros",
       "description": "interface to Ros",
+      "available": true,
       "dependencies": [],
       "categories": [
         "bridge"
@@ -1479,7 +1568,7 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "serial",
           "isRoot": false
         }
@@ -1488,6 +1577,7 @@
     "org.myrobotlab.service.Runtime": {
       "name": "org.myrobotlab.service.Runtime",
       "description": "Runtime singleton service responsible for the creation and registry of all other services",
+      "available": true,
       "dependencies": [],
       "categories": [
         "framework"
@@ -1496,7 +1586,7 @@
         "cli": {
           "key": "cli",
           "actualName": "cli",
-          "fullTypeName": "Cli",
+          "fullTypeName": "org.myrobotlab.service.Cli",
           "comment": "command line interpreter for the runtime",
           "isRoot": false
         }
@@ -1505,6 +1595,7 @@
     "org.myrobotlab.service.Sabertooth": {
       "name": "org.myrobotlab.service.Sabertooth",
       "description": "Interface for the powerful Sabertooth motor controller",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control",
@@ -1514,7 +1605,7 @@
         "serial": {
           "key": "serial",
           "actualName": "serial",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "Serial Port",
           "isRoot": false
         }
@@ -1523,6 +1614,7 @@
     "org.myrobotlab.service.Security": {
       "name": "org.myrobotlab.service.Security",
       "description": "provides security",
+      "available": true,
       "dependencies": [],
       "categories": [
         "security",
@@ -1533,6 +1625,7 @@
     "org.myrobotlab.service.SensorMonitor": {
       "name": "org.myrobotlab.service.SensorMonitor",
       "description": "sensor monitor - capable of displaying sensor information in a crude oscilliscope fasion",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor",
@@ -1543,9 +1636,9 @@
     "org.myrobotlab.service.Serial": {
       "name": "org.myrobotlab.service.Serial",
       "description": "reads and writes data to a serial port",
+      "available": true,
       "dependencies": [
-        "gnu.io.rxtx",
-        "com.googlecode.jssc"
+        "com.googlecode.jssc/2.8.0"
       ],
       "categories": [
         "sensor",
@@ -1557,6 +1650,7 @@
     "org.myrobotlab.service.Servo": {
       "name": "org.myrobotlab.service.Servo",
       "description": "Controls a servo",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control",
@@ -1567,6 +1661,7 @@
     "org.myrobotlab.service.ServoOrchestrator": {
       "name": "org.myrobotlab.service.ServoOrchestrator",
       "description": "organize your Servo-movements",
+      "available": true,
       "dependencies": [],
       "categories": [
         "control",
@@ -1578,6 +1673,7 @@
     "org.myrobotlab.service.Shoutbox": {
       "name": "org.myrobotlab.service.Shoutbox",
       "description": "shoutbox server",
+      "available": true,
       "dependencies": [],
       "categories": [
         "connectivity"
@@ -1587,9 +1683,10 @@
     "org.myrobotlab.service.SlamBad": {
       "name": "org.myrobotlab.service.SlamBad",
       "description": "basic simulator based on Simbad",
+      "available": true,
       "dependencies": [
-        "javax.vecmath",
-        "com.sun.java3d"
+        "com.sun.java3d/1.5.1",
+        "javax.vecmath/1.5.1"
       ],
       "categories": [
         "display",
@@ -1600,8 +1697,9 @@
     "org.myrobotlab.service.Solr": {
       "name": "org.myrobotlab.service.Solr",
       "description": "Solr Service - Open source search engine",
+      "available": true,
       "dependencies": [
-        "org.apache.solr"
+        "org.apache.solr/4.10.2"
       ],
       "categories": [
         "search",
@@ -1612,9 +1710,10 @@
     "org.myrobotlab.service.Sphinx": {
       "name": "org.myrobotlab.service.Sphinx",
       "description": "open source pure Java speech recognition",
+      "available": true,
       "dependencies": [
-        "edu.cmu.sphinx",
-        "javax.speech.recognition"
+        "edu.cmu.sphinx/4-1.0beta6",
+        "javax.speech.recognition/1.0"
       ],
       "categories": [
         "control",
@@ -1625,6 +1724,7 @@
     "org.myrobotlab.service.Sprinkler": {
       "name": "org.myrobotlab.service.Sprinkler",
       "description": "sprinkler system",
+      "available": true,
       "dependencies": [],
       "categories": [
         "home automation",
@@ -1635,6 +1735,7 @@
     "org.myrobotlab.service.Sweety": {
       "name": "org.myrobotlab.service.Sweety",
       "description": "Service for the Sweety robot",
+      "available": true,
       "dependencies": [],
       "categories": [
         "robot"
@@ -1643,203 +1744,203 @@
         "USback": {
           "key": "USback",
           "actualName": "USback",
-          "fullTypeName": "UltrasonicSensor",
+          "fullTypeName": "org.myrobotlab.service.UltrasonicSensor",
           "comment": "USback",
           "isRoot": false
         },
         "USbackLeft": {
           "key": "USbackLeft",
           "actualName": "USbackLeft",
-          "fullTypeName": "UltrasonicSensor",
+          "fullTypeName": "org.myrobotlab.service.UltrasonicSensor",
           "comment": "USbackLeft",
           "isRoot": false
         },
         "USbackRight": {
           "key": "USbackRight",
           "actualName": "USbackRight",
-          "fullTypeName": "UltrasonicSensor",
+          "fullTypeName": "org.myrobotlab.service.UltrasonicSensor",
           "comment": "USbackRight",
           "isRoot": false
         },
         "USfront": {
           "key": "USfront",
           "actualName": "USfront",
-          "fullTypeName": "UltrasonicSensor",
+          "fullTypeName": "org.myrobotlab.service.UltrasonicSensor",
           "comment": "USfront",
           "isRoot": false
         },
         "USfrontLeft": {
           "key": "USfrontLeft",
           "actualName": "USfrontLeft",
-          "fullTypeName": "UltrasonicSensor",
+          "fullTypeName": "org.myrobotlab.service.UltrasonicSensor",
           "comment": "USfrontLeft",
           "isRoot": false
         },
         "USfrontRight": {
           "key": "USfrontRight",
           "actualName": "USfrontRight",
-          "fullTypeName": "UltrasonicSensor",
+          "fullTypeName": "org.myrobotlab.service.UltrasonicSensor",
           "comment": "USfrontRight",
           "isRoot": false
         },
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "arduino",
           "isRoot": false
         },
         "chatBot": {
           "key": "chatBot",
           "actualName": "chatBot",
-          "fullTypeName": "ProgramAB",
+          "fullTypeName": "org.myrobotlab.service.ProgramAB",
           "comment": "chatBot",
           "isRoot": false
         },
         "ear": {
           "key": "ear",
           "actualName": "ear",
-          "fullTypeName": "WebkitSpeechRecognition",
+          "fullTypeName": "org.myrobotlab.service.WebkitSpeechRecognition",
           "comment": "ear",
           "isRoot": false
         },
         "htmlFilter": {
           "key": "htmlFilter",
           "actualName": "htmlFilter",
-          "fullTypeName": "HtmlFilter",
+          "fullTypeName": "org.myrobotlab.service.HtmlFilter",
           "comment": "htmlfilter",
           "isRoot": false
         },
         "leftArm": {
           "key": "leftArm",
           "actualName": "leftArm",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "leftEye": {
           "key": "leftEye",
           "actualName": "leftEye",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "leftForearm": {
           "key": "leftForearm",
           "actualName": "leftForearm",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "leftHand": {
           "key": "leftHand",
           "actualName": "leftHand",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "leftShoulder": {
           "key": "leftShoulder",
           "actualName": "leftShoulder",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "leftTracker": {
           "key": "leftTracker",
           "actualName": "leftTracker",
-          "fullTypeName": "Tracking",
+          "fullTypeName": "org.myrobotlab.service.Tracking",
           "comment": "leftTracker",
           "isRoot": false
         },
         "leftWrist": {
           "key": "leftWrist",
           "actualName": "leftWrist",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "mouth": {
           "key": "mouth",
           "actualName": "mouth",
-          "fullTypeName": "AcapelaSpeech",
+          "fullTypeName": "org.myrobotlab.service.AcapelaSpeech",
           "comment": "sweetys mouth",
           "isRoot": false
         },
         "neck": {
           "key": "neck",
           "actualName": "neck",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "openni": {
           "key": "openni",
           "actualName": "openni",
-          "fullTypeName": "OpenNi",
+          "fullTypeName": "org.myrobotlab.service.OpenNi",
           "comment": "openni",
           "isRoot": false
         },
         "pid": {
           "key": "pid",
           "actualName": "pid",
-          "fullTypeName": "PID",
+          "fullTypeName": "org.myrobotlab.service.PID",
           "comment": "pid",
           "isRoot": false
         },
         "rightArm": {
           "key": "rightArm",
           "actualName": "rightArm",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "rightEye": {
           "key": "rightEye",
           "actualName": "rightEye",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "rightForearm": {
           "key": "rightForearm",
           "actualName": "rightForearm",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "rightHand": {
           "key": "rightHand",
           "actualName": "rightHand",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "rightShoulder": {
           "key": "rightShoulder",
           "actualName": "rightShoulder",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "rightTracker": {
           "key": "rightTracker",
           "actualName": "rightTracker",
-          "fullTypeName": "Tracking",
+          "fullTypeName": "org.myrobotlab.service.Tracking",
           "comment": "rightTracker",
           "isRoot": false
         },
         "rightWrist": {
           "key": "rightWrist",
           "actualName": "rightWrist",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "servo",
           "isRoot": false
         },
         "webGui": {
           "key": "webGui",
           "actualName": "webGui",
-          "fullTypeName": "WebGui",
+          "fullTypeName": "org.myrobotlab.service.WebGui",
           "comment": "webGui",
           "isRoot": false
         }
@@ -1848,9 +1949,10 @@
     "org.myrobotlab.service.TesseractOcr": {
       "name": "org.myrobotlab.service.TesseractOcr",
       "description": "Optical character recognition - the ability to read",
+      "available": true,
       "dependencies": [
-        "net.sourceforge.tess4j",
-        "com.sun.jna"
+        "net.sourceforge.tess4j/1.1",
+        "com.sun.jna/3.2.2"
       ],
       "categories": [
         "intelligence"
@@ -1860,6 +1962,7 @@
     "org.myrobotlab.service.TestCatcher": {
       "name": "org.myrobotlab.service.TestCatcher",
       "description": "TestCatcher is used with TestThrower to test messaging",
+      "available": true,
       "dependencies": [],
       "categories": [
         "testing",
@@ -1870,6 +1973,7 @@
     "org.myrobotlab.service.TestThrower": {
       "name": "org.myrobotlab.service.TestThrower",
       "description": "TestThrower is used with TestCatcher to test messaging",
+      "available": true,
       "dependencies": [],
       "categories": [
         "testing",
@@ -1880,6 +1984,7 @@
     "org.myrobotlab.service.TextTransform": {
       "name": "org.myrobotlab.service.TextTransform",
       "description": "TestThrower is used with TestCatcher to test messaging",
+      "available": true,
       "dependencies": [],
       "categories": [
         "data",
@@ -1890,6 +1995,7 @@
     "org.myrobotlab.service.ThingSpeak": {
       "name": "org.myrobotlab.service.ThingSpeak",
       "description": "Service which can relay data to a ThingSpeak account",
+      "available": true,
       "dependencies": [],
       "categories": [
         "data",
@@ -1900,8 +2006,9 @@
     "org.myrobotlab.service.TopCodes": {
       "name": "org.myrobotlab.service.TopCodes",
       "description": "Topcodes finds visual references and identifiers",
+      "available": true,
       "dependencies": [
-        "edu.northwestern.topcodes"
+        "edu.northwestern.topcodes/1.0"
       ],
       "categories": [
         "sensor",
@@ -1913,6 +2020,7 @@
     "org.myrobotlab.service.Tracking": {
       "name": "org.myrobotlab.service.Tracking",
       "description": "proportional control, tracking, and translation",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor",
@@ -1924,35 +2032,35 @@
         "arduino": {
           "key": "arduino",
           "actualName": "arduino",
-          "fullTypeName": "Arduino",
+          "fullTypeName": "org.myrobotlab.service.Arduino",
           "comment": "shared Arduino instance",
           "isRoot": false
         },
         "opencv": {
           "key": "opencv",
           "actualName": "opencv",
-          "fullTypeName": "OpenCV",
+          "fullTypeName": "org.myrobotlab.service.OpenCV",
           "comment": "shared OpenCV instance",
           "isRoot": false
         },
         "pid": {
           "key": "pid",
           "actualName": "pid",
-          "fullTypeName": "PID2",
+          "fullTypeName": "org.myrobotlab.service.PID2",
           "comment": "PID service - for all your pid needs",
           "isRoot": false
         },
         "x": {
           "key": "x",
           "actualName": "x",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "pan servo",
           "isRoot": false
         },
         "y": {
           "key": "y",
           "actualName": "y",
-          "fullTypeName": "Servo",
+          "fullTypeName": "org.myrobotlab.service.Servo",
           "comment": "tilt servo",
           "isRoot": false
         }
@@ -1961,8 +2069,9 @@
     "org.myrobotlab.service.Twitter": {
       "name": "org.myrobotlab.service.Twitter",
       "description": "Service which can relay tweets",
+      "available": true,
       "dependencies": [
-        "org.twitter4j.twitter"
+        "org.twitter4j.twitter/3.0.5"
       ],
       "categories": [
         "connectivity",
@@ -1973,6 +2082,7 @@
     "org.myrobotlab.service.UltrasonicSensor": {
       "name": "org.myrobotlab.service.UltrasonicSensor",
       "description": "Ranging sensor",
+      "available": true,
       "dependencies": [],
       "categories": [
         "sensor"
@@ -1982,6 +2092,7 @@
     "org.myrobotlab.service.VideoStreamer": {
       "name": "org.myrobotlab.service.VideoStreamer",
       "description": "Video streaming service",
+      "available": true,
       "dependencies": [],
       "categories": [
         "display",
@@ -1992,6 +2103,7 @@
     "org.myrobotlab.service.VirtualDevice": {
       "name": "org.myrobotlab.service.VirtualDevice",
       "description": "A service which can create virtual devices, like the virtual Arduino",
+      "available": true,
       "dependencies": [],
       "categories": [
         "testing"
@@ -2000,14 +2112,14 @@
         "logic": {
           "key": "logic",
           "actualName": "logic",
-          "fullTypeName": "Python",
+          "fullTypeName": "org.myrobotlab.service.Python",
           "comment": "logic to implement",
           "isRoot": false
         },
         "uart": {
           "key": "uart",
           "actualName": "uart",
-          "fullTypeName": "Serial",
+          "fullTypeName": "org.myrobotlab.service.Serial",
           "comment": "uart",
           "isRoot": false
         }
@@ -2016,9 +2128,10 @@
     "org.myrobotlab.service.WebGui": {
       "name": "org.myrobotlab.service.WebGui",
       "description": "web display",
+      "available": true,
       "dependencies": [
-        "org.atmosphere.nettosphere",
-        "io.netty"
+        "io.netty/3.10.0",
+        "org.atmosphere.nettosphere/2.3.0"
       ],
       "categories": [
         "display"
@@ -2028,6 +2141,7 @@
     "org.myrobotlab.service.WebkitSpeechRecognition": {
       "name": "org.myrobotlab.service.WebkitSpeechRecognition",
       "description": "Speech recognition using Google Chrome webkit",
+      "available": true,
       "dependencies": [],
       "categories": [
         "speech recognition"
@@ -2037,8 +2151,9 @@
     "org.myrobotlab.service.Wii": {
       "name": "org.myrobotlab.service.Wii",
       "description": "Wii mote control and sensor info",
+      "available": true,
       "dependencies": [
-        "wiiuse.wiimote"
+        "wiiuse.wiimote/0.12b"
       ],
       "categories": [
         "sensor",
@@ -2059,8 +2174,9 @@
     "org.myrobotlab.service.WiiDar": {
       "name": "org.myrobotlab.service.WiiDar",
       "description": "ranging using a wiimote",
+      "available": true,
       "dependencies": [
-        "wiiuse.wiimote"
+        "wiiuse.wiimote/0.12b"
       ],
       "categories": [
         "sensor"
@@ -2070,7 +2186,10 @@
     "org.myrobotlab.service.WikiDataFetcher": {
       "name": "org.myrobotlab.service.WikiDataFetcher",
       "description": "service interface for Wikipedia",
-      "dependencies": [],
+      "available": true,
+      "dependencies": [
+        "org.wikidata.wdtk/0.5.0"
+      ],
       "categories": [
         "intelligence"
       ],
@@ -2079,9 +2198,10 @@
     "org.myrobotlab.service.WolframAlpha": {
       "name": "org.myrobotlab.service.WolframAlpha",
       "description": "Wolfram service",
+      "available": true,
       "dependencies": [
-        "com.wolfram.alpha",
-        "org.apache.commons.httpclient"
+        "org.apache.commons.httpclient/4.2.5",
+        "com.wolfram.alpha/1.1"
       ],
       "categories": [
         "data",
@@ -2092,6 +2212,7 @@
     "org.myrobotlab.service.XMLConnector": {
       "name": "org.myrobotlab.service.XMLConnector",
       "description": "This is an XML Connector that will parse a large xml file into many small xml documents",
+      "available": true,
       "dependencies": [],
       "categories": [
         "data"
@@ -2101,8 +2222,9 @@
     "org.myrobotlab.service.Xmpp": {
       "name": "org.myrobotlab.service.Xmpp",
       "description": "xmpp service to access the jabber network",
+      "available": true,
       "dependencies": [
-        "org.jivesoftware.smack"
+        "org.jivesoftware.smack/3.3.0"
       ],
       "categories": [
         "connectivity"
@@ -2112,6 +2234,7 @@
     "org.myrobotlab.service._TemplateService": {
       "name": "org.myrobotlab.service._TemplateService",
       "description": "used as a general template",
+      "available": true,
       "dependencies": [],
       "categories": [
         "general"
@@ -2120,6 +2243,11 @@
     }
   },
   "categoryTypes": {
+    "ai": {
+      "serviceTypes": [
+        "org.myrobotlab.service.AzureTranslator"
+      ]
+    },
     "bridge": {
       "serviceTypes": [
         "org.myrobotlab.service.Ros"
@@ -2127,6 +2255,7 @@
     },
     "cloud": {
       "serviceTypes": [
+        "org.myrobotlab.service.AzureTranslator",
         "org.myrobotlab.service.Mqtt",
         "org.myrobotlab.service.ThingSpeak",
         "org.myrobotlab.service.Twitter"
@@ -2407,6 +2536,11 @@
         "org.myrobotlab.service.VirtualDevice"
       ]
     },
+    "translation": {
+      "serviceTypes": [
+        "org.myrobotlab.service.AzureTranslator"
+      ]
+    },
     "video": {
       "serviceTypes": [
         "org.myrobotlab.service.IpCamera",
@@ -2429,397 +2563,402 @@
     }
   },
   "dependencyTypes": {
-    "be.hogent.tarsos": {
+    "be.hogent.tarsos/1.7": {
       "org": "be.hogent.tarsos",
       "revision": "1.7",
       "installed": false
     },
-    "cc.arduino": {
+    "cc.arduino/1.0": {
       "org": "cc.arduino",
       "revision": "1.0",
       "installed": false
     },
-    "com.adafruit.motorshield": {
+    "com.adafruit.motorshield/1.0": {
       "org": "com.adafruit.motorshield",
       "revision": "1.0",
       "installed": false
     },
-    "com.adafruit.servodriver": {
+    "com.adafruit.servodriver/1.0": {
       "org": "com.adafruit.servodriver",
       "revision": "1.0",
       "installed": false
     },
-    "com.coobird.thumbnail": {
+    "com.azure.translator/0.6.2": {
+      "org": "com.azure.translator",
+      "revision": "0.6.2",
+      "installed": false
+    },
+    "com.coobird.thumbnail/0.4.2": {
       "org": "com.coobird.thumbnail",
       "revision": "0.4.2",
       "installed": false
     },
-    "com.getflourish.googlestt": {
+    "com.getflourish.googlestt/1.0": {
       "org": "com.getflourish.googlestt",
       "revision": "1.0",
       "installed": false
     },
-    "com.github.recognito": {
+    "com.github.recognito/0.1.0": {
       "org": "com.github.recognito",
       "revision": "0.1.0",
       "installed": false
     },
-    "com.goodrobots": {
+    "com.goodrobots/1.0.2-SNAPSHOT": {
       "org": "com.goodrobots",
       "revision": "1.0.2-SNAPSHOT",
       "installed": false
     },
-    "com.google.gson": {
+    "com.google.gson/2.2.4": {
       "org": "com.google.gson",
       "revision": "2.2.4",
       "installed": false
     },
-    "com.googlecode.chatterbot": {
+    "com.googlecode.chatterbot/1.2.1": {
       "org": "com.googlecode.chatterbot",
       "revision": "1.2.1",
       "installed": false
     },
-    "com.googlecode.javacv": {
+    "com.googlecode.javacv/0.6": {
       "org": "com.googlecode.javacv",
       "revision": "0.6",
       "installed": false
     },
-    "com.googlecode.jssc": {
+    "com.googlecode.jssc/2.8.0": {
       "org": "com.googlecode.jssc",
       "revision": "2.8.0",
       "installed": false
     },
-    "com.googlecode.simpleopenni": {
+    "com.googlecode.simpleopenni/1.96": {
       "org": "com.googlecode.simpleopenni",
       "revision": "1.96",
       "installed": false
     },
-    "com.leapmotion": {
+    "com.leapmotion/2.1.3": {
       "org": "com.leapmotion",
       "revision": "2.1.3",
       "installed": false
     },
-    "com.mxgraph.jgraph": {
+    "com.mxgraph.jgraph/1.6.1.2": {
       "org": "com.mxgraph.jgraph",
       "revision": "1.6.1.2",
       "installed": false
     },
-    "com.pi4j.pi4j": {
+    "com.pi4j.pi4j/0.0.5": {
       "org": "com.pi4j.pi4j",
       "revision": "0.0.5",
       "installed": false
     },
-    "com.strobel.decompiler": {
+    "com.strobel.decompiler/0.3.2": {
       "org": "com.strobel.decompiler",
       "revision": "0.3.2",
       "installed": false
     },
-    "com.sun.java3d": {
+    "com.sun.java3d/1.5.1": {
       "org": "com.sun.java3d",
       "revision": "1.5.1",
       "installed": false
     },
-    "com.sun.jna": {
+    "com.sun.jna/3.2.2": {
       "org": "com.sun.jna",
       "revision": "3.2.2",
       "installed": false
     },
-    "com.sun.mail": {
+    "com.sun.mail/1.4.5": {
       "org": "com.sun.mail",
       "revision": "1.4.5",
       "installed": false
     },
-    "com.sun.speech.freetts": {
+    "com.sun.speech.freetts/1.2": {
       "org": "com.sun.speech.freetts",
       "revision": "1.2",
       "installed": false
     },
-    "com.thalmic.myo": {
+    "com.thalmic.myo/0.9.0": {
       "org": "com.thalmic.myo",
       "revision": "0.9.0",
       "installed": false
     },
-    "com.thoughtworks.xstream": {
+    "com.thoughtworks.xstream/1.4.7": {
       "org": "com.thoughtworks.xstream",
       "revision": "1.4.7",
       "installed": false
     },
-    "com.wolfram.alpha": {
+    "com.wolfram.alpha/1.1": {
       "org": "com.wolfram.alpha",
       "revision": "1.1",
       "installed": false
     },
-    "com.xuggle.xuggler": {
+    "com.xuggle.xuggler/5.4": {
       "org": "com.xuggle.xuggler",
       "revision": "5.4",
       "installed": false
     },
-    "edu.cmu.sphinx": {
+    "edu.cmu.sphinx/4-1.0beta6": {
       "org": "edu.cmu.sphinx",
       "revision": "4-1.0beta6",
       "installed": false
     },
-    "edu.northwestern.topcodes": {
+    "edu.northwestern.topcodes/1.0": {
       "org": "edu.northwestern.topcodes",
       "revision": "1.0",
       "installed": false
     },
-    "feed4j": {
+    "feed4j/1.0": {
       "org": "feed4j",
       "revision": "1.0",
       "installed": false
     },
-    "gnu.io.rxtx": {
+    "gnu.io.rxtx/2.1-7r2": {
       "org": "gnu.io.rxtx",
       "revision": "2.1-7r2",
       "installed": false
     },
-    "io.netty": {
+    "io.netty/3.10.0": {
       "org": "io.netty",
       "revision": "3.10.0",
       "installed": false
     },
-    "it.sauronsoftware.cron4j": {
+    "it.sauronsoftware.cron4j/2.2.5": {
       "org": "it.sauronsoftware.cron4j",
       "revision": "2.2.5",
       "installed": false
     },
-    "javaFlacEncoder.FLAC_FileEncoder": {
+    "javaFlacEncoder.FLAC_FileEncoder/0.1": {
       "org": "javaFlacEncoder.FLAC_FileEncoder",
       "revision": "0.1",
       "installed": false
     },
-    "javax.microedition.io": {
+    "javax.microedition.io/2.0.3": {
       "org": "javax.microedition.io",
       "revision": "2.0.3",
       "installed": false
     },
-    "javax.speech.recognition": {
+    "javax.speech.recognition/1.0": {
       "org": "javax.speech.recognition",
       "revision": "1.0",
       "installed": false
     },
-    "javax.vecmath": {
+    "javax.vecmath/1.5.1": {
       "org": "javax.vecmath",
       "revision": "1.5.1",
       "installed": false
     },
-    "javazoom.jl.player": {
+    "javazoom.jl.player/1.0.1": {
       "org": "javazoom.jl.player",
       "revision": "1.0.1",
       "installed": false
     },
-    "javazoom.spi": {
+    "javazoom.spi/1.9.5": {
       "org": "javazoom.spi",
       "revision": "1.9.5",
       "installed": false
     },
-    "marytts": {
+    "marytts/5.1.2": {
       "org": "marytts",
       "revision": "5.1.2",
       "installed": false
     },
-    "net.java.games.jinput": {
+    "net.java.games.jinput/20120914": {
       "org": "net.java.games.jinput",
       "revision": "20120914",
       "installed": false
     },
-    "net.sf.opencsv": {
+    "net.sf.opencsv/2.3": {
       "org": "net.sf.opencsv",
       "revision": "2.3",
       "installed": false
     },
-    "net.sourceforge.boofcv": {
+    "net.sourceforge.boofcv/0.19": {
       "org": "net.sourceforge.boofcv",
       "revision": "0.19",
       "installed": false
     },
-    "net.sourceforge.opencv": {
+    "net.sourceforge.opencv/2.4.10": {
       "org": "net.sourceforge.opencv",
       "revision": "2.4.10",
       "installed": false
     },
-    "net.sourceforge.simbad": {
+    "net.sourceforge.simbad/1.4": {
       "org": "net.sourceforge.simbad",
       "revision": "1.4",
       "installed": false
     },
-    "net.sourceforge.tess4j": {
+    "net.sourceforge.tess4j/1.1": {
       "org": "net.sourceforge.tess4j",
       "revision": "1.1",
       "installed": false
     },
-    "opennlp": {
+    "opennlp/1.6": {
       "org": "opennlp",
       "revision": "1.6",
       "installed": false
     },
-    "org.alicebot.ab": {
+    "org.alicebot.ab/0.0.6.26": {
       "org": "org.alicebot.ab",
       "revision": "0.0.6.26",
       "installed": false
     },
-    "org.apache.commons.httpclient": {
+    "org.apache.commons.httpclient/4.2.5": {
       "org": "org.apache.commons.httpclient",
       "revision": "4.2.5",
       "installed": false
     },
-    "org.apache.ivy": {
+    "org.apache.ivy/2.4.0-rc1": {
       "org": "org.apache.ivy",
       "revision": "2.4.0-rc1",
       "installed": false
     },
-    "org.apache.log4j": {
+    "org.apache.log4j/1.2.14": {
       "org": "org.apache.log4j",
       "revision": "1.2.14",
       "installed": false
     },
-    "org.apache.solr": {
+    "org.apache.solr/4.10.2": {
       "org": "org.apache.solr",
       "revision": "4.10.2",
       "installed": false
     },
-    "org.apache.tika": {
+    "org.apache.tika/1.11": {
       "org": "org.apache.tika",
       "revision": "1.11",
       "installed": false
     },
-    "org.atmosphere.nettosphere": {
+    "org.atmosphere.nettosphere/2.3.0": {
       "org": "org.atmosphere.nettosphere",
       "revision": "2.3.0",
       "installed": false
     },
-    "org.bytedeco.ffmpeg": {
+    "org.bytedeco.ffmpeg/2.6.1": {
       "org": "org.bytedeco.ffmpeg",
       "revision": "2.6.1",
       "installed": false
     },
-    "org.bytedeco.javacpp": {
+    "org.bytedeco.javacpp/1.1": {
       "org": "org.bytedeco.javacpp",
       "revision": "1.1",
       "installed": false
     },
-    "org.bytedeco.javacv": {
+    "org.bytedeco.javacv/1.1": {
       "org": "org.bytedeco.javacv",
       "revision": "1.1",
       "installed": false
     },
-    "org.drjava.java": {
+    "org.drjava.java/20120818": {
       "org": "org.drjava.java",
       "revision": "20120818",
       "installed": false
     },
-    "org.eclipse.jetty": {
+    "org.eclipse.jetty/7.6.13": {
       "org": "org.eclipse.jetty",
       "revision": "7.6.13",
       "installed": false
     },
-    "org.eclipse.paho": {
+    "org.eclipse.paho/1.0": {
       "org": "org.eclipse.paho",
       "revision": "1.0",
       "installed": false
     },
-    "org.fife.autocomplete": {
+    "org.fife.autocomplete/2.0.4": {
       "org": "org.fife.autocomplete",
       "revision": "2.0.4",
       "installed": false
     },
-    "org.fife.rsyntaxtextarea": {
+    "org.fife.rsyntaxtextarea/2.0.4.1": {
       "org": "org.fife.rsyntaxtextarea",
       "revision": "2.0.4.1",
       "installed": false
     },
-    "org.jcodec.jcodec": {
+    "org.jcodec.jcodec/0.1.9": {
       "org": "org.jcodec.jcodec",
       "revision": "0.1.9",
       "installed": false
     },
-    "org.jfugue.music": {
+    "org.jfugue.music/5.0": {
       "org": "org.jfugue.music",
       "revision": "5.0",
       "installed": false
     },
-    "org.jivesoftware.smack": {
+    "org.jivesoftware.smack/3.3.0": {
       "org": "org.jivesoftware.smack",
       "revision": "3.3.0",
       "installed": false
     },
-    "org.jsoup": {
+    "org.jsoup/1.8.3": {
       "org": "org.jsoup",
       "revision": "1.8.3",
       "installed": false
     },
-    "org.junit": {
+    "org.junit/4.11": {
       "org": "org.junit",
       "revision": "4.11",
       "installed": false
     },
-    "org.op.chess": {
+    "org.op.chess/1.0.0": {
       "org": "org.op.chess",
       "revision": "1.0.0",
       "installed": false
     },
-    "org.python.core": {
+    "org.python.core/2.7.0": {
       "org": "org.python.core",
       "revision": "2.7.0",
       "installed": false
     },
-    "org.saintandreas.jovr": {
+    "org.saintandreas.jovr/0.7": {
       "org": "org.saintandreas.jovr",
       "revision": "0.7",
       "installed": false
     },
-    "org.simpleframework.xml": {
+    "org.simpleframework.xml/2.7": {
       "org": "org.simpleframework.xml",
       "revision": "2.7",
       "installed": false
     },
-    "org.slf4j": {
-      "org": "org.slf4j",
-      "revision": "1.6.1",
-      "installed": false
-    },
-    "org.slf4j.logback": {
+    "org.slf4j.logback/1.1.3": {
       "org": "org.slf4j.logback",
       "revision": "1.1.3",
       "installed": false
     },
-    "org.tritonus.share.sampled.floatsamplebuffer": {
+    "org.slf4j/1.6.1": {
+      "org": "org.slf4j",
+      "revision": "1.6.1",
+      "installed": false
+    },
+    "org.tritonus.share.sampled.floatsamplebuffer/0.3.6": {
       "org": "org.tritonus.share.sampled.floatsamplebuffer",
       "revision": "0.3.6",
       "installed": false
     },
-    "org.twitter4j.twitter": {
+    "org.twitter4j.twitter/3.0.5": {
       "org": "org.twitter4j.twitter",
       "revision": "3.0.5",
       "installed": false
     },
-    "org.wikidata.wdtk": {
+    "org.wikidata.wdtk/0.5.0": {
       "org": "org.wikidata.wdtk",
       "revision": "0.5.0",
       "installed": false
     },
-    "ph.com.alexan.aceduino": {
+    "ph.com.alexan.aceduino/1.0": {
       "org": "ph.com.alexan.aceduino",
       "revision": "1.0",
       "installed": false
     },
-    "pl.sarxos.webcam": {
+    "pl.sarxos.webcam/0.3.10": {
       "org": "pl.sarxos.webcam",
       "revision": "0.3.10",
       "installed": false
     },
-    "se.comhem.chess": {
+    "se.comhem.chess/1.1.2": {
       "org": "se.comhem.chess",
       "revision": "1.1.2",
       "installed": false
     },
-    "simbad.gui": {
+    "simbad.gui/1.4": {
       "org": "simbad.gui",
       "revision": "1.4",
       "installed": false
     },
-    "wiiuse.wiimote": {
+    "wiiuse.wiimote/0.12b": {
       "org": "wiiuse.wiimote",
       "revision": "0.12b",
       "installed": false
