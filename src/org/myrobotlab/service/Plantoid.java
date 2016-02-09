@@ -567,7 +567,7 @@ public class Plantoid extends Service {
 		meta.addPeer("jFugue", "JFugue", "jfugue service");
 
 		meta.addPeer("webgui", "WebGui", "WebGui service");
-		meta.addPeer("xmpp", "XMPP", "xmpp service");
+		meta.addPeer("xmpp", "Xmpp", "Xmpp service");
 		meta.addPeer("leg1", "Servo", "leg1");
 		meta.addPeer("leg2", "Servo", "leg2");
 		meta.addPeer("leg3", "Servo", "leg3");

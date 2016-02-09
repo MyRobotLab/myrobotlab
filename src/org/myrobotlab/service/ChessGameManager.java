@@ -54,7 +54,7 @@ public class ChessGameManager extends Service {
 		meta.addCategory("game");	
 		meta.addPeer("webgui", "WebGui", "webgui");
 		meta.addPeer("serial", "Serial", "serial");
-		meta.addPeer("speech", "Speech", "speech");
+		meta.addPeer("speech", "AcapelaSpeech", "speech");
 		return meta;		
 	}
 

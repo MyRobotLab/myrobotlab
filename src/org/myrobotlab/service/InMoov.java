@@ -1419,7 +1419,7 @@ public class InMoov extends Service {
 		meta.addPeer("mouth", speechService, "InMoov speech service");
 		meta.addPeer("mouthControl", "MouthControl", "MouthControl");
 		meta.addPeer("opencv", "OpenCV", "InMoov OpenCV service");
-		meta.addPeer("openni", "OpenNI", "Kinect service");
+		meta.addPeer("openni", "OpenNi", "Kinect service");
 		meta.addPeer("pid", "PID2", "PID2 service");
 
 

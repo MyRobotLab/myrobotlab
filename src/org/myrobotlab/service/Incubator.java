@@ -515,7 +515,7 @@ public class Incubator extends Service {
 		meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
 		meta.addCategory("testing", "framework");
 		meta.addPeer("python", "Python", "shared python instance");
-		meta.addPeer("xmpp", "XMPP", "XMPP service");
+		meta.addPeer("xmpp", "Xmpp", "Xmpp service");
 
 		return meta;
 	}
