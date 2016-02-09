@@ -25,24 +25,36 @@ public class ServiceReservation {
 	
 	public boolean isRoot = false;
 
-	public ServiceReservation(String key, String simpleTypeName, String comment) {
+	public ServiceReservation(String key, String typeName, String comment) {
 		this.key = key;
 		this.actualName = key;
-		this.fullTypeName = simpleTypeName;
+		if (!typeName.contains(".")){
+			this.fullTypeName = String.format("org.myrobotlab.service.%s", typeName);
+		} else {
+			this.fullTypeName = typeName;
+		}
 		this.comment = comment;
 	}
 
-	public ServiceReservation(String key, String actualName, String simpleTypeName, String comment) {
+	public ServiceReservation(String key, String actualName, String typeName, String comment) {
 		this.key = key;
 		this.actualName = actualName;
-		this.fullTypeName = simpleTypeName;
+		if (!typeName.contains(".")){
+			this.fullTypeName = String.format("org.myrobotlab.service.%s", typeName);
+		} else {
+			this.fullTypeName = typeName;
+		}
 		this.comment = comment;
 	}
 
-	public ServiceReservation(String key, String actualName, String peerType, String comment, boolean isRoot) {
+	public ServiceReservation(String key, String actualName, String typeName, String comment, boolean isRoot) {
 		this.key = key;
 		this.actualName = actualName;
-		this.fullTypeName = peerType;
+		if (!typeName.contains(".")){
+			this.fullTypeName = String.format("org.myrobotlab.service.%s", typeName);
+		} else {
+			this.fullTypeName = typeName;
+		}
 		this.comment = comment;
 		this.isRoot = isRoot;
 	}

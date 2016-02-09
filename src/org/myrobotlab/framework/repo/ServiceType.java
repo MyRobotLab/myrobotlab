@@ -45,12 +45,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	}
 
 	public void addDependency(String org, String version) {
-		dependencies.add(String.format("%s-%s", org, version));
-		/*
-		for (int i = 0; i < orgs.length; ++i){
-			dependencies.add(orgs[i]);
-		}
-		*/
+		dependencies.add(String.format("%s/%s", org, version));		
 	}
 
 
