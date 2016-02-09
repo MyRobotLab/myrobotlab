@@ -4,9 +4,10 @@
 <input class="form-control" type="text" ng-model="clientSecret" placeholder="Client Secret">
   <button class="btn btn-default"  ng-click="msg.setCredentials(clientID,clientSectret)">Set credentials</button>
 </div>  
-   <div class="input-group">
+   <div class="col-lg-4">
         <textarea ng-model="text" class="form-control"  rows="4" cols="50"></textarea>     
-    </div>
+        </div>
+         <div class="col-lg-4">
      <span class="input-group-btn">
           from <select class="btn btn-default" id="from" ng-model="from" ng-change="msg.fromLanguage(from)" ng-options="o as o for o in service.languages">
           </select>
@@ -14,7 +15,8 @@
           </select>
           <button class="btn btn-default"  ng-click="msg.translate(text)">Translate</button>
      </span>
-        <div class="output-group">
+      </div>
+        <div class="col-lg-4">
         <textarea ng-model="translatedText" id="translatedText"  rows="4" cols="50" readonly>
 </textarea>	 
     </div>
