@@ -9,9 +9,9 @@
         </div>
          <div class="col-lg-4">
      <span class="input-group-btn">
-          from <select class="btn btn-default" id="from" ng-model="from" ng-change="msg.fromLanguage(from)" ng-options="o as o for o in service.languages">
+          <label>from</label> <select class="btn btn-default" id="from" ng-model="from" ng-change="msg.fromLanguage(from)" ng-options="o as o for o in service.languages">
           </select>
-           to <select class="btn btn-default" id="to" ng-model="to" ng-change="msg.toLanguage(to)" ng-options="o as o for o in service.languages">
+            <label>to</label> <select class="btn btn-default" id="to" ng-model="to" ng-change="msg.toLanguage(to)" ng-options="o as o for o in service.languages">
           </select>
           <button class="btn btn-default"  ng-click="msg.translate(text)">Translate</button>
      </span>
