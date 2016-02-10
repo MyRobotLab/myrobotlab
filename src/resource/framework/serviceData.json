@@ -372,8 +372,23 @@
       ],
       "peers": {}
     },
-    "org.myrobotlab.service.GPS": {
-      "name": "org.myrobotlab.service.GPS",
+    "org.myrobotlab.service.GUIService": {
+      "name": "org.myrobotlab.service.GUIService",
+      "description": "Service used to graphically display and control other services",
+      "available": true,
+      "dependencies": [
+        "org.fife.rsyntaxtextarea/2.0.4.1",
+        "org.fife.autocomplete/2.0.4",
+        "com.mxgraph.jgraph/1.6.1.2"
+      ],
+      "categories": [
+        "location",
+        "display"
+      ],
+      "peers": {}
+    },
+    "org.myrobotlab.service.Gps": {
+      "name": "org.myrobotlab.service.Gps",
       "description": "THe Global Positioning Sensor",
       "available": true,
       "dependencies": [],
@@ -390,21 +405,6 @@
           "isRoot": false
         }
       }
-    },
-    "org.myrobotlab.service.GUIService": {
-      "name": "org.myrobotlab.service.GUIService",
-      "description": "Service used to graphically display and control other services",
-      "available": true,
-      "dependencies": [
-        "org.fife.rsyntaxtextarea/2.0.4.1",
-        "org.fife.autocomplete/2.0.4",
-        "com.mxgraph.jgraph/1.6.1.2"
-      ],
-      "categories": [
-        "location",
-        "display"
-      ],
-      "peers": {}
     },
     "org.myrobotlab.service.HtmlFilter": {
       "name": "org.myrobotlab.service.HtmlFilter",
@@ -1217,7 +1217,6 @@
       "description": "OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV",
       "available": true,
       "dependencies": [
-        "org.bytedeco.javacpp/1.1",
         "org.bytedeco.javacv/1.1"
       ],
       "categories": [
@@ -2398,7 +2397,7 @@
     },
     "location": {
       "serviceTypes": [
-        "org.myrobotlab.service.GPS",
+        "org.myrobotlab.service.Gps",
         "org.myrobotlab.service.GUIService"
       ]
     },
@@ -2472,7 +2471,7 @@
     "sensor": {
       "serviceTypes": [
         "org.myrobotlab.service.Android",
-        "org.myrobotlab.service.GPS",
+        "org.myrobotlab.service.Gps",
         "org.myrobotlab.service.LeapMotion",
         "org.myrobotlab.service.Lidar",
         "org.myrobotlab.service.Mpu6050",

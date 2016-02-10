@@ -37,10 +37,10 @@ import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service._TemplateService;
 import org.slf4j.Logger;
 
-public class GPSGUI extends ServiceGUI implements ActionListener {
+public class GpsGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(GPSGUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(GpsGUI.class.getCanonicalName());
 	private JTextField latitudeTextField = new JTextField(10);
 	private JTextField longitudeTextField = new JTextField(10);
 	private JTextField altitudeTextField = new JTextField(10);
@@ -48,7 +48,7 @@ public class GPSGUI extends ServiceGUI implements ActionListener {
 	private JTextField speedTextField = new JTextField(10);
 	private JTextField headingTextField = new JTextField(10);
 
-	public GPSGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public GpsGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 

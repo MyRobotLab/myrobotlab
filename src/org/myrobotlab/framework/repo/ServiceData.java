@@ -104,6 +104,7 @@ public class ServiceData implements Serializable {
 						log.info("adding third party library {} {}", f.getName(), ver.getName());
 						sd.addThirdPartyLib(f.getName(), ver.getName());
 					} catch (Exception e) {
+						log.error("folder {} is hosed !", f.getName());
 						Logging.logError(e);
 					}
 
