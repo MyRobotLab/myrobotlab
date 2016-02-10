@@ -343,6 +343,11 @@ public class Servo extends Service implements ServoControl {
 			error(String.format("%s's controller is not set", getName()));
 			return;
 		}
+		
+		if (!isAttached){
+			warn("servo not attached");
+			return;
+		}
 
 		targetPos = pos;
 		targetOutput = mapper.calcInt(targetPos);

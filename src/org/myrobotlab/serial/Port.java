@@ -31,6 +31,8 @@ public abstract class Port implements Runnable, PortSource {
 	// transient CountDownLatch opened = null;
 	// transient CountDownLatch closed = null;
 
+	final transient Object lock = new Object();
+
 	static int pIndex = 0;
 
 	// thread related
@@ -104,24 +106,26 @@ public abstract class Port implements Runnable, PortSource {
 
 	public void listen(HashMap<String, SerialDataListener> listeners) {
 		// opened = new CountDownLatch(1);
-		this.listeners = listeners;
-		if (readingThread == null) {
-			++pIndex;
-			threadName = String.format("%s.portListener %s", portName, pIndex);
-			readingThread = new Thread(this, threadName);
-			readingThread.start();
-		} else {
-			log.info(String.format("%s already listening", portName));
-		}
-		/*
-		 * try { // we want to wait until our // reader has started and is //
-		 * blocking on a read before // we proceed opened.await();
-		 * Thread.sleep(100); } catch (InterruptedException e) { }
-		 */
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-		}
+		// try {
+			this.listeners = listeners;
+			if (readingThread == null) {
+				++pIndex;
+				threadName = String.format("%s.portListener %s", portName, pIndex);
+				readingThread = new Thread(this, threadName);
+				readingThread.start();
+				/* - this might be a good thing .. wait until the reading thread starts
+				 * - but i don't remember if JSSC works this way
+				synchronized (lock) {
+					lock.wait();
+				}
+				*/
+			} else {
+				log.info(String.format("%s already listening", portName));
+			}
+			// Thread.sleep(100); - added connect retry logic in Arduino
+			// taking out arbitrary sleeps
+		// } catch (InterruptedException e) {
+		// }
 	}
 
 	public void open() throws IOException {
@@ -137,6 +141,13 @@ public abstract class Port implements Runnable, PortSource {
 	 */
 	@Override
 	public void run() {
+		
+		/* - this might be a good thing .. wait until the reading thread starts
+		 * - but i don't remember if JSSC works this way
+		synchronized(lock){
+			lock.notifyAll();
+		}
+		*/
 
 		log.info(String.format("listening on port %s", portName));
 		listening = true;
@@ -150,13 +161,14 @@ public abstract class Port implements Runnable, PortSource {
 																// kill this
 				for (String key : listeners.keySet()) {
 					listeners.get(key).onByte(newByte);
+					//log.info(String.format("%d",newByte));
 				}
 				++stats.total;
 				if (stats.total % stats.interval == 0) {
 
 					stats.ts = System.currentTimeMillis();
 					stats.delta = stats.ts - stats.lastTS;
-					stats.lineSpeed = (8 * stats.interval) /stats.delta;
+					stats.lineSpeed = (8 * stats.interval) / stats.delta;
 					for (String key : listeners.keySet()) {
 						listeners.get(key).updateStats(stats);
 					}
