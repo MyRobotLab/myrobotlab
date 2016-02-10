@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -22,6 +23,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
+import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 
 /**
@@ -58,7 +60,6 @@ public class ArduinoTest {
 		log.info("setUpBeforeClass");
 
 		// Runtime.start("gui", "GUIService");
-		
 
 		arduino = (Arduino) Runtime.start("arduino", "Arduino");
 		serial = arduino.getSerial();
@@ -78,10 +79,8 @@ public class ArduinoTest {
 
 		arduino.setBoardMega();
 		arduino.connect(vport);
-		
-		//serial.removeListener("onByte", serviceName, inMethod);
-		
-		
+
+		// serial.removeListener("onByte", serviceName, inMethod);
 
 		Service.sleep(500);
 		// nice to be able to check messages
@@ -99,11 +98,11 @@ public class ArduinoTest {
 		catcher.clear();
 		catcher.isLocal = true;
 
-		uart.clear();
-		uart.setTimeout(100);
-
 		serial.clear();
 		serial.setTimeout(100);
+		
+		uart.clear();
+		uart.setTimeout(100);
 
 		/*
 		 * arduino.clearLastError(); arduino.hasError();
@@ -115,55 +114,44 @@ public class ArduinoTest {
 	}
 
 	@Test
-	public final void testReleaseService() {
-		// fail("Not yet implemented"); // TODO
+	public void testReleaseService() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStartService() {
-		// fail("Not yet implemented"); // TODO
+	public void testStartService() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStopService() {
-		// fail("Not yet implemented"); // TODO
+	public void testStopService() {
+		// fail("Not yet implemented");
+	}
+
+	/*
+	 * not a good test
+	 * 
+	 * @Test public void testArduino() { // fail("Not yet implemented"); }
+	 */
+
+	@Test
+	public void testAddCustomMsgListener() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testTest() {
-		// fail("Not yet implemented"); // TODO
+	public void testAnalogReadPollingStart() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testGetPeers() {
-		// fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public final void testArduino() {
-		// fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public final void testAddCustomMsgListener() {
-		// fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public final void testAnalogReadPollingStart() {
-		// fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public final void testAnalogReadPollingStop() {
-		// fail("Not yet implemented"); // TODO
+	public void testAnalogReadPollingStop() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public final void testAnalogWrite() throws InterruptedException, IOException {
-		log.info("testConnect - begin");
-
-		serial.clear();
+		log.info("testAnalogWrite");
 
 		arduino.analogWrite(10, 0);
 		String decoded = uart.decode();
@@ -202,6 +190,7 @@ public class ArduinoTest {
 	@Test
 	public final void testConnect() {
 		log.info("testConnect - begin");
+		arduino.disconnect();
 		arduino.connect(vport);
 		assertTrue(arduino.isConnected());
 		assertEquals(ArduinoMsgCodec.MRLCOMM_VERSION, arduino.getVersion().intValue());
@@ -209,22 +198,28 @@ public class ArduinoTest {
 	}
 
 	@Test
-	public final void testCreatePinList() {
-		// fail("Not yet implemented"); // TODO
+	public void testConnectVirtualUART() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testDigitalReadPollingStart() {
-		// fail("Not yet implemented"); // TODO
+	public void testCreatePinList() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testDigitalReadPollingStop() {
-		// fail("Not yet implemented"); // TODO
+	public void testDigitalReadPollingStart() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDigitalReadPollingStop() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public final void testDigitalWrite() {
+		log.info("testDigitalWrite");
 		arduino.digitalWrite(10, 1);
 		assertEquals("digitalWrite/10/1\n", uart.decode());
 		arduino.digitalWrite(10, 0);
@@ -235,6 +230,7 @@ public class ArduinoTest {
 
 	@Test
 	public final void testDisconnect() {
+		log.info("testDisconnect");
 		arduino.disconnect();
 		assertTrue(!arduino.isConnected());
 		arduino.digitalWrite(10, 1);
@@ -247,23 +243,23 @@ public class ArduinoTest {
 	}
 
 	@Test
-	public final void testGetBoardType() {
-		// arduino.setBoardMega();
-		// fail("Not yet implemented"); // TODO
+	public void testGetBoardType() {
+		// arduino.setBoardMega()
 	}
 
 	@Test
-	public final void testGetPinList() {
-		// fail("Not yet implemented"); // TODO
+	public void testGetPinList() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testGetSerial() {
-		assertNotNull(arduino.getSerial());
+	public void testGetSerial() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public final void testGetSketch() {
+		log.info("testGetSketch");
 		Sketch sketch = arduino.getSketch();
 		assertNotNull(sketch);
 		assertTrue(sketch.data.length() > 0);
@@ -275,163 +271,182 @@ public class ArduinoTest {
 
 	@Test
 	public final void testGetVersion() {
+		log.info("testGetVersion");
 		assertEquals(ArduinoMsgCodec.MRLCOMM_VERSION, arduino.getVersion().intValue());
 	}
 
 	@Test
-	public final void testIsConnected() {
-		// fail("Not yet implemented"); // TODO
+	public void testIsConnected() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testMotorAttachStringIntegerInteger() {
-		// fail("Not yet implemented"); // TODO
+	public void testMotorAttach() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testMotorAttachStringStringIntegerInteger() {
-		// fail("Not yet implemented"); // TODO
+	public void testAttach() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testMotorAttachStringStringIntegerIntegerInteger() {
-		// fail("Not yet implemented"); // TODO
+	public void testDetach() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testMotorDetach() {
-		// fail("Not yet implemented"); // TODO
+	public void testMotorDetach() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testMotorMove() {
-		// fail("Not yet implemented"); // TODO
+	public void testMotorMove() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testMotorMoveTo() {
-		// fail("Not yet implemented"); // TODO
+	public void testMotorMoveTo() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testOnByte() {
-		// fail("Not yet implemented"); // TODO
+	public void testMotorStop() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testOnCustomMsg() {
-		// fail("Not yet implemented"); // TODO
+	public void testOnByte() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testOnConnect() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testGetPortName() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testOnCustomMsg() {
+		// fail("Not yet implemented");
+	}
+
+	@Test
+	public void testOnDisconnect() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public final void testPinModeIntString() {
+		log.info("testPinModeIntString");
 		arduino.pinMode(8, "OUTPUT");
 		assertEquals("pinMode/8/1\n", uart.decode());
 	}
 
 	@Test
 	public final void testPinModeIntegerInteger() {
+		log.info("testPinModeIntegerInteger");
 		arduino.pinMode(8, Arduino.OUTPUT);
 		assertEquals("pinMode/8/1\n", uart.decode());
 	}
 
 	@Test
-	public final void testPublishCustomMsg() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishCustomMsg() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPublishLoadTimingEvent() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishLoadTimingEvent() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPublishMRLCommError() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishMRLCommError() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPublishPin() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishPin() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPublishPulse() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishServoEvent() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPublishServoEvent() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishTrigger() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPublishSesorData() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishVersion() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPublishStepperEvent() {
-		// fail("Not yet implemented"); // TODO
+	public void testPulseInt() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPublishTrigger() {
-		// fail("Not yet implemented"); // TODO
+	public void testPulseIntInt() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPublishVersion() {
-		// fail("Not yet implemented"); // TODO
+	public void testPulseIntIntInt() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPulseInIntInt() {
-		// fail("Not yet implemented"); // TODO
+	public void testPulseIntIntIntInt() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPulseInIntIntIntInt() {
-		// fail("Not yet implemented"); // TODO
+	public void testPulseStop() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPulseInIntIntIntString() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishPulse() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testPulseInIntIntInteger() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishPulseStop() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSendMsg() {
-		// fail("Not yet implemented"); // TODO
+	public void testSendMsg() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSensorAttachString() {
-		// fail("Not yet implemented"); // TODO
+	public void testSensorAttach() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSensorAttachUltrasonicSensor() {
-		// fail("Not yet implemented"); // TODO
+	public void testSensorPollingStart() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSensorPollingStart() {
-		// fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public final void testSensorPollingStop() {
-		// fail("Not yet implemented"); // TODO
+	public void testSensorPollingStop() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
 	public final void testServoAttachServoInteger() {
+		log.info("testServoAttachServoInteger");
 		Servo servo = (Servo) Runtime.start("servo", "Servo");
 
 		// NOT THE WAY TO ATTACH SERVOS !!
@@ -489,199 +504,196 @@ public class ArduinoTest {
 	}
 
 	@Test
-	public final void testServoAttachStringInteger() {
-		// fail("Not yet implemented"); // TODO
+	public void testServoAttachServo() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testServoDetachServo() {
-		// fail("Not yet implemented"); // TODO
+	public void testServoDetach() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testServoDetachString() {
-		// fail("Not yet implemented"); // TODO
+	public void testServoSweepStart() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testServoSweepStart() {
-		// fail("Not yet implemented"); // TODO
+	public void testServoSweepStop() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testServoSweepStop() {
-		// fail("Not yet implemented"); // TODO
+	public void testServoWrite() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testServoWrite() {
-		// fail("Not yet implemented"); // TODO
+	public void testServoWriteMicroseconds() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testServoWriteMicroseconds() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetBoard() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetBoard() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetBoardMega() {
+		log.info("testSetBoardMega");
+		String boardType = arduino.getBoardType();
+
+		arduino.setBoardMega();
+
+		assertEquals(Arduino.BOARD_TYPE_MEGA, arduino.getBoardType());
+
+		List<Pin> pins = arduino.getPinList();
+		assertEquals(70, pins.size());
+
+		arduino.setBoard(boardType);
 	}
 
 	@Test
-	public final void testSetDebounce() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetBoardUno() {
+		log.info("testSetBoardUno");
+		String boardType = arduino.getBoardType();
+
+		arduino.setBoardUno();
+
+		assertEquals(Arduino.BOARD_TYPE_UNO, arduino.getBoardType());
+
+		List<Pin> pins = arduino.getPinList();
+		assertEquals(20, pins.size());
+
+		arduino.setBoard(boardType);
 	}
 
 	@Test
-	public final void testSetDigitalTriggerOnly() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetDebounce() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetLoadTimingEnabled() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetDigitalTriggerOnly() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetPWMFrequency() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetLoadTimingEnabled() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetSampleRate() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetPWMFrequency() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetSerialRate() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetSampleRate() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetServoEventsEnabled() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetSerialRate() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetServoSpeed() {
-		// fail("Not yet implemented"); // TODO
+	public void testServoEventsEnabled() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetSketch() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetServoSpeed() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetStepperSpeed() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetSketch() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetTriggerIntInt() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetTriggerIntInt() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSetTriggerIntIntInt() {
-		// fail("Not yet implemented"); // TODO
+	public void testSetTriggerIntIntInt() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testSoftReset() {
-		// fail("Not yet implemented"); // TODO
+	public void testSoftReset() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStepperAttachStepperControl() {
-		// fail("Not yet implemented"); // TODO
+	public void testPublishSensorData() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStepperAttachString() {
-		// fail("Not yet implemented"); // TODO
+	public void testMotorReset() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStepperDetach() {
-		// fail("Not yet implemented"); // TODO
+	public void testMain() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStepperMove() {
-		// fail("Not yet implemented"); // TODO
+	public void testUpdate() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStepperReset() {
-		// fail("Not yet implemented"); // TODO
+	public void testGetDataSinkType() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStepperStepStringInteger() {
-		// fail("Not yet implemented"); // TODO
+	public void testGetSensorType() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStepperStepStringIntegerInteger() {
-		// fail("Not yet implemented"); // TODO
+	public void testGetSensorConfig() {
+		// fail("Not yet implemented");
 	}
 
 	@Test
-	public final void testStepperStop() {
-		// fail("Not yet implemented"); // TODO
+	public void testGetMetaData() {
+		// fail("Not yet implemented");
 	}
 
-	@Test
-	public final void testConnectVirtualUART() {
-		// fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public final void testOnConnect() {
-		// fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public final void testOnDisconnect() {
-		// fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public final void testMain() {
-		// fail("Not yet implemented"); // TODO
-	}
-
-	
 	public static void main(String[] args) {
 		try {
 
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.DEBUG);
-			
+
 			JUnitCore junit = new JUnitCore();
 			Result result = junit.run(ArduinoTest.class);
-			
+
 			ArduinoTest.setUpBeforeClass();
 			ArduinoTest test = new ArduinoTest();
-			
-			WebGui gui = (WebGui)Runtime.start("webgui", "WebGui");
-			//ServiceInterface gui = Runtime.start("gui", "GUIService");
-			
+
+			WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
+			// ServiceInterface gui = Runtime.start("gui", "GUIService");
+
 			Runtime.dumpToFile();
-			
+
 			log.info("here");
 			serial.removeByteListener(gui.getName());
 			uart.removeByteListener(gui.getName());
-			
+
 			Runtime.dumpToFile();
-			
-			
+
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
 	}
-	
 
 }

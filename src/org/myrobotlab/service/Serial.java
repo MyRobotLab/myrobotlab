@@ -433,7 +433,7 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		// give us a second before we advertise the port
 		// is open - often the hardware or JNI buffers
 		// are not ready even though we have "opened" it
-		sleep(1000);
+		// sleep(1000);
 
 		// invoking remote & local onConnect
 		invoke("publishConnect", port.getName());

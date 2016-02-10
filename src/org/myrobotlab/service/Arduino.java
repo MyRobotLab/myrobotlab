@@ -1,37 +1,27 @@
 package org.myrobotlab.service;
 
-// FIXME - need to add this to the generator !
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
-
-
-/////// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
-///// java static import definition - DO NOT MODIFY - Begin //////
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.ANALOG_WRITE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_START;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_READ_POLLING_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.DIGITAL_WRITE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_ATTACH;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_DETACH;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_MOVE_TO;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_RESET;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MOTOR_STOP;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.GET_VERSION;
+// FIXME - need to add this to the generator !
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAGIC_NUMBER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MAX_MSG_SIZE;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.MRLCOMM_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PIN_MODE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_CUSTOM_MSG;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_LOAD_TIMING_EVENT;
+/////// JAVA GENERATED DEFINITION BEGIN - DO NOT MODIFY //////
+///// java static import definition - DO NOT MODIFY - Begin //////
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_MRLCOMM_ERROR;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PIN;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SENSOR_DATA;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_SERVO_EVENT;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_TRIGGER;
+import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PUBLISH_VERSION;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.PULSE_STOP;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SENSOR_ATTACH;
@@ -52,7 +42,6 @@ import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SAMPLE_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERIAL_RATE;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_SERVO_SPEED;
 import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SET_TRIGGER;
-import static org.myrobotlab.codec.serial.ArduinoMsgCodec.SOFT_RESET;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -65,7 +54,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.framework.MRLException;
-import org.myrobotlab.framework.Peers;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
@@ -224,19 +212,20 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	/**
 	 * FIXME ! - these processor types ! - something we are not interested in
-	 * and do not have to deal with - we are far more interested in NUM_DIGITAL_PINS
-	 * and "board pin layouts" - 
+	 * and do not have to deal with - we are far more interested in
+	 * NUM_DIGITAL_PINS and "board pin layouts" -
 	 * 
-	 * As far as I can tell board types are in variants
-	 * 1.0.5 Arduino IDE includes 
+	 * As far as I can tell board types are in variants 1.0.5 Arduino IDE
+	 * includes
 	 * 
 	 * This is the best reference I have found regarding actual pin capabilities
-	 * https://learn.sparkfun.com/tutorials/arduino-comparison-guide#totally-tabular 
-	 * Uno & Duemilanove have 14 digital pins (6 PWM) & 6 analog - total 20
-	 * Mini & Pro have 14 digital pins (8 PWM) & 6 analog - total 20
+	 * https://learn.sparkfun.com/tutorials/arduino-comparison-guide#totally-
+	 * tabular Uno & Duemilanove have 14 digital pins (6 PWM) & 6 analog - total
+	 * 20 Mini & Pro have 14 digital pins (8 PWM) & 6 analog - total 20
 	 * 
-	 * ATmega328 Boards 32kB Program Space // 1 UART // 6 PWM // 4-8 Analog Inputs // 9-14 Digital I/O
-	 * ATmega2560 Arduino Mega's 256kB Program Space // 4 UARTs // 14 PWM // 16 Analog Inputs // 54 Digital I/O - 
+	 * ATmega328 Boards 32kB Program Space // 1 UART // 6 PWM // 4-8 Analog
+	 * Inputs // 9-14 Digital I/O ATmega2560 Arduino Mega's 256kB Program Space
+	 * // 4 UARTs // 14 PWM // 16 Analog Inputs // 54 Digital I/O -
 	 * 
 	 * So at the moment .. there is only Uno & Mega !!!
 	 * 
@@ -341,6 +330,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 	int[] msg = new int[MAX_MSG_SIZE];
 
+	private int retryConnectMax = 3;
 
 	// ---------------------------- ServoController End -----------------------
 	// ---------------------- Protocol Methods Begin ------------------
@@ -366,12 +356,12 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 */
 	public void analogReadPollingStart(Integer pin) {
 		// check pin type - if not analog then change PIN_MODE
-		// sendMsg(PIN_MODE, pin, INPUT);  DUH - not needed !
+		// sendMsg(PIN_MODE, pin, INPUT); DUH - not needed !
 		// sendMsg(ANALOG_READ_POLLING_START, pin);
 		// sendMsg(SENSOR_ATTACH, pin, );
 		// sensorAttachPin = pin;
 		// sensorAttach(this);
-		
+
 		sendMsg(ANALOG_READ_POLLING_START, pin);
 	}
 
@@ -403,9 +393,19 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		// FIXME ! <<<-- REMOVE ,this) - patterns should be to add listener on
 		// startService
 		// return connect(port, 57600, 8, 1, 0); <- put this back ?
-		return serial.connect(port); // <<<-- REMOVE ,this) - patterns
-										// should be to add listener on
-										// startService
+		// return serial.connect(port); // <<<-- REMOVE ,this) - patterns
+		// should be to add listener on
+		// startService
+		boolean ret = serial.connect(port);
+
+		Integer version = getVersion();
+
+		if (version == null || version != MRLCOMM_VERSION) {
+			error("MRLComm expected version %d actual is %d", MRLCOMM_VERSION, version);
+			return false;
+		}
+
+		return true;
 	}
 
 	// TODO - should be override .. ??
@@ -484,7 +484,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		return board;
 	}
 
-
 	@Override
 	public ArrayList<Pin> getPinList() {
 		return pinList;
@@ -515,11 +514,15 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	 */
 	public Integer getVersion() {
 		log.info("getVersion");
+		int retry = 0;
 
 		try {
-			versionQueue.clear();
-			sendMsg(GET_VERSION);
-			mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
+			while (retry < retryConnectMax && mrlCommVersion == null) {
+				versionQueue.clear();
+				sendMsg(GET_VERSION);
+				mrlCommVersion = versionQueue.poll(1000, TimeUnit.MILLISECONDS);
+				++retry;
+			}
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -789,8 +792,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					break;
 				}
 
-				// DEPRECATED - handled by PUBLISH_SENSOR_DATA
-				case PUBLISH_PIN: {					
+					// DEPRECATED - handled by PUBLISH_SENSOR_DATA
+				case PUBLISH_PIN: {
 					Pin pin = pinList.get(msg[1]);
 					pin.value = ((msg[2] & 0xFF) << 8) + (msg[3] & 0xFF);
 					// TODO ? local callback - no thread single invoke -
@@ -840,7 +843,8 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 					// asynchronous callbacks of sensors
 					switch (clazz) {
 					case DATA_SINK_TYPE_INTEGER: {
-						data = Serial.bytesToInt(msg, 3, 2); // 16 bit - 2 byte int
+						data = Serial.bytesToInt(msg, 3, 2); // 16 bit - 2 byte
+																// int
 					}
 						break;
 					case DATA_SINK_TYPE_PIN: {
@@ -851,26 +855,26 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 						break;
 					default: {
 						error("unknown return type %d", clazz);
-					}	
-					break;
 					}
-					
+						break;
+					}
+
 					sensor.update(data);
 					break;
 				} // PUBLISH_SENSOR_DATA
 
-				// could be deprecated
-				/*
-				 * case PUBLISH_PULSE: { int index = (int) msg[1]; // FIXME -
-				 * assumption its a encoder pin on a Motor NO !!! Motor motor =
-				 * encoderPins.get(index);
-				 * 
-				 * Long data = Serial.bytesToLong(msg, 2, 4);
-				 * 
-				 * sensor.update(data); break; }
-				 */
+					// could be deprecated
+					/*
+					 * case PUBLISH_PULSE: { int index = (int) msg[1]; // FIXME
+					 * - assumption its a encoder pin on a Motor NO !!! Motor
+					 * motor = encoderPins.get(index);
+					 * 
+					 * Long data = Serial.bytesToLong(msg, 2, 4);
+					 * 
+					 * sensor.update(data); break; }
+					 */
 
-				// OOB
+					// OOB
 				case PUBLISH_PULSE_STOP: {
 					int index = (int) msg[1];
 					// FIXME - assumption its a encoder pin on a Motor NO !!!
@@ -1133,7 +1137,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	public synchronized boolean sensorAttach(SensorDataSink sensor) {
 		String sensorName = sensor.getName();
 		log.info(String.format("%s/sensorAttach/%s", getName(), sensorName));
-		
+
 		// simple count = index mapping
 		int sensorIndex = sensors.size();
 
@@ -1158,14 +1162,16 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 		for (int i = 0; i < config.length; ++i) {
 			payload[i + 3] = config[i];
 		}
-		
+
 		// SENSOR_ATTACH Format
 		// SENSOR_ATTACH | sensorIndex | sensorType | pinCount | pins ...
 
 		log.info(String.format("sensor index %d type %d config %s", payload[0], payload[1], Arrays.toString(config)));
-		
-		// FIXME - interface should have - requiresConnection to attach vs if (sensorIndex == 0)
-		if (getName().equals(sensorName) /* || !sensor.requiresConnectionToAttach() */){
+
+		// FIXME - interface should have - requiresConnection to attach vs if
+		// (sensorIndex == 0)
+		if (getName().equals(
+				sensorName) /* || !sensor.requiresConnectionToAttach() */) {
 			log.info("{} attach self as SensorSink with sensorIndex {}", getName(), sensorIndex);
 		} else {
 			sendMsg(SENSOR_ATTACH, payload);
@@ -1569,7 +1575,6 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
-		
 
 			// Runtime.start("servo", "Servo");
 			// Runtime.start("clock", "Clock");
@@ -1577,7 +1582,7 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 			arduino.setBoardUno();
 			arduino.connect("COM18");
-			//Runtime.start("webgui", "WebGui");
+			// Runtime.start("webgui", "WebGui");
 			Runtime.start("gui", "GUIService");
 
 			arduino.analogReadPollingStart(14);
@@ -1683,25 +1688,24 @@ public class Arduino extends Service implements SensorDataPublisher, SerialDataL
 	@Override
 	public int[] getSensorConfig() {
 		// is a Pin sensor
-		return new int[]{};
+		return new int[] {};
 	}
-	
-	
+
 	/**
-	 * This static method returns all the details of the class without
-	 * it having to be constructed.  It has description, categories,
-	 * dependencies, and peer definitions.
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
 	 * 
 	 * @return ServiceType - returns all the data
 	 * 
 	 */
-	static public ServiceType getMetaData(){
-		
+	static public ServiceType getMetaData() {
+
 		ServiceType meta = new ServiceType(Arduino.class.getCanonicalName());
 		meta.addDescription("This service interfaces with an Arduino micro-controller");
-		meta.addCategory("microcontroller");		
+		meta.addCategory("microcontroller");
 		meta.addPeer("serial", "Serial", "serial device for this Arduino");
-		return meta;		
+		return meta;
 	}
 
 }
