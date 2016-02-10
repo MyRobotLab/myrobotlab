@@ -753,7 +753,8 @@ public class OpenCV extends VideoSource {
 		org.apache.log4j.BasicConfigurator.configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		
-		OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+		OpenCV opencv = (OpenCV) Runtime.start("left", "OpenCV");
+		Runtime.start("right", "OpenCV");
 		//VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
 		//vs.attach(opencv);
 		//opencv.capture();

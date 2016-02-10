@@ -56,10 +56,12 @@ public class Dependency implements Serializable, Comparator<Dependency> {
 		return installed;
 	}
 
+	
 	public void setResolved(boolean b) {
 		installed = b;
 	}
-
+	
+	
 	public void setRevision(String revision2) {
 		revision = revision2;
 	}

@@ -34,6 +34,9 @@ public class ServiceData implements Serializable {
 
 	TreeMap<String, Category> categoryTypes = new TreeMap<String, Category>();
 
+	// THIS DOES NOT NEED TO BE FILLED DURING BUILD TIME !
+	// IT IS USED TO KEEP TRACK ON A RUNNING INSTANCE - WHICH DEPENDENCIES HAVE BEEN INSTALLED !
+	// THEORETICALLY WE COULD USE IVY'S INFO - WHICH WOULD BE 'MORE' NORMALIZED !!!
 	TreeMap<String, Dependency> dependencyTypes = new TreeMap<String, Dependency>();
 
 	static public ServiceData generate() throws IOException {
@@ -208,10 +211,13 @@ public class ServiceData implements Serializable {
 		dependencyTypes.put(String.format("%s/%s", org, version), dep);
 	}
 
+/*	
 	boolean containsDependency(String org) {
 		return dependencyTypes.containsKey(org);
 	}
 
+*/	
+	
 	public boolean containsServiceType(String fullServiceName) {
 		return serviceTypes.containsKey(fullServiceName);
 	}
@@ -246,14 +252,40 @@ public class ServiceData implements Serializable {
 		}
 		return cat;
 	}
-
-	public Dependency getDependency(String org) {
-		if (dependencyTypes.containsKey(org)) {
-			return dependencyTypes.get(org);
+	
+	
+	public Dependency getDependencyFromKey(String orgVersion){
+		String[] split = orgVersion.split("/");
+		if (split.length != 2){
+			log.error("{} not valid dependency key !!!", orgVersion);
+			return null;
 		}
+		
+		return getDependency(split[0], split[1]);
+	}
+
+
+	public Dependency getDependency(String org, String version) {
+		String key = String.format("%s/%s", org, version);
+		if (dependencyTypes.containsKey(key)) {
+			return dependencyTypes.get(key);
+		} 
 
 		return null;
 	}
+	
+	
+	/** 
+	 * a new dependency was resolved - so we are to mark it if it already exists
+	 * or create a new dependency and mark it as resolved
+	 * @param org
+	 * @param version
+	 */
+	/*
+	public void updateDependencyAsInstalled(String org, String version){
+		
+	}
+	*/
 
 	public String[] getInvalidDependencies() {
 		HashSet<String> unique = new HashSet<String>();
@@ -289,27 +321,18 @@ public class ServiceData implements Serializable {
 		return null;
 	}
 
-	public String[] getServiceTypeDependencies() {
-		HashSet<String> unique = new HashSet<String>();
+	public HashSet<String> getServiceTypeDependencyKeys() {
+		HashSet<String> uniqueKeys = new HashSet<String>();
 		for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
 			ServiceType st = o.getValue();
 			if (st.dependencies != null) {
 				for (String org : st.dependencies) {
-					unique.add(org);
+					uniqueKeys.add(org);
 				}
 			}
 		}
 
-		String[] ret = new String[unique.size()];
-		int x = 0;
-
-		for (String s : unique) {
-			ret[x] = s;
-			++x;
-		}
-
-		Arrays.sort(ret);
-		return ret;
+		return uniqueKeys;
 	}
 
 	public String[] getServiceTypeNames(String filter) {
@@ -337,6 +360,15 @@ public class ServiceData implements Serializable {
 		return ret;
 	}
 
+	/**
+	 * nice check for the repo - but can only be done during 
+	 * 'build-time'
+	 * 
+	 * not valid during runtime - as myrobotlab.jar does not have
+	 * direct access to the repo
+	 * 
+	 * @return
+	 */
 	public String[] getUnusedDependencies() {
 		HashSet<String> unique = new HashSet<String>();
 		for (Map.Entry<String, Dependency> o : dependencyTypes.entrySet()) {
@@ -373,10 +405,12 @@ public class ServiceData implements Serializable {
 		}
 
 		for (String org : d.dependencies) {
+//			gap
 			if (!dependencyTypes.containsKey(org)) {
 				log.error(String.format("%s has dependency of %s, but it is does not have a defined version", fullServiceName, org));
 				return true;
 			} else {
+//				gap
 				Dependency dep = dependencyTypes.get(org);
 				if (!dep.isResolved()) {
 					log.debug(String.format("%s had a dependency of %s, but it is currently not resolved", fullServiceName, org));
@@ -449,12 +483,7 @@ public class ServiceData implements Serializable {
 
 		for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
 			ServiceType st = o.getValue();
-			/*
-			 * this is now impossible :) if
-			 * (!categorizedServiceTypes.contains(st.getName())) {
-			 * log.warn(String.format("uncategorized service %s",
-			 * st.getName())); }
-			 */
+			
 			TreeMap<String, ServiceReservation> peers = st.getPeers();
 			for (ServiceReservation reservation : peers.values()) {
 				if (!serviceTypes.containsKey(reservation.fullTypeName)) {
@@ -472,6 +501,7 @@ public class ServiceData implements Serializable {
 	}
 
 	public boolean isValid(String org) {
+//		gap
 		return dependencyTypes.containsKey(org);
 	}
 
@@ -590,6 +620,18 @@ public class ServiceData implements Serializable {
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
+	}
+
+	public void setResolved(String org, String version) {
+		String key = String.format("%s/%s", org, version);
+		Dependency dep = null;
+		if (dependencyTypes.containsKey(key)){
+			dep = dependencyTypes.get(key);
+		} else {
+			dep = new Dependency(org, version);
+		}
+		
+		dep.setResolved(true);
 	}
 
 }

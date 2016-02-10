@@ -180,7 +180,7 @@ public class Repo implements Serializable {
 		// FIXME - sync serviceData with ivy cache & library
 
 		// get local instance
-		Repo repo = new Repo();
+		Repo repo = new Repo();	
 
 		String[] versions = { "1.0.100", "1.0.101", "1.0.102", "1.0.104", "1.0.105", "1.0.106", "1.0.107", "1.0.92", "1.0.93", "1.0.94", "1.0.95", "1.0.96", "1.0.97", "1.0.98",
 				"1.0.99" };
@@ -406,18 +406,15 @@ public class Repo implements Serializable {
 		// these are immediate dependencies - not Peer
 		if (sd.containsServiceType(fullServiceName)) {
 			ServiceType st = sd.getServiceType(fullServiceName);
-			Set<String> orgs = st.getDependencies();
-			//if (orgs != null) {
-				// Dependency[] deps = new Dependency[orgs.size()];
-			for (String org : orgs){
-				//for (int i = 0; i < orgs.size(); ++i) {
-					Dependency d = sd.getDependency(org);
+			Set<String> keys = st.getDependencies();
+
+			for (String key : keys){
+					Dependency d = sd.getDependencyFromKey(key);
 					if (d != null) {
 						deps.add(d);
 					} else {
-						error("NO DEPENDENCY DEFINED FOR %s - %s", fullServiceName, org);
+						error("NO DEPENDENCY DEFINED FOR %s - %s", fullServiceName, key);
 					}
-				// }
 			}
 
 			// get all the dependencies of my peers
@@ -710,15 +707,15 @@ public class Repo implements Serializable {
 	 * "gnu.io.rxtx" "rxtx" "2.1-7r2" -confs "runtime,x86.64.windows"
 	 * 
 	 * @param org
-	 * @param revision
+	 * @param version
 	 * @return
 	 * @throws IOException
 	 * @throws ParseException
 	 * @throws Exception
 	 */
 	// FIXME - should have a better return than just Files
-	synchronized public ResolveReport resolveArtifacts(String org, String revision, boolean retrieve) throws ParseException, IOException {
-		info("%s %s.%s", (retrieve) ? "retrieve" : "resolve", org, revision);
+	synchronized public ResolveReport resolveArtifacts(String org, String version, boolean retrieve) throws ParseException, IOException {
+		info("%s %s.%s", (retrieve) ? "retrieve" : "resolve", org, version);
 		// creates clear ivy settings
 		// IvySettings ivySettings = new IvySettings();
 		String module;
@@ -783,7 +780,7 @@ public class Repo implements Serializable {
 		log.info(String.format("requesting %s", platformConf));
 
 		String[] confs = new String[] { platformConf };
-		String[] dep = new String[] { org, module, revision };
+		String[] dep = new String[] { org, module, version };
 
 		File ivyfile = File.createTempFile("ivy", ".xml");
 		ivyfile.deleteOnExit();
@@ -809,7 +806,7 @@ public class Repo implements Serializable {
 				errors.add(errStr);
 			}
 		} else {
-			info("%s %s.%s for %s", (retrieve) ? "retrieved" : "installed", org, revision, platform.getPlatformId());
+			info("%s %s.%s for %s", (retrieve) ? "retrieved" : "installed", org, version, platform.getPlatformId());
 		}
 		// TODO - no error
 		if (retrieve && err.size() == 0) {
@@ -823,19 +820,25 @@ public class Repo implements Serializable {
 					.setUseOrigin(false).setDestIvyPattern(ivyPattern).setArtifactFilter(NO_FILTER).setMakeSymlinks(false).setMakeSymlinksInMass(false));
 
 			log.info("retrieve returned {}", ret);
+			
+			localServiceData.setResolved(org, version);
 
-			Dependency dependency = localServiceData.getDependency(org);
+			/*  YAY garbage code !
+			Dependency dependency = localServiceData.getDependency(org, version);
 			if (dependency == null) {
-				error("successfully resolved dependency - but it is not defined in local serviceData.json");
+				// error("successfully resolved dependency - but it is not defined in local serviceData.json");
 				return report;
 			}
-
-			if (!dependency.getRevision().equals(revision)) {
-				error(String.format("forcing revision of %s with revision %s for dependency %s", revision, dependency.getRevision(), org));
-				dependency.setRevision(revision);
+			*/
+			
+			/*
+			if (!dependency.getRevision().equals(version)) {
+				error(String.format("forcing revision of %s with revision %s for dependency %s", version, dependency.getRevision(), org));
+				dependency.setRevision(version);
 			}
+			*/
 
-			dependency.setResolved(true);
+			// dependency.setResolved(true);
 			localServiceData.save();
 
 			// TODO - retrieve should mean unzip from local cache -> to root of
@@ -862,14 +865,19 @@ public class Repo implements Serializable {
 		return report;
 	}
 
+	// FIXME FIXME - retrieveAll is an Ivy method - rename - should just be install(fullServiceType)
+	// FIXME - REFACTOR - the retrieveAll needs to be all Service's dependencies not all dependencies of the repo !!!
 	public ArrayList<ResolveReport> retrieveAll() {
 		ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();
-		String[] orgs = localServiceData.getServiceTypeDependencies();
-		for (int i = 0; i < orgs.length; ++i) {
-			String org = orgs[i];
-			Dependency dep = localServiceData.getDependency(org);
+		HashSet<String> depKeys = localServiceData.getServiceTypeDependencyKeys();//lkljkl
+		for (String key : depKeys) {
+			//Dependency dep = localServiceData.getDependency(key);
 			try {
-				ResolveReport report = retrieveArtifacts(dep.getOrg(), dep.getRevision());
+				String[] parts = key.split("/");
+				if (parts.length != 2){
+					log.error("{} not valid dependency key", key);
+				}
+				ResolveReport report = retrieveArtifacts(parts[0], parts[1]);
 				reports.add(report);
 			} catch (Exception e) {
 				Logging.logError(e);
