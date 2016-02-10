@@ -35,7 +35,7 @@ import org.slf4j.Logger;
  * So if your robot is sending you it's current GPS coordinates, you can see if has wandered into our out of a fenced area.
  *
  */
-public class GPS extends Service implements SerialDataListener {
+public class Gps extends Service implements SerialDataListener {
 
 	/***********************************************************************************
 	 * This block of methods will be used to GeoFencing This code is based on
@@ -79,7 +79,7 @@ public class GPS extends Service implements SerialDataListener {
 	}
 
 	// publish gps data begin ---
-	public static class GPSData {
+	public static class GpsData {
 		public String type; // msg type
 		public Double latitude;
 		public Double longitude;
@@ -147,7 +147,7 @@ public class GPS extends Service implements SerialDataListener {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(GPS.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(Gps.class.getCanonicalName());
 
 	public static final String MODEL = "FV_M8";
 
@@ -168,7 +168,7 @@ public class GPS extends Service implements SerialDataListener {
 
 		try {
 
-			GPS template = new GPS("gps1");
+			Gps template = new Gps("gps1");
 			template.startService();
 
 			Python python = new Python("python");
@@ -184,7 +184,7 @@ public class GPS extends Service implements SerialDataListener {
 		}
 	}
 
-	public GPS(String n) {
+	public Gps(String n) {
 		super(n);
 	}
 
@@ -407,7 +407,7 @@ public class GPS extends Service implements SerialDataListener {
 		return lon > minLon && lon <= maxLon;
 	}
 
-	public void onGPS(GPSData gps) {
+	public void onGPS(GpsData gps) {
 		log.info(String.format("lat: %f", gps.latitude));
 		log.info(String.format("long: %f", gps.longitude));
 	}
@@ -424,7 +424,7 @@ public class GPS extends Service implements SerialDataListener {
 	 */
 	public String[] publishGGAData() {
 
-		GPSData gps = new GPSData();
+		GpsData gps = new GpsData();
 
 		log.info("publishGGAData has been called");
 		log.info("Full data String = " + messageString);
@@ -492,7 +492,7 @@ public class GPS extends Service implements SerialDataListener {
 
 	public String[] publishGLLData() {
 
-		GPSData gps = new GPSData();
+		GpsData gps = new GpsData();
 
 		log.info("publishGLLData has been called");
 		log.info("Full data String = " + messageString);
@@ -537,7 +537,7 @@ public class GPS extends Service implements SerialDataListener {
 						// has subscribed to it
 	}// end dataToString
 
-	public final GPSData publishGPS(final GPSData gps) {
+	public final GpsData publishGPS(final GpsData gps) {
 		return gps;
 	}
 
@@ -550,7 +550,7 @@ public class GPS extends Service implements SerialDataListener {
 
 	public String[] publishGSAData() {
 
-		GPSData gps = new GPSData();
+		GpsData gps = new GpsData();
 
 		log.info("publishGSAData has been called");
 		log.info("Full data String = " + messageString);
@@ -581,7 +581,7 @@ public class GPS extends Service implements SerialDataListener {
 
 	public String[] publishGSVData() {
 
-		GPSData gps = new GPSData();
+		GpsData gps = new GpsData();
 
 		log.info("publishGSVData has been called");
 		log.info("Full data String = " + messageString);
@@ -642,7 +642,7 @@ public class GPS extends Service implements SerialDataListener {
 
 	public String[] publishRMCData() {
 
-		GPSData gps = new GPSData();
+		GpsData gps = new GpsData();
 
 		log.info("publishRMCData has been called");
 		log.info("Full data String = " + messageString);
@@ -702,7 +702,7 @@ public class GPS extends Service implements SerialDataListener {
 
 	public String[] publishVTGData() {
 
-		GPSData gps = new GPSData();
+		GpsData gps = new GpsData();
 
 		log.info("publishVTGData has been called");
 		log.info("Full data String = " + messageString);
@@ -740,7 +740,7 @@ public class GPS extends Service implements SerialDataListener {
 
 	public String[] publishZDAData() {
 
-		GPSData gps = new GPSData();
+		GpsData gps = new GpsData();
 
 		log.info("publishZDAData has been called");
 		log.info("Full data String = " + messageString);
@@ -874,7 +874,7 @@ public class GPS extends Service implements SerialDataListener {
 	 */
 	static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(GPS.class.getCanonicalName());
+		ServiceType meta = new ServiceType(Gps.class.getCanonicalName());
 		meta.addDescription("THe Global Positioning Sensor");
 		meta.addCategory("location");
 		meta.addCategory("sensor");
