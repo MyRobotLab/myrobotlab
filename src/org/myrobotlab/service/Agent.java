@@ -741,6 +741,9 @@ public class Agent extends Service {
 		} else if (platform.isWindows()) {
 			String path = String.format("PATH=%%CD%%\\libraries\\native;PATH=%%CD%%\\libraries\\native\\%s;%%PATH%%", platformId);
 			env.put("PATH", path);
+			// we need to sanitize against a non-ascii username
+			// work around for Jython bug in 2.7.0... 
+			env.put("APPDATA", "%%CD%%");
 		} else {
 			log.error("unkown operating system");
 		}
