@@ -9,7 +9,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -389,7 +388,11 @@ public class Python extends Service {
 	 * 
 	 */
 	public void createPythonInterpreter() {
-		// TODO - check if exists - destroy / de-initialize if necessary
+		// TODO: If the username on windows contains non-ascii characters
+		// the Jython interpreter will blow up.  
+		// The APPDATA environment variable contains the username.
+		// as a result, jython sees the non ascii chars and it causes a utf-8 decoding error.
+		// overriding of the APPDATA environment variable is done in the agent as a work around.
 		PySystemState.initialize();
 		interp = new PythonInterpreter();
 
@@ -854,7 +857,8 @@ public class Python extends Service {
 		in.close();
 		
 		
-		Runtime.createAndStart("webgui", "WebGui");
+		Runtime.createAndStart("gui", "GUIService");
+		// Runtime.createAndStart("webgui", "WebGui");
 
 		} catch (Exception e) {
 			Logging.logError(e);
