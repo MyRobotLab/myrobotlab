@@ -27,6 +27,20 @@ import javax.sound.sampled.AudioInputStream;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.myrobotlab.audio.AudioData;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.ServiceType;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.SpeechRecognizer;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.interfaces.TextListener;
+import org.slf4j.Logger;
+import org.xml.sax.SAXException;
+
 import marytts.LocalMaryInterface;
 import marytts.MaryInterface;
 import marytts.exceptions.SynthesisException;
@@ -39,19 +53,6 @@ import marytts.tools.install.ProgressPanel;
 import marytts.tools.install.VoiceComponentDescription;
 import marytts.util.MaryUtils;
 import marytts.util.data.audio.AudioPlayer;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.repo.ServiceType;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.SpeechRecognizer;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
-import org.myrobotlab.service.interfaces.TextListener;
-import org.slf4j.Logger;
-import org.xml.sax.SAXException;
 
 public class MarySpeech extends Service implements TextListener, SpeechSynthesis {
 
@@ -187,11 +188,12 @@ public class MarySpeech extends Service implements TextListener, SpeechSynthesis
     }
 
     @Override
-    public int speak(String toSpeak) throws SynthesisException, InterruptedException {
+    public AudioData speak(String toSpeak) throws SynthesisException, InterruptedException {
+    	AudioData ret = new AudioData(toSpeak);
         // TODO: handle the isSpeaking logic/state
         speakInternal(toSpeak, false);
         // FIXME - play cache track
-        return -1;
+        return ret;
     }
 
 

@@ -3,6 +3,8 @@ package org.myrobotlab.service.interfaces;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import org.myrobotlab.audio.AudioData;
+
 /**
  * SpeechSynthesis - This is the interface that services that provide text to speech should implement. 
  * 
@@ -28,7 +30,7 @@ public interface SpeechSynthesis extends NameProvider {
 	 * @param toSpeak - the string of text to speak.
 	 * @return TODO
 	 */
-	public abstract int speak(String toSpeak) throws Exception;
+	public abstract AudioData speak(String toSpeak) throws Exception;
 
 	/**
 	 * Begin speaking and wait until all speech has been played back/

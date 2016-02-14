@@ -18,7 +18,6 @@ import javax.sound.sampled.SourceDataLine;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.AudioFile;
-import org.myrobotlab.service.AudioFile.AudioData;
 import org.slf4j.Logger;
 
 // FIXME - make runnable
@@ -50,7 +49,7 @@ public class AudioProcessor extends Thread {
 
 	float targetBalance = balance;
 
-	AudioFile myService = null;
+	AudioFile audioFile = null;
 
 	public boolean pause = false;
 	
@@ -71,17 +70,19 @@ public class AudioProcessor extends Thread {
 
 	public AudioProcessor(AudioFile audioFile, String queueName) {
 		super(String.format("%s:track",queueName));
-		this.myService = audioFile;
+		this.audioFile = audioFile;
 		this.queueName = queueName;
 	}
 
 	// FIXME play with this thread - but block incoming thread
-	public int play(AudioData data) {
+	public AudioData play(AudioData data) {
 
 		log.info(String.format("playing %s", data.toString()));
 		
 		AudioInputStream din = null;
 		try {
+			
+			
 			File file = new File(data.file);
 			AudioInputStream in = AudioSystem.getAudioInputStream(file);
 			AudioFormat baseFormat = in.getFormat();
@@ -101,6 +102,9 @@ public class AudioProcessor extends Thread {
 				int nBytesRead = 0;
 				volume = 0; // new file being played or repeat - targetVolume should be old volume - needs setting to target
 				isPlaying = true;
+				
+				audioFile.invoke("publishAudioStart", data);
+				
 				while (isPlaying && (nBytesRead = din.read(buffer, 0, buffer.length)) != -1) {
 					// byte[] goofy = new byte[4096];
 					/*
@@ -146,7 +150,7 @@ public class AudioProcessor extends Thread {
 						synchronized (lock) {
 							log.info("pausing");
 							// notify all waiting for me
-							List<Object> locks = myService.getLocksWaitingFor(queueName);
+							List<Object> locks = audioFile.getLocksWaitingFor(queueName);
 							for (int i = 0; i < locks.size(); ++i){
 								locks.get(i).notifyAll();
 							}
@@ -158,13 +162,9 @@ public class AudioProcessor extends Thread {
 				line.drain();
 				line.stop();
 				line.close();
-				din.close();
+				din.close();				
 				
-				log.info(String.format("done playing %s", data.toString()));
-				
-				// notifiy that we've finished playing
-				
-				myService.invoke("finishedPlaying", "acapela done");
+				audioFile.invoke("publishAudioEnd", data);			
 				
 			} else {
 				log.error("line is null !");
@@ -181,7 +181,7 @@ public class AudioProcessor extends Thread {
 			}
 		}
 		
-		return -1;
+		return data;
 	}
 
 	
@@ -210,7 +210,7 @@ public class AudioProcessor extends Thread {
 				
 				// check to see if we should be waiting for another track to finish
 				if (waitForKey != null){
-					Object waitForLock = myService.getWaitForLock(waitForKey);
+					Object waitForLock = audioFile.getWaitForLock(waitForKey);
 					synchronized (waitForLock) {
 						waitForLock.wait();
 					}
@@ -219,7 +219,7 @@ public class AudioProcessor extends Thread {
 				play(data);
 				if (currentTrackCount != lastTrackPlayed){
 					String key = String.format("%s:%s", queueName, currentTrackCount);
-					Object waitForLock = myService.getWaitForLock(key);
+					Object waitForLock = audioFile.getWaitForLock(key);
 					if (waitForLock != null){
 						synchronized (waitForLock) {
 							waitForLock.notify();
@@ -255,10 +255,10 @@ public class AudioProcessor extends Thread {
 		return volume;
 	}
 
-	public int add(AudioData data) {
+	public AudioData add(AudioData data) {
 		++trackCount;
-		track.add(data);
-		return trackCount;
+		track.add(data); // COOL - should change state to QUEUED'
+		return data;
 	}
 
 	public Object getLock() {
