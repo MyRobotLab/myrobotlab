@@ -66,6 +66,8 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
+import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.data.Point2Df;
@@ -747,18 +749,34 @@ public class OpenCV extends VideoSource {
 		// lkoptical disparity motion Time To Contact
 		// https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
 		//
-		WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+		//WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
 		GUIService gui = (GUIService)Runtime.start("gui", "GUIService");
 		
 		org.apache.log4j.BasicConfigurator.configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		
 		OpenCV opencv = (OpenCV) Runtime.start("left", "OpenCV");
-		Runtime.start("right", "OpenCV");
+		// Runtime.start("right", "OpenCV");
+		
+		
+		// training images in this example must be same resolution as camera video stream.
+		OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
+		opencv.addFilter(tr);
+
+		
+//		opencv.addFilter("facerec", "FaceRecognizer");
+		
+		OpenCVFilterFaceRecognizer facerec = new OpenCVFilterFaceRecognizer("facerec");
+		
+		String trainingDir = "C:\\facedata\\test1";
+		facerec.train(trainingDir);
+		
+		opencv.addFilter(facerec);
+		
 		//VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
 		//vs.attach(opencv);
 		//opencv.capture();
-
+		opencv.capture();
 		
 		/*
 		OpenCVFilterFFmpeg ffmpeg = new OpenCVFilterFFmpeg("ffmpeg");
@@ -772,7 +790,7 @@ public class OpenCV extends VideoSource {
 			return;
 		}
 		
-		opencv.removeFilters();
+		// opencv.removeFilters();
 		// ffmpeg.stopRecording();
 		// opencv.setCameraIndex(0);
 
