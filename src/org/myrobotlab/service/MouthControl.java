@@ -99,6 +99,7 @@ public class MouthControl extends Service {
 
 	public void setMouth(SpeechSynthesis mouth) {
 		this.mouth = mouth;
+		subscribe(mouth.getName(), "publishStartSpeaking");
 	}
 
 	public void setArduino(Arduino arduino) {
@@ -114,6 +115,9 @@ public class MouthControl extends Service {
 		return "mouth movements based on spoken text";
 	}
 
+public synchronized void onStartSpeaking(String text) {
+	onSaying(text);
+}
 	public synchronized void onSaying(String text) {
 		log.info("move moving to :" + text);
 		if (jaw != null) { // mouthServo.moveTo(Mouthopen);
