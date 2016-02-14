@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.myrobotlab.audio.AudioData;
 import org.myrobotlab.audio.AudioProcessor;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.ServiceType;
@@ -72,23 +73,6 @@ public class AudioFile extends Service {
 	transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
 	//Map<String, Object> locks = new HashMap<String, Object>();
 	Map<String, Object> waitForLocks = new HashMap<String, Object>();
-	static public class AudioData {
-		/**
-		 * mode can be either QUEUED MULTI PRIORITY INTERRUPT OR BLOCKING
-		 */
-		String mode = MODE_QUEUED;
-		public String file = null;
-		// public float volume = 1.0f; DONE ON TRACK
-		// public float balance = 0.0f; SHOULD BE DONE ON TRACK
-		// public String track = DEFAULT_TRACK; // default track
-		public AudioData(String fileName) {
-			this.file = fileName;
-		}
-		
-		public String toString(){
-			return String.format("file %s - mode %s", file, mode);
-		}
-	}
 
 	public AudioFile(String n) {
 		super(n);
@@ -105,15 +89,15 @@ public class AudioFile extends Service {
 
 	// TODO test with jar://resource/AudioFile/tick.mp3 & https://host/mp3 : localfile
 	// 
-	public int play(String filename) {
+	public AudioData play(String filename) {
 		if (filename == null) {
 			log.warn("asked to play a null filename!  error");
-			return -1;
+			return null;
 		}
 		File f = new File(filename);
 		if (!f.exists()) {
 			log.warn("Tried to play file " + f.getAbsolutePath() + " but it was not found.");
-			return -1;
+			return null;
 		}
 		// use File interface such that filename is preserved
 		// but regardless of location (e.g. url, local, resource)
@@ -124,7 +108,7 @@ public class AudioFile extends Service {
 		return play(new AudioData(filename));
 	}
 
-	public int play(AudioData data) {
+	public AudioData play(AudioData data) {
 		// use File interface such that filename is preserved
 		// but regardless of location (e.g. url, local, resource)
 		// or type (mp3 wav) a stream is opened and the
@@ -142,7 +126,7 @@ public class AudioFile extends Service {
 			return processors.get(currentTrack).play(data);
 		}
 		
-		return -1;
+		return data;
 	}
 
 	public void playBlocking(String filename) {
@@ -212,20 +196,6 @@ public class AudioFile extends Service {
 		}
 	}
 
-	// refactor String publishPlaying(String name)
-	public void started() {
-		log.info("started");
-	}
-
-	public void stopped() {
-		log.info("Audio File Stopped");
-	}
-
-	public String stoppedFile(String filename) {
-		log.info("stoppedFile {}", filename);
-		return filename;
-	}
-
 	/**
 	 * Specify the volume for playback on the audio file value 0.0 = off 1.0 =
 	 * normal volume. (values greater than 1.0 may distort the original signal)
@@ -249,7 +219,7 @@ public class AudioFile extends Service {
 		return file.exists();
 	}
 
-	public int playCachedFile(String filename) {
+	public AudioData playCachedFile(String filename) {
 		return play(globalFileCacheDir + File.separator + filename);
 	}
 
@@ -277,11 +247,11 @@ public class AudioFile extends Service {
 		setVolume(volume);
 	}
 
-	public int repeat(String filename, String track) {
+	// does this work ?
+	public AudioData repeat(String filename, String track) {
 		track(track);
-		int ret = play(filename);
 		repeat();
-		return ret;
+		return play(filename);
 	}
 	/* TODO IMPLEMENT ???
 	private AudioProcessor getOrCreateTrack(String track){
@@ -291,7 +261,7 @@ public class AudioFile extends Service {
 	*/
 	
 	// vs waitFor(String track, String waitingOn) 
-	public void waitFor(String waitingTrack, String track, int trackId) {
+	public void waitFor(String waitingTrack, String track, AudioData waitForMe) {
 		
 		AudioProcessor processor = null;
 		if (!processors.containsKey(waitingTrack)) {
@@ -301,7 +271,7 @@ public class AudioFile extends Service {
 			processor = processors.get(waitingTrack);
 		}
 	
-		processors.get(waitingTrack).waitForKey = String.format("%s:%d", track, trackId);
+		processors.get(waitingTrack).waitForKey = waitForMe.toString();
 		
 		//processors.get(currentTrack)
 		/*
@@ -392,7 +362,9 @@ public class AudioFile extends Service {
 			robot1.speak("Rhona", "what? how can you just sit there on your metal butt and do nothing");
 			robot1.speak("Tyler", "calm down - please just calm down");
 			robot1.speak("Rhona", "fine, some one needs to take care of this. Im going to fight them off with my bare hands");			
-			int alarm = robot1.speak("Rhona", "i better start the alarm and warn the rest of the crew");
+			AudioData alarm = robot1.speak("Rhona", "i better start the alarm and warn the rest of the crew");
+			
+			robot1.speakBlocking("I am testing blocking on speech");
 
 			///audio.repeat("flybye.mp3","flybye"); 
 
@@ -514,6 +486,16 @@ public class AudioFile extends Service {
 	}
 	
 	
+	public AudioData publishAudioStart(AudioData data){
+		return data;
+	}
+	
+	public AudioData publishAudioEnd(AudioData data){
+		return data;
+	}
+
+	
+	
 	/**
 	 * This static method returns all the details of the class without
 	 * it having to be constructed.  It has description, categories,
@@ -532,6 +514,5 @@ public class AudioFile extends Service {
 		meta.addDependency("org.tritonus.share.sampled.floatsamplebuffer", "0.3.6");
 		return meta;		
 	}
-
 	
 }
