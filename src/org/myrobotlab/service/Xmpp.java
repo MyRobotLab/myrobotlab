@@ -568,9 +568,9 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 	 * @param message
 	 * @return
 	 */
-	public String publishMessage(Chat chat, Message msg) {
+	public Message publishMessage(Chat chat, Message msg) {
 		log.info(String.format("%s sent msg %s", msg.getFrom(), msg.getBody()));
-		return msg.getBody();
+		return msg;
 	}
 
 	@Override
@@ -585,8 +585,6 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 
 	public XMPPMsg publishXMPPMsg(Chat chat, Message msg) {
 		return new XMPPMsg(chat, msg);
-		publishMessage(chat, msg);
-		log.info(String.format("%s sent msg %s", msg.getFrom(), msg.getBody()))
 	}
 
 	public boolean removeAuditor(String id) {
