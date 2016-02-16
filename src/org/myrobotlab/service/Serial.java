@@ -425,7 +425,9 @@ public class Serial extends Service implements PortSource, QueueSource, SerialDa
 		if (listener != null) {
 			listeners.put(listener.getName(), listener);
 		}
-		port.open();
+		if (!port.isOpen()) {
+			port.open();
+		}
 		port.listen(listeners);
 		connectedPorts.put(portName, newPort);
 
