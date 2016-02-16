@@ -1379,6 +1379,7 @@ public class InMoov extends Service {
 		// SHARING !!! - modified key / actual name begin ------
 		meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
 		meta.sharePeer("torso.arduino", "left", "Arduino", "shared left arduino");
+		meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared left arduino");
 
 		meta.sharePeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
 		meta.sharePeer("leftHand.arduino", "left", "Arduino", "shared left arduino");
