@@ -87,7 +87,7 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 	
 	/**
 	 * auditors chat buddies who can see what commands are being processed and
-	 * by who through the XMPP service TODO - audit full system ??? regardless
+	 * by who through the Xmpp service TODO - audit full system ??? regardless
 	 * of message origin?
 	 */
 	// FIXME ?? - change to HashMap<String, RosterEntry>
@@ -160,7 +160,7 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 				SASLAuthentication.blacklistSASLMechanism("DIGEST-MD5");
 				*/
 				
-				config = new ConnectionConfiguration(hostname, 5222, "gmail.com");
+				config = new ConnectionConfiguration(hostname, 5222);
 			}
 
 			if (connection == null || !connection.isConnected()) {
@@ -338,8 +338,8 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 	}
 
 	/**
-	 * processMessage is the XMPP / Smack API override which handles incoming
-	 * chat messages - XMPP comes with well defined and extendable capabilities,
+	 * processMessage is the Xmpp / Smack API override which handles incoming
+	 * chat messages - Xmpp comes with well defined and extendable capabilities,
 	 * however, Google Talk does not support much more than text messages with
 	 * started open xmpp .. sad :(
 	 * 
@@ -469,7 +469,7 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 		/*
 		 * CUSTOS SPECIFIC - REMOVE else if (body != null && body.length() > 0
 		 * && body.charAt(0) != '/') { broadcast(
-		 * "sorry sir, I do not understand! I await your orders but,\n they must start with / for more information go to http://myrobotlab.org/service/XMPP"
+		 * "sorry sir, I do not understand! I await your orders but,\n they must start with / for more information go to http://myrobotlab.org/service/Xmpp"
 		 * ); broadcast("*HAIL BEPSL!*"); broadcast(String.format(
 		 * "for a list of possible commands please type /%s/help", getName()));
 		 * broadcast
@@ -563,7 +563,7 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 	}
 
 	/**
-	 * publishing point for XMPP messages
+	 * publishing point for Xmpp messages
 	 * 
 	 * @param message
 	 * @return
@@ -702,16 +702,17 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 
 			int i = 1;
 			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
-			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "XMPP");
-			Runtime.createAndStart(String.format("clock%d", i), "Clock");
-			Runtime.createAndStart(String.format("gui%d", i), "GUIService");
-			xmpp1.connect("talk.google.com", 5222, "incubator@myrobotlab.org", "mrlRocks!");
-			xmpp1.addAuditor("Ma. Vo.");
-			xmpp1.sendMessage("Ma. Vo. - xmpp test", "Ma. Vo.");
+			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "Xmpp");
+			// Runtime.createAndStart(String.format("clock%d", i), "Clock");
+			// Runtime.createAndStart(String.format("gui%d", i), "GUIService");
+			xmpp1.connect("myrobotlab.org", 5222, "grogbot", "xxxxxx");
+			// xmpp1.addAuditor("Ma. Vo.");
+			// xmpp1.sendMessage("Ma. Vo. - xmpp test", "Ma. Vo.");
 			// xmpp1.send("Ma. Vo.", "xmpp test");
 			// xmpp1.sendMessage("hello from incubator by name " +
 			// System.currentTimeMillis(), "Greg Perry");
-			xmpp1.sendMessage("xmpp 2", "robot02 02");
+			xmpp1.sendMessage("/runtime/getUptime", "test01@myrobotlab.org");
+			xmpp1.sendMessage("/runtime", "grogbot@myrobotlab.org");
 			if (true) {
 				return;
 			}

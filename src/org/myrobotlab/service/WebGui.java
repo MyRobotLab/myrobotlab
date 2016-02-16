@@ -99,7 +99,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		@Override
 		public void handle(AtmosphereResource r) {
 			// TODO Auto-generated method stub
-			log.info("here");
 			try {
 
 				/*
@@ -129,11 +128,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				log.info("bytes {}", data.length);
 				out.write(data);
 				out.flush();
-				log.info("here");
-				log.info("here");
+
 				// out.close();
 				// r.write(data);
-				log.info("here");
 				// r.writeOnTimeout(arg0)
 				// r.forceBinaryWrite();
 				// r.close();
@@ -295,11 +292,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 				// .resource("/video/ffmpeg.1443989700495.mp4", test)
 
 				// for debugging
-				.resource("./src/resource/WebGui")
-				.resource("./src/resource")
+				.resource("./src/resource/WebGui").resource("./src/resource")
 				// for runtime - after extractions
-				.resource("./resource/WebGui")
-				.resource("./resource")
+				.resource("./resource/WebGui").resource("./resource")
 
 				// Support 2 APIs
 				// REST - http://host/object/method/param0/param1/...
@@ -669,11 +664,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			// FIXME - this is duplicated in processMessageAPI :(
 			if (si.isLocal()) {
-				log.info("{} is local", name);
+				log.debug("{} is local", name);
 				Object ret = method.invoke(si, params);
 				respond(out, codec, method.getName(), ret);
 			} else {
-				log.info("{} is is remote", name);
+				log.debug("{} is is remote", name);
 				Message msg = createMessage(name, method.getName(), params);
 				out(msg);
 			}
@@ -702,7 +697,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			return;
 		}
 		msg.sender = getName();
-		log.info(String.format("got msg %s", msg.toString()));
+		log.debug("got msg {}", msg.toString());
 
 		// out(msg);
 
@@ -724,15 +719,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 		paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
 
-		StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name, msg.method));
-		for (int i = 0; i < paramTypes.length; ++i) {
-			if (i != 0) {
-				sb.append(",");
+		if (log.isDebugEnabled()) {
+			StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name, msg.method));
+			for (int i = 0; i < paramTypes.length; ++i) {
+				if (i != 0) {
+					sb.append(",");
+				}
+				sb.append(paramTypes[i].getSimpleName());
 			}
-			sb.append(paramTypes[i].getSimpleName());
+			sb.append(")");
+			log.debug(sb.toString());
 		}
-		sb.append(")");
-		log.info(sb.toString());
 
 		// WE NOW HAVE ORDINAL AND TYPES
 		params = new Object[encodedArray.length];
@@ -766,7 +763,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 		// FIXME - not good - using my thread to execute another services
 		// method and put its return on the the services out queue :P
 		if (si.isLocal()) {
-			log.info("{} is local", si.getName());
+			log.debug("{} is local", si.getName());
 
 			Object retobj = method.invoke(si, params);
 
@@ -776,7 +773,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 			si.out(msg.method, retobj);
 		} else {
-			log.info("{} is remote", si.getName());
+			log.debug("{} is remote", si.getName());
 			// send(msg.name, msg.method, msg.data);
 			send(msg.name, msg.method, params);
 			// out(msg); LETHAL !
@@ -896,18 +893,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			nettosphere.stop();
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-		
-		/*
-		ServiceType meta = getMetaData(WebGui.class.getCanonicalName());
-		log.info(meta.toString());
-		*/
-		
 
-		//log.info("hello");
+		/*
+		 * ServiceType meta = getMetaData(WebGui.class.getCanonicalName());
+		 * log.info(meta.toString());
+		 */
+
+		// log.info("hello");
 
 		// Call context.reset() to clear any previous configuration, e.g.
 		// default
@@ -918,12 +914,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
 		// log.info(Logging.)
 		/*
-		log.trace("trace");
-		log.debug("debug");
-		log.info("info");
-		log.warn("warn");
-		log.error("error");
-		*/
+		 * log.trace("trace"); log.debug("debug"); log.info("info");
+		 * log.warn("warn"); log.error("error");
+		 */
 
 		try {
 
@@ -946,9 +939,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			Runtime.start("servo", "Servo");
 			WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
 			log.info(Service.getDNA().toString());
-			webgui.startPeer("tracker");
-			
-			log.info(Service.getDNA().toString());
+			// webgui.startPeer("tracker");
+
+			// log.info(Service.getDNA().toString());
 			// webgui.autoStartBrowser(false);
 
 			// Runtime.start("python", "Python");
@@ -988,24 +981,23 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 			Logging.logError(e);
 		}
 	}
-	
-	
+
 	/**
-	 * This static method returns all the details of the class without
-	 * it having to be constructed.  It has description, categories,
-	 * dependencies, and peer definitions.
+	 * This static method returns all the details of the class without it having
+	 * to be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
 	 * 
 	 * @return ServiceType - returns all the data
 	 * 
 	 */
-	static public ServiceType getMetaData(){
-		
+	static public ServiceType getMetaData() {
+
 		ServiceType meta = new ServiceType(WebGui.class.getCanonicalName());
 		meta.addDescription("web display");
 		meta.addCategory("display");
 		// meta.addPeer("tracker", "Tracking", "test tracking");
 		meta.addDependency("io.netty", "3.10.0");
 		meta.addDependency("org.atmosphere.nettosphere", "2.3.0");
-		return meta;		
+		return meta;
 	}
 }
