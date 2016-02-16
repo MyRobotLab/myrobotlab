@@ -585,7 +585,8 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 
 	public XMPPMsg publishXMPPMsg(Chat chat, Message msg) {
 		return new XMPPMsg(chat, msg);
-		invoke("publishMessage", chat, msg);
+		publishMessage(chat, msg);
+		log.info(String.format("%s sent msg %s", msg.getFrom(), msg.getBody()))
 	}
 
 	public boolean removeAuditor(String id) {
