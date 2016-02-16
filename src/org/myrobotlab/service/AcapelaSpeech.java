@@ -292,13 +292,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 			byte[] b = FileIO.toByteArray(entity.getContent());
 
-			/*
-			 * form response with javascript redirect to mp3 url long ts =
-			 * System.currentTimeMillis(); FileOutputStream fos = new
-			 * FileOutputStream(String.format("response.%d.html", ts));
-			 * fos.write(b); fos.close();
-			 */
-
 			// parse out mp3 file url
 			String mp3Url = null;
 			String data = new String(b);

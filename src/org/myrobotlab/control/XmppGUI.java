@@ -36,12 +36,12 @@ import org.myrobotlab.service.GUIService;
 import org.myrobotlab.service.Xmpp;
 import org.slf4j.Logger;
 
-public class XMPPGUI extends ServiceGUI implements ActionListener {
+public class XmppGUI extends ServiceGUI implements ActionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(XMPPGUI.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(XmppGUI.class.getCanonicalName());
 
-	public XMPPGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
+	public XmppGUI(final String boundServiceName, final GUIService myService, final JTabbedPane tabs) {
 		super(boundServiceName, myService, tabs);
 	}
 

@@ -794,19 +794,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			for (int i = 0; i < nes.size(); ++i) {
 				MRLListener entry = nes.get(i);
 				if (entry.equals(listener)) {
-					log.warn(String.format("attempting to add duplicate MRLListener %s", listener));
+					log.debug(String.format("attempting to add duplicate MRLListener %s", listener));
 					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
+				log.debug(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
 				nes.add(listener);
 			}
 		} else {
 			ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
 			notifyList.add(listener);
-			log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
+			log.debug(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
 			outbox.notifyList.put(listener.topicMethod.toString(), notifyList);
 		}
 	}
