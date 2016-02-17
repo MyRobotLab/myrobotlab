@@ -2,6 +2,7 @@ package org.myrobotlab.framework;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.repo.Repo;
@@ -53,7 +54,7 @@ public class Peers {
 
 		// log.info(tdna.toString());
 
-		Index<ServiceReservation> dna = Service.buildDNA("InMoov");
+		TreeMap<String, ServiceReservation> dna = Service.buildDNA("InMoov");
 		log.info(dna.toString());
 	}
 

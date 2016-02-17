@@ -133,7 +133,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	/**
 	 * a radix-tree of data -"DNA" Description of Neighboring Automata ;)
 	 */
-	transient static public final Index<ServiceReservation> dna = new Index<ServiceReservation>();
+	//transient static public final Index<ServiceReservation> dna = new Index<ServiceReservation>();
+	transient static public final TreeMap<String, ServiceReservation> dna = new TreeMap<String, ServiceReservation>();
 
 	private static final long serialVersionUID = 1L;
 
@@ -208,11 +209,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	 * @param comment
 	 *            - added comment
 	 */
-	static public void buildDNA(Index<ServiceReservation> myDNA, String myKey, String serviceClass, String comment) {
+	static public void buildDNA(String myKey, String serviceClass, String comment) {
 
 		String fullClassName = CodecUtils.getServiceType(serviceClass);
 
 		try {
+			
+			/// PUSH PEER KEYS IN - IF SOMETHING ALREADY EXISTS LEAVE IT
 			
 			//// ------- this is static data which will never change ----------------------
 			// - the 'key' structure will never change - however the service reservations within
@@ -254,7 +257,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 				String peerKey = sr.key;
 
 				String fullKey = String.format("%s.%s", myKey, peerKey);
-				ServiceReservation reservation = myDNA.get(fullKey);
+				ServiceReservation reservation = dna.get(fullKey);
 
 				log.info(String.format("(%s) - [%s]", fullKey, sr.actualName));
 
@@ -263,7 +266,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 					// so we set actualName to the key - which is (currentContext).(actualName)
 					sr.actualName = fullKey;
 					log.info(String.format("dna adding new key %s %s %s %s", fullKey, sr.actualName, sr.fullTypeName, comment));
-					myDNA.put(fullKey, sr);
+					dna.put(fullKey, sr);
 				} else {
 					log.info(String.format("dna collision - replacing null values !!! %s", fullKey));
 					StringBuffer sb = new StringBuffer();
@@ -285,7 +288,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 					log.info(sb.toString());
 
-					buildDNA(myDNA, Peers.getPeerKey(myKey, sr.key), sr.fullTypeName, sr.comment);
+					buildDNA(Peers.getPeerKey(myKey, sr.key), sr.fullTypeName, sr.comment);
 				}
 
 			}
@@ -301,6 +304,16 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			log.debug(String.format("%s does not have a getMetaData ", fullClassName));
 		}
 	}
+	
+	static public String getDnaString(){
+		StringBuffer sb = new StringBuffer();
+		for (Map.Entry<String, ServiceReservation> entry : dna.entrySet()) {
+		    String key = entry.getKey();
+		    ServiceReservation value = entry.getValue();
+		    sb.append(String.format("%s=%s", key, value.toString()));
+		}
+		return sb.toString();
+	}
 
 	/**
 	 * Recursively builds Peer type information - which is not instance
@@ -310,23 +323,24 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	 * @param serviceClass
 	 * @return
 	 */
-	static public Index<ServiceReservation> buildDNA(String serviceClass) {
+	static public TreeMap<String, ServiceReservation> buildDNA(String serviceClass) {
 		return buildDNA("", serviceClass);
 	}
 
-	static public Index<ServiceReservation> buildDNA(String myKey, String serviceClass) {
-		Index<ServiceReservation> myDNA = new Index<ServiceReservation>();
-		buildDNA(myDNA, myKey, serviceClass, null);
-		log.info("{}", myDNA.getRootNode().size());
-		return myDNA;
+	static public TreeMap<String, ServiceReservation> buildDNA(String myKey, String serviceClass) {
+		buildDNA(myKey, serviceClass, null);
+		log.info("{}", dna);
+		return dna;
 	}
 
-	static public Index<ServiceReservation> buildDNA(String myKey, String serviceClass, String comment) {
-		Index<ServiceReservation> myDNA = new Index<ServiceReservation>();
+	/*
+	static public TreeMap<String, ServiceReservation> buildDNA(String myKey, String serviceClass, String comment) {
+		TreeMap<String, ServiceReservation> myDNA = new TreeMap<String, ServiceReservation>();
 		buildDNA(myDNA, myKey, serviceClass, comment);
-		log.info("dna root node size {}", myDNA.getRootNode().size());
+		log.info("dna root node size {}", myDNA.size());
 		return myDNA;
 	}
+	*/
 
 	/**
 	 * copyShallowFrom is used to help maintain state information with
@@ -399,7 +413,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	 */
 	static public ServiceInterface createRootReserved(String key) {
 		log.info(String.format("createReserved %s ", key));
-		IndexNode<ServiceReservation> node = dna.getNode(key);
+		ServiceReservation node = dna.get(key);
 		if (node != null) {
 			ServiceReservation r = dna.get(key);
 			return Runtime.create(r.actualName, r.fullTypeName);
@@ -417,7 +431,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		return cfgDir;
 	}
 
-	static public Index<ServiceReservation> getDNA() {
+	static public TreeMap<String,ServiceReservation> getDNA() {
 		return dna;
 	}
 
@@ -545,13 +559,58 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 	/**
 	 * This method will merge in the requested peer dna into the final global
-	 * dna - from which it will be accessable for create methods
+	 * dna - from which it will be accessible for create methods
+	 * 
+	 * template merge with existing dna
 	 * 
 	 * @param myKey
 	 * @param className
 	 */
-	static public void mergePeerDNA(String myKey, String className) {
-		buildDNA(dna, myKey, className, "merged dna");
+	public void mergePeerDNA(String myKey, String className) {
+		if (serviceType != null){
+			TreeMap<String, ServiceReservation> peers = serviceType.getPeers();
+			for (Entry<String,ServiceReservation> reservation : peers.entrySet()){
+				String templateKey = reservation.getKey();
+				// build full key with our instance key + the peer template defined in getMetaData
+				String fullKey = String.format("%s.%s", myKey, templateKey);
+				
+				// test dna - if something already exists then LEAVE IT !!!
+				// if it does not exist then inject it
+				if (!dna.containsKey(fullKey)){
+					// full key does not exist - so we put this reservation in
+					// for further definition
+					// since there was no previous definition of this service - we will modify
+					// the actual name so it is correct with the fullKey (prefix of the context)
+					
+					// this is a template being merged in
+					// if actualName == key then there is no re-mapping and both get prefixed !
+					// if actualName != key then there is a re-map
+					ServiceReservation templateSr = reservation.getValue();
+					
+					// create new service reservation with fullkey to put into dna
+					// do we prefix the actual name !?!?!?!?!?
+					ServiceReservation sr = null;  
+					
+					
+
+					if (templateSr.key.equals(templateSr.actualName)){
+						sr = new ServiceReservation(fullKey, templateSr.fullTypeName, templateSr.comment);
+					} else {
+						if (templateSr.isRoot){
+							sr = new ServiceReservation(fullKey, templateSr.actualName, templateSr.fullTypeName, templateSr.comment, templateSr.isRoot);
+						} else {
+							// We Prefix it if its not a root !						
+							sr = new ServiceReservation(fullKey, String.format("%s.%s", myKey, templateSr.actualName), templateSr.fullTypeName, templateSr.comment);
+						}
+					}
+					
+					dna.put(fullKey, sr);
+				} else {
+					log.info("found reservation {} {}", fullKey, reservation.getValue());
+				}
+			}
+		}
+		// buildDNA(myKey, className, "merged dna");
 		log.debug("merged dna \n{}", dna);
 	}
 
@@ -743,6 +802,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			Runtime.getInstance();
 		}
 
+		// merge all our peer keys into the dna
+		// so that reservations are set with actual names if
+		// necessary
+		mergePeerDNA(reservedKey, serviceClass);
+
 		// see if incoming key is my "actual" name
 		ServiceReservation sr = dna.get(reservedKey);
 		if (sr != null) {
@@ -752,9 +816,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			name = reservedKey;
 		}
 		// keep MessageService name in sync
-
-		// comment ?
-		mergePeerDNA(reservedKey, serviceClass);
 
 		// this.timer = new Timer(String.format("%s_timer", name)); FIXME -
 		// re-implement but only create if there is a task!!
@@ -902,12 +963,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 	public synchronized ServiceInterface createPeer(String reservedKey) {
 		String fullkey = Peers.getPeerKey(getName(), reservedKey);
+
 		ServiceReservation sr = dna.get(fullkey);
 		if (sr == null) {
 			error("can not create peer from reservedkey %s - no type definition !", fullkey);
 			return null;
 		}
-		return Runtime.create(sr.actualName, sr.fullTypeName);
+		
+		return Runtime.create(fullkey, sr.fullTypeName);
 	}
 
 	// -------------------------------- new createPeer begin
@@ -2164,6 +2227,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 		return stats;
 	}
 
+	/*
 	static public ArrayList<ServiceReservation> getPeerMetaData(String serviceType) {
 		ArrayList<ServiceReservation> peerList = new ArrayList<ServiceReservation>();
 		try {
@@ -2174,11 +2238,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 			if (peers != null) {
 				log.info("has peers");
 				peerList = peers.getDNA().flatten();
-				/*
-				 * // Repo r = new Repo(); for (int j = 0; j < peerList.size();
-				 * ++j) { ServiceReservation sr = peerList.get(j);
-				 * s.addPeer(sr.key, sr.fullTypeName); }
-				 */
+				
 				// add peers to serviceData serviceType
 			}
 
@@ -2188,6 +2248,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
 		return peerList;
 	}
+	*/
 
 	/**
 	 * Calls the static method getMetaData on the appropriate class. The class
