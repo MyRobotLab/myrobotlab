@@ -33,8 +33,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 	 * dependency keys of with key structure {org}-{version}
 	 */
 	public HashSet<String> dependencies = new HashSet<String>();
-	public HashSet<String> categories = new HashSet<String>();
-	
+	public HashSet<String> categories = new HashSet<String>();	
 	public TreeMap<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
 	
 	public ServiceType() {
