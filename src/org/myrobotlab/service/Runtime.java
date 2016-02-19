@@ -1304,11 +1304,11 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		String name = s.getName();
 
 		if (se.serviceDirectory.containsKey(name)) {
-			log.info(String.format("attempting to register %1$s which is already registered in %2$s", name, url));
+			log.info("attempting to register {} which is already registered in {}", name, url);
 			if (runtime != null) {
-				runtime.invoke("collision", name);
-				runtime.warn("collision registering %s", name);
-				runtime.error(String.format(" name collision or already registered with %s", name));
+				runtime.invoke("collision", name);// necessary ?  collisions are 'expected' in mrl's evolution
+				log.info("collision registering %s", name);
+				// runtime.error(String.format(" name collision or already registered with %s", name));
 			}
 			return s;// <--- BUG ?!?!? WHAT ABOUT THE REMOTE GATEWAYS !!!
 		}
