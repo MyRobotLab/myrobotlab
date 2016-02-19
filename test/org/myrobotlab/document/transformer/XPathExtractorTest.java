@@ -10,7 +10,7 @@ public class XPathExtractorTest extends AbstractStageTest {
 	public Document createDocument() {
 		// TODO Auto-generated method stub
 		Document doc = new Document("doc_1");
-		String xml = "<?xml version=\"1.0\"?><foo><bar>baz</bar></foo>";
+		String xml = "<?xml version=\"1.0\"?><page><title>baz</title></page>";
 		doc.setField("xml", xml);
 		return doc;
 	}
@@ -29,7 +29,7 @@ public class XPathExtractorTest extends AbstractStageTest {
 	@Override
 	public void validate(Document doc) {
 		System.out.println(doc);
-		Assert.assertEquals(doc.getField("text").get(0).toString(), "baz");
+		Assert.assertEquals(doc.getField("title").get(0).toString(), "baz");
 
 	}
 
