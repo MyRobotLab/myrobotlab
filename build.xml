@@ -759,7 +759,7 @@
 		               printsummary="withOutAndErr"
 		               outputtoformatters="true" -->
                 <jacoco:coverage destfile="${result.jacoco.file}">
-		    <junit printsummary="on" fork="true" haltonfailure="no">
+		    <junit printsummary="on" fork="true" haltonfailure="on">
 			<!--
 			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
 			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			

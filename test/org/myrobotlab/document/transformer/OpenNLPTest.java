@@ -1,8 +1,12 @@
 package org.myrobotlab.document.transformer;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.myrobotlab.document.Document;
 
+// need to make sure the language model files are available.
+
+@Ignore
 public class OpenNLPTest extends AbstractStageTest {
 
 	@Override
