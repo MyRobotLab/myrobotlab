@@ -41,7 +41,7 @@ public class WikipediaIndexer {
 		// build the pipeline.. assemble the stages.
 		// create our document processing pipeline workflow.
 		WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
-		workflowConfig.setNumWorkerThreads(8);
+		workflowConfig.setNumWorkerThreads(5);
 		workflowConfig.setName("default");
 		workflowConfig.addStage(staticFieldStageConfig);
 		workflowConfig.addStage(xpathStageConfig);
@@ -56,7 +56,7 @@ public class WikipediaIndexer {
 		// attach the doc proc to the connector
 		wikipediaConnector.addDocumentListener(docproc);
 
-		wikipediaConnector.setBatchSize(10);
+		wikipediaConnector.setBatchSize(20);
 		// start crawling...
 		wikipediaConnector.startCrawling();
 

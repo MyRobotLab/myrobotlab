@@ -651,7 +651,7 @@
 		</http>
 	</target>
 	<!-- TODO: make this depend on test , gotta figure out why travis ci is failing on this now. -->
-	<target name="dist" depends="jar" description="generate the distribution">
+	<target name="dist" depends="test" description="generate the distribution">
 		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${version}.jar" / -->
 		<!-- backwards compat .. TODO: review this.. -->
 		<mkdir dir="${dist}" />
@@ -752,7 +752,7 @@
 
 	<!-- TODO - upload/publish javadoc -->
 
-	<target name="test" depends="compiletests, dist" description="Run the unit tests">
+	<target name="test" depends="compiletests, jar" description="Run the unit tests">
 		<!-- junit options description="Main  Integration/Unit Tests"
 		               showoutput="true"
 		               printsummary="true"

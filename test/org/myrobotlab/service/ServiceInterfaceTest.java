@@ -27,7 +27,7 @@ import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
 
-// @Ignore
+@Ignore
 public class ServiceInterfaceTest {
 
 	public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
