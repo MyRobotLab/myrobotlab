@@ -86,10 +86,16 @@ public class ServiceReservation {
 		sb.append("[");
 		sb.append(actualName);
 		sb.append("] ");
+		
+		if (isRoot){
+			sb.append("isRoot");
+		}
 
 		sb.append(getSimpleName());
 		sb.append(" - ");
 		sb.append(comment);
+		
+		
 
 		return sb.toString();
 	}
