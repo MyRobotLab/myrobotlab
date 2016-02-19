@@ -762,8 +762,8 @@ public class Tracking extends Service {
 		meta.addPeer("x", "Servo", "pan servo");
 		meta.addPeer("y", "Servo", "tilt servo");
 		meta.addPeer("pid", "PID2", "PID service - for all your pid needs");
-		meta.addPeer("opencv", "OpenCV", "shared OpenCV instance");
-		meta.addPeer("arduino", "Arduino", "shared Arduino instance");
+		meta.addPeer("opencv", "OpenCV", "Tracking OpenCV instance");
+		meta.addPeer("arduino", "Arduino", "Tracking Arduino instance");
 		return meta;
 	}
 	

@@ -34,6 +34,14 @@ import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.slf4j.Logger;
 
+/**
+ * An Xmpp service which utilizes Jive's smack client library
+ * There is smack, whack, and tinder
+ * http://stackoverflow.com/questions/1547599/differences-between-smack-tinder-and-whack
+ * 
+ * @author GROG
+ *
+ */
 public class Xmpp extends Service implements Gateway, MessageListener {
 
 	// GOOD ! - bundle message in single object for event return
@@ -701,21 +709,20 @@ public class Xmpp extends Service implements Gateway, MessageListener {
 		try {
 
 			int i = 1;
-			Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
-			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart(String.format("xmpp%d", i), "Xmpp");
-			// Runtime.createAndStart(String.format("clock%d", i), "Clock");
-			// Runtime.createAndStart(String.format("gui%d", i), "GUIService");
-			xmpp1.connect("myrobotlab.org", 5222, "grogbot", "xxxxxx");
+			// Runtime.main(new String[] { "-runtimeName", String.format("r%d", i) });
+			Xmpp xmpp1 = (Xmpp) Runtime.createAndStart("xmpp", "Xmpp");
+			// Runtime.start(String.format("clock%d", i), "Clock");
+			Runtime.start("gui", "GUIService");
+			Runtime.start("python", "Python");
+			// xmpp1.connect("myrobotlab.org", 5222, "grog.robot01", "xxxxxxx");
 			// xmpp1.addAuditor("Ma. Vo.");
 			// xmpp1.sendMessage("Ma. Vo. - xmpp test", "Ma. Vo.");
 			// xmpp1.send("Ma. Vo.", "xmpp test");
 			// xmpp1.sendMessage("hello from incubator by name " +
 			// System.currentTimeMillis(), "Greg Perry");
-			xmpp1.sendMessage("/runtime/getUptime", "test01@myrobotlab.org");
-			xmpp1.sendMessage("/runtime", "grogbot@myrobotlab.org");
-			if (true) {
-				return;
-			}
+			// xmpp1.sendMessage("/runtime/getUptime", "GroG@myrobotlab.org");
+			// xmpp1.sendMessage("/runtime", "grogbot@myrobotlab.org");
+			
 
 		} catch (Exception e) {
 			Logging.logError(e);

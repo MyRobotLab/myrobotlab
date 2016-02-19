@@ -104,8 +104,8 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 		peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
 	}
 	
-	public void addRootPeer(String key, String actualName, String peerType, String comment) {		
-		peers.put(key, new ServiceReservation(key, actualName, peerType, comment, true));
+	public void addRootPeer(String actualName, String peerType, String comment) {		
+		peers.put(actualName, new ServiceReservation(actualName, actualName, peerType, comment, true));
 	}
 
 	public void setAvailable(boolean b) {

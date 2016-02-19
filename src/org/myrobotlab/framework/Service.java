@@ -502,13 +502,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	 * @param className
 	 */
 	public void mergePeerDNA(String myKey, String className) {
+		if (myKey.equals("c01")){
+			log.info("blah");
+		}
+		
 		if (serviceType != null) {
 			TreeMap<String, ServiceReservation> peers = serviceType.getPeers();
-			for (Entry<String, ServiceReservation> reservation : peers.entrySet()) {
-				String templateKey = reservation.getKey();
+			for (Entry<String, ServiceReservation> entry : peers.entrySet()) {
+				String templateKey = entry.getKey();
+				ServiceReservation template = entry.getValue();
 				// build full key with our instance key + the peer template
 				// defined in getMetaData
-				String fullKey = String.format("%s.%s", myKey, templateKey);
+				
+				String fullKey = String.format("%s.%s", myKey, templateKey);				
 
 				// test dna - if something already exists then LEAVE IT !!!
 				// if it does not exist then inject it
@@ -524,36 +530,36 @@ public abstract class Service extends MessageService implements Runnable, Serial
 					// if actualName == key then there is no re-mapping and both
 					// get prefixed !
 					// if actualName != key then there is a re-map
-					ServiceReservation templateSr = reservation.getValue();
+					
 
 					// create new service reservation with fullkey to put into
 					// dna
 					// do we prefix the actual name !?!?!?!?!?
 					ServiceReservation sr = null;
 
-					if (templateSr.key.equals(templateSr.actualName)) {
-						sr = new ServiceReservation(fullKey, templateSr.fullTypeName, templateSr.comment);
+					if (template.key.equals(template.actualName)  && !template.isRoot) {
+						sr = new ServiceReservation(fullKey, template.fullTypeName, template.comment);
 					} else {
 						// COLLISION WITH CUSTOM KEY - WE ARE MOVING DNA !!!
 						String actualName = null;
-						if (templateSr.isRoot) {
+						if (template.isRoot) {
 							// moving to root
-							actualName = templateSr.actualName;
+							actualName = template.actualName;
 						} else {
 							// We Prefix it if its not a root !
-							actualName = String.format("%s.%s", myKey, templateSr.actualName);
+							actualName = String.format("%s.%s", myKey, template.actualName);
 						}
 
-						sr = new ServiceReservation(fullKey, actualName, templateSr.fullTypeName, templateSr.comment, templateSr.isRoot);
+						sr = new ServiceReservation(fullKey, actualName, template.fullTypeName, template.comment, template.isRoot);
 
 						// we have to recursively move things if we moved a root
 						// of some complex peer
-						movePeerDNA(fullKey, actualName, templateSr.fullTypeName, sr.comment);
+						movePeerDNA(fullKey, actualName, template.fullTypeName, sr.comment);
 					}
 
 					dna.put(fullKey, sr);
 				} else {
-					log.info("found reservation {} {}", fullKey, reservation.getValue());
+					log.info("found reservation {} {}", fullKey, entry.getValue());
 				}
 			}
 		}
@@ -955,7 +961,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 	public void display() {
 	}
 
-	/**
+	/**`
 	 * called typically from a remote system When 2 MRL instances are connected
 	 * they contain serialized non running Service in a registry, which is
 	 * maintained by the Runtime. The data can be stale.

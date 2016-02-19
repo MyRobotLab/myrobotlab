@@ -241,6 +241,7 @@ public class Clock extends Service {
 		ServiceType meta = new ServiceType(Clock.class.getCanonicalName());
 		meta.addDescription("used to generate pulses and recurring messages");
 		meta.addCategory("scheduling");	
+		
 		return meta;		
 	}
 }
