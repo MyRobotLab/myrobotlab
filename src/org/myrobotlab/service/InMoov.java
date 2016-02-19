@@ -1279,11 +1279,17 @@ public class InMoov extends Service {
 		try {
 			LoggingFactory.getInstance().configure();
 			LoggingFactory.getInstance().setLevel(Level.INFO);
+			
+			VirtualDevice v1 = (VirtualDevice)Runtime.start("v1", "VirtualDevice");
+			VirtualDevice v2 = (VirtualDevice)Runtime.start("v2", "VirtualDevice");
+			
+			v1.createVirtualArduino("COM1"); // hmm can to virtual Arduinos be created with one VirtualDevice???
+			v2.createVirtualArduino("COM2");
 
 			//Runtime.start("webgui", "WebGui");
 
 			InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-			InMoovHead h = i01.startHead("COM15");
+			InMoovHead h = i01.startHead("COM1");
 			i01.speakErrors(true);
 		
 			// Blender blender =  (Blender) Runtime.start("blender", "Blender");
@@ -1401,9 +1407,9 @@ public class InMoov extends Service {
 		meta.sharePeer("mouthControl.mouth", "mouth", speechService, "shared Speech");
 		meta.sharePeer("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
 		// SHARING !!! - modified key / actual name end ------
-		
+
 		// Global - undecorated by self name
-		meta.addRootPeer("python", "python", "Python", "shared Python service");
+		meta.addRootPeer("python", "Python", "shared Python service");
 
 
 		// put peer definitions in
