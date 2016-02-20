@@ -1,9 +1,12 @@
 package org.myrobotlab.opencv;
 
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.opencv_core.CvMat;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.MatVector;
+import org.bytedeco.javacpp.opencv_core.Point2f;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_core.RectVector;
 import org.bytedeco.javacpp.opencv_core.Size;
@@ -18,6 +21,8 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_imgproc.cvWarpAffine;
+import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
@@ -48,14 +53,14 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	private int modelSizeX = 256;
 	private int modelSizeY = 256;
 	//private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-	
+
 	//private CvMemStorage storage = null;
-	
+
 	private CascadeClassifier faceCascade;
 	private CascadeClassifier eyeCascade;
 	//private CascadeClassifier noseCascade;
 	private CascadeClassifier mouthCascade;
-	
+
 	public OpenCVFilterFaceRecognizer() {
 		super();
 		initHaarCas();
@@ -79,36 +84,24 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		//nosehaarcascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, "haarcascade_nose.xml")));;
 		//mouthhaarcascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, "haarcascade_mouth.xml")));;
 		// Now we've got all our classifiers i guess?
-		
-//		if (haarcascade == null) {
-//			log.error("Face classifier was null");
-//		}
-//
-//		if (eyehaarcascade == null) {
-//			log.error("Eye classifier was null");
-//		}
-//
-//		if (nosehaarcascade == null) {
-//			log.error("Nose classifier was null");
-//		}
-//
-//		if (mouthhaarcascade == null) {
-//			log.error("Mouth classifier was null");
-//		}
+
 		faceCascade = new CascadeClassifier(cascadeDir+"/haarcascade_frontalface_default.xml");
 		eyeCascade = new CascadeClassifier(cascadeDir+"/haarcascade_eye.xml");
 		// noseCascade = new CascadeClassifier(cascadeDir+"/haarcascade_nose.xml");
-		mouthCascade = new CascadeClassifier(cascadeDir+"/haarcascade_mouth.xml");
+		// TODO: see if we can find the other classifier.. the mcs mouth doesn't see
+		// to work very well.. at least on my face.  i have no mouth!
+		//		mouthCascade = new CascadeClassifier(cascadeDir+"/haarcascade_mouth.xml");
+		mouthCascade = new CascadeClassifier(cascadeDir+"/haarcascade_mcs_mouth.xml");
 
 	}
-	
+
 	// TODO: create some sort of a life cycle for this.
 	public boolean train(String trainingDir) {
-		
+
 		// File filterfile = new File("src/resources/filter.png");
 		// Face filter used to mask edges of face pictures
 		// Mat facefilter = imread(filterfile.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
-		
+
 		File root = new File(trainingDir);
 		if (!root.isDirectory()) {
 			log.error("Training data directory not found {}", root.getAbsolutePath());
@@ -162,13 +155,13 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		eyeCascade.detectMultiScale(mat,vec);
 		return vec;
 	}
-	
+
 	public RectVector detectMouths(Mat mat) {
 		RectVector vec = new RectVector();
 		mouthCascade.detectMultiScale(mat,vec);
 		return vec;
 	}
-	
+
 	public RectVector detectFaces(Mat mat) {
 		RectVector vec = new RectVector();
 		// TODO: see about better tuning and passing these parameters in.
@@ -176,14 +169,14 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		faceCascade.detectMultiScale(mat,vec);
 		return vec;
 	}
-	
+
 	public void drawRect(IplImage image, Rect rect, CvScalar color) {
 		cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x()+rect.width(), rect.y()+rect.height()), color, 1, 1, 0);		
 	}
-	
+
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
-		
+
 		// we want to detect eyes 
 		// detect nose ?
 		// detect mouth
@@ -196,43 +189,118 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 		Frame frame = converterToMat.convert(imageBW);
 		Mat mat = converterToIpl.convertToMat(frame);
-		
-		// detect the eyes
-		RectVector eyes = detectEyes(mat);
-		if (eyes.size() == 2) {
-			// we have 2 eyes yay!!!
-			log.info("We have 2 eyes!");
-			Rect leftEye = eyes.get(0);
-			Rect rightEye = eyes.get(1);
-			// cv2.rectangle(color_image,(x+ex,y+ey),(x+ex+ew,y+ey+eh),(0,255,0),1)
-			// leftEye.x()+leftEye.w
-			// we have eyes!  draw them
-			drawRect(image, leftEye, CvScalar.BLUE);
-			drawRect(image, rightEye, CvScalar.RED);
-			//cvDrawRect(image, cvPoint(leftEye.x(), leftEye.y()), cvPoint(leftEye.x()+leftEye.width(), leftEye.y()+leftEye.height()), CvScalar.RED, 1, 1, 0);
-			//cvDrawRect(image, cvPoint(rightEye.x(), rightEye.y()), cvPoint(rightEye.x()+rightEye.width(), rightEye.y()+rightEye.height()), CvScalar.BLUE, 1, 1, 0);
-		}
-		
-		// ok.. 
-		// detect the mouth
-//		RectVector mouths = detectMouths(mat);
-//		if (mouths.size() == 1) {
-//			log.info("We have 1 mouth!");
-//			drawRect(image, mouths.get(0), CvScalar.GREEN);
-//		}
-		
-		// TODO: detect the faces
-		// RectVector faces = faceCascade.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=5,minSize=(50, 50),flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
+
+		// first lets pick up on the face. we'll asume the eyes and mouth are inside.
 		RectVector faces = detectFaces(mat);
-		
 		for (int i = 0 ; i < faces.size(); i++) {
 			// iterate faces detected.
 			Rect face = faces.get(i);
 			drawRect(image, face, CvScalar.MAGENTA);
 		}
 
+
+
+		// ultimately we want to find the center of the eyes
+		// and the mouth so we can rotate and scale the image?
+		int centerleftx = -1;
+		int centerlefty = -1;
+		int centerrightx = -1;
+		int centerrighty = -1;
+		int centermouthx = -1;
+		int centermouthy = -1;
+
+
+		boolean hasEyes = false;
+		boolean hasMouth = false;
+		// detect the eyes
+		RectVector eyes = detectEyes(mat);
+		if (eyes.size() == 2) {
+			// log.info("We have 2 eyes!");
+			Rect leftEye = eyes.get(0);
+			Rect rightEye = eyes.get(1);
+			// we have eyes!  draw them
+			drawRect(image, leftEye, CvScalar.BLUE);
+			drawRect(image, rightEye, CvScalar.RED);
+			// here we have 2 eyes
+			hasEyes = true;	
+
+			// 		    centerleftx = detected_eyes[0][0]+detected_eyes[0][2]/2  # left side plus half width
+			//            centerlefty = detected_eyes[0][1]+detected_eyes[0][3]/2  # top plus half height
+			//			centerrightx = detected_eyes[1][0]+detected_eyes[1][2]/2  # left side plus half width
+			//			centerrighty = detected_eyes[1][1]+detected_eyes[1][3]/2  # top plus half height
+
+
+
+			// left side plus 1/2 width  and 1/2 height
+			centerleftx = eyes.get(0).x() + eyes.get(0).width()/2;
+			centerlefty = eyes.get(0).y() + eyes.get(0).height()/2;
+			// right side
+			centerrightx = eyes.get(1).x() + eyes.get(1).width()/2;
+			centerrighty = eyes.get(1).y() + eyes.get(1).height()/2;
+
+		}
+
+
+
+		// ok.. 
+		// detect the mouth
+		RectVector mouths = detectMouths(mat);
+		// TODO: get a better mouth detector!
+		if (mouths.size() >= 1) {
+
+			// log.info("We have at "+mouths.size()+ " mouths!");
+			for ( int i = 0 ; i < mouths.size(); i++) {
+				if (isInside(faces, mouths.get(i))) {
+					if (eyes.size() == 2) {
+						if (!isInside(eyes, mouths.get(i))) {
+							drawRect(image, mouths.get(i), CvScalar.GREEN);
+							hasMouth = true;
+						}
+					}
+				} else { 
+					// the mouth is outside of the detected face!
+					// log.info("What is this mouth?!?!");
+				}
+			}
+			centermouthx = mouths.get(0).x() + mouths.get(0).width()/2;
+			centermouthy = mouths.get(0).y() + mouths.get(0).height()/2;						
+		}
+
+
+
+		// TODO: detect the faces
+		// RectVector faces = faceCascade.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=5,minSize=(50, 50),flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
+
+		// ok. if we have a mouth and we have eyes..
+		// it's probably a face.. rotate scale .. mojo
+		//int [][] ipts1 = new int[][]{[[centerleftx,centerlefty],[centerrightx,centerrighty],[centermouthx,centermouthy]]};
+		int [][] ipts1 = new int[3][2];
+		//{[[centerleftx,centerlefty],[centerrightx,centerrighty],[centermouthx,centermouthy]]};
+		ipts1[0][0] = centerleftx;
+		ipts1[0][1] = centerlefty;
+		ipts1[1][0] = centerrightx;
+		ipts1[1][1] = centerrighty;
+		ipts1[2][0] = centermouthx;
+		ipts1[2][1] = centermouthy;
+
+		//		Point2f pts1 = new Point2f(ipts1);
+		//		Point2f pts2 = new Point2f();
+		//		getAffineTransform(pts1, pts2);
+		//		float centerleftx 
+		//		Point2f pts1 = np.float32([[centerleftx,centerlefty],[centerrightx,centerrighty],[centermouthx,centermouthy]]);
+		//		Point2f pts2 = np.float32([[cols*.3,rows*.45],[cols*.7,rows*.45],[cols*.50,rows*.85]]);
+		//		Mat affXform = getAffineTransform(pts1, pts2);
+		// 		ok.. maybe we can do the affine warp here
+		//		CvMat cvAffXform = new CvMat(affXform);
+		//		cvWarpAffine(image, image, cvAffXform);
+
+		if (hasEyes && hasMouth) {
+			// WOOHOO! we have eyes and mouth!
+			log.info("We found a face!!!");
+		}
+
 		if (!trained) {
-			log.error("Face Recognizer filter not trained.");
+			// log.error("Face Recognizer filter not trained.");
 			return image;
 		}
 
@@ -242,14 +310,36 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		// affine correct it based on eyes and mouth
 		// and resize it for the predictor.
 		mat = resizeImage(mat);
-		
+
 		int predictedLabel = faceRecognizer.predict(mat);
 		System.out.println("Predicted label: " + predictedLabel);
 		// TODO: add a label of some text to the image for
 		// the label that was detected..
-		
+
 		return image;
 		// return converterToIpl.convertToIplImage(converterToIpl.convert(mat));
+	}
+
+	private boolean isInside(RectVector rects, Rect test) {
+		for (int i = 0; i < rects.size(); i++) {
+			Rect r = rects.get(i);
+			int rx = r.x();
+			int rxm = r.x()+r.width();
+
+			int ry = r.y();
+			int rym = r.y() + r.height();
+
+			// we want to check that the test rect is inside of the r
+			if (rx < test.x() && rxm > (test.x() + test.width())) {
+				// the xaxis look good.
+				// how about the y axis?
+				if (ry < test.y() && rym > (test.y() + test.height())) {
+					return true;				
+				}
+
+			}
+		}
+		return false;
 	}
 
 	@Override
