@@ -760,8 +760,8 @@ public class OpenCV extends VideoSource {
 		
 		
 		// training images in this example must be same resolution as camera video stream.
-		OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
-		opencv.addFilter(tr);
+	//	OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
+	//	opencv.addFilter(tr);
 
 		
 //		opencv.addFilter("facerec", "FaceRecognizer");
