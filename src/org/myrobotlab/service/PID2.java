@@ -83,7 +83,7 @@ public class PID2 extends Service {
 
 		private long sampleTime = 100; // default Controller Sample Time is 0.1
 		// seconds
-		private double outMin, outMax;
+		private double outMin, outMax, outCenter;
 		private boolean inAuto;
 	}
 
@@ -182,7 +182,7 @@ public class PID2 extends Service {
 
 	public double getOutput(String key) {
 		PIDData piddata = data.get(key);
-		return piddata.output;
+		return piddata.output + piddata.outCenter;
 	}
 
 	public double getSetpoint(String key) {
@@ -277,8 +277,10 @@ public class PID2 extends Service {
 			error("min >= max");
 			return;
 		}
-		piddata.outMin = Min;
-		piddata.outMax = Max;
+		
+		piddata.outCenter = (Min + Max) / 2;
+		piddata.outMin = Min - piddata.outCenter;
+		piddata.outMax = Max - piddata.outCenter;
 
 		if (piddata.inAuto) {
 			if (piddata.output > piddata.outMax)

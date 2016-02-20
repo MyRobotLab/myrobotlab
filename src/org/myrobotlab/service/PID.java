@@ -89,7 +89,7 @@ public class PID extends Service {
 
 	private long sampleTime = 100; // default Controller Sample Time is 0.1
 	// seconds
-	private double outMin, outMax;
+	private double outMin, outMax, outCenter;
 	private boolean inAuto;
 
 	private long sampleCount = 0;
@@ -207,7 +207,7 @@ public class PID extends Service {
 	}
 
 	public double getOutput() {
-		return output;
+		return output  + outCenter;
 	}
 
 	public double getSetpoint() {
@@ -294,6 +294,10 @@ public class PID extends Service {
 		outMin = Min;
 		outMax = Max;
 
+		outCenter = (Min + Max) / 2;
+		outMin = Min - outCenter;
+		outMax = Max - outCenter;
+		
 		if (inAuto) {
 			if (output > outMax)
 				output = outMax;
