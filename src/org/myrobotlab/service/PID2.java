@@ -185,6 +185,12 @@ public class PID2 extends Service {
 		return piddata.output + piddata.outCenter;
 	}
 
+	public void setOutput(String key, double Output) {
+		setMode(key, MODE_MANUAL);
+		PIDData piddata = data.get(key);
+		piddata.output = Output - piddata.outCenter;
+	}
+	
 	public double getSetpoint(String key) {
 		PIDData piddata = data.get(key);
 		return piddata.setpoint;
@@ -254,7 +260,7 @@ public class PID2 extends Service {
 	public void setMode(String key, int Mode) {
 		PIDData piddata = data.get(key);
 		boolean newAuto = (Mode == MODE_AUTOMATIC);
-		if (newAuto == !piddata.inAuto) { /* we just went from manual to auto */
+		if ((newAuto == !piddata.inAuto) && (Mode == MODE_AUTOMATIC)){ /* we just went from manual to auto */
 			init(key);
 		}
 		piddata.inAuto = newAuto;
