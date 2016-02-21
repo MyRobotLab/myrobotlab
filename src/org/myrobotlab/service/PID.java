@@ -48,7 +48,7 @@ import org.slf4j.Logger;
  * 
  * PID - software based PID controller.  This handles a single input / output based on control theory.
  * This will be consolidated with the PID2 service at some point.
- * More info at https://en.wikipedia.org/wiki/PID_controller
+ * More info at https://en.wikipedia.org/wiki/PID_contritoller
  *
  */
 public class PID extends Service {
@@ -210,6 +210,12 @@ public class PID extends Service {
 		return output  + outCenter;
 	}
 
+	public void setOutput(double Output) {
+		// Used to manually override the output
+		setMode(MODE_MANUAL);
+		output  =  Output - outCenter;
+	}
+
 	public double getSetpoint() {
 		return setpoint;
 	}
@@ -271,7 +277,7 @@ public class PID extends Service {
 	 */
 	public void setMode(int Mode) {
 		boolean newAuto = (Mode == MODE_AUTOMATIC);
-		if (newAuto == !inAuto) { /* we just went from manual to auto */
+		if ((newAuto == !inAuto) && (Mode == MODE_AUTOMATIC)){ /* we just went from manual to auto */
 			init();
 		}
 		inAuto = newAuto;
