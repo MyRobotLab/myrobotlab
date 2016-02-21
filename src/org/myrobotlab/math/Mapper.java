@@ -95,4 +95,12 @@ public final class Mapper implements Serializable {
 		minOutput = min;
 	}
 
+	public double getMinOutput(){
+		return minOutput;
+	}	
+	
+	public double getMaxOutput(){
+		return maxOutput;
+	}
+	
 }

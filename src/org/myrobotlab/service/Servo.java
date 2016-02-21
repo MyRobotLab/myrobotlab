@@ -291,12 +291,20 @@ public class Servo extends Service implements ServoControl {
 		return mapper.getMaxX();
 	}
 
+	public Double getMaxOutput() {
+		return mapper.getMaxOutput();
+	}
+	
 	public Double getMin() {
 		return mapper.getMinY();
 	}
 
 	public Double getMinInput() {
 		return mapper.getMinX();
+	}
+	
+	public Double getMinOutput() {
+		return mapper.getMinOutput();
 	}
 
 	@Override
