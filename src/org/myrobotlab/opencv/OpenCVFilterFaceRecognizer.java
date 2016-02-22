@@ -1,5 +1,6 @@
 package org.myrobotlab.opencv;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -17,6 +18,7 @@ import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
@@ -46,8 +48,15 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
 	private static final long serialVersionUID = 1L;
 
+	// training mode stuff
+	public Mode mode = Mode.RECOGNIZE;
+	// when in training mode, this is the name to associate with the face.
+	public String trainName = null;
+	
 	private FaceRecognizer faceRecognizer;
 	private boolean trained = false;
+	// the directory to store the training images.
+	private String trainingDir = "c:/training";
 
 	private int modelSizeX = 256;
 	private int modelSizeY = 256;
@@ -70,7 +79,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		initHaarCas();
 	}
 
-
+	public enum Mode {
+		TRAIN,
+		RECOGNIZE
+	}
+	
 	public void initHaarCas() {
 		String cascadeDir = "haarcascades";
 		//nosehaarcascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, "haarcascade_nose.xml")));;
@@ -85,7 +98,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	}
 
 	// TODO: create some sort of a life cycle for this.
-	public boolean train(String trainingDir) {
+	public boolean train() {
 		// File filterfile = new File("src/resources/filter.png");
 		// Face filter used to mask edges of face pictures
 		// Mat facefilter = imread(filterfile.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
@@ -101,6 +114,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			}
 		};
 		File[] imageFiles = root.listFiles(imgFilter);
+		if (imageFiles.length < 1) {
+			log.info("No images found for training.");
+			return false;
+		}
 		MatVector images = new MatVector(imageFiles.length);
 		Mat labels = new Mat(imageFiles.length, 1, CV_32SC1);
 		IntBuffer labelsBuf = labels.getIntBuffer();
@@ -231,7 +248,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 							mouthIndex = i;
 						}
 					}
-				} else { 
+				} else {
 					// the mouth is outside of the detected face!
 					// log.info("What is this mouth?!?!");
 				}
@@ -239,8 +256,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			centermouthx = mouths.get(mouthIndex).x() + mouths.get(mouthIndex).width()/2;
 			centermouthy = mouths.get(mouthIndex).y() + mouths.get(mouthIndex).height()/2;						
 		}
-
-
 
 		// TODO: detect the faces
 		// RectVector faces = faceCascade.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=5,minSize=(50, 50),flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
@@ -291,12 +306,32 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			// rotate and and center the image.
 			// TODO: this seems no worky?
 			warpAffine(mat, mat, warpMat, new Size(cols,rows));
+			
+			// OK.. if we're in training mode, we should save the image off.
+			if (OpenCVFilterFaceRecognizer.Mode.TRAIN.equals(mode)) {
+				// we're in training mode.. so we should save the image
+				// TODO: save image with the train name
+				if (!StringUtils.isEmpty(trainName)) {
+					// ok we know the name for this face. 
+					// we have the trimmed down image representing the
+					// face. save it off.
+					long i = System.currentTimeMillis();
+					// TODO: encode a proper/better filename.
+					String filename = trainingDir + "/" + trainName + i + ".png";
+					// TODO: what format is this?!!
+					imwrite(filename, mat);
+				} else {
+					log.warn("In Training mode, but the trainName isn't set!");
+				}
+			}
 		}
 
+		
+		
 		if (!trained) {
 			// log.error("Face Recognizer filter not trained.");
-			return converterToIpl.convertToIplImage(converterToIpl.convert(mat));
-			// return image;
+			// return converterToIpl.convertToIplImage(converterToIpl.convert(mat));
+			return image;
 		}
 
 		// This line causes the JVM to seg fault on me : EXCEPTION_ACCESS_VIOLATION
@@ -389,5 +424,31 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	public void setModelSizeY(int modelSizeY) {
 		this.modelSizeY = modelSizeY;
 	}
+	
+	public Mode getMode() {
+		return mode;
+	}
+
+	public void setMode(Mode mode) {
+		this.mode = mode;
+	}
+
+	public String getTrainName() {
+		return trainName;
+	}
+
+	public void setTrainName(String trainName) {
+		this.trainName = trainName;
+	}
+
+	public String getTrainingDir() {
+		return trainingDir;
+	}
+
+	public void setTrainingDir(String trainingDir) {
+		this.trainingDir = trainingDir;
+	}
+
+
 
 }
