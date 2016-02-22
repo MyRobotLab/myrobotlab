@@ -768,8 +768,9 @@ public class OpenCV extends VideoSource {
 		
 		OpenCVFilterFaceRecognizer facerec = new OpenCVFilterFaceRecognizer("facerec");
 		
-		String trainingDir = "C:\\facedata\\test1";
-		facerec.train(trainingDir);
+		String trainingDir = "C:\\training";
+		facerec.setTrainingDir(trainingDir);
+		facerec.train();
 		
 		opencv.addFilter(facerec);
 		
