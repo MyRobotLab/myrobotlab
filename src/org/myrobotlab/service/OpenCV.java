@@ -119,6 +119,7 @@ public class OpenCV extends VideoSource {
 	transient public final static String INPUT_SOURCE_NETWORK = "network";
 	transient public final static String INPUT_SOURCE_PIPELINE = "pipeline";
 	transient public final static String INPUT_SOURCE_IMAGE_FILE = "imagefile";
+	transient public final static String INPUT_SOURCE_IMAGE_DIRECTORY = "slideshow";
 
 	// TODO - OpenCV constants / enums ? ... hmm not a big fan ...
 	transient public static final String FILTER_LK_OPTICAL_TRACK = "LKOpticalTrack";
@@ -757,11 +758,11 @@ public class OpenCV extends VideoSource {
 		
 		OpenCV opencv = (OpenCV) Runtime.start("left", "OpenCV");
 		// Runtime.start("right", "OpenCV");
-		
-		
+		//opencv.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
+		//opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
 		// training images in this example must be same resolution as camera video stream.
-	//	OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
-	//	opencv.addFilter(tr);
+		//	OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
+		//	opencv.addFilter(tr);
 
 		
 //		opencv.addFilter("facerec", "FaceRecognizer");

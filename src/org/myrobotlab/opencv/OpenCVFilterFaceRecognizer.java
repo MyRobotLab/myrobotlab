@@ -63,6 +63,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	private CascadeClassifier faceCascade;
 	private CascadeClassifier eyeCascade;
 	private CascadeClassifier mouthCascade;
+	
+	
+	private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+	private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
 	public OpenCVFilterFaceRecognizer() {
 		super();
@@ -138,8 +142,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		faceRecognizer = createFisherFaceRecognizer();
 		//faceRecognizer = createEigenFaceRecognizer();
 		// faceRecognizer = createLBPHFaceRecognizer()
+
+		//log.info("skipping training for now.");
 		faceRecognizer.train(images, labels);
-		trained = true;
+		//trained = true;
 		return true;
 	}
 
@@ -177,13 +183,15 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
-
-		// Convert to gray scale Mat object.  this looks so lame.. gotta be better way 
+		
+		// Ok. need some major refactoring here. 
+		
+		
+		// Convert to a grayscale image.  
+		//(TODO: maybe convert to a Mat first, then cut color? not sure what's faster 
 		IplImage imageBW = IplImage.create(image.width(), image.height(),8,1);
 		cvCvtColor(image, imageBW, CV_BGR2GRAY);
 		// TODO: this seems super wonky!  isn't there an easy way to go from IplImage to opencv Mat?
-		OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-		OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 		Frame frame = converterToMat.convert(imageBW);
 		int cols = frame.imageWidth;
 		int rows = frame.imageHeight;
@@ -317,7 +325,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 					// face. save it off.
 					long i = System.currentTimeMillis();
 					// TODO: encode a proper/better filename.
-					String filename = trainingDir + "/" + trainName + i + ".png";
+					
+					String filename = trainingDir + "/" + trainName.hashCode() + "-" + trainName + i + ".png";
 					// TODO: what format is this?!!
 					imwrite(filename, mat);
 				} else {

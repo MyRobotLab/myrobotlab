@@ -346,6 +346,9 @@ public class VideoProcessor implements Runnable, Serializable {
 			} else if (OpenCV.INPUT_SOURCE_IMAGE_FILE.equals(inputSource)) {
 				paramTypes[0] = String.class;
 				params[0] = inputFile;
+			} else if (OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY.equals(inputSource)) {
+				paramTypes[0] = String.class;
+				params[0] = inputFile;
 			} else if (OpenCV.INPUT_SOURCE_PIPELINE.equals(inputSource)) {
 				paramTypes[0] = String.class;
 				params[0] = pipelineSelected;

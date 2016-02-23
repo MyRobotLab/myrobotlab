@@ -1,24 +1,13 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_calib3d.*;
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_features2d.*;
-import static org.bytedeco.javacpp.opencv_flann.*;
-import static org.bytedeco.javacpp.opencv_highgui.*;
+
 import static org.bytedeco.javacpp.opencv_imgcodecs.*;
-import static org.bytedeco.javacpp.opencv_ml.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
-import static org.bytedeco.javacpp.opencv_photo.*;
-import static org.bytedeco.javacpp.opencv_shape.*;
-import static org.bytedeco.javacpp.opencv_stitching.*;
-import static org.bytedeco.javacpp.opencv_video.*;
-import static org.bytedeco.javacpp.opencv_videostab.*;
+
+import java.util.HashMap;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -29,26 +18,23 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 
 	private IplImage image;
 	private IplImage lastImage;
-	private IplImage cache;
+	private HashMap<String,IplImage> cache = new HashMap<String,IplImage>();
 	private int frameCounter = 0;
-	String path;
+	public String path;
 	transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
 
 	public ImageFileFrameGrabber(String path) {
 		this.path = path;
-		
-		
 	}
 
 	@Override
 	public Frame grab() {
-
-
-		if (cache == null) {
-			cache = cvLoadImage(path);
+		if (!cache.containsKey(path))  {
+			image = cvLoadImage(path); 
+			cache.put(path, image);
+		} else {
+			image = cache.get(path).clone();
 		}
-
-		image = cache.clone();
 
 		++frameCounter;
 

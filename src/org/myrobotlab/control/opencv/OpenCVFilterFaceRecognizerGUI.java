@@ -48,14 +48,12 @@ public class OpenCVFilterFaceRecognizerGUI extends OpenCVFilterGUI implements Ac
 	private JTextField trainName = new JTextField("trainName", 10);
 	private JCheckBox trainMode = new JCheckBox();
 	
-	
 	public OpenCVFilterFaceRecognizerGUI(String boundFilterName, String boundServiceName, GUIService myService) {
 		super(boundFilterName, boundServiceName, myService);
 		// build the config for this filter.
 		TitledBorder title = BorderFactory.createTitledBorder("Face Recognizer");
 		JPanel j = new JPanel(new GridBagLayout());
 		j.setBorder(title);
-
 		// text box for persons name
 		trainName.addActionListener(this);
 		trainName.setText("Kevin");
@@ -64,7 +62,6 @@ public class OpenCVFilterFaceRecognizerGUI extends OpenCVFilterGUI implements Ac
 		trainMode.setSelected(false);
 		trainMode.addActionListener(this);
 		// the person's name that you're going to train for.
-		
 		// assemble those elements into the UI.
 		JPanel jp = new JPanel(new GridBagLayout());
 		jp.add(new JLabel("Train:"));
@@ -72,7 +69,6 @@ public class OpenCVFilterFaceRecognizerGUI extends OpenCVFilterGUI implements Ac
 		jp.add(new JLabel("Name:"));
 		jp.add(trainName);
 		display.add(jp, gc);
-		
 	}
 
 	@Override
