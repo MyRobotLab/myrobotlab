@@ -146,7 +146,7 @@ public class OpenCV extends VideoSource {
 	static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
 			"Dilate", "Erode", "FaceDetect", "FaceRecognizer","Fauvist", "FFMEG", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray", "HoughLines2", "HSV", "Input",
 			"InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not", "Output", "PyramidDown",
-			"PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageROI", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split", "State", "SURF",
+			"PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageROI", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Split", "State", "SURF",
 			"Threshold", "Transpose" };
 
 	// yep its public - cause a whole lotta data
@@ -754,13 +754,19 @@ public class OpenCV extends VideoSource {
 		org.apache.log4j.BasicConfigurator.configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
 		
-		OpenCV opencv = (OpenCV) Runtime.start("left", "OpenCV");
+		OpenCV opencvLeft = (OpenCV) Runtime.start("left", "OpenCV");
 		// Runtime.start("right", "OpenCV");
-		//opencv.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
-		//opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
+		opencvLeft.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
+		opencvLeft.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
 		// training images in this example must be same resolution as camera video stream.
 		//	OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
 		//	opencv.addFilter(tr);
+
+
+		OpenCV opencvRight = (OpenCV) Runtime.start("right", "OpenCV");
+		// Runtime.start("right", "OpenCV");
+		opencvRight.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
+		opencvRight.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
 
 		
 //		opencv.addFilter("facerec", "FaceRecognizer");
@@ -771,12 +777,13 @@ public class OpenCV extends VideoSource {
 		facerec.setTrainingDir(trainingDir);
 		facerec.train();
 		
-		opencv.addFilter(facerec);
+		opencvLeft.addFilter(facerec);
 		
 		//VideoStreamer vs = (VideoStreamer)Runtime.start("vs", "VideoStreamer");
 		//vs.attach(opencv);
 		//opencv.capture();
-		opencv.capture();
+		opencvLeft.capture();
+		opencvRight.capture();
 		
 		/*
 		OpenCVFilterFFmpeg ffmpeg = new OpenCVFilterFFmpeg("ffmpeg");
@@ -855,7 +862,9 @@ public class OpenCV extends VideoSource {
 		ServiceType meta = new ServiceType(OpenCV.class.getCanonicalName());
 		meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
 		meta.addCategory("video","vision","sensor");
-		meta.addPeer("streamer", "VideoStreamer", "video streaming service for webgui.");
+		// meta.addPeer("streamer", "VideoStreamer", "video streaming service for webgui.");
+		
+		meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 		//meta.addDependency("org.bytedeco.javacpp","1.1");
 		meta.addDependency("org.bytedeco.javacv","1.1");
 		return meta;
