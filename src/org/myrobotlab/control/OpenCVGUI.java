@@ -37,6 +37,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -159,7 +160,10 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 
 			String selected = (String) grabberTypeSelect.getSelectedItem();
 
-			if ("IPCamera".equals(selected) || "Pipeline".equals(selected)) {
+			
+			
+			
+			if ("IPCamera".equals(selected) || "Pipeline".equals(selected) || "ImageFile".equals(selected) || "SlideShow".equals(selected)) {
 				prefixPath = "org.myrobotlab.opencv.";
 			} else {
 				prefixPath = "org.bytedeco.javacv.";
@@ -177,14 +181,26 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 					extension = fileName.substring(i + 1);
 				}
 
+				
+				// 
+				File inputFile = new File(fileName);
+				
+				 
+				
 				if (("jpg").equals(extension) || ("png").equals(extension)) {
 					vp.inputSource = OpenCV.INPUT_SOURCE_IMAGE_FILE;
 					vp.grabberType = "org.myrobotlab.opencv.ImageFileFrameGrabber";
 
+				} else if (inputFile.isDirectory()) {
+					// this is a slide show.
+					vp.inputSource = OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY;
+					vp.grabberType = "org.myrobotlab.opencv.SlideShowFrameGrabber";
+					myService.send(boundServiceName, "setDirectory", inputFile);
 				} else {
 					vp.inputSource = OpenCV.INPUT_SOURCE_MOVIE_FILE;
 				}
 
+				
 			} else if (cameraRadio.isSelected()) {
 				vp.inputSource = OpenCV.INPUT_SOURCE_CAMERA;
 				vp.cameraIndex = (Integer) cameraIndex.getSelectedItem();
@@ -538,8 +554,11 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 						grabberTypeSelect.setSelectedItem("Pipeline");
 						// grabberTypeSelect.addActionListener(grabberTypeListener);
 						pipelineHook.setSelectedItem(vp.pipelineSelected);
+					} else if (OpenCV.INPUT_SOURCE_IMAGE_FILE.equals(inputSource) || OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY.equals(inputSource)) {
+						// the file input should be enabled if we are file or directory.
+						fileRadio.setSelected(true);
 					}
-
+					
 					currentFilters.removeListSelectionListener(self);
 					currentFilters.setSelectedValue(vp.displayFilterName, true);// .setSelectedIndex(index);
 					currentFilters.addListSelectionListener(self);
@@ -575,16 +594,20 @@ public class OpenCVGUI extends ServiceGUI implements ListSelectionListener, Vide
 		capture.addActionListener(captureListener);
 
 		ArrayList<String> frameGrabberList = new ArrayList<String>();
+		// Add all of the OpenCV defined FrameGrabbers
 		for (int i = 0; i < FrameGrabber.list.size(); ++i) {
 			String ss = FrameGrabber.list.get(i);
 			String fg = ss.substring(ss.lastIndexOf(".") + 1);
 			frameGrabberList.add(fg);
 		}
 
+		// Add the MRL Frame Grabbers
 		frameGrabberList.add("IPCamera");
 		frameGrabberList.add("Pipeline"); // service which implements
 											// ImageStreamSource
-
+		frameGrabberList.add("ImageFile");
+		frameGrabberList.add("SlideShowFile");
+		
 		// CanvasFrame cf = new CanvasFrame("hello");
 
 		grabberTypeSelect = new JComboBox(frameGrabberList.toArray());
