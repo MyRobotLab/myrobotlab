@@ -506,9 +506,7 @@ public class VideoProcessor implements Runnable, Serializable {
 							// needed
 							// if displayFilter == null but we are told to
 							// display - then display INPUT
-
 							IplImage display;
-
 							if (forkDisplay) {
 								IplImage forked = cvCreateImage(cvGetSize(image), image.depth(), image.nChannels());
 								cvCopy(image, forked, null);

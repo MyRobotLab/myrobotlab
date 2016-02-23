@@ -10,9 +10,11 @@ import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_core.RectVector;
 import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
+import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+
 import static org.bytedeco.javacpp.opencv_face.createFisherFaceRecognizer;
 import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
@@ -20,14 +22,20 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
+import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This is the OpenCV Face Recognition. It must be trained with a
@@ -45,28 +53,28 @@ import java.nio.IntBuffer;
  *
  */
 public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
-
 	private static final long serialVersionUID = 1L;
-
 	// training mode stuff
 	public Mode mode = Mode.RECOGNIZE;
 	// when in training mode, this is the name to associate with the face.
 	public String trainName = null;
-	
 	private FaceRecognizer faceRecognizer;
 	private boolean trained = false;
 	// the directory to store the training images.
 	private String trainingDir = "c:/training";
-
 	private int modelSizeX = 256;
 	private int modelSizeY = 256;
+	private String cascadeDir = "haarcascades";
 	private CascadeClassifier faceCascade;
 	private CascadeClassifier eyeCascade;
 	private CascadeClassifier mouthCascade;
-	
-	
+	// TODO: why the heck do we need to convert back and forth, and is this effecient?!?!
 	private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
 	private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
+	
+	private HashMap<Integer, String> idToLabelMap = new HashMap<Integer,String>();
+	
+	private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
 	public OpenCVFilterFaceRecognizer() {
 		super();
@@ -87,22 +95,19 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		TRAIN,
 		RECOGNIZE
 	}
-	
+
 	public void initHaarCas() {
-		String cascadeDir = "haarcascades";
-		//nosehaarcascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, "haarcascade_nose.xml")));;
-		// Now we've got all our classifiers i guess?
 		faceCascade = new CascadeClassifier(cascadeDir+"/haarcascade_frontalface_default.xml");
 		eyeCascade = new CascadeClassifier(cascadeDir+"/haarcascade_eye.xml");
+		// TODO: find a better mouth classifier! this one kinda sucks.
 		mouthCascade = new CascadeClassifier(cascadeDir+"/haarcascade_mcs_mouth.xml");
-		// noseCascade = new CascadeClassifier(cascadeDir+"/haarcascade_nose.xml");
-		// TODO: see if we can find the other classifier.. the mcs mouth doesn't see
-		// to work very well.. at least on my face.  i have no mouth!
 		// mouthCascade = new CascadeClassifier(cascadeDir+"/haarcascade_mouth.xml");
+		// noseCascade = new CascadeClassifier(cascadeDir+"/haarcascade_nose.xml");
 	}
 
 	// TODO: create some sort of a life cycle for this.
 	public boolean train() {
+		// TODO: consider adding the mask as a filter.
 		// File filterfile = new File("src/resources/filter.png");
 		// Face filter used to mask edges of face pictures
 		// Mat facefilter = imread(filterfile.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
@@ -128,24 +133,39 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		int counter = 0;
 		for (File image : imageFiles) {
 			Mat img = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
-			int label = Integer.parseInt(image.getName().split("\\-")[0]);
+			String filenamePart = image.getName().split("\\-")[0];
+			int label = filenamePart.hashCode();
+			idToLabelMap.put(label, filenamePart);
+			try {
+				label = Integer.parseInt(image.getName().split("\\-")[0]);
+			} catch (NumberFormatException e) {
+				log.warn("filename not parsed. using hash code.");
+				// e.printStackTrace();
+			}
+			
 			// make sure all our test images are resized 
 			Mat resized = resizeImage(img);
 			// so, now our input for the training set is always 256x256 image.
 			// we should probably run face detect and center this resized image.. 
 			// no idea what sort of data it's going to be pumping out..
+
+			// TODO: we should detect face in the image, and then crop/scale and insert it into 
+			// the array of images.
+
+			// TODO: our training images are indexed by integer,
+			// we're really prefer to have a string map, so we have a human readable label
 			images.put(counter, resized);
 			labelsBuf.put(counter, label);
 			counter++;
 		}
+		
 		// TODO: expose the other types of recognizers ?
 		faceRecognizer = createFisherFaceRecognizer();
 		//faceRecognizer = createEigenFaceRecognizer();
 		// faceRecognizer = createLBPHFaceRecognizer()
-
 		//log.info("skipping training for now.");
 		faceRecognizer.train(images, labels);
-		//trained = true;
+		trained = true;
 		return true;
 	}
 
@@ -183,10 +203,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
-		
-		// Ok. need some major refactoring here. 
-		
-		
 		// Convert to a grayscale image.  
 		//(TODO: maybe convert to a Mat first, then cut color? not sure what's faster 
 		IplImage imageBW = IplImage.create(image.width(), image.height(),8,1);
@@ -195,167 +211,199 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		Frame frame = converterToMat.convert(imageBW);
 		int cols = frame.imageWidth;
 		int rows = frame.imageHeight;
-		Mat mat = converterToIpl.convertToMat(frame);
+		// This is the black and white image that we'll work with.
+		Mat bwImgMat = converterToIpl.convertToMat(frame);
 
-		// first lets pick up on the face. we'll asume the eyes and mouth are inside.
-		RectVector faces = detectFaces(mat);
-		for (int i = 0 ; i < faces.size(); i++) {
-			// iterate faces detected.
-			Rect face = faces.get(i);
-			drawRect(image, face, CvScalar.MAGENTA);
-		}
+		ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat);
 
-		// ultimately we want to find the center of the eyes
-		// and the mouth so we can rotate and scale the image?
-		int centerleftx = -1;
-		int centerlefty = -1;
-		int centerrightx = -1;
-		int centerrighty = -1;
-		int centermouthx = -1;
-		int centermouthy = -1;
-
-		boolean hasEyes = false;
-		boolean hasMouth = false;
-		// detect the eyes
-		RectVector eyes = detectEyes(mat);
-		if (eyes.size() == 2) {
-			// log.info("We have 2 eyes!");
-			Rect leftEye = eyes.get(0);
-			Rect rightEye = eyes.get(1);
-			// we have eyes!  draw them
-			drawRect(image, leftEye, CvScalar.BLUE);
-			drawRect(image, rightEye, CvScalar.RED);
-			// here we have 2 eyes
-			hasEyes = true;	
-			// left side plus 1/2 width  and 1/2 height
-			centerleftx = eyes.get(0).x() + eyes.get(0).width()/2;
-			centerlefty = eyes.get(0).y() + eyes.get(0).height()/2;
-			// right side
-			centerrightx = eyes.get(1).x() + eyes.get(1).width()/2;
-			centerrighty = eyes.get(1).y() + eyes.get(1).height()/2;
-		}
-
-		// detect the mouth(s)
-		RectVector mouths = detectMouths(mat);
-		// TODO: get a better mouth detector!
 		
-		// only the mouth that is in the face and not overlapping with the eyes.
-		int mouthIndex = 0;
-		if (mouths.size() >= 1) {
-			// log.info("We have at "+mouths.size()+ " mouths!");
-			for ( int i = 0 ; i < mouths.size(); i++) {
+		// Ok, for each of these detected faces we should try to classify them.
+		log.info("We found {} faces!!!", dFaces.size());
 
-				// mouth must be inside the face and not overlap with the eyes
-				if (isInside(faces, mouths.get(i))) {
-					
-					
-					if (eyes.size() == 2) {
-						if (!rectOverlap(eyes.get(0), mouths.get(i)) && !rectOverlap(eyes.get(1), mouths.get(i))) {
-							drawRect(image, mouths.get(i), CvScalar.GREEN);
-							hasMouth = true;
-							mouthIndex = i;
+		for (DetectedFace dF : dFaces) {
+			// highlight! 
+			drawFaceRects(image, dF);
+			if (dF.isComplete()) {
+				// Ok we have a complete face. lets get the affine points.
+
+				// ultimately we want to find the center of the eyes
+				// and the mouth so we can rotate and scale the image?
+
+				// left eye center
+				int centerleftx = dF.getLeftEye().x() + dF.getLeftEye().width()/2;
+				int centerlefty = dF.getLeftEye().y() + dF.getLeftEye().height()/2;
+				// right side center
+				int centerrightx = dF.getRightEye().x() + dF.getRightEye().width()/2;
+				int centerrighty = dF.getRightEye().y() + dF.getRightEye().height()/2;
+
+				// mouth center.
+				int centermouthx = dF.getMouth().x() + dF.getMouth().width()/2;
+				int centermouthy = dF.getMouth().y() + dF.getMouth().height()/2;						
+
+				// and array of 3 x,y points.
+				int[][] ipts1 = new int[3][2];
+				// point 1
+				ipts1[0][0] = centerleftx;
+				ipts1[0][1] = centerlefty;
+				// point 2
+				ipts1[1][0] = centerrightx;
+				ipts1[1][1] = centerrighty;
+				// point 3
+				ipts1[2][0] = centermouthx;
+				ipts1[2][1] = centermouthy;
+
+				// create the points
+				Point2f srcTri = new Point2f(3);
+				Point2f dstTri = new Point2f(3);
+
+				// populate source triangle
+				srcTri.position(0).x((float)centerleftx).y((float)centerlefty);
+				srcTri.position(1).x((float)centerrightx).y((float)centerrighty);
+				srcTri.position(2).x((float)centermouthx).y((float)centermouthy);
+
+				// populate dest triangle.
+				dstTri.position(0).x((float)(cols*.3)).y((float)(rows*.45));
+				dstTri.position(1).x((float)(cols*.7)).y((float)(rows*.45));
+				dstTri.position(2).x((float)(cols*.5)).y((float)(rows*.85));
+
+				// create the affine rotation/scale matrix
+				Mat warpMat = getAffineTransform( srcTri.position(0), dstTri.position(0) );
+				
+				// Ok, if we do it to the original image..  this will bust 
+				// TODO: support multiple face detect properly!
+				warpAffine(bwImgMat, bwImgMat, warpMat, new Size(cols,rows));
+				// TODO: allow debug display of the warped image.
+				try {
+					// TODO: why do i have to close these?!
+					srcTri.close();
+					dstTri.close();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				// Ok, now we've got the bwImgMat, that we'll either 
+				// save this image as a training image.
+				// or we'll try to classify the image with our current model.
+				if (Mode.TRAIN.equals(mode)) {
+					// we're in training mode.. so we should save the image
+					// TODO: save image with the train name
+					String trainModeLabel = "TRAINING MODE :" + trainName;
+					cvPutText(image, trainModeLabel, cvPoint(20,20), font, CvScalar.CYAN);
+					if (!StringUtils.isEmpty(trainName)) {
+						// ok we know the name for this face. 
+						// we have the trimmed down image representing the
+						// face. save it off.
+						long i = System.currentTimeMillis();
+						// TODO: encode a proper/better filename.
+						// TODO: choose some sort of better unique filename.
+						String filename = trainingDir + "/" + trainName + "-" + i + ".png";
+						// TODO: what format is this?!!
+						imwrite(filename, bwImgMat);
+					} else {
+						log.warn("In Training mode, but the trainName isn't set!");
+					}
+				} else if (Mode.RECOGNIZE.equals(mode)) {
+					// You bettah recognize!
+					if (!trained) {
+						// we are a young grasshopper.
+						log.info("Classifier not trained yet.");
+						return image;
+					} else {
+						// Ok... now we've gotta predict something!
+						bwImgMat = resizeImage(bwImgMat);
+						int predictedLabel = faceRecognizer.predict(bwImgMat);
+						log.info("Recognized a Face {}", predictedLabel);
+						String name = Integer.toString(predictedLabel);
+						if (idToLabelMap.containsKey(predictedLabel)) {
+							name = idToLabelMap.get(predictedLabel);
 						}
+						String labelString = "Recognized: " + name;
+						// now we should pick the lower left corner of the rect.
+						cvPutText(image, labelString, cvPoint(dF.getFace().x(), dF.getFace().y()+dF.getFace().height()), font, CvScalar.CYAN);
+						return image;
 					}
 				} else {
-					// the mouth is outside of the detected face!
-					// log.info("What is this mouth?!?!");
+					return image;
+				}
+				
+			}
+
+		}
+		
+		//return converterToIpl.convertToIplImage(converterToIpl.convert(bwImgMat));
+		return image;
+		
+	}
+
+	private ArrayList<DetectedFace> extractDetectedFaces(Mat bwImgMat) {
+		ArrayList<DetectedFace> dFaces = new ArrayList<DetectedFace>();
+		// first lets pick up on the face. we'll asume the eyes and mouth are inside.
+		RectVector faces = detectFaces(bwImgMat);
+		// TODO: take only non overlapping faces.
+		// Ok, we have a face, so... we should try to find the eyes and mouths.
+		RectVector eyes = detectEyes(bwImgMat);
+		RectVector mouths = detectMouths(bwImgMat);
+		// Now that we've got eyes and mouths.. lets see if they
+		// line up on the faces..
+		for (int i = 0 ; i < faces.size(); i++) {
+			DetectedFace dFace = new DetectedFace();
+			Rect face = faces.get(i);
+			// the face!
+			dFace.setFace(face);
+			// ok find the mouth in the face.
+			for (int m = 0 ; m < mouths.size(); m++) {
+				Rect mouth = mouths.get(m);
+				// TODO: evaluate what's a better match
+				// maybe many mouths
+				// Ok, now we need to find the eyes in this face
+				for (int e = 0 ; e < eyes.size(); e++) {
+					// this one is a bit trickier , we need 2 eyes in the face.
+					// but i'm not sure which is left or right?!
+					Rect eye = eyes.get(e);
+					if (isInside(face, eye)) {
+						// TODO: some better way to know which is left & right.
+						// for now, just taking the first and second one we find inside the face.
+						// this could be backwards?!
+						if (dFace.getLeftEye() == null) {
+							dFace.setLeftEye(eye);
+						} else {
+							dFace.setRightEye(eye);
+						}
+					}
+				}
+				// TODO: reverse the isInside method args.  seems backwards currently.
+				if (isInside(face, mouth)) {
+					if (!rectOverlap(dFace.getLeftEye(), mouth) && !rectOverlap(dFace.getRightEye(), mouth)) {
+						dFace.setMouth(mouth);
+					}
 				}
 			}
-			centermouthx = mouths.get(mouthIndex).x() + mouths.get(mouthIndex).width()/2;
-			centermouthy = mouths.get(mouthIndex).y() + mouths.get(mouthIndex).height()/2;						
+			// add this to a face that we've found.
+			dFaces.add(dFace);
+		}
+		return dFaces;
+	}
+
+	private void drawFaceRects(IplImage image, DetectedFace dFace) {
+		// helper function to draw rectangles around the detected face(s)
+		drawRect(image, dFace.getFace(), CvScalar.MAGENTA);
+		if (dFace.getLeftEye() != null) {
+			drawRect(image, dFace.getLeftEye(), CvScalar.BLUE);
+		}
+		if (dFace.getRightEye() != null) {
+			drawRect(image, dFace.getRightEye(), CvScalar.RED);
+		}
+		if (dFace.getMouth() != null) {
+			drawRect(image, dFace.getMouth(), CvScalar.GREEN);
 		}
 
-		// TODO: detect the faces
-		// RectVector faces = faceCascade.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=5,minSize=(50, 50),flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
+	}
 
-		// ok. if we have a mouth and we have eyes..
-		// it's probably a face.. rotate scale .. mojo
-		//int [][] ipts1 = new int[][]{[[centerleftx,centerlefty],[centerrightx,centerrighty],[centermouthx,centermouthy]]};
-		int [][] ipts1 = new int[3][2];
-		//{[[centerleftx,centerlefty],[centerrightx,centerrighty],[centermouthx,centermouthy]]};
-		ipts1[0][0] = centerleftx;
-		ipts1[0][1] = centerlefty;
-		ipts1[1][0] = centerrightx;
-		ipts1[1][1] = centerrighty;
-		ipts1[2][0] = centermouthx;
-		ipts1[2][1] = centermouthy;
-
-		
-		Point2f srcTri = new Point2f(3);
-		Point2f dstTri = new Point2f(3);
-
-		// ...
-
-		srcTri.position(0).x((float)centerleftx).y((float)centerlefty);
-		srcTri.position(1).x((float)centerrightx).y((float)centerrighty);
-		srcTri.position(2).x((float)centermouthx).y((float)centermouthy);
-		// and do the same for dstTri
-		// pts2 = np.float32([[cols*.3,rows*.45],[cols*.7,rows*.45],[cols*.50,rows*.85]])
-		dstTri.position(0).x((float)(cols*.3)).y((float)(rows*.45));
-		dstTri.position(1).x((float)(cols*.7)).y((float)(rows*.45));
-		dstTri.position(2).x((float)(cols*.5)).y((float)(rows*.85));
-		
-		
-		Mat warpMat = getAffineTransform( srcTri.position(0), dstTri.position(0) );
-		
-		// TODO: make sure these are closed properly?
-		try {
-			srcTri.close();
-			dstTri.close();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	private void drawRects(IplImage image, RectVector rects, CvScalar color) {
+		for (int i = 0 ; i < rects.size(); i++) {
+			Rect face = rects.get(i);
+			drawRect(image, face, color);
 		}
-		
-
-		if (hasEyes && hasMouth) {
-			// WOOHOO! we have eyes and mouth!
-			log.info("We found a face!!!");
-			// rotate and and center the image.
-			// TODO: this seems no worky?
-			warpAffine(mat, mat, warpMat, new Size(cols,rows));
-			
-			// OK.. if we're in training mode, we should save the image off.
-			if (OpenCVFilterFaceRecognizer.Mode.TRAIN.equals(mode)) {
-				// we're in training mode.. so we should save the image
-				// TODO: save image with the train name
-				if (!StringUtils.isEmpty(trainName)) {
-					// ok we know the name for this face. 
-					// we have the trimmed down image representing the
-					// face. save it off.
-					long i = System.currentTimeMillis();
-					// TODO: encode a proper/better filename.
-					
-					String filename = trainingDir + "/" + trainName.hashCode() + "-" + trainName + i + ".png";
-					// TODO: what format is this?!!
-					imwrite(filename, mat);
-				} else {
-					log.warn("In Training mode, but the trainName isn't set!");
-				}
-			}
-		}
-
-		
-		
-		if (!trained) {
-			// log.error("Face Recognizer filter not trained.");
-			// return converterToIpl.convertToIplImage(converterToIpl.convert(mat));
-			return image;
-		}
-
-		// This line causes the JVM to seg fault on me : EXCEPTION_ACCESS_VIOLATION
-		// resize the mat to fit the model resolution.
-		// here we want to crop the detected face .. 
-		// affine correct it based on eyes and mouth
-		// and resize it for the predictor.
-		mat = resizeImage(mat);
-		int predictedLabel = faceRecognizer.predict(mat);
-		System.out.println("Predicted label: " + predictedLabel);
-		// TODO: add a label of some text to the image for
-		// the label that was detected..
-
-		// return image;
-		return converterToIpl.convertToIplImage(converterToIpl.convert(mat));
 	}
 
 	private boolean isInside(RectVector rects, Rect test) {
@@ -374,13 +422,13 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		int y1 = r1.y();
 		int x2 = x1 + r1.width();
 		int y2 = y1 + r1.height();
-		
+
 		int x3 = r2.x();
 		int y3 = r2.y();
 		int x4 = r2.x() + r2.width();
 		int y4 = r2.y() + r2.height();
-		
-		
+
+
 		// if r2 xmin/xmax is within r1s
 		if (x1 < x3 && x2 > x4) {
 			if (y1 < y3 && y2 > y4) {
@@ -389,14 +437,17 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		}
 		return false;
 	}
-	
+
 	private boolean rectOverlap(Rect r, Rect test) {
-		
+
+		if (test == null || r == null) {
+			return false;
+		}
 		return (((r.x() >= test.x()) && (r.x() < (test.x() + test.width()))) || 
 				((test.x() >= r.x()) && (test.x() < (r.x() + r.width())))) &&
 				(((r.y() >= test.y()) && (r.y() < (test.y() + test.height()))) || 
-						  ((test.y() >= r.y()) && (test.y() < (r.y() + r.height()))));
-		
+						((test.y() >= r.y()) && (test.y() < (r.y() + r.height()))));
+
 		//		int rx = r.x();
 		//		int rxm = r.x()+r.width();
 		//		int ry = r.y();
@@ -433,7 +484,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	public void setModelSizeY(int modelSizeY) {
 		this.modelSizeY = modelSizeY;
 	}
-	
+
 	public Mode getMode() {
 		return mode;
 	}
@@ -456,6 +507,14 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
 	public void setTrainingDir(String trainingDir) {
 		this.trainingDir = trainingDir;
+	}
+
+	public String getCascadeDir() {
+		return cascadeDir;
+	}
+
+	public void setCascadeDir(String cascadeDir) {
+		this.cascadeDir = cascadeDir;
 	}
 
 
