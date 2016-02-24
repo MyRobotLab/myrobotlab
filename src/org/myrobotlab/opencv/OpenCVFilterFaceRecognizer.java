@@ -31,6 +31,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
 
+import java.awt.image.CropImageFilter;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.IntBuffer;
@@ -237,7 +238,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		// This is the black and white image that we'll work with.
 		Mat bwImgMat = converterToIpl.convertToMat(frame);
 
-		ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat);
+		ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat, cols, rows);
 		
 		// Ok, for each of these detected faces we should try to classify them.
 		log.info("We found {} faces!!!", dFaces.size());
@@ -362,23 +363,32 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		
 	}
 
-	private ArrayList<DetectedFace> extractDetectedFaces(Mat bwImgMat) {
+	private ArrayList<DetectedFace> extractDetectedFaces(Mat bwImgMat, int width , int height) {
 		ArrayList<DetectedFace> dFaces = new ArrayList<DetectedFace>();
 		// first lets pick up on the face. we'll asume the eyes and mouth are inside.
 		RectVector faces = detectFaces(bwImgMat);
 		// TODO: take only non overlapping faces.
 		// Ok, we have a face, so... we should try to find the eyes and mouths.
-		RectVector eyes = detectEyes(bwImgMat);
-		RectVector mouths = detectMouths(bwImgMat);
+
 		// Now that we've got eyes and mouths.. lets see if they
 		// line up on the faces..
 		for (int i = 0 ; i < faces.size(); i++) {
 			DetectedFace dFace = new DetectedFace();
 			Rect face = faces.get(i);
+			
+			Mat croppedFace = new Mat(bwImgMat, face);
+			
+			// debugging only!
+			//String filename = trainingDir + "/" + trainName + "-"+System.currentTimeMillis()+ "-" + i + ".png";
+			//imwrite(filename, croppedFace);
+			
+			RectVector eyes = detectEyes(croppedFace);
+			RectVector mouths = detectMouths(croppedFace);
 			// the face!
 			dFace.setFace(face);
 			// ok find the mouth in the face.
 			for (int m = 0 ; m < mouths.size(); m++) {
+				// log.info("Mouth...");
 				Rect mouth = mouths.get(m);
 				// TODO: evaluate what's a better match
 				// maybe many mouths
@@ -387,23 +397,24 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 					// this one is a bit trickier , we need 2 eyes in the face.
 					// but i'm not sure which is left or right?!
 					Rect eye = eyes.get(e);
-					if (isInside(face, eye)) {
-						// TODO: some better way to know which is left & right.
-						// for now, just taking the first and second one we find inside the face.
-						// this could be backwards?!
-						if (dFace.getLeftEye() == null) {
-							dFace.setLeftEye(eye);
-						} else {
-							dFace.setRightEye(eye);
-						}
+					//log.info("Eye...");
+					//if (isInside(face, eye)) {
+					// TODO: some better way to know which is left & right.
+					// for now, just taking the first and second one we find inside the face.
+					// this could be backwards?!
+					if (dFace.getLeftEye() == null) {
+						dFace.setLeftEye(eye);
+					} else {
+						dFace.setRightEye(eye);
 					}
+					//}
 				}
 				// TODO: reverse the isInside method args.  seems backwards currently.
-				if (isInside(face, mouth)) {
+				//if (isInside(face, mouth)) {
 					if (!rectOverlap(dFace.getLeftEye(), mouth) && !rectOverlap(dFace.getRightEye(), mouth)) {
 						dFace.setMouth(mouth);
 					}
-				}
+				//}
 			}
 			// add this to a face that we've found.
 			dFaces.add(dFace);
@@ -415,13 +426,26 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		// helper function to draw rectangles around the detected face(s)
 		drawRect(image, dFace.getFace(), CvScalar.MAGENTA);
 		if (dFace.getLeftEye() != null) {
-			drawRect(image, dFace.getLeftEye(), CvScalar.BLUE);
+			// Ok the eyes are relative to the face
+			Rect offset = new Rect(dFace.getFace().x() + dFace.getLeftEye().x(),
+					dFace.getFace().y() + dFace.getLeftEye().y(),
+					dFace.getLeftEye().width(),
+					dFace.getLeftEye().height());
+			drawRect(image, offset, CvScalar.BLUE);
 		}
 		if (dFace.getRightEye() != null) {
-			drawRect(image, dFace.getRightEye(), CvScalar.RED);
+			Rect offset = new Rect(dFace.getFace().x() + dFace.getRightEye().x(),
+					dFace.getFace().y() + dFace.getRightEye().y(),
+					dFace.getRightEye().width(),
+					dFace.getRightEye().height());
+			drawRect(image, offset, CvScalar.RED);
 		}
 		if (dFace.getMouth() != null) {
-			drawRect(image, dFace.getMouth(), CvScalar.GREEN);
+			Rect offset = new Rect(dFace.getFace().x() + dFace.getMouth().x(),
+					dFace.getFace().y() + dFace.getMouth().y(),
+					dFace.getMouth().width(),
+					dFace.getMouth().height());
+			drawRect(image, offset, CvScalar.GREEN);
 		}
 
 	}
