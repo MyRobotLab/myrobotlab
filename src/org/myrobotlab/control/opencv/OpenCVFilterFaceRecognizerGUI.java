@@ -113,7 +113,6 @@ public class OpenCVFilterFaceRecognizerGUI extends OpenCVFilterGUI implements Ac
 
 	@Override
 	public void getFilterState(FilterWrapper filterWrapper) {
-		// TODO Auto-generated method stub
 		// TODO: what the heck are we doing with this method?!
 	}
 
