@@ -92,6 +92,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	// KW: I made up this word, but I think it's fitting.
 	private boolean dePicaso = true;
 	
+	private boolean doAffine = true;
+	
 	public OpenCVFilterFaceRecognizer() {
 		super();
 		initHaarCas();
@@ -306,7 +308,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 				Mat dFaceMat = new Mat(bwImgMat, dF.getFace());
 				// TODO: transform the original image , then re-crop from that
 				// so we don't loose the borders after the rotation
-				warpAffine(dFaceMat, dFaceMat, warpMat, dF.size());
+				if (doAffine) {
+					warpAffine(dFaceMat, dFaceMat, warpMat, dF.size());
+				}
 				try {
 					// TODO: why do i have to close these?!
 					srcTri.close();
@@ -326,7 +330,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 						String filename = trainingDir + "/" + trainName + "-" + randValue + ".png";
 						// TODO: I think this is a png file ? not sure.
 						imwrite(filename, dFaceMat);
-						cvPutText(image, "Snapshot Saved", cvPoint(20,60), font, CvScalar.CYAN);
+						cvPutText(image, "Snapshot Saved: " + trainName , cvPoint(20,60), font, CvScalar.CYAN);
 					} else {
 						log.warn("In Training mode, but the trainName isn't set!");
 					}

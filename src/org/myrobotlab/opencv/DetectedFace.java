@@ -19,24 +19,21 @@ public class DetectedFace {
 	public void dePicaso() {
 		// the face might be slightly scrabled. make sure the left eye 
 		// is in the left socket.. and the right eye in the right socket.
+				if (mouth.y() < leftEye.y()+leftEye.height()) {
+					// the mouth 
+					// that's not right!
+					Rect tmp = mouth;
+					mouth = leftEye;
+					leftEye = tmp;
 		
-		// 
-//		if (mouth.y() > leftEye.y()+ leftEye.height()) {
-//			// the mouth 
-//			// that's not right!
-//			Rect tmp = mouth;
-//			mouth = leftEye;
-//			leftEye = tmp;
-//
-//		}
-//		
-//		if (mouth.y() > rightEye.y()+ rightEye.height()) {
-//			// the mouth 
-//			// that's not right!
-//			Rect tmp = mouth;
-//			mouth = rightEye;
-//			rightEye = tmp;
-//		}
+				}
+				if (mouth.y() < rightEye.y()+ rightEye.height()) {
+					// the mouth 
+					// that's not right!
+					Rect tmp = mouth;
+					mouth = rightEye;
+					rightEye = tmp;
+				}
 		
 		if (leftEye.x() > rightEye.x()) {
 			// swap eyes!
@@ -44,7 +41,7 @@ public class DetectedFace {
 			leftEye = rightEye;
 			rightEye = tmp;
 		}
-		// make sure the mouth is the lowest
+		
 	}
 	
 	public Point2f resolveCenterTriangle() {
