@@ -79,6 +79,7 @@ public class OpenCVFilterFaceRecognizerGUI extends OpenCVFilterGUI implements Ac
 		
 			if (((JCheckBox)o).isSelected()) {
 				bf.setMode(OpenCVFilterFaceRecognizer.Mode.TRAIN);
+				bf.setTrainName(trainName.getText());
 			} else {
 				// This means we went from training mode to recognition mode
 				// assume that we've created some new training images.

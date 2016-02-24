@@ -11,6 +11,17 @@ public class DetectedFace {
 	// TODO: create some better label id to string mapping
 	public int detectedLabelId;
 	
+	public void dePicaso() {
+		// the face might be slightly scrabled. make sure the left eye 
+		// is in the left socket.. and the right eye in the right socket.
+		if (leftEye.x() > rightEye.x()) {
+			// swap eyes!
+			Rect tmp = leftEye;
+			leftEye = rightEye;
+			rightEye = tmp;
+		}
+	}
+	
 	public Rect getFace() {
 		return face;
 	}
