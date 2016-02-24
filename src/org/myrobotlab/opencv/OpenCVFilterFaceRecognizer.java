@@ -107,6 +107,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
 	// TODO: create some sort of a life cycle for this.
 	public boolean train() {
+		
+		int numLabels = 0;
 		// TODO: consider adding the mask as a filter.
 		// File filterfile = new File("src/resources/filter.png");
 		// Face filter used to mask edges of face pictures
@@ -164,17 +166,29 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		//faceRecognizer = createEigenFaceRecognizer();
 		// faceRecognizer = createLBPHFaceRecognizer()
 		//log.info("skipping training for now.");
-		faceRecognizer.train(images, labels);
-		trained = true;
+		// must be at least 2 things to classify
+		if (idToLabelMap.keySet().size() > 1) {
+			faceRecognizer.train(images, labels);
+			trained = true;
+		} else {
+			log.info("No labeled images loaded. training skipped");
+			trained = false;
+		}
+		
 		return true;
 	}
 
-	private Mat resizeImage(Mat img) {
+	
+	private Mat resizeImage(Mat img, int width, int height) {
 		Mat resizedMat = new Mat();
 		// IplImage resizedImage = IplImage.create(modelSizeX, modelSizeY, img.depth(), img.channels());
-		Size sz = new Size(modelSizeX,modelSizeY);
+		Size sz = new Size(width,height);
 		resize(img, resizedMat, sz);
 		return resizedMat;
+	}
+	
+	private Mat resizeImage(Mat img) {
+		return resizeImage(img, modelSizeX, modelSizeY);
 	}
 
 	public RectVector detectEyes(Mat mat) {
@@ -205,6 +219,15 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
 		// Convert to a grayscale image.  
 		//(TODO: maybe convert to a Mat first, then cut color? not sure what's faster 
+		
+		if (Mode.TRAIN.equals(mode)) {
+			String status = "Training Mode: " + trainName;
+			cvPutText(image, status, cvPoint(20,40), font, CvScalar.GREEN);
+		} else if (Mode.RECOGNIZE.equals(mode)) {
+			String status = "Recognize Mode";
+			cvPutText(image, status, cvPoint(20,40), font, CvScalar.YELLOW);
+			
+		}
 		IplImage imageBW = IplImage.create(image.width(), image.height(),8,1);
 		cvCvtColor(image, imageBW, CV_BGR2GRAY);
 		// TODO: this seems super wonky!  isn't there an easy way to go from IplImage to opencv Mat?
@@ -215,7 +238,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		Mat bwImgMat = converterToIpl.convertToMat(frame);
 
 		ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat);
-
 		
 		// Ok, for each of these detected faces we should try to classify them.
 		log.info("We found {} faces!!!", dFaces.size());
@@ -287,8 +309,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 				if (Mode.TRAIN.equals(mode)) {
 					// we're in training mode.. so we should save the image
 					// TODO: save image with the train name
-					String trainModeLabel = "TRAINING MODE :" + trainName;
-					cvPutText(image, trainModeLabel, cvPoint(20,20), font, CvScalar.CYAN);
+					log.info("Training Mode for {}.", trainName);
 					if (!StringUtils.isEmpty(trainName)) {
 						// ok we know the name for this face. 
 						// we have the trimmed down image representing the
@@ -299,6 +320,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 						String filename = trainingDir + "/" + trainName + "-" + i + ".png";
 						// TODO: what format is this?!!
 						imwrite(filename, bwImgMat);
+						
+						String status = "Snapshot Saved.";
+						cvPutText(image, status, cvPoint(20,60), font, CvScalar.CYAN);
+
 					} else {
 						log.warn("In Training mode, but the trainName isn't set!");
 					}
@@ -329,7 +354,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			}
 
 		}
-		
 		//return converterToIpl.convertToIplImage(converterToIpl.convert(bwImgMat));
 		return image;
 		
