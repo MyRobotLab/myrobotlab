@@ -149,6 +149,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			log.info("Creating new training directory {}", root.getAbsolutePath());
 			root.mkdirs();
 		}
+		log.info("Using {} for training data." , root.getAbsolutePath());
 		File[] imageFiles = listImageFiles(root);
 		if (imageFiles.length < 1) {
 			log.info("No images found for training.");
@@ -336,9 +337,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 						log.info("Classifier not trained yet.");
 						return image;
 					} else {
-						// Ok... now we've gotta predict something!
-						bwImgMat = resizeImage(bwImgMat);
-						int predictedLabel = faceRecognizer.predict(bwImgMat);
+						// Resize the face to pass it to the predicter
+						Mat dFaceMatSized = resizeImage(dFaceMat);
+						int predictedLabel = faceRecognizer.predict(dFaceMatSized);
 						String name = Integer.toString(predictedLabel);
 						if (idToLabelMap.containsKey(predictedLabel)) {
 							name = idToLabelMap.get(predictedLabel);
