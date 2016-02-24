@@ -756,12 +756,11 @@ public class OpenCV extends VideoSource {
 		
 		OpenCV opencvLeft = (OpenCV) Runtime.start("left", "OpenCV");
 		// Runtime.start("right", "OpenCV");
-		opencvLeft.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
-		opencvLeft.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
+		//opencvLeft.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
+		//opencvLeft.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
 		// training images in this example must be same resolution as camera video stream.
 		//	OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
 		//	opencv.addFilter(tr);
-
 
 		OpenCV opencvRight = (OpenCV) Runtime.start("right", "OpenCV");
 		// Runtime.start("right", "OpenCV");
