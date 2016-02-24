@@ -782,7 +782,7 @@ public class OpenCV extends VideoSource {
 		//vs.attach(opencv);
 		//opencv.capture();
 		opencvLeft.capture();
-		opencvRight.capture();
+		// opencvRight.capture();
 		
 		/*
 		OpenCVFilterFFmpeg ffmpeg = new OpenCVFilterFFmpeg("ffmpeg");
