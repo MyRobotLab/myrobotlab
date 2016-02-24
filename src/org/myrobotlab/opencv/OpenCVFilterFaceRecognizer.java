@@ -251,6 +251,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 				// ultimately we want to find the center of the eyes
 				// and the mouth so we can rotate and scale the image?
 
+				// blah!
+				dF.dePicaso();
 				// left eye center
 				int centerleftx = dF.getLeftEye().x() + dF.getLeftEye().width()/2;
 				int centerlefty = dF.getLeftEye().y() + dF.getLeftEye().height()/2;
@@ -258,6 +260,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 				int centerrightx = dF.getRightEye().x() + dF.getRightEye().width()/2;
 				int centerrighty = dF.getRightEye().y() + dF.getRightEye().height()/2;
 
+				
 				// mouth center.
 				int centermouthx = dF.getMouth().x() + dF.getMouth().width()/2;
 				int centermouthy = dF.getMouth().y() + dF.getMouth().height()/2;						
