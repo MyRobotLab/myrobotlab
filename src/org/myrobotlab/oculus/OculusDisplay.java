@@ -34,7 +34,11 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
+import org.lwjgl.util.vector.Vector3f;
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.oculus.lwjgl.entities.Camera;
+import org.myrobotlab.oculus.lwjgl.entities.Entity;
 import org.myrobotlab.oculus.lwjgl.models.RawModel;
 import org.myrobotlab.oculus.lwjgl.models.TexturedModel;
 import org.myrobotlab.oculus.lwjgl.renderengine.Loader;
@@ -42,13 +46,16 @@ import org.myrobotlab.oculus.lwjgl.renderengine.Renderer;
 import org.myrobotlab.oculus.lwjgl.shaders.StaticShader;
 import org.myrobotlab.oculus.lwjgl.textures.ModelTexture;
 import org.myrobotlab.service.OculusRift.RiftFrame;
+import org.myrobotlab.service.data.OculusData;
 import org.saintandreas.gl.FrameBuffer;
 import org.saintandreas.gl.MatrixStack;
 import org.saintandreas.gl.buffers.VertexArray;
 import org.saintandreas.gl.shaders.Program;
 import org.saintandreas.gl.textures.Texture;
 import org.saintandreas.math.Matrix4f;
-import org.saintandreas.math.Vector3f;
+// import org.saintandreas.math.Vector3f;
+import org.saintandreas.vr.RiftUtils;
+import org.slf4j.Logger;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -74,9 +81,11 @@ import com.oculusvr.capi.ViewScaleDesc;
  * that will display the rift image in a side by side fashion
  * in the oculus rift display.
  *
+ * @author kwatters
  */
 public class OculusDisplay implements Runnable {
-
+	
+	public final static Logger log = LoggerFactory.getLogger(OculusDisplay.class);
 	protected int width;
 	protected int height;
 	private final float ipd;
@@ -110,7 +119,9 @@ public class OculusDisplay implements Runnable {
 
 	private static Program unitQuadProgram;
 	private static VertexArray unitQuadVao;
-
+	private Camera camera = new Camera();
+	private boolean trackOrientation = true;
+	
 	private static final String UNIT_QUAD_VS;
 	private static final String UNIT_QUAD_FS;
 	static {
@@ -121,14 +132,13 @@ public class OculusDisplay implements Runnable {
 			throw new IllegalStateException(e);
 		}
 	}
-
 	
 	private static TexturedModel texturedModel = null;
 	private static Loader loader;
 	private static Renderer renderer;
 	private static StaticShader shader;
 
-
+	public OculusData orientationInfo;
 	
 	public OculusDisplay() {
 		// constructor
@@ -183,19 +193,25 @@ public class OculusDisplay implements Runnable {
 		initGl();
 		
 		loader = new Loader();
-		renderer = new Renderer();
 		shader = new StaticShader();
+		renderer = new Renderer(shader);
 		
 		recenterView();
 	}
 
 	private void recenterView() {
-		Vector3f center = Vector3f.UNIT_Y.mult(eyeHeight);
-		Vector3f eye = new Vector3f(0, eyeHeight, ipd * 10.0f);
-		MatrixStack.MODELVIEW.lookat(eye, center, Vector3f.UNIT_Y);
+		
+		org.saintandreas.math.Vector3f center = org.saintandreas.math.Vector3f.UNIT_Y.mult(eyeHeight);
+		org.saintandreas.math.Vector3f eye = new org.saintandreas.math.Vector3f(0, eyeHeight, ipd * 10.0f);
+		MatrixStack.MODELVIEW.lookat(eye, center, org.saintandreas.math.Vector3f.UNIT_Y);
 		hmd.recenterPose();
 	}
 
+	public void updateOrientation(OculusData orientation) {
+		// 
+		this.orientationInfo = orientation;
+	}
+	
 	protected final void setupDisplay() {
 
 		// our size.
@@ -212,6 +228,9 @@ public class OculusDisplay implements Runnable {
 		Display.setLocation(left, right);
 		Display.setVSyncEnabled(true);
 		onResize(width, height);
+		
+		log.info("Setup Oculus Diplsay with resolution {} x {}", width, height);
+		
 	}
 
 	protected void onResize(int width, int height) {
@@ -220,7 +239,7 @@ public class OculusDisplay implements Runnable {
 		this.aspect = (float) width / (float) height;
 	}
 
-
+	
 	public void run() {
 
 		while (!Display.isCloseRequested()) {
@@ -256,7 +275,7 @@ public class OculusDisplay implements Runnable {
 		frameBuffer.activate();
 
 		MatrixStack pr = MatrixStack.PROJECTION;
-		// MatrixStack mv = MatrixStack.MODELVIEW;
+		MatrixStack mv = MatrixStack.MODELVIEW;
 		GLTexture texture = swapTexture.getTexture(swapTexture.CurrentIndex);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.ogl.TexId, 0);
 
@@ -287,16 +306,24 @@ public class OculusDisplay implements Runnable {
 			poses[eye].Position = pose.Position;
 
 			glClearColor(0,0,1,1);
+			
+			// ok use the matrix view and pretranslate/stuff?
+			mv.push().preTranslate(RiftUtils.toVector3f(poses[eye].Position).mult(-1))
+	          .preRotate(RiftUtils.toQuaternion(poses[eye].Orientation).inverse());
+			
 			// ok.. now we have a loop 2x through that gives us our left/right images.
 			if (eye == 0) {
 				// left screen
 				if (currentFrame.left != null) 
-					renderScreen(currentFrame.left);
+					
+					renderScreen(currentFrame.left, orientationInfo);
 			} else {
 				// right screen
 				if (currentFrame.right != null)
-					renderScreen(currentFrame.right);	        	
+					renderScreen(currentFrame.right, orientationInfo);	        	
 			}
+			mv.pop();
+
 		}
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.ogl.TexId, 0);
@@ -375,6 +402,9 @@ public class OculusDisplay implements Runnable {
 		//				      onMouseEvent();
 		//				    }
 		// TODO : nothing?
+		
+		// Here we could update our projection matrix based on HMD info
+		
 
 	}
 
@@ -423,18 +453,20 @@ public class OculusDisplay implements Runnable {
 	/**
 	 * helper function to render an image on the current bound texture. 
 	 */
-	public static void renderScreen(SerializableImage img) {
+	public void renderScreen(SerializableImage img, OculusData orientation) {
 
+		// TODO: this seems to control zoom.
 		float size = 1.0f;
+		float depth = -1.0f;
 
 		if (texturedModel == null) {
 
 			float[] verticies = {
 					// left bottom triangle
-					-size, size, 0f, // V0
-					-size, -size, 0f, // V1
-					size, -size, 0f, // V2
-					size,size,0f, // V3
+					-size, size, depth, // V0
+					-size, -size, depth, // V1
+					size, -size, depth, // V2
+					size,size,depth, // V3
 			};
 			int[] indicies = { 
 					0,1,3,
@@ -444,7 +476,8 @@ public class OculusDisplay implements Runnable {
 			// TODO: calculate the texture scaling (probably depends on the power of 2 size thing for a texture.)
 			// What's the power of 2 here?
 			float xMax = 1.0f;
-			float yMax = 0.63f;
+			//float yMax = 0.63f;
+			float yMax = 1.0f;
 			// something like this?
 			//			float xMax = img.getWidth()/1024.0f;
 			//			float yMax = img.getHeight()/512.0f;
@@ -485,12 +518,37 @@ public class OculusDisplay implements Runnable {
 		//			ModelTexture texture = new ModelTexture(loader.loadTexture(bi));
 		//			texturedModel.setTexture(texture);
 		//		}
-
+		
+		// TODO: should I invert these?
+		float roll = orientation.getRoll().floatValue();
+		float pitch = orientation.getPitch().floatValue();
+		float yaw = orientation.getYaw().floatValue();
+		log.info("ORIENTATION:" + orientation);
+		
+		Entity texturedEntity = new Entity(texturedModel, new Vector3f(0,0,0), 0, 0, 0,1);
+		
+		//camera.setPitch(pitch);
+		//camera.setRoll(roll);
+		//camera.setYaw(yaw);
+		// update the camera position i guess?
+		
+		if (trackOrientation) {
+			camera.setYaw((float)Math.toRadians(yaw));
+			camera.setPitch((float)Math.toRadians(pitch));
+			camera.setRoll((float)Math.toRadians(roll));
+		}
+		camera.move();
+		
+		
 		shader.start();
-		renderer.render(texturedModel);
+		shader.loadViewMatrix(camera);
+		// depending on our orientation. we want to rotate/translate
+		renderer.render(texturedEntity, shader);
 		shader.stop();
+		
 	}
 
 
 
 }
+
