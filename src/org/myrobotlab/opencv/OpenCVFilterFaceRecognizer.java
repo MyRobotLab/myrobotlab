@@ -94,6 +94,12 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	
 	private boolean doAffine = true;
 	
+	// some padding around the detected face
+	private int borderSize = 25;
+	
+	
+	private String lastRecognizedName = null;
+	
 	public OpenCVFilterFaceRecognizer() {
 		super();
 		initHaarCas();
@@ -275,7 +281,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			String status = "Training Mode: " + trainName;
 			cvPutText(image, status, cvPoint(20,40), font, CvScalar.GREEN);
 		} else if (Mode.RECOGNIZE.equals(mode)) {
-			String status = "Recognize Mode";
+			String status = "Recognize Mode:" + lastRecognizedName;
 			cvPutText(image, status, cvPoint(20,40), font, CvScalar.YELLOW);
 		}
 		// convert to grayscale
@@ -305,11 +311,14 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 				dstTri.position(2).x((float)(dF.getFace().width()*.5)).y((float)(dF.getFace().height()*.85));
 				// create the affine rotation/scale matrix
 				Mat warpMat = getAffineTransform( srcTri.position(0), dstTri.position(0) );
-				Mat dFaceMat = new Mat(bwImgMat, dF.getFace());
+				//Mat dFaceMat = new Mat(bwImgMat, dF.getFace());
+				
+				Rect borderRect = dF.faceWithBorder(borderSize, cols, rows);
+				Mat dFaceMat = new Mat(bwImgMat, borderRect);
 				// TODO: transform the original image , then re-crop from that
 				// so we don't loose the borders after the rotation
 				if (doAffine) {
-					warpAffine(dFaceMat, dFaceMat, warpMat, dF.size());
+					warpAffine(dFaceMat, dFaceMat, warpMat, borderRect.size());
 				}
 				try {
 					// TODO: why do i have to close these?!
@@ -353,6 +362,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 						}
 						log.info("Recognized a Face {} - {}", predictedLabel, name);
 						cvPutText(image, "Recognized:"+name, dF.resolveGlobalLowerLeftCorner(), font, CvScalar.CYAN);
+						lastRecognizedName = name;
 					}
 				} 
 			}

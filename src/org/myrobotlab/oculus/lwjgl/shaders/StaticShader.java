@@ -2,6 +2,10 @@ package org.myrobotlab.oculus.lwjgl.shaders;
 
 import java.io.IOException;
 
+import org.lwjgl.util.vector.Matrix4f;
+import org.myrobotlab.oculus.lwjgl.Maths;
+import org.myrobotlab.oculus.lwjgl.entities.Camera;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
@@ -25,6 +29,10 @@ public class StaticShader extends ShaderProgram {
 		}
 	}
 	
+	private int location_transformationMatrix;
+	private int location_projectionMatrix;
+	private int location_viewMatrix;
+	
 	public StaticShader() {
 		// TODO: figure out how to load these from the jar or something...	
 		super(VERTEX_SHADER, FRAGMENT_SHADER);		
@@ -38,4 +46,24 @@ public class StaticShader extends ShaderProgram {
 		super.bindAttribute(1,  "textureCoords");
 	}
 
+	public void loadTransformationMatrix(Matrix4f matrix) {
+		super.loadMatrix(location_transformationMatrix, matrix);
+	}
+	
+	public void loadProjectionMatrix(Matrix4f matrix) {
+		super.loadMatrix(location_projectionMatrix, matrix);
+	}
+	
+	public void loadViewMatrix(Camera camera) {
+		Matrix4f viewMatrix = Maths.createViewMatrix(camera);
+		super.loadMatrix(location_viewMatrix, viewMatrix);
+	}
+
+	@Override
+	protected void getAllUniformLocations() {
+		// TODO Auto-generated method stub
+		location_transformationMatrix = super.getUniformLocation("transformationMatrix");
+		location_projectionMatrix = super.getUniformLocation("projectionMatrix");
+		location_viewMatrix = super.getUniformLocation("viewMatrix");
+	}
 }

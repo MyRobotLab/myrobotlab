@@ -86,6 +86,16 @@ public class DetectedFace {
 	public Rect getFace() {
 		return face;
 	}
+	
+	public Rect faceWithBorder(int size, int cols, int rows) {
+		int x = Math.max(0,face.x()-size/2);
+		int y = Math.max(0,face.y()-size/2);
+		int w = Math.min(cols,face.width()+size);
+		int h = Math.min(rows,face.height()+size);
+		Rect faceWithBorder = new Rect(x, y, w, h);
+		return faceWithBorder;
+	}
+	
 	public void setFace(Rect face) {
 		this.face = face;
 	}
