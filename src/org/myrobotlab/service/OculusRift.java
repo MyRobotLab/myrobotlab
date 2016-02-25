@@ -11,6 +11,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.oculus.OculusDisplay;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
+import org.myrobotlab.opencv.OpenCVFilterResize;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.service.data.OculusData;
 import org.myrobotlab.service.interfaces.OculusDataPublisher;
@@ -68,10 +69,10 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 	private HmdDesc hmdDesc;
 
 	transient public OculusHeadTracking headTracker = null;
-	private OculusData lastData = null;
 
+	// TODO: remove this!  this is if you only have 1 video source.
+	private	boolean mirrorLeftCamera = true;
 
-	
 	public static class RiftFrame{
 		public SerializableImage left;	
 		public SerializableImage right;	
@@ -122,42 +123,28 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 	private void initContext() {
 
 		if (!initialized) {
-
 			log.info("Init the rift.");
-
-
 			// Init the rift..
 			setupRift();
-
-
-
 			//OvrLibrary.INSTANCE.ovr_Initialize();
 			//hmd = Hmd.create(0); 
-
 			//int requiredSensorCaps = 0;
 			//int supportedSensorCaps = OvrLibrary.ovrSensorCaps.ovrSensorCap_Orientation;
-
 			// TODO: what errors/exceptions might be thrown here?  not sure how JNA exposes that info.
 			//hmd.startSensor(supportedSensorCaps, requiredSensorCaps);
 			log.info("Created HMD Oculus Rift Sensor");
 			initialized = true;
-
 			// now that we have the hmd. lets start up the polling thread.
 			headTracker = new OculusHeadTracking(hmd, hmdDesc);
 			headTracker.oculus = this;
 			headTracker.start();
-
 			// create and start the two open cv services..
-
 			leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
 			rightOpenCV = new OpenCV(getName() + "." + RIGHT_OPEN_CV);
-
 			leftOpenCV.startService();
 			rightOpenCV.startService();
-
 			leftOpenCV.setCameraIndex(leftCameraIndex);
 			rightOpenCV.setCameraIndex(rightCameraIndex);
-
 			// create msg routes from opencv services
 			// a bit kludgy because OpenCV is old :P
 			subscribe(leftOpenCV.getName(), "publishDisplay");
@@ -165,31 +152,66 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 			// Add some filters to rotate the images (cameras are mounted on their sides.)
 			// TODO: use 1 filter per eye for the rotations.  (might not be exactly 90degree rotation)
 			// TODO: replace with Affine filter.
+			//OpenCVFilterResize leftResizeFilter = new OpenCVFilterResize("lrf");
+			//OpenCVFilterResize rightResizeFilter = new OpenCVFilterResize("rrf");
+			
+			// TODO: pick these on the resoultion of the rift.
+			int w = 512;
+			int h = w; 
+			//leftResizeFilter.setDestHeight(h);
+			//leftResizeFilter.setDestWidth(w);
+			
+			//rightResizeFilter.setDestHeight(h);
+			//rightResizeFilter.setDestWidth(w);
 
-
-			OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1"); 
-			t1.flipCode = 1; 
-			OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2"); 
-			t2.flipCode = 1; 
-
-			float leftAngle = 180;
-			float rightAngle = 0;
-			//
-			leftAffine.setAngle(leftAngle);
-			rightAffine.setAngle(rightAngle);
-			//rotate 270
-
-			leftOpenCV.addFilter(t1);
+			
+			//leftOpenCV.addFilter(leftResizeFilter);
+			//rightOpenCV.addFilter(rightResizeFilter);
+			
+			boolean addTransposeEyes = true;
+			if (addTransposeEyes) {
+				OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1"); 
+				t1.flipCode = 1; 
+				OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2"); 
+				t2.flipCode = 1; 
+				//float leftAngle = 180;
+				//float rightAngle = 0;
+				//leftAffine.setAngle(leftAngle);
+				//rightAffine.setAngle(rightAngle);
+				//rotate 270
+				leftOpenCV.addFilter(t1);
+				// rotate 90
+				rightOpenCV.addFilter(t2);
+				leftAffine.setAngle(90);
+			}
+			
+			// if we specify some per eye transforms
+			// if we specify some per eye transforms
+			//leftAffine.setDx(200);
+			leftAffine.setDy(0);
+			leftAffine.setAngle(90);
+			//rightAffine.setDx(200);
+			rightAffine.setDy(0);
+			rightAffine.setAngle(90);
+			
+			// the affine is always on top i guess
 			leftOpenCV.addFilter(leftAffine);
-			// rotate 90
-			rightOpenCV.addFilter(t2);
 			rightOpenCV.addFilter(rightAffine);
 
-			//leftOpenCV.setFilter("left");
-			// rightOpenCV.setFilter("right");
 			leftOpenCV.setDisplayFilter("left");
 			rightOpenCV.setDisplayFilter("right");
 
+			// lets set the grabbers
+			// TODO: remove me!
+			//rightOpenCV.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
+			//rightOpenCV.setInputSource(OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY);
+			
+			//leftOpenCV.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
+			//leftOpenCV.setInputSource(OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY);
+			
+			//opencvRight.setFrameGrabberType("org.myrobotlab.opencv.SlideShowFrameGrabber");
+			// opencvRight.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
+			
 			// start the cameras.
 			leftOpenCV.capture();
 			rightOpenCV.capture();
@@ -209,7 +231,15 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 
 	public void onDisplay(SerializableImage frame){
 
-		if ("left".equals(frame.getSource())){
+		// if we're only one camera
+		// the left frame is both frames.
+		if (mirrorLeftCamera) {
+			// if we're mirroring the left camera
+			if ("left".equals(frame.getSource())) {
+				lastRiftFrame.left = frame;
+ 				lastRiftFrame.right = frame;
+			}
+		} else if ("left".equals(frame.getSource())){
 			lastRiftFrame.left = frame;
 		} else if ("right".equals(frame.getSource())){
 			lastRiftFrame.right = frame;
@@ -364,7 +394,10 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		//		if (data != null) {
 		//			System.out.println("Oculus Data: "  + data.toString());
 		//		}
-		lastData = data;
+		// TODO: make this a proper callback / subscribe..
+		if (display != null) {
+			display.updateOrientation(data);
+		}
 		// return the data to the mrl framework to be published.
 		return data;
 	}
@@ -388,7 +421,12 @@ public class OculusRift extends Service implements OculusDataPublisher, PointPub
 		ServiceType meta = new ServiceType(OculusRift.class.getCanonicalName());
 		meta.addDescription("The Oculus Rift Head Tracking Service");
 		meta.addCategory("video","control", "sensor");
+		// make sure the open cv instance share each others streamer..
+		//meta.sharePeer("leftOpenCV.streamer", "streamer", "VideoStreamer", "shared left streamer");
+		//meta.sharePeer("rightOpenCV.streamer", "streamer", "VideoStreamer", "shared right streamer");
+		
 		meta.addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
+		meta.sharePeer("rightOpenCV", "leftOpenCV", "OpenCV", "Right Eye sharing left eye camera");
 		meta.addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
 		meta.addDependency("org.saintandreas.jovr", "0.7");
 		return meta;
