@@ -12,6 +12,6 @@ out vec2 vTexCoord0;
 
 void main() {
   gl_Position = UNIT_QUAD[gl_VertexID];
-  vTexCoord0 = (gl_Position.xy / 2.0) + 0.5; 
+  vTexCoord0 = (gl_Position.xy / 2.0) + 0.5;
   vTexCoord0.y = 1.0 - vTexCoord0.y; 
 }
