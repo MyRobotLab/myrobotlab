@@ -29,20 +29,15 @@ public class DHRobotArm {
 	}
 
 	public Matrix getJInverse() {
-		// TODO Auto-generated method stub
 		// something small.
 		//double delta = 0.000001;
-		double delta = 0.01;
-
+		double delta = 0.001;
 		int numLinks = this.getNumLinks();
-
 		// we need a jacobian matrix that is 6 x numLinks
-		// for now we'll only deal with x,y,z we can add rotation later.
-		// so only 3
+		// for now we'll only deal with x,y,z we can add rotation later. so only 3
+		// We can add rotation information into slots 4,5,6 when we add it to the algorithm.
 		Matrix jacobian = new Matrix(3, numLinks);
-
-		// this will be used to compute the gradient of x,y,z based on the joint
-		// movement.
+		// compute the gradient of x,y,z based on the joint movement.
 		Point basePosition = this.getPalmPosition();
 		// log.debug("Base Position : " + basePosition);
 		// for each servo, we'll rotate it forward by delta (and back), and get
@@ -65,10 +60,8 @@ public class DHRobotArm {
 			jacobian.elements[2][j] = dZdj;
 			// TODO: get orientation roll/pitch/yaw
 		}
-
 		// log.debug("Jacobian(p)approx");
-		// log.debug(jacobian);
-
+		//log.info("JACOBIAN\n" +jacobian);
 		// This is the MAGIC! the pseudo inverse should map
 		// deltaTheta[i] to delta[x,y,z]
 		Matrix jInverse = jacobian.pseudoInverse();
