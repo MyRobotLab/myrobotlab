@@ -124,7 +124,7 @@ public class Point {
 	public String toString() {
 		// TODO: round this out
 		NumberFormat formatter = new DecimalFormat("#0.000");
-		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + " roll=" + formatter.format(roll) + " , pitch=" + formatter.format(pitch) + ", yaw=" + formatter.format(yaw) + ")";
+		return "(x=" + formatter.format(x) + ", y=" + formatter.format(y) + ", z=" + formatter.format(z) + ", roll=" + formatter.format(roll) + ", pitch=" + formatter.format(pitch) + ", yaw=" + formatter.format(yaw) + ")";
 	}
 
 	public void setX(double x) {
