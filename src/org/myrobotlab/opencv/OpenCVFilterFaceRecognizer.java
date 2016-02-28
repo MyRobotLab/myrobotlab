@@ -331,16 +331,14 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			cvPutText(image, status, cvPoint(20,40), font, CvScalar.YELLOW);
 		}
 		
+		// 
 		// Find a bunch of faces and their features
+		// extractDetectedFaces will only return a face if it has all the necessary features (face, 2 eyes and 1 mouth)
 		ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat, cols, rows);
+		
 		// Ok, for each of these detected faces we should try to classify them.
 		for (DetectedFace dF : dFaces) {
 			if (dF.isComplete()) {
-				// Ok we have a complete face. lets get the affine points.
-				// tell the face to move it's eyes and mouth into the right place?!
-				if (dePicaso) {
-					dF.dePicaso();
-				}
 				// and array of 3 x,y points.
 				// create the triangle from left->right->mouth center
 				Point2f srcTri = dF.resolveCenterTriangle();
@@ -431,62 +429,82 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
 	private ArrayList<DetectedFace> extractDetectedFaces(Mat bwImgMat, int width , int height) {
 		ArrayList<DetectedFace> dFaces = new ArrayList<DetectedFace>();
-		// first lets pick up on the face. we'll asume the eyes and mouth are inside.
+		// first lets pick up on the face. we'll assume the eyes and mouth are inside.
 		RectVector faces = detectFaces(bwImgMat);
-		// TODO: take only non overlapping faces.
-		// Ok, we have a face, so... we should try to find the eyes and mouths.
-		// Now that we've got eyes and mouths.. lets see if they
-		// line up on the faces..
+		
+		//
+		// For each detected face, we need to to find the eyes and mouths to make it complete.
+		//
 		for (int i = 0 ; i < faces.size(); i++) {
-			DetectedFace dFace = new DetectedFace();
 			Rect face = faces.get(i);
-			Mat croppedFace = new Mat(bwImgMat, face);
-			// debugging only!
-			//String filename = trainingDir + "/" + trainName + "-"+System.currentTimeMillis()+ "-" + i + ".png";
-			//imwrite(filename, croppedFace);
-			RectVector eyes = detectEyes(croppedFace);
-			RectVector mouths = detectMouths(croppedFace);
-			// the face!
-			dFace.setFace(face);
-			// ok find the mouth in the face.
-			for (int m = 0 ; m < mouths.size(); m++) {
-				// log.info("Mouth...");
-				Rect mouth = mouths.get(m);
-				// TODO: evaluate what's a better match maybe many mouths
-				// Ok, now we need to find the eyes in this face
-				for (int e = 0 ; e < eyes.size(); e++) {
-					// this one is a bit trickier , we need 2 eyes in the face.
-					// but i'm not sure which is left or right?!
-					Rect eye = eyes.get(e);
-					//log.info("Eye...");
-					//if (isInside(face, eye)) {
-					// TODO: some better way to know which is left & right.
-					// for now, just taking the first and second one we find inside the face.
-					// this could be backwards?!
-					if (dFace.getLeftEye() == null) {
-						dFace.setLeftEye(eye);
-					} else {
-						dFace.setRightEye(eye);
-					}
-					//}
-				}
-				// TODO: reverse the isInside method args.  seems backwards currently.
-				//if (isInside(face, mouth)) {
-					if (!rectOverlap(dFace.getLeftEye(), mouth) && !rectOverlap(dFace.getRightEye(), mouth)) {
-						dFace.setMouth(mouth);
-					}
-				//}
-			}
-			// add this to a face that we've found.
-			dFaces.add(dFace);
-			// debugging show(croppedFace, "Face!");
 			if (debug) {
-				show(croppedFace, "Face!");
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				Mat croppedFace = new Mat(bwImgMat, face);
+				show(croppedFace, "Face Area");
+			}
+			
+			//
+			// The eyes will only be located in the top half of the image.   Even with a tilted
+			// image, the face detector won't recognize the face if the eyes aren't in the 
+			// upper half of the image.
+			//
+			Rect eyesRect = new Rect(face.x(), face.y(), face.width(), face.height()/2);
+			Mat croppedEyes = new Mat(bwImgMat, eyesRect);
+			RectVector eyes = detectEyes(croppedEyes);
+			if (debug) {
+				show(croppedEyes, "Eye Area");
+			}
+			
+			// The mouth will only be located in the lower 1/3 of the picture, so only look there.
+			Rect mouthRect = new Rect(face.x(), face.y()+face.height()/3*2, face.width(), face.height()/3);
+			Mat croppedMouth = new Mat(bwImgMat, mouthRect);
+			if (debug) {
+				show(croppedMouth, "Mouth Area");
+			}
+			RectVector mouths = detectMouths(croppedMouth);
+			
+			if (debug) {
+				log.info("Found {} mouth and {} eyes.", mouths.size(), eyes.size());
+			}
+				
+			// 
+			// If we don't find exactly one mouth and two eyes in this image, just skip the whole thing
+			// Or, if the eyes overlap (identification of the same eye), skip this one as well
+			//
+		
+			if ((mouths.size() == 1) && (eyes.size() == 2) &&
+					!rectOverlap(eyes.get(0), eyes.get(1))) {
+				DetectedFace dFace = new DetectedFace();
+				
+				// 
+				// In the recognizer, the first eye detected will be the highest one in the picture.   Because it may detect a
+				// larger area, it's quite possible that the right eye will be detected before the left eye.  Move the eyes 
+				// into the right order, if they're not currently in the right order.   First, set the face features,
+				// then call dePicaso to re-arrange out-of-order eyes.
+				//
+				
+				dFace.setFace(face);
+				
+				//
+				// Remember, the mouth is offset from the top of the picture, so we have to
+				// account for this change before we store it.  The eyes don't matter, as they
+				// start at the top of the image already.
+				//
+			
+			    mouthRect = new Rect(mouths.get(0).x(), mouths.get(0).y()+face.height()/3*2, mouths.get(0).width(), mouths.get(0).height());
+			    
+				dFace.setMouth(mouthRect);
+				dFace.setLeftEye(eyes.get(0));
+				dFace.setRightEye(eyes.get(1));
+				if (dePicaso) {
+					dFace.dePicaso();
+				}
+					
+				// At this point, we've found the complete face and everything appears normal.
+				// Add this to the list of recognized faces
+				dFaces.add(dFace);
+				if (debug) {
+					Mat croppedFace = new Mat(bwImgMat, face);
+					show(croppedFace, "Cropped Face");
 				}
 			}
 		}
@@ -509,7 +527,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 					dFace.getFace().y() + dFace.getRightEye().y(),
 					dFace.getRightEye().width(),
 					dFace.getRightEye().height());
-			drawRect(image, offset, CvScalar.RED);
+			drawRect(image, offset, CvScalar.BLUE);
 		}
 		if (dFace.getMouth() != null) {
 			Rect offset = new Rect(dFace.getFace().x() + dFace.getMouth().x(),
