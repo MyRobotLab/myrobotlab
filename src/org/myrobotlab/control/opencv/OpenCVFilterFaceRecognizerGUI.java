@@ -38,6 +38,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
@@ -56,7 +57,8 @@ public class OpenCVFilterFaceRecognizerGUI extends OpenCVFilterGUI implements Ac
 		j.setBorder(title);
 		// text box for persons name
 		trainName.addActionListener(this);
-		trainName.setText("Kevin");
+		trainName.setText("");
+		
 		// check box for if you're training or not.
 		// by default not checked.
 		trainMode.setSelected(false);
