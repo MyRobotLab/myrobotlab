@@ -17,7 +17,7 @@ public class DetectedFace {
 	public int detectedLabelId;
 	
 	public void dePicaso() {
-		// the face might be slightly scrabled. make sure the left eye 
+		// the face might be slightly scrambled. make sure the left eye 
 		// is in the left socket.. and the right eye in the right socket.
 				if (mouth.y() < leftEye.y()+leftEye.height()) {
 					// the mouth 
