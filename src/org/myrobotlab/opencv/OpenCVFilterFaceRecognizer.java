@@ -76,6 +76,13 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	private String trainingDir = "training";
 	private int modelSizeX = 256;
 	private int modelSizeY = 256;
+	
+	// 
+	// We read in the face filter when training the first time, and use it for all subsequent
+	// training and for masking images prior to comparison.
+	//
+	private Mat facemask = null;
+	
 	private String cascadeDir = "haarcascades";
 	private CascadeClassifier faceCascade;
 	private CascadeClassifier eyeCascade;
@@ -115,6 +122,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		super(filterName, sourceKey);
 		initHaarCas();
 	}
+	
 
 	public enum Mode {
 		TRAIN,
@@ -144,10 +152,27 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	 * @return
 	 */
 	public boolean train() {
-		// TODO: consider adding the mask as a filter. (also likely need to add this at prediction time if we add it here)
-		// File filterfile = new File("src/resources/filter.png");
-		// Face filter used to mask edges of face pictures
-		// Mat facefilter = imread(filterfile.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
+		//
+		// The first time we train, find the image mask, if present, scale it to the current image size, 
+		// and save it for later.
+		//
+		if (facemask == null) {
+			File filterfile = new File("src/resource/facerec/Filter.png");
+			//
+			// Face mask used to mask edges of face pictures to eliminate noise around the edges
+			//
+			if (!filterfile.exists()) {
+				log.warn("No image filter file found.  {}", filterfile.getAbsolutePath());
+			} else {
+				// Read the filter and rescale it to the current image size
+				Mat incomingfacemask = imread(filterfile.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
+				facemask = resizeImage(incomingfacemask);
+				if (debug) {
+					show(facemask, "Face Mask");
+				}
+			}
+		}
+		
 		File root = new File(trainingDir);
 		if (root.isFile()) {
 			log.warn("Training directory was a file, not a directory.  {}", root.getAbsolutePath());
@@ -180,6 +205,16 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			int label = personName.hashCode();
 			// make sure all our test images are resized 
 			Mat resized = resizeImage(img);
+			
+			//
+			// Mask out unwanted parts of the training image by applying the resized mask
+			//
+			if (facemask != null) {
+				Mat maskedface = facemask.clone();
+				resized.copyTo(maskedface,facemask);
+				resized = maskedface;	
+			}
+			
 			// so, now our input for the training set is always 256x256 image.
 			// we should probably run face detect and center this resized image, so we can see
 			// if we detect a full face in the image or not..
@@ -208,7 +243,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 			faceRecognizer.train(images, labels);
 			trained = true;
 		} else {
-			log.info("No labeled images loaded. training skipped, but be at least 2 things to classify.");
+			log.info("No labeled images loaded. training skipped.");
 			trained = false;
 		}
 		return true;
@@ -276,14 +311,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 	
 	@Override
 	public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
-		// TOD: maybe move this to the end, I think we're modifying the image before we detect faces.
-		if (Mode.TRAIN.equals(mode)) {
-			String status = "Training Mode: " + trainName;
-			cvPutText(image, status, cvPoint(20,40), font, CvScalar.GREEN);
-		} else if (Mode.RECOGNIZE.equals(mode)) {
-			String status = "Recognize Mode:" + lastRecognizedName;
-			cvPutText(image, status, cvPoint(20,40), font, CvScalar.YELLOW);
-		}
 		// convert to grayscale
 		Frame grayFrame = makeGrayScale(image);
 		// TODO: this seems super wonky!  isn't there an easy way to go from IplImage to opencv Mat?
@@ -291,6 +318,19 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		int rows = grayFrame.imageHeight;
 		// convert to a Mat
 		Mat bwImgMat = converterToIpl.convertToMat(grayFrame);
+		
+		// 
+		// Image detection is done on the grayscale image, so we can modify the original frame once
+		// we make a grayscale copy.
+		//
+		if (Mode.TRAIN.equals(mode)) {
+			String status = "Training Mode: " + trainName;
+			cvPutText(image, status, cvPoint(20,40), font, CvScalar.GREEN);
+		} else if (Mode.RECOGNIZE.equals(mode)) {
+			String status = "Recognize Mode:" + lastRecognizedName;
+			cvPutText(image, status, cvPoint(20,40), font, CvScalar.YELLOW);
+		}
+		
 		// Find a bunch of faces and their features
 		ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat, cols, rows);
 		// Ok, for each of these detected faces we should try to classify them.
@@ -340,8 +380,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 						// TODO: I think this is a png file ? not sure.
 						imwrite(filename, dFaceMat);
 						cvPutText(image, "Snapshot Saved: " + trainName , cvPoint(20,60), font, CvScalar.CYAN);
-					} else {
-						log.warn("In Training mode, but the trainName isn't set!");
 					}
 				} else if (Mode.RECOGNIZE.equals(mode)) {
 					// You bettah recognize!
@@ -352,6 +390,18 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 					} else {
 						// Resize the face to pass it to the predicter
 						Mat dFaceMatSized = resizeImage(dFaceMat);
+						Mat copytoMat = dFaceMatSized.clone();
+						
+						// If we're applying a mask, do it before the prediction
+						if (facemask != null) {
+							Mat maskedface = facemask.clone();
+							dFaceMatSized.copyTo(maskedface,facemask);
+							dFaceMatSized = maskedface;	
+							if (debug) {
+								show(dFaceMatSized, "Masked Face");
+							}
+						}
+						
 						int predictedLabel = faceRecognizer.predict(dFaceMatSized);
 						String name = Integer.toString(predictedLabel);
 						if (idToLabelMap.containsKey(predictedLabel)) {
@@ -371,7 +421,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		}
 		//pass through/return the original image marked up.
 		return image;
-		
 	}
 
 	private Frame makeGrayScale(IplImage image) {
