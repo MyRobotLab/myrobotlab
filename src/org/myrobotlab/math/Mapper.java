@@ -31,8 +31,14 @@ public final class Mapper implements Serializable {
 		this.minY = minY;
 		this.maxY = maxY;
 
-		this.minOutput = minY;
-		this.maxOutput = maxY;
+		if (minY < maxY){
+			this.minOutput = minY;
+			this.maxOutput = maxY;
+		}
+		else {
+			this.minOutput = maxY;
+			this.maxOutput = minY;		
+		}
 	}
 
 	final public double calc(double in) {
