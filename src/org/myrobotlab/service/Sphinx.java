@@ -202,6 +202,8 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 									send(cmd.name, cmd.method, cmd.params);
 								} else {
 									error(String.format("unknown use case for Sphinx commands - word is %s", resultText));
+									// we don't know what this command was.. just continue.. we shouldn't publish text or recognized.
+									continue;
 								}
 							}
 
