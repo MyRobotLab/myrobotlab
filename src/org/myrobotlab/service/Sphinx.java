@@ -203,11 +203,14 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 								} else {
 									error(String.format("unknown use case for Sphinx commands - word is %s", resultText));
 									// we don't know what this command was.. just continue.. we shouldn't publish text or recognized.
+									// we recognized it. but we don't publish text..
+									invoke("recognized", resultText);
 									continue;
 								}
 							}
 
 							// publishRecognized(resultText);
+							// Only publish the text if there was a known command?
 							invoke("publishText", resultText);
 							invoke("recognized", resultText);
 						}
@@ -351,7 +354,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 
 	public void addVoiceRecognitionListener(Service s) {
 		// TODO - reflect on a public heard method - if doesn't exist error ?
-		addListener("recognized", s.getName(), "heard");
+		this.addListener("recognized", s.getName(), "heard");
 	}
 
 	// TODO - make "Speech" interface if desired
