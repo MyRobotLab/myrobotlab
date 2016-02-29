@@ -18,47 +18,30 @@ import org.slf4j.Logger;
 public class MouthControl extends Service {
 
 	private static final long serialVersionUID = 1L;
-
 	public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
-
 	public int mouthClosedPos = 20;
 	public int mouthOpenedPos = 4;
 	public int delaytime = 100;
 	public int delaytimestop = 200;
 	public int delaytimeletter = 60;
-
 	transient Servo jaw;
 	transient Arduino arduino;
 	transient SpeechSynthesis mouth;
-
 	public boolean autoAttach = true;
-	
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-		try {
-			// LoggingFactory.getInstance().setLevel(Level.INFO);
-			MouthControl MouthControl = new MouthControl("MouthControl");
-			MouthControl.startService();
-
-			Runtime.createAndStart("gui", "GUIService");
-
-			MouthControl.autoAttach = true;
-			MouthControl.onSaying("test on");
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
 
 	public MouthControl(String n) {
 		super(n);
 		jaw = (Servo) createPeer("jaw");
 		arduino = (Arduino) createPeer("arduino");
 		mouth = (SpeechSynthesis) createPeer("mouth");
-
 		jaw.setPin(7);
 		jaw.setController(arduino);
-		subscribe(mouth.getName(), "saying");
+		// TODO: mouth should probably implement speech synthesis.
+		// in a way of speaking, one day, people may be able to read the lips
+		// of the inmoov.. so you're synthesising speech in a mechanical way. 
+		// similar to sign language maybe?
+		subscribe(mouth.getName(), "publishStartSpeaking");
+		subscribe(mouth.getName(), "publishEndSpeaking");
 	}
 
 	// FIXME make interface
@@ -85,6 +68,7 @@ public class MouthControl extends Service {
 	public Arduino getArduino() {
 		return arduino;
 	}
+	
 	public Servo getJaw() {
 		return jaw;
 	}
@@ -114,11 +98,8 @@ public class MouthControl extends Service {
 	public String getDescription() {
 		return "mouth movements based on spoken text";
 	}
-
-public synchronized void onStartSpeaking(String text) {
-	onSaying(text);
-}
-	public synchronized void onSaying(String text) {
+	
+	public synchronized void onStartSpeaking(String text) {
 		log.info("move moving to :" + text);
 		if (jaw != null) { // mouthServo.moveTo(Mouthopen);
 			if (autoAttach) {
@@ -127,7 +108,7 @@ public synchronized void onStartSpeaking(String text) {
 					jaw.attach();
 				}
 			}
-			
+
 			boolean ison = false;
 			String testword;
 			String[] a = text.split(" ");
@@ -172,7 +153,7 @@ public synchronized void onStartSpeaking(String text) {
 		} else {
 			log.info("need to attach first");
 		}
-		
+
 		//  We're done annimating, lets detach the jaw while not in use.
 		if (autoAttach && jaw != null) {
 			if (jaw.isAttached()) {
@@ -181,6 +162,11 @@ public synchronized void onStartSpeaking(String text) {
 			}
 		}
 	}
+	
+	public synchronized void onEndSpeaking() {
+		log.info("Mouth control recognized end speaking.");
+	}
+	
 
 	public void setdelays(Integer d1, Integer d2, Integer d3) {
 		delaytime = d1;
@@ -207,8 +193,8 @@ public synchronized void onStartSpeaking(String text) {
 		arduino.startService();
 		// mouth.startService();
 	}
-	
-	
+
+
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
@@ -222,7 +208,7 @@ public synchronized void onStartSpeaking(String text) {
 		ServiceType meta = new ServiceType(MouthControl.class.getCanonicalName());
 		meta.addDescription("Mouth movements based on spoken text");
 		meta.addCategory("control");
-		
+
 		meta.addPeer("jaw", "Servo", "shared Jaw servo instance");
 		meta.addPeer("arduino", "Arduino", "shared Arduino instance");
 		meta.addPeer("mouth", "AcapelaSpeech", "shared Speech instance");
@@ -230,5 +216,22 @@ public synchronized void onStartSpeaking(String text) {
 		return meta;
 	}
 
+
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		try {
+			// LoggingFactory.getInstance().setLevel(Level.INFO);
+			MouthControl MouthControl = new MouthControl("MouthControl");
+			MouthControl.startService();
+
+			Runtime.createAndStart("gui", "GUIService");
+
+			MouthControl.autoAttach = true;
+			MouthControl.onStartSpeaking("test on");
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
 }
