@@ -163,8 +163,15 @@ public class MouthControl extends Service {
 		}
 	}
 	
-	public synchronized void onEndSpeaking() {
+	public synchronized void onEndSpeaking(String utterance) {
 		log.info("Mouth control recognized end speaking.");
+		// TODO: consider a jaw move to closed position
+		if (jaw != null && jaw.isAttached())  {
+			jaw.moveTo(mouthClosedPos);
+		} 
+		//else {
+		//	log.info("Not closing my mouth?");
+		//}
 	}
 	
 
