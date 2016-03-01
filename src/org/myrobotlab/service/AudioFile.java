@@ -25,8 +25,10 @@
 
 package org.myrobotlab.service;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +70,7 @@ public class AudioFile extends Service {
 	public static final String MODE_BLOCKING = "blocking";
 	public static final String MODE_QUEUED = "queued";
 	static String globalFileCacheDir = "audioFile";
+	public static final String journalFilename = "journal.txt";
 	//Map<String, BlockingQueue<AudioData>> tracks = new HashMap<String, BlockingQueue<AudioData>>();// new
 	String currentTrack = DEFAULT_TRACK;
 	transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
@@ -223,7 +226,7 @@ public class AudioFile extends Service {
 		return play(globalFileCacheDir + File.separator + filename);
 	}
 
-	public void cache(String filename, byte[] data) throws IOException {
+	public void cache(String filename, byte[] data, String toSpeak) throws IOException {
 		File file = new File(globalFileCacheDir + File.separator + filename);
 		File parentDir = new File(file.getParent());
 		if (!parentDir.exists()) {
@@ -232,6 +235,10 @@ public class AudioFile extends Service {
 		FileOutputStream fos = new FileOutputStream(globalFileCacheDir + File.separator + filename);
 		fos.write(data);
 		fos.close();
+		// Now append the journal entry to the journal.txt file 
+		FileWriter journal = new FileWriter(globalFileCacheDir + File.separator + journalFilename, true);
+		journal.append(filename + "," + toSpeak + "\r\n");
+		journal.close();
 	}
 
 	public static String getGlobalFileCacheDir() {

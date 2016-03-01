@@ -434,7 +434,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		audioFiles.push(filename);
 
 		byte[] b = getRemoteFile(toSpeak);
-		audioFile.cache(filename, b);
+		audioFile.cache(filename, b, toSpeak);
 
 		ret =  audioFile.playCachedFile(filename);
 		utterances.put(ret, toSpeak);
