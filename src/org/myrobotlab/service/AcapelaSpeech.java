@@ -60,25 +60,30 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 
 /**
- * AcapelaSpeech
+ * AcapelaSpeech - Use the acapela group speech synthesis API.  This makes a HTTP request
+ * to generate an MP3 that represents the text to be spoken for a given voice.  That mp3
+ * is then cached and played back by the AudioFile service. 
  * 
  */
 public class AcapelaSpeech extends Service implements TextListener, SpeechSynthesis, AudioListener {
 
 	private static final long serialVersionUID = 1L;
-
-	String voice = "Ryan";
-	HashSet<String> voices = new HashSet<String>();
-
-	String pathPrefix = null;
-
+	// default voice
+	public String voice = "Ryan";
+	public HashSet<String> voices = new HashSet<String>();
 	transient PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
-
-	transient AudioFile audioFile = null;// new AudioFile("audioFile");
-
+	// this is a peer service.
+	transient AudioFile audioFile = null;
+	// TODO: use a wait / notify for this so we don't poll in a loop!
+	Boolean finishedSpeaking = false;
+	// TODO: fix the volume control
+	// private float volume = 1.0f;
+	
 	public AcapelaSpeech(String n) {
 		super(n);
 		connectionManager.setMaxTotal(10);
+		// TODO: be country/language aware when asking for voices?
+		// maybe have a get voices by language/locale
 		// Arabic
 		voices.add("Leila");
 		voices.add("Mehdi");
@@ -266,16 +271,12 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	public String getMp3Url(String toSpeak) {
 		HttpPost post = null;
-
 		try {
-
 			HttpClient client = new DefaultHttpClient(connectionManager);
-
 			// request form & send text
 			String url = "http://www.acapela-group.com/demo-tts/DemoHTML5Form_V2.php?langdemo=Powered+by+%3Ca+href%3D%22http%3A%2F%2Fwww.acapela-vaas.com"
 					+ "%22%3EAcapela+Voice+as+a+Service%3C%2Fa%3E.+For+demo+and+evaluation+purpose+only%2C+for+commercial+use+of+generated+sound+files+please+go+to+"
 					+ "%3Ca+href%3D%22http%3A%2F%2Fwww.acapela-box.com%22%3Ewww.acapela-box.com%3C%2Fa%3E";
-
 			post = new HttpPost(url);
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			nvps.add(new BasicNameValuePair("MyLanguages", "sonid10"));
@@ -286,12 +287,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 			UrlEncodedFormEntity formData = new UrlEncodedFormEntity(nvps, "UTF-8");
 			post.setEntity(formData);
 			HttpResponse response = client.execute(post);
-
 			log.info(response.getStatusLine().toString());
 			HttpEntity entity = response.getEntity();
-
 			byte[] b = FileIO.toByteArray(entity.getContent());
-
 			// parse out mp3 file url
 			String mp3Url = null;
 			String data = new String(b);
@@ -303,13 +301,10 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 					mp3Url = data.substring(startPos + startTag.length(), endPos);
 				}
 			}
-
 			if (mp3Url == null) {
 				error("could not get mp3 back from Acapela server !");
 			}
-
 			return mp3Url;
-
 		} catch (Exception e) {
 			Logging.logError(e);
 		} finally {
@@ -325,26 +320,20 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	public byte[] getRemoteFile(String toSpeak) {
 
 		String mp3Url = getMp3Url(toSpeak);
-
 		HttpGet get = null;
 		byte[] b = null;
 		try {
 			HttpClient client = new DefaultHttpClient(connectionManager);
 			HttpResponse response = null;
-
 			// fetch file
 			get = new HttpGet(mp3Url);
 			log.info("mp3Url {}", mp3Url);
-
 			// get mp3 file & save to cache
 			response = client.execute(get);
-
 			log.info("got {}", response.getStatusLine());
 			HttpEntity entity = response.getEntity();
-
 			// cache the mp3 content
 			b = FileIO.toByteArray(entity.getContent());
-
 			EntityUtils.consume(entity);
 		} catch (Exception e) {
 			Logging.logError(e);
@@ -360,27 +349,35 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	@Override
 	public boolean speakBlocking(String toSpeak) throws IOException {
 
-		// FIXME !!
 		speak(toSpeak);
 		// audioFile.playFile(to, true);
 		// sleep(afterSpeechPause);// important pause after speech
 
 		// invoke("publishEndSpeaking", toSpeak);
 
-		try {
-			Thread.sleep(100);
-			log.info("Done speaking pause 100 ms.");
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		// We are blocking so .. now we want to wait on finished speaking to be true.
+		waitForCompletion();
+		
 		return false;
+	}
+
+	private void waitForCompletion() {
+		log.info("Waiting for speaking to finish.");
+		while (!finishedSpeaking) {
+			// TODO: use a better thread wait / notify here.
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+				log.warn("Interrupted while waiting for speaking to finish.", e.getLocalizedMessage());
+			}
+		}
+		log.info("Speaking Finished.");
 	}
 
 	@Override
 	public void setVolume(float volume) {
-
+		// TODO: fix the volume control
+		log.warn("Volume control not implemented in AcapelaSpeech yet.");
 	}
 
 	@Override
@@ -390,9 +387,8 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	@Override
 	public void interrupt() {
-
+		// TODO: Implement me!
 	}
-
 
 	@Override
 	public void onText(String text) {
@@ -413,29 +409,23 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	Stack<String> audioFiles = new Stack<String>(); 
 
 	public AudioData speak(String toSpeak) throws IOException {
+		// this will flip to true on the audio file end playing.
+		finishedSpeaking = false;
 		AudioData ret = null;
-		log.info(String.format("speak %s", toSpeak));
+		log.info("speak {}", toSpeak);
 		if (voice == null) {
-			log.warn("voice is null! setting to default");
+			log.warn("voice is null! setting to default: Ryan");
 			voice = "Ryan";
 		}
-		
-		// notify listeners we are starting to speak
-		// invoke("publishStartSpeaking", toSpeak); removed by GAP replaced with audio events
-
 		String filename = this.getLocalFileName(this, toSpeak, "mp3");
-
 		if (audioFile.cacheContains(filename)) {
 			ret = audioFile.playCachedFile(filename);
 			utterances.put(ret, toSpeak);
 			return ret;
 		}
-
 		audioFiles.push(filename);
-
 		byte[] b = getRemoteFile(toSpeak);
 		audioFile.cache(filename, b, toSpeak);
-
 		ret =  audioFile.playCachedFile(filename);
 		utterances.put(ret, toSpeak);
 		return ret;
@@ -461,7 +451,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		// when we add the ear, we need to listen for request confirmation
 		addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
 		addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
-
 	}
 
 	public void onRequestConfirmation(String text) {
@@ -490,7 +479,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	 * 
 	 */
 	static public ServiceType getMetaData() {
-
 		ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
 		meta.addDescription("Acapela group speech synthesis service.");
 		meta.addCategory("speech");
@@ -498,12 +486,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		return meta;
 	}
 	
+	// audioData to utterance map TODO: revisit the design of this
 	HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
 
-	
-	// audioData to utterance
-
-	//////////////////   NEW METHODS /////////////////////////////////
 	@Override
 	public String publishStartSpeaking(String utterance) {
 		log.info("publishStartSpeaking {}", utterance);
@@ -519,7 +504,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	@Override
 	public void onAudioStart(AudioData data) {
 		log.info("onAudioStart {} {}", getName(), data.toString());
-		
 		// filters on only our speech
 		if (utterances.containsKey(data)){
 			String utterance = utterances.get(data);
@@ -530,33 +514,33 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	@Override
 	public void onAudioEnd(AudioData data) {
 		log.info("onAudioEnd {} {}", getName(), data.toString());		
-
 		// filters on only our speech
 		if (utterances.containsKey(data)){
 			String utterance = utterances.get(data);
 			invoke("publishEndSpeaking", utterance);
 			utterances.remove(data);
+			// TODO: use a thread notify / wait and lock/sychronize on this ..
+			finishedSpeaking = true;
 		}
 	}
 	
 	public static void main(String[] args) {
-
 		LoggingFactory.getInstance().configure();
 		LoggingFactory.getInstance().setLevel(Level.INFO);
-
 		try {
 			// Runtime.start("webgui", "WebGui");
 			AcapelaSpeech speech = (AcapelaSpeech) Runtime.start("speech", "AcapelaSpeech");
 			// speech.setVoice("Ryan");
-
-			speech.speak("this is a test");
-			
-			speech.speak("i am saying something new once again again");			
-			speech.speak("one");			
-			speech.speak("two");			
-			speech.speak("three");			
-			speech.speak("four");			
-			
+			// TODO: fix the volume control
+			//speech.setVolume(0);
+			speech.speakBlocking("I'm afraid I can't do that.");
+			// speech.speak("this is a test");
+			//	
+			// speech.speak("i am saying something new once again again");			
+			// speech.speak("one");			
+			// speech.speak("two");			
+			// speech.speak("three");			
+			// speech.speak("four");			
 			/*
 			 * speech.speak("what is going on"); //speech.speakBlocking(
 			 * "Répète après moi"); speech.speak(
@@ -569,8 +553,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
-
 	}
-
 
 }
