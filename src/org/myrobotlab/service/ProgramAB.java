@@ -550,7 +550,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 			sessions.remove(sessionKey);
 		}
 		// TODO: we should make sure we keep the same path as before. 
-		startSession(path, sessionKey, currentBotName);
+		startSession(path, username, currentBotName);
 	}
 
 	/**
