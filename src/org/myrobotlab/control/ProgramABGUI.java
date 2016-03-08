@@ -38,6 +38,7 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 	private JScrollPane scrollResponse = new JScrollPane(response);
 
 	private JTextField progABPath = new JTextField(new File("ProgramAB").getAbsolutePath(), 16);
+	private JTextField userName = new JTextField("default", 16);
 	private JTextField botName = new JTextField("alice2", 16);
 
 	private JButton startSessionButton = new JButton(START_SESSION_LABEL);
@@ -66,11 +67,14 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 			// clear out the original question.
 			text.setText("");
 		} else if (o == startSessionButton) {
+			String path = progABPath.getText().trim();
+			String user = userName.getText().trim();
+			String bot = botName.getText().trim();
 			if (startSessionButton.getText().equals(START_SESSION_LABEL)) {
-				myService.send(boundServiceName, "startSession", progABPath.getText().trim(), botName.getText().trim());
+				myService.send(boundServiceName, "startSession", path, user, bot);
 				startSessionButton.setText("Reload Session");
 			} else {
-				myService.send(boundServiceName, "reloadSession", progABPath.getText().trim(), botName.getText().trim());
+				myService.send(boundServiceName, "reloadSession", path, user, bot);
 			}
 		} else if (o == saveAIML) {
 			myService.send(boundServiceName, "writeAIML");
@@ -126,6 +130,7 @@ public class ProgramABGUI extends ServiceGUI implements ActionListener {
 		JPanel botControl = new JPanel();
 
 		botControl.add(progABPath);
+		botControl.add(userName);
 		botControl.add(botName);
 		botControl.add(startSessionButton);
 		botControl.add(saveAIML);
