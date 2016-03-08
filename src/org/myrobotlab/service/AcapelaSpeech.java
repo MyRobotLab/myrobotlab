@@ -52,12 +52,14 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
+import org.slf4j.Logger;
 
 /**
  * AcapelaSpeech - Use the acapela group speech synthesis API.  This makes a HTTP request
@@ -67,6 +69,7 @@ import org.myrobotlab.service.interfaces.TextListener;
  */
 public class AcapelaSpeech extends Service implements TextListener, SpeechSynthesis, AudioListener {
 
+	transient public final static Logger log = LoggerFactory.getLogger(AcapelaSpeech.class);
 	private static final long serialVersionUID = 1L;
 	// default voice
 	public String voice = "Ryan";
@@ -74,8 +77,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	transient PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
 	// this is a peer service.
 	transient AudioFile audioFile = null;
-	// TODO: use a wait / notify for this so we don't poll in a loop!
-	Boolean finishedSpeaking = false;
 	// TODO: fix the volume control
 	// private float volume = 1.0f;
 	
@@ -348,30 +349,20 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	@Override
 	public boolean speakBlocking(String toSpeak) throws IOException {
-
-		speak(toSpeak);
-		// audioFile.playFile(to, true);
-		// sleep(afterSpeechPause);// important pause after speech
-
-		// invoke("publishEndSpeaking", toSpeak);
-
-		// We are blocking so .. now we want to wait on finished speaking to be true.
-		waitForCompletion();
-		
-		return false;
-	}
-
-	private void waitForCompletion() {
-		log.info("Waiting for speaking to finish.");
-		while (!finishedSpeaking) {
-			// TODO: use a better thread wait / notify here.
-			try {
-				Thread.sleep(20);
-			} catch (InterruptedException e) {
-				log.warn("Interrupted while waiting for speaking to finish.", e.getLocalizedMessage());
-			}
+		log.info("speak blocking {}", toSpeak);
+		if (voice == null) {
+			log.warn("voice is null! setting to default: Ryan");
+			voice = "Ryan";
 		}
-		log.info("Speaking Finished.");
+		String localFileName = getLocalFileName(this, toSpeak, "mp3");
+		String filename = AudioFile.globalFileCacheDir + File.separator + localFileName;
+		if (!audioFile.cacheContains(localFileName)) {
+			byte[] b = getRemoteFile(toSpeak);
+			audioFile.cache(localFileName, b, toSpeak);
+		}
+		audioFile.playBlocking(filename);
+		log.info("Finished waiting for completion.");
+		return false;
 	}
 
 	@Override
@@ -410,7 +401,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 
 	public AudioData speak(String toSpeak) throws IOException {
 		// this will flip to true on the audio file end playing.
-		finishedSpeaking = false;
 		AudioData ret = null;
 		log.info("speak {}", toSpeak);
 		if (voice == null) {
@@ -519,8 +509,6 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 			String utterance = utterances.get(data);
 			invoke("publishEndSpeaking", utterance);
 			utterances.remove(data);
-			// TODO: use a thread notify / wait and lock/sychronize on this ..
-			finishedSpeaking = true;
 		}
 	}
 	
@@ -533,7 +521,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 			// speech.setVoice("Ryan");
 			// TODO: fix the volume control
 			//speech.setVolume(0);
+			speech.speakBlocking("Open the pod bay door hal.");
 			speech.speakBlocking("I'm afraid I can't do that.");
+			
 			// speech.speak("this is a test");
 			//	
 			// speech.speak("i am saying something new once again again");			
