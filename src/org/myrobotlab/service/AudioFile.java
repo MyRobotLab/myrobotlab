@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -498,6 +497,7 @@ public class AudioFile extends Service {
 	}
 	
 	public AudioData publishAudioEnd(AudioData data){
+		log.info("Audio File publishAudioEnd");
 		return data;
 	}
 
