@@ -214,9 +214,17 @@ public class Console extends AppenderSkeleton implements Appender<ILoggingEvent>
 	public void doAppend(ILoggingEvent loggingEvent) throws LogbackException {
 		//append(loggingEvent);
 		if (logging) {
-			String msg = String.format("[%s] %s", loggingEvent.getThreadName(), loggingEvent.toString()).trim();
-			textArea.append(msg + "\n");
+			final String msg = String.format("[%s] %s", loggingEvent.getThreadName(), loggingEvent.toString()).trim();
+
+			// textarea not threadsafe, needs invokelater
+			EventQueue.invokeLater(new Runnable() {
+		            //@Override
+		            public void run() {  	
+		            	textArea.append(msg + "\n");
+		            }
+			});
 		}
 		
 	}
+	
 }
