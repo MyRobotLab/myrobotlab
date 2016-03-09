@@ -51,6 +51,15 @@ public class Document {
 
 	}
 
+	public void renameField(String oldField, String newField) {
+		if (data.containsKey(oldField)) {
+			// TODO: test me to make sure this is correct.
+			data.put(newField, data.get(oldField));
+			data.remove(oldField);
+		}
+		
+	}
+	
 	public void addToField(String fieldName, Object value) {
 		if (data.containsKey(fieldName) && (data.get(fieldName) != null)) {
 			data.get(fieldName).add(value);

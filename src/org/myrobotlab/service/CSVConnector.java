@@ -18,9 +18,11 @@ public class CSVConnector extends AbstractConnector {
 	private String[] columns;
 	private String idField;
 	private String idPrefix; 
-	private String separator;
+	private String separator = ",";
 	private int numFields;
 	private int idColumn = -1;
+	private boolean useRowAsId = true;
+	private int skipRows = 1;
 	
 	public CSVConnector(String name) {
 		super(name);
@@ -71,16 +73,26 @@ public class CSVConnector extends AbstractConnector {
 		}
 		CSVReader csvReader = new CSVReader(reader, separator.charAt(0));
 		
+		
+		int rowNum = 0;
 		String[] nextLine;
 		
 		try {
 			
 			while ((nextLine = csvReader.readNext()) != null) {
-			    String id = idPrefix + nextLine[idColumn];
+				rowNum++;
+				if (rowNum <= skipRows) {
+					continue;
+				}
+				String id;
+				if (useRowAsId) {
+					id = idPrefix + rowNum;
+				} else {
+					id = idPrefix + nextLine[idColumn];
+				}
 			    Document docToSend = new Document(id);
 			    for (int i = 0; i < numFields ; i++) {
 			    	docToSend.addToField(columns[i], nextLine[i]);
-			    	i++;
 			    }
 			    feed(docToSend);			    
 			}
