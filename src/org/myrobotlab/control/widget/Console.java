@@ -1,6 +1,7 @@
 package org.myrobotlab.control.widget;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
