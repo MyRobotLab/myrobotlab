@@ -410,8 +410,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 						}
 						log.info("Recognized a Face {} - {}", predictedLabel, name);
 						cvPutText(image, "Recognized:"+name, dF.resolveGlobalLowerLeftCorner(), font, CvScalar.CYAN);
+						// If it's a new name. invoke it an publish.
+						if (lastRecognizedName != name) {
+							invoke("publishRecognizedFace", name);							
+						}
 						lastRecognizedName = name;
-						invoke("publishRecognizedFace", name);
 					}
 				} 
 			}
