@@ -54,11 +54,14 @@ public class Console extends AppenderSkeleton implements Appender<ILoggingEvent>
 		if (logging) {
 			final String message = this.layout.format(loggingEvent);
 
-			// Append formatted message to textarea using the Swing Thread.
-			// SwingUtilities.invokeLater(new Runnable() { WOW, this was a nasty
-			// bug !
-			// public void run() {
-			textArea.append(message);
+			// textarea not threadsafe, needs invokelater
+			EventQueue.invokeLater(new Runnable() {
+		            //@Override
+		            public void run() {  	
+		            	textArea.append(message + "\n");
+		            }
+			});
+
 			/*
 			 * if (textArea.getText().length() > maxBuffer) {
 			 * textArea.replaceRange("", 0, maxBuffer/10); // erase tenth }
@@ -68,8 +71,16 @@ public class Console extends AppenderSkeleton implements Appender<ILoggingEvent>
 		}
 	}
 
-	public void append(String msg) {
-		textArea.append(msg);
+	public void append(final String msg) {
+
+		// textarea not threadsafe, needs invokelater
+		EventQueue.invokeLater(new Runnable() {
+	            //@Override
+	            public void run() {  	
+	            	textArea.append(msg + "\n");
+	            }
+		});
+
 	}
 
 	@Override
