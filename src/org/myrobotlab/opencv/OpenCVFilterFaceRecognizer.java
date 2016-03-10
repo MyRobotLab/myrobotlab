@@ -411,6 +411,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 						log.info("Recognized a Face {} - {}", predictedLabel, name);
 						cvPutText(image, "Recognized:"+name, dF.resolveGlobalLowerLeftCorner(), font, CvScalar.CYAN);
 						lastRecognizedName = name;
+						invoke("publishRecognizedFace", name);
 					}
 				} 
 			}
@@ -639,4 +640,14 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 		this.cascadeDir = cascadeDir;
 	}
 
+	public String getLastRecognizedName() {
+		return lastRecognizedName;
+	}
+
+	// Thanks to @calamity  for the suggestion to expose this
+	// TODO: expose this in a more generic way for all OpenCVFilters that 
+	// can recognize objects and other data.
+	public String publishRecognizedFace(String name) {
+		return name;
+	}
 }
