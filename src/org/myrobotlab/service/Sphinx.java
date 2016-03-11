@@ -601,7 +601,7 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 			if (newGrammar.length() > 0) {
 				newGrammar.append("|");
 			}
-			newGrammar.append(grammar);
+			newGrammar.append(cleanGrammar(grammar));
 		}
 
 		createGrammar(newGrammar.toString());
@@ -610,6 +610,11 @@ public class Sphinx extends Service implements SpeechRecognizer, TextPublisher {
 		speechProcessor.start();
 	}
 
+	private String cleanGrammar(String grammar) {
+		// sphinx doesn't like punctuation in it's grammar commas and periods give it a hard time.
+		String clean = grammar.replaceAll("[\\.\\,]", " ");
+		return clean;
+	}
 	@Override
 	public void startRecording() {
 		microphone.clear();
