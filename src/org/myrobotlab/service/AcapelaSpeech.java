@@ -350,6 +350,7 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 	@Override
 	public boolean speakBlocking(String toSpeak) throws IOException {
 		log.info("speak blocking {}", toSpeak);
+		
 		if (voice == null) {
 			log.warn("voice is null! setting to default: Ryan");
 			voice = "Ryan";
@@ -360,7 +361,9 @@ public class AcapelaSpeech extends Service implements TextListener, SpeechSynthe
 			byte[] b = getRemoteFile(toSpeak);
 			audioFile.cache(localFileName, b, toSpeak);
 		}
+		invoke("publishStartSpeaking", toSpeak);
 		audioFile.playBlocking(filename);
+		invoke("publishEndSpeaking", toSpeak);
 		log.info("Finished waiting for completion.");
 		return false;
 	}
