@@ -738,6 +738,10 @@ public class OpenCV extends VideoSource {
 	static public String[] getPossibleFilters() {
 		return POSSIBLE_FILTERS;
 	}
+	
+	public String publishRecognizedFace(String value){
+		return value;
+	}
 
 	public static void main(String[] args) throws Exception {
 
