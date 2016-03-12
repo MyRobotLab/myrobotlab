@@ -220,12 +220,16 @@ public class ServoGUI extends ServiceGUI implements ActionListener, MouseListene
 				if (servo.getPos() == null) {
 					boundPos.setText("");
 				} else {
-					boundPos.setText(servo.getPos().toString());
-					slider.setValue(servo.getPos().intValue());
+					int pos = servo.getPos();
+					boundPos.setText(Integer.toString(pos));
+					slider.setValue(pos);					
 				}
 
-				slider.setMinimum(servo.getMinInput().intValue());
-				slider.setMaximum(servo.getMaxInput().intValue());
+				// In the inverted case, these are reversed
+				int min = Math.min(servo.getMinInput().intValue(), servo.getMaxInput().intValue());
+				int max = Math.max(servo.getMinInput().intValue(), servo.getMaxInput().intValue());
+				slider.setMinimum(min);
+				slider.setMaximum(max);
 
 				posMin.setText(servo.getMin().toString());
 				posMax.setText(servo.getMax().toString());
