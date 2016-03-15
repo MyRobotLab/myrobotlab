@@ -24,8 +24,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "motor",
-        "shield"
+        "shield",
+        "motor"
       ],
       "peers": {
         "arduino": {
@@ -43,8 +43,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "motor",
-        "shield"
+        "shield",
+        "motor"
       ],
       "peers": {
         "arduino": {
@@ -129,8 +129,8 @@
       "description": "Plays back audio file. Can block or multi-thread play",
       "available": true,
       "dependencies": [
-        "org.tritonus.share.sampled.floatsamplebuffer/0.3.6",
         "javazoom.jl.player/1.0.1",
+        "org.tritonus.share.sampled.floatsamplebuffer/0.3.6",
         "javazoom.spi/1.9.5"
       ],
       "categories": [
@@ -146,9 +146,9 @@
         "com.azure.translator/0.6.2"
       ],
       "categories": [
-        "ai",
+        "cloud",
         "translation",
-        "cloud"
+        "ai"
       ],
       "peers": {}
     },
@@ -377,13 +377,13 @@
       "description": "Service used to graphically display and control other services",
       "available": true,
       "dependencies": [
-        "org.fife.rsyntaxtextarea/2.0.4.1",
+        "com.mxgraph.jgraph/1.6.1.2",
         "org.fife.autocomplete/2.0.4",
-        "com.mxgraph.jgraph/1.6.1.2"
+        "org.fife.rsyntaxtextarea/2.0.4.1"
       ],
       "categories": [
-        "location",
-        "display"
+        "display",
+        "location"
       ],
       "peers": {}
     },
@@ -393,8 +393,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "sensor",
-        "location"
+        "location",
+        "sensor"
       ],
       "peers": {
         "serial": {
@@ -412,8 +412,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "data",
-        "filter"
+        "filter",
+        "data"
       ],
       "peers": {}
     },
@@ -445,8 +445,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "ingest",
-        "data"
+        "data",
+        "ingest"
       ],
       "peers": {}
     },
@@ -906,8 +906,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "testing",
-        "framework"
+        "framework",
+        "testing"
       ],
       "peers": {
         "python": {
@@ -932,8 +932,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "control",
-        "robot"
+        "robot",
+        "control"
       ],
       "peers": {}
     },
@@ -943,8 +943,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "control",
-        "robot"
+        "robot",
+        "control"
       ],
       "peers": {}
     },
@@ -953,7 +953,6 @@
       "description": "control and video stream capture for generic ip camera",
       "available": true,
       "dependencies": [
-        "org.bytedeco.javacpp/1.1",
         "org.bytedeco.javacv/1.1"
       ],
       "categories": [
@@ -1060,7 +1059,9 @@
       "description": "Speech synthesis based on MaryTTS",
       "available": true,
       "dependencies": [
-        "marytts/5.1.2"
+        "marytts/5.1.2",
+        "opennlp/1.6",
+        "com.sun.speech.freetts/1.2"
       ],
       "categories": [
         "speech",
@@ -1116,8 +1117,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "sensor",
-        "microcontroller"
+        "microcontroller",
+        "sensor"
       ],
       "peers": {
         "serial": {
@@ -1137,8 +1138,8 @@
         "org.eclipse.paho/1.0"
       ],
       "categories": [
-        "data",
-        "cloud"
+        "cloud",
+        "data"
       ],
       "peers": {}
     },
@@ -1158,8 +1159,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "sensor",
-        "control"
+        "control",
+        "sensor"
       ],
       "peers": {}
     },
@@ -1169,8 +1170,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "sensor",
         "control",
+        "sensor",
         "video"
       ],
       "peers": {
@@ -1191,8 +1192,8 @@
         "org.saintandreas.jovr/0.7"
       ],
       "categories": [
-        "sensor",
         "control",
+        "sensor",
         "video"
       ],
       "peers": {
@@ -1220,8 +1221,8 @@
         "org.bytedeco.javacv/1.1"
       ],
       "categories": [
-        "sensor",
         "vision",
+        "sensor",
         "video"
       ],
       "peers": {
@@ -1229,7 +1230,7 @@
           "key": "streamer",
           "actualName": "streamer",
           "fullTypeName": "org.myrobotlab.service.VideoStreamer",
-          "comment": "video streaming service for webgui.",
+          "comment": "Shared Video Streamer",
           "isRoot": false
         }
       }
@@ -1242,8 +1243,8 @@
         "com.googlecode.simpleopenni/1.96"
       ],
       "categories": [
-        "sensor",
         "vision",
+        "sensor",
         "video"
       ],
       "peers": {
@@ -1262,8 +1263,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "control",
-        "industrial"
+        "industrial",
+        "control"
       ],
       "peers": {}
     },
@@ -1273,8 +1274,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "control",
-        "industrial"
+        "industrial",
+        "control"
       ],
       "peers": {}
     },
@@ -1329,8 +1330,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "sensor",
-        "display"
+        "display",
+        "sensor"
       ],
       "peers": {
         "arduino": {
@@ -1519,8 +1520,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "connectivity",
         "framework",
+        "connectivity",
         "network"
       ],
       "peers": {}
@@ -1531,8 +1532,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "control",
-        "robot"
+        "robot",
+        "control"
       ],
       "peers": {}
     },
@@ -1542,8 +1543,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "control",
-        "robot"
+        "robot",
+        "control"
       ],
       "peers": {
         "serial": {
@@ -1597,8 +1598,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "control",
-        "motor"
+        "motor",
+        "control"
       ],
       "peers": {
         "serial": {
@@ -1627,8 +1628,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "sensor",
-        "display"
+        "display",
+        "sensor"
       ],
       "peers": {}
     },
@@ -1640,9 +1641,9 @@
         "com.googlecode.jssc/2.8.0"
       ],
       "categories": [
+        "microcontroller",
         "sensor",
-        "control",
-        "microcontroller"
+        "control"
       ],
       "peers": {}
     },
@@ -1652,8 +1653,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "control",
-        "motor"
+        "motor",
+        "control"
       ],
       "peers": {}
     },
@@ -1663,9 +1664,9 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "control",
         "motor",
-        "display"
+        "display",
+        "control"
       ],
       "peers": {}
     },
@@ -1684,12 +1685,12 @@
       "description": "basic simulator based on Simbad",
       "available": true,
       "dependencies": [
-        "com.sun.java3d/1.5.1",
-        "javax.vecmath/1.5.1"
+        "javax.vecmath/1.5.1",
+        "com.sun.java3d/1.5.1"
       ],
       "categories": [
-        "display",
-        "simulation"
+        "simulation",
+        "display"
       ],
       "peers": {}
     },
@@ -1711,12 +1712,12 @@
       "description": "open source pure Java speech recognition",
       "available": true,
       "dependencies": [
-        "edu.cmu.sphinx/4-1.0beta6",
-        "javax.speech.recognition/1.0"
+        "javax.speech.recognition/1.0",
+        "edu.cmu.sphinx/4-1.0beta6"
       ],
       "categories": [
-        "control",
-        "speech recognition"
+        "speech recognition",
+        "control"
       ],
       "peers": {}
     },
@@ -1964,8 +1965,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "testing",
-        "framework"
+        "framework",
+        "testing"
       ],
       "peers": {}
     },
@@ -1975,8 +1976,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "testing",
-        "framework"
+        "framework",
+        "testing"
       ],
       "peers": {}
     },
@@ -1986,8 +1987,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "data",
-        "filter"
+        "filter",
+        "data"
       ],
       "peers": {}
     },
@@ -1997,8 +1998,8 @@
       "available": true,
       "dependencies": [],
       "categories": [
-        "data",
-        "cloud"
+        "cloud",
+        "data"
       ],
       "peers": {}
     },
@@ -2010,8 +2011,8 @@
         "edu.northwestern.topcodes/1.0"
       ],
       "categories": [
-        "sensor",
         "vision",
+        "sensor",
         "video"
       ],
       "peers": {}
@@ -2022,9 +2023,9 @@
       "available": true,
       "dependencies": [],
       "categories": [
+        "vision",
         "sensor",
         "control",
-        "vision",
         "video"
       ],
       "peers": {
@@ -2032,14 +2033,14 @@
           "key": "arduino",
           "actualName": "arduino",
           "fullTypeName": "org.myrobotlab.service.Arduino",
-          "comment": "shared Arduino instance",
+          "comment": "Tracking Arduino instance",
           "isRoot": false
         },
         "opencv": {
           "key": "opencv",
           "actualName": "opencv",
           "fullTypeName": "org.myrobotlab.service.OpenCV",
-          "comment": "shared OpenCV instance",
+          "comment": "Tracking OpenCV instance",
           "isRoot": false
         },
         "pid": {
@@ -2073,8 +2074,8 @@
         "org.twitter4j.twitter/3.0.5"
       ],
       "categories": [
-        "connectivity",
-        "cloud"
+        "cloud",
+        "connectivity"
       ],
       "peers": {}
     },
@@ -2155,8 +2156,8 @@
         "wiiuse.wiimote/0.12b"
       ],
       "categories": [
-        "sensor",
-        "control"
+        "control",
+        "sensor"
       ],
       "peers": {}
     },
@@ -2199,8 +2200,8 @@
       "description": "Wolfram service",
       "available": true,
       "dependencies": [
-        "org.apache.commons.httpclient/4.2.5",
-        "com.wolfram.alpha/1.1"
+        "com.wolfram.alpha/1.1",
+        "org.apache.commons.httpclient/4.2.5"
       ],
       "categories": [
         "data",
