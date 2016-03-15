@@ -639,11 +639,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
 		Chat chat = new Chat(bot);
 		
-		for (Category c : bot.brain.getCategories()) {
-			log.info(c.getPattern());
-		}
-		
-		String resp = chat.multisentenceRespond("hello");
+//		for (Category c : bot.brain.getCategories()) {
+//			log.info(c.getPattern());
+//		}
+//		
+//		String resp = chat.multisentenceRespond("hello");
 	
 		// load session specific predicates, these override the default ones.
 		String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
