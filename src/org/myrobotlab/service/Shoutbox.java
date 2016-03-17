@@ -254,7 +254,7 @@ public class Shoutbox extends Service {
 
 			info("loading latest file %s", latest);
 
-			String json = String.format("[%s]", FileIO.fileToString(latest.getAbsoluteFile()));
+			String json = String.format("[%s]", FileIO.toString(latest.getAbsoluteFile()));
 
 			Shout[] saved = CodecUtils.fromJson(json, Shout[].class);
 

@@ -54,7 +54,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HTTPRequest;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.interfaces.RepoUpdateListener;
+import org.myrobotlab.service.interfaces.StatusListener;
 import org.myrobotlab.service.interfaces.ServiceInterface;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
@@ -81,7 +81,7 @@ import org.slf4j.Logger;
  * TODO - add check for 64 bit OS & 32 bit JVM :(
  * 
  */
-public class Runtime extends Service implements MessageListener, RepoUpdateListener {
+public class Runtime extends Service implements MessageListener, StatusListener {
 	final static private long serialVersionUID = 1L;
 
 	/**
@@ -120,10 +120,12 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 	private boolean autoRestartAfterUpdate = false;
 
-	// FYI - can't be transient - "should" be preserved in
-	// network transport - it's the "instances" repo
-	// FIXME - non static member variables should be initialized in constructor
-	private Repo repo = null;
+	/**
+	 * the local repo of this machine - it should not be static as other foreign repos
+	 * will come in with other Runtimes from other machines.
+	 */
+	private Repo repo = Repo.getLocalInstance();
+	private ServiceData serviceData = ServiceData.getLocalInstance();
 
 	private Platform platform = Platform.getLocalInstance();
 
@@ -232,22 +234,6 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 		return ret;
 	}
-
-	/**
-	 * check repo for updates - this will collect "all" update information both
-	 * service dependency resolution & jar version information
-	 * 
-	 * @return
-	 */
-	// FIXED - repo updates no longer needed... - info comes with myrobotlab.jar
-	/*
-	static public Updates checkForUpdates() {
-		runtime.invoke("checkingForUpdates");
-		Updates updates = runtime.repo.checkForUpdates();
-		runtime.invoke("publishUpdates", updates);
-		return updates;
-	}
-	*/
 
 	/**
 	 * 
@@ -487,8 +473,8 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 
 	public static void dumpToFile() {
 		try {
-			FileIO.stringToFile(String.format("serviceRegistry.%s.txt", runtime.getName()), Runtime.dump());
-			FileIO.stringToFile(String.format("notifyEntries.%s.xml", runtime.getName()), Runtime.dumpNotifyEntries());
+			FileIO.toFile(String.format("serviceRegistry.%s.txt", runtime.getName()), Runtime.dump());
+			FileIO.toFile(String.format("notifyEntries.%s.xml", runtime.getName()), Runtime.dumpNotifyEntries());
 		} catch (Exception e) {
 			Logging.logError(e);
 		}
@@ -807,7 +793,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return ret;
 	}
 
-	public static String getPID() {
+	public static String getPid() {
 
 		SimpleDateFormat TSFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 		final String fallback = TSFormatter.format(new Date());
@@ -1017,12 +1003,11 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		return Platform.getLocalInstance().getBranch();//FileIO.resourceToString("branch.txt");
 	}
 	
-	static public void install(){
-		Repo repo = new Repo();
-		repo.retrieveAll();
+	static public void install() throws ParseException, IOException{		
+		Repo.getLocalInstance().install();
 	}
 
-	static public ArrayList<ResolveReport> install(String serviceType) throws ParseException, IOException {
+	static public void install(String serviceType) throws ParseException, IOException {
 		String fullTypeName = null;
 		if (serviceType.indexOf(".") == -1) {
 			fullTypeName = String.format("org.myrobotlab.service.%s", serviceType);
@@ -1030,7 +1015,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			fullTypeName = serviceType;
 		}
 
-		return Runtime.getInstance().repo.install(fullTypeName);
+		Repo.getLocalInstance().install(fullTypeName);
 	}
 
 	static public void invokeCommands(CmdLine cmdline) {
@@ -1191,11 +1176,9 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			if (cmdline.containsKey("-install")) {
 				// force all updates
 				ArrayList<String> services = cmdline.getArgumentList("-install");
-				Repo repo = new Repo(); // FIXME new Repo(branch) .. default
-										// branch is master ? - does this mean
-										// anything - if so what?
+				Repo repo = Repo.getLocalInstance();
 				if (services.size() == 0) {
-					repo.retrieveAll();
+					repo.install();
 					return;
 				} else {
 					for (int i = 0; i < services.size(); ++i) {
@@ -1203,17 +1186,6 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 					}
 				}
 			}
-
-			/* No Longer needed - you can 'install' a service or simply update myrobotlab.jar
-			 * there is no longer the need to 'update' the repo - or service meta data
-			 
-			if (cmdline.containsKey("-update")) {
-				// update myrobotlab
-				runtime = Runtime.getInstance();
-				runtime.update();
-
-			}
-			*/
 			
 			if (cmdline.containsKey("-service")) {
 				createAndStartServices(cmdline);
@@ -1693,43 +1665,41 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		// Platform platform = Platform.getLocalInstance();
 		log.info("============== normalized ==============");
 		log.info("{} - GMT - {}", sdf.format(now), gmtf.format(now));
-		log.info("PID {}", getPID());
-		log.info(String.format("ivy [runtime,%s.%d.%s]", platform.getArch(), platform.getBitness(), platform.getOS()));
-		log.info(String.format("os.name [%s] getOS [%s]", System.getProperty("os.name"), platform.getOS()));
-		log.info(String.format("os.arch [%s] getArch [%s]", System.getProperty("os.arch"), platform.getArch()));
-		log.info(String.format("getBitness [%d]", platform.getBitness()));
-		log.info(String.format("java.vm.name [%s] getVMName [%s]", vmName, platform.getVMName()));
-		log.info(String.format("version [%s]", Runtime.getVersion()));
-		log.info(String.format("/resource [%s]", FileIO.getResouceLocation()));
-		log.info(String.format("jar path [%s]", FileIO.getResourceJarPath()));
-		log.info(String.format("sun.arch.data.model [%s]", System.getProperty("sun.arch.data.model")));
+		log.info("Pid {}", getPid());
+		log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getBitness(), platform.getOS());
+		log.info("os.name [{}] getOS [{}]", System.getProperty("os.name"), platform.getOS());
+		log.info("os.arch [{}] getArch [{}]", System.getProperty("os.arch"), platform.getArch());
+		log.info("getBitness [{}]", platform.getBitness());
+		log.info("java.vm.name [{}] getVMName [{}]", vmName, platform.getVMName());
+		log.info("version [{}]", Runtime.getVersion());
+		log.info("root [{}]", FileIO.getRoot());		
+		log.info("cfg dir [{}]", FileIO.getCfgDir());		
+		log.info("sun.arch.data.model [{}]", System.getProperty("sun.arch.data.model"));
 
 		log.info("============== non-normalized ==============");
-		log.info(String.format("java.vm.name [%s]", vmName));
-		log.info(String.format("java.vm.version [%s]", System.getProperty("java.vm.version")));
-		log.info(String.format("java.vm.vendor [%s]", System.getProperty("java.vm.vendor")));
-		log.info(String.format("java.vm.version [%s]", System.getProperty("java.vm.version")));
-		log.info(String.format("java.vm.vendor [%s]", System.getProperty("java.runtime.version")));
+		log.info("java.vm.name [{}]", vmName);
+		log.info("java.vm.version [{}]", System.getProperty("java.vm.version"));
+		log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
+		log.info("java.vm.version [{}]", System.getProperty("java.vm.version"));
+		log.info("java.vm.vendor [{}]", System.getProperty("java.runtime.version"));
 
 		// System.getProperty("pi4j.armhf")
-		log.info(String.format("os.version [%s]", System.getProperty("os.version")));
-		log.info(String.format("os.version [%s]", System.getProperty("os.version")));
+		log.info("os.version [{}]", System.getProperty("os.version"));
+		log.info("os.version [{}]", System.getProperty("os.version"));
 
-		log.info(String.format("java.home [%s]", System.getProperty("java.home")));
-		log.info(String.format("java.class.path [%s]", System.getProperty("java.class.path")));
-		log.info(String.format("java.library.path [%s]", libararyPath));
-		log.info(String.format("user.dir [%s]", userDir));
+		log.info("java.home [{}]", System.getProperty("java.home"));
+		log.info("java.class.path [{}]", System.getProperty("java.class.path"));
+		log.info("java.library.path [{}]", libararyPath);
+		log.info("user.dir [{}]", userDir);
 
-		log.info(String.format("user.home [%s]", userHome));
-		log.info(String.format("total mem [%d] Mb", Runtime.getTotalMemory() / 1048576));
-		log.info(String.format("total free [%d] Mb", Runtime.getFreeMemory() / 1048576));
-		log.info(String.format("total physical mem [%d] Mb", Runtime.getTotalPhysicalMemory() / 1048576));
+		log.info("user.home [{}]", userHome);
+		log.info("total mem [{}] Mb", Runtime.getTotalMemory() / 1048576);
+		log.info("total free [{}] Mb", Runtime.getFreeMemory() / 1048576);
+		log.info("total physical mem [{}] Mb", Runtime.getTotalPhysicalMemory() / 1048576);
 
 		log.info("getting local repo");
-		repo = new Repo();// FIXME NOW - needs to be defaulted somehow -
-							// probably defaulted to the branch version of the
-							// Agent !
-		repo.addRepoUpdateListener(this);
+
+		Repo.getLocalInstance().addStatusListener(this);
 
 		hideMethods.add("main");
 		hideMethods.add("loadDefaultConfiguration");
@@ -1747,130 +1717,6 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 			Logging.logError(e);
 		}
 	}
-
-	/**
-	 * @param name
-	 *            - name of Service
-	 * @param pkgName
-	 *            - package of Service in case Services are created in different
-	 *            packages
-	 * @param type
-	 *            - type of Service
-	 * @return
-	 */
-	/*
-	 * static public synchronized ServiceInterface create(String name, String
-	 * pkgName, String type) { try {
-	 * log.debug("Runtime.create - Class.forName"); // get String Class String
-	 * typeName = pkgName + type; // Class<?> cl = Class.forName(typeName); //
-	 * Class<?> cl = Class.forName(typeName, false, //
-	 * ClassLoader.getSystemClassLoader()); return createService(name,
-	 * typeName); } catch (Exception e) { Logging.logException(e); } return
-	 * null; }
-	 */
-
-	/**
-	 * headless call - no user intervention needed / no "publishUpdates"
-	 * 
-	 * @return
-	 */
-	/* FIXME no longer needed
-	public UpdateReport applyUpdate() {
-		Updates updates = checkForUpdates();
-		return applyUpdates(updates);
-	}
-	*/
-
-	// ---------------- Runtime end --------------
-
-	/**
-	 * all the data contained in updates is used to apply against the running
-	 * system. this is where are the business logic of the merge between the
-	 * current system, the repo and the users objectives are all resolved
-	 * 
-	 * @param updates
-	 */
-	synchronized public UpdateReport applyUpdates(Updates updates) {
-		UpdateReport ret = new UpdateReport();
-		ret.updates = updates;
-
-		if (!updates.isValid) {
-			error("can not apply updates - updates are not valid");
-			return null;
-		}
-
-		invoke("updatesBegin", updates);
-
-		ArrayList<ResolveReport> reports = new ArrayList<ResolveReport>();
-		String intertoobTest = null;
-		try {
-			intertoobTest = repo.getVersionFromRepo();
-			info("remote version %s", intertoobTest);
-		} catch (Exception e) {
-			error(String.format("connection error - proxy? -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80", e.getMessage()));
-			return null;
-		}
-
-		// FIXME support ServiceTypes with dependencies of ServiceTypes !!!
-		// FIXME compress dependencies of all ServiceTypes into 1 unique
-		// list/Hash
-
-		for (int i = 0; i < updates.serviceTypesToUpdate.size(); ++i) {
-			try {
-				ArrayList<ResolveReport> report = repo.install(updates.serviceTypesToUpdate.get(i));
-				for (int j = 0; j < report.size(); ++j) {
-					reports.add(report.get(j));
-				}
-				// FIXME - distinguish all good versus bad reports ... DUH
-			} catch (Exception e) {
-				Logging.logError(e);
-			}
-		}
-
-		ret.reports = reports;
-
-		// FIXME - selectively choose which parts to update !!!
-		// NOT JUST update because there "is" an update - many
-		// potential parts to an update
-
-		if (updates.hasJarUpdate()) {
-			info("updating myrobotlab.jar");
-			if (runtime.repo.getLatestJar()) {
-
-				if (shutdownAfterUpdate) {
-					log.info("shutdownAfterUpdate = true");
-					releaseAll();
-					System.exit(0);
-				}
-
-				if (autoRestartAfterUpdate) {
-					log.info("autoRestartAfterUpdate = true");
-					// asynch call to get user or config data to determine if a
-					// restart
-					// is desired
-					restart();
-				} else {
-					log.info("autoRestartAfterUpdate = false");
-					log.info("needsRestart = true");
-					// async call to request permission to restart
-					// publish requestSpawnBootStrap
-					needsRestart = true;
-					// invoke("confirmRestart");
-					// progressDialog confirms after download
-				}
-
-			}
-		}
-
-		invoke("updatesFinished", reports);
-		return ret;
-	}
-
-	// ============== update begin ==============
-
-	// ============== update end ==============
-
-	// ============== update events begin ==============
 
 	/**
 	 * publishing event - since checkForUpdates may take a while
@@ -1937,7 +1783,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	// just use & parse "message"
 
 	public Platform getPlatform() {
-		return repo.getPlatform();
+		return platform;
 	}
 
 	/**
@@ -2022,7 +1868,7 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 	 * @return
 	 */
 	public String[] getServiceTypeNames(String filter) {
-		return runtime.repo.getServiceDataFile().getServiceTypeNames(filter);
+		return serviceData.getServiceTypeNames(filter);
 	}
 
 	/**
@@ -2225,70 +2071,18 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		runtime = null;
 	}
 
-	// ---- resolve issues begin ----
-
-	/**
-	 * command line update update myrobotlab.jar only no user interaction is
-	 * required - NO RESTART ONLY SHUTDOWN !!! no endless loop of bootstrap
-	 * getting -update param after update :P
-	 * 
-	 * @return
-	 */
-	/* NO LONGER NEEDED
-	public UpdateReport update() {
-		// we are going to force a shutdown after the update
-		shutdownAfterUpdate = true;
-		return runtime.applyUpdate();
-	}
-	*/
-
-	/**
-	 * FIXME - if true - service data xml needs to be pulled from repo this
-	 * method is called by the user (or system) when a specific service needs to
-	 * be installed (or updated) - it should resolve all the dependencies for
-	 * that service
-	 * 
-	 * @param fullServiceTypeName
-	 *            - full service type for dependency resolution
-	 * @return
-	 */
-	public UpdateReport update(String fullServiceTypeName) {
-		Updates updates = new Updates();
-		updates.isValid = true; // forcing since this is direct request
-		updates.serviceTypesToUpdate.add(fullServiceTypeName);
-		return applyUpdates(updates);
-	}
-
-	// GAH !!! retrieveAll / updateAll / UpdateReport / ResolveReport :P
-	// FIXME - should be "install all" - for services - regardless of what Ivy
-	// calls it
-	public UpdateReport updateAll() {
-
-		UpdateReport report = new UpdateReport();
-		report.updates = new Updates();
-		report.updates.isValid = true; // forcing since this is direct request
-		report.updates.serviceTypesToUpdate = Arrays.asList(getServiceTypeNames());
-
-		invoke("updatesBegin", report.updates);
-		// :D optimized !
-		report.reports = repo.retrieveAll();
-		invoke("updatesFinished", report.reports);
-		return report;
-	}
-
 	/**
 	 * publishing the updates progress with a series of status messages.
 	 * 
 	 * @return
 	 */
 	@Override
-	final public Status updateProgress(final Status status) {
+	final public void onStatus(final Status status) {
 		if (status.isError()) {
 			log.error(status.toString());
 		} else {
 			log.info(status.toString());
 		}
-		return status;
 	}
 
 	/**
@@ -2384,6 +2178,10 @@ public class Runtime extends Service implements MessageListener, RepoUpdateListe
 		meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
 		
 		return meta;
+	}
+
+	public ServiceData getServiceData() {
+		return serviceData;
 	}
 
 

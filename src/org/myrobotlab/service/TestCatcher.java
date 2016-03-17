@@ -263,34 +263,9 @@ public class TestCatcher extends Service implements SerialDataListener {
 		}
 	}
 	
+	
+	static public ServiceType meta = null; 
 
-	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
-
-		try {
-			TestCatcher catcher01 = new TestCatcher("catcher01");
-			catcher01.startService();
-
-			TestThrower thrower = new TestThrower("thrower");
-			thrower.startService();
-
-			catcher01.subscribe(thrower.getName(), "throwInteger", catcher01.getName(), "catchInteger");
-
-			for (int i = 0; i < 1000; ++i) {
-				thrower.invoke("throwInteger", i);
-				if (i % 100 == 0) {
-					thrower.sendBlocking(catcher01.getName(), "catchInteger");
-				}
-			}
-
-			// thrower.throwInteger(count);
-
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
 
 	/**
 	 * This static method returns all the details of the class without it having
@@ -302,10 +277,66 @@ public class TestCatcher extends Service implements SerialDataListener {
 	 */
 	static public ServiceType getMetaData() {
 
+		/*
 		ServiceType meta = new ServiceType(TestCatcher.class.getCanonicalName());
 		meta.addDescription("TestCatcher is used with TestThrower to test messaging");
 		meta.addCategory("testing","framework");		
+		
+		meta.sharePeer("t01.arduino", "left", "Arduino", "shared left arduino");
+		meta.sharePeer("t02.arduino", "left", "Arduino", "shared left arduino");
+
+		meta.addRootPeer("opencv", "OpenCV", "shared global root OpenCV service");
+				
+		meta.sharePeer("t01.opencv", "lowEye", "OpenCV", "shared opencv");
+		meta.sharePeer("t02.opencv", "lowEye", "OpenCV", "shared opencv");
+		
+
+		meta.addPeer("t01", "Tracking", "tracking 01");
+		meta.addPeer("t02", "Tracking", "tracking 02");
+		
+		log.info(getDnaString());
+		*/
+		
 		return meta;
 	}
+	
+	public void startService(){
+		super.startService();
+		startPeer("t01");
+		startPeer("t02");
+		startPeer("opencv");
+	}
+	
+	public static void main(String[] args) {
+		LoggingFactory.getInstance().configure();
+		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+
+		try {
+			
+			TestCatcher catcher01 = (TestCatcher)Runtime.start("c01", "TestCatcher");
+			Runtime.start("gui", "GUIService");
+
+			/*
+			TestThrower thrower = new TestThrower("thrower");
+			thrower.startService();
+
+			catcher01.subscribe(thrower.getName(), "throwInteger", catcher01.getName(), "catchInteger");
+
+			for (int i = 0; i < 1000; ++i) {
+				thrower.invoke("throwInteger", i);
+				if (i % 100 == 0) {
+					thrower.sendBlocking(catcher01.getName(), "catchInteger");
+				}
+			}
+			*/
+
+			// thrower.throwInteger(count);
+
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+
+	}
+
 	
 }

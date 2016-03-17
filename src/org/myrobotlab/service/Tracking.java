@@ -508,6 +508,7 @@ public class Tracking extends Service {
 		pid = (PID2)startPeer("pid");
 		arduino = (Arduino)startPeer("arduino");
 		opencv = (OpenCV)startPeer("opencv");		
+		rest();
 	}
 
 	public void stopScan() {

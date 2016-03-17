@@ -475,7 +475,7 @@ public class SerialTest {
 		serial.stopRecording();
 		assertFalse(serial.isRecording());
 		
-		String data = FileIO.fileToString("out.tx.dec");
+		String data = FileIO.toString("out.tx.dec");
 		DecimalCodec dec = new DecimalCodec(null);
 		assertEquals(dec.decode(x), data);
 	}

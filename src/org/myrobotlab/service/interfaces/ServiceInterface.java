@@ -3,9 +3,11 @@ package org.myrobotlab.service.interfaces;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
@@ -95,4 +97,6 @@ public interface ServiceInterface extends Messaging, LoggingSink, NameProvider {
 	
 	// FIXME - meta data needs to be infused into instance
 	public String getDescription();
+
+	public Map<String, MethodEntry> getMethodMap();
 }

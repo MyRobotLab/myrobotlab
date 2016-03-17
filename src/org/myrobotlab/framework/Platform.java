@@ -35,7 +35,7 @@ public class Platform implements Serializable {
 	private String instanceId;
 	private String branch;
 
-	static Platform localInstance = getLocalInstance();
+	private static Platform localInstance = getLocalInstance();
 
 	// -------------pass through begin -------------------
 	public static Platform getLocalInstance() {
@@ -145,21 +145,6 @@ public class Platform implements Serializable {
 
 	public Platform() {
 	}
-
-	/**
-	 * Returns only the bitness of the JRE hooked here in-case we need to
-	 * normalize
-	 * 
-	 * @return hardware architecture
-	 */
-
-	/**
-	 * Non static methods here are very important when a Platform is serialized
-	 * from a different process - and can be inspected - for local platform info
-	 * the static methods can be used
-	 * 
-	 * @return
-	 */
 
 	public String getBranch() {
 		return branch;

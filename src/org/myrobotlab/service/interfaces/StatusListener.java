@@ -2,7 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.Status;
 
-public interface RepoUpdateListener {
+public interface StatusListener {
 
 	/**
 	 * Status events from Repo when dependency resolution is attempted
@@ -10,6 +10,6 @@ public interface RepoUpdateListener {
 	 * @param status
 	 * @return
 	 */
-	public Status updateProgress(final Status status);
+	public void onStatus(final Status status);
 
 }
